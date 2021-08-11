@@ -1,0 +1,115 @@
+format	
+2	44	1	0	0	
+
+codepage	UTF-8	
+
+commentstring	
+	
+
+pd2	
+	1	0	0,000	0								
+
+01	1	21	0,000	0	21 pv neto							
+
+02	1	14	0,000	0	14 pv neto							
+
+03	1	0	0,000	0	Kontsernisisesed bartertehingud 							
+
+04	1	30	0,000	0	30 pv neto							
+
+05	1	30	0,000	0	30 DAYS NET							
+
+06	1	60	0,000	0	60 DAYS NET							
+
+07	1	30	0,000	0	30 DAYS NET 8%							
+
+08	1	7	0,000	0	7 pv neto							
+
+09	2	0	0,000	0	Sularaha							
+
+10	1	14	0,000	0	14 DAYS NET							
+
+11	1	0	0,000	0	Bartertehing							
+
+12	1	0	0,000	0	Reklaami kulu							
+
+13	1	10	0,000	0	10 pv neto							
+
+14	1	5	0,000	0	5 pv neto							
+
+15	1	3	0,000	0	3 pv neto							
+
+16	3	0	0,000	0	Kreeditarve							
+
+17	1	14	0,000	0	14 DAYS NET 2%							
+
+18	1	0	0,000	0	Credit note							
+ENG	Credit note	
+
+19	1	30	0,000	0	14 DAYS 1,5% - 30 DAYS NET							
+
+20	1	20	0,000	0	20 pv neto							
+
+21	1	0	0,000	0	Net cash on delivery							
+
+22	1	10	0,000	0	10 DAYS NET 4%							
+
+23	1	10	0,000	0	10 DAYS NET							
+
+24	1	45	0,000	0	45 DAYS NET							
+
+25	1	25	0,000	0	25 pv neto							
+
+26	1	0	0,000	0	CAD							
+
+27	1	0	0,000	0	Charging in account with delivery of ordered							
+
+28	1	28	0,000	0	28 pv neto							
+
+29	1	0	0,000	0								
+ENG	according with contract	
+
+30	1	30	0,000	0	30 pv neto							
+
+31	1	0	0,000	0	preliminary payment							
+
+35	1	35	0,000	0	35 pv neto							
+
+40	1	40	0,000	0	40 pv neto							
+
+45	1	45	0,000	0	45 pv neto							
+
+50	1	0	0,000	0	Advance payment 							
+ENG	Advance payment	
+
+51	1	0	0,000	0	21 DAYS NET							
+ENG	21 DAYS NET	
+
+52	1	50	0,000	0	50 päeva							
+
+55	1	0	0,000	0	purchase returns							
+ENG	purchase returns	
+
+60	1	60	0,000	0	60 pv neto							
+
+65	3	65	0,000	0								
+
+70	1	0	0,000	0	kaup ekspordi ootel							
+
+75	1	75	0,000	0	75 pv neto							
+ENG	75 days NET	
+
+90	1	90	0,000	0	90 pv neto							
+
+95	1	120	0,000	0	120 pv neto							
+ENG	120 days net	
+
+99	1	99	0,000	0	Realisatsioon							
+
+ET	1	0	0,000	0	ettemaks							
+ENG	preliminary payment	
+
+TA	1	0	0,000	0	tasaarveldus							
+
+
+

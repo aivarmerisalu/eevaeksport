@@ -1,0 +1,124 @@
+ObjectPlanet's TabbedPanel License Agreement
+
+The following is the end user license agreement ("agreement") used for
+ObjectPlanet's TabbedPanel software product (SOFTWARE).
+
+IMPORTANT -- READ CAREFULLY: By downloading, installing, or using this 
+product, you indicate your acceptance of the following License Agreement. 
+This is a legal agreement between you (either an individual or an entity) 
+and ObjectPlanet Inc. ("ObjectPlanet"). If you do not accept and agree 
+with all of the terms of this agreement, promptly delete any copies on 
+your system(s).
+
+
+SOFTWARE LICENSE
+
+The SOFTWARE is protected by copyright laws and international copyright
+treaties, as well as other intellectual property laws and treaties. The
+SOFTWARE is licensed, not sold.
+
+
+1. EVALUATION LICENSE
+If you downloaded an evaluation version of the SOFTWARE you are free
+to test and evaluate it for 30 days. You may not use the evaluation
+SOFTWARE in any production sofware. If you choose to purchase the
+commersial version you must replace the evaluation copy. If you do
+not choose to purchase the commersial version you must delete
+the evaluation SOFWARE after 30 days.
+
+
+2. GRANT OF LICENSE - COMMERCIAL
+
+     2.1 You need one license per developer or tester using the SOFTWARE.
+
+     2.2 This license permits you to use the java class libraries, 
+     which may include electronic documentation (the "SOFTWARE"), 
+     on a single computer:
+
+          i) To Build Stand-Alone Java Applications. You have a
+          royalty-free right to reproduce and distribute the
+          java class libraries with your application(s) as long 
+          as they are an integral part of your end-user 
+          application(s).
+
+          ii) To Build Applets. Provided that applets you build
+          are used only as an internal component in end-user
+          oriented user-interfaces, you may copy them to
+          additional computers (e.g. Web Servers), from which you
+          may allow end-users to download, royalty-free, the
+          applets in the course of browsing or interacting with
+          Web pages you create. You are not permitted to
+          distribute the applets in any fashion which would
+          promote, encourage or allow reuse or redistribution of
+          the applet, other than as permitted above.
+
+
+     2.3 Limited Distribution Rights. Your royalty-free distribution
+     rights described in Section 2.1 above are granted provided that
+     you:
+
+          (a) distribute the Applet or applets you build only in
+          conjunction with and as an integral part of your Web
+          pages, and distribute the class libraries only as an
+          integral part of your end-user, stand-alone
+          application;
+          (b) your Web pages or software product(s) are targeted
+          at end-users, and are not a development tool;
+          (c) you agree to indemnify, hold harmless, and defend
+          ObjectPlanet and its suppliers from and against any 
+          claims or lawsuits, including attorney’s fees, that arise
+          or result from the use or distribution of your Web pages
+          and/or applications.
+
+
+     2.4 Source Code. If you have purchased the "Source Code" version 
+     of the SOFTWARE, you must use reasonable efforts to maintain the 
+     confidentiality of the source code, including ensuring that it is 
+     installed and used only on the single machine for which it is 
+     licensed, and that it is not otherwise used or copied. 
+     The source can only be included as a part of your software, 
+     and you may not include the source in any similar software 
+     as the purchased source.
+
+
+     2.5 Use Definition. The SOFTWARE is "in use" on a computer when
+     it is loaded into temporary memory (i.e. RAM) or installed into
+     permanent memory (e.g. hard disk, CD-ROM, or other storage
+     device) of that computer, except that a copy installed on a
+     network server for the sole purpose of distribution to other
+     computers is not "in use".
+
+
+3. UPGRADES .
+If the SOFTWARE is an upgrade you may use or transfer the SOFTWARE only 
+in conjunction with the prior version(s) of the SOFTWARE.
+
+
+4. COPYRIGHT.
+The SOFTWARE (including any images, photographs and text incorporated into
+the SOFTWARE) is owned by ObjectPlanet or its suppliers and is protected by
+Norwegian and other countries' copyright laws and international treaty 
+provisions. Therefore you must treat the SOFTWARE like any other copyrighted
+material and not reproduce it except that you may either: (a) make one copy 
+of the SOFTWARE solely for backup or archival purposes, or (b) transfer the 
+SOFTWARE to a single hard disk provided you keep the original solely for 
+backup or archival purposes.
+
+
+5. OTHER RESTRICTIONS.
+You may not rent or lease the SOFTWARE, but you may transfer the SOFTWARE
+on a permanent basis provided you retain no copies and the recipient agrees 
+to the terms of this License Agreement. If the SOFTWARE is an upgrade, any 
+transfer must include the most recent upgrade and all prior versions. You 
+may not reverse engineer, decompile, disassemble, or translate the SOFTWARE.
+
+
+6. LIMITATION OF LIABILITY.
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL
+OBJECTPLANET OR ITS SUPPLIERS BE LIABLE FOR ANY SPECIAL, INCIDENTAL, 
+INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT 
+LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, 
+LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF 
+THE USE OF OR INABILITY TO USE THE SOFTWARE OR THE PROVISION OF OR FAILURE 
+TO PROVIDE SUPPORT SERVICES, EVEN IF OBJECTPLANET HAS BEEN ADVISED OF THE 
+POSSIBILITY OF SUCH DAMAGES. 

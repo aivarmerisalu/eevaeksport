@@ -1,0 +1,431 @@
+
+/**
+ * @author Aivar  Merisalu
+ * MobileJava Junior Programmer +37256248034 
+ */
+package eevaeksport.imp.driver;
+
+
+
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.NumberFormat;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+import org.apache.log4j.Category;
+import org.apache.log4j.PropertyConfigurator;
+
+import eevaeksport.imp.ImportPanel;
+import eevaeksport.imp.Order;
+import eevaeksport.imp.OrderLine;
+
+/**
+ * Title:        Eeva eksport
+ * Description:
+ * Copyright:    Copyright (c) 2002
+ * Company:
+ * @author Tarmo Tubro
+ * @version 1.0
+ */
+
+public class Scala5iESTImportDriver
+    extends AbstractImportDriver {
+
+  static Category log = Category.getInstance(IceImportDriver.class.getName());
+
+  public Scala5iESTImportDriver(ImportPanel parent) {
+    this.parent = parent;
+    PropertyConfigurator.configure("log4j.properties");
+   
+    String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
+    try {
+      Class.forName(databaseDriverName).newInstance();
+      con = DriverManager.getConnection(url,"pda","pda" );
+      updateCustcodes();
+      calNF.setMaximumFractionDigits(0);
+      calNF.setMaximumIntegerDigits(2);
+      calNF.setMinimumIntegerDigits(2);
+      calNF.setGroupingUsed(false);
+    
+    }
+    catch (Exception e) {
+      parent.showError(e);
+    }
+  }
+  
+  private void updateCustcodes(){
+  	Hashtable res = new Hashtable();
+  	try {
+		File fil = new File("sidus.txt");
+		 System.out.println("Via Koodide sidumine ");
+if (fil.exists()){
+       System.out.println("Seon koode ... ");
+		FileReader fr = new FileReader("sidus.txt");
+		BufferedReader reader = new BufferedReader(fr);
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			StringTokenizer st = new StringTokenizer(line, ";");
+			while(st.hasMoreTokens()){
+				res.put(st.nextToken(),st.nextToken());
+			}
+			
+       }
+		System.out.println("Kokku firmasi :" + res.size());
+		if(res.size() > 0){
+			Enumeration enumr = res.keys();
+			while(enumr.hasMoreElements()){
+			String omakood = (String)enumr.nextElement();
+			String viakood = (String)res.get(omakood);
+			   String sql1 = "UPDATE  SL010100 set SL01008 ='" + viakood+ "' where SL01001  =  '" + omakood + "'";			
+			    System.out.println(sql1);
+			    Statement st1 = con.createStatement();
+			    st1.executeUpdate(sql1);
+			    st1.close();	
+			}
+			System.out.println("Kliendi Koodide sidumine valmis " );
+		}
+		
+		
+		
+}
+		}catch (Exception e){
+			e.printStackTrace();
+			
+		}
+  }
+
+  public String identifyCustomer(String id,String regnr) throws SQLException {
+  	String sql1 = null;
+  	
+  	 System.out.println("Kliendi M��ramine: " );
+  	
+  	    sql1 = "SELECT SL01008 AS kood FROM SL010100 where SL01001  =  '" + id + "'";	
+	
+    System.out.println(sql1);
+    String acc = null;
+
+    Statement st1 = con.createStatement();
+    ResultSet rs1 = st1.executeQuery(sql1);
+
+    while (rs1.next()) {
+      acc = rs1.getString("kood").trim() ;
+
+    }
+    rs1.close();
+    st1.close();
+    
+    if(acc == null){
+ 	    sql1 = "SELECT SL01008 AS kood FROM SL010100 where SL01002  LIKE  '%" + id + "%'";	
+ 		
+ 	    System.out.println(sql1);
+ 	
+
+ 	    st1 = con.createStatement();
+ 	   rs1 = st1.executeQuery(sql1);
+
+ 	    while (rs1.next()) {
+ 	      acc = rs1.getString("kood").trim() ;
+
+ 	    }
+ 	    rs1.close();
+ 	    st1.close();
+    }
+
+    System.out.println("Klient: " + acc + " " + id);
+    return acc;
+
+  }
+
+  public String identifyCustomerADDR(String id) throws SQLException {
+  	 String	sql1 = "SELECT N33_ADRESAS AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
+  	 		"  trim(N08_KODAS_KS)||'-'|| N33_EIL_NR = '" + id +"'"; 
+  	
+    System.out.println(sql1);
+    String acc = null;
+
+    Statement st1 = con.createStatement();
+    ResultSet rs1 = st1.executeQuery(sql1);
+
+    while (rs1.next()) {
+      acc = rs1.getString("aadress").trim();
+
+    }
+    rs1.close();
+    st1.close();
+
+    return acc;
+
+  }
+  
+  public String identifyCustomerAGENT(String id) throws SQLException {
+ 	 String	sql1 = "SELECT SL01035 as agent FROM SL010100 left JOIN SY240100  ON SL01036=SY24002 " +
+ 	 		"and SY24001 ='BG' WHERE SL01001='" + id + "'"; 
+ 	
+   System.out.println(sql1);
+   String agent = null;
+
+   Statement st1 = con.createStatement();
+   ResultSet rs1 = st1.executeQuery(sql1);
+
+   while (rs1.next()) {
+   	agent = rs1.getString("agent").trim();
+
+   }
+   rs1.close();
+   st1.close();
+
+   return agent;
+
+ }
+ 
+  
+  public String getPandiPakend(String toode) throws SQLException{
+ 	 
+    String sql1 = " SELECT RTRIM(SC01150) AS pant FROM SC010100  WHERE RTRIM(SC01001)=   '" + toode.trim() + "'";
+    String prod = null;
+    Statement st1 = con.createStatement();
+    ResultSet rs1 = st1.executeQuery(sql1);
+    while (rs1.next()) {
+      prod = rs1.getString("pant").trim();
+    }
+       System.out.println(toode + " prod1 " + prod);
+    rs1.close();
+    st1.close();
+    return prod;
+ }
+ 
+ 
+  public String identifyProduct(String ean, String prodID) throws SQLException{
+  	
+    
+    String sql1 = " SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE RTRIM(SC01132)=   '" + ean.trim() + "'";
+
+    String sql2 = "SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE RTRIM(SC01001)=  '" + prodID.trim() + "'";
+
+    String prod = null;
+
+    Statement st1 = con.createStatement();
+    ResultSet rs1 = st1.executeQuery(sql1);
+
+    while (rs1.next()) {
+      prod = rs1.getString("toode").trim();
+    }
+   System.out.println(ean + " prod0 " + prod);
+    if(prod == null){
+
+      rs1 = st1.executeQuery(sql2);
+
+      while (rs1.next()) {
+        prod = rs1.getString("toode").trim();
+      }
+    }
+
+    System.out.println(prodID + " prod1 " + prod);
+    rs1.close();
+    st1.close();
+
+    return prod;
+  }
+
+  
+ 
+  
+  private double getRealDiscount(String toode,double price){
+  	double res = 0;
+  	
+    String sql1 = " SELECT SC01004 AS price FROM SC010100  WHERE RTRIM(SC01001)=   '" + toode + "'";
+
+    double  pr = 0;
+			try{
+				 Statement st1 = con.createStatement();
+				    ResultSet rs1 = st1.executeQuery(sql1);
+			
+				      while (rs1.next()) {
+				        pr = rs1.getDouble("price");
+				      }
+				    
+			}catch (Exception e){
+				
+			}
+
+  
+if(pr != 0 && price != 0){
+	res =  1- (price/pr);
+}
+System.out.println( "Ale arvutus " + pr + " prod1 " + price + " ale " + res*100);
+  	return res*100;
+  }
+
+  public void makeOrder(Order order) throws SQLException{
+    setOrder(order);
+    makeOutput(order);
+  }
+
+ 
+  
+ private void makeOutput(Order order){
+ 	StringBuffer sb = new StringBuffer();
+ 	 Hashtable pandikas =  new Hashtable();
+ 	 
+ 	 
+ 	 
+ 	 
+ 	 
+ 	try {
+ 	  int cou = 0;
+
+      
+ 	    String cust = order.getCompany();
+		
+		String ref = order.getReference();
+		if ( ref == null ){
+			ref =  " ";
+		}
+		String com = order.getEmailBody();
+		if ( com == null ){
+			com =  " ";
+		}		
+		String ware = order.getWarehouse();
+		if ( ware == null ){
+			ware = " ";
+		}
+		 String doknr = order.getDokNr();
+         if(doknr.length()>6){
+         	doknr = doknr.substring(doknr.length()-6,doknr.length());
+         }
+		
+         
+    Vector lines = order.getOrderLines();
+      for (int i = 0; i < lines.size(); i++) {
+      	
+          
+      	OrderLine line = (OrderLine)lines.elementAt(i);
+          String toode = line.getToode();
+          double price = line.getPrice();
+            double discount = getRealDiscount(toode,price);
+          
+          
+   	   String pant = getPandiPakend(toode);
+       
+       if(pant != null){
+     	  if(pandikas.get(pant) == null){
+     		  pandikas.put(pant,line.getKogus()+"");
+           } else {
+           	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+line.getKogus())+"");
+           }
+        }
+ 
+             
+          double disc = line.getDiscount();
+          if(disc == 0){
+          	discount = 0;
+          }
+          nf.setMaximumFractionDigits(4);
+         System.out.println("linedisc:" + disc + " arvutuslik disc:" + discount);
+     //10193164001;JPV1182;3;123456789asdf;1191863366175
+         sb.append(cust + ";" + toode + "03" + ";" + line.getKogus() + ";" + doknr + ";" + order.getShipCal().getTimeInMillis());
+         sb.append(System.getProperty("line.separator"));
+
+       cou++;
+      }
+
+      if(pandikas.size()>0){
+      	Enumeration enumpant = pandikas.keys();
+       while(enumpant.hasMoreElements()){
+       	
+       	String kood = (String)enumpant.nextElement();
+       	if(kood .trim().length()>0){
+       	
+    	  
+          nf.setMaximumFractionDigits(4);
+          
+         // sb.append(cust + ";" + kood + ";" + pand + ";" + doknr + ";" + order.getShipCal().getTime());
+         // sb.append(System.getProperty("line.separator"));    
+         cou++;
+      	}    	
+       }
+      }
+    	
+      setNumAddedLines(cou);
+      String fileName = escape(parent.getProps().getProperty("conv.dir"))  + doknr   +  ".txt";
+      System.out.println(fileName);
+        FileOutputStream fos = new FileOutputStream(fileName);
+        fos.write(sb.toString().getBytes());
+        fos.close();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+ }
+  
+  public String getDriverVersion(){
+    return "Scala5iESTImport";
+  }
+
+  private void setOrder(Order order){
+   
+  }
+
+ 
+  private String escape(String s){
+    if (s == null) return s;
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0 ; i < s.length() ; i++){
+      char c = s.charAt(i);
+      if (c == '&'){
+        sb.append("&amp;");
+      } else if (c == '<'){
+        sb.append("&lt;");
+      } else if (c == '>'){
+        sb.append("&gt;");
+      } else if (c == '\n'){
+        sb.append(" ");
+      } else {
+        sb.append(c);
+      }
+    }
+    return sb.toString();
+  }
+
+  
+  
+  public static final String addSpaces(String s, int totalLen){
+    int len = s.length();
+    StringBuffer sb = new StringBuffer(s);
+    for (int i=len; i < totalLen ; i++){
+      sb.append(' ');
+    }
+    if( len > totalLen){
+    	return s.substring(0,totalLen);
+    }
+    return sb.toString();
+  }
+  
+  public String getImportFile(){
+    return parent.getProps().getProperty("imp.read");
+  }
+  
+  private NumberFormat calNF = NumberFormat.getInstance();
+
+
+  private String url = "jdbc:odbc:scalaDB";
+  private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
+  private Connection con;
+  private ImportPanel parent;
+
+public String getTrouble() {
+	// TODO Auto-generated method stub
+	return null;
+}
+}

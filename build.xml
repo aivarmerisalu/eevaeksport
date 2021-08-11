@@ -1,0 +1,50 @@
+<project name="EevaEksport" default="dist" basedir=".">
+
+	
+  <!-- set global properties for this build -->
+  <property name="src" value="src"/>
+  <property name="build" value="build"/>
+  <property name="dist"  value="dist"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}" debug="on">
+	<classpath>
+   		<pathelement location="lib/mail.jar"/>
+   		<pathelement location="lib/activation.jar"/>
+   		<pathelement location="lib/log4j.jar"/>
+		<pathelement location="lib/utils.jar"/>
+		<pathelement location="lib/poi-2.5.1-final-20040804.jar"/>
+   		<pathelement location="C:/projektid/e-arve/dist/lib/xerces.jar"/>
+	</classpath>
+    </javac>
+	<copy todir="${build}">
+  		<fileset dir="${src}">
+		    <include name="**/eevaeksport/locale/*.properties"/>
+    			<exclude name="**/*.java"/>
+		</fileset>
+	</copy>
+  </target>
+
+  <target name="dist" depends="compile">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+
+    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+    <jar jarfile="${dist}/lib/eevaeksport.jar" basedir="${build}">
+    </jar>
+  </target>
+
+  <target name="clean">
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+</project>

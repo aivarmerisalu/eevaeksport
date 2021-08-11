@@ -1,0 +1,1275 @@
+/*--- formatted by Jindent 2.1, (www.c-lab.de/~jindent) ---*/
+
+package eevaeksport.driver;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.Vector;
+
+import ee.mobilejava.wrapper.DistEvalLineWrapper;
+import ee.mobilejava.wrapper.DistEvalListWrapper;
+import eevaeksport.Agent;
+import eevaeksport.CustProd;
+import eevaeksport.Customer;
+import eevaeksport.Dealer;
+import eevaeksport.DealerProduct;
+import eevaeksport.EksportPanel;
+import eevaeksport.PlansBonuses;
+import eevaeksport.Product;
+import eevaeksport.manager.ManagerData;
+import eevaeksport.report.ClientBlock;
+import eevaeksport.report.SalesSetter;
+import eevaeksport.report.StockSetter;
+
+
+/**
+ * Title:        Eeva eksport
+ * Description:
+ * Copyright:    Copyright (c) 2002
+ * Company:
+ * @author Tarmo Tubro
+ * @version 1.0
+ */
+public class DeaNewDBDriver extends AbstractDBDriver implements Manager, ClientBlock, StockSetter,SalesSetter{
+
+    /**
+     * Constructor declaration
+     *
+     *
+     * @param parent
+     *
+     * @see
+     */
+    public DeaNewDBDriver(EksportPanel parent) {
+      super(parent);
+        if(parent.getProps().getProperty("language").equals("Russian")){
+        this.nimetu = "rusnimetus";
+        this.pricefield = "jaehind";
+        }
+        this.subjectFilesTo = parent.getString("filemsg");
+        if (parent.getProps().getProperty("dburl") != null &&
+                         parent.getProps().getProperty("dburl").trim().length()>0 ){
+                       this.url = parent.getProps().getProperty("dburl").trim();
+                     }
+        if (parent.getProps().getProperty("report.dburl") != null &&
+                        parent.getProps().getProperty("report.dburl").trim().length()>0 ){
+                       this.url2=parent.getProps().getProperty("report.dburl").trim();
+
+                     }
+
+        // String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
+        String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
+
+        try {
+            Class.forName(databaseDriverName).newInstance();
+        } catch (Exception e) {
+            parent.showError(e);
+        }
+    }
+    public String getSaveDebtInfo() {
+       	return null;
+       }
+       
+    public String getAssortmentStr(Agent agent){
+    	return null;
+    }
+    public String getDealerCustomerCSV(String agent){
+                   StringBuffer sb = new StringBuffer();
+                   connectionUp();
+
+                       String cmd = "SELECT yksus FROM yksus WHERE klassif=1";
+
+                       if (isDebug()) {
+                           System.out.println(cmd);
+                       }
+
+
+                       try {
+                           ResultSet rs = stmt.executeQuery(cmd);
+
+                           while (rs.next()) {
+                               String       yksus = rs.getString("yksus").trim();
+                               String    sql = "SELECT kood,blokk" + yksus + " AS plokk,kood" + yksus + " AS deacode ,debtdate" + yksus + " as daatum FROM klient WHERE kood" + yksus
+                                               + "<>'' AND objekt2='" + agent + "' ORDER BY nimi";
+                               Statement stm = con.createStatement();
+                               ResultSet rst = stm.executeQuery(sql);
+
+                               while (rst.next()) {
+                                 String klient = rst.getString("kood").trim();
+                                 String deacode = rst.getString("deacode");
+                                 String plokk = rst.getString("plokk");
+                                 String daatum = rst.getString("daatum");
+
+                                 if (deacode != null) {
+                                   deacode = deacode.trim();
+                                   if (deacode.length()==0){
+                                    deacode = " ";
+                                    }
+
+                                 }
+
+                                 if (plokk != null) {
+                                   plokk = plokk.trim();
+                                   if (!plokk.equals("1")) {
+                                           plokk = "0";
+                                         }
+                                 }
+
+                                 if (daatum != null) {
+                                   daatum = daatum.trim();
+                                   if (daatum.length()==0){
+                                   daatum = " ";
+                                   }
+                                 }
+
+
+
+                                 sb.append(yksus + ";" + klient + ";" + deacode + ";" + plokk + ";" +
+                                           daatum + "\n");
+                               }
+
+                               rst.close();
+                               stm.close();
+                             }
+
+                           rs.close();
+                       } catch (Exception e) {
+                           getParent().showError(e);
+                       }
+                       connectionDown();
+                       System.out.println(sb.toString());
+                    return sb.toString();
+                   }
+
+
+                                                public String getCustProdDiscounts(Agent agent){
+                                                 return null;
+                                                 }
+
+    /**
+     *
+     */
+    public void connectionUp() {
+
+        if (con == null) {
+            try {
+                con = DriverManager.getConnection(url);
+                stmt = con.createStatement();
+            } catch (Exception e) {
+                getParent().showError(e);
+            }
+        }
+    }
+
+
+
+
+    public String getSaveStockInfo(){
+    return null;
+    }
+
+    /**
+     *
+     */
+    public void connectionDown() {
+        try {
+            stmt.close();
+            con.close();
+
+            con = null;
+        } catch (Exception e) {
+            getParent().showError(e);
+        }
+    }
+
+
+
+    public String getDistribution() {
+      connectionUp();
+      StringBuffer sb = new StringBuffer();
+
+      try {
+        String cmd = "SELECT toode, nimetus FROM toode WHERE pangateen=.T. ORDER BY toode";
+
+        PreparedStatement st = con.prepareStatement(cmd);
+        ResultSet rs = st.executeQuery();
+
+                 while (rs.next()) {
+
+          sb.append(rs.getString("toode").trim() + ";" + rs.getString("nimetus").trim() + "\n");
+        }
+        st.close();
+
+      } catch (Exception e) {}
+      System.out.println(sb.toString());
+      return sb.toString();
+
+        }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @return
+     *
+     * @see
+     */
+    public TreeMap getAgents() {
+        connectionUp();
+
+        /*try {
+            getPlansBonuses("2");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }*/
+
+        // String  cmd = "SELECT yksus,nimetus,objekt FROM yksus WHERE klassif=2";
+        String  cmd = "SELECT yksus,nimetus, 2 AS objekt, klassif ,agentcode FROM yksus order by yksus";
+        TreeMap agents = new TreeMap();
+
+        try {
+            ResultSet	      rs = stmt.executeQuery(cmd);
+            
+            while (rs.next()) {
+                int klassif = rs.getInt("klassif");
+                String agentstr = rs.getString("agentcode").trim();
+
+                if (klassif == 2) {
+                    Agent agent = new Agent(rs.getString("yksus").trim());
+
+                    agent.setObject(rs.getString("objekt").trim());
+
+                    String name = rs.getString("nimetus").trim();
+
+                    agent.setName(name);
+                    agent.setIsPilot(true);
+                    agents.put(name, agent);
+                } else if (klassif == 1 && agentstr.length() == 0) {
+                    Dealer dealer = new Dealer(rs.getString("yksus").trim());
+
+                    dealer.setName(rs.getString("nimetus").trim());
+                    addDealer(dealer);
+                }
+            }
+        } catch (Exception e) {
+            getParent().showError(e);
+        }
+
+        connectionDown();
+
+        return agents;
+    }
+
+    public Vector getDebt(String agentCode){
+      return null;
+    }
+
+    public void blockClients(HashMap clients) throws SQLException{
+      connectionUp();
+      Iterator iter = clients.keySet().iterator();
+      String dlr = (String)iter.next();
+      String sql = "UPDATE klient SET blokk" + dlr + "='',debtdate" + dlr + "='' ";
+      Statement st = con.createStatement();
+      st.executeUpdate(sql);
+      st.close();
+
+      sql = "UPDATE klient SET blokk" + dlr + "=?,debtdate" + dlr + "=? WHERE kood" + dlr + "=?";
+      PreparedStatement pst = con.prepareStatement(sql);
+      iter = clients.keySet().iterator();
+      while(iter.hasNext()){
+        String dealer = (String)iter.next();
+        pst.setString(1, dealer);
+        pst.setString(2, getStartingTime());
+        ArrayList al = (ArrayList)clients.get(dealer);
+        Iterator alIter = al.iterator();
+        while(alIter.hasNext()){
+          pst.setString(3, (String)alIter.next());
+          pst.executeUpdate();
+        }
+      }
+      pst.close();
+    }
+    public void setStocks(HashMap products) throws SQLException{
+      connectionUp();
+      Iterator iter = products.keySet().iterator();
+      String dlr = (String)iter.next();
+      String sql = "UPDATE toode SET stock" + dlr + "=0,stockdat" + dlr + "='' ";
+      Statement st = con.createStatement();
+      st.executeUpdate(sql);
+      st.close();
+
+      sql = "UPDATE toode SET stock" + dlr + "=?,stockdat" + dlr + "=? WHERE trim(kood" + dlr + ")=?";
+      PreparedStatement pst = con.prepareStatement(sql);
+      iter = products.keySet().iterator();
+      while(iter.hasNext()){
+        String dealer = (String)iter.next();
+        ArrayList al = (ArrayList)products.get(dealer);
+
+        for (int i = 0 ; i < al.size() ; i++){
+          Product p = (Product)al.get(i);
+          pst.setDouble(1, p.getStock());
+          pst.setString(2, getStartingTime());
+          pst.setString(3, p.getID());
+          pst.executeUpdate();
+        }
+      }
+      pst.close();
+    }
+
+
+
+
+    public void setSales(HashMap custprods) throws SQLException{
+      connectionUp();
+      Iterator iter = custprods.keySet().iterator();
+      String dlr = (String)iter.next();
+      String sql = "UPDATE toode SET stock" + dlr + "=0,stockdat" + dlr + "='' ";
+      Statement st = con.createStatement();
+      st.executeUpdate(sql);
+      st.close();
+
+      sql = "UPDATE toode SET stock" + dlr + "=?,stockdat" + dlr + "=? WHERE trim(kood" + dlr + ")=?";
+      PreparedStatement pst = con.prepareStatement(sql);
+      iter = custprods.keySet().iterator();
+      while(iter.hasNext()){
+        String dealer = (String)iter.next();
+        ArrayList al = (ArrayList)custprods.get(dealer);
+
+        for (int i = 0 ; i < al.size() ; i++){
+          Product p = (Product)al.get(i);
+          pst.setDouble(1, p.getStock());
+          pst.setString(2, getStartingTime());
+          pst.setString(3, p.getID());
+          pst.executeUpdate();
+        }
+      }
+      pst.close();
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @param agent
+     *
+     * @return
+     *
+     * @see
+     */
+    public TreeMap getCustomers(Agent agent) {
+        connectionUp();
+
+        String cmd =
+            "SELECT k.kood, k.nimi, 0 AS tasumata,visit,dealer,objekt2 as agent, '' AS Address,liik,info , " +
+           "blokk1,blokk2,blokk3,blokk4,blokk5,  " +
+           "blokk6,blokk7,blokk8,blokk9,blokk10,hinnak,k.email,k.turg FROM klient k "
+            + "LEFT JOIN yksus y ON y.yksus=k.dealer";
+       if (agent != null){
+         cmd += " WHERE objekt2=? OR parool=? ";
+       }
+       cmd += " GROUP BY k.kood, k.nimi order by k.nimi";
+
+        log(cmd);
+
+        TreeMap customers = new TreeMap();
+
+        try {
+            PreparedStatement st = con.prepareStatement(cmd);
+
+            if (agent != null){
+              st.setString(1, agent.getID());
+              st.setString(2, agent.getID());
+            }
+
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                Customer cust = new Customer(rs.getString("kood").trim());
+                String   nimi = rs.getString("nimi").trim();
+
+                cust.setName(nimi);
+                cust.setDebt(rs.getDouble("tasumata"));
+                cust.setVisit(rs.getString("visit").trim());
+                cust.setAddress(rs.getString("address").trim());
+                String dealerID = rs.getString("dealer").trim();
+                cust.addAgent(new Agent (rs.getString("agent").trim()));
+                cust.setGroup(rs.getString("liik").trim());
+                String info = rs.getString("info") ;
+                if(info != null){
+                  if(!info.trim().equals(""))
+                cust.setInfo(info.trim());
+                }
+
+                if (!dealerID.equals("")) {
+                  Dealer dealer = (Dealer) getDealers().get(dealerID);
+
+                  if (dealer != null) {
+                    cust.setDealer(dealer);
+                  }
+                }
+
+
+                String block = " ";
+                String block1 = rs.getString("blokk1");
+                String block2 = rs.getString("blokk2");
+                String block3 = rs.getString("blokk3");
+                 String block4 = rs.getString("blokk4");
+                  String block5 = rs.getString("blokk5");
+                   String block6 = rs.getString("blokk6");
+                    String block7 = rs.getString("blokk7");
+                     String block8 = rs.getString("blokk8");
+                      String block9 = rs.getString("blokk9");
+                      String block10 = rs.getString("blokk10");
+
+              if(block1 != null && block1.trim().length()>0){
+              block = block1.trim() ;
+              }
+              if(block2 != null && block2.trim().length()>0){
+             block = block + block2.trim()+ "|" ;
+           }
+           if (block3 != null && block3.trim().length()>0) {
+             block = block + block3.trim() + "|";
+           }
+           if (block4 != null && block4.trim().length()>0) {
+             block = block + block4.trim() + "|";
+           }
+           if (block5 != null && block5.trim().length()>0) {
+             block = block + block5.trim() + "|";
+           }
+           if (block6 != null && block6.trim().length()>0) {
+             block = block + block6.trim() + "|";
+           }
+           if (block7 != null && block7.trim().length()>0) {
+             block = block + block7.trim() + "|";
+           }
+           if (block8 != null && block8.trim().length()>0) {
+             block = block + block8.trim() + "|";
+           }
+           if (block9 != null && block9.trim().length()>0) {
+             block = block + block9.trim() + "|";
+           }
+           if (block10 != null && block10.trim().length()>0) {
+             block = block + block10.trim() ;
+           }
+            cust.setBlockingDealer(block.trim());
+            String ale = rs.getString("hinnak");
+            if (ale != null && !ale.trim().equals("")){
+            cust.setFixDisc(Double.parseDouble(ale));
+            }
+             String email = rs.getString("email");
+              if (email != null && !email.trim().equals("")){
+                cust.setConfirmEmail(email.trim());
+              }
+              boolean showmarket = rs.getBoolean("turg");
+                 if(showmarket){
+                 agent.setShowmarketinfoall(false);
+                 cust.setShowmarketinfo(true);
+                 }
+
+
+                customers.put(nimi, cust);
+            }
+        } catch (Exception e) {
+            getParent().showError(e);
+        }
+
+        return customers;
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @param agent
+     *
+     * @return
+     *
+     * @see
+     */
+    public TreeMap getProducts(Agent agent) {
+        connectionUp();
+
+        TreeMap products = new TreeMap();
+
+
+
+        try {
+
+           String cmd =
+                "SELECT toode," + nimetu +", kastis," + pricefield + ", liik, plaanhind,minkogus,ribakood,focus  FROM toode " +
+               " WHERE len(trim(toode)) > 2 AND len(trim(liik))>0 AND len(trim("+nimetu+"))>0 AND eisaada = .F. ORDER BY toode ";
+
+            if (isDebug()) {
+                System.out.println(cmd);
+            }
+
+            ResultSet rs = stmt.executeQuery(cmd);
+
+            while (rs.next()) {
+                double  tykke = (rs.getDouble("kastis"));
+               // System.out.println( "'" +rs.getString("kood1").trim() + "'");
+                String  kood = rs.getString("toode").trim();
+                String  nimetus = rs.getString(nimetu).trim();
+                Product prod = new Product(kood);
+                prod.setName(nimetus);
+                prod.setPrice(round(rs.getDouble(pricefield), 2));
+                prod.setInCases(tykke);
+                prod.setGroup(rs.getString("liik").trim());
+                prod.setMeasure(rs.getDouble("plaanhind"));
+                prod.setMaxDiscount(rs.getDouble("minkogus"));
+                String ean = rs.getString("ribakood");
+                if(ean != null && ean.trim().length()>7 ){
+                prod.setEAN(ean.trim());
+                }
+                int focus = rs.getInt("focus");
+                //System.out.println( "'" +focus + "'");
+                if (focus == 1){
+                  prod.setMustBe("" + focus);
+
+                  //System.out.println( "'" +prod.getFocus() + "'");
+                }
+                products.put(nimetus, prod);
+
+                // }
+            }
+            rs.close();
+
+        } catch (Exception e) {
+            getParent().showError(e);
+        }
+
+        return products;
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @param agentCode
+     *
+     * @return
+     *
+     * @see
+     */
+    public Vector getCustomerProductsList(String agentCode) {
+        connectionUp();
+
+        String cmd =
+            "SELECT dok.saaja,rid.toode, kogus, sum(iif(dok.kuupaev>date()-30,(kogus),0)) AS pkogus,dok.kuupaev AS lastdate FROM dok INNER "
+            + "JOIN rid ON dok.dokumnr = rid.dokumnr INNER JOIN toode on rid.toode = toode.toode " +
+           " INNER JOIN klient k ON dok.saaja=k.kood WHERE "
+            + " len(trim(dok.saaja)) > 0 AND len(trim(rid.toode)) > 2 AND dok.doktyyp='G' AND dok.kuupaev >= ?";
+        if (agentCode != null){
+          cmd += " AND (dok.pais2obj = ? OR k.parool=? )";
+        }
+        cmd += " AND  dok.doktyyp = 'G' GROUP BY dok.saaja, rid.toode ORDER BY dok.kuupaev DESC, dok.saaja, toode.nimetus";
+
+        if (isDebug()) {
+            System.out.println(cmd);
+        }
+
+        String sql ="SELECT dok.saaja,rid.toode, sum(kogus) AS valjakogus FROM  dok " +
+            "INNER JOIN  rid ON dok.dokumnr = rid.dokumnr INNER JOIN toode on rid.toode = toode.toode INNER JOIN  klient k ON dok.saaja=k.kood " +
+            " WHERE  len(trim(dok.saaja)) > 0 AND len(trim(rid.toode)) > 2 AND dok.doktyyp='G' AND dok.kuupaev >date()-30 ";
+           if (agentCode != null){
+             sql +=" AND (dok.pais2obj = ? OR k.parool=? )" ;
+           }
+            sql +=" AND dok.doktyyp = 'G' GROUP BY dok.saaja, rid.toode ORDER BY dok.kuupaev DESC, dok.saaja, toode.nimetus";
+
+        Vector custProds = new Vector();
+        HashMap kliendid = new HashMap();
+
+        try {
+          PreparedStatement pst = con.prepareStatement(cmd);
+          pst.setDate(1, getStartingDate());
+          if (agentCode != null){
+            pst.setString(2, agentCode);
+            pst.setString(3, agentCode);
+          }
+
+            ResultSet	      rs = pst.executeQuery();
+
+            while (rs.next()) {
+                String kliendikood = rs.getString("saaja").trim();
+                Customer cust = (Customer) kliendid.get(kliendikood);
+                String tootekood = rs.getString("toode").trim();
+                double kogus = rs.getDouble("kogus");
+                double plkogus = rs.getDouble("pkogus");
+                String lastDate = rs.getString("lastdate");
+                CustProd cp = new CustProd(kliendikood, tootekood, kogus ,plkogus ,0,lastDate,0,0,0," ");
+                custProds.add(cp);
+                 kliendid.put(kliendikood, cust);
+            }
+            rs.close();
+            pst.close();
+
+            PreparedStatement pst3 = con.prepareStatement(sql);
+           if (agentCode != null){
+             pst3.setString(1, agentCode);
+             pst3.setString(2, agentCode);
+           }
+            ResultSet rs1 = pst3.executeQuery();
+            while (rs1.next()) {
+              String klient = rs1.getString("saaja").trim();
+              String toode = rs1.getString("toode").trim();
+              double pkogus = rs1.getDouble("valjakogus");
+             // System.out.println(toode+"pkogus"+pkogus);
+
+              Customer c = (Customer) kliendid.get(klient);
+              if (c != null) {
+            //    System.out.println("klient"+c.getName());
+                ArrayList al = (ArrayList) c.getProducts().get(toode);
+                if (al != null) {
+                  CustProd cp = (CustProd) al.get(1);
+                  if (cp != null) {
+                    cp.setMovedStockPluss(pkogus);
+                    custProds.add(cp);
+           //         System.out.println("CP trykk"+cp.toString());
+                  }
+                }
+              }
+            }
+            rs1.close();
+        } catch (Exception e) {
+            getParent().showError(e);
+        }
+
+        connectionDown();
+
+        return custProds;
+    }
+
+
+
+
+    /**
+     * Method declaration
+     *
+     *
+     * @return
+     *
+     * @see
+     */
+    public DealerProduct getDealerProductsList() {
+        connectionUp();
+
+        String cmd = "SELECT yksus FROM yksus WHERE klassif=1";
+
+        if (isDebug()) {
+            System.out.println(cmd);
+        }
+
+        DealerProduct dealerProds = new DealerProduct();
+
+        try {
+            ResultSet rs = stmt.executeQuery(cmd);
+
+            while (rs.next()) {
+                String       yksus = rs.getString("yksus").trim();
+                String        stock = "0";
+                String    sql = "SELECT toode,stock" + yksus + " AS ladu,stockdat" + yksus + " AS laokuup,kood" + yksus + " AS deacode FROM toode WHERE kood" + yksus
+                                + "<>'' ORDER BY nimetus";
+                Statement stm = con.createStatement();
+                ResultSet rst = stm.executeQuery(sql);
+
+                while (rst.next()) {
+                  String toode = rst.getString("toode").trim();
+                  String ladu = rst.getString("ladu") ;
+                  String laokuup = rst.getString("laokuup") ;
+                  String deacode = rst.getString("deacode");
+                  if(laokuup != null && laokuup.trim().length()>0){
+                  laokuup = laokuup.trim();
+                  } else {
+                  laokuup = " ";
+                  }
+                  if (!ladu.trim().equals("")){
+                  stock = ladu ;
+                  if (stock.equals("0")){
+                    stock = " " ;
+                  }
+                  }
+                    dealerProds.add(yksus, toode,stock,laokuup,deacode.trim());
+                  //  System.out.println("dea" + deacode);
+                }
+
+                rst.close();
+                stm.close();
+            }
+
+            rs.close();
+        } catch (Exception e) {
+            getParent().showError(e);
+        }
+
+        connectionDown();
+
+        return dealerProds;
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @return
+     *
+     * @throws SQLException
+     *
+     * @see
+     */
+    public TreeMap getProdGroups() throws SQLException {
+        connectionUp();
+
+        TreeMap   tm = new TreeMap();
+        String    sql =
+            "SELECT liik,artlnimi AS nimetus FROM ../andmed/artliik WHERE grupp='L'";
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+
+        while (rs.next()) {
+            tm.put(rs.getString("liik").trim(),
+                   rs.getString("nimetus").trim());
+        }
+
+        rs.close();
+        st.close();
+        connectionDown();
+
+        return tm;
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @param agent
+     *
+     * @return
+     *
+     * @throws SQLException
+     *
+     * @see
+     */
+    public PlansBonuses getPlansBonuses(String agent) throws SQLException {
+        connectionUp();
+
+        PlansBonuses pb = new PlansBonuses();
+        String       sql =
+            "SELECT liik FROM ../andmed/artliik WHERE grupp='L' ";
+        Statement    st = con.createStatement();
+        ResultSet    rs = st.executeQuery(sql);
+        String       sqlSelectList = "";
+        int	     liik = -1;
+        int	     counter = 0;
+
+        while (rs.next()) {
+            counter++;
+            liik = rs.getInt("liik");
+            pb.add(liik, 0, 0, 0, 0);
+            if (!sqlSelectList.equals("")) {
+                sqlSelectList = sqlSelectList + ",";
+            }
+
+            sqlSelectList = sqlSelectList + "plaan" + liik + ",boonus" + liik;
+        }
+
+        sql =
+            "SELECT SUM(kogus*myygihind) AS plaandone,SUM(baasostu) AS bonusdone,"
+            + sqlSelectList + ", a.liik FROM dok d "
+            + "INNER JOIN  rid r ON r.dokumnr=d.dokumnr LEFT JOIN toode t "
+            + "ON t.toode = r.toode INNER JOIN klient k ON k.kood=d.klient LEFT JOIN ../andmed/artliik a ON a.liik=t.liik LEFT JOIN yksus y "
+            + "ON y.yksus=d.pais2obj  WHERE klassif=2 AND d.pais2obj=? AND a.liik IN (SELECT liik FROM ../andmed/artliik WHERE grupp='L') AND "
+            + "year(date())=year(kuupaev) AND month(date())=month(kuupaev) AND d.doktyyp='G' AND k.outbox=.F. AND d.yksus IN (SELECT yksus FROM yksus WHERE klassif=1 AND block=.F.) "
+            + "GROUP BY a.liik";
+
+        PreparedStatement pst = con.prepareStatement(sql);
+
+        pst.setString(1, agent);
+
+        rs = pst.executeQuery();
+
+        while (rs.next()) {
+          int index = rs.getInt("liik");
+          pb.add(index, rs.getDouble("plaan" + index),
+                       rs.getDouble("boonus" + index), rs.getDouble("plaandone"), rs.getDouble("bonusdone"));
+        }
+
+        //System.out.println(counter + ". " + sql);
+
+        return pb;
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @param agentCode
+     *
+     * @return
+     *
+     * @see
+     */
+    public double getSalary(String agentCode) {
+        connectionUp();
+
+        double  salary = 0;
+
+        try {
+          String sql =
+              "SELECT SUM(t.myygihind*r.kogus) AS sales FROM rid r INNER JOIN dok d ON d.dokumnr=r.dokumnr " +
+              "INNER JOIN toode t ON t.toode=r.toode INNER JOIN klient k ON k.kood=d.klient INNER JOIN yksus y ON y.yksus=d.yksus  WHERE k.objekt2 =? " +
+              "AND year(date())=year(kuupaev) AND len(trim(y.agentcode))=0 AND block=.F. AND r.doktyyp='G' AND month(date())=month(kuupaev)" ;
+
+            if (isDebug()) {
+                System.out.println(sql);
+            }
+
+            PreparedStatement pstmt = con.prepareStatement(sql);
+
+            pstmt.setString(1, agentCode);
+
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()){
+              setSales(rs.getDouble("sales"));
+            }
+
+
+            rs.close();
+            pstmt.close();
+        } catch (Exception e) {
+            getParent().showError(e);
+        }
+
+        salary = Math.round(salary * 100d) / 100d;
+
+        return salary;
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @return
+     *
+     * @see
+     */
+    public String getDriverVersion() {
+        return DRIVER_VERSION;
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @return
+     *
+     * @see
+     */
+    public String getSubjectFilesTo() {
+        return this.subjectFilesTo;
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @param pilot
+     *
+     * @return
+     *
+     * @see
+     */
+    public String getPilotDayData(Agent agent){
+      connectionUp();
+      StringBuffer sb = new StringBuffer();
+      sb.append(
+            "Eelmise kuu plaani t�itmise aruanne\n\n LIIK     PLAAN    T�IDETUD\n");
+      String sql =
+          "SELECT liik FROM ../andmed/artliik WHERE grupp='L' ";
+      try {
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        String sqlSelectList = "";
+        int liik = -1;
+        int counter = 0;
+
+        while (rs.next()) {
+          counter++;
+
+          liik = rs.getInt("liik");
+          //  pb.add(liik, 0, 0, 0, 0);
+          if (!sqlSelectList.equals("")) {
+            sqlSelectList = sqlSelectList + ",";
+          }
+
+          sqlSelectList = sqlSelectList + "plaan" + liik + ",boonus" + liik;
+        }
+
+        sql =
+            "SELECT round(SUM(kogus*myygihind),2) AS plaandone,SUM(baasostu) AS bonusdone,"
+            + sqlSelectList + ", a.liik ,a.artlnimi FROM dok d "
+            + "INNER JOIN  rid r ON r.dokumnr=d.dokumnr LEFT JOIN toode t "
+            + "ON t.toode = r.toode INNER JOIN klient k ON k.kood=d.klient LEFT JOIN ../andmed/artliik a ON a.liik=t.liik LEFT JOIN yksus y "
+            + "ON y.yksus=d.pais2obj  WHERE klassif=2 AND d.pais2obj=? AND d.doktyyp='G' AND a.liik IN (SELECT liik FROM ../andmed/artliik WHERE grupp='L') AND "
+            +
+            "year(date()-10)=year(kuupaev) AND month(date()-10)=month(kuupaev) AND d.yksus IN (select yksus from yksus where klassif=1 and block=.F.)AND k.outbox=.F. "
+            + "GROUP BY a.liik";
+
+        PreparedStatement pst = con.prepareStatement(sql);
+         // System.out.println(agent.getID());
+        pst.setString(1, agent.getID());
+
+        rs = pst.executeQuery();
+
+
+        while (rs.next()) {
+         // System.out.println(sqlSelectList);
+          int index = rs.getInt("liik");
+          sb.append(rs.getString("artlnimi") + "\n\t " +
+                    rs.getDouble("plaan" + index) + "   " +
+                    rs.getDouble("plaandone") + "\n");
+        }
+      } catch (Exception e){}
+
+
+      return sb.toString();
+
+    }
+
+
+    /**
+     * Method declaration
+     *
+     *
+     * @param s
+     *
+     * @see
+     */
+    public void log(String s) {
+        getParent().log(s);
+    }
+
+    /**
+     *
+     * @return the TreeMap value of dealers.
+     */
+    public TreeMap getDealers() {
+        return dealers;
+    }
+
+
+    /**
+     *
+     * @param aDealers - the new value for dealers
+     */
+    public void setDealers(TreeMap aDealers) {
+        dealers = aDealers;
+    }
+
+    /**
+     * Method declaration
+     *
+     *
+     * @param dealer
+     *
+     * @see
+     */
+    private void addDealer(Dealer dealer) {
+        getDealers().put(dealer.getID(), dealer);
+    }
+
+    public String getStartingTime(){
+      Calendar cal = Calendar.getInstance();
+      String month = String.valueOf(cal.get(Calendar.MONTH) + 1);
+      if (month.length() == 1) month = "0" + month;
+      String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+      if (day.length() == 1) day = "0" + day;
+      return day + month + cal.get(Calendar.YEAR);
+    }
+
+    public ManagerData getManagerData() throws SQLException{
+      String sql = " SELECT clid AS klient,docsum AS summa,linecount AS ridu,text AS tekst,enddate AS kuupaev,y.nimetus AS dealer" +
+       " FROM dayreport r INNER JOIN dok d ON d.klient=clid INNER JOIN yksus y ON y.yksus=d.yksus " +
+                                   " WHERE enddate>(DATE()-30) AND d.kuupaev=enddate AND y.klassif = 1 ORDER BY clid,enddate ";
+      Connection c = DriverManager.getConnection(url2);
+      Statement st = c.createStatement();
+      ResultSet rs = st.executeQuery(sql);
+
+      String sql2 = "SELECT kood AS kood ,nimi AS nimi,maksetin AS maksetin,hinnaale AS ale," +
+                   " y.nimetus AS agendinimi , kontaktisi AS kontaktisik , telefon AS telefon " +
+                    "FROM klient k LEFT JOIN yksus y ON y.yksus=k.objekt2 WHERE klassif=2";
+      connectionUp();
+      Statement st2 = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+      ResultSet rs2 = st2.executeQuery(sql2);
+
+      String sql3 = "SELECT SUM(kogus*myygihind) AS kuumyyk,d.klient FROM rid r INNER JOIN dok d ON d.dokumnr=r.dokumnr INNER JOIN toode t ON r.toode=t.toode " +
+                    "WHERE MONTH(d.kuupaev)=MONTH(DATE()) AND YEAR(d.kuupaev)=YEAR(DATE()) AND d.doktyyp='G'  GROUP BY d.klient";
+      Statement st3 = con.createStatement();
+      ResultSet rs3 = st3.executeQuery(sql3);
+      HashMap hm = new HashMap();
+      while (rs3.next()){
+        hm.put(rs3.getString("klient").trim(), new Double(rs3.getDouble("kuumyyk")));
+      }
+      rs3.close();
+      st3.close();
+
+      String sql4 = "SELECT SUM(kogus*myygihind) AS aastamyyk,d.klient FROM rid r INNER JOIN dok d ON d.dokumnr=r.dokumnr INNER JOIN toode t ON r.toode=t.toode " +
+                    "WHERE YEAR(d.kuupaev)=YEAR(DATE()) AND dok.doktyyp='G'  GROUP BY d.klient";
+      Statement st4 = con.createStatement();
+      ResultSet rs4 = st4.executeQuery(sql4);
+      HashMap hm2 = new HashMap();
+      while (rs4.next()){
+        hm2.put(rs4.getString("klient").trim(), new Double(rs4.getDouble("aastamyyk")));
+      }
+      rs4.close();
+      st4.close();
+
+      StringBuffer sb = new StringBuffer();
+      String sep = ";";
+      while(rs.next()){
+        String cliID = rs.getString("klient").trim();
+        sb.append(cliID + sep);
+        sb.append(rs.getString("kuupaev").trim() + sep);
+        sb.append(rs.getDouble("summa") + sep);
+        sb.append(rs.getInt("ridu") + sep);
+        String tekst = ensureLen(rs.getString("tekst")  ," ");
+        tekst = tekst.replace('\'', ' ').replace('\"', ' ');
+        
+        sb.append(tekst + sep);
+
+        boolean has = scrollTo(cliID, rs2);
+        if (has){
+          Double aastamyyk = (Double)hm2.get(cliID);
+          double am = 0;
+          if (aastamyyk != null) am = aastamyyk.doubleValue();
+          sb.append(am + sep);
+
+          Double kuumyyk = (Double)hm.get(cliID);
+          double km = 0;
+          if (kuumyyk != null) km = kuumyyk.doubleValue();
+
+          sb.append(km + sep);
+          sb.append(ensureLen(rs2.getString("agendinimi"), " ") + sep);
+          sb.append(ensureLen(rs2.getString("kontaktisik"), " ") + sep);
+          sb.append(ensureLen(rs2.getString("telefon"), " ") + sep);
+          sb.append(ensureLen(rs2.getString("maksetin"), "0") + sep);
+          sb.append(ensureLen(rs2.getString("ale"), "0") + sep);
+          sb.append("Dealer: " + rs.getString("dealer").trim() + sep);
+        }
+
+        sb.append("\n");
+      }
+
+            ManagerData md = new ManagerData();
+            md.setClientVisitInfo(sb.toString());
+
+            sql = "SELECT kood AS klient,objekt2 AS agent,y.nimetus AS agentname  from klient k inner join yksus y on y.yksus=objekt2 " +
+                                " where klassif =2  GROUP BY kood Order by kood";
+
+    PreparedStatement ps = con.prepareStatement(sql);
+   // ps.setDate(1, new Date(getStartingDate().getTime()));
+    rs = ps.executeQuery();
+    StringBuffer bf2 = new StringBuffer();
+    while(rs.next()){
+      bf2.append(rs.getString("klient").trim() + sep);
+      String agent = rs.getString("agent").trim();
+      bf2.append(agent + sep);
+      String agentName = rs.getString("agentname");
+      if (agentName != null) agentName = agentName.trim();
+      if (agentName == null) agentName = " ";
+      bf2.append(agentName + sep);
+      String email = parent.parseFirstEmail(parent.getEmail(agent));
+      if(email == null || email.trim().length()== 0 )email = " ";
+      bf2.append(email + "\n");	
+	
+	
+	
+    }
+
+    md.setClientAgentInfo(bf2.toString());
+
+
+
+      return md;
+
+    }
+    
+    public void insertDistribution(DistEvalListWrapper wr){
+        String sql = "INSERT into distribution values ("
+        + "?,"   //   agent	C(50),
+        + "?,"   //   agentname	C(200),
+        + "?,"   //   clientid	C(50),
+        + "?,"   //   clientname	C(200),
+        + "?,"   //	prodid	C(50),
+        + "?,"   //   prodname	C(200),
+        + "date() ,"   //	sentdate	D,
+        + "?,"   //	evalcode	C(50),
+        + "?,"   //	bestbefore	C(50),
+        + "?,"   //   ownproduct	L,
+        + "?,"   //	evalname	C(200),
+        + "?,"   //	variation	I,
+        + "?,"   //	package1	I,
+        + "?,"   //	presence	L,
+        + "?,"   //	StockDisp	N,
+        + "?,"   //	StockWare	N,
+        + "?,"   //	SpacePros	I,
+        + "?,"   //	FaceAmBef	I,
+        + "?,"   //	FaceAmAft	I,
+        + "?,"   //	PlanoEval	I,
+        + "?,"   //	PalAmount	I,
+        + "?,"   //	action	L,
+        + "?,"   //	dominance	I,
+        + "?,"   //	FirstInFl	I,
+        + "?,"   //	PlacPres	I,
+        + "?,"   //	NormalPr	N,
+        + "?,"   //	ActionPr	N,
+        + "?,"   //	comment	C(200),	reserv1	C(200),	reserv2	C(200),
+        + "?," 
+        + "?," 
+   	 + "?,"   //	resint1	I,resint2	I,
+   	 + "?," 
+        + "?,"   //	resdou1	N,	resdou2	N,
+        + "?," 
+        + "?,"   //   a2	I,
+        + "?,"   //   a3	I,
+        + "?,"   //	a4	I,
+        + "?,"   //	vobbler	I,
+        + "?,"   //	pricetag	I,
+        + "?,"   //	numberof11	I,
+        + "?,"   //	numberof12	I,
+        + "?,"   //	numberof21	I,
+        + "?,"   //	numberof22	I,
+        + "?,"   //	planocomm	C(200),
+        + "?,"   //	colldtime	C(12),
+        + "?)" ; //	isbrand	L  		
+    
+        try {
+        	connectionUp();
+            PreparedStatement ps = con.prepareStatement(sql);
+            
+
+            for (Iterator iter = wr.getDistEval().getLines().iterator(); iter.hasNext(); ) {
+              DistEvalLineWrapper lw = new DistEvalLineWrapper(iter.next());
+
+              ps.setString(1, wr.getDistEval().getAgentID());
+              ps.setString(2, wr.getDistEval().getAgentName());
+              ps.setString(3, lw.getLine().getCustID());
+              ps.setString(4, lw.getLine().getCustName());
+              ps.setString(5, lw.getLine().getProdID());
+              ps.setString(6, lw.getLine().getProdName());
+              ps.setString(7, lw.getLine().getEvalCode());
+              ps.setString(8, lw.getLine().getBestBefore());
+              ps.setBoolean(9, lw.getLine().isOwnProduct());
+              ps.setString(10, lw.getLine().getEvalName());
+              ps.setInt(11, lw.getLine().getVariation());
+              ps.setInt(12, lw.getLine().getPackage1());
+              ps.setBoolean(13, lw.getLine().isPresence());
+              ps.setDouble(14, lw.getLine().getStockAtDisplay());//   + "?,"   //	StockDisp	N,
+              ps.setDouble(15, lw.getLine().getStockAtWarehouse());// + "?,"   //	StockWare	N,
+              ps.setInt(16, lw.getLine().getSpaceProsentage());//  + "?,"   //	SpacePros	I,
+              ps.setInt(17, lw.getLine().getFaceAmountBefore());//  + "?,"   //	FaceAmBef	I,
+              ps.setInt(18, lw.getLine().getFaceAmountAfter());// + "?,"   //	FaceAmAft	I,
+              ps.setInt(19, lw.getLine().getPalnoeval());//  + "?,"   //	PlanoEval	I,
+              ps.setInt(20, lw.getLine().getPalAmount());//  + "?,"   //	PalAmount	I,
+              ps.setBoolean(21, lw.getLine().isAction());//  + "?,"   //	action	L,
+   		      ps.setInt(22, lw.getLine().getDominance());// + "?,"   //	dominance	I,
+   		      ps.setInt(23, lw.getLine().getFirstinflow());// + "?,"   //	FirstInFl	I,
+   		      ps.setInt(24, lw.getLine().getPlacespresent());// + "?,"   //	PlacPres	I,
+   		      ps.setDouble(25, lw.getLine().getNormalPrice());  // + "?,"   //	NormalPr	N,
+   		      ps.setDouble(26, lw.getLine().getPromoPrice());//+ "?,"   //	ActionPr	N,
+   		      ps.setString(27, lw.getLine().getComment());//   + "?,"   //	comment	C(200),	reserv1	C(200),	reserv2	C(200),
+   		      ps.setString(28, lw.getLine().getReserv1());
+   		      ps.setString(29, lw.getLine().getReserv2());
+   		      ps.setInt(30, lw.getLine().getResint1());// + "?,"   //	resint1	I,resint2	I,
+                ps.setInt(31, lw.getLine().getResint2());  
+                ps.setDouble(32, lw.getLine().getResdouble1());// + "?,"   //	resdou1	N,	resdou2	N,
+                ps.setDouble(33, lw.getLine().getResdouble2());
+   		      ps.setInt(34, lw.getLine().getA2());//  + "?,"   //   a2	I,
+   		      ps.setInt(35, lw.getLine().getA3());//  + "?,"   //   a3	I,
+   		      ps.setInt(36, lw.getLine().getA4());//  + "?,"   //	a4	I,
+   		      ps.setInt(37, lw.getLine().getVobbler());// + "?,"   //	vobbler	I,
+   		      ps.setInt(38, lw.getLine().getPricetag());// + "?,"   //	pricetag	I,
+   		      ps.setInt(39, lw.getLine().getNumberOF11());// + "?,"   //	numberof11	I,
+   		      ps.setInt(40, lw.getLine().getNumberOF12());// + "?,"   //	numberof12	I,
+   		      ps.setInt(41, lw.getLine().getNumberOF21());// + "?,"   //	numberof21	I,
+   		      ps.setInt(42, lw.getLine().getNumberOF22());// + "?,"   //	numberof22	I,
+   		      ps.setString(43, lw.getLine().getPlanoComment());//  + "?,"   //	planocomm	C(200),
+   		      
+   			Calendar cc = Calendar.getInstance();
+			cc.setTime(lw.getLine().getDate());
+			
+			   int tund =   cc.get(Calendar.HOUR_OF_DAY) ;
+			    int minut = (cc.get(Calendar.MINUTE));
+			    int sekund = (cc.get(Calendar.SECOND));
+		
+   		      
+   		      String time = setZero(tund) + "."+setZero(minut)+"."+setZero(sekund);
+   		      ps.setString(44, time);//  + "?,"   //	colldtime	C(12),
+                ps.setBoolean(45, lw.getLine().isBrand());// + "?)" ; //	isbrand	L  		
+   		  
+              ps.executeUpdate();
+            }
+
+            //con.commit();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+      }
+
+
+    private String setZero(int i){
+     	String x = i +"";
+     	if (x.length() == 1){
+     		x = "0" + x;
+     	}
+     	return x;
+     }
+
+
+
+    private String ensureLen(String str, String replace){
+      if (str == null) str = "";
+      else str = str.trim().replace('\'', ' ').replace('\"', ' ').replace(';',' ');
+      if (str.length() == 0){
+        return replace;
+      } else {
+        return str;
+      }
+    }
+
+    private boolean scrollTo(String id, ResultSet rs) throws SQLException{
+      rs.beforeFirst();
+      while(rs.next()){
+        if (id.equals(rs.getString("kood").trim())){
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // private String url = "jdbc:DBF:///c://work/avallone/dbf";
+    public static final String DRIVER_VERSION = "DeaNew";
+
+    private String	       url = "jdbc:odbc:eeva";
+    private String             url2 = "jdbc:odbc:report";
+    private String             nimetu = "nimetus";
+    private String             pricefield = "myygihind";
+    private Connection	       con = null;
+    private Statement	       stmt;
+    private String	       subjectFilesTo = null;
+    private TreeMap	       dealers = new TreeMap();
+}
+
+
+
+/*--- formatting done in "Sun Java Convention" style on 10-07-2002 ---*/
+

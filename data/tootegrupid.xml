@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?><transport><itemclasses><itemclass code="10000" default_name="Artikkel 1" masters=""/>
+<itemclass code="100000" default_name="Kulumaterjal" masters=""/>
+<itemclass code="101000" default_name="Tindid" master="100000" masters="100000,"/>
+<itemclass code="101010" default_name="Canon tindikassetid" master="101000" masters="101000,100000,"/>
+<itemclass code="101011" default_name="HP tindikassetid" master="101000" masters="101000,100000,"/>
+<itemclass code="101012" default_name="Epson tindikassetid" master="101000" masters="101000,100000,"/>
+<itemclass code="101013" default_name="Brother tindikassetid" master="101000" masters="101000,100000,"/>
+<itemclass code="101014" default_name="Muud tindikassetid" master="101000" masters="101000,100000,"/>
+<itemclass code="101100" default_name="Toonerid" master="100000" masters="100000,"/>
+<itemclass code="101110" default_name="Canon toonerid" master="101100" masters="101100,100000,"/>
+<itemclass code="101111" default_name="HP toonerid" master="101100" masters="101100,100000,"/>
+<itemclass code="101112" default_name="Epson toonerid" master="101100" masters="101100,100000,"/>
+<itemclass code="101113" default_name="Samsung toonerid" master="101100" masters="101100,100000,"/>
+<itemclass code="101114" default_name="Xerox toonerid" master="101100" masters="101100,100000,"/>
+<itemclass code="101115" default_name="Muud toonerid" master="101100" masters="101100,100000,"/>
+<itemclass code="101200" default_name="Analoog tindikassetid" master="100000" masters="100000,"/>
+<itemclass code="101210" default_name="Analoog tindid" master="101200" masters="101200,100000,"/>
+<itemclass code="101211" masters=""/>
+<itemclass code="101212" masters=""/>
+<itemclass code="101300" default_name="Analoog toonerid" master="100000" masters="100000,"/>
+<itemclass code="101310" default_name="Analoog HP toonerid" master="101300" masters="101300,100000,"/>
+<itemclass code="101311" default_name="Analoog Canon toonerid" master="101300" masters="101300,100000,"/>
+<itemclass code="101312" default_name="Analoog muud toonerid" master="101300" masters="101300,100000,"/>
+<itemclass code="101400" default_name="Tr11113xxkilindid" master="100000" masters="100000,"/>
+<itemclass code="101500" default_name="Termokiled" master="100000" masters="100000,"/>
+<itemclass code="101600" default_name="T11111xxitmine ja renoveerimine" master="100000" masters="100000,"/>
+<itemclass code="11000" default_name="Paberikaubad" masters=""/>
+<itemclass code="110000" default_name="Paberikaubad" masters=""/>
+<itemclass code="111000" default_name="11118xxmbrikud" master="110000" masters="110000,"/>
+<itemclass code="111011" default_name="Aknata 11113xxmbrikud" master="111000" masters="111000,110000,"/>
+<itemclass code="111012" default_name="Aknaga 11113xxmbrikud" master="111000" masters="111000,110000,"/>
+<itemclass code="111013" default_name="Mullikile11113xxmbrikud" master="111000" masters="111000,110000,"/>
+<itemclass code="111014" default_name="Eri11113xxmbrikud" master="111000" masters="111000,110000,"/>
+<itemclass code="111100" default_name="Valge koopiapaber" master="110000" masters="110000,"/>
+<itemclass code="111110" default_name="Valge koopiapaber formaat A4" master="111100" masters="111100,110000,"/>
+<itemclass code="111111" default_name="Valge koopiapaber formaat A3" master="111100" masters="111100,110000,"/>
+<itemclass code="111112" default_name="Valge koopiapaber formaat A5" master="111100" masters="111100,110000,"/>
+<itemclass code="111113" default_name="Valge koopiapaber formaat A0-A2" master="111100" masters="111100,110000,"/>
+<itemclass code="111200" default_name="V11111xxrviline koopiapaber" master="110000" masters="110000,"/>
+<itemclass code="111210" default_name="V11111xxrviline koopiapaber formaat A4 v11111xxikepakendid" master="111200" masters="111200,110000,"/>
+<itemclass code="111211" default_name="V11111xxrviline koopiapaber formaat A4" master="111200" masters="111200,110000,"/>
+<itemclass code="111212" default_name="V11111xxrviline koopiapaber formaadid A0-A2" master="111200" masters="111200,110000,"/>
+<itemclass code="111213" default_name="V11111xxrviline koopiapaber formaat A3" master="111200" masters="111200,110000,"/>
+<itemclass code="111300" default_name="Disain-ja esinduspaber" master="110000" masters="110000,"/>
+<itemclass code="111310" default_name="Kalka" master="111300" masters="111300,110000,"/>
+<itemclass code="111312" default_name="Esinduspaber" master="111300" masters="111300,110000,"/>
+<itemclass code="111317" default_name="Kopeerpaber" master="111300" masters="111300,110000,"/>
+<itemclass code="111400" default_name="K11114xxrgekvaliteediline paber ja fotopaber" master="110000" masters="110000,"/>
+<itemclass code="111410" default_name="K11114xxrgekvaliteediline paber" master="111400" masters="111400,110000,"/>
+<itemclass code="111411" default_name="Fotopaber" master="111400" masters="111400,110000,"/>
+<itemclass code="111500" default_name="Kaustikud ja plokid" master="110000" masters="110000,"/>
+<itemclass code="111510" default_name="Kaustikud klamberk11112xxites" master="111500" masters="111500,110000,"/>
+<itemclass code="111511" default_name="Spiraalplokid" master="111500" masters="111500,110000,"/>
+<itemclass code="111512" default_name="Kirjaplokid liimk11112xxites" master="111500" masters="111500,110000,"/>
+<itemclass code="111513" default_name="Kontoriraamatud" master="111500" masters="111500,110000,"/>
+<itemclass code="111514" default_name="koolivihikud" master="111500" masters="111500,110000,"/>
+<itemclass code="111515" default_name="Tarbepaber" master="111500" masters="111500,110000,"/>
+<itemclass code="111516" default_name="M11111xxrkmikud" master="111500" masters="111500,110000,"/>
+<itemclass code="111600" default_name="Spetsiaalpaber" master="110000" masters="110000,"/>
+<itemclass code="111610" default_name="Faksipaber" master="111600" masters="111600,110000,"/>
+<itemclass code="111611" default_name="Printeripaber" master="111600" masters="111600,110000,"/>
+<itemclass code="111612" default_name="Kassarullid" master="111600" masters="111600,110000,"/>
+<itemclass code="111613" default_name="Termorullid" master="111600" masters="111600,110000,"/>
+<itemclass code="111614" default_name="Plotteripaberid" master="111600" masters="111600,110000,"/>
+<itemclass code="111700" default_name="Blanketid" master="110000" masters="110000,"/>
+<itemclass code="111800" default_name="M11111xxrkmepaberid" master="110000" masters="110000,"/>
+<itemclass code="111810" default_name="M11111xxrkmepaber liimiribaga" master="111800" masters="111800,110000,"/>
+<itemclass code="111811" default_name="M11111xxrkmepaber" master="111800" masters="111800,110000,"/>
+<itemclass code="111900" default_name="Kalendrid" master="110000" masters="110000,"/>
+<itemclass code="111910" default_name="Seinakalendrid" master="111900" masters="111900,110000,"/>
+<itemclass code="111911" default_name="Lauakalendrid" master="111900" masters="111900,110000,"/>
+<itemclass code="111912" default_name="Kalendrid" master="111900" masters="111900,110000,"/>
+<itemclass code="111913" default_name="Time-masterid" master="111900" masters="111900,110000,"/>
+<itemclass code="111914" default_name="Telefoni- ja aadressim11111xxrkmikud" master="111900" masters="111900,110000,"/>
+<itemclass code="112000" default_name="Indeksid" master="110000" masters="110000,"/>
+<itemclass code="112100" default_name="Postmargid ja postkaardid" master="110000" masters="110000,"/>
+<itemclass code="112110" default_name="Postmargid" masters=""/>
+<itemclass code="112111" default_name="Postkaardid" master="112100" masters="112100,110000,"/>
+<itemclass code="120000" default_name="Dokumendite haldus ja arhiveerimine" masters=""/>
+<itemclass code="121000" default_name="Arhiveerimisvahendid" master="120000" masters="120000,"/>
+<itemclass code="121010" default_name="Arhiivikarbid ja registraatorid" master="121000" masters="121000,120000,"/>
+<itemclass code="121011" default_name="Arhiveerimise lisatarvikud" master="121000" masters="121000,120000,"/>
+<itemclass code="121100" default_name="Nurgakummiga mapid" master="120000" masters="120000,"/>
+<itemclass code="121110" default_name="Kartongist kummiga mapid" master="121100" masters="121100,120000,"/>
+<itemclass code="121111" default_name="Plastikust kummiga mapid ja karbid" master="121100" masters="121100,120000,"/>
+<itemclass code="121200" default_name="Kiirk11112xxitjad" master="120000" masters="120000,"/>
+<itemclass code="121210" default_name="Kartongist kiirk11112xxitjad" master="121200" masters="121200,120000,"/>
+<itemclass code="121211" default_name="Plastikust kiirk11112xxitjad" master="121200" masters="121200,120000,"/>
+<itemclass code="121300" default_name="Kilekaaned ja kiletaskud" master="120000" masters="120000,"/>
+<itemclass code="121310" default_name="Kilekaaned" master="121300" masters="121300,120000,"/>
+<itemclass code="121311" default_name="K11112xxidetavad kiletaskud" master="121300" masters="121300,120000,"/>
+<itemclass code="121312" default_name="Iseliimuvad kiletaskud" master="121300" masters="121300,120000,"/>
+<itemclass code="121315" default_name="Eriotstarbelised kiletaskud" master="121300" masters="121300,120000,"/>
+<itemclass code="121400" default_name="R11114xxngaskaustad" master="120000" masters="120000,"/>
+<itemclass code="121410" default_name="R11114xxngaskaustad 2-r11114xxngaga" master="121400" masters="121400,120000,"/>
+<itemclass code="121411" default_name="R11114xxngaskaustad 4-r11114xxngaga" master="121400" masters="121400,120000,"/>
+<itemclass code="121500" default_name="Registraatorid" master="120000" masters="120000,"/>
+<itemclass code="121510" default_name="Registraatorid A4" master="121500" masters="121500,120000,"/>
+<itemclass code="121511" default_name="Registraatorid A3" master="121500" masters="121500,120000,"/>
+<itemclass code="121513" default_name="Registraatorid A5" master="121500" masters="121500,120000,"/>
+<itemclass code="121600" default_name="Kirjutusalused" master="120000" masters="120000,"/>
+<itemclass code="121700" default_name="Dokumendimapid" master="120000" masters="120000,"/>
+<itemclass code="121711" default_name="Plastikust dokumendimapid" master="121700" masters="121700,120000,"/>
+<itemclass code="121712" default_name="Kartongist dokumendimapid" master="121700" masters="121700,120000,"/>
+<itemclass code="121800" default_name="Vahelehed" master="120000" masters="120000,"/>
+<itemclass code="121810" default_name="Kartongist vahelehed" master="121800" masters="121800,120000,"/>
+<itemclass code="121811" default_name="Plastikust vahelehed" master="121800" masters="121800,120000,"/>
+<itemclass code="121900" default_name="L11114xx11114xxtsmapid" master="120000" masters="120000,"/>
+<itemclass code="122000" default_name="Kile11113xxmbrikud" master="120000" masters="120000,"/>
+<itemclass code="122100" default_name="Esitluskaaned" master="120000" masters="120000,"/>
+<itemclass code="122200" default_name="Dokumendikaaned" master="120000" masters="120000,"/>
+<itemclass code="122210" default_name="Plastikust dokumendikaaned" master="122200" masters="122200,120000,"/>
+<itemclass code="122211" default_name="Kartongist dokumendikaaned" master="122200" masters="122200,120000,"/>
+<itemclass code="122300" default_name="Kiilkaaned" master="120000" masters="120000,"/>
+<itemclass code="122400" default_name="Survemeklambriga kaaned" master="120000" masters="120000,"/>
+<itemclass code="122500" default_name="Rippkaaned ja rippkaantekastid" master="120000" masters="120000,"/>
+<itemclass code="130000" default_name="Lauagarnituurid ja plasttooted" masters=""/>
+<itemclass code="131000" default_name="Dokumendisahtlid" master="130000" masters="130000,"/>
+<itemclass code="131010" default_name="Vertikaalsed dokumendisahtlid" master="131000" masters="131000,130000,"/>
+<itemclass code="131011" default_name="Horisontaalsed dokumendisahtlid" master="131000" masters="131000,130000,"/>
+<itemclass code="131100" default_name="Infoalused" master="130000" masters="130000,"/>
+<itemclass code="131200" default_name="Lauagarnituurid" master="130000" masters="130000,"/>
+<itemclass code="131300" default_name="Paberikorvid" master="130000" masters="130000,"/>
+<itemclass code="131400" default_name="Sirvimisalused" master="130000" masters="130000,"/>
+<itemclass code="131500" default_name="Lauamatid" master="130000" masters="130000,"/>
+<itemclass code="131600" default_name="M11111xxrkmepaberi- ja indeksite hoidjad" master="130000" masters="130000,"/>
+<itemclass code="131700" default_name="Pliiatsitopsid" master="130000" masters="130000,"/>
+<itemclass code="140000" default_name="Arvutitarvikud" masters=""/>
+<itemclass code="141000" default_name="USB m11111xxlupulgad" master="140000" masters="140000,"/>
+<itemclass code="141100" default_name="Andmekandjate karbid" master="140000" masters="140000,"/>
+<itemclass code="141110" default_name="CD karbid" master="141100" masters="141100,140000,"/>
+<itemclass code="141111" default_name="CD mapid" master="141100" masters="141100,140000,"/>
+<itemclass code="141200" default_name="Andmekandjad" master="140000" masters="140000,"/>
+<itemclass code="141210" default_name="CD toorikud" master="141200" masters="141200,140000,"/>
+<itemclass code="141211" default_name="DVD toorikud" master="141200" masters="141200,140000,"/>
+<itemclass code="141212" default_name="M11111xxlukaardid" master="141200" masters="141200,140000,"/>
+<itemclass code="141213" default_name="Disketid" master="141200" masters="141200,140000,"/>
+<itemclass code="141214" default_name="Kassetid" master="141200" masters="141200,140000,"/>
+<itemclass code="141300" default_name="Ergonoomia" masters=""/>
+<itemclass code="141310" default_name="Ekraanifiltrid" master="225000" masters="225000,"/>
+<itemclass code="141311" default_name="Klaviatuurisahtlid" master="225000" masters="225000,"/>
+<itemclass code="141312" default_name="Dokumendihoidjad" master="225000" masters="225000,"/>
+<itemclass code="141313" default_name="Hiirematid ja randmetoed" master="225000" masters="225000,"/>
+<itemclass code="141314" default_name="Monitori- ja telefonialused" master="225000" masters="225000,"/>
+<itemclass code="141315" default_name="Arvutialused" master="225000" masters="225000,"/>
+<itemclass code="141400" default_name="Arvuti puhastusvahendid" master="140000" masters="140000,"/>
+<itemclass code="141500" default_name="Klaviatuurid" master="140000" masters="140000,"/>
+<itemclass code="141600" default_name="Arvutihiired" master="140000" masters="140000,"/>
+<itemclass code="141700" default_name="K11114xxrvaklapid ja mikrofonid" master="140000" masters="140000,"/>
+<itemclass code="141800" default_name="Veebikaamerad" master="140000" masters="140000,"/>
+<itemclass code="141900" default_name="Monitorid" master="140000" masters="140000,"/>
+<itemclass code="142000" default_name="Wireless" master="140000" masters="140000,"/>
+<itemclass code="142100" default_name="Kaardilugejad" master="140000" masters="140000,"/>
+<itemclass code="142200" default_name="K11114xxvakettad" master="140000" masters="140000,"/>
+<itemclass code="142300" default_name="Tarkvara" master="140000" masters="140000,"/>
+<itemclass code="142400" default_name="K11114xxlarid" master="140000" masters="140000,"/>
+<itemclass code="142500" default_name="Klaviatuurikleebised" master="140000" masters="140000,"/>
+<itemclass code="150000" default_name="Kontorim11112xx11112xxbel" masters=""/>
+<itemclass code="151000" default_name="Toolid" master="150000" masters="150000,"/>
+<itemclass code="151010" default_name="Klienditoolid" master="151000" masters="151000,150000,"/>
+<itemclass code="151011" default_name="T11112xx11112xxtoolid" master="151000" masters="151000,150000,"/>
+<itemclass code="151012" default_name="Juhitoolid" master="151000" masters="151000,150000,"/>
+<itemclass code="151100" default_name="Kontorim11112xx11112xxbel" master="150000" masters="150000,"/>
+<itemclass code="151110" default_name="Kapid" master="151100" masters="151100,150000,"/>
+<itemclass code="151111" default_name="Nagid ja riidepuud" master="151100" masters="151100,150000,"/>
+<itemclass code="151112" default_name="Lauad" master="151100" masters="151100,150000,"/>
+<itemclass code="151200" default_name="Valgustid" master="150000" masters="150000,"/>
+<itemclass code="151300" default_name="Kellad" master="150000" masters="150000,"/>
+<itemclass code="151400" default_name="Rippkaante kapid" master="150000" masters="150000,"/>
+<itemclass code="151500" default_name="Pildiraamid" master="150000" masters="150000,"/>
+<itemclass code="151600" default_name="M11111xxrgid" master="150000" masters="150000,"/>
+<itemclass code="151700" default_name="Toolimatid" master="150000" masters="150000,"/>
+<itemclass code="160000" default_name="Majapidamine" masters=""/>
+<itemclass code="161000" default_name="Hoidikud" master="160000" masters="160000,"/>
+<itemclass code="161010" default_name="Majapidamispaberite hoidikud" master="161000" masters="161000,160000,"/>
+<itemclass code="161011" default_name="Tualettpaberite hoidikud" master="161000" masters="161000,160000,"/>
+<itemclass code="161012" default_name="Seebihoidjad" master="161000" masters="161000,160000,"/>
+<itemclass code="161013" default_name="Lehtk11111xxter11111xxtikute hoidjad" master="161000" masters="161000,160000,"/>
+<itemclass code="161100" default_name="Seebid" master="160000" masters="160000,"/>
+<itemclass code="161200" default_name="Pr11113xxgi- ja kilekotid" master="160000" masters="160000,"/>
+<itemclass code="161210" default_name="Pr11113xxgikotid" master="161200" masters="161200,160000,"/>
+<itemclass code="161211" default_name="Minigrip kotid" master="161200" masters="161200,160000,"/>
+<itemclass code="161212" default_name="Kilekotid" master="161200" masters="161200,160000,"/>
+<itemclass code="161300" default_name="Majapidamise puhastus- ja hooldusvahendid" master="160000" masters="160000,"/>
+<itemclass code="161310" default_name="Puhastuslapid ja nuustikud" master="161300" masters="161300,160000,"/>
+<itemclass code="161311" default_name="Harjad" master="161300" masters="161300,160000,"/>
+<itemclass code="161312" default_name="Mopid" master="161300" masters="161300,160000,"/>
+<itemclass code="161313" default_name="Muud majapidamistooted" master="161300" masters="161300,160000,"/>
+<itemclass code="161314" default_name="Kindad" master="161300" masters="161300,160000,"/>
+<itemclass code="161400" default_name="K11113xx11113xxnlad" master="160000" masters="160000,"/>
+<itemclass code="161500" default_name="Kodukeemia" master="160000" masters="160000,"/>
+<itemclass code="161510" default_name="N11114xxudepesuvahendid" master="161500" masters="161500,160000,"/>
+<itemclass code="161511" default_name="P11114xxrandapuhastusvahendid" master="161500" masters="161500,160000,"/>
+<itemclass code="161512" default_name="M11112xx11112xxblipuhastusvahendid" master="161500" masters="161500,160000,"/>
+<itemclass code="161513" default_name="Pesupuhastusvahendid" master="161500" masters="161500,160000,"/>
+<itemclass code="161514" default_name="WC puhastusvahendid" master="161500" masters="161500,160000,"/>
+<itemclass code="161515" default_name="11118xxldpuhastusvahendid" master="161500" masters="161500,160000,"/>
+<itemclass code="161516" default_name="Klaasipuhastusvahendid" master="161500" masters="161500,160000,"/>
+<itemclass code="161517" default_name="11117xxhuv11111xxrskendajad" master="161500" masters="161500,160000,"/>
+<itemclass code="161600" default_name="N11114xxud" master="160000" masters="160000,"/>
+<itemclass code="161610" default_name="11118xxhekordsed n11114xxud" master="161600" masters="161600,160000,"/>
+<itemclass code="161611" default_name="N11114xxud" master="161600" masters="161600,160000,"/>
+<itemclass code="161700" default_name="Esmaabi" master="160000" masters="160000,"/>
+<itemclass code="161800" default_name="Majapidamispaberid ja k11111xxter11111xxtikud" master="160000" masters="160000,"/>
+<itemclass code="161810" default_name="Majapidamispaberid" master="161800" masters="161800,160000,"/>
+<itemclass code="161811" default_name="Lehtk11111xxter11111xxtikud" master="161800" masters="161800,160000,"/>
+<itemclass code="161900" default_name="Pakkematerjalid" master="160000" masters="160000,"/>
+<itemclass code="162000" default_name="Tualettpaberid" master="160000" masters="160000,"/>
+<itemclass code="162100" default_name="Salvr11111xxtikud" master="160000" masters="160000,"/>
+<itemclass code="170000" default_name="P11114xxhit11112xx11112xxvahendid" masters=""/>
+<itemclass code="171000" default_name="Augurauad" master="170000" masters="170000,"/>
+<itemclass code="171100" default_name="Klammerdajad ja klambrid" master="170000" masters="170000,"/>
+<itemclass code="171110" default_name="Klammerdajad" master="171100" masters="171100,170000,"/>
+<itemclass code="171111" default_name="V11114xximsad klammerdajad" master="171100" masters="171100,170000,"/>
+<itemclass code="171112" default_name="Elektrilised klammerdajad" master="171100" masters="171100,170000,"/>
+<itemclass code="171113" default_name="Klambrieemaldajad" master="171100" masters="171100,170000,"/>
+<itemclass code="171114" default_name="Klambrid klammerdajatele" master="171100" masters="171100,170000,"/>
+<itemclass code="171115" default_name="Klambrip11113xxstolid" master="171100" masters="171100,170000,"/>
+<itemclass code="171200" default_name="Klambrid" master="170000" masters="170000,"/>
+<itemclass code="171210" default_name="Knopkad" master="171200" masters="171200,170000,"/>
+<itemclass code="171211" default_name="kirjaklmabrid" master="171200" masters="171200,170000,"/>
+<itemclass code="171212" default_name="Paberiklambrid" master="171200" masters="171200,170000,"/>
+<itemclass code="171213" default_name="N11114xxelad" master="171200" masters="171200,170000,"/>
+<itemclass code="171300" default_name="luubid" master="170000" masters="170000,"/>
+<itemclass code="171310" default_name="Luubid" master="171300" masters="171300,170000,"/>
+<itemclass code="171400" default_name="Liimid" master="170000" masters="170000,"/>
+<itemclass code="171410" default_name="Liimipulgad" master="171400" masters="171400,170000,"/>
+<itemclass code="171411" default_name="PVA" master="171400" masters="171400,170000,"/>
+<itemclass code="171412" default_name="Vedelliimid" master="171400" masters="171400,170000,"/>
+<itemclass code="171413" default_name="Muud liimid" master="171400" masters="171400,170000,"/>
+<itemclass code="171500" default_name="Kleeplindid" master="170000" masters="170000,"/>
+<itemclass code="171510" default_name="Kleeplindid" master="171500" masters="171500,170000,"/>
+<itemclass code="171511" default_name="Kahepoolsed kleeplindid" master="171500" masters="171500,170000,"/>
+<itemclass code="171512" default_name="Pakketteip" master="171500" masters="171500,170000,"/>
+<itemclass code="171513" default_name="Kleeplindihoidjad" master="171500" masters="171500,170000,"/>
+<itemclass code="171600" default_name="Rahakummid" master="170000" masters="170000,"/>
+<itemclass code="171612" default_name="Giljotiinid ja trimmerid" master="171600" masters="171600,170000,"/>
+<itemclass code="171700" default_name="Templid ja tarvikud" master="170000" masters="170000,"/>
+<itemclass code="171710" default_name="Templiv11111xxrvid ja templipadjad" master="171700" masters="171700,170000,"/>
+<itemclass code="171711" default_name="Valmistemplid" master="171700" masters="171700,170000,"/>
+<itemclass code="171712" default_name="Tellitavad templid" master="171700" masters="171700,170000,"/>
+<itemclass code="171800" default_name="V11114xxtmekapid" master="170000" masters="170000,"/>
+<itemclass code="171900" default_name="Neetijad" master="170000" masters="170000,"/>
+<itemclass code="172000" default_name="N11111xxpuniisutajad ja s11114xxrmekummid" master="170000" masters="170000,"/>
+<itemclass code="172100" default_name="K11111xx11111xxrid" master="170000" masters="170000,"/>
+<itemclass code="172200" default_name="Noad" master="170000" masters="170000,"/>
+<itemclass code="180000" default_name="Kirjutusvahendid" masters=""/>
+<itemclass code="181000" default_name="Pasta-, geel- ja tindipliiatsid" master="180000" masters="180000,"/>
+<itemclass code="181010" default_name="Pastapliiatsid" master="181000" masters="181000,180000,"/>
+<itemclass code="181011" default_name="Geelpliiatsid" master="181000" masters="181000,180000,"/>
+<itemclass code="181012" default_name="Tindipliiatsid" master="181000" masters="181000,180000,"/>
+<itemclass code="181013" default_name="Sulepead" master="181000" masters="181000,180000,"/>
+<itemclass code="181014" default_name="Kaligraafia piiatsid" master="181000" masters="181000,180000,"/>
+<itemclass code="181015" default_name="Joonestuspliiatsid, rapiidograafid" master="181000" masters="181000,180000,"/>
+<itemclass code="181100" default_name="korrektuurvahendid" master="180000" masters="180000,"/>
+<itemclass code="181110" default_name="Korrektuurpliiatsid" master="181100" masters="181100,180000,"/>
+<itemclass code="181111" default_name="Korrektuurlindid" master="181100" masters="181100,180000,"/>
+<itemclass code="181112" default_name="Korrektuurv11111xxrvid" master="181100" masters="181100,180000,"/>
+<itemclass code="181200" default_name="Pliiatsiteritajad" master="180000" masters="180000,"/>
+<itemclass code="181300" default_name="Kustukummid" master="180000" masters="180000,"/>
+<itemclass code="181400" default_name="Harilikud pliiatsid" master="180000" masters="180000,"/>
+<itemclass code="181410" default_name="Mehaanilised harilikud" master="181400" masters="181400,180000,"/>
+<itemclass code="181411" default_name="Tavalised harilikud" master="181400" masters="181400,180000,"/>
+<itemclass code="181412" default_name="Mehaanilise pliiatsi s11112xxed" master="181400" masters="181400,180000,"/>
+<itemclass code="181413" default_name="Eriotstarbelised pliiatsid" master="181400" masters="181400,180000,"/>
+<itemclass code="181500" default_name="Markerid" master="180000" masters="180000,"/>
+<itemclass code="181510" default_name="Tekstimarkerid" master="181500" masters="181500,180000,"/>
+<itemclass code="181511" default_name="Tahvlimarkerid" master="181500" masters="181500,180000,"/>
+<itemclass code="181512" default_name="Permanentsed markerid" master="181500" masters="181500,180000,"/>
+<itemclass code="181515" default_name="CD- ja kilemarkerid" master="181500" masters="181500,180000,"/>
+<itemclass code="181600" default_name="S11113xxdamikud" master="180000" masters="180000,"/>
+<itemclass code="181610" default_name="Pastapliiatsite s11113xxdamikud" master="181600" masters="181600,180000,"/>
+<itemclass code="181611" default_name="Geelpliiatsite s11113xxdamikud" master="181600" masters="181600,180000,"/>
+<itemclass code="181612" default_name="Dokumendipliiatsite s11113xxdamikud" master="181600" masters="181600,180000,"/>
+<itemclass code="181613" default_name="Tindid, tushid" master="181600" masters="181600,180000,"/>
+<itemclass code="181700" default_name="Eksklusiivsed kirjutusvahendid" master="180000" masters="180000,"/>
+<itemclass code="181710" default_name="Eksklusiivsed pastapliiatsid" master="181700" masters="181700,180000,"/>
+<itemclass code="181711" default_name="Eksklusiivsed sulepead" master="181700" masters="181700,180000,"/>
+<itemclass code="181712" default_name="Eksklusiivsed geel- ja tindipliiatsid" master="181700" masters="181700,180000,"/>
+<itemclass code="181713" default_name="Kinkekomplektid" master="181700" masters="181700,180000,"/>
+<itemclass code="181714" default_name="Eksklusiivsed mehaanilised pliiatsid" master="181700" masters="181700,180000,"/>
+<itemclass code="181800" default_name="Markeerimiskriidid" master="180000" masters="180000,"/>
+<itemclass code="182100" default_name="Joonestusalused" master="280000" masters="280000,"/>
+<itemclass code="190000" default_name="Mapid ja kohvrid" masters=""/>
+<itemclass code="191000" default_name="Portfellid ja kohvrid" master="190000" masters="190000,"/>
+<itemclass code="191100" default_name="Rahakotid" master="190000" masters="190000,"/>
+<itemclass code="191200" default_name="Muud nahast tooted" master="190000" masters="190000,"/>
+<itemclass code="191300" default_name="Albumid" master="190000" masters="190000,"/>
+<itemclass code="191400" default_name="Visiitkaardimapid" master="190000" masters="190000,"/>
+<itemclass code="191500" default_name="K11111xxekotid" master="190000" masters="190000,"/>
+<itemclass code="191600" default_name="Dokumendimapid" master="190000" masters="190000,"/>
+<itemclass code="191700" default_name="S11113xxlearvutikotid" master="190000" masters="190000,"/>
+<itemclass code="191800" default_name="V11114xxtmehoidjad" master="190000" masters="190000,"/>
+<itemclass code="200000" default_name="Esitlusvahendid" masters=""/>
+<itemclass code="201000" default_name="Tahvlid" master="200000" masters="200000,"/>
+<itemclass code="201010" default_name="Korktahvlid" master="201000" masters="201000,200000,"/>
+<itemclass code="201011" default_name="Liimitahvlid" master="201000" masters="201000,200000,"/>
+<itemclass code="201012" default_name="Valge tahvlid" master="201000" masters="201000,200000,"/>
+<itemclass code="201013" default_name="Planeerimistahvlid" master="201000" masters="201000,200000,"/>
+<itemclass code="201014" default_name="Combo tahvlid" master="201000" masters="201000,200000,"/>
+<itemclass code="201015" default_name="Kriiditahvlid" master="201000" masters="201000,200000,"/>
+<itemclass code="201016" default_name="Tekstiiltahvlid" master="201000" masters="201000,200000,"/>
+<itemclass code="201100" default_name="Planeerimistahvlid" master="201000" masters="201000,200000,"/>
+<itemclass code="201200" default_name="Tahvliplokid" master="200000" masters="200000,"/>
+<itemclass code="201300" default_name="Magnetid, markerihoidjad" master="200000" masters="200000,"/>
+<itemclass code="201400" default_name="Esitlustehnika" master="200000" masters="200000,"/>
+<itemclass code="201410" default_name="Grafoprojektorid" master="201400" masters="201400,200000,"/>
+<itemclass code="201411" default_name="Multimeediaprojektorid" master="201400" masters="201400,200000,"/>
+<itemclass code="201412" default_name="Multimeediaprojektorite tarvikud" master="201400" masters="201400,200000,"/>
+<itemclass code="201413" default_name="Grafokiled" master="201400" masters="201400,200000,"/>
+<itemclass code="201500" default_name="Puhastusvahendid tahvlile" master="200000" masters="200000,"/>
+<itemclass code="201510" default_name="Koopiamasinale" master="201500" masters="201500,200000,"/>
+<itemclass code="201511" default_name="Tindiprinterile" master="201500" masters="201500,200000,"/>
+<itemclass code="201512" default_name="Laserprinterile" master="201500" masters="201500,200000,"/>
+<itemclass code="201600" default_name="Ekraanid" master="200000" masters="200000,"/>
+<itemclass code="201700" default_name="Nimesildid ja hoidjad" master="200000" masters="200000,"/>
+<itemclass code="201800" default_name="Kaardikepid" master="200000" masters="200000,"/>
+<itemclass code="201900" default_name="Interaktiivsed tahvlid ja ekraanid" master="200000" masters="200000,"/>
+<itemclass code="210000" default_name="Toidukaubad" masters=""/>
+<itemclass code="211000" default_name="Suhkur" master="210000" masters="210000,"/>
+<itemclass code="211100" default_name="Kohvikoor" master="210000" masters="210000,"/>
+<itemclass code="211200" default_name="Muud toidukaubad" master="210000" masters="210000,"/>
+<itemclass code="211300" default_name="Mesi" master="210000" masters="210000,"/>
+<itemclass code="211400" default_name="Joogivesi" master="210000" masters="210000,"/>
+<itemclass code="211500" default_name="Mahlad" master="210000" masters="210000,"/>
+<itemclass code="211600" default_name="Karastusjoogid" master="210000" masters="210000,"/>
+<itemclass code="211700" masters=""/>
+<itemclass code="211800" default_name="Toiduained*" master="210000" masters="210000,"/>
+<itemclass code="211900" default_name="Tee" master="210000" masters="210000,"/>
+<itemclass code="212000" default_name="Kohv" master="210000" masters="210000,"/>
+<itemclass code="212200" default_name="Kakao" master="210000" masters="210000,"/>
+<itemclass code="212300" default_name="K11113xxpsised" master="210000" masters="210000,"/>
+<itemclass code="212400" default_name="Shokolaadid ja kommid" master="210000" masters="210000,"/>
+<itemclass code="220000" default_name="Kontoritehnika" masters=""/>
+<itemclass code="221000" default_name="Lamineerimisvahendid" master="220000" masters="220000,"/>
+<itemclass code="221010" default_name="Lamineerijad" master="221000" masters="221000,220000,"/>
+<itemclass code="221011" default_name="Lamineerimiskiled" master="221000" masters="221000,220000,"/>
+<itemclass code="221100" default_name="K11112xxitmisvahendid" master="220000" masters="220000,"/>
+<itemclass code="221110" default_name="K11112xxitemasinad" master="221100" masters="221100,220000,"/>
+<itemclass code="221111" default_name="K11112xxitespiraalid ja k11112xxitesiinid" master="221100" masters="221100,220000,"/>
+<itemclass code="221112" default_name="K11112xxitekartong ja k11112xxitekile" master="221100" masters="221100,220000,"/>
+<itemclass code="221200" default_name="Giljotiinid ja trimmerid" master="171600" masters="171600,170000,"/>
+<itemclass code="221212" default_name="P-Touch lindid" master="100000" masters="100000,"/>
+<itemclass code="221300" default_name="Faksid" master="220000" masters="220000,"/>
+<itemclass code="221310" default_name="Tindifaksid" master="221300" masters="221300,220000,"/>
+<itemclass code="221311" default_name="Laserfaksid" master="221300" masters="221300,220000,"/>
+<itemclass code="221400" default_name="Arvutid" master="220000" masters="220000,"/>
+<itemclass code="221410" default_name="S11113xxlearvutid" master="221400" masters="221400,220000,"/>
+<itemclass code="221411" default_name="Arvutid" master="221400" masters="221400,220000,"/>
+<itemclass code="221412" default_name="Arvuti komponendid" master="221400" masters="221400,220000,"/>
+<itemclass code="221500" default_name="Kalkulaatorid" master="220000" masters="220000,"/>
+<itemclass code="221510" default_name="Lauakalkulaatorid" master="221500" masters="221500,220000,"/>
+<itemclass code="221511" default_name="Koolikalkulaatorid" master="221500" masters="221500,220000,"/>
+<itemclass code="221512" default_name="Taskukalkulaatorid" master="221500" masters="221500,220000,"/>
+<itemclass code="221600" default_name="Printerid" master="220000" masters="220000,"/>
+<itemclass code="221610" default_name="Laserprinterid" master="221600" masters="221600,220000,"/>
+<itemclass code="221611" default_name="Maatriksprinterid" master="221600" masters="221600,220000,"/>
+<itemclass code="221612" default_name="Tindiprinterid" master="221600" masters="221600,220000,"/>
+<itemclass code="221700" default_name="Koduelektroonika" master="220000" masters="220000,"/>
+<itemclass code="221711" default_name="Audiotehnika" master="221700" masters="221700,220000,"/>
+<itemclass code="221712" default_name="Foto- ja videotehnika" master="221700" masters="221700,220000,"/>
+<itemclass code="221713" default_name="Veekeetjad, kohvimasinad" master="221700" masters="221700,220000,"/>
+<itemclass code="221714" default_name="DVD seadmend" master="221700" masters="221700,220000,"/>
+<itemclass code="221715" default_name="Mikrolaineahjud" master="221700" masters="221700,220000,"/>
+<itemclass code="221716" default_name="Tolmuimejad" master="221700" masters="221700,220000,"/>
+<itemclass code="221717" default_name="Ventilaatorid" master="221700" masters="221700,220000,"/>
+<itemclass code="221800" default_name="Paberipurustajad ja tarvikud" master="220000" masters="220000,"/>
+<itemclass code="221810" default_name="Paberipurustajad" master="221800" masters="221800,220000,"/>
+<itemclass code="221811" default_name="Paberipurustajate tarvikud ja varuosad" master="221800" masters="221800,220000,"/>
+<itemclass code="221900" default_name="Pikendusjuhtmed ja kaablid" master="220000" masters="220000,"/>
+<itemclass code="221910" default_name="Pikendusjuhtmed" master="221900" masters="221900,220000,"/>
+<itemclass code="221911" default_name="Kaablid" master="221900" masters="221900,220000,"/>
+<itemclass code="222000" default_name="Patareid, akud ja laadijad" master="220000" masters="220000,"/>
+<itemclass code="222010" default_name="Patareid" master="222000" masters="222000,220000,"/>
+<itemclass code="222011" default_name="Laetavad akud ja laadijad" master="222000" masters="222000,220000,"/>
+<itemclass code="222012" default_name="Taskulambid" master="222000" masters="222000,220000,"/>
+<itemclass code="222100" default_name="Sk11111xxnnerid" master="220000" masters="220000,"/>
+<itemclass code="222200" default_name="Telefonid" master="220000" masters="220000,"/>
+<itemclass code="222210" default_name="Lauatelefonid" master="222200" masters="222200,220000,"/>
+<itemclass code="222211" default_name="Mobiiltelefonid" master="222200" masters="222200,220000,"/>
+<itemclass code="222212" default_name="Telefoni tarvikud" master="222200" masters="222200,220000,"/>
+<itemclass code="222300" default_name="GPS seadmed ja tarkvara" master="220000" masters="220000,"/>
+<itemclass code="222400" default_name="Multifunktsionaalsed seadmed" master="220000" masters="220000,"/>
+<itemclass code="222410" default_name="Multifunktsionaalsed laserseadmed" master="222400" masters="222400,220000,"/>
+<itemclass code="222411" default_name="Multifunktsionaalsed tindiseadmed" master="222400" masters="222400,220000,"/>
+<itemclass code="225000" default_name="Ergonoomia" masters=""/>
+<itemclass code="230000" default_name="Kooli- ja kunstitarbed" masters=""/>
+<itemclass code="231000" default_name="V11111xxrvid" master="230000" masters="230000,"/>
+<itemclass code="231010" default_name="Vesiv11111xxrvid" master="231000" masters="231000,230000,"/>
+<itemclass code="231011" default_name="Guashid" master="231000" masters="231000,230000,"/>
+<itemclass code="231012" default_name="Muud v11111xxrvid" master="231000" masters="231000,230000,"/>
+<itemclass code="231013" default_name="Akr11113xx11113xxlv11111xxrvid" master="231000" masters="231000,230000,"/>
+<itemclass code="231014" default_name="11117xxliv11111xxrvid" master="231000" masters="231000,230000,"/>
+<itemclass code="231015" default_name="N11111xxo- ja n11111xxpuv11111xxrvid" master="231000" masters="231000,230000,"/>
+<itemclass code="231016" default_name="Hobiv11111xxrvid" master="231000" masters="231000,230000,"/>
+<itemclass code="231100" default_name="V11111xxrvi- ja akvarellpliiatsid" master="230000" masters="230000,"/>
+<itemclass code="231110" default_name="V11111xxrvipliiatsid" master="231100" masters="231100,230000,"/>
+<itemclass code="231112" default_name="Akvarellipliiatsid" master="231100" masters="231100,230000,"/>
+<itemclass code="231113" default_name="Kunstniku v11111xxrvi- ja akvarellipliiatsid" master="231100" masters="231100,230000,"/>
+<itemclass code="231114" default_name="Kunstniku pliiatsid ja s11112xxed" master="231100" masters="231100,230000,"/>
+<itemclass code="231200" default_name="Kooli paberitooted" master="230000" masters="230000,"/>
+<itemclass code="231210" default_name="Akvarelliplokid" master="231200" masters="231200,230000,"/>
+<itemclass code="231211" default_name="Joonistus- ja joonestusplokid" master="231200" masters="231200,230000,"/>
+<itemclass code="231212" default_name="V11111xxrviline paber ja kartong" master="231200" masters="231200,230000,"/>
+<itemclass code="231213" default_name="Noodivihikud" master="231200" masters="231200,230000,"/>
+<itemclass code="231214" default_name="Millimeetripaber" master="231200" masters="231200,230000,"/>
+<itemclass code="231215" default_name="P11111xxevikud" master="231200" masters="231200,230000,"/>
+<itemclass code="231216" default_name="V11111xxrviraamatud" master="231200" masters="231200,230000,"/>
+<itemclass code="231300" default_name="Viltpliiatsid ja dekoratiivmarkerid" master="230000" masters="230000,"/>
+<itemclass code="231310" default_name="Viltpliiatsid" master="231300" masters="231300,230000,"/>
+<itemclass code="231311" default_name="Dekoratiivmakerid, tekstiilimarkerid" master="231300" masters="231300,230000,"/>
+<itemclass code="231400" default_name="K11111xxsit11112xx11112xxpaberid" master="230000" masters="230000,"/>
+<itemclass code="231410" default_name="Krepp- ja k11111xxrgpaberid" master="231400" masters="231400,230000,"/>
+<itemclass code="231411" default_name="Lainepapid" master="231400" masters="231400,230000,"/>
+<itemclass code="231412" default_name="Siidipaberid" master="231400" masters="231400,230000,"/>
+<itemclass code="231413" default_name="Dekoratiivpaberid" master="231400" masters="231400,230000,"/>
+<itemclass code="231414" default_name="J11114xxupaber" master="231400" masters="231400,230000,"/>
+<itemclass code="231415" default_name="Pakkepaberid ka kinkekotid" master="231400" masters="231400,230000,"/>
+<itemclass code="231500" default_name="Pinalid ja koolikotid" master="230000" masters="230000,"/>
+<itemclass code="231510" default_name="Pinalid" master="231500" masters="231500,230000,"/>
+<itemclass code="231511" default_name="Koolikotid" master="231500" masters="231500,230000,"/>
+<itemclass code="231600" default_name="Plastiliin ja voolimissavi" master="230000" masters="230000,"/>
+<itemclass code="231610" default_name="Plastiliin" master="231600" masters="231600,230000,"/>
+<itemclass code="231611" default_name="Voolimissavi" master="231600" masters="231600,230000,"/>
+<itemclass code="231700" default_name="Tahvikriidid, asfaldikriidid" master="230000" masters="230000,"/>
+<itemclass code="231800" default_name="Kriidid" master="230000" masters="230000,"/>
+<itemclass code="231810" default_name="Rasvakriidid" master="231800" masters="231800,230000,"/>
+<itemclass code="231811" default_name="11117xxlipastellid" master="231800" masters="231800,230000,"/>
+<itemclass code="231812" default_name="Akvarell- ja pastellkriidid" master="231800" masters="231800,230000,"/>
+<itemclass code="231900" default_name="Pintslid, veetopsid" master="230000" masters="230000,"/>
+<itemclass code="232000" default_name="L11114xxuendid, molbertid" master="230000" masters="230000,"/>
+<itemclass code="232100" default_name="Kaaned vihikutele ja raamatutele" master="230000" masters="230000,"/>
+<itemclass code="232110" default_name="Vihiku- ja raamatupaberid" master="232100" masters="232100,230000,"/>
+<itemclass code="232111" default_name="Kilekaaned vihikutele" master="232100" masters="232100,230000,"/>
+<itemclass code="232112" default_name="Kleepkile" master="232100" masters="232100,230000,"/>
+<itemclass code="232210" default_name="Gloobused" master="230000" masters="230000,"/>
+<itemclass code="232310" default_name="K11111xxsit11112xx11112xxkomplektid" master="230000" masters="230000,"/>
+<itemclass code="232400" default_name="Helkurid" master="230000" masters="230000,"/>
+<itemclass code="232500" default_name="Kleeppildid" master="230000" masters="230000,"/>
+<itemclass code="232600" default_name="K11111xxsit11112xx11112xx ja meisterdamise tooted" master="230000" masters="230000,"/>
+<itemclass code="232700" default_name="Voolimise lisatarvikud" master="230000" masters="230000,"/>
+<itemclass code="232800" default_name="Pintslid" master="230000" masters="230000,"/>
+<itemclass code="250000" default_name="Teenused" masters=""/>
+<itemclass code="250010" default_name="Seadme rent" master="250000" masters="250000,"/>
+<itemclass code="260000" default_name="HOOBEKS" masters=""/>
+<itemclass code="260010" default_name="600" master="260000" masters="260000,"/>
+<itemclass code="260020" default_name="ET" master="260000" masters="260000,"/>
+<itemclass code="260030" default_name="K" master="260000" masters="260000,"/>
+<itemclass code="260040" default_name="L" master="260000" masters="260000,"/>
+<itemclass code="260050" default_name="P" master="260000" masters="260000,"/>
+<itemclass code="260060" default_name="SP" master="260000" masters="260000,"/>
+<itemclass code="260070" default_name="VP" master="260000" masters="260000,"/>
+<itemclass code="260080" default_name="400" master="260000" masters="260000,"/>
+<itemclass code="260090" default_name="VR" master="260000" masters="260000,"/>
+<itemclass code="280000" default_name="Joonestusvahendid" masters=""/>
+<itemclass code="281000" default_name="Joonlauad, kolmnurgad, mallid, lekaalid" master="280000" masters="280000,"/>
+<itemclass code="281010" default_name="Joonlauad" master="281000" masters="281000,280000,"/>
+<itemclass code="281011" default_name="Eriotstarbelised joonlauad" master="281000" masters="281000,280000,"/>
+<itemclass code="281012" default_name="Joonlauakompektid" master="281000" masters="281000,280000,"/>
+<itemclass code="281013" default_name="Kolmnurgad" master="281000" masters="281000,280000,"/>
+<itemclass code="281014" default_name="Mallid" master="281000" masters="281000,280000,"/>
+<itemclass code="281100" default_name="Sirklid" master="280000" masters="280000,"/>
+<itemclass code="281200" default_name="Joonestusalused" master="280000" masters="280000,"/>
+<itemclass code="281300" default_name="Shabloonid" master="280000" masters="280000,"/>
+<itemclass code="281400" default_name="Lekaalid" master="280000" masters="280000,"/>
+<itemclass code="300000" default_name="Etiketid ja markeerijad" masters=""/>
+<itemclass code="301000" default_name="Hinnasildid ja hinnasiltide hoidjad" master="300000" masters="300000,"/>
+<itemclass code="301010" default_name="Hinnasildid" master="301000" masters="301000,300000,"/>
+<itemclass code="301011" default_name="Hinnasiltide hoidjad" master="301000" masters="301000,300000,"/>
+<itemclass code="301100" default_name="Hinnap11113xxstolid ja hinnap11113xxstolilindid" master="300000" masters="300000,"/>
+<itemclass code="301110" default_name="Hinnap11113xxstolilindid" master="301100" masters="301100,300000,"/>
+<itemclass code="301111" default_name="Hinnap11113xxstolid" master="301100" masters="301100,300000,"/>
+<itemclass code="301112" default_name="Hinnap11113xxstolite tarvikud" master="301100" masters="301100,300000,"/>
+<itemclass code="301113" default_name="Tekstiilip11113xxstolid" master="301100" masters="301100,300000,"/>
+<itemclass code="301200" default_name="Kleepkirjamasinad ja lindid" master="300000" masters="300000,"/>
+<itemclass code="301210" default_name="Kleepkirjamasinad" master="301200" masters="301200,300000,"/>
+<itemclass code="301211" default_name="Kleepkirjalindid" master="301200" masters="301200,300000,"/>
+<itemclass code="301300" default_name="Etiketid" master="300000" masters="300000,"/>
+<itemclass code="301310" default_name="Iseliimuvad etiketid" master="301300" masters="301300,300000,"/>
+<itemclass code="301311" default_name="Eriotstarbelised etiketid" master="301300" masters="301300,300000,"/>
+<itemclass code="301400" default_name="Ohutusm11111xxrgid" master="300000" masters="300000,"/>
+<itemclass code="301410" masters=""/>
+<itemclass code="999999" default_name="stendid" masters=""/>
+<itemclass code="KAMP" default_name="Kampaania toode" masters=""/>
+<itemclass code="KIR" default_name="Vana klass" masters=""/>
+<itemclass code="KONTO" default_name="Vana klass" masters=""/>
+<itemclass code="SOOD" default_name="Soodus toode" masters=""/>
+<itemclass code="VANA" default_name="Vanad kaubad" masters=""/>
+</itemclasses></transport>

@@ -1,0 +1,14 @@
+LE122;Eve Peterson
+KA222;Mardo Hoovi
+KK22;Kätlin Klemmer
+KE22;Kairi Kukk
+HO22;Raul Kõvask
+LE222;Tiina Jask
+IE22;Argo Liiv
+MJ122;Tarmo Lillepa
+MJ222;Veljo Sarapuu
+KA122;Kristina Märtson
+PE122;Heidi Metsaru
+PE222;Heinari Milber
+LAE22;Kalvi Jõerand
+HOUSE;Kätlin Klemmer

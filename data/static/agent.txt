@@ -1,0 +1,6 @@
+IDA51;Paist Eno 5 122 672
+KAM51;Künnapas Andrus 5 258 08
+LAA51;Airi Järvesaar 58 001 724
+LOU51;Martjan Ülar 5 167 439
+POH51;Kulmats Rauno 53 402 900
+KA122;Aibvatreg

@@ -1,0 +1,47 @@
+format	
+2	44	1	0	0	
+
+codepage	UTF-8	
+
+commentstring	
+	
+
+user1	
+AVO	Avo Nuder		AVO										0			0				0,00												0,00	0,00				0	0	EST					0					0	0	0	0	0	0	0				0				1	0	0	10249	0			0		
+
+ELINA	Elina Kozhenevski		ELINA										0			0				0,00												0,00	0,00				0	528887315	EST					0					0	0	0	0	0	0	0				0	2007-01-25			0	0	0	10663	0			0		
+
+ENE	Ene Noevere		ENE										0			0				0,00												0,00	0,00				0	1066200065	EST					0					0	0	0	0	0	0	0				0				1	0	0		0			0		
+
+ERLEND	Erlend Peenema		ERLEN										0			0				0,00												0,00	0,00				0	-1388799554	EST					0					0	0	0	0	0	0	0				0	2008-03-19			0	0	0	10306	0			0		
+
+HENDRIK	Priit-Hendrik Sumeri		HENDR										0			0																0,00	0,00				0	0	EST					0					0	0	0	0	0	0	0				0	2009-05-04			1	0	0	10249	1			0		
+
+INGMAR	Ingmar Vester		AVO										0			0				0,00												0,00	0,00				0	-1730898178	EST					0					0	0	0	0	0	0	0				0	2007-07-12			1	0	0	10054	0			0		
+
+INGRID	Ingrid Teder		INGRI										0			0				0,00												0,00	0,00				0	-1578456258	EST					0					0	0	0	0	0	0	0				0	2007-01-29			1	0	0	9890	0			0		
+
+JÜRI	Jüri Laanep		AVO										0			0																0,00	0,00				0	0	EST					0					0	0	0	0	0	0	0				0				1	0	0	10249	0			0		
+
+KAIDI	Kaidi		KAIDI										0			0				0,00												0,00	0,00				0	0	EST					0					0	0	0	0	0	0	0				0				1	0	0		0			0		
+
+LAURI	Lauri Vagenstein		LAURI										0			0				0,00												0,00	0,00				0	-106420486	EST					0					0	0	0	0	0	0	0				0				1	0	0		0			0		
+
+LEM	Lembit		YLD										0			0				0,00												0,00	0,00				0	250934267	EST					0					0	0	0	0	0	0	0				0				0	0	0	10250	0			0		
+
+LIIA	Liia Kallas		LIIA										0			0				0,00												0,00	0,00				0	-303821032	EST					0					0	0	0	0	0	0	0				0	2006-10-03			1	0	0	9793	0			0		
+
+MARKO	Marko Mägi		MARKO										0			0				0,00												0,00	0,00				0	766220302	EST					0					0	0	0	0	0	0	0				0	2008-03-19			1	0	0	10305	0			0		
+
+MYYK	Müügiosakond		INGRI										0			0				0,00												0,00	0,00				0	2109260822	EST					0					0	0	0	0	0	0	0				0	2007-07-12			1	0	0	10054	0			0		
+
+PIIA	Piia Piiber		PIIA										0			0				0,00												0,00	0,00				0	2079899227	EST					0					0	0	0	0	0	0	0				0				0	0	0	9773	0			0	943866	
+
+SIRJE	Sirje Kattai		SIRJE										0			0				0,00												0,00	0,00				0	984236689	EST					0					0	0	0	0	0	0	0				0				1	0	0		0			0		
+
+SVEN	Sven Pallas		AVO										0			0				0,00												0,00	0,00				0	0	EST					0					0	0	0	0	0	0	0				0				1	0	0	10249	0			0		
+
+TOM	Toomas SaraPuu		TOM										0			0				0,00												0,00	0,00				0	0	EST					0					0	0	0	0	0	0	0				0				1	0	0		0			0		
+
+
+

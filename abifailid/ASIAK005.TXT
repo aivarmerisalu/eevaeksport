@@ -1,0 +1,311 @@
+058735A RYYNéNEN KY                                     Haapasaarentie 22        26100RAUMA                                             E0000000001000.00
+175381AALTOSKA T:MI                                     Hakapellonkatu 3 as 6    21200RAISIO                                            E0000000001000.00
+900001AHLMEN ANNA-LEENA                                 Rosklax                  21710KORPPOO                                           E0000000001000.00
+134922ANELLI KUKKAKAUPPA                                Asematie 8               10900HANKO                                             E0000000001000.00
+194436ANEMONE KUKKAKAUPPA                               Vuorikatu 8              10900HANKO                                             E0000000001000.00
+900002ANITAN KUKKAKULMA                                 MÑnnistînkuja 2          33410TAMPERE                                           E0000000001000.00
+112195ANNE ROITO                                        Tîlîntie 11              30420FORSSA                                            E0000000001000.00
+114037ANNELEN KUKKA                                     Rengonraitti             14300RENKO                                             E0000000001000.00
+185181ANNES BLOMBOD                                     OlsbîlevÑgen 6           10520TENHOLA                                           E0000000001000.00
+192407ANSKUKKA                                          Merimiehenkatu 9 C 36    20810TURKU                                             E0000000001000.00
+191039ANTERON KUKKA                                     Tuomiokirkonkatu 36      33100TAMPERE                                           E0000000001000.00
+082577A-SERVICE PISPA KY                                Yliopistonkatu 37 A 58   20100TURKU                                             E0000000001000.00
+151330ATENA KUKKAKAUPPA                                 Torget                   25900TAALINTEHDAS                                      E0000000001000.00
+105673AULIN KUKKA JA SIDONTA OY                         Keskuskatu 15            11100RIIHIMéKI                                         E0000000001000.00
+209160BERRYQUEEN OY                                     Lukkarinkuja 2           21420LIETO                                             E0000000001000.00
+900003BLOMSTERHôRNAN                                    Erottajank 11            10600TAMMISAARI                                        E0000000001000.00
+900004BMA MILJô                                         Kauppiaantie 5           21710KORPPOO                                           E0000000001000.00
+107423BUCKONET OY/KUKKA JA LAHJAKAUPPA PERHONEN         Untamontie 12            00610HELSINKI                                          E0000000001000.00
+160793BUKETTMAKAREN                                     Keskuskatu 82            10300KARJAA                                            E0000000001000.00
+160810CITY KUKKA HéMEENLINNA                            Eikankuja 1              04500 KELLOKOSKI                                       E0000000001000.00
+158698ELLAN KUKKA                                       Laurinkatu 32            08100LOHJA                                             E0000000001000.00
+101654ELLUN FLORISTIT                                   HatanpÑÑnvaltatie 12     33100TAMPERE                                           E0000000001000.00
+132476ELSA KUKKAKAUPPA                                  Uudenmaantie 44          20720TURKU                                             E0000000001000.00
+103109ELéINMAA ZOOLANDIA OY                             ElÑintarhantie 51        21360LIETO AS                                          E0000000001000.00
+040763ETUPALTAN PUUTARHA                                Puutarhantie 9           21250MASKU                                             E0000000001000.00
+014236FARMA MAASEUTUKESKUS                              Artturinkatu 2           20200TURKU                                             E0000000001000.00
+187932FLORES MARTA KUKKAKAUPPA                          Vistantie 15             21530PAIMIO                                            E0000000001000.00
+174691FLOWER SHOP KATARIINA                             PyhÑn Katariinantie 6    20780 KAARINA                                          E0000000001000.00
+130415FLOWERPOINT                                       Latokartanonkatu 2       20200TURKU                                             E0000000001000.00
+136527FORMIS BLOMMOR                                    SigmelundsvÑgen 1        10680EKENéS                                            E0000000001000.00
+014562FORSSAN KAUPUNKI / FORSSAN AIKUISKOULUTUS/FLORISTILaskut Pl 64             30101FORSSA                                            E0000000001000.00
+089498FORSSAN PUUTARHA /FLOPAK OY                       Puutarhakatu             30100FORSSA                                            E0000000001000.00
+101387FREICON CONSULTING OY                             Mustionkatu 8            20750TURKU                                             E0000000001000.00
+900005H HUHTALA KUKKAKAUPPA                             Valtatie 22              37800TOIJALA                                           E0000000001000.00
+900006HAAPASEN PUUTARHA                                 Pertolantie 13           32800KOKEMéKI                                          E0000000001000.00
+129406HAKALA HELI                                       Raskinpolku 6 C 55       20360TURKU                                             E0000000001000.00
+129920HAKALA ILKKA                                      Eurantie 614             23800LAITILA                                           E0000000001000.00
+130891HAKALA JUKKA                                      Helastenrinne 7          21330PAATTINEN                                         E0000000001000.00
+080593HANDELSTRéDGèRD HAGALANDET                        Hagalandet 5             10230INGè ST                                           E0000000001000.00
+160738HANGON KUKKAMYYNTI                                Kappelisatamantie 111    10960HANKO                                             E0000000001000.00
+129946HATTARA ESA T:MI                                  JÑrÑmÑentie 4            21230LEMU                                              E0000000001000.00
+201805HAUTAUSMAAN KUKKAKIOSKI /PUUTARHA TARINA OY       Papinojantie 63          36200KANGASALA                                         E0000000001000.00
+061379HAUTAUSTOIMISTO JA KUKKASITOMO NIEMELé OY         Ostoskeskus              14500 IITTALA                                          E0000000001000.00
+083180HAUTAUSTSTO JA KUKKASITOMO P. KAUNISTO            LauttakylÑnkatu 5        32700HUITTINEN                                         E0000000001000.00
+107396HAVUKKA-AHON KUKKA JA LAHJA                       Kiikoistentie 3          23200VINKKILé                                          E0000000001000.00
+177533HEIDINKUKKA  KUKKASITOMO  KY                      Kirkkotie 98             23120MIETOINEN                                         E0000000001000.00
+212505HELININ PUUTARHA                                  KÑrÑjÑtie 9              21510HEVONPéé                                          E0000000001000.00
+152812HIRVIKOSKEN KIOSKI KY                             Kanta-Loimaantie 1       32210LOIMAA KK                                         E0000000001000.00
+091342HML KAISAN KUKKA OY                               Kirkkorinne 4            13100HéMEENLINNA                                       E0000000001000.00
+069524HONKASEN PUUTARHA                                 Tiihalantie 21           36270KANGASALA                                         E0000000001000.00
+057685HUISKULA OY                                       PL 5097                  70701KUOPIO                                            E0000000001000.00
+014088HUISKULAN PUUTARHA OY                             PL 5098                  70701KUOPIO                                            E0000000001000.00
+099616HéMEEN AMMATILLISEN KORKEAKOULUTUKSEN KUNTAYHTYMé Pl 1231                  13101HéMEENLINNA                                       E0000000001000.00
+043312HéMEENKADUN GRILLI J. RAINIO KY                   HÑmeenkatu 10            20500TURKU                                             E0000000001000.00
+114379HéMEENLINNAN KUKKAKAMMARI                         Sibeliuksenkatu 2        13100HéMEENLINNA                                       E0000000001000.00
+195164HéMEENLINNAN KUKKAKAUPPA PIONI                    Raatihuoneenkatu 13      13100HéMEENLINNA                                       E0000000001000.00
+073824HôYRYLAIVA UKKOPEKKA                              Linnankatu 38            20100TURKU                                             E0000000001000.00
+173415ILVES KUKKA                                       ItsenÑisyydenkatu 15     33500TAMPERE                                           E0000000001000.00
+900007ISS-PALVELUT /2562631                             Pl 910                   01055ISS                                               E0000000001000.00
+130858IXIA TULIAISKIOSKI                                Kostilantie 4 B 8        21530PAIMIO                                            E0000000001000.00
+133761JASMIN MYNéMéEN KUKKAKAUPPA                       Virastotie 2             23100MYNéMéKI                                          E0000000001000.00
+213916JENSKUKKA                                         Riitasuonkatu 26         20360TURKU                                             E0000000001000.00
+113830JOENNIEMEN KUKKAKAUPPA                            Kauppahalli HÑmeenkatu 1933200TAMPERE                                           E0000000001000.00
+157271JOKELAN KUKKATAIKURIT OY                          Keskustie 1              05400JOKELA                                            E0000000001000.00
+200947JUHA TORKKEL/ ANNAMAIJA TURTIAINEN                Torkkelintie 11          30100FORSSA                                            E0000000001000.00
+049995JUKOLAN KUKKATALO KY                              Ahvenistontie 11         13500HéMEENLINNA                                       E0000000001000.00
+099778JéRVISEN KASVIHUONEET                             Bjîrkbodantie 280        25840NIVELAX                                           E0000000001000.00
+157156JéRVISEN KAUPPAPUUTARHA OY                        Puutarhurinkatu 1-3      32200 LOIMAA                                           E0000000001000.00
+014057K AHOSMéKI OY                                     Kuljettajantie 13        20780KAARINA                                           E0000000001000.00
+129452KAARINAN KUKKA JA HAUTAUSTOIMISTO                 Sarininkulmantie 285     31400SOMERO                                            E0000000001000.00
+148665KAIMALAN TILAUSRAVINTOLA                          Kaimalantie 140          21530PAIMIO                                            E0000000001000.00
+088470KAJANDERIN KUKKAKAUPPA KY                         Urjalantie 13            31760URJALA                                            E0000000001000.00
+146920KALANNIN KUKKA JA LAHJA JAANA JALONEN             Pankkitie 2              23600KALANTI                                           E0000000001000.00
+097040KAMPIN KUKKA /ROYAL VIHANNES OY                   Mittatie 7               01260VANTAA                                            E0000000001000.00
+206626KANGASALAN KUKKASITOMO                            Ellintie 2               36200KANGASALA                                         E0000000001000.00
+101205KANKARE MARKKU JA SIRPA                           Arosuontie 464           21420LIETO                                             E0000000001000.00
+130071KARELIUS ANNELI KUKKAKIOSKI                       Raadinkatu 1 C 104       20750TURKU                                             E0000000001000.00
+178653KASKENMéEN KUKKA                                  Kaskenkatu 1             20740TURKU                                             E0000000001000.00
+153469KATIN KUKKA- JA HAUTAUSPALVELU OY                 Mikkolantie 2            33470YLôJéRVI                                          E0000000001000.00
+112539KAUKAJéRVEN KUKKA                                 Haiharankatu 4           33710TAMPERE                                           E0000000001000.00
+157272KAUPPALANKADUN KUKKATAIKURIT                      Kauppalankatu 3          05800HYVINKéé                                          E0000000001000.00
+098613KAUPPAPUUTARHA RITVA LAINE                        Pahkalaukantie 20        21350ILMARINEN                                         E0000000001000.00
+196686KAUPPILA OY                                       Kauratie 43              20740TURKU                                             E0000000001000.00
+206218KEMIôN KUKKAPALVELU TIARELLA KY                   Liiketalo Moneta ArkadivÑ25500KEMIô                                             E0000000001000.00
+103494KIINAN KUKKA TIA WAHLROOS                         Kiinanmyllynkatu 5       20500TURKU                                             E0000000001000.00
+014752KIIPULA SééTIô/ JOKINEN A / KIIPULAN PUUTARHA     Kiipulantie 507          14200TURENKI                                           E0000000001000.00
+029900KIISAN-PIRTTI KY                                  Ruskontie 6              21250MASKU                                             E0000000001000.00
+900008KIKAN KUKKA JA LAHJA                              Helsingintie 21          24100SALO                                              E0000000001000.00
+144532KINOTOUR OY                                       Lahdingontie 18          23200VINKKILé                                          E0000000001000.00
+152556KIRSTIN KUKKA JA LAHJA                            Helsingintie 21          24100SALO                                              E0000000001000.00
+206915KISKON PUUTARHAMYYMéLé KY                         Vilikkalantie 96         25460KISKO                                             E0000000001000.00
+213709K-MARKET RUOKAMERI,SAP.696                        Lukkarintie              21500PIIKKIô                  02-4757724               E0000000001000.00
+132376KOSKISEN PUUTARHA                                 SaarenjÑrventie 580      25500PERNIô                                            E0000000001000.00
+147852K-SUPERMARKER ANNIKA                              Annikanpolku 1           20610TURKU                                             E0000000001000.00
+000000K-SUPERMARKET ELLEN                               Alppilankatu 2           21100NAANTALI                                          E0000000001000.00
+177468K-SUPERMARKET HILA SAP 223                        Kuralankatu 2            20540Turku                                             E0000000001000.00
+160512K-SUPERMARKET HIRVENSALO K/C MATTSON OY, SAP 345  Vanha Kakskerrantie 1    20900TURKU                                             E0000000001000.00
+193457K-SUPERMARKET KIVIKUKKARO SAP 357                 Yliopstonkatu 29         20100TURKU                                             E0000000001000.00
+000001K-SUPERMARKET KUNINKOJA                           ItÑniityntie 11          21280RAISIO                                            E0000000001000.00
+205687K-SUPERMARKET MANHATTAN WELLMANNI OY SAP.274      PitkÑmÑenkatu 4          20250TURKU                                             E0000000001000.00
+164281K-SUPERMARKET PAIMIO JUHA JA JOHANNA KALLIALA OY  Jokipellontie 2          21530PAIMIO                   02-4775230               E0000000001000.00
+154378K-SUPERMARKET RUNOSMéKI MIKKO HUHTANEN OY, SAP.378KorjasmÑenkatu 1         20360TURKU                                             E0000000001000.00
+157273KT-YHTYMé OY                                      KuoppamÑentie 83         05450NUKARI                                            E0000000001000.00
+208590KUKKA FUKSIA T:MI                                 Turuntie 2               21380AURA                                              E0000000001000.00
+111501KUKKA JA HAUTAUSPALVELU PEKKA OHVO                Keskuskatu 5             35700VILPPULA                                          E0000000001000.00
+112559KUKKA- JA KORISTELUPALVELU PELAQUU                Turjankatu 4             33100TAMPERE                                           E0000000001000.00
+201116KUKKA JA LAHJA ADEELIA                            HÑmeen HÑrkÑtie 689      21450TARVASJOKI                                        E0000000001000.00
+132918KUKKA JA LAHJA AMELIA                             Vanhatie 1               21140RYMéTTYLé                                         E0000000001000.00
+133787KUKKA JA LAHJA ULPUKKA                            Eurantie 3               23800LAITILA                                           E0000000001000.00
+130739KUKKA JA LAHJA VILLIVIINI                         SÑllintie 5              25340KANUNKI                                           E0000000001000.00
+157361KUKKA JA SEPPELESITOMO SALME VALTA KY             HÑmeenkatu 9-15          11100RIIHIMéKI                                         E0000000001000.00
+113919KUKKA PIELIKKI                                    Pohjolantie 1            33430VUORENTAUSTA                                      E0000000001000.00
+170549KUKKABOX                                          SeppÑlÑnkatu 18          32200 LOIMAA                                           E0000000001000.00
+206891KUKKAKATRI                                        Haarlantie 1             25500PERNIô                                            E0000000001000.00
+055753KUKKAKAUPPA ANNANSILMé M. SALONEN KY              Kasamikatu 1             13100HéMEENLINNA                                       E0000000001000.00
+199723KUKKAKAUPPA HELMIHEINé KY                         Keskuskatu 48            37830VIIALA                                            E0000000001000.00
+172699KUKKAKAUPPA KULTAMURATTI                          Tampereentie 10          37500LEMPééLé                                          E0000000001000.00
+172690KUKKAKAUPPA KULTAMURATTI IDEAPARK                 Tampereentie 10          37500LEMPééLé                                          E0000000001000.00
+091858KUKKAKAUPPA LIATRIS                               Norrbyntie 12            21600PARAINEN                                          E0000000001000.00
+145330KUKKAKAUPPA MENNINKéINEN                          Joukahaisenkatu 6        20520TURKU                                             E0000000001000.00
+210518KUKKAKAUPPA OLIVE                                 Eerikinkatu 16           20100TURKU                                             E0000000001000.00
+046022KUKKAKAUPPA PIKKU-MAARIA                          EmÑnnÑnpolku 6           90230OULU                                              E0000000001000.00
+111914KUKKAKAUPPA TIINA RANTALA                         Sammonkatu 8-10          33540TAMPERE                                           E0000000001000.00
+155046KUKKAKAUPPA VIHREé SEPPELE                        Kehityksentie 2          21800KYRô                                              E0000000001000.00
+130994KUKKA-KERTTU                                      Kerttulink. 7            20500TURKU                                             E0000000001000.00
+191030KUKKAKILPI                                        Kalevanpuistotie 15      33500TAMPERE                                           E0000000001000.00
+131521KUKKAKIMPPU LEA TAMMI-OLENIUS                     Helsingintie 5           24100SALO                                              E0000000001000.00
+185332KUKKAKORI                                         Horninkatu 11            24100SALO                                              E0000000001000.00
+131225KUKKANURMI T:MI                                   Karjalohjantie 8         25460TOIJA                                             E0000000001000.00
+217688KUKKA-PLAZA                                       Vilhonkatu 8             24100SALO                                              E0000000001000.00
+159055KUKKAPUOTI MARI PYYKôNEN                          Puistokatu 10            38200VAMMALA                                           E0000000001000.00
+164710KUKKAPUOTI PéIVéNNOUTO OY                         RÑlssikatu 4 B 9         37120NOKIA                                             E0000000001000.00
+109312KUKKAPUOTI ROSALIN/ M. & O. KALLIOSALO AVOIN YHTIôOnkiniemenkatu 5         38200VAMMALA                                           E0000000001000.00
+182895KUKKA-PéIVIKKI                                    Sairashuoneenkatu 7      20100TURKU                                             E0000000001000.00
+157376KUKKASIDONTA MARI/ HEININEN MARI ANNUKKA          Isomoisiontie 186        21350ILMARINEN                                         E0000000001000.00
+133356KUKKASOMISTUS TUIJA MéKELé                        Tastontie 27             21350ILMARINEN                                         E0000000001000.00
+088899KUKKATALO JA HAUTAUSTOIMISTO PETRI KOUHIA KY      Koljalantie 1            14200 TURENKI                                          E0000000001000.00
+088890KUKKATALO JA HAUTAUSTOIMISTO PETRI KOUHIA KY      Kirkkoportintie 9        12450TERVAKOSKI                                        E0000000001000.00
+088891KUKKATALO JA HAUTAUSTOIMISTO PETRI KOUHIA KY      Tohvelantie 3            14200TURENKI                                           E0000000001000.00
+171811KUKKATALO MIKAELA                                 Turuntie 16              32200LOIMAA                                            E0000000001000.00
+180226KUKKATERTTU /TERTTU LUNDELIN                      Puutarhakatu 28          20100TURKU                                             E0000000001000.00
+165084KUKKA-TUIRE T:MI                                  Niittymaantie 25         23100MYNéMéKI                                          E0000000001000.00
+187522KUKKATUKKU TIMO KALEVA TMI                        Rauhankatu 23-25 D 45    20100TURKU                                             E0000000001000.00
+131774KUKKAVAINIO/ SALONKI HEIDI VAINIO                 Keskustie 9              23310TAIVASSALO                                        E0000000001000.00
+900009KULTARANNAN HUVILATILA                            Kordelininkatu           21100NAANTALI                                          E0000000001000.00
+048374KUNTOPULSSI                                       Humalistonkatu 11        20100TURKU                                             E0000000001000.00
+131531KURALAN KARTANOTILA                               Kuralantie 11            21900YLéNE                                             E0000000001000.00
+014393KURJENPOLUN TAIMIPALVELU                          Kurjenpolku 8            23500 UUSIKAUPUNKI                                     E0000000001000.00
+020395KUSTAVIN TALOUSKAUPPA                             Kustavintie 5175         23360KUSTAVI                                           E0000000001000.00
+090394LAITILAN PUUTARHAKAUPPA MATTI RAUTANEN OY         Kauppakatu 8             23800LAITILA                                           E0000000001000.00
+131871LEHTISEN PUUTARHA                                 Kemiîntie 241            25500PERNIô                                            E0000000001000.00
+208105LEIKKU OY HAKALA ILKKA                            Euralantie 614           23800LAITILA                                           E0000000001000.00
+091502LEPPéLEHDON PUUTARHA OY                           HykkilÑntie 63           31300TAMMELA                                           E0000000001000.00
+134638LIISAN KUKKA /KOKKO MARJA-LIISA                   Virkkalantie 18          08700VIRKKALA                                          E0000000001000.00
+059656LILLUKKA KUKKA JA PUUTARHAKAUPPA KY SIRKKU REKO   Rantatie 281             27800SéKYLé                                            E0000000001000.00
+017907LINDELL FLOWERS OY AB                             Kasvihuoneentie 14       67100KOKKOLA                                           E0000000001000.00
+048475LINDSTRôM HAUTAUSTSTO JA KUKKA / MAIJA LINDSTRôM  Henrikinkatu 2           21100 NAANTALI                                         E0000000001000.00
+108188LOPEN KUKKAKAUPPA                                 Jokiniementie 2          12700LOPPI                                             E0000000001000.00
+175056LOPENTIEN KIOSKI                                  Lopentie 15-17           11100RIIHIMéKI                                         E0000000001000.00
+133788LUNDELININ KUKKATERTTU                            Linja-autoasema          23500 UUSIKAUPUNKI                                     E0000000001000.00
+124351LéNSIPORTIN KUKKA                                 Asentajankatu 8          20320TURKU                                             E0000000001000.00
+021752LééKéRIASEMA PULSSI OY                            Humalistonkatu 11        20100TURKU                                             E0000000001000.00
+202721MAIJAN KUKKA /DIANA TOIVONEN                      Kauppahalli HÑmeenkatu 1933200TAMPERE                                           E0000000001000.00
+130368MALVA KUKKAKAUPPA                                 HÑmeentie 24             20540TURKU                                             E0000000001000.00
+190746MARIKAN KUKKAKORI                                 Tapolantie 149           31380LETKU                                             E0000000001000.00
+195706MARIN KUKKA KY                                    Kartanonkatu 14          30100FORSSA                                            E0000000001000.00
+133326MARTIN KUKKAKIOSKI                                StÜlarminkatu 10         20810TURKU                                             E0000000001000.00
+196049MATILDAN KUKKATUPA                                SeikelÑntie 2            21250MASKU                                             E0000000001000.00
+900010MERISAARI                                         Hakatie 9                21270NOUSIAINEN                                        E0000000001000.00
+204981MICCISHOP                                         Brahenkatu 12 a          20100TURKU                                             E0000000001000.00
+171810MIKAELA KUKKATALO OY                              Turuntie 16              32200LOIMAA                                            E0000000001000.00
+014128MODELIA OY                                        Brahenkatu 12            20100TURKU                                             E0000000001000.00
+098519MUURLAN LENDI OY                                  Haarlantie 2             25500PERNIô                                            E0000000001000.00
+084810MYNé-KUKKA KY                                     Kirkkokatu               23100MYNéMéKI                                          E0000000001000.00
+064484MéKELéN KUKKA OY                                  Tampereentie 2           37500LEMPééLé                                          E0000000001000.00
+101220MéNTYMéEN PUUTARHA                                KeinumÑentie 55          20380TURKU                                             E0000000001000.00
+107376NINA FLORA                                        Tammelanpuistokatu 34    33100TAMPERE                                           E0000000001000.00
+077558NUMMEN NARSISSI KY                                Vanha-HÑmeentie 29       20540TURKU                                             E0000000001000.00
+021419NUOLIOJA KALEVI                                   Ollilantie 16            32200LOIMAA                                            E0000000001000.00
+157274NURMIJéRVEN KUKKATAIKURIT OY                      Pratikankuja 3           01901NURMIJéRVI                                        E0000000001000.00
+130965NYGR…NIN KUKKAKAUPPA                              Turuntie 9               24100SALO                                              E0000000001000.00
+083935OHISTON KAUPPAPUUTARHA KY                         Kurjenpolku 10           23500UUSIKAUPUNKI                                      E0000000001000.00
+213589OHRANTéHKé KUKKA- JA SISUSTUTSTAVARAKAUPPA        PyhÑjÑrventie 12         27800SéKYLé                                            E0000000001000.00
+146100OKSANEN HANNA JA TAPANI                           Askaistentie 646         21240ASKAINEN                                          E0000000001000.00
+913616PAIMION KAUPUNKI                                  Pl 50                    21530PAIMIO                                            E0000000001000.00
+184063PAIMION KUKKAPALVELU                              Vistantie 27-29          21530PAIMIO                                            E0000000001000.00
+210945PAIMION KUKKASUSANNA                              Vistantie 22             21530PAIMIO                                            E0000000001000.00
+013617PAIMION SEURAKUNTA                                Pl 14                    21530PAIMIO                                            E0000000001000.00
+130508PANU KANKAANRANTA KANKAANRANNAN PUUTARHA          KarimÑentie 19           21570SAUVO                                             E0000000001000.00
+101204PAROLANTIEN KUKKAPALVELU                          Parolantie 1             13130HéMEENLINNA                                       E0000000001000.00
+212865PARRANTIEN KUKKA                                  Parrantie 1              20300TURKU                                             E0000000001000.00
+021626PENTTI LINDQVIST OY                               Varesvuorenpolku 4       21500PIIKKIô                                           E0000000001000.00
+034720PENTTI PIRKKO JA  REIJO                           HÑtilÑntie 25            38210VAMMALA                                           E0000000001000.00
+900011PENTTILéN PUUTARHA                                Padontie 877             27310KODISJOKI                                         E0000000001000.00
+114663PERTTULAN KUKKA JA LAHJA                          KurjenmÑentie 6          32100YPéJé                                             E0000000001000.00
+131393PIIKKIôN KUKKAKAUPPA /ALFTAN-SAARIKKO TIINA MAIJA Hadvalantie 8            21500PIIKKIô                                           E0000000001000.00
+154040PIRILéN KUKKATALO OY                              PirilÑntie 2             21200RAISIO                                            E0000000001000.00
+107352PIRKKALAN KUKKA JA HAUTAUSPALVELU                 Suupantori 2             33960PIRKKALA                                          E0000000001000.00
+066168PUSULAN KUKKA JA HAUTAUSTOIMISTO KY               KirkonmÑki               03850PUSULA                                            E0000000001000.00
+900012PUUTARHA M LEHTO                                  Kankareentie 13          23100MYNéMéKI                                          E0000000001000.00
+098966PUUTARHA PERTTI NIEMINEN                          Puutarhatie 30           21480PRUNKILA                                          E0000000001000.00
+910150PUUTARHA VESTERINEN                               Tuupikkalantie 16        25210VARTSALA                                          E0000000001000.00
+069016PUUTARHALIIKE HELLE                               Brahenkatu 16            20110TURKU                                             E0000000001000.00
+900013PYHéRANNAN PUUTARHA PENTTILé & HYNNé              Ropantie 2               23950PYHéRANTA                                         E0000000001000.00
+135833PéIVIKIN KUKKA                                    Vihdintie 17             03100NUMMELA                                           E0000000001000.00
+900014PééSKYVUOREN KIOSKIT                              Fasaaninkatu 3           20600TURKU                                             E0000000001000.00
+170750RAISION KUKKA OY                                  Kauppakatu 2             21200RAISIO                                            E0000000001000.00
+172121RAISION KUKKAPALVELU                              Varppeenaukio 3          21200 RAISIO                                           E0000000001000.00
+102540RIIHIPUOLTI OY                                    Turuntie 596             21870RIIHIKOSKI                                        E0000000001000.00
+061355RIIPIN PUUTARHA / TUULISTARHAT OY                 Puutarhatie 3            21420LIETO                                             E0000000001000.00
+154702RIITAN KUKKAMAJA                                  Vaunukuja 1              03400VIHTI                                             E0000000001000.00
+111874RINTALAN KUKKAKAUPPA                              Orikoskentie 11          31700URJALA AS                                         E0000000001000.00
+106683RINTA-RISKUN PUUTARHA                             Luhdantie 47             21500PIIKKIô                                           E0000000001000.00
+974105ROSE VERKAHOVIN KUKKAKAUPPA                       Verkatehtaankatu 4       20100TURKU                                             E0000000001000.00
+202974RUNE SôDERLUND                                    BigrÑnd 2                22270ECKERô                                            E0000000001000.00
+129565RUNOSMéEN KUKKAVAINIO                             Friskinkatu 4            20360TURKU                                             E0000000001000.00
+000687RUOKAKESKO OY /  TALOUDENPALVELUKESKUS K687 K-MARKPL 330                   33101TAMPERE                                           E0000000001000.00
+000358RUOKAKESKO OY / TALOUDENPALVELUKESKUS S358 K-SUPERPL 330                   33101TAMPERE                                           E0000000001000.00
+000274RUOKAKESKO OY/ TALOUDENPALVELUKESKUS S274 K-SUPERMPL 330                   33101TAMPERE                                           E0000000001000.00
+000291RUOKAKESKO OY/TALOUDENPALVELUKESKUS S291 K-SUPERMAPL 330                   33101TAMPERE                                           E0000000001000.00
+000614RUOKAKESKO OY/TALOUDENPALVELUKESKUS K614 K-MARKET PL  330                  33101TAMPERE                                           E0000000001000.00
+000652RUOKAKESKO OY/TALOUDENPALVELUKESKUS K652 K-MARKET PL 330                   33101TAMPERE                                           E0000000001000.00
+000585RUOKAKESKO OY/TALOUDENPALVELUKESKUS K585 K-MARKET PL 330                   33101TAMPERE                                           E0000000001000.00
+000696RUOKAKESKO OY/TALOUDENPALVELUKESKUS K696 K-MARKET PL 330                   33101TAMPERE                                           E0000000001000.00
+000357RUOKAKESKO OY/TALOUDENPALVELUKESKUS S357 K-SUPERMAPL 330                   33101TAMPERE                                           E0000000001000.00
+000267RUOKAKESKO OY/TALOUDENPALVELUKESKUS S267 K-SUPERMAPL 330                   33101TAMPERE                                           E0000000001000.00
+000354RUOKAKESKO OY/TALOUDENPALVELUKESKUS S354 K-SUPERMAPL 330                   33101TAMPERE                                           E0000000001000.00
+000392RUOKAKESKO OY/TALOUDENPALVELUKESKUS S392 K-SUPERMAPL 330                   33101TAMPERE                                           E0000000001000.00
+000400RUOKAKESKO OY/TALOUDENPALVELUKESKUS S400 K-SUPERMAPL 330                   33101TAMPERE                                           E0000000001000.00
+000378RUOKAKESKO OY/TALOUDENPALVELUKESKUS S378 K-SUPERMAPL 330                   33101TAMPERE                                           E0000000001000.00
+000223RUOKAKESKO OY/TALOUDENPALVELUKESKUS S223 K-SUPERMAPL 330                   33101TAMPERE                                           E0000000001000.00
+000345RUOKAKESKO OY/TALOUDENPALVELUKESKUS S345 K-SUPERMAPL 330                   33101TAMPERE                                           E0000000001000.00
+000360RUOKAKESKO OY/TALOUDENPALVELUKESKUS S360 K-SUPERMAPL 330                   33101TAMPERE                                           E0000011841000.00
+083650RUUKKUNEN OY                                      Puistotie 20             21620KUUSISTO                                          E0000000001000.00
+160262RUUSUAULA OY                                      Martinkatu 1             20810TURKU                                             E0000000001000.00
+900015SAARELMAN PUUTARHA                                Urheilukuja 4            09810NUMMI                                             E0000000001000.00
+908376SAGA SENIORIKESKUS KASKENNIITTY                   Juhana Herttuanpuistokatu20100TURKU                                             E0000000001000.00
+208376SAGA SENIORIKESKUS KASKENPUISTO                   Juhana Herttuanpuistokatu20100TURKU                                             E0000000001000.00
+058175SAIRAALA PULSSI                                   Humalistonkatu 11 B      20100TURKU                                             E0000000001000.00
+133915SALON KUKKA JA SIEMEN                             Turuntie 4               24100SALO                                              E0000000001000.00
+206381SALON KUKKAPALVELU UNIKKO TMI RIITTA RINNEKARI    Turuntie 3               24100SALO                                              E0000000001000.00
+093620SALUTATOR OY TURUN KUKKAPORTTI                    Seppelkuja 2             20720TURKU                                             E0000000001000.00
+148174SANDELL A-G HAUTAUSTOIMISTO & KUKKAPALVELU OY     Kyrkoesplanaden 13       21600 PARAINEN                                         E0000000001000.00
+066185SARASMéEN KUKKA- JA HAUTAUSTOIMISTO KY            Rautatienkatu 12         30420 FORSSA                                           E0000000001000.00
+132579SATAKUKKA EEVA-LIISA OJALA                        Puistok. 7               38200VAMMALA                                           E0000000001000.00
+207619SATIINA / KUKKA KERTTULI                          Hallituskatu 13          33100TAMPERE                                           E0000000001000.00
+080136SAVON TUONTIKUKKA OY                              Paimalantie 130          20380TURKU                                             E0000000001000.00
+073905SIEMEN FLORA OY                                   Papinhaankatu 12         26100RAUMA                                             E0000000001000.00
+060653SIIVOSEN HAUTAUSTOIMISTO JA KUKKAPIRTTI KY        Alinenkatu 9             23500 UUSIKAUPUNKI                                     E0000000001000.00
+132629SIRKKAKAARINA                                     Henrikinkatu 2           21100NAANTALI                                          E0000000001000.00
+053630SOKOS TAMPERE KUKKAOSASTO 075                     Pl 576                   33101TAMPERE                                           E0000000001000.00
+157605SOLROSEN KUKKAKAUPPA BLOMSTERHANDEL               Vanha Turuntie           10420POHJANKURU                                        E0000000001000.00
+212567SOMERON KUKKA KANERVA & MIKKOLA                   Kassatie 3-5             31400SOMERO                                            E0000000001000.00
+133716SOMERON KUKKAKESKUS JA HAUTAUSTOIMISTO TIMO KAUPPIJoensuuntie 25           31400SOMERO                                            E0000000001000.00
+070220STRANDBO GROUP                                    Rantatie 1               21600PARAINEN                                          E0000000001000.00
+134179STèLARMIN KUKKA T:MI ARVIOLA BIRGITTA             StÜlarminkatu 2          20810TURKU                                             E0000000001000.00
+086553SUN VIHERKASVIPALVELU                             Laitalantie 3            21250MASKU                                             E0000000001000.00
+108381SUNBORN SAGA OY / NAANTALIN KYLPYLé               PL 100                   20101TURKU                                             E0000000001000.00
+114823SUUPAN KUKKA T:MI                                 Suupantori 4             33960PIRKKALA                                          E0000000001000.00
+107082SUVIHEINé KY                                      Valpperintie 6           21270Nousiainen                                        E0000000001000.00
+080545SéKYLéN KUKKA                                     PyhÑjÑrventie 1          27800SéKYLé                                            E0000000001000.00
+134387T:MI KUKKAKAUPPA PIIA JAALA-HAUTALA               Linnankatu 9             20100TURKU                                             E0000000001000.00
+152221T:MI KUKKAMINTTU                                  Juvankatu 10             33710TAMPERE                                           E0000000001000.00
+114849T:MI KUKKASEIJA KUKKA JA SIDONTAPALVELU           HÑmeenkatu 58            11100RIIHIMéKI                                         E0000000001000.00
+197131T:MI NAANTALIN KUKKA-STELLA /KESKITALO PIRKKO     Tullikatu 17             21100NAANTALI                                          E0000000001000.00
+217216T:MI PIA HALLIKAINEN / KUURAN KUKKA               Ihalantie 54             21260RAISIO                                            E0000000001000.00
+107374T:MI PIRJO LAAKSO-SALMI                           Vapparintie 125          20960TURKU                                             E0000000001000.00
+163304T:MI RAHOLAN KUKKA                                Pispalan Valtatie 141    33270TAMPERE                                           E0000000001000.00
+073830T:MI SATU SUOMINEN                                Amberlantie 42 B         23200VINKKILé                                          E0000000001000.00
+130244T:MI VESA RANNIKKO                                Perkontie 10             21290RUSKO                                             E0000000001000.00
+900017TAMMELA                                           HykkilÑntie 63           31300TAMMELA                                           E0000000001000.00
+189352TAMMISILLAN PUUTARHA                              Tammisillantie 210       21500PIIKKIô                                           E0000000001000.00
+102817TAMPEREEN KUKKA-MIMOSA OY                         Sammonkatu 22-24         33540TAMPERE                                           E0000000001000.00
+110499TAMPEREEN KUKKATOIMITUS OY                        Vanha Talvitie 10 G      00580HELSINKI                                          E0000000001000.00
+181097TARJAN KUKKA                                      LauttakylÑnkatu 1        32700HUITTINEN                                         E0000000001000.00
+951173TIMO KôNTTé OY / K SUPERMARKET ELLEN              Appikatu 2               21100NAANTALI                                          E0000000001000.00
+151173TIMO KôNTTé OY /UKKO-PEKKA K-SUPERMARKET/         Venekuja 5               21100NAANTALI                                          E0000000001000.00
+086914TOMMI MéKELé KY                                   EtelÑkatu 23             26100RAUMA                                             E0000000001000.00
+113910TONTERI VEIJO                                     Jokioistentie 389        31640HUMPPILA                                          E0000000001000.00
+900018TUIJA VORNANEN                                    Mielikintie 1            21530PAIMIO                                            E0000000001000.00
+210485TUIKUKKA KUKKAKAUPPA                              Kirkkotie 6              21420 LIETO                                            E0000000001000.00
+112344TURENGIN KUKKA HAUTAUS JA PITOPALVELU             Keskuskuja 2             14200TURENKI                                           E0000000001000.00
+215764TURUN FLORA / TURUN YLIOPISTONKADUN KUKKA OY      Yliopistonkatu 29 C      20100TURKU                                             E0000000001000.00
+014225TURUN HELLUNTAILéHETYS                            Puistokatu 6 B           20200TURKU                                             E0000000001000.00
+020480TURUN JA KAARINAN SRK-YHTYMé MAARIAN SRK/POHJOISMAPl 922                   20101TURKU                                             E0000000001000.00
+920481TURUN KAUPUNKI JéTELAITOS                         Pl 778                   01050 TURUN LASKUT                                     E0000000001000.00
+020481TURUN KAUPUNKI/LIINAHAAN VANHAINK. MARLE SORSA    Liinahaankatu 17         20320TURKU                                             E0000000001000.00
+196229TURUN KUKKA FIORI                                 Visiirikatu 1 as 2       20780KAARINA                                           E0000000001000.00
+091821TURUN KUKKA-CITY KY                               Jonkkustentie 35         21250MASKU                                             E0000000001000.00
+180225TURUN KUKKA-TERTTU / SATU TURKLIN                 Puutarhakatu 28          20100TURKU                                             E0000000001000.00
+064626TURUN MESSUKESKUS OY                              Pl 57                    20201TURKU                                             E0000000001000.00
+163791TURUN VIHERMAAILMA OY                             Taalintehtaankatu 6      20750TURKU                                             E0000000001000.00
+174105TUULENSUUN KUKKA /ROSE VERKAHOVIN KUKKAKAUPPA     Karjatie 5               21420LIETO                                             E0000000001000.00
+900019UFFEN KUKKA                                       HangonkylÑtie 25         10940HANKO                                             E0000000001000.00
+092764UNGERN KY HAUTAUSTOIMISTO                         Laurinkatu 20            08100LOHJA                                             E0000000001000.00
+957271UUDENMAANKADUN KUKKATAIKURIT                      Uudenmaankatu 12         05800HYVINKéé                                          E0000000001000.00
+015371VAARIN KUKKA                                      Liikekatu 3              33500TAMPERE                                           E0000000001000.00
+093698VAMMALAN KULTAKUKKA OY                            Kukkatie 22              38250ROISMALA                                          E0000000001000.00
+013616VARSINAIS-SUOMEN ERITYISHUOLTOPIIRIN KY POMPON HO Vanha-Littoistentie 308  20540 TURKU                                            E0000000001000.00
+082324VARSINAIS-SUOMEN MAASEUTUOPPILAITOKSEN KUNTAYHTYMéTuorlantie 1             21500PIIKKIô                                           E0000000001000.00
+900020VARSINAIS-SUOMEN SOS.DEM PIIRI                    Eerikinkatu 30           20100TURKU                                             E0000000001000.00
+020298WERTHMAN OY AB                                    Kîpmansgatan 18          10300KARIS                                             E0000000001000.00
+210150VESTERISEN PUUTARHA                               Vartsalantie 326         25210VARTSALA                                          E0000000001000.00
+075780VIHER-INKA OY                                     Harventajankatu 2        24130SALO                                              E0000000001000.00
+062053VIHERLASSILA KY                                   AlakylÑntie              20250TURKU                                             E0000000001000.00
+039975VIHERRAKENNE JAAKKOLA KY                          Pl 23                    30101FORSSA                                            E0000000001000.00
+137964VIHREé LINJA / MARY JA VELI KUUSISTO              Pargasintie 25           10600TAMMISAARI                                        E0000000001000.00
+184832VIIALAN KUKKA- JA PUUTARHAPISTE                   Torikatu 2               37830 VIIALA                                           E0000000001000.00
+199347VIVAHDE OY                                        Kauppiaskatu 13          20100TURKU                                             E0000000001000.00
+103665YLôJéRVEN KUKKA                                   Mikkolantie 1-3          33470 YLôJéRVI                                         E0000000001000.00
+099511èHLBERGS TRéDGèRD                                 PrÑstkullagatan 95 A     10660EKENéS                                            E0000000001000.00

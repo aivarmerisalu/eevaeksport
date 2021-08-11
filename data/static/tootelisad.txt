@@ -1,0 +1,244 @@
+81182401022; Gutta BIB MAX Apelsininektar 10L; ; .10L; 64; 1; ; ; ; 4103990040349
+81182402022; Gutta BIB MAX Õunanektar 10L; ; .10L; 64; 1; ; ; ; 4103990040356
+81182404022; Gutta BIB MAX Multinektar 10L; ; .10L; 64; 1; ; ; ; 4103990040257
+71010301022; Gutta Apelsinimahl 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009711518
+71010302022; Gutta Õunamahl 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009731516
+71010303122; Gutta Tomatimahl 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009761513
+71010317022; Gutta Greibimahl 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009751514
+71010327022; Gutta Õuna- Valge viinamarjamahl 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009714502
+71110304022; Gutta Multinektar 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009742512
+71110305022; Gutta Ananassinektar 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009746510
+71110306022; Gutta Rooma viinamarja nektar 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009442511
+71110307022; Gutta Virsikunektar 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009792517
+71110314022; Gutta Sidruninektar 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009752511
+71110315022; Gutta Apelsini-Porgandinektar Küdooniatega 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009711235
+71110320022; Gutta Õuna-kibuvitsanektar 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009711211
+71110322122; Gutta Ploominektar 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009736511
+71110324022; Gutta Apelsini- Aprikoosinektar 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009771512
+71110325022; Gutta Ananassi-Mango-Sidruninektar 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009781511
+71210308022; Gutta Mustsõstrajook 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009748507
+71210316022; Gutta Granaatõunajook 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009788503
+71210318022; Gutta Kirsijook 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009798502
+71210326022; Gutta Jõhvikajook 1L; ; .Gutta 1L; 720; 12; ; 152; ; 4750009786509
+71210331022; Gutta Mustsõstra-punase viinamarja kuum jook 1L; ; .Gutta 1L; 720; 12; ; ; ; 4750009711259
+71011303022; Gutta MAX Tomatimahl 2L; ; .Gutta 2L; 336; 6; ; 63; ; 4750009311978
+71111301022; Gutta MAX Apelsininektar 2L; ; .Gutta 2L; 336; 6; ; 63; ; 4750009321977
+71111301122; Gutta MAX Apelsininektar 2L 1/4 alusel (63 tk); ; .Gutta 2L; 252; 63; ; 63; ; 4750009321977
+71111302022; Gutta MAX Õunanektar 2L; ; .Gutta 2L; 336; 6; ; 63; ; 4750009312968
+71111302122; Gutta MAX Õunanektar 2L 1/4 alusel (63 tk); ; .Gutta 2L; 252; 63; ; 63; ; 4750009312968
+71111304022; Gutta MAX Multinektar 2L; ; .Gutta 2L; 336; 6; ; 63; ; 4750009322974
+71111304122; Gutta MAX Multinektar 2L 1/4 alusel (63 tk); ; .Gutta 2L; 252; 63; ; 63; ; 4750009322974
+71111305022; Gutta MAX Ananassinektar 2L; ; .Gutta 2L; 336; 6; ; 63; ; 4750009352971
+71111305122; Gutta MAX Ananassinektar 2L 1/4 alusel (63 tk); ; .Gutta 2L; 252; 63; ; 63; ; 4750009352971
+71111322022; Gutta MAX Ploominektar 2L; ; .Gutta 2L; 336; 6; ; 63; ; 4750009336971
+71111330022; Gutta MAX Punane multinektar 2L; ; .Gutta 2L; 336; 6; ; 63; ; 4750009323117
+71211306022; Gutta MAX Punase viinamarja jook  2L; ; .Gutta 2L; 336; 6; ; 63; ; 4750009351974
+71211306122; Gutta MAX Punase viinamarja jook 2L 1/4 alusel (63 tk); ; .Gutta 2L; 252; 63; ; 63; ; 4750009351974
+71211326022; Gutta MAX Jõhvikajook 2L; ; .Gutta 2L; 336; 6; ; 63; ; 4750009386976
+72050100022; Everest karboniseerimata joogivesi 0,5 L +Pant 0.5kr; ; .Karatusjoogid; 1080; 12; ; 96; 240; 4750009561656
+72050100122; Everest karboniseerimata joogivesi 1,5 L +Pant 1kr; ; .Karatusjoogid; 504; 6; ; 96; 240; 4750009561458
+72150100022; Everest karboniseeritud joogivesi 0,5 L +Pant 0.5kr; ; .Karatusjoogid; 1080; 12; ; 96; 240; 4750009551657
+72150100122; Everest karboniseeritud joogivesi 1,5 L +Pant 1kr; ; .Karatusjoogid; 504; 6; ; 96; 240; 4750009551459
+72250114022; Everest karboniseeritud joogivesi sidruniga1,5L +Pant1kr; ; .Karatusjoogid; 504; 6; ; 96; 240; 4750009551442
+73152100122; Maahärra Kali 1,5 L +Pant 1kr; ; .Karatusjoogid; 504; 6; ; 96; 240; 4750009911406
+81230304022; Lotte Multimahlajook 10% 0,2L; ; .Lotte0,2L; 3264; 27; ; ; ; 4750009742789
+81230323022; Lotte Maasikajook 10% 0,2L; ; .Lotte0,2L; 3264; 24; ; ; ; 4750009784789
+81230329022; Lotte Õuna-pirnijook 15% 0,2L; ; .Lotte0,2L; 3264; 24; ; ; ; 4750009731783
+71020303022; Samba Tomatimahl 1L; ; .Samba; 720; 12; ; 152; ; 4750009161504
+71120301022; Samba Apelsininektar 1L; ; .Samba; 720; 12; ; ; ; 4750009123502
+71120302022; Samba Õunanektar 50% 1L; ; .Samba; 720; 12; ; ; ; 4750009131514
+71120305022; Samba Ananassinektar 1L; ; .Samba; 576; 12; ; ; ; 4750009174504
+71121303022; Samba 2L Tomatinektar 60%; ; .Samba; 336; 6; ; ; ; 4750009133211
+71220304022; Samba Multimahlajook 1L; ; .Samba; 720; 12; ; ; ; 4750009142503
+71221301022; Samba 2L Apelsinijook 30%; ; .Samba; 336; 6; ; ; ; 4750009133327
+71221302022; Samba 2L Õunajook 30%; ; .Samba; 336; 6; ; ; ; 4750009133112
+71221304022; Samba 2L Multimahlajook 15%; ; .Samba; 336; 6; ; ; ; 4750009132146
+11012321322; Arabeska (pähkli) 140g; ; Assortii; 896; 14; ; ; ; 4750001003406
+11060322122; Prozit (liköörivalik EXP) 180g UUS; ; Assortii; 1152; 18; ; ; ; 4750001002324
+14000511122; Piimašokol. assortii Laima 360g; ; Assortii; 480; 12; ; ; ; 4750001008104
+14000511522; Piimašokolaadikompvekkide assortii EESTI 360g; ; Assortii; 480; 12; ; ; ; 4750001817010
+14000531122; Piimašokol. assortii Laima 215g; ; Assortii; 672; 12; ; ; ; 4750001008180
+14010611222; Assortii Laima 360 g; ; Assortii; 480; 12; ; ; ; 4750001007916
+14010613122; Assortii Tallinn 360g; ; Assortii; 480; 12; ; ; ; 4750001008081
+14010623722; Assortii Punased roosid 470g; ; Assortii; 480; 12; ; ; ; 4750001814743
+14010624622; Assortii Valge 470g (Säästumarket); ; Assortii; 480; 12; ; ; ; 4750001814866
+14010632022; Mini Assortii (Roosid) 190g; ; Assortii; 896; 14; ; ; ; 4750001003499
+14010634022; Assortii Laima 215g; ; Assortii; 672; 12; ; ; ; 4750001008166
+14030121022; Mõru shokolaadikompvekkide assortii 360g; ; Assortii; 480; 12; ; ; ; 4750001008869
+22020841022; Marmelaadilõigud glasuuris 190g; ; Assortii; 1000; 10; ; ; ; 4750011814511
+23010526622; Laima vaniljemaitseline sefiir shokolaadis 280g; ; Assortii; 480; 12; ; ; ; 4750011816157
+24040341222; Mandel shokolaadis 100g; ; Assortii; 4320; 45; ; ; ; 4750011813200
+24040521322; Drazee assortii Laima 100g; ; Assortii; 3840; 40; ; ; ; 4750011813224
+24040641222; Metsapähkel shokolaadis 100g; ; Assortii; 3840; 40; ; ; ; 4750011813163
+24040741022; Maapähkel piimashokolaadis 100g; ; Assortii; 4320; 45; ; ; ; 4750011814108
+24040771022; Maapähkel piimashokolaadis 4,5kg; ; Assortii; 112; 1; ; ; ; 4750011814122
+24050141222; Rosin shokolaadis 100g; ; Assortii; 4320; 45; ; ; ; 4750011813187
+24050171122; Rosin shokolaadis 4,5kg; ; Assortii; 112; 1; ; ; ; 4750001002904
+31020175022; Selga kondenspiima lahtine 5kg; ; Kaalu küpsis; 96; 1; ; ; ; 4750007688867
+31020177022; Selga shokolaad lahtine 5kg; ; Kaalu küpsis; 96; 1; ; ; ; 4750007135897
+31020178022; Selga iiri kreem lahtine 5 kg; ; Kaalu küpsis; 96; 1; ; ; ; 4750007136894
+31040373722; Rondo 3kg; ; Kaalu küpsis; 96; 1; ; ; ; 4750007113642
+31040573722; Eksotiskie/Eksootika 3kg; ; Kaalu küpsis; 96; 1; ; ; ; 4750007116643
+31040673722; Sirsnina/Südamed 3kg; ; Kaalu küpsis; 96; 1; ; ; ; 4750007120640
+31040973722; Avangards/ Avangard 3kg; ; Kaalu küpsis; 96; 1; ; ; ; 4750007104640
+60030171022; Selga soolased kreekerid 2,5 kg; ; Kaalu küpsis; 112; 1; ; ; ; 4750007813764
+11010861022; Maska (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001310832
+11011161022; Rits 2kgx4; ; Kaalu sh.komm; 256; 4; ; ; ; 4750001311136
+11011261022; Tulipunane lilleke (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001311259
+11011461022; Trühvel (2kg x 3); ; Kaalu sh.komm; 168; 3; ; ; ; 4750001311433
+11011661022; Vaverite (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001311662
+11012371022; Arabeska Pähkli 2kg; ; Kaalu sh.komm; 256; 4; ; ; ; 4750001008494
+11012761022; Vinnijs (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001321135
+11013161022; Freska (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001002621
+11020131022; Laima Jõhvika (Dzervene) (2kg x 3); ; Kaalu sh.komm; 168; 3; ; ; ; 4750001816037
+11020132022; Laima Mustika (Mellene) (2kg x 3); ; Kaalu sh.komm; 168; 3; ; ; ; 4750001816044
+11020133022; Laima Kirsi (Kirsis) (2kg x3); ; Kaalu sh.komm; 168; 3; ; ; ; 4750001817188
+11030861022; Diana (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001006865
+11030961022; Salsa (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750007689048
+11031061022; Fruji 2kg; ; Kaalu sh.komm; 256; 4; ; ; ; 4750001009521
+11040661022; Roks (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001003352
+11040671022; Roks 10 kg; ; Kaalu sh.komm; 64; 1; ; ; ; 4750001004427
+11040761022; Rukkilill (Rudzupuke) (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001320749
+11040961022; Soho (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750007687822
+11041061022; Tormilind (Vetrasputns) (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001321050
+11041561022; Sanne (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001813746
+11041661022; Rokenrol (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750007687839
+11080261022; Kolm karu (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001340235
+11081261022; Kazino (2kg x 3); ; Kaalu sh.komm; 192; 3; ; ; ; 4750001003345
+11081351022; Rebeka Vanilla (2kg x 3); ; Kaalu sh.komm; 168; 3; ; ; ; 4750007687914
+11081361022; Serenaad (2kg x 4); ; Kaalu sh.komm; 256; 4; ; ; ; 4750001330960
+11081362022; Rebeka Ananass (2kg x 3); ; Kaalu sh.komm; 168; 3; ; ; ; 4750001007619
+21011041022; Marja-puuvilja 108g; ; Karamell; 3920; 70; ; ; ; 4750011112174
+21011061022; Marja-puuvilja  2,5kg; ; Karamell; 149; 4; ; ; ; 4750011112853
+21031141022; Piimakaramell täidisega 108g; ; Karamell; 4480; 70; ; ; ; 4750011813781
+21031221022; Shokolaadimaitselise täidisega piimakaramellid Tallinn 500g; ; Karamell; 1024; 16; ; ; ; 4750011815945
+21031241022; Piimakaramell shokolaadimaitselise täidisega 108g; ; Karamell; 4480; 70; ; ; ; 4750011813828
+21031261022; Kaalu piimakaramell shok. täidisega 2,5kg (4*2,5kg); ; Karamell; 256; 4; ; ; ; 4750011813835
+21050821022; Riia karamellid 500g; ; Karamell; 1024; 16; ; ; ; 4750011271260
+21051021122; Esmeralda karamellid 500g; ; Karamell; 1024; 16; ; ; ; 4750011816133
+22010171022; Apelsini-sidruni marmelaadilõigud 3kg; ; Marmelaad; 120; 1; ; ; ; 4750001000184
+22030141022; Gundega marmelaad 190g; ; Marmelaad; 2688; 24; ; ; ; 4750011813019
+22030741022; Vijolite marmelaad 190g; ; Marmelaad; 2688; 24; ; ; ; 4750011813033
+22030771022; Vijolite marmelaad 3kg; ; Marmelaad; 360; 1; ; ; ; 4750001001136
+25020141022; Kuldvasikas 108g; ; Nätsukomm; 4480; 70; ; ; ; 4750011501176
+25020161022; Kuldvasikas (suur) (2,5kg *3); ; Nätsukomm; 168; 3; ; ; ; 4750011501855
+25030341022; Närimiskompvekkide segu Laima 200g; ; Nätsukomm; 2240; 40; ; ; ; 4750011811039
+25030342022; Fructis 108g; ; Nätsukomm; 3920; 70; ; ; ; 4750001005936
+25030362522; Fructis 1kg; ; Nätsukomm; 640; 10; ; ; ; 4750001005998
+11010841022; Maska 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750001310825
+11011141022; Rits 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750001311129
+11011241022; Tulipunane lilleke 175g; ; Paki sh.komm; 2240; 40; ; ; ; 4750001340921
+11011441022; Trühvel 175g; ; Paki sh.komm; 1680; 30; ; ; ; 4750001311426
+11012341022; Arabeska pähkli 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750001008418
+11012342022; Arabeska mandli 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750001008487
+11012342122; Arabeska mandli 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750001008487
+11012741022; Vinnijs 175g; ; Paki sh.komm; 1920; 30; ; ; ; 4750001321128
+11020141022; Laima Jõhvika (Dzervene) 150g; ; Paki sh.komm; 2016; 36; ; ; ; 4750001816532
+11020142022; Laima Mustika (Mellene) 150g; ; Paki sh.komm; 2016; 36; ; ; ; 4750001816518
+11020143022; Laima Kirsi (Kirsis) 150g; ; Paki sh.komm; 2016; 36; ; ; ; 4750001817164
+11030841022; Diana 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750001006858
+11030941022; Salsa 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750007689031
+11031041022; Fruji 175g; ; Paki sh.komm; 2016; 36; ; ; ; 4750001009507
+11040641022; Roks 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750001003369
+11040741022; Rukkilill (Rudzupuke) 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750001320732
+11041641022; Rokenrol 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750007687846
+11050942022; Serenaad 175g; ; Paki sh.komm; 2304; 36; ; ; ; 4750001330953
+11080241022; Kolm karu 175g; ; Paki sh.komm; 1680; 30; ; ; ; 4750001340228
+11081241022; Kazino 175g; ; Paki sh.komm; 1680; 30; ; ; ; 4750001003338
+11081342022; Rebeka Ananass 175g; ; Paki sh.komm; 1680; 30; ; ; ; 4750001007596
+11081342322; Rebeka Ananass 175g; ; Paki sh.komm; 1680; 30; ; ; ; 4750001007596
+31020123022; Selga Party Iiri kreem 250g; ; Pakitud küpsis; 960; 15; ; ; ; 4750007689505
+31020131122; Selga karamelli 180g; ; Pakitud küpsis; 2592; 48; ; ; ; 4750007689550
+31020132122; Selga kondenspiima 180g; ; Pakitud küpsis; 2592; 48; ; ; ; 4750007689574
+31020133822; Selga Klassika 180g; ; Pakitud küpsis; 2592; 48; ; ; ; 4750007689512
+31020134222; Selga iiri kreemi 180g; ; Pakitud küpsis; 2592; 48; ; ; ; 4750007689543
+31020135222; Selga shokolaadi 180g; ; Pakitud küpsis; 2592; 48; ; ; ; 4750007689536
+31020138522; Selga apelsinitükkidega180g; ; Pakitud küpsis; 2592; 48; ; ; ; 4750007816154
+31020188522; Selga mooniseemnetega 180g; ; Pakitud küpsis; 2592; 48; ; ; ; 4750007816307
+60020341022; Küpsis Pere 300g UUS; ; Pakitud küpsis; 504; 12; ; ; ; 4750007158346
+60030141022; Selga soolased kreekerid 250g; ; Pakitud küpsis; 504; 12; ; ; ; 4750007689840
+60030241022; Selga köömnetega kreekerid 250g; ; Pakitud küpsis; 504; 12; ; ; ; 4750007689970
+23010141022; Maigums sefiir shokolaadis pakitud 200g; ; Sefiir; 900; 10; ; ; ; 4750001004267
+23010142022; Maigums cappucinomaitseline sefiir shokolaadis 200g; ; Sefiir; 900; 10; ; ; ; 4750011813484
+23010143022; Hibiskuse sefiir shokolaadis 200g; ; Sefiir; 900; 10; ; ; ; 4750011816362
+23010171022; Sefiir shokolaadis 2kg; ; Sefiir; 120; 1; ; ; ; 4750001000207
+23020142022; Aprikoosijogurtimaitseline sefiir 200g; ; Sefiir; 1152; 12; ; ; ; 4750011812982
+23020443122; Vahvlipuistes sefiir 200g; ; Sefiir; 1152; 12; ; ; ; 4750001002843
+23020542222; Roosa sefiir 200g; ; Sefiir; 1152; 12; ; ; ; 4750001002515
+23020642222; Vanilje sefiir pakitud 200g; ; Sefiir; 1152; 12; ; ; ; 4750001002508
+23020671022; Vanilje sefiir 3kg; ; Sefiir; 112; 1; ; ; ; 4750001406023
+23020741022; Jõhvika sefiir 200g; ; Sefiir; 1152; 12; ; ; ; 4750011814498
+23020841022; Kirsi sefiir 200g; ; Sefiir; 1152; 12; ; ; ; 4750011816515
+12010252022; Ekstra piimashokolaad vahvlitükkidega 100g; ; Shokolaad; 5040; 90; 15; ; ; 4750001008302
+12010254122; Ekstra piimashokolaad metsapähkliga 100g; ; Shokolaad; 5040; 90; 15; ; ; 4750001002072
+12010451022; Piimashokolaad Metsapähklitega Laima  100g; ; Shokolaad; 5040; 90; 15; ; ; 4750001007831
+12013052022; Piimashokolaad Sanne metspähklitega 100g; ; Shokolaad; 5760; 30; ; ; ; 4750001010046
+12020253122; Ekstra piimashokolaad 100g; ; Shokolaad; 5040; 90; 15; ; ; 4750001001891
+12020451022; Piimashokolaad Laima 100g; ; Shokolaad; 5040; 90; 15; ; ; 4750001007800
+12020451122; Piimashokolaad Tallinn 100g (100g*15); ; Shokolaad; 5040; 90; 15; ; ; 4750001008371
+12020451222; Piimashokolaad Tallinn 20g (40*20g); ; Shokolaad; 24000; 240; 40; ; ; 4750001009583
+12020551022; Piimashokolaad Sanne 100g; ; Shokolaad; 5760; 30; ; ; ; 4750001010039
+12042911522; Tume šokolaad tervete metsapähklitega 150g; ; Shokolaad; 3200; 20; ; ; ; 4750001816181
+12050451022; Tume shokolaad Laima 100g; ; Shokolaad; 5040; 90; 15; ; ; 4750001007862
+12060451022; Mõru shokolaad 70% Laima 100g; ; Shokolaad; 5040; 90; 15; ; ; 4750001007282
+12060551122; Mõru shokolaad mandlitega 100g; ; Shokolaad; 5040; 90; 15; ; ; 4750001009156
+12060551222; Mõru šokolaad tervete metsapähklite ja jõhvikatega 150g; ; Shokolaad; 3200; 20; ; ; ; 4750001816167
+12070155022; Õhuline tume shokolaad Laima 90g; ; Shokolaad; 3200; 20; ; ; ; 4750001010015
+12070155122; Õhuline piimashokolaad Laima 90g; ; Shokolaad; 3200; 20; ; ; ; 4750001010022
+12070155222; Õhuline mõru shokolaad Laima 90g; ; Shokolaad; 3200; 20; ; ; ; 4750001010008
+12200154422; Kakaokreemitäidisega šokolaad Laima 44g (44g*30); ; Shokolaad; 15360; 240; 30; ; ; 4750001817300
+12200254422; Munaliköörikreemitäidisega šokolaad Laima 44g (44g*30); ; Shokolaad; 15360; 240; 30; ; ; 4750001817331
+13070181022; Batoon Jõhvika (Dzervene) 30g (30g*28tk); ; Shokolaad; 14336; 224; 28; ; ; 4750001815559
+13070182022; Batoon Mustika (Mellene) 30g (30g*28tk); ; Shokolaad; 14336; 224; 28; ; ; 4750001815566
+13070183022; Batoon Kirsi 30g (30g*28tk); ; Shokolaad; 14336; 224; 28; ; ; 4750001817133
+20010151022; Batoon martsipani 45g (30tk*45g); ; Shokolaad; 6000; 30; ; ; ; 4750007687273
+32020874822; Rebeka shokolaadi vahvel 3kg; ; Vahvel; 96; 1; ; ; ; 4750007689703
+32020974822; Rebeka vanilje vahvel 3kg; ; Vahvel; 96; 1; ; ; ; 4750007689741
+32021431422; Rebeka shokolaadi vahvel 90g; ; Vahvel; 3360; 28; ; ; ; 4750007689895
+32021431522; Rebeka shokolaadi vahvel 180g; ; Vahvel; 1680; 14; ; ; ; 4750007689949
+32021531522; Rebeka metspähkli vahvel 90g; ; Vahvel; 3360; 28; ; ; ; 4750007689901
+32021531622; Rebeka pähkli vahvel 180g; ; Vahvel; 1680; 14; ; ; ; 4750007689956
+32021631422; Rebeka vanilje vahvel 90g; ; Vahvel; 3360; 28; ; ; ; 4750007689864
+32021931422; Rebeka halvaa vahvel 90g; ; Vahvel; 3360; 28; ; ; ; 4750007689888
+32021931522; Rebeka halvaa vahvel 180g; ; Vahvel; 1680; 14; ; ; ; 4750007689932
+32040163722; Vahvlilehed 200g; ; Vahvel; 768; 16; ; ; ; 4750007201547
+33010621122; Rebeka, glasuuritud, cappucino 300g; ; Vahvlitort; 990; 18; ; ; ; 4750007244131
+33010622122; Rebeka, glasuuritud, karamell 300g; ; Vahvlitort; 990; 18; ; ; ; 4750007243134
+33010623122; Rebeka, glasuuritud, jogurti 300g; ; Vahvlitort; 990; 18; ; ; ; 4750007688843
+33021022722; Rebeka (moka)350g; ; Vahvlitort; 990; 18; ; ; ; 4750007248047
+33021122722; Rebeka (retro)350g; ; Vahvlitort; 990; 18; ; ; ; 4750007246043
+33021322722; Rebeka (klassika)350g; ; Vahvlitort; 990; 18; ; ; ; 4750007245046
+622; Laima korv; ; XReklaam; ; 1; ; ; ; 
+6022; Shokolaadi display punane (papist); ; XReklaam; 50; 1; ; ; ; 
+6122; Lahtise küpsise riiul (metallist); ; XReklaam; ; ; ; ; ; 
+6222; Kaubaalus; ; XReklaam; ; ; ; ; ; 
+6322; Müügistend metall 1,9 meetrit; ; XReklaam; ; 1; ; ; ; 
+6422; Müügistend metall 1,5 meetrit; ; XReklaam; ; 1; ; ; ; 
+6522; Kaubaalus EUR; ; XReklaam; ; ; ; ; ; 
+61122; Küpsise kasti kaaned; ; XReklaam; ; ; ; ; ; 
+61222; Kommitoru (display); ; XReklaam; ; ; ; ; ; 
+61322; Universaalne müügialus; ; XReklaam; ; 1; ; ; ; 
+61422; Punane Laima trepp (papist); ; XReklaam; ; 1; ; ; ; 
+61522; Sanne müügialus sinine; ; XReklaam; ; ; ; ; ; 
+61822; Suur Laima karussell; ; XReklaam; ; ; ; ; ; 
+61922; Display jõuluplakat (Jõul´07); ; XReklaam; ; ; ; ; ; 
+62022; Shokolaadi riiulidisplay (papist); ; XReklaam; ; ; ; ; ; 
+62122; Marja display; ; XReklaam; ; 1; ; ; ; 
+90022; Gutta 1/2 plastrest 60*1,5 L pudelile; ; XReklaam; ; ; ; ; ; 
+90122; Gutta Euro alus; ; XReklaam; ; ; ; ; ; 
+90522; Gutta PET metallriiul; ; XReklaam; ; ; ; ; ; 
+90622; 1/4 puitalus; ; XReklaam; ; ; ; ; ; 
+90722; 1/2 puitalus; ; XReklaam; ; ; ; ; ; 
+90822; Lotte kokkupandav display (papist; ; XReklaam; ; ; ; ; ; 
+90922; Gutta ladustatav klaas Spirale 270ml; ; XReklaam; ; ; ; ; ; 
+91022; Gutta ACE Mix plastrest 0,4L; ; XReklaam; ; ; ; ; ; 
+91122; Gutta 1/4 plastrest 24*1,5 L pudelile; ; XReklaam; ; ; ; ; ; 
+91322; Gutta 1/2 plastriiul; ; XReklaam; ; ; ; ; ; 
+91522; Gutta aluseääris; ; XReklaam; ; ; ; ; ; 
+91622; Mahlajahuti 3-ne; ; XReklaam; ; ; ; ; ; 
+91822; Gutta Free riiulistopper; ; XReklaam; ; ; ; ; ; 
+92122; Gutta pealt avatud külmik; ; XReklaam; ; ; ; ; ; 
+93022; Gutta klaas ISLANDE 290ml; ; XReklaam; ; ; ; ; ; 
+601022; Laima wrapping (Jõul´07); ; XReklaam; ; ; ; ; ; 
+601122; Laima wrapping; ; XReklaam; ; ; ; ; ; 
+601222; Display, väike (papist); ; XReklaam; ; 1; ; ; ; 

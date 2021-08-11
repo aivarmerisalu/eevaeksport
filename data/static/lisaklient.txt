@@ -1,0 +1,15 @@
+Rimi10;IE22;Rakvere Hyper(Argo);Rakvere Hyper(Argo);E
+Rimi11;IE22;Jõhvi (Argo);Jõhvi (Argo);T
+Rimi12;KA222;Magistrali Rimi, Sõpruse pst. 201/203;Magistrali Rimi, Sõpruse pst. 201/203;TR
+Rimi13;KA222;Nurmenuku Rimi, Ehitajate tee 107;Nurmenuku Rimi, Ehitajate tee 107;TR
+Rimi14;KA122;Põhja Rimi, Põhja pst.17;Põhja Rimi, Põhja pst.17;EN
+Rimi16;KA122;Rimi Kaubahall, Aia 7;Rimi Kaubahall, Aia 7;EN
+Rimi17;KE22;Rimi Viljandi;Rimi Viljandi;E
+Rimi18;LAE22;RIMI SM Kuressaare;RIMI SM Kuressaare;T1
+Rimi3;KA222;Haabersti Rimi, Haabersti 1;Haabersti Rimi, Haabersti 1;EKR
+Rimi4;KA222;Sõpruse Rimi, Sõpruse pst.174/176;Sõpruse Rimi, Sõpruse pst.174/176;TN
+Rimi5;KA122;Lasnamäe Rimi, Mustakivi tee 13;Lasnamäe Rimi, Mustakivi tee 13;TR
+Rimi6;KA222;Ülemiste Rimi, Suur- Sõjamäe 4;Ülemiste Rimi, Suur- Sõjamäe 4;EKR
+Rimi7;KA222;SuperNetto, Tammsaare tee 55;SuperNetto, Tammsaare tee 55;K
+Rimi8;KA122;Sadama Rimi, Lootsi tn. 7;Sadama Rimi, Lootsi tn. 7;EN
+Rimi9;IE22;Narva (Argo);Narva (Argo);K 

@@ -1,0 +1,99 @@
+<html>
+<head>
+   <title>ObjectPlanet's TabbedPanel</title>
+</head>
+<body bgcolor="#ffffff">
+
+<font face="verdana, arial" size=+1>
+ObjectPlanet's TabbedPanel
+</font>
+
+<br>
+<font face="verdana, arial" size=-1>
+This java based tabbed panel component enables you to add several
+components in one panel with a named tab for each component.
+The user can switch between the components by clicking the tabs.
+<p>
+Each tab can be detached into it's own top-level application window
+by right-clicking an active tab. This enables the user to display
+several of the components at the same time as well as resizing them
+individually.
+<p>
+You can also control the colors of each tab as well as fonts and
+font sizes. The tabs can be displayed at the top, bottom, left,
+or right side of the components.
+<p>
+TabbedPanel <a href="demo.html">demonstration</a>, <a href="TabbedPanelDemo.java">source</a><br>
+TabbedPanel <a href="api/com.objectplanet.gui.TabbedPanel.html">reference</a> documentation.<br>
+TabbedPanel <a href="license_agreement.txt">license agreement</a>.<br>
+</font>
+
+<p><br><font face="verdana, arial" size=+1>How to use</font>
+<br><font face="verdana, arial" size=-1>
+To use the tabbed panel in your java application, import the
+com.objectplanet.gui.TabbedPanel.jar file in your development
+environment, or add the same file or the com/objectplant/gui
+directory to your CLASSPATH environment variable.
+<p>
+Then you can import the class and create an instance like this
+</font>
+<font face="courier">
+<pre>
+import java.awt.*;
+import com.objectplanet.gui.TabbedPanel;
+
+public class TabbedPanelDemo {
+   public static void main(String[] argv) {
+      TabbedPanel tabbed = new TabbedPanel();
+  		tabbed.add("monday", new Button("monday"));
+		tabbed.add("tuesday", new Button("tuesday"));
+		tabbed.add("wednesday", new Button("wednesday"));
+		tabbed.add("thursday", new Button("thursday"));
+		tabbed.add("friday", new Button("friday"));
+		tabbed.add("saturday", new Button("saturday"));
+		tabbed.add("sunday", new Button("sunday"));
+
+      Frame f = new Frame();
+      f.add("Center", tabbed);
+      f.setSize(400,30);
+      f.show();
+   }
+}</pre>
+</font>
+
+
+<p><br><font face="verdana, arial" size=+1>Two versions</font>
+<br><font face="verdana, arial" size=-1>
+The tabbed panel component comes in two versions, one compatible
+with JDK 1.1, supported by Netscape 4.06 or newer and Internet Explorer
+or newer. And one compatible with JDK 1.02, supported by Netscape 3 and
+Internet Explorer 3 or later.
+<p>
+The class files for JDK 1.1 version is found in the
+com.objectplanet.gui.TabbedPanel.jar archive file. The class files for
+the JDK 1.02 version is found in the com\objectplanet\gui102 directory.
+<p>
+The package name for the JDK 1.1 version is com.objectplanet.gui and
+com.objectplanet.gui102 for the JDK 1.02 version
+</font>
+
+<p><br><font face="verdana, arial" size=+1>Contact</font>
+<br><font face="verdana, arial" size=-1>
+If you have any questions, 
+comments, bug reports, or feature enhancement requests send an email to 
+<A href="mailto:mail@objectplanet.com">mail@objectplanet.com</A> or call (+47) 2255 3437. 
+</font>
+
+
+<p>
+<br>
+<hr>
+<font face="verdana, arial" size=-2>
+Copyright (C) 1998-2000
+<br>ObjectPlanet, Inc.
+<br>(+47) 2255 3437
+<br><A href="mailto:mail@objectplanet.com">mail@objectplanet.com</A> </FONT></FONT></FONT></FONT>
+</font>
+
+</body>
+</html>

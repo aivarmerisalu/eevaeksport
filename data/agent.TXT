@@ -1,0 +1,27 @@
+format	
+1	44	1	0	0	0	0	-	
+
+codepage	UTF-8	
+
+commentstring	
+	
+
+user2	
+EB3F6719-04613F21-0CFD5E83-B315B073-80A7D118		0	ALEKS	Aleksander Sipria		AVO										0			0																					0	0	EST					0					0	0	0	0	0	0	0				0	06-12-2010			1	0	0		1			0		1						-1			0	
+
+5429D850-66CB2D38-F40DF165-2B24F0FC-B7B483FD		0	ELINA	Elina Kozhenevski		ELINA										0			0																					0	528887315	EST					0					0	0	0	0	0	0	0				0	07-10-2010			0	0	0	11250	0			0	1716936	1						-1			0	
+
+521C21BD-0F768BD6-433B5B80-1FA8683E-4A8FB6AE		0	ENE	Ene Noevere		ENE										0			0																					0	0	EST					0					0	0	0	0	0	0	0				0	07-10-2010			0	0	0		1			0		1						-1			0	
+
+109F3AF6-89BB7492-E9F30D14-AA21989F-390D65CC		0	HENDRIK	Priit-Hendrik Sumeri		HENDR										0			0																					0	0	EST					0					0	0	0	0	0	0	0				0	07-10-2010			1	0	0		1			0		1						-1			0	
+
+E65027CE-1B0269FD-17B82E2B-E25625EF-271EB45D		0	JYRI	Jüri Laanep		AVO										0			0																					0	0	EST					0					0	0	0	0	0	0	0				0	07-10-2010			1	0	0		1			0		1						-1			0	
+
+70F525DC-0AECF0CF-33E1240B-002F8EAA-A4795E9A		0	LEM	Lembit		YLD										0			0																					0	250934267	EST					0					0	0	0	0	0	0	0				0	07-10-2010			0	0	0	11237	0			0	1710841	0						-1			0	
+
+4789825E-E2DE5EF1-60BD1836-CF1662C6-125F2E65		0	PIIA	Piia Piiber		PIIA										0			0																					0	2079899227	EST					0					0	0	0	0	0	0	0				0	07-10-2010			0	0	0	11238	0			0	1711925	0						-1			0	
+
+12C8AE6B-7643AF5A-DD5C2209-ED6165B3-51419807		0	SVEN	Sven Pallas		AVO										0			0																					0	0	EST					0					0	0	0	0	0	0	0				0	07-10-2010			1	0	0		1			0		1						-1			0	
+
+
+

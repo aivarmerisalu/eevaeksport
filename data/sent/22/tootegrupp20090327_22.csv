@@ -1,0 +1,35 @@
+10;Suhkruvabad tooted
+20;Kommikarbid
+30;Pakitud ðokolaadi kommid
+40;Lahtised ðokolaadi kommid
+50;Pakitud karamellid
+60;Lahtised karamellid
+70;Iiris, pehme karamell
+80;Lahtine sefiir
+90;Pakitud sefiir
+A0;Marmelaad
+B0;Pakitud vahvlid
+C0;Vahvlitordid
+D0;Pakitud küpsised
+E0;Lahtised küpsised
+F0;Hooaja tooted
+G0;Reklaammaterjalid
+H0;Lahtised vahvlid
+I0;Batoonid
+Iiris EI;Laima iiris, pehme karamell - ÄRA KASUTA
+J0;Shokolaaditahvlid
+K0;Serbett
+KommikarEI;Laima kommikarbid
+L0;Drazeed
+Laht.karEI;Laima lahtised karamellid
+Laht.küpEI;Laima lahtised küpsised
+Laht.shoEI;Laima lahtised ?okolaadikommid
+MarmelaaEI;Laima marmelaad
+Pak.karaEI;Laima pakitud karamellid
+Pak.küpsEI;Laima pakitud küpsised
+Pak.shoEI;Laima pakitud ?okolaadikommid
+Pak.vahEI;Laima pakitud vahvlid
+SefiirEI;Laima sefiir
+SuhkruvaEI;Laima suhkruvabad tooted
+VahvlitoEI;Laima vahvlitort
+FTR,34
