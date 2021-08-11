@@ -572,8 +572,13 @@ private Object[] params = new Object[] {};
         	    	 country = country.replaceAll("Sygavkylm / ", "Sy");
         	    	 country = country.replaceAll("TORT / ", "T");
         	    	 
-        	    	 
-        	    
+        	    	 if(country.equals("TClara koogid")){
+        	    		 country = "Kook";
+        	    	 }
+        	    	 if(country.equals("TClara tordid")){
+        	    		 country = "Tort";
+        	    	 }
+
         	    	 
          	         tm.put(countryIdName[0],Converter.enCodeEst(country));
         	       }

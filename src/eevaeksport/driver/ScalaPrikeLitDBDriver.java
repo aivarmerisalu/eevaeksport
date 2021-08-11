@@ -1051,13 +1051,14 @@ return bomKount;
 	}
 	
   private TreeMap braakGir = null;
+  private TreeMap nepaGir = null;
   
 	
    private TreeMap getGirStock(){
 		
 	   TreeMap<String,Double> res = new TreeMap<String,Double>();
 	   braakGir = new TreeMap();
-   	
+	   nepaGir = new TreeMap();
    	String fname = this.getExcelDir() + "GirtekaStockUTF8.xml";
 
 	try {   	
@@ -1081,10 +1082,7 @@ return bomKount;
     			String ladu = deCode( getNode(rida,"Busena").getFirstChild().getNodeValue());
     			 String prodcode = deCode( getNode(rida,"PrekId").getFirstChild().getNodeValue());
     			  double kogus = Double.parseDouble(deCode( getNode(rida,"Kiekis").getFirstChild().getNodeValue()));
-    			  
-    			  if(prodcode.equals("AW500T")) {
-    				  System.out.println("AW500T " + ladu + " " + kogus);
-    			  }
+    			
     			  if(ladu.equals("Paruošta NB") || ladu.equals("Paruošta KL") || ladu.equals("Grąžinimas")){
     					if(res.get(prodcode) != null){
     	               	   res.put(prodcode, res.get(prodcode) + kogus);
@@ -1093,15 +1091,23 @@ return bomKount;
     	                }
     	            }
     			  
+    			 
     			  
-    			  
-    			  if(ladu.equals("Grąžinimas")){
+    			  if(ladu.equals("Brokas")){
     					if(braakGir.get(prodcode) != null){
     	        			braakGir.put(prodcode, Double.parseDouble(braakGir.get(prodcode)+"") + kogus);
     	                }else{
     	                	braakGir.put(prodcode, kogus);
     	                }
     	            }
+    			  
+    			  if(ladu.equals("Neparuošta")){
+  					if(nepaGir.get(prodcode) != null){
+  	        			nepaGir.put(prodcode, Double.parseDouble(nepaGir.get(prodcode)+"") + kogus);
+  	                }else{
+  	                	nepaGir.put(prodcode, kogus);
+  	                }
+  	            }
               }catch(Exception e) {
     			e.printStackTrace();
     		}
@@ -1137,9 +1143,11 @@ return bomKount;
 	    System.out.println(cmd);
 	}
 
-        TreeMap bro = getBROStockInfo();
+      
         
         TreeMap gir =  getGirStock();
+        TreeMap bro = braakGir;
+        TreeMap nepa = nepaGir;
     	
         
 	TreeMap products = new TreeMap();
@@ -1151,8 +1159,8 @@ return bomKount;
 	    while (rs.next()) {
 		String kood = rs.getString("toode").trim();
 		String nimetus = rs.getString("nimi").trim();
-
-		
+	     Product prod = new Product(kood);
+		String info = "";
 		if(bro.get(kood) != null){
 			String aa = "";
 			
@@ -1161,12 +1169,22 @@ return bomKount;
 			}catch(Exception e){
 			  e.printStackTrace();	
 			}
-			
+			info = "Brakis: "+(int)Double.parseDouble(bro.get(kood)+"")+ "|"; 
 			System.out.println("braak " + bro.get(kood) + " " + aa);
 			
 			nimetus = nimetus + aa;
 		}
-                Product prod = new Product(kood);
+		
+		if(nepa.get(kood) != null){
+			
+			info = info + "Neparuošta: "+(int)Double.parseDouble(nepa.get(kood)+""); 
+			System.out.println("nepa " + nepa.get(kood) );
+			
+		}
+           
+		if(info != null && info.length()>1) {
+			prod.setPartii(info);
+		}
         
                 prod.setName( nimetus );
                 try{
