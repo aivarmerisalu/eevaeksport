@@ -55,7 +55,8 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaAmberLITDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker {
+public class AxaAmberLITDBDriver extends AbstractDBDriver  implements Manager,Promo,
+BulkUpdater, Discounter,PictureMaker,FixLoader {
   public AxaAmberLITDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -99,6 +100,21 @@ public class AxaAmberLITDBDriver extends AbstractDBDriver  implements Manager,Pr
   String user =  null;
   String pass = null;
   String rcompany = null;
+	private TreeMap eanprods = null;
+	@Override
+	public void FixLoader() {
+		
+	eanprods =  Converter.loadMore();
+		  
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
+		this.getProducts(null);
+		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+		System.out.println("Contracts " + contracts.toString());
+		Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+		System.exit(0);
+	}
 
   
 	@Override
@@ -1680,7 +1696,13 @@ TreeMap   tm = new TreeMap();
         String ean = rs.getString("ean");
         String add = "";
         if(ean != null && ean.trim().length()>0){
-        prod.setEAN(ean);
+        	 prod.setEAN(ean.trim());
+             
+             if(eanprods == null) {
+         		eanprods= new TreeMap();
+         	}
+       
+         eanprods.put(prod.getEAN(), prod.getID());
         int ll  = ean.trim().length();
         if(ean.length() >4){
             add = " " +  ean.trim().substring(ll-4);	

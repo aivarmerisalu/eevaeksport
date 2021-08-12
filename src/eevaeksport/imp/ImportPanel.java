@@ -572,6 +572,11 @@ public String parseFirstEmail(String emails) {
             	  System.out.println("CSV tellimus CSV formaat");
             	  loadCSVOrder(orders, file,troubles);  
               }
+              if(csv.equals("CSVENG")){
+            	  System.out.println("CSVENG tellimus CSVENG formaat");
+            	  
+            	  loadCSVOrder(orders, file,troubles);  
+              }
               if(csv.equals("KAPP")){
             	  System.out.println("CSV tellimus KAPP formaat");
             	  loadCSVKappOrder(orders, file,troubles);  
@@ -9279,7 +9284,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	      line = line.trim();
 	System.out.println(line + " " + counter);
 	      if (counter == 1){
-	        if (line.equals("tellimus") || line.equals("kassamyyk") || line.equals("mmttellimus")){        
+	        if (line.equals("tellimus") || line.equals("kassamyyk") || line.equals("mmttellimus") || line.equals("order")){        
 	        }else{
 	        	 break;
 	        }
@@ -9296,7 +9301,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 		       
 		      } 
 	      
-	      if (line.indexOf("tellija.regnr:") > -1){
+	      if (line.indexOf("tellija.regnr:") > -1 || line.indexOf("client.regnr:") > -1){
 	    	  System.out.println(line + "222 " + counter);
 	        List list0 = parseLine(line, ",");
 	        tellijaRegnr = (String)list0.get(1);
@@ -9350,7 +9355,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 		            
 		          break;
 		        }
-		      }else if (line.indexOf("filiaal:") > -1  ){
+		      }else if (line.indexOf("filiaal:") > -1 || line.indexOf("branch:") > -1  ){
 	        List list = parseLine(line, ",");
 	        tellijaKood = (String)list.get(1);
 	           System.out.println("Tellija Kood: "+tellijaKood);
@@ -9374,8 +9379,8 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	       	 List list0 = parseLine(line, ",");
 	       	  valuuta = (String)list0.get(1);
 	       	// double kogus = Double.parseDouble((String)row.get(4));
-	      } else if (line.startsWith("nr:")){
-	    	  System.out.println("lll "+ line);
+	      } else if (line.startsWith("nr:")  || line.startsWith("order.nr:") ){
+	    	 // System.out.println("lll "+ line);
 	      	 List list0 = parseLine(line, ",");
 	      	  reference = (String)list0.get(1);
 	      	// double kogus = Double.parseDouble((String)row.get(4));
@@ -9388,7 +9393,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	      } else if (line.indexOf("teostaja:") > -1){
 	     	 List list0 = parseLine(line, ",");
 	      	  teostaja = ((String)list0.get(1));
-	      } else if (line.indexOf("tarne_kuupaev:") > -1){
+	      } else if (line.indexOf("tarne_kuupaev:") > -1 || line.indexOf("delivery.date:") > -1){
 	     	 List list0 = parseLine(line, ",");
 	     	  datelong = (String)list0.get(1);
 	      }else if (line.indexOf("tarne_aeg:") > -1){
@@ -9398,7 +9403,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	        String ol = null;
 	        String prod = " ";
 	        while( (ol = br.readLine()) != null){
-	        	System.out.println( "xxx  "+ ol );
+	        	//System.out.println( "xxx  "+ ol );
 	         if(ol.trim().length() > 6){
 	        	 if(ol.startsWith("koostaja")){
 	 	          	ol = br.readLine();
@@ -9421,18 +9426,18 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	          }
 	          ol = ol.replaceAll(",,", ", ,");
 	          
-	          System.out.println(ol);
+	         // System.out.println(ol);
 	       //   ean toote_kood	nimetus	yhik	kogus	km	yhiku_hind		summa	kmsum	partii
 	        
 	        	List row = parseLine(ol, ",");
 	           String ean = ((String)row.get(0)).trim();
 	          String toode = (String)row.get(1);
 	          String name = (String)row.get(2);
-	          System.out.println(toode +"  "+ean);
+	       //   System.out.println(toode +"  "+ean);
 
 	          try{
 	          prod = driver.identifyProduct(ean,toode);
-	          System.out.println(ean + " " +toode +"  "+ prod);
+	        //  System.out.println(ean + " " +toode +"  "+ prod);
 	       } catch (SQLException e) {
 	       e.printStackTrace();	
 	       }
@@ -9444,7 +9449,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	    	  kogus = Double.parseDouble((String)row.get(3));
 	       }
 	     
-	       System.out.println(firma+"'"+prod+"'"+kogus + "'" +  reference);
+	      
 	       String unit = " ";
 	       int vat = 20;
 	       double price = 0;
@@ -9471,7 +9476,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	          if(!datelong.equals("")){
 	          		datelong = getCalXML(datelong);
 	          }
-	          
+	     
 	          orders.add(firma, prod, name ,kogus * tagastus, reference, makseviis, ridasumma, ridakmsumma,datelong,
 	        		  vat + "",price,0,isBill,teostaja,99,unit,ladu,"",ean,time,true,null,null);
 	         // orders.add(firma,toode,name,kogus,dokNr, dealer, bonus, discount,datelong,pl,price,paymterm,false,agcode,status,unit);
@@ -9480,12 +9485,16 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	          orders.setInfo(reference);   
 	          orders.setCurrency(valuuta);
 	          
+	          System.out.println(firma+"'"+prod+"'"+kogus + "'" +  reference);
+	          
 	         }
 	        }
 	      }
 	    }
 	    br.close();
 	    fr.close();
+	    //System.out.println(troubles.toString());
+	  //  System.exit(0);  
 	  }
 	  
   
@@ -12232,6 +12241,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	        BufferedReader in = new BufferedReader(
 	                new FileReader(f));
             String fline = in.readLine() ;
+            String fline2 = in.readLine() ;
             System.out.println(fline);
 	           if(fline.indexOf("Data;Pris")!= -1 ){
 	        	   in.close();
@@ -12242,6 +12252,12 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	        	   in.close();
 	        	   return "KAPP";	        	   
 	           }
+	           
+	           if(fline.indexOf("order")!= -1 ||  fline2.indexOf("client.regnr") != -1){
+	        	   in.close();
+	        	   return "CSVENG";	        	   
+	           }
+	           
 	           
 	           in.close();
 		

@@ -45,7 +45,8 @@ import eevaeksport.util.ReportingService;
  * @version 1.0
  */
 
-public class AxaAmberIBDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker {
+public class AxaAmberIBDBDriver extends AbstractDBDriver  implements Manager,Promo,
+BulkUpdater, Discounter,PictureMaker,FixLoader {
   public AxaAmberIBDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -82,7 +83,23 @@ public class AxaAmberIBDBDriver extends AbstractDBDriver  implements Manager,Pro
   private String url = "jdbc:odbc:amberbev";
  // private String url = "jdbc:odbc:lit";
   
-  
+	private TreeMap eanprods = null;
+	@Override
+	public void FixLoader() {
+		
+	eanprods =  Converter.loadMore();
+		  
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
+		this.getProducts(null);
+		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+		System.out.println("Contracts " + contracts.toString());
+		Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+		System.exit(0);
+	}
+
+	
 	@Override
 	public void PictureMaker() {
 		makePictureCat();
@@ -1806,7 +1823,12 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
         String ean = rs.getString("ean");
         String add = "";
         if(ean != null && ean.trim().length()>0){
-        prod.setEAN(ean);
+        prod.setEAN(ean.trim());
+        if(eanprods == null) {
+    		eanprods= new TreeMap();
+    	}
+  
+    eanprods.put(prod.getEAN(), prod.getID());
         int ll  = ean.trim().length();
         if(ean.length() >4){
             add = " " +  ean.trim().substring(ll-4);	

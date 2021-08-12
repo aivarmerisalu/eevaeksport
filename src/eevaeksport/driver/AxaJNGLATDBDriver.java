@@ -217,8 +217,8 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
-         String sql = " select  * , datediff(day,fromdate,todate) as paev from getprices";
-
+         String sql = " select  * , datediff(day,fromdate,todate) as paev from getprices order by accountrelation,relation desc,itemrelation";
+        HashSet hh = new HashSet();
           try {
 
         	   Connection con = getNewConnection();
@@ -235,19 +235,24 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                           String lopp = rs.getString("todate");
                           double perc = rs.getDouble("percent1");
                           double price = rs.getDouble("amount");
+                          int relation = rs.getInt("relation");
                           int paev = rs.getInt("paev");
                           MatrixLine mline = new MatrixLine();
                           
+                          String check = "";
                           if (custID != null && custID.trim().length() > 1) {
                               mline.setCustID(custID.trim());
+                              check = check + custID.trim();
                           }
                           
                           if (custGR != null && custGR.trim().length() > 1) {
                                   mline.setCliGroup(custGR.trim());
+                                  check = check + custGR.trim();
                           }
                        
                           if (prodID != null && prodID.trim().length() > 1) {
                                   mline.setProdID(prodID.trim());
+                                  check = check + prodID.trim();
                           }
                           if (perc != 0) {
                               mline.setDiscount(perc);
@@ -256,7 +261,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                           if (price != 0) {
                                   mline.setPrice(price);
                           }
-                          if(paev > 1 && paev < 90) {
+                          if((paev > 1 && paev < 90) || relation == 8) {
                         	    
                                  if (lopp != null && lopp.trim().length() > 0  && !lopp.trim().contains("1900")) {
                                      mline.setEndDate(lopp.trim().substring(0,10));
@@ -267,7 +272,11 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                                  } 
                           }
                      
-                          lines.add(mline);
+                          if(!hh.contains(check)){
+                        	  lines.add(mline);  
+                          }
+                        
+                          hh.add(check);
                   }
                   rs.close();
                   stmt.close();
