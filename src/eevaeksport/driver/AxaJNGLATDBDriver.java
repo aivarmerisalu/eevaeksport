@@ -940,7 +940,10 @@ kogusedStr = new HashMap();
         String ean = rs.getString("ean");
         String add = "";
         if(ean != null && ean.trim().length()>0){
-        prod.setEAN(ean);
+        prod.setEAN(ean.trim());
+        if(ean.trim().length() > 4) {
+        	//add = ean.substring(ean.length()-4);
+        }
       }
      
 

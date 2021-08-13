@@ -913,12 +913,10 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		    	             ord3.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			             lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 		  
-		     	        }
-                      else if(itemid.startsWith("M") ){
-         		    	 
-		    	             ord2.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+		     	      }else if(itemid.startsWith("M") ){
+         
+		     	    	  ord2.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			             lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-		  
 		     	        }
 		   
 		     
