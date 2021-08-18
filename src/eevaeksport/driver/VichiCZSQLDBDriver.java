@@ -1105,20 +1105,24 @@ con3.close();
      
      
      try {
-      	  String cmd = "SELECT [Item No_] AS kood,max( [Unit Price]) AS price  from \r\n" + 
-      	  		"	               [Viciunai CZ$Sales Price] where [Starting Date] < getdate()+6  and ([Ending Date] > getdate()+1 or \r\n" + 
-      	  		"				  year ([Ending Date]) = 1753)  and [Sales Type] in (2,0)\r\n" + 
-      	  		"			  group by [Item No_] ";
+      	  String cmd = "SELECT [Item No_] AS kood,max( [Unit Price]) AS price, [Sales Type] as type  from \r\n" + 
+      	  		"      	  		               [Viciunai CZ$Sales Price] where [Starting Date] < getdate()+6  and ([Ending Date] > getdate()+1 or  \r\n" + 
+      	  		"      	  						  year ([Ending Date]) = 1753)  and [Sales Type] in (2,0) \r\n" + 
+      	  		"      	  					  group by [Item No_], [Sales Type]order by [Item No_]";
 
          	 Connection con = getNewConnection2();
      	        Statement stmt = con.createStatement();
      	        ResultSet rs = stmt.executeQuery(cmd);
      	        while(rs.next()){
-     	             String toode = null;
-     	             double seis = 0;;
-     	              	toode =rs.getString("kood");
-     	              	seis = rs.getDouble("price");
-     	              	prices.put(toode, seis + "");
+     	             String toode = rs.getString("kood");
+     	             double seis = rs.getDouble("price");
+     	              int type = rs.getInt("type");
+     	              if(type == 2) {
+     	            	 prices.put(toode, seis + "");  
+     	              } else if (prices.get(toode) == null) {
+     	            	 prices.put(toode, seis + "");
+     	              }
+     	              	
      	        }
 
      	      rs.close();
@@ -1220,8 +1224,6 @@ con3.close();
                            }      	 
                                                       
                            
-
-          	 String vat = rs.getString("vat");
                      	prod.setVat("21");
                     
                    

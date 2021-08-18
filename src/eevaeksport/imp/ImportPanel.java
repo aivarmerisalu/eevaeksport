@@ -256,7 +256,7 @@ public String parseFirstEmail(String emails) {
       File file = files[i];
       StringBuffer troubles = new StringBuffer();
 
-      if (file.isFile()){
+      if (file.isFile() && !file.getName().contains("DS_Store")){
         String fileName = file.getAbsolutePath();
         currentFile = fileName;
         currFile = file;

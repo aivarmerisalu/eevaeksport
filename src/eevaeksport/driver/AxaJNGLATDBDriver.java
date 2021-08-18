@@ -3,6 +3,7 @@ package eevaeksport.driver;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -28,6 +29,10 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -433,6 +438,90 @@ kogusedStr = new HashMap();
   
   private   HashMap logMap = new HashMap();
   
+  
+  
+  private TreeMap<String,String> getVeod(){
+	  	TreeMap<String,String> res = new TreeMap<String,String>();
+	  	
+	  	File f = new File(this.getExcelDir() + "piegades dienas.xlsx");
+			try {
+				
+				 DataFormatter formatter = new DataFormatter();
+				
+				
+				FileInputStream ff = new FileInputStream(f);
+				XSSFWorkbook workbook = new XSSFWorkbook((ff));
+				XSSFSheet sheet = workbook.getSheetAt(0);
+				XSSFRow row = null;
+				
+				for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+					row = sheet.getRow(i);
+					
+					String custID = formatter.formatCellValue(row.getCell((short) 1));
+					String vedu = "";
+
+
+	                       if(custID != null && custID.trim().length() > 0){
+	                    	   
+	                           for (int a = 7; a < 15; a++) {
+	                        	   
+	                        	   String asi = formatter.formatCellValue(row.getCell((short) a));
+	                        	   
+                                     if(a == 7 && asi != null && asi.trim().length() > 1 ) {
+                                    	 vedu = vedu + "1";
+                                     }
+                                     if(a == 8 && asi != null && asi.trim().length() > 1 ) {
+                                    	 vedu = vedu + "2";
+                                     }
+                                     
+                                     if(a == 9 && asi != null && asi.trim().length() > 1 ) {
+                                    	 vedu = vedu + "3";
+                                     }
+                                     
+                                     if(a == 10 && asi != null && asi.trim().length() > 1 ) {
+                                    	 vedu = vedu + "4";
+                                     }
+                                     
+                                     if(a == 11 && asi != null && asi.trim().length() > 1 ) {
+                                    	 vedu = vedu + "5";
+                                     }
+                                     
+                                     if(a == 12 && asi != null && asi.trim().length() > 1 ) {
+                                    	 vedu = vedu + "6";
+                                     }
+                                     
+                                     if(a == 13 && asi != null && asi.trim().length() > 1 ) {
+                                    	 vedu = vedu + "7";
+                                     }
+                                     
+                                     if(vedu.length() > 0) {
+                                    	  if(a == 14 && asi != null && asi.trim().startsWith("24") ) {
+                                         	 vedu = vedu + " -24h"  ;
+                                          }
+                                          if(a == 14 && asi != null && asi.trim().startsWith("48") ) {
+                                         	 vedu = vedu + " -48h"  ;
+                                          }
+                                     }
+                                   
+	                           	   
+							    }    
+	                          }
+	                       
+	                       if(vedu.trim().length() > 0) {
+	                    	res.put(custID, vedu)   ;
+	                       }
+	                    }
+				
+				
+			}catch(Exception r){
+				r.printStackTrace();	
+				}
+				System.out.println("Vedu size  " + res.size());
+	 // 	System.exit(0);
+	  	return res;
+	  }
+  
+  
   public TreeMap getCustomers(Agent agent){
 
 	  double minordsum = 0;
@@ -453,9 +542,12 @@ kogusedStr = new HashMap();
       String cmd = "select * from getCustomers";
       String cmd2 = "select * from getCustomers";
       
-         
-        
-        System.out.println("kliendid alustan , minordsum " + minordsum);
+         TreeMap<String,String> veod = new TreeMap<String,String>();
+          if(!instance.equals("shell")) {
+        	 veod =  getVeod();
+           }
+                
+        System.out.println("kliendid alustan, veod " + veod.size());
         
         TreeMap customers = new TreeMap();
         HashMap custMap = new HashMap();
@@ -623,9 +715,12 @@ kogusedStr = new HashMap();
                 	for (String ag : ags) {
                 		cust.addAgent(new Agent(ag));
                 		//System.out.println("Lisan Agenti " + ag +" " + cust.getID());
+                		 if(ag.trim().indexOf("SH") == -1 && !cust.hasAgent("HOUSE1")){
+                             cust.addAgent(new Agent("HOUSE1")); 
+                         } 
                 	}
                 	
-                          cust.addAgent(new Agent("HOUSE1")); 
+                         
                        
                 }
 
@@ -761,6 +856,7 @@ kogusedStr = new HashMap();
              }
 
              String vedu  = rs.getString("vedu");
+             vedu = veod.get(cust.getID());
              if(vedu != null && vedu.trim().length() != 0){
             	 if(cust.getCity() != null && cust.getCity().trim().length() > 0){
             		 cust.setCity( cust.getCity() + "|Piegades diena - " +  vedu.replaceAll(";", "-")); 	 

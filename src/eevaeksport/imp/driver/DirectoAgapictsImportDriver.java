@@ -53,7 +53,7 @@ import eevaeksport.util.Converter;
 
 public class DirectoAgapictsImportDriver extends AbstractImportDriver{
 
-  static Category log = Category.getInstance(IceAxaImportDriver.class.getName());
+  static Category log = Category.getInstance(DirectoAgapictsImportDriver.class.getName());
 
   public DirectoAgapictsImportDriver(ImportPanel parent) {
     this.parent = parent;
@@ -146,7 +146,7 @@ try{
 	          }	   
 	          }
         	  
-	    
+	          reader.close();
 	     } catch (Exception e){
 	       e.printStackTrace();
 	     }
@@ -497,15 +497,13 @@ try{
     	   signatures = new Vector();
        }
        
- 	 //if(signatures.contains(signature)){
- 		//  this.troubles.append( "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany()) ;
- 		    		  
- 	//  } else {
+ 	 if(signatures.contains(signature)){
+ 		  this.troubles.append( "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany()) ;
+ 	   } else {
  		  makeOutput(order);  
  		  signatures.add(signature);
  		  this.troubles = null;
- 		  
- 	 // }	  
+ 	  }	  
 		
     
   }
@@ -518,9 +516,7 @@ try{
 
 	    String hour = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
 
-	    String minute = String.valueOf(cal.get(Calendar.MINUTE));
 
-	    String second = String.valueOf(cal.get(Calendar.SECOND));
 	 
 	   sb.append(  year + "-");
 	    if (month.length() == 1){
@@ -810,35 +806,7 @@ try{
 	  return 0;
   }
   
-  private double getSum(Order order){
-	  double res = 0;
-	  
-	  Vector lines = order.getOrderLines();
-      for (int i = 0; i < lines.size(); i++) {
 
-    	  OrderLine line = (OrderLine) lines.elementAt(i);
-    	  Product ppp = (Product)tooted.get(line.getToode());
-    	  double hind = 0;
-    	  
-    	  try{
-    		  hind =  this.getPriceAction(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
-		  }catch(Exception e){
-    	  }
-    	  if(hind <  0.0006){
-              try{
-	    		  hind =  getPrice(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
-			  }catch(Exception e){
-	    	  }
-	     }
-    		    	
-
-hind =   Converter.Round((float)hind, 2);
-    	  res = res + line.getKogus()* hind;
-      }
-	  
-	  return res ;
-  }
-  
   
   public static String protectSpecialCharacters(String originalUnprotectedString) {
 	    if (originalUnprotectedString == null) {
@@ -1072,7 +1040,7 @@ hind =   Converter.Round((float)hind, 2);
 	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
 	 	    wr.write(data);
 	 	    wr.flush();
-
+try {
 	 	    // Get the response
 	 	    BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 	 	    String line;
@@ -1100,8 +1068,14 @@ hind =   Converter.Round((float)hind, 2);
 		      }
 	 	    
 		      
+			 	} catch (Exception e) {
+			 		e.printStackTrace();
+			 		log.error(e);
+			 	}
+		      
 	 	} catch (Exception e) {
 	 		e.printStackTrace();
+	 		log.error(e);
 	 	}
        
 
@@ -1124,6 +1098,7 @@ hind =   Converter.Round((float)hind, 2);
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error(e);
 		}
 	 }
 	  
