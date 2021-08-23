@@ -766,7 +766,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
   	
 	  TreeMap openOrders = this.getOpenOrders();
 	  
-	  String cmdo = " MaksjaKood AS payer ,  k.Staatus as blokk , cast(s.Saldo as int ) as credit FROM vw_MJ_kliendid k " +
+	  String cmdo = "Select MaksjaKood AS payer ,  k.Staatus as blokk , cast(s.Saldo as int ) as credit FROM vw_MJ_kliendid k " +
               " LEFT JOIN vw_MJ_KliendiSaldo s on s.Kliendikood= k.Kliendikood or s.Kliendikood = MaksjaKood " ;
 
 	  TreeMap maksjablokk = new TreeMap();
