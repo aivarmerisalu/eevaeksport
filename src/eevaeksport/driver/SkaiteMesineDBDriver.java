@@ -815,6 +815,16 @@ Statement st = null;
     private Vector baashk = null;
       
       public TreeMap getCustomers(Agent agent){
+    	  
+    	  
+    	  
+    	  try{
+    		   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+    			
+    	}catch(Exception e){
+    		
+    	}
+    	  
     	   String cmd = "SELECT CONVERT(Int, part.PartneriaiId) AS CustomerASId, part.regnr as regno , (select  oo.Kodas from Adresai uu " + 
    				" INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as pay, CONVERT(varchar(20), part.Kodas) AS kood,pl.MES_PAV_Trumpinys as nimi2, CONVERT(varchar(40), part.Pavad) AS nimi,   " +
                       "   SumokaPartneriaiID AS payer ,  rtrim(adr.Adresas)  + case when adr.Indeksas IS NULL then '' else ' ' + rtrim(adr.Indeksas)end + ' ' + " +
@@ -855,11 +865,13 @@ Statement st = null;
         String lepingud = "select kl.PartneriaiId as klient , kl.NuolaiduSutartysId  as leping from dbo.NuolaiduSutarciuPartneriai kl inner join  " +
            " dbo.NuolaiduSutartys AS sut ON kl.NuolaiduSutartysId = sut.NuolaiduSutartysId and " +
 			"	   (CONVERT (date, GETDATE()) between   cast(sut.DataNuo_Int as datetime) and  cast(sut.DataIki_Int as datetime) or (sut.DataNuo_Int = 0 and sut.DataIki_Int = 999999))";
+        
         HashMap lepMap = new HashMap();
         HashMap baasMap = new HashMap();
-	TreeMap customers = new TreeMap();
+	    TreeMap customers = new TreeMap();
         HashMap custMap = new HashMap();
         HashMap deguSumm = new HashMap();
+       
         baashk = new Vector();
 	try {
 		

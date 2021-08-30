@@ -1,5 +1,9 @@
 package eevaeksport.imp.driver;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.Vector;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
@@ -46,7 +51,55 @@ public class VSImportDriver extends AbstractImportDriver{
     } catch (Exception e){
        parent.showError(e);
     }
+    loadSignatures();
   }
+  
+  
+  
+
+	 public static Object readObject(String s) throws IOException,
+ClassNotFoundException, IOException {
+Object obj = null;
+File f = new File(s);
+if (f.exists()){
+ObjectInputStream ois = new ObjectInputStream(new FileInputStream(s));
+obj = ois.readObject();
+ois.close();
+}
+return obj;
+}
+
+private void loadSignatures(){
+		
+	  try{		
+	  		File f = new File("signatures.vec");
+	  		Calendar ss = Calendar.getInstance();
+	  		
+	  		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 3600000) {// kui on yle tunni vana siis maha 
+	  			f.delete();
+	  			signatures = new Vector();
+	  		} else {
+	  			signatures = (Vector) readObject("signatures.vec");
+	  		}
+
+	  		
+	  	} catch (Exception e) {
+	  		signatures = new Vector();
+	  	}
+
+	  	}
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 private ImportPanel parent = null;
   
   public String identifyCustomer(String id,String regnr){
@@ -79,13 +132,28 @@ private ImportPanel parent = null;
     return null;
   }
 
+  private Vector signatures = new Vector();
+  private String trouble = null;
   
   public void makeOrder(Order order) throws SQLException{
+	  trouble = null;
+
+	  if (signatures == null){
+	   	   signatures = new Vector();
+	      }
+	  
+	  
+	   String signature = order.getSignature();
+		  if(signatures.contains(signature)){
+			  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
+		  }else{
+			  
     setOrder(order);
     int invoiceID = getNextID();
     addInvoiceHeader(invoiceID);
     addInvoiceLines(invoiceID);
-   }
+       }
+		  }
 
   
   

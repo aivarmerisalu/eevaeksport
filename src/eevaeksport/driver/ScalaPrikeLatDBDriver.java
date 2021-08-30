@@ -1105,9 +1105,10 @@ AND "Invoice order date">'20021101' AND "Actual Del  Date">'00000000'
 */
 //Seelega tuleb teha h�kk
 
-        String sql2 = "SELECT  SL01001 AS klient , ST03017 AS toode ,ST03020 AS Kogus,ST03015  as lastdate " +
+        String sql2 = "SELECT  SL01001 AS klient , ST03017 AS toode ,ST03020 AS Kogus, ST03015  as lastdate ,"
+        		+ "max(ST03014) as arvenr, (ST03021 *((100-ST03022)/100)) as hind , ST03022 as ale " +
                       " FROM ST030400 WITH(NOLOCK) INNER JOIN SL010400 WITH(NOLOCK) ON ST03001 = SL01001 WHERE ST03015> ? AND ST03016>0 AND ST03020>0  and SL01129 !='' " +
-                      " GROUP BY ST03017,SL01001, ST03020,ST03015 ORDER BY SL01001,ST03017 ,ST03015 ASC";
+                      " GROUP BY ST03017,SL01001, ST03020,ST03015 ,ST03021 ,ST03022  ORDER BY SL01001,ST03017 ,ST03015 ASC";
 
 	if (isDebug()) {
 	    System.out.println(sql2);
@@ -1124,10 +1125,17 @@ AND "Invoice order date">'20021101' AND "Actual Del  Date">'00000000'
             ResultSet	      rs = stmt.executeQuery();
 
             while (rs.next()) {
-              String kliendikood = rs.getString("klient").trim();
-              String tootekood = rs.getString("toode").trim();
-              CustProd cp = new CustProd(kliendikood, tootekood, Double.parseDouble(rs.getString("kogus").trim()),0 ,0,
-              		rs.getString("lastdate").substring(5,10),0,0,0," ");
+            	String kliendikood = rs.getString("klient").trim();
+                String tootekood = rs.getString("toode").trim();
+              double kogus =  Double.parseDouble(rs.getString("kogus").trim());
+             String ld =  rs.getString("lastdate").substring(5,10);
+              String arve = rs.getString("arvenr").trim();
+              double hind = rs.getDouble("hind");
+              double ale = rs.getDouble("ale");
+              CustProd cp = new CustProd(kliendikood, tootekood, kogus,0 ,0,
+              		ld,hind,0,0," ");
+              cp.setAbiKood(arve);
+              cp.ale = ale;
                 custProds.add(cp);
              
             }

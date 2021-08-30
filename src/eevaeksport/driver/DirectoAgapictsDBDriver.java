@@ -1265,8 +1265,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
   	   if(parent.getProps().getProperty("savefilesafteremail") != null) {
   		   Converter.saveFile(parent.getProps().getProperty("savefilesafteremail")  + "customerorders.txt", oorders.toString());   
   	   }
-       	  	//System.out.println(res.toString());
-  			
+       	  	
   			return res;
   		}
   		

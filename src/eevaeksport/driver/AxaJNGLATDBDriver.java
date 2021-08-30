@@ -509,6 +509,7 @@ kogusedStr = new HashMap();
 	                       
 	                       if(vedu.trim().length() > 0) {
 	                    	res.put(custID, vedu)   ;
+	                    	res.put("0" + custID, vedu)   ;
 	                       }
 	                    }
 				
