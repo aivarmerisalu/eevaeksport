@@ -737,7 +737,7 @@ public class HansaSatcomImportDriver
 	             customer.setName(Converter.enCodeEst(name));  
 
 	             
-	             st.nextToken().trim();
+	             st.nextToken();
 	             
 	             
 	             
@@ -878,7 +878,7 @@ public class HansaSatcomImportDriver
 	       }
 	 	 
 	 	 }catch(Exception r){
-	 		 r.printStackTrace();
+	 		// r.printStackTrace();
 	 	 }
 	     	
 	    	}

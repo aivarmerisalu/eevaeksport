@@ -1608,7 +1608,7 @@ private long getAndUpdateNext() throws SQLException{
 	         	}
 	          
 	         if(order.isShipDateUsed()) {
-	        	 comm2 = comm2 + "<br> Tarnekuupäev valitud : " + Converter.getDDpMMpYYYYpString(order.getShipCal());
+	        	// comm2 = comm2 + "<br> Tarnekuupäev valitud : " + Converter.getDDpMMpYYYYpString(order.getShipCal());
 	         }
 	          
 	          String tarnekell =  order.getShipTime();

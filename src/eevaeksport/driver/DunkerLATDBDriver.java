@@ -366,7 +366,7 @@ public class DunkerLATDBDriver extends AbstractDBDriver  implements Manager,Prom
           Vector lines = new Vector();
           String sql = " SELECT \"PriceGroupCode\" grupp , \"ItemCode\" as toode, \"PriceType\" as tyyp, \"Price\", " + 
       " \"StartDate\" as algus, \"EndDate\" as lopp  FROM \"PriceGroupItems\" " +
-      " where \"StartDate\" <= current_date-1 and \"EndDate\" >= current_date+1 ";
+      " where \"StartDate\" <= current_date+1 and \"EndDate\" >= current_date+1 ";
 
           try {
 
@@ -403,9 +403,12 @@ public class DunkerLATDBDriver extends AbstractDBDriver  implements Manager,Prom
                           if (lopp != null && lopp.trim().length() > 0) {
                                   mline.setEndDate(lopp.trim().substring(0,10));
                           } 
-                         	  
                           }
                           lines.add(mline);
+                          
+                          if("LATS".equals(clGroup) && "ITA01973".equals(prodID)) {
+                        	  System.out.println("olemas " + mline.getStringForFixedAssortment());
+                          }
                      }
                   rs.close();
                   stmt.close();

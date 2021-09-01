@@ -207,7 +207,7 @@ public class HansaSatcomDBDriver extends AbstractDBDriver implements BulkUpdater
            while((line = reader.readLine()) != null  ){
         	   String kood = null;
     		   String kog = null;
-        	   while( !line.trim().startsWith("</ItemStatusVc") ){
+        	   while( line != null && !line.trim().startsWith("</ItemStatusVc") ){
         		   line = reader.readLine();
         		  
         		 
@@ -1174,7 +1174,7 @@ TreeMap tr = new TreeMap();
      TreeMap tm = new TreeMap();
      if(agent == null  || (agent != null && !agent.getID().equals("stock"))) {
     	 getSaveStockInfo2();
-    	// System.out.println("sees Stocks suurus " + stocks.toString());
+    	 System.out.println("sees Stocks suurus " + stocks.toString());
       }
      
      prods = new ArrayList<String>();

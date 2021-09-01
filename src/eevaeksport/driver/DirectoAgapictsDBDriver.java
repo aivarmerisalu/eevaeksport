@@ -695,6 +695,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
     	 r.printStackTrace();
      }
    
+    // getOpenOrders();
    //  getFixedAssortmentData();
  
      // loene võimalikud agendid sisse 

@@ -218,7 +218,7 @@ public class AltiaLATDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 											}
 									}
 					
-					System.out.println("klient " + klient  + " " +  ean + " " + kogus + " " + uuskood + " " + lisakood + " " + lisakogus );
+					//System.out.println("klient " + klient  + " " +  ean + " " + kogus + " " + uuskood + " " + lisakood + " " + lisakogus );
 					
 					if(klient != null){
 						int ind = klient.indexOf(";");
@@ -266,22 +266,7 @@ public class AltiaLATDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 			}
   }
   
-  private Product hasHaldusCustomerAndProduct(String kl,String ean){
-	  Product res = null;
-	  if(halduskliendid.contains(kl)){
-      Vector<Product> vec = (Vector<Product>)haldusklienditooted.get(kl);
-      if(vec != null){
-    	  Iterator vItr = vec.iterator();
-    	  while(vItr.hasNext()){
-    		  Product prod = (Product)vItr.next();
-    		  if(prod.getID().equals(ean)){
-    			  return prod;
-    		  }
-    	  }
-        }    
-	  }
-	  return res ;
-  }
+
   
   
   
@@ -505,11 +490,11 @@ public class AltiaLATDBDriver extends AbstractDBDriver implements BulkUpdater,Di
             	vv.add(lw);
             	toxml.put(lw.getLine().getCustID(), vv);
             }
-          
-  }
+        }
           makeXML(toxml,agent);
-      
     }
+  
+  
   private String escape(String s){
       if (s == null) return s;
       StringBuffer sb = new StringBuffer();
@@ -940,17 +925,17 @@ public String getPilotDayData(Agent agent){
 
 
 	public Vector getLastThreeData() {
-		// TODO Auto-generated method stub
 		return null;
 	}
+	
 	private HashMap hinnad = new HashMap();
 
 	private HashMap kliendialed = new HashMap();
 	
-   public Vector getPriceMatrixData() {
+    public Vector getPriceMatrixData() {
 
-   	Vector lines = new Vector();
-   	fixedLines = new Vector();                                                             
+   	  Vector lines = new Vector();
+   	    fixedLines = new Vector();                                                             
 
    	String today = getYYYYpMMpDDpTimeNiceString(null);
    	

@@ -1348,7 +1348,7 @@ public void setNF(NumberFormat nf) {
  			    		asList("date_order", ">", Converter.getYYYY_MM_DDpString(mstart))
  			    		)), //(java.util.Arrays.asList("employee", "=", false))
  			    new HashMap() {{
- 			        put("fields", java.util.Arrays.asList("user_id", "amount_total"));
+ 			        put("fields", java.util.Arrays.asList("user_id", "amount_untaxed"));
  			        put("limit", 20000);
  			    }}
  			)));
@@ -1374,7 +1374,7 @@ public void setNF(NumberFormat nf) {
  		  
  		  
  		  
- 		  double sales =  Double.parseDouble(row.get("amount_total")+"");
+ 		  double sales =  Double.parseDouble(row.get("amount_untaxed")+"");
  		  if(ag != null) {
  		 Agent agent = (Agent)agents.get(ag);
          if (agent != null){
