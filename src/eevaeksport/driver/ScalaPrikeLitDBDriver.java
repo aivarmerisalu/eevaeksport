@@ -59,7 +59,7 @@ public class ScalaPrikeLitDBDriver extends AbstractDBDriver implements BulkUpdat
 
     /**
      * Constructor declaration
-     *
+     *Tere Karl
      *
      * @param pare
      *
@@ -1079,11 +1079,16 @@ return bomKount;
     		 if(rida.getNodeName().equals("item")){
     		
     		try {
-    			String ladu = deCode( getNode(rida,"Busena").getFirstChild().getNodeValue());
+    			String busena = deCode( getNode(rida,"Busena").getFirstChild().getNodeValue());
     			 String prodcode = deCode( getNode(rida,"PrekId").getFirstChild().getNodeValue());
     			  double kogus = Double.parseDouble(deCode( getNode(rida,"Kiekis").getFirstChild().getNodeValue()));
-    			
-    			  if(ladu.equals("Paruošta NB") || ladu.equals("Paruošta KL") || ladu.equals("Grąžinimas")){
+    			  String sandelis = deCode( getNode(rida,"Sandelis").getFirstChild().getNodeValue());
+    			  
+    			//  1 – Tavaline laoseis mida on näha kohe sellel tootereal -  
+                 // Laoseis saadakse ainult ladude LK1 ja NEAT ning ainult nende staatuste „Paruošta KL“ ja „Paruošta NB“ korral vastavaid laoseise kokku liites:
+  
+    			  if( (busena.equals("Paruošta NB") || busena.equals("Paruošta KL"))
+    					  && (sandelis.equals("LK1") || sandelis.equals("NEAT")) ){ //|| ladu.equals("Grąžinimas")
     					if(res.get(prodcode) != null){
     	               	   res.put(prodcode, res.get(prodcode) + kogus);
     	                }else{
@@ -1091,17 +1096,23 @@ return bomKount;
     	                }
     	            }
     			  
-    			 
+    			//  3 – In brokas warehouse; näha ainult rohelise tooteinfo nupu   vajutamisel avanevas aknas.
+    			 // Näidatakse ainult laos „BROKAS“ olevate toodete laoseis olenemata toote staatusest.
+
     			  
-    			  if(ladu.equals("Brokas")){
+    			  if(busena.equals("Brokas")){
     					if(braakGir.get(prodcode) != null){
     	        			braakGir.put(prodcode, Double.parseDouble(braakGir.get(prodcode)+"") + kogus);
     	                }else{
     	                	braakGir.put(prodcode, kogus);
     	                }
     	            }
+    		
     			  
-    			  if(ladu.equals("Neparuošta")){
+    		//	  Not prepared to sell; näha ainult rohelise tooteinfo nupu   vajutamisel avanevas aknas.
+             //     Näidatakse ainult staatustega „Neparuoštas Aktas“ ja „Neparuošta“ tooteid olenemata lao tähisest ehk siis üle kõikide ladude.
+
+    			  if(busena.equals("Neparuošta") || busena.equals("Neparuoštas Aktas")){
   					if(nepaGir.get(prodcode) != null){
   	        			nepaGir.put(prodcode, Double.parseDouble(nepaGir.get(prodcode)+"") + kogus);
   	                }else{
