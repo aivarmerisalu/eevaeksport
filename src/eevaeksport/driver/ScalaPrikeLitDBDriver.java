@@ -59,7 +59,7 @@ public class ScalaPrikeLitDBDriver extends AbstractDBDriver implements BulkUpdat
 
     /**
      * Constructor declaration
-     *Tere Karl
+     *Tere Karl  
      *
      * @param pare
      *
