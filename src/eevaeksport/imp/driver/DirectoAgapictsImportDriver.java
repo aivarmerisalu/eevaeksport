@@ -500,12 +500,23 @@ try{
  	 if(signatures.contains(signature)){
  		  this.troubles.append( "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany()) ;
  	   } else {
- 		  makeOutput(order);  
+ 		   
+ 		  Vector splitted =  splitOrder(order);
+	 	  Enumeration en = splitted.elements();
+	 	  while(en.hasMoreElements()){
+	 		  Order ord = (Order)en.nextElement();
+	 			  makeOutput(ord);  
+		    }
+ 		 
  		  signatures.add(signature);
  		  this.troubles = null;
  	  }	  
 		
-    
+ 	 try {
+			Converter.saveObject(signatures, "signatures.vec");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
   }
   
   private String getDateNiceString(Calendar cal){
@@ -883,6 +894,102 @@ try{
 			fos.close();
 		}
   
+  
+  private Vector splitOrder (Order order){
+	  Vector result = new Vector();
+      
+	 System.out.println("Enne suurus splitti" + order.getOrderLines().size());
+	  
+	  Order ord23 = new Order(order.getCompany(),order.getAgentFirstName());
+	 
+	  Order ordJ1 = new Order((order.getCompany()),order.getAgentFirstName());
+      Order ordOTB = new Order((order.getCompany()),order.getAgentFirstName());
+    
+	  ord23.setAgentCode(order.getAgentCode());
+	  ord23.setDokNr(order.getDokNr());
+	  ord23.setInfo(order.getInfo());
+	  ord23.setReference(order.getReference());
+	  ord23.setTeostaja((order.getTeostaja()));
+	  ord23.setChanged(order.isChanged());
+	  ord23.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord23.setStatus(order.getStatus());
+	  ord23.setShipTime(order.getShipTime());
+	  ord23.setShipDateUsed(order.isShipDateUsed());
+	  ord23.setWarehouse(order.getWarehouse());
+	  ord23.setCurrency("KALEV");
+	  
+	
+
+	  ordOTB.setAgentCode(order.getAgentCode());
+	  ordOTB.setDokNr(order.getDokNr());
+	  ordOTB.setInfo(order.getInfo());
+	  ordOTB.setReference(order.getReference());
+	  ordOTB.setTeostaja((order.getTeostaja()));
+	  ordOTB.setChanged(order.isChanged());
+	  ordOTB.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordOTB.setStatus(order.getStatus());
+	  ordOTB.setShipTime(order.getShipTime());
+	  ordOTB.setShipDateUsed(order.isShipDateUsed());
+	  ordOTB.setWarehouse(order.getWarehouse());
+	  ordOTB.setCurrency("OTB");
+	  
+	  ordJ1.setAgentCode(order.getAgentCode());
+	  ordJ1.setDokNr(order.getDokNr());
+	  ordJ1.setInfo(order.getInfo());
+	  ordJ1.setReference(order.getReference());
+	  ordJ1.setTeostaja((order.getTeostaja()));
+	  ordJ1.setChanged(order.isChanged());
+	  ordJ1.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordJ1.setStatus(order.getStatus());
+	  ordJ1.setShipDateUsed(order.isShipDateUsed());
+	  ordJ1.setShipTime(order.getShipTime());
+	  ordJ1.setWarehouse(order.getWarehouse());
+	  ordJ1.setCurrency("KALEV");
+	
+	//  System.out.println("Splitin Warehouse " + order.getWarehouse());
+	  
+	  Vector lines = order.getOrderLines();
+	  Enumeration enums = lines.elements();
+	  while  (enums.hasMoreElements()){
+		  OrderLine lin = (OrderLine)enums.nextElement();
+		
+		     String itemid = lin.getToode();
+		   
+		    	 if(itemid != null)
+		    	 if(itemid.startsWith("OTB") ){
+			    	 ordOTB.add(lin.getToode().substring(3), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+			     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		          }else if(itemid.startsWith("FE")){
+				    	 ordOTB.add(lin.getToode().substring(2), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+				     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+			          }else{
+						    
+						      	  ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+						     		 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+				     }	 
+		     
+	  }
+
+
+	  if(ord23.getOrderLines() != null && ord23.getOrderLines().size()>0){
+		  result.add(ord23);  
+	  }
+
+	 
+	  if(ordJ1.getOrderLines() != null && ordJ1.getOrderLines().size()>0){
+		  result.add(ordJ1);  
+	  }
+	 
+
+	  if(ordOTB.getOrderLines() != null && ordOTB.getOrderLines().size()>0){
+		  result.add(ordOTB);  
+	  }
+//	 System.out.println("Result =" +order.getDokNr()
+	//		 + " "+ result.size());
+	 //System.exit(0);
+	  return result ;
+  }
+
   
   
   private void makeOutput(Order order){

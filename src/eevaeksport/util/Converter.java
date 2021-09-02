@@ -2206,7 +2206,7 @@ public class Converter {
 		        
 		          String format = identifyXLS(file);
 		          System.out.println("Format tuvastatud " + format + " " + file.getName());
-		       // System.exit(0);
+		      //  System.exit(0);
 		        
 		        if(format.equals("mjsortiment")) {
 		        	loadFixMJ(res, file , prods, parent);
@@ -2432,7 +2432,7 @@ public class Converter {
 										cellx = row.getCell((short)y);
 										if(cellx != null) {
 											try {
-											//System.out.println("selver " + formatter.formatCellValue(cellx) + " " + i + " " + y + " " + a);
+											System.out.println("selver " + formatter.formatCellValue(cellx) + " " + i + " " + y + " " + a);
 											if(formatter.formatCellValue(cellx).indexOf("Kadaka Selver") != -1 ) {
 												return "selver";
 											}	
@@ -2489,7 +2489,7 @@ public class Converter {
 									
 									cellx = row.getCell((short)y);
 									if(cellx != null) {
-										System.out.println("RIMI " + y + " " + i + " " + cellx.getStringCellValue());
+									//	System.out.println("RIMI " + y + " " + i + " " + cellx.getStringCellValue());
 										try {
 											if(formatter.formatCellValue(cellx).indexOf("ER47") != -1 || formatter.formatCellValue(cellx).indexOf("ER11") != -1  ) { // || formatter.formatCellValue(cellx).indexOf("") != -1 
 												return "rimi";
@@ -2552,7 +2552,7 @@ public class Converter {
 		  
 		  
 		System.out.println("result " + result);
-		  
+	
 		  return result ;
 	  }
 	  
