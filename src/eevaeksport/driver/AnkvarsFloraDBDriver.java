@@ -441,6 +441,12 @@ public class AnkvarsFloraDBDriver extends AbstractDBDriver implements Discounter
                 if(agentc != null && agentc.trim().length()>0){
                     cust.addAgent(new Agent(agentc.trim()));
                 }
+                if(agentc.equals("133")) {
+                	 cust.addAgent(new Agent("132"));
+                }
+                if(agentc.equals("132")) {
+               	 cust.addAgent(new Agent("133"));
+               }
                 
 
 

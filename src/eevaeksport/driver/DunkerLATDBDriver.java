@@ -649,8 +649,8 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
   	" sh.\"Region\", sh.\"RouteCode\" as visit , sh.\"Contact\", sh.\"Phone\", sh.\"MinOrderAmount\" as minsum,  " +
   	"  sh.\"PriceGroupCode\" as grupp, sh.\"AssortmentGroupCode\" as assortment, sh.\"DiscountPct\" as discount, sh.\"AgentCode\" as agent, sh.\"AgentCodeAdditional\" as agent2," +
   	"  sh.\"Blocked\" as blokk, sh.\"Deleted\", sh.\"TimeStamp\", sh.\"ExternalSTACode\", sh.\"IgnoreItemMinOrderQuantity\", " +
-  	"  sh.\"EDIsoftSTACode\", sh.\"License\", sh.\"LicenseDate\", sh.\"CreatedTimeStamp\", " +
-  	"  sh.\"ModifiedTimeStamp\",cus.\"CreditLimit\" as limit,\"Balance\" as used , cus.\"PaymentTerms\" as paym " +
+  	"  sh.\"EDIsoftSTACode\", sh.\"License\", sh.\"LicenseDate\",  " +
+  	"  cus.\"CreditLimit\" as limit,\"Balance\" as used , cus.\"PaymentTerms\" as paym " +
        " FROM \"ShipTos\" sh LEFT JOIN \"Customers\" cus on cus.\"Code\"=sh.\"CustomerCode\" " ;
  
  
@@ -949,8 +949,11 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
         
         Product prod = new Product(kood);
         String nimetus2 = Converter.enCodeEst(rs.getString("nimetus2").trim() + " " + code) ;
-        String nimetus = Converter.enCodeEst(rs.getString("nimetus").trim()) ;
-        prod.setPartii(nimetus); // tahavad nähe infos pikka nime
+        String nimetus =(rs.getString("nimetus")) ;
+        if(nimetus != null && nimetus.trim().length()> 1 ) {
+        	 prod.setPartii( Converter.enCodeEst(nimetus.trim()));
+        }
+       ; // tahavad nähe infos pikka nime
         
      String grupp = rs.getString("grupp");
      if(grupp!=null && grupp.trim().length()>0){
@@ -1213,7 +1216,7 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
        public void setNF(NumberFormat aNF){
          NF = aNF;
     }
-  private String url = "jdbc:odbc:MobileSales_db_alco";
+  private String url = "jdbc:odbc:droid_db_food";
   private String url2 = "jdbc:odbc:report";
   private String url3 = "jdbc:odbc:droid";
   private Connection con;
