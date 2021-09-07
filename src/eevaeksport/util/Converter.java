@@ -1568,7 +1568,7 @@ public class Converter {
 	 public static TreeMap loadFixRimi2(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 
 		 
-			String errors = null;
+			String errors = null; 
 			TreeMap <String,Vector> klaster= new TreeMap<String,Vector>();
 			
 			
