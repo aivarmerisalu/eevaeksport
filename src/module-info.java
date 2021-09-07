@@ -2,5 +2,5 @@ module eevaeksport {exports eevaeksport;exports eevaeksport.locale;exports eevae
 requires mail;
 requires log4j;
 requires poiaws;
-requires utils;
+//requires utils;
 }

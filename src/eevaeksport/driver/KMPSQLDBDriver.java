@@ -1956,61 +1956,7 @@ private void  insertSortLine(MatrixLine mline){
          }
 
 
-    public void insertDefective(DefectiveWrapper wr){
-        String sql = "INSERT INTO dbo.mj_quality VALUES (?,?,?,?,?,' ',?,?,?,?,getdate(),?,' ',' ',?,?)";
-        try {
-          Connection con = getNewCon();
-            PreparedStatement ps = con.prepareStatement(sql);
-
-            ps.setString(1, wr.getDefective().getAgentID());
-            ps.setString(2, wr.getDefective().getAgentName());
-
-            for (Iterator iter = wr.getDefective().getLines().iterator(); iter.hasNext(); ) {
-              DefectiveLineWrapper lw = new DefectiveLineWrapper(iter.next());
-
-              double kogus = 0;
-              try {
-                kogus = Double.parseDouble(lw.getLine().getAmount());
-              } catch (NumberFormatException nfe){};
-
-
-              double oldprice = 0;
-              try {
-              	oldprice = Double.parseDouble(lw.getLine().getBestBefore());
-              } catch (NumberFormatException nfe){};
-
-              double newprice = 0;
-              try {
-              	newprice = Double.parseDouble(lw.getLine().getProdName());
-              } catch (NumberFormatException nfe){};
-
-
-              ps.setString(3, lw.getLine().getCustID());
-              ps.setString(4, lw.getLine().getCustName());
-              ps.setString(5, lw.getLine().getProdID());
-             // ps.setString(6, lw.getLine().getProdName());
-
-              ps.setDouble(6, kogus);
-              String bb = lw.getLine().getBestBefore();
-              System.out.println(kogus+"bb '"+lw.getLine().getBestBefore()+"'"+bb+"'");
-              this.log( "mj_quality entering " +  lw.getLine().getCustID() + "  "+  wr.getDefective().getAgentName() + "  " + kogus + " bb '"+lw.getLine().getBestBefore()+"'"+bb+"'");
-              ps.setString(7, bb);
-              ps.setInt(8, lw.getLine().getDefectCode());
-              ps.setString(9, lw.getLine().getProdType());
-              ps.setString(10, lw.getLine().getDefectText());
-              ps.setDouble(11,oldprice*100);
-              ps.setDouble(12,newprice*100);
-              ps.executeUpdate();
-            }
-
-            con.commit();
-            ps.close();
-            con.close();
-        } catch (Exception e) {
-        	logerror(e);
-            e.printStackTrace();
-        }
-      }
+    public void insertDefective(DefectiveWrapper wr){}
 
 
 

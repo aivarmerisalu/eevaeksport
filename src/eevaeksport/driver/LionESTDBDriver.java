@@ -62,43 +62,7 @@ public class LionESTDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
   }
 
    
-   public void insertDefective(DefectiveWrapper wr){
-    String sql = "INSERT INTO dbo.MJ_QUALITYEST VALUES (?,?,?,?,?,?,?,?,?,?,getdate(),?,' ',' ',0,0)";
-    try {
-      Connection con = getNewConnection();
-        PreparedStatement ps = con.prepareStatement(sql);
-
-        ps.setString(1, wr.getDefective().getAgentID());
-        ps.setString(2, wr.getDefective().getAgentName());
-
-        for (Iterator iter = wr.getDefective().getLines().iterator(); iter.hasNext(); ) {
-          DefectiveLineWrapper lw = new DefectiveLineWrapper(iter.next());
-          ps.setString(3, lw.getLine().getCustID());
-          ps.setString(4, lw.getLine().getCustName());
-          ps.setString(5, lw.getLine().getProdID());
-          ps.setString(6, lw.getLine().getProdName());
-
-          double kogus = 0;
-          try {
-            kogus = Double.parseDouble(lw.getLine().getAmount());
-          } catch (NumberFormatException nfe){};
-          ps.setDouble(7, kogus);
-          String bb = lw.getLine().getBestBefore();
-          System.out.println(kogus+"bb '"+lw.getLine().getBestBefore()+"'"+bb+"'");
-          ps.setString(8, bb);
-          ps.setInt(9, lw.getLine().getDefectCode());
-          ps.setString(10, lw.getLine().getProdType());
-          ps.setString(11, lw.getLine().getDefectText());
-
-          ps.executeUpdate();
-        }
-
-        con.commit();
-        ps.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-  }
+   public void insertDefective(DefectiveWrapper wr){}
 
    public String getProductSortingData(){
    	return null;

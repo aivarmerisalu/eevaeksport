@@ -1249,9 +1249,6 @@ if (files.size() > 0) {
                if (driver instanceof ScalaPrikeEstDBDriver){
                    ((ScalaPrikeEstDBDriver)driver).insertSuperVisorSQLMeri(vis);
                 }
-               if (driver instanceof AtriaDBDriver ){
-                   ((AtriaDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                 }
                
                if (driver instanceof ErplyLttDBDriver ){
                    ((ErplyLttDBDriver)driver).insertSuperVisorSQLMeri(vis);
@@ -1394,63 +1391,7 @@ if (files.size() > 0) {
       }
 
     
-    private void insertMISQL(MarketInfoWrapper mi) {
-
-
-        String tableName = "marketinfo";
-        if(props.getProperty("marketinfo.tablename") != null && !props.getProperty("marketinfo.tablename").trim().equals("")){
-        	tableName = props.getProperty("marketinfo.tablename");
-        }
-
-        String sql =
-	    "INSERT INTO " + tableName  + " (agentid, agentname, clid, clname, sentdate, question,"
-	    + " questtype, answerchar, ansnum, ansboolean, anschoise, res1, res2, res3) "
-	    + "VALUES (?,?,?,?,?,?,?,?,0,0,0,'','','')";
-
-		Connection conn =  null;
-	try {
-		
-		try{
-			conn = DriverManager.getConnection(props.getProperty("report.dburl"), props.getProperty("dsn.user"),
-					  props.getProperty("dsn.pass"));
-		}catch(Exception e){
-			conn = DriverManager.getConnection(props.getProperty("report.dburl"), props.getProperty("dsna.user"),
-					  props.getProperty("dsna.pass"));
-		}
-	    PreparedStatement ps = conn.prepareStatement(sql);
-
-	    ps.setString(1, mi.getMarketInfo().getAgentCode());
-	    ps.setString(2, mi.getMarketInfo().getAgentName());
-	    ps.setString(3, mi.getMarketInfo().getCustCode());
-	    ps.setString(4, mi.getMarketInfo().getCustName());
-
-	    if (SQL_TYPE_TIMESTAMP.equals(sqlType)) {
-		ps.setTimestamp(5, new java.sql.Timestamp(mi.getMarketInfo().getTime()));
-	    } else {
-		ps.setDate(5, new java.sql.Date(mi.getMarketInfo().getTime()));
-	    }
-
-	    for (Iterator iter = mi.getMarketInfo().getList().iterator(); iter.hasNext(); ) {
-		String[] data = (String[]) iter.next();
-
-		ps.setString(6, data[0]);
-		ps.setString(7, data[1]);
-		ps.setString(8, data[2]);
-		ps.executeUpdate();
-	    }
-	    ps.close();
-	    conn.close();
-	 
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	    try {
-			conn.close();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-	}
-    }
+    private void insertMISQL(MarketInfoWrapper mi) {}
 
 
 

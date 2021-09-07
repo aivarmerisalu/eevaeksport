@@ -1402,7 +1402,6 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		         			customer.setDebt(Double.parseDouble(dueSums.get(id)+ ""));
 		         		}
 		         		
-		         		String kname = name;
 		         		 String sendaadr = ""; 
 		         		try{ 
 		 	         		  sendaadr =  rida.getAttributes().getNamedItem("send_address_street").getNodeValue(); 
