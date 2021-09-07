@@ -165,11 +165,11 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		   	
 		   	    //oleasoleva kataloogi kustutamine
 		   	  System.out.println("Kataloogi kustutamine "  + a);	    
-		               File f = new File("list.txt");
+		               File f = new File(pictspda +  "list.txt");
 		               if (f.exists())f.delete();
 		               
 		                 try {
-		           		PrintWriter os = new PrintWriter(new FileWriter(
+		           		PrintWriter os = new PrintWriter(new FileWriter(pictspda + 
 		           				  "list.txt", true));
 		           		os.write(buf.toString());
 		           		os.close();
@@ -178,20 +178,8 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		           		ex.printStackTrace();
 		           	  }
 		           	//  System.out.println("buf 0 " + a  + " " +  b + " "+ buf0.toString());
-		           	  File f0 = new File("list0.txt");
-		           	
-		           	  	
-		                    if (f0.exists())f0.delete();
-		                 
-		                   try {
-		             		PrintWriter os1 = new PrintWriter(new FileWriter(
-		             				  "list0.txt", true));
-		             		os1.write(buf0.toString());
-		             		os1.close();
-		             		//System.out.println( buf.toString());
-		             	  }catch (Exception ex) {
-		             		ex.printStackTrace();
-		             	  }
+
+
 
 		   //Kataloogi sisude kustutamine
 		             	  
@@ -202,7 +190,7 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		            String[] ff2 = res2.list();
 		        	 for(int i = 0;ff2.length>i;i++){
 		            //	System.out.println("fff " + ff2[i]);
-		            	(new File ( pictspda + ff2[i])).delete(); 
+		            //	(new File ( pictspda + ff2[i])).delete(); 
 		         
 		            }
 //		        	 Lõppes kustutamine 
@@ -216,15 +204,18 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		             	File in = new File ( picts + gg[i]); 
 		             	if(in.isFile() && olemas.contains((gg[i]))){            	
 		             	File inpda = new File ( pictspda + toUpper(gg[i])); 
-		             	Converter.shrinkAndCopyFile(in,inpda);
+		             	if(!inpda.exists()) {
+		             	 	Converter.shrinkAndCopyFile(in,inpda);
+		             	}
+		            
 		             	}
 		             }
 		             
 		             
-		             File fff =  new File (pictspda +  "list.txt");
-		       	  Converter.copyFile(f,fff);  	
-		       	  File fff0 =  new File (pictspda +  "list0.txt");
-		       	Converter.copyFile(f0,fff0);  	
+		           //  File fff =  new File (pictspda +  "list.txt");
+		       	 // Converter.copyFile(f,fff);  	
+		       	 // File fff0 =  new File (pictspda +  "list0.txt");
+		       //	Converter.copyFile(f0,fff0);  	
 		   	} catch (Exception e) {
 		   	    getParent().showError(e);
 		   	}

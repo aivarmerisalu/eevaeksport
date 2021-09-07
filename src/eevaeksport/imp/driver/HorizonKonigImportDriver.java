@@ -439,9 +439,9 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  }
 	  
 	  if(kontOK == null){
-		getKont();
+		  getKont();
 		loadOsak();
-		System.out.println("aadresite suurused " + kontOK.size() + " " + kontNO.size() + " " + kontNOD.size());
+		//System.out.println("aadresite suurused " + kontOK.size() + " " + kontNO.size() + " " + kontNOD.size());
 	  }
 	  
 	
@@ -730,7 +730,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  ord10.setShipDateUsed(order.isShipDateUsed());
 	  ord10.setDealer("53272");
 	  ord10.setCurrency(getType(order.getDealer(),10,order));
-	 
+	  
 	 
 	  
 	  
@@ -771,6 +771,38 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  ord10d.setDealer("81853");
 	  ord10d.setCurrency(getType(order.getDealer(),12,order));
 	  
+	  Order ord10pp = new Order((order.getCompany()+ "_" + lisaV),order.getAgentFirstName()); // D tähega tellimus 
+	  String taht1pp = "pp";
+	  ord10pp.setAgentCode(order.getAgentCode());
+	  ord10pp.setDokNr(order.getDokNr() + taht1pp + mills);
+	  ord10pp.setInfo(order.getInfo());
+	  ord10pp.setTeostaja((order.getTeostaja()));
+	  ord10pp.setChanged(order.isChanged());
+	  ord10pp.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord10pp.setStatus(order.getStatus());
+	  ord10pp.setShipTime(order.getShipTime());
+	  ord10pp.setPaymTerm(order.getPaymTerm());
+	  ord10pp.setWarehouse(order.getWarehouse());
+	  ord10pp.setShipDateUsed(order.isShipDateUsed());
+	  ord10pp.setDealer(order.getDealer());
+	  ord10pp.setCurrency(getType(order.getDealer(),1,order)); // p mitte
+	  
+	  Order ord10fp = new Order((order.getCompany() + "_" + lisaV),order.getAgentFirstName());
+	  String taht4p = "fp";
+	  ord10fp.setAgentCode(order.getAgentCode());
+	  ord10fp.setDokNr(order.getDokNr()+ taht4p+ mills);
+	  ord10fp.setInfo(order.getInfo());
+	  ord10fp.setPaymTerm(order.getPaymTerm());
+	  ord10fp.setTeostaja((order.getTeostaja()));
+	  ord10fp.setChanged(order.isChanged());
+	  ord10fp.setShipDateUsed(order.isShipDateUsed());
+	  ord10fp.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord10fp.setStatus(order.getStatus());
+	  ord10fp.setShipTime(order.getShipTime());
+	  ord10fp.setWarehouse(order.getWarehouse());
+	  ord10fp.setDealer(order.getDealer());
+	  ord10fp.setCurrency(getType(order.getDealer(),4,order));
+	  
 	  
 	  Order ord10r = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName()); // D tähega tellimus 
 	  String taht1r = "r";
@@ -807,15 +839,25 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		  OrderLine lin = (OrderLine)enums.nextElement();
 		
 		     String itemid = lin.getToode();
-		 //    System.out.println("ord10dxx " + lin.getToode() + " " + lin.getKogus());
+		     System.out.println("ppcheck " + lin.getToode() + " " + lin.getKogus() + " " + order.getPaymTerm());
          if(order.getPaymTerm() == -1 ){
-     	    	 
-                if(itemid.startsWith("F") || itemid.startsWith("I") ){
+        	 
+        	 if(itemid.startsWith("FP") && propsVEGE.containsKey(order.getCompany()) ){
+             	ord10fp.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+   		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+             	
+             
+             }else if(itemid.startsWith("F") || itemid.startsWith("I") ){
                 	ordcFI.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
    		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
                 } else if(itemid.startsWith("D") ){
                 	ordcD.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
       		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+                }else if(itemid.startsWith("PP") && propsVEGE.containsKey(order.getCompany()) ){
+                	ord10pp.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+      		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+                	
+                
                 } else if(itemid.startsWith("P") ){
                     boolean FF = true;
           	    	 if(defOsak.get(lin.getToode()) != null && defOsak.get(lin.getToode()).equals("NF")){
@@ -872,7 +914,12 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
                     	 ord10o.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
               		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
            	  
-                     }else if(itemid.startsWith("P") || itemid.startsWith("A") ){
+                     }else if(itemid.startsWith("PP") && propsVEGE.containsKey(order.getCompany()) ){
+                     	ord10pp.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+         		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+                   	
+                   	 System.out.println("ord10pp " + lin.getToode() + " " + lin.getKogus());
+                   }else if(itemid.startsWith("P") || itemid.startsWith("A") ){
             	    	 boolean FF = true;
             	    	 if(defOsak.get(lin.getToode()) != null && defOsak.get(lin.getToode()).equals("NF")){
             	    		 FF = false;
@@ -903,6 +950,11 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
                  	    	 ord1.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
                  		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
                  	  
+                      }else if(itemid.startsWith("FP") && propsVEGE.containsKey(order.getCompany()) ){
+                       	ord10fp.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+          		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+                    	
+                    
                       }else if(itemid.startsWith("F") || itemid.startsWith("I") ){
              	    	 
 	    	                ord4.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
@@ -941,10 +993,20 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  if(ord2.getOrderLines() != null && ord2.getOrderLines().size()>0){
 		  result.add(ord2);  
 	  }
-
+	  if(ord10fp.getOrderLines() != null && ord10fp.getOrderLines().size()>0){
+		  result.add(ord10fp);  
+	  }
+	  
+	  
 	  if(ord3.getOrderLines() != null && ord3.getOrderLines().size()>0){
 		  result.add(ord3);  
 	  }
+	  
+	  if(ord10pp.getOrderLines() != null && ord10pp.getOrderLines().size()>0){
+		  result.add(ord10pp);  
+	  }
+	  
+	  
 
 	  if(ord4.getOrderLines() != null && ord4.getOrderLines().size()>0){
 		  result.add(ord4);  

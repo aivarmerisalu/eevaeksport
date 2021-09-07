@@ -1291,7 +1291,7 @@ con3.close();
                       prod.setInCases(cases);
                     }
                 	
-                	prod.setVat("20");
+                	prod.setVat("21");
               
                    
 
