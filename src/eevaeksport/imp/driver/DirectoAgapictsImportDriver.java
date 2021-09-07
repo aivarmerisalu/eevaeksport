@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -899,94 +900,69 @@ try{
 	  Vector result = new Vector();
       
 	 System.out.println("Enne suurus splitti" + order.getOrderLines().size());
-	  
-	  Order ord23 = new Order(order.getCompany(),order.getAgentFirstName());
 	 
-	  Order ordJ1 = new Order((order.getCompany()),order.getAgentFirstName());
-      Order ordOTB = new Order((order.getCompany()),order.getAgentFirstName());
-    
-	  ord23.setAgentCode(order.getAgentCode());
-	  ord23.setDokNr(order.getDokNr());
-	  ord23.setInfo(order.getInfo());
-	  ord23.setReference(order.getReference());
-	  ord23.setTeostaja((order.getTeostaja()));
-	  ord23.setChanged(order.isChanged());
-	  ord23.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord23.setStatus(order.getStatus());
-	  ord23.setShipTime(order.getShipTime());
-	  ord23.setShipDateUsed(order.isShipDateUsed());
-	  ord23.setWarehouse(order.getWarehouse());
-	  ord23.setCurrency("KALEV");
-	  
-	
+	 // Vaatame mitu erinevat partiid on olemas
+	 
+	  Vector<String> splits = new Vector<String>() ;
 
-	  ordOTB.setAgentCode(order.getAgentCode());
-	  ordOTB.setDokNr(order.getDokNr());
-	  ordOTB.setInfo(order.getInfo());
-	  ordOTB.setReference(order.getReference());
-	  ordOTB.setTeostaja((order.getTeostaja()));
-	  ordOTB.setChanged(order.isChanged());
-	  ordOTB.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ordOTB.setStatus(order.getStatus());
-	  ordOTB.setShipTime(order.getShipTime());
-	  ordOTB.setShipDateUsed(order.isShipDateUsed());
-	  ordOTB.setWarehouse(order.getWarehouse());
-	  ordOTB.setCurrency("OTB");
-	  
-	  ordJ1.setAgentCode(order.getAgentCode());
-	  ordJ1.setDokNr(order.getDokNr());
-	  ordJ1.setInfo(order.getInfo());
-	  ordJ1.setReference(order.getReference());
-	  ordJ1.setTeostaja((order.getTeostaja()));
-	  ordJ1.setChanged(order.isChanged());
-	  ordJ1.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ordJ1.setStatus(order.getStatus());
-	  ordJ1.setShipDateUsed(order.isShipDateUsed());
-	  ordJ1.setShipTime(order.getShipTime());
-	  ordJ1.setWarehouse(order.getWarehouse());
-	  ordJ1.setCurrency("KALEV");
-	
-	//  System.out.println("Splitin Warehouse " + order.getWarehouse());
-	  
 	  Vector lines = order.getOrderLines();
 	  Enumeration enums = lines.elements();
 	  while  (enums.hasMoreElements()){
 		  OrderLine lin = (OrderLine)enums.nextElement();
-		
-		     String itemid = lin.getToode();
-		   
-		    	 if(itemid != null)
-		    	 if(itemid.startsWith("OTB") ){
-			    	 ordOTB.add(lin.getToode().substring(3), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-			     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-		          }else if(itemid.startsWith("FE")){
-				    	 ordOTB.add(lin.getToode().substring(2), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-				     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-			          }else{
-						    
-						      	  ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-						     		 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-				     }	 
-		     
+			
+		     String partii = lin.getPartii();
+		     if(partii != null && partii.trim().length() > 1 && !splits.contains(partii)) {
+		    	 splits.add(partii);
+		     }
 	  }
-
-
-	  if(ord23.getOrderLines() != null && ord23.getOrderLines().size()>0){
-		  result.add(ord23);  
-	  }
-
+		  
+	  System.out.println("splits " + splits.toString());
 	 
-	  if(ordJ1.getOrderLines() != null && ordJ1.getOrderLines().size()>0){
-		  result.add(ordJ1);  
+	  
+	  if(splits.size() == 0) {
+		  result.add(order);
+		  return result;
 	  }
-	 
+	  
+	  HashMap ords = new HashMap();
+	  for(String split : splits ) {
+		  // teeme kehad valmis enne kui ridu paneme sisse
+		  Order ord23 = new Order(order.getCompany(),order.getAgentFirstName());
+		  ord23.setAgentCode(order.getAgentCode());
+		  ord23.setDokNr(order.getDokNr());
+		  ord23.setInfo(order.getInfo());
+		  ord23.setReference(split);
+		  ord23.setTeostaja(split);
+		  ord23.setChanged(order.isChanged());
+		  ord23.setShipCal(order.getShipCal().getTimeInMillis() +"");
+		  ord23.setStatus(order.getStatus());
+		  ord23.setShipTime(order.getShipTime());
+		  ord23.setShipDateUsed(order.isShipDateUsed());
+		  ord23.setWarehouse(order.getWarehouse());
+		  lines = order.getOrderLines();
+		   enums = lines.elements();
+		  while  (enums.hasMoreElements()){
+			  OrderLine lin = (OrderLine)enums.nextElement();
+			
+			     String part = lin.getPartii();
+			     if(part.equals(split)) {
+			    	   ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+					     		 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+			     }
+		  }
+		ords.put(split, ord23);
+	  }
+	  
+	  for(String split : splits ) {
+		  result.add(ords.get(split));
+	  }
+	
+	//  System.out.println("Splitin Warehouse " + order.getWarehouse());
+	
 
-	  if(ordOTB.getOrderLines() != null && ordOTB.getOrderLines().size()>0){
-		  result.add(ordOTB);  
-	  }
-//	 System.out.println("Result =" +order.getDokNr()
-	//		 + " "+ result.size());
-	 //System.exit(0);
+	 System.out.println("Result =" +order.getDokNr()
+		 + " "+ result.size());
+	// System.exit(0);
 	  return result ;
   }
 
@@ -1133,7 +1109,7 @@ try{
 	    System.out.println("output " +order_xml); 
 	 	
 	 		//System.exit(0);
-	 		
+	    String asi = "";
 	 	try {
 	 	    // Construct data
 	 	    String data = URLEncoder.encode("put", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8");
@@ -1151,11 +1127,12 @@ try {
 	 	    // Get the response
 	 	    BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 	 	    String line;
-	 	    String asi = "";
+	 	   
 	 	    while ((line = rd.readLine()) != null) {
 	 	        System.out.println(line);
 	 	        asi = asi + "\n" + line ;
 	 	    }
+	 	    
 	 	    wr.close();
 	 	    rd.close();
 	 	    
