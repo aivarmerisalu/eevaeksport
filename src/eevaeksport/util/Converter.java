@@ -1724,7 +1724,7 @@ public class Converter {
 							        ContractLine ll = new ContractLine(toode);
 							        if(con.lines == null){
 							            con.lines = new Vector();
-							            }
+							            } 
 							        con.lines.add(ll);
 							        res.put(pood, con);
 					        }
