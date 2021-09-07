@@ -72,6 +72,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+//import org.apache.poi.ss.usermodel.CellRange;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -1492,7 +1493,258 @@ public class Converter {
 			 
 	return res;
 }
+
+	 
+	 
+	 public static int doubleLength(double number) {
+		 int length = 1;
+		 if (number >= 100000000) {
+		     length += 8;
+		     number /= 100000000;
+		 }
+		 if (number >= 10000) {
+		     length += 4;
+		     number /= 10000;
+		 }
+		 if (number >= 100) {
+		     length += 2;
+		     number /= 100;
+		 }
+		 if (number >= 10) {
+		     length += 1;
+		 }
+		 return length;
+	 }
+	 
+	 public static int popularint(Vector<Integer> a){
+	   int count = 1, tempCount;
+	   int popular = 0;
+	   int temp = 0;
+	   for (int i = 0; i < (a.lastElement() - 1); i++)
+	   {
+	     temp = a.get(i);
+	     tempCount = 0;
+	     for (int j = 1; j < a.lastElement(); j++)
+	     {
+	       if (temp == a.get(j))
+	         tempCount++;
+	     }
+	     if (tempCount > count)
+	     {
+	       popular = temp;
+	       count = tempCount;
+	     }
+	   }
+	   return popular;
+	 }
+	 
+	 
+	 public static int diffValues(int[] numArray){
+		    int numOfDifferentVals = 0;
+
+		    ArrayList<Integer> diffNum = new ArrayList<>();
+
+		    for(int i=0; i<numArray.length; i++){
+		        if(!diffNum.contains(numArray[i])){
+		            diffNum.add(numArray[i]);
+		        }
+		    }
+
+		    if(diffNum.size()==1){
+		            numOfDifferentVals = 0;
+		    }
+		    else{
+		          numOfDifferentVals = diffNum.size();
+		        } 
+
+		   return numOfDifferentVals;
+		}
+	 
+	 
+	 
+	 
+	 //Importides xlsx tahame teada kas ja kus lehel asuvad ean kood, poe nimi, kood jm info. 
 	
+	 public static TreeMap loadFixRimi2(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
+
+		 
+			String errors = null;
+			TreeMap <String,Vector> klaster= new TreeMap<String,Vector>();
+			
+			
+			
+			Vector <String> EAN = new Vector<String>();				//ean koodid stringina
+			Vector <Integer> EANcolumn = new Vector<Integer>();		//mis ridadel asuvad ean koodid
+			Vector <String> PRODUCT = new Vector<String>();
+			//Vector <String> CLUSTER = new Vector<String>();
+			int dataLocation=1;
+			
+			int productLoc=0;
+			int clusterLoc=0;
+			int clusterLocx=0;
+			
+			DataFormatter formatter2 = new DataFormatter();
+		 try{
+			 
+		       FileInputStream	 ff = new FileInputStream(file);
+				XSSFWorkbook workbook = new XSSFWorkbook(ff); 
+				Sheet sheet = workbook.getSheetAt(0); 
+				Sheet sheet1 = workbook.getSheetAt(1); 
+				System.out.println("Rimi lugemine " + file.getName());
+				ff.close();	
+			 
+			 
+			 int viimanerida=sheet.getLastRowNum();
+			 for(int xx=0 ; xx<viimanerida; xx++) { 		
+				 if(sheet.getRow(xx)!=null) {			
+					 
+					 int cellsInRow=sheet.getRow(xx).getLastCellNum();
+					 
+					 for(int yy=0 ; yy<cellsInRow; yy++) {							//loeme cellid read
+						 if(sheet.getRow(xx).getCell(yy)!=null) {
+							 
+							 String celliSisu=formatter2.formatCellValue(sheet.getRow(xx).getCell(yy));	//loeme celli stringina
+							 if(celliSisu.isEmpty()==false && celliSisu!=null && celliSisu.contains("EAN")==true) {		//vaatame kus asuvad headlined, tiitlite vector parameetrina?
+								 System.out.println("EAN Row: "+xx+ "Col: "+yy);
+							 }
+							 if(celliSisu.isEmpty()==false && celliSisu!=null && celliSisu.contains("Article name")==true) {
+								 System.out.println("Products Row: "+xx+ "Col: "+yy);
+								 productLoc=yy;
+							 }
+							 if(celliSisu.isEmpty()==false && celliSisu!=null && (celliSisu.contains("EEH") || celliSisu.contains("EEMR") )) { //rimi
+								 System.out.println("Cluster Row: "+xx+ "Col: "+yy);
+								 if(clusterLoc!=0) {break;} //otsime ainult esimese klastri veeru tabelis - sealt edasi ainult klustrid lehe lopuni
+								 clusterLoc=yy;
+								 clusterLocx=xx;
+							 }
+							 
+							 
+							 if(yy>=clusterLoc && xx>clusterLocx) {
+								 
+								 if(celliSisu.contains("x") || celliSisu.contains("X") || celliSisu.contains("add")) {
+									 String currentCluster=formatter2.formatCellValue(sheet.getRow(clusterLocx).getCell(yy));
+									 String currentProduct=formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc));
+									 
+									 Vector <String> tooted = new Vector<String>();
+									 if(klaster.get(currentCluster)==null){
+										 klaster.put(currentCluster, tooted);
+										 klaster.get(currentCluster).add(currentProduct);
+										 //System.out.println("Uustoode: " +currentProduct+"  klaster: "+ currentCluster);
+									 }
+									 
+									 if(klaster.get(currentCluster).contains(currentProduct)==false){
+										 /*if(currentCluster.contains("EEHM A.12.01 ALL Large1 460")) {
+											 System.out.println("Lisame: "+ currentCluster+" "+currentProduct);
+											 System.out.println(klaster.get(currentCluster).toString());
+											 System.out.println(klaster.get(currentCluster).size());
+										 }*/
+										 
+										 //System.out.println("lisasime: "+currentProduct +" " +klaster.get(currentCluster).contains(currentProduct)+"  klaster: "+ currentCluster);
+										 klaster.get(currentCluster).add(currentProduct);
+										 
+									 }
+								 }
+							 }
+
+							 
+							 if(celliSisu.isEmpty()==false && celliSisu!=null && isNumeric(celliSisu) ) {														//kas string on number
+								 Double number=Double.parseDouble(celliSisu);										//string->double
+								 if(number>1) {
+									 if(doubleLength(Math.round(number))==13) {												//EAN on 13x pikkune
+										 //System.out.println("clustercol: "+clusterLoc);
+										 EAN.add(celliSisu);
+										 EANcolumn.add(yy);
+										//PRODUCT.add(formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc)));
+										//System.out.println("toode: "+yy);
+									 }
+								 }
+								
+							 }
+
+						 }
+						 
+					 }
+
+				 }
+
+			 }
+			 
+				TreeMap <String,Vector> cluster= new TreeMap<String,Vector>();				//loeme teise lehe andmed
+				for(int x=2 ; x<sheet1.getLastRowNum(); x++) { //andmed algavad 3realt
+					//System.out.println("info: " + sheet1.getRow(x).getCell(1) + "  " + sheet1.getRow(x).getCell(3));
+					String clusterkey=formatter2.formatCellValue(sheet1.getRow(x).getCell(3)).trim();
+					String clustervalue=formatter2.formatCellValue(sheet1.getRow(x).getCell(1)).trim();
+					
+					Vector <String> sisuvektor = new Vector<String>();
+					
+					if(cluster.get(clusterkey) != null) {
+						sisuvektor=cluster.get(clusterkey);
+					}
+					sisuvektor.add(clustervalue);
+					cluster.put(clusterkey, sisuvektor);
+				}
+				
+				//System.out.println(klaster.get("EEHM A.12.01 ALL Large1 460"));
+
+				//System.out.println(klaster.get("EEHM A.12.01 ALL Large1 460").toString());
+			 
+			 for (int a = 0; a < klaster.keySet().size(); a++) {		//mitu keyd on mapis
+
+				    String group = klaster.keySet().toArray()[a].toString();	//loeme grupi sisse
+				    System.out.println(group);
+				    if(cluster.get(group)!=null) {
+				   
+				    	for(int c=0; c<cluster.get(group).size()-1; c++) {   ///loeme grupis olevad poekoodid
+					    	//cluster.get(group).get(c);
+					    	
+					    	
+					        String pood = "RIMI-" + cluster.get(group).get(c);
+					        Contract con = new Contract(pood);
+					        System.out.println(EAN.size());
+					        for(int b=0; b<klaster.get(group).size();b++) {			//mitu toodet on v2tmes
+					        	String tnimi = klaster.get(group).get(b).toString();							//v2tame mapis oleva vectori elemendi
+					        	//System.out.println(klaster.get(group).size());
+					        	String toode = getToode(prods,EAN.get(b));
+					            System.out.println("Sees " +b+ " " + EAN.get(b) + "' " + pood + " " + tnimi);
+
+					        	//klaster.get(klaster.keySet().toArray()[a]).toString();
+								  if(toode.equals(EAN.get(b))) {
+									  if(errors == null) {
+										  errors = "Tuvastamatta tooted sortimendis\n RIMI2 formaat\n fail : " + "file.getName() "+"\n\nEAN     Nimetus\n";
+									  }
+									  if(!errors.contains(EAN.get(b))) {
+										  errors = errors + EAN.get(b) + "   " + tnimi + "\n";
+									  }
+								  }
+								  
+								  
+							        if(res.get(pood) != null){
+							            con = (Contract)res.get(pood);
+							        } 
+							        ContractLine ll = new ContractLine(toode);
+							        if(con.lines == null){
+							            con.lines = new Vector();
+							            }
+							        con.lines.add(ll);
+							        res.put(pood, con);
+					        }
+					    }
+				    }
+				}
+			 //System.out.println(klaster.get("EEHM A.12.01 ALL Large1 460").toString());
+		 }catch(Exception e) {
+						 e.printStackTrace();
+					 }	 
+		// System.exit(0);
+		 if(errors != null) {
+			 sendFixLoadErrorEmail(errors, parent, "rimi2", true);
+		 }
+		 sendFixLoadErrorEmail("\n Rimi2 imported " + res.keySet().size() + " shops fixed sortiments", parent, "rimi",false);
+			 
+	return res;
+}
+
+	 
 	 public static TreeMap loadFixMJ(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
 		
@@ -1562,7 +1814,7 @@ public class Converter {
 									String group = (String) groups.get(a + "");
 									if (group != null && group.trim().length() > 0 ) {
 							 
-                         String pood =  group;
+                         String pood =  "RIMI" +group;
                          Contract con = new Contract(pood);
 							 String value =  formatter.formatCellValue(row.getCell(a));
                        
@@ -2206,7 +2458,7 @@ public class Converter {
 		        
 		          String format = identifyXLS(file);
 		          System.out.println("Format tuvastatud " + format + " " + file.getName());
-		      //  System.exit(0);
+		        //System.exit(0);
 		        
 		        if(format.equals("mjsortiment")) {
 		        	loadFixMJ(res, file , prods, parent);
@@ -2253,6 +2505,10 @@ public class Converter {
 
 		          if(format.equals("rimi")) {
 		        	 loadFixRimi(res, file , prods, parent);
+			      }
+		          
+		          if(format.equals("rimi2")) {
+		        	 loadFixRimi2(res, file , prods, parent);
 			      }
 		          
 		          if(format.equals("prisma")) {
@@ -2432,7 +2688,7 @@ public class Converter {
 										cellx = row.getCell((short)y);
 										if(cellx != null) {
 											try {
-											System.out.println("selver " + formatter.formatCellValue(cellx) + " " + i + " " + y + " " + a);
+											//System.out.println("selver " + formatter.formatCellValue(cellx) + " " + i + " " + y + " " + a);
 											if(formatter.formatCellValue(cellx).indexOf("Kadaka Selver") != -1 ) {
 												return "selver";
 											}	
@@ -2493,6 +2749,14 @@ public class Converter {
 										try {
 											if(formatter.formatCellValue(cellx).indexOf("ER47") != -1 || formatter.formatCellValue(cellx).indexOf("ER11") != -1  ) { // || formatter.formatCellValue(cellx).indexOf("") != -1 
 												return "rimi";
+											}		
+										}catch(Exception e) {
+											
+										}
+										
+										try {
+											if(formatter.formatCellValue(cellx).indexOf("EEHM") != -1 || formatter.formatCellValue(cellx).indexOf("EESM") != -1  ) { // || formatter.formatCellValue(cellx).indexOf("") != -1 
+												return "rimi2";
 											}		
 										}catch(Exception e) {
 											
