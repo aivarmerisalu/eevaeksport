@@ -1567,7 +1567,7 @@ public class Converter {
 	
 	 public static TreeMap loadFixRimi2(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 
-		 
+		 Vector check = new Vector();
 			String errors = null; 
 			TreeMap <String,Vector> klaster= new TreeMap<String,Vector>();
 			
@@ -1622,27 +1622,35 @@ public class Converter {
 							 if(yy>=clusterLoc && xx>clusterLocx) {
 								 
 								 if(celliSisu.contains("x") || celliSisu.contains("X") || celliSisu.contains("add")) {
-									 String currentCluster=formatter2.formatCellValue(sheet.getRow(clusterLocx).getCell(yy));
+									 String currentCluster=formatter2.formatCellValue(sheet.getRow(clusterLocx).getCell(yy)).replaceAll(" " , "");
 									 String currentProduct=formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc));
-									 
-									 Vector <String> tooted = new Vector<String>();
-									 if(klaster.get(currentCluster)==null){
+									 String currentProductEAN=formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc-1));
+										 
+									 Vector <Product> tooted = new Vector<Product>();
+									 if(klaster.get(currentCluster) == null){
+										 Product prod = new Product(currentProduct);
+										 prod.setName(currentProduct);
+										 prod.setEAN(currentProductEAN);
+										 tooted.add(prod);
 										 klaster.put(currentCluster, tooted);
-										 klaster.get(currentCluster).add(currentProduct);
 										 //System.out.println("Uustoode: " +currentProduct+"  klaster: "+ currentCluster);
-									 }
-									 
-									 if(klaster.get(currentCluster).contains(currentProduct)==false){
-										 /*if(currentCluster.contains("EEHM A.12.01 ALL Large1 460")) {
+									 } else {
+									 	 /*if(currentCluster.contains("EEHM A.12.01 ALL Large1 460")) {
 											 System.out.println("Lisame: "+ currentCluster+" "+currentProduct);
 											 System.out.println(klaster.get(currentCluster).toString());
 											 System.out.println(klaster.get(currentCluster).size());
 										 }*/
-										 
+										 Product prod = new Product(currentProduct);
+										 prod.setName(currentProduct);
+										 prod.setEAN(currentProductEAN);
 										 //System.out.println("lisasime: "+currentProduct +" " +klaster.get(currentCluster).contains(currentProduct)+"  klaster: "+ currentCluster);
-										 klaster.get(currentCluster).add(currentProduct);
+										 klaster.get(currentCluster).add(prod);
 										 
 									 }
+							
+									 
+									 
+									 
 								 }
 							 }
 
@@ -1670,11 +1678,11 @@ public class Converter {
 			 }
 			 
 				TreeMap <String,Vector> cluster= new TreeMap<String,Vector>();				//loeme teise lehe andmed
-				for(int x=2 ; x<sheet1.getLastRowNum(); x++) { //andmed algavad 3realt
-					//System.out.println("info: " + sheet1.getRow(x).getCell(1) + "  " + sheet1.getRow(x).getCell(3));
-					String clusterkey=formatter2.formatCellValue(sheet1.getRow(x).getCell(3)).trim();
+				for(int x=2 ; x<sheet1.getLastRowNum()+1; x++) { //andmed algavad 3realt
+					String clusterkey=formatter2.formatCellValue(sheet1.getRow(x).getCell(3)).trim().replaceAll(" " , "");
 					String clustervalue=formatter2.formatCellValue(sheet1.getRow(x).getCell(1)).trim();
-					
+					//System.out.println("info: " + clusterkey);
+						
 					Vector <String> sisuvektor = new Vector<String>();
 					
 					if(cluster.get(clusterkey) != null) {
@@ -1688,32 +1696,40 @@ public class Converter {
 
 				//System.out.println(klaster.get("EEHM A.12.01 ALL Large1 460").toString());
 			 
+				
 			 for (int a = 0; a < klaster.keySet().size(); a++) {		//mitu keyd on mapis
 
 				    String group = klaster.keySet().toArray()[a].toString();	//loeme grupi sisse
-				    System.out.println(group);
-				    if(cluster.get(group)!=null) {
 				   
-				    	for(int c=0; c<cluster.get(group).size()-1; c++) {   ///loeme grupis olevad poekoodid
+				    
+				    if(cluster.get(group)!=null) {
+				   Vector vec = cluster.get(group);
+				    	for(int c=0; c < vec.size(); c++) {   ///loeme grupis olevad poekoodid
 					    	//cluster.get(group).get(c);
 					    	
 					    	
-					        String pood = "RIMI-" + cluster.get(group).get(c);
+					        String pood = "RIMI-" + vec.get(c);
+					        if(!check.contains(vec.get(c))) {
+					        	check.add(vec.get(c));
+					        }
 					        Contract con = new Contract(pood);
-					        System.out.println(EAN.size());
-					        for(int b=0; b<klaster.get(group).size();b++) {			//mitu toodet on v2tmes
-					        	String tnimi = klaster.get(group).get(b).toString();							//v2tame mapis oleva vectori elemendi
+					        Vector vec2 = klaster.get(group);
+					        
+					    //    System.out.println("EAN SIZE " + EAN.size() + "' " + vec2.size());
+					        
+					        for(int b = 0; b < vec2.size(); b++) {			//mitu toodet on v2tmes
+					        	Product prod = (Product)vec2.get(b);							//v2tame mapis oleva vectori elemendi
 					        	//System.out.println(klaster.get(group).size());
-					        	String toode = getToode(prods,EAN.get(b));
-					            System.out.println("Sees " +b+ " " + EAN.get(b) + "' " + pood + " " + tnimi);
+					        	String toode = getToode(prods,prod.getEAN());
+					          //  System.out.println("Sees " +b+ " " + prod.getEAN() + "' " + group + " " + prod.getName());
 
 					        	//klaster.get(klaster.keySet().toArray()[a]).toString();
-								  if(toode.equals(EAN.get(b))) {
+								  if(toode.equals(prod.getEAN())) {
 									  if(errors == null) {
-										  errors = "Tuvastamatta tooted sortimendis\n RIMI2 formaat\n fail : " + "file.getName() "+"\n\nEAN     Nimetus\n";
+										  errors = "Tuvastamatta tooted sortimendis\n RIMI2 formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
 									  }
-									  if(!errors.contains(EAN.get(b))) {
-										  errors = errors + EAN.get(b) + "   " + tnimi + "\n";
+									  if(!errors.contains(prod.getEAN())) {
+										  errors = errors + prod.getEAN() + "   " + prod.getName() + "\n";
 									  }
 								  }
 								  
@@ -1735,6 +1751,9 @@ public class Converter {
 		 }catch(Exception e) {
 						 e.printStackTrace(); 
 					 }	 
+		 
+		// System.out.println("res " + check.toString().replaceAll(", ", "\n"));
+		 
 		// System.exit(0);
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "rimi2", true);
