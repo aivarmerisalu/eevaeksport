@@ -1372,7 +1372,7 @@ public class Converter {
 						int r = 4;
 						int ea = 0;
 						int ni = 3;
-						for(int i = 0 ; i < sheet.getLastRowNum()+1;i++){
+						for(int i = 0 ; i < 6;i++){
 							Row row = sheet.getRow(i);
 							if(row != null) {
 							
@@ -1404,7 +1404,8 @@ public class Converter {
 						}	
 						}
 						
-						
+						System.out.println(ea + " " + ni);
+						//System.exit(0);
 						
 						Row row = sheet.getRow(pais);
 						
@@ -1433,6 +1434,8 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
+							 if(row != null && row.getCell(ea) != null) {
+								
 								String ean = formatter.formatCellValue(row.getCell(ea)).trim();
 								if(ean.length() > 13) {
 									ean = ean.substring(1);
@@ -1474,8 +1477,10 @@ public class Converter {
                   	  res.put(pood, con);
                               }
 						   }
-							 }
+					      }
 						}
+							 
+						 }
 					 }
 					
 					
@@ -1799,13 +1804,14 @@ public class Converter {
 								if(gg.length()>1){
 							      groups.put(a + "", gg);
 							    }
+								
+								System.out.println(a + " " + gg);
 							
 							} catch (Exception e) {
 								 System.out.println(row.getCell((short)a).getNumericCellValue());
 							}
 						}
 						
-					//	System.out.println("Groups " +  groups.size());
 						
 						
 						for(int i = rida+1 ; i < sheet.getLastRowNum()+1;i++){
@@ -1827,19 +1833,20 @@ public class Converter {
 									  errors = errors + ean + "   " + tnimi + "\n";
 								  }
 							  }
-							 
+							  System.out.println("Groups " +  groups.size() + " " + row.getLastCellNum());
+								
 							 for (int a = alg; a < row.getLastCellNum(); a++) {
 
 									String group = (String) groups.get(a + "");
 									if (group != null && group.trim().length() > 0 ) {
 							 
-                         String pood =  "RIMI" +group;
+                         String pood =  group;
                          Contract con = new Contract(pood);
 							 String value =  formatter.formatCellValue(row.getCell(a));
                        
                         
                         if(value.trim().length() > 0 && value.trim().toLowerCase().equals("1")) {
-                        //	 System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
+                         System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
                         
 							if(res.get(pood) != null){
             	                 con = (Contract)res.get(pood);
@@ -1994,7 +2001,7 @@ public class Converter {
                           
                            
                            if(value.trim().length() > 0 && value.trim().toLowerCase().equals("x")) {
-                           //	 System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
+                           	 System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
                            
 							if(res.get(pood) != null){
                	                 con = (Contract)res.get(pood);
