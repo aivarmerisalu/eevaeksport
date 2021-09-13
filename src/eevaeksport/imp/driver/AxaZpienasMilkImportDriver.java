@@ -210,7 +210,7 @@ private String turn(String aa) {
 		  	try{
 		    	  StringBuffer sb = new StringBuffer();
 		  		  Calendar cal = Calendar.getInstance();
-		  		//   cal.setTime(new java.util.Date(order.getShipCal().getTimeInMillis()));
+		  		   cal.setTime(new java.util.Date(order.getShipCal().getTimeInMillis()));
 			        String month = (cal.get(Calendar.MONTH) + 1) + "";
 			        if (month.length() == 1) month = "0" + month;
 			        String day = cal.get(Calendar.DAY_OF_MONTH) + "";

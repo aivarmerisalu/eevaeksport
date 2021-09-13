@@ -1100,7 +1100,7 @@ return bomKount;
     			 // Näidatakse ainult laos „BROKAS“ olevate toodete laoseis olenemata toote staatusest.
 
     			  
-    			  if(busena.equals("Brokas")){
+    			  if(sandelis.equals("BROKAS")){
     					if(braakGir.get(prodcode) != null){
     	        			braakGir.put(prodcode, Double.parseDouble(braakGir.get(prodcode)+"") + kogus);
     	                }else{
@@ -1180,7 +1180,7 @@ return bomKount;
 			}catch(Exception e){
 			  e.printStackTrace();	
 			}
-			info = "Brakis: "+(int)Double.parseDouble(bro.get(kood)+"")+ "|"; 
+			info = "Brokas: "+(int)Double.parseDouble(bro.get(kood)+"")+ "|"; 
 			System.out.println("braak " + bro.get(kood) + " " + aa);
 			
 			nimetus = nimetus + aa;

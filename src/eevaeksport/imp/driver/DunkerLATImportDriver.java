@@ -264,6 +264,7 @@ public class DunkerLATImportDriver
 	     
 	     addInvoiceHeader(salesid,order);
 	     addInvoiceLines(salesid,order);
+	     signatures.add(signature);
 	  
       setNumAddedLines(counter);
 		  }

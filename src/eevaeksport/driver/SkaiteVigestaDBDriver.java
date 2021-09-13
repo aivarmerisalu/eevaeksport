@@ -1336,7 +1336,13 @@ Statement st = null;
       }
 
       try {
-        Connection con = getNewConnection();
+        Connection con = null;
+        try {
+        	 con = getNewConnection();
+        }catch(Exception e) {
+        	System.exit(0);
+        }
+       
         Statement st = con.createStatement();
          
           

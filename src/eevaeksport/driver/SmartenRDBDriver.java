@@ -267,6 +267,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		        		}
 		        		
 		        		asi.put(custid, uu);
+		        		asi.put("0" + custid, uu);
 		        		
 		        	}
 		        	
@@ -274,6 +275,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		        		  String phone =  Converter.cleanLitLatEst(row.getCell((short) 5).getStringCellValue());
 		        		  if(phone != null && phone.length() >0) {
 		        			  asi.put(custid+"phone", phone);
+		        			  asi.put("0"+custid+"phone", phone);
 		        			//  System.out.println("PH "+ phone);
 		        		  }
 		        	}catch(Exception e) {
@@ -284,6 +286,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		        		String email =  Converter.cleanLitLatEst(row.getCell((short) 7).getStringCellValue());
 		        		  if(email != null && email.length() >0) {
 		        			  asi.put(custid+"mail", email);
+		        			  asi.put("0"+custid+"mail", email);
 		        			  //System.out.println("EM "+ email);
 		        		  }
 		        	}catch(Exception e) {
@@ -293,7 +296,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		        		 String name =  Converter.cleanLitLatEst(row.getCell((short) 17).getStringCellValue());
 		        		  if(name != null && name.length() >0) {
 		        			  asi.put(custid+"name", name);
-		        			  //System.out.println("NM "+ name);
+		        			  asi.put("0"+custid+"name", name);
 		        		  }
 		        	}catch(Exception e) {
 		        		
@@ -967,7 +970,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
         }
         
         
-        
+        if(cust.getName().toLowerCase().indexOf("linnam") != -1) {
+        	System.out.println(cust.getID() + " " + cust.getName()+ " || " + cust.getAgents().toString());
+        }
         
                 if(outside == null){
                     cust.addAgent(new Agent(getParent().getProps().getProperty("officerep")));
