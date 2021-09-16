@@ -1273,6 +1273,7 @@ return bomKount;
             st.close();
 	} catch (Exception e) {
 	    getParent().showError(e);
+	    System.exit(0);
 	}
 
 	return products;
