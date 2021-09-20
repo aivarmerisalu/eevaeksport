@@ -254,7 +254,6 @@ HashMap pants = null;
  
 	  setOrder(order);
 	     
-	     String salesid = null ;
 	     
 	  boolean tag = false;
 	  OrderLine ol = (OrderLine)order.getOrderLines().get(0);
@@ -264,11 +263,10 @@ HashMap pants = null;
 	  
 	  System.out.println("On Tagastus " + tag );
     makeOutput(order,tag);
+ 
   }
   
-  
-
-
+ 
 
  private void makeOutput(Order order,boolean tag){
  	StringBuffer sb = new StringBuffer();
@@ -482,8 +480,12 @@ if(ladu.trim().length()!=0){
       sb.append("          </I06>" + ls);
       cou++;
 
+      String cat = parent.getProps().getProperty("conv.dir");
+      if(tag) {
+    	 cat = parent.getProps().getProperty("conv.dirret");
+      }
  	
-      String fileName = escape(parent.getProps().getProperty("conv.dir") + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".EIP";
+      String fileName = escape(cat + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".EIP";
       System.out.println(fileName);
         FileOutputStream fos = new FileOutputStream(fileName);
         fos.write(sb.toString().getBytes());
