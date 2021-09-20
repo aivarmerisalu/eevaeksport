@@ -39,8 +39,8 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-
-import ee.mobilejava.wrapper.DefectiveLineWrapper;
+  
+//import ee.mobilejava.wrapper.DefectiveLineWrapper;
 import ee.mobilejava.wrapper.DefectiveWrapper;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
