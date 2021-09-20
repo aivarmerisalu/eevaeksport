@@ -1606,14 +1606,14 @@ public class Converter {
 							 
 							 String celliSisu=formatter2.formatCellValue(sheet.getRow(xx).getCell(yy));	//loeme celli stringina
 							 if(celliSisu.isEmpty()==false && celliSisu!=null && celliSisu.contains("EAN")==true) {		//vaatame kus asuvad headlined, tiitlite vector parameetrina?
-								 System.out.println("EAN Row: "+xx+ "Col: "+yy);
+								 //System.out.println("EAN Row: "+xx+ "Col: "+yy);
 							 }
 							 if(celliSisu.isEmpty()==false && celliSisu!=null && celliSisu.contains("Article name")==true) {
-								 System.out.println("Products Row: "+xx+ "Col: "+yy);
+								// System.out.println("Products Row: "+xx+ "Col: "+yy);
 								 productLoc=yy;
 							 }
 							 if(celliSisu.isEmpty()==false && celliSisu!=null && (celliSisu.contains("EEH") || celliSisu.contains("EEMR") )) { //rimi
-								 System.out.println("Cluster Row: "+xx+ "Col: "+yy);
+								 //System.out.println("Cluster Row: "+xx+ "Col: "+yy);
 								 if(clusterLoc!=0) {break;} //otsime ainult esimese klastri veeru tabelis - sealt edasi ainult klustrid lehe lopuni
 								 clusterLoc=yy;
 								 clusterLocx=xx;
@@ -1781,6 +1781,12 @@ public class Converter {
 		int clusterLocy=0;
 		String ean="";
 		String toode = "";
+		String tnimi = null;
+
+
+		
+
+		
 			
 		DataFormatter formatter2 = new DataFormatter();
 		
@@ -1794,21 +1800,20 @@ public class Converter {
 			//Sheet sheet = workbook.getSheetAt(0);
 
 			int viimaneleht=workbook.getNumberOfSheets();
-			for(int sheetnr=0; sheetnr<viimaneleht; sheetnr++) {
-				ean="0"; //vaja selleks, et kui ean ei eksisteeri siis pole tegu tootega
+			for(int sheetnr=0; sheetnr<2; sheetnr++) { //viimaneleht
+				//vaja selleks, et kui ean ei eksisteeri siis pole tegu tootega
 				Sheet sheet = workbook.getSheetAt(sheetnr); 
 				String sheettitle=sheet.getSheetName();
 				
-				
 				int viimanerida=sheet.getLastRowNum();
-				for(int row=0; row<viimanerida; row++) {
-					
-					
+				for(int row=0; row < viimanerida+1; row++) {
 
 					
 					if(sheet.getRow(row) != null) {
 						int viimanecell=sheet.getRow(row).getLastCellNum();
-					
+						ean="0"; 
+						toode = null;
+						 tnimi = null;
 						
 					for(int cell=0; cell<viimanecell; cell++) {
 						 String celliSisu=formatter2.formatCellValue(sheet.getRow(row).getCell(cell));	//loeme celli stringina
@@ -1816,12 +1821,13 @@ public class Converter {
 						 if(celliSisu.isEmpty()==false && celliSisu!=null && isNumeric(celliSisu) ) {														//kas string on number
 							 Double number=Double.parseDouble(celliSisu);										//string->double
 							 if(number>1) {
-								 if(doubleLength(Math.round(number))==13 || doubleLength(Math.round(number))==8) {												//EAN on 13x pikkune
+								 if(doubleLength(Math.round(number)) == 13 || doubleLength(Math.round(number)) == 8 ) {												//EAN on 13x pikkune
 									 //System.out.println("EAN: "+celliSisu);
 									 ean=celliSisu;
 									 toode = getToode(prods,ean);
+									 tnimi = formatter2.formatCellValue(sheet.getRow(row).getCell(cell+1));
 									 //EAN.add(celliSisu);
-									 EANcolumn.add(cell);
+									// EANcolumn.add(cell);
 									//PRODUCT.add(formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc)));
 									//System.out.println("toode: "+yy);
 								 }
@@ -1829,13 +1835,16 @@ public class Converter {
 						 }
 						 
 						 String klastriNimi = formatter2.formatCellValue(sheet.getRow(clusterLocy).getCell(cell)); 
+						 if(sheet.getSheetName().contains("ALKO")) {
+							 klastriNimi="ALKO";
+						 }
 						 if (klastriNimi != null && klastriNimi.trim().length() > 0 ) {
-							 String pood =  klastriNimi;
-							 Contract con = new Contract(pood);
+							 String pood =  "ELVI-" + klastriNimi;
+							 Contract con = new Contract( pood);
 					          
 					           
 							 if(cell>clusterLocx && row>0 && celliSisu.length()==1 && ean!="0" && (celliSisu.contains("O") || celliSisu.contains("B"))) {
-								 System.out.println("Sees " + cell + " " + celliSisu + " " + ean + " " + pood);
+								// System.out.println("Sees " + cell + " " + celliSisu + " " + ean + " " + pood + " " + tnimi + " " + toode);
 					           
 								 if(res.get(pood) != null){
 									 con = (Contract)res.get(pood);
@@ -1846,7 +1855,7 @@ public class Converter {
 								 }
 								 con.lines.add(ll);
 								 res.put(pood, con);
-								 System.out.println(con);
+								 //System.out.println(con);
 							 }
 						 }
 						 
@@ -1857,13 +1866,13 @@ public class Converter {
 						 
 					}
 					
-					if(ean != null && ean.trim().length()> 0 ) {
+					if(toode != null && ean != null && ean.trim().length()> 0 ) {
 						  if(toode.equals(ean)) {
 							  if(errors == null) {
-								  errors = "Tuvastamatta tooted sortimendis\n MJSortiment formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+								  errors = "Products not found in assortiment \n ELVI format\n fail : " + file.getName() +"\n\nEAN     Description\n";
 							  }
 							  if(!errors.contains(ean)) {
-								  errors = errors + ean + "   " + "tnimi" + "\n";
+								  errors = errors + ean + "   " + tnimi + "\n";
 							  }
 						  }
 						  //System.out.println("Groups " +  "groups.size()" + " " + "row.getLastCellNum()");
@@ -1880,7 +1889,7 @@ public class Converter {
 			
 			
 			 	System.out.println("Elvi lõpp");
-			 	System.exit(0);
+			 	//System.exit(0);
 
 		 }catch(Exception e) {
 						 e.printStackTrace(); 
@@ -1890,9 +1899,9 @@ public class Converter {
 		 
 		// System.exit(0);
 		 if(errors != null) {
-			 sendFixLoadErrorEmail(errors, parent, "rimi2", true);
+			 sendFixLoadErrorEmail(errors, parent, "elvi", true);
 		 }
-		 sendFixLoadErrorEmail("\n Rimi2 imported " + res.keySet().size() + " shops fixed sortiments", parent, "rimi",false);
+		 sendFixLoadErrorEmail("\n Elvi imported " + res.keySet().size() + " shops fixed sortiments", parent, "elvi",false);
 			 
 	return res;
 }
@@ -1913,6 +1922,7 @@ public class Converter {
 		int clusterLocy=0;
 		String ean="";
 		String toode = "";
+		String tnimi = null;
 			
 		DataFormatter formatter2 = new DataFormatter();
 		
@@ -1931,25 +1941,26 @@ public class Converter {
 				
 				
 				int viimanerida=sheet.getLastRowNum();
-				for(int row=0; row<viimanerida; row++) {
+				for(int row=0; row < viimanerida+1; row++) {
 					
 
 					if(sheet.getRow(row) != null) {
-						int viimanecell=sheet.getRow(row).getLastCellNum();
-					
+						int viimanecell = sheet.getRow(row).getLastCellNum();
+					tnimi = null;
 						
 					for(int cell=0; cell<viimanecell; cell++) {
-						 String celliSisu=formatter2.formatCellValue(sheet.getRow(row).getCell(cell));	//loeme celli stringina
+						 String celliSisu = formatter2.formatCellValue(sheet.getRow(row).getCell(cell));	//loeme celli stringina
 						 
-						 if(celliSisu.isEmpty()==false && celliSisu!=null && isNumeric(celliSisu) ) {														//kas string on number
+						 if(celliSisu.isEmpty() == false && celliSisu != null && isNumeric(celliSisu) ) {														//kas string on number
 							 Double number=Double.parseDouble(celliSisu);										//string->double
-							 if(number>1) {
-								 if(doubleLength(Math.round(number))==13) {												//EAN on 13x pikkune
-									 System.out.println("EAN: "+celliSisu);
+							 if(number > 1) {
+								 if(doubleLength(Math.round(number)) == 13 || doubleLength(Math.round(number)) == 8) {												//EAN on 13x pikkune
+									// System.out.println("EAN: "+celliSisu);
 									 ean=celliSisu;
 									 toode = getToode(prods,ean);
+									 tnimi = formatter2.formatCellValue(sheet.getRow(row).getCell(cell+1));
 									 //EAN.add(celliSisu);
-									 EANcolumn.add(cell);
+									// EANcolumn.add(cell);
 									//PRODUCT.add(formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc)));
 									//System.out.println("toode: "+yy);
 								 }
@@ -1958,7 +1969,7 @@ public class Converter {
 						 
 						 String klastriNimi = formatter2.formatCellValue(sheet.getRow(clusterLocy).getCell(cell)); 
 						 if(klastriNimi=="") {
-							 klastriNimi="Mego";
+							 klastriNimi="MEGO-Mego";
 						 }
 						 if (klastriNimi != null && klastriNimi.trim().length() > 0 ) {
 							 String pood =  klastriNimi;
@@ -1966,7 +1977,7 @@ public class Converter {
 					          
 					           
 							 if(cell>clusterLocx && row>0 && celliSisu.length()==1 && ean!="0" && celliSisu.contains("X")) {
-								 System.out.println("Sees " + cell + " " + celliSisu + " " + ean + " " + pood);
+							//	 System.out.println("Sees " + cell + " " + celliSisu + " " + ean + " " + pood + " " + tnimi);
 					           
 								 if(res.get(pood) != null){
 									 con = (Contract)res.get(pood);
@@ -1977,7 +1988,7 @@ public class Converter {
 								 }
 								 con.lines.add(ll);
 								 res.put(pood, con);
-								 System.out.println(con);
+								
 							 }
 						 }
 						 
@@ -1991,10 +2002,10 @@ public class Converter {
 					if(ean != null && ean.trim().length()> 0 ) {
 						  if(toode.equals(ean)) {
 							  if(errors == null) {
-								  errors = "Tuvastamatta tooted sortimendis\n MJSortiment formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+								  errors = "Products not found in assortiment \n MEGO format\n fail : " + file.getName() +"\n\nEAN     Description\n";
 							  }
 							  if(!errors.contains(ean)) {
-								  errors = errors + ean + "   " + "tnimi" + "\n";
+								  errors = errors + ean + "   " + tnimi + "\n";
 							  }
 						  }
 						  //System.out.println("Groups " +  "groups.size()" + " " + "row.getLastCellNum()");
@@ -2011,7 +2022,7 @@ public class Converter {
 			
 			
 			 	System.out.println("MEGO lõpp");
-			 	System.exit(0);
+			 //	System.exit(0);
 
 		 }catch(Exception e) {
 						 e.printStackTrace(); 
@@ -2021,9 +2032,9 @@ public class Converter {
 		 
 		// System.exit(0);
 		 if(errors != null) {
-			 sendFixLoadErrorEmail(errors, parent, "rimi2", true);
+			 sendFixLoadErrorEmail(errors, parent, "mego", true);
 		 }
-		 sendFixLoadErrorEmail("\n Rimi2 imported " + res.keySet().size() + " shops fixed sortiments", parent, "rimi",false);
+		 sendFixLoadErrorEmail("\n Mego imported " + res.keySet().size() + " shops fixed sortiments", parent, "mego",false);
 			 
 	return res;
 }
