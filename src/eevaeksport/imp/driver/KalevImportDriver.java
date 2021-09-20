@@ -2387,7 +2387,7 @@ if(order.getStatus() < 5) {
 	  if(comm2 == null) {
 		   comm2 = "Tellimus";
 	   }
-	if((comm2 != null || aletext != null || true) ){
+	if((comm2 != null || aletext != null ) ){
 		   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
 		 
 	   sendCommentEmail( comm2+tarne ,aletext,doknr,order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
