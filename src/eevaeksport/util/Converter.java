@@ -1542,8 +1542,7 @@ public class Converter {
 	   }
 	   return popular;
 	 }
-	 
-	 
+
 	 public static int diffValues(int[] numArray){
 		    int numOfDifferentVals = 0;
 
@@ -1565,10 +1564,7 @@ public class Converter {
 		   return numOfDifferentVals;
 		}
 	 
-	 
-	 
-	 
-	 //Importides xlsx tahame teada kas ja kus lehel asuvad ean kood, poe nimi, kood jm info. 
+
 	
 	 public static TreeMap loadFixRimi2(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 
@@ -1769,6 +1765,271 @@ public class Converter {
 }
 
 	 
+	 
+	 
+	 public static TreeMap loadFixElvi(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
+		 
+		 
+
+		Vector check = new Vector();
+		String errors = null; 
+		TreeMap <String,Vector> klaster= new TreeMap<String,Vector>();
+		Vector <Integer> EANcolumn = new Vector<Integer>();		//mis ridadel asuvad ean koodid
+		int dataLocation=1;
+		int productLoc=0;
+		int clusterLocx=2;
+		int clusterLocy=0;
+		String ean="";
+		String toode = "";
+			
+		DataFormatter formatter2 = new DataFormatter();
+		
+		 try{
+			 
+	       	FileInputStream	 ff = new FileInputStream(file);
+			XSSFWorkbook workbook = new XSSFWorkbook(ff); 
+			System.out.println("Elvi lugemine " + file.getName());
+			ff.close();
+			//System.out.println("Elvi lugemine");
+			//Sheet sheet = workbook.getSheetAt(0);
+
+			int viimaneleht=workbook.getNumberOfSheets();
+			for(int sheetnr=0; sheetnr<viimaneleht; sheetnr++) {
+				ean="0"; //vaja selleks, et kui ean ei eksisteeri siis pole tegu tootega
+				Sheet sheet = workbook.getSheetAt(sheetnr); 
+				String sheettitle=sheet.getSheetName();
+				
+				
+				int viimanerida=sheet.getLastRowNum();
+				for(int row=0; row<viimanerida; row++) {
+					
+					
+
+					
+					if(sheet.getRow(row) != null) {
+						int viimanecell=sheet.getRow(row).getLastCellNum();
+					
+						
+					for(int cell=0; cell<viimanecell; cell++) {
+						 String celliSisu=formatter2.formatCellValue(sheet.getRow(row).getCell(cell));	//loeme celli stringina
+						 
+						 if(celliSisu.isEmpty()==false && celliSisu!=null && isNumeric(celliSisu) ) {														//kas string on number
+							 Double number=Double.parseDouble(celliSisu);										//string->double
+							 if(number>1) {
+								 if(doubleLength(Math.round(number))==13 || doubleLength(Math.round(number))==8) {												//EAN on 13x pikkune
+									 //System.out.println("EAN: "+celliSisu);
+									 ean=celliSisu;
+									 toode = getToode(prods,ean);
+									 //EAN.add(celliSisu);
+									 EANcolumn.add(cell);
+									//PRODUCT.add(formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc)));
+									//System.out.println("toode: "+yy);
+								 }
+							 }
+						 }
+						 
+						 String klastriNimi = formatter2.formatCellValue(sheet.getRow(clusterLocy).getCell(cell)); 
+						 if (klastriNimi != null && klastriNimi.trim().length() > 0 ) {
+							 String pood =  klastriNimi;
+							 Contract con = new Contract(pood);
+					          
+					           
+							 if(cell>clusterLocx && row>0 && celliSisu.length()==1 && ean!="0" && (celliSisu.contains("O") || celliSisu.contains("B"))) {
+								 System.out.println("Sees " + cell + " " + celliSisu + " " + ean + " " + pood);
+					           
+								 if(res.get(pood) != null){
+									 con = (Contract)res.get(pood);
+								 } 
+								 ContractLine ll = new ContractLine(toode);
+								 if(con.lines == null){
+									 con.lines = new Vector();
+								 }
+								 con.lines.add(ll);
+								 res.put(pood, con);
+								 System.out.println(con);
+							 }
+						 }
+						 
+					}
+						 
+
+						 
+						 
+					}
+					
+					if(ean != null && ean.trim().length()> 0 ) {
+						  if(toode.equals(ean)) {
+							  if(errors == null) {
+								  errors = "Tuvastamatta tooted sortimendis\n MJSortiment formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+							  }
+							  if(!errors.contains(ean)) {
+								  errors = errors + ean + "   " + "tnimi" + "\n";
+							  }
+						  }
+						  //System.out.println("Groups " +  "groups.size()" + " " + "row.getLastCellNum()");
+					
+					
+					
+					}
+						
+						
+				}
+
+
+			}
+			
+			
+			 	System.out.println("Elvi lõpp");
+			 	System.exit(0);
+
+		 }catch(Exception e) {
+						 e.printStackTrace(); 
+					 }	 
+		 
+		// System.out.println("res " + check.toString().replaceAll(", ", "\n"));
+		 
+		// System.exit(0);
+		 if(errors != null) {
+			 sendFixLoadErrorEmail(errors, parent, "rimi2", true);
+		 }
+		 sendFixLoadErrorEmail("\n Rimi2 imported " + res.keySet().size() + " shops fixed sortiments", parent, "rimi",false);
+			 
+	return res;
+}
+
+	 
+	 
+	 public static TreeMap loadFixMego(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
+		 
+		 
+
+		Vector check = new Vector();
+		String errors = null; 
+		TreeMap <String,Vector> klaster= new TreeMap<String,Vector>();
+		Vector <Integer> EANcolumn = new Vector<Integer>();		//mis ridadel asuvad ean koodid
+		int dataLocation=1;
+		int productLoc=0;
+		int clusterLocx=2;
+		int clusterLocy=0;
+		String ean="";
+		String toode = "";
+			
+		DataFormatter formatter2 = new DataFormatter();
+		
+		 try{
+			 
+	       	FileInputStream	 ff = new FileInputStream(file);
+			XSSFWorkbook workbook = new XSSFWorkbook(ff); 
+			System.out.println("MEGO lugemine " + file.getName());
+			ff.close();
+
+			int viimaneleht=workbook.getNumberOfSheets();
+			for(int sheetnr=0; sheetnr<viimaneleht; sheetnr++) {
+				ean="0"; //vaja selleks, et kui ean ei eksisteeri siis pole tegu tootega
+				Sheet sheet = workbook.getSheetAt(sheetnr); 
+				String sheettitle=sheet.getSheetName();
+				
+				
+				int viimanerida=sheet.getLastRowNum();
+				for(int row=0; row<viimanerida; row++) {
+					
+
+					if(sheet.getRow(row) != null) {
+						int viimanecell=sheet.getRow(row).getLastCellNum();
+					
+						
+					for(int cell=0; cell<viimanecell; cell++) {
+						 String celliSisu=formatter2.formatCellValue(sheet.getRow(row).getCell(cell));	//loeme celli stringina
+						 
+						 if(celliSisu.isEmpty()==false && celliSisu!=null && isNumeric(celliSisu) ) {														//kas string on number
+							 Double number=Double.parseDouble(celliSisu);										//string->double
+							 if(number>1) {
+								 if(doubleLength(Math.round(number))==13) {												//EAN on 13x pikkune
+									 System.out.println("EAN: "+celliSisu);
+									 ean=celliSisu;
+									 toode = getToode(prods,ean);
+									 //EAN.add(celliSisu);
+									 EANcolumn.add(cell);
+									//PRODUCT.add(formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc)));
+									//System.out.println("toode: "+yy);
+								 }
+							 }
+						 }
+						 
+						 String klastriNimi = formatter2.formatCellValue(sheet.getRow(clusterLocy).getCell(cell)); 
+						 if(klastriNimi=="") {
+							 klastriNimi="Mego";
+						 }
+						 if (klastriNimi != null && klastriNimi.trim().length() > 0 ) {
+							 String pood =  klastriNimi;
+							 Contract con = new Contract(pood);
+					          
+					           
+							 if(cell>clusterLocx && row>0 && celliSisu.length()==1 && ean!="0" && celliSisu.contains("X")) {
+								 System.out.println("Sees " + cell + " " + celliSisu + " " + ean + " " + pood);
+					           
+								 if(res.get(pood) != null){
+									 con = (Contract)res.get(pood);
+								 } 
+								 ContractLine ll = new ContractLine(toode);
+								 if(con.lines == null){
+									 con.lines = new Vector();
+								 }
+								 con.lines.add(ll);
+								 res.put(pood, con);
+								 System.out.println(con);
+							 }
+						 }
+						 
+					}
+						 
+
+						 
+						 
+					}
+					
+					if(ean != null && ean.trim().length()> 0 ) {
+						  if(toode.equals(ean)) {
+							  if(errors == null) {
+								  errors = "Tuvastamatta tooted sortimendis\n MJSortiment formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+							  }
+							  if(!errors.contains(ean)) {
+								  errors = errors + ean + "   " + "tnimi" + "\n";
+							  }
+						  }
+						  //System.out.println("Groups " +  "groups.size()" + " " + "row.getLastCellNum()");
+					
+					
+					
+					}
+						
+						
+				}
+
+
+			}
+			
+			
+			 	System.out.println("MEGO lõpp");
+			 	System.exit(0);
+
+		 }catch(Exception e) {
+						 e.printStackTrace(); 
+					 }	 
+		 
+		// System.out.println("res " + check.toString().replaceAll(", ", "\n"));
+		 
+		// System.exit(0);
+		 if(errors != null) {
+			 sendFixLoadErrorEmail(errors, parent, "rimi2", true);
+		 }
+		 sendFixLoadErrorEmail("\n Rimi2 imported " + res.keySet().size() + " shops fixed sortiments", parent, "rimi",false);
+			 
+	return res;
+}
+
+	 
+	 
 	 public static TreeMap loadFixMJ(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
 		
@@ -1879,6 +2140,8 @@ public class Converter {
 			 
 	return res;
 }
+	 
+	 
 	 
 	 public static TreeMap loadFixKeila(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
@@ -2035,7 +2298,6 @@ public class Converter {
 	return res;
 }
 	
-	
 	 
 	 
 	 public static TreeMap loadFixLektus(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
@@ -2141,7 +2403,6 @@ public class Converter {
 			 
 	return res;
 }
-
 	 
 	 
 	
@@ -2339,7 +2600,7 @@ public class Converter {
 			 
     	return res;
     }
-	
+	 
 	 
 	 public static TreeMap loadFixOG(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
@@ -2462,11 +2723,9 @@ public class Converter {
 			 
  	return res;
  }
-	
 	 
 	 
-	
-	public static TreeMap loadFixFromExcels(String dirx , TreeMap prods, EksportPanel parent) {
+	 public static TreeMap loadFixFromExcels(String dirx , TreeMap prods, EksportPanel parent) {
 		TreeMap res = new TreeMap();
 		
 	//	Kammime kataloogi läbi ja määrame mis on mis ja proovime sisse lugeda 
@@ -2543,6 +2802,12 @@ public class Converter {
 		          if(format.equals("prisma2")) {
 			        	 loadFixPrisma2(res, file , prods, parent);
 				      }
+		          if(format.equals("elvi")) {
+			        	 loadFixElvi(res, file , prods, parent);
+				      }
+		          if(format.equals("mego")) {
+			        	 loadFixMego(res, file , prods, parent);
+				      }
 		       }
 		      String nn = file.getName();
 		    		  
@@ -2557,10 +2822,8 @@ public class Converter {
 	}
 	
 	
-	
-	
-	
-	private static String identifyXLS(File f){
+
+	 private static String identifyXLS(File f){
 		  String result = null;
 		  DataFormatter formatter = new DataFormatter();
 			int a = 0;
@@ -2584,11 +2847,42 @@ public class Converter {
 					 sheet = workbook.getSheetAt(0); 
 			  }
 					
+			  if(f.getName().contains("MEGO")) {
+				  System.out.println("mego");
+			       return "mego";
+			  }
+			  
 			  
 			  if(sheet.getSheetName().equals("mjsortiment")) {
 				  return "mjsortiment";
 			  }
+			  
+			  
+			  int numberOfSheets = workbook.getNumberOfSheets();
+			  if(numberOfSheets > 0) {
+				  for(int xx=0; xx<numberOfSheets; xx++) {
+					  sheet = workbook.getSheetAt(xx);
+					  String sheetName=sheet.getSheetName();
+					  if(sheetName=="ELVI" || sheetName.contains("ELVI Shops") || sheetName.contains("ELVI")) {
+						  return "elvi";
+					  }
+					  if(sheetName=="mingi sheet") {
+						  
+					  }
+					  
+				  }
+			  }
 					ff.close();	
+					
+					
+					
+					
+					
+					
+			if(sheet.getSheetName().equals("mjsortiment")) {
+				  return "mjsortiment";
+			  }
+					
 					if(sheet != null){
 						for(int i = 0 ; i < sheet.getLastRowNum();i++){
 							Row row = sheet.getRow(i);
