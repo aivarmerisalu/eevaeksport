@@ -523,6 +523,53 @@ kogusedStr = new HashMap();
 	  }
   
   
+  private HashMap<String,Vector<String>> getMerc(){
+	  HashMap<String,Vector<String>> res = new HashMap<String,Vector<String>>();
+	  	
+	  	File f = new File(this.getExcelDir() + "ClientAgent.xlsx");
+			try {
+				
+				 DataFormatter formatter = new DataFormatter();
+				
+				
+				FileInputStream ff = new FileInputStream(f);
+				XSSFWorkbook workbook = new XSSFWorkbook((ff));
+				XSSFSheet sheet = workbook.getSheetAt(0);
+				XSSFRow row = null;
+				
+				for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+					row = sheet.getRow(i);
+					
+					String custID = formatter.formatCellValue(row.getCell((short) 0));
+					String ag = formatter.formatCellValue(row.getCell((short) 1));
+
+
+	                       
+	                       if(ag.trim().length() > 0) {
+	                    	   if(ag.startsWith("ag")) {
+	                    		   ag = ag.substring(2);
+	                    	   }
+	                    	// System.out.println("ag " + ag); 
+	                    	   Vector<String> vec  = new Vector<String>();
+	                           if(res.get(custID) != null) {
+	                           	vec = res.get(custID);
+	                           }
+	                           if(!vec.contains(ag)) {
+	                           	  vec.add(ag);
+	                           }
+	                           res.put(custID, vec);
+	                       }
+	                    }
+				
+				
+			   } catch(Exception r){
+				  r.printStackTrace();	
+				}
+				System.out.println("Merc size  " + res.size());
+	 // 	System.exit(0);
+	  	return res;
+	  }
+  
   public TreeMap getCustomers(Agent agent){
 
 	  double minordsum = 0;
@@ -536,9 +583,9 @@ kogusedStr = new HashMap();
 	  
 	  try{
 		   Converter.getManagersReplacements(agents1, rcompany, user, pass); 
-	}catch(Exception e){
+	   } catch(Exception e) {
 
-	}
+	   }
 	  
       String cmd = "select * from getCustomers";
       String cmd2 = "select * from getCustomers";
@@ -554,6 +601,7 @@ kogusedStr = new HashMap();
         HashMap custMap = new HashMap();
         HashMap custMap2 = new HashMap();
         HashMap<String,Vector<String>> custAgents = new HashMap<String,Vector<String>>();
+        HashMap<String,Vector<String>> custMercs = getMerc();
         
         try {
         	Connection  con = getNewConnection();
@@ -567,13 +615,10 @@ kogusedStr = new HashMap();
                 if(custAgents.get(klient) != null) {
                 	vec = custAgents.get(klient);
                 }
-                
                 if(!vec.contains(ag)) {
                 	  vec.add(ag);
                 }
-              
                 custAgents.put(klient, vec);
-                	
             }
             rs.close();
             
@@ -720,9 +765,13 @@ kogusedStr = new HashMap();
                              cust.addAgent(new Agent("HOUSE1")); 
                          } 
                 	}
-                	
-                         
-                       
+                }
+                
+                if(custMercs.get(cust.getID()) != null) {
+                	Vector<String> ags = custMercs.get(cust.getID());
+                	for (String ag : ags) {
+                		cust.addAgent(new Agent(ag));
+                	}
                 }
 
            

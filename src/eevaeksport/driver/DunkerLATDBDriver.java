@@ -53,7 +53,7 @@ import imageUtil.ImageLoader;
  * @version 1.0
  */
 
-public class DunkerLATDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker {
+public class DunkerLATDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker,FixLoader {
   public DunkerLATDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -79,6 +79,27 @@ public class DunkerLATDBDriver extends AbstractDBDriver  implements Manager,Prom
   String pass = null;
   String rcompany = null;
 
+  
+  private TreeMap eanprods = null;
+	
+	 @Override
+		public void FixLoader() {
+		  eanprods =  Converter.loadMore();
+		  
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
+			this.getProducts(null);
+			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+			System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			if(contracts.size() > 0) {
+				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+			}
+			
+			
+			System.exit(0);
+		}
+	
 
 	 public void insertSuperVisorSQLMeri(SupervisorInfoWrapperMeri wr){
 	     String sql = "INSERT into supervisor values ("
@@ -976,6 +997,12 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
      String add = "";
      if(ean != null && ean.trim().length()>0){
      prod.setEAN(ean);
+     
+     if(eanprods == null) {
+  	   eanprods = new TreeMap();
+     }
+     eanprods.put(ean.trim(), prod.getID());
+     
      int ll  = ean.trim().length();
      add = " @" +  ean.trim().substring(ll-4);
     }

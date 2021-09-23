@@ -172,6 +172,7 @@ public class Converter {
 	
 	 public static TreeMap loadFixSelver(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int count = 0;
 		 try{
 			 
 			 Workbook workbook = null;
@@ -363,7 +364,11 @@ public class Converter {
                                     
 							if(res.get(pood) != null){
                         	  con = (Contract)res.get(pood);
-                        	 } 
+                        	  } else {
+                        		 count++;
+                        	  }
+							
+							
 							  ContractLine ll = new ContractLine(toode);
                         	  if(con.lines == null){
                         		  con.lines = new Vector();
@@ -388,13 +393,14 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "selver",true);
 		 }
-		 sendFixLoadErrorEmail("\n Selver imported " + res.keySet().size() + " shops fixed sortiments", parent, "selver",false);
+		 sendFixLoadErrorEmail("\n Selver imported " + count + " shops fixed sortiments", parent, "selver",false);
 
  	return res;
  }
 	 
 	 public static TreeMap loadFixKaup(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int count = 0;
 		 try{
 			 
 			 Workbook workbook = null;
@@ -491,7 +497,9 @@ public class Converter {
                                  
 							if(res.get(pood) != null){
                      	  con = (Contract)res.get(pood);
-                     	 } 
+                     	 } else {
+                     		 count++;
+                     	 }
 							  ContractLine ll = new ContractLine(toode);
                      	  if(con.lines == null){
                      		  con.lines = new Vector();
@@ -515,7 +523,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "kaupmees",true);
 		 }
-		 sendFixLoadErrorEmail("\n Kaupmees imported " + res.keySet().size() + " shops fixed sortiments", parent, "kaupmees",false);
+		 sendFixLoadErrorEmail("\n Kaupmees imported " + count + " shops fixed sortiments", parent, "kaupmees",false);
 
 	return res;
 }
@@ -523,6 +531,7 @@ public class Converter {
 
 	 public static TreeMap loadFixKaup2(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int count = 0;
 		 try{
 			 
 			 Workbook workbook = null;
@@ -622,7 +631,9 @@ public class Converter {
                               
 							if(res.get(pood) != null){
                   	  con = (Contract)res.get(pood);
-                  	 } 
+                  	 } else {
+                  		 count++;
+                  	 }
 							  ContractLine ll = new ContractLine(toode);
                   	  if(con.lines == null){
                   		  con.lines = new Vector();
@@ -646,7 +657,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "kaupmees",true);
 		 }
-		 sendFixLoadErrorEmail("\n Kaupmees imported " + res.keySet().size() + " shops fixed sortiments", parent, "kaupmees",false);
+		 sendFixLoadErrorEmail("\n Kaupmees imported " + count + " shops fixed sortiments", parent, "kaupmees",false);
 
 	return res;
 }
@@ -654,6 +665,7 @@ public class Converter {
 
 	 public static TreeMap loadFixcoopRist(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int count = 0;
 		 try{
 			 
 			 Workbook workbook = null;
@@ -796,7 +808,9 @@ public class Converter {
                                  
 							if(res.get(pood) != null){
                      	  con = (Contract)res.get(pood);
-                     	 } 
+                     	 } else {
+                     		 count++;
+                     	 }
 							  ContractLine ll = new ContractLine(toode);
                      	  if(con.lines == null){
                      		  con.lines = new Vector();
@@ -820,7 +834,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "coop",true);
 		 }
-		 sendFixLoadErrorEmail("\n Coop imported " + res.keySet().size() + " shops fixed sortiments", parent, "coop",false);
+		 sendFixLoadErrorEmail("\n Coop imported " + count + " shops fixed sortiments", parent, "coop",false);
 
 	return res;
 }
@@ -828,6 +842,7 @@ public class Converter {
 
 	 public static TreeMap loadFixMaxima(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int count = 0;
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -954,7 +969,9 @@ public class Converter {
 			                   
 							if(res.get(pood) != null){
 			       	           con = (Contract)res.get(pood);
-			       	           } 
+			       	           } else {
+			       	        	   count++;
+			       	           }
 							
 							
 							
@@ -1011,7 +1028,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "maxima",true);
 		 }
-		 sendFixLoadErrorEmail("\n Maxima imported " + res.keySet().size() + " shops fixed sortiments", parent, "maxima",false);
+		 sendFixLoadErrorEmail("\n Maxima imported " + count + " shops fixed sortiments", parent, "maxima",false);
 	return res;
 }
 	
@@ -1019,6 +1036,7 @@ public class Converter {
 	 
 	 public static TreeMap loadFixAldar(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int count = 0;
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -1089,7 +1107,9 @@ public class Converter {
                                  
 							if(res.get(pood) != null){
                      	  con = (Contract)res.get(pood);
-                     	 } 
+                     	 } else {
+                     		 count++;
+                     	 }
 							  ContractLine ll = new ContractLine(toode);
                      	  if(con.lines == null){
                      		  con.lines = new Vector();
@@ -1113,12 +1133,13 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "aldar", false);
 		 }
-		 sendFixLoadErrorEmail("\n Aldar imported " + res.keySet().size() + " shops fixed sortiments", parent, "aldar",false);
+		 sendFixLoadErrorEmail("\n Aldar imported " + count + " shops fixed sortiments", parent, "aldar",false);
 	return res;
 }
 	
 	 public static TreeMap loadFixPrisma2(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int count = 0;
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -1209,7 +1230,9 @@ public class Converter {
                         	   Contract con = new Contract(pood);
                                if(res.get(pood) != null){
                              	  con = (Contract)res.get(pood);
-                    	             } 	
+                    	             } else{
+                    	            	 count++;
+                    	             }
 							  ContractLine ll = new ContractLine(toode);
                	  if(con.lines == null){
                		  con.lines = new Vector();
@@ -1238,12 +1261,13 @@ public class Converter {
 			 sendFixLoadErrorEmail(errors, parent, "Prisma2",true);
 		 }
 		 
-		 sendFixLoadErrorEmail("\n Prisma2 imported " + res.keySet().size() + " shops fixed sortiments", parent, "prisma2",false);
+		 sendFixLoadErrorEmail("\n Prisma2 imported " + count + " shops fixed sortiments", parent, "prisma2",false);
 	
 		 return res;
 }
 	 public static TreeMap loadFixPrisma(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int count = 0;
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -1324,7 +1348,9 @@ public class Converter {
                               
 							if(res.get(pood) != null){
                   	  con = (Contract)res.get(pood);
-                  	 } 
+                  	 } else {
+                  		 count++;
+                  	 }
 							  ContractLine ll = new ContractLine(toode);
                   	  if(con.lines == null){
                   		  con.lines = new Vector();
@@ -1348,7 +1374,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "Prisma",true);
 		 }
-		 sendFixLoadErrorEmail("\n Prisma imported " + res.keySet().size() + " shops fixed sortiments", parent, "prisma",false);
+		 sendFixLoadErrorEmail("\n Prisma imported " + count + " shops fixed sortiments", parent, "prisma",false);
 	return res;
 }
 	
@@ -1356,6 +1382,7 @@ public class Converter {
 	 
 	 public static TreeMap loadFixRimi(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int count = 0;
 		
 		 try{
 			 
@@ -1468,7 +1495,9 @@ public class Converter {
                               
 							if(res.get(pood) != null){
                   	  con = (Contract)res.get(pood);
-                  	 } 
+                  	 } else {
+                  		 count++;
+                  	 }
 							  ContractLine ll = new ContractLine(toode);
                   	  if(con.lines == null){
                   		  con.lines = new Vector();
@@ -1494,7 +1523,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "rimi", true);
 		 }
-		 sendFixLoadErrorEmail("\n Rimi imported " + res.keySet().size() + " shops fixed sortiments", parent, "rimi",false);
+		 sendFixLoadErrorEmail("\n Rimi imported " + count + " shops fixed sortiments", parent, "rimi",false);
 			 
 	return res;
 }
@@ -1567,7 +1596,7 @@ public class Converter {
 
 	
 	 public static TreeMap loadFixRimi2(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
-
+     int count = 0;
 		 Vector check = new Vector();
 			String errors = null; 
 			TreeMap <String,Vector> klaster= new TreeMap<String,Vector>();
@@ -1737,7 +1766,9 @@ public class Converter {
 								  
 							        if(res.get(pood) != null){
 							            con = (Contract)res.get(pood);
-							        } 
+							        } else {
+										 count++;
+									 }
 							        ContractLine ll = new ContractLine(toode);
 							        if(con.lines == null){
 							            con.lines = new Vector();
@@ -1759,7 +1790,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "rimi2", true);
 		 }
-		 sendFixLoadErrorEmail("\n Rimi2 imported " + res.keySet().size() + " shops fixed sortiments", parent, "rimi",false);
+		 sendFixLoadErrorEmail("\n Rimi2 imported " + count + " shops fixed sortiments", parent, "rimi",false);
 			 
 	return res;
 }
@@ -1769,7 +1800,7 @@ public class Converter {
 	 
 	 public static TreeMap loadFixElvi(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 		 
-		 
+		 int count = 0;
 
 		Vector check = new Vector();
 		String errors = null; 
@@ -1848,7 +1879,9 @@ public class Converter {
 					           
 								 if(res.get(pood) != null){
 									 con = (Contract)res.get(pood);
-								 } 
+								 } else {
+									 count++;
+								 }
 								 ContractLine ll = new ContractLine(toode);
 								 if(con.lines == null){
 									 con.lines = new Vector();
@@ -1901,7 +1934,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "elvi", true);
 		 }
-		 sendFixLoadErrorEmail("\n Elvi imported " + res.keySet().size() + " shops fixed sortiments", parent, "elvi",false);
+		 sendFixLoadErrorEmail("\n Elvi imported " + count + " shops fixed sortiments", parent, "elvi",false);
 			 
 	return res;
 }
@@ -1911,7 +1944,7 @@ public class Converter {
 	 public static TreeMap loadFixMego(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 		 
 		 
-
+  int cc = 0;
 		Vector check = new Vector();
 		String errors = null; 
 		TreeMap <String,Vector> klaster= new TreeMap<String,Vector>();
@@ -1981,7 +2014,9 @@ public class Converter {
 					           
 								 if(res.get(pood) != null){
 									 con = (Contract)res.get(pood);
-								 } 
+								 } else {
+									 cc++;
+								 }
 								 ContractLine ll = new ContractLine(toode);
 								 if(con.lines == null){
 									 con.lines = new Vector();
@@ -2034,7 +2069,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "mego", true);
 		 }
-		 sendFixLoadErrorEmail("\n Mego imported " + res.keySet().size() + " shops fixed sortiments", parent, "mego",false);
+		 sendFixLoadErrorEmail("\n Mego imported " + cc+ " shops fixed sortiments", parent, "mego",false);
 			 
 	return res;
 }
@@ -2043,6 +2078,7 @@ public class Converter {
 	 
 	 public static TreeMap loadFixMJ(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int cc = 0;
 		
 		 try{
 			 
@@ -2122,7 +2158,9 @@ public class Converter {
                         
 							if(res.get(pood) != null){
             	                 con = (Contract)res.get(pood);
-            	                } 
+            	                } else {
+            	                	cc++;
+            	                }
 							  ContractLine ll = new ContractLine(toode);
             	               if(con.lines == null){
             		                 con.lines = new Vector();
@@ -2147,7 +2185,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "mjsortiment", true);
 		 }
-		 sendFixLoadErrorEmail("\n MJSortiment imported " + res.keySet().size() + " shops fixed sortiments", parent, "mjsortiment",false);
+		 sendFixLoadErrorEmail("\n MJSortiment imported " + cc + " shops fixed sortiments", parent, "mjsortiment",false);
 			 
 	return res;
 }
@@ -2156,7 +2194,7 @@ public class Converter {
 	 
 	 public static TreeMap loadFixKeila(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
-		
+		int cc =0;
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -2279,7 +2317,9 @@ public class Converter {
                            
 							if(res.get(pood) != null){
                	                 con = (Contract)res.get(pood);
-               	                } 
+               	                } else {
+               	                	cc++;
+               	                }
 							  ContractLine ll = new ContractLine(toode);
                	               if(con.lines == null){
                		                 con.lines = new Vector();
@@ -2304,7 +2344,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "keila", true);
 		 }
-		 sendFixLoadErrorEmail("\n Keila TÜ imported " + res.keySet().size() + " shops fixed sortiments", parent, "keila",false);
+		 sendFixLoadErrorEmail("\n Keila TÜ imported " + cc + " shops fixed sortiments", parent, "keila",false);
 			 
 	return res;
 }
@@ -2313,6 +2353,7 @@ public class Converter {
 	 
 	 public static TreeMap loadFixLektus(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int cc =0;
 			 DataFormatter formatter = new DataFormatter();
 		
 		 try{
@@ -2386,7 +2427,9 @@ public class Converter {
                         
 							if(res.get(pood) != null){
             	                 con = (Contract)res.get(pood);
-            	                } 
+            	                } else {
+            	                	cc++;
+            	                }
 							  ContractLine ll = new ContractLine(toode);
             	               if(con.lines == null){
             		                 con.lines = new Vector();
@@ -2410,7 +2453,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "lektus", true);
 		 }
-		 sendFixLoadErrorEmail("\n  RR Lektus imported " + res.keySet().size() + " shops fixed sortiments", parent, "lektus",false);
+		 sendFixLoadErrorEmail("\n  RR Lektus imported " + cc + " shops fixed sortiments", parent, "lektus",false);
 			 
 	return res;
 }
@@ -2419,6 +2462,7 @@ public class Converter {
 	
 	 public static TreeMap loadFixcoop(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int cc = 0;
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -2581,7 +2625,9 @@ public class Converter {
 							  
 							if(res.get(pood) != null){
                            	  con = (Contract)res.get(pood);
-                           	 } 
+                           	 } else {
+                           		 cc++;
+                           	 }
 							  ContractLine ll = new ContractLine(toode);
                            	  if(con.lines == null){
                            		  con.lines = new Vector();
@@ -2607,7 +2653,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "coop", true);
 		 }
-		 sendFixLoadErrorEmail("\n Coop imported " + res.keySet().size() + " shops fixed sortiments", parent, "coop",false);
+		 sendFixLoadErrorEmail("\n Coop imported " + cc + " shops fixed sortiments", parent, "coop",false);
 			 
     	return res;
     }
@@ -2615,6 +2661,7 @@ public class Converter {
 	 
 	 public static TreeMap loadFixOG(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			int cc =0;
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -2703,7 +2750,9 @@ public class Converter {
 									  
 									if(res.get(pood) != null){
 		                        	  con = (Contract)res.get(pood);
-		                        	 } 
+		                        	 } else {
+		                        		 cc++;
+		                        	 }
 									  ContractLine ll = new ContractLine(toode);
 		                        	  if(con.lines == null){
 		                        		  con.lines = new Vector();
@@ -2730,7 +2779,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "elektra", true);
 		 }
-		 sendFixLoadErrorEmail("\n Elektra imported " + res.keySet().size() + " shops fixed sortiments", parent, "elektra",false);
+		 sendFixLoadErrorEmail("\n Elektra imported " + cc + " shops fixed sortiments", parent, "elektra",false);
 			 
  	return res;
  }

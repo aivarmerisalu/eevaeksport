@@ -1460,6 +1460,8 @@ private long getAndUpdateNext() throws SQLException{
  	 nf.setGroupingUsed(false);
 	 Hashtable pandikas =  new Hashtable();
 	 String aletext = null;
+	 
+	 boolean sendcomm = false;
  	
  	 // SIIA TEE ROUNDIN statuse j�rgi ja kampaania koguse kontroll ja koodi muutmine 
  	 
@@ -1631,7 +1633,8 @@ private long getAndUpdateNext() throws SQLException{
 	         	if(comment.trim().length()>70){
 	         		comm2 = comment;
 	         		comment = comment.substring(0,70);	
-	         	}
+	         		}
+	         	sendcomm = true;
 	         	}
 	          
 	         if(order.isShipDateUsed()) {
@@ -1653,6 +1656,7 @@ private long getAndUpdateNext() throws SQLException{
 	         	 }else{
 	         		 comment = addSpaces("",35) + tarnekell;
 	         	 }
+	         	 //sendcomm = true;
 	          	}
 	          if(order.isChanged()){
 	         	 comment = "Muudetud!!!" + comment;
@@ -2214,6 +2218,7 @@ if(!allowed){
      		 }else {
      			aletext = aletext + ddd + "%  [" + kogus + "] "+ toode + " " + nimi + "\n";
      		 }
+     		sendcomm = true;
      }else{
         	sb.append(addSpaces("", 6)); // discount
      }
@@ -2383,10 +2388,14 @@ if("true".equals(parent.getProps().getProperty("make.oldfile"))){
       fos.write(sb.toString().getBytes());
       fos.close();
 }
-if(order.getStatus() < 5) {
+
+System.out.println("Saadame kommentaari " + sendcomm + " " + comm2 +" "+ aletext);
+
+if(order.getStatus() < 5 && sendcomm) {
 	  if(comm2 == null) {
 		   comm2 = "Tellimus";
 	   }
+	  
 	if((comm2 != null || aletext != null ) ){
 		   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
 		 
