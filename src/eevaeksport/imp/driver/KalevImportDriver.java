@@ -2218,7 +2218,7 @@ if(!allowed){
      		 }else {
      			aletext = aletext + ddd + "%  [" + kogus + "] "+ toode + " " + nimi + "\n";
      		 }
-     		sendcomm = true;
+     		//sendcomm = true;
      }else{
         	sb.append(addSpaces("", 6)); // discount
      }

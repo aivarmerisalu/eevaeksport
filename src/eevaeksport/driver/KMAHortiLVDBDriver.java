@@ -747,7 +747,7 @@ public class KMAHortiLVDBDriver extends AbstractDBDriver implements Manager, Pro
 		try {
 		
 
-		String cmd = " select * from Kaubad where  Tähtsusgrupp like '%Leedu%' ";
+		String cmd = " select * from Kaubad where Tähtsusgrupp in ('Laotoode') ";
 		// Siffer   Nimetus Hind Ühik  ÜhikutKastis   EAN   
 		//YlemGrupp AlamGrupp Hetkeseis   MinHind  Kaal  Brutokaal  Pildilink   
 
@@ -764,8 +764,9 @@ public class KMAHortiLVDBDriver extends AbstractDBDriver implements Manager, Pro
 				String kood = rs.getString("Siffer").trim();
 				if(kood.trim().length() > 1) {
 				Product prod = new Product(kood);
-				String nimetus = rs.getString("nimetus").trim();
-				
+				String nimetus = rs.getString("nimetus");
+				if(nimetus != null) {
+				nimetus = nimetus.trim();
 				try {
 					if (nimetus.indexOf("(") != -1) {
 						nimetus = nimetus.replace('(', '<');
@@ -909,13 +910,15 @@ public class KMAHortiLVDBDriver extends AbstractDBDriver implements Manager, Pro
 				prod.setName(nimetus);
 				
 				
-				if( prod.getName() != null) {
+				if( prod.getName() != null && gg) {
 					
 					//prod.setName( Converter.enCodeEst(nimetus + " " +  add).trim());
 					System.out.println(nimetus + " " + nimetusen + " " + nimetuslv );
 					products.put(prod.getName(), prod);
 				}
 				}
+			}
+				
 			}
 			rs.close();
 			st.close();

@@ -1118,7 +1118,7 @@ if( parent.getProps().getProperty("regnum")!= null){
                if(line.getDiscount() > 0){
             	   price = price / ((100-line.getDiscount())/100);
                }
-               if(hinnad.get(line.getToode()) != null){
+               if(hinnad.get(line.getToode()) != null && Double.parseDouble(hinnad.get(line.getToode()) +"") > 0){
             	   price = Double.parseDouble((String)hinnad.get(line.getToode()));
                }
               
@@ -1138,6 +1138,9 @@ if( parent.getProps().getProperty("regnum")!= null){
                if(hinnad.get(line.getToode()) != null){
             	   price = Double.parseDouble((String)hinnad.get(line.getToode()));
             	   price = price * (100-line.getDiscount())/100;
+            	   if(price == 0) {
+            		   price = line.getPrice();
+            	   }
                }
                if(kink){
             	   price = 0;
