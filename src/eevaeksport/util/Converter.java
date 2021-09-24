@@ -1948,7 +1948,6 @@ public class Converter {
 		Vector check = new Vector();
 		String errors = null; 
 		TreeMap <String,Vector> klaster= new TreeMap<String,Vector>();
-		Vector <Integer> EANcolumn = new Vector<Integer>();		//mis ridadel asuvad ean koodid
 		int dataLocation=1;
 		int productLoc=0;
 		int clusterLocx=2;
@@ -2074,6 +2073,152 @@ public class Converter {
 	return res;
 }
 
+	 
+	 
+
+	 public static TreeMap loadFixSanitex(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
+		 
+		int count = 0;
+		int counter = 0;
+		Vector check = new Vector();
+		String errors = null; 
+		String ean="";
+		String toode = "";
+		String tooteNimi = null;
+		
+		int storeLocX=2;  //mis veerust algavad poed (2=D, 3=E....)
+		int storeLocY=0;  //mis reast algavad poed
+		
+		
+		int prodLoc=1;	//msi veerus on toote nimed ean suhtes =ean veerg+prod veerg
+		
+		
+		
+		DataFormatter formatter2 = new DataFormatter();
+		
+		 try{
+			 
+	       	FileInputStream	 ff = new FileInputStream(file);
+			XSSFWorkbook workbook = new XSSFWorkbook(ff); 
+			System.out.println("Sanitex lugemine " + file.getName());
+			ff.close();
+
+			int viimaneleht=workbook.getNumberOfSheets();
+			for(int sheetnr=0; sheetnr<1; sheetnr++) { 				//loeme lehed
+				
+				
+				Sheet sheet = workbook.getSheetAt(sheetnr); 
+				String sheettitle=sheet.getSheetName();
+				
+				int viimanerida=sheet.getLastRowNum();
+				for(int row=0; row < viimanerida+1; row++) {					
+					//counter=0;
+					
+					if(sheet.getRow(row) != null) {
+						int viimanecell=sheet.getRow(row).getLastCellNum();
+						ean="0"; 
+						toode = null;
+						tooteNimi = null;
+						
+					for(int cell=0; cell<viimanecell; cell++) {
+						 sheet.getRow(row).getCell(cell).setCellType(Cell.CELL_TYPE_STRING);
+						 String celliSisu=formatter2.formatCellValue(sheet.getRow(row).getCell(cell));	//loeme celli stringina
+
+						 if(celliSisu.isEmpty()==false && celliSisu!=null && isNumeric(celliSisu) ) {														//kas string on number
+							 Double number=Double.parseDouble(celliSisu);										//string->double
+							 
+							 if(number>1) {
+								 if(doubleLength(Math.round(number)) == 13 || doubleLength(Math.round(number)) == 12 ) {												//EAN on 13x pikkune
+									 ean=celliSisu;
+									 toode = getToode(prods,ean);
+									 tooteNimi = formatter2.formatCellValue(sheet.getRow(row).getCell(cell+prodLoc));
+									//System.out.println("toode: "+yy);
+									 
+								 }
+							 }
+						 }
+						 
+						 
+						 String klastriNimi = formatter2.formatCellValue(sheet.getRow(storeLocY).getCell(cell)); 
+						 if(klastriNimi=="") {
+							 klastriNimi="SANI-";
+						 }
+						 
+						 if (klastriNimi != null && klastriNimi.trim().length() > 0 ) {
+							 String pood =  "SANI-" + klastriNimi;
+							 Contract con = new Contract( pood);
+
+					           
+							 if(cell>storeLocX && row>0 && celliSisu.length()==1 && ean!="0" && celliSisu.contains("Y")) {
+										
+								 //System.out.println("Sees " + cell + " " + celliSisu + " " + ean + " " + pood + " " + tooteNimi + " " + toode);
+								 counter++;
+								 if(res.get(pood) != null){
+									 con = (Contract)res.get(pood);
+								 } else {
+									 count++;
+								 }
+								 ContractLine ll = new ContractLine(toode);
+								 if(con.lines == null){
+									 con.lines = new Vector();
+								 }
+								 con.lines.add(ll);
+								 res.put(pood, con);
+								 //System.out.println(con);
+							 }
+
+						 }
+						 
+					}
+						 
+					
+						
+						//System.out.println(row+" count: "+counter);
+					
+					
+						 
+					}
+					
+					if(toode != null && ean != null && ean.trim().length()> 0 ) {
+						  if(toode.equals(ean)) {
+							  if(errors == null) {
+								  errors = "Products not found in assortiment \n SANITEX format\n fail : " + file.getName() +"\n\nEAN     Description\n";
+							  }
+							  if(!errors.contains(ean)) {
+								  errors = errors + ean + "   " + tooteNimi + "\n";
+							  }
+						  }
+						  //System.out.println("Groups " +  "groups.size()" + " " + "row.getLastCellNum()");
+					
+					
+					
+					}
+						
+						
+				}
+
+
+			}
+			
+			
+			 	System.out.println("Sanitex lõpp "+counter);
+			 	System.exit(0);
+
+		 }catch(Exception e) {
+						 e.printStackTrace(); 
+					 }	 
+		 
+		// System.out.println("res " + check.toString().replaceAll(", ", "\n"));
+		 System.exit(0);
+		// System.exit(0);
+		 if(errors != null) {
+			 sendFixLoadErrorEmail(errors, parent, "Sanitex", true);
+		 }
+		 sendFixLoadErrorEmail("\n Sanitex imported " + count + " shops fixed sortiments", parent, "Sanitex",false);
+			 
+	return res;
+}
+	 
 	 
 	 
 	 public static TreeMap loadFixMJ(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
@@ -2868,6 +3013,9 @@ public class Converter {
 		          if(format.equals("mego")) {
 			        	 loadFixMego(res, file , prods, parent);
 				      }
+		          if(format.equals("sanitex")) {
+			        	 loadFixSanitex(res, file , prods, parent);
+				      }
 		       }
 		      String nn = file.getName();
 		    		  
@@ -2908,10 +3056,11 @@ public class Converter {
 			  }
 					
 			  if(f.getName().contains("MEGO")) {
-				  System.out.println("mego");
 			       return "mego";
 			  }
-			  
+			  if(f.getName().contains("Sanitex")) {
+			       return "sanitex";
+			  }
 			  
 			  if(sheet.getSheetName().equals("mjsortiment")) {
 				  return "mjsortiment";
