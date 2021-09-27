@@ -2343,8 +2343,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	public void FixLoader() {
 	
 	   
-	    Converter.loadFixFromExcels("excelsort" , prods, parent);
-	    System.exit(0);
+	
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort" , prods, parent);
 		System.out.println("Contracts " + contracts.toString());
 		System.exit(0);

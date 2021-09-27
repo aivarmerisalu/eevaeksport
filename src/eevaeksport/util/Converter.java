@@ -2141,11 +2141,11 @@ public class Converter {
 						 
 						 String klastriNimi = formatter2.formatCellValue(sheet.getRow(storeLocY).getCell(cell)); 
 						 if(klastriNimi=="") {
-							 klastriNimi="SANI-";
+							 klastriNimi="SAN-";
 						 }
 						 
 						 if (klastriNimi != null && klastriNimi.trim().length() > 0 ) {
-							 String pood =  "SANI-" + klastriNimi;
+							 String pood =  "SAN-" + klastriNimi;
 							 Contract con = new Contract( pood);
 
 					           
@@ -2202,14 +2202,14 @@ public class Converter {
 			
 			
 			 	System.out.println("Sanitex lõpp "+counter);
-			 	System.exit(0);
+			 //	System.exit(0);
 
 		 }catch(Exception e) {
 						 e.printStackTrace(); 
 					 }	 
 		 
 		// System.out.println("res " + check.toString().replaceAll(", ", "\n"));
-		 System.exit(0);
+		 //System.exit(0);
 		// System.exit(0);
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "Sanitex", true);
