@@ -690,6 +690,18 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
      try{
+    	 
+    	 if(getParent().getProps().getProperty("christCodes") != null ){
+  		   christCodes = new Vector<String>();
+  		   
+  		  String aa =  getParent().getProps().getProperty("christCodes");
+  		  
+  		  StringTokenizer st = new StringTokenizer(aa,",");
+  		  while(st.hasMoreTokens()) {
+  			  christCodes.add(st.nextToken()) ;
+  		  }
+  	    	System.out.println("christCodes " + christCodes.size());
+  	     }
     	 getProducts(null);	 
      }catch(Exception r){
     	 r.printStackTrace();
@@ -1855,9 +1867,12 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    }
    
    TreeMap<String,Double> eanPrices = new TreeMap<String,Double>();
+   Vector<String> christCodes = null;
    
    public TreeMap getProducts(Agent agent){
 	   TreeMap otherStocks = this.getProductsOther();
+	  
+	 
 	   boolean addShelf = false ;
 	   try {
 		getProdGroups2();
@@ -2166,6 +2181,8 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
                	    	 prod.setType(gr); 
                    	 }
               	}
+        	 
+        	 // jõulud christmas statustop = 5
         	    
       	 	  if( groupIndent !=  null){
             		
@@ -2180,6 +2197,15 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
                 	 }
            		
            	}
+      	 	  
+      	 	 if(christCodes != null ){
+      	 	if( christCodes.contains(grupp)) {
+      	 		prod.setStatusTop("5");
+      	 		prod.setType("Christmas");
+      	 	      } else {
+      	 		prod.setType("Everyday");
+      	 	      }
+      	 	 }
       	 	  
       	 	 }
 
@@ -2272,6 +2298,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
         	 	 }
          	
      	 	 }
+      	 	 
       	 	 
       	 	 if(stockAlter.get(prod.getID()) != null){
       	 		 prod.setStock((Double)stockAlter.get(prod.getID()));

@@ -1342,7 +1342,7 @@ Active customer past 7 days  :  20
         	}
         	if(total.length() > 3){
         		 SimpleDateFormat  dfor = new SimpleDateFormat(" MMMM dd, yyyy", Locale.getDefault() );
-        		sendEmail( total,"Active Customers Report - " + dfor.format(new Date()),parent.getProps().getProperty("reportmail"));
+        		//sendEmail( total,"Active Customers Report - " + dfor.format(new Date()),parent.getProps().getProperty("reportmail"));
         	}
          }
        

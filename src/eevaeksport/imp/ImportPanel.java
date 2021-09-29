@@ -16986,8 +16986,8 @@ shipdate = getCalXML(asi);
             	}
               }
            
-              System.out.println("SIIN OLEMA OMA LUGEMISEGA " +  driver.getDriverVersion() + " " +firma +" " + toode + " text2'" + text2+ "' " +warehouse 
-            		  + " text'" + text +  " shipmode'" + shipmode + "'reference'" + reference + "' dealer:" + dealer);
+          //   System.out.println("SIIN OLEMA OMA LUGEMISEGA " +  driver.getDriverVersion() + " " +firma +" " + toode + " text2'" + text2+ "' " +warehouse 
+            //		  + " text'" + text +  " shipmode'" + shipmode + "'reference'" + reference + "' dealer:" + dealer);
              
               if("true".equals(parent.getProps().getProperty("doknrFilename"))){
               	dokNr = fileName.substring(0,fileName.indexOf(".txt")).replace('.','-');
@@ -16999,10 +16999,16 @@ shipdate = getCalXML(asi);
             	  partii = partii + "|"+ inner;
               }
            
+              if("true".equals(parent.getProps().getProperty("reference.topartii"))){
+            	  partii = reference;
+                }
+              
               orders.add(firma,toode,name,kogus,num, dealer, bonus, discount,datelong,pl,price,paymterm,false,agcode,status,unit,warehouse,partii,null,shiptime,shipDateUsed,selActCode,docType);
-         System.out.println(firma +" " + toode + " " + price + " " + 
+              
+              System.out.println(firma +" " + toode + " " + price + " " + 
               num + " pl-" +  pl +  " "+ warehouse + " | " + dealer + "*" + partii +
               " sdu:" + shipDateUsed + " " + photoname + " " + signaname + " " + contactid + " typ:" + docType);
+            
               if(shipmode.trim().length()>0){
                   orders.setShipMode(shipmode);             
                 }

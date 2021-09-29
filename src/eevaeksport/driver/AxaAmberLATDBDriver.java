@@ -1756,7 +1756,18 @@ int i = 0;
          cust.addAgent(new Agent(teles.trim()));
          if(teles.trim().startsWith("T")){
         	 cust.setCity("Tele: " + teles.trim());
+        	  cust.addAgent(new Agent("T1"));
+              cust.addAgent(new Agent("T2"));
+              cust.addAgent(new Agent("T3"));
+              cust.addAgent(new Agent("T4"));
+              cust.addAgent(new Agent("T5"));
+              cust.addAgent(new Agent("T6"));
+              cust.addAgent(new Agent("T7"));
+              cust.addAgent(new Agent("T8"));
          }
+         
+       
+         
         }
     
         

@@ -914,10 +914,11 @@ try{
 		     if(partii != null && partii.trim().length() > 1 && !splits.contains(partii)) {
 		    	 splits.add(partii);
 		     }
+		 //    System.out.println("partii " + partii);
 	  }
 		  
 	  System.out.println("splits " + splits.toString());
-	 
+	// System.exit(0);
 	  
 	  if(splits.size() == 0) {
 		  result.add(order);
@@ -962,7 +963,7 @@ try{
 
 	 System.out.println("Result =" +order.getDokNr()
 		 + " "+ result.size());
-	// System.exit(0);
+	 System.exit(0);
 	  return result ;
   }
 
