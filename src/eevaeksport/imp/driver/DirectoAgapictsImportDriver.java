@@ -963,7 +963,7 @@ try{
 
 	 System.out.println("Result =" +order.getDokNr()
 		 + " "+ result.size());
-	 System.exit(0);
+//	 System.exit(0);
 	  return result ;
   }
 
