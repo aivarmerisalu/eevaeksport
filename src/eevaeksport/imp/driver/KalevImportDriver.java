@@ -736,10 +736,12 @@ if(acc == null){
 
     String sql1 = "SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE RTRIM(SC01001)=  '" + pr + "' and SC01014 != ''";
 
+  
 
 
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
+   
 
     while (rs1.next()) {
       prod = rs1.getString("toode").trim();
@@ -754,6 +756,30 @@ if(acc == null){
       if (rs1.next()) {
         prod = rs1.getString("toode").trim();
       }
+    }
+    
+    if(prod == null && ean != null){
+    	
+    	  String sqlea = "SELECT  nimetus , toode FROM toode  WHERE TRIM(ribakood)=  '" + ean + "' ";
+
+    	Connection coe = this.getNewConEeva();
+    	
+    	 Statement st2 = coe.createStatement();
+    	    ResultSet rs2 = st2.executeQuery(sqlea);
+    	 rs2 = st2.executeQuery(sqlea);
+         if (rs2.next()) {
+        	 String nimetus = rs2.getString("nimetus").trim();
+        	 String kood = rs2.getString("toode").trim();
+        	 String pre = "FE" ;
+ 			if(kood.startsWith("K0") && nimetus.indexOf("OTB") !=-1){
+ 				pre = "OTB";
+ 			}
+           prod = pre + kood ;
+          
+         }
+         rs2.close();
+         st2.close();
+         coe.close();
     }
 
   //  System.out.println(prodID + " prod1 " + prod);
@@ -1434,6 +1460,8 @@ private long getAndUpdateNext() throws SQLException{
  	 nf.setGroupingUsed(false);
 	 Hashtable pandikas =  new Hashtable();
 	 String aletext = null;
+	 
+	 boolean sendcomm = false;
  	
  	 // SIIA TEE ROUNDIN statuse j�rgi ja kampaania koguse kontroll ja koodi muutmine 
  	 
@@ -1595,6 +1623,7 @@ private long getAndUpdateNext() throws SQLException{
 
 	      String comment = order.getInfo();
 	      String comm2 = comment;
+	      String tarne = "";
 	          
 	          
 	          if(comment == null || comment.trim().length() == 0 ){
@@ -1604,11 +1633,12 @@ private long getAndUpdateNext() throws SQLException{
 	         	if(comment.trim().length()>70){
 	         		comm2 = comment;
 	         		comment = comment.substring(0,70);	
-	         	}
+	         		}
+	         	sendcomm = true;
 	         	}
 	          
 	         if(order.isShipDateUsed()) {
-	        	// comm2 = comm2 + "<br> Tarnekuupäev valitud : " + Converter.getDDpMMpYYYYpString(order.getShipCal());
+	        	  tarne = "<br> Tarnekuupäev valitud : " + Converter.getDDpMMpYYYYpString(order.getShipCal());
 	         }
 	          
 	          String tarnekell =  order.getShipTime();
@@ -1626,6 +1656,7 @@ private long getAndUpdateNext() throws SQLException{
 	         	 }else{
 	         		 comment = addSpaces("",35) + tarnekell;
 	         	 }
+	         	 //sendcomm = true;
 	          	}
 	          if(order.isChanged()){
 	         	 comment = "Muudetud!!!" + comment;
@@ -2187,6 +2218,7 @@ if(!allowed){
      		 }else {
      			aletext = aletext + ddd + "%  [" + kogus + "] "+ toode + " " + nimi + "\n";
      		 }
+     		//sendcomm = true;
      }else{
         	sb.append(addSpaces("", 6)); // discount
      }
@@ -2356,14 +2388,18 @@ if("true".equals(parent.getProps().getProperty("make.oldfile"))){
       fos.write(sb.toString().getBytes());
       fos.close();
 }
-if(order.getStatus() < 5) {
+
+System.out.println("Saadame kommentaari " + sendcomm + " " + comm2 +" "+ aletext);
+
+if(order.getStatus() < 5 && sendcomm) {
 	  if(comm2 == null) {
 		   comm2 = "Tellimus";
 	   }
-	if((comm2 != null || aletext != null || true) ){
+	  
+	if((comm2 != null || aletext != null ) ){
 		   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
 		 
-	   sendCommentEmail( comm2,aletext,doknr,order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
+	   sendCommentEmail( comm2+tarne ,aletext,doknr,order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
 	 }
 }
 

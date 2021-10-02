@@ -53,8 +53,7 @@ import eevaeksport.util.Converter;
 	      if(parent.getEksportFrame().getProps().getProperty("db.url") != null) {
 		     	 url = parent.getEksportFrame().getProps().getProperty("db.url");//"jdbc:odbc:scalaDB";	
 		       }
-	      con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
-	      con2 = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+	    
 	      
 	     // updateCustcodes();
 	      calNF.setMaximumFractionDigits(0);
@@ -102,6 +101,8 @@ import eevaeksport.util.Converter;
 
 		    Statement st1;
 			try {
+				 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+					
 				st1 = con.createStatement();
 			
 		    ResultSet rs1 = st1.executeQuery(sql1);
@@ -112,6 +113,7 @@ import eevaeksport.util.Converter;
 
 		    rs1.close();
 		    st1.close();
+		    con.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -132,6 +134,8 @@ import eevaeksport.util.Converter;
 
 		    Statement st1;
 			try {
+				 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+					
 				st1 = con.createStatement();
 			
 		    ResultSet rs1 = st1.executeQuery(sql1);
@@ -145,6 +149,8 @@ import eevaeksport.util.Converter;
 
 		    rs1.close();
 		    st1.close();
+		    con.close();
+		    
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -167,9 +173,12 @@ import eevaeksport.util.Converter;
 		  
 		    Statement st1;
 			try {
+				 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+					
 				st1 = con.createStatement();
 				st1.executeUpdate(sql1);
 				st1.close();
+				con.close();
 		}catch (Exception e){
 			
 		}
@@ -207,6 +216,8 @@ import eevaeksport.util.Converter;
 
 				    Statement st1;
 					try {
+						 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+							
 						st1 = con.createStatement();
 				    ResultSet rs1 = st1.executeQuery(sql1);
 				    if (rs1.next()) {
@@ -214,6 +225,8 @@ import eevaeksport.util.Converter;
 				    }
 				    rs1.close();
 				    st1.close();
+				    con.close();
+				    
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
@@ -230,6 +243,8 @@ import eevaeksport.util.Converter;
 			String payer = null;
 		  try{
 			String sqlp = "Select SL01056  as maksja from SL010500 where SL01001 = '" + custid + "'";
+			 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+				
 			Statement st1 = con.createStatement();
 		     ResultSet  rs1 = st1.executeQuery(sqlp);			
 			if (rs1.next()) {
@@ -242,6 +257,7 @@ import eevaeksport.util.Converter;
 			
 		    rs1.close();
 		    st1.close();
+		    con.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -261,6 +277,8 @@ import eevaeksport.util.Converter;
 
 		    Statement st1;
 			try {
+				 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+					
 				st1 = con.createStatement();
 		    ResultSet rs1 = st1.executeQuery(sql1);
 		    if (rs1.next()) {
@@ -271,6 +289,7 @@ import eevaeksport.util.Converter;
 		    }
 		    rs1.close();
 		    st1.close();
+		    con.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -288,6 +307,8 @@ import eevaeksport.util.Converter;
 
 		    Statement st1;
 			try {
+				 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+					
 				st1 = con.createStatement();
 		    ResultSet rs1 = st1.executeQuery(sql1);
 		    if (rs1.next()) {
@@ -298,6 +319,7 @@ import eevaeksport.util.Converter;
 		    }
 		    rs1.close();
 		    st1.close();
+		    con.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -358,6 +380,8 @@ import eevaeksport.util.Converter;
 		    
 		           System.out.println(sql1);
 				    double acc = 0;
+				    Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+					
 				    Statement st1 = con.createStatement();
 				    ResultSet rs1 = st1.executeQuery(sql1);
 				    
@@ -429,6 +453,7 @@ import eevaeksport.util.Converter;
 				  }
 				  	   		    rs1.close();
 				    st1.close();
+				    con.close();
 
 				    System.out.println("Klient: " + acc + " " + id);
 				    return acc;
@@ -442,7 +467,8 @@ import eevaeksport.util.Converter;
 	 	
 	   System.out.println(sql1);
 	   String agent = null;
-
+	   Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+		
 	   Statement st1 = con.createStatement();
 	   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -452,6 +478,8 @@ import eevaeksport.util.Converter;
 	   }
 	   rs1.close();
 	   st1.close();
+	   con.close();
+	   
        if(agent.equals("MUU")){
     	//   agent = "   ";
        }
@@ -467,7 +495,8 @@ import eevaeksport.util.Converter;
 		       "   WHERE  SL01001='" + id +"'"; 
 		   System.out.println(sql1);
 		   double res = 0;
-
+		   Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+			
 		   Statement st1 = con.createStatement();
 		   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -477,6 +506,7 @@ import eevaeksport.util.Converter;
 		   }
 		   rs1.close();
 		   st1.close();
+		   con.close();
 	     
 		   return res;
 
@@ -487,7 +517,8 @@ import eevaeksport.util.Converter;
 	 	
 	   System.out.println(sql1);
 	   String agent = null;
-
+	   Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+		
 	   Statement st1 = con.createStatement();
 	   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -497,7 +528,7 @@ import eevaeksport.util.Converter;
 	 
 	   rs1.close();
 	   st1.close();
-     
+     con.close();
 	   return agent;
 
 	 }
@@ -509,7 +540,8 @@ import eevaeksport.util.Converter;
 	 	
 	   System.out.println(sql1);
 	   String agent = null;
-
+	   Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+		
 	   Statement st1 = con.createStatement();
 	   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -519,7 +551,7 @@ import eevaeksport.util.Converter;
 	 
 	   rs1.close();
 	   st1.close();
-     
+     con.close();
 	   return agent;
 
 	 }
@@ -529,7 +561,8 @@ import eevaeksport.util.Converter;
 	 	
 	   System.out.println(sql1);
 	   String agent = null;
-
+	   Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+		
 	   Statement st1 = con.createStatement();
 	   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -539,6 +572,7 @@ import eevaeksport.util.Converter;
 	   }
 	   rs1.close();
 	   st1.close();
+	   con.close();
      
 	   return agent;
 
@@ -551,7 +585,9 @@ import eevaeksport.util.Converter;
 		    String sql1 = " select SC03002 as ladu from  SC030200  " + 
          "  WHERE RTRIM(SC03001)=   '" + toode.trim() + "' and  SC03003-SC03004 > " + kogus + " and SC03002 in ('01') AND SC03003!=0";
 		    String ladu = "02";
-		    Statement st1 = con2.createStatement();
+		    Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+			
+		    Statement st1 = con.createStatement();
 		    ResultSet rs1 = st1.executeQuery(sql1);
 		    if (rs1.next()) {
 		    	ladu = rs1.getString("ladu").trim();
@@ -559,6 +595,8 @@ import eevaeksport.util.Converter;
 		       System.out.println(toode + " ladu1 " + ladu);
 		    rs1.close();
 		    st1.close();
+		    con.close();
+		    
 		    return ladu;
 		 }
 	  
@@ -568,6 +606,8 @@ import eevaeksport.util.Converter;
 	 	 
 	    String sql1 = " SELECT RTRIM(SC01150) AS pant FROM SC010500  WHERE RTRIM(SC01001)=   '" + toode.trim() + "'";
 	    String prod = null;
+	    Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+		
 	    Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql1);
 	    while (rs1.next()) {
@@ -576,6 +616,8 @@ import eevaeksport.util.Converter;
 	       System.out.println(toode + " prod1 " + prod);
 	    rs1.close();
 	    st1.close();
+	    con.close();
+	    
 	    return prod;
 	 }
 	  
@@ -583,6 +625,8 @@ import eevaeksport.util.Converter;
 		 	 
 		    String sql1 = " SELECT RTRIM(SC01019) AS pant FROM SC010500  WHERE RTRIM(SC01001)=   '" + toode.trim() + "'";
 		    double prod = 1;
+		    Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+			
 		    Statement st1 = con.createStatement();
 		    ResultSet rs1 = st1.executeQuery(sql1);
 		    if (rs1.next()) {
@@ -596,6 +640,7 @@ import eevaeksport.util.Converter;
 		       System.out.println(toode + " prod1 " + prod);
 		    rs1.close();
 		    st1.close();
+		    con.close();
 		    return prod;
 		 }
 		   
@@ -634,7 +679,8 @@ import eevaeksport.util.Converter;
 	  private String getDoknr(String aa) throws SQLException{
 	  	String res = null;
 	 	 String	sql1 = "select SY68002 as nr from SY6805XX where SY68001 = '" + aa + "'"; 
-				
+	 	 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+			
 				Statement st1 = con.createStatement();
 				ResultSet rs1 = st1.executeQuery(sql1);
 				
@@ -654,6 +700,7 @@ import eevaeksport.util.Converter;
 				
 		rs1.close();
 		st1.close();
+		con.close();
 	  	return res ;
 	  }
 	 
@@ -731,7 +778,42 @@ import eevaeksport.util.Converter;
 	
  
 
- 
+    TreeMap asendused = null;
+    
+    
+    private TreeMap getAsendused() {
+ 	    
+ 	    TreeMap res = new TreeMap();
+ 	        String cmd =" select SC01001 as toode, ActiveProdCode as asendus from PRODDATA0500	where ActiveProdCode != '' " ;
+ 		
+ 	     
+ 		      System.out.println(cmd);
+ 		   
+
+ 	      
+
+ 		try {
+ 			 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+ 			
+ 	          Statement st = con.createStatement();
+ 		    ResultSet	      rs = st.executeQuery(cmd);
+
+ 		    while (rs.next()) {
+ 			String kood = rs.getString("toode").trim();
+ 			String asendus = rs.getString("asendus").trim();
+ 			res.put(kood, asendus);
+ 			}
+ 		    rs.close();
+ 		    st.close();
+ 		    con.close();
+ 		    
+ 		}catch(Exception e) {
+ 			e.printStackTrace();
+ 		}
+ 	   return res ;
+    }
+    
+
  
 	  private void makeOutput(Order order){
 		  
@@ -739,7 +821,10 @@ import eevaeksport.util.Converter;
 		 	Hashtable pandikas =  new Hashtable();
 		 	String ls = System.getProperty("line.separator");
 		    StringBuffer sb2 = new StringBuffer();
-	   	 	    
+		    if(asendused == null) {
+	        	asendused = getAsendused();
+	        }
+		   
 		 	   
 		 	try {
 		 	  int cou = 0;
@@ -847,7 +932,9 @@ import eevaeksport.util.Converter;
 		    for (i = 0; i < lines.size(); i++) {
 		      	OrderLine line = (OrderLine)lines.elementAt(i);
 		          String toode = line.getToode();
-		          		          
+		          if (asendused.get(toode) != null) {
+		          	  toode = (String)asendused.get(toode);
+		            }
 		          
 		          // otsime ean uuesti ja sama piires vaatan laosaldosid - ja valin vanima tootekoodi veini ja kanget eraldi ei k�sitleta
 		          // SC01116 tooteloomise kuup�ev ja 
@@ -1403,7 +1490,7 @@ import eevaeksport.util.Converter;
 		 	
 		   System.out.println(sql1);
 		   String agent = null;
-
+		 Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
 		   Statement st1 = con.createStatement();
 		   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -1413,6 +1500,7 @@ import eevaeksport.util.Converter;
 		   }
 		   rs1.close();
 		   st1.close();
+		   con.close();
 	     
 		   return agent;
 
@@ -1426,7 +1514,8 @@ import eevaeksport.util.Converter;
 		 	
 		   System.out.println(sql1);
 		   String agent = null;
-
+		   Connection  con = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+			
 		   Statement st1 = con.createStatement();
 		   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -1436,7 +1525,7 @@ import eevaeksport.util.Converter;
 		   }
 		   rs1.close();
 		   st1.close();
-	     
+	     con.close();
 		   return agent;
 
 		 }
@@ -1444,9 +1533,8 @@ import eevaeksport.util.Converter;
 	  private String url = "jdbc:odbc:scalaDB";
 	  private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
 	  private NumberFormat nf2 = NumberFormat.getInstance(Locale.ENGLISH);
-	  private Connection con;
 	  private TreeMap zalMap = new TreeMap();
-	  private Connection con2;
+	 
 	  private ImportPanel parent;
 
 	public String getTrouble() {

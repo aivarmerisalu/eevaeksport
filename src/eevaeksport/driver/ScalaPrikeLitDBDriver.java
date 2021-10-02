@@ -1100,7 +1100,7 @@ return bomKount;
     			 // Näidatakse ainult laos „BROKAS“ olevate toodete laoseis olenemata toote staatusest.
 
     			  
-    			  if(busena.equals("Brokas")){
+    			  if(sandelis.equals("BROKAS")){
     					if(braakGir.get(prodcode) != null){
     	        			braakGir.put(prodcode, Double.parseDouble(braakGir.get(prodcode)+"") + kogus);
     	                }else{
@@ -1136,11 +1136,44 @@ return bomKount;
 		
  }
  
+   TreeMap asendused = null;
+   
+   
+   private TreeMap getAsendused() {
+	        connectionUp(url);
+	    TreeMap res = new TreeMap();
+	        String cmd =" select SC01001 as toode, ActiveProdCode as asendus from PRODDATA0500	where ActiveProdCode != '' " ;
+		
+	        if (isDebug()) {
+		      System.out.println(cmd);
+		   }
+
+	      
+
+		try {
+	          Statement st = con.createStatement();
+		    ResultSet	      rs = st.executeQuery(cmd);
+
+		    while (rs.next()) {
+			String kood = rs.getString("toode").trim();
+			String asendus = rs.getString("asendus").trim();
+			res.put(kood, asendus);
+			
+		    }
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	   return res ;
+   }
    
 
     public TreeMap getProducts(Agent agent){
         connectionUp(url);
         TreeMap links= getLinks();
+        
+        if(asendused == null) {
+        	asendused = getAsendused();
+        }
 //'PR' +
         String cmd =" SELECT  RTRIM(SC01001) AS toode,(RTRIM(SC01002)+' ' " +
                " +rtrim(SC01003)) + ' ' +RTRIM(SC01001) AS nimi,SC39004 AS myygihind ,SC01009 AS tykke, SC03004 ,(SC03003-SC03004) AS stock, SC01011 AS maxale,SC01150 AS pandikas , " +  
@@ -1180,7 +1213,7 @@ return bomKount;
 			}catch(Exception e){
 			  e.printStackTrace();	
 			}
-			info = "Brakis: "+(int)Double.parseDouble(bro.get(kood)+"")+ "|"; 
+			info = "Brokas: "+(int)Double.parseDouble(bro.get(kood)+"")+ "|"; 
 			System.out.println("braak " + bro.get(kood) + " " + aa);
 			
 			nimetus = nimetus + aa;
@@ -1206,7 +1239,7 @@ return bomKount;
                 }
                 prod.setStock(0);
                 prod.setInCases(parseDouble(rs.getString("tykke").trim()));
-                prod.setStock(rs.getDouble("stock"));
+               
                 if(girteka){
                   if( gir.get(prod.getID())!= null ){
                 	  double rr = Double.parseDouble("" +gir.get(prod.getID()));
@@ -1216,6 +1249,8 @@ return bomKount;
                 
                 	//  System.out.println("Setin stocki " + prod.getID() + " " + prod.getStock());
                   }
+                } else {
+                	 prod.setStock(rs.getDouble("stock"));	
                 }
               //  prod.setMaxDiscount(parseDouble(rs.getString("maxale").trim()));
                 
@@ -1255,6 +1290,12 @@ return bomKount;
         	 		 prod.weblink = links.get(prod.getID()) + "";
         	 	 }
                 
+                 
+                 if(asendused.get(prod.getID()) != null) {
+                    prod.setDiffColor(true);	 
+                 }
+                 
+                 
                  String statustop = rs.getString("statustop");
 
                  if(statustop != null && statustop.trim().length()>0 && (statustop.trim().toLowerCase().equals("yes") || 
@@ -1273,6 +1314,7 @@ return bomKount;
             st.close();
 	} catch (Exception e) {
 	    getParent().showError(e);
+	    System.exit(0);
 	}
 
 	return products;
@@ -1290,6 +1332,10 @@ return bomKount;
      */
     public Vector getCustomerProductsList(String agentCode) {
         connectionUp(url);
+        
+        if(asendused == null) {
+        	asendused = getAsendused();
+        }
 	/*
    select "Customer Code" AS klient ,"Stock Code" AS toode,Qty AS kogus from st02 where"Salesman"='45'
 AND "Invoice order date">'20021101' AND "Actual Del  Date">'00000000'
@@ -1322,6 +1368,9 @@ AND "Invoice order date">'20021101' AND "Actual Del  Date">'00000000'
             while (rs.next()) {
               String kliendikood = rs.getString("klient").trim();
               String tootekood = rs.getString("toode").trim();
+              if (asendused.get(tootekood) != null) {
+            	  tootekood = (String)asendused.get(tootekood);
+              }
             double kogus =  Double.parseDouble(rs.getString("kogus").trim());
            String ld =  rs.getString("lastdate").substring(5,10);
             String arve = rs.getString("arvenr").trim();

@@ -254,7 +254,6 @@ HashMap pants = null;
  
 	  setOrder(order);
 	     
-	     String salesid = null ;
 	     
 	  boolean tag = false;
 	  OrderLine ol = (OrderLine)order.getOrderLines().get(0);
@@ -264,11 +263,10 @@ HashMap pants = null;
 	  
 	  System.out.println("On Tagastus " + tag );
     makeOutput(order,tag);
+ 
   }
   
-  
-
-
+ 
 
  private void makeOutput(Order order,boolean tag){
  	StringBuffer sb = new StringBuffer();
@@ -303,8 +301,12 @@ HashMap pants = null;
       sb.append("       <I06>" + ls);
       cou++;
 
+      String type = "51";
+      if(tag) {
+    	  type = "52";
+      }
       sb.append(getLineNr(cou));
-      sb.append("          <I06_OP_TIP>51</I06_OP_TIP>" + ls);
+      sb.append("          <I06_OP_TIP>" + type + "</I06_OP_TIP>" + ls);
       cou++;
 
       sb.append(getLineNr(cou));
@@ -318,6 +320,15 @@ HashMap pants = null;
       sb.append(getLineNr(cou));
       sb.append("          <I06_KODAS_MS>" + escape(agent) + "</I06_KODAS_MS>" + ls);
       cou++;
+      
+      if(tag) {
+    	  sb.append(getLineNr(cou));
+          sb.append("          <I06_ISAF>5</I06_ISAF>" + ls);
+          cou++;  
+      }
+     
+      
+      
       String name =  null;
   	try {
   		
@@ -408,17 +419,20 @@ if(ladu.trim().length()!=0){
           sb.append(getLineNr(cou));
           sb.append("               <I07_KODAS>" +  escape(toode) + "</I07_KODAS>" + ls);
           cou++;
+          double kord = 1;
+          if(tag) {
+        	  kord = -1;
+          }
           
           sb.append(getLineNr(cou));
-          sb.append("               <I07_KIEKIS>" + escape(nf.format(line.getKogus())) + "</I07_KIEKIS>" + ls);
+          sb.append("               <I07_KIEKIS>" + escape(nf.format(line.getKogus() * kord)) + "</I07_KIEKIS>" + ls);
           cou++;
          
        //   sb.append(getLineNr(cou));
        //   sb.append("               <I07_KAINA_BE>" + escape(getConc().getNF().format(price)) + "</I07_KAINA_BE>" + ls);
        //   cou++;
   if (ale != 0 ){
-  	
-          sb.append(getLineNr(cou));
+  	      sb.append(getLineNr(cou));
           sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
           cou++;
 
@@ -482,8 +496,12 @@ if(ladu.trim().length()!=0){
       sb.append("          </I06>" + ls);
       cou++;
 
+      String cat = parent.getProps().getProperty("conv.dir");
+      if(tag) {
+    	 cat = parent.getProps().getProperty("conv.dirret");
+      }
  	
-      String fileName = escape(parent.getProps().getProperty("conv.dir") + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".EIP";
+      String fileName = escape(cat + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".EIP";
       System.out.println(fileName);
         FileOutputStream fos = new FileOutputStream(fileName);
         fos.write(sb.toString().getBytes());

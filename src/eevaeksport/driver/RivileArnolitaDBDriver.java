@@ -754,7 +754,7 @@ String picts = parent.getProps().getProperty("pict.dir");
         	
         	
     String    sql = "select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from I33_PKAI "
-    		+ " where I33_KODAS_iS = 'CER'  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
+    		+ " where I33_KODAS_iS = 'ARB'  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
             System.out.println("hind");
           if (isDebug()) System.out.println(sql);
           connectionUp(url2);

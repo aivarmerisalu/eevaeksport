@@ -39,6 +39,11 @@ import javax.mail.internet.AddressException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -1574,6 +1579,8 @@ rs.close();
 
    public TreeMap getAgents(){
 	   agent1 = new TreeMap();
+	   
+	  // getHigher();
         String cmd = " SELECT tab_nr AS kood,CONCAT(pavarde,' ' ,vardas) AS nimi,'' AS objekt, darb_kod as dubs FROM darbuot " +
 		" WHERE padalinys like '%Vady%' ";
 	    if (isDebug()) System.out.println(cmd);
@@ -2235,11 +2242,58 @@ try{
    
    HashSet docCodes = new HashSet();
    
+   
+   
+   
+   private HashSet getHigher() {
+	   HashSet hh = new HashSet();
+	   try {
+		   DataFormatter formatter = new DataFormatter();
+		   Workbook workbook = null;
+	   File f = new File (getExcelDir() + "ProductCost.xlsx");
+	   boolean xs = true;
+	   if(!f.exists()) {
+		   f = new File (getExcelDir() + "ProductCost.xls"); 
+		   xs = false;
+	   }
+	   
+		  FileInputStream	 ff = new FileInputStream(f);
+		if(xs) {
+		     workbook = new XSSFWorkbook((ff));
+		}else {
+			 workbook = new HSSFWorkbook((ff));
+		}
+		Sheet sheet = workbook.getSheetAt(0);
+	      Row row = null; 
+				ff.close();	
+				if(sheet != null){
+				  int yy = sheet.getLastRowNum();
+					
+					for(int i = 0 ; i < yy+1 ;i++){
+						 row = sheet.getRow(i);
+						if(row != null) {
+							
+							String ean = formatter.formatCellValue(row.getCell(0));
+							String ok = formatter.formatCellValue(row.getCell(1));
+							if(ok.equals("1")) {
+								hh.add(ean.trim());
+							}
+						}}}
+				
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }				
+	   System.out.println("hh " + hh.toString());
+	   return hh;
+   }
+   
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
      HashSet  ladutr = new HashSet();
      HashMap<String,Double>  ladub1 = new HashMap<String,Double>();
      HashMap<String,Double>  ladub1o = new HashMap<String,Double>();
+     
+     HashSet higherCodes = getHigher();
      
      getSaveStockInfo();
      getPartiid();
@@ -2541,7 +2595,10 @@ try{
                 		 prod.setStatusDiscount("2");
                 	 }
                   }
-              
+                 
+                 if(higherCodes.contains(prod.getID())){
+                          prod.setStatusTop("3");
+                         }
                  
                  String origp = rs.getString("origpak");
                  String klimes = rs.getString("klimes");

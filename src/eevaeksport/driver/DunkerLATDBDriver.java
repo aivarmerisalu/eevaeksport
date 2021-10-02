@@ -53,7 +53,7 @@ import imageUtil.ImageLoader;
  * @version 1.0
  */
 
-public class DunkerLATDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker {
+public class DunkerLATDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker,FixLoader {
   public DunkerLATDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -79,6 +79,27 @@ public class DunkerLATDBDriver extends AbstractDBDriver  implements Manager,Prom
   String pass = null;
   String rcompany = null;
 
+  
+  private TreeMap eanprods = null;
+	
+	 @Override
+		public void FixLoader() {
+		  eanprods =  Converter.loadMore();
+		  
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
+			this.getProducts(null);
+			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+			System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			if(contracts.size() > 0) {
+				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+			}
+			
+			
+			System.exit(0);
+		}
+	
 
 	 public void insertSuperVisorSQLMeri(SupervisorInfoWrapperMeri wr){
 	     String sql = "INSERT into supervisor values ("
@@ -588,62 +609,7 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
       debt = new Vector();
 	  sortimendid = new HashMap();
       
-      File fff = new File(this.getDir() + "/xls/sortiments.xls" );
-      TreeMap groups = new TreeMap(); 
-  	try{
-          FileInputStream ff = new FileInputStream(fff);
-  		HSSFWorkbook workbook = new HSSFWorkbook((ff));
-  		HSSFSheet sheet = workbook.getSheet("shops");
-  		HSSFRow row = null;
-  		
-  		row = sheet.getRow(0);
-  	    // teeme valmis gruppide Treemapi key grupp ja Vectoris koodid
-  		
-  	//	System.out.println("rownum " + row.getLastCellNum());
-  		
-  		
-  		for(int a = 1 ; a < sheet.getLastRowNum()+1;a++){
-  			try{
-  			//	Loeme sisse rea
-  				row = sheet.getRow(a);
-  				if (row.getCell((short) 0) != null) {
-  				
-
-
-  	    			   String kood = null;
-  	    			  if(row.getCell((short)0) != null){
-	    	    			  	try{
-	    	    			  	  kood = row.getCell((short)0).getStringCellValue();  
-	    	    			  	 }catch (Exception e){
-	    	    			   	  kood = row.getCell((short)0).getNumericCellValue()+"";  
-	    	    	    		} 
-	    	    			  	 if(kood.indexOf(".")!= -1){
-	    	    			  	 	 kood = (kood.substring(0,kood.indexOf(".")));	
-	    	    			  	 }
-	    	    			  	 String sort = null;
-	    	    			  	try{
-	    	    			  		sort = row.getCell((short)1).getStringCellValue();  
-		    	    			  	 }catch (Exception e){
-		    	    			  		sort = row.getCell((short)1).getNumericCellValue()+"";  
-		    	    	    		} 
-		    	    			  	 if(sort.indexOf(".")!= -1){
-		    	    			  	 	 sort = (sort.substring(0,kood.indexOf(".")));	
-		    	    			  	 }
-	    	    			  	 groups.put(kood.trim(),sort.trim());
-  	    				
-  				       }	   
-  				}
- 			}catch (Exception e){
-  			e.printStackTrace();	
-  			System.out.println(row.getCell((short)a).getNumericCellValue());
-  			}
-  		}
-  		
-  		System.out.println("groups " + groups.toString());
-  
-  	 }catch (Exception e){
-  	//	e.printStackTrace();
-  	}
+ 
 
   	String cmd = "SELECT sh.\"CustomerCode\" as payer , sh.\"ShipToCode\" as koht, sh.\"Description\" as name , sh.\"Address\" as addr, sh.\"City\" as linn, " +
   	" sh.\"Region\", sh.\"RouteCode\" as visit , sh.\"Contact\", sh.\"Phone\", sh.\"MinOrderAmount\" as minsum,  " +
@@ -806,10 +772,11 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
         if (agen2 != null) {
         	 cust.addAgent(new Agent(agen2.trim()));   
         }
-       
+       boolean goes = true;
         int block = rs.getInt("blokk");
         if (block == 1 || block == 2) {
           cust.setSalesBlock(true);
+          goes = false;
         }
         
         
@@ -835,17 +802,13 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
         	cust.setPaymTerm(term);	
         }
        
+         
         
-        String gro = (String) groups.get(cust.getID());
-        if( gro != null){
-        	cust.addFixSortCode(gro.trim());
-        	//System.out.println("Settin fixsorti " + gro);
-        }
-        
-        
-    
-                        customers.put(name, cust);
-                        custMap.put(cust.getID(),cust);	
+    if(goes) {
+    	   customers.put(name, cust);
+           custMap.put(cust.getID(),cust);	
+       }
+                     
                     }
      
              
@@ -976,6 +939,12 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
      String add = "";
      if(ean != null && ean.trim().length()>0){
      prod.setEAN(ean);
+     
+     if(eanprods == null) {
+  	   eanprods = new TreeMap();
+     }
+     eanprods.put(ean.trim(), prod.getID());
+     
      int ll  = ean.trim().length();
      add = " @" +  ean.trim().substring(ll-4);
     }

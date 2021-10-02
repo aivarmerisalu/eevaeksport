@@ -255,287 +255,292 @@ public class AxaAmberLATCallDBDriver extends AbstractDBDriver  implements Manage
    
 
   public Vector getPriceMatrixData() {
-          Vector lines = new Vector();
-         String sql = " SELECT PRICEDISCTABLE.ITEMRELATION as prodid , PRICEDISCTABLE.ACCOUNTRELATION as custid, max(PRICEDISCTABLE.AMOUNT) AS price " +  
-    "   FROM PRICEDISCTABLE WHERE PRICEDISCTABLE.DATAAREAID='spil' AND PRICEDISCTABLE.RELATION=4 AND PRICEDISCTABLE.ACCOUNTCODE=0 AND  " +
-	" PRICEDISCTABLE.itemcode=0  and PRICEDISCTABLE.AMOUNT > 0.01 and  " +
-    "   ((GETDATE() between PRICEDISCTABLE.FROMDATE AND PRICEDISCTABLE.TODATE+1) " +
-	"   or(GETDATE()>=PRICEDISCTABLE.FROMDATE AND year(PRICEDISCTABLE.toDATE) =1900) "+
-	"   or(year(PRICEDISCTABLE.FROMDATE) =1900 and year(PRICEDISCTABLE.toDATE) =1900) " +
-	"  or( GETDATE()<=PRICEDISCTABLE.TODATE+1) )   " +
-	"    GROUP BY ITEMCODE,ACCOUNTCODE,ITEMRELATION,ACCOUNTRELATION " +
-	"	order by ACCOUNTCODE,ITEMCODE	";
+      Vector lines = new Vector();
+     String sql = " SELECT PRICEDISCTABLE.ITEMRELATION as prodid , PRICEDISCTABLE.ACCOUNTRELATION as custid, max(PRICEDISCTABLE.AMOUNT) AS price " +  
+"   FROM PRICEDISCTABLE WHERE PRICEDISCTABLE.DATAAREAID='spil' AND PRICEDISCTABLE.RELATION=4 AND PRICEDISCTABLE.ACCOUNTCODE=0 AND  " +
+" PRICEDISCTABLE.itemcode=0  and PRICEDISCTABLE.AMOUNT > 0.01 and  " +
+"   ((GETDATE() between PRICEDISCTABLE.FROMDATE-(case when DATEPART(DW, PRICEDISCTABLE.FROMDATE) = 2 then 3 else 1 end) AND PRICEDISCTABLE.TODATE  -(case when DATEPART(DW, PRICEDISCTABLE.TODATE) = 1 then 2 else 0 end)) " +
+"   or(GETDATE()>=PRICEDISCTABLE.FROMDATE AND year(PRICEDISCTABLE.toDATE) =1900) "+
+"   or(year(PRICEDISCTABLE.FROMDATE) =1900 and year(PRICEDISCTABLE.toDATE) =1900) " +
+"  or( GETDATE()<=PRICEDISCTABLE.TODATE+1) )   " +
+"    GROUP BY ITEMCODE,ACCOUNTCODE,ITEMRELATION,ACCOUNTRELATION " +
+"	order by ACCOUNTCODE,ITEMCODE	";
 
-          try {
+      try {
 
-   Connection con = this.getNewConnection();
-        	Statement stmt = con.createStatement();
-                  ResultSet rs = stmt.executeQuery(sql);
+Connection con = this.getNewConnection();
+    	Statement stmt = con.createStatement();
+              ResultSet rs = stmt.executeQuery(sql);
 
-                  while (rs.next()) {
-                	  String prodID = rs.getString("prodid");
-                          String custID = rs.getString("custid");
-                          double price = rs.getDouble("price");
-                          MatrixLine mline = new MatrixLine();
+              while (rs.next()) {
+            	  String prodID = rs.getString("prodid");
+                      String custID = rs.getString("custid");
+                      double price = rs.getDouble("price");
+                      MatrixLine mline = new MatrixLine();
+                
+                      if (custID != null && custID.trim().length() > 0) {
+                              mline.setCustID(custID.trim());
+                      }
+                   
+                      if (prodID != null && prodID.trim().length() > 0) {
+                              mline.setProdID(prodID.trim());
+                      }
+                 
+                      if (price != 0) {
+                              mline.setPrice(price);
+                      }
                     
-                          if (custID != null && custID.trim().length() > 0) {
-                                  mline.setCustID(custID.trim());
-                          }
-                       
-                          if (prodID != null && prodID.trim().length() > 0) {
-                                  mline.setProdID(prodID.trim());
-                          }
-                     
-                          if (price != 0) {
-                                  mline.setPrice(price);
-                          }
-                        
-                          lines.add(mline);
-                  }
-                  rs.close();
-                  
-                  
-                  //kampaaniad 
-                  
-                  String sthind = "SELECT PRI.ITEMRELATION as toode ,pri.AMOUNT as hind  " +
-    "   FROM PRICEDISCTABLE pri " +
-	"   WHERE PRI.DATAAREAID='spil' AND PRI.RELATION in (4) AND PRI.ACCOUNTCODE=1 AND pri.itemcode=0  and " + 
-    "     ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) " +
-	"   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
-	"   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) "+
-	"   or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION   like '%Stan%' " +
-	"    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation";
-                  
-            
-                  
-                  TreeMap hinake = new TreeMap();
-                  
-                  rs = stmt.executeQuery(sthind);
-
-                  while (rs.next()) {
-                        hinake.put(rs.getString("toode").trim(), rs.getDouble("hind"));
-                  }
-                  rs.close();
-
-                  String sql4 = "SELECT PRI.ACCOUNTRELATION as grupp,   PRI.ITEMRELATION as toode ,pri.AMOUNT as hind ,PRI.FROMDATE as algus " +
-                  		" ,PRI.TODATE as lopp,month(PRI.TODATE -PRI.FROMDATE)  as kamp ,PRI.RELATION " +
-      " FROM PRICEDISCTABLE pri INNER JOIN INVENTTABLE inv on inv.dataareaid=pri.dataareaid and inv.itemid =pri.itemrelation " +
-	 "  WHERE PRI.DATAAREAID='spil' AND PRI.RELATION in (4,5) AND PRI.ACCOUNTCODE=1 AND pri.itemcode=0  and  " +
-     "    ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) = 1 then 2 else 0 end)) " +
-	 "  or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
-	 "  or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
-	 "  or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'Stan%'" +
-      "   ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation" ;
-                                       
-                          
-                  
-                         rs = stmt.executeQuery(sql4);
-
-                         while (rs.next()) {
-
-                                 String clGroup = Converter.cleanLitLatEst(rs.getString("grupp"));
-                                 String prodID = rs.getString("toode");
-                                 double price = rs.getDouble("hind");
-
-                                 String algus = rs.getString("algus").substring(0,10);
-                                 String lopp = rs.getString("lopp").substring(0,10);
-                                 int kuu = rs.getInt("kamp");
-                                 int relation = rs.getInt("RELATION");
-                                 
-                                 MatrixLine mline = new MatrixLine();
-                                 
-                             
-                                 if (clGroup != null && clGroup.trim().length() > 0) {
-                                         mline.setCliGroup(clGroup.trim());
-                                 }
-
-                                 if (prodID != null && prodID.trim().length() > 0) {
-                                         mline.setProdID(prodID.trim());
-                                 }
-                                 
-                                 if( algus.indexOf("1900")== -1 &&  lopp.indexOf("1900")== -1 ){
-                                	
-                                  if (algus  != null && algus.trim().length() > 0 && algus.indexOf("1900")== -1) {
-                                       //  mline.setStartDate(algus.trim());
-                                 }
-
-                                 if (lopp  != null && lopp.trim().length() > 0  && lopp.indexOf("1900")== -1) {
-                                        // mline.setEndDate(lopp.trim());
-                                 }
-                                 
-                                 if(kuu > 2  && algus.indexOf("1900")== -1 && lopp.indexOf("1900")== -1){
-                                	 //mline.setProdLevel("pr");
-                                 }
-                                 
-                                 }
-                                 boolean goes = true;
-                                 if(hinake.get(prodID) !=null){
-                                	double dd = Double.parseDouble(hinake.get(prodID)+"");
-                                	if(dd == price){
-                                		goes = false;
-                                	}
-                                 }
-                                 
-                                 if(goes){
-                                	
-                                 if(relation == 5 ){
-                                	 if(hinake.get(prodID) !=null){
-                                	 price = Double.parseDouble(hinake.get(prodID)+"")-price;
-                                	 mline.setPrice(price);
-                                         lines.add(mline);
-                                     }
-                                	 
-                                 }else{
-                                	 mline.setPrice(price);
-                                     if(price > 0){
-                                         lines.add(mline);
-                                     }
-                                 }
-                                 
-                                 }
-                         }
-                         
-                         rs.close();
+                      lines.add(mline);
+              }
+              rs.close();
+              
+              
+              //kampaaniad 
+              
+              String sthind = "SELECT PRI.ITEMRELATION as toode ,pri.AMOUNT as hind  " +
+"   FROM PRICEDISCTABLE pri " +
+"   WHERE PRI.DATAAREAID='spil' AND PRI.RELATION in (4) AND PRI.ACCOUNTCODE=1 AND pri.itemcode=0  and " + 
+"     ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) " +
+"   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
+"   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) "+
+"   or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION   like '%Stan%' " +
+"    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation";
+              
         
-                       sql4 = "SELECT PRI.ACCOUNTRELATION as grupp,   PRI.ITEMRELATION as toode ,pri.AMOUNT as hind ,PRI.FROMDATE as algus " +
-                         		" ,PRI.TODATE as lopp,month(PRI.TODATE -PRI.FROMDATE)  as kamp " +
-             " FROM PRICEDISCTABLE pri INNER JOIN INVENTTABLE inv on inv.dataareaid=pri.dataareaid and inv.itemid =pri.itemrelation " +
-       	  " WHERE PRI.DATAAREAID='spil' AND PRI.RELATION=4 AND PRI.ACCOUNTCODE=0 AND pri.itemcode=0  and " +
-           "   ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) "+
-	  " or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
-	  " or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
-	  " or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'Stan%'" +
-           "    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation" ;
-                                
-                                rs = stmt.executeQuery(sql4);
+              
+              TreeMap hinake = new TreeMap();
+              
+              rs = stmt.executeQuery(sthind);
 
-                                while (rs.next()) {
+              while (rs.next()) {
+                    hinake.put(rs.getString("toode").trim(), rs.getDouble("hind"));
+              }
+              rs.close();
 
-                                        String custID = Converter.cleanLitLatEst(rs.getString("grupp"));
-                                        String prodID = rs.getString("toode");
-                                        double price = rs.getDouble("hind");
+              String sql4 = "SELECT PRI.ACCOUNTRELATION as grupp,   PRI.ITEMRELATION as toode ,pri.AMOUNT as hind ,PRI.FROMDATE as algus " +
+              		" ,PRI.TODATE as lopp,month(PRI.TODATE -PRI.FROMDATE)  as kamp ,PRI.RELATION " +
+  " FROM PRICEDISCTABLE pri INNER JOIN INVENTTABLE inv on inv.dataareaid=pri.dataareaid and inv.itemid =pri.itemrelation " +
+ "  WHERE PRI.DATAAREAID='spil' AND PRI.RELATION in (4,5) AND PRI.ACCOUNTCODE=1 AND pri.itemcode=0  and  " +
+ "    ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) " +
+ "  or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
+ "  or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
+ "  or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'Stan%'" +
+  "   ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation" ;
+                                   
+                      
+              
+                     rs = stmt.executeQuery(sql4);
 
-                                        String algus = rs.getString("algus").substring(0,10);
-                                        String lopp = rs.getString("lopp").substring(0,10);
-                                        int kuu = rs.getInt("kamp");
-                                        MatrixLine mline = new MatrixLine();
-                                        
+                     while (rs.next()) {
+
+                             String clGroup = Converter.cleanLitLatEst(rs.getString("grupp"));
+                             String prodID = rs.getString("toode");
+                             double price = rs.getDouble("hind");
+
+                             String algus = rs.getString("algus").substring(0,10);
+                             String lopp = rs.getString("lopp").substring(0,10);
+                             int kuu = rs.getInt("kamp");
+                             int relation = rs.getInt("RELATION");
+                             
+                             MatrixLine mline = new MatrixLine();
+                             
+                         
+                             if (clGroup != null && clGroup.trim().length() > 0) {
+                                     mline.setCliGroup(clGroup.trim().replaceAll(";", ":"));
+                             }
+
+                             if (prodID != null && prodID.trim().length() > 0) {
+                                     mline.setProdID(prodID.trim());
+                             }
+                             
+                             if( algus.indexOf("1900")== -1 &&  lopp.indexOf("1900")== -1 ){
+                            	
+                              if (algus  != null && algus.trim().length() > 0 && algus.indexOf("1900")== -1) {
+                                   //  mline.setStartDate(algus.trim());
+                             }
+
+                             if (lopp  != null && lopp.trim().length() > 0  && lopp.indexOf("1900")== -1) {
+                                    // mline.setEndDate(lopp.trim());
+                             }
+                             
+                             if(kuu > 2  && algus.indexOf("1900")== -1 && lopp.indexOf("1900")== -1){
+                            	 //mline.setProdLevel("pr");
+                             }
+                             
+                             }
+                             boolean goes = true;
+                             if(hinake.get(prodID) !=null){
+                            	double dd = Double.parseDouble(hinake.get(prodID)+"");
+                            	if(dd == price){
+                            		goes = false;
+                            	}
+                             }
+                             
+                             if(goes){
+                            	
+                             if(relation == 5 ){
+                            	 if(hinake.get(prodID) !=null){
+                            	 price = Double.parseDouble(hinake.get(prodID)+"")-price;
+                            	 mline.setPrice(price);
+                                     lines.add(mline);
+                                 }
+                            	 
+                             }else{
+                            	 mline.setPrice(price);
+                                 if(price > 0){
+                                     lines.add(mline);
+                                 }
+                             }
+                             
+                             }
+                     }
+                     
+                     rs.close();
+    
+                   sql4 = "SELECT PRI.ACCOUNTRELATION as grupp,   PRI.ITEMRELATION as toode ,pri.AMOUNT as hind ,PRI.FROMDATE as algus " +
+                     		" ,PRI.TODATE as lopp,month(PRI.TODATE -PRI.FROMDATE)  as kamp " +
+         " FROM PRICEDISCTABLE pri INNER JOIN INVENTTABLE inv on inv.dataareaid=pri.dataareaid and inv.itemid =pri.itemrelation " +
+   	  " WHERE PRI.DATAAREAID='spil' AND PRI.RELATION=4 AND PRI.ACCOUNTCODE=0 AND pri.itemcode=0  and " +
+       "   ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) "+
+  " or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
+  " or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
+  " or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'Stan%'" +
+       "    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation" ;
+                            
+                            rs = stmt.executeQuery(sql4);
+
+                            while (rs.next()) {
+
+                                    String custID = Converter.cleanLitLatEst(rs.getString("grupp"));
+                                    String prodID = rs.getString("toode");
+                                    double price = rs.getDouble("hind");
+
+                                    String algus = rs.getString("algus").substring(0,10);
+                                    String lopp = rs.getString("lopp").substring(0,10);
+                                    int kuu = rs.getInt("kamp");
+                                    MatrixLine mline = new MatrixLine();
                                     
-                                        if (custID != null && custID.trim().length() > 0) {
-                                                mline.setCliGroup(custID.trim());
-                                        }
-
-                                        if (prodID != null && prodID.trim().length() > 0) {
-                                                mline.setProdID(prodID.trim());
-                                        }
-                                        
-                                        if ( kuu < 3 && algus.indexOf("1900")== -1  && lopp.indexOf("1900")== -1){
-                                            if (algus  != null && algus.trim().length() > 0  && algus.indexOf("1900")== -1) {
-                                              //  mline.setStartDate(algus.trim());
-                                        }
-
-                                        if (lopp  != null && lopp.trim().length() > 0  && lopp.indexOf("1900")== -1) {
-                                                //mline.setEndDate(lopp.trim());
-                                        }
-                                        
-                                        if(kuu > 2 ){
-                                       	 mline.setProdLevel("pr");
-                                        }                                        	
-                                        }
-
-                                        boolean goes = true;
-                                        if(hinake.get(prodID) !=null){
-                                       	double dd = Double.parseDouble(hinake.get(prodID)+"");
-                                       	if(dd == price){
-                                       		goes = false;
-                                       	}
-                                        }
-                                        
-                                        if (goes){
-                                            mline.setPrice(price);
-                                            lines.add(mline);
-                                        }
-                               
-                                }
                                 
+                                    if (custID != null && custID.trim().length() > 0) {
+                                            mline.setCliGroup(custID.trim().replaceAll(";", ":"));
+                                    }
+
+                                    if (prodID != null && prodID.trim().length() > 0) {
+                                            mline.setProdID(prodID.trim());
+                                    }
+                                    
+                                    if ( kuu < 3 && algus.indexOf("1900")== -1  && lopp.indexOf("1900")== -1){
+                                        if (algus  != null && algus.trim().length() > 0  && algus.indexOf("1900")== -1) {
+                                          //  mline.setStartDate(algus.trim());
+                                    }
+
+                                    if (lopp  != null && lopp.trim().length() > 0  && lopp.indexOf("1900")== -1) {
+                                            //mline.setEndDate(lopp.trim());
+                                    }
+                                    
+                                    if(kuu > 2 ){
+                                   	 mline.setProdLevel("pr");
+                                    }                                        	
+                                    }
+
+                                    boolean goes = true;
+                                    if(hinake.get(prodID) !=null){
+                                   	double dd = Double.parseDouble(hinake.get(prodID)+"");
+                                   	if(dd == price){
+                                   		goes = false;
+                                   	}
+                                    }
+                                    
+                                    if (goes){
+                                        mline.setPrice(price);
+                                        lines.add(mline);
+                                    }
+                           
+                            }
+                            
 rs.close();
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                sql4 = "select  PRI.PROMONUM as grupp,l.ITEMID as toode ,l.PRICE as hind ,PRI.FROMDATE as algus " +
-                "   	 ,PRI.TODATE as lopp,DATEDIFF(week, PRI.FROMDATE, PRI.TODATE)  as kamp,PRIORITY as prior " +
- " from astPromoGMLine l INNER JOIN astPromoJournal pri on pri.dataareaid = l.dataareaid and pri.promonum = l.promonum " +
- " where l.dataareaid = 'spil' and ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) " +
-	"   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900)  " +
-	"   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
-	"   or( GETDATE()<=PRI.TODATE+1)  and year(PRI.fromDATE) =1900 ) and accepted = 2 and onlycrmaction = 0 and fromqty = 0 and promostatus in (1,4) and maxdiscountpromo = 0 " ;
-                                         
-                                         rs = stmt.executeQuery(sql4);
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            sql4 = "select  PRI.PROMONUM as grupp,l.ITEMID as toode ,l.PRICE as hind ,PRI.FROMDATE as algus ,PRI.FROMDATE as algus2" +
+            "   	 ,PRI.TODATE as lopp,DATEDIFF(week, PRI.FROMDATE, PRI.TODATE)  as kamp,PRIORITY as prior " +
+" from astPromoGMLine l INNER JOIN astPromoJournal pri on pri.dataareaid = l.dataareaid and pri.promonum = l.promonum " +
+" where l.dataareaid = 'spil' and ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) " +
+"   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900)  " +
+"   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
+"   or( GETDATE()<=PRI.TODATE+1)  and year(PRI.fromDATE) =1900 ) and accepted = 2 and onlycrmaction = 0 and fromqty = 0 and promostatus in (1,4)  and maxdiscountpromo = 0 " ;
+                                     
+                                     rs = stmt.executeQuery(sql4);
 
-                                         while (rs.next()) {
+                                     while (rs.next()) {
 
-                                                 String custID = Converter.cleanLitLatEst(rs.getString("grupp"));
-                                                 String prodID = rs.getString("toode");
-                                                 double price = rs.getDouble("hind");
+                                             String custID = Converter.cleanLitLatEst(rs.getString("grupp"));
+                                             String prodID = rs.getString("toode");
+                                             double price = rs.getDouble("hind");
 
-                                                 String algus = rs.getString("algus").substring(0,10);
-                                                 String lopp = rs.getString("lopp").substring(0,10);
-                                                 int kuu = rs.getInt("kamp");
-                                                 String pri = rs.getInt("prior")+"";
-                                                 if(pri.length() == 1){
-                                                	 pri = "000"+ pri;
-                                                 }
-                                                 if(pri.length() == 2){
-                                                	 pri = "00"+ pri;
-                                                 }
+                                             String algus = rs.getString("algus").substring(0,10);
+                                             String lopp = rs.getString("lopp").substring(0,10);
+                                             int kuu = rs.getInt("kamp");
+                                             String pri = rs.getInt("prior")+"";
+                                             if(pri.length() == 1){
+                                            	 pri = "000"+ pri;
+                                             }
+                                             if(pri.length() == 2){
+                                            	 pri = "00"+ pri;
+                                             }
 
-                                                 if(pri.length() == 3){
-                                                	 pri = "01"+ pri;
-                                                 }
-                                                 MatrixLine mline = new MatrixLine();
-                                                 
+                                             if(pri.length() == 3){
+                                            	 pri = "01"+ pri;
+                                             }
+                                             MatrixLine mline = new MatrixLine();
                                              
-                                                 if (custID != null && custID.trim().length() > 0) {
-                                                         mline.setCliGroup(custID.trim());
-                                                 }
-
-                                                 if (prodID != null && prodID.trim().length() > 0) {
-                                                         mline.setProdID(prodID.trim());
-                                                 }
-                                                 
-
-                                                 
-                                                 if(kuu > 16 ){
-                                                	 mline.setProdLevel("pr");
-                                                   }else{
-                                                   mline.setStartDate(algus.trim());
-                                                   mline.setEndDate(lopp.trim());
-                                                 }
-                                                 
-
-                                                 mline.setProdLevel(pri); 
-                                                 mline.setPrice(price);
-                                        
-                                                 lines.add(mline);
-                                         }
                                          
-                                         rs.close();
-                                         stmt.close();
-                                         con.close();
-                                
-                                
-                                
-          } catch (SQLException ex) {
-          ex.printStackTrace();
-          }
+                                             if (custID != null && custID.trim().length() > 0) {
+                                                     mline.setCliGroup(custID.trim().replaceAll(";", ":"));
+                                             }
 
-          return lines;
-  }
+                                             if (prodID != null && prodID.trim().length() > 0) {
+                                                     mline.setProdID(prodID.trim());
+                                             }
+                                             
 
+                                             
+                                             if(kuu > 16 ){
+                                            	 mline.setProdLevel("pr");
+                                               }else{
+                                               mline.setStartDate(algus.trim());
+                                               mline.setEndDate(lopp.trim());
+                                             }
+                                             
+
+                                             mline.setProdLevel(pri); 
+                                             mline.setPrice(price);
+                                    
+                                             lines.add(mline);
+                                     }
+                                     
+                                     rs.close();
+                                     stmt.close();
+                                     con.close();
+
+                            
+                            
+                            
+                            
+                            
+      } catch (SQLException ex) {
+      ex.printStackTrace();
+      }
+
+      return lines;
+}
+  
+  
+  
   public String getProductSortingData(){
    	return null;
    }
@@ -1147,6 +1152,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
         String teles = rs.getString("teles");
         if (teles != null && teles.trim().length() > 0) {
          cust.addAgent(new Agent(teles.trim()));
+         
         
           if(teles.trim().startsWith("T"))
          	 cust.setCity("Tele: " + teles.trim());
@@ -1175,7 +1181,14 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 			}
 		}
          
-         
+       cust.addAgent(new Agent("T1"));
+       cust.addAgent(new Agent("T2"));
+       cust.addAgent(new Agent("T3"));
+       cust.addAgent(new Agent("T4"));
+       cust.addAgent(new Agent("T5"));
+       cust.addAgent(new Agent("T6"));
+       cust.addAgent(new Agent("T7"));
+       cust.addAgent(new Agent("T8"));
         }
     
         

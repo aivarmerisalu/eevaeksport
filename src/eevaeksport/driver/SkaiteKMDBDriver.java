@@ -1518,7 +1518,7 @@ Statement st = null;
 "                     OperacijuKuneliai AS ok WITH(NOLOCK) ON pk.PardavimuKunoId = ok.OperacijosKunoId INNER JOIN " +
 "                    Prekes AS pr  WITH(NOLOCK) ON pk.PrekesId = pr.PrekesId INNER JOIN " +
 "                   Mokesciai AS mok WITH(NOLOCK) ON pk.MokesciaiId = mok.MokesciaiId " +
-"WHERE     0 = 1 AND op.Kilme = 35 and op.Data> getdate()-150 " +
+"WHERE     0 = 1 AND op.Kilme = 35 and op.Data> getdate()-150 and pk.Kiekis != 0 " +
 "UNION ALL " +
 "SELECT  part.Kodas as klkood ,    OrderAsID = CONVERT(varchar(20), op.OperacijosId), DeliveredOrderAsID = CONVERT(varchar(20), " + 
 "                     (CASE WHEN op.OperacijosTipoId = 50 THEN op.OperacijosId ELSE NULL END)), ProductAsId = CONVERT(Int, pr.PrekesId), toode = CONVERT(varchar(35),  " +
@@ -1534,7 +1534,7 @@ Statement st = null;
 "                      Prekes AS pr ON pk.PrekesId = pr.PrekesId INNER JOIN " +
 "                      Mokesciai AS mok  WITH(NOLOCK)ON pk.MokesciaiId = mok.MokesciaiId LEFT OUTER JOIN " +
 "                      xPardavimuKunai_Savikaina AS xSav WITH(NOLOCK) ON pk.PardavimuKunoId = xsav.OperacijosKunoId " +
-"WHERE     op.OperacijosTipoId in ( 50,2000020,2000018) and op.Data > getdate()-150  order by 1,5,14";
+"WHERE     op.OperacijosTipoId in ( 50,2000020,2000018) and op.Data > getdate()-150 and pk.Kiekis != 0  order by 1,5,14";
 
 
 	 
