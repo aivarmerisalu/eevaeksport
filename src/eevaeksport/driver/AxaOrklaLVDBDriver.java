@@ -1747,7 +1747,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
  	 
  	 String prs ="   Select disc.todate, disc.fromdate ,itemrelation as itemid, amount as price from bmssa.pricedisctable disc where disc.dataareaid= 'olv' and  accountrelation='' " +
 				 "  and ((disc.fromdate<=getdate() and disc.todate=('1900-01-01 00:00:00.00') ) or " +
-                 "  getdate() between disc.fromdate and disc.todate +1   )" ;
+                 "  getdate() between disc.fromdate and disc.todate +1)  order by disc.itemrelation , disc.searchagain desc" ;
  	 
  			HashMap prices = new HashMap();
   	 //stmt =  con.createStatement();
