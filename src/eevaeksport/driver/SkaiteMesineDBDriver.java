@@ -1323,7 +1323,7 @@ Statement st = null;
     " CONVERT(Money, tt.PK_PardKaina) AS hind, CASE WHEN pr.mvid = pr.ipokavimomvid OR " +
     " ISNULL(pr.ipokavimomvid, 0) < 2 OR  pr.MVId NOT IN (2, 62733) THEN mv.Kodas ELSE ipokmv.Kodas END AS unit , 0  AS kastis, " +
     "  CONVERT(Money, NULL) AS CostPrice, CONVERT(varchar(20), Pr.KAPKodas) AS ean, CONVERT(varchar(20),  pr.PrekiuGrupesID) AS grupp, '' AS grupp2 ,gr.kodas " +
-   " ,  gr.Pavad as grnimi, mes_prior_preke as topstatus ,MES_NR2 as aggroup FROM  dbo.Prekes AS Pr INNER JOIN dbo.PL_Prekes pl on pl.prekesid=pr.prekesID " +
+   " ,  gr.Pavad as grnimi, mes_prior_preke as topstatus ,MES_NR2 as aggroup, pr.mase as kaal FROM  dbo.Prekes AS Pr INNER JOIN dbo.PL_Prekes pl on pl.prekesid=pr.prekesID " +
   " inner join xPrekes tt on tt.PrekesID = pr.PrekesID LEFT JOIN PrekiuGrupes gr on gr.PrekiuGrupesId= pr.PrekiuGrupesID " +
   "  LEFT OUTER JOIN dbo.MVGSantykiai AS mvs ON Pr.MVId = mvs.MVId1 AND Pr.IpokavimoMVId = mvs.MVId2 AND Pr.MVGId = mvs.MVGId INNER JOIN " +
      "  dbo.Mokesciai AS mok ON Pr.MokesciaiId = mok.MokesciaiId INNER JOIN dbo.PrekiuTipai AS pt ON Pr.PrekiuTipaiId = pt.PrekiuTipaiId INNER JOIN " +
@@ -1430,6 +1430,21 @@ try{
               if(aggroup != null && aggroup.trim().length() > 0){
               	prod.setAgentGroup(aggroup.trim());
                }
+              
+              
+              Double kaal = rs.getDouble("kaal");
+              
+              if(kaal != null && kaal > 0){
+            	  prod.setMeasure(kaal);
+               }
+              
+              if(prod.getUnit().equals("kg")) {
+              	   prod.setMeasure(1);
+                 }
+              
+              
+              
+              
               
               if(goes){
             	  prcodes.put(tid, kood);
