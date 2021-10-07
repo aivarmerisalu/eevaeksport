@@ -324,7 +324,7 @@ public class Converter {
 							}
 						}
 						
-						//System.out.println("Ean " +  ea + " ");
+						System.out.println("Ean " +  ea + " ");
 						
 						  
 						for(int i = 1+addrow ; i < sheet.getLastRowNum()+1;i++){

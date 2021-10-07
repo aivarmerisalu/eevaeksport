@@ -2488,7 +2488,24 @@ public static String getDataDirStr(){
                	  }
                 }
        
-               
+               System.out.println("Kliendigrupid alustan" );
+             	try {
+          		inputLineBuf = postData("request=getCustomerGroups" + userstuff);
+          	} catch (Exception e1) {
+          		e1.printStackTrace();
+          	}
+                 if(inputLineBuf.length() > 2){          
+                       try {
+                     	  File f = new File (getDir() + "klgrupperp.xml");
+                     	  if(f.exists())f.delete();
+                     	 Converter.saveFileInUTF8(getDir() + "klgrupperp.xml", inputLineBuf.toString());
+                 	
+                 	  }catch (Exception ex) {
+                 		ex.printStackTrace();
+                 	  }
+                  }
+                
+                  //  System.exit(0); 
                
                
            try {
@@ -2838,7 +2855,8 @@ public static String getDataDirStr(){
            	  }
             }
           
-                 
+                
+          
      
            
            System.out.println("Algab toodete moodustamine" );

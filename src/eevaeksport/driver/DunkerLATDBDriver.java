@@ -387,7 +387,7 @@ public class DunkerLATDBDriver extends AbstractDBDriver  implements Manager,Prom
           Vector lines = new Vector();
           String sql = " SELECT \"PriceGroupCode\" grupp , \"ItemCode\" as toode, \"PriceType\" as tyyp, \"Price\", " + 
       " \"StartDate\" as algus, \"EndDate\" as lopp  FROM \"PriceGroupItems\" " +
-      " where \"StartDate\" <= current_date+1 and \"EndDate\" >= current_date+1 ";
+      " where \"StartDate\" <= current_date+1 and \"EndDate\" >= current_date ";
 
           try {
 
@@ -534,7 +534,7 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
     
     	Properties props = new Properties();
 		try {
-			props = EksportFrame.loadProps("asendajad.txt");
+		
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -567,16 +567,8 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
           
           agent.setActive(true);
           
-          String agentAGENTS = props.getProperty("dub." +agent.getID());
-		if(agentAGENTS != null){
-           StringTokenizer stag = new StringTokenizer(agentAGENTS, ",");
-	    while(stag.hasMoreTokens()){  	
-         agent.addDubbler(stag.nextToken());
-         System.out.println("Lisan Duubleid " + "dub." +agent.getID() + " " + agent.getDubbler().toString());
-	    }
-
-		}
-		 agents1.put(agent.getID(), agent);
+      
+		  agents1.put(agent.getID(), agent);
 		  agent1.put(agent.getID(), agent);
           agents.put(name, agent);
           sb2.append(agent.getID() + ";" + name + "\n");  
@@ -741,7 +733,6 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
         	  if(aa.isHasE()){
         		  cust.addAgent(new Agent("HOUSE1")); 
         	  }
-        	   
           }
           
           if ( agen != null && agent1.get( agen.trim()) != null){
