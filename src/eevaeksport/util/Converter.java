@@ -1587,7 +1587,7 @@ public class Converter {
 				XSSFWorkbook workbook = new XSSFWorkbook(ff); 
 				Sheet sheet = workbook.getSheetAt(0); 
 				Sheet sheet1 = workbook.getSheetAt(1); 
-				System.out.println("Rimi lugemine " + file.getName());
+				System.out.println("Elvi lugemine " + file.getName());
 				ff.close();	
 			 
 			 
