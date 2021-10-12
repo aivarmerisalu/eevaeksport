@@ -969,13 +969,14 @@ private Hashtable custCodes = null;
             while(rst.next()){
               String id = rst.getString("klient").trim();
               double debt = Double.parseDouble(rst.getString("summa").trim());
-       
+           Customer cc1 = (Customer)custMap2.get(id);
+           
             Iterator iter = custMap2.values().iterator(); 
             //System.out.println("Olemas2 "  + " " + id + " " + debt);
             while (iter.hasNext()){
             	Customer cc = (Customer)iter.next();
             	// 
-            	if(cc.getPayer().equals(id) || cc.getID().equals(id)){
+            	if(cc.getPayer().equals(id) || cc.getID().equals(id) || cc1.getPayer().equals(cc.getPayer())){
             		cc.setDebt(debt);   
             		if(debt > 499){
             			cc.setSalesBlock(true);

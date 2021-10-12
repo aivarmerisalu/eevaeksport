@@ -363,7 +363,7 @@ System.out.println(sql);
         		+ ",[External Document No_] ,[Document Function Code] ,[Exported],[Processed] ,[Export Date_Time]  ,[Import Date_Time]  ,[Order Currency]"
         		+ "  ,[Comment]  ,[CustomerCode] ,[SalesManager]) " +
                 " VALUES ( " + salesid + ",0,'" + order.getDokNr() + "',CAST(getdate() AS date),"
-                		+ " CAST(? AS date) ,'','','123456789','','" + iln + "','','','O',0,0,getdate(),getdate(),"
+                		+ " CAST(? AS date) ,'','','123456789','','" + custid + "','','','O',0,0,getdate(),getdate(),"
                 		+ "'','"+ unicode +"','" + custid1 + "','" + agent + "')";
 
      log.info("addInvoiceHeader2: " + sql);

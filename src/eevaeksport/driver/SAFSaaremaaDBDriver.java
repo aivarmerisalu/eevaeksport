@@ -1403,6 +1403,7 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
            if(eanprods == null) {
         	   eanprods = new TreeMap();
            }
+           if(eanprods.get(ean.trim()) == null)
            eanprods.put(ean.trim(), prod.getID());
          }
 

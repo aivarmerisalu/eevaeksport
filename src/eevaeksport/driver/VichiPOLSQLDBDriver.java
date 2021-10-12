@@ -25,6 +25,7 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import com.amazonaws.services.s3.model.S3DataSource.Utils;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -477,7 +478,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
    	        }
    	                String name = rs.getString("nimi").trim().substring(5).trim() ;
    	             if(id.trim().length()== 4  || id.trim().length() == 5) {
-   	             tm.put(cleardots(id),  Converter.enCodeEst(name) + " " + id.substring(0,1) +" "+ cleardots(id) );
+   	             tm.put(cleardots(id),  Converter.enCodeEst(pol(name)) + " " + id.substring(0,1) +" "+ cleardots(id) );
    	             }
    	        }
    	        
@@ -604,6 +605,58 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 
 	   return idx;
    }
+   
+   
+   private String pol(String in) {
+	   in = in.replaceAll("\"", " ");
+	   in = in.trim();
+	   in = in.replaceAll("  "  , " ");
+	   in = in.replace('^', 'ł');
+	   in = in.replace('^', 'ł');
+
+	
+	   
+	   in = in.replace((char)63 ,'ł');
+	   in = in.replace((char)63 ,'ł');
+	   in = in.replace((char)151 ,'ś');
+	   in = in.replace((char)151 ,'ś');
+	   in = in.replace((char)126 ,'ś');
+	   in = in.replace((char)126 ,'ś');
+	   in = in.replace((char)97 ,'ą');
+	   in = in.replace((char)97 ,'ą');
+	   in = in.replace((char)164 ,'ą');
+	   in = in.replace((char)164 ,'ą');
+
+	   in = in.replace((char)51 ,'ż');
+	   in = in.replace((char)51 ,'ż');
+	   
+	  // in = in.replace('~', 'ś');
+	   //in = in.replace('~', 'ś');
+	   
+	   	     
+	    	   
+	    	     	
+		
+	   
+	   if(in.contains(",mro") || in.contains(",MRO")) {
+		 
+		  	for(int i =0 ;  i< in.toCharArray().length;i++) {
+	     		System.out.println(in.toCharArray()[i] + " " + (int)in.toCharArray()[i]);
+	     	}
+	    
+		 
+	   }
+	   
+	  
+	   
+	   
+	 //  spółka z ograniczoną odpowiedzialnością sp.k 
+	  // ALMAR TRADING  SPa?KA Z OGRANICZON¤ ODPOWIEDZIALNOCI¤
+		//	   Spółka komandytowa
+			   // ą, ć, ę, ł, ń, ó, ś, ź and ż.
+
+	   return in;
+   }
 
    public TreeMap getAgents(){
 
@@ -623,7 +676,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	          Agent agent = new Agent(rs.getString("kood").trim());
 	          String name = rs.getString("nimi").trim();
 	     
-	          agent.setName(name);
+	          agent.setName(pol(name));
 
 
               agent.setLanguage("EST");
@@ -634,7 +687,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	        	  agent.setEmail(email);
 	        	  agent.setActive(true);
 	          }
-	         
+	      //    System.out.println("Nimed " + name + " " + pol(name));
 	          
 	          
 	  		
@@ -645,7 +698,6 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
                  agent.addDubbler(stag.nextToken());
                //  System.out.println("Lisan Duubleid " + "dub." +agent.getID() + " " + agent.getDubbler().toString());
 			    }
-
 				}
 	          agent1.put(agent.getID(), agent);
 	          agents.put(name, agent);
@@ -787,6 +839,9 @@ try{
          if(name2 != null){
         	 name = (name + " " + name2.trim()).trim();
          }
+         
+      //  System.out.println("'" +name + "\n  " + pol("'"+name));
+         
          boolean goes = true;
          
            String id = rs.getString("kood").trim();
@@ -806,7 +861,7 @@ try{
            Customer customer = new Customer(id);
             String payer = null;
            if (name.equals("")) name = "<" + id + ">";
-           customer.setName(Converter.enCodeEst(name));
+           customer.setName(Converter.firstToUpperCase(Converter.enCodeEst(pol(name))).trim());
            	payer = rs.getString("payer");
            	if(payer != null && payer.trim().length()>0){
              customer.setPayer(payer.trim());
@@ -840,8 +895,9 @@ try{
             	 if(country.equals("PL")) {
             		 country = "Poland";
             	 }
-               customer.setAddress(Converter.adressLink(Converter.enCodeEst(aadress),country));
-               customer.setName(customer.getName()+ " " + Converter.enCodeEst(aadress));
+               customer.setAddress(Converter.adressLink(pol(Converter.enCodeEst(aadress)),country));
+               customer.setName(Converter.firstToUpperCase(customer.getName().trim())+ " " + 
+               Converter.firstToUpperCase(pol(Converter.enCodeEst(aadress))));
              }
          
              String ag = rs.getString("agent");
@@ -1133,7 +1189,11 @@ con3.close();
             double weight = 0 ;
             Product prod = new Product(id);
          	String name = rs.getString("nimi");
-         	name =   name.substring(0,1) + (name.substring(1,name.length())).toLowerCase();
+   
+  
+         	name =  Converter.firstToUpperCase(pol( name.trim()));
+
+       
              double price = rs.getDouble("myygihind");
                 prod.setPrice(price);
               if(ladutr.get(id) != null ){
@@ -1176,7 +1236,7 @@ con3.close();
     			}
                 prod.setGroupSecond(grupp2);
 
-                prod.setUnit(rs.getString("unit"));
+                prod.setUnit(pol(rs.getString("unit")));
               
                 String ean = (rs.getString("ean"));
                  if (ean != null && ean.trim().length()>0){
@@ -1201,9 +1261,14 @@ con3.close();
                             	 prod.setMeasure(weight);
                            }      	 
                                                       
-                           
-
-                     	prod.setVat("21");
+                   String vv = rs.getString("vat").substring(3);        
+                 //   System.out.println("vat " + vv);
+                   try {
+                		prod.setVat(vv);
+                   }catch(Exception k) {
+                	   
+                   }
+                     
                     
                    
              /*      if(prod.getEAN().trim().length()==0){
