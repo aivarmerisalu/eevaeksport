@@ -1638,7 +1638,9 @@ public static TreeMap loadFixElvi(TreeMap res, File file , TreeMap prods , Ekspo
 							 Contract con = new Contract( pood);
 					          
 					           
-							 if(cell>clusterLocx && row>0 && celliSisu.length()==1 && ean!="0" && (celliSisu.contains("O") || celliSisu.contains("B"))) {
+							 if(cell>clusterLocx && row>0 && celliSisu.length()==1 && ean!="0" &&
+									 (celliSisu.contains("O") || celliSisu.contains("B")
+											 || celliSisu.contains("A") )) {
 								// System.out.println("Sees " + cell + " " + celliSisu + " " + ean + " " + pood + " " + tnimi + " " + toode);
 					           
 								 if(res.get(pood) != null){
