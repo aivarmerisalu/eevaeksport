@@ -329,12 +329,20 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	           	  Node rida = read.getChildNodes().item(i);
 	           	  if(rida.getNodeName().equals("item")){
 	          	  try{
+	          		 String clGroupName  = getNode(rida,"name").getFirstChild().getNodeValue();
 	          		 
+	          		 boolean camp = false;
+	          		 if("true".equals(getParent().getProps().getProperty("erply.parenthis"))){
+	          			 if(clGroupName.contains("(") && clGroupName.contains(")")) {
+		          			 camp = true;
+		          		 }	 
+	          		 }
+	          		
 	               		 String clGroup  = getNode(rida,"pricelistID").getFirstChild().getNodeValue();
 	               		String startDate  = getNode(rida,"startDate").getFirstChild().getNodeValue();
 	               		String endDate  = getNode(rida,"endDate").getFirstChild().getNodeValue();
 	              
-	               	    
+	               	    System.out.println("out " + clGroupName + " " + startDate + " " + endDate);
 	               			Node read2 = getNode(rida, "pricelistRules");
 	               	    	if(read2 != null){
 	               	    	
@@ -371,7 +379,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	            		 	    Date hetk = new Date();
 	    	               		Date alg = getDate(startDate);
 	    	               	    Date lopp = getDate(endDate);
-	    	               	    if(alg.after(hetk) && lopp.before(hetk)){
+	    	               	    if(lopp.after(hetk) && alg.before(hetk)){
 	    	               	    	mline.setStartDate(startDate);
 	    	               	    	mline.setEndDate(endDate);
 	    	               	    }
@@ -381,7 +389,10 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	            			}catch(Exception k ){
 	            				k.printStackTrace();
 	            			}
-	            			
+	            			if (camp) {
+	            				mline.setStartDate(startDate);
+    	               	    //	mline.setEndDate(endDate);
+	            			}
 	            			
 	            			
 	               		    }
@@ -3137,6 +3148,135 @@ private boolean useOldData = false;
 private TreeMap agent1 = new TreeMap();
 
 
+
+public TreeMap getGrupidPayer(){
+    TreeMap tm = new TreeMap();
+    
+  try {
+	   
+	   FileListFilter fil = new FileListFilter("kliendiderp","xml");
+   	 String[] ll = new File (getDir()).list(fil);
+   	 for (int i = 0; i < ll.length; i++) {
+   		
+   		
+   		 String name = ll[i];
+   		// System.out.println(name);
+		  File f = new File (getDir() + name);
+	   
+	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	     DocumentBuilder db;
+		db = dbf.newDocumentBuilder();      	
+    	FileInputStream in = getCleanInputStream(f);
+    	String handler = null;
+        Document doc = db.parse(in,handler);
+        Node root = getNode(doc, "document");      
+    	Node read = getNode(root, "records");
+    	 for (int s = 0; s < read.getChildNodes().getLength(); s++){
+        	  Node rida = read.getChildNodes().item(s);
+        	  try{
+        		 if(rida.getNodeName().equals("item")){
+        			boolean goes = true;
+        		  String id =  deCode(getNode(rida,"customerID").getFirstChild().getNodeValue());
+        		
+	                 String prlist = null;
+	                 try{ 
+	 	         		 prlist =   getNode(rida,"priceListID").getFirstChild().getNodeValue();
+	 	         		 if(prlist.equals("0")){
+	 	         			prlist = null; 
+	 	         		 }
+	 	        	 }catch(Exception ee){
+		        	 } 
+	                 if(prlist == null){
+	                	 prlist = "";
+	                 }else{
+	                	 prlist = prlist + "|";
+	                 }
+	                 
+	                 String prlist2 = null;
+	                 try{ 
+	 	         		 prlist2 =   getNode(rida,"priceListID2").getFirstChild().getNodeValue();
+	 	         		if(prlist2.equals("0")){
+	 	         			prlist2 = null; 
+	 	         		 }
+	 	        	 }catch(Exception ee){
+		        	 } 
+	                 if(prlist2 != null){
+	                	 prlist = prlist + prlist2 + "|";
+	                 }
+	                 
+	                 String prlist3 = null;
+	                 try{ 
+	 	         		 prlist3 =   getNode(rida,"priceListID3").getFirstChild().getNodeValue();
+	 	        	 }catch(Exception ee){
+		        	 } 
+	                 if(prlist3.equals("0")){
+ 	         			prlist3 = null; 
+ 	         		 }
+	                
+	                 if(prlist3 != null){
+	                	 prlist = prlist + prlist3 + "|" ;
+	                 }
+	                 
+	                 String prlist4 = null;
+	                 try{ 
+	 	         		 prlist4 =   getNode(rida,"priceListID4").getFirstChild().getNodeValue();
+	 	        	 }catch(Exception ee){
+		        	 } 
+	                 if(prlist4 != null && prlist4.equals("0")){
+ 	         			prlist4 = null; 
+ 	         		 }
+	                 
+	                 if(prlist4 != null){
+	                	 prlist = prlist + prlist4 + "|" ;
+	                 }
+	                
+	                 
+	                 String prlist5 = null;
+	                 try{ 
+	 	         		 prlist5 =   getNode(rida,"priceListID5").getFirstChild().getNodeValue();
+	 	        	 }catch(Exception ee){
+		        	 } 
+	                 if(prlist5!= null && prlist5.equals("0")){
+ 	         			prlist5 = null; 
+ 	         		 }
+	                 
+	                 if(prlist5 != null){
+	                	 prlist = prlist + prlist5 ;
+	                 }
+	                 
+	                
+	                 if(prlist.endsWith("|")){
+                   	 prlist = prlist.substring(0, prlist.length()-1);
+                    }
+	                 
+                    if(prlist.length() >0 ){
+                   	 tm.put(id, prlist);
+                   	
+                    }
+	          
+        		 
+        			 
+	                   
+        		 }
+        	  }catch(Exception e){
+        		  e.printStackTrace();
+        	  }
+        
+   	  }    
+        }
+	}catch(Exception e){
+		e.printStackTrace();
+	}
+   
+ 
+
+  
+  
+return tm;
+}
+
+
+
    public TreeMap getCustomers(Agent agent){
 	     TreeMap tm = new TreeMap();
 	     boolean makedata = true;
@@ -3226,6 +3366,7 @@ private TreeMap agent1 = new TreeMap();
 	     StringBuffer sb2 = new StringBuffer();
 	   
 	     TreeMap groups = this.getGrupid();
+	     TreeMap groupsPayer = this.getGrupidPayer();
 	     sortimendid = new HashMap();
 		  ketid = new HashMap();
 	     
@@ -3369,11 +3510,38 @@ private TreeMap agent1 = new TreeMap();
     	                	 prlist = prlist + prlist5 ;
     	                 }
     	                 
-    	                
-                         
     	                 if(prlist.endsWith("|")){
                         	 prlist = prlist.substring(0, prlist.length()-1);
                          }
+    	                 
+    	                 try{
+ 		  	         		String payer  =  getNode(rida,"payerID").getFirstChild().getNodeValue();
+ 		         		            customer.setPayer(payer);
+ 		         		          if(groupsPayer.get(payer) != null) {
+ 		         		        	  if(prlist == null) {
+ 		         		        		  prlist = (String)groupsPayer.get(payer) ;
+ 		         		        	  }else {
+ 		         		        		  
+ 		         		        		 StringTokenizer st = new StringTokenizer((String)groupsPayer.get(payer), "|"); 
+ 		         		        		  while(st.hasMoreTokens()) {
+ 		         		        			  String ss = st.nextToken();
+ 		         		        			  if(!prlist.contains(ss)) {
+ 		         		        				 prlist = prlist + "|" + ss ; 
+ 		         		        			  }
+ 		         		        		
+ 		         		        		  }
+ 		         		        		
+ 		         		        	  
+ 		         		        	  }
+ 		         		        
+ 		         		          }
+ 		  	         		 }catch(Exception ee){
+ 		  		        	 }
+ 		  	         
+    	                 
+    	                 
+    	                
+                     
     	                 
                          if(prlist.length() >0 ){
                         	 customer.setGroup(prlist);
@@ -3695,12 +3863,7 @@ private TreeMap agent1 = new TreeMap();
 	          		
 	          
 	         		  
-	         		  try{
-		  	         		String payer  =  getNode(rida,"payerID").getFirstChild().getNodeValue();
-		         		            customer.setPayer(payer);
-		  	         		 }catch(Exception ee){
-		  		        	 }
-		  	         
+	         		
 		  	         		
 		  	         		  if(getParent().getProps().getProperty("country") != null){
 		  	         			 try{
