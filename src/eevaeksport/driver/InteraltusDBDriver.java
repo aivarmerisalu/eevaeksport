@@ -725,7 +725,7 @@ private TreeMap stocks = null;
         if (con2 == null){
           try {
              con2 = DriverManager.getConnection(url2);
-             stmt2 = con2.createStatement();
+          
           } catch (Exception e) {
             //  getParent().showError(e);
           }
@@ -747,7 +747,7 @@ private TreeMap stocks = null;
     }
     public void connection2Down(){
         try {
-           stmt2.close();
+          
            con2.close();
            con2 = null;
         } catch (Exception e) {
@@ -976,12 +976,17 @@ private Hashtable custCodes = null;
             while (iter.hasNext()){
             	Customer cc = (Customer)iter.next();
             	// 
-            	if(cc.getPayer().equals(id) || cc.getID().equals(id) || cc1.getPayer().equals(cc.getPayer())){
-            		cc.setDebt(debt);   
-            		if(debt > 499){
-            			cc.setSalesBlock(true);
-            		}
+            	try {
+            		if(cc.getPayer().equals(id) || cc.getID().equals(id) || cc1.getPayer().equals(cc.getPayer())){
+                		cc.setDebt(debt);   
+                		if(debt > 499){
+                			cc.setSalesBlock(true);
+                		}
+                	}
+            	}catch(Exception e) {
+            		
             	}
+            	
             }
             	  
               
@@ -1270,7 +1275,7 @@ Statement stmtw = conw.createStatement();
     	  
     	     String    sql2 = "SELECT k.kood, k.nimi FROM firma1.toode t inner join firma1.klient k on k.kood =t.hankija WHERE " +
             "  length(trim(t.toode)) >3 group by k.nimi,k.kood ORDER BY k.kood";
-    	     
+    	     Statement	   stmt2 = con2.createStatement();
     	     ResultSet rs2 = stmt2.executeQuery(sql2);
 
     	     while (rs2.next()) {
@@ -1280,7 +1285,9 @@ Statement stmtw = conw.createStatement();
     	       tm.put(liik,nimetus);
     	       }
     	     }
+    	     
     	     rs2.close();
+    	     stmt2.close();
 
     	     connection2Down();
     	     return tm;
@@ -1328,7 +1335,7 @@ Statement stmtw = conw.createStatement();
             stmt.close();
 
             connection2Up();
-         	      
+            Statement	   stmt2 = con2.createStatement();
             rs = stmt2.executeQuery(cmd);
 
     	    while (rs.next()) {
@@ -1350,6 +1357,7 @@ Statement stmtw = conw.createStatement();
     	    }
 
                 rs.close();
+                stmt2.close();
            this.connection2Down();
             
 	} catch (Exception e) {
@@ -1596,7 +1604,7 @@ Statement stmtw = conw.createStatement();
     private String	       url2 = "jdbc:odbc:eevakiil";
     private Connection	       con = null;
     private Connection	       con2 = null;
-    private Statement	       stmt2;
+
     private String	       subjectFilesTo = null;
 	@Override
 	public void setBulkSales(Map agents) {

@@ -2148,7 +2148,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
       		for(int u = 0 ; u < codeEnds.size(); u++){
       			String aa = codeEnds.elementAt(u) + "";
       			if(id.toLowerCase().endsWith(aa.toLowerCase())){
-      				System.out.println("goes maha 2");
+      				//System.out.println("goes maha 2");
           			goes = false;	
       			}	
       		}
@@ -2199,7 +2199,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
            	}
       	 	  
       	 	 if(christCodes != null ){
-      	 	if( christCodes.contains(grupp)) {
+      	 	if( christCodes.contains(grupp) || prod.getName().startsWith("D111")) {
       	 		prod.setStatusTop("5");
       	 		prod.setType("Christmas");
       	 	      } else {

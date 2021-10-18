@@ -2467,7 +2467,7 @@ public static String getDataDirStr(){
            StringBuffer inputLineBuf = new StringBuffer();
        	try {
     		inputLineBuf = postData("request=getProductGroups&getAllLanguages=1" + userstuff);
-    		//inputLineBuf = getData("request=getCustomers&customerID=122&recordsOnPage=" + onpage + "&getAddresses=1&getContactPersons=1&getBalanceInfo=1&responseMode=detail" + userstuff);
+    	//	inputLineBuf = getData("request=getCustomers&customerID=430&recordsOnPage=" + onpage + "&getAddresses=1&getContactPersons=1&getBalanceInfo=1&responseMode=detail" + userstuff);
            	
     	} catch (Exception e1) {
     		e1.printStackTrace();
@@ -2483,7 +2483,7 @@ public static String getDataDirStr(){
            	  }
             }
           
-          // System.exit(0);
+         //  System.exit(0);
                 inputLineBuf = new StringBuffer();
            	try {
         		inputLineBuf = postData("request=getProductPriorityGroups" + userstuff);
@@ -3002,7 +3002,7 @@ public static String getDataDirStr(){
         	   if(getParent().getProps().getProperty("customer.group") != null){
         		   custgrupp =  "&groupIDWithSubgroups=" + getParent().getProps().getProperty("customer.group");  
         	   }
-       		inputLineBuf = getData("request=getCustomers&customerID=122&recordsOnPage=" + onpage + "&getAddresses=1&getContactPersons=1&getBalanceInfo=1&responseMode=detail"+ custgrupp + userstuff);
+       		inputLineBuf = getData("request=getCustomers&recordsOnPage=" + onpage + "&getAddresses=1&getContactPersons=1&getBalanceInfo=1&responseMode=detail"+ custgrupp + userstuff);
        	
        	System.out.println("buff" + inputLineBuf );
        	   } catch (Exception e1) {

@@ -1196,40 +1196,8 @@ HashSet olemas = new HashSet();
                 }
              
              }
-          
-                    
        
-            /*   double res = 0;
-               if (minam != null && minam.trim().length()>0){
-               	try{
-               	if(minam.indexOf("/")!=-1){
-               		res = Double.parseDouble(minam.trim().substring(0,minam.indexOf("/")));
-               	}else if(minam.indexOf("*")!=-1){
-               		res = Double.parseDouble(minam.trim().substring(0,minam.indexOf("*")));
-               	}else{
-               		res = Double.parseDouble(minam.trim());
-               	}
-               	}catch (Exception e){
-               		e.printStackTrace();
-               	}
-               	prod.setInCases(res);
-               }
-              */ 
-               
-              
-               double max = rs.getDouble("maks");
-               if(max > 0){
-               	if(max < 1){
-               		max = 2;
-               	}
-               	int uus = rs.getInt("uus");
-               	
-               	if(uus > 0){
-               		//prod.setName("t " + nimetus);
-               		//prod.setStatusTop("1");
-               	}
-               	//prod.setMaxDiscount(max);
-               }
+           
            
                String sellout = rs.getString("sellout");
                if(sellout!= null && (sellout.trim().equals("STOP") ||  sellout.trim().equals("OPEN")) ) {
@@ -1259,9 +1227,7 @@ HashSet olemas = new HashSet();
         		   goes = false;
         	   }
                
-               if(prod.getName().indexOf("skonio") != -1 ) {
-            	   System.out.println("nimin " + prod.getName() + " " + goes);
-               }
+            
                
                prod.setVat("21");
                if(goes) {

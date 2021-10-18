@@ -297,7 +297,7 @@ HashMap pants = null;
  
 	  setOrder(order);
 	     
-	     String salesid = null ;
+	   
 	     
 	  boolean tag = false;
 	  OrderLine ol = (OrderLine)order.getOrderLines().get(0);
