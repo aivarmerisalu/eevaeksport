@@ -800,8 +800,11 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 }
                 cust.addAgent(new Agent("HOUSE1"));
               
-                
-                if (cust.getID().equals("0100000")) {
+                    
+                    
+
+                if (cust.getID().equals("0100000") || 
+                		cust.getID().equals("T16022") || cust.getID().equals("T16021")) {
                     Enumeration enums = getParent().getAgentsHash().elements();
                       while (enums.hasMoreElements()) {
                         Agent a = (Agent) enums.nextElement();

@@ -197,7 +197,9 @@ import eevaeksport.util.Converter;
                counter + ",0,'','" +
                Converter.deCode(itemid) + "'," +
                kogus + ",'" + orderLine.getUnit() +"',0," + ale + ","+ kaste + ")";
-System.out.println(sql);
+               
+         System.out.println(sql);
+               
                log.info("SALES_LINE_SQL: " + sql);
              
                PreparedStatement st2 = con2.prepareStatement(sql);
@@ -363,7 +365,7 @@ System.out.println(sql);
         		+ ",[External Document No_] ,[Document Function Code] ,[Exported],[Processed] ,[Export Date_Time]  ,[Import Date_Time]  ,[Order Currency]"
         		+ "  ,[Comment]  ,[CustomerCode] ,[SalesManager]) " +
                 " VALUES ( " + salesid + ",0,'" + order.getDokNr() + "',CAST(getdate() AS date),"
-                		+ " CAST(? AS date) ,'','','123456789','','" + iln + "','','','O',0,0,getdate(),getdate(),"
+                		+ " CAST(? AS date) ,'','','123456789','','" + custid + "','','','O',0,0,getdate(),getdate(),"
                 		+ "'','"+ unicode +"','" + custid1 + "','" + agent + "')";
 
      log.info("addInvoiceHeader2: " + sql);

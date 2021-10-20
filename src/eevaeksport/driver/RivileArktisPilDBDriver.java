@@ -713,23 +713,7 @@ System.out.println("dealerProds " );
                     if (grupp2 != null && grupp2.trim().length()>0){
                       prod.setGroup(grupp2.trim());
                     }
-               String minam = rs.getString("minkogus");
-            /*   double res = 0;
-               if (minam != null && minam.trim().length()>0){
-               	try{
-               	if(minam.indexOf("/")!=-1){
-               		res = Double.parseDouble(minam.trim().substring(0,minam.indexOf("/")));
-               	}else if(minam.indexOf("*")!=-1){
-               		res = Double.parseDouble(minam.trim().substring(0,minam.indexOf("*")));
-               	}else{
-               		res = Double.parseDouble(minam.trim());
-               	}
-               	}catch (Exception e){
-               		e.printStackTrace();
-               	}
-               	prod.setInCases(res);
-               }
-              */ 
+         
                
               
                double max = rs.getDouble("maks");
@@ -926,26 +910,7 @@ System.out.println("dealerProds " );
      * @see
      */
     public double getSalary(String agentCode) {
-      connectionUp(url2+odbc);
-        double sales = 0;
-        String cmd = "SELECT SUM(summa)  AS salary " +
-                     "FROM osmy/my_tell te  WHERE te.osmy = ? " +
-                     "AND month(regaeg)=month(date()) AND year(regaeg)=year(date())";
-        log(cmd);
-
-        try {
-            stmt = con.prepareStatement(cmd);
-            stmt.setInt(1, Integer.parseInt(agentCode));
-            ResultSet	      rs = stmt.executeQuery();
-
-            if(rs.next()) {
-              sales = rs.getDouble("salary");
-            }
-        } catch (Exception e) {
-            getParent().showError(e);
-        }
-
-        setSales(sales);
+    
         return 0;
     }
 

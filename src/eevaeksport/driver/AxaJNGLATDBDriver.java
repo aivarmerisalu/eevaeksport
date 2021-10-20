@@ -998,13 +998,31 @@ kogusedStr = new HashMap();
 
     while (rs.next()) {
       String liik = rs.getString("grupa").trim();
+      String nimi = Converter.enCodeEst(rs.getString("nimetus2").trim());
       if(instance.equals("shell")) {
     	  if(liik.startsWith("74")) {
-    	        tm.put(liik,  Converter.enCodeEst(rs.getString("nimetus2").trim()));
+    	        tm.put(liik, nimi);
     	    }
       }else {
     	  if(!liik.startsWith("74")) {
-  	        tm.put(liik,  Converter.enCodeEst(rs.getString("nimetus2").trim()));
+    		  
+    		  nimi = nimi.replaceAll("Ajax ", "Aja ");
+    		  nimi = nimi.replaceAll("Balsnack ", "Bal ");
+    		  nimi = nimi.replaceAll("Colgate zobu ", "Col Z ");
+    		  nimi = nimi.replaceAll("Colgate ", "Col ");
+    		  nimi = nimi.replaceAll("Colgate-Palmolive", "Col Cit");
+    		  nimi = nimi.replaceAll("Libresse ", "Lib ");
+    		  
+    		  nimi = nimi.replaceAll("Nivea deo - ", "Niv D ");
+    		  nimi = nimi.replaceAll("Nivea virie11120xxu ", "Niv V ");
+    		  nimi = nimi.replaceAll("Nivea ", "Niv ");;
+    		  
+    		  nimi = nimi.replaceAll("Palmolive ", "Pal ");
+    		  nimi = nimi.replaceAll("Vileda ", "Vil ");
+    		  nimi = nimi.replaceAll("Zewa ", "Zew ");
+    		  
+    		  
+  	        tm.put(liik, nimi );
   	    }}  
       }
       

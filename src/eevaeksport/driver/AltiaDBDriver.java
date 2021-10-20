@@ -373,10 +373,12 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
 
 	private HashMap kliendialed = new HashMap();
 	
+	
+	
+	
    public Vector getPriceMatrixData() {
 
    	Vector lines = new Vector();
-
    	String today = getYYYYpMMpDDpTimeNiceString(null);
    	
 	
@@ -461,19 +463,28 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
 		         					//e.printStackTrace();
 		         				}
 		         				boolean goes = true ;
+		         				
+		         				Boolean pr1 = false;
+		         				Boolean pr2 = false;
 		         				try{
 		         					clGroup  = getNode(rida,"Payer").getFirstChild().getNodeValue();		         					
-		         				}catch(Exception e){
-		         					if(prodID != null && price > 0) {
-		         							hinnad.put(prodID.trim(), price + "");
-				         				}
-		         						goes = false;
-			         					
-		         					
-		         					
-		         					//e.printStackTrace();
-		         				}
+		         				} catch(Exception e){
+		         				  	pr1 = true;
+			         			}
 		         				
+		         				
+		         				try{
+		         					clGroup  = getNode(rida,"HierarchyCustomer").getFirstChild().getNodeValue();		         					
+		         				} catch (Exception e){
+		         						pr2 = true;
+			         		    }
+		         				
+		         				if(pr1 && pr2) {
+		         					if(prodID != null && price > 0) {
+	         							hinnad.put(prodID.trim(), price + "");
+			         				}
+		         					goes = false;
+		         				}
 		         				
 		         				try{
 		         					prodGroup  = getNode(rida,"ProductGroupCode").getFirstChild().getNodeValue();
@@ -1161,6 +1172,18 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
 		         		     customer.setGroup(deCode(payer.trim()));	
 		         		    
 		         	   }catch(Exception e){ }
+	                  
+	                  try{
+                       String grupp  =  getNode(rida,"PricatPartyCode").getFirstChild().getNodeValue();
+	                  if(customer.getGroup() != null && customer.getGroup().trim().length() > 0 ) {
+	                	   customer.setGroup(customer.getGroup()+ "|" + deCode(grupp.trim()));
+	                  }else {
+		         		     customer.setGroup(deCode(grupp.trim()));
+	                  }
+	         		     Vector vv = new Vector();
+	         		     vv.add(deCode(grupp.trim()));
+	         		    customer.setFixSortCode(vv);
+	         	            }catch(Exception e){ }
 		         	   
 		         	//  -<PartnerBalanceInfo> <OutstandingAmount>333.72</OutstandingAmount> <OverdueAmount>333.72</OverdueAmount>
 		         	   double overd = 0;

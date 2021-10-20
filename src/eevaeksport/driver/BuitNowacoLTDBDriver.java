@@ -2401,9 +2401,9 @@ try{
 	 + " pak.pakuote as primpak ,t.savik_3 as oma , t.didm_antk as greend, pavad_3 as brandpers " +	
 	"		  FROM prekes t inner join grupes g on g.grupe=t.grupe inner join tipai ty on ty.tipas=t.tipas " +
 	"     left join pr_pak pak on pak.preke = t.preke and pak.pirmine = 1   " +
-	"		  where pard_kaina != 0 or kaina_1 < 321.77 or kaina_2 < 321.77 or kaina_3 < 321.77 or kaina_4 < 321.77 or kaina_5 < 321.77 or " +
-	"		 kaina_6 < 321.77 or kaina_7 < 321.77 or kaina_8 < 321.77 or kaina_9  < 321.77 or kaina_10 < 321.77 ";
-     	
+	"		  where CH_meris  = '1' and (pard_kaina != 0 or kaina_1 < 321.77 or kaina_2 < 321.77 or kaina_3 < 321.77 or kaina_4 < 321.77 or kaina_5 < 321.77 or \r\n" + 
+	"			 kaina_6 < 321.77 or kaina_7 < 321.77 or kaina_8 < 321.77 or kaina_9  < 321.77 or kaina_10 < 321.77)" ;
+	
       System.out.println(cmd);
      	Connection con = getNewConnection();
         Statement stmt = con.createStatement();

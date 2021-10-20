@@ -1340,10 +1340,10 @@ Active customer past 7 days  :  20
         			}
         		}     
         	}
-        	if(total.length() > 3){
-        		 SimpleDateFormat  dfor = new SimpleDateFormat(" MMMM dd, yyyy", Locale.getDefault() );
+        //if(total.length() > 3){
+        	//	 SimpleDateFormat  dfor = new SimpleDateFormat(" MMMM dd, yyyy", Locale.getDefault() );
         		//sendEmail( total,"Active Customers Report - " + dfor.format(new Date()),parent.getProps().getProperty("reportmail"));
-        	}
+        	//}
          }
        
          
@@ -1351,7 +1351,7 @@ Active customer past 7 days  :  20
 
     
     
-    private void sendEmail(String body,String subjekt,String to ){
+ /*   private void sendEmail(String body,String subjekt,String to ){
   		Email mail = new Email(null);
   		mail.setSMTP(parent.getProps().getProperty("smtphost"));
   		mail.setFrom(parent.getProps().getProperty("from"));
@@ -1382,7 +1382,7 @@ Active customer past 7 days  :  20
   			}
   		}	
     }
-    
+    */
     
 
     
