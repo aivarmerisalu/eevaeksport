@@ -468,6 +468,17 @@ Fillial 03    - agent 016*/
         	  ladu = "920";
           }
           
+          if(prod != null && prod.getMainWarehouseStock() != null && 
+        		  prod.getMainWarehouseStock().trim().length() > 2) {
+        	  ladu = prod.getMainWarehouseStock().trim();
+        	  
+        	  if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 0) {
+            	  ladu = order.getWarehouse();
+              }
+          }
+          
+         
+          
 if(ladu.trim().length()!=0){
 	
           sb.append(getLineNr(cou));
@@ -602,7 +613,7 @@ if(ladu.trim().length()!=0){
   
   public Product getProduct(String toode){
    Product prod = null;
- String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus,1  AS tykke,1  AS alusel, 0 AS myygihind," +
+ String cmd = " SELECT N17_KODAS_MS as ladu, N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus,1  AS tykke,1  AS alusel, 0 AS myygihind," +
  		"N37_BAR_KODAS AS ean, "+
  " 0 AS kogus,n17_kodas_ls_1 AS grupp, N17_KODAS_GS AS grupp2 ,N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status , N17_MAX_NUOL as maks," +
  " case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus " +
@@ -617,8 +628,12 @@ if(ladu.trim().length()!=0){
     	    ResultSet rs = st1.executeQuery(cmd);
 
           while (rs.next()) {
+        	  String ladu = rs.getString("ladu");
             String kood = rs.getString("toode").trim();
             prod = new Product(kood);
+            if(ladu != null && ladu.trim().length() > 0) {
+            	prod.setMainWarehouseStock(ladu);
+            }
             prod.setUnit("VNT");
             String nimetus = rs.getString("nimetus").trim();
             prod.setName(Converter.enCodeEst(nimetus));

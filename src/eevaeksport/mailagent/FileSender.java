@@ -227,7 +227,8 @@ public class FileSender {
 	    	               // s3Client.putObject(bucketName, dirOut, "Uploaded String Object");
 
 	    	                // Upload a file as a new object with ContentType and title specified.
-	    	        		if(f.getName().contains("stockref") || f.getName().contains("customerorders")) {
+	    	        		if(f.getName().contains("stockref") || f.getName().contains("customerorders")
+	    	        				|| f.getName().contains("debtref")) {
 	    	        			  PutObjectRequest request = new PutObjectRequest(bucketName, dirOut + f.getName(), f);
 	  	    	                ObjectMetadata metadata = new ObjectMetadata();
 	  	    	                metadata.setContentType("plain/text");

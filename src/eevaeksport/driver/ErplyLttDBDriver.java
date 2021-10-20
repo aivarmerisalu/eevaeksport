@@ -332,6 +332,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	          		 String clGroupName  = getNode(rida,"name").getFirstChild().getNodeValue();
 	          		 
 	          		 boolean camp = false;
+	          		 boolean over = false;
 	          		 if("true".equals(getParent().getProps().getProperty("erply.parenthis"))){
 	          			 if(clGroupName.contains("(") && clGroupName.contains(")")) {
 		          			 camp = true;
@@ -364,35 +365,45 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	            			if (prodID != null && prodID.trim().length() > 0) {
 	            				mline.setProdID(prodID.trim());
 	            			}
+	            			
+	            			
+	            			try{
+		            			if(!startDate.equals("0000-00-00") && !endDate.equals("0000-00-00")){
+		            		 	    Date hetk = new Date();
+		    	               		Date alg = getDate(startDate);
+		    	               	    Date lopp = getDate(endDate);
+		    	               	    if(lopp.after(hetk) && alg.before(hetk)){
+		    	               	    	mline.setStartDate(startDate);
+		    	               	    	mline.setEndDate(endDate);
+		    	               	    }else {
+		    	               	    	over = true;
+		    	               	    }
+		    	               	    
+		            			}
+		                		
+		            			}catch(Exception k ){
+		            				k.printStackTrace();
+		            			}
+		            			if (camp) {
+		            				mline.setStartDate(startDate);
+	    	               	    //	mline.setEndDate(endDate);
+		            			}
+	            			
+	            			
 	            			try{
 	            				 double price = Double.parseDouble(getNode(rida2,"price").getFirstChild().getNodeValue());
 	 	            			if (price != 0) {
 	 	            				mline.setPrice(price);
 	 	            			}
-	 	            			lines.add(mline);
+	 	            			if(!over) {
+	 	            				lines.add(mline);
+	 	            			}
+	 	            			
 	 	               		    		
 	            			}catch(Exception k ){
 	            				
 	            			}
-	            			try{
-	            			if(!startDate.equals("0000-00-00") && !endDate.equals("0000-00-00")){
-	            		 	    Date hetk = new Date();
-	    	               		Date alg = getDate(startDate);
-	    	               	    Date lopp = getDate(endDate);
-	    	               	    if(lopp.after(hetk) && alg.before(hetk)){
-	    	               	    	mline.setStartDate(startDate);
-	    	               	    	mline.setEndDate(endDate);
-	    	               	    }
-	    	               	    
-	            			}
-	                		
-	            			}catch(Exception k ){
-	            				k.printStackTrace();
-	            			}
-	            			if (camp) {
-	            				mline.setStartDate(startDate);
-    	               	    //	mline.setEndDate(endDate);
-	            			}
+	            			
 	            			
 	            			
 	               		    }

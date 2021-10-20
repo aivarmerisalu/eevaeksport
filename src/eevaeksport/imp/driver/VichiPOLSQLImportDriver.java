@@ -197,7 +197,9 @@ import eevaeksport.util.Converter;
                counter + ",0,'','" +
                Converter.deCode(itemid) + "'," +
                kogus + ",'" + orderLine.getUnit() +"',0," + ale + ","+ kaste + ")";
-System.out.println(sql);
+               
+         System.out.println(sql);
+               
                log.info("SALES_LINE_SQL: " + sql);
              
                PreparedStatement st2 = con2.prepareStatement(sql);

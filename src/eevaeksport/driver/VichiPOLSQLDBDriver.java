@@ -749,6 +749,8 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 private TreeMap agent1 = new TreeMap();
 
    public TreeMap getCustomers(Agent agent){
+	   
+	   TreeMap<String,Double> overdue= new TreeMap<String,Double>();
    HashSet custs = new HashSet();
  try {
 
@@ -760,17 +762,18 @@ try{
 		}
 
    
-      String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number, a.[Due Date] AS kuupaev, sum(b.[Amount]) AS summa," +
+      String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[Document No_] AS number, a.[Due Date] AS kuupaev, sum(b.[Amount]) AS summa," +
                             " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer ,a.[Posting Date] as kuup FROM [VICIUNAI-POL$Cust_ Ledger Entry] a inner join " +
                             " [VICIUNAI-POL$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] " +
                             " where " +
-							"  (a.[Document type] = 2 or a.[Document type]= 3) and a.[Due Date] < GETDATE()+7 AND a.[Posting Date] > getdate()-200 AND a.[Open]= 1 " +
-                            " group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[External Document No_], " +
+							"  (a.[Document type] = 2 or a.[Document type]= 3)  AND a.[Posting Date] > getdate()-300 AND a.[Open]= 1 " +
+                            " group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[Document No_], " +
                             " a.[Due Date], a.[Posting Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount])<> 0 order by  a.[Due Date]";
 
       ketid = new HashMap();
       sortimendid = new HashMap();
   System.out.println(cmd);
+
        this.debtList = new Vector();
        con = getNewConnection2();
        Statement stmt1 = con.createStatement();
@@ -779,6 +782,7 @@ try{
         Debt debt = new Debt();
        String custID = rs1.getString("klient");
         debt.setCustID(custID);
+        debt.setPayerID(custID);
 try{
 	 String doknr = rs1.getString("number").trim();    
      debt.setDoknr(doknr);
@@ -788,8 +792,16 @@ try{
        
         debt.setDuedate(rs1.getDate("kuupaev"));
         debt.setSum(rs1.getDouble("summa"));
+      
         int dueint = rs1.getInt("due");
         debt.setDate(rs1.getDate("kuup"));
+        if(dueint > 0) {
+        	  if(overdue.get(custID) != null) {
+              	overdue.put(custID,overdue.get(custID) + debt.getSum());
+              }else {
+              	overdue.put(custID, debt.getSum());
+              }
+        }
         
         debt.setDue(dueint + "");
         int old = 0;
@@ -829,7 +841,7 @@ try{
    try {
         Connection con = getNewConnection2();
         Statement stmt = con.createStatement();
-        HashSet payers = new HashSet();
+
         ResultSet rs = stmt.executeQuery(sql);
         
         while(rs.next()){
@@ -840,16 +852,8 @@ try{
         	 name = (name + " " + name2.trim()).trim();
          }
          
-      //  System.out.println("'" +name + "\n  " + pol("'"+name));
-         
-         boolean goes = true;
-         
            String id = rs.getString("kood").trim();
-      
-           if(payers.contains(id)) {
-        	   goes = false;
-           }
-      
+           String payer = id;
            String id2 = rs.getString("kood2");
            if(id2 != null && id2.trim().length() > 0) {
         	   id = id + "_" + id2.trim();
@@ -859,15 +863,17 @@ try{
            
            
            Customer customer = new Customer(id);
-            String payer = null;
+           
+           if(overdue.get(payer) != null) {
+        	   customer.setDebt(overdue.get(payer));
+           }
+           
            if (name.equals("")) name = "<" + id + ">";
-           customer.setName(Converter.firstToUpperCase(Converter.enCodeEst(pol(name))).trim());
-           	payer = rs.getString("payer");
+           customer.setName(Converter.firstToUpperCase(pol(name)).trim());
+       
            	if(payer != null && payer.trim().length()>0){
-             customer.setPayer(payer.trim());
-           //  customer.setCustType(payer.trim());
-
-             customer.addFixSortCode(payer.trim());
+              customer.setPayer(payer.trim());
+              // customer.addFixSortCode(payer.trim());
              }
              customer.addFixSortCode(id);
              String aadress = rs.getString("aadress");
@@ -994,47 +1000,6 @@ try{
            	if(minsum>0){
            		customer.setMinsum(minsum);
            	}
-
-           if (!customer.isNodebt()){
-         
-  
-                String sql3 =  "  SELECT     No_ AS kood, CASE WHEN k.[Bill-to Customer No_] = '' THEN " +
-                         " (SELECT     SUM(de.[Amount (LCY)]) FROM [VICIUNAI-POL$Cust_ Ledger Entry] c INNER JOIN  " +
-                         "  [VICIUNAI-POL$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] " +
-                         "   WHERE   c.[Customer No_] = k.No_ and[Due Date] <getdate()+1 ) WHEN k.[Bill-to Customer No_] <> '' THEN (SELECT   SUM(de.[Amount (LCY)]) " +
-                         "   FROM  [VICIUNAI-POL$Cust_ Ledger Entry] c INNER JOIN " +
-                         "    [VICIUNAI-POL$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] " +
-                         "   WHERE  c.[Customer No_] = k.[Bill-to Customer No_] AND [OPEN] = 1 AND c.[Sell-to Customer No_] = k.No_ " +
-						 " 	 and [Due Date] <getdate()+1    and c.[Posting Date] > getdate()- 100) " +
-					     " 	 END AS yle FROM [VICIUNAI-POL$Customer] k "+
-					      "	WHERE  (No_ = '" + id + "') AND (Blocked <> 3) AND ([Salesperson Code] <> '') " ;
-
-		    try {
-		      Connection con3 = getNewConnection2();
-		      Statement stmt3 = con3.createStatement();
-		      ResultSet rs3 = stmt3.executeQuery(sql3);
-		      while(rs3.next()){
-		      
-		         double sum = rs3.getDouble("yle");
-		         if(sum !=0 && sum != 1 && sum != -1){
-		         	customer.setDebt(sum);
-		         	//System.out.println("yle " + id+ " " +  sum);
-		         }
-		         
-		      }
-
-rs3.close();
-stmt3.close();
-con3.close();
-		    } catch (Exception e){
-		         e.printStackTrace();
-		       }
-
-            	
-
-        
-           	//customer.setUsedCredit(Double.parseDouble(used.replaceAll(",",".").replaceAll(" ","")));
-           }
           
            if(paym != null && paym.trim().length()>0){
         	   paym = paym.replaceAll("D"," ");
@@ -1171,7 +1136,7 @@ con3.close();
      StringBuffer buf = new StringBuffer();
      try {
      	String cmd = "  SELECT [No_] AS toode,(t.[Description]) AS nimi, pr.[Unit Price] AS myygihind, [Product Group Code] AS grupp,[Subgroup Code] AS grupp2\r\n" + 
-     			"     					,[Base Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
+     			"     					,[Sales Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
      			"     						  '' AS type, [Qty_ per Unit of Measure] AS kastis,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc \r\n" + 
      			"     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup FROM [VICIUNAI-POL$Item] t \r\n" + 
      			"							  left join [VICIUNAI-POL$Sales Price] pr ON pr.[Item No_] = [No_] and pr.[Sales Code] = ''\r\n" + 
@@ -1257,12 +1222,12 @@ con3.close();
                 	
              	weight = rs.getDouble("kaal");
                            if(weight > 0){
-                            	// prod.setInUnit(weight);
+                           
                             	 prod.setMeasure(weight);
                            }      	 
                                                       
                    String vv = rs.getString("vat").substring(3);        
-                 //   System.out.println("vat " + vv);
+          
                    try {
                 		prod.setVat(vv);
                    }catch(Exception k) {
@@ -1270,18 +1235,7 @@ con3.close();
                    }
                      
                     
-                   
-             /*      if(prod.getEAN().trim().length()==0){
-                  	 dateOut.put(id.trim(),id.trim() + "|" + deCode (name.trim()) + "|" + prod.getStock());
-                  	 buf.append(id.trim() + ";"+ id.trim() + "|" + deCode (name.trim()) + "|" + prod.getStock() + "\n");
-                  }else{
-                  	 dateOut.put(prod.getEAN(),id.trim() + "|" + deCode (name.trim()) + "|" + prod.getStock());
-                  	 buf.append(prod.getEAN() + ";"+ id.trim() + "|" + deCode (name.trim()) + "|" + prod.getStock() + "\n");
-                  	 if(prod.getEanCase().trim().length() >0){
-                  		 dateOut.put(prod.getEanCase(),id.trim() + "|" + deCode (name.trim()) + "|" + prod.getStock());
-                      	 buf.append(prod.getEanCase() + ";"+ id.trim() + "|" + deCode (name.trim()) + "|" + prod.getStock() + "\n");	 
-                  	 }
-                  }*/
+       
                    
                	 String info = rs.getString("info");
                  if(info != null && info.trim().length()>0){   
@@ -1307,28 +1261,7 @@ con3.close();
 
 
         
-        
-        
-        
-        /*try {
-			saveObject(dateOut,"tootedRev.has");
-			  if(buf.length() > 2){
-	                File f = new File(getDir() + "tootedRev.txt");
-	                if (f.exists())f.delete();
-	                  try {
-	            		PrintWriter os = new PrintWriter(new FileWriter(
-	            				getDir() + "tootedRev.txt", true));
-	            		os.write(buf.toString());
-	            		os.close();
-	            	  }catch (IOException ex) {
-	            		ex.printStackTrace();
-	            	  }
-	             }
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-      */  
+
         
         rs.close();
         con.close();

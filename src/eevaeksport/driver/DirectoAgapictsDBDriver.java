@@ -2153,7 +2153,10 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
       			}	
       		}
       	}
-	 	  
+	 len = line.indexOf("class=");
+	 	 if(len != -1){
+	 		 
+	 	 }
   	
       		 len = line.indexOf("class=");
       	 	 if(len != -1){
@@ -2199,7 +2202,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
            	}
       	 	  
       	 	 if(christCodes != null ){
-      	 	if( christCodes.contains(grupp) || prod.getName().startsWith("D111")) {
+      	 	if( christCodes.contains(grupp) ) {
       	 		prod.setStatusTop("5");
       	 		prod.setType("Christmas");
       	 	      } else {
