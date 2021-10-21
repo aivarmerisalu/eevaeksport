@@ -1403,7 +1403,7 @@ if(sb.length() >10){
         		 || cust.getID().equals("2183") ||  cust.getID().equals("1950")
         		 || cust.getID().equals("2671") ||  cust.getID().equals("7445")
         		 ||  cust.getID().equals("3543") ||  cust.getID().equals("8255")
-         		        		 ||ag.startsWith("121")
+         		      || ag.startsWith("121") || ag.startsWith("142")
         		 
         		 ){
         	 cust.addAgent(new Agent("LADU"));

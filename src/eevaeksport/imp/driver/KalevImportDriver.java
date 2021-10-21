@@ -1030,7 +1030,7 @@ private long getAndUpdateNext() throws SQLException{
 
   public void makeOrder(Order order) throws SQLException{
 	  
-	   
+	  this.trouble =  null;
 	   String aaa = parent.getProps().getProperty("cust.deposits");
 	   if(aaa != null){
 		

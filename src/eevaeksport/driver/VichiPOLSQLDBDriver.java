@@ -1105,35 +1105,34 @@ try{
 	}
 	   
      TreeMap tm = new TreeMap();
-      TreeMap  ladutr = new TreeMap();
+     
+      TreeMap<String,Double>  ladutr = new TreeMap<String,Double>();
       prodHash = new HashMap();
+      
      try {
    	  String cmd = "SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [VICIUNAI-POL$Item Ledger Entry] l " +
-         " INNER JOIN [VICIUNAI-POL$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('HOPI MR') " +
-         " AND t.[Blocked]=0 AND t.[Unit Price]>0 AND len(t.[Product Group Code])>0 " +
+         " INNER JOIN [VICIUNAI-POL$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('MAG15') " +
+         " AND t.[Blocked]=0 AND len(t.[Product Group Code])>0 " +
          " GROUP BY l.[Location Code],l.[Item No_] HAVING sum(l.[Quantity]) > 0 ORDER BY l.[Item No_] ";
 
       	 Connection con = getNewConnection2();
   	        Statement stmt = con.createStatement();
   	        ResultSet rs = stmt.executeQuery(cmd);
+  	        
   	        while(rs.next()){
-  	             String toode = null;
-  	             double seis = 0;;
-  	              	toode =rs.getString("kood");
-  	              	seis = rs.getDouble("kogus");
-  	              	ladutr.put(toode, seis + "");
+  	           ladutr.put(rs.getString("kood").trim(), rs.getDouble("kogus"));
   	        }
 
   	      rs.close();
   	      con.close();
 
-  	    System.out.println(cmd);
+  	    //System.out.println(cmd);
+
+  	   // System.out.println("ladu " + ladutr.toString());
    } catch (Exception e) {
        e.printStackTrace();
    }
      
-     Hashtable dateOut = new Hashtable();
-     StringBuffer buf = new StringBuffer();
      try {
      	String cmd = "  SELECT [No_] AS toode,(t.[Description]) AS nimi, pr.[Unit Price] AS myygihind, [Product Group Code] AS grupp,[Subgroup Code] AS grupp2\r\n" + 
      			"     					,[Sales Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
@@ -1162,7 +1161,8 @@ try{
              double price = rs.getDouble("myygihind");
                 prod.setPrice(price);
               if(ladutr.get(id) != null ){
-            	  prod.setStock(new Double((String)ladutr.get(id)).doubleValue());
+            	  prod.setStock(ladutr.get(id));
+            	 // System.out.println(id + "  " + ladutr.get(id));
               }
                 String grupp = cleardots(rs.getString("grupp"));
                 if(grupp.equals("28")){
