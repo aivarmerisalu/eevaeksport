@@ -48,20 +48,12 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class HansaPommDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker{
+public class HansaPommDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker, FixReporter{
 
   public HansaPommDBDriver(EksportPanel parent) {
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
-	// String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
-	String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 
-	try {
-	    Class.forName(databaseDriverName).newInstance();
-
-	} catch (Exception e) {
-	    parent.showError(e);
-	}
     
 	   user =  getParent().getProps().getProperty("rest.user");
 	    pass = getParent().getProps().getProperty("rest.pass");
@@ -1714,7 +1706,13 @@ try{
          }
    
    
-
+   public void createExcelReport() {
+	   //kuupäev
+	   //toodete lugemine 
+	    //getproducts(name ja product treemap)
+	   //faili salvestamine uue nimega kataloogi
+   }
+   
    
    
  @Override
@@ -1722,6 +1720,12 @@ try{
  	  sendReExReport();
  		  System.exit(0);
  }
+
+@Override
+public void FixReporter() {
+	createExcelReport();
+	
+}
   
   
 }
