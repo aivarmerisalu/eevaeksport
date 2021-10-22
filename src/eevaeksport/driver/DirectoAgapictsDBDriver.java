@@ -80,7 +80,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,FixLoader {
+public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,FixLoader{
 
   public DirectoAgapictsDBDriver(EksportPanel parent) {
     super(parent);

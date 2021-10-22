@@ -61,6 +61,9 @@ static Category log = Category.getRoot();
       if (args[i].trim().equalsIgnoreCase("/fixloader")){
           this.setFixLoader(true);
         }
+      if (args[i].trim().equalsIgnoreCase("/fixreporter")){
+          this.setFixReporter(true);
+        }
       if (args[i].trim().equalsIgnoreCase("/sendstock")){
        this.sendStock = true;
      }
@@ -558,6 +561,7 @@ static Category log = Category.getRoot();
   public final static boolean USE_SCHEDULE_BUTTON = false;
   private boolean autoSend = false;
   private boolean fixLoader = false;
+  private boolean fixReporter = false;
   private boolean saveStock = false;
   private boolean distRep = false;
   public boolean isDistRep() {
@@ -729,5 +733,12 @@ public boolean isFixLoader() {
 
 public void setFixLoader(boolean fixLoader) {
 	this.fixLoader = fixLoader;
+}
+public boolean isFixReporter() {
+	return fixReporter;
+}
+
+public void setFixReporter(boolean fixReporter) {
+	this.fixReporter = fixReporter;
 }
 }

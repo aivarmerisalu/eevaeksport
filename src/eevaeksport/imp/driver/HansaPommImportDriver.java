@@ -63,10 +63,8 @@ public class HansaPommImportDriver
     this.parent = parent;
     PropertyConfigurator.configure("log4j.properties");
     getProducts(null);
-    String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
+
     try {
-      Class.forName(databaseDriverName).newInstance();
-   //   con = DriverManager.getConnection(url, "mobile","mobile");
 
       calNF.setMaximumFractionDigits(0);
       calNF.setMaximumIntegerDigits(2);
