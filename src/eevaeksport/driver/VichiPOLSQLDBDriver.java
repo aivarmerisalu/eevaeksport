@@ -1111,7 +1111,7 @@ try{
       
      try {
    	  String cmd = "SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [VICIUNAI-POL$Item Ledger Entry] l " +
-         " INNER JOIN [VICIUNAI-POL$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('MAG15') " +
+         " INNER JOIN [VICIUNAI-POL$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('MAG15','MAG12') " +
          " AND t.[Blocked]=0 AND len(t.[Product Group Code])>0 " +
          " GROUP BY l.[Location Code],l.[Item No_] HAVING sum(l.[Quantity]) > 0 ORDER BY l.[Item No_] ";
 
@@ -1134,17 +1134,18 @@ try{
    }
      
      try {
-     	String cmd = "  SELECT [No_] AS toode,(t.[Description]) AS nimi, pr.[Unit Price] AS myygihind, [Product Group Code] AS grupp,[Subgroup Code] AS grupp2\r\n" + 
-     			"     					,[Sales Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
-     			"     						  '' AS type, [Qty_ per Unit of Measure] AS kastis,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc \r\n" + 
-     			"     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup FROM [VICIUNAI-POL$Item] t \r\n" + 
-     			"							  left join [VICIUNAI-POL$Sales Price] pr ON pr.[Item No_] = [No_] and pr.[Sales Code] = ''\r\n" + 
-     			"							  LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] vat ON (vat.[Item No_]=[No_] and vat.[Code]='KARTON' ) \r\n" + 
-     			"     						  LEFT JOIN [VICIUNAI-POL$Item Cross Reference] ref ON (ref.[Item No_]=[No_] and ref.[Unit of Measure]='SZT'  and ref.[Cross-Reference Type] = 3)\r\n" + 
-     			"     						  WHERE ([Blocked]=0  AND len([Product Group Code])>0 and  len(t.[Description]) != 0) \r\n" + 
-     			"     						  or [Subgroup Code] like '%2.08.01%' ORDER BY [No_] ";
+     	String cmd = " SELECT [No_] AS toode,(t.[Description]) AS nimi, var.[Qty_ per Unit of Measure] as kordaja , pr.[Unit Price] AS myygihind, [Product Group Code] AS grupp,[Subgroup Code] AS grupp2 \r\n" + 
+     			"     			     					,[Sales Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
+     			"     			     						  '' AS type, vat.[Qty_ per Unit of Measure] AS kastis,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc  \r\n" + 
+     			"     			     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup FROM [VICIUNAI-POL$Item] t \r\n" + 
+     			"     										  left join [VICIUNAI-POL$Sales Price] pr ON pr.[Item No_] = [No_] and pr.[Sales Code] = ''\r\n" + 
+     			"     										  LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] vat ON (vat.[Item No_]=[No_] and vat.[Code]='KARTON' ) \r\n" + 
+     			"											   LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] var ON var.[Item No_]=[No_] and var.[Code]=[Sales Unit of Measure]  \r\n" + 
+     			"     			     						  LEFT JOIN [VICIUNAI-POL$Item Cross Reference] ref ON (ref.[Item No_]=[No_] and ref.[Unit of Measure]='SZT'  and ref.[Cross-Reference Type] = 3)\r\n" + 
+     			"     			     						  WHERE ([Blocked]=0  AND len([Product Group Code])>0 and  len(t.[Description]) != 0) \r\n" + 
+     			"     			     						  or [Subgroup Code] like '%2.08.01%' ORDER BY [No_]";
      	
-      System.out.println(cmd);
+     // System.out.println(cmd);
      	Connection con = getNewConnection2();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(cmd);
@@ -1152,18 +1153,20 @@ try{
             String id = rs.getString("toode").trim();
             double weight = 0 ;
             Product prod = new Product(id);
-         	String name = rs.getString("nimi");
-   
-  
-         	name =  Converter.firstToUpperCase(pol( name.trim()));
-
-       
+         	String name =  Converter.firstToUpperCase(pol( rs.getString("nimi").trim()));
+            Double kordaja = rs.getDouble("kordaja");
+            if(ladutr.get(id) != null ){
+            	Double kogus = ladutr.get(id); 
+            	if(kordaja != null && kordaja > 0) {
+            		kogus = kogus / kordaja;
+            	}
+          	  prod.setStock(kogus);
+          	 // System.out.println(id + "  " + ladutr.get(id));
+            }
+              
              double price = rs.getDouble("myygihind");
                 prod.setPrice(price);
-              if(ladutr.get(id) != null ){
-            	  prod.setStock(ladutr.get(id));
-            	 // System.out.println(id + "  " + ladutr.get(id));
-              }
+             
                 String grupp = cleardots(rs.getString("grupp"));
                 if(grupp.equals("28")){
                 	grupp = "51";
