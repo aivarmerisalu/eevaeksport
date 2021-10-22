@@ -63,11 +63,7 @@ public class ODOOApiImportDriver
     this.parent = parent;
     PropertyConfigurator.configure("log4j.properties");
    
-    String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
     try {
-      Class.forName(databaseDriverName).newInstance();
-      
-
       calNF.setMaximumFractionDigits(0);
       calNF.setMaximumIntegerDigits(2);
       calNF.setMinimumIntegerDigits(2);

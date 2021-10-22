@@ -809,13 +809,14 @@ System.out.println("fixed size " + result.size());
          }
 
          
+         
          if(cust.getID().equals("1003") || cust.getID().equals("1005") 
         		 ||cust.getID().equals("5755")|| cust.getID().equals("7588")
         		 ||cust.getID().equals("3274")|| cust.getID().equals("1217")
         		 || cust.getID().equals("2183") ||  cust.getID().equals("1950")
         		 || cust.getID().equals("2671") ||  cust.getID().equals("7445")
         		 ||  cust.getID().equals("3543") ||  cust.getID().equals("8255")
-         		        		 ||ag.startsWith("121")
+         		        		 ||ag.startsWith("121")|| ag.startsWith("142")
         		 
         		 ){
         	 cust.addAgent(new Agent("LADU"));
