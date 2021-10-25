@@ -1155,16 +1155,18 @@ try{
             Product prod = new Product(id);
          	String name =  Converter.firstToUpperCase(pol( rs.getString("nimi").trim()));
             Double kordaja = rs.getDouble("kordaja");
+            double price = rs.getDouble("myygihind");
             if(ladutr.get(id) != null ){
             	Double kogus = ladutr.get(id); 
             	if(kordaja != null && kordaja > 0) {
             		kogus = kogus / kordaja;
+            		price = price / kordaja;
             	}
           	  prod.setStock(kogus);
           	 // System.out.println(id + "  " + ladutr.get(id));
             }
               
-             double price = rs.getDouble("myygihind");
+           
                 prod.setPrice(price);
              
                 String grupp = cleardots(rs.getString("grupp"));
