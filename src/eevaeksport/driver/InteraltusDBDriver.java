@@ -657,8 +657,9 @@ conv2.close();
         stocks = new TreeMap();
           
 
-         String sql = "select sum(s.kogus) as kogus, s.toode  from  " + 
-         		"                 firma1.seisud s where s.osak ='3'  group by s.toode ";
+         String sql = "set search_path to firma1,public;\r\n" ; 
+        		  String sql2 ="select sum(s.kogus) as kogus, s.toode from (\r\n" + 
+         		"select * from crlaosei6())as  s where s.objekt = '3' group by s.toode ";
          if (isDebug()) {
              System.out.println(sql);
          }
@@ -667,9 +668,15 @@ conv2.close();
 
         	 Connection con = DriverManager.getConnection(url);
         	 PreparedStatement pstm = con.prepareStatement(sql);
-        	 
-
-          ResultSet rs = pstm.executeQuery();
+        	 ResultSet rs = null;
+        	  try {
+        		   pstm.executeQuery();
+        	  }catch(Exception ee) {
+        		  
+        	  }
+     
+          pstm = con.prepareStatement(sql2);
+          rs = pstm.executeQuery();
           
           while (rs.next()) {
         	  double seis = rs.getDouble("kogus");
@@ -1031,67 +1038,33 @@ private Hashtable custCodes = null;
     	getSaveStockInfo();
         connectionUp();
         TreeMap products = new TreeMap();
-        HashMap kiilis = new HashMap();
-        HashMap altuses = new HashMap();
         HashMap partiid = new HashMap();
         HashMap omahinnad = new HashMap();
         HashMap kriitiline = new HashMap();
         
         
         
-        String sql3 = " select toode , sum(kogus) as kokku from firma1.seisud " + 
-         " where  osak='1' group  by toode   " ;
-
-try{
- Connection con2 = DriverManager.getConnection(url2);
-PreparedStatement pstm = con2.prepareStatement(sql3);
-ResultSet rs6 = pstm.executeQuery();
-
-while(rs6.next()){
-	kiilis.put("KI-"+rs6.getString("toode").trim(),rs6.getDouble("kokku") );
-}
-rs6.close();
-pstm.close();
-con2.close();
-
-}catch (Exception e){
-}
-
-System.out.println("Kiilis " + kiilis.size());
-       
-        
- 
- String sql4 = " select toode , sum(kogus) as kokku  from firma1.seisud " + 
- " where  osak='3' group  by toode  " ;
-
-try{
-	Connection con = DriverManager.getConnection(url);
-PreparedStatement pstm = con.prepareStatement(sql4);
-ResultSet rs6 = pstm.executeQuery();
-
-while(rs6.next()){
-altuses.put(rs6.getString("toode").trim(),rs6.getDouble("kokku") );
-}
-rs6.close();
-pstm.close();
-con.close();
-
-}catch (Exception e){
-	e.printStackTrace();
-}
  
 
-System.out.println("Altuses " + altuses.size());
-
- sql4 = " select s.toode , (s.kogus) as kokku , s.partii ,s.hind as oh , t.real as kuud  from firma1.seisud s "
- 		+ " inner join firma1.toode t on t.toode=s.toode where s.osak='3' and (s.kogus) > 0 " ;
+ String sql = "set search_path to firma1,public;\r\n" ; 
+ String sql2 ="select  s.toode , (s.kogus) as kokku , s.partii ,s.laosumma/s.kogus as oh , t.real as kuud  from (\r\n" + 
+ 		"select * from crlaosei6())as  s  inner join firma1.toode t on t.toode=s.toode  where s.objekt = '3' and s.kogus > 0 ";
 
 try{
 	Connection con = DriverManager.getConnection(url);
 
-PreparedStatement pstm = con.prepareStatement(sql4);
-ResultSet rs6 = pstm.executeQuery();
+PreparedStatement pstm = null ;
+ResultSet rs6 = null ;
+try {
+	pstm = con.prepareStatement(sql);
+	 rs6 = pstm.executeQuery();
+}catch(Exception e) {
+	
+}
 
+
+pstm = con.prepareStatement(sql2);
+ rs6 = pstm.executeQuery();
 while(rs6.next()){
 	String toode  = rs6.getString("toode").trim(); 
 	double kog  = rs6.getDouble("kokku");
