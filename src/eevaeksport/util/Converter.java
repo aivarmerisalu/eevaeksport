@@ -4196,27 +4196,41 @@ public static void loadVisitLines(String status,String company, String user , St
 	}
 	
   
-	  public static void getContractsFixedByProd(TreeMap tm , String company, String user , String pass){
-		  eevaeksport.util.ReportingService serv = new ReportingService();
-		  serv.user =  user;
-			serv.pass = pass;
-			serv.company = company;
-			
-			try {
-				org.json.JSONArray array = serv.getContracts();
-			
-			//	throw new Exception("demo"); 
+	  public static void getContractsFixedByProd(TreeMap tm , String company, String user , String pass, Boolean useweb){
+		  if(!useweb) {
+			  eevaeksport.util.ReportingService serv = new ReportingService();
+			  serv.user =  user;
+				serv.pass = pass;
+				serv.company = company;
+				
 				try {
+					org.json.JSONArray array = serv.getContracts();
+				
+				//	throw new Exception("demo"); 
 					
-						Converter.saveFile(  "contracts.json" , array.toString());
+						
+							Converter.saveFile(  "contracts.json" , array.toString());
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+					serv.closeClient();
+			  }
+			  
+			  
+					
+					try {
 			
-			
-			for(int i = 0; i <	array.length();i++){
-				JSONObject cob = (JSONObject)array.get(i);
+				JSONParser parser = new JSONParser();
+				 Object obj = parser.parse(new FileReader( "contracts.json"));
+				
+				 
+				
+		            org.json.simple.JSONArray tagList = (org.json.simple.JSONArray) obj;
+
+			for(int i = 0; i <	tagList.size();i++){
+				org.json.simple.JSONObject cob =  ((org.json.simple.JSONObject) tagList.get(i));
 				Long start = null;
 				try {
 		       	 start = (Long)cob.get("starts");
@@ -4239,11 +4253,11 @@ public static void loadVisitLines(String status,String company, String user , St
 		        	String level = null;
 		        	String customer = null;
 		        	try {
-		        		JSONArray levelList = (JSONArray) cob.get("levels");
+		        		org.json.simple.JSONArray levelList = (org.json.simple.JSONArray) cob.get("levels");
 				          
 				         if(levelList != null){
-				        	 for (int r = 0 ; r < levelList.length() ;r++) {
-				                    JSONObject typex = levelList.getJSONObject(r);
+				        	 for (int r = 0 ; r < levelList.size() ;r++) {
+				        		 org.json.simple.JSONObject typex = (org.json.simple.JSONObject) levelList.get(r);
 					            	level = (String)typex.get("code");
 					               	
 					            } 
@@ -4255,11 +4269,11 @@ public static void loadVisitLines(String status,String company, String user , St
 			        	 
 			        	// System.out.println("typs size " + typs.size());
 		        	try {  
-			         JSONArray custList = (JSONArray) cob.get("customers");
+		        		org.json.simple.JSONArray custList = (org.json.simple.JSONArray) cob.get("customers");
 			        
 			         if(custList != null){
-			        	 for (int r = 0 ; r < custList.length() ;r++) {
-		                    JSONObject cus = custList.getJSONObject(r);
+			        	 for (int r = 0 ; r < custList.size() ;r++) {
+			        		 org.json.simple.JSONObject cus = (org.json.simple.JSONObject) custList.get(r);
 		                       	customer = (String)cus.get("code");	
 		                    } 
 			         }
@@ -4280,12 +4294,21 @@ public static void loadVisitLines(String status,String company, String user , St
 		       ((start != null && end != null && start < Calendar.getInstance().getTimeInMillis()) && (end > Calendar.getInstance().getTimeInMillis())
 		    		   ||  (start == null && end == null && (created - weeks2 < now.getTimeInMillis())))){
 		    	
-		    	 	JSONArray prodList = (JSONArray) cob.get("contractLines");
+		    	  org.json.simple.JSONArray prodList = null;
+
+		    	  
+		    	  try {
+			    	 	prodList = (org.json.simple.JSONArray) cob.get("contractLines");
+
+		    	  }catch(Exception e) {
+		    		  
+		    	  }
+		    	 	
 	                if(prodList != null) {
 	               
-	                     for (int r = 0 ; r < prodList.length() ;r++) {
+	                     for (int r = 0 ; r < prodList.size() ;r++) {
 	                    	 
-	                     	JSONObject line = prodList.getJSONObject(r);
+	                    	 org.json.simple.JSONObject line = (org.json.simple.JSONObject) prodList.get(r);
 	                     	Long create = (Long)line.get("created");
 	                     	 Boolean pour = null;
 	                     	 try {
@@ -4321,7 +4344,7 @@ public static void loadVisitLines(String status,String company, String user , St
 	                     	 }
 	                     	try {
                             	if(line.get("product") != null) {
-	                     	   JSONObject prod = (JSONObject)line.get("product");
+                            	org.json.simple.JSONObject prod = (org.json.simple.JSONObject)line.get("product");
 	                            String prcode = (String)prod.get("code");
 	                            String prname = null ;
 	                            try {
@@ -4408,7 +4431,6 @@ public static void loadVisitLines(String status,String company, String user , St
 					k.printStackTrace();
 				}
 		
-			serv.closeClient();
 			
 	  }
 		
@@ -4425,27 +4447,40 @@ public static void loadVisitLines(String status,String company, String user , St
 		  return false;
 	  }
   
-  public static void getContractsFixedByCust(TreeMap tm , String company, String user , String pass){
+  public static void getContractsFixedByCust(TreeMap tm , String company, String user , String pass, Boolean useweb){
+	  
+	  if(!useweb) {
 	  eevaeksport.util.ReportingService serv = new ReportingService();
 	  serv.user =  user;
 		serv.pass = pass;
 		serv.company = company;
 		
-		try {
+
+			try {
 			org.json.JSONArray array = serv.getContracts();
 		
-		//	throw new Exception("demo"); 
-			try {
 				
 					Converter.saveFile(  "contracts.json" , array.toString());
 				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		
-		
-		for(int i = 0; i <	array.length();i++){
-			JSONObject cob = (JSONObject)array.get(i);
+			
+			serv.closeClient();
+	  }
+	  
+	  
+			
+			try {
+			JSONParser parser = new JSONParser();
+			 Object obj = parser.parse(new FileReader( "contracts.json"));
+			
+			 
+			
+	            org.json.simple.JSONArray tagList = (org.json.simple.JSONArray) obj;
+
+		for(int i = 0; i <	tagList.size();i++){
+			org.json.simple.JSONObject cob =  ((org.json.simple.JSONObject) tagList.get(i));
 			Long start = null;
 			try {
 	       	 start = (Long)cob.get("starts");
@@ -4468,11 +4503,11 @@ public static void loadVisitLines(String status,String company, String user , St
 	        	String level = null;
 	        	String customer = null;
 	        	try {
-	        		JSONArray levelList = (JSONArray) cob.get("levels");
+	        		org.json.simple.JSONArray levelList = (org.json.simple.JSONArray) cob.get("levels");
 			          
 			         if(levelList != null){
-			        	 for (int r = 0 ; r < levelList.length() ;r++) {
-			                    JSONObject typex = levelList.getJSONObject(r);
+			        	 for (int r = 0 ; r < levelList.size() ;r++) {
+			        		 org.json.simple.JSONObject typex = (org.json.simple.JSONObject) levelList.get(r);
 				            	level = (String)typex.get("code");
 				               	
 				            } 
@@ -4484,11 +4519,11 @@ public static void loadVisitLines(String status,String company, String user , St
 		        	 
 		        	// System.out.println("typs size " + typs.size());
 	        	try {  
-		         JSONArray custList = (JSONArray) cob.get("customers");
+	        		org.json.simple.JSONArray custList = (org.json.simple.JSONArray) cob.get("customers");
 		        
 		         if(custList != null){
-		        	 for (int r = 0 ; r < custList.length() ;r++) {
-	                    JSONObject cus = custList.getJSONObject(r);
+		        	 for (int r = 0 ; r < custList.size() ;r++) {
+		        		 org.json.simple.JSONObject cus = (org.json.simple.JSONObject) custList.get(r);
 	                       	customer = (String)cus.get("code");	
 	                    } 
 		         }
@@ -4504,12 +4539,12 @@ public static void loadVisitLines(String status,String company, String user , St
 	       ((start != null && end != null && start < Calendar.getInstance().getTimeInMillis()) && (end > Calendar.getInstance().getTimeInMillis())
 	    		   ||  (start == null && end == null && (created - weeks2 < now.getTimeInMillis())))){
 	    	  ArrayList lines = new ArrayList();
-	    	 	JSONArray prodList = (JSONArray) cob.get("contractLines");
+	    	  org.json.simple.JSONArray prodList = (org.json.simple.JSONArray) cob.get("contractLines");
                 if(prodList != null) {
                
-                     for (int r = 0 ; r < prodList.length() ;r++) {
-                     	JSONObject line = prodList.getJSONObject(r);
-                        	JSONObject prod = (JSONObject)line.get("product");
+                     for (int r = 0 ; r < prodList.size() ;r++) {
+                    	 org.json.simple.JSONObject line = (org.json.simple.JSONObject) prodList.get(r);
+                    	 org.json.simple.JSONObject prod = (org.json.simple.JSONObject)line.get("product");
                         	lines.add( (String)prod.get("code"));
                      }
                 }
@@ -4528,7 +4563,6 @@ public static void loadVisitLines(String status,String company, String user , St
 			
 			
 		
-		serv.closeClient();
 		
   }
 	

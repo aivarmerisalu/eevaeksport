@@ -14,12 +14,16 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -27,6 +31,15 @@ import java.util.Vector;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
+
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -900,6 +913,7 @@ TreeMap tr = new TreeMap();
                    customer.addAgent(new Agent("HOUSE"));
                    customer.addAgent(new Agent("ARV"));
                    customer.addAgent(new Agent("EVE"));
+                   customer.setMainAgent(ahh);
                  //  customer.addAgent(new Agent("GUN"));
                    	
                           		         if ( ahh != null && agent1.get( ahh.trim()) != null){
@@ -1219,7 +1233,7 @@ TreeMap tr = new TreeMap();
         	 	
         	 if("AA".equals(tok.trim())) {
         		 prod.setStatusTop("1");
-        		 System.out.println("aaa " + tok + " " + o);
+        		 //System.out.println("aaa " + tok + " " + o);
         	 }
         	  
           }
@@ -1706,11 +1720,131 @@ try{
          }
    
    
-   public void createExcelReport() {
-	   //kuupäev
-	   //toodete lugemine 
-	    //getproducts(name ja product treemap)
-	   //faili salvestamine uue nimega kataloogi
+   public void createExcelReport(TreeMap products, ArrayList leptooted, TreeMap masterSortiment, TreeMap customers) {
+	   
+
+		 	NumberFormat nf2 = NumberFormat.getInstance(Locale.ENGLISH);
+		 	nf2.setMaximumFractionDigits(4);
+			nf2.setMinimumFractionDigits(2);
+			nf2.setGroupingUsed(false);
+	    	String ss = "olv";
+	    	
+	    	String fname = "/home/gpc/Documents/Merisoft/mobilejava/excel/" + "fixreportbase.xlsx";
+	    	String tname = "/home/gpc/Documents/Merisoft/mobilejava/data/" + "tooted.TXT";
+	    	
+	
+	    	//DateFormat df1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+	    	//Calendar datenow = Calendar.getInstance();
+						
+  try{
+						  FileInputStream excelifail = new FileInputStream(fname); //Read the spreadsheet that needs to be updated
+					      XSSFWorkbook  wb = new XSSFWorkbook(excelifail);
+					      XSSFSheet worksheet = wb.getSheetAt(0);
+
+					      //Paneme dokumendi numbri paika 
+					        XSSFRow row1 = worksheet.getRow(1);  //0 = row number
+					        XSSFCell c = row1.getCell(1);
+					             //c.setCellValue(c.getStringCellValue() + " " + ref);
+					    
+					           //Paneme dokumendi kuupäeva paika 
+							    row1 = worksheet.getRow(1);  //0 = row number
+							      c = row1.getCell(3);
+							      c.setCellValue(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
+							      
+							      
+							      // kirjutame kõik sortimendis olevad tooted excelisse ülevalt alla
+							  
+							      int algusx = 1;
+							      int algusy = 5;
+							     
+							      
+							      HashMap<String, Integer> tootedjrk = new HashMap<String, Integer>();
+							      Iterator iter2 = leptooted.iterator();
+							  		while (iter2.hasNext()){
+							  			
+							  			String id = (String) iter2.next();
+							  			Product prod = (Product) products.get(id);
+							  			if(worksheet.getRow(algusy)==null) {
+							  				worksheet.createRow(algusy);
+							  				worksheet.getRow(algusy).createCell(algusx);
+							  				worksheet.getRow(algusy).createCell(algusx+2);
+							  				worksheet.getRow(algusy).createCell(algusx+3);
+							  			}
+							  			row1 = worksheet.getRow(algusy);
+							  			row1.createCell(algusx).setCellValue(prod.getID());
+							  			row1.createCell(algusx + 1).setCellValue(prod.getEAN());
+							  			row1.createCell(algusx + 2).setCellValue(Converter.deCode(prod.getName()));
+				
+							  			tootedjrk.put(id, algusy);
+							  			
+							  			algusy++;
+							  		}
+							  		//System.out.println(masterSortiment.get("1072").toString());
+							  		//System.out.println(tootedjrk.get("3863").toString());
+
+							  		//Lisame päisesse kliendi andmed
+							  		
+							  		algusx = 4;
+								    algusy = 1;
+							  		
+							  		iter2 = masterSortiment.keySet().iterator();
+							  		while (iter2.hasNext()){
+							  			String id = (String) iter2.next();
+							  			Customer cust = (Customer) customers.get(id);
+							  			
+							  			
+							  			//Paneme kliendi id paika
+						  				worksheet.getRow(algusy).createCell(algusx).setCellValue(id);
+						  				//Paneme paika kliendi nime
+						  				worksheet.getRow(algusy+1).createCell(algusx).setCellValue(cust.getName());
+						  				//Paneme paika kliendi nime
+						  				worksheet.getRow(algusy+2).createCell(algusx).setCellValue(cust.getMainAgent());
+						  				//Paneme paika kliendi keti
+						  				worksheet.getRow(algusy+3).createCell(algusx).setCellValue(cust.getChain());
+						  				
+						  				//M2rgistame kliendi tooted sortimendis
+						  				ArrayList prods = (ArrayList) masterSortiment.get(id);
+						  				Iterator iter3 = prods.iterator();
+						  				while (iter3.hasNext()){
+						  					String prodid = (String) iter3.next();
+					  						//System.out.println(prodid + " ");
+
+						  					if(tootedjrk.get(prodid) != null) {
+						  						int rownum=tootedjrk.get(prodid);
+						  						//System.out.println(prodid + " " + rownum);
+						  						worksheet.getRow(rownum).createCell(algusx).setCellValue("1");
+						  						
+						  						
+						  					}
+						  					
+						  					
+						  				}
+						  				
+						  				
+						  				
+						  				
+							  			algusx++;
+							  			
+							  		}
+							  		
+							  		
+
+							  		
+							  		
+									  excelifail.close(); //Close the InputStream
+									  System.out.println(this.getExcelDir() + "fixreport-" + 
+											  Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+								        FileOutputStream output_file =new FileOutputStream(this.getExcelDir() + "fixreport-" + 
+									  Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+								        wb.write(output_file); //write changes
+								        output_file.close();  //close the stream
+					        
+					        
+					        
+  }catch (Exception e){
+		e.printStackTrace();
+	}
+	   
    }
    
    
@@ -1723,8 +1857,107 @@ try{
 
 @Override
 public void FixReporter() {
-	createExcelReport();
 	
+	TreeMap prods = new TreeMap();
+	Iterator iter1 = this.getProducts(null).values().iterator();
+	while (iter1.hasNext()){
+		Product prod = (Product) iter1.next();
+		prods.put(prod.getID(), prod);
+	}
+	
+	TreeMap custs = new TreeMap();
+	iter1 = this.getCustomers(null).values().iterator();
+	while (iter1.hasNext()){
+		Customer cust = (Customer) iter1.next();
+		custs.put(cust.getID(), cust);
+	}
+	
+	  TreeMap levelTooted = new TreeMap();
+	  Converter.getContractsFixedByCust(levelTooted, rcompany, user, pass, false);
+
+	//array kus on olemas kõik esinevad tooted lepingutes
+		Iterator iteraa = levelTooted.keySet().iterator();
+		ArrayList tooted = new ArrayList();
+		
+		while(iteraa.hasNext()) {
+			String cu = iteraa.next()+"";
+			ArrayList prods1 = (ArrayList) levelTooted.get(cu);
+			Iterator iteraaa = prods1.iterator();
+			while(iteraaa.hasNext()) {
+				String idd = (String) iteraaa.next();
+				
+				if(!tooted.contains(idd)) {
+					tooted.add(idd);
+				}
+			}
+		}
+	
+	//k2sime veebist leveli ja kaupluse seost
+	  TreeMap custLevels = new TreeMap();
+	  TreeMap levelsCustomers = new TreeMap();
+	  try {
+			Converter.loadCustDimensions("level", rcompany, user, pass);
+			custLevels = Converter.getCustDimsLoading("level");
+			Iterator itera =	custLevels.keySet().iterator();
+			
+			while(itera.hasNext()) {
+				String cu =itera.next()+"";
+				ArrayList<String> ar = (ArrayList<String>)custLevels.get(cu);
+				for(String lev: ar) {
+					if(levelsCustomers.get(lev) != null) {
+						ArrayList vv = (ArrayList)levelsCustomers.get(lev);
+						vv.add(cu);
+						levelsCustomers.put(lev, vv);
+					} else {
+						ArrayList vv = new ArrayList();
+						vv.add(cu);
+						levelsCustomers.put(lev, vv);
+					}
+				}
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	  
+	
+	  TreeMap masterSortiment = new TreeMap();
+		Iterator itera = custLevels.keySet().iterator();
+		
+		while(itera.hasNext()) {
+			String custid = itera.next()+"";
+			ArrayList levels = (ArrayList) custLevels.get(custid);
+			ArrayList tooted1 = new ArrayList();
+			
+			Iterator iteral = levels.iterator();
+			
+			while(iteral.hasNext()) {
+				String level = (String) iteral.next();
+				
+				if(levelTooted.get(level) != null) {
+					ArrayList aaa = (ArrayList) levelTooted.get(level);
+					Iterator itera2 = aaa.iterator();
+					
+					while(itera2.hasNext()) {
+						tooted1.add(itera2.next() + "");
+						
+					}
+				}
+			}
+			//System.out.println(custid + " " + tooted1.size());
+			
+			if(tooted1.size()!=0) {
+				masterSortiment.put(custid, tooted1);
+			}
+			
+			
+			
+			
+		}
+	  
+	  
+	//System.out.println(masterSortiment.get("1072").toString()); //näide 1072
+	createExcelReport(prods, tooted, masterSortiment, custs);
+	System.exit(0);
 }
   
   

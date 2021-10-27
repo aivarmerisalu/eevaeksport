@@ -542,7 +542,7 @@ public class AxaAmberUKDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  
 	  TreeMap tr = new TreeMap();
 	   
- 	  Converter.getContractsFixedByProd(tr, rcompany, user, pass);
+ 	  Converter.getContractsFixedByProd(tr, rcompany, user, pass, true);
  	  
  	
 	  // teeme aruande read valmis ja paneme brandide järgi objekti 
