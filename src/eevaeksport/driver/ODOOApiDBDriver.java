@@ -1056,7 +1056,11 @@ private Object[] params = new Object[] {};
          
          prod.setName(Converter.enCodeEst(Converter.firstToUpperCase(row.get("name")+"") + " " + add));
          prod.setPartii("Kood: " + code);
-       
+       	
+         String christ = getParent().getProps().getProperty("odoo.christ");	
+         if(christ != null && prod.getName().toLowerCase().contains(christ)) {
+        	 prod.setStatusTop("5");
+         }
          
         
          

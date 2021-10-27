@@ -1404,7 +1404,6 @@ if(sb.length() >10){
         		 || cust.getID().equals("2671") ||  cust.getID().equals("7445")
         		 ||  cust.getID().equals("3543") ||  cust.getID().equals("8255")
          		      || ag.startsWith("121") || ag.startsWith("142")
-        		 
         		 ){
         	 cust.addAgent(new Agent("LADU"));
         	 cust.addAgent(new Agent("LADU1"));
@@ -1448,6 +1447,11 @@ if(sb.length() >10){
         	 } 
          }
          
+         if(cust.hasAgent("142") || cust.hasAgent("141")) {
+          	 cust.addAgent(new Agent("LADU"));
+        	 cust.addAgent(new Agent("LADU1"));
+        	 System.out.println("Lisan LADU "+ cust.getName());
+         }
          String block = rs.getString("blocked");
          if(block != null && block.trim().length()>0){
          	
@@ -1732,11 +1736,11 @@ String region = rs.getString("region");
     	  
     	  
                      
-                     System.out.println("Counter " + counter + " Asses " + asses.size() + " " + vec.size());
+              //       System.out.println("Counter " + counter + " Asses " + asses.size() + " " + vec.size());
                      
     	   Converter.sendAssetsJson(vec,this.user,this.pass,this.rcompany);     
     	   
-    	     System.out.println(" Asses saadetud  lähen tegema seoseid" + asses.size());
+    	    // System.out.println(" Asses saadetud  lähen tegema seoseid" + asses.size());
                 		
              		
              		
@@ -1763,10 +1767,7 @@ String region = rs.getString("region");
                          String custcode = rs1.getString("custcode").trim();
                          obj.put("customerCode", custcode);
                          
-                         if(code.indexOf("1104090041") != -1){
-                        //	 System.out.println("1104090041 " + custcode +" "+ (asses.contains(code)) + " " +custs.contains(custcode));
-                         }
-                       
+                     
                          if(asses.contains(code) && custs.contains(custcode) ){
                         	  String olemas = (String)asscusts.get(code);
                         	  if(olemas == null){
@@ -1783,7 +1784,7 @@ String region = rs.getString("region");
                   
                       rs1.close();
                       stm.close();
-    	   System.out.println("assets cou " +  cou + " "+ coua + " " + vec.size());
+    	//   System.out.println("assets cou " +  cou + " "+ coua + " " + vec.size());
                       
                       // siis peaks tegema vahele kontrolli et kui on muudatus siis ainult laksad ylesse
     	   
@@ -1895,7 +1896,7 @@ String region = rs.getString("region");
 			 }catch(Exception d){
 		       	   d.printStackTrace();
 		          }
-			System.out.println("result " + result.toString());
+		//	System.out.println("result " + result.toString());
 			return result;
   }
   
@@ -1980,7 +1981,7 @@ String region = rs.getString("region");
         	prod.setMaxDiscount(maxdisc);
         	prod.setStatusDiscount("1");
         	prod.setName(nimetus.trim() + " MD:" + (int)maxdisc+ "%");
-        	System.out.println("MD:" + (int)maxdisc+ "% " +nimetus.trim());
+        //	System.out.println("MD:" + (int)maxdisc+ "% " +nimetus.trim());
         }
         
        
@@ -2231,7 +2232,7 @@ connectionDown();
 
 
 Converter.saveFile(parent.getProps().getProperty("stockrefdir") + "st"+ agent + "report.txt", sb.toString());
-System.out.println(sb.toString());
+//System.out.println(sb.toString());
 			  }}
 return "";//sb.toString();
 

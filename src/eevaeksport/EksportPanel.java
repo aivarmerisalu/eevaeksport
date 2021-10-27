@@ -1,6 +1,7 @@
 package eevaeksport;
 
 import java.awt.BorderLayout;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -1664,6 +1665,11 @@ public class EksportPanel extends JPanel implements ActionListener,
                 if(wh.exists()){
                     zip.addFile("warehouse.txt");
                 }
+                File wh1 = new File("outcome.txt");
+                if(wh1.exists()){
+                    zip.addFile("outcome.txt");
+                }
+                
                 File imor = new File("aorder");
                 if(imor.exists()){
                 zip.addFolder("aorder");

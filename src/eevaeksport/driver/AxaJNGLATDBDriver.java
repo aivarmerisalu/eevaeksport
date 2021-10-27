@@ -309,69 +309,108 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
   private HashMap kogused = null;
   private HashMap kogusedStr = null;
 
- public String getSaveStockInfo(){
+  public String getSaveStockInfo(){
 	  
-kogused = new HashMap();
-kogusedStr = new HashMap();
-	  
-	  String  cmd = " select l.*,OTC from GETSTOCK l inner join getproducts t on t.toode=l.kood ";
-  
+	  kogused = new HashMap();
+	  kogusedStr = new HashMap();
 
-       if (isDebug()) System.out.println(cmd);
-       StringBuffer products = new StringBuffer();
-       try {
+	  StringBuffer products = new StringBuffer();
 
-    	 Connection con = getNewConnection();
-    	 Statement st = con.createStatement();
-         ResultSet rs = st.executeQuery(cmd);
+	  if(instance.equals("shell")) {
+	  	
+	  	  String  cmd = " select l.*,OTC from GETSTOCK l inner join getproducts t on t.toode=l.kood ";
+	    
 
-         while (rs.next()) {
+	         if (isDebug()) System.out.println(cmd);
+	         try {
 
-           String kood = rs.getString("kood").trim();
-           double seis = rs.getDouble("stock");
-           String otc = rs.getString("OTC");
-      
-           
-           if(seis > 0){
-        	   
-        	   
-        	   if(instance.equals("shell")) {
-        		   if(otc != null && otc.trim().equals("SHELL")) {
-  	        		  products.append(kood +  ";");
-  	                   products.append(" ;");
-  	                   products.append(getParent().getNF().format(seis) +  "\n"); 
-  	        	  }
-  	        	
-  	        }else {
-  	        	 if(otc == null || !otc.trim().equals("SHELL")) {
-  	        	  products.append(kood +  ";");
-                  products.append(" ;");
-                  products.append(getParent().getNF().format(seis) +  "\n"); 
-  	        	 }
-  	        	
-  	        }
-        	   
-        	   
-        		 
-                   if(kogused.get(kood) != null){
-                	   double vahe = Double.parseDouble((String) kogused.get(kood));
-                	   kogused.put(kood, (vahe+ seis) + "");
-                   }else{
-                	   kogused.put(kood, seis + ""); 
-                   }
-                  
-           }
-           }
-           rs.close();
-           st.close();
-           con.close();
-           
-       } catch (Exception e) {
-           getParent().showError(e);
-       }
-    
-       return products.toString();
-   }
+	      	 Connection con = getNewConnection();
+	      	 Statement st = con.createStatement();
+	           ResultSet rs = st.executeQuery(cmd);
+
+	           while (rs.next()) {
+
+	             String kood = rs.getString("kood").trim();
+	             double seis = rs.getDouble("stock");
+	             String otc = rs.getString("OTC");
+	        
+	             
+	             if(seis > 0){
+	          	   
+	          	   
+	          	   if(instance.equals("shell")) {
+	          		   if(otc != null && otc.trim().equals("SHELL")) {
+	    	        		  products.append(kood +  ";");
+	    	                   products.append(" ;");
+	    	                   products.append(getParent().getNF().format(seis) +  "\n"); 
+	    	        	  }
+	    	        	
+	    	        }else {
+	    	        	 if(otc == null || !otc.trim().equals("SHELL")) {
+	    	        	  products.append(kood +  ";");
+	                    products.append(" ;");
+	                    products.append(getParent().getNF().format(seis) +  "\n"); 
+	    	        	 }
+	    	        	
+	    	        }
+	          	        if(kogused.get(kood) != null){
+	                  	   double vahe = Double.parseDouble((String) kogused.get(kood));
+	                  	   kogused.put(kood, (vahe+ seis) + "");
+	                     }else{
+	                  	   kogused.put(kood, seis + ""); 
+	                     }
+	                    
+	             }
+	             }
+	             rs.close();
+	             st.close();
+	             con.close();
+	             
+	         } catch (Exception e) {
+	             getParent().showError(e);
+	         }
+	      
+	  }else {
+	  	
+	  	try{
+	  		String file2 = "stockref.txt";
+	  		File ff = new File(getExcelDir() +  file2);
+	  		if(ff.exists()){		
+	  			FileReader fr = new FileReader(getExcelDir()  + file2);
+	  		 BufferedReader reader = new BufferedReader(fr);
+	  	 String line = null;
+	  		while ((line = reader.readLine()) != null) {
+	  			StringTokenizer st = new StringTokenizer(line, ";");
+	  			if (st.hasMoreTokens()) {
+	  				String kood = st.nextToken().trim();
+	  					
+	  						while (st.hasMoreTokens()) {
+	  							Double seis = Double.parseDouble(st.nextToken().trim());
+	  							if(0 < seis) {
+	  							  products.append(kood +  ";");
+	  			                  products.append(" ;");
+	  			                  products.append(getParent().getNF().format(seis) +  "\n"); 
+	  						
+	  						if(kogused.get(kood) != null){
+	  		                	   double vahe = Double.parseDouble((String) kogused.get(kood));
+	  		                	   kogused.put(kood, (vahe+ seis) + "");
+	  		                   }else{
+	  		                	   kogused.put(kood, seis + ""); 
+	  		                   }
+	  						}}
+	  				}
+	  			}
+	  		}
+	  		
+	  	
+	  	}catch(Exception e){
+	  	e.printStackTrace();	
+	  	}
+	  	
+	  }
+
+	         return products.toString();
+	     }
 
 
 
