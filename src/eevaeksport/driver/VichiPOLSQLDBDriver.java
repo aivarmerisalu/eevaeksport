@@ -211,9 +211,14 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 		 
 	
 	 private Vector mlines = null;
+	 TreeMap<String,Double> prodprices = new TreeMap<String,Double>();
 	
    public Vector getPriceMatrixData(){
 		  
+	   
+	   if(prodprices.size() == 0) {
+		   this.getProducts(null);
+	   }
 	  	 
 	  	 String sql =" SELECT '' AS custid,[Sales Code] AS clgroup,[Item No_] AS prodid,'' AS prodgroup, \r\n" + 
 	  	 		"	  	 				              [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val from \r\n" + 
@@ -272,10 +277,12 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	             String prodID = rs.getString("prodid");
 	             String prodGroup = rs.getString("prodgroup");
 	            
-	         
-	            
-	             
 	             double price = rs.getDouble("price");
+	            if(prodprices.get(prodID) != null) {
+	            //	price = price * prodprices.get(prodID);
+	            }
+	             
+	            
 	             double disc =  rs.getDouble("disc");
 	             String edate = rs.getString("paev");
 	             String sdate = rs.getString("startday");
@@ -1186,11 +1193,13 @@ try{
          	String name =  (pol( rs.getString("nimi").trim()));
             Double kordaja = rs.getDouble("kordaja");
             double price = rs.getDouble("myygihind");
+            if(kordaja != null && kordaja > 0) {
+        	  //  price = price * kordaja;
+            }
             if(ladutr.get(id) != null ){
             	Double kogus = ladutr.get(id); 
             	if(kordaja != null && kordaja > 0) {
             		kogus = kogus / kordaja;
-            		price = price / kordaja;
             	}
           	  prod.setStock(kogus);
           	 // System.out.println(id + "  " + ladutr.get(id));
@@ -1198,6 +1207,7 @@ try{
               
            
                 prod.setPrice(price);
+                prodprices.put(id, price);
              
                 String grupp = cleardots(rs.getString("grupp"));
                 if(grupp.equals("28")){
