@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -128,7 +129,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 		         toode = toode.replace('/', '_');
 		   	    	if(c == 100){
 		   	    		  c = 0;
-		   	    		  System.out.println("Piltide leidmine "  + a);	
+		   	    		 // System.out.println("Piltide leidmine "  + a);	
 		   	    		  
 		   	    	}
 		   	     
@@ -149,7 +150,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 				            	 
 				            	 if(gg[i].startsWith(toode)){
 				            		 
-				            		System.out.println("gg " + gg[0] + " " + gg.length);
+				            	//	System.out.println("gg " + gg[0] + " " + gg.length);
 				            		 File in = new File ( picts + gg[i]); 
 				            		 len = in.length() + "";
 				            		
@@ -608,46 +609,46 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
    
    
    private String pol(String in) {
+	 
+	   
+	   if(in.contains("MEDUZA") ) {
+		   System.out.println("NAme " + in );
+		  	for(int i =0 ;  i< in.toCharArray().length;i++) {
+	     		System.out.println(in.toCharArray()[i] + " " + (int)in.toCharArray()[i]);
+	     	}
+	   }
 	   in = in.replaceAll("\"", " ");
 	   in = in.trim();
 	   in = in.replaceAll("  "  , " ");
 	   in = in.replace('^', 'ł');
 	   in = in.replace('^', 'ł');
 
-	
 	   
-	   in = in.replace((char)63 ,'ł');
-	   in = in.replace((char)63 ,'ł');
-	   in = in.replace((char)151 ,'ś');
-	   in = in.replace((char)151 ,'ś');
+	   in = in.replace((char)63 ,'Ł');
+	   in = in.replace((char)63 ,'Ł');
+	   in = in.replace((char)151 ,'Ś');
+	   in = in.replace((char)151 ,'Ś');
 	   in = in.replace((char)126 ,'ś');
 	   in = in.replace((char)126 ,'ś');
-	   in = in.replace((char)97 ,'ą');
-	   in = in.replace((char)97 ,'ą');
-	   in = in.replace((char)164 ,'ą');
-	   in = in.replace((char)164 ,'ą');
 
-	   in = in.replace((char)51 ,'ż');
-	   in = in.replace((char)51 ,'ż');
+	   in = in.replace((char)352 ,'ę');
+	   in = in.replace((char)352 ,'ę');
+	   in = in.replace((char)168 ,'Ę');
+	   in = in.replace((char)168 ,'Ę');
+
+	   in = in.replace((char)164 ,'Ą');
+	   in = in.replace((char)164 ,'Ą');
+	   
+	   in = in.replace((char)228 ,'ń');
+	   in = in.replace((char)228 ,'ń');
+	   
+	   
+
+	  // in = in.replace((char)51 ,'ż');
+	  // in = in.replace((char)51 ,'ż');
 	   
 	  // in = in.replace('~', 'ś');
 	   //in = in.replace('~', 'ś');
-	   
-	   	     
-	    	   
-	    	     	
-		
-	   
-	   if(in.contains(",mro") || in.contains(",MRO")) {
-		 
-		  	for(int i =0 ;  i< in.toCharArray().length;i++) {
-	     		System.out.println(in.toCharArray()[i] + " " + (int)in.toCharArray()[i]);
-	     	}
-	    
-		 
-	   }
-	   
-	  
 	   
 	   
 	 //  spółka z ograniczoną odpowiedzialnością sp.k 
@@ -869,7 +870,36 @@ try{
            }
            
            if (name.equals("")) name = "<" + id + ">";
-           customer.setName(Converter.firstToUpperCase(pol(name)).trim());
+          name = ((pol(name)).trim());
+           
+           name = name .replaceAll("SPaŁKA", "SPÓŁKA");
+           name = name .replaceAll("spałka", "spółka");
+           name = name .replaceAll("Spcłka", "Spółka");
+           name = name .replaceAll("spcłka", "spółka");
+           name = name .replaceAll("Spclka", "Spółka");
+           
+           name = name .replaceAll("aSKI", "ÓSKI");
+           name = name .replaceAll("nY ", "ną ");  
+           
+           name = name .replaceAll("iY ", "ią ");
+           name = name .replaceAll("Y ", "ą ");
+           name = name .replaceAll("1cłtki", "Źółtki");
+           name = name .replaceAll("GaRNA", "GÓRNA");
+           name = name .replaceAll("WSPaLNICY", "WSPÓLNICY");
+           name = name .replaceAll("FORODOaSKA", "FORODOÓSKA");
+           name = name .replaceAll("JaZEFA", "JÓZEFA");
+           name = name .replaceAll("POZNAa", "POZNAÓ");
+           name = name .replaceAll("SKaRCZ", "SKÓRCZ");
+        
+           
+           
+           
+           
+           
+           
+           
+           customer.setName(((name)).trim());
+           
        
            	if(payer != null && payer.trim().length()>0){
               customer.setPayer(payer.trim());
@@ -902,8 +932,8 @@ try{
             		 country = "Poland";
             	 }
                customer.setAddress(Converter.adressLink(pol(Converter.enCodeEst(aadress)),country));
-               customer.setName(Converter.firstToUpperCase(customer.getName().trim())+ " " + 
-               Converter.firstToUpperCase(pol(Converter.enCodeEst(aadress))));
+               customer.setName((customer.getName().trim())+ " " + 
+              (pol(Converter.enCodeEst(aadress))));
              }
          
              String ag = rs.getString("agent");
@@ -1153,7 +1183,7 @@ try{
             String id = rs.getString("toode").trim();
             double weight = 0 ;
             Product prod = new Product(id);
-         	String name =  Converter.firstToUpperCase(pol( rs.getString("nimi").trim()));
+         	String name =  (pol( rs.getString("nimi").trim()));
             Double kordaja = rs.getDouble("kordaja");
             double price = rs.getDouble("myygihind");
             if(ladutr.get(id) != null ){
@@ -1206,7 +1236,12 @@ try{
     			}
                 prod.setGroupSecond(grupp2);
 
-                prod.setUnit(pol(rs.getString("unit")));
+                String unit = rs.getString("unit");
+                if(unit.contains("mro")) {
+              	  int i = unit.indexOf("mro");
+              	  unit = unit.substring(0,i) + "mroż" + unit.substring(i+4);
+                }
+                prod.setUnit(unit);
               
                 String ean = (rs.getString("ean"));
                  if (ean != null && ean.trim().length()>0){
@@ -1221,13 +1256,12 @@ try{
 
                 double	cases = rs.getDouble("kastis");
                 	if(cases>0){
-                   prod.setInCases(cases);
+                      prod.setInCases(cases/kordaja);
                 	}
 
                 	
-             	weight = rs.getDouble("kaal");
+             	weight = kordaja;
                            if(weight > 0){
-                           
                             	 prod.setMeasure(weight);
                            }      	 
                                                       
@@ -1243,8 +1277,14 @@ try{
        
                    
                	 String info = rs.getString("info");
-                 if(info != null && info.trim().length()>0){   
-                	 prod.setPartii(info.trim());
+                 if(info != null && info.trim().length()>0){ 
+                	 
+                	   if(info.contains("mro")) {
+                     	  int i = info.indexOf("mro");
+                     	 info = info.substring(0,i) + "mroż" + info.substring(i+4);
+                       }
+                	 
+                	 prod.setPartii(pol(info.trim()));
                  }
                  
                  String prgroup = rs.getString("prgroup");
@@ -1252,11 +1292,24 @@ try{
                 	 prod.setDiscgrupp(prgroup.trim());
                  }
                  
+                  if(name.contains("mro")) {
+                	  int i = name.indexOf("mro");
+                	  name = name.substring(0,i) + "mroż" + name.substring(i+4);
+                  }
                   
-                 
+                  if(name.contains("MRO")) {
+                	  int i = name.indexOf("MRO");
+                	  name = name.substring(0,i) + "MROŻ" + name.substring(i+4);
+                  }
+                
                    
-          //leedu versioonis prod.setName(weight.substring(0,weight.indexOf('.')+3) + " " + name);
-          prod.setName(Converter.enCodeEst(name) + " " + prod.getID());
+                  
+                   
+              
+                  
+             
+                 
+          prod.setName((name) + " " + prod.getID());
           if(inPricelist.contains(prod.getID())) {
         	    tm.put(name + prod.getID(), prod);
                 prodHash.put(prod.getID(), prod);  
@@ -1455,26 +1508,50 @@ public void setNF(NumberFormat nf) {
    * @param agents Map
    */
   public void setBulkSales(Map agents) {
-
+		DecimalFormat formatter = new DecimalFormat("##0.00' ‎zł'");
   	 try {
-  	 	String cmd = " select [Salesperson Code] as agent ,sum([Sales (LCY)]) as summa from [VICIUNAI-POL$Cust_ Ledger Entry] " +
-  	 			"where Month(getdate())=Month([Posting Date]) and " +
-             "Year(getdate())=Year([Posting Date]) " +
-              "  group by [Salesperson Code]"; // and [Global Dimension 1 Code]='400'
+  	 	String cmd = "select [Salesperson Code] as agent ,sum([Sales (LCY)]) as summa from [VICIUNAI-POL$Cust_ Ledger Entry] "+
+              "  where Month(getdate())=Month([Posting Date]) and " +
+ " Year(getdate())=Year([Posting Date])    group by [Salesperson Code]";
+
+  	 			
+  	 	
   	  Connection con = getNewConnection2();
 	        Statement stmt = con.createStatement();
 	        ResultSet rs = stmt.executeQuery(cmd);
 	        while(rs.next()){
-            
+	        	 
                  String agentID = rs.getString("agent");
                  double sales = rs.getDouble("summa");
                  Agent agent = (Agent)agents.get(agentID);
                  if (agent != null){
-                   agent.setMonthSales((int)(sales));
-            }
-          }
+                   agent.setStart("Wyfakturowane: " + formatter.format(sales) + "");
+                }
+             }
 
 	        rs.close();
+	       
+	    	cmd= 	" select sum(case when [Currency Factor] <> 0 then [Amount]/[Currency Factor]else [Amount] end) as summa,[Salesperson Code] AS agent \r\n" + 
+	  	 			"					 from (select b.[Amount],a.[Currency Factor] ,a.[Salesperson Code]  from [VICIUNAI-POL$Sales Invoice Header] a \r\n" + 
+	  	 			"					 inner  join [VICIUNAI-POL$Sales Invoice Line] b on a.[No_]=b.[Document No_] where Year(getdate())=Year(a.[Shipment Date]) and \r\n" + 
+	  	 			"					 Month(getdate())=Month(a.[Shipment Date]) union all select b.[Amount],a.[Currency Factor],a.[Salesperson Code] from \r\n" + 
+	  	 			"					 [VICIUNAI-POL$Sales Cr_Memo Header] a inner join [VICIUNAI-POL$Sales CR_Memo Line] b on a.[No_]=b.[Document No_] \r\n" + 
+	  	 			"					 where Year(getdate())=Year(a.[Shipment Date]) and Month(getdate())=Month(a.[Shipment Date])) S \r\n" + 
+	  	 			"					 group By [Salesperson Code]"; // and [Global Dimension 1 Code]='400'
+	    	
+	    	rs = stmt.executeQuery(cmd);
+	    	while(rs.next()){
+	        	   double sales = rs.getDouble("summa");
+               String agentID = rs.getString("agent");
+            
+               Agent agent = (Agent)agents.get(agentID);
+               if (agent != null){
+                 agent.setStart(agent.getStart()+"|Zamówienia w realizacji: " + formatter.format(sales) + "");
+              }
+           }
+
+	        rs.close();
+	        stmt.close();
 	        con.close();
       } catch (Exception e){
         e.printStackTrace();
