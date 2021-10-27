@@ -540,7 +540,7 @@ public class AxaAmberUKDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  
 	  TreeMap prodNames = new TreeMap();
 	  
-	  TreeMap tr = new TreeMap();
+	  TreeMap tr = new TreeMap(); 
 	   
  	  Converter.getContractsFixedByProd(tr, rcompany, user, pass, true); 
  	  

@@ -9298,7 +9298,7 @@ client.close();
 					}
 				}
 					
-				//läheme Selveri kallale.
+				//läheme Selveri kallale. 
 				
 				sheet = workbook.getSheetAt(1);
 				
