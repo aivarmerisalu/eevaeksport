@@ -1,5 +1,6 @@
 package eevaeksport.driver;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,17 +33,21 @@ import java.util.Vector;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -1723,308 +1728,13 @@ try{
          }
    
    
-   public void createExcelReport(TreeMap products1, TreeMap customers1, Vector custProds, String rcompany, String user, String pass) {
-	   
-		TreeMap prods = new TreeMap();
-		Iterator iter1 = products1.values().iterator();
-		while (iter1.hasNext()){
-			Product prod = (Product) iter1.next();
-			prods.put(prod.getID(), prod);
-		}
-		
-		TreeMap customers = new TreeMap();
-		iter1 = this.getCustomers(null).values().iterator();
-		while (iter1.hasNext()){
-			Customer cust = (Customer) iter1.next();
-			customers.put(cust.getID(), cust);
-		}
-
-	   
-	  TreeMap levelTooted = new TreeMap();
-	  Converter.getContractsFixedByCust(levelTooted, rcompany, user, pass, false);
-
-	  //array kus on olemas kõik esinevad tooted lepingutes
-		Iterator iteraa = levelTooted.keySet().iterator();
-		ArrayList leptooted = new ArrayList();
-		
-		while(iteraa.hasNext()) {
-			String cu = iteraa.next()+"";
-			ArrayList prods1 = (ArrayList) levelTooted.get(cu);
-			Iterator iteraaa = prods1.iterator();
-			while(iteraaa.hasNext()) {
-				String idd = (String) iteraaa.next();
-				
-				if(!leptooted.contains(idd)) {
-					leptooted.add(idd);
-				}
-			}
-		}
-	   
-		//k2sime veebist leveli ja kaupluse seost
-		  TreeMap custLevels = new TreeMap();
-		  TreeMap levelsCustomers = new TreeMap();
-		  try {
-				Converter.loadCustDimensions("level", rcompany, user, pass);
-				custLevels = Converter.getCustDimsLoading("level");
-				Iterator itera =	custLevels.keySet().iterator();
-				
-				while(itera.hasNext()) {
-					String cu =itera.next()+"";
-					ArrayList<String> ar = (ArrayList<String>)custLevels.get(cu);
-					for(String lev: ar) {
-						if(levelsCustomers.get(lev) != null) {
-							ArrayList vv = (ArrayList)levelsCustomers.get(lev);
-							vv.add(cu);
-							levelsCustomers.put(lev, vv);
-						} else {
-							ArrayList vv = new ArrayList();
-							vv.add(cu);
-							levelsCustomers.put(lev, vv);
-						}
-					}
-			}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		  
-		
-		  TreeMap masterSortiment = new TreeMap();
-			Iterator itera = custLevels.keySet().iterator();
-			
-			while(itera.hasNext()) {
-				String custid = itera.next()+"";
-				ArrayList levels = (ArrayList) custLevels.get(custid);
-				ArrayList tooted1 = new ArrayList();
-				
-				Iterator iteral = levels.iterator();
-				while(iteral.hasNext()) {
-					String level = (String) iteral.next();
-					
-					if(levelTooted.get(level) != null) {
-						ArrayList aaa = (ArrayList) levelTooted.get(level);
-						Iterator itera2 = aaa.iterator();
-						
-						while(itera2.hasNext()) {
-							tooted1.add(itera2.next() + "");
-						}
-					}
-				}
-				if(tooted1.size()!=0) {
-					masterSortiment.put(custid, tooted1);
-				}
-			}
-			
-			
-			  TreeMap <String, ArrayList> custBuys = new TreeMap<String, ArrayList>();
-			  itera = custProds.iterator();
-			
-				while(itera.hasNext()) {
-					CustProd cp = (CustProd) itera.next();
-					String custid = cp.getCustID();
-					String prodid = cp.getProdID();
-					ArrayList produss = new ArrayList();
-					
-					if(custBuys.get(custid)!=null) {
-						produss = custBuys.get(custid);
-					}
-					   produss.add(prodid);
-						custBuys.put(custid, produss);
-					
-				}
-
-	   
-	   
-		 	NumberFormat nf2 = NumberFormat.getInstance(Locale.ENGLISH);
-		 	nf2.setMaximumFractionDigits(4);
-			nf2.setMinimumFractionDigits(2);
-			nf2.setGroupingUsed(false);
-	    	String ss = "olv";
-	    	
-	    	String fname = "/home/gpc/Documents/Merisoft/mobilejava/excel/" + "fixreportbase.xlsx";
-	    	String tname = "/home/gpc/Documents/Merisoft/mobilejava/data/" + "tooted.TXT";
-	    	
-	
-	    	//DateFormat df1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-	    	//Calendar datenow = Calendar.getInstance();
-						
-  try{
-	  
-						  FileInputStream excelifail = new FileInputStream(fname); //Read the spreadsheet that needs to be updated
-					      XSSFWorkbook  wb = new XSSFWorkbook(excelifail);
-					      XSSFSheet worksheet = wb.getSheetAt(0);
-
-					      //genereerime xssf objektid
-					        XSSFRow row1 = worksheet.getRow(1);  //0 = row number
-					        XSSFCell c = row1.getCell(1);
-					             //c.setCellValue(c.getStringCellValue() + " " + ref);
-					    
-					        
-					        CellStyle myydudStyle = worksheet.getRow(3).getCell(0).getCellStyle();
-					        CellStyle centerStyle = worksheet.getRow(0).getCell(0).getCellStyle();
-					        
-					        
-					           //Paneme dokumendi kuupäeva paika 
-							    row1 = worksheet.getRow(1);  //0 = row number
-							      c = row1.getCell(2);
-							      c.setCellValue(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
-							      
-							      
-							      // kirjutame kõik sortimendis olevad tooted excelisse ülevalt alla
-							  
-							      int algusx = 1;
-							      int algusy = 5;
-							     
-							      
-							      HashMap<String, Integer> tootedjrk = new HashMap<String, Integer>();
-							      Iterator iter2 = leptooted.iterator();
-							  		while (iter2.hasNext()){
-							  			
-							  			String id = (String) iter2.next();
-							  			Product prod = (Product) prods.get(id);
-							  			if(worksheet.getRow(algusy)==null) {
-							  				worksheet.createRow(algusy);
-							  				worksheet.getRow(algusy).createCell(algusx);
-							  				worksheet.getRow(algusy).createCell(algusx+2);
-							  				worksheet.getRow(algusy).createCell(algusx+3);
-							  			}
-							  			row1 = worksheet.getRow(algusy);
-							  			row1.createCell(algusx).setCellValue(prod.getID());
-							  			row1.createCell(algusx + 1).setCellValue(prod.getEAN());
-							  			row1.createCell(algusx + 2).setCellValue(Converter.deCode(prod.getName()));
-				
-							  			tootedjrk.put(id, algusy);
-							  			
-							  			algusy++;
-							  		}
-							  		int tootedKokku = algusy;
-							  		//System.out.println(masterSortiment.get("1072").toString());
-							  		//System.out.println(tootedjrk.get("3863").toString());
-
-							  		//Lisame päisesse kliendi andmed
-
-							  		
-							  		algusx = 4;
-								    algusy = 1;
-							  		
-							  		iter2 = masterSortiment.keySet().iterator();
-							  		while (iter2.hasNext()){
-							  			String id = (String) iter2.next();
-							  			Customer cust = (Customer) customers.get(id);
-							  			
-							  			
-							  			//Paneme kliendi id paika
-						  				worksheet.getRow(algusy).createCell(algusx).setCellValue(id);
-						  				//Paneme paika kliendi nime
-						  				worksheet.getRow(algusy+1).createCell(algusx).setCellValue(cust.getName());
-						  				//Paneme paika kliendi nime
-						  				worksheet.getRow(algusy+2).createCell(algusx).setCellValue(cust.getMainAgent());
-						  				//Paneme paika kliendi keti
-						  				worksheet.getRow(algusy+3).createCell(algusx).setCellValue(cust.getChain());
-						  				
-						  				//M2rgistame kliendi tooted sortimendis
-						  				ArrayList prodss = (ArrayList) masterSortiment.get(id);
-						  				Iterator iter3 = prodss.iterator();
-						  				while (iter3.hasNext()){
-						  					String prodid = (String) iter3.next();
-					  						//System.out.println(prodid + " ");
-
-						  					if(tootedjrk.get(prodid) != null) {
-						  						int rownum=tootedjrk.get(prodid);
-						  						//System.out.println(prodid + " " + rownum);
-						  						Cell ccc = worksheet.getRow(rownum).createCell(algusx);
-						  						ccc.setCellValue("1");
-						  						ccc.setCellStyle(centerStyle);
-						  					}
-						  				}
-						  				
-
-						  				//produss = custBuys.get(custid);
-
-						  					ArrayList produss = custBuys.get(id); //mida pood on müünud
-						  					
-						  					if(produss!=null) {
-						  						Iterator iter33 = produss.iterator();
-								  				while (iter33.hasNext()){
-								  					String tootdeid = (String) iter33.next();
-								  					if(tootedjrk.get(tootdeid) != null) {
-								  						int rownum=tootedjrk.get(tootdeid);
-								  						
-											  			Row row = worksheet.getRow(rownum);
-											  			if(row == null) {
-											  				row = worksheet.createRow(rownum);
-											  			}
-											  			Cell cell = row.getCell(algusx);
-											  			if(cell==null) {
-											  				cell = row.createCell(algusx);
-											  			}
-								  						cell.setCellStyle(myydudStyle);
-								  						
-								  						
-							  						}
-								  					
-								  				}
-
-						  						
-						  						
-						  					}
-						  				
-						  				
-						  				//
-						  				
-						  				
-						  				
-						  				//Mitu toodet on poes?
-								  		String column_letter = CellReference.convertNumToColString(algusx);
-								  		CellStyle cellStyle = worksheet.getRow(4).getCell(0).getCellStyle();
-							  			Row row = worksheet.getRow(0);
-							  			if(row == null) {
-							  				row = worksheet.createRow(0);
-							  			}
-							  			Cell cell = row.createCell(algusx);
-							  			cell.setCellType(Cell.CELL_TYPE_FORMULA);
-							  			cell.setCellFormula("COUNTA(" + column_letter + "" + 6 + ":" + column_letter + "" + tootedKokku + ")");
-							  			cell.setCellStyle(cellStyle);
-							  			algusx++;
-							  		}
-							  		
-							  		
-							  		
-							  		
-							  		
-							  		
-							  		
-							  		//Mitmes poes esineb toode?
-							  		String last_column_letter = CellReference.convertNumToColString(algusx-1);
-							  		CellStyle cellStyle = worksheet.getRow(4).getCell(0).getCellStyle();
-							  		for(int x=0; x<tootedKokku-5; x++){
-							  			Row row = worksheet.getRow(x + 5);
-							  			if(row == null) {
-							  				row = worksheet.createRow(x + 5);
-							  			}
-							  			Cell cell = row.createCell(0);
-							  			cell.setCellType(Cell.CELL_TYPE_FORMULA);
-							  			cell.setCellFormula("COUNTA(E" + (x + 5 + 1) +":" + last_column_letter + "" + (x+6) + ")");
-							  			cell.setCellStyle(cellStyle);
-							  		}
-							  		
-
-			
-									  excelifail.close(); //Close the InputStream
-									  System.out.println(this.getExcelDir() + "fixreport-" + 
-											  Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-								        FileOutputStream output_file =new FileOutputStream(this.getExcelDir() + "fixreport-" + 
-									  Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-								        wb.write(output_file); //write changes
-								        output_file.close();  //close the stream
-					        
-					        
-					        
-  }catch (Exception e){
-		e.printStackTrace();
-	}
-	   
-   }
    
+
+   
+   
+   
+   
+
     
    
  @Override
@@ -2035,7 +1745,7 @@ try{
 
 @Override
 public void FixReporter() {
-	createExcelReport(this.getProducts(null), this.getCustomers(null), this.getCustomerProductsList(null), rcompany, user, pass);
+	Converter.createExcelReport(this.getProducts(null), this.getCustomers(null), this.getCustomerProductsList(null), getPriceMatrixData(), this.getExcelDir(), rcompany, user, pass);
 	System.exit(0);
 }
   
