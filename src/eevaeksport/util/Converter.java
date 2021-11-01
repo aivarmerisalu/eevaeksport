@@ -9382,7 +9382,7 @@ client.close();
 
 		   
 		  TreeMap levelTooted = new TreeMap();
-		  Converter.getContractsFixedByCust(levelTooted, rcompany, user, pass, false);
+		  Converter.getContractsFixedByCust(levelTooted, rcompany, user, pass, true);
 
 		  //array kus on olemas kõik esinevad tooted lepingutes
 			Iterator iteraa = levelTooted.keySet().iterator();
@@ -9526,14 +9526,10 @@ client.close();
 			 	nf2.setMaximumFractionDigits(4);
 				nf2.setMinimumFractionDigits(2);
 				nf2.setGroupingUsed(false);
-		    	String ss = "olv";
+		    
 		    	
-		    	String fname = "/home/gpc/Documents/Merisoft/mobilejava/excel/" + "fixreportbase.xlsx";
-		    	String tname = "/home/gpc/Documents/Merisoft/mobilejava/data/" + "tooted.TXT";
-		    	
-		
-		    	//DateFormat df1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		    	//Calendar datenow = Calendar.getInstance();
+		    	String fname = exceldir + "fixreportbase.xlsx";
+
 							
 	  try{
 		  
@@ -9584,16 +9580,10 @@ client.close();
 							      campaignMyydudStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND); 
 					
 							      
-							      
 						      //genereerime xssf objektid
 						        XSSFRow row1 = worksheet.getRow(1);  //0 = row number
 						        XSSFCell c = row1.getCell(1);
-						             //c.setCellValue(c.getStringCellValue() + " " + ref);
-						    
-
-						        
-						        
-						           //Paneme dokumendi kuupäeva paika 
+				
 								    row1 = worksheet.getRow(1);  //0 = row number
 								      c = row1.getCell(2);
 								      c.setCellValue(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
@@ -9627,9 +9617,7 @@ client.close();
 								  			algusy++;
 								  		}
 								  		int tootedKokku = algusy;
-								  		//System.out.println(masterSortiment.get("1072").toString());
-								  		//System.out.println(tootedjrk.get("3863").toString());
-
+					
 								  		//Lisame päisesse kliendi andmed
 
 								  		
@@ -9687,14 +9675,8 @@ client.close();
 												  				cell = row.createCell(algusx);
 												  			}
 									  						cell.setCellStyle(myydudStyle);
-									  						
-									  						
 								  						}
-									  					
 									  				}
-
-							  						
-							  						
 							  					}
 							  					
 							  					//v2rvime kampaania teksti roheliseks
@@ -9725,30 +9707,10 @@ client.close();
 											  					}else{
 												  					cell.setCellStyle(campaignStyle);
 											  					}
-												  				
-												  				
-												  			  //org.apache.poi.ss.usermodel.Color fillFGColor = cellStyle.getFillBackgroundColorColor();
-												  				//System.out.println(fillFGColor);
-												  			  //XSSFColor fillColor = cell.getCellStyle().getFillForegroundColorColor();
-												                //if(fillColor!=null) {System.out.println(((XSSFColor) fillColor).getARGBHex());}
-												  	            //
-												  				//campaignStyle = cell.getCellStyle();
-												  				//campaignStyle.setFillForegroundColor(campaignColor);
-												  				//campaignStyle=cell.getCellStyle();
-												  				//campaignStyle.setFillForegroundColor(IndexedColors.GREEN.getIndex());
-												  				//campaignStyle.setFont(campaignFont);
-												  				//CellUtil.setFont(cell, wb, campaignFont);
-												  				//cell.setCellStyle(campaignStyle);
-												  				
 												  			}
-									  						
-									  						
 								  						}
-									  					
 									  				}
 									  			}
-							  				
-							  				
 							  				
 							  				//Mitu toodet on poes?
 									  		String column_letter = CellReference.convertNumToColString(algusx);
@@ -9763,13 +9725,7 @@ client.close();
 								  			cell.setCellStyle(cellStyle);
 								  			algusx++;
 								  		}
-								  		
-								  		
-								  		
-								  		
-								  		
-								  		
-								  		
+							  		
 								  		//Mitmes poes esineb toode?
 								  		String last_column_letter = CellReference.convertNumToColString(algusx-1);
 								  		CellStyle cellStyle = worksheet.getRow(4).getCell(0).getCellStyle();
@@ -9783,17 +9739,7 @@ client.close();
 								  			cell.setCellFormula("COUNTA(E" + (x + 5 + 1) +":" + last_column_letter + "" + (x+6) + ")");
 								  			cell.setCellStyle(cellStyle);
 								  		}
-								  		
-								  		
-								
-								  		
-								  		
-								  		
-								  		
-								  		
-								  		
-
-				
+						
 										  excelifail.close(); //Close the InputStream
 										  System.out.println(exceldir + "fixreport-" + 
 												  Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
@@ -9801,7 +9747,6 @@ client.close();
 										  Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
 									        wb.write(output_file); //write changes
 									        output_file.close();  //close the stream
-						        
 						        
 						        
 	  }catch (Exception e){
@@ -9812,13 +9757,6 @@ client.close();
 	   
 	    
 	
-	
-	
-	
-	
-	
-	
-	
-	
+
 
 }

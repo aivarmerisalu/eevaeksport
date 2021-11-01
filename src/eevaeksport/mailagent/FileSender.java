@@ -228,7 +228,7 @@ public class FileSender {
 
 	    	                // Upload a file as a new object with ContentType and title specified.
 	    	        		if(f.getName().contains("stockref") || f.getName().contains("customerorders")
-	    	        				|| f.getName().contains("debtref")) {
+	    	        				|| f.getName().contains("debtref") ||  f.getName().startsWith("st")) {
 	    	        			  PutObjectRequest request = new PutObjectRequest(bucketName, dirOut + f.getName(), f);
 	  	    	                ObjectMetadata metadata = new ObjectMetadata();
 	  	    	                metadata.setContentType("plain/text");
