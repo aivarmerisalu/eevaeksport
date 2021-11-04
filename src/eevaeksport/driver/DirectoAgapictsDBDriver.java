@@ -707,7 +707,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
     	 r.printStackTrace();
      }
    
-    // getOpenOrders();
+     getOpenOrders();
    //  getFixedAssortmentData();
  
      // loene võimalikud agendid sisse 
@@ -1107,17 +1107,13 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
       
     	    
     	    TreeMap cmanas = custManas();
-  		 TreeMap<String, ArrayList<Toode>> docs = new TreeMap<String, ArrayList<Toode>>();
+  		    TreeMap<String, ArrayList<Toode>> docs = new TreeMap<String, ArrayList<Toode>>();
   			TreeMap res = new TreeMap();
-  			
   			TreeMap prods = getProducts2();
-  			
   			StringBuffer oorders = new StringBuffer();
   			oorders.append(Calendar.getInstance().getTimeInMillis() + "\n");
   			
   			try {
-  			    	 
-  			    	   
   				 File f = new File (getDir() + "orders.xml");
   		 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
   		 	     DocumentBuilder db;
@@ -1162,7 +1158,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
   	  			    	try {
   	  			    	String status =  (rida.getAttributes().getNamedItem("status").getNodeValue());
 			    			 if(status != null && status.equals("MUUTA") && ( number.startsWith("45") || number.startsWith("46") 
-			    					 || id.equals("10183"))) { // coop
+			    					 || id.equals("10183") )) { // coop
 			    				 goes = true;
 			    			 }
   	  			    	}catch(Exception e) {
@@ -1191,7 +1187,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	  			    	  
 	  			    	  if(toode.startsWith("UT") && prods.get(toode) != null) {
 	  			    		  toode = ((Product)prods.get(toode)).getEAN();
-	  			    		//  System.out.println("muutsin koodi " + toode);
+	  			    		 // System.out.println("muutsin koodi " + toode);
 	  			    	  }
 	  			    	  
 	  			    	  
@@ -2447,6 +2443,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		      	    	ean =  ean.replaceAll(";", ":");
 		      	    	if(!ean.contains("=")) {
 		      	    	    prod.setEAN(ean);
+		      	    	    if(prod.getID().contains("KO003649"))
 			          	     System.out.println("Konvert kood " + ean + " " + prod.getID());
 			            }
 		          	 }

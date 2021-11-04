@@ -9540,7 +9540,7 @@ client.close();
 						      
 						      XSSFColor colorBlack = new XSSFColor(Color.black);//212°, 15%, 96%
 							  XSSFColor colorBlue = new XSSFColor(new java.awt.Color(204, 255, 240));
-							  XSSFColor colorGreen = new XSSFColor(new java.awt.Color(0, 255, 0));
+							  XSSFColor colorGreen = new XSSFColor(new java.awt.Color(28, 122, 53));
 						      
 						      XSSFFont defaultFont= wb.createFont();					//tavaline must tekst
 						        defaultFont.setFontHeightInPoints((short)10);
@@ -9633,7 +9633,7 @@ client.close();
 								  			//Paneme kliendi id paika
 							  				worksheet.getRow(algusy).createCell(algusx).setCellValue(id);
 							  				//Paneme paika kliendi nime
-							  				worksheet.getRow(algusy+1).createCell(algusx).setCellValue(cust.getName());
+							  				worksheet.getRow(algusy+1).createCell(algusx).setCellValue(Converter.deCode(cust.getName()));
 							  				//Paneme paika kliendi nime
 							  				worksheet.getRow(algusy+2).createCell(algusx).setCellValue(cust.getMainAgent());
 							  				//Paneme paika kliendi keti

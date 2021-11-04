@@ -20,6 +20,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -61,7 +62,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	} catch (Exception e) {
 	    parent.showError(e);
 	}
-  		  user =  getParent().getProps().getProperty("rest.user");
+  		    user =  getParent().getProps().getProperty("rest.user");
 		    pass = getParent().getProps().getProperty("rest.pass");
 		    rcompany = getParent().getProps().getProperty("rest.company");
 		    rcompanyx = getParent().getProps().getProperty("rest.companyx");
@@ -1132,7 +1133,54 @@ try{
    private TreeMap agents1 = new TreeMap();
    private HashMap prodHash = new HashMap();
    
+   private void makeTexts() throws Exception{
+		  
+		  
+		  String    sql = "select No_ as kood , Comment as asi from [VICIUNAI-POL$Comment Line] where [Table Name] = '3' order by No_,[Line No_]";
+		  
+		  TreeMap<String,String> tr = new TreeMap<String,String>();
+	  Connection con =  getNewConnection2();
+	  Statement stmt = con.createStatement();
+	   ResultSet rs = stmt.executeQuery(sql);
+	    StringBuffer sb = new StringBuffer();
+	   while (rs.next()) {
+	     String kood=rs.getString("kood").trim();
+	    	 String nimetus=rs.getString("asi");
+	    			 if(nimetus != null){
+	    				 nimetus = nimetus.trim().replaceAll("\\r\\n|\\r|\\n", "|").replaceAll(";", ":"); 
+	    				 
+	    				 String aa = tr.get(kood);
+	    				 if(aa == null) {
+	    					 aa = nimetus;
+	    				 }else {
+	    					 aa = aa +" " + nimetus; 
+	    				 }
+	    				 if(aa.trim().length()> 1)
+	    				 tr.put(kood, aa.trim());
+	    			 }
+	      }
+	   
+	   rs.close();
+	   stmt.close();
+	   con.close();
+	   
+	  Iterator itera =  tr.keySet().iterator();
+	  while (itera.hasNext()) {
+		  String kood = (String)itera.next();
+		  sb.append(kood + ";" + tr.get(kood) + "\n");  
+	  }
+	   Converter.saveFileInUTF8("texts.txt", sb);
+
+	  }
+   
+   
    public TreeMap getProducts(Agent agent) {
+	   try {
+		makeTexts();
+	} catch (Exception e2) {
+		// TODO Auto-generated catch block
+		e2.printStackTrace();
+	}
 		HashSet inPricelist = null;
 	   try {
 		   inPricelist = getActiveprods();
@@ -1524,7 +1572,7 @@ public void setNF(NumberFormat nf) {
               "  where Month(getdate())=Month([Posting Date]) and " +
  " Year(getdate())=Year([Posting Date])    group by [Salesperson Code]";
 
-  	 			
+  	 			TreeMap<String, Double> ags = new TreeMap<String, Double>();
   	 	
   	  Connection con = getNewConnection2();
 	        Statement stmt = con.createStatement();
@@ -1534,6 +1582,7 @@ public void setNF(NumberFormat nf) {
                  String agentID = rs.getString("agent");
                  double sales = rs.getDouble("summa");
                  Agent agent = (Agent)agents.get(agentID);
+                 ags.put(agentID, sales);
                  if (agent != null){
                    agent.setStart("Wyfakturowane: " + formatter.format(sales) + "");
                 }
@@ -1553,6 +1602,10 @@ public void setNF(NumberFormat nf) {
 	    	while(rs.next()){
 	        	   double sales = rs.getDouble("summa");
                String agentID = rs.getString("agent");
+               
+               if(ags.get(agentID) != null) {
+            	   sales = sales - ags.get(agentID);
+               }
             
                Agent agent = (Agent)agents.get(agentID);
                if (agent != null){
