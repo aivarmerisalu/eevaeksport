@@ -91,8 +91,16 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	
 	 private void makePictureCat(){
 
-			String cmd2 = "SELECT t.[No_] AS toode  " +
-	   "FROM [VICIUNAI-POL$Item] t WHERE [Blocked]=0 AND [Unit Price] > 0 AND len([Grupės kodas])>0 " ;
+		 String cmd2 = " SELECT [No_] AS toode,(t.[Description]) AS nimi, var.[Qty_ per Unit of Measure] as kordaja , pr.[Unit Price] AS myygihind, [Product Group Code] AS grupp,[Subgroup Code] AS grupp2 \r\n" + 
+	     			"     			     					,[Sales Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
+	     			"     			     						  '' AS type, vat.[Qty_ per Unit of Measure] AS kastis,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc  \r\n" + 
+	     			"     			     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup FROM [VICIUNAI-POL$Item] t \r\n" + 
+	     			"     										  left join [VICIUNAI-POL$Sales Price] pr ON pr.[Item No_] = [No_] and pr.[Sales Code] = ''\r\n" + 
+	     			"     										  LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] vat ON (vat.[Item No_]=[No_] and vat.[Code]='KARTON' ) \r\n" + 
+	     			"											   LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] var ON var.[Item No_]=[No_] and var.[Code]=[Sales Unit of Measure]  \r\n" + 
+	     			"     			     						  LEFT JOIN [VICIUNAI-POL$Item Cross Reference] ref ON (ref.[Item No_]=[No_] and ref.[Unit of Measure]='SZT'  and ref.[Cross-Reference Type] = 3)\r\n" + 
+	     			"     			     						  WHERE ([Blocked]=0  AND len([Product Group Code])>0 and  len(t.[Description]) != 0) \r\n" + 
+	     			"     			     						  or [Subgroup Code] like '%2.08.01%' ORDER BY [No_]";
 
 		    String picts = parent.getProps().getProperty("pict.dir");
            	String pictspda = parent.getProps().getProperty("pictpda.dir");
@@ -114,71 +122,47 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 
 
 		        StringBuffer buf = new StringBuffer();
-		        StringBuffer buf0 = new StringBuffer();
-		        int a = 0;
-		        int b = 0;
-		        int c = 0;
-		        
+		      
+		      
+		        HashSet prods = new HashSet();
 		        
 		        while (rs.next()) {
-		   	    	a++;
-		   	    	c++;
+		   	    	
+		   	    	
 		   	    	
 		   	     String toode = rs.getString("toode").trim();  
+		   	     String ean = rs.getString("ean"); 
 		       
+		   	     if(ean != null && !prods.contains(toode)) {
+		   	    	 ean = ean.trim();
+		   	    	 prods.add(toode);
+		   	    
 		   	     toode = toode.replace('/', '_');
 		         toode = toode.replace('/', '_');
-		   	    	if(c == 100){
-		   	    		  c = 0;
-		   	    		 // System.out.println("Piltide leidmine "  + a);	
-		   	    		  
-		   	    	}
-		   	     
-		              
-		                 File f = new File(picts + toode+".jpg");
-		                 String len = "0";
-		                 if(f.exists()){
-		                   len = f.length() + "";
-		                   if(f.isFile()){            	
-		 		             	File inpda = new File ( pictspda + toode + ".jpg"); 
-		 		             	Converter.shrinkAndCopyFile(f,inpda);
-		 		               }
-		                 }else{
+		   	    	
 		                	 String[] gg = new File(picts).list();
-				         	  
 				            
 				             for(int i = 0 ; gg.length > i ; i++){ 
+				            	 String len = "0";
 				            	 
-				            	 if(gg[i].startsWith(toode)){
-				            		 
-				            	//	System.out.println("gg " + gg[0] + " " + gg.length);
+				            	 if(gg[i].startsWith(ean)){
+				          
 				            		 File in = new File ( picts + gg[i]); 
-				            		 len = in.length() + "";
-				            		
 				            		 if(in.isFile()){            	
 				 		             	File inpda = new File ( pictspda + toode + ".jpg"); 
 				 		             	Converter.shrinkAndCopyFile(in,inpda);
+				 		                len = inpda.length() + "";
 				 		               }
-				            		 
+				            		 buf.append(toode+".jpg;"  + len + "\n");
 				            	    }
 				             	 }
-				             }
-		                 
-		                 
-		                 
-		                 if(len.equals("0")){
-		                 	buf0.append(toode+".jpg\n");
-		                 }else{
-		                	buf.append(toode+".jpg;"  + len + "\n");
-		           	    	b++;
-		                 }
-		                 }
+				            }
+		               }
 		   	    rs.close();
 		   	    stmt.close();
 		   	    con.close();
 		   	
-		   	    //oleasoleva kataloogi kustutamine
-		   	  System.out.println("Kataloogi kustutamine "  + a);	    
+		  	    
 		               File f = new File("list.txt");
 		               if (f.exists())f.delete();
 		                 try {
@@ -189,21 +173,11 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 		           	  }catch (Exception ex) {
 		           		ex.printStackTrace();
 		           	  }
-		           	  File f0 = new File("list0.txt");
-		           	   if (f0.exists())f0.delete();
-		                   try {
-		             		PrintWriter os1 = new PrintWriter(new FileWriter(
-		             				  "list0.txt", true));
-		             		os1.write(buf0.toString());
-		             		os1.close();
-		             	  }catch (Exception ex) {
-		             		ex.printStackTrace();
-		             	  }
+		        
 
 		             File fff =  new File (pictspda +  "list.txt");
-		       	  Converter.copyFile(f,fff);  	
-		       	  File fff0 =  new File (pictspda +  "list0.txt");
-		       	Converter.copyFile(f0,fff0);  	
+		       	     Converter.copyFile(f,fff);  	
+		   	
 		   	} catch (Exception e) {
 		   	    getParent().showError(e);
 		   	}
@@ -1590,13 +1564,13 @@ public void setNF(NumberFormat nf) {
 
 	        rs.close();
 	       
-	    	cmd= 	" select sum(case when [Currency Factor] <> 0 then [Amount]/[Currency Factor]else [Amount] end) as summa,[Salesperson Code] AS agent \r\n" + 
-	  	 			"					 from (select b.[Amount],a.[Currency Factor] ,a.[Salesperson Code]  from [VICIUNAI-POL$Sales Invoice Header] a \r\n" + 
-	  	 			"					 inner  join [VICIUNAI-POL$Sales Invoice Line] b on a.[No_]=b.[Document No_] where Year(getdate())=Year(a.[Shipment Date]) and \r\n" + 
-	  	 			"					 Month(getdate())=Month(a.[Shipment Date]) union all select b.[Amount],a.[Currency Factor],a.[Salesperson Code] from \r\n" + 
-	  	 			"					 [VICIUNAI-POL$Sales Cr_Memo Header] a inner join [VICIUNAI-POL$Sales CR_Memo Line] b on a.[No_]=b.[Document No_] \r\n" + 
-	  	 			"					 where Year(getdate())=Year(a.[Shipment Date]) and Month(getdate())=Month(a.[Shipment Date])) S \r\n" + 
-	  	 			"					 group By [Salesperson Code]"; // and [Global Dimension 1 Code]='400'
+	    	cmd= 	" select sum(case when [Currency Factor] <> 0 then [Line Amount]/[Currency Factor]else [Line Amount] end) as summa,[Salesperson Code] AS agent \r\n" + 
+	    			"	  	 							 from (select b.[Line Amount],a.[Currency Factor] ,a.[Salesperson Code]  from [VICIUNAI-POL$Sales Header] a \r\n" + 
+	    			"	  	 								 inner  join [VICIUNAI-POL$Sales Line] b on a.[No_]=b.[Document No_] where Year(getdate())=Year(a.[Shipment Date]) and \r\n" + 
+	    			"	  	 								 Month(getdate())=Month(a.[Shipment Date]) union all select b.[Line Amount],a.[Currency Factor],a.[Salesperson Code] from \r\n" + 
+	    			"	  	 								 [VICIUNAI-POL$Sales Cr_Memo Header] a inner join [VICIUNAI-POL$Sales CR_Memo Line] b on a.[No_]=b.[Document No_]  \r\n" + 
+	    			"	  	 								 where Year(getdate())=Year(a.[Shipment Date]) and Month(getdate())=Month(a.[Shipment Date])) S \r\n" + 
+	    			"	  	 								 group By [Salesperson Code]"; // and [Global Dimension 1 Code]='400'
 	    	
 	    	rs = stmt.executeQuery(cmd);
 	    	while(rs.next()){
@@ -1604,7 +1578,7 @@ public void setNF(NumberFormat nf) {
                String agentID = rs.getString("agent");
                
                if(ags.get(agentID) != null) {
-            	   sales = sales - ags.get(agentID);
+            	  // sales = sales - ags.get(agentID);
                }
             
                Agent agent = (Agent)agents.get(agentID);
