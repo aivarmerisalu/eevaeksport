@@ -69,7 +69,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 	}
 	user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
-    rcompany = getParent().getProps().getProperty("rest.company");
+    rcompany = getParent().getProps().getProperty("rest.companyx");
      }
   
   String user =  null;
@@ -325,7 +325,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
     public String getSaveDebtInfo() {
     	  Calendar alg = Calendar.getInstance();
    	    alg.add(Calendar.DATE, -1);
-   	    Converter.makeWebFilesList(alg.getTime(), null , rcompany,  user ,  pass, this.getExcelDir()+"files/");
+   	    Converter.makeWebFilesList(alg.getTime(), null , rcompany,  user ,  pass, this.getExcelDir()+"files/", "klp");
    	    System.exit(0);
    	  
    	    return null;

@@ -4172,7 +4172,7 @@ try{
 		
 	}
 	
-	 public static void makeWebFilesList(Date algus, Date lopp ,String company, String user , String pass, String dir) {
+	 public static void makeWebFilesList(Date algus, Date lopp ,String company, String user , String pass, String dir, String comp) {
 			
 		   Converter.loadUploadedFiles(algus, null ,company,  user ,  pass);
 		
@@ -4208,7 +4208,7 @@ try{
 		            	
 		            	
 		            	
-		            	sb.append( cuid + "," + agent + "," + date + "," + key + "\n" );
+		            	sb.append( cuid + ";" + agent + ";" + date + ";" + key + "\n" );
 		            	
 		            	
 		              
@@ -4217,7 +4217,7 @@ try{
 		           		 }catch(Exception e) {
 		           			 e.printStackTrace();
 		           		 }
-			 String fn = dir + "Files-" + Converter.getDDpMMpYYYYpString(Calendar.getInstance()) +".csv";
+			 String fn = dir + "files-" + comp + "-" + Converter.getDDpMMpYYYYpString(Calendar.getInstance()) +".csv";
 		      Converter.saveFile(fn, sb.toString());
 		      System.out.println( "File ssved  " + fn);
 		           		 

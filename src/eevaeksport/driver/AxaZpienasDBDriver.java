@@ -90,9 +90,17 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 		return null;
 	}
 
-  public String getSaveDebtInfo() {
-   	return null;
-   }
+	  public String getSaveDebtInfo() {
+    	  Calendar alg = Calendar.getInstance();
+   	    alg.add(Calendar.DATE, -1);
+   	    Converter.makeWebFilesList(alg.getTime(), null , rcompany,  user ,  pass, "C:/mobilejavaklp/excel/files/", "zp");
+   	    System.exit(0);
+   	  
+   	    return null;
+   	  
+       }
+	  
+	  
   private HashMap fixGroups = new HashMap();
   
   private void makeFixHash(){
