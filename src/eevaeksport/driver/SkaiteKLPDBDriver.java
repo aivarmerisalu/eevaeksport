@@ -326,6 +326,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
    	    alg.add(Calendar.DATE, -1);
    	    Converter.makeWebFilesList(alg.getTime(), null , rcompany,  user ,  pass, this.getExcelDir()+"files/");
    	    System.exit(0);
+   	    
    	    return null;
    	   
        }
