@@ -321,14 +321,15 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
     public void connectionUp(){
       connectionUp(this.url);
     }
+    
     public String getSaveDebtInfo() {
     	  Calendar alg = Calendar.getInstance();
    	    alg.add(Calendar.DATE, -1);
    	    Converter.makeWebFilesList(alg.getTime(), null , rcompany,  user ,  pass, this.getExcelDir()+"files/");
    	    System.exit(0);
-   	    
+   	  
    	    return null;
-   	   
+   	  
        }
        
     public String getAssortmentStr(Agent agent){
