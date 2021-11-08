@@ -154,6 +154,23 @@ public JSONArray getCustomersChains() throws Exception{
 	return json;
 }
 
+public JSONArray getUploadedFileList(Date algus, Date lopp) throws Exception{
+	
+	String web = "http://merisoft.eu:8080/rest/fileUpload/list";
+	if(algus != null) {
+		web = web + "?from=" + algus.getTime();
+	}
+	
+	if(lopp != null) {
+		web = web + "to=" + lopp.getTime();
+	}
+	
+	HttpClient cli = getClient();
+    HttpResponse resp = cli.execute(getReq(web));
+    JSONArray json = new JSONArray(EntityUtils.toString(resp.getEntity()));
+	return json;
+}
+
 public JSONArray getVisitedList(String status) throws Exception{
 	String web = "http://merisoft.eu:8080/rest/visitlinesBy?contactstatus=" + status + "&days=60"; // visitlinesBy?contactstatus=plan&days=30
 	HttpClient cli = getClient();

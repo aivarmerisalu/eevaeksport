@@ -22,12 +22,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -4147,6 +4149,79 @@ try{
 		return res;
 	}
   
+	public static void loadUploadedFiles(Date algus, Date lopp ,String company, String user , String pass){
+		
+		try {
+			
+			 eevaeksport.util.ReportingService serv = new ReportingService();
+			  serv.user =  user;
+				serv.pass = pass;
+				serv.company = company;
+	
+			
+				JSONArray array = serv.getUploadedFileList(algus,lopp);
+				Converter.saveFile(  "uploadedfileslist.json" , array.toString());
+			
+			
+					serv.closeClient();	
+				
+			
+			} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	 public static void makeWebFilesList(Date algus, Date lopp ,String company, String user , String pass, String dir) {
+			
+		   Converter.loadUploadedFiles(algus, null ,company,  user ,  pass);
+		
+		  StringBuffer sb  = new StringBuffer();
+		
+			 try {
+				
+				 JSONParser parser = new JSONParser();
+				 Object obj =  parser.parse(new FileReader( "uploadedfileslist.json"));
+				
+				 
+				 
+				
+				   	
+		            org.json.simple.JSONArray tagList = (org.json.simple.JSONArray) obj;
+		            
+		            Iterator<org.json.simple.JSONObject> iterator = ((List) tagList).iterator();
+		            while (iterator.hasNext()) {
+		            	org.json.simple.JSONObject cob = iterator.next();
+		            	
+		            	String key = (String)cob.get("url");
+		            	
+		            	try {
+		            	     key = java.net.URLDecoder.decode(key, StandardCharsets.UTF_8.name());
+		            	} catch (UnsupportedEncodingException e) {
+		            	  
+		            	}
+		            	
+		                String agent = key.substring(key.lastIndexOf("/")+1, key.indexOf("-{"));
+		            	String cuid = key.substring(key.indexOf("{")+1, key.indexOf("}"));
+		            	String date = key.substring(key.indexOf("}")+2, key.indexOf("}")+8);
+		            	date = "20" + date.substring(0,2) + "-" + date.substring(2,4) + "-" + date.substring(4,6);
+		            	
+		            	
+		            	
+		            	sb.append( cuid + "," + agent + "," + date + "," + key + "\n" );
+		            	
+		            	
+		              
+		            	
+		            }
+		           		 }catch(Exception e) {
+		           			 e.printStackTrace();
+		           		 }
+			 String fn = dir + "Files-" + Converter.getDDpMMpYYYYpString(Calendar.getInstance()) +".csv";
+		      Converter.saveFile(fn, sb.toString());
+		      System.out.println( "File ssved  " + fn);
+		           		 
+	  }
 
 	public static void loadCustDimensions(String asi ,String company, String user , String pass){
 		

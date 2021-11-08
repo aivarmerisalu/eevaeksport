@@ -13,10 +13,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -685,9 +687,15 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
         }
 
 
-
+ 
+    
      
    public TreeMap getAgents(){
+	   
+	   
+	 
+	   
+	   
      TreeMap tm = new TreeMap();
      try{
     	 
@@ -707,7 +715,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
     	 r.printStackTrace();
      }
    
-     getOpenOrders();
+     //getOpenOrders();
    //  getFixedAssortmentData();
  
      // loene võimalikud agendid sisse 
