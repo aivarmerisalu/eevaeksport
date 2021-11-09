@@ -1119,7 +1119,7 @@ System.out.println(cmd);
 
     	           	String num = rs.getString("alekood");
     	           	if(num != null && num.trim().length()>0){
-    	             customer.setDiscount(Double.parseDouble((num.trim())));
+    	          //   customer.setDiscount(Double.parseDouble((num.trim())));
     	           	}
     	           	
     	           	int kred = rs.getInt("krediit");

@@ -30,6 +30,7 @@ import org.w3c.dom.Node;
 import ee.mobilejava.earve.GenericDOM;
 import eevaeksport.Agent;
 import eevaeksport.Customer;
+import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.driver.Toode;
@@ -614,6 +615,10 @@ public class DirectoImportDriver extends AbstractImportDriver{
   }
   
   private void makeOutput(Order order){
+	  boolean sendcomm = false;
+	  if("true".equals(parent.getProps().getProperty("sendemail.allorders"))) {
+		  sendcomm = true;
+	  }
 	 	try {
 	 	 
 	 		Customer ccc = (Customer)kliendid.get(order.getCompany());
@@ -749,12 +754,81 @@ public class DirectoImportDriver extends AbstractImportDriver{
 	       
 	      Converter.saveFileInUTF8(fileName, order_xml);
 	    
+	      
+	      if(order.getStatus() < 5 && sendcomm) {
+	    	
+	    	  
+	    		   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
+	    		 
+	    	   sendCommentEmail( comm ,null,doknr,order.getCompany(),  " " + ccc.getName() , " ",false,ag,parent);
+	    	 
+	    }
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	 }
-	  
+  private void sendCommentEmail(String comment1 ,String comment2,String doknr,String custid, String nimi , String chain, boolean price, Agent ag ,ImportPanel parent){
+	   	try{
+	   		String comment = null ;
+	   		if(comment1 != null && comment1.trim().length() > 0) {
+	   			comment = "Comment : " + comment1 + "\n\n" ;
+	   		}
+	   		
+	   		if(comment2 != null && comment2.trim().length() > 0) {
+	   			if(comment == null) {
+	   				comment = "";
+	   			}
+	   			
+	   			comment = comment + "Price info : " + comment2 + "\n" ;
+	   		}
+	   		
+	   		if(comment != null && comment.trim().length() >0){
+	   			
+	   			//System.out.println(comment);
+	   			Email mail = new Email(null);
+		  		   
+	   			
+	                mail.setSMTP(parent.getProps().getProperty("smtphost"));
+	                if(parent.getProps().getProperty("smtpuser") != null)
+	                mail.setUser(parent.getProps().getProperty("smtpuser"));
+	                
+	                if(parent.getProps().getProperty("smtppass") != null)
+	                mail.setPass(parent.getProps().getProperty("smtppass"));
+	                
+	                if(parent.getProps().getProperty("smtpport") != null)
+	                mail.setPort(parent.getProps().getProperty("smtpport"));
+	                
+		  	  		mail.setFilesTo(parent.getProps().getProperty("operatoremail"));
+		  	  		mail.setFrom(parent.getProps().getProperty("from"));
+		  	  		String agent = "";
+		  	  	if(ag != null) {
+		  	  		agent = ag.getName() ;
+		  	  	}
+		  	  		mail.setSubjectFilesTo("Order info : "+ agent + " " + custid + " " + nimi);
+		  	  		String lisa = "";
+		  	  		
+		  	  		mail.setEncoding("utf-8");
+		  	  		
+		  	  		
+		  	  		mail.setBodyHtml( "Customer code : " + custid +  "<br>Customer Name : " + nimi + "<br>" +
+		  	  			    "Manager : " + agent + "<br><br>" + comment.replaceAll("\n", "<br>") + lisa  + "<br><br>");
+		  	  		//mail.setBody("\nOrder :" +  doknr + " \nCustomer code :" + custid +  "\nCustomer Name :" + nimi + "\n" +
+		  	  			//    "Manager :" + agent + "\n" +  "\n" + lisa + comment + "\n\n.");
+		  	  		mail.setSendNotice(false);
+		  	  		
+		  	  		mail.send();
+		  	  		System.out.println("\nOrder Comment " +  doknr + " " + lisa + custid + " "+ nimi + " " + agent + "\n\n" +
+		  	  				  "\n >>>>>" + comment + "<<<<<");
+		  				
+	   		}
+		  	
+		  			}catch(Exception e){
+		  			e.printStackTrace();	
+		  			}
+		  	
+	   }
+
 
   private String escape(String s){
     if (s == null) return s;

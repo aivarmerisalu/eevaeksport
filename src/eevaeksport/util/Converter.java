@@ -4201,14 +4201,24 @@ try{
 		            	  
 		            	}
 		            	
+		            	System.out.println(key);
+		            	
 		                String agent = key.substring(key.lastIndexOf("/")+1, key.indexOf("-{"));
 		            	String cuid = key.substring(key.indexOf("{")+1, key.indexOf("}"));
 		            	String date = key.substring(key.indexOf("}")+2, key.indexOf("}")+8);
+		            	String time = key.substring(key.indexOf("}")+9, key.indexOf("}")+17).replaceAll("_", ".");
+		            	String gr = " "; 
+		            	try {
+		            		gr = key.substring(key.indexOf("[")+1, key.indexOf("]"));
+	            		} catch (Exception e) {
+		            		
+		            	}
+		            	
 		            	date = "20" + date.substring(0,2) + "-" + date.substring(2,4) + "-" + date.substring(4,6);
 		            	
 		            	
 		            	
-		            	sb.append( cuid + ";" + agent + ";" + date + ";" + key + "\n" );
+		            	sb.append( cuid + ";" + agent + ";" + date + ";" + time + ";" + gr + ";" + key + "\n" );
 		            	
 		            	
 		              
