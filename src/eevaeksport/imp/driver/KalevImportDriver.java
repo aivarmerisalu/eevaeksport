@@ -2037,7 +2037,7 @@ private long getAndUpdateNext() throws SQLException{
                 	 kogus = kogus /2;  //mingi laima kommi case on see..
                  }
             	 if(line.getToode().equals("02425")) {
-                	 kogus = kogus /2;  //mingi laima kommi case on see..
+                	// kogus = kogus /2;  //mingi laima kommi case on see..
                  }
              }
              

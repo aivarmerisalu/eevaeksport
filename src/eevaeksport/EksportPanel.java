@@ -2,6 +2,7 @@ package eevaeksport;
 
 import java.awt.BorderLayout;
 
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -55,7 +56,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import eevaeksport.driver.AbstractDBDriver;
 import eevaeksport.driver.BulkUpdater;
 import eevaeksport.driver.Discounter;
-import eevaeksport.driver.IceAxaDBDriver;
 import eevaeksport.driver.Manager;
 import eevaeksport.driver.MustDister;
 import eevaeksport.driver.Outputter;
@@ -4734,10 +4734,7 @@ if(agprods != null && agprods.size() >0){
     
     private void  sendDistributionFile() throws IOException {
 
-    	
-    	 if (driver instanceof IceAxaDBDriver){
-             ((IceAxaDBDriver)driver).sendDistributionReport(null);
-           }
+    
           System.exit(0);
         
       }

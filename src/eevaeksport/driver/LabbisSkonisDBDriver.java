@@ -369,8 +369,8 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
        public String getSaveStockInfo(){
 
     	   String cmd = "SELECT KOD AS kood, sum([LIKUTIS]) AS kogus,  left (PADALINYS ,1) as ladu FROM dba.[v_PrekiuLikuciaiList] where  " +
-			"	PADALINYS in ( '0BF001','0AS101','0PS119','0TS100','1BF002','1AS203','1PS210','1TS200','2BF003','2AS303','2PS308','2TS300','3BF004','3AS403','3PS404','3TS400','0AS132') " +
-            " GROUP BY left (PADALINYS ,1), KOD having sum(LIKUTIS) != 0  ORDER BY KOD";
+    				"	PADALINYS in ( '0BF001','0AS101','0PS119','0TS100','1BF002','1AS203','1PS210','1TS200','2BF003','2AS303','2PS308','2TS300','3BF004','3AS403','3PS404','3TS400','0AS132') " +
+    	           " GROUP BY left (PADALINYS ,1), KOD having sum(LIKUTIS) != 0  ORDER BY KOD";
     	   
     		         if (isDebug()) System.out.println(cmd);
     		         StringBuffer products = new StringBuffer();
@@ -383,14 +383,15 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
 
     		             String kood = rs.getString("kood").trim();
     		             double seis = rs.getDouble("kogus");
+    		             String ladu = rs.getString("ladu").trim();
     		             if(seis < 1){
     		            	 seis = 1;
     		             }
-    		             String dealer = rs.getString("ladu").trim();
+    		             
     		             if(seis > 0){
     		                 products.append(kood +  ";");
     		                 products.append(" ;");
-    		                 products.append(getParent().getNF().format(seis) + "; "  + dealer +  "\n");
+    		                 products.append(getParent().getNF().format(seis) + ";" + ladu + "\n");
     		            //   kogused.put(kood, seis + "");
     		             }
     		             }

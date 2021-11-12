@@ -256,7 +256,7 @@ public class FileSender {
 	        if(this.sendPicts) {
 	        	 System.out.println(time + " Sees Picts " + new File(dirPictLoc).listFiles() + " " + dirOutLoc);
 	    	        for (File f : new File(dirPictLoc).listFiles())  {
-	    	        	 System.out.println(time + " Sees " + f.getName());
+	    	        	
 	    	        	try {
 
 	    	        			  PutObjectRequest request = new PutObjectRequest(bucketName, dirPict + f.getName(), f);
@@ -264,6 +264,18 @@ public class FileSender {
 	  	    	                metadata.setContentType("plain/text");
 	  	    	                metadata.addUserMetadata("title", "someTitle");
 	  	    	                request.setMetadata(metadata);
+	  	    	                TreeMap 
+	  	    	              ObjectListing   objectListing = s3Client.listObjects(bucketName, dirPict);
+	  	    	            System.out.println(time + " Sees " + f.getName() + " " + objectListing.getObjectSummaries().toString());
+	  	    	            for (S3ObjectSummary objectSummary :    objectListing.getObjectSummaries()) {
+	  	    	              System.out.println( " - " + objectSummary.getKey() + "  " +
+	  	    	                  "(size = " + objectSummary.getSize() + 
+	  	    	                  ")");
+	  	    	            }
+	  	    	            
+	  	    	            
+	  	    	                System.exit(0);
+	  	    	                
 	  	    	             if(! s3Client.doesObjectExist(bucketName, dirPict + f.getName()) || f.getName().endsWith("txt")) {
 	  	    	            	 s3Client.putObject(request);
 		  	    	                log(time + " Uploaded PIcture file to AWS : " + f.getName());
