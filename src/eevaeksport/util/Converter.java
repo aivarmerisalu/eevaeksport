@@ -470,6 +470,8 @@ public class Converter {
 					
 						
 						int r = 1;
+						int ea = 0;
+						int ni = 1;
 						
 						
 						for (int a = 0; a < row.getLastCellNum(); a++) {
@@ -477,6 +479,13 @@ public class Converter {
 							
 								//System.out.println(row.getCell((short)a).getStringCellValue());
 								String gg = row.getCell((short) a).getStringCellValue().trim();
+								if(gg.toLowerCase().indexOf("vöötkood") != -1 ) {
+									ea = a;
+								}
+								if(gg.toLowerCase().indexOf("kauba nimetus") != -1 ) {
+									ni = a;
+								}
+								
 								if(gg.toLowerCase().indexOf("1ll") != -1 || gg.toLowerCase().indexOf("1ka") != -1) {
 									r = a;
 									break;
@@ -504,15 +513,17 @@ public class Converter {
 							}
 						}
 						
-						System.out.println("Groups " +  r);
+						
+						System.out.println("Groups " + 
+						r + " " + ea + " " + ni);
 						
 						
 						for(int i = 1 ; i < sheet.getLastRowNum()+1;i++){
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(r-1));
-								String tnimi = formatter.formatCellValue(row.getCell(1));
+								String ean = formatter.formatCellValue(row.getCell(ea));
+								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
 							 
 							  if(toode.equals(ean)) {
@@ -598,6 +609,9 @@ public class Converter {
 					
 						
 						int r = 1;
+						int ea = 0;
+						int ni = 1;
+						
 						
 						
 						for (int a = 0; a < row.getLastCellNum(); a++) {
@@ -605,6 +619,13 @@ public class Converter {
 							
 								//System.out.println(row.getCell((short)a).getStringCellValue());
 								String gg = row.getCell((short) a).getStringCellValue().trim();
+								if(gg.toLowerCase().indexOf("vöötkood") != -1 ) {
+									ea = a;
+								}
+								if(gg.toLowerCase().indexOf("kauba nimetus") != -1 ) {
+									ni = a;
+								}
+								
 								if(gg.toLowerCase().equals("Kad")) {
 									r = a;
 									break;
@@ -614,9 +635,7 @@ public class Converter {
 								// System.out.println(row.getCell((short)a).getNumericCellValue());
 							}
 						}
-						
 					
-						
 						
 						
 						for (int a = r; a < row.getLastCellNum(); a++) {
@@ -635,15 +654,15 @@ public class Converter {
 							}
 						}
 						
-						System.out.println("Groups " +  r);
+						System.out.println("Groups " +  r + " " + ea +" "+ ni);
 						
 						
 						for(int i = 1 ; i < sheet.getLastRowNum()+1;i++){
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(2));
-								String tnimi = formatter.formatCellValue(row.getCell(3));
+								String ean = formatter.formatCellValue(row.getCell(ea));
+								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
 							 
 							  if(toode.equals(ean)) {
@@ -668,7 +687,7 @@ public class Converter {
                              
                               
                               if(value.trim().length() > 0 && (value.trim().equals("PS") || value.trim().equals("HK") )) {
-                              	 System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
+                              //	 System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
                               
 							if(res.get(pood) != null){
                   	  con = (Contract)res.get(pood);
