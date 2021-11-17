@@ -550,6 +550,7 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
               agent.setLanguage("LIT");
               agent.setCountry("lt");
               agent.setPassWord("0000");
+            
             //  agent.needsZipPass = true;
               
               //LT     1,2,3,5,6,7,8,10,11,12,13,15,17
@@ -571,6 +572,7 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
               if(agent.getID().equals("xx") ){
             	  agent.addProdGroupList("LT3");
               }
+              agent.needsZipPass = true;
 
               agents.put(nimi, agent);
               agent1.put(agent.getID(), agent);

@@ -278,10 +278,14 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 		   return asi ;
 	   }
 	
-
+	   private StringBuffer oorders = null;
+	   
  
 	   private TreeMap  getOpenOrders(){
 			TreeMap res = new TreeMap();
+			oorders = new StringBuffer();
+			oorders.append(Calendar.getInstance().getTimeInMillis() + "\n");
+			
 				
 			   String sql2 =  " Select apyv_id as id , '' as tyyp,b.klient_id as kkood, dokumentas as number, data as kuup , 0 as summa  from apyvarta d \r\n" + 
 			   		"					 INNER JOIN klientai b ON b.klientas=d.gavejas  where data > current_date()" ;
@@ -314,6 +318,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 			
 	 	 String summa = NF.format(rs.getDouble("summa"));
 	 	 
+	  	oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
 	 	
 		    String sql3 = "  select kiekis as amount,  r.mato_vien as unit  , pavad as name \r\n" + 
 		    		"		    			    						    FROM   apyv_gr r INNER JOIN prekes t ON t.preke = r.preke\r\n" + 
@@ -353,6 +358,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 
 	 	connectionDown();
 	 		System.out.println("Open orders " + res.toString());
+	 		Converter.saveFile(parent.getProps().getProperty("savefilesdir")  + "customerorders.txt", oorders.toString());
 			return res;
 		}
  
@@ -1247,7 +1253,7 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
            products.append(" ;");
            products.append(getParent().getNF().format(stocks.get(id)) + "; "  +  "\n"); // + dealer +  "\n");
     }
-		
+     getOpenOrders();
 	   
     return products.toString();
    }
@@ -1416,6 +1422,8 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
 
 	     TreeMap discs = new TreeMap();
 	     TreeMap openOrders = this.getOpenOrders();
+	     
+	     
  try {
 
 	 Converter.getManagersReplacements(agent1, rcompany, user , pass);

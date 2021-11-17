@@ -236,6 +236,8 @@ public class Product {
         public String getStatusSellout(){
           return statusSellout;
         }
+        
+        public String suggAle = null;
 
         public void setStatusNew(String status){
           statusNew = status;

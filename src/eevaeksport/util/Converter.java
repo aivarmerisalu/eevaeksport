@@ -2635,22 +2635,35 @@ public class Converter {
 							 if(pais.equals("EAN")) {
 								 eanp = 2;
 							 }
+							 pais = formatter.formatCellValue(rowu.getCell(4));
+							 if(pais.equals("EAN")) {
+								 eanp = 4;
+							 }
 							 
 							 pais = formatter.formatCellValue(rowu.getCell(4));
 							 if(pais.equals("Nimetus")) {
 								 tnim = 4;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(6));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 6;
 							 }
 							 
 							 pais = formatter.formatCellValue(rowu.getCell(8));
 							 if(pais.equals("Seisund")) {
 								 seis = 8;
 							 }
+							 pais = formatter.formatCellValue(rowu.getCell(11));
+							 if(pais.equals("Seisund")) {
+								 seis = 11;
+							 }
 						 }
 						 
 						 
 						 
 						 
-				//	 System.out.println("u " + u +" " + tnim + " "+ seis + " "+ eanp );
+					 System.out.println("u " + u +" " + tnim + " "+ seis + " "+ eanp );
+					
 					
 						for(int i = u ; i < sheet.getLastRowNum()+1;i++){
 							XSSFRow row = sheet.getRow(i);
@@ -2675,7 +2688,7 @@ public class Converter {
 									seisund = false;
 								}
 								
-								//System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood);
+								System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi+ " "+ ean + " " + pood);
 								
 							}
 							

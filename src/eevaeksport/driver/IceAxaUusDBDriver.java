@@ -87,7 +87,7 @@ try {
 	  }
 		this.getProducts(null);
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
-		System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+	//	System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
 		if(contracts.size() > 0) {
 			Converter.sendContractJson(contracts ,  rcompanyx,  user ,  pass);
 		}
