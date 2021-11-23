@@ -1282,11 +1282,12 @@ sqlo = "   SELECT  jou.orderaccount as agent,case when itemgroupid = 'SALD' then
  		"                AND co.accountnum = cus.accountnum) AS debt, cus.linedisc , cus.pricegroup,  \r\n" + 
  		"                 aad.address, '' AS visit ,salesgroup AS agent ,  numofdays AS term, blocked AS block , \r\n" + 
  		"			   (select max (blocked) from custtable cc where  cc.invoiceaccount=cus.invoiceaccount) \r\n" + 
- 		"			   as payerblock ,cus.phone  as info , aad.city, aad.street, astdeliverytermid as magus  FROM custtable cus \r\n" + 
+ 		"			   as payerblock ,cus.phone  as info , aad.city, aad.street, astdeliverytermid as magus, ch.groupid as chain FROM custtable cus \r\n" + 
  		"			   LEFT JOIN paymterm  pay on cus.paymtermid=pay.paymtermid and  cus.dataareaid= pay.dataareaid  \r\n" + 
- 		"			   LEFT JOIN ADDRESS aad ON aad.addrrecid=cus.recid and aad.dataareaid= 'lve'   and  cus.dataareaid= aad.dataareaid\r\n" + 
+ 		"			   LEFT JOIN ADDRESS aad ON aad.addrrecid=cus.recid and aad.dataareaid= 'lve'   and  cus.dataareaid = aad.dataareaid "
+ 		+ " left join ASTCUSTTREEDENORMALIZATIO30138 ch on ch.custaccount = cus.accountnum and cus.dataareaid = ch.dataareaid\r\n" + 
  		"		 WHERE   (cus.dataareaid='lve' AND  len(salesgroup)>0 and astblocked != 1 )   \r\n" + //blocked != 2 and 
- 		"			    order by cus.name" ;
+ 		"			    order by cus.name " ;
  
        //    tal_visitationdays ,talspartnercode,
 
@@ -1393,7 +1394,7 @@ sqlo = "   SELECT  jou.orderaccount as agent,case when itemgroupid = 'SALD' then
         	 if(cust.getPayer().equals("109") || cust.getPayer().equals("511")) {
         		 de = false;
         		 cust.addFixSortCode(accountnum);
-        		System.out.println(accountnum + " fix kood lisatud" );
+        		//System.out.println(accountnum + " fix kood lisatud" );
         	 }
         	 
         if(de) {
@@ -1558,6 +1559,11 @@ sqlo = "   SELECT  jou.orderaccount as agent,case when itemgroupid = 'SALD' then
         
         if(displ.get(cust.getID()) != null) {
         	cust.setInfo(displ.get(cust.getID())+"");
+        }
+        String chain = rs.getString("chain");
+        if(chain != null && chain.trim().length() > 0) {
+        	cust.setChain(chain);
+        	
         }
         
         

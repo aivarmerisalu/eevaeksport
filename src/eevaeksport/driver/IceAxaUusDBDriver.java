@@ -1206,11 +1206,13 @@ String region = rs.getString("region");
                   
                       rs1.close();
                       stm.close();
-    	   System.out.println("assets cou " +  cou + " "+ coua + " " + vec.size());
+    	     
+                      System.out.println("assets cou " +  cou + " "+ coua + " " + vec.size());
                       
                       // siis peaks tegema vahele kontrolli et kui on muudatus siis ainult laksad ylesse
     	   
-    	   
+                  //	Converter.saveFile("json" + System.getProperty("file.separator") 
+        		//	+ Calendar.getInstance().getTimeInMillis()+ "vec.txt" , vec.toString());
     	   
                     Converter.sendAssetsCustomerJson(vec,this.user,this.pass,this.rcompany);     
                	   

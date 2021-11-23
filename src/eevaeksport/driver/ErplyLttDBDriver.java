@@ -2477,6 +2477,10 @@ public static String getDataDirStr(){
        try{
            StringBuffer inputLineBuf = new StringBuffer();
        	try {
+       		
+       		
+       		
+       		
     		inputLineBuf = postData("request=getProductGroups&getAllLanguages=1" + userstuff);
     	//	inputLineBuf = getData("request=getCustomers&customerID=430&recordsOnPage=" + onpage + "&getAddresses=1&getContactPersons=1&getBalanceInfo=1&responseMode=detail" + userstuff);
            	
@@ -2493,8 +2497,106 @@ public static String getDataDirStr(){
            		ex.printStackTrace();
            	  }
             }
+           
+           
+           
+           try {
+        	   
+        	   
+        	    FileListFilter fil = new FileListFilter("tootepildid","xml");
+    	    	 String[] ll = new File (getDir()).list(fil);
+    	    	 for (int i = 0; i < ll.length; i++) {
+    	    		 String name = ll[i];
+    		    		// System.out.println(name);
+    		 		  File f = new File (getDir() + name);
+    	           if(f.exists()){
+    	        	   f.delete();
+    	           }
+    	    	 }
+        	   
+        	   try {
+            		inputLineBuf = postData("request=getProductPictures&recordsOnPage=" + onpage  + userstuff);
+            	} catch (Exception e1) {
+            		e1.printStackTrace();
+            	}
+        	   System.out.println("1 " + inputLineBuf);            
+                   int tsykkel = 0;
+           		if (inputLineBuf.indexOf("recordsTotal") != -1) {
+           			int lines = inputLineBuf.indexOf("recordsTotal");
+           			int end = inputLineBuf.indexOf("recordsTotal", lines + 12);
+           			 System.out.println(inputLineBuf);
+           			try {
+           				tsykkel = Integer.parseInt(inputLineBuf.substring(
+           						lines + 13, end - 2));
+           			} catch (Exception e) {
+
+           			}
+           		}
+           		
+       		inputLineBuf = postData("request=getProductPictures" + userstuff);
+       	//	inputLineBuf = getData("request=getCustomers&customerID=430&recordsOnPage=" + onpage + "&getAddresses=1&getContactPersons=1&getBalanceInfo=1&responseMode=detail" + userstuff);
+      
+           if (inputLineBuf.length() > 2) {
+   			try {
+   				File f = new File(getDir() + "tootepildid1.xml");
+   				if (f.exists())
+   					f.delete();
+   				 String c = (char)0x19 + "";
+   				 Converter.saveFileInUTF8(getDir() + "tootepildid1.xml", inputLineBuf.toString().replace((char)0x19, ' ')
+   						 .replace((char)0x19, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0x19, ' ')
+   						 .replace((char)0x1c, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
+   						 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+   						 .replace((char)0x1b, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0x1b, ' '));
+   		       
+   			} catch (Exception ex) {
+   				ex.printStackTrace();
+   			}
+   		}
+           
+           
+
+   		if (tsykkel > onpage) {
+   			int counter = 2;
+   			for (; tsykkel > onpage; tsykkel = tsykkel - onpage) {
+   				try {
+   					inputLineBuf = postData("request=getProductPictures&recordsOnPage=" + onpage + "&pageNo="
+   							+ counter + userstuff);
+   				} catch (Exception e1) {
+   					e1.printStackTrace();
+   				}
+
+   				if (inputLineBuf.length() > 2) {
+   					try {
+   						File f = new File(getDir() + "tootepildid" + counter
+   								+ ".xml");
+   						if (f.exists())
+   							f.delete();
+   						
+   						 Converter.saveFileInUTF8(getDir() + "tootepildid" + counter + ".xml", inputLineBuf.toString().replace((char)0x19, ' ')
+   								 .replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0x19, ' ')
+   								 .replace((char)0xe, ' ').replace((char)0x19, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
+   								 .replace((char)0x1c, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+   								 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+
+   					     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' '));
+   					
+   					} catch (Exception ex) {
+   						ex.printStackTrace();
+   					}
+   				}
+
+   				counter++;
+   			}
+
+   		}
+    	
+   	} catch (Exception e1) {
+   		e1.printStackTrace();
+   	}
           
-         //  System.exit(0);
+           System.exit(0);
+           
+           
                 inputLineBuf = new StringBuffer();
            	try {
         		inputLineBuf = postData("request=getProductPriorityGroups" + userstuff);

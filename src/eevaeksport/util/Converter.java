@@ -5014,7 +5014,7 @@ try{
 		}
 	
 	if(ccc.getChain()!= null && ccc.getChain().trim().length() > 0 ){
-	//	System.out.println(ag.getChain());
+		System.out.println(ccc.getChain());
 		JSONArray arrayx = new JSONArray();
 		JSONObject valuex = new JSONObject();
 		valuex.put("code", ccc.getChain());
@@ -6263,12 +6263,7 @@ String ees = "";
 	
 		try {
 			
-			try {
-					Converter.saveFile("json" + System.getProperty("file.separator") 
-					+ Calendar.getInstance().getTimeInMillis()+ ".txt" , array.toString());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			
 			
 		String aaa = 	serv.postJson(array.toString(), url);
 			System.out.println("MYJSON ASII   \n" + aaa + "\n" + array.toString() );
@@ -6323,10 +6318,13 @@ String ees = "";
 		
 	
 		try {
+			Converter.saveFile("json" + System.getProperty("file.separator") 
+			+ Calendar.getInstance().getTimeInMillis()+ ".txt" , array.toString());
+		
 			String aaa = serv.postJson(array.toString(), url);
 			System.out.println("MYJSON RCals left  "+ aaa  + " " + array.toString() );
-		//	Converter.saveFile("json" + System.getProperty("file.separator") 
-			//+ Calendar.getInstance().getTimeInMillis()+ ".txt" , array.toString());
+		
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
