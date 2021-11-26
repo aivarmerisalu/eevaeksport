@@ -346,6 +346,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 		   	sb = new StringBuffer();
 		       
 		}
+		 
 		
 		
 		rs.close();

@@ -1432,6 +1432,10 @@ public class DirectoDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
      String groupIndent = null;
          TreeMap brands = new TreeMap();
          boolean sortBR = false;
+         boolean useBrandAsType = false;
+         if(getParent().getProps().getProperty("usebrand") != null){
+        	 useBrandAsType = true;
+         }
      
      if(getParent().getProps().getProperty("codeends") != null){
      	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("codeends"),",");
@@ -1623,6 +1627,17 @@ public class DirectoDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
       	 	      areto =  line.substring(len + 29); 
       	 	      areto = areto.substring(0,areto.indexOf("\""));
                 // System.out.println("areto " + areto );
+
+      	 	 }
+      	 	 
+      	 	 len = line.indexOf("data code=\"BRAND\""); 
+      	 	 if(len != -1){
+      	 	      areto =  line.substring(len + 27); 
+      	 	      areto = areto.substring(0,areto.indexOf("\""));
+                 System.out.println("areto " + prod.getID() + " " + areto );
+                if(useBrandAsType) {
+                	prod.setType(areto);
+                }
 
       	 	 }
 

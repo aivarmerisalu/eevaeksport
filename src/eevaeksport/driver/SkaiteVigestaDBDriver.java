@@ -572,7 +572,11 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
               if(agent.getID().equals("xx") ){
             	  agent.addProdGroupList("LT3");
               }
-              agent.needsZipPass = true;
+              
+            if("true".equals(  getParent().getProps().getProperty("usewebpass"))) {
+            	agent.needsZipPass = true;
+            }
+              
 
               agents.put(nimi, agent);
               agent1.put(agent.getID(), agent);

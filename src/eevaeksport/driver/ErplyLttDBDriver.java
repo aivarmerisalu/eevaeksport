@@ -119,7 +119,15 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
       + "&password=" + password;
    
    session = getSessionId(passString);
-	System.out.println(session);
+   try {
+		myurlcdn = new URL("https://cdn.erply.com/");
+	} catch (MalformedURLException e) {
+		e.printStackTrace();
+	}
+	
+   sessioncdn = getSessionIdCDN("session?jwt=" +session);
+	System.out.println(sessioncdn);
+	System.exit(0);
    while(session.indexOf("%") != -1){
 	   session = getSessionId(passString);
    }
@@ -142,6 +150,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
   public String getSaveDebtInfo() {
    	return null;
    }
+  
   public static String getYYYYpMMpDDpString(Date dd){
 	    StringBuffer sb = new StringBuffer();
 	    Calendar cal= Calendar.getInstance();
@@ -166,6 +175,19 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 
 
 
+  private String getSessionIdCDN(String asi ){
+	  
+	  try {
+	String res = (postDataCDN(asi)).toString();
+	System.out.println("res " + res);
+	sessioncdn = res.substring(res.indexOf("sessionKey") + 11 ,res.indexOf("</sessionKey"));
+	
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	 
+	  return sessioncdn;
+  }
   
 
   
@@ -254,6 +276,74 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
   return inputLineBuf;
   }
   
+  
+  private StringBuffer postDataCDN(String data) throws Exception {
+	  HttpURLConnection urlc = null;
+
+	 	Converter.doTrustToCertificates();
+	  StringBuffer inputLineBuf = new StringBuffer();
+	  try{
+		
+	  urlc = (HttpURLConnection) myurlcdn.openConnection();
+	  try{
+	  urlc.setRequestMethod( "POST" );
+	  } catch (ProtocolException e) {
+	    throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
+	  }
+	  urlc.setDoOutput(true);
+	  urlc.setDoInput(true);
+	  urlc.setUseCaches(false);
+	  urlc.setAllowUserInteraction(false);
+	  OutputStream out = urlc.getOutputStream();
+	  try {
+		out.write( data.getBytes() );
+	  } catch (IOException e){
+	  throw new Exception("IOException while posting data", e);
+	  } finally {
+	  if (out != null)
+	  out.close();
+	  }
+	  
+	  
+	  InputStream in = urlc.getInputStream();
+	  try{
+	  Reader reader = new InputStreamReader(in);
+	    InputStreamReader isr = new InputStreamReader(in,"UTF-8");
+	    BufferedReader inr = new BufferedReader(isr);
+	    String inputLine;
+
+	    while ((inputLine = inr.readLine()) != null){
+	        inputLine = enCode(inputLine);	// enCode(inputLine);	
+	    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n").replace((char)0x1c, ' ').replace((char)0x1b, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ')
+	    			.replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0xb, ' ').replace((char)0xe, ' ')
+	    			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+	    			 .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+	     			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+	     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ')
+	    			);
+	  }
+
+	     inr.close();
+	  
+	  
+	  reader.close();
+	  
+	  
+	  } catch (IOException e) {
+	  throw new Exception("IOException while reading response", e);
+	  } finally { if (in != null)
+	  in.close();
+	  }
+	  } catch (IOException e)
+	  {
+	  throw new Exception("Connection error (is server running at " + myurlcdn + " ?): " + e);
+	  } finally
+	  {
+	  if (urlc != null)
+	  urlc.disconnect();
+	  }
+	  return inputLineBuf;
+	  }
   
   private StringBuffer getData(String data) throws Exception {
      	String httpsURL = myurl + "?" + data;
@@ -1082,15 +1172,12 @@ if(sb.length() >10){
 										if(prodX != null){
 											mline.setProdID(prodX.trim());		
 										}else{
-											System.out.println("mingi jama toodet pole " + prodID );
+											//System.out.println("mingi jama toodet pole " + prodID );
 										}
 										
 										
 									}
-									if(prodID.indexOf("420101") != -1){
-										System.out.println("mingi jama toodet pole " + prodID  + " " + (String)prodCodes.get(prodID.trim()));
-											
-									}
+									
 									
 								}
 								
@@ -3547,7 +3634,7 @@ return tm;
 	         		  
                          String grp = (String)groups.get(id);
     	                 if(grp != null){
-    	                 	System.out.println("Siin on grupp olemas "  + grp + " " + customer.getID() );
+    	                 	//System.out.println("Siin on grupp olemas "  + grp + " " + customer.getID() );
     	                 	Vector vv = new Vector();
     	                 	StringTokenizer st = new StringTokenizer(grp,"|");
     	                 	while (st.hasMoreElements()){
@@ -4911,6 +4998,7 @@ return tm;
    private Vector pricelists = new Vector();
    private Vector custtsUsed = new Vector();
    private String session = "";
+   private String sessioncdn = "";
    private String passString = ""; 
    private String username = null;
    private int onpage = 100;
@@ -4920,6 +5008,7 @@ return tm;
    private String returntype = null;
    private String userstuff = null;
      private URL myurl = null;
+     private URL myurlcdn = null;
 
   /**
    * setBulkSales

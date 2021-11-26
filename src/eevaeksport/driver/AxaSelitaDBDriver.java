@@ -148,8 +148,11 @@ public class AxaSelitaDBDriver extends AbstractDBDriver  implements Manager,Prom
   public String getAssortmentStr(Agent agent){
   	return null;
   }
+  
+  private TreeMap laos = null;
 
   public String getSaveStockInfo(){
+	  laos = new TreeMap();
 	  
 
 	  
@@ -173,8 +176,16 @@ public class AxaSelitaDBDriver extends AbstractDBDriver  implements Manager,Prom
          while (rs.next()) {
 
            String kood = rs.getString("toode").trim();
+           String ladu = rs.getString("ladu").trim();
            double seis = rs.getDouble("stock");
            if(seis > 0){
+        	   
+        	   if(laos.get(kood) != null) {
+        		   laos.put(kood, laos.get(kood) + "|" + ladu + ":" + (int)seis);
+        	   }else {
+        		   laos.put(kood, ladu + ":" + (int)seis);
+        	   }
+        	   
                products.append(kood +  ";");
                products.append(" ;");
                products.append(getParent().getNF().format(seis) + "; "  +  "\n"); // + dealer +  "\n");
@@ -215,7 +226,7 @@ public class AxaSelitaDBDriver extends AbstractDBDriver  implements Manager,Prom
                "  INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid " +
                "  INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid  "+
                "  WHERE summ.DATAAREAID='sel'and dim.DATAAREAID='sel' and inv.DATAAREAID='sel' AND CLOSED = 0 AND  moduletype=0 " +
-               "    and dim.inventlocationid like'%PROD%' " +
+               "    and dim.inventlocationid like '%PROD%' " +
                "  GROUP BY dim.inventlocationid,summ.itemid  ORDER BY dim.inventlocationid,summ.itemid ";
 
            if (isDebug()) System.out.println(sql);
@@ -486,6 +497,7 @@ public class AxaSelitaDBDriver extends AbstractDBDriver  implements Manager,Prom
 
   public TreeMap getProducts(Agent agent){
 
+	  this.getSaveStockInfo();
     String cmd = "SELECT inv.itemid, inv.itemname AS nimetus, taxpackagingqty AS kastis,palletquantity_col AS alusel, disc.amount AS price " +
 ", bar.itembarcode AS ean ,brandsubgroupid_col AS grupp,mod.unitid As unit, taxitemgroupid as vat FROM pricedisctable disc " +
 "left JOIN inventtable inv ON inv.dataareaid='sel' and " +
@@ -625,13 +637,15 @@ public class AxaSelitaDBDriver extends AbstractDBDriver  implements Manager,Prom
       if(vat!=null && vat.trim().length()>0){
        prod.setVat(vat.trim());
     }
-      
+      if(laos.get(prod.getID()) != null){
+    	  prod.setPartii(laos.get(prod.getID())+"");
+      }
     /* String grupp2 = rs.getString("grupp2");
       if(grupp2 != null && grupp2.trim().length()>0){
             // prod.setGroupSecond(grupp2);
           }
 
-          
+         
 
           //   prod.setInUnit(rs.getDouble("yhikukogus"));
 */

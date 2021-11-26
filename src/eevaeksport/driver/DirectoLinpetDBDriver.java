@@ -938,7 +938,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
              			 String name  = rida.getAttributes().getNamedItem("name").getNodeValue(); 
                  		 group = Converter.cleanLitLatEst(group);
                  		  name  =  Converter.enCodeEst(name);
-                 		  prGroups.put(group, name);  
+                 		//  prGroups.put(group, name);  
              		 }catch(Exception r){
              			 
              		 }
@@ -1099,7 +1099,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      
     // System.out.println("Agendilist tehtud" );
      log.info("Agendilist tehtud");
-     log.fine("Hinnakirju kasutusel "  + pricelists.size() +  " " + pricelists.toString() );
+     log.fine("Hinnakirju kasutusel "  + pricelists.size() );
      System.out.println("Aktiivseid kliente kasutusel "  + custtsUsed.size());
      System.out.println("Võlas olevaid kliente kasutusel "  + custDebtUsed.size());
      System.out.println("Agent1 suurus "  + agent1.size());
@@ -1920,6 +1920,12 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      if(getParent().getProps().getProperty("usedataforgroups") != null){
          groupIndent = getParent().getProps().getProperty("usedataforgroups");
       	prGroups = new TreeMap();
+      	try {
+			this.getProdGroups2();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
       }
      
 
@@ -2156,7 +2162,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
         	   	    gr1 = gr1.substring(0,gr1.indexOf("\""));
             	     prod.setGroup(Converter.cleanLitLatEst(gr1));
             	     prod.setGroupSecond(Converter.cleanLitLatEst(grupp));
-            	     System.out.println("Grupid " +  prod.getGroup() + "*" + prod.getGroupSecond() + "*" + gr1);
+            	   //  System.out.println("Grupid " +  prod.getGroup() + "*" + prod.getGroupSecond() + "*" + gr1);
         	         
          	    	  
                }

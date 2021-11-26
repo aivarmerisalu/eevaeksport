@@ -1597,6 +1597,7 @@ sqlo = "   SELECT  jou.orderaccount as agent,case when itemgroupid = 'SALD' then
   con.close();
     } catch (Exception e){
       getParent().showError(e);
+      System.exit(0);
     }
     return customers;
   }

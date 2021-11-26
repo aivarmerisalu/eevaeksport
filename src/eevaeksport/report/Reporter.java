@@ -1283,30 +1283,9 @@ if (files.size() > 0) {
                if (driver instanceof VichiLITSQLDBDriver){
                    ((VichiLITSQLDBDriver)driver).insertSuperVisorSQLMeri(vis);
                 }
-               if (driver instanceof AlitaLTDBDriver){
-                   ((AlitaLTDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                }
-               
-               if (driver instanceof VichiLITMercDBDriver){
-                   ((VichiLITMercDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                }
-               
-         
-               
-               
-               if (driver instanceof BSMSDBDriver){
-                   ((BSMSDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                }
-               
-               if (driver instanceof ScalaTobaDBDriver){
-                   ((ScalaTobaDBDriver)driver).insertSuperVisorSQLMeri(vis,dd);
-                }
                if (driver instanceof RakvereDBDriver){
                    ((RakvereDBDriver)driver).insertSuperVisorSQLMeri(vis);
                 }             
-               if (driver instanceof SAFMaagDBDriver ){
-                   ((SAFMaagDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                  }
                if (driver instanceof MovexLatDBDriver ){
                    ((MovexLatDBDriver)driver).insertSuperVisorSQLMeri(vis);
                  }

@@ -392,7 +392,7 @@ try {
                    String algus = rs.getString("algus").substring(0,10);
                    String lopp = rs.getString("lopp").substring(0,10);
                    int kuu = rs.getInt("kamp");
-                   int relation = rs.getInt("RELATION");
+                  // int relation = rs.getInt("RELATION");
                    String kamp2 = rs.getString("kamp2");
                    boolean iscamp = false;
                    if(kamp2 != null && kamp2.trim().length() > 0) {
@@ -424,20 +424,24 @@ try {
                   	 //mline.setProdLevel("pr");
                    }
                    
+                  // ainult kampaaniate puhul paneme hinna info kaasa .
+                   if(price > 0){
+                	   mline.setPrice(price);
+                       lines.add(mline);
+                   }
+                     
+                       if(perc > 0){
+                    	   mline.setDiscount(perc);
+                           lines.add(mline);
+                       }
+                       
+                       
                    }
                 
                   	
                 
                   	
-                       if(price > 0){
-                    	   mline.setPrice(price);
-                           lines.add(mline);
-                       }
-                         
-                           if(perc > 0){
-                        	   mline.setDiscount(perc);
-                               lines.add(mline);
-                           }
+                      
                 	
            }
            
@@ -468,7 +472,7 @@ try {
                    String algus = rs.getString("algus").substring(0,10);
                    String lopp = rs.getString("lopp").substring(0,10);
                    int kuu = rs.getInt("kamp");
-                   int relation = rs.getInt("RELATION");
+                  
                    String kamp2 = rs.getString("kamp2");
                    boolean iscamp = false;
                    if(kamp2 != null && kamp2.trim().length() > 0) {
@@ -504,7 +508,7 @@ try {
                    boolean goes = true;
                  
                    
-                   if(goes){
+                   if(goes && iscamp){  //ainult kampaaniate puhul 
                   	
                            if(price > 0){
                         	   mline.setPrice(price);
@@ -575,24 +579,28 @@ try {
                           
                           if(kuu > 2 ){
                          	 mline.setProdLevel("pr");
-                          }                                        	
+                          }  
+                          
+                          
+                          
+                      	   if(price > 0 ) {
+                   		   mline.setPrice(price);
+                              if(price > 0){
+                                  lines.add(mline);
+                              }
+                   	   }
+                     	
+                   	   if(perc > 0 ) {
+                   		   mline.setDiscount(perc);
+                              if(perc > 0){
+                                  lines.add(mline);
+                              }
+                   	   }
+                   	   
                           }
 
                        
-                          
-                   	   if(price > 0 ) {
-                		   mline.setPrice(price);
-                           if(price > 0){
-                               lines.add(mline);
-                           }
-                	   }
-                  	
-                	   if(perc > 0 ) {
-                		   mline.setDiscount(perc);
-                           if(perc > 0){
-                               lines.add(mline);
-                           }
-                	   }
+                     
                 	   
                          
                  
@@ -1168,7 +1176,7 @@ if(grupp.equals("leib") ){
     try {
     	
     	Connection con = this.getNewConnection();
-    	Statement stmr = con.createStatement();
+    	
       	
     	TreeMap<String,Double> debts = new TreeMap<String ,Double>();
     	
@@ -1269,7 +1277,7 @@ if(grupp.equals("leib") ){
         
         
         if(budg.length() > 1) {
-        	cust.addToCustDataVec(accountnum+ ";custbudget; ;" + budg);
+        	//cust.addToCustDataVec(accountnum+ ";custbudget; ;" + budg);
         }
         
         cust.setName(name );
@@ -1392,6 +1400,7 @@ if(grupp.equals("leib") ){
   con.close();
     } catch (Exception e){
       getParent().showError(e);
+      System.exit(0);
     }
     return customers;
   }

@@ -229,7 +229,7 @@ public class RivonaImportDriver
 		      }else if (ware.equals("00000030")){
 		    		 ord06.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 		    				 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-		      }else if (ware.equals("00000015")){
+		      }else if (ware.equals("00000015") || order.getStatus() == 55){
 		    		 ord04.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 		    				 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 		      }else if (ware.equals("KS000090")){
