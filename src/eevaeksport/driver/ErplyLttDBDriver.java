@@ -45,6 +45,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.http.client.methods.HttpGet;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -53,6 +54,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -120,15 +124,20 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
    
    session = getSessionId(passString);
    try {
-		myurlcdn = new URL("https://cdn.erply.com/");
+		myurlcdn = new URL("https://cdn.erply.com/session");
 	} catch (MalformedURLException e) {
 		e.printStackTrace();
 	}
-	
-   sessioncdn = getSessionIdCDN("session?jwt=" +session);
-	System.out.println(sessioncdn);
-	System.exit(0);
-   while(session.indexOf("%") != -1){
+   sessioncdn = getSessionIdCDN("jwt=" +jwttoken);
+   
+   try {
+		// getImagesCDN(sessioncdn);
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+
+	while(session.indexOf("%") != -1){
 	   session = getSessionId(passString);
    }
     userstuff = "&clientCode=" + company +"&version=" + apiversion + "&responseType=" + returntype + "&sessionKey=" + session;
@@ -148,6 +157,46 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
   String rcompany = null;
     
   public String getSaveDebtInfo() {
+	   
+           	   int mm = 1;
+           	   if(getParent().getProps().getProperty("months") != null){        
+           		    mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+           	   }
+           	   
+              Calendar dds = Calendar.getInstance();
+              dds.add(Calendar.MONTH, - mm);
+              
+              Calendar dde = Calendar.getInstance();
+              
+              
+              System.out.println("kliendisortimendid alustan"  + mm + " kuud" +  Converter.getYYYYmMMmDDmString(dds.getTime()) +"  "+  Converter.getYYYYmMMmDDmString(dde.getTime()));
+               
+              StringBuffer inputLineBuf = null;
+        
+              try {
+          		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
+   				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
+          	
+          		
+          	} catch (Exception e1) {
+          		e1.printStackTrace();
+          	}
+                 if(inputLineBuf.length() > 2 && inputLineBuf.indexOf("<errorCode>") == -1 ){          
+                       try {
+                     	  File f = new File (getDir() + "klienditoodeErp.xml");
+                     	  if(f.exists())f.delete();
+                     	  Converter.saveFileInUTF8(getDir() + "klienditoodeErp.xml", Converter.deCode(inputLineBuf.toString()));
+                 	 }catch (Exception ex) {
+                 		ex.printStackTrace();
+                 	  }
+                  }
+              
+              System.out.println("kliendisortimendid tehtud" );
+              
+              
+             System.exit(0);
+   		
+	  
    	return null;
    }
   
@@ -180,16 +229,19 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	  try {
 	String res = (postDataCDN(asi)).toString();
 	System.out.println("res " + res);
-	sessioncdn = res.substring(res.indexOf("sessionKey") + 11 ,res.indexOf("</sessionKey"));
+	JSONParser parser = new JSONParser();  
+	JSONObject json = (JSONObject) parser.parse(res);  
+	sessioncdn = (String)json.get("sessionKey");
 	
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
-	 
+	  System.out.println("res " + sessioncdn);
 	  return sessioncdn;
   }
   
-
+  
+String jwttoken = null;
   
   private String getSessionId(String asi ){
 
@@ -198,9 +250,10 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	  
 	  try {
 	String res = (postData(data)).toString();
-	//System.out.println("res " + res);
+//	System.out.println("res " + res);
 	session = res.substring(res.indexOf("sessionKey") + 11 ,res.indexOf("</sessionKey"));
-	
+	jwttoken = res.substring(res.indexOf("<token") + 7 ,res.indexOf("</token"));
+	//System.out.println("res " + jwttoken);
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
@@ -280,10 +333,20 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
   private StringBuffer postDataCDN(String data) throws Exception {
 	  HttpURLConnection urlc = null;
 
+	  
+	/*  String data = "data=Hello+World!";
+      URL url = new URL("http://localhost:8084/WebListenerServer/webListener");
+      HttpURLConnection con = (HttpURLConnection) url.openConnection();
+      con.setRequestMethod("POST");
+      con.setDoOutput(true);
+      con.getOutputStream().write(data.getBytes("UTF-8"));
+      con.getInputStream();
+*/
+	  
 	 	Converter.doTrustToCertificates();
 	  StringBuffer inputLineBuf = new StringBuffer();
 	  try{
-		
+		//System.out.println("data " + data);
 	  urlc = (HttpURLConnection) myurlcdn.openConnection();
 	  try{
 	  urlc.setRequestMethod( "POST" );
@@ -334,11 +397,9 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	  } finally { if (in != null)
 	  in.close();
 	  }
-	  } catch (IOException e)
-	  {
+	  } catch (IOException e){
 	  throw new Exception("Connection error (is server running at " + myurlcdn + " ?): " + e);
-	  } finally
-	  {
+	  } finally {
 	  if (urlc != null)
 	  urlc.disconnect();
 	  }
@@ -362,6 +423,80 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
         return inputLineBuf;
 	  }
 	  
+	  
+  private HashMap getImagesCDN(String apikey) throws Exception {
+	  HashMap pildid = new HashMap();
+	  
+   	String httpsURL = "https://cdn.erply.com/images?page=1";
+      URL myurl1 = new URL(httpsURL);
+      
+      HttpsURLConnection con = (HttpsURLConnection)myurl1.openConnection();
+       con.setRequestProperty("API_KEY", apikey);
+      InputStream ins = con.getInputStream();
+      InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
+      BufferedReader in = new BufferedReader(isr);
+
+      String inputLine;
+      int totalRec = 0;
+     
+      while ((inputLine = in.readLine()) != null){
+    	 
+    	  JSONParser parser = new JSONParser();  
+    		JSONObject json = (JSONObject) parser.parse(inputLine); 
+    		JSONArray arr =(JSONArray)json.get("images");
+    		System.out.println(inputLine);
+    		for(int i = 0; i < arr.size(); i++) {
+    			JSONObject aa = (JSONObject)arr.get(i);
+    			
+    			// System.out.println("aa.get(\"productId\")" + aa.get("productId")+ " "+ aa.get("key") + " " + aa.get("size"));
+    			 String toode = (aa.get("productId"))+"";
+	    			pildid.put(toode, aa.get("key"));
+    			
+    		}
+    		totalRec = Integer.parseInt( ((Long) json.get("totalRecords")) +"");
+     }
+      in.close();
+      isr.close();
+      con.disconnect();
+      
+      int pages = (int) (totalRec/100);
+      
+   
+      for(int w = 2; w < pages + 2; w++) {
+    		 httpsURL = "https://cdn.erply.com/images?page=" + (w);
+    	       myurl1 = new URL(httpsURL);
+    	      
+    	     con = (HttpsURLConnection)myurl1.openConnection();
+    	       con.setRequestProperty("API_KEY", apikey);
+    	      ins = con.getInputStream();
+    	      isr = new InputStreamReader(ins,"UTF-8");
+    	      in = new BufferedReader(isr);
+
+    	     
+    	      while ((inputLine = in.readLine()) != null){
+    	    	//  System.out.println(inputLine);
+    	    	  JSONParser parser = new JSONParser();  
+    	    		JSONObject json = (JSONObject) parser.parse(inputLine); 
+    	    		JSONArray arr =(JSONArray)json.get("images");
+    	    		
+    	    		for(int i = 0; i < arr.size(); i++) {
+    	    			JSONObject aa = (JSONObject)arr.get(i);
+    	    			String toode = (aa.get("productId"))+"";
+    	    			pildid.put(toode, aa.get("key"));
+    	    			
+    	    			
+    	    		}
+    	    		
+    	     }
+    	      in.close();
+    	      isr.close();
+    	      con.disconnect();
+      }
+      
+      System.out.println("suurus " + pildid.size());
+    //  System.exit(0);
+      return pildid;
+	  }
 	  
   
   
@@ -433,7 +568,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	               		String startDate  = getNode(rida,"startDate").getFirstChild().getNodeValue();
 	               		String endDate  = getNode(rida,"endDate").getFirstChild().getNodeValue();
 	              
-	               	    System.out.println("out " + clGroupName + " " + startDate + " " + endDate);
+	               	   // System.out.println("out " + clGroupName + " " + startDate + " " + endDate);
 	               			Node read2 = getNode(rida, "pricelistRules");
 	               	    	if(read2 != null){
 	               	    	
@@ -610,6 +745,8 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	  	  if("true".equals(getParent().getProps().getProperty("distribution.insmarking"))){
 	  		oosmarge = false; 
 	  	  }
+	  	  
+	  	  
 	  	  
 	  	  
 	  	 //=10379733,10379733
@@ -2550,7 +2687,7 @@ public static String getDataDirStr(){
          File[] listOfFiles = ff.listFiles();
 
          for (int i = 0; i < listOfFiles.length; i++) {
-        	 System.out.println("copy data dir " + listOfFiles[i].getName());
+        	// System.out.println("copy data dir " + listOfFiles[i].getName());
              if (listOfFiles[i].isFile()) {
                   File f = new File(getDir() +listOfFiles[i].getName()); 
                     f.renameTo(new File(fs.getAbsolutePath()+"/"+ listOfFiles[i].getName()));
@@ -2586,102 +2723,8 @@ public static String getDataDirStr(){
             }
            
            
-           
-           try {
-        	   
-        	   
-        	    FileListFilter fil = new FileListFilter("tootepildid","xml");
-    	    	 String[] ll = new File (getDir()).list(fil);
-    	    	 for (int i = 0; i < ll.length; i++) {
-    	    		 String name = ll[i];
-    		    		// System.out.println(name);
-    		 		  File f = new File (getDir() + name);
-    	           if(f.exists()){
-    	        	   f.delete();
-    	           }
-    	    	 }
-        	   
-        	   try {
-            		inputLineBuf = postData("request=getProductPictures&recordsOnPage=" + onpage  + userstuff);
-            	} catch (Exception e1) {
-            		e1.printStackTrace();
-            	}
-        	   System.out.println("1 " + inputLineBuf);            
-                   int tsykkel = 0;
-           		if (inputLineBuf.indexOf("recordsTotal") != -1) {
-           			int lines = inputLineBuf.indexOf("recordsTotal");
-           			int end = inputLineBuf.indexOf("recordsTotal", lines + 12);
-           			 System.out.println(inputLineBuf);
-           			try {
-           				tsykkel = Integer.parseInt(inputLineBuf.substring(
-           						lines + 13, end - 2));
-           			} catch (Exception e) {
-
-           			}
-           		}
-           		
-       		inputLineBuf = postData("request=getProductPictures" + userstuff);
-       	//	inputLineBuf = getData("request=getCustomers&customerID=430&recordsOnPage=" + onpage + "&getAddresses=1&getContactPersons=1&getBalanceInfo=1&responseMode=detail" + userstuff);
-      
-           if (inputLineBuf.length() > 2) {
-   			try {
-   				File f = new File(getDir() + "tootepildid1.xml");
-   				if (f.exists())
-   					f.delete();
-   				 String c = (char)0x19 + "";
-   				 Converter.saveFileInUTF8(getDir() + "tootepildid1.xml", inputLineBuf.toString().replace((char)0x19, ' ')
-   						 .replace((char)0x19, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0x19, ' ')
-   						 .replace((char)0x1c, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
-   						 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
-   						 .replace((char)0x1b, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0x1b, ' '));
-   		       
-   			} catch (Exception ex) {
-   				ex.printStackTrace();
-   			}
-   		}
-           
-           
-
-   		if (tsykkel > onpage) {
-   			int counter = 2;
-   			for (; tsykkel > onpage; tsykkel = tsykkel - onpage) {
-   				try {
-   					inputLineBuf = postData("request=getProductPictures&recordsOnPage=" + onpage + "&pageNo="
-   							+ counter + userstuff);
-   				} catch (Exception e1) {
-   					e1.printStackTrace();
-   				}
-
-   				if (inputLineBuf.length() > 2) {
-   					try {
-   						File f = new File(getDir() + "tootepildid" + counter
-   								+ ".xml");
-   						if (f.exists())
-   							f.delete();
-   						
-   						 Converter.saveFileInUTF8(getDir() + "tootepildid" + counter + ".xml", inputLineBuf.toString().replace((char)0x19, ' ')
-   								 .replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0x19, ' ')
-   								 .replace((char)0xe, ' ').replace((char)0x19, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
-   								 .replace((char)0x1c, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
-   								 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
-
-   					     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' '));
-   					
-   					} catch (Exception ex) {
-   						ex.printStackTrace();
-   					}
-   				}
-
-   				counter++;
-   			}
-
-   		}
-    	
-   	} catch (Exception e1) {
-   		e1.printStackTrace();
-   	}
-          
-           System.exit(0);
+       
+       //   System.exit(0);
            
            
                 inputLineBuf = new StringBuffer();
@@ -2896,6 +2939,11 @@ public static String getDataDirStr(){
                	 if("true".equals(getParent().getProps().getProperty("nosoldsort"))){        	   
                		soldsort = false;
                       }
+               	 
+               	 if("true".equals(getParent().getProps().getProperty("soldindebt"))){        	   
+                		soldsort = false;
+                       }
+
 
                        if(soldsort){
                     	   int mm = 1;
@@ -2916,19 +2964,12 @@ public static String getDataDirStr(){
                        try {
                    		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
             				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
-                   	 if(inputLineBuf.indexOf("<errorCode>") != -1 ){
-                   		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
-            				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
-                     }
-                   	if(inputLineBuf.indexOf("<errorCode>") != -1 ){
-                   		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
-            				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime())+ userstuff);
-                     }
+                   	
                    		
                    	} catch (Exception e1) {
                    		e1.printStackTrace();
                    	}
-                          if(inputLineBuf.length() > 2){          
+                          if(inputLineBuf.length() > 2 && inputLineBuf.indexOf("<errorCode>") == -1 ){          
                                 try {
                               	  File f = new File (getDir() + "klienditoodeErp.xml");
                               	  if(f.exists())f.delete();
@@ -4165,6 +4206,29 @@ return tm;
         boolean groupmustbe = false;
         boolean masterKapp = false;
         HashSet kappProds = new HashSet();
+        HashMap cdnPictures = null;
+        
+        boolean addpicts = false;
+        String pictType = "";
+        if(getParent().getProps().getProperty("usepictures") != null){
+     	   addpicts = true;
+     	   pictType = getParent().getProps().getProperty("usepictures");
+        }
+        
+        if("true".equals(getParent().getProps().getProperty("cdn.pictures"))){
+        	   sessioncdn = getSessionIdCDN("jwt=" +jwttoken);
+            	System.out.println(sessioncdn);
+            	
+            	try {
+					cdnPictures = getImagesCDN(sessioncdn);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	
+        }
+
+     
         
         if( getParent().getProps().getProperty("masterdir") != null){
         	masterKapp = true;
@@ -4210,12 +4274,7 @@ return tm;
     	priorEtte = getParent().getProps().getProperty("priorEtte");
     }
     
-   boolean addpicts = false;
-   String pictType = "";
-   if(getParent().getProps().getProperty("usepictures") != null){
-	   addpicts = true;
-	   pictType = getParent().getProps().getProperty("usepictures");
-   }
+  
 	   
    
     if(getParent().getProps().getProperty("prodstatus") != null){
@@ -4407,8 +4466,20 @@ return tm;
                 	
               		
               		if(addpicts){
-              			try{
-              				Node picts  =  getNode(rida,"images");
+              			
+              			
+              			
+              			if(cdnPictures != null && cdnPictures.get(code) != null) {
+              				String fileN = (String)cdnPictures.get(code);
+              				String url = "https://cdn.erply.com/images/" + company + "/" + fileN ;//+"?width=200&height=200";
+              						//5153/3D-Agnesi-pasta-Casarecce-500g.jpg?width=200&height=200
+              				
+              				System.out.println("sees " + url);
+              				prod.setPhotoid("phurl:" +url); 
+              			} else {
+              			
+              			try {
+              				 Node picts  =  getNode(rida,"images");
                           
               				
               				for (int e = 0; e < picts.getChildNodes().getLength(); e++){
@@ -4434,6 +4505,9 @@ return tm;
               			}catch(Exception e){
               			 //	e.printStackTrace();
               			}
+              			
+              			}
+              			
               		}
               		
               		String price  =  getNode(rida,"price").getFirstChild().getNodeValue();

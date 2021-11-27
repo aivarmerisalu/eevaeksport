@@ -160,7 +160,7 @@ public class AxaSelitaDBDriver extends AbstractDBDriver  implements Manager,Prom
       "  INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid " +
       "  INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid  "+
       "  WHERE summ.DATAAREAID='sel'and dim.DATAAREAID='sel' and inv.DATAAREAID='sel' AND CLOSED = 0 AND  moduletype=0 " +
-      "    and dim.inventlocationid like'%PROD%' " +
+      "    and dim.inventlocationid = 'PROD' " +
       "  GROUP BY dim.inventlocationid,summ.itemid  ORDER BY dim.inventlocationid,summ.itemid ";
 
 
@@ -226,7 +226,7 @@ public class AxaSelitaDBDriver extends AbstractDBDriver  implements Manager,Prom
                "  INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid " +
                "  INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid  "+
                "  WHERE summ.DATAAREAID='sel'and dim.DATAAREAID='sel' and inv.DATAAREAID='sel' AND CLOSED = 0 AND  moduletype=0 " +
-               "    and dim.inventlocationid like '%PROD%' " +
+               "    and dim.inventlocationid = 'PROD' " +
                "  GROUP BY dim.inventlocationid,summ.itemid  ORDER BY dim.inventlocationid,summ.itemid ";
 
            if (isDebug()) System.out.println(sql);
@@ -276,7 +276,7 @@ public class AxaSelitaDBDriver extends AbstractDBDriver  implements Manager,Prom
           String name = rs.getString("name").trim();
           agent.setName(name);
           agent.setIsPilot(true);
-          agent.setObject(rs.getString("ladu").trim());
+          agent.setObject("PROD");
           
           agent.setLanguage("LIT");
           agent.setCountry("lt");
