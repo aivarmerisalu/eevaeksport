@@ -1,12 +1,19 @@
 package eevaeksport.driver;
 import java.sql.SQLException;
+
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import ee.merisoft.sm.Product;
 import eevaeksport.Agent;
 import eevaeksport.DealerProduct;
 import eevaeksport.EksportPanel;
+import eevaeksport.util.Converter;
 
 /**
  * <p>Title: </p>
@@ -17,12 +24,20 @@ import eevaeksport.EksportPanel;
  * @version 1.0
  */
 
-public class ConverterDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter {
+public class ConverterDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,FixLoader {
 
   public ConverterDBDriver(EksportPanel parent) {
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
-  }
+    user =  getParent().getProps().getProperty("rest.user");
+    pass = getParent().getProps().getProperty("rest.pass");
+    rcompany = getParent().getProps().getProperty("rest.companyx");
+     }
+  
+  String user =  null;
+  String pass = null;
+  String rcompany = null;
+  
   public String getSaveDebtInfo() {
    	return null;
    }
@@ -108,7 +123,31 @@ public class ConverterDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
 
    public TreeMap getProducts(Agent agent){
-      return new TreeMap();
+	   TreeMap res = new TreeMap();
+	   
+	 JSONArray prods =  Converter.getWebProducts( rcompany, user ,  pass);
+	 
+	 for(int i = 0; i < prods.length(); i++) {
+		 
+		 try {
+			JSONObject pr = (JSONObject) prods.get(i);
+			//System.out.println("prod " + pr.toString());
+			String code = (String)pr.get("code");
+			String ean = (String)pr.get("EAN");
+			String name = (String)pr.get("name");
+			//System.out.println("prod " + code + " " + ean + " " + name );
+			Product prod = new Product(code);
+			prod.setName(name);
+			prod.setEAN(ean);
+			 eanprods.put(ean, code);
+			 res.put(name, prod);
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		 
+	 }
+      return res;
    }
 
    
@@ -118,9 +157,7 @@ public class ConverterDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
 
    public Vector getCustomerProductsList(String agentCode){
-    
-
-     return vec;
+     return new Vector();
    }
 
    public String getStartingTime(){
@@ -136,13 +173,9 @@ public class ConverterDBDriver extends AbstractDBDriver implements BulkUpdater,D
      return 0;
    }
 
-  
 
-   public static final String SEPARATOR = "|";
-   public static final String DATA_FILE = "DATA.TXT";
-   public static final String SALES_BILLS_FILE = "orders.log";
    private String subjectFilesTo = null;
-   private  Vector vec = new Vector();
+  
   
 
   /**
@@ -152,4 +185,21 @@ public class ConverterDBDriver extends AbstractDBDriver implements BulkUpdater,D
    */
   public void setBulkSales(Map agents) {
   }
+  private TreeMap eanprods = null;
+  
+  @Override
+  public void FixLoader() {
+  	
+  eanprods =  Converter.loadMore();
+  	  
+  	  if(eanprods == null) {
+  		  eanprods = new TreeMap();
+  	  }
+  	this.getProducts(null);
+  	TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+  	System.out.println("Contracts " + contracts.toString());
+  	Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+  	System.exit(0);
+  }
+
   }
