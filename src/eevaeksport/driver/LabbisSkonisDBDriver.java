@@ -627,6 +627,11 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
 	        agents.put("Ware", aa2);
 	        
 	        
+	        
+	        Agent aa3 = new Agent("0TECHNIC");
+	        aa3.setName("TECHNIC");
+	        agents.put("TECHNIC", aa3);
+	        
             rs.close();
             stmt.close();
 	        con.close();
@@ -708,6 +713,13 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
 
     	   Converter.getManagersReplacements(this.getAgents1(), rcompanyx, user , pass);
 
+    	   ArrayList tech = new ArrayList();
+    	   try {
+    		   Converter.readFile(new File("techcustomers.txt"), "utf-8", tech);
+    	   }catch(Exception e) {
+    		   
+    	   }
+    	  
     	   
      	   Converter cc = new Converter();
 	    	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
@@ -863,6 +875,10 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
     	                           }
     	                     }
     	             }
+    	             
+    	             if(tech.contains(customer.getID())) {
+    	            	 customer.addAgent(new Agent("0TECHNIC"));
+    	             }
 
 
     	             if(rs.getString("blokk").equals("1")){
@@ -991,7 +1007,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
             	   }else{
             		   norduo = "";
             	   }
-            	   customer.setLicence(nordok + " " + norduo);
+            	   customer.setLicence(nordok.trim() + " " + norduo);
             	   
                }
                String street = rs.getString("street");
