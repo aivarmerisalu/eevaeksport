@@ -2659,6 +2659,25 @@ public class Converter {
 							 }
 						 }
 						 
+						 pais = formatter.formatCellValue(rowu.getCell(2));
+						 if (pais.equals("Kauplus")) {
+							 u = 3;
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(8));
+							 if(pais.equals("EAN")) {
+								 eanp = 8;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(15));
+							 if(pais.equals("Seisund")) {
+								 seis = 15;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(10));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 10;
+							 }
+						 }
+							
+						 
 						 
 						 
 						 
@@ -2670,6 +2689,9 @@ public class Converter {
 							 int poo = 0;
                           if(u == 6) {
                         	  poo = 3;
+                          }
+                          if(seis == 15) {
+                        	  poo = 2;
                           }
                           if(seis == 100) {
                         	  poo = 1;
@@ -4067,7 +4089,7 @@ try{
 	}
 	
 	if(ag.getStock() > 0){
-		value.put("stock", ag.getStock());
+		//value.put("stock", ag.getStock());
 	}
 	
 	if(ag.getMeasure() > 0){

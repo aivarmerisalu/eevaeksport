@@ -4853,35 +4853,12 @@ return tm;
     	 
     
     	 getOutDir();
- 		Converter.makeTelemaFiles(this.getOutDir(), tm, this.getProdGroups(), null, ownGLN);
+ 		//Converter.makeTelemaFiles(this.getOutDir(), tm, this.getProdGroups(), null, ownGLN);
  	} catch (Exception e) {
  		
  		e.printStackTrace();
  	}
-	 
- 	
- 	if(pictroot != null){
 
-		Properties props = parent.getParentFrame().loadProps("update.pro");
-		if(props == null){
-			props = new Properties();
-		}
-		props.put("weburl", pictroot);
-		
-
-		
-
-		try {
-			FileOutputStream fos = new FileOutputStream("update.pro");
-			props.store(fos, "");
-			fos.flush();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		
- 	}
  	
      return tm;
    }

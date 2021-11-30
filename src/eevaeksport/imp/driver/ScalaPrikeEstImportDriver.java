@@ -2013,14 +2013,14 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 					String asik = ref;
 					if(order.isChanged()){
 						ref =  "T" + ref ;
-						if(isZeroStatus(order.getCompany())){
-							status = "0";
-						}
-						if(!isokTTTStatus(order.getCompany())){
+						//if(isZeroStatus(order.getCompany())){
+							//status = "0";
+						//}
+     						if(!isokTTTStatus(order.getCompany())){
 							sendTTTEmail(order.getCompany(),getNimi(order.getCompany()),lines, this.identifyCustomerAGENT(cust) ,
 					    			  order.getInfo(), getAddress(order.getCompany()));
 							status = "0";
-						}
+						} 
 					}
 			         
 			
