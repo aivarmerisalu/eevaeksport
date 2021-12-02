@@ -2154,14 +2154,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       	 	     }
       	 
       	    //  	log.info("33 " + goes + " " + grupp);
-      	 	  prod.setGroup(Converter.cleanLitLatEst(grupp));
+      	 	  prod.setGroup(Converter.cleanLitLatEst(grupp.replace(';',':')));
 
           	  len = line.indexOf("supplier_code=");
         	    if(len != -1 && hasSupplier){
         	    	 String gr1  = line.substring(len + 15);
         	   	    gr1 = gr1.substring(0,gr1.indexOf("\""));
-            	     prod.setGroup(Converter.cleanLitLatEst(gr1));
-            	     prod.setGroupSecond(Converter.cleanLitLatEst(grupp));
+            	     prod.setGroup(Converter.cleanLitLatEst(gr1.replace(';',':')));
+            	     prod.setGroupSecond(Converter.cleanLitLatEst(grupp.replace(';',':')));
             	   //  System.out.println("Grupid " +  prod.getGroup() + "*" + prod.getGroupSecond() + "*" + gr1);
         	         
          	    	  
@@ -2187,8 +2187,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
             	    	 String  gr   = line.substring(len + lll + 10);
             	    	 
             	    	 gr = gr.substring(0,gr.indexOf("\""));
-            	    	 prod.setGroup(gr);
-                	   this.prGroups.put(gr, gr);  
+            	    	 prod.setGroup(gr.replace(';',':'));
+                	   this.prGroups.put(gr.replace(';',':'), gr.replace(';',':'));  
                 	 }
            		
            	}

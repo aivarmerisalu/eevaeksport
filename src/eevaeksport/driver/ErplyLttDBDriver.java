@@ -4325,7 +4325,9 @@ return tm;
     if("true".equals(getParent().getProps().getProperty("supplier.group"))){
         suppliersTM = new TreeMap();
     }
-		 
+     
+     StringBuffer code8 = new StringBuffer();
+     
      HashSet prodsInWares = new HashSet();
     // System.out.println("masterKapp "+ masterKapp);
     if(masterKapp){
@@ -4422,6 +4424,21 @@ return tm;
               		 }catch (Exception e){
               			 
               		 }
+              		try{
+             			String kood8 = deCode(getNode(rida,"code8").getFirstChild().getNodeValue());
+             			if(kood8 != null && kood8.trim().length() > 0) {
+             				StringTokenizer st = new StringTokenizer(kood8,",");
+             				code8.append(code);
+             				while(st.hasMoreTokens()) {
+             					code8.append(";"+ st.nextToken());
+             				}
+             				code8.append("\n");
+             			}
+             		
+             		 } catch (Exception e){
+             			 
+             		 }
+              		
               		String ean  = null;
               		String add = code;
               		 if("true".equals(getParent().getProps().getProperty("name.code.none"))){
@@ -4842,6 +4859,10 @@ return tm;
     	 if(lllean.length() > 0){
       	   	  Converter.saveFileInUTF8(getMasterDir() + "itembarcodes.csv", lllean.toString());
         }
+    	 
+    	 if("true".equals(getParent().getProps().getProperty("makeanalogs")) && code8.length() > 0) {
+    		 Converter.saveFileInUTF8("prodanalogs.txt", code8.toString());
+    	 }
      } catch (Exception e){
        e.printStackTrace();
      }
