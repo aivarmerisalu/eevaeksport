@@ -1349,7 +1349,7 @@ public class Converter {
 						for (int a = gr; a < row.getLastCellNum(); a++) {
 							try {
 								// System.out.println(row.getCell((short)a).getStringCellValue());
-								String gg = row.getCell((short) a).getStringCellValue().trim();
+								String gg = row.getCell((short) a).getStringCellValue().trim().replaceAll("\n", " ");
 							
 								if(gg.length()>1){
 							      groups.put(a + "", gg);

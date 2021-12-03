@@ -1205,13 +1205,14 @@ if(grupp.equals("leib") ){
  
       while(rs.next()){
         String name = Converter.enCodeEst(rs.getString("name").trim());
-        
+        boolean goes = true;
         
         String accountnum = rs.getString("accountnum").trim();
        
         Customer cust = new Customer(accountnum);
           if(accountnum.startsWith("C40")) {
         	  cust.diffBack2 = true;
+        	  goes = false;
           }
         cust.setPayer(rs.getString("payer"));
         boolean de = true;
@@ -1360,9 +1361,11 @@ if(grupp.equals("leib") ){
         if(diff.contains(cust.getID())) {
      	   cust.diffBack = true;
         }
-        
-        customers.put(name, cust);
-        custMap.put(cust.getID(),cust);
+        if(goes) {
+            customers.put(name, cust);
+            custMap.put(cust.getID(),cust);	
+        }
+  
       }
 
   /*    String sql = "SELECT  a.accountnum AS klient,a.invoice AS number,co.duedate AS maksepaev,co.amountmst AS tasumata, " +

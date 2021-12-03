@@ -13869,7 +13869,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 			     		 doknr=dokNr;
 			        }
 			       }
-			       if(kogus != 0 && prod.trim().length() > 0){
+			       if(kogus != 0 && prod!= null &&  prod.trim().length() > 0){
 			       
 			       prod = oldpro;
 						System.out.println(i + "*"+firma+"*"+ eans +"*"+ name +"*"+kogus+"*"+ dokNr  );

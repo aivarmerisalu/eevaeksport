@@ -4634,13 +4634,17 @@ if(agprods != null && agprods.size() >0){
       
 
        buf.append(EksportPanel.separator);
-       buf.append(prod.suggAle);
+       if(prod.suggAle == null) {
+    	   buf.append(" ");
+        } else {
+    	   buf.append(prod.suggAle);
+        }
+       
+       buf.append(EksportPanel.separator);
+       buf.append(prod.statusSmallPack);
+   
        
        buf.append(lineSeparator);
-
-       
-     
-
        
        
        this.products.put(prod.getID(), prod);

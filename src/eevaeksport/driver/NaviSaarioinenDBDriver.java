@@ -255,9 +255,11 @@ String rcompany = null;
    	        ResultSet rs = stmt.executeQuery(cmd);
    	        while(rs.next()){
    	            String id = rs.getString("kood");
-                String name = rs.getString("nimi") ;
+                String name = rs.getString("nimi").trim() ;
    	             if(id != null && id.trim().length()>0) {
-   	             tm.put(id.trim(), name.trim());
+   	            	 name = name.replaceAll("HoReCa", "Ho");
+   	            	 name = name.replaceAll("Mamma", "Ma");
+   	             tm.put(id.trim(), name);
    	             }
    	        }
 

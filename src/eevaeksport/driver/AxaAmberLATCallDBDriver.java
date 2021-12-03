@@ -1527,7 +1527,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 	  String cmd = "   SELECT inv.itemid, inv.itemname AS nimetus, inv.taxpackagingqty AS kastis,inv.standardpalletquantity AS alusel, disc.amount AS price  " + 
 			  " , bar.itembarcode AS ean ,inv.ITEMSUBGROUPID AS grupp,inv.SPIBRANDID AS grupp2,mod.unitid As unit, '21' as vat,mod.LineDisc as alegr  " +
 			   " , ITEMGROUPID as type ,lowestqty as mini , multipleqty as opti ,NEWITEM as uus ,sellout as out , topitem as tops , topoffitem as tops2,"
-			   + " giftbox as gift  , SPIDONTCONTROLMINAMOUNTMS as nocount FROM inventtable inv with(nolock) " +
+			   + " giftbox as gift  , SPIDONTCONTROLMINAMOUNTMS as nocount  ,unitvolume as small FROM inventtable inv with(nolock) " +
 			  "  left join InventItemSalesSetup s with(nolock) on s.itemid = inv.itemid and s.dataareaid=inv.dataareaid left join pricedisctable as disc with(nolock) on inv.itemid=disc.itemrelation and disc.dataareaid=inv.dataareaid " +
 			  "  and disc.module in ( 0 , 1 )  and disc.relation=4  and disc.itemcode=0 and disc.accountcode=1 and accountrelation = 'Standarts' and (disc.todate > getdate() or year( disc.todate ) = 1900) and   (disc.fromdate < getdate()+1 or year( disc.fromdate ) = 1900 )" +
 			  "  left join inventitembarcode bar with(nolock)  on bar.dataareaid = inv.dataareaid  and  bar.itemid = inv.itemid and bar.barcodesetupid ='EANBottle'  and useforprinting = 1  " +
@@ -1698,11 +1698,21 @@ Connection con = this.getNewConnection();
       if(giftitem == 1){
     	  prod.setStatusGiftPack("1");
       }
+      
+    
+    
 
       int  nocount = rs.getInt("nocount");
       if(nocount == 1){
     	 prod.sumNoCount = true;
       }
+      
+      double small = rs.getDouble("small");
+      if(small < 0.21 && small > 0.005){
+    	  prod.statusSmallPack = "1";
+      }
+
+      
       
       if(goes){
      	  products.put(Converter.cleanLitLatEst(ette) + nimetus, prod);

@@ -2287,6 +2287,54 @@ try{
 	   return hh;
    }
    
+   
+   
+   private HashMap<String, Double> getSuggDisc() {
+	   HashMap<String, Double> hh = new HashMap<String, Double>();
+	   try {
+		   DataFormatter formatter = new DataFormatter();
+		   Workbook workbook = null;
+	   File f = new File (getExcelDir() + "RecDisc.xlsx");
+	   boolean xs = true;
+	   if(!f.exists()) {
+		   f = new File (getExcelDir() + "RecDisc.xls"); 
+		   xs = false;
+	   }
+	   
+		  FileInputStream	 ff = new FileInputStream(f);
+		if(xs) {
+		     workbook = new XSSFWorkbook((ff));
+		}else {
+			 workbook = new HSSFWorkbook((ff));
+		}
+		Sheet sheet = workbook.getSheetAt(0);
+	      Row row = null; 
+				ff.close();	
+				if(sheet != null){
+				  int yy = sheet.getLastRowNum();
+					
+					for(int i = 1 ; i < yy+1 ;i++){
+						 row = sheet.getRow(i);
+						if(row != null) {
+							
+							String ean = formatter.formatCellValue(row.getCell(0)).trim();
+							String ale = formatter.formatCellValue(row.getCell(1));
+						  if(ale != null && ale.trim().length() > 0) {
+							  try {
+								  hh.put(ean.trim(), Double.parseDouble(ale)); 
+							  }catch(Exception r) {
+								  r.printStackTrace();
+							  }
+						  }
+						}}}
+				
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }				
+	   System.out.println("REC " + hh.size());
+	   return hh;
+   }
+   
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
      HashSet  ladutr = new HashSet();
@@ -2294,6 +2342,8 @@ try{
      HashMap<String,Double>  ladub1o = new HashMap<String,Double>();
      
      HashSet higherCodes = getHigher();
+     
+     HashMap<String,Double> suggDisc = getSuggDisc();
      
      getSaveStockInfo();
      getPartiid();
@@ -2413,6 +2463,10 @@ try{
             String id = rs.getString("toode").trim();
             String weight ="";
             Product prod = new Product(id);
+            if(suggDisc.get(id) != null) {
+            	prod.suggAle = suggDisc.get(id) + "";
+            	//System.out.println("suggAle " + prod.suggAle);
+            }
             prod.setStock(0);
             if(stocks.get(id) != null &&  stocks.get(id) > 0){
             	prod.setStock(stocks.get(id));

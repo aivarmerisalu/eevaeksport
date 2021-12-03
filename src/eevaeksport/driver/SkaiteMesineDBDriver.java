@@ -632,6 +632,7 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
 
     
   
+    
     public Vector getPriceMatrixData()  {
         Vector lines = new Vector();
        this.getProducts(null);
@@ -811,6 +812,9 @@ Statement st = null;
     	
        }
 
+    
+    
+    
     
     private Vector baashk = null;
       
