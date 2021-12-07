@@ -430,7 +430,10 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
               if (end != null && end.trim().length() > 0) {
                   mline.setEndDate(end.trim().substring(0,10));
                 }
-             lines.add(mline);
+              if(mline.getPrice() > 0 || mline.getDiscount() > 0) {
+            	   lines.add(mline);  	  
+              }
+          
             }
 
             
@@ -456,41 +459,55 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
               String end = rs.getString("enddate");
               int days = rs.getInt("days");
               MatrixLine mline = new MatrixLine();
+              MatrixLine mline2 = new MatrixLine();
 
               if (custID != null && custID.trim().length() > 0) {
-                mline.setCustID(custID.trim());
+                mline2.setCustID(custID.trim()); // maksja kaudu tuleb info
+            	 
+                mline.setCliGroup(custID.trim());
               }
               if ( clGroup !=null && clGroup.trim().length() > 0) {
-                mline.setCliGroup(clGroup.trim());
+               // mline.setCliGroup(clGroup.trim());
               }
 
               if (prodID != null && prodID.trim().length() > 0) {
                 mline.setProdID(prodID.trim());
+                mline2.setProdID(prodID.trim());
               }
               if (mline.getProdID() == null &&  prodGroup != null && prodGroup.trim().length() > 0) {
                 mline.setProdGroup(prodGroup.trim());
+                mline2.setProdGroup(prodGroup.trim());
               }
               if(discount.trim().length()==0){
               	discount = "0";
               }
                 mline.setDiscount(Double.parseDouble(discount));
+                mline2.setDiscount(Double.parseDouble(discount));
+
 
               if (Double.parseDouble(discount) == 0 && price != 0) {
                 mline.setPrice(price);
+                mline2.setPrice(price);
 
               }
               
               if (begin != null && begin.trim().length() > 0) {
                   mline.setStartDate(begin.trim().substring(0,10));
+                  mline2.setStartDate(begin.trim().substring(0,10));
                 }
               if (end != null && end.trim().length() > 0) {
                   mline.setEndDate(end.trim().substring(0,10));
+                  mline2.setEndDate(end.trim().substring(0,10));
                 }
               if(days > 32){
-            	  System.out.println("P�evad " + days);
+            	 // System.out.println("P�evad " + days);
             	  mline.setProdLevel("pr"); //m�rgime et on tegemist pika hinnaga mitte kampaania 
+            	  mline2.setProdLevel("pr");
               }
-             lines.add(mline);
+              if(mline.getPrice() > 0 || mline.getDiscount() > 0) {
+           	   lines.add(mline);  
+           	  lines.add(mline2);  
+             }
             }
             
             
@@ -1407,6 +1424,7 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
           
           
           cust.setPayer(rs.getString("payer").trim());
+          cust.setGroup(cust.getPayer());
          // double ale  = rs.getDouble("ale");
          // if (ale>0){cust.setDiscount(ale);}
          // cust.setDebt(rs.getDouble("debt"));
@@ -1431,7 +1449,12 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
           
          String grupp = rs.getString("grupp");
           if(grupp != null && grupp.trim().length()>0){
-          	cust.setGroup(grupp.trim());
+        	  if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
+        		  cust.setGroup(grupp.trim() + "|" + cust.getGroup());
+        	  }else {
+        		  cust.setGroup(grupp.trim());
+        	  }
+          	
           }
           
           String sort = rs.getString("sort");

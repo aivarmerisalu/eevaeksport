@@ -1308,6 +1308,22 @@ if(grupp.equals("leib") ){
   		}
       }
       	
+      	if(agen.trim().startsWith("3T")) {
+      		
+      		cust.addAgent(new Agent("3T 01"));
+      		cust.addAgent(new Agent("3T 02"));
+      		cust.addAgent(new Agent("3T 03"));
+      		cust.addAgent(new Agent("3T 04"));
+      		cust.addAgent(new Agent("3T 05"));
+      		cust.addAgent(new Agent("3T 06"));
+      		cust.addAgent(new Agent("3T 07"));
+      		cust.addAgent(new Agent("3T 08"));
+      		cust.addAgent(new Agent("3T 09"));
+      		cust.addAgent(new Agent("3T 10"));
+      		cust.addAgent(new Agent("3T 11"));
+      		
+      	}
+      	
         }
         
         
