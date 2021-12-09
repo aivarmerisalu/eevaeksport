@@ -728,7 +728,7 @@ StringBuffer sb = new StringBuffer();
 	  			}
 	  		}
 
-			System.out.println("M17154 " + groups.get("M17154")+ " " + sheet.getLastRowNum() );
+		//	System.out.println("M17154 " + groups.get("M17154")+ " " + sheet.getLastRowNum() );
 	  
 	  	 }catch (Exception e){
 	  		e.printStackTrace();
@@ -930,7 +930,8 @@ StringBuffer sb = new StringBuffer();
 		
 		/*
 SELECT  [MasterProductCode] as klient 
-      ,[class] as tase
+      ,[class] as taseblock
+      
   FROM [scalaDB].[dbo].[customerclass]*/
 		
 		// alumine on Kristine tehtud
@@ -1034,20 +1035,16 @@ SELECT  [MasterProductCode] as klient
 							cust.addAgent(new Agent((String)vvv.elementAt(i)));
 						}
 					}
-					
-					
-					
 				}
-				
 				
 				
 				String custinfo = null;
 
 				if (miinuskaks.get(cust.getID()) != null) {
-					custinfo =  "�leeelmine kuu: "
+					custinfo =  "Üleeelmine kuu: "
 							+ miinuskaks.get(cust.getID()) + "|";
-
 				}
+
 				if (miinusyks.get(cust.getID()) != null) {
 					if (custinfo == null) {
 						custinfo = "Eelmine kuu: "
@@ -1075,9 +1072,9 @@ SELECT  [MasterProductCode] as klient
 
 				
 				if(felkoodid.size() >0 && !felkoodid.contains(cust.getID())){
-					cust.setInfo(" OTB TOOTEID EI SAA M��A - KOOD PUUDUB||" + cust.getInfo());
+					cust.setInfo(" OTB TOOTEID EI SAA MÜÜA - KOOD PUUDUB||" + cust.getInfo());
 				}else 				if(smartBlokoodid.size() >0 && smartBlokoodid.contains(cust.getID())){
-					cust.setInfo(" Smartenis On M��k blokeeritud V�LGNEVUS||" + cust.getInfo());
+					cust.setInfo(" Smartenis On MÜÜk blokeeritud VÕLGNEVUS||" + cust.getInfo());
 				}
 				boolean goes = true;
 
@@ -1105,6 +1102,7 @@ SELECT  [MasterProductCode] as klient
 					cust.addAgent(new Agent("FELIX"));	
 					goes = true;
 				}
+				
 				if (myyk.get(cust.getID()) != null) {
 					Vector ags = (Vector) myyk.get(cust.getID());
 					for (int i = 0; i < ags.size(); i++) {

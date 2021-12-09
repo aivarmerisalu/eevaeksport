@@ -854,8 +854,10 @@ System.out.println("re " + re.toString());
 				          StringTokenizer st = new StringTokenizer(line,",");
 				          try {
 				        	 String  toode = st.nextToken();
+				        	if(line.endsWith("\"")) {
+				        		  line = line.substring(0,line.length()-1);
+				        	}
 				        	
-				        	  line = line.substring(0,line.length()-1);
 				        	  
 				        		 double kog = 0;
 				        		 try {
