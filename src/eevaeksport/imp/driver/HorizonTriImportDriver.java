@@ -98,8 +98,9 @@ try{
 	"  LEFT OUTER JOIN APV06161.NMINMAX aa ON aa.PK_NOM=t.PK_NOM and aa.PK_NOL=22013 " +
 	"   LEFT OUTER JOIN [APV06161].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
 	"   LEFT OUTER JOIN [APV06161].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
-	"  where t.STATUSS = 0  and PAMVID = 2015  and  gr.kods != 'TM'  ";
+	"  where t.STATUSS = 0  and PAMVID = 2015  and  gr.kods != 'TM' and t.kods not like 'NIC%'and t.kods not like 'PRV%'   ";
 			    		
+			//	 tubakas mitte jätta .
 	
 			        	Connection con = this.getNewConnection(); 
 			        		 stmr = con.createStatement();
@@ -124,6 +125,47 @@ try{
 	  }
 
 	private Vector  alco = null;
+	private Vector  toba = null;
+	
+	
+
+	 private void loadToba(){
+		  try{
+			  toba = new Vector();
+				ResultSet rs1 ;
+		    	Statement stmr ;
+				 String sqldea = "	  select t.PK_NOM as abi, t.KODS as  toode" +
+	" from APV06161.NNOM  t LEFT OUTER JOIN APV06161.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
+	" LEFT OUTER JOIN APV06161.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
+	"  LEFT OUTER JOIN APV06161.CHD_MG1 gr ON t.PK_MG1=gr.PK_MG1 " +
+	"  LEFT OUTER JOIN APV06161.NMINMAX aa ON aa.PK_NOM=t.PK_NOM and aa.PK_NOL=22013 " +
+	"   LEFT OUTER JOIN [APV06161].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
+	"   LEFT OUTER JOIN [APV06161].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
+	"  where t.STATUSS = 0  and PAMVID = 2015  and (t.kods like 'NIC%' or t.kods  like 'PRV%')   ";
+			    		
+			//	 tubakas mitte jätta .
+	
+			        	Connection con = this.getNewConnection(); 
+			        		 stmr = con.createStatement();
+			            	
+			                 rs1 = stmr.executeQuery(sqldea);
+			                
+			                 while(rs1.next()){
+			                	String toode = rs1.getString("toode").trim();
+			                	toba.add(toode);
+			                }
+			                
+			               rs1.close();
+			               stmr.close();
+			               con.close();
+			        	}catch(Exception s){
+			        		s.printStackTrace();
+			        	}
+
+			    	System.out.println("alco " + toba.size());
+			    	
+			    	
+	  }
 	
 	 private Vector splitOrder (Order order){
 			
@@ -135,7 +177,9 @@ try{
 		  if(alco == null){
 			  loadAlco();
 		  }
-		
+		  if(toba == null) {
+			  loadToba();
+		  }
 		 
 			  
 		  
@@ -166,6 +210,19 @@ try{
 		  ord2.setWarehouse("859");
 		  ord2.setDealer(order.getDealer());
 		  
+		  
+		  Order ord3 = new Order((order.getCompany()  ),order.getAgentFirstName());
+		  ord3.setAgentCode(order.getAgentCode());
+		  ord3.setDokNr(order.getDokNr()+ "t");
+		  ord3.setInfo(order.getInfo());
+		  ord3.setTeostaja((order.getTeostaja()));
+		  ord3.setChanged(order.isChanged());
+		  ord3.setShipCal(order.getShipCal().getTimeInMillis() +"");
+		  ord3.setStatus(order.getStatus());
+		  ord3.setShipTime(order.getShipTime());
+		  ord3.setWarehouse("859");
+		  ord3.setDealer(order.getDealer());
+		  
 
 		 
 
@@ -185,7 +242,12 @@ try{
 	        	   ord1.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 	                 		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 	                 	  
-	                      } else {
+	                      } else  if(toba.contains(itemid)){
+	                 	    	
+	        	            ord3.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+	                 		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+	                 	  
+	                      }else {
 	         		    	 
 			    	             ord2.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			             lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
@@ -204,6 +266,10 @@ try{
 
 		  if(ord2.getOrderLines() != null && ord2.getOrderLines().size()>0){
 			  result.add(ord2);  
+		  }
+
+		  if(ord3.getOrderLines() != null && ord3.getOrderLines().size()>0){
+			  result.add(ord3);  
 		  }
 
 
