@@ -1210,7 +1210,7 @@ if(grupp.equals("leib") ){
         String accountnum = rs.getString("accountnum").trim();
        
         Customer cust = new Customer(accountnum);
-          if(accountnum.startsWith("C40")) {
+          if(accountnum.startsWith("C40") || accountnum.startsWith("c40")) {
         	  cust.diffBack2 = true;
         	  goes = false;
           }
@@ -1321,6 +1321,7 @@ if(grupp.equals("leib") ){
       		cust.addAgent(new Agent("3T 09"));
       		cust.addAgent(new Agent("3T 10"));
       		cust.addAgent(new Agent("3T 11"));
+      		cust.addAgent(new Agent("Kesk"));
       		
       	}
       	

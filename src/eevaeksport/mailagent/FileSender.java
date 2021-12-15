@@ -165,7 +165,7 @@ public class FileSender {
 	    	        	for (S3ObjectSummary objectSummary : objects.getObjectSummaries())  {
 		    	        	 if(!objectSummary.getKey().equals(dirInCash)) {
 		    	            String keyy = objectSummary.getKey();
-		    	        		 String filen = dirOutCashLoc + keyy.substring(keyy.lastIndexOf("/")+1);
+		    	        		 String filen = dirOutCashLoc + keyy.substring(keyy.lastIndexOf("/")+1).replaceAll("\n", " " );
 		    	            FileUtils.copyInputStreamToFile(s3Client.getObject(bucketName, keyy)
 		    	            		.getObjectContent(), new File(filen));
 		    	            
