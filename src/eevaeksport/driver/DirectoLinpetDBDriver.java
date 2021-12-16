@@ -741,25 +741,29 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            		  if(rida.getNodeName().equals("priceformula")){
            			 String custID = " ";
                      String clGroup = " ";
-                     String prodID = " ";
+                     String prodID = null;
                      String prodGroup = " ";
                      String start = null;
                      String end = null;
                      MatrixLine mline = new MatrixLine();
                     try{
                     	 clGroup = ensureLen(rida.getAttributes().getNamedItem("code").getNodeValue()); 
-                         prodID =  rida.getAttributes().getNamedItem("item").getNodeValue(); 
+                    	  try{
+                    		  prodID =  rida.getAttributes().getNamedItem("item").getNodeValue(); 
+                    	  }catch(Exception rr) {
+                    		  System.out.println("jama " + i + " " + clGroup);
+                    	  }
+                    	  
+                        
                         try { 
                          start =  rida.getAttributes().getNamedItem("start_date").getNodeValue();
-              	  }catch(Exception aa){ }
-              	  try{
+              	           }catch(Exception aa){ }
+              	        
+                        try{
                            end =  rida.getAttributes().getNamedItem("end_date").getNodeValue();
-                  	  }catch(Exception aa){ }
+                  	      }catch(Exception aa){ }
                          
-                         
-                         if (custID != null && custID.trim().length() > 0) {
-                           mline.setCustID(custID.trim());
-                         }
+                    
                          if (clGroup != null && clGroup.trim().length() > 0) {
                            mline.setCliGroup(clGroup.trim());
                          }
@@ -767,14 +771,12 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                          if (prodID != null && prodID.trim().length() > 0) {
                            mline.setProdID(prodID.trim());
                          }
-                         
-                         if (mline.getProdID() == null && prodGroup != null
-                             && prodGroup.trim().length() > 0) {
-                           mline.setProdGroup(prodGroup);
-                         }
-
-                        
-                         if(prods.keySet().contains(prodID) && pricelists.contains(clGroup.trim())){
+                    
+                         if(clGroup.equals("01981")) {
+                    		 System.out.println("jama "+  prodID + " " + pricelists.contains(clGroup.trim()) + " " + prods.keySet().contains(prodID));
+                    	 }
+                         if(prodID != null && prods.keySet().contains(prodID) && pricelists.contains(clGroup.trim())){
+                        	
                         	
                         	 
                         	if(!prodsInUse.contains(prodID.trim())){
@@ -797,6 +799,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                     
                        
                     }catch(Exception e){
+                    	e.printStackTrace();
                     }
                     
                    }
@@ -1027,7 +1030,6 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      }catch(Exception r){
     	 r.printStackTrace();
      }
-   
     // getFixedAssortmentData();
      //getProducts(null);
     // makeData();
@@ -1089,7 +1091,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		         	      }
 	         	  
          	  }catch(Exception e){
-         		//  e.printStackTrace();
+         		  e.printStackTrace();
          	  }
          }
          
@@ -1394,7 +1396,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    public TreeMap getCustomers(Agent agent){
 	   TreeMap tm = new TreeMap();
 	  
-	   makeData();
+	  // makeData();
 	   System.out.println("kliendid a");
 		
 		  String country = "Estonia";
@@ -1880,7 +1882,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      
      if(custProds.size() == 0){
          prodCodes = new HashSet();
-    	 getCustomerProductsList2();
+    	// getCustomerProductsList2();
      }
   TreeMap stockAlter = new TreeMap();
      if(getParent().getProps().getProperty("stockdir") != null ){
@@ -2154,14 +2156,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       	 	     }
       	 
       	    //  	log.info("33 " + goes + " " + grupp);
-      	 	  prod.setGroup(Converter.cleanLitLatEst(grupp.replace(';',':')));
+      	 	  prod.setGroup(Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
 
           	  len = line.indexOf("supplier_code=");
         	    if(len != -1 && hasSupplier){
         	    	 String gr1  = line.substring(len + 15);
         	   	    gr1 = gr1.substring(0,gr1.indexOf("\""));
-            	     prod.setGroup(Converter.cleanLitLatEst(gr1.replace(';',':')));
-            	     prod.setGroupSecond(Converter.cleanLitLatEst(grupp.replace(';',':')));
+            	     prod.setGroup(Converter.cleanLitLatEst(gr1.replaceAll(";",":").replaceAll("&amp;", "&")));
+            	     prod.setGroupSecond(Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
             	   //  System.out.println("Grupid " +  prod.getGroup() + "*" + prod.getGroupSecond() + "*" + gr1);
         	         
          	    	  
@@ -2175,7 +2177,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                	    if(len != -1){
                	    	 String  gr   = line.substring(len + lll + 10);
                	    	 gr = gr.substring(0,gr.indexOf("\""));
-               	    	 prod.setType(gr); 
+               	    	 prod.setType(gr.replaceAll("&amp;", "&")); 
                    	 }
               	}
         	    
@@ -2187,8 +2189,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
             	    	 String  gr   = line.substring(len + lll + 10);
             	    	 
             	    	 gr = gr.substring(0,gr.indexOf("\""));
-            	    	 prod.setGroup(gr.replace(';',':'));
-                	   this.prGroups.put(gr.replace(';',':'), gr.replace(';',':'));  
+            	    	 prod.setGroup(gr.replaceAll(";",":").replaceAll("&amp;", "&"));
+                	   this.prGroups.put(gr.replaceAll(";",":").replaceAll("&amp;", "&"), gr.replaceAll(";",":").replaceAll("&amp;", "&"));  
                 	 }
            		
            	}
