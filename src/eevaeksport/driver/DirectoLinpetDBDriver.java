@@ -1396,7 +1396,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    public TreeMap getCustomers(Agent agent){
 	   TreeMap tm = new TreeMap();
 	  
-	  // makeData();
+	   makeData();
 	   System.out.println("kliendid a");
 		
 		  String country = "Estonia";
@@ -1882,7 +1882,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      
      if(custProds.size() == 0){
          prodCodes = new HashSet();
-    	// getCustomerProductsList2();
+    	 getCustomerProductsList2();
      }
   TreeMap stockAlter = new TreeMap();
      if(getParent().getProps().getProperty("stockdir") != null ){
