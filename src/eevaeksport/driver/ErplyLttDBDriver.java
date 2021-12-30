@@ -4430,7 +4430,9 @@ return tm;
              				StringTokenizer st = new StringTokenizer(kood8,",");
              				code8.append(code);
              				while(st.hasMoreTokens()) {
-             					code8.append(";"+ st.nextToken());
+             					String hh = st.nextToken();
+             					hh = hh.replaceAll("\\s","");
+             					code8.append(";"+ hh);
              				}
              				code8.append("\n");
              			}
