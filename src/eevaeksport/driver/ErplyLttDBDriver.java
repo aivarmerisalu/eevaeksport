@@ -228,7 +228,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	  
 	  try {
 	String res = (postDataCDN(asi)).toString();
-	System.out.println("res " + res);
+//	System.out.println("res " + res);
 	JSONParser parser = new JSONParser();  
 	JSONObject json = (JSONObject) parser.parse(res);  
 	sessioncdn = (String)json.get("sessionKey");
@@ -236,7 +236,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
-	  System.out.println("res " + sessioncdn);
+	//  System.out.println("res " + sessioncdn);
 	  return sessioncdn;
   }
   
@@ -1772,6 +1772,7 @@ if(sb.length() >10){
    private HashMap<String,Double> overDue = null;
    
    public Vector getDebt2(){
+	  
 	   
 	   debtList = new Vector();
 	   overDue = new HashMap<String,Double>();
@@ -1805,16 +1806,27 @@ if(sb.length() >10){
 					String paymentStatus = getNode(rida, "paymentStatus").getFirstChild().getNodeValue();
 					String type = getNode(rida, "type").getFirstChild().getNodeValue();
 					String type2 = null;
+					String invoiceState = null;
+					
+				
+					try{
+						invoiceState = getNode(rida, "invoiceState").getFirstChild().getNodeValue();
+						
+					}catch(Exception r) {
+						
+					}
 					try{
 						type2 = getNode(rida, "followUpDocuments").getFirstChild().getNodeValue();
 						
 					}catch(Exception r) {
 						
 					}
-					
+				
 					
 					if( !paymentStatus.equals("PAID") && (type.equals("INVWAYBILL") || type2.equals("INVOICE") )){
+					
 						
+					
 					
 					int paevi = 0 ;
 					try{
@@ -1878,6 +1890,108 @@ if(sb.length() >10){
 	 	 }
 	
 	      return this.debtList;
+   
+   }
+   
+   
+   public void getAfterOrders(){
+	   if("true".equals(getParent().getProps().getProperty("after.orders"))){
+		   afterOrders = new TreeMap();
+	     
+		  String mm = getMonthc().substring(0,7);
+	      FileListFilter fil = new FileListFilter("ordlist","xml");
+	 	 String[] ll = new File (getDir()).list(fil);
+	 	 for (int u = 0; u < ll.length; u++) {
+	 		 String name = ll[u];
+		    	//	System.out.println(name);
+		 		  File f = new File (getDir() + name);
+		 		  
+		 		 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		  	     DocumentBuilder db;
+		  	     try{
+		  		db = dbf.newDocumentBuilder();      	
+		      	FileInputStream in = getCleanInputStream(f);
+		      	String handler = null;
+		          Document doc = db.parse(in,handler);
+		        
+		        Node root = getNode(doc, "document");      
+		       	Node read = getNode(root, "records");
+		       for (int i = 0; i < read.getChildNodes().getLength(); i++){
+		           	  Node rida = read.getChildNodes().item(i);
+		           	  if(rida.getNodeName().equals("item")){
+		          	  try{
+					
+					String number = getNode(rida, "number").getFirstChild().getNodeValue();
+					String date =  getNode(rida, "date").getFirstChild().getNodeValue();
+					String cust = getNode(rida, "clientID").getFirstChild().getNodeValue();
+					String paymentStatus = getNode(rida, "paymentStatus").getFirstChild().getNodeValue();
+					String type = getNode(rida, "type").getFirstChild().getNodeValue();
+					String type2 = null;
+					String invoiceState = null;
+					
+				
+					try{
+						invoiceState = getNode(rida, "invoiceState").getFirstChild().getNodeValue();
+						
+					}catch(Exception r) {
+						
+					}
+				
+					
+					if(afterOrders != null && (number.endsWith("-1") || number.endsWith("-2") || number.endsWith("-3") || number.endsWith("-4") || number.endsWith("-5"))) {
+					//	System.out.println("number " + number + " klient " + cust  + " type " + type + " " + invoiceState);
+						
+						  Node tooted = getNode(rida, "rows");
+						  
+						  for (int p = 0; p < tooted.getChildNodes().getLength(); p++){
+							  Node tt = tooted.getChildNodes().item(p);
+				           	  if(tt.getNodeName().equals("item")){
+				           		  
+				           		  String prod = getNode(tt, "productID").getFirstChild().getNodeValue();
+				           		 String am = getNode(tt, "amount").getFirstChild().getNodeValue();
+				           	
+				           		String price = getNode(tt, "finalNetPrice").getFirstChild().getNodeValue();
+				           		
+				           		 Toode t = new Toode(prod);
+				           		 t.setBrand(date);
+				           		 try {
+				           			t.setKogus(Double.parseDouble(am));
+					              }catch(Exception r) {
+				           			 r.printStackTrace();
+				           		 }
+				           		 try {
+					           			t.setPlancur(Double.parseDouble(price));
+						              }catch(Exception r) {
+					           			 r.printStackTrace();
+					           		 }
+				           		 //    CustProd cp = new CustProd(klient, t.getID(),0,0,0,t.getBrand(),t.getPlancur(),t.getKogus(),0," ");
+				           		 
+				           		 ArrayList arr  = new ArrayList();
+				           		 if(afterOrders.get(cust) != null) {
+				           			 arr = (ArrayList)afterOrders.get(cust);
+				           		 }
+				           		 arr.add(t);
+				           		afterOrders.put(cust, arr);
+				           		 
+				           		//System.out.println("number " + number + " klient " + cust  + " type " + type + " " + invoiceState + " " + prod +" "+ am);
+				           		  
+				           	  }
+						  }
+						  
+					}
+				
+		          	  }catch(Exception e){
+		          		  e.printStackTrace();
+		          	  }
+		           	}     
+		          }
+		           
+	         	  }catch(Exception e){
+	         		  e.printStackTrace();
+	         	  }
+	 	 }    
+	 	 }
+	 	
    
    }
    
@@ -2180,9 +2294,7 @@ if(sb.length() >10){
                                            			 }catch(Exception e){
                                            			 }
                                            		 }
-                                           		 if(a3group.startsWith("42")) {
-                                                		System.out.println("ridu3  " + a3group + " " + web + " " + web0); 
-                                                	 }
+                                           		
                                            		 
                                            		String web4 = null;
                                            		if(mdGrupid != null){
@@ -2369,91 +2481,14 @@ if(sb.length() >10){
    private TreeMap suppliersTM = null;
 
    private String enCode(String res ){
-	  	 
-
-	  	res =res.replaceAll("�","11111xx");
-	  	res =res.replaceAll("�","11112xx");
-		res =res.replaceAll("�","11114xx");
-		res =res.replaceAll("�","11114xx");
-		res =res.replaceAll("�","11113xx");
-		res =res.replaceAll("�","e");
-		res =res.replaceAll("�"," "); 
-		
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		res = res.replaceAll("�"," ");
-		res = res.replaceAll("�", " ");
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�","e");
-		res =res.replaceAll("�","E");
-		res =res.replaceAll("�"," ");
-		
-
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		
-		
-		res = res.replaceAll("�", "EUR");
-		res = res.replaceAll("�", "Nael");
-	
-		res =res.replaceAll("�","11115xx");
-		res =res.replaceAll("�","11116xx");
-		res =res.replaceAll("�","11117xx");
-		res =res.replaceAll("�","11118xx");
-		
-		res =res.replaceAll("�","11119xx");
-		res =res.replaceAll("�","11120xx");
-		res =res.replaceAll("�","11121xx");
-		res =res.replaceAll("�","11122xx");
-
-	 	 
-	  	return res;
+	  	 return Converter.enCodeEst(res);
 	  }
 	  
    
    public static String deCode(String res ){
-	   
-	   while(res.indexOf("11111xx") != -1){
-	   	int aa = res.indexOf("11111xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   }
-	   while(res.indexOf("11112xx") != -1){
-	   	
-	   	int aa = res.indexOf("11112xx");
-	   //	System.out.println(aa + " " +res);
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11113xx") != -1){
-	   	int aa = res.indexOf("11113xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11114xx") != -1){
-	   	int aa = res.indexOf("11114xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11115xx") != -1){
-	   	int aa = res.indexOf("11115xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11116xx") != -1){
-	   	int aa = res.indexOf("11116xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11117xx") != -1){
-	   	int aa = res.indexOf("11117xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11118xx") != -1){
-	   	int aa = res.indexOf("11118xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-
-	 
- 	return res;
+	  return Converter.deCode(res);
  }
+
    TreeMap agents = null;
    
    private void sendAsi(){
@@ -2589,7 +2624,7 @@ if(sb.length() >10){
 		       		
 		 sm.setName("OFFICE");
      tm.put("HOUSE", sm); 
-   //  getDebt2();
+    // getAfterOrders();
      return tm;
    }
 
@@ -2992,14 +3027,12 @@ public static String getDataDirStr(){
           // System.out.println("Tootegrupid tehtud" );
 
                     
-                         
-                              
 
                        
                        
-                       System.out.println("Teen Dokyumendi listi" );   
+                       System.out.println("Teen Order listi" );   
            
-           FileListFilter fil2 = new FileListFilter("doklist","xml");
+           FileListFilter fil2 = new FileListFilter("ordlist","xml");
 	    	 String[] ll2 = new File (getDir()).list(fil2);
 	    	 for (int i = 0; i < ll2.length; i++) {
 	    		 String name = ll2[i];
@@ -3017,7 +3050,105 @@ public static String getDataDirStr(){
 
            if(doclist){
         	
-         String  data = "request=getSalesDocuments&recordsOnPage=" + this.onpage + "&dateFrom=" + getMonth6() + "&types=INVWAYBILL,WAYBILL,INVOICE"
+         String  data = "request=getSalesDocuments&recordsOnPage=" + this.onpage + "&dateFrom=" + getMonth6() +  "&getRowsForAllInvoices=1&types=ORDER&invoiceState=READY" //"&types=INVWAYBILL,WAYBILL,INVOICE"
+				+ userstuff;// &dateFrom=2010-12-01
+		// System.out.println(data);
+
+		inputLineBuf = postData(data);
+		// System.out.println(inputLineBuf.toString());
+
+		 tsykkel = 0;
+		if (inputLineBuf.indexOf("recordsTotal") != -1) {
+			int lines = inputLineBuf.indexOf("recordsTotal");
+			int end = inputLineBuf.indexOf("recordsTotal", lines + 12);
+			// System.out.println(inputLineBuf);
+			try {
+				tsykkel = Integer.parseInt(inputLineBuf.substring(
+						lines + 13, end - 2));
+			} catch (Exception e) {
+
+			}
+		}
+		if (inputLineBuf.length() > 2) {
+			try {
+				File f = new File(getDir() + "ordlist1.xml");
+				if (f.exists())
+					f.delete();
+				 String c = (char)0x19 + "";
+				 Converter.saveFileInUTF8(getDir() + "ordlist1.xml", inputLineBuf.toString().replace((char)0x19, ' ')
+						 .replace((char)0x19, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0x19, ' ')
+						 .replace((char)0x1c, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
+						 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+						 .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+			     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' '));
+		       
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		if (tsykkel > onpage) {
+			int counter = 2;
+			for (; tsykkel > onpage; tsykkel = tsykkel - onpage) {
+				try {
+					inputLineBuf = postData("request=getSalesDocuments&recordsOnPage=" + onpage + "&getRowsForAllInvoices=1&types=ORDER&invoiceState=READY&dateFrom=" + getMonth6() + "&pageNo="
+							+ counter + userstuff);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+
+				if (inputLineBuf.length() > 2) {
+					try {
+						File f = new File(getDir() + "ordlist" + counter
+								+ ".xml");
+						if (f.exists())
+							f.delete();
+						
+						 Converter.saveFileInUTF8(getDir() + "ordlist" + counter + ".xml", inputLineBuf.toString().replace((char)0x19, ' ')
+								 .replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0x19, ' ')
+								 .replace((char)0xe, ' ').replace((char)0x19, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
+								 .replace((char)0x1c, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+								 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+					     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' '));
+					
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+
+				counter++;
+			}
+
+		}
+           
+		   
+           }
+           
+                              
+
+                       
+                       
+                       System.out.println("Teen Dokyumendi listi" );   
+           
+           FileListFilter fil23 = new FileListFilter("doklist","xml");
+	    	 String[] ll23 = new File (getDir()).list(fil23);
+	    	 for (int i = 0; i < ll23.length; i++) {
+	    		 String name = ll23[i];
+		    		// System.out.println(name);
+		 		  File f = new File (getDir() + name);
+	           if(f.exists()){
+	        	   f.delete();
+	           }
+	    	 }
+	    		
+	    	
+	    	 if("true".equals(getParent().getProps().getProperty("nodoclist"))){        	   
+	    		 doclist = false;
+	           }
+
+           if(doclist){
+        	
+         String  data = "request=getSalesDocuments&recordsOnPage=" + this.onpage + "&dateFrom=" + getMonth6() +  "&types=INVWAYBILL,WAYBILL,INVOICE"
 				+ userstuff;// &dateFrom=2010-12-01
 		// System.out.println(data);
 
@@ -3518,7 +3649,7 @@ public TreeMap getGrupidPayer(){
 return tm;
 }
 
-
+private TreeMap afterOrders = null;
 
    public TreeMap getCustomers(Agent agent){
 	     TreeMap tm = new TreeMap();
@@ -3577,19 +3708,8 @@ return tm;
 	          	  }
 	    
 	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     getDebt2();
+	
+	    
 	     if( getParent().getProps().getProperty("replace.managers") != null){
 	    	 repManas = getParent().getProps().getProperty("replace.managers") ;
 	     }
@@ -3606,6 +3726,8 @@ return tm;
 	    	 makeData();
 	 	 }
 	     
+	     
+	     getDebt2();
 	     StringBuffer sb2 = new StringBuffer();
 	   
 	     TreeMap groups = this.getGrupid();
@@ -4372,7 +4494,7 @@ return tm;
             	  String ladu = st.nextToken();
             	 TreeMap<String,Double> la =  this.getWarehouseStock(ladu);
             	 
-            	 System.out.println("la suurus " + la.size());
+            	// System.out.println("la suurus " + la.size());
             	Iterator itera = la.keySet().iterator();
             	while(itera.hasNext()){
             		String kood = (String)itera.next();
@@ -4821,9 +4943,7 @@ return tm;
              	    	}
              	 	}
              	
-             		if(kood.indexOf("28188") != -1) {
-              			System.out.println("uhuuu " + grori + " " + !okGrupid.contains(grori) +" "+ goes +" "+ code + " " + kood + " " +  (getNode(rida,"name").getFirstChild().getNodeValue()));
-              		}
+             	
              		
                if(goes){
          			 String sorting = prod.getID();
@@ -4959,6 +5079,10 @@ return tm;
  
    public Vector getCustomerProductsList(String agentCode){
 	 
+	   getAfterOrders();
+	   
+	   HashSet afterOlemas = new HashSet();
+	   
 	   custProds = new Vector();
 	   soldProds = new HashSet();
 
@@ -5005,22 +5129,53 @@ return tm;
 		          			   }catch(Exception e){
 		          				   
 		          			   }
-		          			
+		          			double oamount = 0;
+		          			   if(this.afterOrders != null && afterOrders.get(klient) != null) {
+		          				// System.out.println("oamount olemas "  + klient + " " + toode + " " + oamount );
+		          				   ArrayList<Toode> prods = (ArrayList<Toode>)afterOrders.get(klient);
+		          				   for(Toode tt : prods) {
+		          					   if(tt.getID().equals(toode)) {
+		          						   oamount = tt.getKogus();
+		          						 afterOlemas.add(klient+toode+oamount);
+		          						 
+		          						   System.out.println("oamount olemas "  + klient + " " + toode + " " + oamount );
+		          					   }
+		          				   }
+		          			   }
 		          			   
 		          			 stv.nextToken().trim();
 		          			  
 		          			 String kogus = stv.nextToken().trim();
 		          			  kog = Double.parseDouble(kogus); 
 		          			 
-		          			  CustProd cp = new CustProd(klient, toode,kog,0,0,kuupaev,lastpr,0,0," ");
+		          			  CustProd cp = new CustProd(klient, toode,kog,0,0,kuupaev,lastpr,oamount,0," ");
 			          		   custProds.add(cp);
 			          		   if(!soldProds.contains(toode)){
 			          			   soldProds.add(toode);
 			          		    } 
 	  
 	          			  		 }catch(Exception e){
+	          			  			// e.printStackTrace();
 	          			 }  } } } }     
 	          }
+	        
+	        if(this.afterOrders != null) {
+	        	Iterator itera = afterOrders.keySet().iterator();
+	        	while (itera.hasNext()) {
+	        		String klient = (String)itera.next();
+	        	
+	        		ArrayList<Toode> arr = (ArrayList<Toode>)afterOrders.get(klient);
+   for(Toode t : arr) {
+	   
+	   CustProd cp = new CustProd(klient, t.getID(),0,0,0,t.getBrand(),t.getPlancur(),t.getKogus(),0," ");
+	   cp.setAbiKood("BackOrder");
+	   custProds.add(cp);
+   }
+    			 
+        		   
+	        	}
+	        }
+	        
 	          
 	  	}catch(Exception e){
 	  		e.printStackTrace();
@@ -5092,6 +5247,7 @@ return tm;
    */
      
      private Hashtable docCust = null;
+     
      
   public void setBulkSales(Map agents) {
 	  TreeMap myygid = new TreeMap();

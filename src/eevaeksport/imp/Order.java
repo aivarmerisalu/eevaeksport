@@ -285,7 +285,10 @@ public void setContactID(String contactID) {
 }
 
 
-private String photoname = null;
+
+
+  public String fullDelyveryOnly = null;
+  private String photoname = null;
   private String signaname = null;
   private String info = null;
   private boolean isBill = false;

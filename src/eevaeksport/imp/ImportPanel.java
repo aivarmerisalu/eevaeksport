@@ -16746,6 +16746,7 @@ shipdate = getCalXML(asi);
               String photoname = null;
               String signaname = null;
               String contactid = null;
+              String fullDeliveryOnly = null;
               
               if (st.hasMoreTokens()){
                 dokNr = st.nextToken();
@@ -16861,6 +16862,9 @@ shipdate = getCalXML(asi);
                                            }
                                         	if (st.hasMoreTokens()) {
                                         		contactid = st.nextToken() ;
+                                           }
+                                        	if (st.hasMoreTokens()) {
+                                        		fullDeliveryOnly = st.nextToken() ;
                                            }
                                          }
                                        }
@@ -17007,7 +17011,7 @@ shipdate = getCalXML(asi);
               
               System.out.println(firma +" " + toode + " " + price + " " + 
               num + " pl-" +  pl +  " "+ warehouse + " | " + dealer + "*" + partii +
-              " sdu:" + shipDateUsed + " " + photoname + " " + signaname + " " + contactid + " typ:" + docType);
+              " sdu:" + shipDateUsed + " " + photoname + " " + signaname + " " + contactid + " " + fullDeliveryOnly + " typ:" + docType);
             
               if(shipmode.trim().length()>0){
                   orders.setShipMode(shipmode);             
@@ -17022,6 +17026,10 @@ shipdate = getCalXML(asi);
               
               if(contactid != null && contactid.trim().length()>0){
                   orders.setContactID(contactid);             
+                }
+              
+              if(fullDeliveryOnly != null && fullDeliveryOnly.trim().length()>0){
+                  orders.setFullDeliveryOnly(fullDeliveryOnly);             
                 }
               
               if(reference != null && reference.trim().length() > 0){
