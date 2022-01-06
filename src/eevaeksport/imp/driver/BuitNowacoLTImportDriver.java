@@ -662,7 +662,7 @@ if(ag != null){
 
 
    
-  private String url = "jdbc:odbc:mynowaco";
+  private String url = "jdbc:odbc:my_nowaco";
   private Connection con;
   private ImportPanel parent;
   private boolean isAmount = false;

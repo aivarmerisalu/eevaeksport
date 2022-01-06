@@ -520,7 +520,9 @@ public class Converter {
 						
 						for(int i = 1 ; i < sheet.getLastRowNum()+1;i++){
 							 row = sheet.getRow(i);
-							 
+							 try {
+								 
+							
 							 DataFormatter formatter = new DataFormatter();
 								String ean = formatter.formatCellValue(row.getCell(ea));
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
@@ -562,7 +564,9 @@ public class Converter {
                                  }
 						   }
 							 }
-						}
+						 }catch(Exception e) {
+							 e.printStackTrace();
+						 }}
 					 }
 					
 					
@@ -4283,6 +4287,40 @@ try{
 	  return getSVData(new Date(from) , new Date(to) , company,  user ,  pass,  week, type , subTypes , nameadd);
   }
 	
+  
+  public static String getTaskData(long from , long to , String company, String user , String pass,  String nameadd){
+	  eevaeksport.util.ReportingService serv = new ReportingService();
+	  serv.user =  user;
+		serv.pass = pass;
+		serv.company = company;
+		String res = "";
+		try {
+			org.json.JSONArray array = serv.getTaskdata(new Date(from), new Date(to) );
+			//System.out.println("oioi "+ array.toString());
+		//	throw new Exception("demo"); 
+			try {
+				String mm = (new Date(from).getMonth()+1)+ "";
+				if(mm.length() == 1)
+					mm = "0"+ mm;
+				
+				String yyyy = (new Date(from).getYear()+1900)+ "";
+				String ww = "";
+			
+				res = "svdata/taskdata-" + nameadd + ww + mm  + yyyy + ".json" ;
+					Converter.saveFile(  "svdata/taskdata-" + nameadd + ww + mm  + yyyy + ".json" , array.toString());
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		 
+		  } catch (Exception t) {
+			t.printStackTrace();
+		  }
+		
+		return res;
+		
+  }
+  
   public static String getSVData(Date from , Date to , String company, String user , String pass, boolean week , String type , String subTypes , String nameadd){
 	  eevaeksport.util.ReportingService serv = new ReportingService();
 	  serv.user =  user;
@@ -5883,6 +5921,10 @@ try{
 	    				value.put("street", ag.restStreet);
 	    			}
 	    			
+	    			if(ag.section != null){
+	    				value.put("section", ag.section);
+	    			}
+	    			
 
 	    			if(ag.restPerPos != null){
 	    				value.put("perposition", ag.restPerPos);
@@ -6136,6 +6178,10 @@ String ees = "";
 	
 	if(ag.restPerEmail != null){
 		value.put("peremail", ag.restPerEmail);
+	}
+	
+	if(ag.section != null){
+		value.put("section", ag.section);
 	}
 	
 	

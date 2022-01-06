@@ -2317,9 +2317,15 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		if(getParent().getProps().getProperty("namepart") != null){
 			namepart = getParent().getProps().getProperty("namepart");
 		}
+		
 		String namepartno  = null;
 		if(getParent().getProps().getProperty("namepartno") != null){
 			namepartno = getParent().getProps().getProperty("namepartno");
+		}
+		
+		String namepartend  = null;
+		if(getParent().getProps().getProperty("namepartend") != null){
+			namepartend = getParent().getProps().getProperty("namepartend");
 		}
 		
 		
@@ -2654,6 +2660,12 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 
 												   if(namepartno != null) {
 													   if(prod.getName().toLowerCase().contains(namepartno)) {
+														   goes = false;
+													   }
+												   }
+												   
+												   if(namepartend != null) {
+													   if(prod.getName().contains(namepartend)) {
 														   goes = false;
 													   }
 												   }

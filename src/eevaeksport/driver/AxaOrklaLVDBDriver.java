@@ -29,6 +29,9 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateMidnight;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.json.JSONObject;
 
 import eevaeksport.Agent;
@@ -53,9 +56,11 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaOrklaLVDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker,RestSalesSender {
+public class AxaOrklaLVDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker,RestSalesSender,FixReporter {
   public AxaOrklaLVDBDriver(EksportPanel parent){
     super(parent);
+    
+	
     this.subjectFilesTo = parent.getString("filemsg");
     //String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
@@ -1006,8 +1011,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
 	  
 	  
 
-  	String cmd = "\r\n" + 
-  			"\r\n" + 
+  	String cmd =  
   			"SELECT cus.name,cus.accountnum,cus.invoiceaccount AS payer,   \r\n" + 
   			"  	  (SELECT sum(amountmst ) FROM bmssa.custtransopen co  with (nolock) WHERE co.duedate<(getdate()-1)  and  co.dataareaid = 'olv' and co.dataareaid=cus.dataareaid \r\n" + 
   			"  	  AND co.accountnum = (case when len(cus.invoiceaccount)=0 then cus.accountnum else  \r\n" + 
@@ -1029,7 +1033,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
   			"	   as credit ,stbcustchainid as chain , TraCatalogueCode as fixed , transportthreshold as minam \r\n" + 
   			"  	  , case when cus.invoiceaccount != '' then (select max (PaymMode) from bmssa.custtable cc where cc.invoiceaccount=cus.invoiceaccount  and cc.dataareaid = 'olv')\r\n" + 
   			"	   else cus.PaymMode end as ette\r\n" + 
-  			"  	  , cb2.LVDISCNOTALLOW as nomax ,  paymtermidstk as sdkterm ,cus.recid as refe FROM bmssa.custtable cus \r\n" + 
+  			"  	  , cb2.LVDISCNOTALLOW as nomax ,  paymtermidstk as sdkterm ,cus.recid as refe, cus.supplyrouteid as refe2, cus.traregionid as refe3 FROM bmssa.custtable cus \r\n" + 
   			"	  left outer JOIN bmssa.paymterm \r\n" + 
   			"  	  pay on cus.paymtermid=pay.paymtermid and pay.dataareaid='olv'  and pay.dataareaid = cus.dataareaid\r\n" + 
   			"	  left outer JOIN bmssa.stbcustgrouptable  cb on cb.custgroupid=cus.stbcustgroupid and cb.dataareaid=cus.dataareaid \r\n" + 
@@ -1073,14 +1077,32 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
  " and a.invoice != '' AND co.duedate < getdate()+5 ORDER BY a.accountnum,co.transdate  ";
  
  
- String deliv = "	SELECT  refrecid AS klient, TRALOGISTICSPARTNERID as par, case when MONDAY = 1 then '.1' else '' end +"
- 		+ " case when TUESDAY = 1 then '.2' else '' end + "
- 		+ "case when WEDNESDAY = 1 then '.3' else '' end + "
- 		+ "case when THURSDAY = 1 then '.4' else '' end + "
- 		+ "case when FRIDAY = 1 then '.5' else '' end +"
- 		+ "case when SATURDAY = 1 then '.6' else '' end + case when SUNDAY = 1 then '.7' else '' end +"
- 		+ " case when TraServiceType = 1 then '-24H'  when TraServiceType = 2 then '-48H' end as dely "
- 		+ "FROM bmssa.TraDeliveryTime co where  co.dataareaid='olv' and TRALOGISTICSPARTNERID like 'BLS%' ";
+ String deliv = "	SELECT   CAST(refrecid AS varchar(12)) AS klient, TRALOGISTICSPARTNERID+'' as par, case when MONDAY = 1 then '.1' else '' end +\r\n" + 
+ 		" 		 case when TUESDAY = 1 then '.2' else '' end + \r\n" + 
+ 		" 	case when WEDNESDAY = 1 then '.3' else '' end + \r\n" + 
+ 		" 		case when THURSDAY = 1 then '.4' else '' end + \r\n" + 
+ 		" 		case when FRIDAY = 1 then '.5' else '' end +\r\n" + 
+ 		" 		case when SATURDAY = 1 then '.6' else '' end + case when SUNDAY = 1 then '.7' else '' end +\r\n" + 
+ 		" 		 case when TraServiceType = 1 then '-24H'  when TraServiceType = 2 then '-48H' end as dely \r\n" + 
+ 		" 		FROM bmssa.TraDeliveryTime co where  co.dataareaid='olv' and TRALOGISTICSPARTNERID like 'BLS%' 	\r\n" + 
+ 		"		union\r\n" + 
+ 		"	 SELECT  CAST(supplyrouteid AS varchar(12)) AS klient, 'STK' as par, case when MONDAY = 1 then '.1' else '' end +\r\n" + 
+ 		" 		 case when TUESDAY = 1 then '.2' else '' end + \r\n" + 
+ 		" 	case when WEDNESDAY = 1 then '.3' else '' end + \r\n" + 
+ 		" 		case when THURSDAY = 1 then '.4' else '' end + \r\n" + 
+ 		" 		case when FRIDAY = 1 then '.5' else '' end +\r\n" + 
+ 		" 		case when SATURDAY = 1 then '.6' else '' end + case when SUNDAY = 1 then '.7' else '' end  as dely \r\n" + 
+ 		" 		FROM bmssa.supplyroutetable co where  co.dataareaid='olv' \r\n" + 
+ 		"	union	\r\n" + 
+ 		"		SELECT  CAST(reg.regionid AS varchar(12)) AS klient, 'CS' as par, case when MONDAY = 1 then '.1' else '' end +\r\n" + 
+ 		" 		 case when TUESDAY = 1 then '.2' else '' end + \r\n" + 
+ 		" 	case when WEDNESDAY = 1 then '.3' else '' end + \r\n" + 
+ 		" 		case when THURSDAY = 1 then '.4' else '' end + \r\n" + 
+ 		" 		case when FRIDAY = 1 then '.5' else '' end +\r\n" + 
+ 		" 		case when SATURDAY = 1 then '.6' else '' end + case when SUNDAY = 1 then '.7' else '' end +\r\n" + 
+ 		" 		 case when TraServiceType = 1 then '-24H'  when TraServiceType = 2 then '-48H' end as dely \r\n" + 
+ 		" 		FROM bmssa.TraDeliveryTime co INNER JOIN bmssa.TraRegionTable reg on reg.recid = co.refrecid  where  co.dataareaid='olv' and reg.dataareaid='olv' \r\n" + 
+ 		"		and TRALOGISTICSPARTNERID not like 'BLS%'";
  
  
     TreeMap deliveries = new TreeMap();
@@ -1548,6 +1570,26 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
 		if (refe != null && refe.trim().length() > 0 ) {
 			if(deliveries.get(refe.trim())!= null) {
 			   cust.addCity("Dienas : " + deliveries.get(refe.trim()));
+			}
+		}
+		
+		String refe2 = rs.getString("refe2");
+		if (refe2 != null && refe2.trim().length() > 0 ) {
+			if(deliveries.get(refe2.trim())!= null) {
+				if(cust.getCity().contains("Dienas")) {
+					 cust.addCity( deliveries.get(refe2.trim())+"");
+				} else {
+					 cust.addCity("Dienas : " + deliveries.get(refe2.trim()));
+				}
+			  
+			}
+		}
+		String refe3 = rs.getString("refe3");
+		if (refe3 != null && refe3.trim().length() > 0 ) {
+			if(cust.getCity().contains("Dienas")) {
+				 cust.addCity(""+deliveries.get(refe3.trim()));
+			} else {
+				 cust.addCity("Dienas : " + deliveries.get(refe3.trim()));
 			}
 		}
 		
@@ -4511,6 +4553,31 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 	public Vector getFixedAssortmentData() {
 		
 		return fixed;
+	}
+	@Override
+	public void FixReporter() {
+		
+	//	On vaja tekitada 3 faili 
+	//	1. Dayreports käimistega 
+	//	2. Tasks 
+	//	3. Vastustega
+		
+		  
+		  final DateTime input = new DateTime();
+		  //System.out.println(input);
+		  final DateMidnight startOfLastWeek = 
+		             new DateMidnight(input.minusDays(14));
+		  //System.out.println(startOfLastWeek);
+		  final DateMidnight endOfLastWeek = startOfLastWeek.plusDays(15);
+		
+		String filenameSV =   Converter.getSVData(startOfLastWeek.getMillis(), endOfLastWeek.getMillis(), rcompanyx, user, pass,true,"SELYNLIST",null,"answers");
+		 System.out.println("filenameSV "+  filenameSV);
+		 
+			String filenameTask =   Converter.getTaskData(startOfLastWeek.getMillis(), endOfLastWeek.getMillis(), rcompanyx, user, pass,"Tasks");
+			 System.out.println("filenameTask "+  filenameTask);
+		 
+		 
+		 System.exit(0);
 	}
 	    
 

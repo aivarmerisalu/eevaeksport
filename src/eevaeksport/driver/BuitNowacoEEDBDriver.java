@@ -2338,7 +2338,7 @@ try{
    private HashMap sortimendid = null;
    private Vector klient = new Vector();
    private TreeMap agents = new TreeMap();
-   private String url = "jdbc:odbc:mynowest";
+   private String url = "jdbc:odbc:my_nowest";
    private Connection con;
    private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
    private TreeMap debtDays = new TreeMap();

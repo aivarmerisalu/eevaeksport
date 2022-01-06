@@ -612,13 +612,14 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
        " FROM \"ShipTos\" sh LEFT JOIN \"Customers\" cus on cus.\"Code\"=sh.\"CustomerCode\" " ;
  
  
- String sql = "  select rtrim(a.[Sell-to Customer No_])+ '-' +[Ship-To Address Code] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number, a.[Due Date] AS maksepaev, sum(a.[Remaining Amt_ (LCY)]) AS summa, " + 
-                           "     a.[Posting Date] as kuupaev , DATEDIFF(dd,a.[Due Date],GETDATE()) AS yle ,a.[Customer No_] AS payer FROM [Cust__Ledger_Entry] a  " +
-                            "      where  " +
-           "  (a.[Document Type] =2 or a.[Document Type]= 3)  AND a.[Posting Date] > getdate()-200 AND a.[Open]= 1 " +
-                                "   group by rtrim(a.[Sell-to Customer No_])+ '-' +[Ship-To Address Code],a.[Customer No_] ,a.[External Document No_],  " +
-                                "  a.[Due Date] ,a.[Posting Date], DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(a.[Remaining Amt_ (LCY)])<> 0 order by  a.[Due Date]" ;
-
+ String sql = " select rtrim(a.\"Sell-to Customer No_\") || '-' || \"Ship-To Address Code\" AS klient, a.\"Customer No_\" AS maksja,a.\"External Document No_\" AS number, " +
+		  " a.\"Due Date\" AS maksepaev, sum(a.\"Remaining Amt_ (LCY)\") AS summa,  " +
+		  " a.\"Posting Date\" as kuupaev ,  current_date - a.\"Due Date\" AS yle ,a.\"Customer No_\" AS payer FROM \"Cust__Ledger_Entry\" a  " +
+		   "   where  (a.\"Document Type\" =2 or a.\"Document Type\"= 3)  AND a.\"Posting Date\" > current_date-200 AND a.\"Open\"= 1 " +
+		    "          group by rtrim(a.\"Sell-to Customer No_\")|| '-' ||\"Ship-To Address Code\",a.\"Customer No_\" ,a.\"External Document No_\",  " +
+		     "       a.\"Due Date\" ,a.\"Posting Date\"  ,a.\"Customer No_\" having sum(a.\"Remaining Amt_ (LCY)\")<> 0 order by  a.\"Due Date\" ";
+		 
+		 
   if (isDebug()) System.out.println(cmd);
     TreeMap customers = new TreeMap();
     TreeMap custMap = new TreeMap();
@@ -626,7 +627,7 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
     try {
     	
     	 Converter.getManagersReplacements(agent1, rcompany, user , pass);
-    	Connection cc = this.getNewConnection3(url3);
+    	Connection cc = this.getNewConnection();
     	Statement stmt = cc.createStatement();
       ResultSet rs = stmt.executeQuery(sql);
     
@@ -824,9 +825,7 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
       public String getDistribution() {
         return null;
       }
-      private Connection getNewConnection3(String url) throws SQLException{
-  	    return DriverManager.getConnection(url3,"droid", "droid");
-  	  }
+   
 
   public TreeMap getProdGroups() throws SQLException {
 
@@ -986,16 +985,14 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
 	    Vector custProds = new Vector();
 	    //if (true) return custProds ;
 
-	 String cmd =  "SELECT   rtrim(d.[Sell-to Customer No_])+'-'+d.[Ship-to Code] AS klient,r.[No_] AS toode,r.[Quantity] AS kogus, r.[Vat Base Amount] as price ,d.[Posting Date] AS kuup,r.[No_] as dok " +
-	  " FROM [Sales_Shipment_Line] r " +
-	  "INNER JOIN [Sales_Shipment_Header] d ON r.[Document No_]= d.[No_] INNER JOIN [Item] t ON t.[No_]=r.[No_]  WHERE " +
-	 " d.[Posting Date]> GETDATE()-120 ORDER BY  d.[Sell-to Customer No_],d.[Ship-to Code], t.[Search_Description],r.[No_],d.[Posting Date]";
-	    if (isDebug()) System.out.println(cmd);
-
+	  String cmd =  " SELECT   rtrim(d.\"Sell-to Customer No_\")||'-'||d.\"Ship-to Code\" AS klient,r.\"No_\" AS toode,r.\"Quantity\" AS kogus, r.\"VAT Base Amount\" as price ,d.\"Posting Date\" AS kuup,r.\"No_\" as dok  "+
+			"   FROM \"Sales_Shipment_Line\" r "+
+			"  INNER JOIN \"Sales_Shipment_Header\" d ON r.\"Document No_\"= d.\"No_\" INNER JOIN \"Items\" t ON t.\"Code\"=r.\"No_\"  WHERE " +
+			"  d.\"Posting Date\"> current_date-120 ORDER BY  d.\"Sell-to Customer No_\",d.\"Ship-to Code\", t.\"ExternalCode\",r.\"No_\",d.\"Posting Date\" ";
 	    try {
-
-	    	Statement stmt =  this.getNewConnection3(url3).createStatement();
-	      ResultSet rs = stmt.executeQuery(cmd);
+            Connection con = this.getNewConnection();
+	    	Statement stmt =  con.createStatement();
+	        ResultSet rs = stmt.executeQuery(cmd);
 	   
 	      while(rs.next()){
 	        String kliendikood = rs.getString("klient").trim();
@@ -1015,6 +1012,10 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
 	        //cp.setRedline(rs.getString("date"));
 	        custProds.add(cp);
 	      }
+	      rs.close();
+	      stmt.close();
+	      con.close();
+	      
 	    } catch (Exception e){
 	      getParent().showError(e);
 	    }
@@ -1036,10 +1037,12 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
 	  	 try {
 	  	 	
 	  	 	
-	  	   String cmd = "select [Salesperson Code] as agent ,sum([Sales (LCY)]) as summa from [Cust__Ledger_Entry]  " +
-	        " where Month(getdate())=Month([Posting Date]) and  " +
-	              " Year(getdate())=Year([Posting Date])  group by [Salesperson Code]";
-	  	  Connection con = getNewConnection3(url3);
+	  	   String cmd = "select \"Salesperson Code\" as agent ,sum(\"Sales (LCY)\") as summa from \"Cust__Ledger_Entry\" " +  
+	  	        " where date_part('month',current_date)=date_part('month',\"Posting Date\") and  " +
+	             "  date_part('year',current_date) = date_part('year',\"Posting Date\")  group by \"Salesperson Code\" ";
+	  	        
+	         
+	  	  Connection con = getNewConnection();
 		        Statement stmt = con.createStatement();
 		        ResultSet rs = stmt.executeQuery(cmd);
 		        while(rs.next()){
@@ -1178,7 +1181,7 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
     }
   private String url = "jdbc:odbc:droid_db_food";
   private String url2 = "jdbc:odbc:report";
-  private String url3 = "jdbc:odbc:droid";
+ 
   private Connection con;
   private   Vector debt = new Vector();
   private Statement stmt;

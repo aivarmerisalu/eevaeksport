@@ -399,7 +399,7 @@ private String ankeediTyyp = " ";
     private double maxdisc = -1;
     private String sortCode = " ";
     private String chain = " ";
-    
+    public String section = null;
     public String restPhone = null;
     public String restStreet = null;
     public String restCity = null;

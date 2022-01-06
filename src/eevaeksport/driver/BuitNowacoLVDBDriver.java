@@ -2459,7 +2459,7 @@ System.out.println("CP suurus2 " + vec.size());
    private HashMap sortimendid = null;
    private Vector klient = new Vector();
    private TreeMap agents = new TreeMap();
-   private String url = "jdbc:odbc:mynowlv";
+   private String url = "jdbc:odbc:my_nowlv";
    private Connection con;
    private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
    private TreeMap debtDays = new TreeMap();

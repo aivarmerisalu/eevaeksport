@@ -671,7 +671,7 @@ private String getCustNimi(String cust){
 
 
   
-  private String url = "jdbc:odbc:mynowest";
+  private String url = "jdbc:odbc:my_nowest";
   private Connection con;
   private int counter = 0;
   private ImportPanel parent;

@@ -144,6 +144,24 @@ public JSONArray getSVdata(Date from , Date to , String type , String subTypes) 
 		return json;
 		
 	}
+
+
+public JSONArray getTaskdata(Date from , Date to ) throws Exception{
+	
+	String web = "http://merisoft.eu:8080/rest/task/list?from=" + from.getTime() + "&to=" + to.getTime() ;
+
+
+	HttpClient cli = getClient();
+	HttpGet aa = new HttpGet(web);
+	//aa.setHeader (HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
+	HttpResponse resp = cli.execute(aa);
+	String aaa = EntityUtils.toString(resp.getEntity());
+//	System.out.println("ahaaa SV data " + aaa);
+	JSONArray json = new JSONArray(aaa);
+	return json;
+	
+}
+
 	
 
 public JSONArray getCustomersChains() throws Exception{

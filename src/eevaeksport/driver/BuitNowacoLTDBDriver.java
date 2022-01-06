@@ -1857,14 +1857,17 @@ try{
 
   	String agextra = getParent().getProps().getProperty("all.customers");
 
-   String sql =  "   SELECT k.klientas  AS nimi,k.klient_id AS kood,k.kodas AS payer,k.prek_adres AS aadress ,a.tab_nr AS agent ,k.dienos as paymterm,  " +
-	" filialas AS blokk, 0 AS yle,'' AS visit,kainos_nr AS type," +
-	"  atstovas as kontakt , k.kl_grupe as kett , max_skola as credit, kainos_nr as hinnak ,telefonai as phone , nuolaida as maxdisc , ma.dienos as mars "
-	+ ",k.kl_grupe as rcatrgory , k.miestas AS rcity , k.indeksas AS rindex , k.sritis AS rmaakond , k.salis as rcountry,k.atstovas as rkontakt "+ 
-	" ,k.telefonai as rperphone, k.e_mail as remail " +
-	"  FROM klientai k  INNER JOIN " +
-	"  (select klientas, tab_nr from (select * from manager order by klientas,data desc)as man  group by klientas order by klientas,data ) " +
-	"   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where  (gavejas = 1 and e_klientas = 1) or filialas =1 " ;
+   String sql =  "    SELECT k.klientas  AS nimi,k.klient_id AS kood,k.kodas AS payer,k.prek_adres AS aadress ,a.tab_nr AS agent ,k.dienos as paymterm,  \r\n" + 
+   		"	 filialas AS blokk, 0 AS yle,'' AS visit,kainos_nr AS type,\r\n" + 
+   		"  atstovas as kontakt , k.kl_grupe as kett , max_skola as credit, kainos_nr as hinnak ,telefonai as phone , nuolaida as maxdisc , ma.dienos as mars \r\n" + 
+   		"	,k.kl_grupe as rcatrgory , k.miestas AS rcity , k.indeksas AS rindex , k.sritis AS rmaakond , k.salis as rcountry,k.atstovas as rkontakt \r\n" + 
+   		"	 ,k.telefonai as rperphone, k.e_mail as remail \r\n" + 
+   		"	  FROM klientai k  INNER JOIN \r\n" + 
+   		"	 ( select klientas, tab_nr from(\r\n" + 
+   		"	   select klientas, tab_nr from (select * from manager order by klientas,data desc,tab_nr )as man \r\n" + 
+   		"	  group by klientas,data order by klientas,data desc) as mm group by klientas ) \r\n" + 
+   		"	   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where  (gavejas = 1 and e_klientas = 1) or filialas =1\r\n" + 
+   		"	   order by k.klientas " ;
 
  //  System.out.println(sql);
    try {
@@ -2941,7 +2944,7 @@ try{
    private HashMap sortimendid = null;
    private Vector klient = new Vector();
    private TreeMap agents = new TreeMap();
-   private String url = "jdbc:odbc:mynowaco";
+   private String url = "jdbc:odbc:my_nowaco";
    private Connection con;
    private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
    private TreeMap debtDays = new TreeMap();

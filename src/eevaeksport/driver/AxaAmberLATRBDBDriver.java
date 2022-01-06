@@ -2557,7 +2557,7 @@ stmt.close();
   String cmd =" select eagentaccountid as agent , itemsubgroup as grupp , salesamount as planx,"
   		+ " focussubgroup ,itemgroupid "
 			  + " from ASTSalesAgentForecast where year(transdate)=year(getdate())"
-			   + " and  month(transdate) = month(getdate()) and dataareaid = 'spil' and modelid = 'B_2020' ";
+			   + " and  month(transdate) = month(getdate()) and dataareaid = 'spil' and modelid = 'B_2022' ";
 
 			       if (isDebug()) System.out.println(cmd);
 			          try {

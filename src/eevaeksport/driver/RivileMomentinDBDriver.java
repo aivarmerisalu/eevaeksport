@@ -1021,6 +1021,74 @@ HashSet olemas = new HashSet();
     }
     
     
+    private void getPricesFromExcelOld(TreeMap tooted) {
+    	try {
+    		
+    	
+    	 File f = new File ( "excel/pricelist2021.xlsx");
+  	   FileInputStream	 ff = new FileInputStream(f);
+  	 int a = 0;
+  		XSSFWorkbook workbook = new XSSFWorkbook((ff));
+  		XSSFSheet sheet = workbook.getSheetAt(0);
+   		XSSFRow row = null; 
+  				ff.close();	
+  				if(sheet != null){
+  					for(int i = 0 ; i < sheet.getLastRowNum();i++){
+ 						 row = sheet.getRow(i);
+ 						if(row == null && a == 0){
+ 							a = i;
+ 						}else{
+ 							a = sheet.getLastRowNum();
+ 						}
+ 					}
+ 				// siin siis hinna lugemine 
+  					
+  					for(int i = 6 ; i < a + 1 ; i++){
+  						 row = sheet.getRow(i);
+ 						String prod = null;
+ 						try {
+							prod = (row.getCell((short) 1).getStringCellValue()).trim();
+ 					      } catch (Exception e) {
+ 					    	 try {
+ 					    		  prod =(( (int)(row.getCell((short) 1).getNumericCellValue()))+"").trim();
+ 		 						  
+ 					    	 }catch(Exception r) {
+ 					    		 
+ 					    	 }
+ 					     // e.printStackTrace();
+ 					      }
+ 						
+ 						
+ 						double hi = 0 ;
+ 						try {
+ 							hi = row.getCell(12).getNumericCellValue();	
+ 						}catch (Exception e) {
+ 							try {
+ 								hi = Double.parseDouble(row.getCell(12).getStringCellValue());	
+ 			 				}catch(Exception k) {
+ 								
+ 							}
+ 						}
+ 						
+ 						if(prod != null && hi > 0 ) {
+ 							tooted.put(prod, hi);
+ 						}
+ 						
+  					}
+					
+					
+  					
+  					
+  					
+  				}
+  				
+  					
+  					
+           }catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	//System.out.println("tooted suurus " + tooted.size() + " " + tooted.toString());
+    }
     
     private void getPricesFromExcel(TreeMap tooted) {
     	try {
@@ -1275,6 +1343,9 @@ HashSet olemas = new HashSet();
     public Vector getCustomerProductsList(String agentCode) {
         connectionUp(url2);
         
+        TreeMap oldPr = new TreeMap();
+        		getPricesFromExcelOld(oldPr);
+        		
         String cmd =" SELECT ltrim(I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) as kood," +
         		"I07_KODAS AS toode,I07_KIEKIS AS kogus, " +
 				"I06_DOK_DATA AS kuupaev  ,max(I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end ) as lastprice FROM i07_pard p" +
@@ -1305,21 +1376,32 @@ HashSet olemas = new HashSet();
              
              String tootekood = rs.getString("toode").trim();
              double kogus = Double.parseDouble(rs.getString("kogus").trim());
-             String kuup = rs.getString("kuupaev").substring(5,10).trim();
+             String kuup = rs.getString("kuupaev");
+            
              Customer cust = (Customer) kliendid.get(kliendikood);
              double lastprice = rs.getDouble("lastprice");
+             
+             double lastale = 0;
+             if(kuup.contains("2021") && oldPr.get(tootekood) != null) {
+            	 lastale = 100 -( lastprice/Double.parseDouble(oldPr.get(tootekood)+"") * 100 ); 
+             }
+             kuup = kuup.substring(5,10).trim();
             
              if (cust == null) {
                cust = new Customer(kliendikood);
              }
-
+             
              Product prod = new Product(tootekood);
+             CustProd cp = new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
+                     kuup, lastprice, 0,0," ");
+             if(lastale > 0) {
+            	 cp.ale = Converter.Round((float)lastale,3);
+             }
+           
              cust.addProduct(prod,
-                             new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
-                                          kuup, lastprice, 0,0," "),false);
+                             cp,false);
              kliendid.put(kliendikood, cust);
-             custProds.add(new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
-                                          kuup, lastprice, 0,0," "));
+             custProds.add(cp);
            }
            rs.close();
            stmt.close();

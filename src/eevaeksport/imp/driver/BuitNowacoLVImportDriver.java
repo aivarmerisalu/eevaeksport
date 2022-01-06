@@ -586,7 +586,7 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 		isAmount = aAmount;
 	}
 
-	private String url = "jdbc:odbc:mynowlv";
+	private String url = "jdbc:odbc:my_nowlv";
 	private Connection con;
 	private int counter = 0;
 	private ImportPanel parent;

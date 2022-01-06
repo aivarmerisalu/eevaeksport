@@ -494,27 +494,41 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 " FROM  BBSStationTable dim " +
 " where   dataareaid = 'zp'"; // OK
 	 
-	       String todays = "select destinationid as cust  from TRRouteWaypoint r " + 
-	       		"		 inner join TRWayBill d on d.routeid = r.routeid  and d.transdate > getdate()-2  group by destinationid"; 
+	       String todays = "select destinationid as cust , planningcapacity as pla from TRRouteWaypoint r " + 
+	       		"	       		 inner join TRWayBill d on d.routeid = r.routeid  and d.transdate > getdate()-2  group by destinationid,planningcapacity"; 
 	           
 	  if (isDebug()) System.out.println(cmd);
 	    TreeMap customers = new TreeMap();
 	  
 	    HashSet today = new HashSet();
+	    HashMap paak = new HashMap();
 	    StringBuffer sb1 = new StringBuffer();
 	    try {
 	    	
 	  Connection ddd = getNewConnection();
 	       
 	       Statement stmt = ddd.createStatement();
-	       
-	       ResultSet    rs = stmt.executeQuery(todays);
+	       ResultSet rs = stmt.executeQuery(todays);
 		    
 		      while(rs.next()){
-		    	  today.add(rs.getString("cust").trim());
+		    	  String aa = rs.getString("cust").trim();
+		    	  String bb = rs.getString("pla");
+		    	  if(!today.contains(aa)) {
+		    		  today.add(aa);
+		    	  }
+		    	  String cc = "";
+		    	  if(paak.get(aa) != null) {
+		    		  cc = (String)paak.get(aa);
+		    	  }
+		    	  if(bb != null) {
+		    		  paak.put(aa, (cc + bb.trim()).replaceAll(";", " ").replaceAll(":", " ").replaceAll("\\s",""));  
+		    	  }
+		    	
 		      }
-	       rs.close();
-	       
+		      
+		 //     System.out.println("ppp " + paak.toString());
+	     
+		  rs.close();
 	      rs = stmt.executeQuery(cmd);
 	    
 	      while(rs.next()){
@@ -548,6 +562,9 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 	    	   cust.setPayer(payer);
 		   }
 	       
+	       if(paak.get(cust.getID()) != null && ((String)paak.get(cust.getID())).trim().length() > 0 ) {
+	    	   cust.section = (String)paak.get(cust.getID());
+	       }
 	       
 	        String aadr = rs.getString("address");
 	        if (aadr != null) {
