@@ -2315,21 +2315,24 @@ System.out.println(cmd);
      Vector vec = new Vector();
      HashMap kliendid = new HashMap();
      try {
-    String cmd =  " select * from (	SELECT  b.klient_id AS klient,r.preke AS toode,(kiekis) AS kogus, Data AS lastdate, " +
+    String cmd =  " 	SELECT  b.klient_id AS klient,r.preke AS toode,(kiekis) AS kogus, Data AS lastdate, " +
     		" kaina as price FROM apyv_gr r " +
             " INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 180 day) > current_date()  INNER JOIN klientai b ON b.klientas=d.gavejas " + 
-	        " where DATE_ADD(data,interval 180 day) > current_date() order by klient_id ,r.preke ,data desc ) as tab group by klient,toode";
+	        " where DATE_ADD(data,interval 180 day) > current_date() order by klient_id ,r.preke ,data desc ";
     System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupï¿½ev","viimane kogus"
     Connection con = getNewConnection();
     Statement stmt = con.createStatement();
     ResultSet rs = stmt.executeQuery(cmd);
+    HashSet olemas = new HashSet();
+    
     while(rs.next()){
 
              String custID = rs.getString("klient").trim();
                String prodID = rs.getString("toode").trim();
                  String lastdate = " ";
-             
+                 String xx = custID + "_" +prodID;
+                 olemas.add(xx);
                  double  amount = rs.getDouble("kogus");
                  lastdate = rs.getString("lastdate").trim().substring(5,10);
                     Customer cust = (Customer)kliendid.get(custID);
@@ -2341,11 +2344,12 @@ System.out.println(cmd);
                
                     Product prod = new Product(prodID);
                     CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate + "_" + price + "€",price,0,0," ");
-
-                 cust.addProduct(prod,cp,false);
-                 kliendid.put(custID, cust);
-                 vec.addElement(cp);
-
+                    if(!olemas.contains(xx)) {
+                    	cust.addProduct(prod,cp,false);
+                        kliendid.put(custID, cust);
+                        vec.addElement(cp);
+                    }
+                 olemas.add(xx);
            }
          rs.close();
          con.close();

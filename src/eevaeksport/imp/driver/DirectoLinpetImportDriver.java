@@ -61,9 +61,16 @@ public class DirectoLinpetImportDriver extends AbstractImportDriver{
     kliendid = getCustomers(null);
     tooted = this.getProducts();
  //   mlines = new Vector();//getFixedAssortmentData();
-    grupid = this.getProdGroups();     
+    grupid = this.getProdGroups(); 
+    
+    logurl = "https://directo.gate.ee/xmlcore/";
+    if( parent.getProps().getProperty("logurl") != null){
+    	  logurl = parent.getProps().getProperty("logurl");
+    }
   }
 
+  String logurl = null;
+  
   
   private void sendCommentEmail(String comment1 ,String comment2,String doknr,String custid, String nimi , String chain, boolean price, Agent ag ,ImportPanel parent){
 	   	try{
@@ -1017,7 +1024,7 @@ hind =   Converter.Round((float)hind, 2);
 	 	    data += "&" + URLEncoder.encode("xmldata", "UTF-8") + "=" + URLEncoder.encode(order_xml, "UTF-8");
 	 	    // Send data
 	 	   Converter.doTrustToCertificates();
-	 	    URL url = new URL("https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp");
+	 	    URL url = new URL(logurl + company + "/xmlcore.asp");
 	 	    URLConnection conn = url.openConnection();
 	 	    conn.setDoOutput(true);
 	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());

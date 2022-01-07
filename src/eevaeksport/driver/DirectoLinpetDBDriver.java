@@ -73,13 +73,16 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
     user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.company");
-    
-    if( parent.getProps().getProperty("stock.dir") != null){
-
-    	stockConn = parent.getProps().getProperty("stock.dir");
-    	
+    logurl = "https://directo.gate.ee/xmlcore/";
+    if( parent.getProps().getProperty("logurl") != null){
+    	  logurl = parent.getProps().getProperty("logurl");
     }
-     }
+  
+    if( parent.getProps().getProperty("stock.dir") != null){
+    	stockConn = parent.getProps().getProperty("stock.dir");
+    }
+
+  }
   
 
   
@@ -87,7 +90,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
   String user =  null;
   String pass = null;
   String rcompany = null;
-
+  String logurl = null;
+  
   public TreeMap getProductsOther(){
 	    TreeMap tm = new TreeMap();
 	     if(stockConn != null){
@@ -1127,7 +1131,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 
 	     
        try{
-       	String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
+       	String httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=itemclass";
        	
        	Converter.doTrustToCertificates();
            URL myurl = new URL(httpsURL);
@@ -1163,7 +1167,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            System.out.println("Tootegrupid tehtud" );
            //algab Hinnakirja faili moodustamine
            
-           httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=priceformula";
+           httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=priceformula";
            myurl = new URL(httpsURL);
            con = (HttpsURLConnection)myurl.openConnection();
            ins = con.getInputStream();
@@ -1199,7 +1203,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            
            
           
-          httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=supplier";
+          httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=supplier";
           myurl = new URL(httpsURL);
           con = (HttpsURLConnection)myurl.openConnection();
           ins = con.getInputStream();
@@ -1227,7 +1231,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
          	  }
           }
           
-          httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=brand";
+          httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=brand";
           myurl = new URL(httpsURL);
           con = (HttpsURLConnection)myurl.openConnection();
           ins = con.getInputStream();
@@ -1265,7 +1269,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
           
            //algab tootede faili moodustamine
            
-            httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=item";
+            httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=item";
             if(getParent().getProps().getProperty("stockcode") != null){
             	httpsURL = httpsURL + "&stock=" +  getParent().getProps().getProperty("stockcode");
   		  }
@@ -1303,7 +1307,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            System.out.println("Tooted tehtud" );
            //algab kliendi faili moodustamine
            
-           httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=customer";
+           httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=customer";
            myurl = new URL(httpsURL);
            con = (HttpsURLConnection)myurl.openConnection();
            ins = con.getInputStream();
@@ -1714,7 +1718,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 
 	   Vector result = new Vector();
 	   try{
-			String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice_row&get=1&number=" + number;
+			String httpsURL = logurl  + company + "/xmlcore.asp?what=invoice_row&get=1&number=" + number;
 		       // System.out.println("httpsURL " + httpsURL);
 				URL myurl = new URL(httpsURL);
 		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
@@ -2483,7 +2487,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		   try{
 			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
 				
-			 	String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice&get=1&orderer=" + cuurl;
+			 	String httpsURL = logurl  + company + "/xmlcore.asp?what=invoice&get=1&orderer=" + cuurl;
 		     //  System.out.println(httpsURL);
 			 	Converter.doTrustToCertificates();
 			 	URL myurl = new URL(httpsURL);
@@ -2651,7 +2655,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 			   Converter.doTrustToCertificates();
 			   custid = Converter.deCode(custid);
 			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
-				String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice&get=1&orderer=" + cuurl 
+				String httpsURL = logurl  + company + "/xmlcore.asp?what=invoice&get=1&orderer=" + cuurl 
 				+ "&invoicedate1=" + start + "&invoicedate2=" + end;
 		  //     System.out.println(httpsURL);
 				URL myurl = new URL(httpsURL);
@@ -2764,7 +2768,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		
 	  try{
 
-			String httpsURL = "https://directo.gate.ee/xmlcore/sirekar_hulgi/xmlcore.asp?what=sale&get=1&code=" + agentID;
+			String httpsURL = logurl  + company + "/xmlcore.asp?what=sale&get=1&code=" + agentID;
 		       // System.out.println("httpsURL " + httpsURL);
 				URL myurl = new URL(httpsURL);
 				Converter.doTrustToCertificates();
@@ -2811,7 +2815,7 @@ public String getSaveStockInfo() {
       
  try{
 	 Converter.doTrustToCertificates();
-   String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=item";
+   String httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=item";
     if(getParent().getProps().getProperty("stockcode") != null){
     	httpsURL = httpsURL + "&stock=" +  getParent().getProps().getProperty("stockcode");
 	  }

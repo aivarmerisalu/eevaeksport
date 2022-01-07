@@ -63,14 +63,18 @@ public class DirectoImportDriver extends AbstractImportDriver{
     mlines = getFixedAssortmentData();
     grupid = this.getProdGroups();
    
-     
+    logurl = "https://directo.gate.ee/xmlcore/";
+    if( parent.getProps().getProperty("logurl") != null){
+    	  logurl = parent.getProps().getProperty("logurl");
+    }
+
     try {
       Class.forName(databaseDriverName).newInstance();
     } catch (Exception e){
        parent.showError(e);
     }
   }
-
+  String logurl = null;
   
   public TreeMap getProducts(){
 
@@ -701,7 +705,7 @@ public class DirectoImportDriver extends AbstractImportDriver{
 	 	    data += "&" + URLEncoder.encode("xmldata", "UTF-8") + "=" + URLEncoder.encode(order_xml, "UTF-8");
 	 	    // Send data
 	 	   Converter.doTrustToCertificates();
-	 	    URL url = new URL("https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp");
+	 	    URL url = new URL( logurl + company + "/xmlcore.asp");
 	 	    URLConnection conn = url.openConnection();
 	 	    conn.setDoOutput(true);
 	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
