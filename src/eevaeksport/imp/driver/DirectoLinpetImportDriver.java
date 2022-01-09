@@ -1025,6 +1025,7 @@ hind =   Converter.Round((float)hind, 2);
 	 	    // Send data
 	 	   Converter.doTrustToCertificates();
 	 	    URL url = new URL(logurl + company + "/xmlcore.asp");
+	 	    System.out.println(logurl + company + "/xmlcore.asp");
 	 	    URLConnection conn = url.openConnection();
 	 	    conn.setDoOutput(true);
 	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());

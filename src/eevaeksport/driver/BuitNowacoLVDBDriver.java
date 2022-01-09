@@ -1630,7 +1630,9 @@ System.out.println(cmd);
  	" filialas AS blokk, 0 AS yle,'' AS visit,sistema AS type," +
  	"  atstovas as kontakt , k.kl_grupe as kett , max_skola as credit, kainos_nr as hinnak ,telefonai as phone , e_mail as email , nuolaida as maxdisc , ma.dienos as mars " +
  	"  FROM klientai k  INNER JOIN " +
- 	"  (select klientas, tab_nr from (select * from manager order by klientas,data desc)as man  group by klientas order by klientas,data ) " +
+	"	 ( select klientas, tab_nr from(\r\n" + 
+		"	   select klientas, tab_nr from (select * from manager order by klientas,data desc,tab_nr )as man \r\n" + 
+		"	  group by klientas,data order by klientas,data desc) as mm group by klientas ) \r\n" + 
  	"   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where  (gavejas = 1 ) or filialas =1 " ;
 
    System.out.println(sql);
@@ -2332,7 +2334,7 @@ System.out.println(cmd);
                String prodID = rs.getString("toode").trim();
                  String lastdate = " ";
                  String xx = custID + "_" +prodID;
-                 olemas.add(xx);
+               
                  double  amount = rs.getDouble("kogus");
                  lastdate = rs.getString("lastdate").trim().substring(5,10);
                     Customer cust = (Customer)kliendid.get(custID);
