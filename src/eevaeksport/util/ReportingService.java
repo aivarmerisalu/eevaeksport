@@ -148,9 +148,7 @@ public JSONArray getSVdata(Date from , Date to , String type , String subTypes) 
 
 public JSONArray getTaskdata(Date from , Date to ) throws Exception{
 	
-	String web = "http://merisoft.eu:8080/rest/task/list?from=" + from.getTime() + "&to=" + to.getTime() ;
-
-
+	String web = "http://merisoft.eu:8080/rest/task/list?allManagers=true&from=" + from.getTime() + "&to=" + to.getTime() ;
 	HttpClient cli = getClient();
 	HttpGet aa = new HttpGet(web);
 	//aa.setHeader (HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
