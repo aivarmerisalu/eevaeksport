@@ -2086,6 +2086,7 @@ System.out.println(cmd);
          
      } catch (Exception e) {
        e.printStackTrace();
+       System.exit(0);
    }
      
      Hashtable dateOut = new Hashtable();
@@ -2255,6 +2256,7 @@ System.out.println(cmd);
         con.close();
      } catch (Exception e){
        e.printStackTrace();
+       System.exit(0);
      }
      return tm;
    }

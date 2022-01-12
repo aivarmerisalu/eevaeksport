@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -294,6 +295,104 @@ JSONObject ord = new JSONObject();
 		   header.put( "InventLocation", order.getWarehouse());
 	   }
 	 
+	   String shipmode = order.getShipMode();
+	   
+	   if(shipmode != null && shipmode.trim().length()>0){
+		      String ID = "";
+		      String CARR = "";
+		      String NAME = "";
+		      String COMPANY = "";
+			  String PHONE = "";
+			  String EMAIL = "";
+			  String STREET = "";
+			  String CITY = "";
+			  String INDEX = "";
+			  String TYPE = "";
+			  String PRIV = "";
+			  
+			  
+			  StringTokenizer st = new StringTokenizer(shipmode,"|");
+			  while(st.hasMoreElements()) {
+				  
+				//  ky:EE90105|re:10092256|na:Aivar Merisalu|co: Akadeemia Konsum Etk9_1|te:+37256248034|em:Aivar@mobilejava.ee|tn:|ci:|in:|ty:box|pp:false
+				   ID = st.nextToken().substring(3);
+				   CARR = st.nextToken().substring(3);
+			       NAME = st.nextToken().substring(3);
+			       COMPANY = st.nextToken().substring(3);
+				   PHONE = st.nextToken().substring(3);
+				   EMAIL = st.nextToken().substring(3);
+				   STREET = st.nextToken().substring(3);
+				   CITY = st.nextToken().substring(3);
+				   INDEX = st.nextToken().substring(3);
+				   TYPE = st.nextToken().substring(3);
+				   PRIV = st.nextToken().substring(3).toUpperCase();
+				   
+				   /*<DeliveryCompanyName>OC Demo</DeliveryCompanyName>         <!--mandatory-->
+		<DeliveryPersonName>Elmo Tamm</DeliveryPersonName>         <!--mandatory-->
+		<DeliveryContactEmail>demo@demo.ee</DeliveryContactEmail>  <!--optional-->
+		<DeliveryContactPhone>+37256565656</DeliveryContactPhone>  <!--mandatory. Notification will be sent to this number. Must contain country code and no empty spaces -->
+		<DeliveryServiceType>ParcelLocker</DeliveryServiceType>    <!--mandatory Courier or ParcelLocker -->
+		<DeliveryServiceCarrier>1034324</DeliveryServiceCarrier>   <!--mandatory DPD or other partner registernumber. Can be taken from Via3L parcelmachinelist API-->
+		<TerminalId>EE90186</TerminalId>                           <!--mandatory Parcel Locker code. Can be taken from Via3L parcelmachinelist API -->*/
+				   if( COMPANY.trim().length() > 0) {
+					   header.put( "DeliveryCompanyName", COMPANY);
+				   }
+				   if( NAME.trim().length() > 0) {
+					   header.put( "DeliveryPersonName", NAME);
+				   }
+				   if( EMAIL.trim().length() > 0) {
+					   header.put( "DeliveryContactEmail", EMAIL);
+				   }
+				   if( PHONE.trim().length() > 0) {
+					   header.put( "DeliveryContactPhone", PHONE);
+				   }
+				   if( TYPE.trim().length() > 0) {
+					   if(TYPE.equals("box")) {
+						   header.put( "DeliveryServiceType", "ParcelLocker");
+					   } else {
+						   header.put( "DeliveryServiceType", "Courier"); 
+						   header.put( "Country", "EE"); 
+						 
+					   }
+				   }
+				   if( CARR.trim().length() > 0) {
+					   header.put( "DeliveryServiceCarrier", CARR);
+				   }
+				   if( !ID.equals("kul1") && ID.trim().length() > 0) {
+					   header.put( "TerminalId", ID);
+				   }
+				   if( PRIV.trim().length() > 0) {
+					   header.put( "DeliveryIsToPrivatePerson", PRIV);
+				   }
+				   
+				   /*<DeliveryAddressDetail>
+			<Country>EE</Country> <!--mandatory-->
+			<Postalcode>45451</Postalcode> <!--mandatory-->
+			<City>Tallinn</City> <!--mandatory-->
+			<AddressRow1>TC$he 7-1</AddressRow1> <!--* 2 possibilities: This field must be filled or Street,StreetNumber,PostBox fields must be filled-->
+			<Street>TC$he</Street> <!--*-->
+			<StreetNumber>7</StreetNumber><!--*-->
+			<PostBox>1</PostBox><!--*-->
+		</DeliveryAddressDetail>*/
+				   if( STREET.trim().length() > 0) {
+					   JSONObject aadress = new JSONObject();
+					   aadress.put("AddressRow1", STREET);
+					   if( INDEX.trim().length() > 0) {
+						   aadress.put("Postalcode", INDEX);
+					   }
+					   if( CITY.trim().length() > 0) {
+						   aadress.put("City", CITY);
+					   }
+					  
+					   header.put( "DeliveryAddressDetail", aadress);
+				   }
+				   
+				   
+			  }
+			  
+			  
+		   
+	   }
 	   
 	   String com = (order.getInfo());
 	   
