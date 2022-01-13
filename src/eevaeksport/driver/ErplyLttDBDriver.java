@@ -49,9 +49,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.simple.JSONArray;
@@ -2525,6 +2527,8 @@ if(sb.length() >10){
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
     // this.getFixedAssortmentData();
+     
+     
      agent1 = new TreeMap();
     // sendAsi();
      agents = new TreeMap();
@@ -2625,6 +2629,7 @@ if(sb.length() >10){
 		 sm.setName("OFFICE");
      tm.put("HOUSE", sm); 
     // getAfterOrders();
+    // setBulkSales(tm);
      return tm;
    }
 
@@ -5138,7 +5143,7 @@ private TreeMap afterOrders = null;
 		          						   oamount = tt.getKogus();
 		          						 afterOlemas.add(klient+toode+oamount);
 		          						 
-		          						   System.out.println("oamount olemas "  + klient + " " + toode + " " + oamount );
+		          						//   System.out.println("oamount olemas "  + klient + " " + toode + " " + oamount );
 		          					   }
 		          				   }
 		          			   }
@@ -5245,14 +5250,91 @@ private TreeMap afterOrders = null;
    *
    * @param agents Map
    */
+     double totalPlanSum = 0;
+     
+     private TreeMap makePlans(String fname){
+   	   TreeMap res = new TreeMap();
+   	      totalPlanSum = 0;
+   	   try{
+   		
+   	   Calendar cal = Calendar.getInstance();
+   	   int a = 0;
+   	   File f = new File (getExcelDir() + fname);
+   		  FileInputStream	 ff = new FileInputStream(f);
+   		DataFormatter formatter = new DataFormatter();
+		
+   		XSSFWorkbook workbook = new XSSFWorkbook((ff));
+   		XSSFSheet sheet = workbook.getSheetAt(0);
+   		XSSFRow row = null; 
+   				ff.close();	
+   				if(sheet != null){
+   					for(int i = 0 ; i < sheet.getLastRowNum();i++){
+   						 row = sheet.getRow(i);
+   						if(row == null && a == 0){
+   							a = i;
+   						}else{
+   							a = sheet.getLastRowNum();
+   						}
+   					}
+   					String gr1 = null;
+   					
+   					for(int i = 1 ; i < a + 1;i++){ // 9ndast reas hakkame scrollima nii kilosid kui ka summat
+   						 row = sheet.getRow(i);
+   						String agent = null;
+   						double g1 = 0;
+   						
+   						
+   						try {
+   							agent = formatter.formatCellValue(row.getCell((short) 1));
+   						
+   						} catch (Exception e) {
+      					    	//  System.out.println("agent ei  " + agent);
+      						 //  e.printStackTrace();
+      					      }
+   			    
+   						try {
+   						g1 = Double.parseDouble(row.getCell((short) (2 + cal.get(Calendar.MONTH))).getNumericCellValue()+ "");
+   					//  System.out.println("agent jah  " + g1);
+   						} catch (Exception e) {
+   	   					 e.printStackTrace();	
+    					    }
+   						
+   					
+   						if(agent != null) {
+   							i++;
+   							 row = sheet.getRow(i);
+   						
+   							 
+   						TreeMap asi= new TreeMap();
+   				        Toode t1 = new Toode(gr1);
+  						       t1.setPlancur(g1);
+  						    //   System.out.println("agenthh " + agent + " " + g1 + " " );
+  					    res.put(agent, t1);
+   					  }
+   					}
+   						
+   					}
+   				
+   				
+           		   
+   	   }catch (Exception e){
+   		   e.printStackTrace();
+   	   }
+   	   
+   	   System.out.println("totalPlanSum "+ res.toString() );
+   	   return res;
+      }
+      
      
      private Hashtable docCust = null;
-     
+     private TreeMap plans = null; 
      
   public void setBulkSales(Map agents) {
 	  TreeMap myygid = new TreeMap();
 	  TreeMap myygideelm = new TreeMap();
 	  docCust = new Hashtable();
+	  
+	  plans = this.makePlans("Budget.xlsx");
 	  
 	  int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 	  
@@ -5307,7 +5389,10 @@ private TreeMap afterOrders = null;
 		        }else{
 		        	myygid.put(agent,total+"");
 		        }
-		    	
+		    	  if (agent != null && plans.get(agent) != null){
+	                   Toode tt = (Toode)plans.get(agent);
+	                   tt.setDonecur(tt.getDonecur() + total);
+	                   }
 			    }
 				
 				if(date.startsWith(mme) && confirmed ){
@@ -5338,20 +5423,30 @@ private TreeMap afterOrders = null;
          		
          	  }
  	 }
-         	  System.out.println("myygid" + myygid.size() + " Doccust " + docCust.size());
+         //	  System.out.println("myygid" + myygid.size() + " Doccust " + docCust.size());
  	         
 	 		  Iterator itera = myygid.keySet().iterator();
 	 		  while(itera.hasNext()){
 	 			  String code = (String)itera.next();
 	 			 Agent agent = (Agent)agents.get(code);
+	 			Toode tt =   (Toode)plans.get(code);
 	             if (agent != null){
-	            	   agent.setMonthSales((int) Double.parseDouble((String)myygid.get(code))); 
+	            	 
+	            	 double teh = Double.parseDouble((String)myygid.get(code));
+	            	   agent.setMonthSales((int) teh); 
+	            	 String  asi = "";
+	            	
+	            	 if(tt != null) {
+	            		 asi = (((int)(teh/tt.getPlancur()*100))+ "% Plan.: " +(int) tt.getPlancur() + " €  Sales.: " + (int) teh + " €||");
+	     	     	 }
+	            	 
 	            	   if(myygideelm.get(code) != null && day < 6 ) {
-	            		   agent.setStart("Last Month: " + (int) Double.parseDouble((String)myygideelm.get(code)));  
+	            		  asi = asi + ("|Last Month: " + (int) Double.parseDouble((String)myygideelm.get(code)));  
 	            	   }
-	            		   
+	            	   
+	            	   System.out.println(agent.getID() + " " + asi);
+	            	   agent.setStart(asi);
 	             }
 	          }
-          
-     }
-}
+         }
+    }

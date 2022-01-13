@@ -9284,7 +9284,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	      line = line.trim();
 	System.out.println(line + " " + counter);
 	      if (counter == 1){
-	        if (line.equals("tellimus") || line.equals("kassamyyk") || line.equals("mmttellimus") || line.equals("order")){        
+	        if (line.equals("tellimus") || line.equals("kassamyyk") || line.equals("mmttellimus") || line.contains("order")){        
 	        }else{
 	        	 break;
 	        }
