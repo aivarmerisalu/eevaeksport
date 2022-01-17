@@ -755,7 +755,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                     	  try{
                     		  prodID =  rida.getAttributes().getNamedItem("item").getNodeValue(); 
                     	  }catch(Exception rr) {
-                    		  System.out.println("jama " + i + " " + clGroup);
+                    		 // System.out.println("jama " + i + " " + clGroup);
                     	  }
                     	  
                         
@@ -777,7 +777,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                          }
                     
                          if(clGroup.equals("01981")) {
-                    		 System.out.println("jama "+  prodID + " " + pricelists.contains(clGroup.trim()) + " " + prods.keySet().contains(prodID));
+                    		// System.out.println("jama "+  prodID + " " + pricelists.contains(clGroup.trim()) + " " + prods.keySet().contains(prodID));
                     	 }
                          if(prodID != null && prods.keySet().contains(prodID) && pricelists.contains(clGroup.trim())){
                         	
@@ -1095,7 +1095,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		         	      }
 	         	  
          	  }catch(Exception e){
-         		  e.printStackTrace();
+         		 // e.printStackTrace();
          	  }
          }
          
@@ -1886,7 +1886,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      
      if(custProds.size() == 0){
          prodCodes = new HashSet();
-    	 getCustomerProductsList2();
+    	getCustomerProductsList2();
      }
   TreeMap stockAlter = new TreeMap();
      if(getParent().getProps().getProperty("stockdir") != null ){
@@ -1934,7 +1934,18 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		}
       }
      
-
+     String fixedurl = null;
+     
+     if(getParent().getProps().getProperty("fixedurl") != null){
+    	 fixedurl = getParent().getProps().getProperty("fixedurl");
+      }
+     
+     boolean proddatafile = false;
+     
+     if("true".equals(getParent().getProps().getProperty("proddatafile"))){
+    	 proddatafile = true;
+      }
+     
      if(getParent().getProps().getProperty("usedatafortypes") != null){
          typeIndent = getParent().getProps().getProperty("usedatafortypes");
       	prTypes = new TreeMap();
@@ -1984,6 +1995,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      	}
      }
      
+     StringBuffer sb = new StringBuffer();
+     
      try {
  
     	   FileReader fr = new FileReader(getDir() + "tooted.xml");
@@ -2015,6 +2028,24 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
           	 shelf = shelf.substring(0,shelf.indexOf("\""));
           	 shelf = " " + shelf ;
       	    }
+      	    
+      	    if(proddatafile) {
+
+       	       String longt = "";
+       	    
+       	     len = line.indexOf("long_description=");
+       	     
+       	     if(len != -1) {
+       	    	
+       	     longt   = line.substring(len +18);
+       	  //   System.out.println("uuuu " + longt);
+       	     longt = longt.substring(0,longt.indexOf("\""));
+         	 longt = longt.trim().replaceAll("\\r\\n|\\r|\\n", "|").replaceAll(";", ":"); 
+   				sb.append(id + ";" + longt + "\n");
+       	       }
+   			 }
+
+      	    
       	    
       	    String url = null;
       	 
@@ -2122,10 +2153,15 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
           	   }
 	         }
           	 
-          	 if(url!=null){
-          		 
-          		 prod.setPhotoid("phurl:" +url); 
+          	 if(fixedurl != null) {
+          		 prod.setPhotoid("phurl:" +fixedurl + id + ".jpg" ); 
+          	 }else {
+          		 if(url!=null){
+              		 
+              		 prod.setPhotoid("phurl:" +url); 
+              	 } 
           	 }
+          
           	 
            	 
       	  boolean goes = true;
@@ -2194,11 +2230,10 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
             	    	 
             	    	 gr = gr.substring(0,gr.indexOf("\""));
             	    	 prod.setGroup(gr.replaceAll(";",":").replaceAll("&amp;", "&"));
-                	   this.prGroups.put(gr.replaceAll(";",":").replaceAll("&amp;", "&"), gr.replaceAll(";",":").replaceAll("&amp;", "&"));  
+                	   this.prGroups.put(gr.replaceAll(";",":").replaceAll("&amp;", "&"), gr.replaceAll(";",":").replaceAll("&amp;", "&")); 
+                	   prod.setGroupSecond(Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
                 	 }
-           		
-           	}
-      	 	  
+           	     }
       	 	 }
 
       	 	 len = line.indexOf("data code=\"GENERAL\""); 
@@ -2371,7 +2406,9 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	    }
      
     
-     
+       if(sb.length() > 0) {
+    	   Converter.saveFileInUTF8("texts.txt", sb);
+       }
      
      return tm;
    }

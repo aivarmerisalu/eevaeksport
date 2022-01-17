@@ -1665,6 +1665,11 @@ public class EksportPanel extends JPanel implements ActionListener,
                 if(wh.exists()){
                     zip.addFile("warehouse.txt");
                 }
+                
+                File wh3 = new File("contactpersons.txt");
+                if(wh3.exists()){
+                    zip.addFile("contactpersons.txt");
+                }
                 wh = new File("prodanalogs.txt");
                 if(wh.exists()){
                     zip.addFile("prodanalogs.txt");

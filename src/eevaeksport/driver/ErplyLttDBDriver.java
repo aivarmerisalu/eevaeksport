@@ -2527,7 +2527,7 @@ if(sb.length() >10){
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
     // this.getFixedAssortmentData();
-     
+    // plans = this.makePlans("Budget.xlsx");
      
      agent1 = new TreeMap();
     // sendAsi();
@@ -5268,43 +5268,31 @@ private TreeMap afterOrders = null;
    		XSSFRow row = null; 
    				ff.close();	
    				if(sheet != null){
-   					for(int i = 0 ; i < sheet.getLastRowNum();i++){
-   						 row = sheet.getRow(i);
-   						if(row == null && a == 0){
-   							a = i;
-   						}else{
-   							a = sheet.getLastRowNum();
-   						}
-   					}
+   					
    					String gr1 = null;
    					
-   					for(int i = 1 ; i < a + 1;i++){ // 9ndast reas hakkame scrollima nii kilosid kui ka summat
+   					for(int i = 1 ; i < sheet.getLastRowNum() + 1;i++){ // 9ndast reas hakkame scrollima nii kilosid kui ka summat
    						 row = sheet.getRow(i);
    						String agent = null;
    						double g1 = 0;
    						
-   						
    						try {
    							agent = formatter.formatCellValue(row.getCell((short) 1));
-   						
    						} catch (Exception e) {
-      					    	//  System.out.println("agent ei  " + agent);
-      						 //  e.printStackTrace();
+      					//    	 System.out.println("agent ei  " + agent);
+      						//  e.printStackTrace();
       					      }
-   			    
+   				//	  System.out.println("agent jah  " + agent + "  " +g1);
    						try {
    						g1 = Double.parseDouble(row.getCell((short) (2 + cal.get(Calendar.MONTH))).getNumericCellValue()+ "");
-   					//  System.out.println("agent jah  " + g1);
+   					//  System.out.println("agent jah0  " + agent +" "+ g1);
    						} catch (Exception e) {
    	   					 e.printStackTrace();	
     					    }
    						
    					
    						if(agent != null) {
-   							i++;
-   							 row = sheet.getRow(i);
-   						
-   							 
+   							    row = sheet.getRow(i);
    						TreeMap asi= new TreeMap();
    				        Toode t1 = new Toode(gr1);
   						       t1.setPlancur(g1);
