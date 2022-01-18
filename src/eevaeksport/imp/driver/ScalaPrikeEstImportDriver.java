@@ -116,7 +116,7 @@ import eevaeksport.util.Converter;
 				// Uurime millised ankeedid on aktiivsed ja koodid meelde .
 				
 
-				for (int a = 4; a < pikkus; a++) {
+				for (int a = 4; a < pikkus+1; a++) {
 					row = sheet.getRow(a);
 						String klient = null;
 						
@@ -237,7 +237,7 @@ import eevaeksport.util.Converter;
 				}catch(Exception ee ){
 					ee.printStackTrace();
 				}
-			//	System.out.println("Haldus kliendid " + haldusklienditooted.toString());
+				//System.out.println("Haldus kliendid " + haldusklienditooted.toString());
 	  }
 	  
 	  private Product getHaldusCustomerAndProduct(String kl,OrderLine  line){
