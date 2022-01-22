@@ -1745,7 +1745,10 @@ try{
 
 @Override
 public void FixReporter() {
-	Converter.createExcelReport(this.getProducts(null), this.getCustomers(null), this.getCustomerProductsList(null), getPriceMatrixData(), this.getExcelDir(), rcompany, user, pass);
+	//Converter.createExcelReport(this.getProducts(null), this.getCustomers(null), this.getCustomerProductsList(null), getPriceMatrixData(), this.getExcelDir(), rcompany, user, pass);
+	
+	Converter.getDayReportReport(this.getExcelDir(), rcompany, user, pass);
+
 	System.exit(0);
 }
   

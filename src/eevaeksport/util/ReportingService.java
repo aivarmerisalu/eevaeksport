@@ -191,6 +191,20 @@ public JSONArray getCustomersTypes() throws Exception{
 		return json;
 	}
 	
+	public JSONArray getDayReport(long timestampstart, long timestampend) throws Exception{
+		String web = "http://merisoft.eu:8080/rest/dayreport?from=" + timestampstart + "&to=" + timestampend;
+		HttpClient cli = getClient();
+		HttpGet aa = new HttpGet(web);
+		//aa.setHeader (HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
+		HttpResponse resp = cli.execute(aa);
+		String aaa = EntityUtils.toString(resp.getEntity());
+		//System.out.println("ahaaa Dayreport " + aaa.toString());
+		JSONArray json = new JSONArray(aaa);
+		return json;
+	}
+	
+	
+	
 	public Vector getCustomersCodes() throws Exception{
 		
 		String web = "http://merisoft.eu:8080/rest/customer/allCodes";
