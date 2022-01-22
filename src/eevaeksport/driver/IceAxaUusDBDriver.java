@@ -68,12 +68,15 @@ try {
  user =  getParent().getProps().getProperty("rest.user");
  pass = getParent().getProps().getProperty("rest.pass");
  rcompany = getParent().getProps().getProperty("rest.company");
+ rcompanyx = getParent().getProps().getProperty("rest.companyx");
       }
    
    String user =  null;
    String pass = null;
    String rcompany = null; 
+   String rcompanyx = null;
    private TreeMap eanprods = null;
+   
    
    @Override
 	public void FixLoader() {
@@ -84,9 +87,9 @@ try {
 	  }
 		this.getProducts(null);
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
-		System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+	//	System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
 		if(contracts.size() > 0) {
-			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+			Converter.sendContractJson(contracts ,  rcompanyx,  user ,  pass);
 		}
 		
 		
@@ -1181,31 +1184,35 @@ String region = rs.getString("region");
                          String custcode = rs1.getString("custcode").trim();
                          obj.put("customerCode", custcode);
                          
-                         if(code.indexOf("1104090041") != -1){
-                        //	 System.out.println("1104090041 " + custcode +" "+ (asses.contains(code)) + " " +custs.contains(custcode));
+                         if(code.indexOf("MI.W81608439") != -1){
+                        	 System.out.println("MI.W81608439 " + custcode +" "+ (asses.contains(code)) + " " +custs.contains(custcode));
                          }
                        
                          if(asses.contains(code) && custs.contains(custcode) ){
                         	  String olemas = (String)asscusts.get(code);
+                        	  
+                        	  
                         	  if(olemas == null){
                                   vec.add(obj);  
                                   cou++;  
                          	  }else if(olemas != null){
-                        		 // if(!olemas.equals(custcode)){
+                        		  if(!olemas.equals(custcode)){
                         			   vec.add(obj);  
                                        cou++; 
-                        		  //}
+                        		  }
                         	  }
                           }
                        }
                   
                       rs1.close();
                       stm.close();
-    	 //  System.out.println("assets cou " +  cou + " "+ coua + " " + vec.size());
+    	     
+                      System.out.println("assets cou " +  cou + " "+ coua + " " + vec.size());
                       
                       // siis peaks tegema vahele kontrolli et kui on muudatus siis ainult laksad ylesse
     	   
-    	   
+                  //	Converter.saveFile("json" + System.getProperty("file.separator") 
+        		//	+ Calendar.getInstance().getTimeInMillis()+ "vec.txt" , vec.toString());
     	   
                     Converter.sendAssetsCustomerJson(vec,this.user,this.pass,this.rcompany);     
                	   

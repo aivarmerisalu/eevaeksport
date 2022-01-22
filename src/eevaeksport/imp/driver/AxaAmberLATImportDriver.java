@@ -317,7 +317,7 @@ private Vector signatures = new Vector();
 	   		    	 nimi = "<noname>";
 	   		     }
 	   				
-	   				System.out.println(ol.getDiscount());
+	   				//System.out.println(ol.getDiscount());
 	   			body = body + "\nProduct code : " + ol.getToode()+
 	   					      "\nProduct name : " + nimi +
 	   					      "\nStandard price: " + prod.getPrice() + "EUR" + 

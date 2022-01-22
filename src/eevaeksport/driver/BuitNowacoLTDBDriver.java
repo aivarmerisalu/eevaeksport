@@ -1857,14 +1857,17 @@ try{
 
   	String agextra = getParent().getProps().getProperty("all.customers");
 
-   String sql =  "   SELECT k.klientas  AS nimi,k.klient_id AS kood,k.kodas AS payer,k.prek_adres AS aadress ,a.tab_nr AS agent ,k.dienos as paymterm,  " +
-	" filialas AS blokk, 0 AS yle,'' AS visit,kainos_nr AS type," +
-	"  atstovas as kontakt , k.kl_grupe as kett , max_skola as credit, kainos_nr as hinnak ,telefonai as phone , nuolaida as maxdisc , ma.dienos as mars "
-	+ ",k.kl_grupe as rcatrgory , k.miestas AS rcity , k.indeksas AS rindex , k.sritis AS rmaakond , k.salis as rcountry,k.atstovas as rkontakt "+ 
-	" ,k.telefonai as rperphone, k.e_mail as remail " +
-	"  FROM klientai k  INNER JOIN " +
-	"  (select klientas, tab_nr from (select * from manager order by klientas,data desc)as man  group by klientas order by klientas,data ) " +
-	"   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where  (gavejas = 1 and e_klientas = 1) or filialas =1 " ;
+   String sql =  "    SELECT k.klientas  AS nimi,k.klient_id AS kood,k.kodas AS payer,k.prek_adres AS aadress ,a.tab_nr AS agent ,k.dienos as paymterm,  \r\n" + 
+   		"	 filialas AS blokk, 0 AS yle,'' AS visit,kainos_nr AS type,\r\n" + 
+   		"  atstovas as kontakt , k.kl_grupe as kett , max_skola as credit, kainos_nr as hinnak ,telefonai as phone , nuolaida as maxdisc , ma.dienos as mars \r\n" + 
+   		"	,k.kl_grupe as rcatrgory , k.miestas AS rcity , k.indeksas AS rindex , k.sritis AS rmaakond , k.salis as rcountry,k.atstovas as rkontakt \r\n" + 
+   		"	 ,k.telefonai as rperphone, k.e_mail as remail \r\n" + 
+   		"	  FROM klientai k  INNER JOIN \r\n" + 
+   		"	 ( select klientas, tab_nr from(\r\n" + 
+   		"	   select klientas, tab_nr from (select * from manager order by klientas,data desc,tab_nr )as man \r\n" + 
+   		"	  group by klientas,data order by klientas,data desc) as mm group by klientas ) \r\n" + 
+   		"	   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where  (gavejas = 1 and e_klientas = 1) or filialas =1\r\n" + 
+   		"	   order by k.klientas " ;
 
  //  System.out.println(sql);
    try {
@@ -2287,6 +2290,54 @@ try{
 	   return hh;
    }
    
+   
+   
+   private HashMap<String, Double> getSuggDisc() {
+	   HashMap<String, Double> hh = new HashMap<String, Double>();
+	   try {
+		   DataFormatter formatter = new DataFormatter();
+		   Workbook workbook = null;
+	   File f = new File (getExcelDir() + "RecDisc.xlsx");
+	   boolean xs = true;
+	   if(!f.exists()) {
+		   f = new File (getExcelDir() + "RecDisc.xls"); 
+		   xs = false;
+	   }
+	   
+		  FileInputStream	 ff = new FileInputStream(f);
+		if(xs) {
+		     workbook = new XSSFWorkbook((ff));
+		}else {
+			 workbook = new HSSFWorkbook((ff));
+		}
+		Sheet sheet = workbook.getSheetAt(0);
+	      Row row = null; 
+				ff.close();	
+				if(sheet != null){
+				  int yy = sheet.getLastRowNum();
+					
+					for(int i = 1 ; i < yy+1 ;i++){
+						 row = sheet.getRow(i);
+						if(row != null) {
+							
+							String ean = formatter.formatCellValue(row.getCell(0)).trim();
+							String ale = formatter.formatCellValue(row.getCell(1));
+						  if(ale != null && ale.trim().length() > 0) {
+							  try {
+								  hh.put(ean.trim(), Double.parseDouble(ale)); 
+							  }catch(Exception r) {
+								  r.printStackTrace();
+							  }
+						  }
+						}}}
+				
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }				
+	   System.out.println("REC " + hh.size());
+	   return hh;
+   }
+   
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
      HashSet  ladutr = new HashSet();
@@ -2294,6 +2345,8 @@ try{
      HashMap<String,Double>  ladub1o = new HashMap<String,Double>();
      
      HashSet higherCodes = getHigher();
+     
+     HashMap<String,Double> suggDisc = getSuggDisc();
      
      getSaveStockInfo();
      getPartiid();
@@ -2413,6 +2466,10 @@ try{
             String id = rs.getString("toode").trim();
             String weight ="";
             Product prod = new Product(id);
+            if(suggDisc.get(id) != null) {
+            	prod.suggAle = suggDisc.get(id) + "";
+            	//System.out.println("suggAle " + prod.suggAle);
+            }
             prod.setStock(0);
             if(stocks.get(id) != null &&  stocks.get(id) > 0){
             	prod.setStock(stocks.get(id));
@@ -2750,22 +2807,24 @@ try{
      Vector vec = new Vector();
      HashMap kliendid = new HashMap();
      try {
-    String cmd =  " select * from (	SELECT  b.klient_id AS klient,r.preke AS toode,(kiekis) AS kogus, Data AS lastdate, " +
-    		" kaina as price FROM apyv_gr r " +
-            " INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 300 day) > current_date() "
-            + " INNER JOIN klientai b ON b.klientas=d.gavejas " + 
-	        " where DATE_ADD(data,interval 300 day) > current_date()  and pvm_stat ='S' order by klient_id ,r.preke ,data desc ) as tab group by klient,toode";
+    String cmd =  "  SELECT  b.klient_id AS klient,r.preke AS toode,(kiekis) AS kogus, (Data) AS lastdate, " + 
+    		"    		 kaina as price FROM apyv_gr r " + 
+    		"             INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 300 day) > current_date() " + 
+    		"             INNER JOIN klientai b ON b.klientas=d.gavejas " + 
+    		"	         where DATE_ADD(data,interval 300 day) > current_date()  and pvm_stat ='S' " + 
+    		"			order by klient, toode, lastdate desc";
     System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupï¿½ev","viimane'%%' kogus"
     Connection con = getNewConnection();
     Statement stmt = con.createStatement();
     ResultSet rs = stmt.executeQuery(cmd);
+    HashSet olemas = new HashSet();
     while(rs.next()){
 
              String custID = rs.getString("klient").trim();
                String prodID = rs.getString("toode").trim();
                  String lastdate = " ";
-             
+               String xx = custID + "_" +prodID;
                  double  amount = rs.getDouble("kogus");
                  lastdate = rs.getString("lastdate").trim().substring(5,10);
                     Customer cust = (Customer)kliendid.get(custID);
@@ -2778,10 +2837,14 @@ try{
                     Product prod = new Product(prodID);
                     CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate + "_" + price + "€",price,0,0," ");
 
-                 cust.addProduct(prod,cp,false);
-                 kliendid.put(custID, cust);
-                 vec.addElement(cp);
+                    if(!olemas.contains(xx)) {
+                    	   cust.addProduct(prod,cp,false);
+                           kliendid.put(custID, cust);
+                           vec.addElement(cp);	
+                    }
+              
 
+                 olemas.add(xx);
            }
          rs.close();
          con.close();
@@ -2887,7 +2950,7 @@ try{
    private HashMap sortimendid = null;
    private Vector klient = new Vector();
    private TreeMap agents = new TreeMap();
-   private String url = "jdbc:odbc:mynowaco";
+   private String url = "jdbc:odbc:my_nowaco";
    private Connection con;
    private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
    private TreeMap debtDays = new TreeMap();

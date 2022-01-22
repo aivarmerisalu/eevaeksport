@@ -370,9 +370,9 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	             getParent().showError(e);
 	         }
 	      
-	  }else {
+	    } else {
 	  	
-	  	try{
+	     	try{
 	  		String file2 = "stockref.txt";
 	  		File ff = new File(getExcelDir() +  file2);
 	  		if(ff.exists()){		

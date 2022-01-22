@@ -278,10 +278,14 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 		   return asi ;
 	   }
 	
-
+	   private StringBuffer oorders = null;
+	   
  
 	   private TreeMap  getOpenOrders(){
 			TreeMap res = new TreeMap();
+			oorders = new StringBuffer();
+			oorders.append(Calendar.getInstance().getTimeInMillis() + "\n");
+			
 				
 			   String sql2 =  " Select apyv_id as id , '' as tyyp,b.klient_id as kkood, dokumentas as number, data as kuup , 0 as summa  from apyvarta d \r\n" + 
 			   		"					 INNER JOIN klientai b ON b.klientas=d.gavejas  where data > current_date()" ;
@@ -314,6 +318,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 			
 	 	 String summa = NF.format(rs.getDouble("summa"));
 	 	 
+	  	oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
 	 	
 		    String sql3 = "  select kiekis as amount,  r.mato_vien as unit  , pavad as name \r\n" + 
 		    		"		    			    						    FROM   apyv_gr r INNER JOIN prekes t ON t.preke = r.preke\r\n" + 
@@ -341,6 +346,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 		   	sb = new StringBuffer();
 		       
 		}
+		 
 		
 		
 		rs.close();
@@ -353,6 +359,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 
 	 	connectionDown();
 	 		System.out.println("Open orders " + res.toString());
+	 		Converter.saveFile(parent.getProps().getProperty("savefilesdir")  + "customerorders.txt", oorders.toString());
 			return res;
 		}
  
@@ -1247,7 +1254,7 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
            products.append(" ;");
            products.append(getParent().getNF().format(stocks.get(id)) + "; "  +  "\n"); // + dealer +  "\n");
     }
-		
+     getOpenOrders();
 	   
     return products.toString();
    }
@@ -1416,6 +1423,8 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
 
 	     TreeMap discs = new TreeMap();
 	     TreeMap openOrders = this.getOpenOrders();
+	     
+	     
  try {
 
 	 Converter.getManagersReplacements(agent1, rcompany, user , pass);
@@ -1621,7 +1630,9 @@ System.out.println(cmd);
  	" filialas AS blokk, 0 AS yle,'' AS visit,sistema AS type," +
  	"  atstovas as kontakt , k.kl_grupe as kett , max_skola as credit, kainos_nr as hinnak ,telefonai as phone , e_mail as email , nuolaida as maxdisc , ma.dienos as mars " +
  	"  FROM klientai k  INNER JOIN " +
- 	"  (select klientas, tab_nr from (select * from manager order by klientas,data desc)as man  group by klientas order by klientas,data ) " +
+	"	 ( select klientas, tab_nr from(\r\n" + 
+		"	   select klientas, tab_nr from (select * from manager order by klientas,data desc,tab_nr )as man \r\n" + 
+		"	  group by klientas,data order by klientas,data desc) as mm group by klientas ) \r\n" + 
  	"   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where  (gavejas = 1 ) or filialas =1 " ;
 
    System.out.println(sql);
@@ -2075,6 +2086,7 @@ System.out.println(cmd);
          
      } catch (Exception e) {
        e.printStackTrace();
+       System.exit(0);
    }
      
      Hashtable dateOut = new Hashtable();
@@ -2244,6 +2256,7 @@ System.out.println(cmd);
         con.close();
      } catch (Exception e){
        e.printStackTrace();
+       System.exit(0);
      }
      return tm;
    }
@@ -2306,21 +2319,24 @@ System.out.println(cmd);
      Vector vec = new Vector();
      HashMap kliendid = new HashMap();
      try {
-    String cmd =  " select * from (	SELECT  b.klient_id AS klient,r.preke AS toode,(kiekis) AS kogus, Data AS lastdate, " +
+    String cmd =  " 	SELECT  b.klient_id AS klient,r.preke AS toode,(kiekis) AS kogus, Data AS lastdate, " +
     		" kaina as price FROM apyv_gr r " +
             " INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 180 day) > current_date()  INNER JOIN klientai b ON b.klientas=d.gavejas " + 
-	        " where DATE_ADD(data,interval 180 day) > current_date() order by klient_id ,r.preke ,data desc ) as tab group by klient,toode";
+	        " where DATE_ADD(data,interval 180 day) > current_date() order by klient_id ,r.preke ,data desc ";
     System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupï¿½ev","viimane kogus"
     Connection con = getNewConnection();
     Statement stmt = con.createStatement();
     ResultSet rs = stmt.executeQuery(cmd);
+    HashSet olemas = new HashSet();
+    
     while(rs.next()){
 
              String custID = rs.getString("klient").trim();
                String prodID = rs.getString("toode").trim();
                  String lastdate = " ";
-             
+                 String xx = custID + "_" +prodID;
+               
                  double  amount = rs.getDouble("kogus");
                  lastdate = rs.getString("lastdate").trim().substring(5,10);
                     Customer cust = (Customer)kliendid.get(custID);
@@ -2332,11 +2348,12 @@ System.out.println(cmd);
                
                     Product prod = new Product(prodID);
                     CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate + "_" + price + "€",price,0,0," ");
-
-                 cust.addProduct(prod,cp,false);
-                 kliendid.put(custID, cust);
-                 vec.addElement(cp);
-
+                    if(!olemas.contains(xx)) {
+                    	cust.addProduct(prod,cp,false);
+                        kliendid.put(custID, cust);
+                        vec.addElement(cp);
+                    }
+                 olemas.add(xx);
            }
          rs.close();
          con.close();
@@ -2450,7 +2467,7 @@ System.out.println("CP suurus2 " + vec.size());
    private HashMap sortimendid = null;
    private Vector klient = new Vector();
    private TreeMap agents = new TreeMap();
-   private String url = "jdbc:odbc:mynowlv";
+   private String url = "jdbc:odbc:my_nowlv";
    private Connection con;
    private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
    private TreeMap debtDays = new TreeMap();

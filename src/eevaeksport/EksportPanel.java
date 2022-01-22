@@ -2,6 +2,7 @@ package eevaeksport;
 
 import java.awt.BorderLayout;
 
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -55,7 +56,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import eevaeksport.driver.AbstractDBDriver;
 import eevaeksport.driver.BulkUpdater;
 import eevaeksport.driver.Discounter;
-import eevaeksport.driver.IceAxaDBDriver;
 import eevaeksport.driver.Manager;
 import eevaeksport.driver.MustDister;
 import eevaeksport.driver.Outputter;
@@ -1664,6 +1664,15 @@ public class EksportPanel extends JPanel implements ActionListener,
                 File wh = new File("warehouse.txt");
                 if(wh.exists()){
                     zip.addFile("warehouse.txt");
+                }
+                
+                File wh3 = new File("contactpersons.txt");
+                if(wh3.exists()){
+                    zip.addFile("contactpersons.txt");
+                }
+                wh = new File("prodanalogs.txt");
+                if(wh.exists()){
+                    zip.addFile("prodanalogs.txt");
                 }
                 File wh1 = new File("outcome.txt");
                 if(wh1.exists()){
@@ -4352,8 +4361,6 @@ if(agprods != null && agprods.size() >0){
         if(driver.getDriverVersion().equals("AltiaLAT")){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(2,prod.getName().length()));
             	
-        }else if(driver.getDriverVersion().equals("ScalaToba") || driver.getDriverVersion().equals("ScalaTobaCall")){
-        	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(4,prod.getName().length()));	
         }else if(driver.getDriverVersion().equals("Miesnieks")){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(5,prod.getName().length()));
         }else if(driver.getDriverVersion().equals("Dansg")){
@@ -4392,34 +4399,8 @@ if(agprods != null && agprods.size() >0){
         	}
         
           	buf.append("   " + add +(prod.getName().trim().replace(';', '-').replace(':', '-').replaceAll("\\r\\n|\\r|\\n", " ")).trim());	
-        }else if(driver.getDriverVersion().equals("SkaiteAG")){
-        	String add = "  ";
-        	
-        	 if(prod.getMaxDiscount()> 0){
-        		add = "% ";
-        	}
-        	
-        	if(prod.getName().indexOf("MD") == -1){
-        		add = "  ";
-        	}
-        	
-        	if(prod.getType().equals("1") || prod.getType().equals("12")){
-        		add = "t ";        	
-        		}
-
-        	if((prod.getType().equals("1") || prod.getType().equals("12")) && prod.getMaxDiscount()> 0){
-        		add = "t% ";
-        		if(prod.getName().indexOf("MD") == -1){
-        			add = "t ";
-        		}
-        	}
-        	
-          //  System.out.println((add + "'"+  (prod.getName().replace(';', ':'))).trim());
-        	buf.append("   " + add +(prod.getName().trim().replace(';', '-').replace(':', '-')).substring(prod.getID().length()).trim().replaceAll("\\r\\n|\\r|\\n", " "));	
         }else if(driver.getDriverVersion().equals("VichiLATSQL")){
         	buf.append( prod.getID() + " " +(prod.getName().trim().replace(';', '-').replace(':', '-').replaceAll("\\r\\n|\\r|\\n", " ")));	
-        }else if(driver.getDriverVersion().equals("SolcraftJun")|| driver.getDriverVersion().equals("SolMan")){
-        	buf.append("    " + prod.getID() + " " + prod.getName().replace(';', '-').replace(':', '-').replaceAll("\\r\\n|\\r|\\n", " "));	
         }else{
         	buf.append(prod.getName().replace(';', '-').replace(':', '-').replaceAll("\\r\\n|\\r|\\n", " ")
         			.replace('²', '2').replace('¹', '1').replace('¼', ' ').replace('¾', ' ').replace('~', ' ').replace('¤', ' '));
@@ -4656,12 +4637,19 @@ if(agprods != null && agprods.size() >0){
            buf.append("0");
        }
       
+
+       buf.append(EksportPanel.separator);
+       if(prod.suggAle == null) {
+    	   buf.append(" ");
+        } else {
+    	   buf.append(prod.suggAle);
+        }
+       
+       buf.append(EksportPanel.separator);
+       buf.append(prod.statusSmallPack);
+   
        
        buf.append(lineSeparator);
-
-       
-     
-
        
        
        this.products.put(prod.getID(), prod);
@@ -4734,10 +4722,7 @@ if(agprods != null && agprods.size() >0){
     
     private void  sendDistributionFile() throws IOException {
 
-    	
-    	 if (driver instanceof IceAxaDBDriver){
-             ((IceAxaDBDriver)driver).sendDistributionReport(null);
-           }
+    
           System.exit(0);
         
       }

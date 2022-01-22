@@ -832,9 +832,69 @@ System.out.println("re " + re.toString());
  return null;
    }
 
-
+  
  
-       public String getSaveStockInfo(){
+   
+   
+   public String getSaveStockInfo(){
+ 	  
+	   StringBuffer products = new StringBuffer();
+	   stocks = new TreeMap<String,Double>();
+	   	File ff = new File(getParent().getProps().getProperty("data.dir") + "Likuciai.csv");
+			
+			   try {
+				
+				    FileInputStream is = new FileInputStream(ff);
+					InputStreamReader isr = new InputStreamReader(is, "utf-8");
+					BufferedReader reader = new BufferedReader(isr);
+				    String line = null;
+				 
+				    try {
+				        while((line = reader.readLine()) != null) {
+				          StringTokenizer st = new StringTokenizer(line,",");
+				          try {
+				        	 String  toode = st.nextToken();
+				        	if(line.endsWith("\"")) {
+				        		  line = line.substring(0,line.length()-1);
+				        	}
+				        	
+				        	  
+				        		 double kog = 0;
+				        		 try {
+				        			 kog = Double.parseDouble((line.substring(line.indexOf("KG,")+3).replace(",", ".").replaceAll("\"", " ").trim()));
+				        		 }catch(Exception t ) {
+				        			 
+				        		 }
+				        		if(kog == 0) {
+				        			 kog = Double.parseDouble((line.substring(line.indexOf("VN,")+3).replace(",", ".").replaceAll("\"", " ").trim()));
+				        		}
+				        	
+					        	   products.append(toode +  ";");
+					               products.append(" ;");
+					               products.append(getParent().getNF().format(kog) + "; "  +  "\n");
+					        	   stocks.put(toode, kog);
+				        	 }catch(Exception r) {
+				        		
+				        	 }
+				           
+				        }
+
+				    } finally {
+				        reader.close();
+				    }
+				 
+			   }catch(Exception e) {
+				   e.printStackTrace();
+			   }
+			   
+		
+	   System.out.println("stocks" + products.toString());
+	   
+   return products.toString();
+
+   }
+   
+       public String getSaveStockInfoOLD(){
     	  
     	   StringBuffer products = new StringBuffer();
     	  

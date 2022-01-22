@@ -13,10 +13,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -685,9 +687,13 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
         }
 
 
-
+ 
+    
      
    public TreeMap getAgents(){
+	   
+	   
+	   
      TreeMap tm = new TreeMap();
      try{
     	 
@@ -702,12 +708,12 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
   		  }
   	    	System.out.println("christCodes " + christCodes.size());
   	     }
-    	 getProducts(null);	 
+    	// getProducts(null);	 
      }catch(Exception r){
     	 r.printStackTrace();
      }
    
-     getOpenOrders();
+     //getOpenOrders();
    //  getFixedAssortmentData();
  
      // loene võimalikud agendid sisse 
@@ -2149,11 +2155,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
       			}	
       		}
       	}
-	 len = line.indexOf("class=");
-	 	 if(len != -1){
-	 		 
-	 	 }
-  	
+	 
       		 len = line.indexOf("class=");
       	 	 if(len != -1){
       	 	     String grupp   = line.substring(len + 7);
@@ -2198,6 +2200,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
            	}
       	 	  
       	 	 if(christCodes != null ){
+      	 		 if(prod.getID().equals("PA000940")) {
+      	 			 System.out.println("PA940 "+ grupp + " " + christCodes.contains(grupp));
+      	 		 }
       	 	if( christCodes.contains(grupp) ) {
       	 		prod.setStatusTop("5");
       	 		prod.setType("Christmas");

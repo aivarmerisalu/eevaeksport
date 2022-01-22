@@ -280,7 +280,11 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 	    String section = "1";
 			   String trip = "1";
 			   String tripkl = "1";
-			   String scan = null;
+			   String scan = " ";
+			   String koef = "1";
+			   String smell = " ";
+			   String clean = " ";
+			   String sample = " ";
 		 	   if(line.getUnit() != null ) {
 		 		  if(line.getUnit().indexOf("ss:") != -1) {
 		 			   section = line.getUnit().substring(line.getUnit().indexOf("ss:")+3, line.getUnit().indexOf("ss:") + 4);
@@ -293,6 +297,21 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 		   }
 		 		  if(line.getUnit().indexOf("sc:") != -1) {
 		 			  scan = line.getUnit().substring(line.getUnit().indexOf("sc:")+3, line.getUnit().indexOf("sc:") + 11); 
+		 		   }
+		 		  
+		 		  //"ko:" + koef + "sm:" + smell + "cl:" + clean + "sa:" + sample
+		 		  if(line.getUnit().indexOf("ko:") != -1) {
+		 			  koef = line.getUnit().substring(line.getUnit().indexOf("ko:")+3, line.getUnit().indexOf("sm:")); 
+		 		   }
+		 		  if(line.getUnit().indexOf("sm:") != -1) {
+		 			  smell = line.getUnit().substring(line.getUnit().indexOf("sm:")+3, line.getUnit().indexOf("cl:")); 
+		 		   }
+		 		  if(line.getUnit().indexOf("cl:") != -1) {
+		 			  clean = line.getUnit().substring(line.getUnit().indexOf("cl:")+3, line.getUnit().indexOf("sa:")); 
+		 		   }
+		 		  
+		 		  if(line.getUnit().indexOf("sa:") != -1) {
+		 			  sample = line.getUnit().substring(line.getUnit().indexOf("sa:")+3); 
 		 		   }
 		 	   }
 		 	     
@@ -361,13 +380,13 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		        sb.append(dateString + ";" + waybill + ";" + waybill.substring(3) + ";" + time + ";P;" +  type + ";ZP;"+ vendType + ";" +  company + ";" +
 		        
 		        desttype + ";" + tripFrom  +  ";" + driverStock + ";" +  section + ";" + trip +  ";"+ line.getKogus() + ";" + days + ";" + station +";" + signa + ";" + photo
-		           + ";" + comment + ";" + temp + "\n"); 
+		           + ";" + comment + ";" + temp + ";" + koef + ";" + smell + ";" + clean + ";" + sample +    "\n"); 
 		        	  
 		    //    Data+“;“+ путевoй лист+“;“+ грузовoй лист+ “;“+начало сбора+“;“+ Item+“;“+ тип молока+ “;“+ место расследования  + “;“+ тип (поставщик, склад)+ “;
 		        //“+ код из+“;“+ место из+“;“+ цикл из+ “;“+склад+ “;“
 		     //   +место to+“;“+ в цикл+“;“+Количество кг+“;“+ количество дней+“;“+ точка++“;“+SIGNATURE+“;“+ PHOTO+“;“+COMMENT
 
-		        
+		     
 		        	  coun++;
 		          }
 		        }

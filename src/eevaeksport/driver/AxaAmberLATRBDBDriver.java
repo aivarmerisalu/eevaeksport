@@ -1696,7 +1696,7 @@ int i = 0;
         String aleke = rs.getString("linedisc");
         if(aleke != null && aleke.trim().length()>0){
             aleke = aleke.trim();
-           cust.setGroup(aleke);
+          // cust.setGroup(aleke);
         } else {
         	aleke = "000" ;
         }
@@ -1712,8 +1712,7 @@ int i = 0;
         String age = rs.getString("agent");
         if (age != null) {
          cust.addAgent(new Agent(age.trim()));
-         cust.addAgent(new Agent("WARE"));
-     
+       
          cust.setMainAgent(age.trim());
          if (age != null && agent1.get(age.trim()) != null){
 				Agent aa = (Agent)agent1.get(age.trim());
@@ -1797,19 +1796,19 @@ int i = 0;
         if (grupp != null && grupp.trim().length()>0 && grupp.indexOf("Stand") == -1) {
          
           if(cust.getGroup() != null && cust.getGroup().trim().length() > 0 ){
-      		cust.setGroup(cust.getGroup() + "|" + Converter.cleanLitLatEst(grupp.trim()));
+      	//	cust.setGroup(cust.getGroup() + "|" + Converter.cleanLitLatEst(grupp.trim()));
       	}else{
-      		cust.setGroup(Converter.cleanLitLatEst(grupp.trim()));
+      		//cust.setGroup(Converter.cleanLitLatEst(grupp.trim()));
       	}
           
-          cust.setCustType(Converter.cleanLitLatEst(grupp.trim()));
+         // cust.setCustType(Converter.cleanLitLatEst(grupp.trim()));
         }
        
         if(promogroups.get(cust.getID()) != null){
         	if(cust.getGroup() != null && cust.getGroup().trim().length() > 0 ){
-        		cust.setGroup(cust.getGroup() + "|" + (String)promogroups.get(cust.getID()));
+        	//	cust.setGroup(cust.getGroup() + "|" + (String)promogroups.get(cust.getID()));
         	}else{
-        		cust.setGroup((String)promogroups.get(cust.getID()));
+        	//	cust.setGroup((String)promogroups.get(cust.getID()));
         	}
         	//System.out.println("grupp " + cust.getGroup());
         }
@@ -1838,9 +1837,9 @@ int i = 0;
         if (licec != null && licec.trim().length()>0) {
             
             if(cust.getCity().length()>1){
-        	 	cust.setCity(cust.getCity() + "|" +Converter.enCodeEst("Licence : " + licec.replace('|', '&').replace('|', '&').replace('|', '&').trim()));
+        	 	//cust.setCity(cust.getCity() + "|" +Converter.enCodeEst("Licence : " + licec.replace('|', '&').replace('|', '&').replace('|', '&').trim()));
         	}else{
-        	 	cust.setCity(Converter.enCodeEst("Licence : " + licec.replace('|', '&').replace('|', '&').replace('|', '&').trim()));
+        	 //	cust.setCity(Converter.enCodeEst("Licence : " + licec.replace('|', '&').replace('|', '&').replace('|', '&').trim()));
         	}
           }
         
@@ -1849,9 +1848,9 @@ int i = 0;
         String rating = rs.getString("rating");
         if (rating != null && rating.trim().length()>0) {
              if(cust.getCity().length()>1){
-      	 	cust.setCity(cust.getCity() + "|" +Converter.enCodeEst("CRate : " + rating.trim()));
+      	 //	cust.setCity(cust.getCity() + "|" +Converter.enCodeEst("CRate : " + rating.trim()));
       	}else{
-      	 	cust.setCity(Converter.enCodeEst("CRate : " + rating.trim()));
+      	 	//cust.setCity(Converter.enCodeEst("CRate : " + rating.trim()));
       	}
         }
       
@@ -2072,7 +2071,7 @@ TreeMap   tm = new TreeMap();
 "  left join inventitembarcode bar   on bar.dataareaid = inv.dataareaid  and  bar.itemid = inv.itemid and bar.barcodesetupid ='EANBottle'  and useforprinting = 1  " +
 " left JOIN inventtablemodule mod ON mod.itemid = inv.itemid and mod.dataareaid=inv.dataareaid  " +
 " WHERE  inv.dataareaid='spil'    AND mod.dataareaid='spil'   " +
-"  AND moduletype=2 and active = 1  and inv.ITEMID not like  'AM%' and inv.ITEMID not like  'NE%' and inv.onlyretail = 0 " +
+"  AND moduletype=2 and active = 1  and inv.ITEMID not like  'AM%' and inv.ITEMID not like  'NE%' and inv.onlyretail = 0 and inv.itemname like '%Red Bull%' " +
 "  order by inv.itemid, disc.module ,disc.todate desc ";
     
 String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicenceItemGroup where dataareaid = 'spil'";
@@ -2558,7 +2557,7 @@ stmt.close();
   String cmd =" select eagentaccountid as agent , itemsubgroup as grupp , salesamount as planx,"
   		+ " focussubgroup ,itemgroupid "
 			  + " from ASTSalesAgentForecast where year(transdate)=year(getdate())"
-			   + " and  month(transdate) = month(getdate()) and dataareaid = 'spil' and modelid = 'B_2020' ";
+			   + " and  month(transdate) = month(getdate()) and dataareaid = 'spil' and modelid = 'B_2022' ";
 
 			       if (isDebug()) System.out.println(cmd);
 			          try {

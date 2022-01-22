@@ -550,6 +550,7 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
               agent.setLanguage("LIT");
               agent.setCountry("lt");
               agent.setPassWord("0000");
+            
             //  agent.needsZipPass = true;
               
               //LT     1,2,3,5,6,7,8,10,11,12,13,15,17
@@ -571,6 +572,11 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
               if(agent.getID().equals("xx") ){
             	  agent.addProdGroupList("LT3");
               }
+              
+            if("true".equals(  getParent().getProps().getProperty("usewebpass"))) {
+            	agent.needsZipPass = true;
+            }
+              
 
               agents.put(nimi, agent);
               agent1.put(agent.getID(), agent);
@@ -593,11 +599,61 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
 	return agents;
     }
 
-   
+
+    public Vector getPriceMatrixData()  {
+        Vector lines = new Vector();
+    
+     
+   String    sql = "select Partneriai_Kodas as clgroup, Prekes_Kodas as prodid,KainaBePVM as price  from [MES_Kainos]  " ; 
+		
+
+           try {
+             TreeMap prior = new TreeMap(); 
+        	   
+             Connection con = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
+                     getParent().getProps().getProperty("dsn.pass"));
+             Statement  st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql);
+
+             while (rs.next()) {
+
+               String clGroup = rs.getString("clgroup");
+               String prodID = rs.getString("prodid").trim();
+               double price = rs.getDouble("price");
+             
+               if(clGroup.trim().length() > 0) {
+            	   MatrixLine mline = new MatrixLine();
+               mline.setCliGroup(clGroup.trim());
+
+               if (prodID != null && prodID.trim().length() > 1) {
+                 mline.setProdID(prodID.trim());
+               }
+             
+               if (price != 0) {
+                 mline.setPrice(price);
+               }
+              
+                   lines.add(mline);   
+             }
+             }
+             rs.close();
+             st.close();
+             con.close();
+            	   
+           }
+           catch (SQLException ex) {
+             ex.printStackTrace();
+           }
+           System.out.println("Maatrix suurus " + lines.size());
+         return lines;
+    	
+       }
+
+    
 
     
   
-    public Vector getPriceMatrixData()  {
+    public Vector getPriceMatrixDataold()  {
         Vector lines = new Vector();
        this.getProducts(null);
     
@@ -735,37 +791,7 @@ Statement st = null;
              st.close();
              con.close();
      
-             
-             if(baashk != null && baashk.size() > 0){
-            	
-             for(int r = 0; r<baashk.size();r++){
-            	 
-         String asi = (baashk.elementAt(r) + "");
-       		con = this.getNewConnection();
-       		  CallableStatement  msProcedure = con.prepareCall( "uspv_Kainininkas '" + 
-       				  asi.substring(1) + "', 'eur' ,0" );
-       		    ResultSet rs3 = msProcedure.executeQuery();
-       	      while(rs3.next()){
-       	    	  String toode = rs3.getString("prekesid");
-       	    	  String hind = rs3.getString("kaina");
-       	    //  	System.out.println( "Toode " +  toode + " hind " + hind);
-       	      	MatrixLine mm = new MatrixLine();
-       	      	mm.setProdID(toode);
-       	      	mm.setCliGroup(asi);
-       	      	if(hind != null){
-       	     	mm.setPrice(Double.parseDouble(hind));
-         	    }
-       	      	mm.setProdLevel("0");
-       	      }
-       	       rs3.close();
-       	       msProcedure.close();
-       	    con.close();
-       	  
-             }
-            	 
-               	 
-              
-             }
+          
             	   
            }
            catch (SQLException ex) {
@@ -777,7 +803,6 @@ Statement st = null;
        }
     private TreeMap agent1 = new TreeMap();
     
-    private Vector baashk = null;
       
       public TreeMap getCustomers(Agent agent){
     	  
@@ -826,34 +851,6 @@ Statement st = null;
 	
         log(cmd);
 
-        String lepingud = "select kl.PartneriaiId as klient , kl.NuolaiduSutartysId  as leping from dbo.NuolaiduSutarciuPartneriai kl inner join  " +
-           " dbo.NuolaiduSutartys AS sut ON kl.NuolaiduSutartysId = sut.NuolaiduSutartysId and " +
-			"	   (CONVERT (date, GETDATE()) between   cast(sut.DataNuo_Int as datetime) and  cast(sut.DataIki_Int as datetime) or (sut.DataNuo_Int = 0 and sut.DataIki_Int = 999999))";
-        HashMap lepMap = new HashMap();
-        HashMap baasMap = new HashMap();
-	TreeMap customers = new TreeMap();
-        HashMap custMap = new HashMap();
-        HashMap deguSumm = new HashMap();
-        baashk = new Vector();
-	try {
-		
-		Connection con2 = this.getNewConnection();
-        PreparedStatement  stmt = con2.prepareStatement(lepingud);
-        ResultSet	      rs = stmt.executeQuery();
-
-	   while (rs.next()) {
-		 String klient = (rs.getString("klient").trim()); 
-		 String leping = (rs.getString("leping").trim());
-		 if(lepMap.get(klient) != null){
-			 lepMap.put(klient, lepMap.get(klient) +"|"+leping); 
-		 }else{
-			 lepMap.put(klient, leping); 
-		 }
-		
-	   }
-		 rs.close();
-		 stmt.close();
-		
 		 
 		 
 		 String degu = " SELECT  part.Kodas as klient , pr.Kodas as toode , pk.kiekis*pr.PK_PardKaina as summa,pr.PK_PardKaina as hind " +
@@ -862,8 +859,15 @@ Statement st = null;
  " WHERE     op.OperacijosTipoId = (2000018) and year(op.Data) = year(getdate()) and month(op.Data) = month(getdate()) "+
  " order by 1,2";
 		 
-	          stmt = con2.prepareStatement(degu);
-	        	      rs = stmt.executeQuery();
+		    HashMap baasMap = new HashMap();
+			TreeMap customers = new TreeMap();
+		        HashMap custMap = new HashMap();
+		        HashMap deguSumm = new HashMap();
+		    	
+				 try {	     
+		 Connection con2 = this.getNewConnection();
+	        PreparedStatement stmt = con2.prepareStatement(degu);
+	        ResultSet  rs = stmt.executeQuery();
 
 		   while (rs.next()) {
 			 String klient = (rs.getString("klient").trim());
@@ -884,45 +888,8 @@ Statement st = null;
 			 
 	//	System.out.println("Degusum " + deguSumm.toString());	 
 			 
-		 
-		 
-		 
-		 String sqlb = "SELECT Partneriai.PartneriaiId as klient,(SELECT  Nuolaidukainininkusudetis.PrekiuKainuKategorijosId AS hk FROM " +
-   "{oj{oj{oj  dbo.NuolaiduKainininkuSudetis Nuolaidukainininkusudetis    LEFT OUTER JOIN dbo.NuolaiduKainininkai Nuolaidukainininkai " +
-   "  ON  Nuolaidukainininkusudetis.NuolaiduKainininkaiId = Nuolaidukainininkai.NuolaiduKainininkaiId} " +
-   " LEFT OUTER JOIN dbo.PrekiuKainuKategorijos Prekiukainukategorijos  " +
-   "ON  Nuolaidukainininkusudetis.PrekiuKainuKategorijosId = Prekiukainukategorijos.PrekiuKainuKategorijosId}  " +
-   " LEFT OUTER JOIN dbo.PartneriuKategorijos Partneriukategorijos " +
-   "ON  Nuolaidukainininkusudetis.NuolaiduKainininkaiId = Partneriukategorijos.NuolaiduKainininkaiId} " +
-" WHERE  Prekiukainukategorijos.Neaktyvi <> ( 1 ) " +
- "  AND  Nuolaidukainininkusudetis.DataIki_Int = ( 999999 ) and Nuolaidukainininkusudetis.PrekiuKainuKategorijosId  != 93776 and Partneriukategorijos.PartneriuKategorijosId = Pa.PartneriuKategorijosId )" +
- " AS hk FROM   {oj{oj  dbo.Partneriai Partneriai    LEFT OUTER JOIN dbo.PartneriaiPa Pa " +
- "    ON  Partneriai.PartneriaiId = pa.PartneriaiId} " +
- "   LEFT OUTER JOIN dbo.PL_PARTNERIAI Pl_partneriai " +
- "  ON  Partneriai.PartneriaiId = Pl_partneriai.PARTNERIAIID} " +
-" WHERE   Pa.PartneriuKategorijosId !=1 order by Partneriai.PartneriaiId";
 	
-		 //baas hinnakirjade leidmine
 		
-		 
-		 
-		 stmt = con2.prepareStatement(sqlb);
-	             rs = stmt.executeQuery();
-
-		   while (rs.next()) {
-			 String klient = (rs.getString("klient").trim()); 
-			 String hk = rs.getString("hk");
-			 if(hk != null && hk.trim().length() > 0){
-				 baasMap.put(klient, "B" + hk.trim()); 
-				 if(baashk!= null && !baashk.contains("B" + hk.trim())){
-					 baashk.add("B" + hk.trim());
-				 } 
-			 }
-				}
-			 rs.close();
-			 stmt.close();
-			
-		 
 		 
 		 
 		 
@@ -943,7 +910,7 @@ Statement st = null;
 		 
 		   if(payid != null){
 				  cust.setPayer(payid);
-	             // cust.setRegnr(payer);
+				  cust.setGroup(payid);
 	          }
 		   
 		   String nim = rs.getString("nimi2").replaceAll("\""," ").trim();
@@ -955,6 +922,7 @@ Statement st = null;
 		 if(payer != null){
 			 payer = Converter.enCodeEst(payer.replaceAll("\""," ").trim());
 		 }
+		 
 		 String addr =  Converter.enCodeEst(rs.getString("Address").replaceAll("\""," ").trim());
 		 String vatno = rs.getString("vatno");
 		 if(vatno != null){
@@ -994,21 +962,11 @@ Statement st = null;
                 }
                
                 
-                
-               /* String ale = rs.getString("ale");
-                if (ale != null && ale.length() > 0){
-                  cust.setDiscount(Double.parseDouble(ale.trim()));
-                }*/
-              
-                cust.setPaymTerm(parent.make(term));
+                  cust.setPaymTerm(parent.make(term));
               
                 double debti = rs.getDouble("debt");
                
                 	cust.setDebt(debti);
-                //cust.setVisit(rs.getString("visit"));
-                
-                //String info = rs.getString("info");
-               // cust.setPersonalData(enCode(parent.make(info)));
                 
                 String agen = rs.getString("agent");
                 if(agen != null){
@@ -1028,23 +986,9 @@ Statement st = null;
       				}
       			}
                 }
-                boolean goes = true;
-                
                 
                 cust.addAgent(new Agent("HOUSE"));
-               /* String group = rs.getString("grupp");
-                if(group != null){
-                  cust.setGroup(group.trim());
-                }
-                String tyyp = rs.getString("tyyp");
-                int aktive = rs.getInt("aktiivne");
-               
-                if(tyyp != null && tyyp.trim().length() >0 && tyyp.trim().equals("NENAUDOJAMAS")){
-                   goes = false;
-                }
-                if(aktive == 1){
-                	goes = false;
-                }*/
+              
                 String aadrjur = rs.getString("jurid");
                 if(aadrjur != null && aadrjur.trim().length()>0){
                   cust.setJuridics(Converter.enCodeEst(aadrjur.trim()));
@@ -1054,41 +998,12 @@ Statement st = null;
                 if(aletext != null && aletext.trim().length()>0){
                   cust.setZipcode(Converter.enCodeEst(aletext.trim()));
                 }
-                String hinnak = rs.getString("hinnak");
-                if(hinnak != null && hinnak.trim().length()>0){
-                  cust.setGroup(hinnak.trim());
-                }
+              
+               
                 
-                String hinnak2 = rs.getString("hinnak2");
-                if(hinnak2 != null && !hinnak2.trim().equals("1")){
-                	if(cust.getGroup().trim().length() > 0 ){
-                		 cust.setGroup(cust.getGroup() + "|K" + hinnak2.trim());
-                	}else{
-                		 cust.setGroup("K" + hinnak2.trim());
-                	}
-                 
-                }
-                 if(lepMap.get(payid) != null){
-                	 if(cust.getGroup().trim().length() > 0 ){
-                		 cust.setGroup(cust.getGroup() + "|" +lepMap.get(payid));
-                	 }else{
-                		 cust.setGroup("" +lepMap.get(payid)); 
-                	 }
-                 }
-                 
-                 if(baasMap.get(id) != null){
-                	 if(cust.getGroup().trim().length() > 0 ){
-                		 cust.setGroup(cust.getGroup() + "|" +baasMap.get(id));
-                	 }else{
-                		 cust.setGroup("" +baasMap.get(id)); 
-                	 }
-                 }
-                
-                if(goes){
                 	 customers.put(Converter.cleanLitLatEst(nim+addr), cust);
                      custMap.put(cust.getID(), cust);	
-                }
-               
+                
 	    }
             rs.close();
             stmt.close();
@@ -1756,6 +1671,7 @@ try{
 
     public static final String DRIVER_VERSION = "SkaiteVigesta";
     private String             url = "jdbc:odbc:skaita";
+    private String             url2 = "jdbc:odbc:report";
     private Connection	       con = null;
     private Vector grouplist = new Vector();
     private PreparedStatement  stmt = null;

@@ -22,12 +22,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -237,6 +239,8 @@ public class Converter {
 							}
 						}
 						
+					
+						
 						
 						if(!found) {
 							 row = sheet.getRow(1);
@@ -290,7 +294,39 @@ public class Converter {
 								}
 							}
 						}
-						
+						if(!found) {
+							 row = sheet.getRow(3);
+							
+							
+							boolean jarve = false;
+							for (int a = 0; a < row.getLastCellNum(); a++) {
+								try {
+								
+									//System.out.println(row.getCell((short)a).getStringCellValue());
+									String gg = row.getCell((short) a).getStringCellValue().trim();
+									if(gg.toLowerCase().indexOf("ean") != -1) {
+										ea = a;
+									}
+									if(gg.toLowerCase().indexOf("järve") != -1) {
+										jarve = true;
+									}
+									if(gg.toLowerCase().indexOf("kadaka") != -1) {
+										
+										r = a;
+										if(jarve) {
+											r=r-1 ; // kui järve on esimesena siis teeme kadaka -1
+										}
+										found = true;
+										addrow = 3;
+										break;
+									}
+								
+								} catch (Exception e) {
+									// System.out.println(row.getCell((short)a).getNumericCellValue());
+								}
+							}
+						}
+					
 						
 						if(!found) {
 							 row = sheet.getRow(15);
@@ -318,6 +354,8 @@ public class Converter {
 							}
 						}
 						
+					
+						
 						for (int a = r; a < row.getLastCellNum(); a++) {
 							try {
 								 System.out.println(row.getCell((short)a).getStringCellValue() + " " + r);
@@ -339,7 +377,8 @@ public class Converter {
 							}
 						}
 						
-						//System.out.println("Ean " +  ea + " ");
+					//	System.out.println("r "  + r + " "+ ea + " " + addrow + " " + groups.toString());
+						//System.exit(0);
 						
 						  
 						for(int i = 1+addrow ; i < sheet.getLastRowNum()+1;i++){
@@ -435,6 +474,8 @@ public class Converter {
 					
 						
 						int r = 1;
+						int ea = 0;
+						int ni = 1;
 						
 						
 						for (int a = 0; a < row.getLastCellNum(); a++) {
@@ -442,6 +483,13 @@ public class Converter {
 							
 								//System.out.println(row.getCell((short)a).getStringCellValue());
 								String gg = row.getCell((short) a).getStringCellValue().trim();
+								if(gg.toLowerCase().indexOf("vöötkood") != -1 ) {
+									ea = a;
+								}
+								if(gg.toLowerCase().indexOf("kauba nimetus") != -1 ) {
+									ni = a;
+								}
+								
 								if(gg.toLowerCase().indexOf("1ll") != -1 || gg.toLowerCase().indexOf("1ka") != -1) {
 									r = a;
 									break;
@@ -469,15 +517,19 @@ public class Converter {
 							}
 						}
 						
-						System.out.println("Groups " +  r);
+						
+						System.out.println("Groups " + 
+						r + " " + ea + " " + ni);
 						
 						
 						for(int i = 1 ; i < sheet.getLastRowNum()+1;i++){
 							 row = sheet.getRow(i);
-							 
+							 try {
+								 
+							
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(r-1));
-								String tnimi = formatter.formatCellValue(row.getCell(1));
+								String ean = formatter.formatCellValue(row.getCell(ea));
+								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
 							 
 							  if(toode.equals(ean)) {
@@ -516,7 +568,9 @@ public class Converter {
                                  }
 						   }
 							 }
-						}
+						 }catch(Exception e) {
+							 e.printStackTrace();
+						 }}
 					 }
 					
 					
@@ -563,6 +617,9 @@ public class Converter {
 					
 						
 						int r = 1;
+						int ea = 0;
+						int ni = 1;
+						
 						
 						
 						for (int a = 0; a < row.getLastCellNum(); a++) {
@@ -570,6 +627,13 @@ public class Converter {
 							
 								//System.out.println(row.getCell((short)a).getStringCellValue());
 								String gg = row.getCell((short) a).getStringCellValue().trim();
+								if(gg.toLowerCase().indexOf("vöötkood") != -1 ) {
+									ea = a;
+								}
+								if(gg.toLowerCase().indexOf("kauba nimetus") != -1 ) {
+									ni = a;
+								}
+								
 								if(gg.toLowerCase().equals("Kad")) {
 									r = a;
 									break;
@@ -579,9 +643,7 @@ public class Converter {
 								// System.out.println(row.getCell((short)a).getNumericCellValue());
 							}
 						}
-						
 					
-						
 						
 						
 						for (int a = r; a < row.getLastCellNum(); a++) {
@@ -600,15 +662,15 @@ public class Converter {
 							}
 						}
 						
-						System.out.println("Groups " +  r);
+						System.out.println("Groups " +  r + " " + ea +" "+ ni);
 						
 						
 						for(int i = 1 ; i < sheet.getLastRowNum()+1;i++){
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(2));
-								String tnimi = formatter.formatCellValue(row.getCell(3));
+								String ean = formatter.formatCellValue(row.getCell(ea));
+								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
 							 
 							  if(toode.equals(ean)) {
@@ -633,7 +695,7 @@ public class Converter {
                              
                               
                               if(value.trim().length() > 0 && (value.trim().equals("PS") || value.trim().equals("HK") )) {
-                              	 System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
+                              //	 System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
                               
 							if(res.get(pood) != null){
                   	  con = (Contract)res.get(pood);
@@ -1295,7 +1357,7 @@ public class Converter {
 						for (int a = gr; a < row.getLastCellNum(); a++) {
 							try {
 								// System.out.println(row.getCell((short)a).getStringCellValue());
-								String gg = row.getCell((short) a).getStringCellValue().trim();
+								String gg = row.getCell((short) a).getStringCellValue().trim().replaceAll("\n", " ");
 							
 								if(gg.length()>1){
 							      groups.put(a + "", gg);
@@ -2065,7 +2127,7 @@ public class Converter {
 									String group = (String) groups.get(a + "");
 									if (group != null && group.trim().length() > 0 ) {
 							 
-                         String pood =  "RIMI" +group;
+                         String pood =  group;
                          Contract con = new Contract(pood);
 							 String value =  formatter.formatCellValue(row.getCell(a));
                        
@@ -2303,10 +2365,118 @@ public class Converter {
 								     }
 								  }	
 							}
-						
 						} 
 						
-					//	System.out.println("rida "+ rida);
+						
+						 if( formatter.formatCellValue(sheet.getRow(rida).getCell(2)).contains("Laogrupid")) {
+							 
+
+							 TreeMap sisu = new TreeMap();
+							 TreeMap nimi = new TreeMap();
+							int  reanr = 3;
+							int sortasuk = 2;
+							 // määrame andmete rea
+							
+							 
+							// System.out.println("reanr " + reanr );
+							//Teeme kõigepealt treemapi valmis kja siis krutime läbi 
+								for(int i = rida ; i < sheet.getLastRowNum()+1;i++){
+								 row = sheet.getRow(i);
+									String ean = formatter.formatCellValue(row.getCell(0));
+									String code = formatter.formatCellValue(row.getCell(sortasuk));
+									String nimis = formatter.formatCellValue(row.getCell(sortasuk-1));
+									if(ean != null && ean.trim().length() > 0) {
+										sisu.put(ean.trim(), code);
+										nimi.put(ean.trim(), nimis);
+									
+									} 
+									
+								}
+							 
+						
+								
+								Iterator itera  =  sisu.keySet().iterator();
+								while(itera.hasNext()) {
+								
+								String ean = (String)itera.next();
+							    String toode = getToode(prods,ean);
+							    if(toode.equals(ean)) {
+									  if(errors == null) {
+										  errors = "Tuvastamatta tooted sortimendis\n RR-Lektus formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+									  }
+									  if(!errors.contains(ean)) {
+										  errors = errors + ean + "   " + nimi.get(ean) + "\n";
+									  }
+								  }
+							    
+							    //nüüd lööme koodi tykkideks ja lisame 
+							    String sort = (String)sisu.get(ean);
+							    ArrayList<String> sorts = new ArrayList<String>();
+							    if(sort.indexOf("1") != -1) {
+							    	sorts.add("1");
+							      sort = sort.substring(sort.indexOf("1")+1);
+							    }
+							    
+							    if(sort.indexOf("2") != -1) {
+							    	sorts.add("2");
+							      sort = sort.substring(sort.indexOf("2")+1);
+							    }
+							    
+							    if(sort.indexOf("3") != -1) {
+							    	sorts.add("3");
+							      sort = sort.substring(sort.indexOf("3")+1);
+							    }
+							    
+							    if(sort.indexOf("4") != -1) {
+							    	sorts.add("4");
+							      sort = sort.substring(sort.indexOf("4")+1);
+							    }
+							    if(sort.indexOf("5") != -1) {
+							    	sorts.add("5");
+							      sort = sort.substring(sort.indexOf("5")+1);
+							    }
+							    if(sort.indexOf("6") != -1) {
+							    	sorts.add("6");
+							      sort = sort.substring(sort.indexOf("6")+1);
+							    }
+							    if(sort.indexOf("7") != -1) {
+							    	sorts.add("7");
+							      sort = sort.substring(sort.indexOf("7")+1);
+							    }
+							    if(sort.indexOf("8") != -1) {
+							    	sorts.add("8");
+							      sort = sort.substring(sort.indexOf("8")+1);
+							    }
+							    
+							    
+							  //  System.out.println(sorts.toString());
+							    for(String so : sorts) {
+							    	
+			                         String pood = "RR-" +so;
+										
+										Contract con = new Contract(pood);
+										
+										 System.out.println("Sees " + pood + " " + ean);
+
+										  
+										if(res.get(pood) != null){
+			                        	  con = (Contract)res.get(pood);
+			                        	 } 
+										  ContractLine ll = new ContractLine(toode);
+			                        	  if(con.lines == null){
+			                        		  con.lines = new Vector();
+			                        	  }
+			                        	  con.lines.add(ll);
+			                        	  res.put(pood, con);
+							    }
+								
+								}
+								
+							  
+						 }else {
+							 
+						
+						
 						
 						for(int i = rida+1 ; i < sheet.getLastRowNum()+1;i++){
 							 row = sheet.getRow(i);
@@ -2349,7 +2519,7 @@ public class Converter {
 						   }
 							 }
 							 }
-						
+					 }
 					
 					
 				System.out.println("Lektussorts size " + res.toString() );
@@ -2473,27 +2643,63 @@ public class Converter {
 							 if(pais.equals("EAN")) {
 								 eanp = 2;
 							 }
+							 pais = formatter.formatCellValue(rowu.getCell(4));
+							 if(pais.equals("EAN")) {
+								 eanp = 4;
+							 }
 							 
 							 pais = formatter.formatCellValue(rowu.getCell(4));
 							 if(pais.equals("Nimetus")) {
 								 tnim = 4;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(6));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 6;
 							 }
 							 
 							 pais = formatter.formatCellValue(rowu.getCell(8));
 							 if(pais.equals("Seisund")) {
 								 seis = 8;
 							 }
+							 pais = formatter.formatCellValue(rowu.getCell(11));
+							 if(pais.equals("Seisund")) {
+								 seis = 11;
+							 }
 						 }
 						 
+						 pais = formatter.formatCellValue(rowu.getCell(2));
+						 if (pais.equals("Kauplus")) {
+							 u = 3;
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(8));
+							 if(pais.equals("EAN")) {
+								 eanp = 8;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(15));
+							 if(pais.equals("Seisund")) {
+								 seis = 15;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(10));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 10;
+							 }
+						 }
+							
 						 
 						 
 						 
-					//	 System.out.println("u " + u );
+						 
+					 System.out.println("u " + u +" " + tnim + " "+ seis + " "+ eanp );
+					
+					
 						for(int i = u ; i < sheet.getLastRowNum()+1;i++){
 							XSSFRow row = sheet.getRow(i);
 							 int poo = 0;
                           if(u == 6) {
                         	  poo = 3;
+                          }
+                          if(seis == 15) {
+                        	  poo = 2;
                           }
                           if(seis == 100) {
                         	  poo = 1;
@@ -2512,7 +2718,8 @@ public class Converter {
 									seisund = false;
 								}
 								
-								// System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood);
+								System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi+ " "+ ean + " " + pood);
+								
 							}
 							
 							if(seisund) {
@@ -2542,6 +2749,7 @@ public class Converter {
                            	  con.lines.add(ll);
                            	  res.put(pood, con);
 						   }
+							 // System.exit(0);
 							}
 							}
 						}
@@ -2590,13 +2798,36 @@ public class Converter {
 						 TreeMap sisu = new TreeMap();
 
 						 TreeMap nimi = new TreeMap();
+						int  reanr = 4;
+						int sortasuk = 3;
+						 // määrame andmete rea
+						 for(int i = 0 ; i < 10;i++){
+							
+						 Row row = sheet.getRow(1);
+						 for(int y = 2 ; y < 15 ;y++) {
+								Cell cellx = row.getCell((short)y);
+								if(cellx != null) {
+									try {
+								//	System.out.println("Elektra " + cellx.getStringCellValue());
+									if(formatter.formatCellValue(cellx).indexOf("A+") != -1  && reanr == 4) {
+										reanr = i;
+										sortasuk = y;
+									}
+                           }catch(Exception e) {
+									//e.printStackTrace();
+								}
+								}	
+							}
 						 
+						 }
+						 
+						// System.out.println("reanr " + reanr );
 						//Teeme kõigepealt treemapi valmis kja siis krutime läbi 
-							for(int i = 4 ; i < sheet.getLastRowNum()+1;i++){
-								Row row = sheet.getRow(i);
+							for(int i = reanr ; i < sheet.getLastRowNum()+1;i++){
+							Row row = sheet.getRow(i);
 								String ean = formatter.formatCellValue(row.getCell(0));
-								String code = formatter.formatCellValue(row.getCell(3));
-								String nimis = formatter.formatCellValue(row.getCell(2));
+								String code = formatter.formatCellValue(row.getCell(sortasuk));
+								String nimis = formatter.formatCellValue(row.getCell(sortasuk-1));
 								if(ean != null && ean.trim().length() > 0) {
 									sisu.put(ean.trim(), code);
 									nimi.put(ean.trim(), nimis);
@@ -2644,7 +2875,7 @@ public class Converter {
 						      sort = sort.substring(sort.indexOf("C")+1);
 						    }
 						    
-						    System.out.println(sorts.toString());
+						  //  System.out.println(sorts.toString());
 						    for(String so : sorts) {
 						    	
 		                         String pood = "OG-" +so;
@@ -2673,8 +2904,8 @@ public class Converter {
 					 }
 					
 					
-				//	System.out.println("sorts size " + res.toString() + " " + sheet.getLastRowNum());
-					//System.exit(0);
+					//System.out.println("sorts size " + res.toString() + " " + sheet.getLastRowNum());
+				//	System.exit(0);
 						
 					 }catch(Exception e) {
 						 e.printStackTrace();
@@ -2776,9 +3007,15 @@ public class Converter {
 		       }
 		      String nn = file.getName();
 		    		  
-		    if(!file.isDirectory())
+		    if(!file.isDirectory()) {
+		    	File ii = new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn);
+		    	if(ii.exists()) {
+		    		ii.delete();
+		    	}
 		    	System.out.println("renamed " +   file.renameTo(new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn)));
 		      
+		    }
+		    	
 		    }
 		
 	 
@@ -2892,28 +3129,31 @@ public class Converter {
 									}	
 								}
 								
-                                 
 									
-									cellx = row.getCell((short)0);
-									if(cellx != null) {
-										try {
-										String a1 = formatter.formatCellValue(cellx);
-									cellx = row.getCell((short)1);
-									String a2 = formatter.formatCellValue(cellx);
-									cellx = row.getCell((short)2);
-									String a3 = formatter.formatCellValue(cellx);
-									
+									 if(row != null) {
+									 cellx = row.getCell((short)0);
+										if(cellx != null) {
+											try {
+											String a1 = formatter.formatCellValue(cellx);
+										cellx = row.getCell((short)1);
+										String a2 = formatter.formatCellValue(cellx);
+										cellx = row.getCell((short)2);
+										String a3 = formatter.formatCellValue(cellx);
 										
-								
-											if(a1 != null && a1.equals("Ribakood") && a2 != null && a2.equals("Nimetus")
-													&& a3 != null && a3.equals("Kaubagrupp")) {
-												return "lektus";
+											
+									
+												if(a1 != null && a1.equals("Ribakood") && a2 != null && a2.equals("Nimetus")
+														&&  a3 != null && (a3.equals("Kaubagrupp") || a3.equals("Laogrupid"))  ) {
+													return "lektus";
+												}
+											}catch(Exception k) {
+												k.printStackTrace();
 											}
-										}catch(Exception k) {
-											k.printStackTrace();
-										}
-										
-									}	
+											
+										}	 
+								 }
+									
+									
 								
 								
 	                      for(int y = 3 ; y < 12 ;y++) {
@@ -3043,7 +3283,7 @@ public class Converter {
 								}
 								
 								
-								for(int y = 3 ; y < 15 ;y++) {
+								for(int y = 2 ; y < 15 ;y++) {
 									cellx = row.getCell((short)y);
 									if(cellx != null) {
 										try {
@@ -3857,7 +4097,7 @@ try{
 	}
 	
 	if(ag.getStock() > 0){
-		value.put("stock", ag.getStock());
+		//value.put("stock", ag.getStock());
 	}
 	
 	if(ag.getMeasure() > 0){
@@ -3956,7 +4196,7 @@ try{
 			}
 			
 			
-			System.out.println("Pass " + agent + " " + passx);
+		//	System.out.println("Pass " + agent + " " + passx);
 			
 			Iterator itera =  tm.values().iterator();
 		       while (itera.hasNext()){
@@ -4051,6 +4291,40 @@ try{
 	  return getSVData(new Date(from) , new Date(to) , company,  user ,  pass,  week, type , subTypes , nameadd);
   }
 	
+  
+  public static String getTaskData(long from , long to , String company, String user , String pass,  String nameadd){
+	  eevaeksport.util.ReportingService serv = new ReportingService();
+	  serv.user =  user;
+		serv.pass = pass;
+		serv.company = company;
+		String res = "";
+		try {
+			org.json.JSONArray array = serv.getTaskdata(new Date(from), new Date(to) );
+			//System.out.println("oioi "+ array.toString());
+		//	throw new Exception("demo"); 
+			try {
+				String mm = (new Date(from).getMonth()+1)+ "";
+				if(mm.length() == 1)
+					mm = "0"+ mm;
+				
+				String yyyy = (new Date(from).getYear()+1900)+ "";
+				String ww = "";
+			
+				res = "svdata/taskdata-" + nameadd + ww + mm  + yyyy + ".json" ;
+					Converter.saveFile(  "svdata/taskdata-" + nameadd + ww + mm  + yyyy + ".json" , array.toString());
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		 
+		  } catch (Exception t) {
+			t.printStackTrace();
+		  }
+		
+		return res;
+		
+  }
+  
   public static String getSVData(Date from , Date to , String company, String user , String pass, boolean week , String type , String subTypes , String nameadd){
 	  eevaeksport.util.ReportingService serv = new ReportingService();
 	  serv.user =  user;
@@ -4151,6 +4425,89 @@ try{
 		return res;
 	}
   
+	public static void loadUploadedFiles(Date algus, Date lopp ,String company, String user , String pass){
+		
+		try {
+			
+			 eevaeksport.util.ReportingService serv = new ReportingService();
+			  serv.user =  user;
+				serv.pass = pass;
+				serv.company = company;
+	
+			
+				JSONArray array = serv.getUploadedFileList(algus,lopp);
+				Converter.saveFile(  "uploadedfileslist.json" , array.toString());
+			
+			
+					serv.closeClient();	
+				
+			
+			} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	 public static void makeWebFilesList(Date algus, Date lopp ,String company, String user , String pass, String dir, String comp) {
+			
+		   Converter.loadUploadedFiles(algus, null ,company,  user ,  pass);
+		
+		  StringBuffer sb  = new StringBuffer();
+		
+			 try {
+				
+				 JSONParser parser = new JSONParser();
+				 Object obj =  parser.parse(new FileReader( "uploadedfileslist.json"));
+				
+				 
+				 
+				
+				   	
+		            org.json.simple.JSONArray tagList = (org.json.simple.JSONArray) obj;
+		            
+		            Iterator<org.json.simple.JSONObject> iterator = ((List) tagList).iterator();
+		            while (iterator.hasNext()) {
+		            	org.json.simple.JSONObject cob = iterator.next();
+		            	
+		            	String key = (String)cob.get("url");
+		            	
+		            	try {
+		            	     key = java.net.URLDecoder.decode(key, StandardCharsets.UTF_8.name());
+		            	} catch (UnsupportedEncodingException e) {
+		            	  
+		            	}
+		            	
+		            	System.out.println(key);
+		            	
+		                String agent = key.substring(key.lastIndexOf("/")+1, key.indexOf("-{"));
+		            	String cuid = key.substring(key.indexOf("{")+1, key.indexOf("}"));
+		            	String date = key.substring(key.indexOf("}")+2, key.indexOf("}")+8);
+		            	String time = key.substring(key.indexOf("}")+9, key.indexOf("}")+17).replaceAll("_", ".");
+		            	String gr = " "; 
+		            	try {
+		            		gr = key.substring(key.indexOf("[")+1, key.indexOf("]"));
+	            		} catch (Exception e) {
+		            		
+		            	}
+		            	
+		            	date = "20" + date.substring(0,2) + "-" + date.substring(2,4) + "-" + date.substring(4,6);
+		            	
+		            	
+		            	
+		            	sb.append( cuid + ";" + agent + ";" + date + ";" + time + ";" + gr + ";" + key + "\n" );
+		            	
+		            	
+		              
+		            	
+		            }
+		           		 }catch(Exception e) {
+		           			 e.printStackTrace();
+		           		 }
+			 String fn = dir + "files-" + comp + "-" + Converter.getDDpMMpYYYYpString(Calendar.getInstance()) +".csv";
+		      Converter.saveFile(fn, sb.toString());
+		      System.out.println( "File ssved  " + fn);
+		           		 
+	  }
 
 	public static void loadCustDimensions(String asi ,String company, String user , String pass){
 		
@@ -4721,7 +5078,7 @@ try{
 		}
 	
 	if(ccc.getChain()!= null && ccc.getChain().trim().length() > 0 ){
-	//	System.out.println(ag.getChain());
+		System.out.println(ccc.getChain());
 		JSONArray arrayx = new JSONArray();
 		JSONObject valuex = new JSONObject();
 		valuex.put("code", ccc.getChain());
@@ -5568,6 +5925,10 @@ try{
 	    				value.put("street", ag.restStreet);
 	    			}
 	    			
+	    			if(ag.section != null){
+	    				value.put("section", ag.section);
+	    			}
+	    			
 
 	    			if(ag.restPerPos != null){
 	    				value.put("perposition", ag.restPerPos);
@@ -5823,6 +6184,10 @@ String ees = "";
 		value.put("peremail", ag.restPerEmail);
 	}
 	
+	if(ag.section != null){
+		value.put("section", ag.section);
+	}
+	
 	
 	if(ag.getCountry() != null){
 		value.put("country", ag.getCountry());
@@ -5970,12 +6335,7 @@ String ees = "";
 	
 		try {
 			
-			try {
-					Converter.saveFile("json" + System.getProperty("file.separator") 
-					+ Calendar.getInstance().getTimeInMillis()+ ".txt" , array.toString());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			
 			
 		String aaa = 	serv.postJson(array.toString(), url);
 			System.out.println("MYJSON ASII   \n" + aaa + "\n" + array.toString() );
@@ -6009,8 +6369,8 @@ String ees = "";
 			JSONObject elem = (JSONObject)itera.nextElement();
 			array.put(elem);
 
-	if(cou == 300){
-		System.out.println("MYJSON AssetsCustomers 300 " );
+	if(cou == 1000){
+		System.out.println("MYJSON AssetsCustomers 1000 " );
 		
 			try {
 				String aaa = serv.postJson(array.toString(), url);
@@ -6030,10 +6390,13 @@ String ees = "";
 		
 	
 		try {
+			Converter.saveFile("json" + System.getProperty("file.separator") 
+			+ Calendar.getInstance().getTimeInMillis()+ ".txt" , array.toString());
+		
 			String aaa = serv.postJson(array.toString(), url);
 			System.out.println("MYJSON RCals left  "+ aaa  + " " + array.toString() );
-		//	Converter.saveFile("json" + System.getProperty("file.separator") 
-			//+ Calendar.getInstance().getTimeInMillis()+ ".txt" , array.toString());
+		
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -9761,7 +10124,12 @@ client.close();
 								  			cell.setCellFormula("COUNTA(E" + (x + 5 + 1) +":" + last_column_letter + "" + (x+6) + ")");
 								  			cell.setCellStyle(cellStyle);
 								  		}
-						
+
+								  		exceldir = exceldir + "reports/";
+								  		File ff = new File(exceldir);
+								  		if(!ff.exists()) {
+								  			ff.mkdir();
+								  		}
 										  excelifail.close(); //Close the InputStream
 										  System.out.println(exceldir + "fixreport-" + 
 												  Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");

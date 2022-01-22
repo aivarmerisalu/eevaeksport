@@ -299,6 +299,20 @@ public class LabbisSkonisImportDriver
 	  l0AS132.setWarehouse("0AS132");
 	  
 	
+	  Order l0AS131 = new Order(order.getCompany(),order.getAgentFirstName());
+
+	  l0AS131.setAgentCode(order.getAgentCode());
+	  l0AS131.setDokNr("19" + order.getDokNr());
+	  l0AS131.setInfo(order.getInfo());
+	  l0AS131.setTeostaja((order.getTeostaja()));
+	  l0AS131.setChanged(order.isChanged());
+	  l0AS131.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  l0AS131.setStatus(order.getStatus());
+	  l0AS131.setShipTime(order.getShipTime());
+	  l0AS131.setWarehouse("0AS131");
+	  
+	  
+	  
 	  Vector lines = order.getOrderLines();
 	  Enumeration enumr = lines.elements();
 	  
@@ -374,6 +388,10 @@ public class LabbisSkonisImportDriver
 										    	 l0AS132.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 											     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 											     }
+										     else if(ware.equals("0AS131") ){
+										    	 l0AS131.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+											     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+											     }
 		     
 		     
 
@@ -382,6 +400,9 @@ public class LabbisSkonisImportDriver
 
 	  if(l0AS132.getOrderLines() != null && l0AS132.getOrderLines().size()>0){
 		  result.add(l0AS132);  
+	  }
+	  if(l0AS131.getOrderLines() != null && l0AS131.getOrderLines().size()>0){
+		  result.add(l0AS131);  
 	  }
 	  
 

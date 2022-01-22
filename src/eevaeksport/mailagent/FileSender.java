@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Category;
@@ -164,7 +165,7 @@ public class FileSender {
 	    	        	for (S3ObjectSummary objectSummary : objects.getObjectSummaries())  {
 		    	        	 if(!objectSummary.getKey().equals(dirInCash)) {
 		    	            String keyy = objectSummary.getKey();
-		    	        		 String filen = dirOutCashLoc + keyy.substring(keyy.lastIndexOf("/")+1);
+		    	        		 String filen = dirOutCashLoc + keyy.substring(keyy.lastIndexOf("/")+1).replaceAll("\n", " " );
 		    	            FileUtils.copyInputStreamToFile(s3Client.getObject(bucketName, keyy)
 		    	            		.getObjectContent(), new File(filen));
 		    	            
@@ -255,8 +256,18 @@ public class FileSender {
 	        
 	        if(this.sendPicts) {
 	        	 System.out.println(time + " Sees Picts " + new File(dirPictLoc).listFiles() + " " + dirOutLoc);
+	        	  TreeMap<String,Long> sizes = new TreeMap<String,Long>();
+	        	 
+	             ObjectListing   objectListing = s3Client.listObjects(bucketName, dirPict);
+	    	          //  System.out.println(time + " Sees " + f.getName() + " " + objectListing.getObjectSummaries().toString());
+	    	            for (S3ObjectSummary objectSummary :    objectListing.getObjectSummaries()) {
+	    	             // System.out.println( " - " + objectSummary.getKey() + "  " +
+	    	              //    "(size = " + objectSummary.getSize() +  ")");
+	    	               sizes.put(objectSummary.getKey(), objectSummary.getSize());
+	    	            }
+	    	            
 	    	        for (File f : new File(dirPictLoc).listFiles())  {
-	    	        	 System.out.println(time + " Sees " + f.getName());
+	    	        	
 	    	        	try {
 
 	    	        			  PutObjectRequest request = new PutObjectRequest(bucketName, dirPict + f.getName(), f);
@@ -264,11 +275,20 @@ public class FileSender {
 	  	    	                metadata.setContentType("plain/text");
 	  	    	                metadata.addUserMetadata("title", "someTitle");
 	  	    	                request.setMetadata(metadata);
-	  	    	             if(! s3Client.doesObjectExist(bucketName, dirPict + f.getName()) || f.getName().endsWith("txt")) {
+	  	    	              
+	  	    	                
+	  	    	         
+	  	    	            
+	  	    	            //    System.exit(0);
+	  	    	                
+	  	    	             if ( sizes.get(dirPict + f.getName()) == null || f.getName().endsWith("txt")) {
 	  	    	            	 s3Client.putObject(request);
 		  	    	                log(time + " Uploaded PIcture file to AWS : " + f.getName());
 		  		    	            System.out.println(time + " Uploading " + f.getName());	
-	  	    	             }else {
+	  	    	             } else if(sizes.get( dirPict + f.getName()) != f.length()){
+	  	    	            	 s3Client.putObject(request);
+	  	    	            	 System.out.println(time + " Pilt on uue suurusega " + f.getName() + " W" + sizes.get( dirPict + f.getName())+ " L" + f.length() );	
+	  	    	             } else {
 	  	    	            	 System.out.println(time + " Pilt olemas ei lae " + f.getName());	
 	  	    	             }
 	  	    	               

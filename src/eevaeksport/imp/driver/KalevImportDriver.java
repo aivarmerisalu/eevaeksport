@@ -1998,7 +1998,7 @@ private long getAndUpdateNext() throws SQLException{
             	 kogus = kogus /2;  //mingi laima kommi case on see..
              }
              
-             if(order.getStatus() ==  98) { // maxima 
+             if(order.getStatus() ==  98 || order.getCompany().equals("M17307")) { // maxima 
             	 if(line.getToode().equals("07398")) {
                 	 kogus = kogus *5;  //mingi laima kommi case on see..
                  }

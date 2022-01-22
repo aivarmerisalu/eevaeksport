@@ -272,10 +272,7 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
 
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
-          
-          //1. loeme kylge delyvery aadressi asjad 
-          
- 
+     
 
           try {
 
@@ -338,17 +335,7 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                  int nadal = rs.getInt("kamp");
                                  String relation = rs.getString("relation");
                                  String pri = rs.getString("priority");
-                                 if(pri!= null){
-                                 if(pri.length() == 1){
-                                	 pri = "111"+ pri;
-                                 }
-                                 if(pri.length() == 2){
-                                	 pri = "11"+ pri;
-                                 }
-                                 if(pri.length() == 3){
-                                	 pri = "1"+ pri;
-                                 }                               
-                                 }
+                                 
                                  
                                  MatrixLine mline = new MatrixLine();
                                  
@@ -388,8 +375,19 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                    mline.setEndDate(lopp.trim());
                                  }
                                  
+                                 if(pri!= null){
+                                     if(pri.length() == 1){
+                                    	 pri = "111"+ pri;
+                                     }
+                                     if(pri.length() == 2){
+                                    	 pri = "11"+ pri;
+                                     }
+                                     if(pri.length() == 3){
+                                    	 pri = "1"+ pri;
+                                     }                               
+                                     }
 
-                                 mline.setProdLevel(pri); 
+                                // mline.setProdLevel(pri); 
                                  
                                if(goes){
                                  if(price > 0){
@@ -397,7 +395,8 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                      lines.add(mline);       	 
                                  }else if (perc0 >0){
                                 	 mline.setDiscount(perc0);
-                                     lines.add(mline);   
+                                     lines.add(mline); 
+                                   //  mline.setProdLevel("2"+pri);  // vähendame prioriteeti alel
                                  }/*else if (perc >0){
                                 	 mline.setDiscount(perc);
                                      lines.add(mline);   
@@ -459,7 +458,7 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                           }
                                           
 
-                                          mline.setProdLevel(pri); 
+                                       //   mline.setProdLevel(pri); 
                                           mline.setPrice(price);
                                  
                                           lines.add(mline);
@@ -676,7 +675,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 
 	  String  cmd2 = "select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
 		      "   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid  " +
-		     " WHERE  summ.DATAAREAID='bd' and CLOSED = 0  and dim.inventlocationid in ('VLAK','VLAKKOOPS','VLAKTB') " +
+		     " WHERE  summ.DATAAREAID='bd' and CLOSED = 0  and dim.inventlocationid in ('VLAK','VLAKKOOPS','VLAKTB','VLRK') " +
 			"	GROUP BY  summ.itemid  having sum(availphysical) >0";
 	  
 	  

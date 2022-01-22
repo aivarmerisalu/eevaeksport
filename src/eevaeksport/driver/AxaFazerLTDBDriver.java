@@ -1370,6 +1370,7 @@ if(grupp.equals("leib") ){
   con.close();
     } catch (Exception e){
       getParent().showError(e);
+      System.exit(0);
     }
     return customers;
   }

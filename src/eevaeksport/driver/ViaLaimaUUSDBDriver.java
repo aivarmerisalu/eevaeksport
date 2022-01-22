@@ -1,6 +1,7 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,7 +10,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
@@ -119,7 +122,8 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
         jsonopen2 = getParent().getProps().getProperty("json.open2");
         jsonopen3 = getParent().getProps().getProperty("json.open3");
         jsonopen4 = getParent().getProps().getProperty("json.open4");
-        
+        jsonshmode = "http://84.50.148.253/edimap2/index.php?loc=php/reports/actionsreports.php&trackid=0899e9728ad5c6d69baf32d059759064b478957db0cbfdc9adc3ff0d7ec7ae1f54d61d5506df844b9f3f7ef3bb9e7ce2c82e31363431333335303539&output=json";
+    
 	}
 
       String user =  null;
@@ -166,6 +170,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
       String jsonopen2 = null;
       String jsonopen3 = null;
       String jsonopen4 = null;
+      String jsonshmode = null;
       
       
       private NumberFormat NF = NumberFormat.getInstance();
@@ -1108,7 +1113,105 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 	
 	private Vector dlist = null;
 	
-	 
+	 private void makeShipModeFile(String countries) {
+		 
+		 StringBuffer sb1 = new StringBuffer();
+		   TreeMap<String,String> vahe = new TreeMap<String,String>();
+		 final File  v  = new File("shmodejson.txt");
+	          
+	    	   try{
+	    	   URL urlst = new URL(jsonshmode);
+				Converter.trustAllHttpsURLConnection();
+				Converter.doTrustToCertificates();
+			URLConnection con = urlst.openConnection();
+			InputStream is = con.getInputStream();
+			OutputStream os = new FileOutputStream(v);
+			int i;
+			while ( (i = is.read()) != -1) {
+				os.write(i);
+			}
+			is.close();
+			os.close();
+	    	   }catch(Exception w){
+			    	w.printStackTrace();	
+			       }
+	    	   System.out.println("SHModeJson lopetan ");
+	    	   try{	   
+	    	 
+	    	   
+			JSONParser parser = new JSONParser();
+		       Object obj = parser.parse(new FileReader("shmodejson.txt"));
+	           org.json.simple.JSONObject company = (org.json.simple.JSONObject) obj;
+	           org.json.simple.JSONArray companyList = (org.json.simple.JSONArray) company.get("data");
+	      
+	          
+	        
+	      Iterator<org.json.simple.JSONObject> iterator = ((List) companyList).iterator();
+	      while (iterator.hasNext()) {
+	    	  org.json.simple.JSONObject cob = iterator.next();
+	    	 
+	    	  String id = (String)cob.get("reference");
+	    	  String nimi = (String)cob.get("name");
+	    	  String carr = (String)cob.get("carrier_name");
+	    	  String carrreg = (String)cob.get("carrier_reg_no");
+	    	  String abi = "";
+	    	  if(carr.equals("Eesti Post AS")) {
+	    		  abi = "EP ";
+	    	  }
+	    	  if(carr.toLowerCase().contains("dpd")) {
+	    		  abi = "DPD ";
+	    	  }
+	    	  if(carr.toLowerCase().contains("itell")) {
+	    		  abi = "SP ";
+	    	  }
+	    	  String mode = "box";
+
+	    	  String country =  (String)cob.get("country");
+	    	  if(countries.contains(country)) {
+	    		  String data = id+ ";" + abi + nimi + ";"+ mode + ";" + carr + ";" + carrreg ;
+	    		  vahe.put(abi+nimi, data);
+	    	  }
+	    	 /*   "id": "2351",
+	    	      "reference": "88854",
+	    	      "name": "Alytaus PC ARENA pa\u0161tomatas (PERPILDYTAS)",
+	    	      "carrier_name": "Eesti Post AS",
+	    	      "carrier_id": "267",
+	    	      "carrier_reg_no": "10328799",
+	    	      "address_row_1": "\u016adrijos g. 1",
+	    	      "city": "Alytaus m. sav.",
+	    	      "postcode": "62411",
+	    	      "country": "LT"
+	    	    },*/
+	        }
+		 
+	    	   }catch(Exception w){
+			    	w.printStackTrace();	
+			       }
+		 try{
+			 
+			 //lisame kullerid 
+			 
+			  vahe.put("KUL DPD Eesti", "kul1;KUL DPD Eesti;dtd;DPD;10092256" );
+			  vahe.put("KUL SendPack", "kul1;KUL SendPack;dtd;SEP;2423252" );
+			 
+			Iterator itera =  vahe.values().iterator();
+			while (itera.hasNext()) {
+				sb1.append(itera.next()+ "\n");
+			}
+		        if(sb1.toString().length() >0) {
+		        	  Writer out = new BufferedWriter(new OutputStreamWriter(
+		  	  			    new FileOutputStream("shipmode.txt"), "UTF-8"));
+		  	  			try {
+		  	  			    out.write(sb1.toString());
+		  	  			} finally {
+		  	  			    out.close();
+		  	  			}
+		        }
+	       	
+	        } catch(Exception r) {
+	        	
+	        }
+	 }
 	
 	 private TreeMap  getOpenOrders(){
 		 
@@ -1898,6 +2001,11 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 				e.printStackTrace();
 			}
         
+        if ("true".equals(getParent().getProps().getProperty("shipmodefile"))) {
+		
+        	makeShipModeFile("EE");
+			
+		}
         
       TreeMap  oOrders = this.getOpenOrders();
         
@@ -2317,9 +2425,15 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		if(getParent().getProps().getProperty("namepart") != null){
 			namepart = getParent().getProps().getProperty("namepart");
 		}
+		
 		String namepartno  = null;
 		if(getParent().getProps().getProperty("namepartno") != null){
 			namepartno = getParent().getProps().getProperty("namepartno");
+		}
+		
+		String namepartend  = null;
+		if(getParent().getProps().getProperty("namepartend") != null){
+			namepartend = getParent().getProps().getProperty("namepartend");
 		}
 		
 		
@@ -2654,6 +2768,12 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 
 												   if(namepartno != null) {
 													   if(prod.getName().toLowerCase().contains(namepartno)) {
+														   goes = false;
+													   }
+												   }
+												   
+												   if(namepartend != null) {
+													   if(prod.getName().contains(namepartend)) {
 														   goes = false;
 													   }
 												   }

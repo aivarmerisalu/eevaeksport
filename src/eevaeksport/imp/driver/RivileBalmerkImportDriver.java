@@ -6,11 +6,23 @@
 package eevaeksport.imp.driver;
 
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -86,7 +98,20 @@ public class RivileBalmerkImportDriver
     catch (Exception e) {
       parent.showError(e);
     }
-  }
+    
+    logurl = "https://api.manorivile.lt/client/v2";
+    if( parent.getProps().getProperty("logurl") != null){
+    	  logurl = parent.getProps().getProperty("logurl");
+    }
+    if( parent.getProps().getProperty("apikey") != null){
+    	APIKEY = parent.getProps().getProperty("apikey");
+    }
+   }
+  
+  
+  private String logurl = null;
+  private String APIKEY = null;
+  
   public String getImportFile(){
 	    return parent.getProps().getProperty("imp.read");
 	  }
@@ -509,6 +534,19 @@ if(ladu.trim().length()!=0){
 
         
         this.sendOrderEmail(order, tag, pandikas);
+        if(APIKEY != null) {
+        String data = "	<body><method>EDIT_I06_FULL</method><data>" + sb.toString() + "</data>" + 
+        		"</body>";
+       StringBuffer sbb = postData(data);
+       System.out.println("Response " + sbb);
+       
+        fileName = escape(cat + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  "response.txt";
+       System.out.println(fileName);
+          fos = new FileOutputStream(fileName);
+         fos.write(sbb.toString().getBytes());
+         fos.close();
+        }
+        
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
@@ -518,8 +556,67 @@ if(ladu.trim().length()!=0){
     return "RivileBalmerk";
   }
 
+  private StringBuffer postData(String data) throws Exception {
+	  HttpURLConnection urlc = null;
+	  StringBuffer inputLineBuf = new StringBuffer();
+	  try{
+	  urlc = (HttpURLConnection)  new URL(this.logurl).openConnection();
+	  try{
+	  urlc.setRequestMethod( "POST" );
+	  urlc.addRequestProperty("ApiKey", APIKEY);
+	  } catch (ProtocolException e) {
+	    throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
+	  }
+	  urlc.setDoOutput(true);
+	  urlc.setDoInput(true);
+	  urlc.setUseCaches(false);
+	  urlc.setAllowUserInteraction(false);
+	  OutputStream out = urlc.getOutputStream();
+	  try {
+		out.write( data.getBytes() );
+	  } catch (IOException e){
+	  throw new Exception("IOException while posting data", e);
+	  } finally {
+	  if (out != null)
+	  out.close();
+	  }
+	  InputStream in = urlc.getInputStream();
+	  try{
+	  Reader reader = new InputStreamReader(in);
+	    InputStreamReader isr = new InputStreamReader(in,"UTF-8");
+	    BufferedReader inr = new BufferedReader(isr);
+	    String inputLine;
 
- 
+	    while ((inputLine = inr.readLine()) != null){
+	        inputLine = Converter.enCodeEst(inputLine);	// enCode(inputLine);	
+	    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n"));
+	  }
+
+	     inr.close();
+	  
+	  
+	  reader.close();
+	  } catch (IOException e)
+	  {
+	  throw new Exception("IOException while reading response", e);
+	  } finally
+	  {
+	  if (in != null)
+	  in.close();
+	  }
+	  } catch (IOException e)
+	  {
+	  throw new Exception("Connection error (is server running at " + this.logurl + " ?): " + e);
+	  } finally
+	  {
+	  if (urlc != null)
+	  urlc.disconnect();
+	  }
+	  return inputLineBuf;
+	  }
+	  
+
+
 
   private String escape(String s){
     if (s == null) return s;

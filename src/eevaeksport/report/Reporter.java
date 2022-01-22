@@ -5,6 +5,7 @@ package eevaeksport.report;
 
 
 import java.io.BufferedReader;
+
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,7 +57,7 @@ import eevaeksport.driver.BSMSDBDriver;
 import eevaeksport.driver.CrmData;
 import eevaeksport.driver.ErplyLttDBDriver;
 import eevaeksport.driver.GuttaDBDriver;
-import eevaeksport.driver.IceAxaDBDriver;
+
 import eevaeksport.driver.KalevDBDriver;
 import eevaeksport.driver.KodupaberDBDriver;
 import eevaeksport.driver.LeiburDBDriver;
@@ -1282,36 +1283,13 @@ if (files.size() > 0) {
                if (driver instanceof VichiLITSQLDBDriver){
                    ((VichiLITSQLDBDriver)driver).insertSuperVisorSQLMeri(vis);
                 }
-               if (driver instanceof AlitaLTDBDriver){
-                   ((AlitaLTDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                }
-               
-               if (driver instanceof VichiLITMercDBDriver){
-                   ((VichiLITMercDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                }
-               
-         
-               
-               
-               if (driver instanceof BSMSDBDriver){
-                   ((BSMSDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                }
-               
-               if (driver instanceof ScalaTobaDBDriver){
-                   ((ScalaTobaDBDriver)driver).insertSuperVisorSQLMeri(vis,dd);
-                }
                if (driver instanceof RakvereDBDriver){
                    ((RakvereDBDriver)driver).insertSuperVisorSQLMeri(vis);
                 }             
-               if (driver instanceof SAFMaagDBDriver ){
-                   ((SAFMaagDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                  }
                if (driver instanceof MovexLatDBDriver ){
                    ((MovexLatDBDriver)driver).insertSuperVisorSQLMeri(vis);
                  }
-                 if (driver instanceof IceAxaDBDriver ){
-                     ((IceAxaDBDriver)driver).insertSuperVisorSQLMeri(vis);
-                   }
+               
                  if (driver instanceof LeiburDBDriver ){
                      ((LeiburDBDriver)driver).insertSuperVisorSQLMeri(vis);
                    }

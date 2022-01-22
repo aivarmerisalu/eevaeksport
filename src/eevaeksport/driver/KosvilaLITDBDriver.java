@@ -617,13 +617,12 @@ String ag = rs.getString("agent").trim();
     public Vector getCustomerProductsList(String agentCode) {
         connectionUp(url2);
         
-        String cmd =" SELECT trim(I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else trim((N33_kodas_ak)) end) as kood," +
+        String cmd =" SELECT trim(I06_KODAS_KS)  AS klient,(case when (i06_kodas_ak) is null then '1' else trim((i06_kodas_ak)) end) as kood," +
         		"I07_KODAS AS toode,I07_KIEKIS AS kogus, " +
 				"I06_DOK_DATA AS kuupaev FROM i07_pard p" +
 				"  INNER JOIN i06_parh ON p.I07_KODAS_PO=I06_KODAS_PO "+
-				" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
 				" WHERE I06_DOK_DATA > ? "+
-				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else trim((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS";
+				" GROUP BY I06_KODAS_KS,(case when (i06_kodas_ak) is null then '1' else trim((i06_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS";
     
         if (isDebug()) {
            System.out.println(cmd);

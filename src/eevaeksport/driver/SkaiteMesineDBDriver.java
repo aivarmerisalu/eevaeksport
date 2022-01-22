@@ -630,9 +630,58 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
       }
 
 
-    
-  
+
     public Vector getPriceMatrixData()  {
+        Vector lines = new Vector();
+    
+     
+   String    sql = "select Partneriai_Kodas as clgroup, Prekes_Kodas as prodid,KainaBePVM as price  from [MES_Kainos]  " ; 
+		
+
+           try {
+             TreeMap prior = new TreeMap(); 
+        	   
+             Connection con = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
+                     getParent().getProps().getProperty("dsn.pass"));
+             Statement  st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql);
+
+             while (rs.next()) {
+
+               String clGroup = rs.getString("clgroup");
+               String prodID = rs.getString("prodid").trim();
+               double price = rs.getDouble("price");
+             
+               if(clGroup.trim().length() > 0) {
+            	   MatrixLine mline = new MatrixLine();
+               mline.setCliGroup(clGroup.trim());
+
+               if (prodID != null && prodID.trim().length() > 1) {
+                 mline.setProdID(prodID.trim());
+               }
+             
+               if (price != 0) {
+                 mline.setPrice(price);
+               }
+              
+                   lines.add(mline);   
+             }
+             }
+             rs.close();
+             st.close();
+             con.close();
+            	   
+           }
+           catch (SQLException ex) {
+             ex.printStackTrace();
+           }
+           System.out.println("Maatrix suurus " + lines.size());
+         return lines;
+    	
+       }
+  
+    
+    public Vector getPriceMatrixDataOld()  {
         Vector lines = new Vector();
        this.getProducts(null);
     
@@ -812,6 +861,9 @@ Statement st = null;
        }
 
     
+    
+    
+    
     private Vector baashk = null;
       
       public TreeMap getCustomers(Agent agent){
@@ -985,7 +1037,8 @@ Statement st = null;
 		   }
 		   if(payid != null){
 				  cust.setPayer(payid);
-	          }
+				  cust.setGroup(payid);
+			  }
 		   
 		   String nim = rs.getString("nimi2").replaceAll("\""," ").trim();
 		   String nims = rs.getString("nimi").replaceAll("\""," ").trim();
@@ -1091,7 +1144,7 @@ Statement st = null;
                 if(aletext != null && aletext.trim().length()>0){
                   cust.setZipcode(Converter.enCodeEst(aletext.trim()));
                 }
-                String hinnak = rs.getString("hinnak");
+                /*String hinnak = rs.getString("hinnak");
                 if(hinnak != null && hinnak.trim().length()>0){
                   cust.setGroup(hinnak.trim());
                 }
@@ -1111,7 +1164,7 @@ Statement st = null;
                 	 }else{
                 		 cust.setGroup("" +lepMap.get(payid)); 
                 	 }
-                 }
+                 }*/
                  
                  if(deguSumm.get(cust.getID()) != null){
                 	cust.setCity("DeguSuma : " + deguSumm.get(cust.getID()) + " eur");
@@ -1754,6 +1807,7 @@ try{
 
     public static final String DRIVER_VERSION = "SkaiteMesine";
     private String             url = "jdbc:odbc:ES_MazeikiuMesine";
+    private String             url2 = "jdbc:odbc:report";
     private Connection	       con = null;
     private Vector grouplist = new Vector();
     private PreparedStatement  stmt = null;

@@ -1303,8 +1303,8 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
         " hi.idgrarticle=pr.id RIGHT JOIN grpricelist pl ON pl.id=hi.idgrpricelist RIGHT JOIN " +
 		" grarticlecat arca ON arca.id = cat.idgrarticlecat  " +
         " RIGHT JOIN grunit y ON y.id=pr.idgrunit   " +
-        " WHERE rtrim(pl.code)='Hinnakiri' and I_Grupp1 = 12 and U_Aktiivne=1 AND (arca.category='Hinnakiri' or arca.category='suveHinnakiri' or arca.category='jouluHinnakiri') 	 " +
-		" order by pr.code ";
+        " WHERE (rtrim(pl.code)='Hinnakiri' and I_Grupp1 = 12 and U_Aktiivne=1 AND (arca.category='Hinnakiri' or arca.category='suveHinnakiri' or arca.category='jouluHinnakiri') ) 	 " +
+		"  OR ( I_Grupp1 = 13 and U_Telema=1 ) order by pr.code ";
     
     String cmd2 = "SELECT pr.code AS toode,SUM(quantity) AS seis FROM dcurbalancestore ss  " +
     		 "INNER JOIN grarticle pr ON idgrarticle = pr.id WHERE ss.iddrstore=13 AND quantity >0 GROUP BY  pr.code " ;

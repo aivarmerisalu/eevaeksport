@@ -45,14 +45,20 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.http.client.methods.HttpGet;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -119,8 +125,21 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
       + "&password=" + password;
    
    session = getSessionId(passString);
-	System.out.println(session);
-   while(session.indexOf("%") != -1){
+   try {
+		myurlcdn = new URL("https://cdn.erply.com/session");
+	} catch (MalformedURLException e) {
+		e.printStackTrace();
+	}
+   sessioncdn = getSessionIdCDN("jwt=" +jwttoken);
+   
+   try {
+		// getImagesCDN(sessioncdn);
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+
+	while(session.indexOf("%") != -1){
 	   session = getSessionId(passString);
    }
     userstuff = "&clientCode=" + company +"&version=" + apiversion + "&responseType=" + returntype + "&sessionKey=" + session;
@@ -140,8 +159,49 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
   String rcompany = null;
     
   public String getSaveDebtInfo() {
+	   
+           	   int mm = 1;
+           	   if(getParent().getProps().getProperty("months") != null){        
+           		    mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+           	   }
+           	   
+              Calendar dds = Calendar.getInstance();
+              dds.add(Calendar.MONTH, - mm);
+              
+              Calendar dde = Calendar.getInstance();
+              
+              
+              System.out.println("kliendisortimendid alustan"  + mm + " kuud" +  Converter.getYYYYmMMmDDmString(dds.getTime()) +"  "+  Converter.getYYYYmMMmDDmString(dde.getTime()));
+               
+              StringBuffer inputLineBuf = null;
+        
+              try {
+          		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
+   				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
+          	
+          		
+          	} catch (Exception e1) {
+          		e1.printStackTrace();
+          	}
+                 if(inputLineBuf.length() > 2 && inputLineBuf.indexOf("<errorCode>") == -1 ){          
+                       try {
+                     	  File f = new File (getDir() + "klienditoodeErp.xml");
+                     	  if(f.exists())f.delete();
+                     	  Converter.saveFileInUTF8(getDir() + "klienditoodeErp.xml", Converter.deCode(inputLineBuf.toString()));
+                 	 }catch (Exception ex) {
+                 		ex.printStackTrace();
+                 	  }
+                  }
+              
+              System.out.println("kliendisortimendid tehtud" );
+              
+              
+             System.exit(0);
+   		
+	  
    	return null;
    }
+  
   public static String getYYYYpMMpDDpString(Date dd){
 	    StringBuffer sb = new StringBuffer();
 	    Calendar cal= Calendar.getInstance();
@@ -166,8 +226,24 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 
 
 
+  private String getSessionIdCDN(String asi ){
+	  
+	  try {
+	String res = (postDataCDN(asi)).toString();
+//	System.out.println("res " + res);
+	JSONParser parser = new JSONParser();  
+	JSONObject json = (JSONObject) parser.parse(res);  
+	sessioncdn = (String)json.get("sessionKey");
+	
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	//  System.out.println("res " + sessioncdn);
+	  return sessioncdn;
+  }
   
-
+  
+String jwttoken = null;
   
   private String getSessionId(String asi ){
 
@@ -176,9 +252,10 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	  
 	  try {
 	String res = (postData(data)).toString();
-	//System.out.println("res " + res);
+//	System.out.println("res " + res);
 	session = res.substring(res.indexOf("sessionKey") + 11 ,res.indexOf("</sessionKey"));
-	
+	jwttoken = res.substring(res.indexOf("<token") + 7 ,res.indexOf("</token"));
+	//System.out.println("res " + jwttoken);
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
@@ -255,6 +332,82 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
   }
   
   
+  private StringBuffer postDataCDN(String data) throws Exception {
+	  HttpURLConnection urlc = null;
+
+	  
+	/*  String data = "data=Hello+World!";
+      URL url = new URL("http://localhost:8084/WebListenerServer/webListener");
+      HttpURLConnection con = (HttpURLConnection) url.openConnection();
+      con.setRequestMethod("POST");
+      con.setDoOutput(true);
+      con.getOutputStream().write(data.getBytes("UTF-8"));
+      con.getInputStream();
+*/
+	  
+	 	Converter.doTrustToCertificates();
+	  StringBuffer inputLineBuf = new StringBuffer();
+	  try{
+		//System.out.println("data " + data);
+	  urlc = (HttpURLConnection) myurlcdn.openConnection();
+	  try{
+	  urlc.setRequestMethod( "POST" );
+	  } catch (ProtocolException e) {
+	    throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
+	  }
+	  urlc.setDoOutput(true);
+	  urlc.setDoInput(true);
+	  urlc.setUseCaches(false);
+	  urlc.setAllowUserInteraction(false);
+	  OutputStream out = urlc.getOutputStream();
+	  try {
+		out.write( data.getBytes() );
+	  } catch (IOException e){
+	  throw new Exception("IOException while posting data", e);
+	  } finally {
+	  if (out != null)
+	  out.close();
+	  }
+	  
+	  
+	  InputStream in = urlc.getInputStream();
+	  try{
+	  Reader reader = new InputStreamReader(in);
+	    InputStreamReader isr = new InputStreamReader(in,"UTF-8");
+	    BufferedReader inr = new BufferedReader(isr);
+	    String inputLine;
+
+	    while ((inputLine = inr.readLine()) != null){
+	        inputLine = enCode(inputLine);	// enCode(inputLine);	
+	    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n").replace((char)0x1c, ' ').replace((char)0x1b, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ')
+	    			.replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0xb, ' ').replace((char)0xe, ' ')
+	    			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+	    			 .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+	     			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+	     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ')
+	    			);
+	  }
+
+	     inr.close();
+	  
+	  
+	  reader.close();
+	  
+	  
+	  } catch (IOException e) {
+	  throw new Exception("IOException while reading response", e);
+	  } finally { if (in != null)
+	  in.close();
+	  }
+	  } catch (IOException e){
+	  throw new Exception("Connection error (is server running at " + myurlcdn + " ?): " + e);
+	  } finally {
+	  if (urlc != null)
+	  urlc.disconnect();
+	  }
+	  return inputLineBuf;
+	  }
+  
   private StringBuffer getData(String data) throws Exception {
      	String httpsURL = myurl + "?" + data;
         URL myurl1 = new URL(httpsURL);
@@ -272,6 +425,80 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
         return inputLineBuf;
 	  }
 	  
+	  
+  private HashMap getImagesCDN(String apikey) throws Exception {
+	  HashMap pildid = new HashMap();
+	  
+   	String httpsURL = "https://cdn.erply.com/images?page=1";
+      URL myurl1 = new URL(httpsURL);
+      
+      HttpsURLConnection con = (HttpsURLConnection)myurl1.openConnection();
+       con.setRequestProperty("API_KEY", apikey);
+      InputStream ins = con.getInputStream();
+      InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
+      BufferedReader in = new BufferedReader(isr);
+
+      String inputLine;
+      int totalRec = 0;
+     
+      while ((inputLine = in.readLine()) != null){
+    	 
+    	  JSONParser parser = new JSONParser();  
+    		JSONObject json = (JSONObject) parser.parse(inputLine); 
+    		JSONArray arr =(JSONArray)json.get("images");
+    		System.out.println(inputLine);
+    		for(int i = 0; i < arr.size(); i++) {
+    			JSONObject aa = (JSONObject)arr.get(i);
+    			
+    			// System.out.println("aa.get(\"productId\")" + aa.get("productId")+ " "+ aa.get("key") + " " + aa.get("size"));
+    			 String toode = (aa.get("productId"))+"";
+	    			pildid.put(toode, aa.get("key"));
+    			
+    		}
+    		totalRec = Integer.parseInt( ((Long) json.get("totalRecords")) +"");
+     }
+      in.close();
+      isr.close();
+      con.disconnect();
+      
+      int pages = (int) (totalRec/100);
+      
+   
+      for(int w = 2; w < pages + 2; w++) {
+    		 httpsURL = "https://cdn.erply.com/images?page=" + (w);
+    	       myurl1 = new URL(httpsURL);
+    	      
+    	     con = (HttpsURLConnection)myurl1.openConnection();
+    	       con.setRequestProperty("API_KEY", apikey);
+    	      ins = con.getInputStream();
+    	      isr = new InputStreamReader(ins,"UTF-8");
+    	      in = new BufferedReader(isr);
+
+    	     
+    	      while ((inputLine = in.readLine()) != null){
+    	    	//  System.out.println(inputLine);
+    	    	  JSONParser parser = new JSONParser();  
+    	    		JSONObject json = (JSONObject) parser.parse(inputLine); 
+    	    		JSONArray arr =(JSONArray)json.get("images");
+    	    		
+    	    		for(int i = 0; i < arr.size(); i++) {
+    	    			JSONObject aa = (JSONObject)arr.get(i);
+    	    			String toode = (aa.get("productId"))+"";
+    	    			pildid.put(toode, aa.get("key"));
+    	    			
+    	    			
+    	    		}
+    	    		
+    	     }
+    	      in.close();
+    	      isr.close();
+    	      con.disconnect();
+      }
+      
+      System.out.println("suurus " + pildid.size());
+    //  System.exit(0);
+      return pildid;
+	  }
 	  
   
   
@@ -343,7 +570,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	               		String startDate  = getNode(rida,"startDate").getFirstChild().getNodeValue();
 	               		String endDate  = getNode(rida,"endDate").getFirstChild().getNodeValue();
 	              
-	               	    System.out.println("out " + clGroupName + " " + startDate + " " + endDate);
+	               	   // System.out.println("out " + clGroupName + " " + startDate + " " + endDate);
 	               			Node read2 = getNode(rida, "pricelistRules");
 	               	    	if(read2 != null){
 	               	    	
@@ -520,6 +747,8 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	  	  if("true".equals(getParent().getProps().getProperty("distribution.insmarking"))){
 	  		oosmarge = false; 
 	  	  }
+	  	  
+	  	  
 	  	  
 	  	  
 	  	 //=10379733,10379733
@@ -1082,15 +1311,12 @@ if(sb.length() >10){
 										if(prodX != null){
 											mline.setProdID(prodX.trim());		
 										}else{
-											System.out.println("mingi jama toodet pole " + prodID );
+											//System.out.println("mingi jama toodet pole " + prodID );
 										}
 										
 										
 									}
-									if(prodID.indexOf("420101") != -1){
-										System.out.println("mingi jama toodet pole " + prodID  + " " + (String)prodCodes.get(prodID.trim()));
-											
-									}
+									
 									
 								}
 								
@@ -1548,6 +1774,7 @@ if(sb.length() >10){
    private HashMap<String,Double> overDue = null;
    
    public Vector getDebt2(){
+	  
 	   
 	   debtList = new Vector();
 	   overDue = new HashMap<String,Double>();
@@ -1581,16 +1808,27 @@ if(sb.length() >10){
 					String paymentStatus = getNode(rida, "paymentStatus").getFirstChild().getNodeValue();
 					String type = getNode(rida, "type").getFirstChild().getNodeValue();
 					String type2 = null;
+					String invoiceState = null;
+					
+				
+					try{
+						invoiceState = getNode(rida, "invoiceState").getFirstChild().getNodeValue();
+						
+					}catch(Exception r) {
+						
+					}
 					try{
 						type2 = getNode(rida, "followUpDocuments").getFirstChild().getNodeValue();
 						
 					}catch(Exception r) {
 						
 					}
-					
+				
 					
 					if( !paymentStatus.equals("PAID") && (type.equals("INVWAYBILL") || type2.equals("INVOICE") )){
+					
 						
+					
 					
 					int paevi = 0 ;
 					try{
@@ -1654,6 +1892,108 @@ if(sb.length() >10){
 	 	 }
 	
 	      return this.debtList;
+   
+   }
+   
+   
+   public void getAfterOrders(){
+	   if("true".equals(getParent().getProps().getProperty("after.orders"))){
+		   afterOrders = new TreeMap();
+	     
+		  String mm = getMonthc().substring(0,7);
+	      FileListFilter fil = new FileListFilter("ordlist","xml");
+	 	 String[] ll = new File (getDir()).list(fil);
+	 	 for (int u = 0; u < ll.length; u++) {
+	 		 String name = ll[u];
+		    	//	System.out.println(name);
+		 		  File f = new File (getDir() + name);
+		 		  
+		 		 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		  	     DocumentBuilder db;
+		  	     try{
+		  		db = dbf.newDocumentBuilder();      	
+		      	FileInputStream in = getCleanInputStream(f);
+		      	String handler = null;
+		          Document doc = db.parse(in,handler);
+		        
+		        Node root = getNode(doc, "document");      
+		       	Node read = getNode(root, "records");
+		       for (int i = 0; i < read.getChildNodes().getLength(); i++){
+		           	  Node rida = read.getChildNodes().item(i);
+		           	  if(rida.getNodeName().equals("item")){
+		          	  try{
+					
+					String number = getNode(rida, "number").getFirstChild().getNodeValue();
+					String date =  getNode(rida, "date").getFirstChild().getNodeValue();
+					String cust = getNode(rida, "clientID").getFirstChild().getNodeValue();
+					String paymentStatus = getNode(rida, "paymentStatus").getFirstChild().getNodeValue();
+					String type = getNode(rida, "type").getFirstChild().getNodeValue();
+					String type2 = null;
+					String invoiceState = null;
+					
+				
+					try{
+						invoiceState = getNode(rida, "invoiceState").getFirstChild().getNodeValue();
+						
+					}catch(Exception r) {
+						
+					}
+				
+					
+					if(afterOrders != null && (number.endsWith("-1") || number.endsWith("-2") || number.endsWith("-3") || number.endsWith("-4") || number.endsWith("-5"))) {
+					//	System.out.println("number " + number + " klient " + cust  + " type " + type + " " + invoiceState);
+						
+						  Node tooted = getNode(rida, "rows");
+						  
+						  for (int p = 0; p < tooted.getChildNodes().getLength(); p++){
+							  Node tt = tooted.getChildNodes().item(p);
+				           	  if(tt.getNodeName().equals("item")){
+				           		  
+				           		  String prod = getNode(tt, "productID").getFirstChild().getNodeValue();
+				           		 String am = getNode(tt, "amount").getFirstChild().getNodeValue();
+				           	
+				           		String price = getNode(tt, "finalNetPrice").getFirstChild().getNodeValue();
+				           		
+				           		 Toode t = new Toode(prod);
+				           		 t.setBrand(date);
+				           		 try {
+				           			t.setKogus(Double.parseDouble(am));
+					              }catch(Exception r) {
+				           			 r.printStackTrace();
+				           		 }
+				           		 try {
+					           			t.setPlancur(Double.parseDouble(price));
+						              }catch(Exception r) {
+					           			 r.printStackTrace();
+					           		 }
+				           		 //    CustProd cp = new CustProd(klient, t.getID(),0,0,0,t.getBrand(),t.getPlancur(),t.getKogus(),0," ");
+				           		 
+				           		 ArrayList arr  = new ArrayList();
+				           		 if(afterOrders.get(cust) != null) {
+				           			 arr = (ArrayList)afterOrders.get(cust);
+				           		 }
+				           		 arr.add(t);
+				           		afterOrders.put(cust, arr);
+				           		 
+				           		//System.out.println("number " + number + " klient " + cust  + " type " + type + " " + invoiceState + " " + prod +" "+ am);
+				           		  
+				           	  }
+						  }
+						  
+					}
+				
+		          	  }catch(Exception e){
+		          		  e.printStackTrace();
+		          	  }
+		           	}     
+		          }
+		           
+	         	  }catch(Exception e){
+	         		  e.printStackTrace();
+	         	  }
+	 	 }    
+	 	 }
+	 	
    
    }
    
@@ -1956,9 +2296,7 @@ if(sb.length() >10){
                                            			 }catch(Exception e){
                                            			 }
                                            		 }
-                                           		 if(a3group.startsWith("42")) {
-                                                		System.out.println("ridu3  " + a3group + " " + web + " " + web0); 
-                                                	 }
+                                           		
                                            		 
                                            		String web4 = null;
                                            		if(mdGrupid != null){
@@ -2145,91 +2483,14 @@ if(sb.length() >10){
    private TreeMap suppliersTM = null;
 
    private String enCode(String res ){
-	  	 
-
-	  	res =res.replaceAll("�","11111xx");
-	  	res =res.replaceAll("�","11112xx");
-		res =res.replaceAll("�","11114xx");
-		res =res.replaceAll("�","11114xx");
-		res =res.replaceAll("�","11113xx");
-		res =res.replaceAll("�","e");
-		res =res.replaceAll("�"," "); 
-		
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		res = res.replaceAll("�"," ");
-		res = res.replaceAll("�", " ");
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�","e");
-		res =res.replaceAll("�","E");
-		res =res.replaceAll("�"," ");
-		
-
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		res =res.replaceAll("�"," ");
-		
-		
-		res = res.replaceAll("�", "EUR");
-		res = res.replaceAll("�", "Nael");
-	
-		res =res.replaceAll("�","11115xx");
-		res =res.replaceAll("�","11116xx");
-		res =res.replaceAll("�","11117xx");
-		res =res.replaceAll("�","11118xx");
-		
-		res =res.replaceAll("�","11119xx");
-		res =res.replaceAll("�","11120xx");
-		res =res.replaceAll("�","11121xx");
-		res =res.replaceAll("�","11122xx");
-
-	 	 
-	  	return res;
+	  	 return Converter.enCodeEst(res);
 	  }
 	  
    
    public static String deCode(String res ){
-	   
-	   while(res.indexOf("11111xx") != -1){
-	   	int aa = res.indexOf("11111xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   }
-	   while(res.indexOf("11112xx") != -1){
-	   	
-	   	int aa = res.indexOf("11112xx");
-	   //	System.out.println(aa + " " +res);
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11113xx") != -1){
-	   	int aa = res.indexOf("11113xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11114xx") != -1){
-	   	int aa = res.indexOf("11114xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11115xx") != -1){
-	   	int aa = res.indexOf("11115xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11116xx") != -1){
-	   	int aa = res.indexOf("11116xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11117xx") != -1){
-	   	int aa = res.indexOf("11117xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11118xx") != -1){
-	   	int aa = res.indexOf("11118xx");
-	   	res = res.substring(0,aa) + "�" + res.substring(aa+7,res.length()); 	    
-	   } 
-
-	 
- 	return res;
+	  return Converter.deCode(res);
  }
+
    TreeMap agents = null;
    
    private void sendAsi(){
@@ -2266,6 +2527,8 @@ if(sb.length() >10){
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
     // this.getFixedAssortmentData();
+    // plans = this.makePlans("Budget.xlsx");
+     
      agent1 = new TreeMap();
     // sendAsi();
      agents = new TreeMap();
@@ -2365,7 +2628,8 @@ if(sb.length() >10){
 		       		
 		 sm.setName("OFFICE");
      tm.put("HOUSE", sm); 
-   //  getDebt2();
+    // getAfterOrders();
+    // setBulkSales(tm);
      return tm;
    }
 
@@ -2463,7 +2727,7 @@ public static String getDataDirStr(){
          File[] listOfFiles = ff.listFiles();
 
          for (int i = 0; i < listOfFiles.length; i++) {
-        	 System.out.println("copy data dir " + listOfFiles[i].getName());
+        	// System.out.println("copy data dir " + listOfFiles[i].getName());
              if (listOfFiles[i].isFile()) {
                   File f = new File(getDir() +listOfFiles[i].getName()); 
                     f.renameTo(new File(fs.getAbsolutePath()+"/"+ listOfFiles[i].getName()));
@@ -2477,6 +2741,10 @@ public static String getDataDirStr(){
        try{
            StringBuffer inputLineBuf = new StringBuffer();
        	try {
+       		
+       		
+       		
+       		
     		inputLineBuf = postData("request=getProductGroups&getAllLanguages=1" + userstuff);
     	//	inputLineBuf = getData("request=getCustomers&customerID=430&recordsOnPage=" + onpage + "&getAddresses=1&getContactPersons=1&getBalanceInfo=1&responseMode=detail" + userstuff);
            	
@@ -2493,8 +2761,12 @@ public static String getDataDirStr(){
            		ex.printStackTrace();
            	  }
             }
-          
-         //  System.exit(0);
+           
+           
+       
+       //   System.exit(0);
+           
+           
                 inputLineBuf = new StringBuffer();
            	try {
         		inputLineBuf = postData("request=getProductPriorityGroups" + userstuff);
@@ -2707,6 +2979,11 @@ public static String getDataDirStr(){
                	 if("true".equals(getParent().getProps().getProperty("nosoldsort"))){        	   
                		soldsort = false;
                       }
+               	 
+               	 if("true".equals(getParent().getProps().getProperty("soldindebt"))){        	   
+                		soldsort = false;
+                       }
+
 
                        if(soldsort){
                     	   int mm = 1;
@@ -2727,19 +3004,12 @@ public static String getDataDirStr(){
                        try {
                    		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
             				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
-                   	 if(inputLineBuf.indexOf("<errorCode>") != -1 ){
-                   		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
-            				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
-                     }
-                   	if(inputLineBuf.indexOf("<errorCode>") != -1 ){
-                   		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
-            				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime())+ userstuff);
-                     }
+                   	
                    		
                    	} catch (Exception e1) {
                    		e1.printStackTrace();
                    	}
-                          if(inputLineBuf.length() > 2){          
+                          if(inputLineBuf.length() > 2 && inputLineBuf.indexOf("<errorCode>") == -1 ){          
                                 try {
                               	  File f = new File (getDir() + "klienditoodeErp.xml");
                               	  if(f.exists())f.delete();
@@ -2762,14 +3032,12 @@ public static String getDataDirStr(){
           // System.out.println("Tootegrupid tehtud" );
 
                     
-                         
-                              
 
                        
                        
-                       System.out.println("Teen Dokyumendi listi" );   
+                       System.out.println("Teen Order listi" );   
            
-           FileListFilter fil2 = new FileListFilter("doklist","xml");
+           FileListFilter fil2 = new FileListFilter("ordlist","xml");
 	    	 String[] ll2 = new File (getDir()).list(fil2);
 	    	 for (int i = 0; i < ll2.length; i++) {
 	    		 String name = ll2[i];
@@ -2787,7 +3055,105 @@ public static String getDataDirStr(){
 
            if(doclist){
         	
-         String  data = "request=getSalesDocuments&recordsOnPage=" + this.onpage + "&dateFrom=" + getMonth6() + "&types=INVWAYBILL,WAYBILL,INVOICE"
+         String  data = "request=getSalesDocuments&recordsOnPage=" + this.onpage + "&dateFrom=" + getMonth6() +  "&getRowsForAllInvoices=1&types=ORDER&invoiceState=READY" //"&types=INVWAYBILL,WAYBILL,INVOICE"
+				+ userstuff;// &dateFrom=2010-12-01
+		// System.out.println(data);
+
+		inputLineBuf = postData(data);
+		// System.out.println(inputLineBuf.toString());
+
+		 tsykkel = 0;
+		if (inputLineBuf.indexOf("recordsTotal") != -1) {
+			int lines = inputLineBuf.indexOf("recordsTotal");
+			int end = inputLineBuf.indexOf("recordsTotal", lines + 12);
+			// System.out.println(inputLineBuf);
+			try {
+				tsykkel = Integer.parseInt(inputLineBuf.substring(
+						lines + 13, end - 2));
+			} catch (Exception e) {
+
+			}
+		}
+		if (inputLineBuf.length() > 2) {
+			try {
+				File f = new File(getDir() + "ordlist1.xml");
+				if (f.exists())
+					f.delete();
+				 String c = (char)0x19 + "";
+				 Converter.saveFileInUTF8(getDir() + "ordlist1.xml", inputLineBuf.toString().replace((char)0x19, ' ')
+						 .replace((char)0x19, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0x19, ' ')
+						 .replace((char)0x1c, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
+						 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+						 .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+			     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' '));
+		       
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		if (tsykkel > onpage) {
+			int counter = 2;
+			for (; tsykkel > onpage; tsykkel = tsykkel - onpage) {
+				try {
+					inputLineBuf = postData("request=getSalesDocuments&recordsOnPage=" + onpage + "&getRowsForAllInvoices=1&types=ORDER&invoiceState=READY&dateFrom=" + getMonth6() + "&pageNo="
+							+ counter + userstuff);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+
+				if (inputLineBuf.length() > 2) {
+					try {
+						File f = new File(getDir() + "ordlist" + counter
+								+ ".xml");
+						if (f.exists())
+							f.delete();
+						
+						 Converter.saveFileInUTF8(getDir() + "ordlist" + counter + ".xml", inputLineBuf.toString().replace((char)0x19, ' ')
+								 .replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0x19, ' ')
+								 .replace((char)0xe, ' ').replace((char)0x19, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
+								 .replace((char)0x1c, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+								 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+					     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' '));
+					
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+
+				counter++;
+			}
+
+		}
+           
+		   
+           }
+           
+                              
+
+                       
+                       
+                       System.out.println("Teen Dokyumendi listi" );   
+           
+           FileListFilter fil23 = new FileListFilter("doklist","xml");
+	    	 String[] ll23 = new File (getDir()).list(fil23);
+	    	 for (int i = 0; i < ll23.length; i++) {
+	    		 String name = ll23[i];
+		    		// System.out.println(name);
+		 		  File f = new File (getDir() + name);
+	           if(f.exists()){
+	        	   f.delete();
+	           }
+	    	 }
+	    		
+	    	
+	    	 if("true".equals(getParent().getProps().getProperty("nodoclist"))){        	   
+	    		 doclist = false;
+	           }
+
+           if(doclist){
+        	
+         String  data = "request=getSalesDocuments&recordsOnPage=" + this.onpage + "&dateFrom=" + getMonth6() +  "&types=INVWAYBILL,WAYBILL,INVOICE"
 				+ userstuff;// &dateFrom=2010-12-01
 		// System.out.println(data);
 
@@ -3288,7 +3654,7 @@ public TreeMap getGrupidPayer(){
 return tm;
 }
 
-
+private TreeMap afterOrders = null;
 
    public TreeMap getCustomers(Agent agent){
 	     TreeMap tm = new TreeMap();
@@ -3347,19 +3713,8 @@ return tm;
 	          	  }
 	    
 	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     
-	     getDebt2();
+	
+	    
 	     if( getParent().getProps().getProperty("replace.managers") != null){
 	    	 repManas = getParent().getProps().getProperty("replace.managers") ;
 	     }
@@ -3376,6 +3731,8 @@ return tm;
 	    	 makeData();
 	 	 }
 	     
+	     
+	     getDebt2();
 	     StringBuffer sb2 = new StringBuffer();
 	   
 	     TreeMap groups = this.getGrupid();
@@ -3445,7 +3802,7 @@ return tm;
 	         		  
                          String grp = (String)groups.get(id);
     	                 if(grp != null){
-    	                 	System.out.println("Siin on grupp olemas "  + grp + " " + customer.getID() );
+    	                 	//System.out.println("Siin on grupp olemas "  + grp + " " + customer.getID() );
     	                 	Vector vv = new Vector();
     	                 	StringTokenizer st = new StringTokenizer(grp,"|");
     	                 	while (st.hasMoreElements()){
@@ -3976,6 +4333,29 @@ return tm;
         boolean groupmustbe = false;
         boolean masterKapp = false;
         HashSet kappProds = new HashSet();
+        HashMap cdnPictures = null;
+        
+        boolean addpicts = false;
+        String pictType = "";
+        if(getParent().getProps().getProperty("usepictures") != null){
+     	   addpicts = true;
+     	   pictType = getParent().getProps().getProperty("usepictures");
+        }
+        
+        if("true".equals(getParent().getProps().getProperty("cdn.pictures"))){
+        	   sessioncdn = getSessionIdCDN("jwt=" +jwttoken);
+            	System.out.println(sessioncdn);
+            	
+            	try {
+					cdnPictures = getImagesCDN(sessioncdn);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	
+        }
+
+     
         
         if( getParent().getProps().getProperty("masterdir") != null){
         	masterKapp = true;
@@ -4021,12 +4401,7 @@ return tm;
     	priorEtte = getParent().getProps().getProperty("priorEtte");
     }
     
-   boolean addpicts = false;
-   String pictType = "";
-   if(getParent().getProps().getProperty("usepictures") != null){
-	   addpicts = true;
-	   pictType = getParent().getProps().getProperty("usepictures");
-   }
+  
 	   
    
     if(getParent().getProps().getProperty("prodstatus") != null){
@@ -4077,7 +4452,9 @@ return tm;
     if("true".equals(getParent().getProps().getProperty("supplier.group"))){
         suppliersTM = new TreeMap();
     }
-		 
+     
+     StringBuffer code8 = new StringBuffer();
+     
      HashSet prodsInWares = new HashSet();
     // System.out.println("masterKapp "+ masterKapp);
     if(masterKapp){
@@ -4122,7 +4499,7 @@ return tm;
             	  String ladu = st.nextToken();
             	 TreeMap<String,Double> la =  this.getWarehouseStock(ladu);
             	 
-            	 System.out.println("la suurus " + la.size());
+            	// System.out.println("la suurus " + la.size());
             	Iterator itera = la.keySet().iterator();
             	while(itera.hasNext()){
             		String kood = (String)itera.next();
@@ -4174,6 +4551,23 @@ return tm;
               		 }catch (Exception e){
               			 
               		 }
+              		try{
+             			String kood8 = deCode(getNode(rida,"code8").getFirstChild().getNodeValue());
+             			if(kood8 != null && kood8.trim().length() > 0) {
+             				StringTokenizer st = new StringTokenizer(kood8,",");
+             				code8.append(code);
+             				while(st.hasMoreTokens()) {
+             					String hh = st.nextToken();
+             					hh = hh.replaceAll("\\s","");
+             					code8.append(";"+ hh);
+             				}
+             				code8.append("\n");
+             			}
+             		
+             		 } catch (Exception e){
+             			 
+             		 }
+              		
               		String ean  = null;
               		String add = code;
               		 if("true".equals(getParent().getProps().getProperty("name.code.none"))){
@@ -4218,8 +4612,20 @@ return tm;
                 	
               		
               		if(addpicts){
-              			try{
-              				Node picts  =  getNode(rida,"images");
+              			
+              			
+              			
+              			if(cdnPictures != null && cdnPictures.get(code) != null) {
+              				String fileN = (String)cdnPictures.get(code);
+              				String url = "https://cdn.erply.com/images/" + company + "/" + fileN ;//+"?width=200&height=200";
+              						//5153/3D-Agnesi-pasta-Casarecce-500g.jpg?width=200&height=200
+              				
+              				System.out.println("sees " + url);
+              				prod.setPhotoid("phurl:" +url); 
+              			} else {
+              			
+              			try {
+              				 Node picts  =  getNode(rida,"images");
                           
               				
               				for (int e = 0; e < picts.getChildNodes().getLength(); e++){
@@ -4245,6 +4651,9 @@ return tm;
               			}catch(Exception e){
               			 //	e.printStackTrace();
               			}
+              			
+              			}
+              			
               		}
               		
               		String price  =  getNode(rida,"price").getFirstChild().getNodeValue();
@@ -4539,9 +4948,7 @@ return tm;
              	    	}
              	 	}
              	
-             		if(kood.indexOf("28188") != -1) {
-              			System.out.println("uhuuu " + grori + " " + !okGrupid.contains(grori) +" "+ goes +" "+ code + " " + kood + " " +  (getNode(rida,"name").getFirstChild().getNodeValue()));
-              		}
+             	
              		
                if(goes){
          			 String sorting = prod.getID();
@@ -4579,6 +4986,10 @@ return tm;
     	 if(lllean.length() > 0){
       	   	  Converter.saveFileInUTF8(getMasterDir() + "itembarcodes.csv", lllean.toString());
         }
+    	 
+    	 if("true".equals(getParent().getProps().getProperty("makeanalogs")) && code8.length() > 0) {
+    		 Converter.saveFileInUTF8("prodanalogs.txt", code8.toString());
+    	 }
      } catch (Exception e){
        e.printStackTrace();
      }
@@ -4590,35 +5001,12 @@ return tm;
     	 
     
     	 getOutDir();
- 		Converter.makeTelemaFiles(this.getOutDir(), tm, this.getProdGroups(), null, ownGLN);
+ 		//Converter.makeTelemaFiles(this.getOutDir(), tm, this.getProdGroups(), null, ownGLN);
  	} catch (Exception e) {
  		
  		e.printStackTrace();
  	}
-	 
- 	
- 	if(pictroot != null){
 
-		Properties props = parent.getParentFrame().loadProps("update.pro");
-		if(props == null){
-			props = new Properties();
-		}
-		props.put("weburl", pictroot);
-		
-
-		
-
-		try {
-			FileOutputStream fos = new FileOutputStream("update.pro");
-			props.store(fos, "");
-			fos.flush();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		
- 	}
  	
      return tm;
    }
@@ -4696,6 +5084,10 @@ return tm;
  
    public Vector getCustomerProductsList(String agentCode){
 	 
+	   getAfterOrders();
+	   
+	   HashSet afterOlemas = new HashSet();
+	   
 	   custProds = new Vector();
 	   soldProds = new HashSet();
 
@@ -4742,22 +5134,53 @@ return tm;
 		          			   }catch(Exception e){
 		          				   
 		          			   }
-		          			
+		          			double oamount = 0;
+		          			   if(this.afterOrders != null && afterOrders.get(klient) != null) {
+		          				// System.out.println("oamount olemas "  + klient + " " + toode + " " + oamount );
+		          				   ArrayList<Toode> prods = (ArrayList<Toode>)afterOrders.get(klient);
+		          				   for(Toode tt : prods) {
+		          					   if(tt.getID().equals(toode)) {
+		          						   oamount = tt.getKogus();
+		          						 afterOlemas.add(klient+toode+oamount);
+		          						 
+		          						//   System.out.println("oamount olemas "  + klient + " " + toode + " " + oamount );
+		          					   }
+		          				   }
+		          			   }
 		          			   
 		          			 stv.nextToken().trim();
 		          			  
 		          			 String kogus = stv.nextToken().trim();
 		          			  kog = Double.parseDouble(kogus); 
 		          			 
-		          			  CustProd cp = new CustProd(klient, toode,kog,0,0,kuupaev,lastpr,0,0," ");
+		          			  CustProd cp = new CustProd(klient, toode,kog,0,0,kuupaev,lastpr,oamount,0," ");
 			          		   custProds.add(cp);
 			          		   if(!soldProds.contains(toode)){
 			          			   soldProds.add(toode);
 			          		    } 
 	  
 	          			  		 }catch(Exception e){
+	          			  			// e.printStackTrace();
 	          			 }  } } } }     
 	          }
+	        
+	        if(this.afterOrders != null) {
+	        	Iterator itera = afterOrders.keySet().iterator();
+	        	while (itera.hasNext()) {
+	        		String klient = (String)itera.next();
+	        	
+	        		ArrayList<Toode> arr = (ArrayList<Toode>)afterOrders.get(klient);
+   for(Toode t : arr) {
+	   
+	   CustProd cp = new CustProd(klient, t.getID(),0,0,0,t.getBrand(),t.getPlancur(),t.getKogus(),0," ");
+	   cp.setAbiKood("BackOrder");
+	   custProds.add(cp);
+   }
+    			 
+        		   
+	        	}
+	        }
+	        
 	          
 	  	}catch(Exception e){
 	  		e.printStackTrace();
@@ -4809,6 +5232,7 @@ return tm;
    private Vector pricelists = new Vector();
    private Vector custtsUsed = new Vector();
    private String session = "";
+   private String sessioncdn = "";
    private String passString = ""; 
    private String username = null;
    private int onpage = 100;
@@ -4818,6 +5242,7 @@ return tm;
    private String returntype = null;
    private String userstuff = null;
      private URL myurl = null;
+     private URL myurlcdn = null;
 
   /**
    * setBulkSales
@@ -4825,13 +5250,79 @@ return tm;
    *
    * @param agents Map
    */
+     double totalPlanSum = 0;
+     
+     private TreeMap makePlans(String fname){
+   	   TreeMap res = new TreeMap();
+   	      totalPlanSum = 0;
+   	   try{
+   		
+   	   Calendar cal = Calendar.getInstance();
+   	   int a = 0;
+   	   File f = new File (getExcelDir() + fname);
+   		  FileInputStream	 ff = new FileInputStream(f);
+   		DataFormatter formatter = new DataFormatter();
+		
+   		XSSFWorkbook workbook = new XSSFWorkbook((ff));
+   		XSSFSheet sheet = workbook.getSheetAt(0);
+   		XSSFRow row = null; 
+   				ff.close();	
+   				if(sheet != null){
+   					
+   					String gr1 = null;
+   					
+   					for(int i = 1 ; i < sheet.getLastRowNum() + 1;i++){ // 9ndast reas hakkame scrollima nii kilosid kui ka summat
+   						 row = sheet.getRow(i);
+   						String agent = null;
+   						double g1 = 0;
+   						
+   						try {
+   							agent = formatter.formatCellValue(row.getCell((short) 1));
+   						} catch (Exception e) {
+      					//    	 System.out.println("agent ei  " + agent);
+      						//  e.printStackTrace();
+      					      }
+   				//	  System.out.println("agent jah  " + agent + "  " +g1);
+   						try {
+   						g1 = Double.parseDouble(row.getCell((short) (2 + cal.get(Calendar.MONTH))).getNumericCellValue()+ "");
+   					//  System.out.println("agent jah0  " + agent +" "+ g1);
+   						} catch (Exception e) {
+   	   					 e.printStackTrace();	
+    					    }
+   						
+   					
+   						if(agent != null) {
+   							    row = sheet.getRow(i);
+   						TreeMap asi= new TreeMap();
+   				        Toode t1 = new Toode(gr1);
+  						       t1.setPlancur(g1);
+  						    //   System.out.println("agenthh " + agent + " " + g1 + " " );
+  					    res.put(agent, t1);
+   					  }
+   					}
+   						
+   					}
+   				
+   				
+           		   
+   	   }catch (Exception e){
+   		   e.printStackTrace();
+   	   }
+   	   
+   	   System.out.println("totalPlanSum "+ res.toString() );
+   	   return res;
+      }
+      
      
      private Hashtable docCust = null;
+     private TreeMap plans = null; 
      
   public void setBulkSales(Map agents) {
 	  TreeMap myygid = new TreeMap();
 	  TreeMap myygideelm = new TreeMap();
 	  docCust = new Hashtable();
+	  
+	  plans = this.makePlans("Budget.xlsx");
 	  
 	  int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 	  
@@ -4886,7 +5377,10 @@ return tm;
 		        }else{
 		        	myygid.put(agent,total+"");
 		        }
-		    	
+		    	  if (agent != null && plans.get(agent) != null){
+	                   Toode tt = (Toode)plans.get(agent);
+	                   tt.setDonecur(tt.getDonecur() + total);
+	                   }
 			    }
 				
 				if(date.startsWith(mme) && confirmed ){
@@ -4917,20 +5411,30 @@ return tm;
          		
          	  }
  	 }
-         	  System.out.println("myygid" + myygid.size() + " Doccust " + docCust.size());
+         //	  System.out.println("myygid" + myygid.size() + " Doccust " + docCust.size());
  	         
 	 		  Iterator itera = myygid.keySet().iterator();
 	 		  while(itera.hasNext()){
 	 			  String code = (String)itera.next();
 	 			 Agent agent = (Agent)agents.get(code);
+	 			Toode tt =   (Toode)plans.get(code);
 	             if (agent != null){
-	            	   agent.setMonthSales((int) Double.parseDouble((String)myygid.get(code))); 
+	            	 
+	            	 double teh = Double.parseDouble((String)myygid.get(code));
+	            	   agent.setMonthSales((int) teh); 
+	            	 String  asi = "";
+	            	
+	            	 if(tt != null) {
+	            		 asi = (((int)(teh/tt.getPlancur()*100))+ "% Plan.: " +(int) tt.getPlancur() + " €  Sales.: " + (int) teh + " €||");
+	     	     	 }
+	            	 
 	            	   if(myygideelm.get(code) != null && day < 6 ) {
-	            		   agent.setStart("Last Month: " + (int) Double.parseDouble((String)myygideelm.get(code)));  
+	            		  asi = asi + ("|Last Month: " + (int) Double.parseDouble((String)myygideelm.get(code)));  
 	            	   }
-	            		   
+	            	   
+	            	   System.out.println(agent.getID() + " " + asi);
+	            	   agent.setStart(asi);
 	             }
 	          }
-          
-     }
-}
+         }
+    }

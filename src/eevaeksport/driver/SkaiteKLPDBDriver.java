@@ -69,7 +69,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 	}
 	user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
-    rcompany = getParent().getProps().getProperty("rest.company");
+    rcompany = getParent().getProps().getProperty("rest.companyx");
      }
   
   String user =  null;
@@ -321,8 +321,25 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
     public void connectionUp(){
       connectionUp(this.url);
     }
+    
     public String getSaveDebtInfo() {
-       	return null;
+    	
+    	 String dd = getParent().getProps().getProperty("days");
+			Integer days = 1;
+			if(dd != null) {
+				try {
+					days = Integer.parseInt(dd);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+    	  Calendar alg = Calendar.getInstance();
+   	    alg.add(Calendar.DATE, -days);
+   	    Converter.makeWebFilesList(alg.getTime(), null , rcompany,  user ,  pass, this.getExcelDir() + "files/", "klp");
+   	    System.exit(0);
+   	  
+   	    return null;
+   	  
        }
        
     public String getAssortmentStr(Agent agent){
@@ -769,9 +786,7 @@ String email = " ";
         agent.setIsPilot(true);
         agents.put(nimi, agent);
         
-        if(rcompany != null){
-	    	//Converter.sendAgentJson(agents, rcompany, false);
-	    }
+       
         
 	return agents;
     }
@@ -1223,9 +1238,7 @@ private Vector baashk = null;
             stmt.close();
            
 
-            if(rcompany != null){
-            // 	Converter.sendCustomerJson(customers, rcompany,false,user,pass);
-             }
+            
 
 
 		      String sql3 = "SELECT op.Doknr,  part.Kodas as klient ,  OrderAsID = CONVERT(varchar(20), op.OperacijosId),   ProductAsId = CONVERT(Int, pr.PrekesId), prodid = CONVERT(varchar(35),   \r\n" + 

@@ -446,6 +446,7 @@ public class ErplyLttImportDriver extends AbstractImportDriver{
 	  }
 	  
 	  double miinus = 1;
+	  boolean fullDelOnly = false;
 	  
 	  if( "true".equals(parent.getProps().getProperty("returnmode"))){
 		  miinus = -1;
@@ -627,9 +628,16 @@ public class ErplyLttImportDriver extends AbstractImportDriver{
 	 	 			contact= "&contactID=" + cc;
 	 	 		}
 	 	 		
+	 	 		String delAllProds = "";
+	 	 		
+	 	 		if( order.fullDelyveryOnly != null && order.fullDelyveryOnly.trim().length() > 0 ){
+	 	 			delAllProds = "&deliveryOnlyWhenAllItemsInStock=1" ;
+	 	 		}
+	 	 		
+	 	 		
 	 	 		
 	 	 		  String dat = "request=saveSalesDocument&type=" + doctype + "&currencyCode=EUR&" + confirm + custID + addressID+payerID+
-	 				"&employeeID=" + order.getAgent() + "&date=" + date + "&deliveryDate=" + sdate + "&" + comment + wareinfo + shipmode + contact + orderdata +  userstuff;
+	 				"&employeeID=" + order.getAgent() + "&date=" + date + "&deliveryDate=" + sdate + "&" + comment + wareinfo + shipmode + contact + delAllProds + orderdata +  userstuff;
 	 	 		  System.out.println(dat);
 	 	 			
 	 	 		  if(senddata){

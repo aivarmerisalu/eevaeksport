@@ -1200,8 +1200,8 @@ HashSet olemas = new HashSet();
                }
            
                String sellout = rs.getString("sellout");
-               if(sellout!= null && (sellout.trim().equals("STOP") || sellout.trim().equals("Stopped") || sellout.trim().equals("Active")) ) {
-            	 if(sellout.equals("STOP") || sellout.trim().equals("Stopped")){
+               if(sellout!= null && (sellout.trim().toLowerCase().startsWith("stop") || sellout.trim().equals("Active")) ) {
+            	 if(sellout.trim().toLowerCase().startsWith("stop")){
             		   prod.setStatusSellout("1");
             	   }
             	 

@@ -127,6 +127,8 @@ public class Orders {
   private String photoname = null;
   private String signaname = null;
   private String contactid = null;
+  private String fullDelyveryOnly = null;
+  
   private String shipTime = null;
   private String teostaja = null;
   public String getTeostaja() {
@@ -267,6 +269,15 @@ public void setContactID( String mode) {
 		existingOrder.setContactID(mode);
 	}
 	this.contactid = mode;
+
+}
+
+public void setFullDeliveryOnly( String mode) {
+	
+	if(existingOrder != null){
+		existingOrder.fullDelyveryOnly = mode ;
+	}
+	this.fullDelyveryOnly = mode;
 
 }
 

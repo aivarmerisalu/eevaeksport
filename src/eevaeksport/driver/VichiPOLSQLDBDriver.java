@@ -1170,7 +1170,7 @@ try{
       
      try {
    	  String cmd = "SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [VICIUNAI-POL$Item Ledger Entry] l " +
-         " INNER JOIN [VICIUNAI-POL$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('MAG15','MAG12') " +
+         " INNER JOIN [VICIUNAI-POL$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('MAG15','MAG12','MAG17') " +
          " AND t.[Blocked]=0 AND len(t.[Product Group Code])>0 " +
          " GROUP BY l.[Location Code],l.[Item No_] HAVING sum(l.[Quantity]) > 0 ORDER BY l.[Item No_] ";
 

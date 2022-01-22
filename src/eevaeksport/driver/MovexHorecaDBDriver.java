@@ -2439,7 +2439,8 @@ public void eventInfo(Vector lines) throws SQLException {
 		String line = (String)lines.elementAt(i);
 		if(line.length() > 50){
 			
-		
+			
+			line = Converter.deCode(line);
 		
 	StringTokenizer st = new StringTokenizer(line,";");
 	String id = "";

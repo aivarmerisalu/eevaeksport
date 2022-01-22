@@ -623,7 +623,7 @@ private Object[] params = new Object[] {};
 	        			    }}
 	        			)));
 	        	
-	        	//  System.out.println("Res " + res.toString());
+	        	  System.out.println("Res " + res.toString());
 	        	  
 	        	  for (Object json : res){
 	        		  HashMap row = (HashMap)json;  

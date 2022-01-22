@@ -236,6 +236,8 @@ public class Product {
         public String getStatusSellout(){
           return statusSellout;
         }
+        
+        public String suggAle = null;
 
         public void setStatusNew(String status){
           statusNew = status;
@@ -323,6 +325,7 @@ public class Product {
     private String statusMustbe = " " ;
     private String statusDiscount = " " ;
     private String statusGiftPack = " " ;
+    public String statusSmallPack = " " ;
     private String statusSellout = " " ;
     private String statusNew = " " ;
     private String statusTOP = " " ;
@@ -388,6 +391,7 @@ public class Product {
 	public double layer = 0;
 	public Integer points = 0;
 	public boolean noOrder = false;
+	
    
    public double getOptAmountInUnits() {
    	return optAmountInUnits;

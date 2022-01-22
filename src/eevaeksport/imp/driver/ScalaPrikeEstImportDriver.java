@@ -116,7 +116,7 @@ import eevaeksport.util.Converter;
 				// Uurime millised ankeedid on aktiivsed ja koodid meelde .
 				
 
-				for (int a = 4; a < pikkus; a++) {
+				for (int a = 4; a < pikkus+1; a++) {
 					row = sheet.getRow(a);
 						String klient = null;
 						
@@ -237,7 +237,7 @@ import eevaeksport.util.Converter;
 				}catch(Exception ee ){
 					ee.printStackTrace();
 				}
-			//	System.out.println("Haldus kliendid " + haldusklienditooted.toString());
+				//System.out.println("Haldus kliendid " + haldusklienditooted.toString());
 	  }
 	  
 	  private Product getHaldusCustomerAndProduct(String kl,OrderLine  line){
@@ -2013,14 +2013,14 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 					String asik = ref;
 					if(order.isChanged()){
 						ref =  "T" + ref ;
-						if(isZeroStatus(order.getCompany())){
-							status = "0";
-						}
-						if(!isokTTTStatus(order.getCompany())){
+						//if(isZeroStatus(order.getCompany())){
+							//status = "0";
+						//}
+     						if(!isokTTTStatus(order.getCompany())){
 							sendTTTEmail(order.getCompany(),getNimi(order.getCompany()),lines, this.identifyCustomerAGENT(cust) ,
 					    			  order.getInfo(), getAddress(order.getCompany()));
 							status = "0";
-						}
+						} 
 					}
 			         
 			
@@ -2191,6 +2191,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		            		 || order.getCompany().equals("T1072-20") || order.getCompany().equals("T24161")
 		            		 || order.getCompany().equals("T62481") || order.getCompany().equals("T62482")
 		            		 || order.getCompany().startsWith("T5739")
+		            		 || order.getCompany().startsWith("T8587")//lidl
 		            		 ||  (order.getILN() != null && order.getILN().equals("4740660999899"))
 		            		 || (order.getILN() != null && prisma)
 		            		 ){//prismad 
