@@ -322,7 +322,7 @@ HashMap pants = null;
  	String ls = System.getProperty("line.separator");
  	try {
  	  int cou = 1;
-      sb.append(getLineNr(cou));
+     // sb.append(getLineNr(cou));
       sb.append("       <I06>" + ls);
       cou++;
 
@@ -330,11 +330,11 @@ HashMap pants = null;
       if(tag) {
     	  type = "52";
       }
-      sb.append(getLineNr(cou));
+      //sb.append(getLineNr(cou));
       sb.append("          <I06_OP_TIP>" + type + "</I06_OP_TIP>" + ls);
       cou++;
 
-      sb.append(getLineNr(cou));
+      //sb.append(getLineNr(cou));
       sb.append("          <I06_PVM_TIP>0</I06_PVM_TIP>" + ls);
       cou++;
       String cust = order.getCompany();
@@ -342,12 +342,12 @@ HashMap pants = null;
       
       String agent = order.getAgent();
       
-      sb.append(getLineNr(cou));
+      //sb.append(getLineNr(cou));
       sb.append("          <I06_KODAS_MS>" + escape(agent) + "</I06_KODAS_MS>" + ls);
       cou++;
       
       if(tag) {
-    	  sb.append(getLineNr(cou));
+    	//  sb.append(getLineNr(cou));
           sb.append("          <I06_ISAF>5</I06_ISAF>" + ls);
           cou++;  
       }
@@ -372,23 +372,23 @@ HashMap pants = null;
   		e1.printStackTrace();
   	}
 
-      sb.append(getLineNr(cou));
+     // sb.append(getLineNr(cou));
       sb.append("          <I06_DOK_NR>U" +  escape(agent)+ "-" + name + "-"  +  escape(order.getDokNr())  + "</I06_DOK_NR>" + ls);
       cou++;
       
 
-      sb.append(getLineNr(cou));
+    //  sb.append(getLineNr(cou));
       sb.append("          <I06_OP_DATA>" +  getDateString(order.getShipCal()) + "</I06_OP_DATA>" + ls);
       cou++;
       
       
-      sb.append(getLineNr(cou));
+  //    sb.append(getLineNr(cou));
       sb.append("          <I06_DOK_DATA>" +  getDateString(Calendar.getInstance()) + "</I06_DOK_DATA>" + ls);
       cou++;
   
 
 
-	sb.append(getLineNr(cou));
+	//sb.append(getLineNr(cou));
       sb.append("          <I06_KODAS_KS>" + escape(cust.substring(0,cust.lastIndexOf("-"))) + "</I06_KODAS_KS>" + ls);
       cou++;
       
@@ -398,14 +398,23 @@ HashMap pants = null;
 	} catch (SQLException e1) {
 		e1.printStackTrace();
 	}
-	sb.append(getLineNr(cou));
+//	sb.append(getLineNr(cou));
       sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
       cou++;
       
+      String lisa = null;
+      if(order.getInfo() != null && order.getInfo().trim().length() > 0) {
+    	  lisa = order.getInfo().trim();
+      }
+      if(lisa != null){
+    	//  sb.append(getLineNr(cou));
+          sb.append("          <I06_PASTABOS>" + escape(lisa) + "</I06_PASTABOS>" + ls);
+          cou++;  
+      }
      
     lines = order.getOrderLines();
       for (int i = 0; i < lines.size(); i++) {
-      	 sb.append(getLineNr(cou));
+      //	 sb.append(getLineNr(cou));
          sb.append("          <I07>" + ls);
          cou++;
         
@@ -422,7 +431,7 @@ HashMap pants = null;
         	  ale = 100;
           }
           
-          sb.append(getLineNr(cou));
+          //sb.append(getLineNr(cou));
           sb.append("               <I07_TIPAS>1</I07_TIPAS>" + ls);
           cou++;
           /*
@@ -433,7 +442,7 @@ Fillial 03    - agent 016*/
           
 if(ladu.trim().length()!=0){
 	
-          sb.append(getLineNr(cou));
+        //  sb.append(getLineNr(cou));
           sb.append("               <I07_KODAS_IS>" + ladu  + "</I07_KODAS_IS>" + ls);
           cou++;
 
@@ -441,7 +450,7 @@ if(ladu.trim().length()!=0){
 
 
 
-          sb.append(getLineNr(cou));
+         // sb.append(getLineNr(cou));
           sb.append("               <I07_KODAS>" +  escape(toode) + "</I07_KODAS>" + ls);
           cou++;
           double kord = 1;
@@ -449,7 +458,7 @@ if(ladu.trim().length()!=0){
         	  kord = -1;
           }
           
-          sb.append(getLineNr(cou));
+         // sb.append(getLineNr(cou));
           sb.append("               <I07_KIEKIS>" + escape(nf.format(line.getKogus() * kord)) + "</I07_KIEKIS>" + ls);
           cou++;
          
@@ -457,7 +466,7 @@ if(ladu.trim().length()!=0){
        //   sb.append("               <I07_KAINA_BE>" + escape(getConc().getNF().format(price)) + "</I07_KAINA_BE>" + ls);
        //   cou++;
   if (ale != 0 ){
-  	      sb.append(getLineNr(cou));
+  	    //  sb.append(getLineNr(cou));
           sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
           cou++;
 
@@ -474,7 +483,7 @@ if(ladu.trim().length()!=0){
 
   addNumLine();
 
-          sb.append(getLineNr(cou));
+       //   sb.append(getLineNr(cou));
           sb.append("          </I07>" + ls);
           cou++;
       }
@@ -487,7 +496,7 @@ if(ladu.trim().length()!=0){
        	String toode = (String)enumpant.nextElement();
       	double pand = new Double((String)pandikas.get(toode)).doubleValue();
     	  
-   	 sb.append(getLineNr(cou));
+   	 //sb.append(getLineNr(cou));
      sb.append("          <I07>" + ls);
      cou++;
     
@@ -498,26 +507,26 @@ if(ladu.trim().length()!=0){
       String ladu = "";   
 if(ladu.trim().length()!=0){
 
-      sb.append(getLineNr(cou));
+      //sb.append(getLineNr(cou));
       sb.append("               <I07_KODAS_IS>" + ladu  + "</I07_KODAS_IS>" + ls);
       cou++;
 }      
 
-      sb.append(getLineNr(cou));
+      //sb.append(getLineNr(cou));
       sb.append("               <I07_KODAS>" +  escape(toode) + "</I07_KODAS>" + ls);
       cou++;
       
-      sb.append(getLineNr(cou));
+      //sb.append(getLineNr(cou));
       sb.append("               <I07_KIEKIS>" + escape(nf.format(pand)) + "</I07_KIEKIS>" + ls);
       cou++;
      
-      sb.append(getLineNr(cou));
+     // sb.append(getLineNr(cou));
       sb.append("          </I07>" + ls);
       cou++;
    	  }
       }
       
-      sb.append(getLineNr(cou));
+      //sb.append(getLineNr(cou));
       sb.append("          </I06>" + ls);
       cou++;
 
@@ -537,6 +546,7 @@ if(ladu.trim().length()!=0){
         if(APIKEY != null) {
         String data = "	<body><method>EDIT_I06_FULL</method><data>" + sb.toString() + "</data>" + 
         		"</body>";
+        System.out.println(data);
        StringBuffer sbb = postData(data);
        System.out.println("Response " + sbb);
        
@@ -564,6 +574,8 @@ if(ladu.trim().length()!=0){
 	  try{
 	  urlc.setRequestMethod( "POST" );
 	  urlc.addRequestProperty("ApiKey", APIKEY);
+	  urlc.addRequestProperty("Accept", "application/xml");
+	  urlc.addRequestProperty("Content-Type", "application/xml");
 	  } catch (ProtocolException e) {
 	    throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
 	  }
@@ -599,13 +611,11 @@ if(ladu.trim().length()!=0){
 	  } catch (IOException e)
 	  {
 	  throw new Exception("IOException while reading response", e);
-	  } finally
-	  {
+	  } finally  {
 	  if (in != null)
 	  in.close();
 	  }
-	  } catch (IOException e)
-	  {
+	  } catch (IOException e) {
 	  throw new Exception("Connection error (is server running at " + this.logurl + " ?): " + e);
 	  } finally
 	  {

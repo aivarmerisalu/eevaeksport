@@ -1131,6 +1131,18 @@ try{
         
         
         nimetus = nimetus.replaceAll("konfektes", "konf.");
+        nimetus = nimetus.replaceAll("VIENREIZ", "Vien.");
+        nimetus = nimetus.replaceAll("E-CIGARETE", "E-Cig.");
+
+        nimetus = nimetus.replaceAll("MASKKING", "Mask.");
+        nimetus = nimetus.replaceAll("STRAWBERRY", "Straw.");
+        nimetus = nimetus.replaceAll("WATERMELON", "Wmelon");
+        nimetus = nimetus.replaceAll("BLUEBERRY", "Blueb.");
+        nimetus = nimetus.replaceAll("RASPBERRY", "Raspb.");
+        
+        
+         
+        
     
       prod.setName(nimetus + " " + addx);
     //  prod.setAlegrupp("1");

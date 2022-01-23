@@ -1505,6 +1505,16 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                          
 		         		
 
+		         		String limit = "";
+		         		try{ 
+		         			limit =  rida.getAttributes().getNamedItem("limit").getNodeValue(); 
+		 	         		customer.setCredit(limit);
+		 	         	 }catch(Exception ee){
+		         		 }
+                         
+		         		
+		         		
+
 		         		try{ 
 		         			double discount  =  Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
 		         			if(discount > 0){

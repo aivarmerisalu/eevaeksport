@@ -955,7 +955,14 @@ Statement st = null;
                    		
                 	}
                 	cust.setAddress(aadr);
-                	 cust.restStreet = addr.trim();
+                	 int comma = addr.indexOf(",");
+                	 if(comma != -1) {
+                		 cust.restStreet = addr.substring(0,comma);
+                		 cust.restCity = addr.substring(comma+1);
+                	 }else {
+                		 cust.restStreet = addr.trim(); 
+                	 }
+                
                 	
                 }catch(Exception aa){
                 	

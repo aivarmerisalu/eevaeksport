@@ -90,6 +90,9 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 
   public ErplyLttDBDriver(EksportPanel parent) {
     super(parent);
+    
+
+    
     this.subjectFilesTo = parent.getString("filemsg");
    String url = getParent().getProps().getProperty("erply.url");
    ownGLN = getParent().getProps().getProperty("owngln");
@@ -125,6 +128,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
       + "&password=" + password;
    
    session = getSessionId(passString);
+   if("true".equals(getParent().getProps().getProperty("cdn.pictures"))){
    try {
 		myurlcdn = new URL("https://cdn.erply.com/session");
 	} catch (MalformedURLException e) {
@@ -132,12 +136,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	}
    sessioncdn = getSessionIdCDN("jwt=" +jwttoken);
    
-   try {
-		// getImagesCDN(sessioncdn);
-	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+   }
 
 	while(session.indexOf("%") != -1){
 	   session = getSessionId(passString);
@@ -153,10 +152,15 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
     user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.companyx");
+    
+ 
+    
      }
   String user =  null;
   String pass = null;
   String rcompany = null;
+  
+  
     
   public String getSaveDebtInfo() {
 	   

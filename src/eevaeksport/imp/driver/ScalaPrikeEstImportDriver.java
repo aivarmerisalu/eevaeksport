@@ -244,7 +244,7 @@ import eevaeksport.util.Converter;
 		  Product res = null;
 		 String maksja =  getPayer(kl);
 		 String ean = getEan(line.getToode());
-		//System.out.println("maksja on olemas " + maksja + " " + halduskliendid.contains(maksja));
+		System.out.println("maksja on olemas " + maksja + " " + halduskliendid.contains(maksja));
 		 if(maksja != null && halduskliendid.contains(maksja)){
 	      Vector<Product> vec = (Vector<Product>)haldusklienditooted.get(maksja);
 	     // System.out.println("tooted "+ vec);
@@ -2349,74 +2349,13 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
               nf.setMaximumFractionDigits(3);
               nf.setGroupingUsed(false);
               
-
-		      
-		    //lisame pandipakendi  !!!!!!!
-            
-		          if(false && pandikas.size()>0){
-		            	Enumeration enumpant = pandikas.keys();
-		             while(enumpant.hasMoreElements()){
-		             	
-		             	String kood = (String)enumpant.nextElement();
-		             	if(kood .trim().length()>0){
-		             	i++;
-		          	double pand = new Double((String)pandikas.get(kood)).doubleValue();
-		          	  
-
-				      	sb.append(addSpaces(doknr, 10));
-				      	sb.append(type);//11
-				        sb.append(addSpaces(cust, 10));//22
-				        sb.append(getToday());//46 siia pane dokkuup
-				        sb.append(getTarne(order));//46
-				        sb.append(addSpaces(agent, 3));//49	      
-				        sb.append(addSpaces(kood, 20));//113
-				        sb.append(addSpaces(nf.format(pand).replace(',','.').replaceAll(" ",""), 8));//129
-				        sb.append(addSpaces(" ",70));//181
-				        sb.append("01");// Laokood 
-				        sb.append(addSpaces("",200));//181
-				           
-		                 sb.append(System.getProperty("line.separator"));
-		              
-		                 
-				          sb2.append("      <dta:OrderLine>" + ls);
-				          sb2.append("         <dta:LineNum>" + getLineNr(i+1) + "</dta:LineNum>" + ls);
-				          sb2.append("         <dta:StockCode>" + escape(kood) + "</dta:StockCode>" + ls);
-				          sb2.append("         <dta:QtyOrdered>" + nf.format(pand).replace(',','.').replaceAll(" ","") + "</dta:QtyOrdered>" + ls);
-				          sb2.append("         <dta:AccStr>" + ls);
-					      sb2.append("               <dta:AccDim1>" + agent + "</dta:AccDim1>" + ls);
-					      sb2.append("         </dta:AccStr>" + ls);
-					      sb2.append("      </dta:OrderLine>" + ls);
-		             
-		         	
-		             	}
-		            	
-		            }
-		            }
-		      
-		      
-		      
-		      
 		    	
 		      setNumAddedLines(getNumAddedLines() + cou);
 		      String add = agent;
 		      if(add.equals("   ")){
 		    	  add = "MUU";
 		      }
-	        /*  if(!demagoogia){
-	          	 
-	            String fileName = escape(parent.getProps().getProperty("conv.dir") + add)  + "." + doknr   +  ".txt";
-	   	     
-	   	      System.out.println(fileName);
-	   	        FileOutputStream fos = new FileOutputStream(fileName);
-	   	        fos.write(sb.toString().getBytes());
-	   	        fos.close();
-	          	
-	          }else {
-	          	String fileName2 = escape(parent.getProps().getProperty("conv.dir2") + add)  + "." + doknr   +  ".txt";
-	          	FileOutputStream fos = new FileOutputStream(fileName2);
-		        fos.write(sb.toString().getBytes());
-		        fos.close();
-	          }*/
+	       
 	          
 	          sb2.append("        </dta:OrderLines>" + ls);
 		      sb2.append("      <dta:TextLines />" + ls);

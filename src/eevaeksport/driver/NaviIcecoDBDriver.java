@@ -479,7 +479,7 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
                 	}
                 }
 			    sb2.append(agent.getID() + ";" + name + "\n"); 
-			    System.out.println("dubblers " + agent.getDubbler().toString());
+			   // System.out.println("dubblers " + agent.getDubbler().toString());
 	          agents.put(name, agent);
 	          agents1.put(agent.getID(), agent);
 	        }
@@ -830,6 +830,37 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
        e.printStackTrace();
    }
       
+     
+     TreeMap<String, Double> costs = new TreeMap<String, Double>();
+     
+     try {
+    	 
+     
+   
+      	String cmd =   "SELECT [No_] as kood, [Item Cost] AS cost   FROM [UAB ICECO Trade$Merisoft Stock] ORDER BY [No_] ";
+      	
+       System.out.println(cmd);
+       
+       this.getProdGroups();
+       
+       
+      	Connection con = getNewConnection2();
+         Statement stmt = con.createStatement();
+         ResultSet rs = stmt.executeQuery(cmd);
+         while(rs.next()){
+             String id = rs.getString("kood").trim();
+             double cost = rs.getDouble("cost");
+             costs.put(id, cost);  
+         }
+         rs.close();
+         stmt.close();
+         con.close();
+             
+         } catch(Exception e) {
+    		 e.printStackTrace();
+    	 }
+     
+     
       
    //  getFixedAssortmentData();
  
@@ -898,7 +929,16 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
                  if (ean != null &&ean.trim().length()>3){
                    prod.setEAN(ean.trim());
                  }
-        
+        if(costs.get(prod.getID()) != null) {
+        	double oh = costs.get(prod.getID());
+        	double kate = (1-oh/prod.getPrice())*100;
+        	if(kate>0){
+        		String kat = (kate + "");
+        		  prod.setMargin(kat);
+         	}	
+          
+        }
+              
              	String discou = rs.getString("maxdiscount");
              	if(discou != null && discou.trim().length()>0){
                 prod.setMaxDiscount(Double.parseDouble(discou));

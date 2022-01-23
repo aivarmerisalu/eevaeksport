@@ -155,15 +155,7 @@ try{
 	        return client.execute(httpPost);
 
 	}
-  private HttpClient getClient() throws Exception{
-		if (client == null){
-			client =  HttpClients.createDefault();
-		
-		}
-		
-		return client;
-	}
-  
+
 	public void closeClient(){
 		if(client != null){
 			
@@ -383,7 +375,9 @@ JSONObject ord = new JSONObject();
 					   if( CITY.trim().length() > 0) {
 						   aadress.put("City", CITY);
 					   }
-					  
+					   if(!TYPE.equals("box")) {
+						   aadress.put( "Country", "EE"); 
+					   }
 					   header.put( "DeliveryAddressDetail", aadress);
 				   }
 				   

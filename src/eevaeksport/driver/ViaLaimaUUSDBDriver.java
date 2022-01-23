@@ -1192,7 +1192,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 			 //lisame kullerid 
 			 
 			  vahe.put("KUL DPD Eesti", "kul1;KUL DPD Eesti;dtd;DPD;10092256" );
-			  vahe.put("KUL SendPack", "kul1;KUL SendPack;dtd;SEP;2423252" );
+			  vahe.put("KUL SendPack", "kul1;KUL SendPack;dtd;SEP;12703132" );
 			 
 			Iterator itera =  vahe.values().iterator();
 			while (itera.hasNext()) {
