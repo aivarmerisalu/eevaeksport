@@ -86,3 +86,4 @@ CVS/
 **/CVS/*
 .cvsignore
 */.cvsignore
+/eksport.ini

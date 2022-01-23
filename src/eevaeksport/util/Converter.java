@@ -36,6 +36,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -9169,6 +9173,25 @@ client.close();
 		return cc;
 	}
 	
+	public static JSONArray getWebDayReport(long startTimestamp, long endTimestamp, String company, String user , String pass) {
+		// TODO Auto-generated method stub
+		JSONArray cc =  null;
+		
+		  eevaeksport.util.ReportingService serv = new ReportingService();
+		  serv.user =  user;
+			serv.pass = pass;
+			serv.company = company;
+			try {
+			 cc = 	serv.getDayReport(startTimestamp, endTimestamp);
+			int lenn = cc.length();
+			//System.out.println("Dayreport suurus " + lenn);
+			serv.closeClient();	
+        	} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		return cc;
+	}
 
 	public static JSONArray getWebProducts( String company, String user , String pass) {
 		// TODO Auto-generated method stub
@@ -9725,7 +9748,6 @@ client.close();
 
 	  
 	  **/
-	
 
 	   public static void createExcelReport(TreeMap products1, TreeMap customers1, Vector custProds, Vector matrix, String exceldir, String rcompany, String user, String pass) {
 		   
@@ -10123,8 +10145,144 @@ client.close();
 		   
 	   }
 	   
-	    
-	
 
+	    public static double distanceBetweenCoords(double lt1, double ln1, double lt2, double ln2) {
+	    	double r2d = 180.0D / 3.141592653589793D;
+	    	double d2r = 3.141592653589793D / 180.0D;
+	    	double d2km = 111189.57696D * r2d;
+	        double x = lt1 * d2r;
+	        double y = lt2 * d2r;
+	        return Math.acos( Math.sin(x) * Math.sin(y) + Math.cos(x) * Math.cos(y) * Math.cos(d2r * (ln1 - ln2))) * d2km;
+	    }
+	   
+
+	   
+	    
+	   
+	   public static void getDayReportReport(String exceldir, String rcompany, String user, String pass) {
+		   LocalDate today = LocalDate.now(ZoneId.of("Europe/Tallinn"));
+		   //today = today.minusDays(3);
+		   if(today.getDayOfWeek().getValue() != 1) { //kui ei ole esmasp siis teeskleme et on
+			   today = today.minusDays(today.getDayOfWeek().getValue()-1);
+		   }
+		   LocalDate lastMonday = today.with(TemporalAdjusters.previous( DayOfWeek.MONDAY ));
+		   LocalDate lastSaturday = today.with(TemporalAdjusters.previous( DayOfWeek.SATURDAY ));
+		   Long monTimestamp = lastMonday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000;
+		   Long satTimestamp = lastSaturday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000;
+		   //System.exit(0);
+
+		   
+		   
+	  try{
+		  JSONArray dayreportarray = new JSONArray();
+		  JSONArray webcustarray = new JSONArray();
+		  dayreportarray = getWebDayReport(monTimestamp, satTimestamp, rcompany, user, pass);
+		  webcustarray = getWebCustomersAll(rcompany, user, pass);
+
+		  int lenn = webcustarray.length();
+		  TreeMap custsloc = new TreeMap();
+		  for (int i = 0; i < lenn; i++) {
+			JSONObject cob = (JSONObject) webcustarray.getJSONObject(i);
+          	String key = (String)cob.get("code");
+          	try {
+          	String loc = (String)cob.get("location");
+          	//System.out.println("kood: " + key);
+          	custsloc.put(key, loc);
+          	
+          	}catch(Exception e){
+          	}
+
+		  }
+		  
+		  StringBuffer sb = new StringBuffer(); 
+		  sb.append("Kliento kodas,Kliento Pavadinimas,Data,Pradzios laikas,Pabaigos laikas,Kliento kordinates,Kordinates,Sutampa ar ne su Faktiniu adresu \r\n");
+		  sb.append("Код клиента,Название клиента,Дата заказа,Время (начала заказа),Время (Конец заказа),Координаты клиента,Координаты заказа,Совпадает или нет с фактическим адресом клиента\r\n");
+			
+		  lenn = dayreportarray.length();
+		  for (int i = 0; i < lenn; i++) {
+			  
+		  	  String key = null;
+			  JSONObject cob = (JSONObject) dayreportarray.getJSONObject(i);
+			  key = (String)cob.get("custid");
+			  
+			  
+			  String custname = null;
+			  try {
+				  custname = (String)cob.get("custname");
+				  custname = custname.replaceAll(",", ".");
+			  }catch (Exception e){
+			  }
+
+			  SimpleDateFormat hhmmFormat = new SimpleDateFormat("HH:mm");
+			  String startdates = null;
+			  String starttime = null;
+			  try {
+				  Long startdate = (Long)cob.get("startdate");
+				  Date startdatee = new Date(startdate);
+				  startdates = Converter.getYYYY_MM_DD_String(startdatee);
+				  starttime = hhmmFormat.format(startdatee);
+			  }catch (Exception e){
+			  }
+
+
+			  String endtime = null;
+			  try {
+				  Long enddate = (Long)cob.get("enddate");
+				  Date enddatee = new Date(enddate);
+				  endtime = hhmmFormat.format(enddatee);
+			  }catch (Exception e){
+			  }
+			  
+			  
+			  Double lat = null;
+			  Double lon = null;
+			  String clientcoords = null;
+			  try {
+				  lat = (Double)cob.get("latitude");
+				  lon = (Double)cob.get("longitude");
+				  clientcoords = lat.toString() + ";" + lon.toString(); //kliendi kordinaadid
+			  }catch (Exception e){
+			  }
+
+			  
+			  String ordercoords = null;
+			  String[] arrOfOrderCoords = null;
+			  Double lat1=null;
+			  Double lon1=null;
+			  try {
+				  ordercoords = custsloc.get(key).toString(); 
+				  arrOfOrderCoords = ordercoords.split(";");
+				  lat1=Double.parseDouble(arrOfOrderCoords[0]);
+				  lon1=Double.parseDouble(arrOfOrderCoords[1]);
+			  }catch (Exception e){
+			  }
+
+			  
+			  String isInRange = null;
+			  try {
+				  Double distance = distanceBetweenCoords(lat, lon, lat1, lon1);
+				  if (distance < 850) {
+					  isInRange = "OK";
+				  } else {
+					  distance = (double) Math.round(distance);
+					  distance = distance/1000;
+					  isInRange = "NOK: " + distance + " km";
+				  }
+			  }catch (Exception e){
+			  }
+
+				  sb.append(key + "," + custname + "," + startdates + "," + starttime + "," + endtime + "," + clientcoords + "," + ordercoords + "," + isInRange + "\r\n");
+
+		  }
+
+			saveFileInUTF8(exceldir + "vigestareport" + lastMonday + ".csv",sb);
+
+		  
+	  }catch (Exception e){
+			e.printStackTrace();
+		}
+		   
+	 }
+	   
 
 }
