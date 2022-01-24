@@ -40,7 +40,7 @@ import eevaeksport.util.Converter;
  * @author Tarmo Tubro
  * @version 1.0
  */
-public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter{
+public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter,FixReporter{
 
 
     public SkaiteVigestaDBDriver(EksportPanel parent) {
@@ -1685,6 +1685,17 @@ try{
     private String	       subjectFilesTo = null;
     private NumberFormat NF = NumberFormat.getInstance(); 
     private TreeMap  dealers = new TreeMap();
+
+
+
+	@Override
+	public void FixReporter() {
+		String fileName = Converter.saveDayReportReport(this.getExcelDir(), rcompany, user, pass);
+		if(fileName != null) {
+			Converter.sendReportEmail("Dayreport weekly report", fileName, parent);
+		}
+		System.exit(0);
+	}
     
 
 	

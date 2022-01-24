@@ -1184,8 +1184,8 @@ String region = rs.getString("region");
                          String custcode = rs1.getString("custcode").trim();
                          obj.put("customerCode", custcode);
                          
-                         if(code.indexOf("MI.W81608439") != -1){
-                        	 System.out.println("MI.W81608439 " + custcode +" "+ (asses.contains(code)) + " " +custs.contains(custcode));
+                         if(code.indexOf("MI.04459") != -1){
+                        	 System.out.println("MI.04459 " + custcode +" "+ (asses.contains(code)) + " " +custs.contains(custcode));
                          }
                        
                          if(asses.contains(code) && custs.contains(custcode) ){

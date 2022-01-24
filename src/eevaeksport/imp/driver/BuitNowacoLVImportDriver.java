@@ -171,11 +171,18 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 	}
 
 	
-	private String getAgent(String custid ,String ag) {
+	private String getAgent(String klient ,String ag) {
 
 		  String sql =  "   SELECT a.tab_nr AS agent FROM klientai k  INNER JOIN " +
 				 	"  (select klientas, tab_nr from (select * from manager order by klientas,data desc)as man  group by klientas order by klientas,data ) " +
-				 	"   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where ( (gavejas = 1 ) or filialas =1 ) and k.klient_id ="  + custid ; 
+				 	"   a ON a.klientas = k.klientas and a.tab_nr >0 "
+				 	+ "LEFT join marsrut ma on ma.kodas = k.marsrutas where ( (gavejas = 1 ) or filialas =1 ) and k.klient_id ="  + klient ; 
+		  
+		  sql =   "   SELECT k.klientas  AS nimi,k.klient_id AS kood ,a.tab_nr AS agent " +
+		     		"  FROM klientai k  INNER JOIN " +
+					"  (select klientas, tab_nr from (select * from manager order by klientas,data desc)as man  group by klientas order by klientas,data ) " +
+					"   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas"
+					+ " where  k.klient_id = " + klient ;
 		System.out.println(sql);
 		String res = null;
 		try {
