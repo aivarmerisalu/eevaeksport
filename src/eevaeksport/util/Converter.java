@@ -10331,7 +10331,11 @@ client.close();
 			  }catch (Exception e){
 			  }
 
-				  sb.append(agentname + "\t" + key + "\t" + custname + "\t" + startdates + "\t" + starttime + "\t" + endtime + "\t" + clientcoords + "\t" + ordercoords.replace(";", ":") + "\t" + isInRange + "\r\n");
+			  String ooo = "0:0";
+			 if( ordercoords != null) {
+				 ooo = ordercoords.replace(";", ":");
+			  }
+				  sb.append(agentname + "\t" + key + "\t" + custname + "\t" + startdates + "\t" + starttime + "\t" + endtime + "\t" + clientcoords + "\t" + ooo + "\t" + isInRange + "\r\n");
 
 		  }
 
