@@ -10159,10 +10159,10 @@ client.close();
 	   
 	    
 	   
-	   public static void getDayReportReport(String exceldir, String rcompany, String user, String pass) {
+	   public static String saveDayReportReport(String exceldir, String rcompany, String user, String pass) {
 		   LocalDate today = LocalDate.now(ZoneId.of("Europe/Tallinn"));
 		   //today = today.minusDays(3);
-		   if(today.getDayOfWeek().getValue() != 1) { //kui ei ole esmasp siis teeskleme et on
+		   while(today.getDayOfWeek().getValue() != 1) { //kui ei ole esmasp siis teeskleme et on
 			   today = today.minusDays(today.getDayOfWeek().getValue()-1);
 		   }
 		   LocalDate lastMonday = today.with(TemporalAdjusters.previous( DayOfWeek.MONDAY ));
@@ -10195,8 +10195,8 @@ client.close();
 		  }
 		  
 		  StringBuffer sb = new StringBuffer(); 
-		  sb.append("Kliento kodas,Kliento Pavadinimas,Data,Pradzios laikas,Pabaigos laikas,Kliento kordinates,Kordinates,Sutampa ar ne su Faktiniu adresu \r\n");
-		  sb.append("Код клиента,Название клиента,Дата заказа,Время (начала заказа),Время (Конец заказа),Координаты клиента,Координаты заказа,Совпадает или нет с фактическим адресом клиента\r\n");
+		  sb.append("Agento Kodas\tKliento kodas\tKliento Pavadinimas\tData\tPradzios laikas\tPabaigos laikas\tKliento kordinates\tKordinates\tSutampa ar ne su Faktiniu adresu \r\n");
+		//  sb.append("Код клиента,Название клиента,Дата заказа,Время (начала заказа),Время (Конец заказа),Координаты клиента,Координаты заказа,Совпадает или нет с фактическим адресом клиента\r\n");
 			
 		  lenn = dayreportarray.length();
 		  for (int i = 0; i < lenn; i++) {
@@ -10209,10 +10209,18 @@ client.close();
 			  String custname = null;
 			  try {
 				  custname = (String)cob.get("custname");
-				  custname = custname.replaceAll(",", ".");
+				  custname = custname.replaceAll("\t", ",");
 			  }catch (Exception e){
 			  }
 
+			  String agentname = null;
+			  
+			  try {
+				  agentname = (String)cob.get("agentname");
+				  agentname = agentname.replaceAll("\t", ",");
+			  }catch (Exception e){
+			  }
+			  
 			  SimpleDateFormat hhmmFormat = new SimpleDateFormat("HH:mm");
 			  String startdates = null;
 			  String starttime = null;
@@ -10240,7 +10248,7 @@ client.close();
 			  try {
 				  lat = (Double)cob.get("latitude");
 				  lon = (Double)cob.get("longitude");
-				  clientcoords = lat.toString() + ";" + lon.toString(); //kliendi kordinaadid
+				  clientcoords = lat.toString() + ":" + lon.toString(); //kliendi kordinaadid
 			  }catch (Exception e){
 			  }
 
@@ -10271,18 +10279,19 @@ client.close();
 			  }catch (Exception e){
 			  }
 
-				  sb.append(key + "," + custname + "," + startdates + "," + starttime + "," + endtime + "," + clientcoords + "," + ordercoords + "," + isInRange + "\r\n");
+				  sb.append(agentname + "\t" + key + "\t" + custname + "\t" + startdates + "\t" + starttime + "\t" + endtime + "\t" + clientcoords + "\t" + ordercoords.replace(";", ":") + "\t" + isInRange + "\r\n");
 
 		  }
 
 			saveFileInUTF8(exceldir + "vigestareport" + lastMonday + ".csv",sb);
-
+			
+return exceldir + "vigestareport" + lastMonday + ".csv";
 		  
 	  }catch (Exception e){
 			e.printStackTrace();
 		}
-		   
+	  return null;    
 	 }
-	   
+	
 
 }

@@ -46,6 +46,12 @@ import javax.mail.internet.InternetAddress;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -326,7 +332,7 @@ HashMap pants = null;
       sb.append("       <I06>" + ls);
       cou++;
 
-      String type = "51";
+      String type = "53"; //tellimus
       if(tag) {
     	  type = "52";
       }
@@ -500,7 +506,7 @@ if(ladu.trim().length()!=0){
      sb.append("          <I07>" + ls);
      cou++;
     
-      sb.append(getLineNr(cou));
+     // sb.append(getLineNr(cou));
       sb.append("               <I07_TIPAS>1</I07_TIPAS>" + ls);
       cou++;
 
@@ -547,8 +553,13 @@ if(ladu.trim().length()!=0){
         String data = "	<body><method>EDIT_I06_FULL</method><data>" + sb.toString() + "</data>" + 
         		"</body>";
         System.out.println(data);
-       StringBuffer sbb = postData(data);
-       System.out.println("Response " + sbb);
+        
+        HttpResponse aaa = restPostRequest(data);
+       
+        String sbb = EntityUtils.toString(aaa.getEntity());
+        System.out.println("Response " + sbb);
+     //  StringBuffer sbb = postData(data);
+     //  System.out.println("Response " + sbb);
        
         fileName = escape(cat + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  "response.txt";
        System.out.println(fileName);
@@ -565,6 +576,20 @@ if(ladu.trim().length()!=0){
   public String getDriverVersion(){
     return "RivileBalmerk";
   }
+  
+  
+  private HttpResponse restPostRequest(String data) throws Exception {
+
+		 HttpPost httpPost = new HttpPost(this.logurl);
+		 if(data != null){
+			 httpPost.setEntity(new StringEntity(data,"utf-8"));
+			  httpPost.setHeader("ApiKey", "XIZC7NH.LwyLXNZwNyql8UKtnor9MVEbnIcGrpMwRtlXQNpG");
+		        httpPost.setHeader("Accept", "application/xml");
+		        httpPost.setHeader("Content-type", "application/xml;charset=utf-8");
+		 }
+	        return HttpClients.createDefault().execute(httpPost);
+
+	}
 
   private StringBuffer postData(String data) throws Exception {
 	  HttpURLConnection urlc = null;
@@ -576,6 +601,8 @@ if(ladu.trim().length()!=0){
 	  urlc.addRequestProperty("ApiKey", APIKEY);
 	  urlc.addRequestProperty("Accept", "application/xml");
 	  urlc.addRequestProperty("Content-Type", "application/xml");
+	  
+	
 	  } catch (ProtocolException e) {
 	    throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
 	  }
@@ -616,6 +643,27 @@ if(ladu.trim().length()!=0){
 	  in.close();
 	  }
 	  } catch (IOException e) {
+		  
+		  InputStream in = urlc.getInputStream();
+		  try{
+		  Reader reader = new InputStreamReader(in);
+		    InputStreamReader isr = new InputStreamReader(in,"UTF-8");
+		    BufferedReader inr = new BufferedReader(isr);
+		    String inputLine;
+
+		    while ((inputLine = inr.readLine()) != null){
+		        inputLine = Converter.enCodeEst(inputLine);	// enCode(inputLine);	
+		    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n"));
+		  }
+
+		     inr.close();
+		  
+		  
+		  reader.close();
+		  } catch (IOException uu){
+			uu.printStackTrace();  
+		  }
+		  
 	  throw new Exception("Connection error (is server running at " + this.logurl + " ?): " + e);
 	  } finally
 	  {
