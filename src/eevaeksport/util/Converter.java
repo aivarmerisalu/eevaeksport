@@ -3354,6 +3354,58 @@ public class Converter {
 	}
 	
 	
+	public static void sendReportEmail(String comment1 , String fileName, EksportPanel parent ){
+	   	try{
+	   		String comment = null ;
+	   		if(comment1 != null && comment1.trim().length() > 0) {
+	   			comment =  comment1 + "\n\n" ;
+	   		}
+	   		
+	   		
+	   		if(comment != null && comment.trim().length() >0){
+	   			
+	   			//System.out.println(comment);
+	   			Email mail = new Email(null);
+		  		   
+	   			
+	                mail.setSMTP(parent.getProps().getProperty("smtphost"));
+	                if(parent.getProps().getProperty("smtpuser") != null)
+	                mail.setUser(parent.getProps().getProperty("smtpuser"));
+	                
+	                if(parent.getProps().getProperty("smtppass") != null)
+	                mail.setPass(parent.getProps().getProperty("smtppass"));
+	                
+	                if(parent.getProps().getProperty("smtpport") != null)
+	                mail.setPort(parent.getProps().getProperty("smtpport"));
+	               
+	              
+	                	mail.setSubjectFilesTo("Merisoft Report " );
+	               
+		  	  		
+		  	  		mail.setFrom(parent.getProps().getProperty("from"));
+		  	  		
+		  	  
+		  	  	
+		  	  		String lisa = "";
+		  	  		
+		  	  		mail.setEncoding("utf-8");
+		  	  		mail.setBodyHtml("<br>" + lisa + comment.replaceAll("\n", "<br>") + "<br><br>");
+		  	  		mail.setSendNotice(false);
+		  	  		mail.addAttach(fileName);
+		  	  	 StringTokenizer st = new StringTokenizer(parent.getProps().getProperty("report.email"),",");
+		  	  	 while(st.hasMoreTokens()) {
+		  	  	    mail.setFilesTo(st.nextToken());
+		  	  		mail.send(); 
+		  	  	 }
+	               	
+	   		}
+		  	
+		  			}catch(Exception e){
+		  			e.printStackTrace();	
+		  			}
+		  	
+	   }
+	
 	public static void sendFixLoadErrorEmail(String comment1 , EksportPanel parent , String format , boolean error){
 	   	try{
 	   		String comment = null ;
