@@ -1188,7 +1188,7 @@ String region = rs.getString("region");
                         	 System.out.println("MI.04459 " + custcode +" "+ (asses.contains(code)) + " " +custs.contains(custcode));
                          }
                        
-                         if(asses.contains(code) && custs.contains(custcode) ){
+                         if(asses.contains(code)  ){ // && custs.contains(custcode)
                         	  String olemas = (String)asscusts.get(code);
                         	  
                         	  
@@ -1217,7 +1217,8 @@ String region = rs.getString("region");
                     Converter.sendAssetsCustomerJson(vec,this.user,this.pass,this.rcompany);     
                	   
                     System.out.println("assets saadetud " +  cou + " "+ coua);
-    	   
+    	   System.exit(0);
+    	   //lendame välja kuna in inventari case
     	   
       }
    

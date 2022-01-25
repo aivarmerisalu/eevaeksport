@@ -81,6 +81,7 @@ import eevaeksport.EksportFrame;
 import eevaeksport.Email;
 import eevaeksport.Product;
 import eevaeksport.imp.driver.AbstractImportDriver;
+import eevaeksport.imp.driver.KalevImportDriver;
 import eevaeksport.imp.driver.MovexLatImportDriver;
 import eevaeksport.imp.driver.SkaiteEugImportDriver;
 import eevaeksport.imp.driver.VichiLITSQLImportDriver;
@@ -13857,6 +13858,18 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 			            e.printStackTrace();	
 			         }
 			         
+			          if (prod == null){
+			          try{
+		            	  if (driver instanceof KalevImportDriver){
+		                   String  prod1 =  ((KalevImportDriver)driver).identifyProduct2(ean, prod);
+		                   if(prod1 != null && prod1.trim().length() > 0){
+		                	   prod=prod1;
+		                   }
+		                    } 	  
+		                }catch(Exception e ){
+		                	
+		                }
+			          }
 			       
 			       if (prod == null){
 			         addLog(parent.getString("noprodid") + "\n " + ean + "\n" + fileName + "\n" + parent.getString("fixprodid") +"\n\n");
