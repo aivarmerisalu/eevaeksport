@@ -2971,8 +2971,9 @@ public class Converter {
 		          if(format.equals("selver")) {
 		        	  loadFixSelver(res, file , prods, parent);
 		          }
-		          
-		          
+		          if(format.equals("circlek")) {
+		        	  loadFixCirclek(res, file , prods, parent);
+		          }
 		          if(format.equals("keila")) {
 		        	  loadFixKeila(res, file , prods, parent);
 		          }
@@ -3080,7 +3081,7 @@ public class Converter {
 									//	System.out.println("xx " +formatter.formatCellValue(cellx));
 										if(formatter.formatCellValue(cellx).indexOf("Maksimarket") != -1 ) {
 											return "coop";
-										}	
+										}
 										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 ) {
 											return "maxima";
 										}	
@@ -3106,7 +3107,10 @@ public class Converter {
 									try {
 										if(formatter.formatCellValue(cellx).indexOf("Maksimarket") != -1 ) {
 											return "coop";
-										}	
+										}
+										if(formatter.formatCellValue(cellx).indexOf("CircleK") != -1 ) {
+											return "circlek";
+										}
 									}catch(Exception k) {
 										k.printStackTrace();
 									}
@@ -10353,5 +10357,140 @@ return exceldir + "vigestareport" + lastMonday + ".csv";
 	  return null;    
 	 }
 	
+
+		 public static TreeMap loadFixCirclek(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
+				String errors = null;
+				
+			 try{
+
+				 Workbook workbook = null;
+				 Sheet sheet = null;
+				       FileInputStream	 ff = new FileInputStream(file);
+				       if(file.getName().endsWith(".xlsx")) {
+				    	   workbook = new XSSFWorkbook(ff); 
+							 sheet = workbook.getSheetAt(0); 
+				       }else {
+				    	    workbook = new HSSFWorkbook(ff); 
+							 sheet = workbook.getSheetAt(0); 
+						
+				       }
+						
+						
+						System.out.println("CircleK lugemine " + file.getName());
+						
+						ff.close();	
+						
+						if(sheet != null){
+							TreeMap groups = new TreeMap();
+						    Row row = sheet.getRow(0);
+						
+							int r = 3;
+							int ea = 1;
+							
+							for (int a = 0; a < row.getLastCellNum(); a++) {
+								try {
+									//System.out.println(row.getCell((short)a).getStringCellValue());
+									String gg = row.getCell((short) a).getStringCellValue().trim();
+									if(gg.toLowerCase().indexOf("ean") != -1) {
+										ea = a;
+										//System.out.println(ea);
+									}
+								} catch (Exception e) {
+									// System.out.println(row.getCell((short)a).getNumericCellValue());
+								}
+							}
+							
+						
+							
+							row = sheet.getRow(1);
+							for (int a = r; a < row.getLastCellNum(); a++) {
+								try {
+									 //System.out.println(row.getCell((short)a).getStringCellValue() + " " + r);
+									String gg = row.getCell((short) a).getStringCellValue().trim();
+									if(gg.length()>1){
+								      groups.put(a + "", gg);
+								      //System.out.println(gg);
+								    }
+								
+								} catch (Exception e) {
+									 //System.out.println(row.getCell((short)a).getNumericCellValue());
+								}
+							}
+							
+						//	System.out.println("r "  + r + " "+ ea + " " + addrow + " " + groups.toString());
+							//System.exit(0);
+							
+							
+							for(int i = 2 ; i < sheet.getLastRowNum()+1;i++){
+								 row = sheet.getRow(i);
+								 
+								 DataFormatter formatter = new DataFormatter();
+									String ean = formatter.formatCellValue(row.getCell(ea));
+									String tnimi = formatter.formatCellValue(row.getCell(ea+1));
+									String toode = getToode(prods,ean);
+									
+								 if(!"Nimetus".equals(tnimi)) {
+									 
+								 
+								  if(toode.equals(ean) ) {
+									  if(errors == null) {
+										  errors = "Tuvastamatta tooted sortimendis\n CircleK formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+									  }
+									  if(!errors.contains(ean)) {
+										  errors = errors + ean + "   " + tnimi + "\n";
+									  }
+									
+								  }
+								 
+								 for (int a = r; a < row.getLastCellNum(); a++) {
+
+										String group = (String) groups.get(a + "");
+										
+										if (group != null && group.trim().length() > 0) {
+								 
+		                                  String pood = "CIR-" + group;
+		                                  Contract con = new Contract(pood);
+		                                  String value =  formatter.formatCellValue(row.getCell(a));
+		                                
+		                                 
+		                                 if(value.trim().length() > 0 && value.trim().equals("1")) {
+		                                 	//System.out.println("Sees " +a + " " + value + " " + ean);
+											if(res.get(pood) != null){
+					                     	  con = (Contract)res.get(pood);
+					                     	 } 
+												  ContractLine ll = new ContractLine(toode);
+					                     	  if(con.lines == null){
+					                     		  con.lines = new Vector();
+					                     	  }
+					                     	  con.lines.add(ll);
+					                     	  res.put(pood, con);
+			                                 }
+										}
+								 	}
+								 }
+							}
+
+						 }
+						
+						
+						//System.out.println("sorts size " + res.toString() );
+							
+						 }catch(Exception e) {
+							 e.printStackTrace();
+						 }	 
+			 
+			 
+			System.exit(0);
+			
+			
+			 if(errors != null) {
+				 sendFixLoadErrorEmail(errors, parent, "circlek",true);
+			 }
+			 sendFixLoadErrorEmail("\n CircleK imported " + res.keySet().size() + " shops fixed sortiments", parent, "circlek",false);
+
+		return res;
+	}
+
+
 
 }
