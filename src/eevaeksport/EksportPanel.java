@@ -4007,6 +4007,13 @@ if(agprods != null && agprods.size() >0){
            }
            buf.append(sms); 
           
+           buf.append(EksportPanel.separator);
+           String tdeal = " ";
+           if(cust.taraDeal != null){
+        	   tdeal = cust.taraDeal;
+           }
+           buf.append(tdeal); 
+           
            
            buf.append(lineSeparator);
       }

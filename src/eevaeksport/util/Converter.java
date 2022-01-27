@@ -10218,19 +10218,17 @@ client.close();
 			   today = today.minusDays(today.getDayOfWeek().getValue()-1);
 		   }
 		   LocalDate lastMonday = today.with(TemporalAdjusters.previous( DayOfWeek.MONDAY ));
-		   LocalDate lastSaturday = today.with(TemporalAdjusters.previous( DayOfWeek.SATURDAY ));
+		   LocalDate lastSaturday = today.with(TemporalAdjusters.previous( DayOfWeek.SUNDAY ));
 		   Long monTimestamp = lastMonday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000;
-		   Long satTimestamp = lastSaturday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000;
+		   Long satTimestamp = lastSaturday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000 + 43200000;
 		   //System.exit(0);
 
 		   
 		   
 	  try{
-		  JSONArray dayreportarray = new JSONArray();
-		  JSONArray webcustarray = new JSONArray();
-		  dayreportarray = getWebDayReport(monTimestamp, satTimestamp, rcompany, user, pass);
-		  webcustarray = getWebCustomersAll(rcompany, user, pass);
-
+		  JSONArray dayreportarray = getWebDayReport(monTimestamp, satTimestamp, rcompany, user, pass);
+		  JSONArray webcustarray = getWebCustomersAll(rcompany, user, pass);
+//System.out.println(dayreportarray.toString());
 		  int lenn = webcustarray.length();
 		  TreeMap custsloc = new TreeMap();
 		  for (int i = 0; i < lenn; i++) {
@@ -10276,8 +10274,9 @@ client.close();
 			  SimpleDateFormat hhmmFormat = new SimpleDateFormat("HH:mm");
 			  String startdates = null;
 			  String starttime = null;
+			  Long startdate = null;
 			  try {
-				  Long startdate = (Long)cob.get("startdate");
+				   startdate = (Long)cob.get("startdate");
 				  Date startdatee = new Date(startdate);
 				  startdates = Converter.getYYYY_MM_DD_String(startdatee);
 				  starttime = hhmmFormat.format(startdatee);
@@ -10287,11 +10286,16 @@ client.close();
 
 			  String endtime = null;
 			  try {
-				  Long enddate = (Long)cob.get("enddate");
+				  Integer duration = (Integer)cob.get("duration");
+				  long enddate = duration+startdate;
+				//  Date enddatee = new Date(Long.parseLong(duration+""));
 				  Date enddatee = new Date(enddate);
 				  endtime = hhmmFormat.format(enddatee);
 			  }catch (Exception e){
+			  e.printStackTrace();
+			 // System.exit(0);
 			  }
+			  
 			  
 			  
 			  Double lat = null;

@@ -456,13 +456,11 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
    	        ResultSet rs = stmt.executeQuery(cmd);
    	        while(rs.next()){
    	            String id = rs.getString("kood");
-   	        if(cleardots(id).equals("28")){
-   	        	id = "5.1.";
-   	        }
+   	        
    	                String name = rs.getString("nimi").trim().substring(5).trim() ;
-   	             if(id.trim().length()== 4  || id.trim().length() == 5) {
+   	           //  if(id.trim().length()== 4  || id.trim().length() == 5) {
    	             tm.put(cleardots(id),  Converter.enCodeEst(pol(name)) + " " + id.substring(0,1) +" "+ cleardots(id) );
-   	             }
+   	             //}
    	        }
    	        
    	      rs.close();
@@ -515,56 +513,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	        ResultSet rs = stmt.executeQuery(cmd);
 	        while(rs.next()){
 	            String groupID = rs.getString("kood");
-	            if(cleardots(groupID).equals("20801")){
-	            	groupID = "5.01.01.";
-	   	        }
-	          /*  if(cleardots(groupID).equals("20802")){
-	            	groupID = "5.01.02.";
-	   	        } if(cleardots(groupID).equals("20803")){
-	            	groupID = "5.01.03.";
-	   	        } if(cleardots(groupID).equals("20804")){
-	            	groupID = "5.01.04.";
-	   	        } if(cleardots(groupID).equals("20805")){
-	            	groupID = "5.01.05.";
-	   	        } if(cleardots(groupID).equals("20806")){
-	            	groupID = "5.01.06.";
-	   	        } if(cleardots(groupID).equals("20807")){
-	            	groupID = "5.01.07.";
-	   	        } if(cleardots(groupID).equals("20808")){
-	            	groupID = "5.01.08.";
-	   	        } if(cleardots(groupID).equals("20809")){
-	            	groupID = "5.01.09.";
-	   	        }*/
-	        	if (cleardots(groupID).equals("281")) {
-					groupID = "5.1.1.";
-				}
-				if (cleardots(groupID).equals("282")) {
-					groupID = "5.1.2.";
-				}
-				if (cleardots(groupID).equals("283")) {
-					groupID = "5.1.3.";
-				}
-				if (cleardots(groupID).equals("284")) {
-					groupID = "5.1.4.";
-				}
-				if (cleardots(groupID).equals("285")) {
-					groupID = "5.1.5.";
-				}
-				if (cleardots(groupID).equals("286")) {
-					groupID = "5.1.6.";
-				}
-				if (cleardots(groupID).equals("287")) {
-					groupID = "5.1.7.";
-				}
-				if (cleardots(groupID).equals("288")) {
-					groupID = "5.1.8.";
-				}
-				if (cleardots(groupID).equals("289")) {
-					groupID = "5.1.9.";
-				}
-
-
-	   	        
+	          	   	        
 	                String name = rs.getString("nimi") ;
 	                if(groupID.length()>5){
 	                   tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + " " +name));
@@ -1232,41 +1181,12 @@ try{
                 prodprices.put(id, price);
              
                 String grupp = cleardots(rs.getString("grupp"));
-                if(grupp.equals("28")){
-                	grupp = "51";
-                }
-                prod.setGroup(grupp);
+             if(grupp != null)
+                prod.setGroup(grupp.trim());
 
         		String grupp2 = cleardots(rs.getString("grupp2"));
-    			
-    			if (grupp2.equals("281")) {
-    				grupp2 = "511";
-    			}
-    			if (grupp2.equals("282")) {
-    				grupp2 = "512";
-    			}
-    			if (grupp2.equals("283")) {
-    				grupp2 = "513";
-    			}
-    			if (grupp2.equals("284")) {
-    				grupp2 = "514";
-    			}
-    			if (grupp2.equals("285")) {
-    				grupp2 = "515";
-    			}
-    			if (grupp2.equals("286")) {
-    				grupp2 = "516";
-    			}
-    			if (grupp2.equals("287")) {
-    				grupp2 = "517";
-    			}
-    			if (grupp2.equals("288")) {
-    				grupp2 = "518";
-    			}
-    			if (grupp2.equals("289")) {
-    				grupp2 = "519";
-    			}
-                prod.setGroupSecond(grupp2);
+        		if(grupp2 != null)
+    			prod.setGroupSecond(grupp2);
 
                 String unit = rs.getString("unit");
                 if(unit.contains("mro")) {

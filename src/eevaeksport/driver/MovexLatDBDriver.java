@@ -528,6 +528,11 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
 
 
           cust.setPayer(rs.getString("payer").trim());
+          String taraDeal = rs.getString("EILADU").trim();
+          if(taraDeal != null && taraDeal.trim().length() > 0){
+              cust.taraDeal = taraDeal;
+              }
+          
           String  blokk = rs.getString("blok2") ;
 
           if(!blokk.trim().equals("0")){

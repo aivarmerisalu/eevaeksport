@@ -30,6 +30,7 @@ public class Customer {
   public boolean allowGift = false;
   public String GLNCode = null;
   public String currency = null;
+  public String taraDeal = null;
   public String category = null;
   public String restdirect = null;
   public String level = null;
