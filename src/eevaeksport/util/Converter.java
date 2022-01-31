@@ -10473,14 +10473,14 @@ return exceldir + "vigestareport" + lastMonday + ".csv";
 						 }
 						
 						
-						//System.out.println("sorts size " + res.toString() );
+						System.out.println("sorts size " + res.toString() );
 							
 						 }catch(Exception e) {
 							 e.printStackTrace();
 						 }	 
 			 
 			 
-			System.exit(0);
+			//System.exit(0);
 			
 			
 			 if(errors != null) {
