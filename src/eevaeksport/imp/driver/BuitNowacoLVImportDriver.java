@@ -57,40 +57,7 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 				parent.getProps().getProperty("dsn.pass"));
 	}
 
-	private TreeMap custNames() {
-		TreeMap res = new TreeMap();
-		String sql = "  SELECT k.klientas  AS nimi,k.klient_id AS kood , sandelis as ware " + "  FROM klientai k  ";
 
-		if (custwares == null) {
-			custwares = new TreeMap();
-		}
-		System.out.println(sql);
-		try {
-			Connection con = getNewConnection();
-			Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery(sql);
-			while (rs.next()) {
-				String name = rs.getString("nimi").trim();
-				String id = rs.getString("kood").trim();
-				String ware = rs.getString("ware");
-				res.put(id, name);
-
-				if (ware != null && ware.trim().length() > 0) {
-					custwares.put(id, ware.trim());
-				}
-
-			}
-			rs.close();
-			stmt.close();
-			con.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		System.out.println("customerNames Size " + res.size());
-
-		return res;
-	}
 
 	public String getImportFile() {
 		return parent.getProps().getProperty("imp.read");
@@ -173,7 +140,7 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 	
 	private String getAgent(String klient ,String ag) {
 
-		  String sql =  " select klientas, tab_nr   from (select * from manager  ) as man where klientas = (select  klientas from klientai k where k.klient_id = " + klient + ") order by klientas,data desc limit 1 "   ; 
+		  String sql =  " select klientas, tab_nr as agent  from (select * from manager  ) as man where klientas = (select  klientas from klientai k where k.klient_id = " + klient + ") order by klientas,data desc limit 1 "   ; 
 		  
 		/*  sql =   "   SELECT k.klientas  AS nimi,k.klient_id AS kood ,a.tab_nr AS agent " +
 		     		"  FROM klientai k  INNER JOIN " +

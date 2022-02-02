@@ -301,6 +301,7 @@ JSONObject ord = new JSONObject();
 			  String INDEX = "";
 			  String TYPE = "";
 			  String PRIV = "";
+			  String ORDNUM = "";
 			  
 			  
 			  StringTokenizer st = new StringTokenizer(shipmode,"|");
@@ -318,6 +319,7 @@ JSONObject ord = new JSONObject();
 				   INDEX = st.nextToken().substring(3);
 				   TYPE = st.nextToken().substring(3);
 				   PRIV = st.nextToken().substring(3).toUpperCase();
+				   ORDNUM = st.nextToken().substring(3);
 				   
 				   /*<DeliveryCompanyName>OC Demo</DeliveryCompanyName>         <!--mandatory-->
 		<DeliveryPersonName>Elmo Tamm</DeliveryPersonName>         <!--mandatory-->
@@ -355,6 +357,9 @@ JSONObject ord = new JSONObject();
 				   }
 				   if( PRIV.trim().length() > 0) {
 					   header.put( "DeliveryIsToPrivatePerson", PRIV);
+				   }
+				   if( ORDNUM.trim().length() > 0) {
+					   header.put( "OrigOrder", ORDNUM);
 				   }
 				   
 				   /*<DeliveryAddressDetail>

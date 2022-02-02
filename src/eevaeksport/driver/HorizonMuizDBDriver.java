@@ -949,11 +949,11 @@ public class HorizonMuizDBDriver extends AbstractDBDriver  implements Manager,Pr
     
 	  if("true".equals(getParent().getProps().getProperty("sales"))){
 		// kui on ainult agendid siis teine sql
-		  cmd = "select t.KODS as  itemid,t.NOSAUK  AS nimetus, t.M_ATT12 AS kastis,1 AS alusel,   bar.BAR_KODS AS ean ,PK_NOMGR AS grupp,yh.kods As unit,1/M_ATT13 as liter " +
-					" from APV06517.NNOM  t LEFT OUTER JOIN APV06517.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
-					" LEFT OUTER JOIN APV06517.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
-					"  where (t.PAMVID IN (2015,7713,24522,18205,12200,12201,13204,13205,15139)) AND (( ( (t.STATUSS = 0)) " +
-					"   AND ( ( EXISTS (SELECT 1 FROM APV06517.NNOMSAGR NSG WHERE NSG.PK_NOM=t.PK_NOM AND NSG.PK_NOMPGR = 6)))))";
+		  cmd = "select t.KODS as  itemid,t.NOSAUK  AS nimetus, t.M_ATT12 AS kastis,1 AS alusel,   bar.BAR_KODS AS ean ,PK_NOMGR AS grupp,yh.kods As unit,1/M_ATT13 as liter \" +\r\n" + 
+		  		"					\" from APV06517.NNOM  t LEFT OUTER JOIN APV06517.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 \" +\r\n" + 
+		  		"					\" LEFT OUTER JOIN APV06517.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN \" +\r\n" + 
+		  		"					\"  where (t.PAMVID IN (2015,7713,24522,18205,12200,12201,13204,13205,15139)) AND (( ( (t.STATUSS = 0)) \" +\r\n" + 
+		  		"					\"   AND ( ( EXISTS (SELECT 1 FROM APV06517.NNOMSAGR NSG WHERE NSG.PK_NOM=t.PK_NOM AND NSG.PK_NOMPGR = 6)))))";
 	  }
 	 		    
 	  

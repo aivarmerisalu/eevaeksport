@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -2028,6 +2029,34 @@ try{
 	  }
 
   
+  public HashSet lvNotCustomer() throws SQLException {
+	  	String sql1 = null;
+	  
+	  //	 System.out.println("Kliendi Määramine: "  + id + " " + regnr);
+	  	
+	  	    sql1 = "  select PK_KLIENTS as kood  from APV04761.DKLIENTS k where  k.pk_valsts != 51 ";	
+	  	   Connection con = getNewConnection();
+	 //   System.out.println(sql1);
+	  	 HashSet res = new HashSet();
+	    Statement st1 = con.createStatement();
+	    ResultSet rs1 = st1.executeQuery(sql1);
+
+	    while (rs1.next()) {
+	      res.add( rs1.getString("kood").trim()) ;
+	    }
+	    rs1.close();
+	    st1.close();
+	
+	    
+
+      con.close();
+	    
+	  //  System.out.println("Klient: " + acc + " " + id);
+	    return res;
+
+	  }
+
+  
   public String identifyProduct(String ean, String prodID) throws SQLException{
 	  	
 	    String prod = null;
@@ -2072,6 +2101,8 @@ try{
 	
   private ArrayList<String> hrccusts = null; 
 	private TreeMap delDays = null;	 
+	
+	private HashSet nlvKlients = null;
   
   public void makeOrder(Order order) throws SQLException{
        counter = 0;
@@ -2110,6 +2141,14 @@ try{
     					  hrccustomer = true;
     				  }
     				  
+    				  if(nlvKlients == null) {
+    					  nlvKlients = lvNotCustomer();
+    				  }
+    				if(nlvKlients.contains(order.getCompany())) {
+    					 makeOutput(order,order);  
+    				}else {
+    				
+    				  
     				  if(!hrccustomer){
     				//	  System.out.println("OffTrade");
     					  Vector splitted =  splitOrder(order);
@@ -2131,7 +2170,8 @@ try{
         	        		 
     					  }
     				  }
-    				 
+    					
+    				}
     					signatures.add(signature);
         			  
         		  }

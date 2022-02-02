@@ -1710,7 +1710,10 @@ System.out.println(cmd);
              if(ag != null && ag.trim().length() > 0) {
             	   customer.addAgent(new Agent("171"));
                    customer.addAgent(new Agent("172"));	 
-                   customer.addAgent(new Agent("176"));	 
+                   customer.addAgent(new Agent("176"));
+                   
+                   customer.addAgent(new Agent("227"));	 
+                   customer.addAgent(new Agent("228"));	 
              }
             	 
           
