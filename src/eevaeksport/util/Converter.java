@@ -2171,10 +2171,19 @@ public class Converter {
 			String errors = null;
 		
 		 try{
-			 
+			 Workbook workbook = null;
+			  
 			       FileInputStream	 ff = new FileInputStream(file);
-			        HSSFWorkbook workbook = new HSSFWorkbook(ff); 
-					HSSFSheet sheet = workbook.getSheetAt(0);
+			       if(file.getName().endsWith(".xlsx")) {
+			    	   workbook = new XSSFWorkbook(ff); 
+						 
+			       }else {
+			    	    workbook = new HSSFWorkbook(ff); 
+						
+					
+			       }
+			       Sheet sheet = workbook.getSheetAt(0); 
+			
 					DataFormatter formatter = new DataFormatter();
 					
 					System.out.println("Keila lugemine " + file.getName());
@@ -2184,35 +2193,37 @@ public class Converter {
 					if(sheet != null){
 						
 						int rida = 1;
-						int alg = 1;
-						HSSFRow row = sheet.getRow(1);
+						int alg = 3;
+						Row row = sheet.getRow(1);
 						
 						for(int i = 0 ; i < sheet.getLastRowNum()+1;i++){
 							row = sheet.getRow(i);
-							
+							if(row != null) {
 						for (int a = 0; a < row.getLastCellNum(); a++) {
 							String ean = formatter.formatCellValue(row.getCell(a));
 							if(ean.contains("EAN")) {
 								rida = i;
-								//System.out.println("rida2 " + rida + " algus");
+								System.out.println("rida2 " + rida + " algus");
 						     }
 							if(ean.contains("Jaama")) {
-								alg = a;
+								//alg = a;
 								//System.out.println("rida1 " + rida + " algus " + alg);
 						     }
 							if(ean.contains("Turba")) {
-								alg = a;
+							//	alg = a;
 								//System.out.println("rida1 " + rida + " algus " + alg);
 						     }
 						   }
-						 }
+						 }}
 						
 						if(alg != 1) {
 							
 							row = sheet.getRow(0);
 							for(int i = 0 ; i < sheet.getLastRowNum()+1;i++){
 								row = sheet.getRow(i);
-								rida = 0;
+								rida = 1;
+								if(row != null) {
+								
 							for (int a = 0; a < row.getLastCellNum(); a++) {
 								String ean = formatter.formatCellValue(row.getCell(a));
 								if(ean.contains("EAN")) {
@@ -2220,22 +2231,25 @@ public class Converter {
 									//System.out.println("rida2 " + rida + " algus");
 							     }
 								if(ean.contains("Jaama")) {
-									alg = a;
+								//	alg = a;
 									//System.out.println("rida1 " + rida + " algus " + alg);
 							     }
 								if(ean.contains("Turba")) {
-									alg = a;
+								//	alg = a;
 									//System.out.println("rida1 " + rida + " algus " + alg);
 							     }
 							   }
 							 }
+						}	
 						}
 						
 						
-						//System.out.println("rida " + rida + " algus " + alg);
+						System.out.println("rida " + rida + " algus " + alg);
 						
 						 row = sheet.getRow(rida);
 						TreeMap groups = new TreeMap();
+						if(row != null) {
+						
 						for (int a = alg; a < row.getLastCellNum(); a++) {
 							try {
 								
@@ -2254,6 +2268,7 @@ public class Converter {
 							}
 						}
 						
+						}
 					//	System.out.println("Groups " +  groups.toString());
 						
 						
@@ -2307,8 +2322,8 @@ public class Converter {
 					 }
 					
 					
-			//	System.out.println("Keilasorts size " + res.toString() );
-					//System.exit(0);
+				//System.out.println("Keilasorts size " + res.toString() );
+				//	System.exit(0);
 						
 					 }catch(Exception e) {
 						 e.printStackTrace();
