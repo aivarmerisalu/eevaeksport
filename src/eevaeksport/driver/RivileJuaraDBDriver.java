@@ -915,23 +915,7 @@ String picts = parent.getProps().getProperty("pict.dir");
                     	}
                      // prod.setGroupSecond(grupp2.trim());
                     }
-               String minam = rs.getString("minkogus");
-            /*   double res = 0;
-               if (minam != null && minam.trim().length()>0){
-               	try{
-               	if(minam.indexOf("/")!=-1){
-               		res = Double.parseDouble(minam.trim().substring(0,minam.indexOf("/")));
-               	}else if(minam.indexOf("*")!=-1){
-               		res = Double.parseDouble(minam.trim().substring(0,minam.indexOf("*")));
-               	}else{
-               		res = Double.parseDouble(minam.trim());
-               	}
-               	}catch (Exception e){
-               		e.printStackTrace();
-               	}
-               	prod.setInCases(res);
-               }
-              */ 
+           
                
                if(nimetus.startsWith("X ")) {
             	   prod.setStatusSellout("1");

@@ -393,7 +393,8 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
          " MIN(PRICEDISCTABLE.AMOUNT) AS price   ,min(PRICEDISCTABLE.FROMDATE) as algus , max(PRICEDISCTABLE.TODATE) as lopp ," +
 		" datediff( day,min(PRICEDISCTABLE.FROMDATE) , max(PRICEDISCTABLE.TODATE) )  as paevi " +
          "  FROM PRICEDISCTABLE WHERE PRICEDISCTABLE.DATAAREAID='VIR' AND PRICEDISCTABLE.RELATION=4 AND PRICEDISCTABLE.ACCOUNTCODE=0 " + 
-         "  AND  (GETDATE()>=PRICEDISCTABLE.FROMDATE AND GETDATE()<=PRICEDISCTABLE.TODATE+1) " +
+         "  AND  (GETDATE()>=PRICEDISCTABLE.FROMDATE " + 
+         " AND (GETDATE()<=PRICEDISCTABLE.TODATE+1 OR PRICEDISCTABLE.TODATE=('1900-01-01 00:00:00.00'))) " + 
          "  GROUP BY ITEMCODE,ACCOUNTCODE,ITEMRELATION,ACCOUNTRELATION";
 
           try {
@@ -445,7 +446,8 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
                   " PRICEDISCTABLE.ITEMRELATION as prodid, MIN(PRICEDISCTABLE.AMOUNT) AS price  , min(PRICEDISCTABLE.FROMDATE) as algus , max(PRICEDISCTABLE.TODATE) as lopp" +
               	  " , datediff( day,min(PRICEDISCTABLE.FROMDATE) , max(PRICEDISCTABLE.TODATE) )  as paevi " +
                   " FROM PRICEDISCTABLE WHERE PRICEDISCTABLE.DATAAREAID='VIR' AND PRICEDISCTABLE.RELATION=4 AND PRICEDISCTABLE.ACCOUNTCODE=1 AND " +
-                  " (GETDATE()>=PRICEDISCTABLE.FROMDATE AND GETDATE()<=PRICEDISCTABLE.TODATE+1) " +
+                  " (GETDATE()>=PRICEDISCTABLE.FROMDATE " + 
+                  " AND (GETDATE()<=PRICEDISCTABLE.TODATE+1 OR PRICEDISCTABLE.TODATE=('1900-01-01 00:00:00.00'))) " + 
                   " GROUP BY ITEMCODE, ACCOUNTCODE, ITEMRELATION, ACCOUNTRELATION";
                   
                   rs = stmt.executeQuery(sql2);
@@ -1132,7 +1134,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	  " FROM inventtable inv  " +
 	  " left JOIN pricedisctable disc ON inv.itemid=disc.itemrelation and disc.dataareaid= inv.dataareaid " +
 	  " left JOIN inventtablemodule mod ON mod.itemid = inv.itemid and mod.dataareaid=inv.dataareaid "+
-	  " left join inventitembarcode bar ON bar.dataareaid = inv.dataareaid and bar.itemid=inv.itemid and bar.useforinput  = 1 " +
+	  " left join inventitembarcode bar ON bar.dataareaid = inv.dataareaid and bar.itemid=inv.itemid and bar.useforprinting  = 1 " +
 	  "  LEFT JOIN UNITCONVERT u ON inv.ITEMID=u.ITEMID AND u.DATAAREAID=inv.dataareaid  AND u.TOUNIT='kast'" +
 	  " WHERE disc.dataareaid='vir' and inv.dataareaid='vir' and inv.ssOrdererAccount='DUNKER' and u.dataareaid='vir'   AND mod.dataareaid='vir'  " +
 	  " and (disc.todate>getdate()-1 OR (disc.fromdate<=getdate() AND disc.todate=('1900-01-01 00:00:00.00') ) )  "+

@@ -1785,6 +1785,7 @@ st.close();
 	   TreeMap res = new TreeMap();
 	  
 
+	   
 					    
 			    String cmd =" select eagentaccountid as agent , itemsubgroup as grupp , salesamount as planx,focussubgroup "
 			    		+ " from ASTSalesAgentForecast where year(transdate)=year(getdate())"

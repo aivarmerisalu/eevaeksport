@@ -4568,7 +4568,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 		  final DateMidnight startOfLastWeek = 
 		             new DateMidnight(input.minusDays(14));
 		  //System.out.println(startOfLastWeek);
-		  final DateMidnight endOfLastWeek = startOfLastWeek.plusDays(15);
+		  final DateMidnight endOfLastWeek =  new DateMidnight(input.plusDays(1));
 		
 		String filenameSV =   Converter.getSVData(startOfLastWeek.getMillis(), endOfLastWeek.getMillis(), rcompanyx, user, pass,true,"SELYNLIST",null,"answers");
 		 System.out.println("filenameSV "+  filenameSV);

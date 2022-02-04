@@ -148,6 +148,11 @@ System.out.println(sql);
  boolean entered  = false;  	
    	String agent = order.getAgent();
    	System.out.println("agent " + agent);
+   	
+    
+	  if(agent.equals("Marcis")) {
+		  agent = "Mārcis";
+	}
     String cc = order.getCompany();
     String cust = cc.substring(0, cc.indexOf("-"));
     String adr = cc.substring(cc.indexOf("-")+1);

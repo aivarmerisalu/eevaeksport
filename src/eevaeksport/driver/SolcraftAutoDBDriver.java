@@ -750,7 +750,12 @@ public class SolcraftAutoDBDriver extends AbstractDBDriver implements Discounter
             ResultSet	      rs = stmt.executeQuery(cmd);
             System.out.println("Agents Starting ");
             while (rs.next()) {
-              Agent agent = new Agent(rs.getString("kood").trim());
+            	String kk = rs.getString("kood").trim();
+            	if(kk.equals("Mārcis")) {
+            		kk = "Marcis";
+            	}
+            	
+              Agent agent = new Agent(kk);
               String nimi = rs.getString("nimi").trim();
               agent.setName(nimi);
               agent.setIsPilot(true);
@@ -920,6 +925,10 @@ public class SolcraftAutoDBDriver extends AbstractDBDriver implements Discounter
                 String agentc = rs.getString("agent");
 
               if(agentc != null){
+            	  
+            	  if(agentc.equals("Mārcis")) {
+            		  agentc = "Marcis";
+              	}
             		cust.addAgent(new Agent(agentc.trim()));
             		cust.addAgent(new Agent("KA"));
               }
