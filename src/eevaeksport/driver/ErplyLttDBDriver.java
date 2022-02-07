@@ -105,6 +105,8 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 		e.printStackTrace();
 	}
 	
+	
+
    username = getParent().getProps().getProperty("erply.user");	
    company = getParent().getProps().getProperty("erply.company");
    password = getParent().getProps().getProperty("erply.pass");
@@ -163,6 +165,11 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
   
     
   public String getSaveDebtInfo() {
+	  
+	  // mis servus on report api 
+	  
+	  
+	  // 
 	   
            	   int mm = 1;
            	   if(getParent().getProps().getProperty("months") != null){        
@@ -180,10 +187,11 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
               StringBuffer inputLineBuf = null;
         
               try {
-          		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
-   				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
-          	
-          		
+          		//inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
+   				//+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
+          	// https://api-reports-eu10.erply.com/v1/generated-reports/invoice-rows?displaySoldBundles=BY_COMPONENTS
+          		inputLineBuf = getRepData( "&startDate="+ Converter.getYYYYmMMmDDmString(dds.getTime())
+				+"&endDate=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + "?displaySoldBundles=BY_COMPONENTS");
           	} catch (Exception e1) {
           		e1.printStackTrace();
           	}
@@ -197,7 +205,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
                  	  }
                   }
               
-              System.out.println("kliendisortimendid tehtud" );
+              System.out.println("kliendisortimendid tehtud"  +  inputLineBuf .toString());
               
               
              System.exit(0);
@@ -335,6 +343,73 @@ String jwttoken = null;
   return inputLineBuf;
   }
   
+  
+  private StringBuffer getRepData(String data) throws Exception {
+	  HttpURLConnection urlc = null;
+
+	 	Converter.doTrustToCertificates();
+	  StringBuffer inputLineBuf = new StringBuffer();
+	  try {
+			myurlrep = new URL("https://api-reports-eu10.erply.com/v1/generated-reports/invoice-rows?"+ data);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+	  try{
+		// 1. sessionKey
+		  // 2. kliendikood
+		  
+	  urlc = (HttpURLConnection) myurlrep.openConnection();
+	  try{
+	  urlc.setRequestMethod( "GET" );
+	  } catch (ProtocolException e) {
+	    throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
+	  }
+	 // urlc.setDoOutput(true);
+	 // urlc.setDoInput(true);
+	 // urlc.setUseCaches(false);
+	 // urlc.setAllowUserInteraction(false);
+	 
+	  InputStream in = urlc.getInputStream();
+	  try{
+	  Reader reader = new InputStreamReader(in);
+	    InputStreamReader isr = new InputStreamReader(in,"UTF-8");
+	    BufferedReader inr = new BufferedReader(isr);
+	    String inputLine;
+
+	    while ((inputLine = inr.readLine()) != null){
+	        inputLine = enCode(inputLine);	// enCode(inputLine);	
+	    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n").replace((char)0x1c, ' ').replace((char)0x1b, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ')
+	    			.replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0xb, ' ').replace((char)0xe, ' ')
+	    			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+	    			 .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+	     			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+	     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ')
+	    			);
+	  }
+
+	     inr.close();
+	  
+	  
+	  reader.close();
+	  } catch (IOException e)
+	  {
+	  throw new Exception("IOException while reading response", e);
+	  } finally
+	  {
+	  if (in != null)
+	  in.close();
+	  }
+	  } catch (IOException e)
+	  {
+	  throw new Exception("Connection error (is server running at " + myurlrep + " ?): " + e);
+	  } finally
+	  {
+	  if (urlc != null)
+	  urlc.disconnect();
+	  }
+	  return inputLineBuf;
+	  }
+
   
   private StringBuffer postDataCDN(String data) throws Exception {
 	  HttpURLConnection urlc = null;
@@ -2532,7 +2607,7 @@ if(sb.length() >10){
      TreeMap tm = new TreeMap();
     // this.getFixedAssortmentData();
     // plans = this.makePlans("Budget.xlsx");
-     
+     getSaveDebtInfo();
      agent1 = new TreeMap();
     // sendAsi();
      agents = new TreeMap();
@@ -3008,6 +3083,9 @@ public static String getDataDirStr(){
                        try {
                    		inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
             				+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
+                   	
+                   	///v1/generated-reports/invoice-rows
+                   		
                    	
                    		
                    	} catch (Exception e1) {
@@ -5246,6 +5324,7 @@ private TreeMap afterOrders = null;
    private String returntype = null;
    private String userstuff = null;
      private URL myurl = null;
+     private URL myurlrep = null;
      private URL myurlcdn = null;
 
   /**
