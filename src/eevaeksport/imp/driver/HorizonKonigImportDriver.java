@@ -2144,7 +2144,10 @@ try{
     				  if(nlvKlients == null) {
     					  nlvKlients = lvNotCustomer();
     				  }
+    				  
+    				  System.out.println(order.getCompany() + " " + nlvKlients.contains(order.getCompany()));
     				if(nlvKlients.contains(order.getCompany())) {
+    					order.setCurrency("NPARK2");
     					 makeOutput(order,order);  
     				}else {
     				
@@ -2326,7 +2329,7 @@ try{
 		        	cukood = escape(cukood.substring(0,cukood.indexOf("_")));
 			    }
 		        
-		        if(adid.indexOf("_")!= -1){
+		        if(adid != null && adid.indexOf("_")!= -1){
 		        	adid =  escape(adid.substring(0,adid.indexOf("_")));
 			    }
 		         
