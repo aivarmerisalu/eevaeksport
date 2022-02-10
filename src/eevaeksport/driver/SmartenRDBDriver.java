@@ -18,6 +18,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
@@ -91,7 +92,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
   	  }
   	this.getProducts(null);
   	TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
-  	System.out.println("Contracts " + contracts.toString());
+  //	System.out.println("Contracts " + contracts.toString());
   	Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
   	System.exit(0);
   }
@@ -215,11 +216,13 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 	}
 	
 	
+	HashSet abicusts = null;
+	
 	private TreeMap getCustAgsExcel() {
 		TreeMap asi = null;
-	
+		abicusts = new HashSet();
 		
-File f = new File(this.getExcelDir() + "Partnerid.xls");
+    File f = new File(this.getExcelDir() + "Partnerid.xls");
 		
 		try {
 			
@@ -252,7 +255,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 	        		  custid = ((int)(row.getCell((short) 0).getNumericCellValue())+"");
 	        		//  System.out.println("Jama koodiga " + custid + " " + a);
 	        	  }
-	        	
+	        	  if(!abicusts.contains(custid))
+	        	  abicusts.add(custid);
+	        	  
 	        	  String agent =  Converter.cleanLitLatEst(row.getCell((short) 13).getStringCellValue());
 		        	StringTokenizer st = new StringTokenizer(agent,";");
 		        	String uu = "";
@@ -315,7 +320,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		}catch(Exception e) {
 		e.printStackTrace();	
 		}		
-		
+		System.out.println("abicusts " + abicusts.size());
 		return asi ;
 	}
   
@@ -800,7 +805,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
  
 	TreeMap custAgs = null;
 	
-	if (getParent().getProps().getProperty("partnercode").endsWith("RU") ||
+	
+	if ( this.partnercode.equals("AFRU") ||
 			getParent().getProps().getProperty("partnercode").endsWith("VS")) { // royal unibrew
 		custAgs = getCustAgsExcel();
 		//System.out.println("custAgs " + custAgs.toString());
@@ -969,18 +975,23 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
        	
         }
         
+        boolean goes = true;
         
-        if(cust.getName().toLowerCase().indexOf("linnam") != -1) {
-        	System.out.println(cust.getID() + " " + cust.getName()+ " || " + cust.getAgents().toString());
+        if(abicusts != null) {
+      	  if(!abicusts.contains(cust.getID())) {
+      		  goes = false;
+      	  }
         }
-        
+    
                 if(outside == null){
                     cust.addAgent(new Agent(getParent().getProps().getProperty("officerep")));
                     if(getParent().getProps().getProperty("officerep2") != null){
                         cust.addAgent(new Agent(getParent().getProps().getProperty("officerep2")));
                     }
+                    if(goes) {
                     customers.put(name, cust);
                     custMap.put(cust.getID(),cust);	
+                    }
                 
                 } else if(outside.containsKey(cust.getID())){
                 	Customer ccc = (Customer)outside.get(cust.getID());
@@ -1006,8 +1017,14 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
                       if(getParent().getProps().getProperty("officerep2") != null){
                           cust.addAgent(new Agent(getParent().getProps().getProperty("officerep2")));
                       }
-                	  customers.put(name, cust);
-                      custMap.put(cust.getID(),cust);	 
+                      
+                    
+                      
+                      if(goes) {
+                    	  customers.put(name, cust);
+                          custMap.put(cust.getID(),cust);  
+                      }
+                	 
             
                 }
             }
@@ -1018,6 +1035,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
     } catch (Exception e){
       getParent().showError(e);
     }
+    
+    System.out.println("Cust suurus " + customers.size());
     return customers;
   }
 
@@ -1423,10 +1442,10 @@ System.out.println("Siin sees ");
                 while(itera.hasNext()) {
                 	String agentID = itera.next()+"";
                 	Agent agent = (Agent)agents.get(agentID);
-                	 System.out.println(agent + " "  + agentID);
+                //	 System.out.println(agent + " "  + agentID);
                     if (agent != null){
                       agent.setMonthSales((int) (myyk.get(agentID)).doubleValue());
-                      System.out.println(agent.getMonthSales());
+                      //System.out.println(agent.getMonthSales());
                     }	
                 }
                  

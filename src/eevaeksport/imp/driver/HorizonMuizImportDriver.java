@@ -12,6 +12,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.http.HttpResponse;
@@ -97,6 +100,28 @@ try{
      return obj;
    }
 
+	   
+	   private TreeMap getPandiPakend() throws SQLException{
+		   Connection con = getNewConnection();
+		   TreeMap pants = new TreeMap();
+		    String sql1 = " SELECT  nn.[PK_NOM] as toode, nn.[PK_PIESKGR]as grupp ,P.PK_PIESK as kood " + 
+		    		"  FROM [FTGWIN_ALUS_2021].[APV06517].[NNOMPIESK] nn inner join [FTGWIN_ALUS_2021].[APV06517].NPIESK P"
+		    		+ "  ON P.PK_PIESKGR=NN.PK_PIESKGR";
+		   
+		    Statement st1 = con.createStatement();
+		    ResultSet rs1 = st1.executeQuery(sql1);
+		    while (rs1.next()) {
+		    	String prod = rs1.getString("toode").trim();
+		    	String kood = rs1.getString("kood").trim();
+		    	pants.put(prod, kood);
+		    }
+		      // System.out.println(toode + " prod1 " + prod);
+		    rs1.close();
+		    st1.close();
+		    con.close();
+		    return pants;
+		 }
+		  
   
   public String getImportFile(){
 	    return parent.getProps().getProperty("imp.read");
@@ -297,12 +322,19 @@ try{
   
   
   private void makeOutput(Order order){
-  	
+	  Hashtable pandikas =  new Hashtable();
+	
+	  TreeMap pants = null;
+	try {
+		pants = getPandiPakend();
+		System.out.println("pants " + pants.size());
+	} catch (SQLException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
 	 	try {
 	 		
-	 	if("true".equals(parent.getProps().getProperty("testing"))){
-	 		System.out.println("Testing ");
-       	 	}else{
+	 	
 	 	
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
@@ -395,9 +427,10 @@ try{
 	     	 Vector lines = order.getOrderLines();
 		      for (int i = 0; i < lines.size(); i++) {
 		    	  OrderLine line = (OrderLine) lines.elementAt(i);
+		    	  String prid = getProdId(line.getToode());
 		         order_xml = order_xml + "<row>";
 		         order_xml = order_xml +  "<RN_VEIDS>0</RN_VEIDS> ";
-		         order_xml = order_xml +  "<PK_NOM>" + getProdId(line.getToode()) + "</PK_NOM>";
+		         order_xml = order_xml +  "<PK_NOM>" + prid + "</PK_NOM>";
 		          //  <!--KODS>113</KODS-->
 		          // <!--BAR_KODS>4751012090010</BAR_KODS-->
 		         order_xml = order_xml +  "<DAUDZ>" + line.getKogus() + "</DAUDZ>";
@@ -411,7 +444,38 @@ try{
 			      order_xml = order_xml + "</row>";
 			 
 			     counter++;
+			     if(pants != null) {
+			    	 String pant = (String) pants.get(prid)  ; 
+				     
+				     if(pant != null){
+			           	  if(pandikas.get(pant) == null){
+			           		  pandikas.put(pant,line.getKogus()+"");
+			                 } else {
+			                 	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+line.getKogus())+"");
+			                 }
+			              } 
+			     }
+			    
+		             
 	      }
+		      
+		      
+		      
+		      
+		      if( pandikas.size()>0){ // kommentisin v�lja pandi asja Kalevi soovil sept 2018
+		        	Enumeration enumpant = pandikas.keys();
+		        	
+		         while(enumpant.hasMoreElements()){
+		         	String kood = (String)enumpant.nextElement();
+		         	if(kood.trim().length()>0){
+		             	 order_xml = order_xml + "<row>";
+				         order_xml = order_xml +  "<RN_VEIDS>2</RN_VEIDS> ";
+				         order_xml = order_xml +  "<PK_NOM>" + kood + "</PK_NOM>";
+				         order_xml = order_xml + "</row>";
+		        	}    	
+		         }
+		        }
+		      
 		      
 	
 		
@@ -438,6 +502,11 @@ try{
 		      System.out.println(fileName);
 		
 		   //   trouble = "IMPORTED ORDER \n" + order_xml;
+		      
+		      if("true".equals(parent.getProps().getProperty("testing"))){
+			 		System.out.println("Testing ");
+		    	  System.exit(0);
+		      }
 			 	
 	 		String xml = getWeb(order_xml , "DokNr:" + order.getDokNr() + " Company:" + cukood);		
 	 	//	System.out.println("Tulemus " + xml);
@@ -456,7 +525,7 @@ try{
 	 	//  System.exit(0);
 	 	}
 
-	 	}
+	 	
 		} catch (Exception e) {
 			e.printStackTrace();
 

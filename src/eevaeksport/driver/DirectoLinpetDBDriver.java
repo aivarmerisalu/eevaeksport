@@ -875,6 +875,47 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
   }
 	    
   
+  private TreeMap getLaoSeisud(String ladu) {
+	  TreeMap seis = new TreeMap();
+	  
+	 	try {
+	  		  File f = new File (getDir() + "laoseis.xml");
+	  	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	  	     DocumentBuilder db;
+	  		db = dbf.newDocumentBuilder();      	
+	      	FileInputStream in = getCleanInputStream(f);
+	      	String handler = null;
+	          Document doc = db.parse(in,handler);
+	          Node root = getNode(doc, "transport");      
+	       //   System.out.println(root);
+	      	Node read = getNode(root, "stocklevels");
+	      //	System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
+	          for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	          	  Node rida = read.getChildNodes().item(i);
+	          	  try{
+	          		  if(rida.getNodeName().equals("stocklevel")){
+	               		 String prodid  = rida.getAttributes().getNamedItem("code").getNodeValue();
+	               		 double kog = Double.parseDouble(rida.getAttributes().getNamedItem("stock_level").getNodeValue());
+	               		 seis.put(prodid, kog);
+	               		 try{
+	               			 String lkood = rida.getAttributes().getNamedItem("stock_code").getNodeValue();
+	               		 }catch(Exception r){
+	               			 
+	               		 }
+	          		  } 
+	          	  }catch(Exception e){
+	          		  e.printStackTrace();
+	          	  }
+	          }
+	          
+	  	}catch(Exception e){
+	  		e.printStackTrace();
+	  	}
+	  
+	  
+	  return seis;
+  }
+  
    public TreeMap getProdGroups2() throws SQLException {
     
      
@@ -1166,6 +1207,37 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            //lõpeb tootegruppidega tegelemine 
            System.out.println("Tootegrupid tehtud" );
            //algab Hinnakirja faili moodustamine
+           
+           httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=stocklevel";
+           myurl = new URL(httpsURL);
+           con = (HttpsURLConnection)myurl.openConnection();
+           ins = con.getInputStream();
+           isr = new InputStreamReader(ins,"UTF-8");
+           in = new BufferedReader(isr);
+
+           inputLine = "";
+          inputLineBuf = new StringBuffer();
+          while ((inputLine = in.readLine()) != null){
+          	inputLine = Converter.enCodeEst(inputLine);
+          	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
+          }
+
+          in.close();
+          
+          if(inputLineBuf.length() > 2){
+         
+                try {
+              	  File f = new File (getDir() + "laoseis.xml");
+              	  if(f.exists())f.delete();
+              	 Converter.saveFileInUTF8(getDir() + "laoseis.xml", inputLineBuf.toString());
+          	
+          	  }catch (Exception ex) {
+          		ex.printStackTrace();
+          	  }
+           }
+          
+          System.out.println("Laoseisud tehtud" );
+           
            
            httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=priceformula";
            myurl = new URL(httpsURL);
@@ -1883,13 +1955,15 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	   System.out.println("tooted a");
 	   TreeMap otherStocks = this.getProductsOther();
 	   
+	   TreeMap stocksfile = getLaoSeisud(null);
+	   
 	   boolean addShelf = false ;
 	   try {
-		getProdGroups2();
-	} catch (SQLException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	}
+		   getProdGroups2();
+	     } catch (SQLException e1) {
+		  e1.printStackTrace();
+	     }
+	   
      TreeMap tm = new TreeMap();
      HashMap prodHash = new HashMap();
      HashSet usedGroups = new HashSet();
@@ -2340,6 +2414,13 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
     	      		}catch(Exception t){
     				} 
         	   }
+      	   
+      	   if(stocksfile.get(prod.getID()) != null) {
+      		 try{
+				 prod.setStock((int)Double.parseDouble(stocksfile.get(prod.getID())+""));  
+	      		}catch(Exception t){
+				} 
+      	   }
       	 	 
       	 	 
       	  if(line.indexOf("ARTIKKEL_KAMP") != -1){

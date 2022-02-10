@@ -302,6 +302,7 @@ JSONObject ord = new JSONObject();
 			  String TYPE = "";
 			  String PRIV = "";
 			  String ORDNUM = "";
+			  String COMM = "";
 			  
 			  
 			  StringTokenizer st = new StringTokenizer(shipmode,"|");
@@ -320,6 +321,7 @@ JSONObject ord = new JSONObject();
 				   TYPE = st.nextToken().substring(3);
 				   PRIV = st.nextToken().substring(3).toUpperCase();
 				   ORDNUM = st.nextToken().substring(3);
+				   COMM = st.nextToken().substring(3);
 				   
 				   /*<DeliveryCompanyName>OC Demo</DeliveryCompanyName>         <!--mandatory-->
 		<DeliveryPersonName>Elmo Tamm</DeliveryPersonName>         <!--mandatory-->
@@ -384,6 +386,14 @@ JSONObject ord = new JSONObject();
 						   aadress.put( "Country", "EE"); 
 					   }
 					   header.put( "DeliveryAddressDetail", aadress);
+					   
+					   if(COMM.length()>1) {
+						   JSONObject aadress2 = new JSONObject();
+						   aadress2.put("AddressRow2", COMM);
+						   header.put( "DeliveryAddressDetail", aadress2); 
+					   }
+					
+					 
 				   }
 				   
 				   

@@ -1259,8 +1259,8 @@ String email = " ";
     	        this.getProdGroups();
     	       String cmd = "SELECT N17_KODAS_PS AS toode,trim(N17_PAV) AS nimetus,N27_KIEKIS_PAK  AS tykke,  " +
     	 "   n17_kodas_ls_1 AS grupp ,N17_MEN_PAV AS minkogus , " +
-    	 "   N17_KODAS_LS_4 AS status , N17_MAX_NUOL as maxa ,( select N27_KIEKIS_PAK from N27_PAK a where left(a.N27_KODAS_US_PAK,7)='SANDPAL' and " +
-    	 " a.N27_KODAS_PS = N17_KODAS_PS) as alusel,( select N27_KIEKIS_PAK from N27_PAK a where left(a.N27_KODAS_US_PAK,8)='SANDPICK' and " +
+    	 "   N17_KODAS_LS_4 AS status , N17_MAX_NUOL as maxa ,( select top 1 N27_KIEKIS_PAK from N27_PAK a where left(a.N27_KODAS_US_PAK,7)='SANDPAL' and " +
+    	 " a.N27_KODAS_PS = N17_KODAS_PS) as alusel,( select top 1 N27_KIEKIS_PAK from N27_PAK a where left(a.N27_KODAS_US_PAK,8)='SANDPICK' and " +
     	 " a.N27_KODAS_PS = N17_KODAS_PS)  as optimum ,a.N17_KODAS_KS_G as tarnija, k.N08_PAV as tarnijanimi " +
     	 "   FROM n17_prod a   left join N27_PAK on  trim(N17_KODAS_PS)=trim(N27_KODAS_PS) and left(N27_KODAS_US_PAK,7)='SANDPAK' " +
     	 "  left join n08_klij k on k.n08_kodas_ks= a.N17_KODAS_KS_G where  n17_kodas_ls_1<>'' and n17_kodas_ls_1 !='GAMYBA'  and  N17_POZ_DATE =0 and " +
@@ -1277,7 +1277,7 @@ String email = " ";
     	            System.out.println(cmd);
     	        }
     	        System.out.println("tooted");
-    	        System.out.println("laos " + tooted.size() + " 599954089665 '" + tooted.get("599954089665")+"'");
+    	   //     System.out.println("laos " + tooted.size() + " 599954089665 '" + tooted.get("599954089665")+"'");
     	      
     	        Vector done = new Vector(); 
     	        
@@ -1506,6 +1506,7 @@ String email = " ";
     	               	idd = idd.substring(idd.length()-8,idd.length());
     	               }
     	               if(goes){
+    	            	   lubatud.add(prod.getID());
     	            	   products.put(nimetus, prod);
     	                   done.addElement(prod.getID());
     	                   codes.add(prod.getID()) ;            

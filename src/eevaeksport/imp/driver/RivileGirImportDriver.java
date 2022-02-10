@@ -200,6 +200,7 @@ public class RivileGirImportDriver
 
  private void makeOutput(Order order){
  	StringBuffer sb = new StringBuffer();
+ 	String nimi = order.getCompany();
     
  	String ls = System.getProperty("line.separator");
  	try {
@@ -350,7 +351,7 @@ if(ladu.trim().length()!=0){
       cou++;
 
  	
-      String fileName = escape(parent.getProps().getProperty("conv.dir") + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".EIP";
+      String fileName = escape(parent.getProps().getProperty("conv.dir") + order.getAgent()) + "-" + order.getDokNr() + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".EIP";
       System.out.println(fileName);
         FileOutputStream fos = new FileOutputStream(fileName);
         fos.write(sb.toString().getBytes());
