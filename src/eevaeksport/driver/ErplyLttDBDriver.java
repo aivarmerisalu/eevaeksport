@@ -165,10 +165,8 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
   
     
   public String getSaveDebtInfo() {
-	  
+
 	  // mis servus on report api 
-	  
-	  
 	  // 
 	   
            	   int mm = 1;
@@ -177,9 +175,11 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
            	   }
            	   
               Calendar dds = Calendar.getInstance();
-              dds.add(Calendar.MONTH, - mm);
-              
+              //dds.add(Calendar.MONTH, - mm);
+              dds.add(Calendar.DATE, -5);
               Calendar dde = Calendar.getInstance();
+              
+              
               
               
               System.out.println("kliendisortimendid alustan"  + mm + " kuud" +  Converter.getYYYYmMMmDDmString(dds.getTime()) +"  "+  Converter.getYYYYmMMmDDmString(dde.getTime()));
@@ -190,11 +190,48 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
           		//inputLineBuf = postData("request=getReportSalesRows" + "&dateStart="+ Converter.getYYYYmMMmDDmString(dds.getTime())
    				//+"&dateEnd=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + userstuff);
           	// https://api-reports-eu10.erply.com/v1/generated-reports/invoice-rows?displaySoldBundles=BY_COMPONENTS
-          		inputLineBuf = getRepData( "&startDate="+ Converter.getYYYYmMMmDDmString(dds.getTime())
-				+"&endDate=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + "?displaySoldBundles=BY_COMPONENTS");
+          		inputLineBuf = getRepData( "startDate="+ Converter.getYYYYmMMmDDmString(dds.getTime())
+				+"&endDate=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + "&displaySoldBundles=BY_COMPONENTS");
+          		
+          		// "&clientCode=" + company +"&version=" + apiversion + "&responseType=" + returntype + "&sessionKey=" + session
+          		Converter.saveFile("data/arveread.json", inputLineBuf.toString().replace((char)0x1c, ' ').replace((char)0x1b, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ')
+  		    			.replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0xb, ' ').replace((char)0xe, ' ')
+  		    			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+  		    			 .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+  		     			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+  		     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' '));
+          		
+          	  /*try{
+          		  Reader reader = new InputStreamReader(in);
+          		    InputStreamReader isr = new InputStreamReader(in,"UTF-8");
+          		    BufferedReader inr = new BufferedReader(isr);
+          		    String inputLine;
+
+          		    while ((inputLine = inr.readLine()) != null){
+          		        inputLine = enCode(inputLine);	// enCode(inputLine);	
+          		    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n").replace((char)0x1c, ' ').replace((char)0x1b, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ')
+          		    			.replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0xb, ' ').replace((char)0xe, ' ')
+          		    			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+          		    			 .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+          		     			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+          		     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ')
+          		    			);
+          		  }
+
+          		     inr.close();
+          		  
+          		  
+          		  reader.close();
+          		  } catch (IOException e){
+          		  throw new Exception("IOException while reading response", e);
+          		  }
+          		  */
+          		//System.out.println(inputLineBuf.toString());
+          		
           	} catch (Exception e1) {
           		e1.printStackTrace();
           	}
+              System.exit(0);
                  if(inputLineBuf.length() > 2 && inputLineBuf.indexOf("<errorCode>") == -1 ){          
                        try {
                      	  File f = new File (getDir() + "klienditoodeErp.xml");
@@ -347,10 +384,12 @@ String jwttoken = null;
   private StringBuffer getRepData(String data) throws Exception {
 	  HttpURLConnection urlc = null;
 
-	 	Converter.doTrustToCertificates();
+	  Converter.doTrustToCertificates();
 	  StringBuffer inputLineBuf = new StringBuffer();
+	  
+	  //kysime millise urli pealt tuleb reportit küsida ja salvestame faili
 	  try {
-			myurlrep = new URL("https://api-reports-eu10.erply.com/v1/generated-reports/invoice-rows?"+ data);
+			myurlrep = new URL("https://" + company + ".erply.com/api/?request=getServiceEndpoints&sendContentType=1&clientCode=" + company);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -364,6 +403,79 @@ String jwttoken = null;
 	  } catch (ProtocolException e) {
 	    throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
 	  }
+	  InputStream in = urlc.getInputStream();
+	  try{
+	  Reader reader = new InputStreamReader(in);
+	    InputStreamReader isr = new InputStreamReader(in,"UTF-8");
+	    BufferedReader inr = new BufferedReader(isr);
+	    String inputLine;
+
+	    while ((inputLine = inr.readLine()) != null){
+	        inputLine = enCode(inputLine);	// enCode(inputLine);	
+	    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n").replace((char)0x1c, ' ').replace((char)0x1b, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ')
+	    			.replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0xb, ' ').replace((char)0xe, ' ')
+	    			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+	    			 .replace((char)0x1b, ' ') .replace((char)0x1b, ' ') .replace((char)0x1b, ' ')
+	     			.replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ')
+	     			.replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ')
+	    			);
+	  }
+
+	     inr.close();
+	  
+	  
+	  reader.close();
+	  } catch (IOException e){
+	  throw new Exception("IOException while reading response", e);
+	  } finally{
+	  if (in != null)
+	  in.close();
+	  }
+	  } catch (IOException e){
+		  throw new Exception("Connection error (is server running at " + myurlrep + " ?): " + e);
+		  } finally {
+		  if (urlc != null)
+		  urlc.disconnect();
+		  }
+	  
+	  
+	  if(inputLineBuf.toString().length() > 1) {
+		  Converter.saveFile(getDir() + "reporturl.json", inputLineBuf.toString());
+	  }
+	  
+	  JSONObject jsonobj = Converter.readJSONFile(getDir() + "reporturl.json");
+	  JSONArray jsonarr = (JSONArray) jsonobj.get("records");
+	  String reportsurl = null;
+	  Iterator itera = jsonarr.iterator();
+		while(itera.hasNext()) {
+			JSONObject rida = (JSONObject) itera.next();
+			if (rida.get("reports") != null) {
+				reportsurl = ((JSONObject) rida.get("reports")).get("url").toString();
+			}
+		}
+
+	  //System.exit(0);
+	  
+	  
+	  try {
+			myurlrep = new URL(reportsurl + "v1/generated-reports/invoice-rows?"+ data);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+	  try{
+		// 1. sessionKey
+		  // 2. kliendikood
+		  
+	  urlc = (HttpURLConnection) myurlrep.openConnection();
+	  try{
+	  urlc.setRequestMethod( "GET" );
+	  urlc.setRequestProperty("sessionKey", session);
+	  urlc.setRequestProperty("clientCode", company);
+	  } catch (ProtocolException e) {
+	    throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
+	  }
+	  
+	  
 	 // urlc.setDoOutput(true);
 	 // urlc.setDoInput(true);
 	 // urlc.setUseCaches(false);
@@ -391,19 +503,15 @@ String jwttoken = null;
 	  
 	  
 	  reader.close();
-	  } catch (IOException e)
-	  {
+	  } catch (IOException e){
 	  throw new Exception("IOException while reading response", e);
-	  } finally
-	  {
+	  } finally{
 	  if (in != null)
 	  in.close();
 	  }
-	  } catch (IOException e)
-	  {
+	  } catch (IOException e){
 	  throw new Exception("Connection error (is server running at " + myurlrep + " ?): " + e);
-	  } finally
-	  {
+	  } finally {
 	  if (urlc != null)
 	  urlc.disconnect();
 	  }
