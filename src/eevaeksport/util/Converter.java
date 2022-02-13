@@ -2216,32 +2216,23 @@ public class Converter {
 						   }
 						 }}
 						
-						if(alg != 1) {
+					
 							
 							row = sheet.getRow(0);
 							for(int i = 0 ; i < sheet.getLastRowNum()+1;i++){
 								row = sheet.getRow(i);
-								rida = 1;
+							
 								if(row != null) {
 								
 							for (int a = 0; a < row.getLastCellNum(); a++) {
 								String ean = formatter.formatCellValue(row.getCell(a));
 								if(ean.contains("EAN")) {
 									rida = i;
-									//System.out.println("rida2 " + rida + " algus");
-							     }
-								if(ean.contains("Jaama")) {
-								//	alg = a;
-									//System.out.println("rida1 " + rida + " algus " + alg);
-							     }
-								if(ean.contains("Turba")) {
-								//	alg = a;
-									//System.out.println("rida1 " + rida + " algus " + alg);
-							     }
+								 }
 							   }
 							 }
 						}	
-						}
+						
 						
 						
 						System.out.println("rida " + rida + " algus " + alg);

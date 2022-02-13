@@ -222,7 +222,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
-         String sql = " select  * , datediff(day,fromdate,todate) as paev from getprices order by accountrelation,relation desc,itemrelation";
+         String sql = " select  * , datediff(day,fromdate,todate) as paev from getprices where getdate() between fromdate-2 and todate  order by accountrelation,relation desc,itemrelation";
         HashSet hh = new HashSet();
           try {
 
@@ -626,6 +626,41 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 
 	   }
 	  
+	  
+	  HashMap salesres = new HashMap();
+	  
+	  
+	   try {
+		   
+		   String salessql = "  select  klient , trim(str(year(kuupaev))) + case when len(trim(str(month(kuupaev)))) = 1 then '0' +trim(str(month(kuupaev))) else  trim(str(month(kuupaev))) end as kuu , sum(kogus*lprice) as summa from getcustomerproductlist where\r\n" + 
+		   		"		   kuupaev > getdate()-200  and len(trim(klient)) >1 group by klient ,  trim(str(year(kuupaev))) + case when len(trim(str(month(kuupaev)))) = 1 then '0' +trim(str(month(kuupaev))) else  trim(str(month(kuupaev))) end \r\n" + 
+		   		"		    order by klient ,  trim(str(year(kuupaev)))  + case when len(trim(str(month(kuupaev)))) = 1 then '0' +trim(str(month(kuupaev))) else  trim(str(month(kuupaev))) end";
+		   
+		     Connection con = getNewConnection();
+		     	Statement stmt =  con.createStatement();
+		          ResultSet rs1 = stmt.executeQuery(salessql);
+		          
+		          while(rs1.next()){
+		          	String klient = rs1.getString("klient").trim();
+		          	String kuu = rs1.getString("kuu");
+		          	int summa = (int)rs1.getDouble("summa");
+		            if(salesres.get(klient) == null){
+		          	  salesres.put(klient,"   " + kuu + " : " + summa + " €" );
+		            }else{
+		          	  String asi = (String)salesres.get(klient);     	  
+		          	  salesres.put(klient,"   " + kuu + " : " + summa +"€|" + asi);
+		            }
+		          }
+		         rs1.close();
+		         stmt.close();
+		         con.close();
+		      	System.out.println(salesres.toString());   
+	   }catch(Exception e) {
+		   
+	   }
+
+	  
+	  
       String cmd = "select * from getCustomers";
       String cmd2 = "select * from getCustomers";
       
@@ -954,6 +989,13 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
             	 }
                  cust.setCity(Converter.enCodeEst(cust.getCity()));
              }
+             
+             
+             
+             if(salesres.get(cust.getID()) != null){
+               	cust.setInfo(Converter.enCodeEst("CHART sales Eur. :|Month & year|Sales |" )+ salesres.get(cust.getID()) );
+               }
+
              
           
           if(cust.getID().toLowerCase().indexOf("pr")==-1 && agentc != null && agentc.toLowerCase().indexOf("pr")==-1){

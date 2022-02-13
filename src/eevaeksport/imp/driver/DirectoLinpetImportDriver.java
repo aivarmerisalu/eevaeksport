@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,6 +17,7 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -902,8 +904,51 @@ hind =   Converter.Round((float)hind, 2);
 
 	    return stringBuffer.toString();
 	}
+  void saveProps(Properties props, String filename, String header)
+		throws IOException {
+			FileOutputStream fos = new FileOutputStream(filename);
+			props.save(fos, header);
+			fos.close();
+		}
+  
 
-	
+  private int getNum() {
+	  Properties props = new Properties();
+	    try {
+	      FileInputStream in = new FileInputStream("serial.txt");
+	      props.load(in);
+	      in.close();
+	    } catch (IOException e){
+	      
+	      } 
+	    if(props.get("doknr") == null ) {
+	    	props.put("doknr", "5000001");
+	    	
+	    	 try {
+				saveProps(props,"serial.txt","value");
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+	    	 return 5000000;
+	    }else {
+	    	int i = Integer.parseInt(props.get("doknr")+"");
+	    	i++;
+	    	
+	    	 props.put("doknr", i+"");
+		    	
+	    	 try {
+				saveProps(props,"serial.txt","value");
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+	    	 return i;
+	    }
+	    	
+	    
+	 
+  }
   
   private void makeOutput(Order order){
 	  boolean sendcomm = false;
@@ -911,7 +956,7 @@ hind =   Converter.Round((float)hind, 2);
 		  sendcomm = true;
 	  }
 	 	try {
-	 	 
+	 		String ordnum = getNum()+ "";
 	 		Customer ccc = (Customer)kliendid.get(order.getCompany());
 	 
 	 		String comm = "";
@@ -952,7 +997,7 @@ hind =   Converter.Round((float)hind, 2);
 	 	    String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
 	          "<transport>" +
 	          "<order " + 
-	         "webid=\"" + "1" + "\" " + //order.getDokNr()+
+	         "webid=\"" + ordnum + "\" " + //order.getDokNr()+
 	         "webdate=\"" + getDateNiceString(Calendar.getInstance())+ "\" " +
 	         "ccode=\"" +deCode( order.getCompany()) + "\" " +
 	         "send_mode=\"POST\" " + 

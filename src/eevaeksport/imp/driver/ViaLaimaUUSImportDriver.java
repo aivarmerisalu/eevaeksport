@@ -320,7 +320,9 @@ JSONObject ord = new JSONObject();
 				   INDEX = st.nextToken().substring(3);
 				   TYPE = st.nextToken().substring(3);
 				   PRIV = st.nextToken().substring(3).toUpperCase();
+				   if(st.hasMoreTokens())
 				   ORDNUM = st.nextToken().substring(3);
+				   if(st.hasMoreTokens())
 				   COMM = st.nextToken().substring(3);
 				   
 				   /*<DeliveryCompanyName>OC Demo</DeliveryCompanyName>         <!--mandatory-->
@@ -385,13 +387,15 @@ JSONObject ord = new JSONObject();
 					   if(!TYPE.equals("box")) {
 						   aadress.put( "Country", "EE"); 
 					   }
-					   header.put( "DeliveryAddressDetail", aadress);
 					   
 					   if(COMM.length()>1) {
-						   JSONObject aadress2 = new JSONObject();
-						   aadress2.put("AddressRow2", COMM);
-						   header.put( "DeliveryAddressDetail", aadress2); 
+							  
+						   aadress.put("AddressRow2", COMM);
+						   
 					   }
+					   header.put( "DeliveryAddressDetail", aadress);
+					   
+					   
 					
 					 
 				   }

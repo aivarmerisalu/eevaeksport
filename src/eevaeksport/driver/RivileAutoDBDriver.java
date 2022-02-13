@@ -14,11 +14,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -708,6 +710,7 @@ public class RivileAutoDBDriver extends AbstractDBDriver implements  BulkUpdater
     }
 
     public TreeMap getProducts(Agent agent){
+    	  nf.setMinimumFractionDigits(2);
     	getDealerProductsList();
     	System.out.println("stocks suurus " + stocks.size());
   
@@ -744,9 +747,28 @@ public class RivileAutoDBDriver extends AbstractDBDriver implements  BulkUpdater
              rst.close();
              stm.close();
              
+   sql = "  SELECT  I17_KODAS_PS AS toode  ,sum( I17_SUMA) as cost,sum(I17_kiekis) as kogus  from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS  \r\n" + 
+   		"   		    where  (I17_kiekis >0 OR (I17_P_PAR_K)>0) and n17_kodas_ls_1<>''  and  N17_POZ_DATE =0  \r\n" + 
+   		"   			   GROUP BY I17_KODAS_PS  having sum(I17_kiekis  ) >0   ORDER BY I17_KODAS_PS";
+        	
+        	
+   TreeMap tooted2 = new TreeMap();
+   stm = con.createStatement();
+     rst = stm.executeQuery(sql);
 
-        	
-        	
+      while (rst.next()) {
+        String toode = rst.getString("toode").trim();
+        double ohind = rst.getDouble("cost");
+        double kogus = rst.getDouble("kogus");
+       	 Toode tt = new Toode(toode);                
+            tt.setKastis(ohind);
+            tt.setDonecur(kogus);
+            tooted2.put(toode,tt);	
+    }
+    rst.close();
+    stm.close();
+   
+   
              connectionUp(url2);
             stmt = con.prepareStatement(cmd);
             ResultSet	      rs = stmt.executeQuery();
@@ -808,6 +830,26 @@ public class RivileAutoDBDriver extends AbstractDBDriver implements  BulkUpdater
                }
                prod.setVat("21");
                
+               	
+               
+               Toode tt2 = (Toode) tooted2.get(prod.getID());
+               
+               if(tt2 != null) {
+            	   
+             Double oma =  tt2.getKastis() / tt2.getDonecur();
+               
+               
+           
+              	 prod.setMargin(nf.format((100-(oma/prod.getPrice()*100))) + "");
+              	 if(prod.getPartii() != null && prod.getPartii().trim().length() > 0){
+              		 prod.setPartii(prod.getPartii() + "|Cost: " + nf.format(oma) + " €"); 
+              	 }else{
+              		 prod.setPartii("Cost: " + nf.format(oma) + " €"); 
+              	 }
+               
+               }
+               
+               
                products.put(nimetus, prod);
 
                 // }
@@ -819,6 +861,8 @@ public class RivileAutoDBDriver extends AbstractDBDriver implements  BulkUpdater
         return products;
     }
 
+    
+    private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
     /**
      * Method declaration
      *
