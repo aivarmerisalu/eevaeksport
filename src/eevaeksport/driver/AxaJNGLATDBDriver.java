@@ -93,8 +93,49 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
   public void connectionUp(){
   }
 	public Vector getLastThreeData() {
-		// TODO Auto-generated method stub
-		return null;
+		Vector result = new Vector();
+      
+		if(instance.equals("shell")) {
+    			try {
+    	    		String sq3 = "  select * from lastteninvoices" ;
+    						
+    						Connection con3 = getNewConnection();
+    						Statement st3 = con3.createStatement();
+    						ResultSet rs3 = st3.executeQuery(sq3);
+    						while (rs3.next()) {
+    							MatrixLine ml = new MatrixLine();
+    							ml.setCustID(rs3.getString("klient").trim());
+    							ml.setStartDate(rs3.getString("kuup").substring(5,10));
+    							ml.setProdID(rs3.getString("toode").trim());
+    							ml.setPrice(rs3.getDouble("kogus"));
+    							double kmin = rs3.getDouble("kogusmin");
+    							
+    							ml.setMinAm(kmin);
+    							ml.setLineinfo(rs3.getString("doknr").trim());
+    							
+    							int color = rs3.getInt("color");
+    							if(color == 1) {
+    								ml.setCliGroup("green");
+    							}
+    	                        
+    							if(kmin < 0) {
+    								ml.setCliGroup("red");
+    							}
+    						    
+    							result.add(ml);
+    						}
+    						rs3.close();
+    						st3.close();
+    						con3.close();
+    				
+    			} catch (Exception e) {
+    				e.printStackTrace();
+    			}
+    			}
+
+    			return result;
+    	
+
 	}
 
   public String getSaveDebtInfo() {
@@ -316,7 +357,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 
 	  StringBuffer products = new StringBuffer();
 
-	  if(instance.equals("shell")) {
+	//  if(instance.equals("shell")) {
 	  	
 	  	  String  cmd = " select l.*,OTC from GETSTOCK l inner join getproducts t on t.toode=l.kood ";
 	    
@@ -370,7 +411,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	             getParent().showError(e);
 	         }
 	      
-	    } else {
+	   /* } else {
 	  	
 	     	try{
 	  		String file2 = "stockref.txt";
@@ -407,7 +448,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	  	e.printStackTrace();	
 	  	}
 	  	
-	  }
+	  }*/
 
 	         return products.toString();
 	     }

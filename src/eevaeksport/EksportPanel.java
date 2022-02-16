@@ -895,6 +895,7 @@ public class EksportPanel extends JPanel implements ActionListener,
             		|| driver.getDriverVersion().equals("NaviLivikoLAT")
             		|| driver.getDriverVersion().equals("EevaArke")
             		|| driver.getDriverVersion().equals("HorizonKonig")
+            		|| driver.getDriverVersion().equals("AxaJNGLAT")
             		|| driver.getDriverVersion().equals("NaviLivikoLIT")){
             	lastThree = ((Discounter) driver).getLastThreeData();
             }

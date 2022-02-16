@@ -1372,7 +1372,40 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            		ex.printStackTrace();
            	  }
             }
-           
+
+// kui on olemas ka teine ladu siis teeme selle seisu ka.
+           if(getParent().getProps().getProperty("stockcode1") != null){
+        	   httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=item&stock=" +  getParent().getProps().getProperty("stockcode1");
+        	   
+        	   System.out.println(httpsURL);
+               myurl = new URL(httpsURL);
+               con = (HttpsURLConnection)myurl.openConnection();
+               ins = con.getInputStream();
+               isr = new InputStreamReader(ins,"UTF-8");
+               in = new BufferedReader(isr);
+
+               inputLine = "";
+              inputLineBuf = new StringBuffer();
+              while ((inputLine = in.readLine()) != null){
+              	inputLine = Converter.enCodeEst(inputLine);
+              	inputLineBuf.append(inputLine.replaceAll("<item","\n<item" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
+              }
+
+              in.close();
+              
+              if(inputLineBuf.length() > 2){
+             
+                    try {
+                  	  File f = new File (getDir() + "tooted" + getParent().getProps().getProperty("stockcode1") +".xml");
+                  	  if(f.exists())f.delete();
+                  	Converter.saveFileInUTF8(getDir() + "tooted" + getParent().getProps().getProperty("stockcode1") + ".xml", inputLineBuf.toString());
+                 	
+              	  }catch (Exception ex) {
+              		ex.printStackTrace();
+              	  }
+               }
+        	   
+ 		  }
 
            //lõpeb toodetega tegelemine 
 
@@ -1475,10 +1508,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	   makeData();
 	   System.out.println("kliendid a");
 		
-		  String country = "Estonia";
-		  if(getParent().getProps().getProperty("country") != null){
-			  country = getParent().getProps().getProperty("country");
-		  }
+		 
 	     this.customers = new ArrayList();
 	   
 	     
@@ -1528,6 +1558,11 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		         		if(this.dueSums.get(id) != null){
 		         			customer.setDebt(Double.parseDouble(dueSums.get(id)+ ""));
 		         		}
+		         		
+		         		 String country = "Estonia";
+		       		  if(getParent().getProps().getProperty("country") != null){
+		       			  country = getParent().getProps().getProperty("country");
+		       		  }
 		         		
 		         		String kname = name;
 		         		 String sendaadr = ""; 
@@ -1968,6 +2003,15 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      HashMap prodHash = new HashMap();
      HashSet usedGroups = new HashSet();
      
+     TreeMap stockLisa = new TreeMap();
+     if(getParent().getProps().getProperty("stockcode1") != null ){
+    	
+    	 stockLisa = this.getProducts4();
+    //	System.out.println("stockLisaXXXXX " + stockLisa.size());
+     }
+     
+     
+     
      if(custProds.size() == 0){
          prodCodes = new HashSet();
     	getCustomerProductsList2();
@@ -1979,7 +2023,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
     	System.out.println("stockalter " + stockAlter.size());
      }
 
-     
+   
      
      
      Vector noGrups = new Vector();
@@ -2401,6 +2445,15 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
         	 	 }
          	
      	 	 }
+      	 	len = line.indexOf("stock_level=");
+    	 	 if(len != -1){
+    	 	     String stock   = line.substring(len + 13);  
+    	 	     int st = (int)Double.parseDouble(stock.substring(0,stock.indexOf("\"")));
+    	 	     if(st > 0) {
+    	 	    	 prod.setStock(st);
+    	 	     }
+   	         
+   	 	 }
       	 	 
       	 	 if(stockAlter.get(prod.getID()) != null){
       	 		 prod.setStock((Double)stockAlter.get(prod.getID()));
@@ -2422,7 +2475,17 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 				} 
       	   }
       	 	 
+      	 
       	 	 
+      	 
+      	 if(stockLisa.get(prod.getID()) != null) {
+      		 
+      		// System.out.println("Lisan " +  stockLisa.get(prod.getID())  + " " + prod.getID());
+      		 try{
+				 prod.setPartii( getParent().getProps().getProperty("stockcode1") + ":" + (int)Double.parseDouble(stockLisa.get(prod.getID())+""));  
+	      		}catch(Exception t){
+				} 
+      	   }
       	  if(line.indexOf("ARTIKKEL_KAMP") != -1){
       	    	prod.setStatusDiscount("1");
       	    }
@@ -2540,6 +2603,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	   }
 
    
+   
+   
    public TreeMap getProducts3(){
 	   TreeMap tm = new TreeMap();
 	    
@@ -2596,6 +2661,46 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	     return tm;
 	     
 	   }
+   
+   
+   
+   
+   public TreeMap getProducts4(){
+	   TreeMap tm = new TreeMap();
+	    
+	     
+	     try {
+	 
+	    	   FileReader fr = new FileReader(getDir() + "tooted" + 
+	    			   getParent().getProps().getProperty("stockcode1")+ ".xml");
+	    	   
+	           BufferedReader reader = new BufferedReader(fr);
+	         String line = null;
+
+	          while((line = reader.readLine()) != null  ){
+	        	 
+		        	
+	        	  if((line.trim().length()) > 50){
+	        		  int len = line.indexOf("code=");
+		        	  String id   = line.substring(len + 6);
+		        	  id = id.substring(0,id.indexOf("\""));
+		        	 // System.out.println(id);
+		      	 	  		len = line.indexOf("stock_level=");
+		             	 	 if(len != -1){
+		             	 	     String stock   = line.substring(len + 13);
+		             	 	     tm.put(id, Double.parseDouble(stock.substring(0,stock.indexOf("\"")))); 
+		            	 	 }
+		             	 
+		      	  }
+	          }	    	 
+	     } catch (Exception e){
+	       e.printStackTrace();
+	     }
+	     
+	     return tm;
+	     
+	   }
+   
 
    
    public String getAssortmentStr(Agent agent){

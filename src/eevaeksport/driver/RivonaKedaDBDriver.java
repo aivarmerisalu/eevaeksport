@@ -285,9 +285,11 @@ public class RivonaKedaDBDriver extends AbstractDBDriver implements  BulkUpdater
 
             public String getSaveStockInfo(){
 
-            	 String  cmd = "  SELECT  I17_KODAS_PS AS toode, sum(I17_kiekis - I17_atiduota - i17_rezervas) AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS " +
-            			 " where I17_KODAS_IS in ('KS000001','KS000005','KS000002','KS000003','KS000080') AND ((I17_kiekis - I17_atiduota - i17_rezervas) >0 OR (I17_P_PAR_K)>0) and n17_kodas_ls_1<>''  and  N17_POZ_DATE =0 " +
-            						 "   GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_atiduota - i17_rezervas) >0   ORDER BY I17_KODAS_PS" ;
+            	 String  cmd = "  SELECT  I17_KODAS_PS AS toode, sum(I17_kiekis - I17_atiduota - i17_rezervas)/(case when N17_KODAS_US ='KG' or   N17_KODAS_US ='M' then 1000 else 1 end)\r\n" + 
+            	 		"              	  		  AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS \r\n" + 
+            	 		"    where I17_KODAS_IS in ('KS000001','KS000005','KS000002','KS000003','KS000080') AND ((I17_kiekis - I17_atiduota - i17_rezervas) >0 OR (I17_P_PAR_K)>0) and n17_kodas_ls_1<>''  and  N17_POZ_DATE =0 \r\n" + 
+            	 		"  			   GROUP BY I17_KODAS_PS,N17_KODAS_US  having sum(I17_kiekis - I17_atiduota - i17_rezervas) >0   ORDER BY I17_KODAS_PS			\r\n" + 
+            	 		"									" ;
 
                    if (isDebug()) System.out.println(cmd);
 
@@ -1142,9 +1144,7 @@ String email = " ";
     	                    	tt.setDonecur(cost);
     	                    }
     	                    tooted.put(toode,tt);
-    	                    if(toode.equals("599954089665")) {
-    	               			 System.out.println("Laoseis 000 '599954089665' " + seis);
-    	               		 }
+    	                  
     	            }
     	            rst.close();
     	            stm.close();
@@ -1244,7 +1244,12 @@ String email = " ";
     	             tt.setLadu(yhik);
     	             tt.setGr1(pallet + "");
     	             tt.setGr2(aleprice + "");
+    	             if(prices.get("toode") == null)
     	             prices.put(toode,tt);
+    	             
+    	             if(toode.startsWith("599954089229")) {
+              			 System.out.println("Laoseis 00dd '599954089229' " + " "+toode + " " + yhik);
+              		 }
     	      }    
     	   
     	   rst1.close();
@@ -1306,6 +1311,10 @@ String email = " ";
     	           
     	           
     	              Toode tt = (Toode) prices.get(kood);
+    	              
+    	              if(kood.startsWith("599954089229")) {
+              			 System.out.println("Laoseis 00 '599954089229' " + " "+kood + " " + tt);
+              		 }
     	              String add = "";
     	              if(tt != null){
     	              	kogus = tt.getKogus();
@@ -1323,39 +1332,7 @@ String email = " ";
     	                	prod.setUnit(yhik.trim());
     	                }
     	                
-    	                
-    	                Toode t = (Toode) tooted.get(kood);
-    	                if(kood.startsWith("59995408966")) {
-               			 System.out.println("Laoseis 00 '599954089665' " + " "+kood);
-               		 }
-    	                
-    	                if(t != null){
-    	                	kogus = t.getKogus();
-    	                	
-    	                	
-    	                	 if(kogus!= 0){
-    	                		 if(prod.getUnit().equals("KG") || prod.getUnit().equals("M") ){
-    	                			 kogus = kogus /1000;
-    	                		 }
-    	                    
-    	                		 if(kogus > 50000){
-    	                			 kogus = 55555;
-    	                		 }
-    	                		 if(prod.getID().equals("599954089665")) {
-    	                			 System.out.println("Laoseis '599954089665' " + kogus);
-    	                		 }
-    	                		 prod.setStock(kogus);
-    	                    }
-    	                	 
-    	                	  double cost =  t.getDonecur();
-   	                         if(cost >0){
-   	                        	 double marg = (1-cost/prod.getPrice())*100 ;
-   	                         	 if(marg >0){
-   	                         	 	 prod.setMargin((int) marg + "");
-   	                             }   
-   	                         }
-    	                }
-    	                
+    	           
     	                
     	                Toode ttt = (Toode) kriitil.get(kood);
     	                
@@ -1401,8 +1378,44 @@ String email = " ";
     	                if(palprice > 0){
     	               	 prod.setPartii( " %k" + palprice + "");
     	                }
-    	             	prices.remove(kood);
+    	             	//prices.remove(kood);
     	              }
+    	              
+    	              
+    	              
+  	                Toode t = (Toode) tooted.get(kood);
+  	                if(kood.startsWith("59995408966")) {
+             			 System.out.println("Laoseis 00 '599954089665' " + " "+kood);
+             		 }
+  	                
+  	                if(t != null){
+  	                	kogus = t.getKogus();
+  	                	
+  	                	
+  	                	 if(kogus!= 0){
+  	                		 if(prod.getUnit().equals("KG") || prod.getUnit().equals("M") ){
+  	                			 kogus = kogus /1000;
+  	                		 }
+  	                    
+  	                		 if(kogus > 50000){
+  	                			 kogus = 55555;
+  	                		 }
+  	                		 if(prod.getID().equals("599954089665")) {
+  	                			 System.out.println("Laoseis '599954089665' " + kogus);
+  	                		 }
+  	                		 prod.setStock(kogus);
+  	                    }
+  	                	 
+  	                	  double cost =  t.getDonecur();
+ 	                         if(cost >0){
+ 	                        	 double marg = (1-cost/prod.getPrice())*100 ;
+ 	                         	 if(marg >0){
+ 	                         	 	 prod.setMargin((int) marg + "");
+ 	                             }   
+ 	                         }
+  	                }
+  	                
+    	              
     	            String lopp = prod.getID();
     	            if(lopp.length() > 4){
     	            	nimetus  = nimetus  + " " + lopp.substring(lopp.length() - 3 ) + " ";

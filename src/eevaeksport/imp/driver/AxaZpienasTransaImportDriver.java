@@ -202,6 +202,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 	   private void makeMilkTransportOrder(Order order){
 		   String waybill = " ";
 		   String desttype = " ";
+		   String driverStock = order.getAgent();
 		  	try{
 		    	  StringBuffer sb = new StringBuffer();
 		  		  Calendar cal = Calendar.getInstance();
@@ -209,6 +210,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 			        if (month.length() == 1) month = "0" + month;
 			        String day = cal.get(Calendar.DAY_OF_MONTH) + "";
 			        if (day.length() == 1) day = "0" + day;
+			        
 			        
 			        
 			    String dateString = cal.get(Calendar.YEAR) +"."+ month +"."+ day ;	
@@ -324,7 +326,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 	    	 company = company.substring(0, company.indexOf("--"));
 		 	     }
 		 	     
-		 	     String driverStock = order.getAgent();
+		 	  
 		 	     while(driverStock.length() < 6) {
 		 	    	driverStock = "0" + driverStock;
 		 	     }
@@ -381,8 +383,8 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
                   
 		        sb.append(dateString + ";" + waybill + ";" + waybill.substring(3) + ";" + time + ";P;" +  type + ";ZP;"+ vendType + ";" +  company + ";" +
 		        
-		        desttype + ";" + tripFrom  +  ";" + driverStock + ";" +  section + ";" + trip +  ";"+ line.getKogus() + ";" + days + ";" + station +";" + signa + ";" + photo
-		           + ";" + comment + ";" + temp + ";" + koef + ";" + smell + ";" + clean + ";" + sample +    ";;;;;;TIE\n"); 
+		        desttype + ";" + tripFrom  +  ";" + driverStock + ";" +  section + ";" + trip +  ";"+ Converter.Round((float)line.getKogus(), 1) + ";" + days + ";" + station +";" + signa + ";" + photo
+		           + ";" + comment + ";" + temp + ";" +  ";" +  ";" + ";" + ";;;;;;TIE\n"); 
 		        	  
 		
 		//        Data +“;“+ путевой лист.+“;“+ грузовoй лист.+ “;“+ начало сбора +“;“+ Item +“;“+ тип молока + “;“+ место расследования + “;“+ тип (поставщик(0), склад(1))+ “;“+ код из +“;“+ место из +“;“+
@@ -408,7 +410,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
                
                
                //date_ путевой лист_ код из_ Признак.csv
-               fileName =  loca + dateString2 +  "_" + waybill + "_" +  desttype +  "_TIE.csv";
+               fileName =  loca + dateString2 +  "_" + waybill + "_" +  driverStock +  "_TIE.csv";
  		      
                if(refe){
             	   loca = parent.getProps().getProperty("conv2.dir");
@@ -433,7 +435,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
         	           }
             	   }else {
             	 	   fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() +  ".csv";
-            	          fileName =  loca + dateString +  "_" + waybill + "_" +  desttype +  "_TIE.csv";
+            	          fileName =  loca + dateString2 +  "_" + waybill + "_" +  driverStock +  "_TIE.csv";
         		 	   System.out.println("uus fail" + fileName);
         		 	  writeToFile(sb.toString(),fileName);
             	   }

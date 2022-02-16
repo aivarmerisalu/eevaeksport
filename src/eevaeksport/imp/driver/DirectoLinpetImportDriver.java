@@ -993,7 +993,16 @@ hind =   Converter.Round((float)hind, 2);
 	 		}
 	 		System.out.println("Comment " + comm);
 	 		order.setSum(0);
+	 		
+	 		String ladu = "";
+	 		 if("true".equals(parent.getProps().getProperty("order.setware"))) {
+	 			 ladu =  "stock=\"" + parent.getProps().getProperty("stockcode") +  "\" "  ; 
+	 		  }
 			
+	 		 if(order.getWarehouse() != null && order.getWarehouse().trim().length() >0) {
+	 			 ladu =  "stock=\"" + order.getWarehouse() +  "\" "  ; 
+	 		 }
+	 		 
 	 	    String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
 	          "<transport>" +
 	          "<order " + 
@@ -1004,10 +1013,12 @@ hind =   Converter.Round((float)hind, 2);
 	         "send_type=\"ALL\" " +
 	         "object=\"4\" " +
              comm + 
+              ladu +
 	         "amount=\"" + order.getSum() + "\" " +
 	         "amount_vat=\"" + order.getSum()* 1.2 + "\" " +
 	         "currency=\"EUR\" language=\"EST\">" +
 	         "<pricelist>" + gr + "</pricelist>" +
+	       
 	         "<send_address>" +
 	         "<street>" + adr + "</street>" +
 	         "<county>" + city + "</county>" +

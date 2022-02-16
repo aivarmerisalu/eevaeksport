@@ -679,7 +679,7 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
   public TreeMap getProducts(Agent agent){
 
 	  prices = new Hashtable();
-	  
+	  Connection con = null;
 String ex = parent.getProps().getProperty("products");
     if (ex == null){
 
@@ -707,7 +707,7 @@ String ex = parent.getProps().getProperty("products");
     TreeMap products = new TreeMap();
     HashMap prodHash = new HashMap();
     try {
-      Connection con = getNewConnection();
+       con = getNewConnection();
       Statement st = con.createStatement();
       ResultSet rs = st.executeQuery(cmd);
 
@@ -801,14 +801,13 @@ String ex = parent.getProps().getProperty("products");
       }
       
       rs.close();
-     
+      st.close();
+      con.close();
+
       
 
-    
-      
-
-
-
+      con = getNewConnection();
+      st = con.createStatement();
        ResultSet rs1 = st.executeQuery(cmd2);
                          while(rs1.next()){
                            String id = rs1.getString("TOODE").trim();
@@ -824,10 +823,11 @@ String ex = parent.getProps().getProperty("products");
                          }
 
       rs1.close();
-      //st.close();
-      //con.close();
+      st.close();
+      con.close();
       
-
+      con = getNewConnection();
+      st = con.createStatement();
        rs1 = st.executeQuery(cmd3);
                         while(rs1.next()){
                           String id = rs1.getString("ITNO").trim();
@@ -884,6 +884,12 @@ String ex = parent.getProps().getProperty("products");
      
     } catch (Exception e){
       getParent().showError(e);
+      try {
+		con.close();
+	} catch (SQLException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
     }
 
     return products;
