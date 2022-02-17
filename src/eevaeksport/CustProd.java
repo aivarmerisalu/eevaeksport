@@ -42,7 +42,8 @@ public void setGroup(String group) {
   private String redline = "0";
   private String abiKood = " ";
   private Date reportmonth = null;
-
+  public java.util.Date checkdate = null;
+  
   /**
    *
    * @param aS5 - the new value for s5
