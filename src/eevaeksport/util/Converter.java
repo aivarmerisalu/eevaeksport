@@ -5003,6 +5003,127 @@ public static void loadVisitLines(String status,String company, String user , St
 	
 	
 	
+ public static void getContractsSuggByCustOrType(TreeMap tm , String company, String user , String pass, Boolean useweb){
+	  //jungent LV tellimusel tehtud
+	 
+	  if(useweb) {
+	  eevaeksport.util.ReportingService serv = new ReportingService();
+	  serv.user =  user;
+		serv.pass = pass;
+		serv.company = company;
+		
+
+			try {
+			org.json.JSONArray array = serv.getContracts();
+		
+				
+					Converter.saveFile(  "contracts.json" , array.toString());
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			serv.closeClient();
+	  }
+	  
+	  
+			
+			try {
+			JSONParser parser = new JSONParser();
+			 Object obj = parser.parse(new FileReader( "contracts.json"));
+			
+			 
+			
+	            org.json.simple.JSONArray tagList = (org.json.simple.JSONArray) obj;
+
+		for(int i = 0; i <	tagList.size();i++){
+			org.json.simple.JSONObject cob =  ((org.json.simple.JSONObject) tagList.get(i));
+			Long start = null;
+			try {
+	       	 start = (Long)cob.get("starts");
+			}catch(Exception j) {
+        		
+        	}
+	       	Long end = null;
+	       	try {
+		       	 end = (Long)cob.get("ends");
+				}catch(Exception j) {
+	        		
+	        	}
+	       	Long created = (Long)cob.get("created");
+	       	//	String name = (String)cob.get("name");
+	        	String contractType = (String)cob.get("contractType");
+	    	 System.out.println("load contracts mess " + start + " " + end + " " + created);
+	        	Calendar now = Calendar.getInstance();
+	        	long weeks2 = 1209600000; 
+	        	String type = contractType;
+	        	String level = null;
+	        	String customer = null;
+	        	try {
+	        		org.json.simple.JSONArray levelList = (org.json.simple.JSONArray) cob.get("types");
+			          
+			         if(levelList != null){
+			        	 for (int r = 0 ; r < levelList.size() ;r++) {
+			        		 org.json.simple.JSONObject typex = (org.json.simple.JSONObject) levelList.get(r);
+				            	level = (String)typex.get("code");
+				               	
+				            } 
+			         }
+	        	}catch(Exception j) {
+	        		
+	        	}
+	        	
+		        	 
+		        	// System.out.println("typs size " + typs.size());
+	        	try {  
+	        		org.json.simple.JSONArray custList = (org.json.simple.JSONArray) cob.get("customers");
+		        
+		         if(custList != null){
+		        	 for (int r = 0 ; r < custList.size() ;r++) {
+		        		 org.json.simple.JSONObject cus = (org.json.simple.JSONObject) custList.get(r);
+	                       	customer = (String)cus.get("code");	
+	                    } 
+		         }
+            }catch(Exception j) {
+	        		
+	        	}
+                       
+                 
+		    //     System.out.println("typs  " + customer + " " + level ); 	
+	        	
+	        	
+	      if((type.equals("SUGGESTED")) && 
+	       ((start != null && end != null && start < Calendar.getInstance().getTimeInMillis()) && (end > Calendar.getInstance().getTimeInMillis())
+	    		   ||  (start == null && end == null && (created - weeks2 < now.getTimeInMillis())))){
+	    	  ArrayList lines = new ArrayList();
+	    	  org.json.simple.JSONArray prodList = (org.json.simple.JSONArray) cob.get("contractLines");
+                if(prodList != null) {
+               
+                     for (int r = 0 ; r < prodList.size() ;r++) {
+                    	 org.json.simple.JSONObject line = (org.json.simple.JSONObject) prodList.get(r);
+                    	 org.json.simple.JSONObject prod = (org.json.simple.JSONObject)line.get("product");
+                        	lines.add( (String)prod.get("code"));
+                     }
+                //     System.out.println( level + " " + lines.toString());
+                }
+                if(level != null) {
+                	  tm.put(level, lines);  
+                }else if(customer != null) {
+                	tm.put(customer, lines);  
+                }
+              
+	      }
+	      }
+						
+			} catch(Exception k){
+				k.printStackTrace();
+			}
+			
+			
+		
+		
+  }
+	
 	
 	public static void sendCustomerJson(TreeMap tm , String company,boolean addRoutes, String user , String pass, boolean sendpartner){
 		sendCustomerJson( tm ,company,addRoutes, user ,  pass, false,sendpartner); 

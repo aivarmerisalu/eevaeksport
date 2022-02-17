@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -55,7 +56,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Promo, BulkUpdater, Discounter, PictureMaker {
+public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Promo, BulkUpdater, Discounter, PictureMaker, FixReporter {
   public AxaJNGLATDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -650,7 +651,97 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	  	return res;
 	  }
   
+  
+  public TreeMap getCustomerTopProds(TreeMap custTypes, TreeMap mustCon){
+	    TreeMap custProds = new TreeMap();
+	 
+	
+	    
+	    String cmd = "select KLIENT ,TOODE  from getcustomerproductlist where KUUPAEV > getdate()-90 and len(KLIENT) > 0 " + 
+	    		" GROUP BY klient, toode ORDER BY klient,toode" ;
+
+	    
+	    
+
+	    if (isDebug()) System.out.println(cmd);
+
+	    try {
+
+	    	Connection con = this.getNewConnection();
+	    	Statement stmt =  con.createStatement();
+	      ResultSet rs = stmt.executeQuery(cmd);
+	  
+	      while(rs.next()){
+	        String kliendikood = rs.getString("klient").trim();
+	        String tootekood = rs.getString("toode").trim();
+	        if(custTypes != null && custTypes.get(kliendikood) != null) {
+	        	ArrayList type = (ArrayList)custTypes.get(kliendikood);
+	        	if(mustCon.get(type.get(0)) != null) {
+	        		ArrayList lines = (ArrayList)mustCon.get(type.get(0));
+	        		if(lines != null && lines.contains(tootekood)) {
+	        			ArrayList arr = new ArrayList();
+	        			if(custProds.get(kliendikood) != null) {
+	        				arr =  (ArrayList)custProds.get(kliendikood);
+	        			}
+	        			if(!arr.contains(tootekood)) {
+	        				arr.add(tootekood);
+	        				custProds.put(kliendikood, arr);
+	        			}
+	        		
+	        		}
+	        	}
+	        }
+	      }
+	      
+	      rs.close();
+	      stmt.close();
+	      con.close();
+	    } catch (Exception e){
+          e.printStackTrace();
+	    }
+	    
+	 //   System.out.println(custProds.toString());
+	    
+	    
+	    TreeMap res = new TreeMap();
+	    
+	  Iterator itera =   custProds.keySet().iterator();
+	  while(itera.hasNext()) {
+		  String kkood = (String)itera.next();
+		  double cpsize =  ((ArrayList)custProds.get(kkood)).size();
+		  
+		  ArrayList type = (ArrayList)custTypes.get(kkood);
+		  if(type != null && mustCon.get(type.get(0)) != null ) {
+			  double arrs = ((ArrayList) mustCon.get(type.get(0))).size();
+			  res.put(kkood,cpsize/arrs);
+			  
+			 // System.out.println(kkood + " " + cpsize + " " + arrs);
+		  }
+		  
+		 
+	  }
+	    
+	//   System.out.println(res.toString());
+	    return res;
+	  }
+
+  
+  
+  
+  
   public TreeMap getCustomers(Agent agent){
+	  
+	  TreeMap custTop = new TreeMap();
+	  if(!instance.equals("shell")) {
+		  // teeme Must toodete mapi ja protsendid 
+		  TreeMap mustCon = new TreeMap();
+			Converter.getContractsSuggByCustOrType(mustCon,rcompany,user,pass,true) ;	 
+		    TreeMap custTypes =  Converter.getCustDimsLoading("type");
+		    custTop =   getCustomerTopProds(custTypes , mustCon);
+     }
+	  
+	//  System.exit(0);
+	  
 
 	  double minordsum = 0;
       if(getParent().getProps().getProperty("minordsum") != null){
@@ -1031,7 +1122,25 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                  cust.setCity(Converter.enCodeEst(cust.getCity()));
              }
              
-             
+             try {
+            	 
+            
+             if(custTop.get(cust.getID()) != null) {
+            	 Double vv = Double.parseDouble((String) custTop.get(cust.getID()));
+            	 
+            	 if(vv != null && vv > 0) {
+            		 if(cust.getCity() != null && cust.getCity().trim().length() > 0){
+                		 cust.setCity( cust.getCity() + "|Must prod Percent - " +  getNF().format(vv*100) + "%"); 	 
+                	 }else{
+                		 cust.setCity("Must prod Percent - " +  getNF().format(vv*100) + "%"); 	 
+                	 }  
+            	 }
+            	
+             }
+             }catch(Exception e) {
+            	 e.printStackTrace();
+             }
+            
              
              if(salesres.get(cust.getID()) != null){
                	cust.setInfo(Converter.enCodeEst("CHART sales Eur. :|Month & year|Sales |" )+ salesres.get(cust.getID()) );
@@ -1318,6 +1427,9 @@ HashSet<String> shell = null;
 	        
 	       
 	      }
+	      rs.close();
+	      stmt.close();
+	      con.close();
 	    } catch (Exception e){
          e.printStackTrace();
 	    }
@@ -1446,4 +1558,22 @@ HashSet<String> shell = null;
   private   Vector debt = new Vector();
   private String subjectFilesTo = null;
     private NumberFormat NF = NumberFormat.getInstance();
+
+	@Override
+	public void FixReporter() {
+		 try{
+		    // tõmbame lepingud sisse 	
+			 TreeMap contracts = new TreeMap();
+		    	Converter.getContractsSuggByCustOrType(contracts,rcompany,user,pass,true) ;	 
+		    	Converter.loadCustDimensions("type",rcompany,user,pass);
+		     TreeMap custTypes =  Converter.getCustDimsLoading("type");
+		    	
+		     
+		     
+		    	System.exit(0);
+		     }catch(Exception r){
+		    	 r.printStackTrace();
+		     }
+		
+	}
 }

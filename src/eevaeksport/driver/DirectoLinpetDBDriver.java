@@ -1071,7 +1071,12 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
      try{
-    	//  testing(); 	 
+    	TreeMap contracts = new TreeMap();
+    	Converter.getContractsSuggByCustOrType(contracts,rcompany,user,pass,true) ;	 
+     	Converter.loadCustDimensions("type",rcompany,user,pass);
+	     TreeMap custTypes =  Converter.getCustDimsLoading("type");
+	     System.out.println(custTypes);
+    	System.exit(0);
      }catch(Exception r){
     	 r.printStackTrace();
      }
