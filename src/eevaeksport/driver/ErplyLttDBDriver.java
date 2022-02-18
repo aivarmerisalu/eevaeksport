@@ -167,82 +167,107 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
   
     
   public String getSaveDebtInfo() {
-	  getCustomerProductsList2(null);
-      System.exit(0);
-           	   int mm = 1;
-           	   if(getParent().getProps().getProperty("months") != null){
-           		   mm = Integer.parseInt(getParent().getProps().getProperty("months"));
-           	   }
-           	   Calendar dds = Calendar.getInstance();
-           	   Calendar dde = Calendar.getInstance();
-           	   
-           	   
-           	   for(int x=mm; x>0; x--) {
-            	   dds = Calendar.getInstance();
-               	   dds.set(Calendar.DAY_OF_MONTH, 1);
-               	   dds.add(Calendar.MONTH, - x);
-               	   dde = Calendar.getInstance();
-               	   dde.set(Calendar.DAY_OF_MONTH, 1);
-               	   dde.add(Calendar.MONTH, - x);
-               	   dde.set(Calendar.DAY_OF_MONTH, dde.getActualMaximum(Calendar.DAY_OF_MONTH));
-               	   SimpleDateFormat yymmFormat = new SimpleDateFormat("yy-MM");
-                   System.out.println("kliendisortimendid alustan "  + mm + " kuud " +  Converter.getYYYYmMMmDDmString(dds.getTime()) +"  "+  Converter.getYYYYmMMmDDmString(dde.getTime()));
-                   boolean generating = true;
-                   String fileName = yymmFormat.format(dds.getTime()) + "arveread.json";
-                   File filef = new File(getDir() + fileName);
-                   
-                   if(!filef.exists()) {
-                	   while(generating) {
-	                	   StringBuffer inputLineBuf = null;
-	                       
-	                       try {
-	                   		inputLineBuf = getRepData( "startDate="+ Converter.getYYYYmMMmDDmString(dds.getTime())
-	         				+"&endDate=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + "&displaySoldBundles=BY_COMPONENTS");
-	                   		if(!inputLineBuf.toString().contains("\"status\":\"GENERATING\"")) {
-	                   			generating = false;
-		                   		Converter.saveFile(getDir() + fileName, inputLineBuf.toString());	
-		                   		JSONObject jsonobj = Converter.readJSONFile(getDir() + fileName);
-		                   		//System.out.println(jsonobj.toString().substring(0, 200));
-	                   		}else{
-	                   			Thread.sleep(2000);
-	                   		}
-	                   	} catch (Exception e1) {
-	                   		e1.printStackTrace();
-	                   	}
-                   }}
-           	   }
-           	   
-           	   boolean generating = true;
-           	   
-        	   dds = Calendar.getInstance();
-           	   dds.set(Calendar.DAY_OF_MONTH, 1);
-           	   dde = Calendar.getInstance();
-           	   dde.set(Calendar.DAY_OF_MONTH, dde.getActualMaximum(Calendar.DAY_OF_MONTH));
-          	   while(generating) {
-            	   StringBuffer inputLineBuf = null;
-                   
-                   try {
-               		inputLineBuf = getRepData( "startDate="+ Converter.getYYYYmMMmDDmString(dds.getTime())
-     				+"&endDate=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + "&displaySoldBundles=BY_COMPONENTS");
-               		if(!inputLineBuf.toString().contains("\"status\":\"GENERATING\"")) {
-               			generating = false;
-                   		Converter.saveFile(getDir() + "arveread.json", inputLineBuf.toString());	
-                   		JSONObject jsonobj = Converter.readJSONFile(getDir() + "arveread.json");
-                   		System.out.println(jsonobj.toString().substring(0, 200));
-               		}else{
-               			System.out.println("generating");
-               			Thread.sleep(2000);
-               		}
-               	} catch (Exception e1) {
-               		e1.printStackTrace();
-               	}
-           }
-           	   
-             System.exit(0);
-   		
-	  
-   	return null;
+	 
+   return null;
    }
+  
+  
+  public void makeCPData() {
+		 
+	   ArrayList<String> filesGenned = new ArrayList<String>();
+  	   int mm = 6;
+  	   if(getParent().getProps().getProperty("months") != null){
+  		   mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+  	   }
+  	   Calendar dds = Calendar.getInstance();
+  	   Calendar dde = Calendar.getInstance();
+  	   
+  	   
+  	   for(int x=mm; x>0; x--) {
+   	   dds = Calendar.getInstance();
+      	   dds.set(Calendar.DAY_OF_MONTH, 1);
+      	   dds.add(Calendar.MONTH, - x);
+      	   dde = Calendar.getInstance();
+      	   dde.set(Calendar.DAY_OF_MONTH, 1);
+      	   dde.add(Calendar.MONTH, - x);
+      	   dde.set(Calendar.DAY_OF_MONTH, dde.getActualMaximum(Calendar.DAY_OF_MONTH));
+      	   SimpleDateFormat yymmFormat = new SimpleDateFormat("yy-MM");
+       //   System.out.println("kliendisortimendid alustan "  + mm + " kuud " +  Converter.getYYYYmMMmDDmString(dds.getTime()) +"  "+  Converter.getYYYYmMMmDDmString(dde.getTime()));
+          boolean generating = true;
+          String fileName = yymmFormat.format(dds.getTime()) + "arveread.json";
+          File filef = new File(getDir() + fileName);
+          filesGenned.add(fileName);
+          
+          if(!filef.exists()) {
+       	   while(generating) {
+           	   StringBuffer inputLineBuf = null;
+                  
+                  try {
+              		inputLineBuf = getRepData( "startDate="+ Converter.getYYYYmMMmDDmString(dds.getTime())
+    				+"&endDate=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + "&displaySoldBundles=BY_COMPONENTS");
+              		if(!inputLineBuf.toString().contains("\"status\":\"GENERATING\"")) {
+              			generating = false;
+                  		Converter.saveFile(getDir() + fileName, inputLineBuf.toString());	
+                  	//	JSONObject jsonobj = Converter.readJSONFile(getDir() + fileName);
+                  		//System.out.println(jsonobj.toString().substring(0, 200));
+              		}else{
+              			Thread.sleep(2000);
+              		}
+              	} catch (Exception e1) {
+              		e1.printStackTrace();
+              	}
+          }}
+  	   }
+  	   
+  	   boolean generating = true;
+  	   
+	   dds = Calendar.getInstance();
+  	   dds.set(Calendar.DAY_OF_MONTH, 1);
+  	   dde = Calendar.getInstance();
+  	   dde.set(Calendar.DAY_OF_MONTH, dde.getActualMaximum(Calendar.DAY_OF_MONTH));
+ 	   while(generating) {
+   	   StringBuffer inputLineBuf = null;
+          
+          try {
+      		inputLineBuf = getRepData( "startDate="+ Converter.getYYYYmMMmDDmString(dds.getTime())
+			+"&endDate=" + Converter.getYYYYmMMmDDmString(dde.getTime()) + "&displaySoldBundles=BY_COMPONENTS");
+      		if(!inputLineBuf.toString().contains("\"status\":\"GENERATING\"")) {
+      			generating = false;
+          		Converter.saveFile(getDir() + "arveread.json", inputLineBuf.toString());
+          		 filesGenned.add("arveread.json");
+          	//	JSONObject jsonobj = Converter.readJSONFile(getDir() + "arveread.json");
+          		//System.out.println(jsonobj.toString().substring(0, 200));
+      		}else{
+      			System.out.println("generating");
+      			Thread.sleep(2000);
+      		}
+      	} catch (Exception e1) {
+      		e1.printStackTrace();
+      	}
+  }
+ 	   
+ 	   //kustutame maha need mida ei gennitud 
+ 	   
+ 		 FileListFilter fil = new FileListFilter("arveread","json");
+    	 String[] ll = new File (getDir()).list(fil);
+    	 for (int ee = 0; ee < ll.length; ee++) {
+
+    		 String name = ll[ee];
+    		 if(!filesGenned.contains(name)) {
+    			  File f = new File (getDir() + name);
+    			  if(f.exists()) {
+    				  f.delete();
+    				  System.out.println("kustutan üleliigse faili " + name);
+    			  }
+    		 }
+        
+    	 }
+    		
+    		
+    		
+}
+ 
+  
   
   public static String getYYYYpMMpDDpString(Date dd){
 	    StringBuffer sb = new StringBuffer();
@@ -629,7 +654,7 @@ String jwttoken = null;
     	  JSONParser parser = new JSONParser();  
     		JSONObject json = (JSONObject) parser.parse(inputLine); 
     		JSONArray arr =(JSONArray)json.get("images");
-    		System.out.println(inputLine);
+    		//System.out.println(inputLine);
     		for(int i = 0; i < arr.size(); i++) {
     			JSONObject aa = (JSONObject)arr.get(i);
     			
@@ -678,7 +703,7 @@ String jwttoken = null;
     	      con.disconnect();
       }
       
-      System.out.println("suurus " + pildid.size());
+     // System.out.println("suurus " + pildid.size());
     //  System.exit(0);
       return pildid;
 	  }
@@ -916,7 +941,7 @@ String jwttoken = null;
 	  		//e.printStackTrace();
 	  	}
 	  	 
-	  	 System.out.println("fix grupid suurus " + groups.size() + " " + groups.toString() );
+	  	// System.out.println("fix grupid suurus " + groups.size() + " " + groups.toString() );
 	      
 	     return groups; 
 	  	 
@@ -1425,7 +1450,7 @@ if(sb.length() >10){
 				}
 			}
 
-			System.out.println(groups.toString());
+		//	System.out.println(groups.toString());
 
 			for (int i = 2; i < sheet.getLastRowNum(); i++) {
 				row = sheet.getRow(i);
@@ -1532,7 +1557,7 @@ if(sb.length() >10){
 		
 		}
 		// System.exit(0);
-   System.out.println("fixed size ddddd " + result.size());
+ //  System.out.println("fixed size ddddd " + result.size());
 		return result;
 
 	}
@@ -2435,7 +2460,7 @@ if(sb.length() >10){
                                    			 }
                                    		 }
                                        	 if(a2group.startsWith("42")) {
-                                       		System.out.println("ridu2  " + a2group + " " + web); 
+                                       	//	System.out.println("ridu2  " + a2group + " " + web); 
                                        	 }
                                      	
                                        		String a2name  = "noname " + a2group;
@@ -2539,7 +2564,7 @@ if(sb.length() >10){
                                                        		 }
                                                        		
                                                        		 if(a4group.startsWith("45")) {
-                                                            		System.out.println("ridu4  " + a4group + " " + web); 
+                                                            		//System.out.println("ridu4  " + a4group + " " + web); 
                                                             	 } 
                                                        		 
                                                         		String web5 = null;
@@ -2607,7 +2632,7 @@ if(sb.length() >10){
  	
   //	System.out.println("ok " + okGrupid.toS );
     
-  	System.out.println("tm " + tm.size());
+  	//System.out.println("tm " + tm.size());
          return tm;
    }
 
@@ -2711,7 +2736,7 @@ if(sb.length() >10){
      TreeMap tm = new TreeMap();
     // this.getFixedAssortmentData();
     // plans = this.makePlans("Budget.xlsx");
-     getSaveDebtInfo();
+    // getSaveDebtInfo();
      agent1 = new TreeMap();
     // sendAsi();
      agents = new TreeMap();
@@ -3180,7 +3205,7 @@ public static String getDataDirStr(){
                        Calendar dde = Calendar.getInstance();
                        
                        
-                       System.out.println("kliendisortimendid alustan"  + mm + " kuud" +  Converter.getYYYYmMMmDDmString(dds.getTime()) +"  "+  Converter.getYYYYmMMmDDmString(dde.getTime()));
+                      // System.out.println("kliendisortimendid alustan"  + mm + " kuud" +  Converter.getYYYYmMMmDDmString(dds.getTime()) +"  "+  Converter.getYYYYmMMmDDmString(dde.getTime()));
                         
 
                  
@@ -3567,7 +3592,7 @@ public static String getDataDirStr(){
         	   }
        		inputLineBuf = getData("request=getCustomers&recordsOnPage=" + onpage + "&getAddresses=1&getContactPersons=1&getBalanceInfo=1&responseMode=detail"+ custgrupp + userstuff);
        	
-       	System.out.println("buff" + inputLineBuf );
+      // 	System.out.println("buff" + inputLineBuf );
        	   } catch (Exception e1) {
        		e1.printStackTrace();
        	   }
@@ -3610,7 +3635,7 @@ public static String getDataDirStr(){
        	 }catch(Exception e){
        		 
        	 }
-       	 System.out.println("Klientide tsykkel " + tsykkel);
+       	// System.out.println("Klientide tsykkel " + tsykkel);
        	 
         }
         
@@ -4806,7 +4831,7 @@ private TreeMap afterOrders = null;
               				String url = "https://cdn.erply.com/images/" + company + "/" + fileN ;//+"?width=200&height=200";
               						//5153/3D-Agnesi-pasta-Casarecce-500g.jpg?width=200&height=200
               				
-              				System.out.println("sees " + url);
+              			//	System.out.println("sees " + url);
               				prod.setPhotoid("phurl:" +url); 
               			} else {
               			
@@ -5219,49 +5244,29 @@ private TreeMap afterOrders = null;
 	  
 	   soldProds = new HashSet();
 
-		try {
-	  		  File f = new File (getDir() + "klienditoodeErp.xml");
-	  	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	  	     DocumentBuilder db;
-	  		db = dbf.newDocumentBuilder();      	
-	      	FileInputStream in = getCleanInputStream(f);
-	      	String handler = null;
-	          Document doc = db.parse(in,handler);
-	        Node root = getNode(doc, "document");      
-	       	Node read = getNode(root, "records");
-	        for (int i = 0; i < read.getChildNodes().getLength(); i++){
-	           	  Node rida = read.getChildNodes().item(i);
-	           	  if(rida.getNodeName().equals("CSV")){
-	          	  String csv = rida.getFirstChild().getNodeValue();
-	          	  csv = csv.replaceAll("\"\"", "|");
-	          
-	          	  StringTokenizer st = new StringTokenizer(csv,"|");
-	          	  st.nextToken();
-	          	  while (st.hasMoreElements()){
-	          		  String line = st.nextToken();
-	          		 line = line.replaceAll("\";\"", "|");
-	          		 line = line.replaceAll("\"", " ").trim();
-	          		
-	      //    		System.out.println("line  " + line);
-	          	//	line  6276|8|Aurusti eGo Sigma|2013-06-29|6.6667|8|1
-	          		 StringTokenizer stv = new StringTokenizer(line,"|");
-	          		  while (stv.hasMoreElements()){
-	          			
-	          				 String toode =  " "; 
-	 	          			 try{
-		          				  toode = stv.nextToken().trim();
-			          		  if(!soldProds.contains(toode)){
-			          			soldProds.add(toode);
-			          		  }
-	          			  		 }catch(Exception e){
-	          			 } } } }     
-	              }
-	          
-	  	}catch(Exception e){
-	  		e.printStackTrace();
-	  	}
-	  
-	  	   System.out.println("SoldProds size " + soldProds.size());
+	   File filedir = new File(getDir());
+	   File[] listOfFiles = filedir.listFiles(new FileFilter() {
+           @Override
+           public boolean accept(File pathname) {
+               return pathname.getName().toLowerCase().contains("arveread.json");
+           }
+       });
+	   
+	   for(File ff:listOfFiles) {
+		   JSONObject jobj = Converter.readJSONFile(ff.getAbsolutePath());
+		   JSONArray read = (JSONArray) ( (JSONObject) jobj.get("data")).get("report");
+		   
+		   for(Object obj:read) {
+			   JSONObject objj = (JSONObject) obj;
+			   String toode = (String) objj.get("productCode");
+			  
+   			 if(!soldProds.contains(toode)){
+    			   soldProds.add(toode);
+    		    } 
+   			 
+		   }
+	   }
+	  	//   System.out.println("SoldProds size " + soldProds.size());
 	  
    
    }
@@ -5269,8 +5274,15 @@ private TreeMap afterOrders = null;
    private  Vector custProds = new Vector();
  
 
-   public Vector getCustomerProductsList2(String agentCode){
+   public Vector getCustomerProductsList(String agentCode){
+	   
+	   makeCPData();
 	   TreeMap vaheObj = new TreeMap();
+	   getAfterOrders();
+ HashSet afterOlemas = new HashSet();
+	   
+	   custProds = new Vector();
+	   soldProds = new HashSet();
 	   
 	   File filedir = new File(getDir());
 	   File[] listOfFiles = filedir.listFiles(new FileFilter() {
@@ -5289,7 +5301,7 @@ private TreeMap afterOrders = null;
 			   JSONObject objj = (JSONObject) obj;
 			   String kuup = (String) objj.get("date");
 			   String arvenr = (String) objj.get("invoiceNumber");
-			   String toode = (String) objj.get("productCode");
+			   String toode = ((Long) objj.get("productId")) + "";
 			   String klient = ((Long) objj.get("customerId")).toString();
 			   
 			   Double kogus = null;
@@ -5307,12 +5319,14 @@ private TreeMap afterOrders = null;
 			   }
 			   
 			   Double hind = summa/kogus;
-			   System.out.println(kuup + " " + arvenr + " " + toode + " " + klient + " " + kogus + " " + hind);
+			//   System.out.println(kuup + " " + arvenr + " " + toode + " " + klient + " " + kogus + " " + hind);
 			   String key = klient + toode;
    			   CustProd cp = new CustProd(klient, toode,kogus ,0,0,kuup,hind,0,0," ");	
    			   cp.checkdate = getDate(kuup);
    			   
-   			   
+   			 if(!soldProds.contains(toode)){
+    			   soldProds.add(toode);
+    		    } 
    			   cp.setAbiKood(arvenr);
 			   if(vaheObj.get(key) != null) {
 				   CustProd cpv = (CustProd) vaheObj.get(key);
@@ -5328,14 +5342,34 @@ private TreeMap afterOrders = null;
 	   
 	   
 	   
-	   Vector res = new Vector();
-	   res.addAll(vaheObj.values());
-	   System.out.println(res.size());
-
-	   return null;
+	    custProds = new Vector();
+	    custProds.addAll(vaheObj.values());
+	 
+	   System.out.println("custProds Size " + custProds.size());
+	   
+	   
+	   if(this.afterOrders != null) {
+       	Iterator itera = afterOrders.keySet().iterator();
+       	while (itera.hasNext()) {
+       		String klient = (String)itera.next();
+       	
+       		ArrayList<Toode> arr = (ArrayList<Toode>)afterOrders.get(klient);
+for(Toode t : arr) {
+  
+  CustProd cp = new CustProd(klient, t.getID(),0,0,0,t.getBrand(),t.getPlancur(),t.getKogus(),0," ");
+  cp.setAbiKood("BackOrder");
+  custProds.add(cp);
+}
+			 
+   		   
+       	}
+       }
+	   
+	   
+	   return custProds;
    }
    
-   public Vector getCustomerProductsList(String agentCode){
+   public Vector getCustomerProductsListold(String agentCode){
 	 
 	   getAfterOrders();
 	   
@@ -5439,7 +5473,7 @@ private TreeMap afterOrders = null;
 	  		e.printStackTrace();
 	  	}
 	  
-	  	   System.out.println("Cp size " + custProds.size());
+	  	 //  System.out.println("Cp size " + custProds.size());
 	   return custProds;
    }
 
@@ -5563,7 +5597,7 @@ private TreeMap afterOrders = null;
    		   e.printStackTrace();
    	   }
    	   
-   	   System.out.println("totalPlanSum "+ res.toString() );
+   	 //  System.out.println("totalPlanSum "+ res.toString() );
    	   return res;
       }
       
@@ -5686,7 +5720,7 @@ private TreeMap afterOrders = null;
 	            		  asi = asi + ("|Last Month: " + (int) Double.parseDouble((String)myygideelm.get(code)));  
 	            	   }
 	            	   
-	            	   System.out.println(agent.getID() + " " + asi);
+	            	  // System.out.println(agent.getID() + " " + asi);
 	            	   agent.setStart(asi);
 	             }
 	          }
