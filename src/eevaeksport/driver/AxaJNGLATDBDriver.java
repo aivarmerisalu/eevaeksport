@@ -726,12 +726,15 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	  }
 
   
-  
+  private TreeMap<String,ArrayList<Double>> agentMust = null;
   
   
   public TreeMap getCustomers(Agent agent){
 	  
 	  TreeMap custTop = new TreeMap();
+	  
+	  agentMust = new TreeMap<String,ArrayList<Double>>();
+	  
 	  if(!instance.equals("shell")) {
 		  // teeme Must toodete mapi ja protsendid 
 		  TreeMap mustCon = new TreeMap();
@@ -740,7 +743,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 		    custTop =   getCustomerTopProds(custTypes , mustCon);
      }
 	  
-	//  System.exit(0);
+	  System.out.println("custTop " + custTop.size() + " " + custTop.toString());
 	  
 
 	  double minordsum = 0;
@@ -786,7 +789,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 		         rs1.close();
 		         stmt.close();
 		         con.close();
-		      	System.out.println(salesres.toString());   
+		     // 	System.out.println(salesres.toString());   
 	   }catch(Exception e) {
 		   
 	   }
@@ -801,7 +804,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
         	 veod =  getVeod();
            }
                 
-        System.out.println("kliendid alustan, veod " + veod.size());
+        //System.out.println("kliendid alustan, veod " + veod.size());
         
         TreeMap customers = new TreeMap();
         HashMap custMap = new HashMap();
@@ -966,6 +969,20 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                 	Vector<String> ags = custAgents.get(cust.getID());
                 	for (String ag : ags) {
                 		cust.addAgent(new Agent(ag));
+                		if(custTop.get(cust.getID()) != null) {
+                			 Double vv = Double.parseDouble( custTop.get(cust.getID()) + "");
+                			 if(agentMust.get(ag) != null) {
+                				 ArrayList<Double> vv1 = agentMust.get(ag);
+                				 vv1.add(vv);
+                				 this.agentMust.put(ag,  vv1 );
+                			 } else {
+                				 ArrayList<Double> vv1 = new ArrayList<Double>();
+                				 vv1.add(vv);
+                				 this.agentMust.put(ag, vv1 );	 
+                			 }
+                			
+                		}
+                	  
                 		//System.out.println("Lisan Agenti " + ag +" " + cust.getID());
                 		 if(ag.trim().indexOf("SH") == -1 && !cust.hasAgent("HOUSE1")){
                              cust.addAgent(new Agent("HOUSE1")); 
@@ -1126,8 +1143,9 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
             	 
             
              if(custTop.get(cust.getID()) != null) {
-            	 Double vv = Double.parseDouble((String) custTop.get(cust.getID()));
-            	 
+            	
+            	 Double vv = Double.parseDouble( custTop.get(cust.getID()) + "");
+            	// System.out.println("oioi " + vv);
             	 if(vv != null && vv > 0) {
             		 if(cust.getCity() != null && cust.getCity().trim().length() > 0){
                 		 cust.setCity( cust.getCity() + "|Must prod Percent - " +  getNF().format(vv*100) + "%"); 	 
@@ -1161,7 +1179,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
             
             
             String sql3 = "select klient , sum(summa) as summa from getdebt where kuupaev <= getdate() group by klient ";
-            System.out.println(sql3);
+          //  System.out.println(sql3);
                 rs = stmt.executeQuery(sql3);
                 while(rs.next()){
                 
@@ -1176,7 +1194,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                 }
             
             sql3 = "select * from getdebt ";
-            System.out.println(sql3);
+        //    System.out.println(sql3);
                 rs = stmt.executeQuery(sql3);
                 
                while(rs.next()){
@@ -1472,6 +1490,26 @@ HashSet<String> shell = null;
             } catch (Exception e) {
                 getParent().showError(e);
              }
+            
+            
+             if(agentMust != null) {
+            	Iterator itera =  agentMust.keySet().iterator();
+            	while(itera.hasNext()) {
+            		String ag = (String) itera.next();
+            		  Agent agent = (Agent)agents.get(ag);
+                      if (agent != null){
+                    	  double avg = 0;
+                    	  ArrayList<Double> aa = agentMust.get(ag);
+                    	  double size = aa.size();
+                    	  double sum = 0;
+                    	  for(Double x : aa) {
+                    		  sum = sum + x;
+                    	  }
+                    	  
+                        agent.setStart("Must Prods: " + getNF().format(sum/size*100) + "%");
+                      }
+            	}
+             }
           }
 
     public double getFoodSales(String agentCode) throws SQLException{
@@ -1540,7 +1578,7 @@ HashSet<String> shell = null;
 	                      getParent().showError(e);
 	                  }
 
-        System.out.println(agent.getID() + " " + sb.toString());
+    //    System.out.println(agent.getID() + " " + sb.toString());
 	      return sb.toString();
 	  }
 
