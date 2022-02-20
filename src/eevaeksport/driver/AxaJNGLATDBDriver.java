@@ -98,7 +98,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
       
 		if(instance.equals("shell")) {
     			try {
-    	    		String sq3 = "  select * from lastteninvoices" ;
+    	    		String sq3 = "select * from getlastteninvoices" ;
     						
     						Connection con3 = getNewConnection();
     						Statement st3 = con3.createStatement();

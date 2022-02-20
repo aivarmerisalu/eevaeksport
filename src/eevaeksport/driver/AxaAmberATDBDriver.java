@@ -4129,7 +4129,7 @@ filenameCyear =  Converter.getSVData(seeastaA.getTime(), seeastaL.getTime(), rco
     "     ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) = 1 then 2 else 0 end)) " +
 	"   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
 	"   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) "+
-	"   or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION   like '%DPD%' " +
+	"   or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION   like '%Standard%' " +
 	"    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation";
                   
             
@@ -4150,7 +4150,7 @@ filenameCyear =  Converter.getSVData(seeastaA.getTime(), seeastaL.getTime(), rco
      "    ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) = 1 then 2 else 0 end)) " +
 	 "  or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
 	 "  or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
-	 "  or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'DPD%'" +
+	 "  or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'Standard%'" +
       "   ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation" ;
                                        
                           
@@ -4343,7 +4343,7 @@ filenameCyear =  Converter.getSVData(seeastaA.getTime(), seeastaL.getTime(), rco
            "   ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) = 1 then 2 else 0 end)) "+
 	  " or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
 	  " or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
-	  " or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'DPD%'" +
+	  " or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'Standard%'" +
            "    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation" ;
                                 
                                 rs = stmt.executeQuery(sql4);
@@ -4598,13 +4598,12 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 //For LB products - SPIL's warehouse 'GPP-VT' and warehouse from LB AX file - Lb_l - 'GPP'.
 
 
-   String  cmd = "select   summ.itemid  AS toode ,sum(AVAILPHYSICAL)/case when max(inv.taxpackagingqty) > 0\r\n" + 
-   		"   		 then max(inv.taxpackagingqty)  else 1 end  AS stock ,dim.inventlocationid as ladu ,"
-   		+ " case when dim.configid ='' then 'ALL' else dim.configid end as config  FROM INVENTSUM summ  with(nolock) \r\n" + 
-   		"   		   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid \r\n" + 
-   		"   		   inner join  inventtable inv on summ.itemid = inv.itemid and inv.dataareaid=summ.dataareaid \r\n" + 
-   		"   		 WHERE  summ.DATAAREAID='ABAT' and CLOSED = 0  and dim.inventlocationid in ('TTUB','TTDP','DAWDP')\r\n" + 
-   		"		 GROUP BY  summ.itemid  ,dim.inventlocationid ,dim.configid having sum(availphysical) >0" ;
+   String  cmd ="select   summ.itemid  AS toode ,sum(AVAILPHYSICAL) AS stock ,dim.inventlocationid as ladu ,\r\n" + 
+   		"   		 case when dim.configid ='' then 'ALL' else dim.configid end as config  FROM INVENTSUM summ  with(nolock) \r\n" + 
+   		"   		   		   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid  \r\n" + 
+   		"   		   		   inner join  inventtable inv on summ.itemid = inv.itemid and inv.dataareaid=summ.dataareaid  \r\n" + 
+   		"   		   		 WHERE  summ.DATAAREAID='ABAT' and CLOSED = 0  \r\n" + 
+   		"   				 GROUP BY  summ.itemid  ,dim.inventlocationid ,dim.configid having sum(availphysical) >0";
 
    posseisud = new TreeMap<String , Integer>();
        if (isDebug()) System.out.println(cmd);
@@ -4622,7 +4621,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
            String dealer = rs.getString("ladu").trim();
            String config = rs.getString("config").trim();
            
-           if (dealer.equals("DAWDP")) {
+           if (dealer.equals("EBBS-POS")) {
         	 //  config = "ALL"; 
         	   if(posseisud.get(kood) != null) {
         		   posseisud.put(kood,  posseisud.get(kood) + (int)seis);
@@ -4632,29 +4631,18 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
         	 
            }
            
-           String aa = kood + "|" + config;
+           String aa = kood ;
            if(seis > 0){
-        	//   •	NDS configuration, we will show stock balances in TTUB and TTDP warehouse for only with configuration NDS and/or blank
-        	 //  •	For others we will show stock balances in TTUB and TTDP warehouse for items with configuration DS or blank
-             if(config.equals("NDS") || config.equals("ALL")) {
-            	 if(seisud.get(kood + "|NDS") != null) {
-            		 seisud.put(kood + "|NDS", seisud.get(kood + "|NDS")+ seis);
+        	
+            	 if(seisud.get(kood ) != null) {
+            		 seisud.put(kood , seisud.get(kood )+ seis);
             	 }else {
-            		 seisud.put(kood + "|NDS", seis);
+            		 seisud.put(kood , seis);
             	 }
-             }
-        	   
-             if(config.equals("DS") || config.equals("ALL")) {
-            	 if(seisud.get(kood + "|DS") != null) {
-            		 seisud.put(kood + "|DS", seisud.get(kood + "|DS")+ seis);
-            	 }else {
-            		 seisud.put(kood + "|DS", seis);
-            	 }
-             }
             
-            }
+            
            }
-
+         }
          
            rs.close();
            st.close();
@@ -4662,13 +4650,13 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
            
            Iterator itera =  seisud.keySet().iterator();
           while(itera.hasNext()) {
-        	  String kood = itera.next()+"";
-        	  products.append(kood.substring(0,kood.indexOf("|")) +  ";");
+        	String kood = itera.next()+"";
+        	  products.append(kood+  ";");
               products.append(" ;");
-              products.append(getParent().getNF().format(seisud.get(kood)) + ";" + kood.substring(kood.indexOf("|")+1) + "\n"); // + dealer +  "\n");
-        kogused.put(kood, seisud.get(kood) + "");  
+              products.append(getParent().getNF().format(seisud.get(kood))  + "\n"); // + dealer +  "\n");
+            kogused.put(kood, seisud.get(kood) + "");  
           }
-
+         
 		  
            
        } catch (Exception e) {
@@ -4698,85 +4686,8 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 
   
   public DealerProduct getDealerProductsList() {
-	  DealerProduct dealerProds = new DealerProduct();
-
-
-	   String  cmd = "select   summ.itemid  AS toode ,sum(AVAILPHYSICAL)/case when max(inv.taxpackagingqty) > 0\r\n" + 
-	   		"   		 then max(inv.taxpackagingqty)  else 1 end  AS stock ,dim.inventlocationid as ladu ,"
-	   		+ " case when dim.configid ='' then 'ALL' else dim.configid end as config  FROM INVENTSUM summ  with(nolock) \r\n" + 
-	   		"   		   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid \r\n" + 
-	   		"   		   inner join  inventtable inv on summ.itemid = inv.itemid and inv.dataareaid=summ.dataareaid \r\n" + 
-	   		"   		 WHERE  summ.DATAAREAID='ABAT' and CLOSED = 0  and dim.inventlocationid in ('TTUB','TTDP','DAWDP')\r\n" + 
-	   		"		 GROUP BY  summ.itemid  ,dim.inventlocationid ,dim.configid having sum(availphysical) >0" ;
-
-
-	       if (isDebug()) System.out.println(cmd);
-	       StringBuffer products = new StringBuffer();
-	       try {
-	    	   Connection con = this.getNewConnection();
-	         Statement st = con.createStatement();
-	         ResultSet rs = st.executeQuery(cmd);
-	      TreeMap<String,Double> seisud = new TreeMap<String,Double> ();
-	      
-	      
-	         while (rs.next()) {
-	           String kood = rs.getString("toode").trim();
-	           double seis = rs.getDouble("stock");
-	           String dealer = rs.getString("ladu").trim();
-	           
-	           String config = rs.getString("config").trim();
-	           if (dealer.equals("DAWDP") ) {
-	        	  // config = "ALL";   
-	           }
-	           
-	           String aa = kood + "|" + config;
-	           if(seis > 0){
-	        	//   •	NDS configuration, we will show stock balances in TTUB and TTDP warehouse for only with configuration NDS and/or blank
-	        	 //  •	For others we will show stock balances in TTUB and TTDP warehouse for items with configuration DS or blank
-	             if(config.equals("NDS") || config.equals("ALL")) {
-	            	 if(seisud.get(kood + "|NDS") != null) {
-	            		 seisud.put(kood + "|NDS", seisud.get(kood + "|NDS")+ seis);
-	            	 }else {
-	            		 seisud.put(kood + "|NDS", seis);
-	            	 }
-	             }
-	        	   
-	             if(config.equals("DS") || config.equals("ALL")) {
-	            	 if(seisud.get(kood + "|DS") != null) {
-	            		 seisud.put(kood + "|DS", seisud.get(kood + "|DS")+ seis);
-	            	 }else {
-	            		 seisud.put(kood + "|DS", seis);
-	            	 }
-	             }
-	            
-	            }
-	           }
-
-	         
-	           rs.close();
-	           st.close();
-	           con.close();
-	           
-	           Iterator itera =  seisud.keySet().iterator();
-	          while(itera.hasNext()) {
-	        	  String kood = itera.next()+"";
-	        	  dealerProds.add(kood.substring(kood.indexOf("|")+1),
-	        			  kood.substring(0,kood.indexOf("|")),(seisud.get(kood))+""," "," " );
-
-	          }
-
-			  
-	           
-	       } catch (Exception e) {
-	           getParent().showError(e);
-	       }
-	       
-
-
-      
-      //  System.out.println( " dealerProds suurus " + dealer + " " + dealerProds.toString());
-       // System.exit(0);
-       return dealerProds;
+	 
+       return null;
      
      }
 
@@ -4835,9 +4746,9 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
       } catch (Exception e){
         getParent().showError(e);
       }
-    Agent agent = new Agent("WARE");
-    agent.setName("WARE");
-    agents.put("WARE", agent);
+    Agent agent = new Agent("ABG001");
+    agent.setName("ABG001");
+    agents.put("ABG001", agent);
     agent1.put(agent.getID(), agent);
     
     
@@ -5279,7 +5190,7 @@ e.printStackTrace();
 				+"  (select spiminorderamount from smmBusRelChainGroup e where e.dataareaid= cus.dataareaid and e.chainid = COMPANYCHAINID ) as minam , ItemConfigId as dealer"
 				
 			  + " FROM custtable cus  LEFT JOIN dirpartytable dp ON dp.partyid=cus.partyid  inner join address a on a.ADDRRECID = dp.RECID left outer JOIN paymterm  pay on cus.paymtermid=pay.paymtermid and  pay.dataareaid='ABAT'  " +
-			  "	 WHERE   cus.dataareaid in ('ABAT')   and (SPIEAGENTACCOUNTID != '' or SPITELESALESAGENTGROUPID != '')  "
+			  "	 WHERE   cus.dataareaid in ('ABAT')   " // and (SPIEAGENTACCOUNTID != '' or SPITELESALESAGENTGROUPID != '') 
 			  + " and erpactive = 1  and  internal != 1 " ; //and blocked != 2
  
  
@@ -5476,7 +5387,7 @@ int i = 0;
 
         String limit = rs.getString("limit");
         if (limit != null){
-          cust.setCredit(limit);
+        //  cust.setCredit(limit);
         }
     	}
        
@@ -5516,6 +5427,14 @@ int i = 0;
 				}
 			}
         }
+        
+        // paneme kõigile kõik külge 
+        
+       Iterator itera  =  agent1.keySet().iterator();
+       while (itera.hasNext()) {
+    	   String ag = (String)itera.next();
+    	   cust.addAgent(new Agent(ag));
+       }
     
         String teles = rs.getString("teles");
         if (teles != null && teles.trim().length() > 0) {
@@ -5582,7 +5501,7 @@ int i = 0;
         
         
         String grupp = rs.getString("grupp");
-        if (grupp != null && grupp.trim().length()>0 && grupp.indexOf("DPD") == -1) {
+        if (grupp != null && grupp.trim().length()>0 && grupp.indexOf("Standard") == -1) {
          
           if(cust.getGroup() != null && cust.getGroup().trim().length() > 0 ){
       		cust.setGroup(cust.getGroup() + "|" + Converter.cleanLitLatEst(grupp.trim()));
@@ -5694,13 +5613,7 @@ int i = 0;
                                    	cust.addToCustDataVec(cust.getID() + ";tarasaldo; ;Open Order |"   +  openOrders.get(cust.getID()));
                                    }              
                     
-                                   
-                                   String ladu = rs.getString("dealer");
-                                   if(ladu != null && ladu.trim().length() > 0){
-                                   	cust.setDealer(new Dealer(ladu.trim()));
-                                   }else {
-                                	   cust.setDealer(new Dealer("DS"));
-                                   }
+                                
                                    
                     if(goes){
                         customers.put(name, cust);
@@ -5761,19 +5674,9 @@ int i = 0;
   public TreeMap getDealers() {
 
       TreeMap dealers = new TreeMap();
-   
-
-    	
-                   Dealer dealer = new Dealer("NDS");
-                   dealer.setName("NDS");
-                   dealers.put(dealer.getID(), dealer);
-      
-                   Dealer dealer2 = new Dealer("DS");
-                   dealer2.setName("DS");
-                   dealers.put(dealer2.getID(), dealer2);
-      
 	  return dealers;
-	    }
+
+  }
   
 
   private Connection getNewConnection() throws SQLException{
@@ -5879,7 +5782,7 @@ int i = 0;
   public TreeMap getProducts(Agent agent){
 
 	  
-    String cmd  = "SELECT inv.itemid, inv.itemname AS nimetus, ERPOLDITEMID as oldcode , inv.taxpackagingqty AS kastis,inv.standardpalletquantity AS alusel, disc.amount AS price   \r\n" + 
+    String cmd  = "SELECT inv.itemid, inv.itemname AS nimetus , inv.taxpackagingqty AS kastis,inv.standardpalletquantity AS alusel, disc.amount AS price   \r\n" + 
     		"    		     , bar.itembarcode AS ean  ,bar2.itembarcode as ean2,inv.ITEMSUBGROUPID AS grupp,inv.SPIBRANDID AS grupp2, origcountryregionid as coun,mod.unitid As unit, '21' as vat,mod.LineDisc as alegr ,inv.alcstrengthgroupid as gruppale    \r\n" + 
     		"    	     , ITEMGROUPID as type ,lowestqty as mini , multipleqty as opti ,NEWITEM as uus ,sellout as out , topitem as tops , topoffitem as tops2, giftbox as gift\r\n" + 
     		"    		     ,  itemfreetextannotation  as annot , SPIDONTCONTROLMINAMOUNTMS as nocount ,inv.grossWidth , \r\n" + 
@@ -5889,7 +5792,7 @@ int i = 0;
     		"    		inner join inventtablemodule mod  ON mod.itemid = inv.itemid  and mod.dataareaid=inv.dataareaid   AND mod.moduletype=2    \r\n" + 
     		"    		left join pricedisctable as disc  on inv.itemid=disc.itemrelation  and disc.dataareaid=inv.dataareaid \r\n" + 
     		"    		   and disc.module in ( 0 , 1 )   and disc.relation=4   and disc.itemcode=0 and disc.accountcode=1\r\n" + 
-    		"    		   and disc.accountrelation = 'DPD'   and disc.Currency = 'GBP' and disc.unitid = mod.unitid  and disc.fromdate <= getdate() \r\n" + 
+    		"    		   and disc.accountrelation = 'Standard'   and disc.Currency = 'EUR' and disc.unitid = mod.unitid  and disc.fromdate <= getdate() \r\n" + 
     		"    		   and(disc.todate >= getdate() or disc.todate = '')     left join inventitembarcode bar    on bar.dataareaid = inv.dataareaid  \r\n" + 
     		"    		   and bar.itemid = inv.itemid    and bar.barcodesetupid ='EANBottle'   and bar.InventDimId = N'AllBlank'   and len(bar.itembarcode)>8   \r\n" + 
     		"    		   and bar.useforprinting = 1 left join inventitembarcode bar2  on bar2.dataareaid = inv.dataareaid \r\n" + 
@@ -5918,7 +5821,7 @@ int i = 0;
         String kood = rs.getString("itemid").trim();
         Product prod = new Product(kood);
         String nimetus =  " " +rs.getString("nimetus").trim() ;
-         String oldcode = rs.getString("oldcode");
+     //    String oldcode = rs.getString("oldcode");
          nimetus =  Converter.enCodeEst(nimetus);
  
 
@@ -6007,7 +5910,7 @@ int i = 0;
       
       String vat = rs.getString("vat");
       if(vat!=null && vat.trim().length()>0){
-       prod.setVat("21");
+       prod.setVat("20");
     }
   
       String alegr = rs.getString("alegr");
