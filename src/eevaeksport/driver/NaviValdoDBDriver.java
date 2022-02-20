@@ -91,26 +91,26 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
 	
 	  	 String  sql = " select * from ( SELECT [Sales Code] AS custid,'' AS clgroup,[Item No_] AS prodid,'' AS prodgroup, " +
-            "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,iif([Reason Code]=2,1,0)  as camp from" +
-            "   [ATRIA EESTI$Sales Price] where (getdate()+5 between [Starting Date] and [Ending Date]+5  or  " +
+            "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,0  as camp from" +
+            "   [VOLDEMĀRS SIA$Sales Price] where (getdate()+5 between [Starting Date] and [Ending Date]+5  or  " +
                        "  (year ([Ending Date]) = 1753 and getdate()+5 > [Starting Date]) ) and [Sales Type] = 0   " +
                           "  union  SELECT '' AS custid,[Sales Code] AS clgroup,[Item No_]  AS prodid,'' AS prodgroup,  " +
-             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,iif([Reason Code]=2,1,0) as camp from  " +
-             "  [ATRIA EESTI$Sales Price] where ( getdate()+1 between [Starting Date] and [Ending Date] or (getdate()+1 > [Starting Date]) and  year ([Ending Date]) = 1753) " +
+             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,0 as camp from  " +
+             "  [VOLDEMĀRS SIA$Sales Price] where ( getdate()+1 between [Starting Date] and [Ending Date] or (getdate()+1 > [Starting Date]) and  year ([Ending Date]) = 1753) " +
 			  "  and [Sales Type] = 1 " +   
                           "  union  select [Sales Code] AS custid, '' AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
-            "   0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,iif([Reason Code]=2,1,0) as camp " +
-                       "  from [ATRIA EESTI$Sales Line Discount] where [Type] = 1 and [Sales Type] = 0   " +     
+            "   0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,0 as camp " +
+                       "  from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 1 and [Sales Type] = 0   " +     
                    "  union select [Sales Code] AS custid, ''  AS clgroup,[Code] AS prodid,'' AS prodgroup, " +
-              " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,iif([Reason Code]=2,1,0) as camp  " +
-                       "  from [ATRIA EESTI$Sales Line Discount] where [Type] = 0 and [Sales Type] = 0 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or  " +
+              " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,0 as camp  " +
+                       "  from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 0 and [Sales Type] = 0 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or  " +
                       "   year ([Ending Date]) = 1753) " +
                       " union select '' AS custid, [Sales Code] AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
-                     " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,iif([Reason Code]=2,1,0) as camp " +
-                     "    from [ATRIA EESTI$Sales Line Discount] where [Type] = 1 and [Sales Type] = 1        " +
+                     " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,0 as camp " +
+                     "    from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 1 and [Sales Type] = 1        " +
                     " union select '' AS custid, [Sales Code] AS clgroup,[Code] AS prodid,'' AS prodgroup, " +
-                   " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,iif([Reason Code]=2,1,0) as camp " +
-                    "     from [ATRIA EESTI$Sales Line Discount] where [Type] = 0 and [Sales Type] = 1 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or " + 
+                   " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,0 as camp " +
+                    "     from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 0 and [Sales Type] = 1 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or " + 
                      "    year ([Ending Date]) = 1753) ) as ta order by custid , clgroup, prodid ,paev desc " ; 
 			
   	 
@@ -245,7 +245,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 			HSSFRow row = null;
 			TreeMap groups = new TreeMap();
 			row = sheet.getRow(3);
-			// MÄÄRAME ÄRA MIS VÄLJAS ASUVAD Sortimendi tähised.
+			// MÃÃRAME ÃRA MIS VÃLJAS ASUVAD Sortimendi tÃ¤hised.
 
 			// System.out.println("rownum " + row.getLastCellNum());
 			for (int a = 2; a < row.getLastCellNum(); a++) {
@@ -275,8 +275,8 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 					
                        if(!prodID.equals("0")){
                     	
-					// Siin läheme reasisse rokkima ja vaatama kas se toode
-					// läheb kaasa
+					// Siin lÃ¤heme reasisse rokkima ja vaatama kas se toode
+					// lÃ¤heb kaasa
 					for (int a = 2; a < row.getLastCellNum(); a++) {
 
 						String group = (String) groups.get(a + "");
@@ -291,7 +291,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
 							MatrixLine mline = new MatrixLine();
 							// Vaatame kas selles veerus on sellel tootel pandud
-							// mingi tähis
+							// mingi tÃ¤his
 							if (row.getCell((short) a) != null) {
 
 								try {
@@ -379,8 +379,8 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
  	  	  
     		  String  cmd = 
-    " SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [ATRIA EESTI$Item Ledger Entry] l " +
-    "        INNER JOIN [ATRIA EESTI$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('74') and t.[Blocked]=0   " + //,'MAR003','UTE002'
+    " SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [VOLDEMĀRS SIA$Item Ledger Entry] l " +
+    "        INNER JOIN [VOLDEMĀRS SIA$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('74') and t.[Blocked]=0   " + //,'MAR003','UTE002'
 	"	   GROUP BY l.[Location Code], l.[Item No_] " ;
 	
 
@@ -467,9 +467,9 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
            public TreeMap getProdGroups() throws SQLException {
       	     TreeMap   tm = new TreeMap();
       	     setTreeGroup(true);
-      	     String cmd = " SELECT  [Product Group] AS kood ,[Product Group] AS nimi FROM [ATRIA EESTI$Item] " +  
-      	     		" where [Item Category Code] ='VALMIS'  and [Product Group]  != '' "
-      	     		+ " group by [Product Group] order by [Product Group] ";
+      	     String cmd = "SELECT  t.[Product Group Code] AS kood ,g.[Description] AS nimi FROM [VOLDEMĀRS SIA$Item] t inner join [VOLDEMĀRS SIA$Product Group] g ON t.[Product Group Code]=g.[Code]\r\n"
+      	     		+ "where t.[Gen_ Prod_ Posting Group] = 'PRECES'   and t.[Product Group Code]  != ''\r\n"
+      	     		+ "group by t.[Product Group Code],g.[Description] order by t.[Product Group Code] 	 ";
       	       	 Connection con = getNewConnection2();
       	       	System.out.println(cmd);
       	   	        Statement stmt = con.createStatement();
@@ -501,7 +501,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
    public TreeMap getAgents(){
 	   
 	    String cmd = "SELECT [Code] AS kood,[Name] AS nimi,'' AS objekt FROM " + 
-		"  [ATRIA EESTI$Salesperson_Purchaser] ";
+		"  [VOLDEMĀRS SIA$Salesperson_Purchaser] ";
         
 	    if (isDebug()) System.out.println(cmd);
 	    TreeMap agents = new TreeMap();
@@ -608,14 +608,14 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
    
    
  String  sql3 =  "  SELECT     No_ AS kood, CASE WHEN k.[Bill-to Customer No_] = '' THEN " +
-           " (SELECT     SUM(de.[Amount (LCY)]) FROM [ATRIA EESTI$Cust_ Ledger Entry] c INNER JOIN  " +
-           "  [ATRIA EESTI$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] " +
+           " (SELECT     SUM(de.[Amount (LCY)]) FROM [VOLDEMĀRS SIA$Cust_ Ledger Entry] c INNER JOIN  " +
+           "  [VOLDEMĀRS SIA$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] " +
            "   WHERE   c.[Customer No_] = k.No_) WHEN k.[Bill-to Customer No_] <> '' THEN (SELECT   SUM(de.[Amount (LCY)]) " +
-           "   FROM  [ATRIA EESTI$Cust_ Ledger Entry] c INNER JOIN " +
-           "    [ATRIA EESTI$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] " +
+           "   FROM  [VOLDEMĀRS SIA$Cust_ Ledger Entry] c INNER JOIN " +
+           "    [VOLDEMĀRS SIA$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] " +
            "   WHERE  c.[Customer No_] = k.[Bill-to Customer No_] AND [Open] = 1 AND c.[Sell-to Customer No_] = k.No_ " +
 			 " 	 ) " +
-		     " 	 END AS used FROM [ATRIA EESTI$Customer] k "+
+		     " 	 END AS used FROM [VOLDEMĀRS SIA$Customer] k "+
 		      "	WHERE   (Blocked <> 3) AND ([Salesperson Code] <> '') " ;
 
 try {
@@ -637,8 +637,8 @@ con3.close();
    e.printStackTrace();
  }
 
-            sql3 =  " select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle FROM [ATRIA EESTI$Cust_ Ledger Entry] a inner join " + 
-                       " [ATRIA EESTI$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_]  " +
+            sql3 =  " select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle FROM [VOLDEMĀRS SIA$Cust_ Ledger Entry] a inner join " + 
+                       " [VOLDEMĀRS SIA$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_]  " +
                        " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] <getdate()+1    and a.[Posting Date] > getdate()- 1000 " +
                        "  group by a.[Customer No_]  having sum(b.[Amount])<> 0  " ;
 
@@ -654,8 +654,8 @@ con3.close();
 	         }
 	         
 	      }
-	    String  sqlb =  "  select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle  FROM [ATRIA EESTI$Cust_ Ledger Entry] a inner join " +
-                  " [ATRIA EESTI$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] inner join [ATRIA EESTI$Customer] k on k.[No_] = a.[Customer No_]  " +
+	    String  sqlb =  "  select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle  FROM [VOLDEMĀRS SIA$Cust_ Ledger Entry] a inner join " +
+                  " [VOLDEMĀRS SIA$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] inner join [VOLDEMĀRS SIA$Customer] k on k.[No_] = a.[Customer No_]  " +
                   " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] < getdate()-8    and a.[Posting Date] > getdate()- 1000 " +
                   "  group by a.[Customer No_]  having sum(b.[Amount]) > 0" ;
 
@@ -685,8 +685,8 @@ con3.close();
 
     	      String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number,a.[Document No_] AS number2"
     	      		+ ", a.[Posting Date] AS kuupaev1 , a.[Due Date] AS kuupaev, sum(b.[Amount]) AS summa," +
-    	                            " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer FROM [ATRIA EESTI$Cust_ Ledger Entry] a inner join " +
-    	                            " [ATRIA EESTI$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] " +
+    	                            " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer FROM [VOLDEMĀRS SIA$Cust_ Ledger Entry] a inner join " +
+    	                            " [VOLDEMĀRS SIA$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] " +
     	                            " where " +
     								"  (a.[Document Type] = 2 or a.[Document Type]= 3)  AND a.[Posting Date] > getdate()-1000 AND a.[Open]= 1 " +
     	                            "  group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[External Document No_],a.[Document No_], " +
@@ -743,7 +743,7 @@ con3.close();
     	"  [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type,  " +
     	"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt  ,k.Contact +' ' + k.[Phone No_] as kontakt , 0 as sendall " +
     	" ,[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 , k.[Address] as street , k.[City]"
-    	+ " ,k.[Post Code] as inde,  k.[E-Mail] as mail,'' as regno , 0 as minsum FROM [ATRIA EESTI$Customer] k  " +
+    	+ " ,k.[Post Code] as inde,  k.[E-Mail] as mail,'' as regno , 0 as minsum FROM [VOLDEMĀRS SIA$Customer] k  " +
 	  	"	  WHERE k.[Salesperson Code] != ''  AND Blocked != 3  " ;
 
     	   System.out.println(sql);
@@ -1008,7 +1008,7 @@ con3.close();
       
      try {
     	 String   cmd = "  SELECT [Item No_]  AS kood,  [Unit Price] AS hind  from   "+
-    	  	         " [ATRIA EESTI$Sales Price] where [Sales Type] = 2  and "+
+    	  	         " [VOLDEMĀRS SIA$Sales Price] where [Sales Type] = 2  and "+
     				  " (( getdate() between [Starting Date] and [Ending Date]+1 )  "+
     				  "  or ((getdate() > [Starting Date]) and  year ([Ending Date]) = 1753) ) and [Unit Price] != 0 "+
 					"	order by [Item No_] ,[Starting Date] " ;
@@ -1043,13 +1043,16 @@ con3.close();
  
   
      try {
-     	String cmd = " SELECT t.[No_] AS toode,t.[Description] AS nimi, 0 AS myygihind, " +
-     	"	 t.[Product Group] AS grupp   " +
-	" ,t.[Base Unit of Measure] AS unit,[Barcode] AS ean,'' AS status ,0 AS maxdiscount," +
-	"		 '' AS type, [Units per Parcel] AS kastis,  [Net Weight]   AS kaal, [VAT Prod_ Posting Group] AS vat,[Item Disc_ Group] as grd ,"
-	+ "[Pricing Preservation] as maxdays" +
-	"		  FROM [ATRIA EESTI$Item] t   " +
-	"		  WHERE t.[Blocked]=0 and  t.[Inventory Posting Group] = 'VALMIS'   ORDER BY t.[No_]"; 
+     	String cmd = "SELECT t.[No_] AS toode,t.[Description] AS nimi, [Unit Price] AS myygihind, \r\n"
+     			+ "[Product Group Code] AS grupp   \r\n"
+     			+ " ,t.[Base Unit of Measure] AS unit,[Barcode] AS ean,'' AS status ,0 AS maxdiscount,\r\n"
+     			+ "	 '' AS type, [Units per Parcel] AS kastis,  [Net Weight]   AS kaal, [VAT Prod_ Posting Group] AS vat,[Item Disc_ Group] as grd ,\r\n"
+     			+ "0 as maxdays, *\r\n"
+     			+ "	  FROM [VOLDEMĀRS SIA$Item] t \r\n"
+     			+ "	  WHERE t.[Blocked]=0 and  t.[Gen_ Prod_ Posting Group] = 'PRECES'   ORDER BY t.[No_]"; 
+     	
+     	
+     	
      	
       System.out.println(cmd);
       
@@ -1124,10 +1127,12 @@ con3.close();
                   	}
                  	
                  
-
+            	     String vat = rs.getString("vat");
+           	      if(vat != null && vat.trim().equals("PVN21")){
+           	    	  	prod.setVat("21");
+                     }
                  	 
                  	 
-                 	 prod.setVat("20");
                            
 
                  	     String grd = rs.getString("grd");
@@ -1202,11 +1207,11 @@ con3.close();
      HashMap kliendid = new HashMap();
      try {
     String cmd =  "SELECT  d.[Sell-to Customer No_] AS klient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate,0 as lastamount" +
-    		" FROM [ATRIA EESTI$Sales Shipment Line] r " +
-    "  INNER JOIN [ATRIA EESTI$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [ATRIA EESTI$Item] t ON t.[No_]=r.[No_]  WHERE " +
+    		" FROM [VOLDEMĀRS SIA$Sales Shipment Line] r " +
+    "  INNER JOIN [VOLDEMĀRS SIA$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_]  WHERE " +
     "  d.[Posting Date]> GETDATE()-30 ORDER BY  d.[Sell-to Customer No_], t.[Search Description],r.[No_],d.[Posting Date]";
     System.out.println(cmd);
-   //   "klient","toode","kogus","viimane kuupï¿½ev","viimane kogus"
+   //   "klient","toode","kogus","viimane kuupÃ¯Ā¿Ā½ev","viimane kogus"
     Connection con = getNewConnection2();
     Statement stmt = con.createStatement();
     ResultSet rs = stmt.executeQuery(cmd);
@@ -1261,11 +1266,11 @@ con3.close();
           String olddate = " ";
           String oldtoode = null;
 
-          String cmd2 =  "SELECT  d.[Sell-to Customer No_] AS klient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate FROM [ATRIA EESTI$Sales Invoice Line] r " +
-		  " INNER JOIN [ATRIA EESTI$Sales Invoice Header] d ON r.[Document No_]= d.[No_] WHERE d.[Posting Date]> GETDATE()-30 " +
+          String cmd2 =  "SELECT  d.[Sell-to Customer No_] AS klient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate FROM [VOLDEMĀRS SIA$Sales Invoice Line] r " +
+		  " INNER JOIN [VOLDEMĀRS SIA$Sales Invoice Header] d ON r.[Document No_]= d.[No_] WHERE d.[Posting Date]> GETDATE()-30 " +
 		  " Order by d.[Sell-to Customer No_],r.[No_],d.[Posting Date] desc ";
           System.out.println(cmd2);
-		   //   "klient","toode","kogus","viimane kuupï¿½ev","viimane kogus"
+		   //   "klient","toode","kogus","viimane kuupaev","viimane kogus"
 		    Connection con2 = getNewConnection2();
 		    Statement stmt2 = con2.createStatement();
 		    ResultSet rs2 = stmt2.executeQuery(cmd2);
@@ -1367,7 +1372,7 @@ public void setNF(NumberFormat nf) {
 public void setBulkSales(Map agents) {
 
  	 try {
- 	 	String cmd = " select [Salesperson Code] as agent ,sum([Sales (LCY)]) as summa from [ATRIA EESTI$Cust_ Ledger Entry] " +
+ 	 	String cmd = " select [Salesperson Code] as agent ,sum([Sales (LCY)]) as summa from [VOLDEMĀRS SIA$Cust_ Ledger Entry] " +
  	 			"where Month(getdate())=Month([Posting Date]) and " +
             "Year(getdate())=Year([Posting Date]) " +
              " group by [Salesperson Code]";// and [Global Dimension 1 Code]='400'
