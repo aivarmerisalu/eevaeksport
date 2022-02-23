@@ -1734,7 +1734,8 @@ if(text.indexOf("\"")!=-1){
 		}
 		
 		StringBuffer sb = new StringBuffer();
-		String subtext = (axat +  " Cellar Trends Ltd.' \n &emsp;&emsp;&emsp;&emsp; Stonehouse Farm/Ashby Rd, Swadlincote DE11 7BP, United Kingdom\n").trim();
+		String subtext = (axat +  " Amber Beverage UK Ltd.' \n &emsp;&emsp;&emsp;&emsp; B100 East Midlands Airport, "
+				+ "100 Beverley Road, Derby, United Kingdom DE74 2SA").trim();
 		String regno = ("&emsp;&emsp;&emsp;&emsp; No. 3705002<br>" + agname);
 		
 			subtext = subtext + " " + regno;

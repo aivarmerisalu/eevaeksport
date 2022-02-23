@@ -750,7 +750,8 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 						 " from HinnakirjaKaubad  r INNER JOIN Hinnakirjad h on h.HK_ID = r.HK_ID " + 
 						 " where Lõpp > getdate() group by Siffer ";
 
-		String cmd = " select * from Kaubad where Tähtsusgrupp in('Laotoode','Lõpumüük','Eritellimustoode') or Tähtsusgrupp like '%Hooaja%'";
+		String cmd = " select * from Kaubad where (Tähtsusgrupp in('Laotoode','Lõpumüük','Eritellimustoode') or Tähtsusgrupp like '%Hooaja%') "
+				+ " and Nimetus is not null ";
 		// Siffer   Nimetus Hind Ühik  ÜhikutKastis   EAN   
 		//YlemGrupp AlamGrupp Hetkeseis   MinHind  Kaal  Brutokaal  Pildilink   
 
