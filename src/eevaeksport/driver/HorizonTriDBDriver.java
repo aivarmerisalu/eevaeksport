@@ -352,6 +352,9 @@ try{
 	           String kood = rs.getString("toode").trim();
 	           double seis = rs.getDouble("stock");
 	           String dealer = rs.getString("ladu");
+	           if(kood.startsWith("PRV") && dealer.contains("1250")) {
+	        	   seis = 0;
+	           }
 	           if(seis > 0){
 	               products.append(kood +  ";");
 	               products.append(" ;");

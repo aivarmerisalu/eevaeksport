@@ -2008,7 +2008,7 @@ System.out.println(cmd);
 				if(mintime.get(prod.getID()) != null){
 					prod.setTimeToSell(Long.parseLong(mintime.get(prod.getID())+""));
 				}
-				prod.setName(Converter.enCodeEst(weight.substring(0, weight.indexOf('.') + 3) + " "
+				prod.setName(Converter.enCodeEst(weight.substring(0, weight.indexOf('.') + 4) + " "
 						+ name.replace('~', '-')) + " " + prod.getID());
 				tm.put(prod.getName(), prod);
 			}

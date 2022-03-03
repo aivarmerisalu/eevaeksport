@@ -252,7 +252,7 @@ public class KalevIntrDBDriver extends AbstractDBDriver implements Manager,Promo
          " LEFT OUTER JOIN SY240100 ON SL01035=SY24002 AND SY24001='BK'" +
          " LEFT OUTER JOIN SL220100 ON SL01024=SL22002 AND SL22001='0'  " +
          " WHERE len(SL01001)>4 and ( SL01001 like '%INTR5%' or"
-         + " SL01001 like '%INTR9%' or SL01001 like '%M10217%' or SL01001 like '%M12320%'  or SL01001 like '%M16739%' "
+         + " SL01001 like '%INTR9%' or SL01001 like '%M10217%' or SL01001 like '%M12320%'  or SL01001 like '%M16739%'  or SL01001 like '%M19031%'   "
          + "or SL01001 like '%M15369%') and SL01001 not in ('') ORDER BY SL01002";
        
         
@@ -286,7 +286,12 @@ if(cal.get(Calendar.MONTH) > 7 ) {
                   if(cust.getID().equals("M16739")){
                 	  cust.addAgent(new Agent("M12320"));
                   }
+                  
+                  if(cust.getID().equals("M19031")){
+                	  cust.addAgent(new Agent("M12320"));
+                  }
                  
+                  
              
                   
             if(joul) {

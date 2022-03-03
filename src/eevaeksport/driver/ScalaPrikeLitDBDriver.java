@@ -1182,7 +1182,7 @@ return bomKount;
                " +rtrim(SC01003)) + ' ' +RTRIM(SC01001) AS nimi,SC39004 AS myygihind ,SC01009 AS tykke, SC03004 ,(SC03003-SC03004) AS stock, SC01011 AS maxale,SC01150 AS pandikas , " +  
     " case when  SC01031 = 1 then 1 else 0 end AS out ,SC01037 AS grupp,SC01132 AS ean  , SC01016 as letter , SC01067 as gr2  ,SC01161 as statustop" +
     " FROM SC010500 left outer JOIN SC030500 on SC03001=SC01001 and SC03002='01' AND (SC03003-SC03004)!=0 left outer JOIN SC390500 ON SC01001 " +
-    " = SC39001 and SC39002='00' " +
+    " = SC39001 and SC39002='00' and SC39004 != 0 " +
     "    WHERE   LEN(LTRIM(SC01037))>0  and rtrim(ltrim(SC01016)) != 'S' ORDER BY LEFT(RTRIM(SC01037),1),SC01001 " ;
 	
         //and SC39004 > 0

@@ -620,11 +620,13 @@ try{
 	   getOpenOrders();
 	 
 	   kogused = new TreeMap();
+	   
+
 		  
 	   String    cmd = " select toode , kogus , case  when ladu = 81209 then 53296  else(case  when ladu = 81208 then 53269  else (case  when ladu = 53277 then 53268  else \r\n" + 
 		  		"(case  when ladu = 81853 then 53268  else (case  when ladu = 81734 then 53269  else (case  when ladu = 81735 then 53270  else  \r\n" + 
 		  		"(case when ladu = 79742 then 53268 else (case  when ladu = 79743 then 53269 else \r\n" + 
-		  		"(case  when ladu = 79744 then 53270 else ladu end) end) end) end) end)end) end)end )end AS ladu  \r\n" + 
+		  		"(case  when ladu = 79744 then 53270 else   (case  when ladu = 83018 then 53268 else ladu end) end) end) end) end) end) end) end) end )end AS ladu  \r\n" + 
 		  		"from\r\n" + 
 		  		"(SELECT TOP (30001)   N.KODS AS toode,  BATL.DAUDZ AS kogus,  PCN.PK_KLIENTS as ladu\r\n" + 
 		  		"FROM  APV04761.NNOM N \r\n" + 
@@ -745,7 +747,7 @@ try{
 	  String    cmd = "select toode , kogus , case  when ladu = 81209 then 53296  else(case  when ladu = 81208 then 53269  else (case  when ladu = 53277 then 53268  else \r\n" + 
 	  		"(case  when ladu = 81853 then 53268  else (case  when ladu = 81734 then 53269  else (case  when ladu = 81735 then 53270  else  \r\n" + 
 	  		"(case when ladu = 79742 then 53268 else (case  when ladu = 79743 then 53269 else \r\n" + 
-	  		"(case  when ladu = 79744 then 53270 else ladu end) end) end) end) end)end) end)end )end AS ladu  \r\n" + 
+	  		"(case  when ladu = 79744 then 53270 else (case  when ladu = 83018 then 53268 else ladu end) end) end) end) end) end)end) end)end )end AS ladu  \r\n" + 
 	  		"from\r\n" + 
 	  		"(SELECT TOP (30001)   N.KODS AS toode,  BATL.DAUDZ AS kogus,  PCN.PK_KLIENTS as ladu\r\n" + 
 	  		"FROM  APV04761.NNOM N \r\n" + 

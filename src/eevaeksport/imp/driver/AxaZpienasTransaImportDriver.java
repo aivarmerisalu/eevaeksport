@@ -203,6 +203,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		   String waybill = " ";
 		   String desttype = " ";
 		   String driverStock = order.getAgent();
+		   String trip = "1";
 		  	try{
 		    	  StringBuffer sb = new StringBuffer();
 		  		  Calendar cal = Calendar.getInstance();
@@ -282,13 +283,14 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 	     
 		 	     
 		 	    String section = "1";
-			   String trip = "1";
+			     
 			   String tripkl = "1";
 			   String scan = " ";
 			   String koef = "1";
 			   String smell = " ";
 			   String clean = " ";
 			   String sample = " ";
+			   System.out.println("UNIT " + line.getUnit());
 		 	   if(line.getUnit() != null ) {
 		 		  if(line.getUnit().indexOf("ss:") != -1) {
 		 			   section = line.getUnit().substring(line.getUnit().indexOf("ss:")+3, line.getUnit().indexOf("ss:") + 4);
@@ -410,13 +412,13 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
                
                
                //date_ путевой лист_ код из_ Признак.csv
-               fileName =  loca + dateString2 +  "_" + waybill + "_" +  driverStock +  "_TIE.csv";
+               fileName =  loca + dateString2 +  "_" + waybill + "_" +  driverStock + "_" + trip +  "_TIE.csv";
  		      
                if(refe){
             	   loca = parent.getProps().getProperty("conv2.dir");
 
             	   
-    		 	   fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() +  ".csv";
+    		 	   fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() + "_" + trip +   ".csv";
     		 	   System.out.println("tagastus" + fileName);
     		 	  writeToFile(sb.toString(),fileName);
                }else {
@@ -434,8 +436,8 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
             			   
         	           }
             	   }else {
-            	 	   fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() +  ".csv";
-            	          fileName =  loca + dateString2 +  "_" + waybill + "_" +  driverStock +  "_TIE.csv";
+            	 	  // fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() +  ".csv";
+            	          fileName =  loca + dateString2 +  "_" + waybill + "_" +  driverStock +  "_" + trip +  "_TIE.csv";
         		 	   System.out.println("uus fail" + fileName);
         		 	  writeToFile(sb.toString(),fileName);
             	   }
@@ -501,13 +503,14 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 	   private class FileNameFilter  implements FilenameFilter {
 			
 		     String agent = null;
+		     String trip = null;
 		
 		    @Override
 		
 		    public boolean accept(File directory, String fileName) {
 		    	System.out.println("is Today " + directory.toString() + " " + directory.lastModified() +" " +isToday(directory.lastModified()));
 		    	  if(isToday(new File(directory.toString() +"\\"+ fileName).lastModified())) {
-		    		  if ( fileName.contains(agent) ) {
+		    		  if ( fileName.contains(agent) && fileName.contains("_"+ trip + "_")) {
 				          return true;
 				        }	  
 		    	  }
@@ -520,6 +523,9 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 
 			public void setAgent(String agent) {
 				this.agent = agent;
+			}
+			public void setTrip(String trip) {
+				this.trip = trip;
 			}
 }
  	

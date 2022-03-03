@@ -850,7 +850,7 @@ HashSet olemas = new HashSet();
 
         	if(!testing) {
         		
-        	
+        		System.out.println("customers Starting ");	
             String salessql = "\r\n" + 
             		"SELECT ltrim(I06_KODAS_KS)  AS klient,(case when (I06_kodas_ak) is null then '1' else ltrim((I06_kodas_ak)) end) as kood ,\r\n" + 
             		"( ltrim( case when month(I06_DOK_DATA) <10 then  '0' + ltrim(str(month(I06_DOK_DATA))) else \r\n" + 
@@ -884,7 +884,7 @@ HashSet olemas = new HashSet();
            rs1.close();
            stmt.close();
         
-        //	System.out.println(salesres.toString());
+        	System.out.println("salesres done");
         	
         	
         	
@@ -908,7 +908,7 @@ HashSet olemas = new HashSet();
             rs1.close();
             stmt.close();
         	
-
+            System.out.println("overall done");
 
             String sqlu =
                 "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
@@ -930,7 +930,7 @@ HashSet olemas = new HashSet();
             rs1.close();
         	}
 
-        	
+            System.out.println("used done");
             stmt = con.prepareStatement(cmd);
             //stmt.setInt(1, Integer.parseInt(agent.getID()));
             //stmt.setDate(2, getStartingDate());
@@ -1063,7 +1063,7 @@ HashSet olemas = new HashSet();
        
             }
             rs.close();
-
+            System.out.println("maincust done");
             stmt.close();
             con.close();
           }

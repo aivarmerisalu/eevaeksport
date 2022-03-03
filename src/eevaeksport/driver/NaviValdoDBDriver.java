@@ -64,7 +64,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 	} catch (Exception e) {
 	    parent.showError(e);
 	}
-	  user =  getParent().getProps().getProperty("rest.user");
+	    user =  getParent().getProps().getProperty("rest.user");
 	    pass = getParent().getProps().getProperty("rest.pass");
 	    rcompany = getParent().getProps().getProperty("rest.companyx");
 	     
@@ -140,7 +140,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
              MatrixLine mline = new MatrixLine();
 
              if (custID != null && custID.length() > 0) {
-               mline.setCustID(custID);
+               mline.setCliGroup(custID); //asendasin cliGroup kuna cust asemel on payer
              }else{
             	 custID = ""; 
              }
@@ -340,7 +340,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		// System.exit(0);
@@ -378,13 +378,12 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
        public String getSaveStockInfo(){
 
  	  	  
-    		  String  cmd = 
-    " SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [VOLDEMĀRS SIA$Item Ledger Entry] l " +
-    "        INNER JOIN [VOLDEMĀRS SIA$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('74') and t.[Blocked]=0   " + //,'MAR003','UTE002'
-	"	   GROUP BY l.[Location Code], l.[Item No_] " ;
+    		  String  cmd = " SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [VOLDEMĀRS SIA$Item Ledger Entry] l " + 
+    "              INNER JOIN [VOLDEMĀRS SIA$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('010P','080P','015A') and t.[Blocked]=0  " + 
+    "  		   GROUP BY l.[Location Code], l.[Item No_]  having sum(l.[Quantity])  != 0 " ;
 	
-
     		  
+    		 
     		  
     		         if (isDebug()) System.out.println(cmd);
     		         StringBuffer products = new StringBuffer();
@@ -500,8 +499,10 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
    
    public TreeMap getAgents(){
 	   
-	    String cmd = "SELECT [Code] AS kood,[Name] AS nimi,'' AS objekt FROM " + 
-		"  [VOLDEMĀRS SIA$Salesperson_Purchaser] ";
+	    String cmd = "SELECT [Code] AS kood,[Name] AS nimi,'' AS objekt FROM  " + 
+	    		"		  [VOLDEMĀRS SIA$Salesperson_Purchaser] where [Send to E-Pasaule] = 1 order by[Code] ";
+	    
+	    
         
 	    if (isDebug()) System.out.println(cmd);
 	    TreeMap agents = new TreeMap();
@@ -617,6 +618,8 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 			 " 	 ) " +
 		     " 	 END AS used FROM [VOLDEMĀRS SIA$Customer] k "+
 		      "	WHERE   (Blocked <> 3) AND ([Salesperson Code] <> '') " ;
+ 
+ 
 
 try {
 Connection con3 = getNewConnection2();
@@ -738,13 +741,17 @@ con3.close();
     	     this.customers = new ArrayList();
 
 
-    	   String sql =  "   SELECT k.[Name] AS nimi, k.[Name 2] AS nimi2 , k.City as addr2 ,k.[No_] AS kood,k.[Bill-to Customer No_] AS payer,k.[Address] + ' ' + k.[City] AS aadress " +  
-    	"   	,k.[Salesperson Code] AS agent ,  k.Blocked AS blokk,   " +
-    	"  [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type,  " +
-    	"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt  ,k.Contact +' ' + k.[Phone No_] as kontakt , 0 as sendall " +
-    	" ,[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 , k.[Address] as street , k.[City]"
-    	+ " ,k.[Post Code] as inde,  k.[E-Mail] as mail,'' as regno , 0 as minsum FROM [VOLDEMĀRS SIA$Customer] k  " +
-	  	"	  WHERE k.[Salesperson Code] != ''  AND Blocked != 3  " ;
+    	   String sql =  "  SELECT k.[Name] AS nimi, k.[Name 2] AS nimi2  ,k.[No_] AS kood,a.Code as abikood ,k.[Bill-to Customer No_] AS payer  , a.[Address]+' '+a.[Address 2]+a.[City] as address \r\n" + 
+    	   		"	,a.[Salesperson Code] AS agent ,  k.Blocked AS blokk,   \r\n" + 
+    	   		"[Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type,  \r\n" + 
+    	   		"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt  ,k.Contact +' ' + k.[Phone No_] as kontakt , 0 as sendall \r\n" + 
+    	   		",[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 , k.[Address] as street , k.[City]\r\n" + 
+    	   		",k.[Post Code] as inde,  k.[E-Mail] as mail,'' as regno , 0 as minsum ,a.* FROM [VOLDEMĀRS SIA$Ship-to Address] a LEFT join  [VOLDEMĀRS SIA$Customer] k    on  a.[Customer No_]=k.[No_] \r\n" + 
+    	   		"        \r\n" + 
+    	   		"	  WHERE a.[Salesperson Code] != ''  AND Blocked != 3   and a.[Send to E-Pasaule] = 1 " ;
+    	   
+    	   
+    	   
 
     	   System.out.println(sql);
     	   try {
@@ -755,19 +762,17 @@ con3.close();
     	         String name = rs.getString("nimi").trim();
     	         String name2 = rs.getString("nimi2");
     	         if(name2 != null){
-    	        	 name = (name + " " + name2.trim()).trim();
+    	        	// name = (name + " " + name2.trim()).trim();
     	         }
-    	         String addr2 = rs.getString("addr2");
-    	         if(addr2 != null){
-    	        	
-    	         }
+    	       
     	         name = name.replaceAll("\"", " ");
     	         name = name.replace('*', ' ');
     	         name = name.replace('*', ' ');
     	         name = name.replace('*', ' ');
     	           String id = rs.getString("kood").trim();
+    	           String id2 = rs.getString("abikood").trim();
     	           //System.out.println(line);
-    	           Customer customer = new Customer(id);
+    	           Customer customer = new Customer(id + "_" + id2);
     	            String payer = null;
     	           if (name.equals("")) name = "<" + id + ">";
     	           customer.setName(Converter.enCodeEst(name) + " " + id);
@@ -775,7 +780,7 @@ con3.close();
     	           	if(payer != null && payer.trim().length()>0){
     	             customer.setPayer(payer.trim());
     	             }
-
+    	            customer.setPayer(id);
     	           	
     	           	if(used.get(id) != null){
     	           		customer.setUsedCredit(used.get(id));
@@ -790,17 +795,17 @@ con3.close();
     	           	
     	     
     	           	
-    	             String aadress = rs.getString("aadress");
+    	             String aadress = rs.getString("address");
     	             if( aadress != null && aadress.trim().length()>0){
-    	               customer.setAddress(Converter.adressLink(Converter.enCodeEst(aadress),"Estonia"));
+    	               customer.setAddress(Converter.adressLink(Converter.enCodeEst(aadress),"Latvia"));
     	               name = name + " " + Converter.enCodeEst(aadress);
     	              customer.setName(Converter.enCodeEst(name));
     	             }
     	         	String ag = rs.getString("agent");
-    	             customer.addAgent(new Agent(ag));
+    	             customer.addAgent(new Agent(ag.trim()));
     	             customer.setMainAgent(ag.trim());
     	             
-    	             customer.addAgent(new Agent("HOUSE"));
+    	            // customer.addAgent(new Agent("HOUSE"));
     	             
     	             if (ag != null ){
 	           				Agent agg = ((Agent)this.getAgents1().get(ag));
@@ -850,11 +855,7 @@ con3.close();
     	      
     	           if (!customer.isNodebt()){
     	         
-    	      			
-
-
-    	        
-    	           	//customer.setUsedCredit(Double.parseDouble(used.replaceAll(",",".").replaceAll(" ","")));
+    	      	           	//customer.setUsedCredit(Double.parseDouble(used.replaceAll(",",".").replaceAll(" ","")));
     	           }
     	          
     	           if(paym != null && paym.trim().length()>0){
@@ -1049,7 +1050,7 @@ con3.close();
      			+ "	 '' AS type, [Units per Parcel] AS kastis,  [Net Weight]   AS kaal, [VAT Prod_ Posting Group] AS vat,[Item Disc_ Group] as grd ,\r\n"
      			+ "0 as maxdays, *\r\n"
      			+ "	  FROM [VOLDEMĀRS SIA$Item] t \r\n"
-     			+ "	  WHERE t.[Blocked]=0 and  t.[Gen_ Prod_ Posting Group] = 'PRECES'   ORDER BY t.[No_]"; 
+     			+ "	  WHERE t.[Blocked]=0 and  t.[Gen_ Prod_ Posting Group] = 'PRECES'  and   [Send to E-Pasaule] = 1  ORDER BY t.[No_]"; 
      	
      	
      	
@@ -1071,11 +1072,9 @@ con3.close();
          	name = name + " " + id;
          	
              double price = 1 ;
-             boolean goo = false;
              if(prices.get(id) != null){
             	 price = prices.get(id);
-            	 goo = true;
-             }
+              }
              
               
              
@@ -1098,19 +1097,14 @@ con3.close();
                 }
             
                 String ean = rs.getString("ean");
-                if(prod.getID().equals("8009")) {
-                	System.out.println("8009 " + ean);
-                }
+              
                 if (ean != null && ean.trim().length()>3){
                    prod.setEAN(ean.trim());
                    eanprods.put(ean.trim(), prod.getID());
                    
                  }
         
-                
-                if(prod.getID().equals("8009")) {
-                	System.out.println("8009q " + eanprods.toString());
-                }
+           
              	String discou = rs.getString("maxdiscount");
              	if(discou != null && discou.trim().length()>0){
                 prod.setMaxDiscount(Double.parseDouble(discou));
@@ -1152,18 +1146,18 @@ con3.close();
                    
                 	 String ee = "";
                 	 if (ean != null &&ean.trim().length()>3){
-                        // ee = " " + ean.substring(ean.trim().length()-3);
+                         ee = " " + ean.substring(ean.trim().length()-3);
                        }
                 	 
                 	 if(grupp.indexOf(" ") != -1){
-                	 	 prod.setName(Converter.enCodeEst( grupp.substring(0,grupp.indexOf(" "))+ " " + name.trim() ));
+                	 	 prod.setName(Converter.enCodeEst(  name.trim() + " " + ee ));
                           
                 	 }else{
-                	 	 prod.setName(Converter.enCodeEst(grupp + " " + name.trim() ));
+                	 	 prod.setName(Converter.enCodeEst( name.trim() + " " + ee ));
                          	 
                 	 }
                 	 
-                if(goo)    
+               
                 	 tm.put( name, prod); 
                 
           
@@ -1206,10 +1200,10 @@ con3.close();
      Vector vec = new Vector();
      HashMap kliendid = new HashMap();
      try {
-    String cmd =  "SELECT  d.[Sell-to Customer No_] AS klient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate,0 as lastamount" +
-    		" FROM [VOLDEMĀRS SIA$Sales Shipment Line] r " +
-    "  INNER JOIN [VOLDEMĀRS SIA$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_]  WHERE " +
-    "  d.[Posting Date]> GETDATE()-30 ORDER BY  d.[Sell-to Customer No_], t.[Search Description],r.[No_],d.[Posting Date]";
+    String cmd =  " SELECT  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]  as abiklient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate,0 as lastamount," + 
+    		"    (r.[Unit Price]*(100-r.[Line Discount _])/100) as lastprice		FROM [VOLDEMĀRS SIA$Sales Shipment Line] r " + 
+    		"      INNER JOIN [VOLDEMĀRS SIA$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_]  WHERE " + 
+    		"      d.[Posting Date]> GETDATE()-180 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date]";
     System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupÃ¯Ā¿Ā½ev","viimane kogus"
     Connection con = getNewConnection2();
@@ -1218,6 +1212,7 @@ con3.close();
     while(rs.next()){
 
              String custID = rs.getString("klient").trim();
+             String custAbi = rs.getString("abiklient").trim();
 
                  String prodID = rs.getString("toode").trim();;
 
@@ -1245,10 +1240,10 @@ con3.close();
                     }else if (percent < 70){
                     	open = lastamount - amount ;
                     }
-                    
+                    double lprice = rs.getDouble("lastprice");;
                     
                     Product prod = new Product(prodID);
-                    CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate,0,open,0," ");
+                    CustProd cp = new CustProd(custID+ "_" + custAbi , prodID,amount , 0, 0,lastdate,lprice,open,0," ");
 
                  cust.addProduct(prod,cp,false);
                  kliendid.put(custID, cust);
@@ -1260,70 +1255,6 @@ con3.close();
          con.close();
 
 
-           int counter = 0;
-           int cou = 0;
-          String oldklient = null;
-          String olddate = " ";
-          String oldtoode = null;
-
-          String cmd2 =  "SELECT  d.[Sell-to Customer No_] AS klient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate FROM [VOLDEMĀRS SIA$Sales Invoice Line] r " +
-		  " INNER JOIN [VOLDEMĀRS SIA$Sales Invoice Header] d ON r.[Document No_]= d.[No_] WHERE d.[Posting Date]> GETDATE()-30 " +
-		  " Order by d.[Sell-to Customer No_],r.[No_],d.[Posting Date] desc ";
-          System.out.println(cmd2);
-		   //   "klient","toode","kogus","viimane kuupaev","viimane kogus"
-		    Connection con2 = getNewConnection2();
-		    Statement stmt2 = con2.createStatement();
-		    ResultSet rs2 = stmt2.executeQuery(cmd2);
-
-
-  while (rs2.next()){
-       String klient = rs2.getString("klient").trim();
-               String toode = rs2.getString("toode").trim();
-               String kogus = "0";
-               String date = " ";
-                  kogus = rs2.getDouble("kogus")+"";
-                  kogus = kogus.replace('.',',');
-				  if(kogus.indexOf(",") != -1){
-				  	kogus=kogus.substring(0,kogus.indexOf(","));
-				  }
-                   date = rs2.getString("lastdate").trim().substring(0,10);
-
-               if(cou == 0){oldklient = klient;olddate = date;oldtoode=toode;}
-               if(!oldklient.equals(klient)){
-                             counter = 0;
-                             oldklient = klient;
-                             olddate = date;
-               }
-               if(!toode.equals(oldtoode)){
-               	counter = 0;
-               }
-               Customer c = (Customer)kliendid.get(klient);
-               if (c != null ){
-
-                 ArrayList al = (ArrayList)c.getProducts().get(toode);
-                 if (al != null){
-                   CustProd cp = (CustProd)al.get(1);
-                   if (cp != null){
-                    if(!olddate.equals(date)){counter++;}
-                     if (counter == 0){cp.setS1(kogus );}
-                     if (counter == 1){cp.setS2(kogus );}
-                     if (counter == 2){cp.setS3(kogus );}
-                     if (counter == 3){cp.setS4(kogus );}
-                     if (counter == 4){cp.setS5(kogus );}
-
-                     vec.add(cp);
-                   }
-                 }
-                 oldklient = klient;
-                 olddate = date;
-                 oldtoode = toode;
-               }
-               cou++;
-             }
-
-
-  rs2.close();
-  con2.close();
 
      } catch (Exception e){
        e.printStackTrace();

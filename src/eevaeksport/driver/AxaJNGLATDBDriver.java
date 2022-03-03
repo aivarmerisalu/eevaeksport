@@ -193,8 +193,8 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
           	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
 	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
 	                    	}
-          	  	 }  
-	              	}
+          	  	          }  
+	              	   }
 	                 }
 	               }
 	             }
@@ -264,7 +264,8 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
-         String sql = " select  * , datediff(day,fromdate,todate) as paev from getprices where getdate() between fromdate-2 and todate  order by accountrelation,relation desc,itemrelation";
+         String sql = " select  * , datediff(day,fromdate,todate) as paev from getprices where (getdate() between fromdate-2 and todate) " + 
+         		" or ( getdate() > fromdate-2 ) order by accountrelation,relation desc,itemrelation ";
         HashSet hh = new HashSet();
           try {
 
@@ -623,14 +624,11 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 					
 					String custID = formatter.formatCellValue(row.getCell((short) 0));
 					String ag = formatter.formatCellValue(row.getCell((short) 1));
-
-
 	                       
 	                       if(ag.trim().length() > 0) {
 	                    	   if(ag.startsWith("ag")) {
 	                    		   ag = ag.substring(2);
 	                    	   }
-	                    	// System.out.println("ag " + ag); 
 	                    	   Vector<String> vec  = new Vector<String>();
 	                           if(res.get(custID) != null) {
 	                           	vec = res.get(custID);
@@ -642,8 +640,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	                       }
 	                    }
 				
-				
-			   } catch(Exception r){
+			    } catch(Exception r){
 				  r.printStackTrace();	
 				}
 				System.out.println("Merc size  " + res.size());
