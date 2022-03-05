@@ -3060,12 +3060,12 @@ private TreeMap makePlans(){
 	  
   	 try {
   	 	
-  		String cmd2 = "SELECT d.manager ,sum( kiekis * (kaina -t.savik_3)) as profit FROM apyv_gr r " +
-        	    " INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 300 day) > current_date()  INNER JOIN klientai b ON b.klientas=d.gavejas  " +
-        		" INNER JOIN prekes t on t.preke = r.preke " +
-        	    " where month(Data) =month(current_date()) and YEAR(Data) = YEAR(current_date()) " +
-        		" and day(Data) <= day(current_date()) and operacija  not like'%Reklam%' and operacija  not like'%Pirkimas%' and " +
-        		" (d.tiekejas is null or d.tiekejas like '%idvest%' ) group  by d.manager ";
+  		String cmd2 = "               SELECT d.manager ,sum( kiekis * (kaina -r.savik_3)) as profit FROM apyv_gr r \r\n" + 
+  				"                    INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 300 day) > current_date()  INNER JOIN klientai b ON b.klientas=d.gavejas  \r\n" + 
+  				"                               where month(Data) =month(current_date()) and YEAR(Data) = YEAR(current_date()) \r\n" + 
+  				"                               and day(Data) <= day(current_date()) and operacija  not like'%Reklam%' and operacija  not like'%Pirkimas%' and \r\n" + 
+  				"                (d.tiekejas is null or d.tiekejas like '%idfood%' ) \r\n" + 
+  				"               group  by d.manager ";
   		 
      String cmd = "select sum(viso_1) AS summa,a.manager as agent FROM apyvarta a " +
                           "   where month(Data) =month(current_date()) and YEAR(Data) = YEAR(current_date()) " +

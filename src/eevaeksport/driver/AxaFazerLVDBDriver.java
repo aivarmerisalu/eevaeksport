@@ -928,7 +928,12 @@ try {
 								try {
 									cust = (row.getCell((short) 0).getStringCellValue());
 		 					      } catch (Exception e) {
-		 					    	 cust =( (int)(row.getCell((short) 0).getNumericCellValue()))+"";
+		 					    	 try {
+		 					    		 cust =( (int)(row.getCell((short) 0).getNumericCellValue()))+"";
+		 					    	 }catch(Exception o) {
+		 					    		 
+		 					    	 }
+		 					    	
 		 						  }
 								
 								String type = null;
@@ -964,7 +969,7 @@ try {
 		 						  }
 								
 								Calendar cc = Calendar.getInstance();
-								if(algus != null && lopp != null && text != null &&
+								if(cust != null && algus != null && lopp != null && text != null &&
 										cc.getTimeInMillis() > algus.getTime() && cc.getTimeInMillis() < lopp.getTime()) {
 									if(res.get(cust) != null) {
 										res.put(cust, res.get(cust) + "|" + type + ":" + text);

@@ -548,7 +548,9 @@ if(ladu.trim().length()!=0){
         fos.close();
 
         
-        this.sendOrderEmail(order, tag, pandikas);
+       // this.sendOrderEmail(order, tag, pandikas);
+        
+        
         if(APIKEY != null) {
         String data = "	<body><method>EDIT_I06_FULL</method><data>" + sb.toString() + "</data>" + 
         		"</body>";

@@ -1268,7 +1268,7 @@ try{
 		"				  as info , linedisc as grupp, MINORDERAMOUNT_BBS as minord , " +
          "                    ROUTECODE_TR as transa,'' as discount ,'' as samm , SubGroupCode_BBS as tyyp , " +
 			"				 (Select top 1 DISPLAYVALUE from DIMENSIONATTRIBUTEVALUESETITEM dv WITH (NOLOCK) where dv.DIMENSIONATTRIBUTEVALUESET = cus.DEFAULTDIMENSION    ) as osad, SHELFAREA_BBS as sharea, " +
-            " SHELFSHARE_BBS As shshare ,'' as pictemail ,(select top  1 defaultagreementlineexpirationdate from agreementheader ah WITH (NOLOCK) where ah.custaccount=cus.invoiceaccount)  as contrend  "
+            " SHELFSHARE_BBS As shshare ,'' as pictemail ,(select top  1 defaultagreementlineexpirationdate from agreementheader ah WITH (NOLOCK) where ah.custaccount=cus.invoiceaccount order by defaultagreementlineexpirationdate desc)  as contrend  "
             + " FROM  custtable cus with(nolock) inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join " +
 			" LOGISTICSPOSTALADDRESS adr ON adr.LOCATION = dp.PRIMARYADDRESSLOCATION and getdate() >=VALIDFROM  and  getdate() <= VALIDTO left outer JOIN  paymterm  " +
              "           pay on cus.paymtermid = pay.paymtermid  and pay.DATAAREAID  = cus.DATAAREAID  " +

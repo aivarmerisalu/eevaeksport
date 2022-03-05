@@ -840,7 +840,7 @@ public class AxaZpienasManaDBDriver extends AbstractDBDriver  implements Manager
            	}	
         }
      
-        cc.addQuestiosToCustomer(cust,kyssad);
+      //  cc.addQuestiosToCustomer(cust,kyssad);
      
                     boolean laks = true;
                     if((payer == null || payer.trim().length() == 0) && payers.contains(cust.getID())){

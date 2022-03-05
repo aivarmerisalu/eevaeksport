@@ -956,23 +956,21 @@ public class SolcraftAutoDBDriver extends AbstractDBDriver implements Discounter
         	 }else{
         		 cust.setGroup( Converter.cleanLitLatEst(alegr.trim()));
         	 }
-        	
          }
 
          
-         if(custMap.get(cust.getPayer()) != null){
-	 Customer cc = (Customer)custMap.get(cust.getPayer());
+        if(custMap.get(cust.getPayer()) != null){
+	        Customer cc = (Customer)custMap.get(cust.getPayer());
         	 cust.setDebt(cc.getDebt());
         	 cust.setUsedCredit(cc.getUsedCredit());
         	 cust.setCredit(cc.getCredit());
         	 cust.setSalesBlock(cc.getSalesBlock());; 
-         }
+          }
          
-            customers.put(cust.getName(), cust);
-             
+              customers.put(cust.getName(), cust);
               custMap2.put(cust.getID(), cust);
           	
-                	}
+                }
               }
             }
 
