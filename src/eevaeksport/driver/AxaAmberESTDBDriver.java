@@ -848,7 +848,7 @@ rs.close();
 	  
 	   TreeMap openOrders = this.getOpenOrders();
 	   
-	   System.out.println("openOrders " + openOrders.toString());
+	  // System.out.println("openOrders " + openOrders.toString());
 		
 
  String cmd = "  SELECT   cus.name,cus.accountnum,cus.invoiceaccount AS payer, " +
@@ -1243,7 +1243,7 @@ rs.close();
                                	  first = false;
                                    String inff = rs11.getString("Kylmik");
                                    cust.setCity(cust.getCity() + "|" + inff );
-                                 System.out.println(cust.getCity());
+                              //   System.out.println(cust.getCity());
                                  }
                                 rs11.close();
                                 
@@ -1842,6 +1842,7 @@ st.close();
 this.connectionUp();
   
     TreeMap plans = makePlans();
+   // System.out.println("plans " + plans.toString());
 	 int yy = Calendar.getInstance().get(Calendar.YEAR);
    int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
    int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -1904,7 +1905,7 @@ this.connectionUp();
               agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
                
        		}catch(Exception e){
-       		  e.printStackTrace();
+       		 // e.printStackTrace();
        	  }
        	 System.out.println(agentID + "' " + asi  );
          
@@ -1940,11 +1941,14 @@ this.connectionUp();
  //K2|VODKA|LB=43991.97816010396, R11=324834.90552250843, R11|RTD=61743.06907171655,
   //R11|SPIRIT_DR=41825.6858004074, R11|VODKA|LB=48906.82130825486}
                      	  double msales = agent.buffer;
-                 		  double psales = 0;
+                 		  Double psaless = null;
                  		try{
-                 		  psales = Double.parseDouble(plans.get(agent.getID()+"|"+ grupp+"|"+type)+"");
-                 		 if(psales > 0){
-                 			
+                 		  psaless = Double.parseDouble(plans.get(agent.getID()+"|"+ grupp+"|"+type)+"");
+                 		}catch(Exception e){
+                   		 // e.printStackTrace();
+                   	  }
+                 		 if(psaless != null){
+                 			double psales = psaless;
                  		  double  tehtudsalperc = msales/psales;
                      	  double plaanitavMyykSal = d2 * msales/dd;
                      	  double  prognosalperc = plaanitavMyykSal/psales;
@@ -1959,9 +1963,7 @@ this.connectionUp();
                         agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
                         
                  		 }
-                 		}catch(Exception e){
-                 		 // e.printStackTrace();
-                 	  }
+                 	
                  	     }
                           }
                         rs.close();
@@ -1997,6 +1999,9 @@ this.connectionUp();
                           		  
                           		try{
                           		  psales = Double.parseDouble(plans.get(agent.getID()+"|"+ grupp)+"");
+                          		}catch(Exception e){
+                              		//  e.printStackTrace();
+                              	  }
                           		 if(psales > 0){
                           			
                           		  double  tehtudsalperc = msales/psales;
@@ -2013,9 +2018,7 @@ this.connectionUp();
                                  agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
                                  
                           		 }
-                          		}catch(Exception e){
-                          		 // e.printStackTrace();
-                          	  }
+                          	
                           	     }
                                    }
                                  rs.close();

@@ -15,6 +15,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -212,10 +213,7 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
   
   
   private void makeOutput(Order order){
-	  
-	  if(names == null){
-		 // names = this.custNames();
-	  }
+	
 	  
 	 	  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	    
@@ -228,9 +226,36 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
 	        doc.appendChild(root);
 
 
-	  //      String filiaalStr = null;
-	    //    String tarnijaKoodStr = null;
 
+	        boolean tagastus = false;
+	   	 	 Vector lin = order.getOrderLines();
+	   	 	 int nega = 0;
+	   	 	 for (int i = 0; i < lin.size(); i++) {
+	   	 		OrderLine ol = (OrderLine) lin.elementAt(i);
+	   	 		if(ol.getKogus() < 0 && (order.getStatus() == 5 || order.getStatus() == 4 || order.getStatus() == 2)){
+	   	 			nega++;
+	   	 		}
+	   	 	 }  
+	   	
+	   	 	
+	   	 	 
+	   	 	 if(nega == lin.size()){
+	   		    	tagastus = true;
+	   		    }
+	   	 	
+	   	 	 
+	   	 	  boolean repr = false;
+	   	 	 	 for (int i = 0; i < lin.size(); i++) {
+	   	 	 		OrderLine ol = (OrderLine) lin.elementAt(i);
+	   	 	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0.1 && (order.getStatus() == 5 || order.getStatus() == 4)){
+	   	 	 			repr = true;
+	   	 	 			tagastus = false;
+	   	 	 		}
+	   	 
+	   	 	 		
+	   	 	 	 } 
+	        
+	        
 	        Node docheader = doc.createElement("Document-Header");
 	        root.appendChild(docheader);
 	        
@@ -357,31 +382,18 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
 
 	        boolean invoice = false;
 	        Node function  = doc.createElement("DocumentFunctionCode");
-	        String pilots = parent.getProps().getProperty("pilots");
+	       
 	        
-	        if(pilots != null && pilots.contains(order.getAgent())){
-	        	invoice = true;
-	        	if(order.getWarehouse() != null && order.getWarehouse().indexOf("CENTR") != -1 ){
-	        		invoice = false;
-	        	}
-	        }
+	        System.out.println("Seisund " + repr + " " + tagastus );
 	        
-	        if(pilots != null && !pilots.contains(order.getAgent())){
-	        	if(order.getWarehouse() != null && order.getWarehouse().indexOf("NUOLAIDA") != -1 ){
-	        		  Node ware = doc.createElement("Warehouse");
-	  		        Text wareVal = doc.createTextNode("ISPARDAVIM");
-	  		        ware.appendChild(wareVal);
-	  		        header.appendChild(ware);	
-	        	}
-	        }
-	   
-	        
-	        
-		        String func = "ORDER";
-		        if(invoice){
-		        	func = "INVOICE";
-		        }
-		        
+		     String func = "ORDER";
+		      if(repr) {
+		    	  func = "REPRICE";
+		      }
+		      
+		      if(tagastus) {
+		    	  func = "RETURN";
+		      }
 		        
 	        Text functionVal = doc.createTextNode(func);
 	        function.appendChild(functionVal);
@@ -431,7 +443,7 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
 	        	  sum = sum + (line.getKogus()* line.getPrice());
 	        	  System.out.println("rida " + line.getToode() + " " + line.getKogus() + " " + line.getPrice() + " " + line.getKogus()* line.getPrice() + " " + sum);
 	        	  coun++;
-	          	addLine(line, read, doc, coun, order, invoice);
+	          	addLine(line, read, doc, coun, order, repr);
 	          }
 	          }
 
@@ -500,7 +512,7 @@ if(invoice){
    
    
    
-   private void addLine(OrderLine line, Node read, Document doc,int counter ,Order order, boolean invoice) throws SQLException{
+   private void addLine(OrderLine line, Node read, Document doc,int counter ,Order order, boolean repr) throws SQLException{
 	   
 
 	
@@ -561,7 +573,7 @@ if(invoice){
 	     
 	    
 	    
-	    if(disc > 0 || invoice){
+	    if(disc > 0 || repr){
 	    	
 	     Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
 	    	//price = price * (100-disc)/100;
@@ -590,11 +602,11 @@ if(invoice){
 //				     ridaitem.appendChild(yhiku_va);
 
 				     
-				     if(disc > 0 && !invoice){
+				     if(disc > 0 ){
 					     Node yhiku_vad = doc.createElement("Discount");
 					      Text yhiku_vadVla = doc.createTextNode(this.nf.format(disc));
 						     yhiku_vad.appendChild(yhiku_vadVla);
-						//     ridaitem.appendChild(yhiku_vad);
+						   ridaitem.appendChild(yhiku_vad);
 		    		    	 
 				     }
 		

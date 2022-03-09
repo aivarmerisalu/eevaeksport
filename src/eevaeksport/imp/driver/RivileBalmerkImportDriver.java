@@ -239,6 +239,26 @@ HashMap pants = null;
    return acc;
 
  }
+  
+  public String getAgentCar(String age) throws SQLException {
+	 	 String	sql1 = "SELECT N72_KODAS_AU AS carplate FROM N72_mas  WHERE N72_KODAS_MS = '" + age +"'"; 
+	 	
+	   System.out.println(sql1);
+	   String acc = null;
+
+	   Statement st1 = con.createStatement();
+	   ResultSet rs1 = st1.executeQuery(sql1);
+
+	   while (rs1.next()) {
+	     acc = rs1.getString("carplate").trim();
+
+	   }
+	   rs1.close();
+	   st1.close();
+
+	   return acc;
+
+	 }
  
   public String identifyProduct(String ean, String prodID) throws SQLException{
   	
@@ -322,7 +342,21 @@ HashMap pants = null;
   
      
 	
-	
+     boolean shipmodeown  = false ;
+     boolean noinvoice = false; 
+     
+     if(order.getShipMode() != null && order.getShipMode().trim().length() > 0) {
+     	String uu =  order.getShipMode();
+     	
+     	if(uu.contains("-3")) {
+     		noinvoice = true;
+     	}
+     	
+     	if( uu.contains("B")) {
+     		shipmodeown = true;
+     	}
+     	
+     }
 	
  	
  	String ls = System.getProperty("line.separator");
@@ -397,6 +431,22 @@ HashMap pants = null;
 	//sb.append(getLineNr(cou));
       sb.append("          <I06_KODAS_KS>" + escape(cust.substring(0,cust.lastIndexOf("-"))) + "</I06_KODAS_KS>" + ls);
       cou++;
+      
+      sb.append("          <I06_KODAS_AK>" + escape(cust.substring(cust.lastIndexOf("-")+1)) + "</I06_KODAS_AK>" + ls);
+      cou++;
+      
+      
+      if(shipmodeown) {
+    	  String carPlate = this.getAgentCar(agent);
+    	  System.out.println("PLATE " + carPlate );
+    	  if(carPlate != null) {
+    		  sb.append("          <I06_KODAS_AU>" + escape(carPlate) + "</I06_KODAS_AU>" + ls);
+    	      cou++;  
+    	  }
+    	  
+    	        
+      }
+      
       
       String addr =  null;
 	try {
@@ -548,7 +598,7 @@ if(ladu.trim().length()!=0){
         fos.close();
 
         
-       // this.sendOrderEmail(order, tag, pandikas);
+  
         
         
         if(APIKEY != null) {
@@ -568,7 +618,11 @@ if(ladu.trim().length()!=0){
           fos = new FileOutputStream(fileName);
          fos.write(sbb.toString().getBytes());
          fos.close();
+        } else {
+        	   this.sendOrderEmail(order, tag, pandikas);
         }
+         
+        
         
 	} catch (Exception e) {
 		e.printStackTrace();
@@ -834,7 +888,7 @@ if(ladu.trim().length()!=0){
               email.setFilesTo(aadr);
           //    email.send();
               }
-          
+            System.out.println("mail saatmisel " );
             
             if(ret) {
             	
@@ -896,6 +950,8 @@ if(ladu.trim().length()!=0){
 					log.error(e);
 					System.exit(0);
 			    }
+			        
+			        System.out.println("mail saadetud");
 				
   }
   

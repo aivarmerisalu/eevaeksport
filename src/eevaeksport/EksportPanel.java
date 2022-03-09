@@ -4477,7 +4477,7 @@ if(agprods != null && agprods.size() >0){
         buf.append(prod.getEAN().replaceAll("\r", " ").replaceAll("\n", " "));
 
         buf.append(EksportPanel.separator);
-        buf.append(prod.getOnPallet());
+        buf.append((int)prod.getOnPallet());
 
        buf.append(EksportPanel.separator);
        buf.append(prod.getUnit());

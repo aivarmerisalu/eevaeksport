@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -147,10 +149,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
              
              
              
-             
-             if (curr != null && curr.length() > 0) {
-                 mline.setCurrency(curr.trim());
-               }
+          
              
              if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
                mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
@@ -159,14 +158,14 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
              
            
              
-            if(camp == 1){
+            if(paevi < 60){
             	 if(sdate != null  && !sdate.startsWith("1753")){
                 	 mline.setStartDate(sdate.substring(0,10));
                  }
                  if(date != null && !date.startsWith("1753")){
                 	 mline.setEndDate(date.substring(0,10));
                  }
-             }else if(paevi > 75 && camp == 0){
+             }else if(paevi > 60 && camp == 0){
             	// mline.setProdLevel("pr");
              }
              
@@ -191,8 +190,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
                }
              
              
-             if((mline.getPrice() > 0 || mline.getDiscount() > 0) && !olemas.contains(clGroup+"" + prodID + custID)
-            		 && !"AKTYV25".equals( mline.getCliGroup())){
+             if((mline.getPrice() > 0 || mline.getDiscount() > 0) && !olemas.contains(clGroup+"" + prodID + custID)){
             	               result.add(mline); 
                      olemas.add(clGroup+"" + prodID + custID);
             	 
@@ -379,7 +377,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
  	  	  
     		  String  cmd = " SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [VOLDEMĀRS SIA$Item Ledger Entry] l " + 
-    "              INNER JOIN [VOLDEMĀRS SIA$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('010P','080P','015A') and t.[Blocked]=0  " + 
+    "              INNER JOIN [VOLDEMĀRS SIA$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('010P','080P','015A') and t.[Send to E-Pasaule] = 1  " + 
     "  		   GROUP BY l.[Location Code], l.[Item No_]  having sum(l.[Quantity])  != 0 " ;
 	
     		  
@@ -463,9 +461,9 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
             }
 
            
-           public TreeMap getProdGroups() throws SQLException {
+           public TreeMap getProdGroupsSecond()  throws SQLException {
       	     TreeMap   tm = new TreeMap();
-      	     setTreeGroup(true);
+      	    
       	     String cmd = "SELECT  t.[Product Group Code] AS kood ,g.[Description] AS nimi FROM [VOLDEMĀRS SIA$Item] t inner join [VOLDEMĀRS SIA$Product Group] g ON t.[Product Group Code]=g.[Code]\r\n"
       	     		+ "where t.[Gen_ Prod_ Posting Group] = 'PRECES'   and t.[Product Group Code]  != ''\r\n"
       	     		+ "group by t.[Product Group Code],g.[Description] order by t.[Product Group Code] 	 ";
@@ -475,7 +473,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
       	   	        ResultSet rs = stmt.executeQuery(cmd);
       	   	        while(rs.next()){
       	   	            String id = Converter.cleanLitLatEst(rs.getString("kood"));     
-      	                String name = Converter.enCodeEst(rs.getString("nimi")) ;
+      	                String name = (rs.getString("nimi")) ;
       	   	             tm.put((id), name);  	             
       	   	        }
       	   	      rs.close();
@@ -491,11 +489,35 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
            
 
          
-           public TreeMap getProdGroupsSecond() throws SQLException {
-               return teised;
+           public TreeMap  getProdGroups() throws SQLException {
+        	   TreeMap   tm = new TreeMap();
+        	   
+        	     String cmd = " SELECT  t.[Item Brend Dimension Code] AS kood ,g.[Name] AS nimi FROM [VOLDEMĀRS SIA$Item] t " + 
+        	     		"					  inner join [VOLDEMĀRS SIA$Dimension Value] g ON t.[Item Brend Dimension Code]=g.[Code] and g.[Dimension Code] = 'Y-BRENDS' " + 
+        	     		"        	     		where   [Send to E-Pasaule] = 1 " + 
+        	     		"        	     	group by t.[Item Brend Dimension Code],g.[Name] order by t.[Item Brend Dimension Code]  ";
+        	       	 Connection con = getNewConnection2();
+        	       	System.out.println(cmd);
+        	   	        Statement stmt = con.createStatement();
+        	   	        ResultSet rs = stmt.executeQuery(cmd);
+        	   	        while(rs.next()){
+        	   	            String id = Converter.cleanLitLatEst(rs.getString("kood"));     
+        	                String name = (rs.getString("nimi")).replaceAll("Valdo", "Val")
+        	                		.replaceAll("Tautas", "Tau") 
+        	                		.replaceAll("TAUTAS", "Tau")
+        	                		.replaceAll("Draugu konditorija", "DrKo") ;
+        	                 
+
+        	   	             tm.put((id), name.trim());  	             
+        	   	        }
+        	   	      rs.close();
+        	   	      con.close();
+
+
+        	         return tm;
              }
 
-  private TreeMap teised = new TreeMap();
+
    
    public TreeMap getAgents(){
 	   
@@ -686,13 +708,13 @@ con3.close();
 	    	  
 	    try {
 
-    	      String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number,a.[Document No_] AS number2"
+    	      String cmd = " select a.[Sell-to Customer No_]  + '_' + a.[Ship-to code] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number,a.[Document No_] AS number2"
     	      		+ ", a.[Posting Date] AS kuupaev1 , a.[Due Date] AS kuupaev, sum(b.[Amount]) AS summa," +
     	                            " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer FROM [VOLDEMĀRS SIA$Cust_ Ledger Entry] a inner join " +
     	                            " [VOLDEMĀRS SIA$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] " +
     	                            " where " +
     								"  (a.[Document Type] = 2 or a.[Document Type]= 3)  AND a.[Posting Date] > getdate()-1000 AND a.[Open]= 1 " +
-    	                            "  group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[External Document No_],a.[Document No_], " +
+    	                            "  group by a.[Sell-to Customer No_] + '_' + a.[Ship-to code],a.[Customer No_] ,a.[External Document No_],a.[Document No_], " +
     	                            " a.[Posting Date] ,a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount])<> 0 order by  a.[Due Date]";
 
     	  System.out.println(cmd);
@@ -703,6 +725,9 @@ con3.close();
     	       while(rs1.next()){
     	        Debt debt = new Debt();
     	       String custID = rs1.getString("klient").trim();
+    	       if(custID.endsWith("-")) {
+    	    	   custID = custID.substring(0,custID.length()-1);
+    	       }
     	        debt.setCustID(custID);
     	        String payerID = rs1.getString("maksja").trim();
                 debt.setPayerID(payerID);
@@ -741,14 +766,15 @@ con3.close();
     	     this.customers = new ArrayList();
 
 
-    	   String sql =  "  SELECT k.[Name] AS nimi, k.[Name 2] AS nimi2  ,k.[No_] AS kood,a.Code as abikood ,k.[Bill-to Customer No_] AS payer  , a.[Address]+' '+a.[Address 2]+a.[City] as address \r\n" + 
+    	   String sql =  "  SELECT k.[Name] AS nimi, k.[Name 2] AS nimi2  ,k.[No_] AS kood,a.Code as abikood ,k.[Bill-to Customer No_] AS payer  , a.[Address] + ' ' + a.[City] as address \r\n" + 
     	   		"	,a.[Salesperson Code] AS agent ,  k.Blocked AS blokk,   \r\n" + 
-    	   		"[Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type,  \r\n" + 
-    	   		"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt  ,k.Contact +' ' + k.[Phone No_] as kontakt , 0 as sendall \r\n" + 
-    	   		",[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 , k.[Address] as street , k.[City]\r\n" + 
-    	   		",k.[Post Code] as inde,  k.[E-Mail] as mail,'' as regno , 0 as minsum ,a.* FROM [VOLDEMĀRS SIA$Ship-to Address] a LEFT join  [VOLDEMĀRS SIA$Customer] k    on  a.[Customer No_]=k.[No_] \r\n" + 
-    	   		"        \r\n" + 
-    	   		"	  WHERE a.[Salesperson Code] != ''  AND Blocked != 3   and a.[Send to E-Pasaule] = 1 " ;
+    	   		" [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type, " + 
+    	   		"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt  ,k.Contact +' ' + k.[Phone No_] as kontakt , 0 as sendall " + 
+    	   		",[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 , a.[Address] as street , a.[City] " + 
+    	   		", a.[Post Code] as inde,  a.[E-Mail] as mail,'' as regno , 0 as minsum , dim.Name as chainname , dim.[Code] as chain , k.[Allow Line Disc_] as allowline "
+    	   		+ " FROM [VOLDEMĀRS SIA$Ship-to Address] a LEFT join  [VOLDEMĀRS SIA$Customer] k    on  a.[Customer No_]=k.[No_]  "
+    	   		+ " LEFT JOIN [VOLDEMĀRS SIA$Dimension Value] dim ON dim.[Code] = a.[Customer Group Dimension Code] and dim.[Dimension Code] = 'Y-TIKL'" + 
+    	   		"	  WHERE a.[Salesperson Code] != ''  AND k.Blocked != 3   and a.[Send to E-Pasaule] = 1 " ;
     	   
     	   
     	   
@@ -929,7 +955,30 @@ con3.close();
     	        	customer.setRegnr(regno.trim());
     	        	
     	           } 
-    	     
+
+    	           String chainname  = rs.getString("chainname");
+    	           if(chainname != null && chainname.trim().length()>0){
+    	        	customer.setCity("Tiklas :" +  chainname.trim());
+    	           } 
+    	           
+    	           String chain  = rs.getString("chain");
+    	           if(chain != null && chain.trim().length()>0){
+    	        	customer.setChain(chain.trim());
+    	           } 
+    	           
+    	           int allowline  = rs.getInt("allowline");
+    	           if(allowline > 0){
+
+    	        	   if(customer.getGroup().trim().length() >0){
+    	    	        	//customer.setCustType(Converter.cleanLitLatEst(alegr.trim()));
+    	    	        	 	customer.setGroup(customer.getGroup() + "|" + Converter.cleanLitLatEst("ldok")); 	
+    	    	        	}else{
+    	    	        	 	customer.setGroup(Converter.cleanLitLatEst("ldok")); 
+    	    	        	}
+    	        	   
+    	           } 
+    	           
+    	       
     	            tm.put(customer.getName(), customer);
     	            this.customers.add(customer.getID());
     	           
@@ -1045,10 +1094,10 @@ con3.close();
   
      try {
      	String cmd = "SELECT t.[No_] AS toode,t.[Description] AS nimi, [Unit Price] AS myygihind, \r\n"
-     			+ "[Product Group Code] AS grupp   \r\n"
+     			+ "[Product Group Code] AS grupp  ,[Item Brend Dimension Code] as grupp2  \r\n"
      			+ " ,t.[Base Unit of Measure] AS unit,[Barcode] AS ean,'' AS status ,0 AS maxdiscount,\r\n"
-     			+ "	 '' AS type, [Units per Parcel] AS kastis,  [Net Weight]   AS kaal, [VAT Prod_ Posting Group] AS vat,[Item Disc_ Group] as grd ,\r\n"
-     			+ "0 as maxdays, *\r\n"
+     			+ "   [Item Type] AS type, [Units per Parcel] AS kastis,  [Net Weight]   AS kaal, [VAT Prod_ Posting Group] AS vat,[Item Disc_ Group] as grd ,"
+     			+ "(case when [Shelf life period type] = 2 then [Shelf life period]  else  [Shelf life period]*30 end) as maxdays , [Units per pallet] as pallet ,[Reorder Point] as optimum "
      			+ "	  FROM [VOLDEMĀRS SIA$Item] t \r\n"
      			+ "	  WHERE t.[Blocked]=0 and  t.[Gen_ Prod_ Posting Group] = 'PRECES'  and   [Send to E-Pasaule] = 1  ORDER BY t.[No_]"; 
      	
@@ -1068,17 +1117,16 @@ con3.close();
          	String name = rs.getString("nimi").trim();
          	name = name.replace('{', '(');
          	name = name.replace('}', ')');
-         	name =   Converter.firstToUpperCase(name);
-         	name = name + " " + id;
+         //	name =   Converter.firstToUpperCase(name);
+         //	name = name + " " + id;
          	
-             double price = 1 ;
-             if(prices.get(id) != null){
-            	 price = prices.get(id);
+             double price = rs.getDouble("myygihind");
+             if(price > 0){
+            	  prod.setPrice(price);
               }
              
               
-             
-                prod.setPrice(price);
+                
               if(ladutr.get(id) != null ){
             	  prod.setStock(ladutr.get(id));
               }
@@ -1087,7 +1135,12 @@ con3.close();
                 String grupp = Converter.cleanLitLatEst(rs.getString("grupp"));
                 
               if(grupp != null && grupp.trim().length()>0 ){
-                 prod.setGroup(grupp.trim());
+                 prod.setGroupSecond(grupp.trim());
+              }
+              String grupp2 = Converter.cleanLitLatEst(rs.getString("grupp2"));
+              
+              if(grupp2 != null && grupp2.trim().length()>0 ){
+                 prod.setGroup(grupp2.trim());
               }
           
                 prod.setUnit(rs.getString("unit"));
@@ -1110,6 +1163,12 @@ con3.close();
                 prod.setMaxDiscount(Double.parseDouble(discou));
                 }
 
+             	  String type = rs.getString("type");
+           	      if(type != null && type.trim().length() > 0 ){
+           	    	  	prod.setType(type.trim());
+                     }
+                 	 
+             	
                 double	cases = rs.getDouble("kastis");
                 	if(cases>0){
                       prod.setInCases(cases);
@@ -1117,7 +1176,7 @@ con3.close();
 
                 	 double	kaal = rs.getDouble("kaal");
                  	if(kaal>0){
-                       prod.setInUnit(kaal);
+                   //    prod.setInUnit(kaal);
                   	}
                  	
                  
@@ -1131,7 +1190,7 @@ con3.close();
 
                  	     String grd = rs.getString("grd");
                 	      if(grd != null && grd.trim().length()>0){
-                           	prod.setDiscgrupp(Converter.cleanLitLatEst(grd.trim()));
+                           //	prod.setDiscgrupp(Converter.cleanLitLatEst(grd.trim()));
                           }
                 	      String maxdays = (rs.getString("maxdays"));
                 	      
@@ -1139,38 +1198,120 @@ con3.close();
        			        	prod.setPartii("MaxDays " + maxdays.trim());
        			        }
                           	
-                   String add = "";
-                   if(id.length() > 5){
-                	   add = id.substring(0,5);
-                   }
-                   
+               
+                	      
+                	      double	pallet = rs.getDouble("pallet");
+                       	if(pallet > 0){
+                             prod.setOnPallet(pallet);
+                        	}
+                       	
+                       	
+              	      double	opt = rs.getDouble("optimum");
+                     	if(opt > 0){
+                           prod.setOptAmountInUnits(opt);
+                      	}
+                     	
+                       	
+                       	
                 	 String ee = "";
                 	 if (ean != null &&ean.trim().length()>3){
                          ee = " " + ean.substring(ean.trim().length()-3);
                        }
                 	 
-                	 if(grupp.indexOf(" ") != -1){
                 	 	 prod.setName(Converter.enCodeEst(  name.trim() + " " + ee ));
                           
-                	 }else{
-                	 	 prod.setName(Converter.enCodeEst( name.trim() + " " + ee ));
-                         	 
-                	 }
-                	 
+                	
                
                 	 tm.put( name, prod); 
                 
           
         }
+        
+        
+        
+        
+        
+        
+        
   
         rs.close();
         stmt.close();
         con.close();
+        
+        
+        
+        
+  	  cmd = " SELECT [Item No_] AS prodid,  [Unit Price] AS price , [Minimum Quantity]  as kogus, [Ending Date] as paev, [Starting Date] as startday  from \r\n" + 
+  	  		"                              [VOLDEMĀRS SIA$Sales Price] where (getdate()+5 between [Starting Date] and [Ending Date]+5  or   \r\n" + 
+  	  		"                               (year ([Ending Date]) = 1753 and getdate()+5 > [Starting Date]) )  and [Sales Type] = 2  ";
+  	 
+  		
+  	    StringBuffer buf = new StringBuffer();
+  		try {
+  			
+  			 con = this.getNewConnection2();
+  		     stmt =  con.createStatement();
+  		      rs = stmt.executeQuery(cmd);
+
+  	           while(rs.next()){
+  	        	        String  gruppx = "ldok";
+  	                  	String  toodex = rs.getString("prodid").trim();
+  	                  	try{
+  	                  	double  hind  = rs.getDouble("price");
+  	                   	    double  kogus = rs.getDouble("kogus");
+  	                  	
+  		                  	
+  		                  	if(kogus == 0){
+  		                  		kogus = 1;
+  		                  	}
+  		                  	      	
+  		                  	      buf.append(toodex+ "; ; ;" + NF.format(hind).replace(',', '.') + ";" + gruppx + ";" + kogus + ";"  );
+  		                          buf.append("\n");	
+  		                      	
+  	                  		
+  	                  	}catch(Exception e){
+  	                  	 e.printStackTrace();	
+  	                  	}
+  	                  }	
+  	           rs.close();
+  	           stmt.close();
+  	           con.close();
+        
+        
       
+        if(buf.length() > 2){
+            File f = new File("prodactions.txt");
+            if (f.exists())f.delete();
+              try {
+        		PrintWriter os = new PrintWriter(new FileWriter(
+        				 "prodactions.txt", true));
+        		os.write(Converter.cleanLitLatEst(buf.toString()));
+        		os.close();
+        	  }catch (IOException ex) {
+        		ex.printStackTrace();
+        	  }
+         }else{
+            File f = new File("prodactions.txt");
+            if (f.exists())f.delete();
+              try {
+        		PrintWriter os = new PrintWriter(new FileWriter(
+        				 "prodactions.txt", true));
+        		os.write("");
+        		os.close();
+        	  }catch (IOException ex) {
+        		ex.printStackTrace();
+        	  }
+         }
+        
+        
+  	   } catch (Exception t){
+  	       t.printStackTrace();
+  	     }
         
      } catch (Exception e){
        e.printStackTrace();
      }
+  		
      return tm;
    }
 
@@ -1201,9 +1342,13 @@ con3.close();
      HashMap kliendid = new HashMap();
      try {
     String cmd =  " SELECT  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]  as abiklient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate,0 as lastamount," + 
-    		"    (r.[Unit Price]*(100-r.[Line Discount _])/100) as lastprice		FROM [VOLDEMĀRS SIA$Sales Shipment Line] r " + 
-    		"      INNER JOIN [VOLDEMĀRS SIA$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_]  WHERE " + 
-    		"      d.[Posting Date]> GETDATE()-180 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date]";
+    		"    (r.[Unit Price]*(100-r.[Line Discount _])/100) as lastprice	, dd.[External Document No_]  as lastdoc , dd.[Order No_]  as lastdoc1 , "
+    		+ " (case when ([Shelf life period] = 0 or [Shelf life period type] = 0 or d.[Posting Date]+ (case when [Shelf life period type] = 2 then [Shelf life period]  else  [Shelf life period]*30 end) > getdate()) then 0 else 1 end) as paevi  "
+    		+ "		FROM [VOLDEMĀRS SIA$Sales Shipment Line] r " + 
+    		"      INNER JOIN [VOLDEMĀRS SIA$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_] "
+    		+  "  LEFT JOIN [VOLDEMĀRS SIA$Sales Invoice Header] dd ON dd.[Linked Sales Shipment No_] = d.[No_] WHERE " + 
+    		"      d.[Posting Date]> GETDATE()-300 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date]";
+    
     System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupÃ¯Ā¿Ā½ev","viimane kogus"
     Connection con = getNewConnection2();
@@ -1240,11 +1385,26 @@ con3.close();
                     }else if (percent < 70){
                     	open = lastamount - amount ;
                     }
-                    double lprice = rs.getDouble("lastprice");;
+                    double lprice = rs.getDouble("lastprice");
+                    
+                    
+
+                    String ldoc = rs.getString("lastdoc");
+                    String ldoc1 = rs.getString("lastdoc1");
+                    Integer paevi = rs.getInt("paevi");
                     
                     Product prod = new Product(prodID);
                     CustProd cp = new CustProd(custID+ "_" + custAbi , prodID,amount , 0, 0,lastdate,lprice,open,0," ");
-
+                 
+                    if(ldoc1 != null && ldoc1.trim().length() > 0) {
+                    	  cp.setAbiKood(ldoc1);
+                    }
+                  
+                    if(ldoc != null && ldoc.trim().length() > 0) {
+                    	 cp.setAbiKood(ldoc.trim());
+                    }
+                    	
+                    cp.setRedline(paevi+"");
                  cust.addProduct(prod,cp,false);
                  kliendid.put(custID, cust);
                  vec.addElement(cp);
