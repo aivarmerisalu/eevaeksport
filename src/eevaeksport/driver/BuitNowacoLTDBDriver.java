@@ -2451,7 +2451,7 @@ try{
 	"		 , t.mato_vien AS unit, t.bar_kodas AS ean,0 AS status ,t.max_nuol AS maxdiscount,  " +
 	"		  t.tipas AS type, t.orig_pak AS kastis,t.pak_kiek as kastis2 ,  t.prek_neto AS kaal,21 AS vat,  pak_kiek as opt ,prek_mode as info ,t.vieta as staatus  " +
 	 "    , orig_pak as origpak, kilm_salis as klimes , laik_salyg as laiksal ,"
-	 + " pak.pakuote as primpak ,t.savik_3 as oma , t.didm_antk as greend, pavad_3 as brandpers " +	
+	 + " pak.pakuote as primpak ,t.savik_3 as oma , t.didm_antk as greend, pavad_3 as brandpers, t.aprasymas as otsing " +	
 	"		  FROM prekes t inner join grupes g on g.grupe=t.grupe inner join tipai ty on ty.tipas=t.tipas " +
 	"     left join pr_pak pak on pak.preke = t.preke and pak.pirmine = 1   " +
 	"		  where CH_meris  = '1' and (pard_kaina != 0 or kaina_1 < 321.77 or kaina_2 < 321.77 or kaina_3 < 321.77 or kaina_4 < 321.77 or kaina_5 < 321.77 or \r\n" + 
@@ -2723,7 +2723,29 @@ try{
                 	 }	 
                  }
                  
+                 String otsing = rs.getString("otsing");
                  
+                 if(otsing != null && otsing.trim().length() != 0) {
+                	 
+                	 
+                	 StringTokenizer st = new StringTokenizer(otsing,",");
+                	 if(otsing.contains(",")) {
+                		 while(st.hasMoreTokens()) {
+                    		 prod.addBarcode(st.nextToken().trim());
+                    	 } 
+                	 }
+                	
+                	 
+                  	 if(otsing.contains(";")) {
+                  		 st = new StringTokenizer(otsing,";");
+                  		 while(st.hasMoreTokens()) {
+                    		 prod.addBarcode(st.nextToken().trim());
+                    	 }
+                  	 }
+              
+                		 
+                 }
+                	 
                  
                    if(goes ){
                 	   prod.setName(Converter.enCodeEst(name));
@@ -2982,33 +3004,36 @@ private TreeMap makePlans(){
 	   try{
 		
 	   Calendar cal = Calendar.getInstance();
-	   int month = (cal.get(Calendar.MONTH)+1)-7;
-	   int yer = cal.get(Calendar.YEAR);
-	   if(yer == 2021) {
-		   month = month + 6;
+	   int month = (cal.get(Calendar.MONTH)+1);
+	   String mon = month+"";
+	   if(mon.length() == 1) {
+		   mon = "0" + mon;
 	   }
+	   int yer = cal.get(Calendar.YEAR);
+	  
+	   String currSheet = yer + "" + mon;
 	   
-	   File f = new File (getExcelDir() + "budget.xlsx");
+	   File f = new File (getExcelDir() + "Budget.xlsx");
 		  FileInputStream	 ff = new FileInputStream(f);
 		XSSFWorkbook workbook = new XSSFWorkbook((ff));
-		XSSFSheet sheet = workbook.getSheetAt(0);
+		XSSFSheet sheet = workbook.getSheet(currSheet);
 	XSSFRow row = null; 
 				ff.close();	
 				if(sheet != null){
 				
-					
-					for(int i = 26 ; i < 67;i++){
+					int rows = sheet.getLastRowNum()+1; 
+					for(int i = 1 ; i < rows ;i++){
 						 row = sheet.getRow(i);
 						String agent = null;
 						if(row != null) {
 							
 						
 						try {
-							agent = (row.getCell((short) 1).getStringCellValue());
+							agent = (row.getCell((short) 0).getStringCellValue());
 					      } catch (Exception e) {
 					    	  try {
-					    		  if(row.getCell((short) 1) != null)
-					    		agent = (int)(row.getCell((short) 1).getNumericCellValue())+ "";
+					    		  if(row.getCell((short) 0) != null)
+					    		agent = (int)(row.getCell((short) 0).getNumericCellValue())+ "";
 					    	  }catch(Exception j) {
 					    		 j.printStackTrace();
 					    	  }
@@ -3018,20 +3043,28 @@ private TreeMap makePlans(){
 						
 						double plan = 0;
 						try {
-			    			plan = Double.parseDouble(row.getCell((short) 3+month).getNumericCellValue()+ "");
+			    			plan = Double.parseDouble(row.getCell((short) 1).getNumericCellValue()+ "");
 						} catch (Exception e) {
 	   					 e.printStackTrace();	
-	   				  	 plan = Double.parseDouble(row.getCell((short) month+3).getStringCellValue());
+	   				  	 plan = Double.parseDouble(row.getCell((short) 1).getStringCellValue());
 						}
 						
-						if(agent != null && i < 47){
+
+						double profit = 0;
+						try {
+							profit = Double.parseDouble(row.getCell((short) 2).getNumericCellValue()+ "");
+						} catch (Exception e) {
+	   					 e.printStackTrace();	
+	   				profit = Double.parseDouble(row.getCell((short) 2).getStringCellValue());
+						}
+						
+						System.out.println(agent + " " + i + " " + plan + " " + profit);
 						    res.put(agent,(int)plan);
-						}
-						if(agent != null && i > 47){
-							planprofit.put(agent,(int)plan);
-						}
+					
+							planprofit.put(agent,(int)profit);
+					
 						
-					//	System.out.println(agent + " " + i);
+					
 						}
 					}}
 			   
@@ -3043,7 +3076,6 @@ private TreeMap makePlans(){
 	//	System.exit(0);
 	   return res;
 }
-
 
   public void setBulkSales(Map agents) {
 
@@ -3108,7 +3140,7 @@ private TreeMap makePlans(){
                          
                          
                          //siin on 1ˇ
-                   if(false) {      
+                   if(true) {      
                          agent.buffer = (int)(sales);
 
     	            	  double msales = agent.buffer;
@@ -3150,19 +3182,20 @@ private TreeMap makePlans(){
     	        	  }
     	        	  
     	        	  
-    	          String asi = "Sales: " + (int)msales + " €||";
+    	        	String asi = "Sales plan: " + (int)psales + " €||"; 
+    	          
     	          if(dd > 6){
     	        	  asi = asi + "Plan Sales done/estimate :";
     	              asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
     	          }
-    	           asi = asi + "Sales plan: " + (int)psales + " €||"; 
+    	          
     	           
-    	            asi = asi +  "Profit: " + (int)msalesP + " €||";
+    	          asi = asi + "Profit plan: " + (int)psalesP + " €||"; 
      	          if(dd > 6){
      	        	  asi = asi + "Plan Profit done/estimate :";
      	              asi = asi + "     " +(int)(tehtudsalpercP*100) + "% / " + (int)(prognosalpercP*100)  + " %||";  
      	          }
-     	           asi = asi + "Profit plan: " + (int)psalesP + " €||"; 
+     	         
      	           
      	            
     	           

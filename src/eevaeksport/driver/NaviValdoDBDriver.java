@@ -54,7 +54,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,FixLoader {
+public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,FixLoader,PictureMaker {
 
   public NaviValdoDBDriver(EksportPanel parent) {
     super(parent);
@@ -113,7 +113,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
                     " union select '' AS custid, [Sales Code] AS clgroup,[Code] AS prodid,'' AS prodgroup, " +
                    " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,0 as camp " +
                     "     from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 0 and [Sales Type] = 1 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or " + 
-                     "    year ([Ending Date]) = 1753) ) as ta order by custid , clgroup, prodid ,paev desc " ; 
+                     "    year ([Ending Date]) = 1753) ) as ta order by custid , clgroup, prodid ,paevi " ; 
 			
   	 
 
@@ -611,18 +611,10 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	   try{
     		   Converter.getManagersReplacements(agents1, rcompany, user, pass); 
     			
-    	}catch(Exception e){
+    	} catch(Exception e){
     		e.printStackTrace();
     	}
     	   
-    	
-           
-           
-       	 
-           
-       //	 System.out.println("groups to string " + groups.toString());
-           
-
 
    TreeMap<String,Double> debts = new TreeMap<String,Double>();
    TreeMap<String,Double> blokk = new TreeMap<String,Double>();
@@ -769,7 +761,7 @@ con3.close();
     	   String sql =  "  SELECT k.[Name] AS nimi, k.[Name 2] AS nimi2  ,k.[No_] AS kood,a.Code as abikood ,k.[Bill-to Customer No_] AS payer  , a.[Address] + ' ' + a.[City] as address \r\n" + 
     	   		"	,a.[Salesperson Code] AS agent ,  k.Blocked AS blokk,   \r\n" + 
     	   		" [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type, " + 
-    	   		"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt  ,k.Contact +' ' + k.[Phone No_] as kontakt , 0 as sendall " + 
+    	   		"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt  ,a.Contact +' ' + a.[Phone No_] as kontakt , 0 as sendall " + 
     	   		",[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 , a.[Address] as street , a.[City] " + 
     	   		", a.[Post Code] as inde,  a.[E-Mail] as mail,'' as regno , 0 as minsum , dim.Name as chainname , dim.[Code] as chain , k.[Allow Line Disc_] as allowline "
     	   		+ " FROM [VOLDEMĀRS SIA$Ship-to Address] a LEFT join  [VOLDEMĀRS SIA$Customer] k    on  a.[Customer No_]=k.[No_]  "
@@ -1386,9 +1378,6 @@ con3.close();
                     	open = lastamount - amount ;
                     }
                     double lprice = rs.getDouble("lastprice");
-                    
-                    
-
                     String ldoc = rs.getString("lastdoc");
                     String ldoc1 = rs.getString("lastdoc1");
                     Integer paevi = rs.getInt("paevi");
@@ -1485,6 +1474,87 @@ public void setBulkSales(Map agents) {
      }
 
  }
+
+
+private void makePictureCat(){
+	    
+  	
+  	String pictssou = parent.getProps().getProperty("pict.dir");
+	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	    TreeMap phsize = new TreeMap();
+	    
+	    
+	 try {
+   	  File f = new File(pictspda +"list.txt");
+        if (f.exists())f.delete();
+        //Kataloogi sisude kustutamine
+    	  File res2 = new File (pictspda);
+           String[] ff2 = res2.list();
+      
+//       	 Lõppes kustutamine 
+		 
+		 TreeMap prods = this.getProducts(null);
+       StringBuffer buf = new StringBuffer();
+       Iterator enume = prods.keySet().iterator();
+  
+       while (enume.hasNext()) {
+  	    	String asi = (String)enume.next();
+  	    	Product prod = (Product)prods.get(asi);
+  	    	String toode = prod.getID();  
+             if(toode.length() > 0){
+              	
+  	   	  res2 = new File (pictssou);
+            ff2 = res2.list();
+          
+       	 for(int i = 0;ff2.length>i;i++){
+           	if( ff2[i].startsWith(toode)){
+             // System.out.println("pilt olemas " + ff2[i]);
+          	File in = new File ( pictssou + ff2[i]); 
+            	if(in.isFile()){
+            	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+            	if(!inpda.exists()) {
+            		Converter.shrinkAndCopyFile(in,inpda,400);
+            	}
+                	
+                	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
+                	phsize.put(prod.getID(), kkk.length());
+          	    }
+               }
+             }
+           }
+  	   }
+      
+       
+     Iterator itera =   phsize.keySet().iterator();
+     while(itera.hasNext()) {
+  	   String prid = (String)itera.next();
+  		buf.append(prid +".jpg;"  + phsize.get(prid) + "\n");
+             
+     }
+      
+       
+       try {
+   		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+   		os.write(buf.toString());
+   		os.close();
+   	  }catch (Exception ex) {
+   		ex.printStackTrace();
+   	  }
+	 
+	 } catch (Exception e) {
+  	    getParent().showError(e);
+  	}
+    
+}
+
+
+
+@Override
+public void PictureMaker() {
+	 makePictureCat();
+	  System.exit(0);
+	
+}
 
 
 }
