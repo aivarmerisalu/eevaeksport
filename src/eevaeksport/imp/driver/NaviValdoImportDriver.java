@@ -400,20 +400,28 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
 	        header.appendChild(function);		   
 	        root.appendChild(header);
 
-	        
+	        String cust = order.getCompany();
+	        String aadr = cust.substring(cust.indexOf("_")+1);
+	        cust = cust.substring(0,cust.indexOf("_"));
 	        
 
 	        Node parties = doc.createElement("Document-Parties");
 	        Node seller = doc.createElement("Receiver");
 
 	        Node ise = doc.createElement("CodeByBuyer");
-	        Text nimiVal = doc.createTextNode(Converter.deCode(order.getCompany()));
+	        Text nimiVal = doc.createTextNode(Converter.deCode(cust));
 	        ise.appendChild(nimiVal);
+	        
+	        Node isea = doc.createElement("ShipToAddress");
+	        Text nimiVala = doc.createTextNode(Converter.deCode(aadr));
+	        isea.appendChild(nimiVala);
+	        
 	        Node ise2 = doc.createElement("ILN");
 	        Text nimiVal2 = doc.createTextNode(Converter.deCode(order.getCompany()));
 	        ise2.appendChild(nimiVal2);
 	        
 	        seller.appendChild(ise);
+	        seller.appendChild(isea);
 	        seller.appendChild(ise2);
 
 	        parties.appendChild(seller);

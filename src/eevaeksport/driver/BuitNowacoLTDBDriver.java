@@ -3182,23 +3182,22 @@ private TreeMap makePlans(){
     	        	  }
     	        	  
     	        	  
-    	        	String asi = "Sales plan: " + (int)psales + " €||"; 
+    	        	String asi = "Apyvartos planas: " + (int)psales + " €||"; 
     	          
     	          if(dd > 6){
-    	        	  asi = asi + "Plan Sales done/estimate :";
+    	        	  asi = asi + "Apyvartos planas atl./plan. :";
     	              asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
     	          }
     	          
     	           
-    	          asi = asi + "Profit plan: " + (int)psalesP + " €||"; 
+    	          asi = asi + "Pelno planas: " + (int)psalesP + " €||"; 
      	          if(dd > 6){
-     	        	  asi = asi + "Plan Profit done/estimate :";
+     	        	  asi = asi + "Pelno planas atl./plan. :";
      	              asi = asi + "     " +(int)(tehtudsalpercP*100) + "% / " + (int)(prognosalpercP*100)  + " %||";  
      	          }
      	         
      	           
-     	            
-    	           
+     	        
     	           
     	           
     	           agent.setStart( Converter.enCodeEst(asi ));

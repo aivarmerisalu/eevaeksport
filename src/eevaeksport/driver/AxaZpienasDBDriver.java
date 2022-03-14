@@ -25,6 +25,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.json.JSONException;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -48,7 +49,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter {
+public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter, FixReporter {
   public AxaZpienasDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -83,6 +84,170 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
   /**
    *
    */
+  
+  
+  private void saveAssetFile() {
+	org.json.JSONArray data = Converter.getAssetsJson(user, pass, rcompany);
+	//System.out.println(data.toString().substring(0, 3000));
+	
+	
+	     String sisu = "InventoryCode;InventoryName;FactoryId;NFC;CustomerCode;CustomerName"
+	     		+ ";LastCheck;LastCheckManagerCode;LastCheckManagerName;Status;PictureLink;PictureDate\n";
+	  int i = data.length();
+	 for(int a = 0; a < i;a++) {
+		 String nimi = null;
+		 String knimi = null;
+		 String kkood = null;
+		 String kood = null;
+		 String mnimi = null;
+		 String mkood = null;
+		 String nfc = null;
+		 String fnimi = null;
+		 String dnimi = null;
+		 Long viimaneKin = null;
+		 String fId = null;
+		 Long modified = null;
+		 String status = null;
+		 Long fcreated = null;
+		 
+		 
+
+		 
+	 try {
+		 org.json.JSONObject asset =(org.json.JSONObject) data.get(a);
+		nimi = (String) asset.get("name");
+		kood = (String) asset.get("code");
+		
+
+		
+	try {
+		org.json.JSONArray fileArr =(org.json.JSONArray) asset.get("files");
+		if(fileArr != null) {
+			int e = fileArr.length();
+			 for(int u = 0; u < e;u++) {
+				 org.json.JSONObject fileO =(org.json.JSONObject) fileArr.get(u);
+				 fnimi = (String) fileO.get("filename");
+				 fcreated = (Long) fileO.get("created");
+				 }
+		}
+	} catch (JSONException e) {
+	}	
+	
+	try {
+		viimaneKin = (Long) asset.get("lastConfirmed");
+		//System.out.println(Converter.getDDsMMMsYYYYString(new Date(viimaneKin)));
+	} catch (JSONException e) {
+	}	
+	
+	
+	try {
+		status = (String) asset.get("status");
+	}catch (JSONException e) {
+	}	
+	
+	
+	
+	try {
+		modified = (Long) asset.get("modified");
+		
+	} catch (JSONException e) {
+	}
+	
+	
+	try {
+		fId = (String) asset.get("factoryId");
+	} catch (JSONException e) {
+	}	
+	
+	
+	
+	try {
+		org.json.JSONArray dims =(org.json.JSONArray) asset.get("dimensions");
+		if(dims != null) {
+			int e = dims.length();
+			 for(int u = 0; u < e;u++) {
+				 org.json.JSONObject dimO =(org.json.JSONObject) dims.get(u);
+				 dnimi = (String) dimO.get("name");
+				}
+		}
+	} catch (JSONException e) {
+	}	
+		
+		
+		try {
+			nfc = (String) asset.get("nfcTag");
+		} catch (JSONException e) {
+		}	
+		
+		
+		
+		try {
+			 org.json.JSONObject manager =(org.json.JSONObject) asset.get("changeManager");
+			 if(manager != null) {
+				 mnimi = (String) manager.get("name");
+				 mkood = (String) manager.get("code");
+			 }
+			
+		} catch (JSONException e) {
+		}	
+		
+		
+		try {
+			
+			 org.json.JSONObject customer =(org.json.JSONObject) asset.get("customer");
+			 if(customer != null) {
+				 knimi = (String) customer.get("name");
+				 kkood = (String) customer.get("code");
+
+			 }
+		} catch (JSONException e) {
+		}	
+
+		
+		//"InventoryCode;InventoryName;FactoryId;NFC;CustomerCode;CustomerName"
+		//+ ";LastCheck;LastCheckManagerCode;LastCheckManagerName;Status;PictureLink;PictureDate\n";
+		
+		sisu = sisu + kood + ";" + nimi + ";" + nonull(fId) + ";" + nonull(nfc) + ";" + nonull(kkood) + ";" + nonull(knimi) + ";" + lnonull(viimaneKin)
+		+ ";" + nonull(mkood) + ";" + nonull(mnimi) + ";" + nonull(status) + ";" + nonull(fnimi) + ";" + lnonull(fcreated);
+		sisu = sisu + "\n";
+	} catch (JSONException e) {
+		e.printStackTrace();
+	}
+		//System.out.println(kood + " ja " + nimi + " ja " +  knimi + " ja " + kkood);
+		//System.out.println(  " ja " + nfc +   " ja " +  mnimi + " ja " + mkood);
+		//System.out.println( dnimi +" "+ kood);
+	 }
+	 
+	//  Calendar cal = ;
+	
+	   
+	 Converter.saveFile("inventorydata/Inventorydata"+  Converter.getDDpMMpYYYYpString(Calendar.getInstance()) + ".txt", sisu);
+	 System.exit(0);
+	
+}
+  private String lnonull(Long a) {
+	   if(a == null) {
+		   return " ";
+		   
+	   }
+	   Calendar cal = Calendar.getInstance();
+	   cal.setTimeInMillis(a);
+	   return Converter.getDDpMMpYYYYpString(cal);
+  }
+  
+  
+  
+  private String nonull(String a) {
+	   if(a == null) {
+		   return " ";
+		   
+	   }
+	   return a;
+  }
+  
+
+  
+  
   public void connectionUp(){
   }
 	public Vector getLastThreeData() {
@@ -2993,4 +3158,10 @@ String   cmd2 = "  select  a.EmployeeCode as agent,b.BpcItemBrandCode as brands,
 
   private String subjectFilesTo = null;
     private NumberFormat NF = NumberFormat.getInstance();
+	@Override
+	public void FixReporter() {
+		saveAssetFile();
+	}
+	
+	
 }

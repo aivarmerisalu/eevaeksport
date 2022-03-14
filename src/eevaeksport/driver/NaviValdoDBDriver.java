@@ -381,19 +381,38 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     "  		   GROUP BY l.[Location Code], l.[Item No_]  having sum(l.[Quantity])  != 0 " ;
 	
     		  
-    		 
+    		  String  cmd2 = "  SELECT l.[No_] AS kood, sum(l.[Quantity]) AS kogus FROM [VOLDEMĀRS SIA$Sales Line] l " + 
+    		  		"                  INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=l.[No_] WHERE  t.[Send to E-Pasaule] = 1 " + 
+    		  		"			      GROUP BY  l.[No_]  having sum(l.[Quantity])  != 0 " ;
+    		  
+    				
     		  
     		         if (isDebug()) System.out.println(cmd);
     		         StringBuffer products = new StringBuffer();
     		         try {
     		        	 Connection con = getNewConnection2();
-  
-    		        	 
-   
- 
-      		           Statement st = con.createStatement();
-      		           ResultSet rs = st.executeQuery(cmd);
+                        Statement st = con.createStatement();
+      		           ResultSet rs = st.executeQuery(cmd2);
 
+      		     
+      		           
+      		           
+      		       while (rs.next()) {
+      		         String kood = rs.getString("kood");
+	            		 if(kood != null){
+                            kood = kood.trim();
+	                        double seis = rs.getDouble("kogus"); 
+	                        ladutr.put( kood, seis * -1);  
+      		           }
+      		       }
+                  
+      		       rs.close();
+  		        
+      		           
+      		           
+      		           
+      		           
+      		         rs = st.executeQuery(cmd);
     		           while (rs.next()) {
 
     		             String kood = rs.getString("kood");
@@ -1119,7 +1138,7 @@ con3.close();
              
               
                 
-              if(ladutr.get(id) != null ){
+              if(ladutr.get(id) != null && ladutr.get(id) > 0){
             	  prod.setStock(ladutr.get(id));
               }
              

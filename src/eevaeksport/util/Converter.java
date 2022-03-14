@@ -2328,7 +2328,24 @@ public class Converter {
 	return res;
 }
 	
-	
+	 public static JSONArray getAssetsJson(String user , String pass, String company){
+			JSONArray cc =  null;
+			
+			  eevaeksport.util.ReportingService serv = new ReportingService();
+			  serv.user =  user;
+				serv.pass = pass;
+				serv.company = company;
+				try {
+				 cc = 	serv.getAssets(null);
+				int lenn = cc.length();
+				//System.out.println("WebCust suurus " + lenn);
+	      	} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			return cc;
+		}
+
 	 
 	 
 	 public static TreeMap loadFixLektus(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
