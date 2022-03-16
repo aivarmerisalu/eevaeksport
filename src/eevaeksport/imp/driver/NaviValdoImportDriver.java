@@ -225,7 +225,7 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
 	        Element root = doc.createElement("Document-Order");
 	        doc.appendChild(root);
 
-
+double kordaja = 1;
 
 	        boolean tagastus = false;
 	   	 	 Vector lin = order.getOrderLines();
@@ -241,6 +241,7 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
 	   	 	 
 	   	 	 if(nega == lin.size()){
 	   		    	tagastus = true;
+	   		    	kordaja =-1;
 	   		    }
 	   	 	
 	   	 	 
@@ -250,6 +251,7 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
 	   	 	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0.1 && (order.getStatus() == 5 || order.getStatus() == 4)){
 	   	 	 			repr = true;
 	   	 	 			tagastus = false;
+	   	 	 		    kordaja =-1;
 	   	 	 		}
 	   	 
 	   	 	 		
@@ -451,7 +453,7 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
 	        	  sum = sum + (line.getKogus()* line.getPrice());
 	        	  System.out.println("rida " + line.getToode() + " " + line.getKogus() + " " + line.getPrice() + " " + line.getKogus()* line.getPrice() + " " + sum);
 	        	  coun++;
-	          	addLine(line, read, doc, coun, order, repr);
+	          	addLine(line, read, doc, coun, order, repr, kordaja);
 	          }
 	          }
 
@@ -520,7 +522,7 @@ if(invoice){
    
    
    
-   private void addLine(OrderLine line, Node read, Document doc,int counter ,Order order, boolean repr) throws SQLException{
+   private void addLine(OrderLine line, Node read, Document doc,int counter ,Order order, boolean repr, double kordaja) throws SQLException{
 	   
 
 	
@@ -561,14 +563,14 @@ if(invoice){
 
 	    
 
-	     double kogus = line.getKogus();
+	     double kogus = line.getKogus() * kordaja;
 	     double price = line.getPrice();
 	     double disc = line.getDiscount();
 	     String unit = line.getUnit();
 	     
 	     Node koGus = doc.createElement("OrderedQuantity");
 	     
-	     Text kogusVal = doc.createTextNode(getNF().format(kogus));
+	     Text kogusVal = doc.createTextNode(getNF().format(kogus ));
 	     koGus.appendChild(kogusVal);
 	     ridaitem.appendChild(koGus);
 
@@ -590,6 +592,16 @@ if(invoice){
 		     ridaitem.appendChild(yhiku_hind);
 	    }
 	
+	    if(repr){
+	    	
+		     Node yhiku_hind = doc.createElement("CompensationSum");
+		    	double compsum = (price - (price * (100-disc)/100)) * kogus  ;
+		        Text yhiku_hindVal = doc.createTextNode(this.nf.format(compsum));
+			     yhiku_hind.appendChild(yhiku_hindVal);
+			     ridaitem.appendChild(yhiku_hind);
+		    }
+		
+		     
 	     
 	     Node yhiku_sum = doc.createElement("OrderedNetAmount");
 	      Text yhiku_sumVla = doc.createTextNode(this.nf.format(price * kogus));
