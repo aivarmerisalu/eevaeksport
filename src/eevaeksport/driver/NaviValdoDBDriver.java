@@ -93,25 +93,25 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
 	
 	  	 String  sql = " select * from ( SELECT [Sales Code] AS custid,'' AS clgroup,[Item No_] AS prodid,'' AS prodgroup, " +
-            "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,0  as camp from" +
+            "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,[Campaign Category]  as camp from" +
             "   [VOLDEMĀRS SIA$Sales Price] where (getdate()+5 between [Starting Date] and [Ending Date]+5  or  " +
                        "  (year ([Ending Date]) = 1753 and getdate()+5 > [Starting Date]) ) and [Sales Type] = 0   " +
                           "  union  SELECT '' AS custid,[Sales Code] AS clgroup,[Item No_]  AS prodid,'' AS prodgroup,  " +
-             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,0 as camp from  " +
+             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,[Campaign Category] as camp from  " +
              "  [VOLDEMĀRS SIA$Sales Price] where ( getdate()+1 between [Starting Date] and [Ending Date] or (getdate()+1 > [Starting Date]) and  year ([Ending Date]) = 1753) " +
 			  "  and [Sales Type] = 1 " +   
                           "  union  select [Sales Code] AS custid, '' AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
-            "   0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,0 as camp " +
+            "   0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,'' as camp " +
                        "  from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 1 and [Sales Type] = 0   " +     
                    "  union select [Sales Code] AS custid, ''  AS clgroup,[Code] AS prodid,'' AS prodgroup, " +
-              " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,0 as camp  " +
+              " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi '' as camp  " +
                        "  from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 0 and [Sales Type] = 0 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or  " +
                       "   year ([Ending Date]) = 1753) " +
                       " union select '' AS custid, [Sales Code] AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
-                     " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,0 as camp " +
+                     " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,'' as camp " +
                      "    from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 1 and [Sales Type] = 1        " +
                     " union select '' AS custid, [Sales Code] AS clgroup,[Code] AS prodid,'' AS prodgroup, " +
-                   " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,0 as camp " +
+                   " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,'' as camp " +
                     "     from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 0 and [Sales Type] = 1 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or " + 
                      "    year ([Ending Date]) = 1753) ) as ta order by custid , clgroup, prodid ,paevi " ; 
 			
@@ -638,8 +638,30 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
    TreeMap<String,Double> debts = new TreeMap<String,Double>();
    TreeMap<String,Double> blokk = new TreeMap<String,Double>();
    TreeMap<String,Double> used = new TreeMap<String,Double>();
-
    
+
+   String sqlus = "   SELECT l.[Sell-to Customer No_] AS kood,  sum([Shipped Not Invoiced (LCY)]) as summa FROM [VOLDEMĀRS SIA$Sales Line] l " + 
+   		"                  GROUP BY  l.[Sell-to Customer No_]   having sum([Shipped Not Invoiced (LCY)] )  != 0 ";
+
+try {
+Connection con3 = getNewConnection2();
+Statement stmt3 = con3.createStatement();
+ResultSet rs3 = stmt3.executeQuery(sqlus);
+while(rs3.next()){
+	  String maksja  = rs3.getString("kood");
+   double sum = rs3.getDouble("summa");
+   if(sum !=0){
+	   used.put(maksja, sum);
+   }
+ }
+
+rs3.close();
+stmt3.close();
+con3.close();
+} catch (Exception e){
+   e.printStackTrace();
+ }
+
    
  String  sql3 =  "  SELECT     No_ AS kood, CASE WHEN k.[Bill-to Customer No_] = '' THEN " +
            " (SELECT     SUM(de.[Amount (LCY)]) FROM [VOLDEMĀRS SIA$Cust_ Ledger Entry] c INNER JOIN  " +
@@ -662,6 +684,12 @@ while(rs3.next()){
 	  String maksja  = rs3.getString("kood");
    double sum = rs3.getDouble("used");
    if(sum !=0){
+	   if(used.get(maksja) != null) {
+		   double vana = used.get(maksja);
+		   used.put(maksja, sum + vana);
+	   } else {
+		   used.put(maksja, sum);
+	   }
 	   used.put(maksja, sum);
    }
  }

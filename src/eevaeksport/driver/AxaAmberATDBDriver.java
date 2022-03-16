@@ -6987,7 +6987,7 @@ private void loadSignatures(){
 		          			
 		          			String axat = "IMPORTED to AXAPTA";
                             StringBuffer sb = new StringBuffer();
-		          			String subtext = (axat +  " Cellar Trends Ltd. <br>Stonehouse Farm/Ashby Rd, Swadlincote DE11 7BP, United Kingdom<br>").trim();
+		          			String subtext = (axat +  " Amber Austria Ltd. <br>Stonehouse Farm/Ashby Rd, Swadlincote DE11 7BP, United Kingdom<br>").trim();
 		          			String regno = (" No. 3705002<br> Manager : " + agent.getID());
 
 		          			      subtext = subtext + " " + regno;
