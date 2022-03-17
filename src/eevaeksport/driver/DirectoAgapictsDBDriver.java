@@ -688,11 +688,12 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 
 
  
-    
+  
+	  
      
    public TreeMap getAgents(){
 	   
-	   
+
 	   
      TreeMap tm = new TreeMap();
      try{
@@ -1714,7 +1715,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		
 	  }
 
-   private Vector getCP(String custid , String number, String date ){
+   private Vector getCP(String custid , String number, String date,HashSet check ){
 
 	   Vector result = new Vector();
 	   try{
@@ -1765,7 +1766,15 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			        	}
 			        	
 		        if(toode != null && toode.trim().length() > 0){
-			        result.add(new CustProd(custid, toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
+		        	
+		        
+		        	if(!check.contains(custid+""+toode)) {
+		        		  result.add(new CustProd(custid, toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
+		        		  check.add(custid+""+toode);
+		        			
+		        	}
+			      
+			      
 			        if(!prodCodes.contains(toode)){
 				        prodCodes.add(toode);	
 			        }
@@ -2669,6 +2678,8 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    public Vector getCustomerProductsList2(){
 	   //1.teeme klientide arvete nimekirja .
 	    custProds = new Vector();
+	    
+	    HashSet check = new HashSet();
 	
 	   Calendar cal = Calendar.getInstance();
 	   String d = cal.get(Calendar.DAY_OF_MONTH)+ "";
@@ -2718,6 +2729,8 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
 		        BufferedReader in = new BufferedReader(isr);
 
+		        TreeMap malu = new TreeMap();
+		        
 		        String inputLine;
 		        StringBuffer inputLineBuf = new StringBuffer();
 		        while ((inputLine = in.readLine()) != null){
@@ -2740,24 +2753,49 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			        		String date = line.substring(ind + 6);
 			        		date = date.substring(0,date.indexOf("\""));
 			        		// System.out.println(date + " " + number + " " + custid);	
-				        		
-			        		 if(isOkDate(date)){
-			        			// System.out.println(date + "  222 " + number + " " + custid);	
-					        		
-			     					Vector cps = this.getCP(Converter.deCode(custid),number,date);
-			     					if(cps != null){
-			     						Enumeration eee = cps.elements();
-			     						while( eee.hasMoreElements()){
-				     						custProds.add(eee.nextElement());
-				     					//	System.out.println(date + " " + number + " " + custid);
-			     						}			     				
-					        			 	
-			     					}
-			     				}
+				        		malu.put(date+custid+ number, number+"@"+date);
+			        		
 			        	  }		
-		        	}           	
+		        	}
+		        	
+		        	   Iterator itera= 	malu.keySet().iterator();
+				        Vector arr = new Vector();
+			        	while(itera.hasNext()) {
+			        		arr.add((String)itera.next());
+			        	}
+			        //	System.out.println("  222 "  + arr.toString() );	
+		        	Vector aa = upsideVector(arr);
+		      
+		        	//System.out.println( "  333 " + aa.toString() );	
+		        	
+		        	for(int u = 0 ; aa.size() > u ;u++) {
+		        		String key = (String)aa.get(u);
+		        		String vahe = (String) malu.get(key);
+		        		String date = vahe.substring(vahe.indexOf("@")+1);
+		        		String number = vahe.substring(0, vahe.indexOf("@"));
+		        		
+		        	
+		        	 if(isOkDate(date)){
+		        			// System.out.println(date + "  222 " + number + " " + custid);	
+				        		
+		     					Vector cps = this.getCP(Converter.deCode(custid),number,date ,check);
+		     					if(cps != null){
+		     						Enumeration eee = cps.elements();
+		     						while( eee.hasMoreElements()){
+		     							
+		     						
+		     							
+			     						custProds.add(eee.nextElement());
+			     					//	System.out.println(date + " " + number + " " + custid);
+		     						}			     				
+				        			 	
+		     					}
+		     				}
+		        	}
+		        	
+		        	
 		        }
-		      //  System.out.println(inputLineBuf);
+		      //  Converter.saveFile("data/sort"+custid+ ".txt" , inputLineBuf.toString());
 		        in.close();
 		        isr.close();
 		        ins.close();
@@ -2768,6 +2806,15 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   return custProds;
    }
 
+   public  Vector upsideVector(Vector inVec){
+	   Vector sorted = new Vector(inVec.size());
+        while(inVec.size() > 0){
+        	sorted.add(inVec.get(inVec.size()-1));
+        	inVec.remove(inVec.size()-1);
+        }
+        return sorted;
+      }
+   
    public String getStartingTime(){
      return null;
    }

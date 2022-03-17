@@ -93,18 +93,18 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
 	
 	  	 String  sql = " select * from ( SELECT [Sales Code] AS custid,'' AS clgroup,[Item No_] AS prodid,'' AS prodgroup, " +
-            "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,[Campaign Category]  as camp from" +
+            "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi , [Akcija]  as camp from" +
             "   [VOLDEMĀRS SIA$Sales Price] where (getdate()+5 between [Starting Date] and [Ending Date]+5  or  " +
                        "  (year ([Ending Date]) = 1753 and getdate()+5 > [Starting Date]) ) and [Sales Type] = 0   " +
                           "  union  SELECT '' AS custid,[Sales Code] AS clgroup,[Item No_]  AS prodid,'' AS prodgroup,  " +
-             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,[Campaign Category] as camp from  " +
+             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi , [Akcija] as camp from  " +
              "  [VOLDEMĀRS SIA$Sales Price] where ( getdate()+1 between [Starting Date] and [Ending Date] or (getdate()+1 > [Starting Date]) and  year ([Ending Date]) = 1753) " +
 			  "  and [Sales Type] = 1 " +   
                           "  union  select [Sales Code] AS custid, '' AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
             "   0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,'' as camp " +
                        "  from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 1 and [Sales Type] = 0   " +     
                    "  union select [Sales Code] AS custid, ''  AS clgroup,[Code] AS prodid,'' AS prodgroup, " +
-              " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi '' as camp  " +
+              " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,'' as camp  " +
                        "  from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 0 and [Sales Type] = 0 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or  " +
                       "   year ([Ending Date]) = 1753) " +
                       " union select '' AS custid, [Sales Code] AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
@@ -137,7 +137,7 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
              String sdate = rs.getString("startday");
              String curr = rs.getString("val");
              int paevi = rs.getInt("paevi");
-             int camp  = rs.getInt("camp");
+             String camp  = rs.getString("camp");
              
              MatrixLine mline = new MatrixLine();
 
@@ -158,18 +158,20 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
              
            
              
-            if(paevi < 60){
+            if( paevi < 60 || camp.length() > 0 ){
             	 if(sdate != null  && !sdate.startsWith("1753")){
                 	 mline.setStartDate(sdate.substring(0,10));
                  }
                  if(date != null && !date.startsWith("1753")){
                 	 mline.setEndDate(date.substring(0,10));
                  }
-             }else if(paevi > 60 && camp == 0){
+             }else if(paevi > 60){ //  && camp == 0
             	// mline.setProdLevel("pr");
              }
              
-             
+             if(camp != null && camp.trim().length() > 0) {
+            	 mline.setLineinfo(camp);
+             }
              
              
              if (prodID != null && prodID.length() > 0) {
@@ -621,7 +623,28 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
    
   private HashSet sorts = new HashSet();
   
-
+private HashSet getNoDebts() {
+	
+	  HashSet nodebts = new HashSet();
+	  
+	  nodebts.add("19037900"); //MAXIMA Latvija, SIA
+	  nodebts.add("19008400"); // RIMI LATVIA, SIA
+	  nodebts.add("19000121"); // RANVUS, SIA
+	  nodebts.add("19000015"); //LENOKA, SIA
+	  nodebts.add("16109200"); // BALTIC RESTAURANTS LATVIA, SIA
+	  nodebts.add("11433000"); // FIRMA MADARA 89, SIA
+	  nodebts.add("16141863"); // DEPO DIY, SIA
+	  nodebts.add("19033900"); // VITA MĀRKETS, SIA
+	  nodebts.add("16000396"); // GABRIĒLA, SIA
+	  nodebts.add("16141952"); // VIRŠI-A, AS
+	  nodebts.add("19000708"); // TOPLOGISTIC, SIA
+	  nodebts.add("10500385"); // DGR SOLUTIONS, SIA
+	  nodebts.add("16110100"); // DEVONA, SIA
+	  nodebts.add("16049100"); // SANITEX ,SIA
+	  nodebts.add("16141863"); // DEPO DIY LT, UAB
+return nodebts;
+	
+}
   
 	
   
@@ -635,6 +658,8 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	}
     	   
 
+    	HashSet noDebts = this.getNoDebts();
+    	   
    TreeMap<String,Double> debts = new TreeMap<String,Double>();
    TreeMap<String,Double> blokk = new TreeMap<String,Double>();
    TreeMap<String,Double> used = new TreeMap<String,Double>();
@@ -790,7 +815,11 @@ con3.close();
     	        if(old<dueint){
     	       this.debtDays.put(custID,dueint+"") ;
     	        }
-    	        this.debtList.add(debt);
+    	        
+    	        if (!noDebts.contains(payerID)) {
+    	            this.debtList.add(debt);
+    	        }
+    	   
     	            }
 
     	       rs1.close();
@@ -847,13 +876,17 @@ con3.close();
     	             }
     	            customer.setPayer(id);
     	           	
-    	           	if(used.get(id) != null){
-    	           		customer.setUsedCredit(used.get(id));
-    	           	}
-    	           	if(debts.get(customer.getPayer()) != null){
-    	           		customer.setDebt(debts.get(customer.getPayer()));
-    	           	}
-    	           	
+    	            if (!noDebts.contains(id)) {
+    	            	if(used.get(id) != null){
+        	           		customer.setUsedCredit(used.get(id));
+        	           	}
+        	           	if(debts.get(customer.getPayer()) != null){
+        	           		customer.setDebt(debts.get(customer.getPayer()));
+        	           	}
+        	           	
+    	            }
+    	            
+    	           
     	           	if(blokk.get(customer.getPayer()) != null && blokk.get(customer.getPayer()) > 0){
     	           		customer.setSalesBlock(true);
     	           	}
@@ -997,7 +1030,7 @@ con3.close();
 
     	           String chainname  = rs.getString("chainname");
     	           if(chainname != null && chainname.trim().length()>0){
-    	        	customer.setCity("Tiklas :" +  chainname.trim());
+    	        	customer.setCity("Tīkls :" +  chainname.trim());
     	           } 
     	           
     	           String chain  = rs.getString("chain");

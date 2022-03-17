@@ -227,6 +227,12 @@ public class Converter {
 								if(gg.toLowerCase().indexOf("ean") != -1) {
 									ea = a;
 								}
+								if(gg.toLowerCase().indexOf("järve") != -1) {
+									r = a;
+									found = true;
+								
+									break;
+								}
 								if(gg.toLowerCase().indexOf("kadaka") != -1) {
 									r = a;
 									found = true;
@@ -254,7 +260,13 @@ public class Converter {
 									String gg = row.getCell((short) a).getStringCellValue().trim();
 									if(gg.toLowerCase().indexOf("ean") != -1) {
 										ea = a;
-									}
+										if(gg.toLowerCase().indexOf("järve") != -1) {
+											r = a;
+											found = true;
+											addrow = 1;
+											break;
+										}}
+									
 									if(gg.toLowerCase().indexOf("kadaka") != -1) {
 										r = a;
 										found = true;
@@ -280,6 +292,13 @@ public class Converter {
 									String gg = row.getCell((short) a).getStringCellValue().trim();
 									if(gg.toLowerCase().indexOf("ean") != -1) {
 										ea = a;
+									}
+									if(gg.toLowerCase().indexOf("järve") != -1) {
+										r = a;
+										found = true;
+										
+										addrow = 2;
+										break;
 									}
 									if(gg.toLowerCase().indexOf("kadaka") != -1) {
 										r = a;
@@ -377,7 +396,7 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("r "  + r + " "+ ea + " " + addrow + " " + groups.toString());
+						//System.out.println("r "  + r + " "+ ea + " " + addrow + " " + groups.toString());
 						//System.exit(0);
 						
 						  

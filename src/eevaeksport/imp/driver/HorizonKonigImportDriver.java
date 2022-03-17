@@ -1,11 +1,15 @@
 package eevaeksport.imp.driver;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -17,6 +21,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -206,9 +211,75 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  }
 	  
 
+  private TreeMap getPandiPakend() {
+	   TreeMap pants = new TreeMap();
+		FileInputStream is = null;
+		try {
+			is = new FileInputStream("deposit.txt");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		InputStreamReader isr = null;
+		try {
+			isr = new InputStreamReader(is, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		BufferedReader reader = new BufferedReader(isr);
+		
+		
+	    String         line = null;
+	   
+	    String         ls = System.getProperty("line.separator");
 
+	  
+	        try {
+				while((line = reader.readLine()) != null) {
+					int vord = line.indexOf("=");
+					
+					if(vord > -1) {
+						String key =line.substring(0,vord) ;
+					String val = line.substring(vord+1);
+					
+						pants.put(key,val);
+					}
+					
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+	  
+	    return pants;
+	 }
   
-    
+  
+  private TreeMap getPandiPakendHind() throws SQLException{
+	   Connection con = getNewConnection();
+	   TreeMap pants = new TreeMap();
+	    String sql1 = " SELECT PK_PIESK as PK_NOM, KODS as kood, LIKME AS price " + 
+	    		"FROM APV04761.NPIESK " + 
+	    		"WHERE KODS LIKE N'DEP%'" ;
+	   
+	    Statement st1 = con.createStatement();
+	    ResultSet rs1 = st1.executeQuery(sql1);
+	    while (rs1.next()) {
+	    	String koodnom = rs1.getString("PK_NOM").trim();
+	      	String kood = rs1.getString("kood").trim();
+	    	double hind = rs1.getDouble("price");
+	  
+	    	pants.put(kood, hind);
+	    	pants.put(kood+"nom", koodnom);
+	    }
+	      // System.out.println(toode + " prod1 " + prod);
+	    rs1.close();
+	    st1.close();
+	    con.close();
+	    return pants;
+	 }
+	  
  
   
   
@@ -2308,7 +2379,23 @@ try{
   
 
  private void makeOutput(Order order, Order orig){
-	  	
+	 
+	 Hashtable pandikas =  new Hashtable();
+	
+	 TreeMap pantHinnad = null;
+		
+	 TreeMap	pants = getPandiPakend();
+			System.out.println("pants " + pants.size());
+	
+		try {
+			pantHinnad = getPandiPakendHind();
+			System.out.println("panthinnad " + pantHinnad.size());
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	 
+	 
 	 	try {
 	 		
 	 	
@@ -2456,8 +2543,9 @@ try{
 		    	  OrderLine line = (OrderLine) lines.elementAt(i);
 		    	  JSONObject lin  = new JSONObject(); 
 		    	  row.put(lin);
+		    	  String prid = getProdId(line.getToode());
 		    	  lin.put("RN_VEIDS", 0);
-		    	  lin.put("PK_NOM",  getProdId(line.getToode()));
+		    	  lin.put("PK_NOM", prid );
 		    	  double kogus = line.getKogus();
 		    	  if(kogus  > 100000){
 		    		  kogus = 99999;
@@ -2479,10 +2567,48 @@ try{
 	                 }
 		          }
 			      
+		    	  if(pants != null) {
+				    	 String pant = (String) pants.get(line.getToode())  ; 
+					     
+					     if(pant != null){
+				           	  if(pandikas.get(pant) == null){
+				           		  pandikas.put(pant,line.getKogus()+"");
+				                 } else {
+				                 	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+line.getKogus())+"");
+				                 }
+				              } 
+				     }
 			      counter++;
 			      }
 		      
-	
+		      if( pandikas.size()>0){ 
+		        	Enumeration enumpant = pandikas.keys();
+		        	
+		         while(enumpant.hasMoreElements()){
+		         	String kood = (String)enumpant.nextElement();
+		         	if(kood.trim().length()>0){
+		         		 JSONObject lin  = new JSONObject(); 
+				    	  row.put(lin);
+				    	  String prid = (String)pantHinnad.get(kood+"nom");
+				    	  lin.put("RN_VEIDS", 2);
+				    	  lin.put("PK_NOM", prid );
+				    	  double kogus = Double.parseDouble(pandikas.get(kood)+"");
+				    	  double hind = Double.parseDouble(pantHinnad.get(kood)+"");
+				    	  lin.put("DAUDZ", hind);
+				    	  lin.put("V_KODS", "gab");
+				    	  //  <!--KODS>113</KODS-->
+				          // <!--BAR_KODS>4751012090010</BAR_KODS-->
+				         //   <TEKSTS>RindÄ PiezÄ«mes</TEKSTS>
+				         //  <TEMPERAT>RindÄ raksturojums</TEMPERAT>
+				    	
+				    	      
+						    	  lin.put("CENA", kogus);
+						    	 
+			                 
+				          }
+		        	}    	
+		         }
+		        
 	
 	// 	System.out.println("output' " + resource.toString()); 
 	 	

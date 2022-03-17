@@ -347,7 +347,7 @@ HashMap pants = null;
       
       
       sb.append(getLineNr(cou));
-      sb.append("          <I06_DOK_DATA>" +  getDateString(order.getShipCal()) + "</I06_DOK_DATA>" + ls); 
+      sb.append("          <I06_DOK_DATA>" +  getDateString(Calendar.getInstance()) + "</I06_DOK_DATA>" + ls); 
       //getDateString(Calendar.getInstance())
       cou++;
   
