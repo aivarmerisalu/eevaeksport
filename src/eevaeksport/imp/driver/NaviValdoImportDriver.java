@@ -336,10 +336,26 @@ double kordaja = 1;
 		        header.appendChild(com);
 		        comm = order.getInfo();
 	 		}
-	 		System.out.println("Comment " + comm);
+	 		System.out.println("Comment " + comm + " " + order.getTeostaja() + " " + order.getShipMode());
 	        
-	        
-	 		  
+	 		if(order.getTeostaja() != null && order.getTeostaja().trim().length() >0){
+
+	 			Node coms = doc.createElement("CustomerOrderNumber");
+		        Text comVals = doc.createTextNode(order.getTeostaja());
+		        coms.appendChild(comVals);
+		        header.appendChild(coms);
+		   
+	 		}
+
+	 		if(order.getShipMode() != null && order.getShipMode().trim().length() >0){
+
+	 			Node coms = doc.createElement("ShipMode");
+		        Text comVals = doc.createTextNode(order.getShipMode());
+		        coms.appendChild(comVals);
+		        header.appendChild(coms);
+		   
+	 		}
+	 		
 	       
 
 	        Node kuupaev = doc.createElement("OrderDate");

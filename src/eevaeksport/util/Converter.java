@@ -4429,10 +4429,7 @@ try{
 		serv.pass = pass;
 		serv.company = company;
 		String res = "";
-		try {
-			org.json.JSONArray array = serv.getSVdata(from, to , type , subTypes);
-			//System.out.println("oioi "+ array.toString());
-		//	throw new Exception("demo"); 
+ 
 			try {
 				String mm = (from.getMonth()+1)+ "";
 				if(mm.length() == 1)
@@ -4449,15 +4446,19 @@ try{
 					}
 				}
 				res = "svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" ;
-					Converter.saveFile(  "svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" , array.toString());
 				
+				File ff = new File("svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" );
+				if(!ff.exists()) {
+					org.json.JSONArray array = serv.getSVdata(from, to , type , subTypes);
+					Converter.saveFile(  "svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" , array.toString());
+			
+				}
+					
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		 
-		  } catch (Exception t) {
-			t.printStackTrace();
-		  }
+		
 		
 		return res;
 		

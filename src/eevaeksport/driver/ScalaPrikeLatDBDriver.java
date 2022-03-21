@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -48,7 +50,7 @@ import eevaeksport.util.Converter;
  * @author Tarmo Tubro
  * @version 1.0
  */
-public class ScalaPrikeLatDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Promo,Discounter{
+public class ScalaPrikeLatDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Promo,Discounter,PictureMaker{
 
     /**
      * Constructor declaration
@@ -1406,6 +1408,86 @@ return sb.toString();
          NF = aNF;
     }
 
+
+@Override
+public void PictureMaker() {
+	 makePictureCat();
+	  System.exit(0);
+	
+}
+private void makePictureCat(){
+	    
+  	
+  	String pictssou = parent.getProps().getProperty("pict.dir");
+	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	    TreeMap phsize = new TreeMap();
+	    
+	    
+	 try {
+   	  File f = new File(pictspda +"list.txt");
+        if (f.exists())f.delete();
+        //Kataloogi sisude kustutamine
+    	  File res2 = new File (pictspda);
+           String[] ff2 = res2.list();
+      
+//       	 Lõppes kustutamine 
+		 
+		 TreeMap prods = this.getProducts(null);
+       StringBuffer buf = new StringBuffer();
+       Iterator enume = prods.keySet().iterator();
+  
+       while (enume.hasNext()) {
+  	    	String asi = (String)enume.next();
+  	    	Product prod = (Product)prods.get(asi);
+  	    	String toode = prod.getID();  
+             if(toode.length() > 0){
+              	
+  	   	  res2 = new File (pictssou);
+            ff2 = res2.list();
+          
+       	 for(int i = 0;ff2.length>i;i++){
+           	if( ff2[i].startsWith(toode)){
+             // System.out.println("pilt olemas " + ff2[i]);
+          	File in = new File ( pictssou + ff2[i]); 
+            	if(in.isFile()){
+            	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+            	if(!inpda.exists()) {
+            		Converter.shrinkAndCopyFile(in,inpda,400);
+            	}
+                	
+                	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
+                	phsize.put(prod.getID(), kkk.length());
+          	    }
+               }
+             }
+           }
+  	   }
+      
+       
+     Iterator itera =   phsize.keySet().iterator();
+     while(itera.hasNext()) {
+  	   String prid = (String)itera.next();
+  		buf.append(prid +".jpg;"  + phsize.get(prid) + "\n");
+             
+     }
+      
+       
+       try {
+   		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+   		os.write(buf.toString());
+   		os.close();
+   	  }catch (Exception ex) {
+   		ex.printStackTrace();
+   	  }
+	 
+	 } catch (Exception e) {
+  	    getParent().showError(e);
+  	}
+    
+}
+
+
+       
        
     public static final String DRIVER_VERSION = "ScalaPrikeLat";
     private String             url = "jdbc:odbc:scalaDB";

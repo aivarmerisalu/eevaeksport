@@ -88,7 +88,7 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
   
   private void saveAssetFile() {
 	org.json.JSONArray data = Converter.getAssetsJson(user, pass, rcompany);
-	//System.out.println(data.toString().substring(0, 3000));
+//	System.out.println(data.toString().substring(0, 3000));
 	
 	
 	     String sisu = "InventoryCode;InventoryName;FactoryId;NFC;CustomerCode;CustomerName"
@@ -106,7 +106,6 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 		 String dnimi = null;
 		 Long viimaneKin = null;
 		 String fId = null;
-		 Long modified = null;
 		 String status = null;
 		 Long fcreated = null;
 		 
@@ -115,7 +114,7 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 		 
 	 try {
 		 org.json.JSONObject asset =(org.json.JSONObject) data.get(a);
-		nimi = (String) asset.get("name");
+		nimi = ((String) asset.get("name")).replaceAll("\\r\\n|\\r|\\n", " ");
 		kood = (String) asset.get("code");
 		
 
@@ -126,7 +125,7 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 			int e = fileArr.length();
 			 for(int u = 0; u < e;u++) {
 				 org.json.JSONObject fileO =(org.json.JSONObject) fileArr.get(u);
-				 fnimi = (String) fileO.get("filename");
+				 fnimi = (String) fileO.get("url");
 				 fcreated = (Long) fileO.get("created");
 				 }
 		}
@@ -146,12 +145,6 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 	}	
 	
 	
-	
-	try {
-		modified = (Long) asset.get("modified");
-		
-	} catch (JSONException e) {
-	}
 	
 	
 	try {
@@ -184,7 +177,7 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 		try {
 			 org.json.JSONObject manager =(org.json.JSONObject) asset.get("changeManager");
 			 if(manager != null) {
-				 mnimi = (String) manager.get("name");
+				 mnimi = ((String) manager.get("name")).replaceAll("\\r\\n|\\r|\\n", " ");
 				 mkood = (String) manager.get("code");
 			 }
 			
@@ -196,7 +189,7 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 			
 			 org.json.JSONObject customer =(org.json.JSONObject) asset.get("customer");
 			 if(customer != null) {
-				 knimi = (String) customer.get("name");
+				 knimi = ((String) customer.get("name")).replaceAll("\\r\\n|\\r|\\n", " ");
 				 kkood = (String) customer.get("code");
 
 			 }

@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +32,12 @@ import java.util.Vector;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import ee.mobilejava.wrapper.SupervisorInfoWrapper;
 import eevaeksport.Agent;
@@ -89,8 +97,85 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
    }
 
 
+private TreeMap getExcelStuff(){
+	   
+	   TreeMap res = new TreeMap();
+   
+	   File f = new File(this.getExcelDir() + "Actions.xlsx");
+		try {
+			
+			
+			DataFormatter forma = new DataFormatter();
+ 	        
+			FileInputStream ff = new FileInputStream(f);
+			Workbook workbook = new XSSFWorkbook((ff));
+			Sheet sheet = workbook.getSheetAt(0);
+			
+			for (int fff = 1; fff < sheet.getLastRowNum(); fff++) {
+			
+				XSSFRow row = (XSSFRow)sheet.getRow(fff);
+			
+				try {
+
+					String text = forma.formatCellValue(row.getCell((short)16 ));
+					if(text != null && text.trim().length() > 0) {
+						String prgrupp = forma.formatCellValue(row.getCell((short)4 ));
+						String toode = forma.formatCellValue(row.getCell((short)8 ));
+						
+						Date algus = null ;
+						try {
+							algus = row.getCell(11).getDateCellValue();
+						}catch(Exception e) {
+							
+						}
+						
+						
+						Date lopp = null;
+						try {
+							lopp = row.getCell(12).getDateCellValue();
+						}catch(Exception e) {
+							
+						}
+						
+						
+						if(algus != null && lopp != null) {
+							Calendar now = Calendar.getInstance();
+							Calendar stcal = Calendar.getInstance();
+							stcal.setTime(algus);
+							stcal.add(Calendar.DATE, -2);
+							Calendar endcal = Calendar.getInstance();
+							endcal.setTime(lopp);
+							endcal.add(Calendar.DATE, +2);
+							
+							if(now.before(endcal) && now.after(stcal)) {
+								
+								 res.put( prgrupp + "|" + toode, text);
+							}
+							
+						}
+						
+					}
+					
+					
+				} catch (Exception e) {
+					 e.printStackTrace();
+				}
+			}
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		}
+		 System.out.println("nn " + res.toString());
+		return res;
+   }
+  
+   
    public Vector getPriceMatrixData(){
 
+	   
+	   TreeMap excelStuff = getExcelStuff();
 	
 	  	 String  sql = " select * from ( SELECT [Sales Code] AS custid,'' AS clgroup,[Item No_] AS prodid,'' AS prodgroup, " +
             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi , [Akcija]  as camp from" +
@@ -172,6 +257,15 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
              if(camp != null && camp.trim().length() > 0) {
             	 mline.setLineinfo(camp);
              }
+             
+             if (clGroup !=null && clGroup.trim().length() > 0) {
+            	 if(excelStuff.get(clGroup+"|"+ prodID) != null) {
+            		 mline.setLineinfo(excelStuff.get(clGroup+"|"+ prodID)+"");
+            		// System.out.println("lisan " + mline.getLineinfo());
+            	 }
+             }
+                 
+            
              
              
              if (prodID != null && prodID.length() > 0) {
@@ -569,16 +663,10 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 	        while(rs.next()){
 	          Agent agent = new Agent(rs.getString("kood").trim());
 	          String name = rs.getString("nimi").trim() + " " + agent.getID();
-	          String obj = rs.getString("objekt");
-	          if(obj != null && obj.trim().length() > 0){
-	        	  //agent.setObject(obj.trim());
-	        	  if(!obj.trim().contains("CENTR")){
-	        		 // agent.setIsPilot(true);
-	        	  }
-	          }
+	        
 	         
 	          agent.setName(name);
-	          agent.setLanguage("EST");
+	          agent.setLanguage("LAT");
 	          agent.setCountry("ee");
 	          agent.setPassWord("0000");
             
@@ -599,11 +687,6 @@ public class NaviValdoDBDriver extends AbstractDBDriver implements BulkUpdater,D
 	          agents1.put(agent.getID(), agent);
 	        }
 
-
-	        Agent aa = new Agent("HOUSE");
-	        aa.setName("Kontor");
-	        agents.put(aa.getName(), aa);
-	        agents1.put(aa.getID(), aa);
 	        
 	        rs.close();
             stmt.close();
@@ -863,10 +946,12 @@ con3.close();
     	         name = name.replace('*', ' ');
     	         name = name.replace('*', ' ');
     	         name = name.replace('*', ' ');
+    	      
     	           String id = rs.getString("kood").trim();
     	           String id2 = rs.getString("abikood").trim();
     	           //System.out.println(line);
     	           Customer customer = new Customer(id + "_" + id2);
+    	           String namex = name + " " + id;
     	            String payer = null;
     	           if (name.equals("")) name = "<" + id + ">";
     	           customer.setName(Converter.enCodeEst(name) + " " + id);
@@ -1051,7 +1136,7 @@ con3.close();
     	           } 
     	           
     	       
-    	            tm.put(customer.getName(), customer);
+    	            tm.put(namex, customer);
     	            this.customers.add(customer.getID());
     	           
     	         }

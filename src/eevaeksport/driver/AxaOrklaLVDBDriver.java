@@ -4565,13 +4565,27 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 		  
 		  final DateTime input = new DateTime();
 		  //System.out.println(input);
+		
+		  
+		 // Teeme tsykli et saame iga päeva eraldi kätte
+		  for(int u = 0 ; u < 14 ;u++) {
+			  final DateMidnight startOfLastWeek2 = 
+			             new DateMidnight(input.minusDays(u+2));
+			  final DateMidnight endOfLastWeek2 =  new DateMidnight(input.minusDays(u+1));
+				System.out.println("algus " +startOfLastWeek2.toString());
+				System.out.println("lopp " +endOfLastWeek2.toString());
+			  String filenameSV =   Converter.getSVData(startOfLastWeek2.getMillis(), endOfLastWeek2.getMillis(),
+					  rcompanyx, user, pass,true,"SELYNLIST",null,"answers"+ u);
+				 System.out.println("filenameSV "+  filenameSV);
+		  }
+		  
 		  final DateMidnight startOfLastWeek = 
 		             new DateMidnight(input.minusDays(14));
+		  
+		
 		  //System.out.println(startOfLastWeek);
 		  final DateMidnight endOfLastWeek =  new DateMidnight(input.plusDays(1));
 		
-		String filenameSV =   Converter.getSVData(startOfLastWeek.getMillis(), endOfLastWeek.getMillis(), rcompanyx, user, pass,true,"SELYNLIST",null,"answers");
-		 System.out.println("filenameSV "+  filenameSV);
 		 
 			String filenameTask =   Converter.getTaskData(startOfLastWeek.getMillis(), endOfLastWeek.getMillis(), rcompanyx, user, pass,"Tasks");
 			 System.out.println("filenameTask "+  filenameTask);

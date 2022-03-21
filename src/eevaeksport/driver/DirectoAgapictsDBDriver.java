@@ -688,12 +688,11 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 
 
  
-  
 	  
      
    public TreeMap getAgents(){
 	   
-
+	 
 	   
      TreeMap tm = new TreeMap();
      try{
