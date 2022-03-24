@@ -896,6 +896,7 @@ public class EksportPanel extends JPanel implements ActionListener,
             		|| driver.getDriverVersion().equals("EevaArke")
             		|| driver.getDriverVersion().equals("HorizonKonig")
             		|| driver.getDriverVersion().equals("AxaJNGLAT")
+            		|| driver.getDriverVersion().equals("Kalev")
             		|| driver.getDriverVersion().equals("NaviLivikoLIT")){
             	lastThree = ((Discounter) driver).getLastThreeData();
             }
@@ -1274,6 +1275,7 @@ public class EksportPanel extends JPanel implements ActionListener,
                 		  || driver.getDriverVersion().equals("HorizonKonig")
                 		  || driver.getDriverVersion().equals("AxaFazerLT")
                 		  || driver.getDriverVersion().equals("AxaJNGLAT")
+                		  || driver.getDriverVersion().equals("Kalev")
                 		  || driver.getDriverVersion().equals("AxaFazerEE")){
                      LastThreeFile(agentCode, customers,  lastThree);
                    }

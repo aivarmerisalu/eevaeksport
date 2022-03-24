@@ -220,7 +220,10 @@ public class SkaiteKLPSCANDBDriver extends AbstractDBDriver implements BulkUpdat
 					ps.setInt(35, lw.getLine().getResInt3());
 				//	System.out.println("ps asse");
 					
-					
+					String gru = "0";
+					if(lw.getLine().isGroup()) {
+						gru = "1";
+					}
 					
 					int leng = lw.getLine().getCustID().length();
 					String sb =  wr.getInfo().getAgentID() + ";;"
@@ -228,6 +231,7 @@ public class SkaiteKLPSCANDBDriver extends AbstractDBDriver implements BulkUpdat
 					   ";"  ;	
 				     sb = sb + getDateTimeStr(cal) + ";" + cr2 + ";" +  Converter.deCode(cc) + ";" +  Converter.deCode(cd);  
 				     sb = sb + ";" + lw.getLine().getAction1Eval() + ";" + lw.getLine().getAction2Eval();//long,latt
+				     sb = sb + ";" + gru ;//long,latt
 					System.out.println("ps asse" + sb);
 					
 					if(cr1.equals("INVSCAN")){

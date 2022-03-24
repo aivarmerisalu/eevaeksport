@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -624,6 +625,10 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
    		return agents1;
    	}
     
+    private TreeMap get90daysinvoices() {
+    	TreeMap res = new TreeMap();
+    	return res;
+    }
 
     private TreeMap custs = null; 
     
@@ -631,6 +636,13 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
     public TreeMap getCustomers(Agent agent){
         connectionUp(url);
         connectionUp2(url);
+        
+        
+        
+        TreeMap days90 = get90daysinvoices();
+        
+        
+        
         Vector nocrinfo = getNoCrecitInfo();
         String cmd = "SELECT SL01001 as sckood,SL01002 AS nimi,SL01001 AS kood,(SL01003 + ' (' + SL01004 + ')') AS aadress, " +
 		"	SL01003 as tanav,SL01004 as linn,SL01005 as regioon,SL01083 as indeks,(SELECT SC45005 FROM SC450400 WHERE SC45003=(select SL01036 from SL010400 WHERE SL01001=k.SL01056)) AS ale,SL01036 AS ale2 , " +
@@ -989,7 +1001,7 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
         String cmd =" SELECT    RTRIM(SC01001) AS toode,(RTRIM(SC01002)+' '  " +
              "   +rtrim(SC01003)) + ' ' +RTRIM(SC01001) AS nimi,(SC39004) AS myygihind ,SC01009 AS tykke , SC01011 AS maxale,'KE' +RTRIM(SC01150) AS pandikas ,   " +
              " case when  SC01031 = 1 then 1 else 0 end AS out ,SC01128 AS grupp,SC01132 AS ean , SC01016 as letter , SC01071 /100 as maht  " +
-             ", SC03003-SC03004 AS stock , SC01097 as separate FROM SC010400 left outer JOIN SC390400 ON SC01001 " +
+             ", SC03003-SC03004 AS stock , SC01097 as separate , SC03055 as bestb FROM SC010400 left outer JOIN SC390400 ON SC01001 " +
              "  = SC39001 and SC39002='00' left outer JOIN SC030400 on SC03001=SC01001 and SC03002='07' AND SC03003!=0 WHERE  "
              + " LEN((SC01128))>0 and SC39004 > 0 and rtrim(ltrim(SC01016)) not in  ('S','U') " +
              "  ORDER BY LEFT(RTRIM(SC01037),1),SC01001 " ;
@@ -1002,7 +1014,8 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
 	try {
           Statement st = con.createStatement();
 	    ResultSet	      rs = st.executeQuery(cmd);
-
+		Calendar timeNow = Calendar.getInstance();
+			timeNow.add(Calendar.DATE, -30);
 	    while (rs.next()) {
 		String kood = rs.getString("toode").trim();
 		String nimetus = rs.getString("nimi").trim().replaceAll("'", "").replaceAll("\"", "");
@@ -1048,6 +1061,23 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
             		  prod.setSendSeparate("nonalco");
             	  }
               }
+              
+              Date bestb  = rs.getDate("bestb");
+              if (bestb != null) {
+            	 
+      			Calendar bestbe = Calendar.getInstance();
+      			bestbe.setTimeInMillis(bestb.getTime());
+      			int year = bestbe.get(Calendar.YEAR);
+                    if ( year > 2021 && timeNow.after(bestbe)) {
+                        prod.setDiffColor(true);
+                        prod.setPartii("BB:" + Converter.getDDpMMpYYYYpString(bestbe));
+                    }  
+              }
+              
+              
+
+              
+              
               
               if(prod.getGroup().equals("TAR")){
             	  prod.setSendSeparate("alco");

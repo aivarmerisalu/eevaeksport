@@ -167,7 +167,7 @@ private TreeMap getExcelStuff(){
 			e.printStackTrace();
 			
 		}
-		 System.out.println("nn " + res.toString());
+		// System.out.println("nn " + res.toString());
 		return res;
    }
   
@@ -178,11 +178,11 @@ private TreeMap getExcelStuff(){
 	   TreeMap excelStuff = getExcelStuff();
 	
 	  	 String  sql = " select * from ( SELECT [Sales Code] AS custid,'' AS clgroup,[Item No_] AS prodid,'' AS prodgroup, " +
-            "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi , [Akcija]  as camp from" +
+            "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi , [Akcija] + ' ' + [Campaign Category] as camp from" +
             "   [VOLDEMĀRS SIA$Sales Price] where (getdate()+5 between [Starting Date] and [Ending Date]+5  or  " +
                        "  (year ([Ending Date]) = 1753 and getdate()+5 > [Starting Date]) ) and [Sales Type] = 0   " +
                           "  union  SELECT '' AS custid,[Sales Code] AS clgroup,[Item No_]  AS prodid,'' AS prodgroup,  " +
-             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi , [Akcija] as camp from  " +
+             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi , [Akcija] + ' ' + [Campaign Category] as camp from  " +
              "  [VOLDEMĀRS SIA$Sales Price] where ( getdate()+1 between [Starting Date] and [Ending Date] or (getdate()+1 > [Starting Date]) and  year ([Ending Date]) = 1753) " +
 			  "  and [Sales Type] = 1 " +   
                           "  union  select [Sales Code] AS custid, '' AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
@@ -197,8 +197,8 @@ private TreeMap getExcelStuff(){
                      "    from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 1 and [Sales Type] = 1        " +
                     " union select '' AS custid, [Sales Code] AS clgroup,[Code] AS prodid,'' AS prodgroup, " +
                    " 0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi,'' as camp " +
-                    "     from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 0 and [Sales Type] = 1 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or " + 
-                     "    year ([Ending Date]) = 1753) ) as ta order by custid , clgroup, prodid ,paevi " ; 
+                    "     from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 0 and [Sales Type] = 1 and [Minimum Quantity] =  0 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()-1 or " + 
+                     "    year ([Ending Date]) = 1753) ) as ta order by custid , clgroup, prodid , case when paevi = 0 then 1000 else paevi end " ; 
 			
   	 
 
@@ -254,7 +254,7 @@ private TreeMap getExcelStuff(){
             	// mline.setProdLevel("pr");
              }
              
-             if(camp != null && camp.trim().length() > 0) {
+             if(camp != null && camp.trim().length() > 0 && camp.trim().endsWith("AV")) {
             	 mline.setLineinfo(camp);
              }
              
@@ -917,7 +917,7 @@ con3.close();
     	     this.customers = new ArrayList();
 
 
-    	   String sql =  "  SELECT k.[Name] AS nimi, k.[Name 2] AS nimi2  ,k.[No_] AS kood,a.Code as abikood ,k.[Bill-to Customer No_] AS payer  , a.[Address] + ' ' + a.[City] as address \r\n" + 
+    	   String sql =  "  SELECT k.[Name] AS nimi, a.[Address]  AS nimi2  ,k.[No_] AS kood,a.Code as abikood ,k.[Bill-to Customer No_] AS payer  , a.[Address] + ' ' + a.[City] as address \r\n" + 
     	   		"	,a.[Salesperson Code] AS agent ,  k.Blocked AS blokk,   \r\n" + 
     	   		" [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type, " + 
     	   		"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt  ,a.Contact +' ' + a.[Phone No_] as kontakt , 0 as sendall " + 
@@ -938,9 +938,7 @@ con3.close();
     	        while(rs.next()){
     	         String name = rs.getString("nimi").trim();
     	         String name2 = rs.getString("nimi2");
-    	         if(name2 != null){
-    	        	// name = (name + " " + name2.trim()).trim();
-    	         }
+    	        
     	       
     	         name = name.replaceAll("\"", " ");
     	         name = name.replace('*', ' ');
@@ -951,10 +949,13 @@ con3.close();
     	           String id2 = rs.getString("abikood").trim();
     	           //System.out.println(line);
     	           Customer customer = new Customer(id + "_" + id2);
-    	           String namex = name + " " + id;
+    	           if(name2 != null){
+      	        	 name = (name + " " + id2.trim()).trim();
+      	         }
+    	           String namex = name + " " + id+ id2;
     	            String payer = null;
     	           if (name.equals("")) name = "<" + id + ">";
-    	           customer.setName(Converter.enCodeEst(name) + " " + id);
+    	           customer.setName(Converter.enCodeEst(name) );
     	           	payer = rs.getString("payer");
     	           	if(payer != null && payer.trim().length()>0){
     	             customer.setPayer(payer.trim());
@@ -1203,6 +1204,7 @@ con3.close();
    
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
+  
      
      
      eanprods =  loadMore();
@@ -1213,41 +1215,7 @@ con3.close();
       TreeMap<String,Double>  prices = new TreeMap<String,Double>();
       TreeMap<String,String>  yhikSood = new TreeMap<String,String>();
       
-     try {
-    	 String   cmd = "  SELECT [Item No_]  AS kood,  [Unit Price] AS hind  from   "+
-    	  	         " [VOLDEMĀRS SIA$Sales Price] where [Sales Type] = 2  and "+
-    				  " (( getdate() between [Starting Date] and [Ending Date]+1 )  "+
-    				  "  or ((getdate() > [Starting Date]) and  year ([Ending Date]) = 1753) ) and [Unit Price] != 0 "+
-					"	order by [Item No_] ,[Starting Date] " ;
 
-      	 Connection con = getNewConnection2();
-  	        Statement stmt = con.createStatement();
-  	        ResultSet rs = stmt.executeQuery(cmd);
-  	        while(rs.next()){
-  	             String toode = null;
-  	             double seis = 0;;
-  	              	toode =rs.getString("kood");
-  	              	if(toode != null){
-  	              	seis = rs.getDouble("hind");
-  	              	prices.put(toode.trim(), seis);	
-  	              	}
-  	              	
-  	        }
-
-  	      rs.close();
-  	    System.out.println("prices Size " + prices.size());
-  	 
-  	      
-  	      stmt.close();
-  	      con.close();
-
-  	    System.out.println(cmd);
-   } catch (Exception e) {
-       e.printStackTrace();
-   }
-      
-   //  getFixedAssortmentData();
- 
   
      try {
      	String cmd = "SELECT t.[No_] AS toode,t.[Description] AS nimi, [Unit Price] AS myygihind, \r\n"
@@ -1256,7 +1224,7 @@ con3.close();
      			+ "   [Item Type] AS type, [Units per Parcel] AS kastis,  [Net Weight]   AS kaal, [VAT Prod_ Posting Group] AS vat,[Item Disc_ Group] as grd ,"
      			+ "(case when [Shelf life period type] = 2 then [Shelf life period]  else  [Shelf life period]*30 end) as maxdays , [Units per pallet] as pallet ,[Reorder Point] as optimum "
      			+ "	  FROM [VOLDEMĀRS SIA$Item] t \r\n"
-     			+ "	  WHERE t.[Blocked]=0 and  t.[Gen_ Prod_ Posting Group] = 'PRECES'  and   [Send to E-Pasaule] = 1  ORDER BY t.[No_]"; 
+     			+ "	  WHERE t.[Blocked]=0 and    [Send to E-Pasaule] = 1  ORDER BY t.[No_]"; 
      	
      	
      	
@@ -1280,6 +1248,7 @@ con3.close();
              double price = rs.getDouble("myygihind");
              if(price > 0){
             	  prod.setPrice(price);
+            	 	prices.put(id, price);	
               }
              
               
@@ -1375,13 +1344,10 @@ con3.close();
                          ee = " " + ean.substring(ean.trim().length()-3);
                        }
                 	 
+                	 prod.setNameSorting(Converter.cleanLitLatEst(name));
                 	 	 prod.setName(Converter.enCodeEst(  name.trim() + " " + ee ));
-                          
-                	
-               
-                	 tm.put( name, prod); 
-                
-          
+                  	 tm.put( name, prod); 
+              
         }
         
         
@@ -1398,9 +1364,13 @@ con3.close();
         
         
         
-  	  cmd = " SELECT [Item No_] AS prodid,  [Unit Price] AS price , [Minimum Quantity]  as kogus, [Ending Date] as paev, [Starting Date] as startday  from \r\n" + 
-  	  		"                              [VOLDEMĀRS SIA$Sales Price] where (getdate()+5 between [Starting Date] and [Ending Date]+5  or   \r\n" + 
-  	  		"                               (year ([Ending Date]) = 1753 and getdate()+5 > [Starting Date]) )  and [Sales Type] = 2  ";
+  	  cmd = " SELECT [Item No_] AS prodid,  [Unit Price] AS price , 0 as discount, [Minimum Quantity]  as kogus, [Ending Date] as paev, [Starting Date] as startday  from " + 
+  	  		"  	  		      [VOLDEMĀRS SIA$Sales Price] where (getdate()+5 between [Starting Date] and [Ending Date]+5  or  " + 
+  	  		"  	  		  (year ([Ending Date]) = 1753 and getdate()+5 > [Starting Date]) )  and [Sales Type] = 2  and [Minimum Quantity] > 0 " + 
+  	  		"		 union " + 
+  	  		"	 SELECT [Code] AS prodid,  0 AS price ,[Line Discount _]  as discount, [Minimum Quantity]  as kogus, [Ending Date] as paev, [Starting Date] as startday  from " + 
+  	  		"  	  [VOLDEMĀRS SIA$Sales Line Discount] where (getdate()+5 between [Starting Date] and [Ending Date]+5  or   " + 
+  	  		"  	 (year ([Ending Date]) = 1753 and getdate()+5 > [Starting Date]) )  and  [Minimum Quantity] > 0	";
   	 
   		
   	    StringBuffer buf = new StringBuffer();
@@ -1413,17 +1383,26 @@ con3.close();
   	           while(rs.next()){
   	        	        String  gruppx = "ldok";
   	                  	String  toodex = rs.getString("prodid").trim();
+  	                  	
   	                  	try{
   	                  	double  hind  = rs.getDouble("price");
-  	                   	    double  kogus = rs.getDouble("kogus");
-  	                  	
-  		                  	
+  	              	    double  discount  = rs.getDouble("discount");
+  	                   	double  kogus = rs.getDouble("kogus");
+  	               //   System.out.println("ooo " + discount + " " + toodex + " " + prices.get(toodex));
+  	                   	if(discount > 0 && prices.get(toodex) != null) {
+  	                   		
+  	                   		hind = prices.get(toodex)*(100-discount)/100;
+  	                   	}
+  	                   	
   		                  	if(kogus == 0){
   		                  		kogus = 1;
   		                  	}
-  		                  	      	
-  		                  	      buf.append(toodex+ "; ; ;" + NF.format(hind).replace(',', '.') + ";" + gruppx + ";" + kogus + ";"  );
-  		                          buf.append("\n");	
+  		                  	    
+  		                  	if(hind != 0) {
+  		                      buf.append(toodex+ "; ; ;" + NF.format(hind).replace(',', '.') + ";" + gruppx + ";" + (int)kogus + ";"  );
+		                          buf.append("\n");	
+  		                  	}
+  		                  	  
   		                      	
   	                  		
   	                  	}catch(Exception e){
@@ -1620,7 +1599,8 @@ public void setBulkSales(Map agents) {
  	 	String cmd = " select [Salesperson Code] as agent ,sum([Sales (LCY)]) as summa from [VOLDEMĀRS SIA$Cust_ Ledger Entry] " +
  	 			"where Month(getdate())=Month([Posting Date]) and " +
             "Year(getdate())=Year([Posting Date]) " +
-             " group by [Salesperson Code]";// and [Global Dimension 1 Code]='400'
+             " group by [Salesperson Code]";
+ 	 	
  	  Connection con = getNewConnection2();
 	        Statement stmt = con.createStatement();
 	        ResultSet rs = stmt.executeQuery(cmd);
@@ -1633,7 +1613,24 @@ public void setBulkSales(Map agents) {
                  }
            }
 	        rs.close();
+	        
+	        String cmd2 = "  SELECT h.[Salesperson Code] AS agent,  sum([Shipped Not Invoiced (LCY)]) as summa FROM [VOLDEMĀRS SIA$Sales Line] l " + 
+	        		"	  INNER JOIN [VOLDEMĀRS SIA$Sales Header] h ON h.[No_]= l.[Document No_] " + 
+	        		"    GROUP BY  h.[Salesperson Code]  having sum([Shipped Not Invoiced (LCY)] )  != 0";
+	    
+	        rs = stmt.executeQuery(cmd2);
+	        while(rs.next()){
+                String agentID = rs.getString("agent");
+                double sales = rs.getDouble("summa");
+                Agent agent = (Agent)agents.get(agentID);
+                if (agent != null){
+                  agent.setMonthSales((int)(sales));
+                 }
+              }
+	        rs.close();
+	        stmt.close();
 	        con.close();
+	        
      } catch (Exception e){
        e.printStackTrace();
      }

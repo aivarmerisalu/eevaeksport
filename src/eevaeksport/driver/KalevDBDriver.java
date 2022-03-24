@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -81,6 +82,149 @@ public class KalevDBDriver extends AbstractDBDriver implements Manager, Promo,
 	  String pass = null;
 	  String rcompany = null;
 	  private TreeMap eanprods = null;
+	  
+	  
+	  private TreeMap  getOpenOrders(){
+			TreeMap res = new TreeMap();
+			oorders = new StringBuffer();
+			oorders.append(Calendar.getInstance().getTimeInMillis() + "\n");
+
+			   String sql2 =  " select  OR01001 AS id,case when OR01072 != '' then 1 else 0 end as abi, case when OR01004='+' then OR01003 else OR01004 end  AS kkood , \r\n" + 
+			   		"			   			 OR01021 as number ,''  as status,OR01015 AS kuup, OR01024 AS summa from OR010100 sal\r\n" + 
+			   		"			   			WHERE OR01015 > getdate()-2  and (case when OR01004='+' then OR01003 else OR01004 end) not like ('INTR%') and OR01024 > 0\r\n" + 
+			   		"			   			ORDER BY (case when OR01004='+' then OR01003 else OR01004 end ),OR01015 desc " ;
+			   
+		 
+	
+		try {
+		   nf.setMinimumFractionDigits(2);
+	       
+		   Connection con = this.getNewCon();
+		   Connection cc = this.getNewCon();
+		   PreparedStatement stmt2 = con.prepareStatement(sql2);
+		   ResultSet  rs = stmt2.executeQuery();
+
+HashSet ids = new HashSet();
+int u = 0;
+String oldcust = null;
+		while(rs.next()){
+			StringBuffer sb = new StringBuffer();
+			String id = rs.getString("id").trim();
+			
+			if(!ids.contains(id)) {
+			ids.add(id);
+			
+			u++;
+			
+			
+			 int abi = Integer.parseInt(rs.getString("abi"));
+			 String text = "edi";
+			 if(abi == 1){
+				 text = "merisoft";
+			 }
+		    String nimi = rs.getString("kkood");
+		    if (nimi == null){
+		    nimi = " ";
+		    } else {nimi = nimi.trim();}
+		    
+		    boolean goes = true;
+		    
+		    if(oldcust == null) {
+		    	oldcust = nimi;		   
+		    	}
+		    
+		    if(u > 3 && oldcust.equals(nimi)) {
+				goes = false;  
+				//System.out.println("ei lähe " + nimi);
+			}
+		    
+		    
+		    if(!nimi.equals(oldcust)) {
+		    	oldcust = nimi;
+		    	u = 0;
+		    	goes = true;
+		    	//System.out.println("muutus " + nimi);
+		    }
+         
+		    if(goes) {
+
+			//DPP00488444 (‘Pabeigts’ – 01.06.2018; merisoft).
+		    	String number = rs.getString("number") ;
+		    	if(number == null) {
+		    		number = id;
+		    	}else {
+		    		number = number.trim();
+		    	}
+		    sb.append(number + " (");
+		    
+		    String kuup = rs.getString("kuup").trim().substring(0,10);
+			sb.append(kuup + " " + text + ") ");
+			
+
+			double summa = Double.parseDouble(rs.getString("summa").trim());
+			if(summa > 0 ){
+				String sum = getNF().format(summa) ;
+			    sb.append(sum + " eur KM-ta|" );	
+			}else{
+				 sb.append("|" );	
+			}
+			oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
+		  
+		    String sql3 = "select OR03011 as amount,  'tk.' as unit  , OR03006 as name from OR030100 where OR03001 = '" + id + "'";
+		  
+		    PreparedStatement stmt3 = cc.prepareStatement(sql3);
+			 
+		       ResultSet  rs2 = stmt3.executeQuery();
+		   
+			    while(rs2.next()){
+			    	sb.append("[" +nf.format(rs2.getDouble("amount"))+"] " 
+			       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
+			    }
+		   
+			    rs2.close();
+		       stmt3.close();
+		       
+		       if(res.get(nimi) != null){
+		    	   res.put(nimi,res.get(nimi) +" | |" + sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
+		   	       
+		       }else{
+		    	   res.put(nimi, sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
+		   	    	   
+		       }
+		   	
+		   }
+		}
+			
+		}
+		
+	
+		
+		cc.close();
+		rs.close();
+		stmt2.close();
+		con.close(); 	 
+		
+
+		
+		
+		
+		
+		
+		} catch (Exception e) {
+		  getParent().showError(e);
+		}
+
+System.out.println("res OO suurus " + res.size());
+
+Converter.saveFile(parent.getProps().getProperty("stockrefdir")  + "customerorders.txt", oorders.toString());
+			return res;
+		}
+		
+	   private StringBuffer oorders = null;
+
+	  private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
+	  
+	
 	  
 	  @Override
 		public void FixLoader() {
@@ -355,6 +499,8 @@ public class KalevDBDriver extends AbstractDBDriver implements Manager, Promo,
 		} catch (Exception e) {
 			getParent().showError(e);
 		}
+		
+		   getOpenOrders();
 		return products.toString();
 	}
 
@@ -643,6 +789,7 @@ StringBuffer sb = new StringBuffer();
 			Converter.getManagersReplacements(getAgents1(), rcompanyx, user , pass);
 		}
 		
+		  TreeMap openOrders = this.getOpenOrders();
 		  sortimendid = new HashMap();
 		  File fff = new File(this.getExcelDir() + "/SortimentDroid.xlsx" );
 	      File fffx = new File(this.getExcelDir() + "/SortimentFel.xlsx" );
@@ -968,7 +1115,7 @@ SELECT  [MasterProductCode] as klient
 				// stmt.setString(1, agent.getID());
 			}
 			rs = stmt.executeQuery();
-			String header = " |L�bimyygi Aruanne :| | ";
+			String header = " |Läbimyygi Aruanne :| | ";
 			while (rs.next()) {
 				String nimi = Converter.enCodeEst(rs.getString("nimi").trim().replaceAll("bussipeatus", "pea").replaceAll("hansu", "h."));
 				Customer cust = new Customer(rs.getString("kood").trim());
@@ -1004,7 +1151,10 @@ SELECT  [MasterProductCode] as klient
                   cust.restZipCode = indeks.trim();
                 }
 
-
+               if(openOrders.get(cust.getID()) != null){
+                	cust.addToCustDataVec(cust.getID() + ";tarasaldo; ;Avatud Tellimused |"   +  openOrders.get(cust.getID()));
+                }
+               
 				
 
 				cust.setName(nimi + " " + cust.getID());
@@ -2822,10 +2972,65 @@ try{
 		return agents1;
 	}
 
-	public Vector getLastThreeData() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		public Vector getLastThreeData() {
+
+			Vector result = new Vector();
+			try {
+				   
+	
+	  
+		        Connection con3 = getNewCon();
+				
+				
+				
+
+						String sq3 = "select * from (\r\n" + 
+								"select case when d.OR20004='+' then d.OR20003 else d.OR20004 end AS klient  ,d.OR20015 AS kuup ,r.OR21005 as toode,sum(r.OR21012) as kogus, max(r.OR21008)  as hind, max(d.OR20024) as summa  from OR210100 r INNER JOIN OR200100 d ON r.OR21001=d.OR20001   \r\n" + 
+								"									 WHERE   d.OR20024 > 0 AND d.OR20015 >=(select top 1 kuupaev  from ( 	SELECT top 5 jou2.OR20015 as kuupaev \r\n" + 
+								"														FROM  OR200100 jou2  where ltrim(case when jou2.OR20004='+' then jou2.OR20003 else jou2.OR20004 end) = ltrim(case when d.OR20004='+' then d.OR20003 else d.OR20004 end)  \r\n" + 
+								"													 and jou2.OR20015 > getdate()-30   and jou2.OR20024 > 0 group by (case when jou2.OR20004='+' then jou2.OR20003 else jou2.OR20004 end) , jou2.OR20015 order by jou2.OR20015 desc ) \r\n" + 
+								"														  as dd order by kuupaev) and (case when d.OR20004='+' then d.OR20003 else d.OR20004 end) not like 'INTR%'  and r.OR21005 not like 'PP%'\r\n" + 
+								"														 GROUP BY case when d.OR20004='+' then d.OR20003 else d.OR20004 end,d.OR20015 ,r.OR21005 \r\n" + 
+								"						union all\r\n" + 
+								"		select case when d.OR01004='+' then d.OR01003 else d.OR01004 end AS klient  ,d.OR01015 AS kuup ,r.OR03005 as toode,sum(r.OR03011) as kogus, max(r.OR03008)  as hind, max(d.OR01024) as summa  from OR030100 r INNER JOIN OR010100 d ON r.OR03001=d.OR01001   \r\n" + 
+								"									 WHERE   d.OR01024 > 0 AND d.OR01015 >=(select top 1 kuupaev  from ( 	SELECT top 2 jou2.OR01015 as kuupaev \r\n" + 
+								"														FROM  OR010100 jou2  where ltrim(case when jou2.OR01004='+' then jou2.OR01003 else jou2.OR01004 end) = ltrim(case when d.OR01004='+' then d.OR01003 else d.OR01004 end)  \r\n" + 
+								"													 and jou2.OR01015 > getdate()-2   and jou2.OR01024 > 0 group by (case when jou2.OR01004='+' then jou2.OR01003 else jou2.OR01004 end) , jou2.OR01015 order by jou2.OR01015 desc ) \r\n" + 
+								"														  as dd order by kuupaev) and (case when d.OR01004='+' then d.OR01003 else d.OR01004 end) not like 'INTR%' and r.OR03005 not like 'PP%'\r\n" + 
+								"														 GROUP BY case when d.OR01004='+' then d.OR01003 else d.OR01004 end,d.OR01015 ,r.OR03005) as ll \r\n" + 
+								"														  ORDER BY 1,2 desc ,3" ;
+						
+					 
+						Statement st3 = con3.createStatement();
+						ResultSet rs3 = st3.executeQuery(sq3);
+						while (rs3.next()) {
+							MatrixLine ml = new MatrixLine();
+							ml.setCustID(rs3.getString("klient").trim());
+							String kuup = rs3.getString("kuup");
+							ml.setStartDate(kuup.substring(5,10));
+							String toode = rs3.getString("toode");
+							if(toode != null) {
+								ml.setProdID(toode.trim());
+								ml.setPrice(rs3.getDouble("kogus"));
+								ml.discount = rs3.getDouble("hind");
+								double summa = rs3.getDouble("summa");
+								ml.setLineinfo(kuup.substring(0,10)+ " ("+ (int)summa + "€)" );
+							    
+								result.add(ml);
+							}
+							
+						}
+						rs3.close();
+						st3.close();
+						con3.close();
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+System.out.println("lastthree läbi" + result.size());
+			return result;
+		}
+	
 
 	public String getProductSortingData() {
 		// TODO Auto-generated method stub

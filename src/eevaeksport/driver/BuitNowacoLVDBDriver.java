@@ -358,7 +358,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 		}
 
 	 	connectionDown();
-	 		System.out.println("Open orders " + res.toString());
+	 	//	System.out.println("Open orders " + res.toString());
 	 		Converter.saveFile(parent.getProps().getProperty("savefilesdir")  + "customerorders.txt", oorders.toString());
 			return res;
 		}
