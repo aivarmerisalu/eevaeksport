@@ -231,9 +231,9 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 					ps.setInt(35, lw.getLine().getResInt3());
 				//	System.out.println("ps asse");
 					
-					String gru = "0";
+					String gru = "1";
 					if(lw.getLine().isGroup()) {
-						gru = "1";
+						gru = "2";
 					}
 					
 					int leng = lw.getLine().getCustID().length();

@@ -791,15 +791,14 @@ if(acc == null){
 
   
   
-  
-  public String identifyProduct2(String ean, String prodID) throws SQLException{
+  public String identifyProduct3(String ean, String prodID) throws SQLException{
 	  	
 
 	  
 	    String prod = null;
 	 String ea = ean;
 	 if(ea == null){
-		 ea = "XXXXXXXXXXX";
+		 ea = "XXXXXXXXXX";
 	 }
 	 if (ea.length() == 0 ){
 		 ea = "XXXXXXXXXX";
@@ -815,7 +814,96 @@ if(acc == null){
 		   pr = "000000000";
 	   }
 	  
+	  if(ea.length() == 12) {
+		  ea = ea + "0";
+	  }
 	  
+	  
+	   
+  String sql2 = " SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE (RTRIM(SC01132)=   '" + ea 
+                            + "' or RTRIM(SC01003) = '" + ea + "')   and SC01014 != ''   order by len(SC01001)  ";
+
+  String sql1 = "SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE  SC01014 != ''  and RTRIM(SC01001)=  '" + pr + "' ";
+
+
+
+
+  Statement st1 = con.createStatement();
+  ResultSet rs1 = st1.executeQuery(sql1);
+ 
+
+  while (rs1.next()) {
+    prod = rs1.getString("toode").trim();
+   }
+//  System.out.println(ean + " prod0 " + prod);
+ 
+ 
+ 
+  if(prod == null && ean != null){
+
+    rs1 = st1.executeQuery(sql2);
+    if (rs1.next()) {
+      prod = rs1.getString("toode").trim();
+    }
+  }
+  
+  if(prod == null && ean != null){
+  	
+  	  String sqlea = "SELECT  nimetus , toode FROM toode  WHERE TRIM(ribakood)=  '" + ean + "' ";
+
+  	Connection coe = this.getNewConEeva();
+  	
+  	 Statement st2 = coe.createStatement();
+  	    ResultSet rs2 = st2.executeQuery(sqlea);
+  	 rs2 = st2.executeQuery(sqlea);
+       if (rs2.next()) {
+      	 String nimetus = rs2.getString("nimetus").trim();
+      	 String kood = rs2.getString("toode").trim();
+      	 String pre = "FE" ;
+			if(kood.startsWith("K0") && nimetus.indexOf("OTB") !=-1){
+				pre = "OTB";
+			}
+         prod = pre + kood ;
+        
+       }
+       rs2.close();
+       st2.close();
+       coe.close();
+  }
+
+//  System.out.println(prodID + " prod1 " + prod);
+  rs1.close();
+  st1.close();
+
+  return prod;
+} 
+  
+  public String identifyProduct2(String ean, String prodID) throws SQLException{
+	  	
+
+	  
+	    String prod = null;
+	 String ea = ean;
+	 if(ea == null){
+		 ea = "XXXXXXXXXX";
+	 }
+	 if (ea.length() == 0 ){
+		 ea = "XXXXXXXXXX";
+	 }
+	 
+	 if(ea != null && (ea.equals("2050000039577")  || ea.equals("0299600004468")  || ea.trim().equals("100004005")  || ea.equals("2050000039560") || ea.equals("100009811")
+			 || ea.equals("0299600004482") || ea.equals("530000004024") || ea.equals("100004021") || ea.equals("0299600004499"))){  
+		 return "NOPANT";
+	 }
+	    
+	   String pr = prodID;
+	   if(pr == null){
+		   pr = "000000000";
+	   }
+	  
+	   if(ea.length() == 12) {
+			  ea = ea + "0";
+		  }
 	   
   String sql2 = " SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE (RTRIM(SC01132)=   '" + ea 
                             + "' or RTRIM(SC01003) = '" + ea + "')  order by len(SC01001)  ";
@@ -874,6 +962,8 @@ if(acc == null){
 
   return prod;
 }
+  
+  
   private TreeMap getTwoEans() {
 	TreeMap res = new TreeMap();
 	

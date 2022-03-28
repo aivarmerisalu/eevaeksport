@@ -112,7 +112,8 @@ public class ImportPanel extends JPanel implements ActionListener{
 	   * 82 - multimaxima 
 	   * 83 - assorti
 	   * 84 - rtffyxls
-	   * 
+	   * 77 - kalev xls
+	   * 78 - kalev eanpda
 	   * 80 - PDF Format NPFOODS lithuania
 	   * 80 - PDF Format COLGATE poland
 	   * 80 - PDF Format NESTLE lithuania
@@ -670,6 +671,11 @@ public String parseFirstEmail(String emails) {
                             this.loadXLSKalevOrder(orders, file,troubles);
                         
                         }
+                       if(format.equals("kaleveanpda")){
+                    	    System.out.println("XLS tellimus kalev");
+                           this.loadXLSKalevPDAEANOrder(orders, file,troubles);
+                       
+                       }
                        if(format.equals("statoil")){
                            this.loadXLSStatoilOrder(orders, file,troubles);
                            System.out.println("XLS tellimus statoil");
@@ -11947,6 +11953,11 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 								System.out.println("Firma ORKLA " + cell);
 								return  "orkla";
 							}
+							
+							if(cell.toLowerCase().indexOf("kalevi")!= -1 &&   cell.toLowerCase().indexOf("pda")!= -1){
+								System.out.println("Firma KALEVEAN " + cell);
+								return  "kaleveanpda";
+							}
 							if(cell.toLowerCase().indexOf("kalevi")!= -1  ){
 								System.out.println("Firma KALEV " + cell);
 								return  "kalev";
@@ -13630,6 +13641,283 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 
 	  }
 
+  
+ 
+  
+  
+  private void loadXLSKalevPDAEANOrder(Orders orders, File f,StringBuffer troubles) throws IOException{
+	    String fileName = f.getName();
+	    setEmailBody(orders,fileName);
+
+	    String tellijaKood = null;
+	    String dokNr = null;
+	    firma = "";
+	    String shipdate = " ";
+	    String comment = null;
+	    String ladu = null;
+	    String tellijaRegnr = null;
+	    String kood = null;
+	    int counter = 0;
+		int a = 0;
+	    try{
+	    	
+	    	XSSFWorkbook workbook1 = null;
+	    	HSSFWorkbook workbook2 = null;
+	    	Sheet sheet = null;
+	    	try{
+	    		FileInputStream ff = new FileInputStream(f);
+	    		 workbook2 = new HSSFWorkbook(ff);
+	    		 sheet = (HSSFSheet) workbook2.getSheetAt(0);
+	    		 ff.close();
+	    	}catch (Exception u){
+	    		FileInputStream ff = new FileInputStream(f);
+	    		 workbook1 = new XSSFWorkbook(ff);
+	    		 sheet = (XSSFSheet)workbook1.getSheetAt(0);
+	    		 ff.close();
+	    	}
+	    	 
+		
+			
+			for(int i = 0 ; i < sheet.getLastRowNum();i++){
+				Row row = sheet.getRow(i);
+				//System.out.println(row);
+				if(row == null && a == 0){
+					a = i;
+					//System.out.println("99 " + i);
+				}else{
+					a = sheet.getLastRowNum();
+				}
+			}
+			
+			
+			System.out.println("sees " + a);
+			//Enumeration enum = sheet.getLastRowNum()
+			
+			
+			int hours = 24;
+			
+			for(int i = 0 ; i < a+1;i++){
+				Row row = sheet.getRow(i);
+				
+			
+				if(i == 3){				
+					Date dd = null;
+					
+					try{
+						  dd  = row.getCell((short)1).getDateCellValue();	
+					 } catch (Exception e) {
+						e.printStackTrace();
+					 }
+					
+					Calendar cal = Calendar.getInstance();
+					if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY){
+						hours = 72;
+					}
+					cal.add(Calendar.HOUR, hours);
+					
+					//System.out.println("EXCELDATE " + dd);
+					if(dd != null){
+						cal.setTime(dd);
+					}
+					
+					shipdate = cal.getTime().getTime() + "";
+		        	    
+				}
+				
+				if(i == 2){
+					Calendar cal = Calendar.getInstance();
+					dokNr =  (cal.getTime().getTime() + "").substring(5);
+					try{
+						 dokNr = row.getCell((short)1).getStringCellValue();	
+					}catch(Exception e){
+						try{
+							 dokNr = row.getCell((short)1).getNumericCellValue() + "";	
+						}catch(Exception r){
+						}
+					}
+					dokNr = dokNr.replace('\\', '-').replace('/', '-');
+					//System.out.println("doknr : " + dokNr);
+					
+				}
+				
+				if(i == 4){
+					try{
+						 ladu = row.getCell((short)1).getStringCellValue();	
+					}catch(Exception e){
+						try{
+							 ladu = row.getCell((short)1).getNumericCellValue() + "";	
+						}catch(Exception r){
+						}
+					}
+					//System.out.println("ladu " + ladu);
+					
+				}
+				
+				if(i == 5){
+				
+					try{
+						 comment = row.getCell((short)1).getStringCellValue();	
+					}catch(Exception e){
+						try{
+							 comment = row.getCell((short)1).getNumericCellValue() + "";	
+						}catch(Exception r){
+						}
+					}
+					
+					//System.out.println("COMMENT " + comment);
+					
+				}
+				
+				
+				if(i == 1){
+					String cell = "";
+					try{
+						cell = row.getCell((short)1).getStringCellValue();
+					}catch(Exception e){
+						cell = ((int) row.getCell((short)1).getNumericCellValue()) + "";
+					}
+					
+					firma = cell;
+					if(firma != null){
+						firma = firma.trim();
+					}
+					System.out.println("Firma " + firma);
+					firma = driver.identifyCustomer(firma,null);				     
+				
+
+					 if (firma == null || firma.trim().length() == 0){
+					       addLog(parent.getString("nocompid") + " " + tellijaKood + "\n" + fileName + "\n" + parent.getString("fixcompid") +"\n" );
+					       troubles.append("Customer CANNOT BE RESOLVED Kalev XLSX format \n" + "Dok Nr: " + doknr + "\n"
+									 + "\t\tRegNr:" + tellijaRegnr + " Code:" + kood + " Number:" + dokNr + "\n\n");
+					       doknr=dokNr;
+					     }
+		        	
+				}
+				
+			
+				   
+				
+				if (i > 7 && i < 600){
+				//	System.out.println("edasi " + i );
+			        String prod = null;
+			        String ean = "";
+			        try{
+
+			        	prod = row.getCell((short)0).getStringCellValue();	
+				      // System.out.println(ean);
+			        }catch (Exception e ){
+						try{
+							prod = row.getCell((short)0).getNumericCellValue() + "";
+						     
+						     if(prod.indexOf("E") != -1){
+						    	 prod = prod.substring(0,prod.indexOf("E") );
+						     }
+						 //   
+						     prod = prod.substring(0,1) + prod.substring(2,prod.length());
+						}catch(Exception rr){
+							
+						}
+				       
+			        }
+			        
+			    //	System.out.println("prod  " + prod);
+					
+			        
+			         try{
+
+				        ean = row.getCell((short)1).getStringCellValue();	
+				       // System.out.println(ean);
+			        }catch (Exception e ){
+						try{
+							 ean = row.getCell((short)1).getNumericCellValue() + "";
+						     
+						     if(ean.indexOf("E") != -1){
+						     	ean = ean.substring(0,ean.indexOf("E") );
+						     }
+						 //   
+						     ean = ean.substring(0,1) + ean.substring(2,ean.length());
+						}catch(Exception rr){
+						}
+				    }
+			       
+			          	
+			      
+					double kogus = 0;
+					try{
+						kogus = (row.getCell((short)3).getNumericCellValue());
+					}catch (Exception e){
+					//	e.printStackTrace();
+						try{
+							kogus = Double.parseDouble((row.getCell((short)3).getStringCellValue()));
+						}catch (Exception ee){
+							//ee.printStackTrace();
+						}
+					}
+					
+					
+			//		 System.out.println("EAN TEST "  + ean + " " + kogus);
+					
+			        	
+			        		
+			          String eans = ean;
+			          if(eans.indexOf(".") != -1){
+			        	  eans = eans.substring(0,eans.indexOf("."));
+			          }
+			          String name =  row.getCell((short)2).getStringCellValue();
+			        String oldpro = prod;
+			     
+			          try{
+			           prod = driver.identifyProduct(eans,prod);
+			         } catch (SQLException e) {
+			            e.printStackTrace();	
+			         }
+			         
+			          if (prod == null){
+			          try{
+		            	  if (driver instanceof KalevImportDriver){
+		                   String  prod1 =  ((KalevImportDriver)driver).identifyProduct3(ean, prod);
+		                   if(prod1 != null && prod1.trim().length() > 0){
+		                	   prod=prod1;
+		                   }
+		                    } 	  
+		                }catch(Exception e ){
+		                	
+		                }
+			          }
+			       
+			       if (prod == null){
+			         addLog(parent.getString("noprodid") + "\n " + ean + "\n" + fileName + "\n" + parent.getString("fixprodid") +"\n\n");
+			         System.out.println(parent.getString("noprodid") + "\n " + ean + "\n" + fileName + "\n" + parent.getString("fixprodid") +"\n\n");
+			         //break;
+			         prod = " ";
+			         if(prod.trim().length() == 0 ){
+			        	 troubles.append("PRODUCT HAS NOT BEING RECOGNIZED Kalev XLSX : \n" + "Dok Nr: " + doknr + "\n"
+			        			 + "\tLineNum: "  +  (counter+1) + " " + name +" EAN:"  + eans +  " Code:" + oldpro + " amount: " + kogus + "\n\n");
+			     		 doknr=dokNr;
+			        }
+			       }
+			       if(kogus != 0 && prod!= null &&  prod.trim().length() > 0){
+			       
+			       prod = oldpro;
+						System.out.println(i + "*"+firma+"*"+ eans +"*"+ name +"*"+kogus+"*"+ dokNr  );
+					      //	System.exit(0);
+					          orders.setInfo(dokNr);
+					          orders.add(firma, prod, name ,kogus, dokNr, null, 0, 0,shipdate,"0",0,0,false,"",
+					        		  78," ",ladu,"",ean,null,true,null,null);
+					          orders.setEmailBody(comment); 
+					 
+			       	  }
+			    }
+				
+			}
+			
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+	//f.delete();
+
+	  }
+  
   
   private void loadXLSKalevOrder(Orders orders, File f,StringBuffer troubles) throws IOException{
 	    String fileName = f.getName();

@@ -726,7 +726,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    public Vector getFixedAssortmentData1() {
        Vector lines = new Vector();
        TreeMap prods = this.getProducts2();
-      System.out.println("prods " + prods.size());
+    //  System.out.println("prods " + prods.size());
        
        try {
    		  File f = new File (getDir() + "hinnakiri.xml");
@@ -776,9 +776,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                            mline.setProdID(prodID.trim());
                          }
                     
-                         if(clGroup.equals("01981")) {
-                    		// System.out.println("jama "+  prodID + " " + pricelists.contains(clGroup.trim()) + " " + prods.keySet().contains(prodID));
-                    	 }
+                       
                          if(prodID != null && prods.keySet().contains(prodID) && pricelists.contains(clGroup.trim())){
                         	
                         	
@@ -817,7 +815,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    	}catch(Exception e){
    		e.printStackTrace();
    	}
-       System.out.println("prodsinuse " +prodsInUse.size() );
+      // System.out.println("prodsinuse " +prodsInUse.size() );
        
        return sortLines(lines,prods);
  }
@@ -837,7 +835,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	        	sorted.add((MatrixLine)asi.get(key));
 	        }
 	       
-	       System.out.println("sorted Size " + sorted.size());
+	     //  System.out.println("sorted Size " + sorted.size());
 	        return sorted;
 	      }
 	
@@ -875,11 +873,13 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
   }
 	    
   
-  private TreeMap getLaoSeisud(String ladu) {
+  private TreeMap getLaoSeisud (String ladu) {
 	  TreeMap seis = new TreeMap();
 	  
 	 	try {
 	  		  File f = new File (getDir() + "laoseis.xml");
+	  		  if(f.exists()) {
+	  			
 	  	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	  	     DocumentBuilder db;
 	  		db = dbf.newDocumentBuilder();      	
@@ -904,14 +904,16 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	               		 }
 	          		  } 
 	          	  }catch(Exception e){
-	          		  e.printStackTrace();
+	          		 // e.printStackTrace();
 	          	  }
 	          }
 	          
+	  		  }
 	  	}catch(Exception e){
-	  		e.printStackTrace();
+	  		//e.printStackTrace();
 	  	}
-	  
+	    
+		  
 	  
 	  return seis;
   }
@@ -1500,8 +1502,13 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 
    public TreeMap getCustomers(Agent agent){
 	   TreeMap tm = new TreeMap();
-	  
-	   makeData();
+	  boolean useold = false;
+	  if("true".equals(getParent().getProps().getProperty("use.olddata"))){
+		  useold = true;
+		  }
+	  if(!useold) {
+		  makeData();
+	  }
 	   System.out.println("kliendid a");
 		
 		 
@@ -1986,7 +1993,13 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	   System.out.println("tooted a");
 	   TreeMap otherStocks = this.getProductsOther();
 	   
-	   TreeMap stocksfile = getLaoSeisud(null);
+	   TreeMap stocksfile = null;
+	   try {
+		   stocksfile = getLaoSeisud(null); 
+	   }catch(Exception e) {
+		   
+	   }
+	 
 	   
 	   boolean addShelf = false ;
 	   try {
@@ -2100,7 +2113,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      	String pr = getParent().getProps().getProperty("usepricelist");
      	prices = getPricelists(pr);
      }
-     
+
+     String lang = null;
+   
+     if(getParent().getProps().getProperty("product.lang") != null){
+      	 lang = getParent().getProps().getProperty("product.lang");
+      	// System.out.println("product.lang="+ lang);
+      }
+      
     
      if("true".equals(getParent().getProps().getProperty("sortbybrands"))){
      	try {
@@ -2370,12 +2390,66 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       	 		 }catch(Exception e) {
       	 			 
       	 		 }
+      	 	      	 	 }
+      	 
+      	 	 
+      	 	 
+      	 	 
+      	  if(lang != null && line.indexOf("param=\"" + lang + "\"") != -1) {
       	 	
-
+      	 	 len = line.indexOf("data code=\"ART_LANG\""); 
+      	 	 if(len != -1){
+      	 		 try {
+      	 		   String   vahe =  line.substring(len + 30); 
+       	 	    String  areto = vahe.substring(0,vahe.indexOf(">"));
+                  //System.out.println("areto " + areto  + "\n vahe: " + vahe);
+                  if(areto.contains("param=\"" + lang + "\"")) {
+                	  prod.setName(areto.substring(0,areto.indexOf("\""))); 
+                  } else {
+                	  len = vahe.indexOf("data code=\"ART_LANG\""); 
+                	//  System.out.println("len2 " + len);
+                	  if(len != -1){
+               	 		
+               	 		    vahe =  vahe.substring(len + 30); 
+                	 	     areto = vahe.substring(0,vahe.indexOf(">"));
+                	 	     
+                	 	   // System.out.println("areto2 " + areto );
+                            if(areto.contains("param=\"" + lang + "\"")) {
+                          	  prod.setName(areto.substring(0,areto.indexOf("\""))); 
+                            }else {
+                            	len = vahe.indexOf("data code=\"ART_LANG\""); 
+                          	  
+                          	  if(len != -1){
+                         	 		 try {
+                         	 		    vahe =  vahe.substring(len + 30); 
+                          	 	     areto = vahe.substring(0,vahe.indexOf(">"));
+                          	 	     
+                          	 	    //System.out.println("areto3 " + areto );
+                                      if(areto.contains("param=\"" + lang + "\"")) {
+                                    	  prod.setName(areto.substring(0,areto.indexOf("\""))); 
+                                      }	
+                            
+               	 	 }catch(Exception ee) {
+          	 			 
+          	 		 }
+                	  
+                          	  }  
+                  }
+                	  }
+       	 	  
+      	 	      	 	 
+                	  }
+      	 	 }catch(Exception ee) {
+  	 			 
+  	 		 }
       	 	 }
-      	 	 
-      	 	 
-      	 	 String areto = "";
+      	 //	 System.out.println(prod.getName());
+      	 //System.exit(0);	 
+      	  }
+      	  
+      	  
+      	  
+      	 String  areto = "";
       	 	 len = line.indexOf("data code=\"ALK_REG\""); 
       	 	 if(len != -1){
       	 	      areto =  line.substring(len + 29); 
@@ -2464,7 +2538,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
     				} 
         	   }
       	   
-      	   if(stocksfile.get(prod.getID()) != null) {
+      	   if(stocksfile != null && stocksfile.get(prod.getID()) != null) {
       		 try{
 				 prod.setStock((int)Double.parseDouble(stocksfile.get(prod.getID())+""));  
 	      		}catch(Exception t){
@@ -2559,6 +2633,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
        if(sb.length() > 0) {
     	   Converter.saveFileInUTF8("texts.txt", sb);
        }
+       
+       System.out.println("tooted tehtud ");
      
      return tm;
    }
