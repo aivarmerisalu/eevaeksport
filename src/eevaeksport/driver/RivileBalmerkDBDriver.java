@@ -997,12 +997,13 @@ HashSet olemas = new HashSet();
     	this.getSaveStockInfo();
     	System.out.println("stocks suurus " + stocks.size() + " " + stocks6.size());
   
-   String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus,dbo.papn(L11_LAUKAS , 8, 'c')  AS tykke,dbo.papn(L11_LAUKAS , 9, 'c')  AS alusel, 0 AS myygihind," +
-   		"N17_KODAS_PS AS ean, "+
-   " 0 AS kogus,n17_kodas_ls_5 AS grupp, N17_KODAS_GS AS grupp2, n17_kodas_ls_3 AS gruppabi ,N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status , N17_MAX_NUOL as maks," +
-   " case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus , ltrim(N17_KODAS_LS_8) as sellout " +
-   " FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1" +
-  " left join L02_FILD on L02_kodas_fil = N17_KODAS_PS  where  N17_POZ_DATE !=1 and (L02_KODAS_FS is null or L02_KODAS_FS!='NP_O') and N17_MEN_PAV !='IG' and len(ltrim(N17_PAV_K1))  >0";
+   String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus,dbo.papn(L11_LAUKAS , 8, 'c')  AS tykke,dbo.papn(L11_LAUKAS , 9, 'c')  AS alusel, 0 AS myygihind,\r\n" + 
+   		"   		N17_KODAS_PS AS ean, \r\n" + 
+   		"    0 AS kogus,n17_kodas_ls_5 AS grupp, N17_KODAS_GS AS grupp2, n17_kodas_ls_3 AS gruppabi ,N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status ,  N35_PAV_K3 as maks,\r\n" + 
+   		"    case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus , ltrim(N17_KODAS_LS_8) as sellout \r\n" + 
+   		"    FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
+   		"   left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1 and (L02_KODAS_FS is null or L02_KODAS_FS!='NP_O') and N17_MEN_PAV !='IG' and len(ltrim(N17_PAV_K1))  >0\r\n" + 
+   		"   ";
   
   
             System.out.println(cmd);
@@ -1192,7 +1193,7 @@ HashSet olemas = new HashSet();
                		//prod.setName("t " + nimetus);
                		//prod.setStatusTop("1");
                	}
-               	//prod.setMaxDiscount(max);
+               	prod.setMaxDiscount(max);
                }
                
                if(prod.getID().contains("GLASSES")) {

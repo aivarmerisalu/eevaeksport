@@ -360,7 +360,7 @@ public class BiovelaUusCCDBDriver extends AbstractDBDriver implements BulkUpdate
 	}
 	
    public Vector getPriceMatrixDataXX() {
-
+		TreeMap vahe = new TreeMap();
    	Vector lines = new Vector();
    	fixedass = new Vector();
    	prices = new HashMap();
@@ -502,6 +502,7 @@ public class BiovelaUusCCDBDriver extends AbstractDBDriver implements BulkUpdate
 		}
 		//mline.setDiscount(discount);
 
+		boolean action = false;
 		
 		if((listname != null && listname.trim().startsWith("AK"))){
 			//System.out.println( clGroup + "'" + prodID + "'" + discGroup + "'" + discount +  " " 
@@ -515,7 +516,7 @@ public class BiovelaUusCCDBDriver extends AbstractDBDriver implements BulkUpdate
 						}else{
 							mline.setEndDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
 						}
-						
+						action = true;
 					}
 				}
 				
@@ -532,6 +533,8 @@ public class BiovelaUusCCDBDriver extends AbstractDBDriver implements BulkUpdate
 				}else{
 					mline.setEndDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
 				}
+
+				action = true;
 				mline.setProdLevel("004");
 			}
 		}
@@ -571,14 +574,28 @@ public class BiovelaUusCCDBDriver extends AbstractDBDriver implements BulkUpdate
 				mline.setLineinfo(lineinfo);
 				//System.out.println("Lineinfo " + lineinfo);
 			}
-			lines.add(mline);
-		}
-		}
-			}
-			
-			
-				
+			String idd = clGroup+"|"+prodID;
 		
+			if(vahe.get(idd) != null )  {
+				if( action ) {
+					vahe.put(idd, mline);
+				}
+				
+			}else {
+				vahe.put(idd, mline);
+			}
+		
+	  }
+	}
+}
+		
+	Iterator itera = vahe.keySet().iterator();
+	while(itera.hasNext()) {
+		Object mline = vahe.get(itera.next()+"");
+		lines.add(mline);
+	}
+			
+	
 
 	} catch (Exception ex) {
 		ex.printStackTrace();

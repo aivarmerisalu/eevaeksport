@@ -42,6 +42,7 @@ public void setGroup(String group) {
   private String redline = "0";
   private String abiKood = " ";
   private Date reportmonth = null;
+  public String returnData = " ";
   public java.util.Date checkdate = null;
   
   /**

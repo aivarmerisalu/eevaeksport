@@ -5729,6 +5729,8 @@ while (itra.hasNext()){
             buf.append(cp.getAbiKood());
             buf.append(EksportPanel.separator);
             buf.append(cp.ale);
+            buf.append(EksportPanel.separator);
+            buf.append(cp.returnData);
             buf.append(EksportPanel.lineSeparator);
 
          }

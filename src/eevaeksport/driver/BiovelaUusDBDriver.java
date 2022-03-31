@@ -397,6 +397,7 @@ System.out.println("re " + re.toString());
    public Vector getPriceMatrixDataXX() {
 
    	Vector lines = new Vector();
+   	TreeMap vahe = new TreeMap();
    	fixedass = new Vector();
    	prices = new HashMap();
    	usedCustCodes = new HashSet();
@@ -532,7 +533,7 @@ System.out.println("re " + re.toString());
 			
 		}
 		//mline.setDiscount(discount);
-
+		boolean action = false;
 		
 		if((listname != null && listname.trim().startsWith("AK"))){
 			//System.out.println( clGroup + "'" + prodID + "'" + discGroup + "'" + discount +  " " 
@@ -546,7 +547,7 @@ System.out.println("re " + re.toString());
 						}else{
 							mline.setEndDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
 						}
-						
+						action = true;
 					}
 				}
 		 mline.setProdLevel("000");
@@ -562,6 +563,7 @@ System.out.println("re " + re.toString());
 				}else{
 					mline.setEndDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
 				}
+				action = true;
 			 mline.setProdLevel("004");
 			}
 		}
@@ -601,15 +603,30 @@ System.out.println("re " + re.toString());
 				mline.setLineinfo(lineinfo);
 				//System.out.println("Lineinfo " + lineinfo);
 			}
+			
+			String idd = clGroup+"|"+prodID;
+				
+				if(vahe.get(idd) != null ) {
+					if( action) {
+						vahe.put(idd, mline);
+					}
+					
+				}else {
+					vahe.put(idd, mline);
+				}
+			
+		  }
+		}
+	}
+			
+		Iterator itera = vahe.keySet().iterator();
+		while(itera.hasNext()) {
+			Object mline = vahe.get(itera.next()+"");
 			lines.add(mline);
 		}
-		}
-			}
-			
-			
 				
 		
-
+	
 	} catch (Exception ex) {
 		ex.printStackTrace();
 	}
@@ -618,6 +635,8 @@ System.out.println("re " + re.toString());
 	return lines;
 
    }
+   
+   
    private HashSet usedCustCodes = null;
 
    private HashMap prices = new HashMap();

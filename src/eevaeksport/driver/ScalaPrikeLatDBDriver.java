@@ -31,6 +31,11 @@ import java.util.Vector;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -1062,7 +1067,7 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
             	  }
               }
               
-              Date bestb  = rs.getDate("bestb");
+          /*    Date bestb  = rs.getDate("bestb");
               if (bestb != null) {
             	 
       			Calendar bestbe = Calendar.getInstance();
@@ -1072,11 +1077,14 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
                         prod.setDiffColor(true);
                         prod.setPartii("BB:" + Converter.getDDpMMpYYYYpString(bestbe));
                     }  
-              }
+              }*/
               
               
 
-              
+              if(letter != null && letter.trim().length()>0 && 
+            		  letter.trim().equals("X")) {
+            	  prod.setStatusSellout("1");
+              }
               
               
               if(prod.getGroup().equals("TAR")){
@@ -1106,14 +1114,53 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
 	    	//Converter.sendCustomerJson(customers, rcompany,false,null,null);
 	    }
 	   
-	
+	makeTextFile();
     
 	
-
 	return products;
     }
 
+    
+    private void makeTextFile() {
+       	StringBuffer sb = new StringBuffer();
+       	
+      
+    		 try{
+    			 File file = new File(this.getExcelDir() + "descriptions.xlsx");
+    			 
+    			 Workbook workbook = null;
+    			 Sheet sheet = null;
+    			       FileInputStream	 ff = new FileInputStream(file);
+    			       if(file.getName().endsWith(".xlsx")) {
+    			    	   workbook = new XSSFWorkbook(ff); 
+    						 sheet = workbook.getSheetAt(0); 
+    			       }else {
+    			    	    workbook = new HSSFWorkbook(ff); 
+    						 sheet = workbook.getSheetAt(0); 
+    					
+    			       }
+    	
+    					ff.close();	
+    					
+    					if(sheet != null){
+    					int lastRowNum = sheet.getLastRowNum();
+    					for(int i = 1 ; i<= lastRowNum ; i++) {
+    						Row row = sheet.getRow(i);
+    						 DataFormatter formatter = new DataFormatter();
+    							String kood = formatter.formatCellValue(row.getCell(0));
+    							String tekst = formatter.formatCellValue(row.getCell(3)).replaceAll("\\r\\n|\\r|\\n", "|").replaceAll(";", ":");
+    							sb.append(kood + ";" + tekst + "\n");
+    					}
+    					
+    					}
+    		 }catch(Exception e) {
+    			 e.printStackTrace();
+    			 }
+       	
+       	
+       	 Converter.saveFileInUTF8("texts.txt", sb);
 
+       }
 
     /**
      * Method declaration
@@ -1457,8 +1504,7 @@ private void makePictureCat(){
    	  File f = new File(pictspda +"list.txt");
         if (f.exists())f.delete();
         //Kataloogi sisude kustutamine
-    	  File res2 = new File (pictspda);
-           String[] ff2 = res2.list();
+  
       
 //       	 Lõppes kustutamine 
 		 
@@ -1469,14 +1515,14 @@ private void makePictureCat(){
        while (enume.hasNext()) {
   	    	String asi = (String)enume.next();
   	    	Product prod = (Product)prods.get(asi);
-  	    	String toode = prod.getID();  
-             if(toode.length() > 0){
+  	    	String ean = prod.getEAN();  
+             if(ean.length() > 0){
               	
-  	   	  res2 = new File (pictssou);
-            ff2 = res2.list();
+  	   	  File res2 = new File (pictssou);
+           String[] ff2 = res2.list();
           
        	 for(int i = 0;ff2.length>i;i++){
-           	if( ff2[i].startsWith(toode)){
+           	if( ff2[i].startsWith(ean)){
              // System.out.println("pilt olemas " + ff2[i]);
           	File in = new File ( pictssou + ff2[i]); 
             	if(in.isFile()){

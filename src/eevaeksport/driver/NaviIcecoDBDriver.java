@@ -804,7 +804,7 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
       
      try {
     	 String  cmd = " SELECT [Item No_] AS kood,  [Unit Price] AS hind ,[Starting Date],[Ending Date] from " +
-                 " [UAB ICECO Trade$Sales Price] where ( getdate()+1 between [Starting Date] and [Ending Date] or (getdate()+1 > [Starting Date]) and  year ([Ending Date]) = 1753) " +
+                 " [UAB ICECO Trade$Sales Price] where ( getdate()+1 between [Starting Date] and [Ending Date]+2 or (getdate()+1 > [Starting Date]) and  year ([Ending Date]) = 1753) " +
    			 " and [Sales Type] = 1  and [Sales Code] = 'AKTYV25'  order by [Item No_],[Ending Date] ";
 
       	 Connection con = getNewConnection2();

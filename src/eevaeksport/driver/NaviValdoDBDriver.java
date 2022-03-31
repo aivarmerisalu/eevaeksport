@@ -1477,6 +1477,15 @@ con3.close();
      Vector vec = new Vector();
      HashMap kliendid = new HashMap();
      try {
+    	 
+    	 String last3 = "SELECT  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]  as abiklient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate, \r\n" + 
+    	 		"    		    (r.[Unit Price]*(100-r.[Line Discount _])/100) as lastprice	, [External Document No_]  as lastdoc , [Order No_]  as lastdoc1 " + 
+    	 		"    			FROM [VOLDEMĀRS SIA$Sales Invoice Line] r \r\n" + 
+    	 		"    		      INNER JOIN [VOLDEMĀRS SIA$Sales Invoice Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_] \r\n" + 
+    	 		"    		   WHERE   d.[Posting Date]> GETDATE()-100 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date]";
+    	 
+    	 
+    	 
     String cmd =  " SELECT  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]  as abiklient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate,0 as lastamount," + 
     		"    (r.[Unit Price]*(100-r.[Line Discount _])/100) as lastprice	, dd.[External Document No_]  as lastdoc , dd.[Order No_]  as lastdoc1 , "
     		+ " (case when ([Shelf life period] = 0 or [Shelf life period type] = 0 or d.[Posting Date]+ (case when [Shelf life period type] = 2 then [Shelf life period]  else  [Shelf life period]*30 end) > getdate()) then 0 else 1 end) as paevi  "
@@ -1489,7 +1498,51 @@ con3.close();
    //   "klient","toode","kogus","viimane kuupÃ¯Ā¿Ā½ev","viimane kogus"
     Connection con = getNewConnection2();
     Statement stmt = con.createStatement();
-    ResultSet rs = stmt.executeQuery(cmd);
+    ResultSet rs = stmt.executeQuery(last3);
+    
+    HashMap lisainfo = new HashMap();
+    String oldkey = null;
+    int count = 0;
+    
+    while(rs.next()){
+
+            String custID = rs.getString("klient").trim();
+            String custAbi = rs.getString("abiklient").trim();
+            String prodID = rs.getString("toode").trim();;
+            double amount = rs.getDouble("kogus");
+            String lastdate = rs.getString("lastdate").trim().substring(0,10);
+        
+               double lprice = rs.getDouble("lastprice");
+               String ldoc = rs.getString("lastdoc");
+               String ldoc1 = rs.getString("lastdoc1");
+             
+              String key = custID+ "_" + custAbi + "-" + prodID;
+              if(oldkey == null) {
+            	  oldkey = key;
+              }
+              
+              if(!oldkey.equals(key)) {
+            	  count = 0;
+              }
+              
+               	if(count < 3) {
+               		String value = ldoc + "," + lastdate + "," +this.getNF().format(amount) + "," + this.getNF().format(lprice) ;
+               		if(lisainfo.get(key) != null) {
+               			value = lisainfo.get(key) + "|" + value;
+               		}
+               		
+               	   lisainfo.put(key, value);
+               	}
+                
+               oldkey = key;
+               count++;
+
+      }
+    
+    
+    
+    rs.close();
+    rs = stmt.executeQuery(cmd);
     while(rs.next()){
 
              String custID = rs.getString("klient").trim();
@@ -1526,6 +1579,7 @@ con3.close();
                     String ldoc1 = rs.getString("lastdoc1");
                     Integer paevi = rs.getInt("paevi");
                     
+                    
                     Product prod = new Product(prodID);
                     CustProd cp = new CustProd(custID+ "_" + custAbi , prodID,amount , 0, 0,lastdate,lprice,open,0," ");
                  
@@ -1537,6 +1591,12 @@ con3.close();
                     	 cp.setAbiKood(ldoc.trim());
                     }
                     	
+                    String key = custID+ "_" + custAbi + "-" + prodID;
+                    		
+                    		if(lisainfo.get(key) != null) {
+                    			cp.returnData = lisainfo.get(key)+"";
+                    		}
+                    
                     cp.setRedline(paevi+"");
                  cust.addProduct(prod,cp,false);
                  kliendid.put(custID, cust);

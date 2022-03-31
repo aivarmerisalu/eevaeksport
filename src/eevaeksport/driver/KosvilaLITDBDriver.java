@@ -367,13 +367,12 @@ public class KosvilaLITDBDriver extends AbstractDBDriver implements  BulkUpdater
 
     public TreeMap getCustomers(Agent agent){
         connectionUp(url2);
-        String cmd = "SELECT  trim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else trim((N33_kodas_ak)) end) AS kood," +
-        		" trim(N08_PAV) + ' ' + trim(N33_kodas_ak)AS nimetus, "+
-				" N33_ADRESAS AS aadress, (case when N08_NUOL_GR ='JURA' then '0' else N08_NUOL_GR end)  AS ale , " +
-				" ' ' AS visit ,N08_KODAS_KS AS payer , " +
-				" (CASE WHEN LENGTH(TRIM(N33_SHIP_VIA))=0 or N33_SHIP_VIA IS NULL THEN  N08_KODAS_MS_P ELSE N33_SHIP_VIA END) AS agent , "  +
-				" (case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS') then '0' else N08_KODAS_TS_P end) as paymterm " +
-				"  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS  order by N08_PAV";
+        String cmd = "SELECT  N08_KODAS_KS AS kood1, (case when N33_kodas_ak is null then '1' else N33_kodas_ak end) AS kood,\r\n" + 
+        		"        		 trim(N08_PAV) + ' ' + trim(N33_kodas_ak) AS nimetus, \r\n" + 
+        		"				 N33_ADRESAS AS aadress, (case when N08_NUOL_GR ='JURA' then '0' else N08_NUOL_GR end)  AS ale , \r\n" + 
+        		"				 ' ' AS visit ,N08_KODAS_KS AS payer , N33_SHIP_VIA  AS agent ,  N08_KODAS_MS_P as agent2 ,\r\n" + 
+        		"				  N08_KODAS_TS_P  as paymterm \r\n" + 
+        		"				  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS  order by N08_PAV";
         log(cmd);
         TreeMap customers = new TreeMap();
         HashMap custMap = new HashMap();
@@ -381,17 +380,23 @@ public class KosvilaLITDBDriver extends AbstractDBDriver implements  BulkUpdater
             stmt = con.prepareStatement(cmd);
             //stmt.setInt(1, Integer.parseInt(agent.getID()));
             //stmt.setDate(2, getStartingDate());
+            
             ResultSet	      rs = stmt.executeQuery();
 
 
             while (rs.next()) {
+            	System.out.println();
               String accountnum = rs.getString("kood1").trim();
-              String acc = rs.getString("kood");
+              String acc = rs.getString("kood").trim();
               if (acc != null && acc.trim().length()>0){
               	accountnum = accountnum + "-" + acc.trim();
               }
+              
+            
               String name = rs.getString("nimetus").trim() + accountnum;
               Customer cust = new Customer(accountnum);
+              
+              System.out.println(accountnum + name);
                cust.setName(Converter.enCodeEst(name));
               String aadr = rs.getString("aadress");
               if(aadr != null && aadr.trim().length()>0){
@@ -418,7 +423,17 @@ public class KosvilaLITDBDriver extends AbstractDBDriver implements  BulkUpdater
               if(payer != null && payer.trim().length()> 0){
                 cust.setPayer(payer.trim());
               }
-String ag = rs.getString("agent").trim();
+String ag = rs.getString("agent");
+if(ag == null || ag.trim().length() == 0) {
+	ag = rs.getString("agent2");
+	if(ag != null && ag.trim().length() > 0) {
+		ag = ag.trim();
+	}
+   } else {
+	  ag = ag.trim();
+   }
+        if(ag != null) {
+
               cust.addAgent(new Agent(ag));
               if(ag.equals("043")){
             	  cust.addAgent(new Agent("005"));
@@ -429,7 +444,16 @@ String ag = rs.getString("agent").trim();
               if(ag.equals("045")){
             	  cust.addAgent(new Agent("021"));
               }
-              cust.setPaymTerm(rs.getInt("paymterm")+"");
+          	
+          }
+        
+        try {
+        	int paym = Integer.parseInt(rs.getString("paymterm"));
+            cust.setPaymTerm(paym+"");
+        }catch(Exception e) {
+        	
+        }
+        
              //System.out.println(cust.getID() +" " + cust.getAgents().toString());
               customers.put(name, cust);
               custMap.put(cust.getPayer(), cust);

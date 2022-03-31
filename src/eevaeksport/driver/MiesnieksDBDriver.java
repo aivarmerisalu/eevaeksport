@@ -141,7 +141,7 @@ public class MiesnieksDBDriver extends AbstractDBDriver implements Manager,Promo
 								tm.put(custid, paev);
    						}
 							//if(paev.equals("K"))
-							System.out.println("P�ev " + a + " " + i +" " + custid + " *" + paev + " " + week);
+							//System.out.println("P�ev " + a + " " + i +" " + custid + " *" + paev + " " + week);
 							
 						}
 					}

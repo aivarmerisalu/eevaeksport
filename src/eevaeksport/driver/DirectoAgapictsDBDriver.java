@@ -687,12 +687,13 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
         }
 
 
+   
+  
  
 	  
      
    public TreeMap getAgents(){
-	   
-	 
+	
 	   
      TreeMap tm = new TreeMap();
      try{
@@ -2384,7 +2385,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   
 	
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort" , prods, parent);
-		System.out.println("Contracts " + contracts.toString());
+		System.out.println("Contracts " + contracts.size() + " " +  contracts.toString());
 		System.exit(0);
 		
 	}

@@ -2717,13 +2717,27 @@ public class Converter {
 							 if(pais.equals("EAN")) {
 								 eanp = 8;
 							 }
+							 pais = formatter.formatCellValue(rowu.getCell(6));
+							 if(pais.equals("EAN")) {
+								 eanp = 6;
+							 }
 							 pais = formatter.formatCellValue(rowu.getCell(15));
 							 if(pais.equals("Seisund")) {
 								 seis = 15;
 							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(13));
+							 if(pais.equals("Seisund")) {
+								 seis = 13;
+							 }
+							 
 							 pais = formatter.formatCellValue(rowu.getCell(10));
 							 if(pais.equals("Nimetus")) {
 								 tnim = 10;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(8));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 8;
 							 }
 						 }
 							
@@ -2731,7 +2745,7 @@ public class Converter {
 						 
 						 
 						 
-					 System.out.println("u " + u +" " + tnim + " "+ seis + " "+ eanp );
+				//	 System.out.println("u " + u +" " + tnim + " "+ seis + " "+ eanp );
 					
 					
 						for(int i = u ; i < sheet.getLastRowNum()+1;i++){
@@ -2741,6 +2755,9 @@ public class Converter {
                         	  poo = 3;
                           }
                           if(seis == 15) {
+                        	  poo = 2;
+                          }
+                          if(seis == 13) {
                         	  poo = 2;
                           }
                           if(seis == 100) {
@@ -2756,11 +2773,11 @@ public class Converter {
 							Boolean seisund = true;
 							if(seis != 0 ) {
 								String snimi = formatter.formatCellValue(row.getCell(seis));
-								if(!snimi.equals("Sortimendis")) {
+								if(!snimi.equals("Sortimendis") && !snimi.equals("Toote hankimine")) {
 									seisund = false;
 								}
 								
-								System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi+ " "+ ean + " " + pood);
+								//System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi+ " "+ ean + " " + pood);
 								
 							}
 							
@@ -2769,8 +2786,8 @@ public class Converter {
 							
 							Contract con = new Contract(pood);
 							String toode = getToode(prods,ean);
-							 
-							// System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
+							// if(ean.equals("4744136010477"))
+							//System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
 							  if(toode.equals(ean) && !toode.equals("EAN")) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Coop formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
@@ -2805,7 +2822,7 @@ public class Converter {
 						 e.printStackTrace();
 					 }	 
 		 
-		// System.exit(0);
+	//	System.exit(0);
 		 
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "coop", true);

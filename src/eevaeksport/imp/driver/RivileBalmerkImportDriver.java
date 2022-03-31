@@ -571,9 +571,13 @@ if(ladu.trim().length()!=0){
       //sb.append(getLineNr(cou));
       sb.append("               <I07_KODAS>" +  escape(toode) + "</I07_KODAS>" + ls);
       cou++;
+      double kord = 1;
+      if(tag) {
+    	  kord = -1;
+      }
       
       //sb.append(getLineNr(cou));
-      sb.append("               <I07_KIEKIS>" + escape(nf.format(pand)) + "</I07_KIEKIS>" + ls);
+      sb.append("               <I07_KIEKIS>" + escape(nf.format(pand * kord)) + "</I07_KIEKIS>" + ls);
       cou++;
      
      // sb.append(getLineNr(cou));
