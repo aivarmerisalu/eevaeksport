@@ -6076,10 +6076,16 @@ int i = 0;
       
       
 //see on vana
-	  cmd = " select  PRI.PROMONUM as grupp,l.ITEMID as toode ,l.PRICE as hind , fromqty as kogus ,(1-l.price/qtyprice)*100 as perc,linedisc "+
-       " from astPromoGMLine l INNER JOIN astPromoJournal pri on pri.dataareaid = l.dataareaid and pri.promonum = l.promonum  " +
-       " where l.dataareaid = 'ABAT' and ( GETDATE() between PRI.FROMDATE-1 AND PRI.TODATE ) " +
-	   "  and accepted = 2 and promostatus in (1,4) and maxdiscountpromo = 1  ";
+	  cmd = " SELECT PRI.ACCOUNTRELATION as grupp,   PRI.ITEMRELATION as toode ,pri.AMOUNT as hind ,quantityamount as kogus \r\n" + 
+	  		"       FROM PRICEDISCTABLE pri INNER JOIN INVENTTABLE inv on inv.dataareaid=pri.dataareaid and inv.itemid =pri.itemrelation \r\n" + 
+	  		"	   WHERE PRI.DATAAREAID='ABAT' AND PRI.RELATION in (4,5) and quantityamount > 0\r\n" + 
+	  		"	    AND pri.itemcode=0  and  \r\n" + 
+	  		"         ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) \r\n" + 
+	  		"		 AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) = 1 then 2 else 0 end)) \r\n" + 
+	  		"	   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) \r\n" + 
+	  		"	   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) \r\n" + 
+	  		"	   or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'Standard%'\r\n" + 
+	  		"         ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation ";
 	 
 		
 	    StringBuffer buf = new StringBuffer();
@@ -6093,20 +6099,21 @@ int i = 0;
 	        	        String  gruppx = rs.getString("grupp").trim();
 	                  	String  toodex = rs.getString("toode").trim();
 	                  	try{
-	                  		double  hind  = ((Product)prodHash.get(toodex)).getPrice();
-		                  	double  kogus = rs.getDouble("kogus");
-		                  	double  perc  = rs.getDouble("perc");
+	                  		//double  hind  = ((Product)prodHash.get(toodex)).getPrice();
+		                  
+		                  	double  hind  = rs.getDouble("hind");
+		                	double  kogus = rs.getDouble("kogus");
 		                  	double  lined = 0;
 		                  	
 		                  	if(kogus == 0){
 		                  		kogus = 1;
 		                  	}
 		                  	
-		                  	double hl = (hind -lined) *(100-perc)/100;
+		                  
 		                  	
 		                  	// siia teha number format 
 		                  	
-		                  	      buf.append(toodex+ "; ; ;" + NF.format(hl).replace(',', '.') + ";" + gruppx + ";" + kogus + ";"  );
+		                  	      buf.append(toodex+ "; ; ;" + NF.format(hind).replace(',', '.') + ";" + gruppx + ";" + kogus + ";"  );
 		                          buf.append("\n");	
 		              		
 	                  	}catch(Exception e){

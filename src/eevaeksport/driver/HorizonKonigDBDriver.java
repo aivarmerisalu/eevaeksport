@@ -623,32 +623,44 @@ try{
 	   
 
 		  
-	   String    cmd = " select toode , kogus , case  when ladu = 81209 then 53296  else(case  when ladu = 81208 then 53269  else (case  when ladu = 53277 then 53268  else \r\n" + 
-		  		"(case  when ladu = 81853 then 53268  else (case  when ladu = 81734 then 53269  else (case  when ladu = 81735 then 53270  else  \r\n" + 
-		  		"(case when ladu = 79742 then 53268 else (case  when ladu = 79743 then 53269 else \r\n" + 
-		  		"(case  when ladu = 79744 then 53270 else   (case  when ladu = 83018 then 53268 else ladu end) end) end) end) end) end) end) end) end )end AS ladu  \r\n" + 
-		  		"from\r\n" + 
-		  		"(SELECT TOP (30001)   N.KODS AS toode,  BATL.DAUDZ AS kogus,  PCN.PK_KLIENTS as ladu\r\n" + 
-		  		"FROM  APV04761.NNOM N \r\n" + 
-		  		"LEFT OUTER JOIN APV04761.NVIEN VIEN ON N.PK_VIEN=VIEN.PK_VIEN \r\n" + 
-		  		"LEFT OUTER JOIN \r\n" + 
-		  		"(SELECT NPBATL.PK_NOM AS PK_NOM,SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ END) AS DAUDZ, \r\n" + 
-		  		"SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ2 END) AS DAUDZP, SUM(CASE NPP.STATUSS WHEN 2 THEN NPBATL.DAUDZ ELSE 0 END) AS DAUDZBR,\r\n" + 
-		  		"SUM(NPBATL.SUMMA) AS SUMMA \r\n" + 
-		  		"FROM APV04761.NPBATL, APV04761.NNOMPART NPP \r\n" + 
-		  		"WHERE  NPP.PK_NOMPART = NPBATL.PK_NOMPART \r\n" + 
-		  		"GROUP BY NPBATL.PK_NOM) KBATL ON N.PK_NOM = KBATL.PK_NOM \r\n" + 
-		  		"LEFT OUTER JOIN APV04761.NCEN_LAST PCN ON N.PK_NOM = PCN.PK_NOM AND NOT (PCN.PK_KLIENTS = 2) \r\n" + 
-		  		"LEFT OUTER JOIN (SELECT NPBATL.PK_NOM AS PK_NOM, NPBATL.PK_NOL AS PK_NOL,SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ END) AS DAUDZ, \r\n" + 
-		  		"SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ2 END) AS DAUDZP, \r\n" + 
-		  		"SUM(CASE NPP.STATUSS WHEN 2 THEN NPBATL.DAUDZ ELSE 0 END) AS DAUDZBR, \r\n" + 
-		  		"SUM(NPBATL.SUMMA) AS SUMMA \r\n" + 
-		  		"FROM APV04761.NPBATL, APV04761.NNOMPART NPP \r\n" + 
-		  		"WHERE  NPP.PK_NOMPART = NPBATL.PK_NOMPART \r\n" + 
-		  		"GROUP BY NPBATL.PK_NOM, NPBATL.PK_NOL) BATL ON PCN.PK_NOM = BATL.PK_NOM AND PCN.PK_KLIENTS = BATL.PK_NOL  \r\n" + 
-		  		"WHERE (N.PAMVID IN (2015,7713,24522,18205, 12200 ,12201,13204,13205,15139)) AND ((  ( (N.STATUSS = 0) )  ))) as vol\r\n" + 
-		  		"where kogus >0 and ladu not in ('53273')\r\n" + 
-		  		"" ;
+	   String    cmd = " SELECT toode, sum(kogus) as kogus, ladu FROM\r\n" + 
+	   		"(select toode , kogus , \r\n" + 
+	   		"case  when ladu = 81209 then 53296  \r\n" + 
+	   		"else(case  when ladu = 81208 then 53269  \r\n" + 
+	   		"else (case  when ladu = 53277 then 53268  \r\n" + 
+	   		"else  (case  when ladu = 81853 then 53268  \r\n" + 
+	   		"else (case  when ladu = 81734 then 53269  \r\n" + 
+	   		"else (case  when ladu = 81735 then 53270  \r\n" + 
+	   		"else (case when ladu = 79742 then 53268 \r\n" + 
+	   		"else (case  when ladu = 79743 then 53269 \r\n" + 
+	   		"else (case  when ladu = 79744 then 53270 \r\n" + 
+	   		"else (case  when ladu = 83018 then 53268 \r\n" + 
+	   		"else ladu end) end) end) end) end) end)end) end)end )end AS ladu\r\n" + 
+	   		"from\r\n" + 
+	   		"(SELECT TOP (30001)   N.KODS AS toode,  BATL.DAUDZ AS kogus,  PCN.PK_KLIENTS as ladu \r\n" + 
+	   		"FROM  APV04761.NNOM N \r\n" + 
+	   		"LEFT OUTER JOIN APV04761.NVIEN VIEN ON N.PK_VIEN=VIEN.PK_VIEN\r\n" + 
+	   		"LEFT OUTER JOIN \r\n" + 
+	   		"(SELECT NPBATL.PK_NOM AS PK_NOM,SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ END) AS DAUDZ,\r\n" + 
+	   		"SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ2 END) AS DAUDZP, \r\n" + 
+	   		"SUM(CASE NPP.STATUSS WHEN 2 THEN NPBATL.DAUDZ ELSE 0 END) AS DAUDZBR,\r\n" + 
+	   		"SUM(NPBATL.SUMMA) AS SUMMA\r\n" + 
+	   		"FROM APV04761.NPBATL, APV04761.NNOMPART NPP \r\n" + 
+	   		"WHERE  NPP.PK_NOMPART = NPBATL.PK_NOMPART \r\n" + 
+	   		"GROUP BY NPBATL.PK_NOM) KBATL ON N.PK_NOM = KBATL.PK_NOM \r\n" + 
+	   		"LEFT OUTER JOIN APV04761.NCEN_LAST PCN ON N.PK_NOM = PCN.PK_NOM AND NOT (PCN.PK_KLIENTS = 2)\r\n" + 
+	   		"LEFT OUTER JOIN (SELECT NPBATL.PK_NOM AS PK_NOM, NPBATL.PK_NOL AS PK_NOL,SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ END) AS DAUDZ,\r\n" + 
+	   		"SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ2 END) AS DAUDZP,\r\n" + 
+	   		"SUM(CASE NPP.STATUSS WHEN 2 THEN NPBATL.DAUDZ ELSE 0 END) AS DAUDZBR,\r\n" + 
+	   		"SUM(NPBATL.SUMMA) AS SUMMA \r\n" + 
+	   		"FROM APV04761.NPBATL, APV04761.NNOMPART NPP \r\n" + 
+	   		"WHERE  NPP.PK_NOMPART = NPBATL.PK_NOMPART \r\n" + 
+	   		"GROUP BY NPBATL.PK_NOM, NPBATL.PK_NOL) BATL ON PCN.PK_NOM = BATL.PK_NOM AND PCN.PK_KLIENTS = BATL.PK_NOL\r\n" + 
+	   		"WHERE (N.PAMVID IN (2015,7713,24522,18205, 12200 ,12201,13204,13205,15139)) AND ((  ( (N.STATUSS = 0) )  ))) as vol\r\n" + 
+	   		"where kogus >0 and ladu not in ('53273') \r\n" + 
+	   		") AS toodegroupingneeded\r\n" + 
+	   		"GROUP BY toode, ladu\r\n" + 
+	   		"" ;
 		  
 
 	       if (isDebug()) System.out.println(cmd); 
@@ -744,32 +756,44 @@ try{
 	  
 
 
-	  String    cmd = "select toode , kogus , case  when ladu = 81209 then 53296  else(case  when ladu = 81208 then 53269  else (case  when ladu = 53277 then 53268  else \r\n" + 
-	  		"(case  when ladu = 81853 then 53268  else (case  when ladu = 81734 then 53269  else (case  when ladu = 81735 then 53270  else  \r\n" + 
-	  		"(case when ladu = 79742 then 53268 else (case  when ladu = 79743 then 53269 else \r\n" + 
-	  		"(case  when ladu = 79744 then 53270 else (case  when ladu = 83018 then 53268 else ladu end) end) end) end) end) end)end) end)end )end AS ladu  \r\n" + 
+	  String    cmd = "SELECT toode, sum(kogus) as kogus, ladu FROM\r\n" + 
+	  		"(select toode , kogus , \r\n" + 
+	  		"case  when ladu = 81209 then 53296  \r\n" + 
+	  		"else(case  when ladu = 81208 then 53269  \r\n" + 
+	  		"else (case  when ladu = 53277 then 53268  \r\n" + 
+	  		"else  (case  when ladu = 81853 then 53268  \r\n" + 
+	  		"else (case  when ladu = 81734 then 53269  \r\n" + 
+	  		"else (case  when ladu = 81735 then 53270  \r\n" + 
+	  		"else (case when ladu = 79742 then 53268 \r\n" + 
+	  		"else (case  when ladu = 79743 then 53269 \r\n" + 
+	  		"else (case  when ladu = 79744 then 53270 \r\n" + 
+	  		"else (case  when ladu = 83018 then 53268 \r\n" + 
+	  		"else ladu end) end) end) end) end) end)end) end)end )end AS ladu\r\n" + 
 	  		"from\r\n" + 
-	  		"(SELECT TOP (30001)   N.KODS AS toode,  BATL.DAUDZ AS kogus,  PCN.PK_KLIENTS as ladu\r\n" + 
+	  		"(SELECT TOP (30001)   N.KODS AS toode,  BATL.DAUDZ AS kogus,  PCN.PK_KLIENTS as ladu \r\n" + 
 	  		"FROM  APV04761.NNOM N \r\n" + 
-	  		"LEFT OUTER JOIN APV04761.NVIEN VIEN ON N.PK_VIEN=VIEN.PK_VIEN \r\n" + 
+	  		"LEFT OUTER JOIN APV04761.NVIEN VIEN ON N.PK_VIEN=VIEN.PK_VIEN\r\n" + 
 	  		"LEFT OUTER JOIN \r\n" + 
-	  		"(SELECT NPBATL.PK_NOM AS PK_NOM,SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ END) AS DAUDZ, \r\n" + 
-	  		"SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ2 END) AS DAUDZP, SUM(CASE NPP.STATUSS WHEN 2 THEN NPBATL.DAUDZ ELSE 0 END) AS DAUDZBR,\r\n" + 
-	  		"SUM(NPBATL.SUMMA) AS SUMMA \r\n" + 
+	  		"(SELECT NPBATL.PK_NOM AS PK_NOM,SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ END) AS DAUDZ,\r\n" + 
+	  		"SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ2 END) AS DAUDZP, \r\n" + 
+	  		"SUM(CASE NPP.STATUSS WHEN 2 THEN NPBATL.DAUDZ ELSE 0 END) AS DAUDZBR,\r\n" + 
+	  		"SUM(NPBATL.SUMMA) AS SUMMA\r\n" + 
 	  		"FROM APV04761.NPBATL, APV04761.NNOMPART NPP \r\n" + 
 	  		"WHERE  NPP.PK_NOMPART = NPBATL.PK_NOMPART \r\n" + 
 	  		"GROUP BY NPBATL.PK_NOM) KBATL ON N.PK_NOM = KBATL.PK_NOM \r\n" + 
-	  		"LEFT OUTER JOIN APV04761.NCEN_LAST PCN ON N.PK_NOM = PCN.PK_NOM AND NOT (PCN.PK_KLIENTS = 2) \r\n" + 
-	  		"LEFT OUTER JOIN (SELECT NPBATL.PK_NOM AS PK_NOM, NPBATL.PK_NOL AS PK_NOL,SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ END) AS DAUDZ, \r\n" + 
-	  		"SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ2 END) AS DAUDZP, \r\n" + 
-	  		"SUM(CASE NPP.STATUSS WHEN 2 THEN NPBATL.DAUDZ ELSE 0 END) AS DAUDZBR, \r\n" + 
+	  		"LEFT OUTER JOIN APV04761.NCEN_LAST PCN ON N.PK_NOM = PCN.PK_NOM AND NOT (PCN.PK_KLIENTS = 2)\r\n" + 
+	  		"LEFT OUTER JOIN (SELECT NPBATL.PK_NOM AS PK_NOM, NPBATL.PK_NOL AS PK_NOL,SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ END) AS DAUDZ,\r\n" + 
+	  		"SUM(CASE NPP.STATUSS WHEN 2 THEN 0 ELSE NPBATL.DAUDZ2 END) AS DAUDZP,\r\n" + 
+	  		"SUM(CASE NPP.STATUSS WHEN 2 THEN NPBATL.DAUDZ ELSE 0 END) AS DAUDZBR,\r\n" + 
 	  		"SUM(NPBATL.SUMMA) AS SUMMA \r\n" + 
 	  		"FROM APV04761.NPBATL, APV04761.NNOMPART NPP \r\n" + 
 	  		"WHERE  NPP.PK_NOMPART = NPBATL.PK_NOMPART \r\n" + 
-	  		"GROUP BY NPBATL.PK_NOM, NPBATL.PK_NOL) BATL ON PCN.PK_NOM = BATL.PK_NOM AND PCN.PK_KLIENTS = BATL.PK_NOL  \r\n" + 
+	  		"GROUP BY NPBATL.PK_NOM, NPBATL.PK_NOL) BATL ON PCN.PK_NOM = BATL.PK_NOM AND PCN.PK_KLIENTS = BATL.PK_NOL\r\n" + 
 	  		"WHERE (N.PAMVID IN (2015,7713,24522,18205, 12200 ,12201,13204,13205,15139)) AND ((  ( (N.STATUSS = 0) )  ))) as vol\r\n" + 
-	  		"where kogus >0 and ladu not in ('53273')\r\n" + 
-	  		"" ;
+	  		"where kogus >0 and ladu not in ('53273') \r\n" + 
+	  		") AS toodegroupingneeded\r\n" + 
+	  		"GROUP BY toode, ladu\r\n"  
+	  		 ;
 	  
 	  
 

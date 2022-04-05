@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -229,9 +230,13 @@ double kordaja = 1;
 
 	        boolean tagastus = false;
 	   	 	 Vector lin = order.getOrderLines();
+	   	 	 HashSet signas = new HashSet();
 	   	 	 int nega = 0;
 	   	 	 for (int i = 0; i < lin.size(); i++) {
 	   	 		OrderLine ol = (OrderLine) lin.elementAt(i);
+	   	 		if(!signas.contains(ol.getToode() + " " + ol.getKogus())) {
+	   	 			signas.add(ol.getToode() + " " + ol.getKogus());
+	   	 		}
 	   	 		if(ol.getKogus() < 0 && (order.getStatus() == 5 || order.getStatus() == 4 || order.getStatus() == 2)){
 	   	 			nega++;
 	   	 		}
@@ -318,6 +323,9 @@ double kordaja = 1;
 	        
 	        
 	        Node nr = doc.createElement("OrderNumber");
+	        if(number.length() > 20) {
+	        	number = number.substring(0,20);
+	        }
 	        Text nrVal = doc.createTextNode(number + "");
 	        nr.appendChild(nrVal);
 	        header.appendChild(nr);
@@ -341,7 +349,11 @@ double kordaja = 1;
 	 		if(order.getTeostaja() != null && order.getTeostaja().trim().length() >0){
 
 	 			Node coms = doc.createElement("CustomerOrderNumber");
-		        Text comVals = doc.createTextNode(order.getTeostaja());
+	 			String num = order.getTeostaja();
+	 			 if(num.length() > 20) {
+	 	        	num = num.substring(0,20);
+	 	        }
+		        Text comVals = doc.createTextNode(num);
 		        coms.appendChild(comVals);
 		        header.appendChild(coms);
 		   
@@ -468,8 +480,13 @@ double kordaja = 1;
 	        	  kog = kog + line.getKogus();
 	        	  sum = sum + (line.getKogus()* line.getPrice());
 	        	  System.out.println("rida " + line.getToode() + " " + line.getKogus() + " " + line.getPrice() + " " + line.getKogus()* line.getPrice() + " " + sum);
-	        	  coun++;
-	          	addLine(line, read, doc, coun, order, repr, kordaja);
+	        	 
+	        	  if(signas.contains(toode+ " " + line.getKogus())) {
+	        		  coun++;
+	        		  addLine(line, read, doc, coun, order, repr, kordaja); 
+	        		  addNumLine(); 
+	        	  }
+	          	  signas.remove(toode+ " " + line.getKogus()); // topelt ridade vastu tehtud ...
 	          }
 	          }
 
@@ -584,6 +601,7 @@ if(invoice){
 	     double disc = line.getDiscount();
 	     String unit = line.getUnit();
 	     
+	     
 	     Node koGus = doc.createElement("OrderedQuantity");
 	     
 	     Text kogusVal = doc.createTextNode(getNF().format(kogus ));
@@ -606,6 +624,13 @@ if(invoice){
 	        Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
 		     yhiku_hind.appendChild(yhiku_hindVal);
 		     ridaitem.appendChild(yhiku_hind);
+		     
+		     if(line.getPartii() != null && line.getPartii().trim().length() >0) {
+		    	    Node origDoc = doc.createElement("OriginalDocNumber");
+				     Text origDocVal = doc.createTextNode(line.getPartii());
+				     origDoc.appendChild(origDocVal);
+				     ridaitem.appendChild(origDoc); 
+		     }
 	    }
 	
 	    if(repr){
@@ -647,7 +672,10 @@ if(invoice){
 				     }
 		
 	     
-	     
+				     
+				    
+				 
+
 	     
 	     
 	     Node yhik = doc.createElement("UnitOfMeasure");
@@ -656,7 +684,7 @@ if(invoice){
 	     ridaitem.appendChild(yhik);
 
 	     rida.appendChild(ridaitem);
-	     addNumLine(); 
+	   
 	   }
 
    public NumberFormat getNF() {

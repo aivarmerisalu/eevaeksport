@@ -279,7 +279,7 @@ HashMap pants = null;
     while (rs1.next()) {
       prod = rs1.getString("toode").trim();
     }
-   System.out.println(ean + " prod0 " + prod);
+ //  System.out.println(ean + " prod0 " + prod);
     if(prod == null){
 
       rs1 = st1.executeQuery(sql2);
@@ -289,7 +289,7 @@ HashMap pants = null;
       }
     }
 
-    System.out.println(prodID + " prod1 " + prod);
+   // System.out.println(prodID + " prod1 " + prod);
     rs1.close();
     st1.close();
 
@@ -300,6 +300,35 @@ HashMap pants = null;
 	     this.order = order;
 	   }
   private Order order = null;
+  
+  
+  
+  private double getProductPrice(String toode) {
+	  double res = 0;
+	  
+	  String    sql = "select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from I33_PKAI "
+	    		+ " where I33_KODAS_iS = 'SAND1' and  I33_KODAS_PS = '" + toode + "'  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
+	            System.out.println("hind");
+	       try {
+	    	   
+	      
+	            Statement st1 = con.createStatement();
+	            ResultSet rst = st1.executeQuery(sql);
+	            
+	       
+	               while (rst.next()) {
+	                 res = rst.getDouble("hind");
+	                }
+	             rst.close();
+	             st1.close();
+	             
+           }catch(Exception e ) {
+	    	   
+	       }
+	  return res;
+			  
+  }
+  
   
   public void makeOrder(Order order) throws SQLException{
  
@@ -518,10 +547,12 @@ if(ladu.trim().length()!=0){
           sb.append("               <I07_KIEKIS>" + escape(nf.format(line.getKogus() * kord)) + "</I07_KIEKIS>" + ls);
           cou++;
          
-       //   sb.append(getLineNr(cou));
-       //   sb.append("               <I07_KAINA_BE>" + escape(getConc().getNF().format(price)) + "</I07_KAINA_BE>" + ls);
-       //   cou++;
+    
   if (ale != 0 ){
+	       double hind = this.getProductPrice(toode);
+	   //   sb.append(getLineNr(cou));
+         sb.append("               <I07_KAINA_BE>" + escape(nf.format(hind)) + "</I07_KAINA_BE>" + ls);
+         cou++;
   	    //  sb.append(getLineNr(cou));
           sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
           cou++;
@@ -651,88 +682,6 @@ if(ladu.trim().length()!=0){
 
 	}
 
-  private StringBuffer postData(String data) throws Exception {
-	  HttpURLConnection urlc = null;
-	  StringBuffer inputLineBuf = new StringBuffer();
-	  try{
-	  urlc = (HttpURLConnection)  new URL(this.logurl).openConnection();
-	  try{
-	  urlc.setRequestMethod( "POST" );
-	  urlc.addRequestProperty("ApiKey", APIKEY);
-	  urlc.addRequestProperty("Accept", "application/xml");
-	  urlc.addRequestProperty("Content-Type", "application/xml");
-	  
-	
-	  } catch (ProtocolException e) {
-	    throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
-	  }
-	  urlc.setDoOutput(true);
-	  urlc.setDoInput(true);
-	  urlc.setUseCaches(false);
-	  urlc.setAllowUserInteraction(false);
-	  OutputStream out = urlc.getOutputStream();
-	  try {
-		out.write( data.getBytes() );
-	  } catch (IOException e){
-	  throw new Exception("IOException while posting data", e);
-	  } finally {
-	  if (out != null)
-	  out.close();
-	  }
-	  InputStream in = urlc.getInputStream();
-	  try{
-	  Reader reader = new InputStreamReader(in);
-	    InputStreamReader isr = new InputStreamReader(in,"UTF-8");
-	    BufferedReader inr = new BufferedReader(isr);
-	    String inputLine;
-
-	    while ((inputLine = inr.readLine()) != null){
-	        inputLine = Converter.enCodeEst(inputLine);	// enCode(inputLine);	
-	    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n"));
-	  }
-
-	     inr.close();
-	  
-	  
-	  reader.close();
-	  } catch (IOException e)
-	  {
-	  throw new Exception("IOException while reading response", e);
-	  } finally  {
-	  if (in != null)
-	  in.close();
-	  }
-	  } catch (IOException e) {
-		  
-		  InputStream in = urlc.getInputStream();
-		  try{
-		  Reader reader = new InputStreamReader(in);
-		    InputStreamReader isr = new InputStreamReader(in,"UTF-8");
-		    BufferedReader inr = new BufferedReader(isr);
-		    String inputLine;
-
-		    while ((inputLine = inr.readLine()) != null){
-		        inputLine = Converter.enCodeEst(inputLine);	// enCode(inputLine);	
-		    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n"));
-		  }
-
-		     inr.close();
-		  
-		  
-		  reader.close();
-		  } catch (IOException uu){
-			uu.printStackTrace();  
-		  }
-		  
-	  throw new Exception("Connection error (is server running at " + this.logurl + " ?): " + e);
-	  } finally
-	  {
-	  if (urlc != null)
-	  urlc.disconnect();
-	  }
-	  return inputLineBuf;
-	  }
-	  
 
 
 
@@ -757,21 +706,6 @@ if(ladu.trim().length()!=0){
   }
 
   
-  private String getLineNr(int i){
-  	String res = i + "";
-  	if (res.length() == 1){
-  		res = "00000" + res;
-  	} else if (res.length() == 2){
-  		res = "0000" + res;
-  	} else if (res.length() == 3){
-  		res = "000" + res;
-  	} else if (res.length() == 4){
-  		res = "00" + res;
-  	} else if (res.length() == 5){
-  		res = "0" + res;
-  	}
-  	return res;
-  }
   
   private String getDateString(Calendar cal){
     StringBuffer sb = new StringBuffer();
@@ -1425,11 +1359,13 @@ if(ladu.trim().length()!=0){
 	     Product prod = this.getProduct(toode);
 	
 	     if(prod== null) {
-	    	 System.out.println("Prod null " + toode);
+	    	// System.out.println("Prod null " + toode);
 	    	// System.exit(0);
 	    	 prod = new Product(toode);
 	    	 prod.setEAN(toode);
 	    	 prod.setName(toode);
+	    	 prod.setPrice(line.getPrice());
+	    	 
 	     }
 	     try {
 			    Node toote_ean = doc.createElement("EAN");
