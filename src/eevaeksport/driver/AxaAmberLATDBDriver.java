@@ -2741,7 +2741,11 @@ stmt.close();
 	 "	 round(SUM(case when MONTH(sal.invoicedate) = MONTH(getdate()) and YEAR(sal.invoicedate) = YEAR(getdate())-1 then lineamount else 0  end),0) AS summalast " +  
      "    FROM custinvoicetrans sal with(noLock)  INNER JOIN inventtable inv with(noLock)  ON sal.itemid=inv.itemid  and  inv.dataareaid= sal.dataareaid INNER JOIN custinvoicejour jou with(noLock)  ON  " +
      "    sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid  INNER JOIN custtable cus with(noLock)  ON cus.accountnum = jou.orderaccount " +
-	 "	 WHERE inv.dataareaid='spil' AND sal.dataareaid='spil' AND cus.dataareaid='spil'  AND jou.dataareaid='spil' AND sal.invoicedate > getdate()-400 " +
+	 "	 WHERE inv.dataareaid='spil' AND sal.dataareaid='spil' AND cus.dataareaid='spil'  AND jou.dataareaid='spil' AND ((sal.invoicedate >= DATEADD(month, DATEDIFF(month, 0, getdate()), 0) " + 
+	 "     AND sal.invoicedate <  DATEADD(month, DATEDIFF(month, 0, getdate())+1, 0) )\r\n" + 
+	 "       OR (sal.invoicedate >= DATEADD(month, DATEDIFF(month, 0, getdate())-12, 0)  \r\n" + 
+	 "    AND sal.invoicedate <  DATEADD(month, DATEDIFF(month, 0, getdate())-12+1, 0) ))      " + 
+	
      "      and  cus.inventlocation != '' and inv.ITEMGROUPID not in  ('TARA','POS') and cus.SPIEAGENTACCOUNTID != '' GROUP BY cus.SPIEAGENTACCOUNTID ";
 
          if (isDebug()) System.out.println(cmd);

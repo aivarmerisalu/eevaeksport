@@ -2556,7 +2556,12 @@ public static String getYYYYpMMpDD(Date dd){
       	    				
       	    					
       	    					if(klient != null) {
-      	    						 excelketid.put(klient.trim(),kett1.trim() );
+      	    						if(excelketid.get(klient.trim()) !=  null) {
+      	    							 excelketid.put(klient.trim(),excelketid.get(klient.trim()) + "," + kett1.trim() );
+      	    						}else {
+      	    							 excelketid.put(klient.trim(),kett1.trim() );
+      	    						}
+      	    						
       	    					}
       						   
       						}

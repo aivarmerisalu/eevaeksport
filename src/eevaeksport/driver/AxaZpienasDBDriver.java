@@ -1218,13 +1218,17 @@ String email = " ";
 					skai = (String)custs.get(lw.getLine().getCustID());
 				}
 				
-				
+				String gru = "1";
+				if(lw.getLine().isGroup()) {
+					gru = "2";
+				}
 				int leng = lw.getLine().getCustID().length();
 				String sb =  wr.getInfo().getAgentID() + ";" + lw.getLine().getCustID()+ ";"
 				+ skai +  ";" +Converter.deCode(lw.getLine().getCustName().substring(0,lw.getLine().getCustName().length() - leng)) +
 				   ";"  ;	
 			     sb = sb + getDateTimeStr(cal) + ";" + cr2 + ";" + Converter.deCode(cc) + ";" +  Converter.deCode(cd); 
 			     sb = sb + ";" + lw.getLine().getAction1Eval() + ";" + lw.getLine().getAction2Eval();//long,latt
+			     sb = sb + ";" + gru ;//long,latt
 				System.out.println("ps asse" + sb);
 				
 				if(cr1.equals("INVSCAN")){

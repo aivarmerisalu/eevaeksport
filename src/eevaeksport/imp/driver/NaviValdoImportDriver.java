@@ -114,45 +114,7 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
   
   public String identifyProduct(String ean, String prodID) throws SQLException{
 	
-	  
-    String sql1 = "SELECT [No_] AS toode  FROM [VOLDEMĀRS SIA$Item] LEFT JOIN [Viï¿½iunai Baltic$Item Unit of Measure]" +
-    		" vat ON (vat.[Item No_]=[No_] and vat.[Code]='' ) " +
-			"  WHERE [] ='" + ean + "'  order by [Blocked] "; // and [Blocked]=0
-
-
-    String sql2 = " SELECT [No_] AS toode FROM [VOLDEMĀRS SIA$Item] " +
-			"  WHERE [No_] = '" + prodID + "' "; // and [Blocked]=0 
-
-    String prod = null;
-
-    Statement st1 = con.createStatement();
-    ResultSet rs1 = st1.executeQuery(sql1);
-
-  	System.out.println(sql1);
-    if (rs1.next()) {
-    	if(ean.trim().length()>0){
-    	      prod = rs1.getString("toode").trim();	
-    	}
-    }
-    System.out.println("peale esimest " + prod);
-    
-    if(prod == null || prod.trim().length() == 0  ){
-    	System.out.println(sql2);
-        rs1 = st1.executeQuery(sql2);
-        while (rs1.next()) {
-
-        	if(prodID != null && prodID.trim().length()>0){
-                prod = rs1.getString("toode").trim();	
-        	}
-        }
-        System.out.println("peale teist " + prod);
-      }
- 
-    rs1.close();
-    st1.close();
-    
-	   System.out.println("Tagastan toote:"  + prod + " prodID:" + prodID + " ean:" + ean);
-    return prod;
+  return prodID;
   
 }
   
@@ -346,7 +308,8 @@ double kordaja = 1;
 	 		}
 	 		System.out.println("Comment " + comm + " " + order.getTeostaja() + " " + order.getShipMode());
 	        
-	 		if(order.getTeostaja() != null && order.getTeostaja().trim().length() >0){
+	 		if(order.getTeostaja() != null && order.getTeostaja().trim().length() >0 &&
+	 				!order.getTeostaja().trim().startsWith("VLD")){
 
 	 			Node coms = doc.createElement("CustomerOrderNumber");
 	 			String num = order.getTeostaja();

@@ -2229,7 +2229,11 @@ TreeMap   tm = new TreeMap();
 	 "	 round(SUM(case when MONTH(sal.invoicedate) = MONTH(getdate()) and YEAR(sal.invoicedate) = YEAR(getdate())-1 then lineamount else 0  end),0) AS summalast " +  
      "    FROM custinvoicetrans sal with(nolock) INNER JOIN inventtable inv with(nolock) ON sal.itemid=inv.itemid  and  inv.dataareaid= sal.dataareaid INNER JOIN custinvoicejour jou with(nolock) ON  " +
      "    sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid  INNER JOIN custtable cus with(nolock) ON cus.accountnum = jou.orderaccount " +
-	 "	 WHERE inv.dataareaid='bd' AND sal.dataareaid='bd' AND cus.dataareaid='bd'  AND jou.dataareaid='bd' AND sal.invoicedate > getdate()-400 " +
+	 "	 WHERE inv.dataareaid='bd' AND sal.dataareaid='bd' AND cus.dataareaid='bd'  AND jou.dataareaid='bd'  AND((sal.invoicedate >= DATEADD(month, DATEDIFF(month, 0, getdate()), 0) \r\n" + 
+	 "     AND sal.invoicedate <  DATEADD(month, DATEDIFF(month, 0, getdate())+1, 0) )\r\n" + 
+	 "       OR (sal.invoicedate >= DATEADD(month, DATEDIFF(month, 0, getdate())-12, 0)  \r\n" + 
+	 "    AND sal.invoicedate <  DATEADD(month, DATEDIFF(month, 0, getdate())-12+1, 0) ))            \r\n" + 
+	 " " +
      "      and  cus.inventlocation != '' and inv.ITEMGROUPID not in  ('TARA','POS') and cus.SPIEAGENTACCOUNTID != '' GROUP BY cus.SPIEAGENTACCOUNTID ";
 
          if (isDebug()) System.out.println(cmd);
