@@ -536,7 +536,7 @@ System.out.println("re " + re.toString());
 							action = true;
 						}
 					}
-			 mline.setProdLevel("000");
+			// mline.setProdLevel("000");
 			
 			if((type != null && type.equals("4")) ){
 		//System.out.println("'" + custID + "'" + clGroup + "'" + prodID + "'" + discGroup + "'" + discount +  " " 
@@ -550,7 +550,7 @@ System.out.println("re " + re.toString());
 						mline.setEndDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
 					}
 					action = true;
-				 mline.setProdLevel("004");
+			//	 mline.setProdLevel("004");
 				}
 			}
 			

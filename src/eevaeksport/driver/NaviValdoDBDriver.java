@@ -479,9 +479,9 @@ private TreeMap getExcelStuff(){
     "  		   GROUP BY l.[Location Code], l.[Item No_]  having sum(l.[Quantity])  != 0 " ;
 	
     		  
-    		  String  cmd2 = "  SELECT l.[No_] AS kood, sum(l.[Quantity]) AS kogus FROM [VOLDEMĀRS SIA$Sales Line] l " + 
+    		  String  cmd2 = "  SELECT l.[No_] AS kood, sum(l.[Outstanding Quantity]) AS kogus FROM [VOLDEMĀRS SIA$Sales Line] l " + 
     		  		"                  INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=l.[No_] WHERE  t.[Send to E-Pasaule] = 1 " + 
-    		  		"			      GROUP BY  l.[No_]  having sum(l.[Quantity])  != 0 " ;
+    		  		"			      GROUP BY  l.[No_]  having sum(l.[Outstanding Quantity])  != 0 " ;
     		  
     				
     		  
@@ -1510,17 +1510,17 @@ con3.close();
     	 		"    		    (r.[Unit Price]*(100-r.[Line Discount _])/100) as lastprice	, [External Document No_]  as lastdoc , [Order No_]  as lastdoc1 " + 
     	 		"    			FROM [VOLDEMĀRS SIA$Sales Invoice Line] r \r\n" + 
     	 		"    		      INNER JOIN [VOLDEMĀRS SIA$Sales Invoice Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_] \r\n" + 
-    	 		"    		   WHERE   d.[Posting Date]> GETDATE()-200 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date]";
+    	 		"    		   WHERE   d.[Posting Date]> GETDATE()-365 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date] desc";
     	 
     	 
     	 
-    String cmd =  " SELECT  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]  as abiklient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate, [Qty ordered] as lastamount," + 
+    String cmd =  " SELECT  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]  as abiklient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate, d.[Posting Date] AS lastdate1, [Qty ordered] as lastamount," + 
     		"    (r.[Unit Price]*(100-r.[Line Discount _])/100) as lastprice	, dd.[External Document No_]  as lastdoc , dd.[Order No_]  as lastdoc1 , "
     		+ " (case when ([Shelf life period] = 0 or [Shelf life period type] = 0 or d.[Posting Date]+ (case when [Shelf life period type] = 2 then [Shelf life period]  else  [Shelf life period]*30 end) > getdate()) then 0 else 1 end) as paevi  "
     		+ "		FROM [VOLDEMĀRS SIA$Sales Shipment Line] r " + 
     		"      INNER JOIN [VOLDEMĀRS SIA$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_] "
     		+  "  LEFT JOIN [VOLDEMĀRS SIA$Sales Invoice Header] dd ON dd.[Linked Sales Shipment No_] = d.[No_] WHERE " + 
-    		"      d.[Posting Date]> GETDATE()-300 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date] desc";
+    		"      d.[Posting Date]> GETDATE()-365 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date] desc";
     
     System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupÃ¯Ā¿Ā½ev","viimane kogus"
@@ -1566,7 +1566,9 @@ con3.close();
                count++;
 
       }
-    
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.DATE, -7);
+    java.sql.Date now = new java.sql.Date(cal.getTimeInMillis());
     
     HashSet loetud = new HashSet ();
     rs.close();
@@ -1578,10 +1580,9 @@ con3.close();
 
                  String prodID = rs.getString("toode").trim();;
 
-                 double amount = 0;
-                 String lastdate = " ";
-                 amount = rs.getDouble("kogus");
-                 lastdate = rs.getString("lastdate").trim().substring(5,10);
+                  double  amount = rs.getDouble("kogus");
+                 String lastdate = rs.getString("lastdate").trim().substring(5,10);
+                 java.sql.Date dd = rs.getDate("lastdate1");
                     double lastamount = rs.getDouble("lastamount");
                     double lprice = rs.getDouble("lastprice");
                     String ldoc = rs.getString("lastdoc");
@@ -1596,12 +1597,15 @@ con3.close();
                     
                
                     double open = 0;
-                    if(amount == 0 && lastamount >0){
-                    	open = lastamount;
-                       
-                    }else if (percent < 70 && lastamount != 0){
-                    	open = lastamount - amount ;
+                    if(dd.after(now)) {
+                    	   if(amount == 0 && lastamount >0){
+                           	open = lastamount;
+                              
+                           }else if (percent < 70 && lastamount != 0){
+                           	open = lastamount - amount ;
+                           }	
                     }
+                 
                     
                     
                     Product prod = new Product(prodID);
@@ -1761,7 +1765,7 @@ private void makePictureCat(){
             	if(in.isFile()){
             	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
             	if(!inpda.exists()) {
-            		Converter.shrinkAndCopyFile(in,inpda,400);
+            		Converter.shrinkAndCopyFile(in,inpda,250);
             	}
                 	
                 	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 

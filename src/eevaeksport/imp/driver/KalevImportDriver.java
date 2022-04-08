@@ -182,6 +182,32 @@ public class KalevImportDriver
 		
     }
   
+	
+private HashSet getXXX(){
+	  	
+  HashSet res = new HashSet();
+
+	    String sql1 = " Select SC01001 AS pda  FROM SC010100 pr  where SC01014 = 'XXX' ";
+
+		try {
+	    Statement st1 = con.createStatement();
+	    ResultSet rs1 = st1.executeQuery(sql1);
+
+	    while (rs1.next()) {
+	      res.add(rs1.getString("pda").trim());
+	    }
+
+	    rs1.close();
+	    st1.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	    return res;
+	  }
+
+
+  
   
   public boolean makeRoundingO (String prodID){
 	  	
@@ -476,10 +502,9 @@ public class KalevImportDriver
 	  Vector result = new Vector();
       
 	 System.out.println("Enne suurus splitti" + order.getOrderLines().size());
-	  
+	  HashSet xxxprods = getXXX();
 	  Order ord23 = new Order(order.getCompany(),order.getAgentFirstName());
-	 
-	  Order ordJ1 = new Order(getKKood(order.getCompany()),order.getAgentFirstName());
+	  Order ordJ1 = new Order((order.getCompany()),order.getAgentFirstName());
       Order ordOTB = new Order(leiaFelixiKlkood(order.getCompany()),order.getAgentFirstName());
     
 	  ord23.setAgentCode(order.getAgentCode());
@@ -521,7 +546,7 @@ public class KalevImportDriver
 	  ordJ1.setShipDateUsed(order.isShipDateUsed());
 	  ordJ1.setShipTime(order.getShipTime());
 	  ordJ1.setWarehouse(order.getWarehouse());
-	  ordJ1.setCurrency("KALEV");
+	  ordJ1.setCurrency("EBAST");
 	
 	//  System.out.println("Splitin Warehouse " + order.getWarehouse());
 	  
@@ -535,7 +560,8 @@ public class KalevImportDriver
 		    	// kui on pandi jama siis ei lisa tellimusele aga numeraatori keerame edasi 
 		    	 cou++;
 		     }else{
-		    	 if(itemid != null)
+		    	 if(itemid != null) {
+		    	
 		    	 if(itemid.startsWith("OTB") ){
 			    	 ordOTB.add(lin.getToode().substring(3), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
@@ -543,11 +569,18 @@ public class KalevImportDriver
 				    	 ordOTB.add(lin.getToode().substring(2), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
 			          }else{
-						    String sorting =  identfySorting(itemid);
-						      	  ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-						     			sorting + " " + lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+			        	  String sorting =  identfySorting(itemid);
+			        	  if((order.getCompany().startsWith("INTR")  || order.getCompany().equals("M12320")) && xxxprods.contains(itemid)) {
+			        		  ordJ1.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+						     			sorting + " " + lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType); 
+			        	  }else {
+			        		  ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+						     			sorting + " " + lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);  
+			        	  }
+						   
+			        	     	 
 				     }	 
-		     }
+		     } }
 	  }
 
 
@@ -1264,7 +1297,7 @@ private long getAndUpdateNext() throws SQLException{
       			  + Converter.deCode(order.getCompany()) ;
       			  }else{
 
-                      makeOutput(ord);  
+                      makeOutput(ord,false);  
                       signatures.add(signature);
      			     
        			  }
@@ -1277,12 +1310,12 @@ private long getAndUpdateNext() throws SQLException{
     			  
             } 
           
-            /*if(ord.getCurrency().equals("FELIX")){
-            	System.out.println("Felixi Tellimus " + ord.getOrderLines().size() + " rida");
-                makeOutputFelix(ord);	
+            if(ord.getCurrency().equals("EBAST")){
+            	System.out.println("Poe Ebastandartne Tellimus " + ord.getOrderLines().size() + " rida");
+            	makeOutput(ord , true);	
             } 
             
-            if(ord.getCurrency().equals("FELIXUUS")){
+            /*if(ord.getCurrency().equals("FELIXUUS")){
             	System.out.println("FelixiUUS Tellimus " + ord.getOrderLines().size() + " rida");
                 makeOutputFelixUUS(ord);	
             } */ 
@@ -1399,7 +1432,10 @@ private long getAndUpdateNext() throws SQLException{
 	 	        fos.write(sb.toString().getBytes());
 	 	        fos.close();
 	      }
-	   
+	      
+	      Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
+		   sendCommentEmail("OTB KAUBAD " + com ,null,doknr,order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
+		
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1629,7 +1665,7 @@ private long getAndUpdateNext() throws SQLException{
   private HashSet felProds = null;
   
   
- private void makeOutput(Order order){
+ private void makeOutput(Order order , boolean ebast){
  	StringBuffer sb = new StringBuffer();
  	 nf.setGroupingUsed(false);
 	 Hashtable pandikas =  new Hashtable();
@@ -1686,7 +1722,7 @@ private long getAndUpdateNext() throws SQLException{
 		
 		
 		String warex = "SKSM1";
-		if(order.getWarehouse() != null && order.getWarehouse().equals("23")){
+		if((order.getWarehouse() != null && order.getWarehouse().equals("23")) || ebast){
 			warex = "23";
 		}
 		
@@ -1904,6 +1940,9 @@ private long getAndUpdateNext() throws SQLException{
 		ordsta = "1";
 	}
 	
+	if(ebast) {
+		ordsta = "2";
+	}
 	    	      sb2.append("      <dta:OrdType>1</dta:OrdType>" + ls);
 			      sb2.append("      <dta:WhID>" + warex + "</dta:WhID>" + ls);
 			      sb2.append("      <dta:OrdStatus>" + ordsta + "</dta:OrdStatus>" + ls);
@@ -2587,8 +2626,11 @@ if(order.getStatus() < 5 && sendcomm) {
 	}
  }
   
+  
 	private void sendCommentEmail(String comment1 ,String comment2,String doknr,String custid, String nimi , String chain, boolean price, Agent ag ,ImportPanel parent){
 	   	try{
+	   		
+	  
 	   		String comment = null ;
 	   		if(comment1 != null && comment1.trim().length() > 0) {
 	   			comment = "Comment : " + comment1 + "\n\n" ;

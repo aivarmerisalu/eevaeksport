@@ -1620,8 +1620,14 @@ public class EksportPanel extends JPanel implements ActionListener,
                 File mdf = new File("maxdiscounts.txt");
                 if(mdf.exists()){
                     zip.addFile("maxdiscounts.txt");
-                	
                 }
+               
+                File mdfs = new File("deposit.txt");
+                if(mdfs.exists()){
+                    zip.addFile("deposit.txt");
+                }
+               
+                
                 File mdfj = new File("customercrm.txt");
                 if(mdfj.exists()){
                     zip.addFile("customercrm.txt");

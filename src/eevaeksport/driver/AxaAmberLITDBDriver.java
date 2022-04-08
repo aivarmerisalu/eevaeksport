@@ -1450,6 +1450,10 @@ payers = new TreeMap();
      	   cust.setMinsum(minam);
         }
         
+        if(cust.getID().equals("DBD024324")) {
+        	System.out.println("OLEMAS KLIENT " + goes + " " + (!payers2.contains(cust.getID()))+ " " +  cust.getAgents().toString());
+        }
+        
         
         if(!payers2.contains(cust.getID())){
         

@@ -304,6 +304,9 @@ boolean send2 = false;
 	   String veoring = order.getShipMode();
 	   if(veoring != null && veoring.trim().length() > 0 ){
 		   veoring = veoring.trim();
+		   if(veoring.contains("|")) {
+			   veoring = veoring.substring(0,veoring.indexOf("|"));
+		   }
 		   try{
 			   int aa = Integer.parseInt(veoring);
 		   }catch(Exception e){

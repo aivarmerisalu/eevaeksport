@@ -7551,9 +7551,20 @@ client.close();
            	 
            	 
            	 Image bb =  ImageLoader.fromFile(out);
+           	 
+           	 boolean portrait  = false ;
+           	 if(bb.getWidth() < bb.getHeight()) {
+           		 portrait = true ;
+           		 double ss = (size /3 *2);
+           		 size = (int)ss;
+           	 }
+           	 
+           	
+           	 
            	if(bb.getWidth() > size){
          		System.out.println("Muudan suurust " + bb.getWidth() + " " + in);
          		try{
+         			
          		    bb.getResizedToWidth(size).writeToJPG(new File(out), 0.8f);//.soften(0.95f)
                    			
          		} catch (Exception ioe) {

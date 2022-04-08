@@ -759,7 +759,7 @@ try{
 
 
 
-   String sql =  " SELECT k.[Name]  AS nimi, k.[Name 2] AS nimi2 ,k.[No_] AS kood,adr.[Code] as kood2 ,k.[Bill-to Customer No_] AS payer,\r\n" + 
+   String sql =  " SELECT k.[Name]  AS nimi, k.[Name 2] AS nimi2 ,adr.[Name] AS nimi3 ,k.[No_] AS kood,adr.[Code] as kood2 ,k.[Bill-to Customer No_] AS payer,\r\n" + 
    		"   		adr.[Address] + ' ' + adr.[Address 2] + ' ' + adr.[City] AS aadress ,k.[Country Code] as country,adr.[Salesperson Code] AS agent , \r\n" + 
    		"		k.[Salesperson Code] AS agent2 ,blocked AS blokk, \r\n" + 
    		"   			 [Payment Terms Code] AS payment,[Line Discount %] AS alekood, 0 AS yle,'' AS visit,'' AS type,   \r\n" + 
@@ -784,6 +784,10 @@ try{
         	 name = (name + " " + name2.trim()).trim();
          }
          
+         String name3 = rs.getString("nimi3");
+         if(name3 != null){
+        	 name = name3.trim(); 
+         }
            String id = rs.getString("kood").trim();
            String payer = id;
            String id2 = rs.getString("kood2");
@@ -1262,6 +1266,7 @@ try{
              
                  
           prod.setName((name) + " " + prod.getID());
+          prod.setNameSorting( prod.getID() + " " + (name));
           if(inPricelist.contains(prod.getID())) {
         	    tm.put(name + prod.getID(), prod);
                 prodHash.put(prod.getID(), prod);  

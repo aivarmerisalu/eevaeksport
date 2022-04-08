@@ -1720,7 +1720,7 @@ int i = 0;
     String cmd = " SELECT inv.itemid, inv.itemname AS nimetus, ERPOLDITEMID as oldcode , inv.taxpackagingqty AS kastis,inv.standardpalletquantity AS alusel, disc.amount AS price " +
 " , bar.itembarcode AS ean ,inv.ITEMSUBGROUPID AS grupp,inv.SPIBRANDID AS grupp2, origcountryregionid as coun,mod.unitid As unit, '21' as vat,mod.LineDisc as alegr ,inv.alcstrengthgroupid as gruppale " +  
  " , ITEMGROUPID as type ,lowestqty as mini , multipleqty as opti ,NEWITEM as uus ,sellout as out , topitem as tops , topoffitem as tops2, giftbox as gift " +
-" ,  itemfreetextannotation  as annot , SPIDONTCONTROLMINAMOUNTMS as nocount FROM inventtable inv  " +
+" ,  itemfreetextannotation  as annot , SPIDONTCONTROLMINAMOUNTMS as nocount , MarkupGroupId as pant  FROM inventtable inv  " +
  " left join InventItemSalesSetup s on s.itemid = inv.itemid and s.dataareaid=inv.dataareaid left join pricedisctable as disc on inv.itemid=disc.itemrelation and disc.dataareaid=inv.dataareaid " +
  " and disc.module in ( 0 , 1 )  and disc.relation=4  and disc.itemcode=0 and disc.accountcode=1 and accountrelation = 'Standarts' " +
  " and (((disc.todate > getdate() or year( disc.todate ) = 1900) and   (disc.fromdate < getdate()+1 or year( disc.fromdate ) = 1900 )) or " +
@@ -1994,6 +1994,13 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
       if(nocount == 1){
     	 prod.sumNoCount = true;
       }
+
+      String pant = rs.getString("pant");
+      if(pant != null && pant.trim().length() > 0){
+    	 prod.setPandPakendiKood(pant.trim());
+      }
+      
+      
       
       if(goes){
      	  products.put(Converter.cleanLitLatEst(ette) + nimetus + prod.getID(), prod);
