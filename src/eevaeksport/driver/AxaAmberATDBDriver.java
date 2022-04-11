@@ -4619,7 +4619,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
            String kood = rs.getString("toode").trim();
            double seis = rs.getDouble("stock");
            String dealer = rs.getString("ladu").trim();
-           String config = rs.getString("config").trim();
+         //  String config = rs.getString("config").trim();
            
            if (dealer.equals("EBBS-POS")) {
         	 //  config = "ALL"; 
@@ -5498,7 +5498,11 @@ int i = 0;
         	cust.setVisit(visits.get(cust.getID())+"");
         }
         
-        
+        if(cust.getGroup() != null && cust.getGroup().trim().length() > 0 ){
+      		cust.setGroup(cust.getGroup() + "|" + Converter.cleanLitLatEst(cust.getID()));
+      	}else{
+      		cust.setGroup(Converter.cleanLitLatEst(cust.getID()));
+      	}
         
         String grupp = rs.getString("grupp");
         if (grupp != null && grupp.trim().length()>0 && grupp.indexOf("Standard") == -1) {
@@ -5822,7 +5826,7 @@ int i = 0;
         Product prod = new Product(kood);
         String nimetus =  " " +rs.getString("nimetus").trim() ;
      //    String oldcode = rs.getString("oldcode");
-         nimetus =  Converter.enCodeEst(nimetus);
+         nimetus =  Converter.enCodeEst(nimetus.replace('?', ' ').replaceAll("  ", " "));
  
 
 
