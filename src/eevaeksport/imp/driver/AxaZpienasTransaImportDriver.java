@@ -200,7 +200,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 	  private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
 	
 	   private void makeMilkTransportOrder(Order order){
-		   String waybill = " ";
+		   String extDoc = " ";
 		   String desttype = " ";
 		   String driverStock = order.getAgent();
 		   String trip = "1";
@@ -290,6 +290,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 			   String smell = " ";
 			   String clean = " ";
 			   String sample = " ";
+			  
 			   System.out.println("UNIT " + line.getUnit());
 		 	   if(line.getUnit() != null ) {
 		 		  if(line.getUnit().indexOf("ss:") != -1) {
@@ -317,14 +318,17 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 		   }
 		 		  
 		 		  if(line.getUnit().indexOf("sa:") != -1) {
-		 			  sample = line.getUnit().substring(line.getUnit().indexOf("sa:")+3); 
+		 			  sample = line.getUnit().substring(line.getUnit().indexOf("sa:")+3, line.getUnit().indexOf("ed:")); 
+		 		   }
+		 		 if(line.getUnit().indexOf("ed:") != -1) {
+		 			  extDoc = line.getUnit().substring(line.getUnit().indexOf("ed:")+3); 
 		 		   }
 		 	   }
 		 	     
 		 	     String company = order.getCompany();
-		 	      waybill = " ";
+		 	    //  waybill = " ";
 		 	     if(company.indexOf("--") != -1) {
-		 	    	 waybill = company.substring(company.indexOf("--") + 2, company.length());
+		 	    	// waybill = company.substring(company.indexOf("--") + 2, company.length());
 		 	    	 company = company.substring(0, company.indexOf("--"));
 		 	     }
 		 	     
@@ -383,7 +387,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 	    	}
 		 	    	//4.	цикл из - последний (восьмой) символ из barкода поставщика
                   
-		        sb.append(dateString + ";" + waybill + ";" + waybill.substring(3) + ";" + time + ";P;" +  type + ";ZP;"+ vendType + ";" +  company + ";" +
+		        sb.append(dateString + ";" + extDoc + ";" + extDoc.substring(3) + ";" + time + ";P;" +  type + ";ZP;"+ vendType + ";" +  company + ";" +
 		        
 		        desttype + ";" + tripFrom  +  ";" + driverStock + ";" +  section + ";" + trip +  ";"+ Converter.Round((float)line.getKogus(), 1) + ";" + days + ";" + station +";" + signa + ";" + photo
 		           + ";" + comment + ";" + temp + ";" +  ";" +  ";" + ";" + ";;;;;;TIE\n"); 
@@ -412,7 +416,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
                
                
                //date_ путевой лист_ код из_ Признак.csv
-               fileName =  loca + dateString2 +  "_" + waybill + "_" +  driverStock + "_" + trip +  "_TIE.csv";
+               fileName =  loca + dateString2 +  "_" + extDoc + "_" +  driverStock + "_" + trip +  "_TIE.csv";
  		      
                if(refe){
             	   loca = parent.getProps().getProperty("conv2.dir");
@@ -424,7 +428,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
                }else {
             	   File ff = new File (loca);
             	   FileNameFilter filter = new FileNameFilter();
-            	     filter.setAgent(waybill); //order.getAgent() ja meetod tee ka ymner strrt in peale
+            	     filter.setAgent(extDoc); //order.getAgent() ja meetod tee ka ymner strrt in peale
             	  
             	     
             	     File[] aa = ff.listFiles(filter);
@@ -437,7 +441,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
         	           }
             	   }else {
             	 	  // fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() +  ".csv";
-            	          fileName =  loca + dateString2 +  "_" + waybill + "_" +  driverStock +  "_" + trip +  "_TIE.csv";
+            	          fileName =  loca + dateString2 +  "_" + extDoc + "_" +  driverStock +  "_" + trip +  "_TIE.csv";
         		 	   System.out.println("uus fail" + fileName);
         		 	  writeToFile(sb.toString(),fileName);
             	   }

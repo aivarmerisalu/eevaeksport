@@ -62,6 +62,12 @@ import javax.mail.internet.AddressException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -271,6 +277,49 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 	   
 	}
 	 
+  
+  private HashSet getHigher() {
+	   HashSet hh = new HashSet();
+	   try {
+		   DataFormatter formatter = new DataFormatter();
+		   Workbook workbook = null;
+	   File f = new File (getExcelDir() + "ProductCost.xlsx");
+	   boolean xs = true;
+	   if(!f.exists()) {
+		   f = new File (getExcelDir() + "ProductCost.xls"); 
+		   xs = false;
+	   }
+	   
+		  FileInputStream	 ff = new FileInputStream(f);
+		if(xs) {
+		     workbook = new XSSFWorkbook((ff));
+		}else {
+			 workbook = new HSSFWorkbook((ff));
+		}
+		Sheet sheet = workbook.getSheetAt(0);
+	      Row row = null; 
+				ff.close();	
+				if(sheet != null){
+				  int yy = sheet.getLastRowNum();
+					
+					for(int i = 0 ; i < yy+1 ;i++){
+						 row = sheet.getRow(i);
+						if(row != null) {
+							
+							String ean = formatter.formatCellValue(row.getCell(0));
+							String ok = formatter.formatCellValue(row.getCell(1));
+							if(ok.equals("1")) {
+								hh.add(ean.trim());
+							}
+						}}}
+				
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }				
+	   System.out.println("hh " + hh.toString());
+	   return hh;
+  }
+  
 	   private String toUpper(String asi ){
 		   
 		   asi = asi.substring(0,asi.length()-4).toUpperCase() + asi.substring(asi.lastIndexOf(".")).toLowerCase();
@@ -2092,6 +2141,9 @@ System.out.println(cmd);
        System.exit(0);
    }
      
+     
+     HashSet higherCodes = getHigher();
+     
      Hashtable dateOut = new Hashtable();
      StringBuffer buf = new StringBuffer();
      try {
@@ -2204,7 +2256,7 @@ System.out.println(cmd);
                    if(vat != null && vat.trim().length()>0){
                      	prod.setVat(vat);
                    }
-                  
+               
                    
                    double opt = rs.getDouble("opt");
                    if (opt > 0){
@@ -2245,6 +2297,17 @@ System.out.println(cmd);
                 		 prod.setPartii("Cost: " + nf.format(oma) + " €"); 
                 	 }
                  }
+                 
+                 
+                 if(higherCodes.contains(prod.getID())){
+                	 if(prod.getStatusTop().trim().length() > 0) {
+                		 prod.setStatusTop(prod.getStatusTop() +"3"); 
+                	 }else {
+                		 prod.setStatusTop("3"); 
+                	 }
+                    
+                    }
+                 
                
                    if(goes ){
                 	   prod.setName(Converter.enCodeEst(name));

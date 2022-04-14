@@ -1433,9 +1433,12 @@ private long getAndUpdateNext() throws SQLException{
 	 	        fos.close();
 	      }
 	      
-	      Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
-		   sendCommentEmail("OTB KAUBAD " + com ,null,doknr,order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
-		
+	      if(order.getStatus() < 5) {
+	    	  Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
+			   sendCommentEmail("OTB KAUBAD " + com ,null,doknr,order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
+			  
+	      }
+	    
 
 		} catch (Exception e) {
 			e.printStackTrace();

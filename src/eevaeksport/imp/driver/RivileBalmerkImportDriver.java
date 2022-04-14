@@ -395,7 +395,7 @@ HashMap pants = null;
       sb.append("       <I06>" + ls);
       cou++;
 
-      String type = "53"; //tellimus
+      String type = "51"; //tellimus
       if(tag) {
     	  type = "52";
       }
@@ -442,8 +442,8 @@ HashMap pants = null;
   	}
 
      // sb.append(getLineNr(cou));
-      sb.append("          <I06_DOK_NR>U" +  escape(agent)+ "-" + name + "-"  +  escape(order.getDokNr())  + "</I06_DOK_NR>" + ls);
-      cou++;
+   //   sb.append("          <I06_DOK_NR>U" +  escape(agent)+ "-" + name + "-"  +  escape(order.getDokNr())  + "</I06_DOK_NR>" + ls);
+     // cou++;
       
 
     //  sb.append(getLineNr(cou));

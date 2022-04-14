@@ -441,8 +441,8 @@ JSONObject ord = new JSONObject();
 			
 			if(ARVE.length() > 3){
 				ARVE = ARVE.substring(3);
-				if(ARVE.length() > 100){
-					ARVE = ARVE.substring(0,100);
+				if(ARVE.length() > 250){
+					ARVE = ARVE.substring(0,250);
 				}
 				String test =  JSONObject.escape(ARVE.trim());
 				comm.put("Invoice", test);
@@ -450,8 +450,8 @@ JSONObject ord = new JSONObject();
 			
 			if(KT.length() > 3){
 				KT = KT.substring(3);
-				if(KT.length() > 100){
-					KT = KT.substring(0,100);
+				if(KT.length() > 250){
+					KT = KT.substring(0,250);
 				}
 				String test =  JSONObject.escape(KT.trim());
 				comm.put("Block", test);
@@ -459,8 +459,8 @@ JSONObject ord = new JSONObject();
 			
 			if(KOMPL.length() > 3){
 				KOMPL = KOMPL.substring(3);
-				if(KOMPL.length() > 100){
-					KOMPL = KOMPL.substring(0,100);
+				if(KOMPL.length() > 250){
+					KOMPL = KOMPL.substring(0,250);
 				}
 				String test =  JSONObject.escape(KOMPL.trim());
 				comm.put("Pick", test);

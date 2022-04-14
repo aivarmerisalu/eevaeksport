@@ -250,13 +250,11 @@ System.out.println(sql2);
           String sql =" INSERT into [UAB Vilandra$EDI Order Line] ([Entry No_], [Line No_], [Order No_] ,[Source Line No_],[Item No_],[Quantity] ,[Discount %], " +
  " [Unit Price With Disc_(no Act_)],[EAN],[Customer Item No_],[Item Description],[Unit of Measure],[Customer Unit of Measure],[Unit Price], " +
  " [EDI Pack Size],[Blocked],[Comment],[Modification User],[Modification Date],[Modification Time],[Action Discount %],[Additional Fee]  " +
- " ,[Action Discount Amount], [Shipped Quantity])   " +
+ " ,[Action Discount Amount], [Shipped Quantity],[Amount],[VAT Amount],[VAT %],[Amount Including VAT],[Dimension (PADALINYS)],[Dimension (KODUKAI)],[Dimension (TINKLAS)],[Dimension (ZENKLAS)])   " +
  "  values("+salesid+","+ counter + ",'" +  order.getDokNr() + "',"+ counter + ",'"+itemid+"'," +
              		+kogus+"," + discount + ",0.0,'','','','','',0.0, 0,'','',''," +
-             				"cast ('1753-01-01 00:00:00.000' as datetime),cast('1754-01-01 00:00:00.000' as datetime),0,'',0,0)";
-        	  
-        	
-
+             				"cast ('1753-01-01 00:00:00.000' as datetime),cast('1754-01-01 00:00:00.000' as datetime),0,'',0,0,0,0,0,0,'','','','')";
+  
               log.info("SALES_LINE_SQL: " + sql);
               System.out.println(sql);
               Statement st2 = con2.createStatement();
@@ -334,13 +332,14 @@ String perfix = "MS";
     " [Discount %],[Salesperson],[User],[Record Date],[Record Time] ,[Delivery Comment] ,[Delivery Date],[Buyer ILN],[Buyer Name],[Customer ILN],[Customer Name], " +
     " [Delivery Point Name],[Delivery Point by Buyer],[Delivery Point ILN],[Location],[Currency],[Comment],[Internal Document No_],[Blocked],[Duration (ms)] " +
     " ,[Status User],[Status Date],[Status Time],[Order Status],[Payment Status],[TVS Customer No_],[Customer Address], "+
-    " [Customer City],[Customer Post Code],[Customer Phone No_],[Customer E-mail],[Delivery Address],[Delivery City],[Delivery Post Code], [Posting No_],[Receiving Advice Number]) " + 
+    " [Customer City],[Customer Post Code],[Customer Phone No_],[Customer E-mail],[Delivery Address],[Delivery City],[Delivery Post Code],"
+    + " [Posting No_],[Receiving Advice Number],[Amount],[Due Date],[Vendor No_], [Vendor Name],[Vendor Registration No_],[Vendor Account No_],[Customer Registration No_]) " + 
     " VALUES (" + salesid + ",2,0,'" + perfix + dokNr + "'," + type + ", cast(cast(getdate() as date) as datetime),'" + comp +"',0,'" + agent + "','MERISOFT'," +
     		"  cast(cast(getdate() as date) as datetime),cast('1754-01-01 " + time + "' as datetime)" + // cast(substring('1754-01-01 ' + cast(cast(getdate() as time) as char),0,24) as datetime)
     ",'" + tekst +"', cast(cast(? as date) as datetime),'','','','','','','','','','" + tekst +"','','','',''," +
-    		" cast ('1753-01-01 00:00:00.000' as datetime),cast('1754-01-01 00:00:00.000' as datetime),'','','','','','','','','','','','','')" ; 
-     
-           
+    		" cast ('1753-01-01 00:00:00.000' as datetime),cast('1754-01-01 00:00:00.000' as datetime),'','','','','','','','','','','','',''"
+    		+ ",0,cast('1754-01-01 00:00:00.000' as datetime),'','','','','')" ; 
+         
           log.info("addInvoiceHeader2: " + sql);
         System.out.println(sql);
         Connection con2 = DriverManager.getConnection(url + "navi"

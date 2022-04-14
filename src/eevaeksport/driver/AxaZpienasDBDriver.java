@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -89,10 +90,16 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
   private void saveAssetFile() {
 	org.json.JSONArray data = Converter.getAssetsJson(user, pass, rcompany);
 //	System.out.println(data.toString().substring(0, 3000));
-	
-	
-	     String sisu = "InventoryCode;InventoryName;FactoryId;NFC;CustomerCode;CustomerName"
+	   String sisu = "InventoryCode;InventoryName;FactoryId;NFC;CustomerCode;CustomerName"
 	     		+ ";LastCheck;LastCheckManagerCode;LastCheckManagerName;Status;PictureLink;PictureDate\n";
+	try {
+	
+	 Connection con = this.getNewConnectionAsset();
+   
+
+     
+	
+	  
 	  int i = data.length();
 	 for(int a = 0; a < i;a++) {
 		 String nimi = null;
@@ -104,10 +111,10 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 		 String nfc = null;
 		 String fnimi = null;
 		 String dnimi = null;
-		 Long viimaneKin = null;
+		 Long viimaneKin = 0l;
 		 String fId = null;
 		 String status = null;
-		 Long fcreated = null;
+		 Long fcreated = 0l;
 		 
 		 
 
@@ -203,6 +210,20 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 		sisu = sisu + kood + ";" + nimi + ";" + nonull(fId) + ";" + nonull(nfc) + ";" + nonull(kkood) + ";" + nonull(knimi) + ";" + lnonull(viimaneKin)
 		+ ";" + nonull(mkood) + ";" + nonull(mnimi) + ";" + nonull(status) + ";" + nonull(fnimi) + ";" + lnonull(fcreated);
 		sisu = sisu + "\n";
+		
+		String sql = " INSERT INTO merisoftassets VALUES('" + kood + "','" + nimi + "', '" + nonull(fId) + "', '" + nonull(nfc) + "', '" +nonull(kkood)+ "' , "
+				+ "'" + nonull(knimi)+ "',?,'"  + nonull(mkood) +  "','" + nonull(mnimi) +  "','" + nonull(status) + "',?,?,cast(cast(getdate() as date) as datetime))";
+
+		PreparedStatement st = con.prepareStatement(sql);
+		
+		 st.setTimestamp(1, new Timestamp(viimaneKin));
+		 System.out.println(fnimi);
+		 st.setString(2, nonull(fnimi) );
+		 st.setTimestamp(3, new Timestamp(fcreated));
+	   	 st.executeUpdate();
+	   
+		//	System.exit(0);
+		
 	} catch (JSONException e) {
 		e.printStackTrace();
 	}
@@ -212,8 +233,13 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 	 }
 	 
 	//  Calendar cal = ;
+	 con.close();
+		
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+		}
 	
-	   
 	 Converter.saveFile("inventorydata/Inventorydata"+  Converter.getDDpMMpYYYYpString(Calendar.getInstance()) + ".txt", sisu);
 	 System.exit(0);
 	
@@ -1957,6 +1983,9 @@ try{
   }
   //
   
+  private Connection getNewConnectionAsset() throws SQLException{
+	    return DriverManager.getConnection(getParent().getProps().getProperty("dsn.asset"), getParent().getProps().getProperty("dsn.userasset"), getParent().getProps().getProperty("dsn.passasset"));
+	  }
   
   private Connection getNewConnection2() throws SQLException{
 	    return DriverManager.getConnection(getParent().getProps().getProperty("dsn.host2"));

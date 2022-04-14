@@ -324,8 +324,13 @@ double kordaja = 1;
 
 	 		if(order.getShipMode() != null && order.getShipMode().trim().length() >0){
 
+	 			String sm = order.getShipMode();
+	 			if(sm.indexOf("Pieg") != -1) {
+	 				sm = "Piegade";
+	 			}
+	 			System.out.println("sm " + sm );
 	 			Node coms = doc.createElement("ShipMode");
-		        Text comVals = doc.createTextNode(order.getShipMode());
+		        Text comVals = doc.createTextNode(sm);
 		        coms.appendChild(comVals);
 		        header.appendChild(coms);
 		   

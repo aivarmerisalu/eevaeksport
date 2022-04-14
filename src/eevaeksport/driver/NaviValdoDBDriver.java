@@ -481,7 +481,7 @@ private TreeMap getExcelStuff(){
     		  
     		  String  cmd2 = "  SELECT l.[No_] AS kood, sum(l.[Outstanding Quantity]) AS kogus FROM [VOLDEMĀRS SIA$Sales Line] l " + 
     		  		"                  INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=l.[No_] WHERE  t.[Send to E-Pasaule] = 1 " + 
-    		  		"			      GROUP BY  l.[No_]  having sum(l.[Outstanding Quantity])  != 0 " ;
+    		  		"		and	l.[Location Code] in ('010P','080P','015A')      GROUP BY  l.[No_]  having sum(l.[Outstanding Quantity])  != 0 " ;
     		  
     				
     		  
@@ -924,7 +924,7 @@ con3.close();
     	   		"	,a.[Salesperson Code] AS agent ,  k.Blocked AS blokk,   \r\n" + 
     	   		" [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type, " + 
     	   		"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt  ,a.Contact +' ' + a.[Phone No_] as kontakt , 0 as sendall " + 
-    	   		",[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 , a.[Address] as street , a.[City] " + 
+    	   		",[Customer Price Group] as alegr ,a.[Cust__Item Disc_ Gr_] as alegr2 ,a.[Price Group Code] as alegr3 , a.[Address] as street , a.[City] " + 
     	   		", a.[Post Code] as inde,  a.[E-Mail] as mail,'' as regno , 0 as minsum , dim.Name as chainname , dim.[Code] as chain , k.[Allow Line Disc_] as allowline "
     	   		+ " FROM [VOLDEMĀRS SIA$Ship-to Address] a LEFT join  [VOLDEMĀRS SIA$Customer] k    on  a.[Customer No_]=k.[No_]  "
     	   		+ " LEFT JOIN [VOLDEMĀRS SIA$Dimension Value] dim ON dim.[Code] = a.[Customer Group Dimension Code] and dim.[Dimension Code] = 'Y-TIKL'" + 
@@ -1071,11 +1071,16 @@ con3.close();
     	           	          
 
     	           String alegr = rs.getString("alegr");
-    	           if(alegr != null && alegr.trim().length()>0){
+
+    	           String alegr2 = rs.getString("alegr2");
+    	           String alegr3 = rs.getString("alegr3");
+    	           
+    	           if(alegr3 != null && alegr3.trim().length()>0){
+    	        	customer.setGroup(Converter.cleanLitLatEst(alegr3.trim()));   
+    	           }else  if(alegr != null && alegr.trim().length()>0){
     	        	customer.setGroup(Converter.cleanLitLatEst(alegr.trim()));   
     	           }
     	           
-    	           String alegr2 = rs.getString("alegr2");
     	           if(alegr2 != null && alegr2.trim().length()>0){
     	       
     	        	if(customer.getGroup().trim().length() >0){
@@ -1567,7 +1572,7 @@ con3.close();
 
       }
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DATE, -7);
+    cal.add(Calendar.DATE, -30);
     java.sql.Date now = new java.sql.Date(cal.getTimeInMillis());
     
     HashSet loetud = new HashSet ();
