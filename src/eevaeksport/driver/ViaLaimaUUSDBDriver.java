@@ -361,7 +361,12 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
     		
     		
     			if(prodid != null) {
-    		    	 double hind =  row.getCell((short) 8).getNumericCellValue();
+    		    	 double hind =  1;
+    		    	 try{
+    		    		hind = row.getCell((short) 8).getNumericCellValue();
+    		    	 }catch(Exception t) {
+    		    		 
+    		    	 }
     	          Product prod = new Product(prodid);
     	          prod.setPrice(hind);
     	          if(name != null) {
