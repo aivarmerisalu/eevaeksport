@@ -81,11 +81,13 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 //import org.apache.poi.ss.usermodel.CellRange;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -3443,8 +3445,9 @@ public class Converter {
 	               
 	              
 	                	mail.setSubjectFilesTo("Merisoft Report " );
-	               
-		  	  		
+		                if(parent.getProps().getProperty("report.subject") != null)
+		                	mail.setSubjectFilesTo(parent.getProps().getProperty("report.subject"));
+		                
 		  	  		mail.setFrom(parent.getProps().getProperty("from"));
 		  	  		
 		  	  
@@ -4280,6 +4283,36 @@ try{
 	}
 	
 
+  public static TreeMap getManagerList(String company, String user , String pass){
+	  
+	  eevaeksport.util.ReportingService serv = new ReportingService();
+	  serv.user =  user;
+	  serv.pass = pass;
+	  serv.company = company;
+	  TreeMap result = new TreeMap();
+		
+		
+		try {
+			
+			org.json.JSONArray array = serv.getManagerList();
+		//	System.out.println("oioi "+ array.toString());
+		//	throw new Exception("demo"); 
+
+		for(int i = 0; i <	array.length();i++){
+			JSONObject ag = (JSONObject)array.get(i);
+			String agent = ag.getString("code");
+			String name = ag.getString("name");
+
+			result.put(agent, name);
+
+		}
+			
+		}catch(Exception ff){}
+		serv.closeClient();
+		
+  
+	  return result;
+  }
 	
 	
   public static void getManagersReplacements(TreeMap tm , String company, String user , String pass){
@@ -9484,7 +9517,7 @@ client.close();
          
             	JSONObject cob = (JSONObject) cc.getJSONObject(i);
             	String key = (String)cob.get("code");
-            	//System.out.println("manas " + cob.toString());
+            	System.out.println("manas " + cob.toString());
 				
 				try{
 					JSONArray manas = (JSONArray)cob.get("managers");
@@ -9534,7 +9567,7 @@ client.close();
     		int lenn = cc.length();
 		
 
-        //    System.out.println("baone algus dd "  + lenn);
+           //System.out.println("baone algus dd "  + lenn);
             
     		for (int i = 0; i < lenn; i++) {
          
@@ -9991,13 +10024,210 @@ client.close();
 	
 	
 	
-/**
-		
+	   public static ArrayList<String> createExcelProductProblemsOosReport(String exceldir, String rcompany, String user, String pass) {
+		   ArrayList<String> arreturn = new ArrayList<String>();
+			
+			File f = new File("svdata");
+			if(!f.exists()) {
+				f.mkdir();
+			}
 
-	  
-	  **/
+			Calendar algus = Calendar.getInstance();  
+		  	Calendar lopp = Calendar.getInstance();  	
+		  	algus.add(Calendar.DATE, -3);
+		  	algus.set(Calendar.HOUR, 0);
+		  	lopp.set(Calendar.HOUR, 23);
+		  	lopp.set(Calendar.MINUTE, 59);
+		  	
+			
+			JSONArray prodsjson = Converter.getWebProducts(rcompany, user, pass);
+			TreeMap managers = Converter.getManagerList(rcompany, user, pass);
+			
+			TreeMap<String, ArrayList> custagents = new TreeMap();	//populate and merge TreeMap with TreeMap
+			Iterator itera = managers.keySet().iterator();
+			while(itera.hasNext()) {
+				TreeMap<String, ArrayList> temp = Converter.getWebMercagents(rcompany, user, pass, false, itera.next().toString());
+				for (String k : temp.keySet()) {
+					ArrayList arr = custagents.get(k);
+					if(arr == null) {
+						arr = new ArrayList();
+					}
+					arr.add(temp.get(k));
+					custagents.put(k, arr);
+				} 
+				//System.out.println(custagents.size());
+			}
+			//System.out.println("manas" + managers.toString());
 
-	   public static void createExcelReport(TreeMap products1, TreeMap customers1, Vector custProds, Vector matrix, String exceldir, String rcompany, String user, String pass) {
+			
+			//String exceldir = this.getExcelDir();
+			String fnamePROB = exceldir + "productdetailproblembase.xlsx";
+			try {	
+				FileInputStream excelifailOOS = new FileInputStream(fnamePROB);
+				FileInputStream excelifailPROB = new FileInputStream(fnamePROB);
+				XSSFWorkbook  wbOOS = new XSSFWorkbook(excelifailOOS);
+				XSSFWorkbook  wbPROB = new XSSFWorkbook(excelifailPROB);
+				XSSFSheet worksheetOOS = wbOOS.getSheetAt(0);
+				XSSFSheet worksheetPROB = wbPROB.getSheetAt(0);
+				
+				
+				XSSFFont defaultFontOOS = wbOOS.createFont();					//font ja style
+					defaultFontOOS.setFontHeightInPoints((short)11);
+					defaultFontOOS.setFontName("Calibri");
+					defaultFontOOS.setColor(new XSSFColor(Color.black));
+				XSSFFont defaultFontPROB = wbPROB.createFont();					//font ja style
+					defaultFontPROB.setFontHeightInPoints((short)11);
+					defaultFontPROB.setFontName("Calibri");
+					defaultFontPROB.setColor(new XSSFColor(Color.black));
+				
+				XSSFCellStyle borderOOS = wbOOS.createCellStyle();
+					borderOOS.setBorderBottom(BorderStyle.THIN);
+					borderOOS.setBorderLeft(BorderStyle.THIN);
+					borderOOS.setBorderRight(BorderStyle.THIN);
+				XSSFCellStyle borderCenteredOOS = wbOOS.createCellStyle();
+					borderCenteredOOS.setAlignment(HorizontalAlignment.CENTER);
+					borderCenteredOOS.setBorderBottom(BorderStyle.THIN);
+					borderCenteredOOS.setBorderLeft(BorderStyle.THIN);
+					borderCenteredOOS.setBorderRight(BorderStyle.THIN);
+					borderCenteredOOS.setFont(defaultFontOOS);
+				
+				XSSFCellStyle borderPROB = wbPROB.createCellStyle();
+					borderPROB.setBorderBottom(BorderStyle.THIN);
+					borderPROB.setBorderLeft(BorderStyle.THIN);
+					borderPROB.setBorderRight(BorderStyle.THIN);
+					
+				XSSFCellStyle borderCenteredPROB = wbPROB.createCellStyle();
+					borderCenteredPROB.setAlignment(HorizontalAlignment.CENTER);
+					borderCenteredPROB.setBorderBottom(BorderStyle.THIN);
+					borderCenteredPROB.setBorderLeft(BorderStyle.THIN);
+					borderCenteredPROB.setBorderRight(BorderStyle.THIN);
+					borderCenteredPROB.setFont(defaultFontPROB);
+					
+
+					
+				//teeme ja loeme sv jsoni ja paneme excelisse
+			  	try {
+			  		JSONParser parser = new JSONParser();
+			  		Object obj = parser.parse(new FileReader(Converter.getSVData(algus.getTimeInMillis(), lopp.getTimeInMillis(), rcompany, user, pass, false, null, null, "test")));
+			  		org.json.simple.JSONArray cc = (org.json.simple.JSONArray) obj;
+			  		
+			  		TreeMap prods = new TreeMap();
+			  		for(int z=0; z<prodsjson.length(); z++) {
+			  			if(prodsjson.getJSONObject(z).has("code") && prodsjson.getJSONObject(z).has("EAN")) {
+				  			prods.put(prodsjson.getJSONObject(z).get("code"), prodsjson.getJSONObject(z).get("EAN"));
+			  			}
+			  		}
+
+			  		
+			  		
+			  		int problems=1;int outofstocks=1;
+			  		for (int i = 0; i < cc.size(); i++) {
+			  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+			  			
+			  			String filterProblem = (String)cob.get("resstr1");
+			  			String filterOutOfStock = (String)cob.get("resint3").toString();
+			  			
+			  			String dateAndTime = (String)cob.get("recetime");
+			  			String dateOnly = dateAndTime.split("T")[0];
+			  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
+			  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
+			  			
+			  			String agid = "" +((ArrayList) (custagents.get(cob.get("custid")+"")).get(0)).get(0);
+			  			
+			  			if(filterProblem.equals("PRODUCTDIST")) {
+			  				worksheetPROB.createRow(problems);
+			  				worksheetPROB.getRow(problems).createCell(0).setCellValue((String)cob.get("agentid"));
+			  				worksheetPROB.getRow(problems).createCell(1).setCellValue(agid);
+			  				worksheetPROB.getRow(problems).createCell(2).setCellValue(managers.get(agid)+"");
+			  				worksheetPROB.getRow(problems).createCell(3).setCellValue((String)cob.get("custid"));
+			  				worksheetPROB.getRow(problems).createCell(4).setCellValue((String)cob.get("custname"));
+			  				worksheetPROB.getRow(problems).createCell(5).setCellValue(dateOnly);
+			  				worksheetPROB.getRow(problems).createCell(6).setCellValue(timeOnly);
+			  				worksheetPROB.getRow(problems).createCell(7).setCellValue(prods.get(cob.get("prodid"))+"");
+			  				worksheetPROB.getRow(problems).createCell(8).setCellValue((String)cob.get("prodname"));
+			  				worksheetPROB.getRow(problems).createCell(9).setCellValue((String)cob.get("resstr2"));
+			  				worksheetPROB.getRow(problems).createCell(10).setCellValue("");
+			  				
+			  				for(int x=0; x<11; x++) {
+			  					if(x == 0 || x == 1 || x == 3) {
+			  						worksheetPROB.getRow(problems).getCell(x).setCellStyle(borderCenteredPROB);
+			  					}else {
+			  						worksheetPROB.getRow(problems).getCell(x).setCellStyle(borderPROB);
+			  					}
+			  				}
+			  				problems++;
+			  			}
+			  			
+			  			if(filterOutOfStock.equals("999")){
+			  				worksheetOOS.createRow(outofstocks);
+			  				worksheetOOS.getRow(outofstocks).createCell(0).setCellValue((String)cob.get("agentid"));
+			  				worksheetOOS.getRow(outofstocks).createCell(1).setCellValue(agid);
+			  				worksheetOOS.getRow(outofstocks).createCell(2).setCellValue(managers.get(agid)+"");
+			  				worksheetOOS.getRow(outofstocks).createCell(3).setCellValue((String)cob.get("custid"));
+			  				worksheetOOS.getRow(outofstocks).createCell(4).setCellValue((String)cob.get("custname"));
+			  				worksheetOOS.getRow(outofstocks).createCell(5).setCellValue(dateOnly);
+			  				worksheetOOS.getRow(outofstocks).createCell(6).setCellValue(timeOnly);
+			  				worksheetOOS.getRow(outofstocks).createCell(7).setCellValue((String)cob.get("resstr2"));
+			  				worksheetOOS.getRow(outofstocks).createCell(8).setCellValue((String)cob.get("prodname"));
+			  				worksheetOOS.getRow(outofstocks).createCell(9).setCellValue((String)cob.get(""));
+			  				worksheetOOS.getRow(outofstocks).createCell(10).setCellValue("");
+			  				
+			  				
+			  				for(int x=0; x<11; x++) {
+			  					if(x == 0 || x == 1 || x == 3) {
+			  						worksheetOOS.getRow(outofstocks).getCell(x).setCellStyle(borderCenteredOOS);
+			  					}else {
+			  						worksheetOOS.getRow(outofstocks).getCell(x).setCellStyle(borderOOS);
+			  					}
+			  				}
+			  				outofstocks++;
+			  			}
+			  			
+			  			
+			  			
+			  		}
+			  		
+			  	}catch (Exception e){
+			  		e.printStackTrace();
+				}
+			  	
+			  	
+
+				exceldir = exceldir + "reports/";
+		  		File ff = new File(exceldir);
+		  		if(!ff.exists()) {
+		  			ff.mkdir();
+		  		}
+		  		excelifailOOS.close();
+		  		excelifailPROB.close();
+				
+		  		FileOutputStream output_file_oos =new FileOutputStream(exceldir + "productdetailoos-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+		  		FileOutputStream output_file_prob =new FileOutputStream(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+		  		arreturn.add(exceldir + "productdetailoos-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+		  		arreturn.add(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+		  		wbOOS.write(output_file_oos); //write changes
+		  		output_file_oos.close();  //close the stream
+		  		wbPROB.write(output_file_prob); //write changes
+		  		output_file_prob.close();  //close the stream
+		  		
+		  		
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+			
+			
+		   return arreturn;
+		   
+		   
+		   
+	   }
+		   
+
+	
+	
+	
+	
+	   public static void createExcelSortVSSoldReport(TreeMap products1, TreeMap customers1, Vector custProds, Vector matrix, String exceldir, String rcompany, String user, String pass) {
 		   
 			TreeMap prods = new TreeMap();
 			Iterator iter1 = products1.values().iterator();
