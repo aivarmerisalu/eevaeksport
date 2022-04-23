@@ -1028,7 +1028,7 @@ StringBuffer sb = new StringBuffer();
 			isChrist = true;
 		}
 		
-		System.out.println("on J�ulud " + isChrist);
+	
 		String myy = " SELECT  SL01001 AS klient  ,SL01035 as agent "
 				+ "  FROM ST030100 INNER JOIN SL010100 ON ST03001 = SL01001 WHERE ST03015> getdate()-360 and SL01035!= '' "
 				+ " GROUP BY SL01001 ,SL01035 order by SL01001 ,SL01035";
@@ -1164,10 +1164,10 @@ SELECT  [MasterProductCode] as klient
 					cust.setDiscount(Double.parseDouble(ale.trim()));
 				}
 				String ale2 = rs.getString("ale2");
-				if (ale2 != null && ale2.trim().equals("04")) {
-					// cust.setDiscount(17);
-
+				if (ale2 != null && !ale2.trim().equals("0")) {
+					cust.setGroup("D" + ale2.trim());
 				}
+				
 				String visit = rs.getString("visit");
 				if (visit != null && visit.trim().length() > 0) {
 					cust.setVisit(getVisitDay(visit.trim()));
@@ -1280,8 +1280,13 @@ SELECT  [MasterProductCode] as klient
 						cust.addAgent(a);
 					}
 				}
-
-				cust.setGroup(rs.getString("klgrupp"));
+                if(cust.getGroup().trim().length() > 0 ) {
+    				cust.setGroup(cust.getGroup() + "|" + rs.getString("klgrupp"));
+                	
+                }else {
+    				cust.setGroup(rs.getString("klgrupp"));
+                	
+                }
 
 				String block = rs.getString("block");
 				if (block != null && block.trim().length() > 0) {
@@ -1584,13 +1589,88 @@ SELECT  [MasterProductCode] as klient
 				if (Double.parseDouble(discount) == 0 && price != 0) {
 					mline.setPrice(price);
 					result.add(mline);
-					//kui hind on siis paneme 
 				}
-				
-			 // Kommentisin v�lja kuniks uus hinna skeem
-									// hakkab toimima
+			
 			}
 
+			
+			String sql3 = " select SC45003 as klgrupp , SC45005 as a1 ,  SC45006 as a2, SC45007 as a3, SC45008 as a4, SC45009 as a5, SC45010 as a6,\r\n" + 
+					"						 SC45011 as a7 from SC450100 where SC45001 = 'D'";
+				rs = st.executeQuery(sql3);
+
+				while (rs.next()) {
+
+					String clGroup = rs.getString("klgrupp");
+					if(clGroup != null) {
+						clGroup = "D" + clGroup.trim();
+				
+				
+					double a1 = rs.getDouble("a1");
+				if(a1 != 0) {
+					MatrixLine mline = new MatrixLine();
+						mline.setCliGroup(clGroup.trim());
+					    mline.setProdGroup("a1");
+                   	    mline.setDiscount(a1);
+						result.add(mline);
+					}
+					
+				double a2 = rs.getDouble("a2");
+				if(a2 != 0) {
+					MatrixLine mline = new MatrixLine();
+					mline.setCliGroup(clGroup.trim());
+				    mline.setProdGroup("a2");
+                   	mline.setDiscount(a2);
+						result.add(mline);
+					}
+			
+			
+				double a3 = rs.getDouble("a3");
+				if(a3 != 0) {
+					MatrixLine mline = new MatrixLine();
+					mline.setCliGroup(clGroup.trim());
+				    mline.setProdGroup("a3");
+                   	mline.setDiscount(a3);
+						result.add(mline);
+					}
+				
+				double a4 = rs.getDouble("a4");
+				if(a4 != 0) {
+					MatrixLine mline = new MatrixLine();
+					mline.setCliGroup(clGroup.trim());
+				    mline.setProdGroup("a4");
+                   	mline.setDiscount(a4);
+						result.add(mline);
+					}
+				double a5 = rs.getDouble("a5");
+				if(a5 != 0) {
+					MatrixLine mline = new MatrixLine();
+					mline.setCliGroup(clGroup.trim());
+				    mline.setProdGroup("a5");
+                   	mline.setDiscount(a5);
+						result.add(mline);
+					}
+				double a6 = rs.getDouble("a6");
+				if(a6 != 0) {
+					MatrixLine mline = new MatrixLine();
+					mline.setCliGroup(clGroup.trim());
+				    mline.setProdGroup("a6");
+                   	mline.setDiscount(a6);
+						result.add(mline);
+						System.out.println("Lisan " + mline.toString());
+					}
+				
+				double a7 = rs.getDouble("a7");
+				if(a7 != 0) {
+					MatrixLine mline = new MatrixLine();
+					mline.setCliGroup(clGroup.trim());
+				    mline.setProdGroup("a7");
+                   	mline.setDiscount(a7);
+						result.add(mline);
+					}
+					}
+		
+				
+				}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1632,7 +1712,7 @@ SELECT  [MasterProductCode] as klient
 		String cmd = "SELECT  RTRIM(t.SC01001) AS toode,(RTRIM(SC01002)+' ' "
 				+ "        +rtrim(SC01003)) + ' ' +RTRIM(t.SC01001) AS nimi,SC39004 AS myygihind ,"
 				+ "SC01015 AS tykke,SC03003 AS stock, " //-SC03004
-				+ " SC01115  AS grupp,SC01132 AS ean  , SC01016 as letter ,SC01014 as sorting "
+				+ " SC01115  AS grupp, SC01031 as alegr,SC01132 AS ean  , SC01016 as letter ,SC01014 as sorting "
 				+ " , case when SC01135 = 0 then  'KG' else 'TK' end as unit  ,  SC01141 as kaal, " +
 						" OptimumKTellimuseKogus as inunit ,SC01107 as type , SC01164 as kate FROM SC010100 t left outer JOIN SC030100 on SC03001=t.SC01001 and SC03002='SKSM1' AND SC03003!=0 left outer JOIN SC390100 ON t.SC01001 "
 				+ "  = SC39001 and SC39002='00' LEFT OUTER JOIN proov20100 yh ON yh.SC01001= t.SC01001 " +
@@ -1680,9 +1760,17 @@ SELECT  [MasterProductCode] as klient
 						gr = "XX";
 					}
 				}
-			//	prod.setMaxDiscount(1);
+				
+
+				String alegr = rs.getString("alegr");
+				if(alegr != null && alegr.trim().length() > 0){
+					prod.setAlegrupp("a" + alegr.trim());
+				}
+
+
 				prod.setName(gr.trim() + " " + nimetus);
 				gr = rs.getString("ean");
+				
 				
 				boolean goes = true;
 				String sort = rs.getString("sorting");

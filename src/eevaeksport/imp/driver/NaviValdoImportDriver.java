@@ -187,6 +187,8 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
 	        Document doc = db.newDocument();
 	        Element root = doc.createElement("Document-Order");
 	        doc.appendChild(root);
+	        
+	        String retemail = null; 
 
 double kordaja = 1;
 
@@ -202,6 +204,12 @@ double kordaja = 1;
 	   	 		if(ol.getKogus() < 0 && (order.getStatus() == 5 || order.getStatus() == 4 || order.getStatus() == 2)){
 	   	 			nega++;
 	   	 		}
+	   	 		
+	   	 	 if(ol.getPartii() != null && ol.getPartii().trim().length() >0) {
+		    	  if(ol.getPartii().contains("++")) {
+		    		  retemail = ol.getPartii().substring(ol.getPartii().indexOf("++")+2);
+		    	  }
+		     }
 	   	 	 }  
 	   	
 	   	 	
@@ -396,8 +404,19 @@ double kordaja = 1;
 	        Text functionVal = doc.createTextNode(func);
 	        function.appendChild(functionVal);
 	        header.appendChild(function);		   
-	        root.appendChild(header);
+	    
+	        if(retemail != null) {
+	        	Node retem  = doc.createElement("RepriceEmail");
+	  	        Text retemailVal = doc.createTextNode(retemail);
+	  	        retem.appendChild(retemailVal);
+	  	        header.appendChild(retem);	
+	        }
+	        
+	      	   
+	        
 
+	        root.appendChild(header);
+	        
 	        String cust = order.getCompany();
 	        String aadr = cust.substring(cust.indexOf("_")+1);
 	        cust = cust.substring(0,cust.indexOf("_"));
@@ -537,17 +556,8 @@ if(invoice){
 	     Text linnum = doc.createTextNode(counter+"");
 	     linenum.appendChild(linnum);
 	     ridaitem.appendChild(linenum);
-
-
-	 /*    Node toote_ean = doc.createElement("EAN");
-	     Text toote_eanVal = doc.createTextNode(line.getEAN());
-	     toote_ean.appendChild(toote_eanVal);
-	     ridaitem.appendChild(toote_ean);
-*/
-	     
 	     
 	     String toode  = line.getToode();
-	    
 
 	     Node toote_kood = doc.createElement("SupplierItemCode");
 	     Text toote_koodVal = doc.createTextNode(toode);
@@ -576,13 +586,6 @@ if(invoice){
 	     koGus.appendChild(kogusVal);
 	     ridaitem.appendChild(koGus);
 
-	     
-	     
-
-	    
-	     
-	   
-	     
 	    
 	    
 	    if(disc > 0 || repr){
@@ -592,10 +595,15 @@ if(invoice){
 	        Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
 		     yhiku_hind.appendChild(yhiku_hindVal);
 		     ridaitem.appendChild(yhiku_hind);
-		     
-		     if(line.getPartii() != null && line.getPartii().trim().length() >0) {
+		     String par = line.getPartii();
+		     if(par != null && par.trim().length() >0) {
 		    	    Node origDoc = doc.createElement("OriginalDocNumber");
-				     Text origDocVal = doc.createTextNode(line.getPartii());
+		    	   
+		    	    if(par.contains("++")) {
+			    		  par = par.substring(0,par.indexOf("++"));
+			    	  }
+		    	    
+				     Text origDocVal = doc.createTextNode(par);
 				     origDoc.appendChild(origDocVal);
 				     ridaitem.appendChild(origDoc); 
 		     }
