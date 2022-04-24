@@ -223,7 +223,14 @@ public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discoun
   
   @Override
   public void FixReporter() {
-	  ArrayList<String> arr = Converter.createExcelProductProblemsOosReport(this.getExcelDir(), rcompany, user, pass);
+		Calendar algus = Calendar.getInstance();  
+	  	Calendar lopp = Calendar.getInstance();  	
+	  	algus.add(Calendar.DATE, -3);
+	  	algus.set(Calendar.HOUR, 0);
+	  	lopp.set(Calendar.HOUR, 23);
+	  	lopp.set(Calendar.MINUTE, 59);
+	  
+	  ArrayList<String> arr = Converter.createExcelProductProblemsOosReport(algus, lopp, this.getExcelDir(), rcompany, user, pass);
 	  System.out.println(arr);
 	  for(String fname : arr) {
 		  String tekst = " ";

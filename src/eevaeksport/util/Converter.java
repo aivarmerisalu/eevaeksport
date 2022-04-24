@@ -4498,11 +4498,10 @@ try{
 				res = "svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" ;
 				
 				File ff = new File("svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" );
-				if(!ff.exists()) {
+				//if(!ff.exists()) {
 					org.json.JSONArray array = serv.getSVdata(from, to , type , subTypes);
 					Converter.saveFile(  "svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" , array.toString());
-			
-				}
+				//}
 					
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -10024,7 +10023,8 @@ client.close();
 	
 	
 	
-	   public static ArrayList<String> createExcelProductProblemsOosReport(String exceldir, String rcompany, String user, String pass) {
+	   public static ArrayList<String> createExcelProductProblemsOosReport(Calendar calAlgus, Calendar calLopp, String exceldir, String rcompany, String user, String pass) {
+		   boolean oos=false; boolean prob=false;
 		   ArrayList<String> arreturn = new ArrayList<String>();
 			
 			File f = new File("svdata");
@@ -10032,12 +10032,7 @@ client.close();
 				f.mkdir();
 			}
 
-			Calendar algus = Calendar.getInstance();  
-		  	Calendar lopp = Calendar.getInstance();  	
-		  	algus.add(Calendar.DATE, -3);
-		  	algus.set(Calendar.HOUR, 0);
-		  	lopp.set(Calendar.HOUR, 23);
-		  	lopp.set(Calendar.MINUTE, 59);
+
 		  	
 			
 			JSONArray prodsjson = Converter.getWebProducts(rcompany, user, pass);
@@ -10108,7 +10103,7 @@ client.close();
 				//teeme ja loeme sv jsoni ja paneme excelisse
 			  	try {
 			  		JSONParser parser = new JSONParser();
-			  		Object obj = parser.parse(new FileReader(Converter.getSVData(algus.getTimeInMillis(), lopp.getTimeInMillis(), rcompany, user, pass, false, null, null, "test")));
+			  		Object obj = parser.parse(new FileReader(Converter.getSVData(calAlgus.getTimeInMillis(), calLopp.getTimeInMillis(), rcompany, user, pass, false, null, null, "test")));
 			  		org.json.simple.JSONArray cc = (org.json.simple.JSONArray) obj;
 			  		
 			  		TreeMap prods = new TreeMap();
@@ -10135,6 +10130,7 @@ client.close();
 			  			String agid = "" +((ArrayList) (custagents.get(cob.get("custid")+"")).get(0)).get(0);
 			  			
 			  			if(filterProblem.equals("PRODUCTDIST")) {
+			  				prob=true;
 			  				worksheetPROB.createRow(problems);
 			  				worksheetPROB.getRow(problems).createCell(0).setCellValue((String)cob.get("agentid"));
 			  				worksheetPROB.getRow(problems).createCell(1).setCellValue(agid);
@@ -10159,6 +10155,7 @@ client.close();
 			  			}
 			  			
 			  			if(filterOutOfStock.equals("999")){
+			  				oos=true;
 			  				worksheetOOS.createRow(outofstocks);
 			  				worksheetOOS.getRow(outofstocks).createCell(0).setCellValue((String)cob.get("agentid"));
 			  				worksheetOOS.getRow(outofstocks).createCell(1).setCellValue(agid);
@@ -10201,15 +10198,20 @@ client.close();
 		  		excelifailOOS.close();
 		  		excelifailPROB.close();
 				
-		  		FileOutputStream output_file_oos =new FileOutputStream(exceldir + "productdetailoos-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-		  		FileOutputStream output_file_prob =new FileOutputStream(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-		  		arreturn.add(exceldir + "productdetailoos-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-		  		arreturn.add(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-		  		wbOOS.write(output_file_oos); //write changes
-		  		output_file_oos.close();  //close the stream
-		  		wbPROB.write(output_file_prob); //write changes
-		  		output_file_prob.close();  //close the stream
-		  		
+		  		if(oos) {
+			  		FileOutputStream output_file_oos =new FileOutputStream(exceldir + "productdetailoos-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+			  		arreturn.add(exceldir + "productdetailoos-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+			  		wbOOS.write(output_file_oos); //write changes
+			  		output_file_oos.close();  //close the stream
+		  		}
+		  		if(prob) {
+			  		FileOutputStream output_file_prob =new FileOutputStream(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+			  		arreturn.add(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+			  		wbPROB.write(output_file_prob); //write changes
+			  		output_file_prob.close();  //close the stream
+		  		}
+
+		  		System.out.println(oos + " " + prob);
 		  		
 			}catch (Exception e){
 				e.printStackTrace();
