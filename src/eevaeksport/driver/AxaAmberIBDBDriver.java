@@ -307,6 +307,10 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                 	}
                                  }
                                  
+                                 if(clGroup != null && clGroup.equals("ARKA_STD")) {
+                                	 goes = false;
+                                 }
+                                 
                                  if(goes){
                                 	
                                  if(relation == 5 ){
@@ -412,6 +416,10 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                                       
 
                                                       mline.setProdLevel(pri); 
+                                                      
+                                                      if(clGroup != null && clGroup.equals("ARKA_STD")) {
+                                                     	 goes = false;
+                                                      }
                                                       
                                                     if(goes){
                                                       if(price > 0){
