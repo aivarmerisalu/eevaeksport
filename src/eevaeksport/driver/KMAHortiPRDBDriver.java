@@ -727,7 +727,7 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 		String cmd = " select Siffer,nimetus,hind,Ühik,ÜhikutKastis,ean,YlemGrupp"
 				+ ",AlamGrupp,Hetkeseis,PildiLink,SoovituslikJaehind,Hooaeg,tähtsusgrupp from KaubadProff"
 				+ " union all select  Siffer,nimetus,hind,Ühik,ÜhikutKastis,ean,YlemGrupp " + 
-			    ",AlamGrupp,Hetkeseis,PildiLink,SoovituslikJaehind,Hooaeg,tähtsusgrupp  from Kaubad ";
+			    ",AlamGrupp,Hetkeseis,PildiLink,SoovituslikJaehind,Hooaeg,tähtsusgrupp  from Kaubad  ";
 		// Siffer   Nimetus Hind Ühik  ÜhikutKastis   EAN   
 		//YlemGrupp AlamGrupp Hetkeseis   MinHind  Kaal  Brutokaal  Pildilink   
 
@@ -748,7 +748,12 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 
 				String kood = rs.getString("Siffer").trim();
 				Product prod = new Product(kood);
-				String nimetus = rs.getString("nimetus").trim();
+				String nimetus = rs.getString("nimetus");
+				
+				if(nimetus != null) {
+							nimetus = nimetus.trim();
+						
+						
 				try {
 					if (nimetus.indexOf("(") != -1) {
 						nimetus = nimetus.replace('(', '<');
@@ -853,6 +858,7 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 					products.put(prod.getName(), prod);
 					
 				}
+			}
 			}
 			rs.close();
 			st.close();

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1417,12 +1418,14 @@ try{
 
 	   while (rs.next()) {
 		   
-		   
+		   String  id = rs.getString("CustomerASId").trim();
 		   String  kood = rs.getString("kood").trim();
+		 
 		   if(klpMap.get(kood) != null ){
 			   kood = (String)klpMap.get(kood) + "";
 			   double debti = rs.getDouble("debt");
             	klpover.put(kood, debti);
+            	  klids.put( kood,id);
 		   }
             
 	    }
@@ -1438,7 +1441,48 @@ try{
 
   
   private TreeMap klpover = new TreeMap();
+  private TreeMap klids = new TreeMap();
  
+  private Connection getNewConnectionScan() throws SQLException{
+	    return DriverManager.getConnection(url4, "ESofficeLogin", "esoffice");
+	  }
+
+  
+  private TreeMap<String, String> getScannedLastDate(){
+	   TreeMap<String, String> res = new TreeMap<String, String>();
+	   String sql = "select partneris_id as klient, max (scan_time) as daat, max (patv_time) as lastconf from turto_list group by partneris_id";
+	   try {
+		   Connection c = this.getNewConnectionScan();
+		   Statement st = c.createStatement();
+		   ResultSet rs = st.executeQuery(sql);
+		   
+		   while(rs.next()){
+		 	  String cliID = rs.getString("klient");
+		 	 if(cliID != null) {
+			 	
+			 	  Date d2 = rs.getDate("daat");
+				 	//  Date d2 = rs.getDate("lastconf");
+				 	  
+				   if(d2 != null){
+				 		 res.put(cliID,(d2+"").substring(0,10));
+				 	  }
+				 	  
+			 	  
+			 	  }
+			 	 
+		 	 
+		   }
+		   rs.close();
+		   st.close();
+		   c.close();
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }
+
+      
+	   return res;
+  }
+
  
   public TreeMap getCustomers(Agent agent){
 
@@ -1556,7 +1600,7 @@ try{
            }
 
              
-
+           TreeMap<String, String> scans =  getScannedLastDate();
      	  System.out.println("Alustan Kliendid 2");
            
        //    tal_visitationdays ,talspartnercode,
@@ -1853,6 +1897,18 @@ try{
         	}
         
         }
+        
+        String id = (String) klids.get(cust.getID());
+        
+        if(id != null && scans.get(id) != null) {
+        	
+        	if(cust.getCity()== null || cust.getCity().length() == 0 ){
+        		cust.setCity("KLP Paskutinis skenavimas: " + scans.get(id));
+        	}else{
+        		cust.setCity( cust.getCity() + "| KLP Paskutinis skenavimas: " + scans.get(id));
+        	}
+			
+		   }
         
         
         String osad = rs.getString("osad");
@@ -3180,6 +3236,7 @@ String   cmd2 = "  select  a.EmployeeCode as agent,b.BpcItemBrandCode as brands,
   private String url = "jdbc:odbc:axauus";
   private String url2 = "jdbc:odbc:report";
   private String url3 = "jdbc:odbc:skaita";
+  private String url4 = "jdbc:odbc:scan";
   private   Vector debt = new Vector();
 
   private String subjectFilesTo = null;

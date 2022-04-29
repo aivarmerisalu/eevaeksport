@@ -469,7 +469,7 @@ Converter.saveFile(parent.getProps().getProperty("stockrefdir")  + "customerorde
 				double seis = rs.getDouble("stock");
 				String dd = " ";
 				if(part.get(kood) != null) {
-					dd = part.get(kood)+"";
+					//dd = part.get(kood)+"";
 				}
 				if (seis > 0) {
 					products.append(kood + ";");

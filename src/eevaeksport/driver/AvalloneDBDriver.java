@@ -764,7 +764,7 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
        if (isDebug()) {
            	System.out.println(cmd);
            	}
-
+StringBuffer sb = new StringBuffer();
 
           stmt = con.createStatement();
                       ResultSet rs = stmt.executeQuery(cmd);
@@ -850,12 +850,14 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
           				nimetus = prod.getName();
           				
           				          
-                     
+                     sb.append(prod.getID()+ ";" + nimetus + ";" + prod.getEAN() + ";" + prod.getStock()+"\n");
                           
                           products.put(nimetus, prod);
 
                       }
-                      
+              if(sb.length()> 0) {
+            	  Converter.saveFile("webileht/tooted.csv", sb.toString());
+              }
 
         } catch (Exception e) {
             getParent().showError(e);

@@ -4,7 +4,12 @@ package eevaeksport.imp.driver;
 
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -12,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
@@ -149,7 +155,9 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
   
   public void makeOrder(Order order) throws SQLException{
 
-     makeOutput(order); 	    
+     makeOutput(order); 
+     
+     
     
   }
   
@@ -305,16 +313,16 @@ double kordaja = 1;
 	        age.appendChild(ageVal);
 	        header.appendChild(age);
 	        
-			String comm = "";
+		//	String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 
 	 			Node com = doc.createElement("comment");
 		        Text comVal = doc.createTextNode(order.getInfo());
 		        com.appendChild(comVal);
 		        header.appendChild(com);
-		        comm = order.getInfo();
+		  //      comm = order.getInfo();
 	 		}
-	 		System.out.println("Comment " + comm + " " + order.getTeostaja() + " " + order.getShipMode());
+	 	//	System.out.println("Comment " + comm + " " + order.getTeostaja() + " " + order.getShipMode());
 	        
 	 		if(order.getTeostaja() != null && order.getTeostaja().trim().length() >0 &&
 	 				!order.getTeostaja().trim().startsWith("VLD")){
@@ -348,7 +356,7 @@ double kordaja = 1;
 
 	        Node kuupaev = doc.createElement("OrderDate");
 	        Calendar cal = Calendar.getInstance();
-	        cal.setTime(order.getShipCal().getTime()); // karolise erisoov 
+	       // cal.setTime(order.getShipCal().getTime()); // karolise erisoov 
 
 	        String month = (cal.get(Calendar.MONTH) + 1) + "";
 	        if (month.length() == 1) month = "0" + month;
@@ -519,8 +527,21 @@ if(invoice){
 // <TotalTaxAmount>7.974</TotalTaxAmount>
 	        
 }	        
-	 	
-	      String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim() +  ".xml";
+String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + "-" + (uni + "").trim() +  ".xml";
+
+
+ String loginfo = Converter.getDDpMMpYYYYpString(Calendar.getInstance()) +  ";" + order.getAgent() + ";" + order.getDokNr() + ";" + order.getCompany() +";"+ 
+ order.getOrderLines().size()+ ";"+ order.filename + ";" + order.getDokNr().trim() + "-" +  (uni + "").trim() +  ".xml";
+ 
+ 
+ Path p = Paths.get(parent.getProps().getProperty("log.dir") + "loginfo.csv");
+ String s = System.lineSeparator() + loginfo;
+ try {
+	    Files.write(p, s.getBytes(), StandardOpenOption.APPEND);
+	} catch (IOException e) {
+	    System.err.println(e);
+	}
+
 	      System.out.println(fileName);
 	      OutputFormat of = new OutputFormat();
 	        of.setIndenting(true);
@@ -675,7 +696,7 @@ if(invoice){
 
  
   public String getDriverVersion(){
-    return "NaviIcecoImport";
+    return "NaviValdoImport";
   }
  
  

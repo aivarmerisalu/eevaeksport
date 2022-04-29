@@ -272,6 +272,7 @@ public class Order {
   public String dend = null;
   public String colorStatus = null;
   
+  public String filename = null;
   
   public String routeName = null;
   public String id = null;

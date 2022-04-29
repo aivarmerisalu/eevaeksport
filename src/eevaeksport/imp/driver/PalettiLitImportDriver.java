@@ -474,8 +474,9 @@ public class PalettiLitImportDriver
 						 
 			  }else{
 				//kui laoseis on 0 siis otsime uue toote 
-				  
-				  
+				  // Gintarsi soovil paneme sama toote kui laoseis on 0
+				  linex.add(ol);
+				  /*
 					 Product mas = (Product)products.get(pr);
 					 String group = mas.getEAN();
 					 if(groupProducts.get(group) != null){
@@ -500,7 +501,7 @@ public class PalettiLitImportDriver
 						   }
 						}
 						}
-					 }
+					 }*/
 			  }
 		  }
 		  

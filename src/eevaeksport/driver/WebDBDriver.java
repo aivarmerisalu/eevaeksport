@@ -225,7 +225,16 @@ public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discoun
   public void FixReporter() {
 		Calendar algus = Calendar.getInstance();  
 	  	Calendar lopp = Calendar.getInstance();  	
-	  	algus.add(Calendar.DATE, -3);
+	  	Integer days = 3;
+	  if(	parent.getProps().getProperty("webreport.days") != null) {
+		  try {
+			  days = Integer.parseInt(parent.getProps().getProperty("webreport.days"));
+		  }catch(Exception e) {
+			  
+		  }
+	
+	  };
+	  	algus.add(Calendar.DATE, -1 * days);
 	  	algus.set(Calendar.HOUR, 0);
 	  	lopp.set(Calendar.HOUR, 23);
 	  	lopp.set(Calendar.MINUTE, 59);

@@ -12342,7 +12342,9 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	        BufferedReader in = new BufferedReader(
 	                new FileReader(f));
             String fline = in.readLine() ;
-            System.out.println(fline);
+            if(fline != null) {
+            	
+            
             if(fline.trim().startsWith("45") && fline.trim().length() == 10  ){
 	        	   in.close();
 	        	   return "SAP";	        	   
@@ -12370,7 +12372,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	        	   in.close();
 	        	   return "EIP";	        	   
 	           } 
-	           System.out.println("'" + fline + "'");
+	          // System.out.println("'" + fline + "'");
 	        
 	           fline = in.readLine() ;
 	           fline = in.readLine() ;
@@ -12379,7 +12381,11 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	        	   in.close();
 	        	   return "PRI";	        	   
 	           }
-	           
+            }else {
+        		f.renameTo(new File(parent.getProps().getProperty("imp.read") + "error" + File.separator  + f.getName()));            					
+      			
+            	//System.exit(0);
+            }
 	           in.close();
 		
 		}catch(Exception e) {
@@ -17261,10 +17267,11 @@ shipdate = getCalXML(asi);
             				           || driver.getDriverVersion().equals("SkaiteKMImport")
             				           || driver.getDriverVersion().equals("AxaJNGLAT")
             				           || driver.getDriverVersion().equals("IceAxaUusImport")
-            				           
+            				           || driver.getDriverVersion().equals("NaviValdoImport")
             						  )){
             	  dokNr = agordnum;         	  
               }
+              
               if(driver.getDriverVersion().equals("SkaiteAG")){
             	  String ddd = firma;
             	  ddd =  driver.identifyCustomer(firma, null)  ;
@@ -17333,6 +17340,7 @@ shipdate = getCalXML(asi);
                   orders.setFullDeliveryOnly(fullDeliveryOnly);             
                 }
               
+              orders.fileName = fileName;
               if(reference != null && reference.trim().length() > 0){
             	 if(reference.indexOf("|") !=-1){
             		 dokNr = reference.substring(0,reference.indexOf("|"));         		 

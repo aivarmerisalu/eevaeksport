@@ -69,6 +69,7 @@ public class Orders {
       existingOrder.setCurrency(this.getCurrency());
       existingOrder.setTeostaja(this.getTeostaja());
       existingOrder.setILN(this.getILN());
+      existingOrder.filename = (this.fileName);
       
       orders.add(existingOrder);
       
@@ -82,6 +83,8 @@ public class Orders {
       existingOrder.setKogusumma(getSumma());
       existingOrder.setKmsumma(getKmsumma());
       existingOrder.setShipDateUsed(shipDateUsed);
+      existingOrder.filename = (this.fileName);
+      
      // existingOrder.setShipTime(shiptime);
       
      // System.out.println("teine " + existingOrder.getILN());
@@ -114,6 +117,7 @@ public class Orders {
 
   private Vector orders = new Vector();
   public String agent = null;
+  public String fileName = null;
   private String compName = null;
   private String emailBody = null;
   private double summa = 0; 

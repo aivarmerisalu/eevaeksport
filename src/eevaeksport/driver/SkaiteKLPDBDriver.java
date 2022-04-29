@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -92,6 +93,9 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 		    return DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
 		  }
 
+	  private Connection getNewConnectionScan() throws SQLException{
+		    return DriverManager.getConnection(url3, "ESofficeLogin", "esoffice");
+		  }
 	
 
 	  public void insertSuperVisorSQLMeri(SupervisorInfoWrapperMeri wr) {
@@ -1017,6 +1021,9 @@ private Vector baashk = null;
 	
         log(cmd);
 
+        
+        TreeMap<String, String> scans =  getScannedLastDate();
+        
         String lepingud = "select kl.PartneriaiId as klient , kl.NuolaiduSutartysId  as leping from dbo.NuolaiduSutarciuPartneriai kl inner join  " +
            " dbo.NuolaiduSutartys AS sut ON kl.NuolaiduSutartysId = sut.NuolaiduSutartysId and " +
 			"	   (CONVERT (date, GETDATE()) between   cast(sut.DataNuo_Int as datetime) and  cast(sut.DataIki_Int as datetime) or (sut.DataNuo_Int = 0 and sut.DataIki_Int = 999999)) order by DataNuo_Int desc";
@@ -1089,6 +1096,9 @@ private Vector baashk = null;
 		   
 		   String id = rs.getString("CustomerASId").trim();
 		   Customer cust = new Customer(rs.getString("kood").trim());
+		   if(scans.get(id) != null) {
+			   cust.setCity("Paskutinis skenavimas: " + scans.get(id));
+		   }
 		   
 		   String tanav = rs.getString("tanav");
            if (tanav != null && tanav.length() > 0){
@@ -1869,7 +1879,39 @@ try{
      }
 
 
+   private TreeMap<String, String> getScannedLastDate(){
+	   TreeMap<String, String> res = new TreeMap<String, String>();
+	   String sql = "select partneris_id as klient, max (scan_time) as daat, max (patv_time) as lastconf from turto_list group by partneris_id";
+	   try {
+		   Connection c = this.getNewConnectionScan();
+		   Statement st = c.createStatement();
+		   ResultSet rs = st.executeQuery(sql);
+		   
+		   while(rs.next()){
+		 	  String cliID = rs.getString("klient");
+		 	  if(cliID != null) {
+		 		
+		 	  Date d2 = rs.getDate("daat");
+		 	//  Date d2 = rs.getDate("lastconf");
+		 	  
+		   if(d2 != null){
+		 		 res.put(cliID,(d2+"").substring(0,10));
+		 	  }
+		 	  
+		 	 
+		 	  }
+		 	 
+		   }
+		   rs.close();
+		   st.close();
+		   c.close();
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }
 
+       
+	   return res;
+   }
 
 
     public ManagerData getManagerData() throws SQLException{
@@ -2038,6 +2080,7 @@ try{
     public static final String DRIVER_VERSION = "SkaiteKLP";
     private String             url = "jdbc:odbc:skaita";
     private String             url2 = "jdbc:odbc:report";
+    private String             url3 = "jdbc:odbc:scan";
     private Connection	       con = null;
     private Vector grouplist = new Vector();
     private PreparedStatement  stmt = null;

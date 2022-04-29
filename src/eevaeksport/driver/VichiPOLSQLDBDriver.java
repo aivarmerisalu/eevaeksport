@@ -459,7 +459,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
    	        
    	                String name = rs.getString("nimi").trim().substring(5).trim() ;
    	           //  if(id.trim().length()== 4  || id.trim().length() == 5) {
-   	             tm.put(cleardots(id),  Converter.enCodeEst(pol(name)) + " " + id.substring(0,1) +" "+ cleardots(id) );
+   	             tm.put(cleardots(id),  Converter.enCodeEst(pol(name)));
    	             //}
    	        }
    	        
@@ -516,7 +516,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	          	   	        
 	                String name = rs.getString("nimi") ;
 	                if(groupID.length()>5){
-	                   tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + " " +name));
+	                   tm.put(cleardots(groupID),name);
 	           }
 	        }
 	     //   System.out.println("Teine" + tm.toString());
@@ -683,10 +683,12 @@ private TreeMap agent1 = new TreeMap();
    public TreeMap getCustomers(Agent agent){
 	   
 	   TreeMap<String,Double> overdue= new TreeMap<String,Double>();
+	   TreeMap<String,Double> used= new TreeMap<String,Double>();
    HashSet custs = new HashSet();
- try {
+    
+     try {
 
-try{
+     try {
 			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
 				
 		}catch(Exception e){
@@ -734,6 +736,11 @@ try{
               	overdue.put(custID, debt.getSum());
               }
         }
+        if(used.get(custID) != null) {
+          	used.put(custID,used.get(custID) + debt.getSum());
+          }else {
+          	used.put(custID, debt.getSum());
+          }
         
         debt.setDue(dueint + "");
         int old = 0;
@@ -765,7 +772,7 @@ try{
    		"   			 [Payment Terms Code] AS payment,[Line Discount %] AS alekood, 0 AS yle,'' AS visit,'' AS type,   \r\n" + 
    		"   			   [Blocking after overdue days] AS extradays ,'' AS sort, '' AS debt , 0 AS minsum , \r\n" + 
    		"   			  adr.contact +' ' + adr.[Phone no_] + ' ' + adr.[E-Mail] as kontakt ,' 'as kett  , '' as chain , \r\n" + 
-   		"   			  [Customer Price Group] as hinnak, k.[Currency Code] as currency\r\n" + 
+   		"   			  [Customer Price Group] as hinnak, k.[Currency Code] as currency ,  0 as credit \r\n" + 
    		"   			  FROM [VICIUNAI-POL$Customer] k  LEFT JOIN [VICIUNAI-POL$Ship-to Address] adr ON adr.[Customer No_]  = k.[No_]  \r\n" + 
    		"			  LEFT JOIN [VICIUNAI-POL$Sales Line Discount] d ON d.[Sales Code] = k.[Customer Disc_ Group] \r\n" + 
    		"   			 WHERE k.[Salesperson Code] != ''  AND blocked != 3 " ;
@@ -803,6 +810,11 @@ try{
            if(overdue.get(payer) != null) {
         	   customer.setDebt(overdue.get(payer));
            }
+           
+           if(used.get(payer) != null) {
+        	   customer.setUsedCredit(used.get(payer));
+           }
+           
            
            if (name.equals("")) name = "<" + id + ">";
           name = ((pol(name)).trim());
@@ -907,8 +919,8 @@ try{
  			}
            
 
-
-             if(rs.getString("blokk").equals("1")){
+   String bl = rs.getString("blokk");
+             if(bl.equals("1") || bl.equals("2")){
                customer.setSalesBlock(true);
              }
 
@@ -1034,7 +1046,12 @@ try{
            }
            
            
-          // customer.setPayer(id);
+           Double credit = rs.getDouble("credit");
+           if(credit != null && credit > 0) {
+        	   customer.setCredit(credit +"");
+           }
+           
+          
             tm.put(customer.getName(), customer);
             this.customers.add(customer.getID());
             custs.add(customer.getID());
@@ -1148,8 +1165,8 @@ try{
      try {
      	String cmd = " SELECT [No_] AS toode,(t.[Description]) AS nimi, var.[Qty_ per Unit of Measure] as kordaja , pr.[Unit Price] AS myygihind, [Product Group Code] AS grupp,[Subgroup Code] AS grupp2 \r\n" + 
      			"     			     					,[Sales Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
-     			"     			     						  '' AS type, vat.[Qty_ per Unit of Measure] AS kastis,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc  \r\n" + 
-     			"     			     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup FROM [VICIUNAI-POL$Item] t \r\n" + 
+     			"     			     						   vat.[Qty_ per Unit of Measure] AS kastis,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc  \r\n" + 
+     			"     			     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup  ,t.[Type] AS type FROM [VICIUNAI-POL$Item] t \r\n" + 
      			"     										  left join [VICIUNAI-POL$Sales Price] pr ON pr.[Item No_] = [No_] and pr.[Sales Code] = ''\r\n" + 
      			"     										  LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] vat ON (vat.[Item No_]=[No_] and vat.[Code]='KARTON' ) \r\n" + 
      			"											   LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] var ON var.[Item No_]=[No_] and var.[Code]=[Sales Unit of Measure]  \r\n" + 
@@ -1247,6 +1264,12 @@ try{
                  if(prgroup != null && prgroup.trim().length()>0){   
                 	 prod.setDiscgrupp(prgroup.trim());
                  }
+                 
+                 String type = rs.getString("type");
+                 if(type != null && type.trim().length()>0){   
+                	 prod.setType(type.trim());
+                 }
+                 
                  
                   if(name.contains("mro")) {
                 	  int i = name.indexOf("mro");
