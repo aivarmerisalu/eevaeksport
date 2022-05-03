@@ -1526,7 +1526,7 @@ private void makePictureCat(){
              // System.out.println("pilt olemas " + ff2[i]);
           	File in = new File ( pictssou + ff2[i]); 
             	if(in.isFile()){
-            	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+            	File inpda = new File ( pictspda + prod.getID().replace("/", "_").replace("/", "_") + ".jpg"); 
             	if(!inpda.exists()) {
             		Converter.shrinkAndCopyFile(in,inpda,400);
             	}

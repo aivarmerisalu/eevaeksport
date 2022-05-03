@@ -4500,7 +4500,7 @@ try{
 				File ff = new File("svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" );
 				//if(!ff.exists()) {
 					org.json.JSONArray array = serv.getSVdata(from, to , type , subTypes);
-					Converter.saveFile(  "svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" , array.toString());
+					Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" , array.toString());
 				//}
 					
 			} catch (Exception e) {
@@ -4513,6 +4513,41 @@ try{
 		
   }
 	
+  
+  public static org.json.JSONArray getSVDataArray(Date from , Date to , String company, String user , String pass, boolean week , String type , String subTypes , String nameadd ){
+	  eevaeksport.util.ReportingService serv = new ReportingService();
+	  serv.user =  user;
+		serv.pass = pass;
+		serv.company = company;
+		org.json.JSONArray array = null;
+ 
+			try {
+				String mm = (from.getMonth()+1)+ "";
+				if(mm.length() == 1)
+					mm = "0"+ mm;
+				
+				String yyyy = (from.getYear()+1900)+ "";
+				String ww = "";
+				if(week) {
+					Calendar cc = Calendar.getInstance();
+					cc.setTime(from);
+					ww = cc.get(Calendar.WEEK_OF_YEAR)+"";
+					if(ww.length() == 1) {
+						ww = "0"+ww;
+					}
+				}
+				
+		 array = serv.getSVdata(from, to , type , subTypes);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		 
+		
+		
+		return array;
+		
+  }
   
 	public static TreeMap getCustDimsLoading(  String asi){
 		TreeMap res = null;
@@ -10036,9 +10071,9 @@ client.close();
 		  	
 			
 			JSONArray prodsjson = Converter.getWebProducts(rcompany, user, pass);
-			TreeMap managers = Converter.getManagerList(rcompany, user, pass);
+			//TreeMap managers = Converter.getManagerList(rcompany, user, pass);
 			
-			TreeMap<String, ArrayList> custagents = new TreeMap();	//populate and merge TreeMap with TreeMap
+		/*	TreeMap<String, ArrayList> custagents = new TreeMap();	//populate and merge TreeMap with TreeMap
 			Iterator itera = managers.keySet().iterator();
 			while(itera.hasNext()) {
 				TreeMap<String, ArrayList> temp = Converter.getWebMercagents(rcompany, user, pass, false, itera.next().toString());
@@ -10051,7 +10086,7 @@ client.close();
 					custagents.put(k, arr);
 				} 
 				//System.out.println(custagents.size());
-			}
+			}*/
 			//System.out.println("manas" + managers.toString());
 
 			
@@ -10102,9 +10137,8 @@ client.close();
 					
 				//teeme ja loeme sv jsoni ja paneme excelisse
 			  	try {
-			  		JSONParser parser = new JSONParser();
-			  		Object obj = parser.parse(new FileReader(Converter.getSVData(calAlgus.getTimeInMillis(), calLopp.getTimeInMillis(), rcompany, user, pass, false, null, null, "test")));
-			  		org.json.simple.JSONArray cc = (org.json.simple.JSONArray) obj;
+			  		
+			  		org.json.JSONArray cc = Converter.getSVDataArray(calAlgus.getTime(), calLopp.getTime(), rcompany, user, pass, false, null, null, "test");
 			  		
 			  		TreeMap prods = new TreeMap();
 			  		for(int z=0; z<prodsjson.length(); z++) {
@@ -10116,8 +10150,8 @@ client.close();
 			  		
 			  		
 			  		int problems=1;int outofstocks=1;
-			  		for (int i = 0; i < cc.size(); i++) {
-			  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+			  		for (int i = 0; i < cc.length(); i++) {
+			  			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
 			  			
 			  			String filterProblem = (String)cob.get("resstr1");
 			  			String filterOutOfStock = (String)cob.get("resint3").toString();
@@ -10127,14 +10161,16 @@ client.close();
 			  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
 			  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
 			  			
-			  			String agid = "" +((ArrayList) (custagents.get(cob.get("custid")+"")).get(0)).get(0);
+			  			//String agid = "" +((ArrayList) (custagents.get(cob.get("custid")+"")).get(0)).get(0);
+			  			String agid = (String)cob.get("custagent");
+			  			String agname = (String)cob.get("custagname");
 			  			
 			  			if(filterProblem.equals("PRODUCTDIST")) {
 			  				prob=true;
 			  				worksheetPROB.createRow(problems);
 			  				worksheetPROB.getRow(problems).createCell(0).setCellValue((String)cob.get("agentid"));
 			  				worksheetPROB.getRow(problems).createCell(1).setCellValue(agid);
-			  				worksheetPROB.getRow(problems).createCell(2).setCellValue(managers.get(agid)+"");
+			  				worksheetPROB.getRow(problems).createCell(2).setCellValue(agname+"");
 			  				worksheetPROB.getRow(problems).createCell(3).setCellValue((String)cob.get("custid"));
 			  				worksheetPROB.getRow(problems).createCell(4).setCellValue((String)cob.get("custname"));
 			  				worksheetPROB.getRow(problems).createCell(5).setCellValue(dateOnly);
@@ -10159,7 +10195,7 @@ client.close();
 			  				worksheetOOS.createRow(outofstocks);
 			  				worksheetOOS.getRow(outofstocks).createCell(0).setCellValue((String)cob.get("agentid"));
 			  				worksheetOOS.getRow(outofstocks).createCell(1).setCellValue(agid);
-			  				worksheetOOS.getRow(outofstocks).createCell(2).setCellValue(managers.get(agid)+"");
+			  				worksheetOOS.getRow(outofstocks).createCell(2).setCellValue(agname);
 			  				worksheetOOS.getRow(outofstocks).createCell(3).setCellValue((String)cob.get("custid"));
 			  				worksheetOOS.getRow(outofstocks).createCell(4).setCellValue((String)cob.get("custname"));
 			  				worksheetOOS.getRow(outofstocks).createCell(5).setCellValue(dateOnly);
