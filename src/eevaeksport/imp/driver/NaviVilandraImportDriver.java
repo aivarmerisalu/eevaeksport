@@ -250,10 +250,11 @@ System.out.println(sql2);
           String sql =" INSERT into [UAB Vilandra$EDI Order Line] ([Entry No_], [Line No_], [Order No_] ,[Source Line No_],[Item No_],[Quantity] ,[Discount %], " +
  " [Unit Price With Disc_(no Act_)],[EAN],[Customer Item No_],[Item Description],[Unit of Measure],[Customer Unit of Measure],[Unit Price], " +
  " [EDI Pack Size],[Blocked],[Comment],[Modification User],[Modification Date],[Modification Time],[Action Discount %],[Additional Fee]  " +
- " ,[Action Discount Amount], [Shipped Quantity],[Amount],[VAT Amount],[VAT %],[Amount Including VAT],[Dimension (PADALINYS)],[Dimension (KODUKAI)],[Dimension (TINKLAS)],[Dimension (ZENKLAS)])   " +
+ " ,[Action Discount Amount], [Shipped Quantity],[Amount],[VAT Amount],[VAT %],[Amount Including VAT],[Dimension (PADALINYS)],[Dimension (KODUKAI)],[Dimension (TINKLAS)],[Dimension (ZENKLAS)]"
+ + ",[Dimension (OBJEKTAS)])   " +
  "  values("+salesid+","+ counter + ",'" +  order.getDokNr() + "',"+ counter + ",'"+itemid+"'," +
              		+kogus+"," + discount + ",0.0,'','','','','',0.0, 0,'','',''," +
-             				"cast ('1753-01-01 00:00:00.000' as datetime),cast('1754-01-01 00:00:00.000' as datetime),0,'',0,0,0,0,0,0,'','','','')";
+             				"cast ('1753-01-01 00:00:00.000' as datetime),cast('1754-01-01 00:00:00.000' as datetime),0,'',0,0,0,0,0,0,'','','','','')";
   
               log.info("SALES_LINE_SQL: " + sql);
               System.out.println(sql);
