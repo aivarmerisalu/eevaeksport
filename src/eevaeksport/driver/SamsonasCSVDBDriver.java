@@ -71,35 +71,30 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
        Vector result = new Vector();
 	         try {
 	          
-	        	 FileReader fr = new FileReader(getDir() + "Discount.csv");
+	        	 FileReader fr = new FileReader(getDir() + "PriceMatrix.csv");
 	             BufferedReader reader = new BufferedReader(fr);
 	           String line = null;
 	           reader.readLine();
 	            while((line = reader.readLine()) != null ){
 
-	                 line = line.replaceAll(";"," |");
+	                 line = line.replaceAll(";"," | ");
 	            	StringTokenizer st = new StringTokenizer(line, "|");
 
 	              if (st.hasMoreTokens()) {
-	            	
-//  Discount_ID;DiscountPercent;Is_Manual;DiscountDescribtion;ValidFrom;ValidTill;Priority;ProductCL3;Customer_ID
-                     st.nextToken();
-                  double percent = Double.parseDouble(st.nextToken().trim());
+	            	//System.out.println( line );
+//  00012;;00012;0019D;;;7.6;;
                      st.nextToken();
                      st.nextToken();
-                  String sdate =  st.nextToken().trim() ;
-   	              String edate = st.nextToken().trim();
-   	                 st.nextToken();
-   	             String prodGroup = st.nextToken().trim();
-	             String custID = st.nextToken().trim();
-	             String clGroup = null;
-	             String prodID = null;
-	            
+                     
+                     String clGroup = st.nextToken().trim();
+                     String prodID = st.nextToken().trim();
+                     st.nextToken();
+                     st.nextToken();
+                     double price = Double.parseDouble(st.nextToken().trim());
+                     String sdate =  st.nextToken().trim();
+   	                 String edate = st.nextToken().trim();
+   	            
 	             MatrixLine mline = new MatrixLine();
-
-	             if (custID != null && custID.length() > 0) {
-	               mline.setCustID(custID);
-	             }
 	             if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
 	               mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
 	             }
@@ -113,15 +108,13 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	             if (prodID != null && prodID.length() > 0) {
 	               mline.setProdID(prodID);
 	             }
-	             if (mline.getProdID() == null &&  prodGroup != null && prodGroup.trim().length() > 0) {
-	               mline.setDiscGroup(prodGroup.trim());
-	             }
+	            
 
-	             if (percent != 0) {
-	                 mline.setDiscount(percent);
+	             if (price != 0) {
+	                 mline.setPrice(price);
                  }
 	             
-	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
+	             if(mline.getPrice() > 0 ){
 	                 result.add(mline);    
 	               }
 	             }
@@ -130,9 +123,10 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	            reader.close();
 	            fr.close();
 	         }catch(Exception e){
-	        //	 e.printStackTrace();
+	         e.printStackTrace();
 	         }
 		
+	        // System.out.println(result.toString());
 	    return result;
 	      }
 
@@ -168,18 +162,6 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
        return null;
        }
 
-  private Date getDate(String mmddyy){//2008-12-31 00:00:00
-  	long lon = 0;
-  	Calendar cal = Calendar.getInstance();
-    cal.set(Calendar.YEAR, Integer.parseInt(mmddyy.trim().substring(0, 4)));
-    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.trim().substring(5, 7))-1);
-    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.trim().substring(8, 10)));
-  
-   Date date = new Date(lon);
-   date.setTime(cal.getTimeInMillis());
-//   System.out.println(mmddyy + " " + date.toLocaleString() + " xxx " + mmddyy.trim().substring(0, 4) + " " + Integer.parseInt(mmddyy.trim().substring(5, 7)));  //05.02.14
-  return date;
-  }
 
 
 
@@ -220,9 +202,31 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 		             String groupcode = st.nextToken().trim();
 		             String parentgroupcode = st.nextToken().trim();
 		             String name = st.nextToken().trim();
-		        	 
-		        	 
-		        	 tm.put(Converter.cleanLitLatEst(parentgroupcode), Converter.enCodeEst(name));
+		             
+		          
+		             if (parentgroupcode.equals("15")) {
+		        		 name = "PaDeLe " + name;
+		        	 }
+		             if (parentgroupcode.equals("3")) {
+		        		 name = "PaDeRo " + name;
+		        	 }
+
+		        	 if (parentgroupcode.equals("4")) {
+		        		 name = "SaruDe " + name;
+		        	 }
+		        	 if (parentgroupcode.equals("11")) {
+		        		 name = "SaruGa " + name;
+		        	 }
+		        	 if (parentgroupcode.equals("1")) {
+		        		 name = "ViDeRo " + name;
+		        	 }
+		        	 if (parentgroupcode.equals("2")) {
+		        		 name = "ViDeLe " + name;
+		        	 }
+		        	 if(name.length()> 2) {
+		        		 tm.put(Converter.cleanLitLatEst(parentgroupcode), Converter.enCodeEst(name));
+		 		        
+		        	 }
 		           }
 		         }
 	     reader.close();
@@ -248,7 +252,9 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-  
+     //getPriceMatrixData();
+     //getCustomerProductsList(null);
+   //  getDebt(null);
      try {
        FileReader fr = new FileReader(getDir() + "Agent.csv");
        BufferedReader reader = new BufferedReader(fr);
@@ -292,16 +298,118 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
        }
        
        
+       private Hashtable dueSums = new Hashtable();
+       private Hashtable usedCredit = new Hashtable();
+
+       
+       
+       private Date getDate(String mmddyy){
+    	  	long lon = 0;
+    	  	Calendar cal = Calendar.getInstance();
+    	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
+    	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(4, 6))-1);
+    	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(6, 8)));
+    	  // System.out.println(cal.getTime()); 
+    	   Date date = new Date(lon);
+    	   date.setTime(cal.getTimeInMillis());
+    	    return date;
+    		
+    	  }
+      
+       
+       private boolean isDueDate(String yyyymmdd){
+    	  	
+    	  	Calendar cal = Calendar.getInstance();
+    	  	if( yyyymmdd.trim().length() == 0 ) {
+    	  		return false;
+    	  	 }
+    	  
+    	    cal.set(Calendar.YEAR, Integer.parseInt( yyyymmdd.substring(0, 4)));
+    	    cal.set(Calendar.MONTH, Integer.parseInt(yyyymmdd.substring(4, 6))-1);
+    	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(yyyymmdd.substring(6, 8)));
+    		Calendar ca = Calendar.getInstance();
+    		ca.add(Calendar.DAY_OF_YEAR, -1);
+    		
+    		if(cal.before(ca)){
+    			return true;
+    		}else{
+    			return false;
+    		}
+    		
+    	  }
 
 
    public TreeMap getCustomers(Agent agent){
      TreeMap tm = new TreeMap();
+     
 
      try {
-
-	 FileReader fr = new FileReader(getDir() + "Customer.csv");
+     FileReader fr = new FileReader(getDir() + "DebtList.csv");
 	 BufferedReader reader = new BufferedReader(fr);
-     String line = null;
+	 reader.readLine();
+	 
+	 String line = null;
+	 
+     while((line = reader.readLine()) != null){
+    	 
+    	 line = line.replaceAll(";"," |");
+        StringTokenizer st = new StringTokenizer(line, "|");
+           	while (st.hasMoreTokens()){
+     	//DocumentNo;DocDate;PayDate;OpenAmount;CustomerCode;PayerCode	
+           		String number = st.nextToken().trim();
+           		String date = st.nextToken().trim();
+           		String duedate = st.nextToken().trim();
+           		String volg = st.nextToken().trim();
+           		String custid = st.nextToken().trim();
+     			String payer = st.nextToken().trim();
+	        	
+     		
+	        
+		        //	System.out.println(custid  + " " + number + " " + date  + " " + duedate  + " " + volg );	
+		       
+	        
+	        		 double vv = Double.parseDouble(volg);
+	        		 if(vv != 0){
+	        			 if(isDueDate(duedate)){
+				        		     Debt dd = new Debt();
+				     				  dd.setCustID(custid);
+				     				  dd.setPayerID(payer);
+				     				  dd.setDoknr(number);
+				     				  dd.setDate(getDate(date));
+				     				  dd.setDuedate(getDate(duedate));
+				     				  
+				     				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
+				     				  dd.setDue(ff + "");
+				     				  dd.setSum(vv);
+				     				//	System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " +ff);	
+						        			  
+				     				  if(dueSums.get(payer) != null){
+				     					  double ss = Double.parseDouble(dueSums.get(payer) + "")+ vv ;
+				     					 dueSums.put(payer, ss);    
+				     				  }else{
+				     					 dueSums.put(payer, volg); 
+				     				  }
+				     				 debtList.add(dd);
+
+							        		
+				        	 }
+	        			 
+
+	     				  if(usedCredit.get(payer) != null){
+	     					  double ss = Double.parseDouble(usedCredit.get(payer) + "")+ vv ;
+	     					 usedCredit.put(payer, ss);    
+	     				  }else{
+	     					 usedCredit.put(payer, volg); 
+	     				  }
+	        			 
+	        		 }
+           	}
+     }
+     
+     
+	  fr = new FileReader(getDir() + "Customer.csv");
+	  reader = new BufferedReader(fr);
+      line = null;
      //Custcode	 CustName	PayerCode	Address	City	Post Code	DebtDue	SalespersonCode	Contact	PhoneNo	PaymentTerm	CreditLimit	UsedCredit	CustDiscount	Blocked
 
      line=reader.readLine();
@@ -366,24 +474,28 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
            
 
          if(payer.length() > 0){
-             customer.setPayer(payer);        	 
+             customer.setPayer(payer);  
+             if(dueSums.get(payer) != null) {
+            	 customer.setDebt(Double.parseDouble(dueSums.get(payer) +""));
+             }
+           
          }
-
+         
              
     	double limit = 0;
     	try{
     		limit = Double.parseDouble(crlimit);
-    		customer.setCredit(limit + "");	
+    		if(limit > 0) {
+    			customer.setCredit(limit + "");	
+      		  if(usedCredit.get(payer) != null) {
+               	 customer.setUsedCredit(Double.parseDouble(usedCredit.get(payer) +""));
+                }
+    		}
+    	
     	}catch(Exception e ){
     	}
     	
-        double used = 0;
-        try{
-    		used = Double.parseDouble(usedcredit);
-        	customer.setUsedCredit(used);
-        	
-    	}catch(Exception e ){
-    	}
+       
         
         if(payterm.length() > 0) {
         	customer.setPaymTerm(payterm);
@@ -417,7 +529,7 @@ private Hashtable prodNames = null;
           
     	
          String line = null;
-         TreeMap prods = new TreeMap();
+         
 		 FileReader fr = new FileReader(getDir() + "Product.csv");
 		 BufferedReader reader = new BufferedReader(fr);
 
@@ -426,9 +538,7 @@ private Hashtable prodNames = null;
         line = line.replaceAll(";"," |");
      
        StringTokenizer st = new StringTokenizer(line, "|");
-       int i = st.countTokens();
-
-  	 //Code		Description		Unit	incase	GroupCode	GroupSecCode	UnitPrice	EAN	Inventory	Pallet	Blocked
+      //Code		Description		Unit	incase	GroupCode	GroupSecCode	UnitPrice	EAN	Inventory	Pallet	Blocked
 
        if (st.hasMoreTokens()){
     	   String id = st.nextToken().trim();
@@ -461,7 +571,7 @@ private Hashtable prodNames = null;
 			 }
 			 
 			 if(description.length() > 0) {
-				 prod.setName(description);
+				 prod.setName(description + " "+ id);
 			 
 	
 				 if(Double.parseDouble(unitprice) > 0) {
@@ -471,6 +581,8 @@ private Hashtable prodNames = null;
 				 if(ean.length() > 0) {
 					 prod.setEAN(ean);
 				 }
+				 
+				 prod.setVat("21");
 				 tm.put(Converter.cleanLitLatEst(description + prod.getUnit()), prod);
 			 
 			 }
@@ -502,8 +614,37 @@ private Hashtable prodNames = null;
 
    public Vector getCustomerProductsList(String agentCode){
 	   Vector custProds = new Vector();
-
+  try {
 	  
+     FileReader fr = new FileReader(getDir() + "CustomerProducts.csv");
+		 BufferedReader reader = new BufferedReader(fr);
+		 String line = null;
+      
+		 reader.readLine();
+      while(( line = reader.readLine()) != null ){
+    	  line = line.replaceAll(";"," |");
+    	   StringTokenizer st = new StringTokenizer(line, "|"); 
+    	 //  CustCode;ProductCode;Qty;LastDate;InvoiceNo;LastPrice
+    	   String custID = st.nextToken().trim();
+        	String prodID = st.nextToken().trim();
+			double sold = Double.parseDouble(st.nextToken().trim());							
+			String last = st.nextToken().trim();
+			String lastdoc = st.nextToken().trim();
+			double lastprice = Double.parseDouble(st.nextToken().trim());	
+			
+			CustProd cp = new CustProd(custID, prodID,
+					 sold, 0,0, last, lastprice, 0, 0, " ");
+	
+			cp.setAbiKood(lastdoc);
+			custProds.addElement(cp);
+      }
+      
+	  reader.close();
+  }catch(Exception e) {
+	  e.printStackTrace();
+  }
+	
+  //System.out.println(custProds.toString());
 	    return custProds;
 	  }
    
