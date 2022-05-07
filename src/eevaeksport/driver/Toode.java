@@ -51,6 +51,8 @@ public class Toode {
     sb.append("\tplanvol = " + planvol + "\n");
     sb.append("\tdonevol = " + donevol + "\n");
     sb.append("\tbrand = " + brand + "\n");
+    sb.append("\tgr1 = " + this.gr1 + "\n");
+    sb.append("\tgr2 = " + this.gr2 + "\n");
     
     return sb.toString();
   }

@@ -2,6 +2,7 @@ package eevaeksport.driver;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,6 +27,14 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import ee.mobilejava.wrapper.DefectiveLineWrapper;
 import ee.mobilejava.wrapper.DefectiveWrapper;
@@ -65,7 +74,79 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    	return null;
    }
    
-   
+   private Hashtable readPlans(){
+		Hashtable hh = new Hashtable();
+		  File f = new File(this.getExcelDir() + "MeatPlan.xlsx");
+		  try {
+				FileInputStream ff = new FileInputStream(f);
+				XSSFWorkbook workbook = new XSSFWorkbook((ff));
+				
+				int currMont = Calendar.getInstance().get(Calendar.MONTH)+1;
+				int currYear = Calendar.getInstance().get(Calendar.YEAR);
+				String sh = currYear + "" + currMont;
+				
+				if((currMont+"").length() == 1) {
+					sh = currYear + "0" + currMont;
+				  }
+				
+				 DataFormatter formatter = new DataFormatter();
+					
+				
+				XSSFSheet sheet = workbook.getSheet(sh);
+				XSSFRow row = null;
+				for (int i = 1; i < sheet.getLastRowNum(); i++) {
+					row = sheet.getRow(i);
+					String agentID = formatter.formatCellValue(row.getCell(0));
+					String meatGroup = formatter.formatCellValue(row.getCell(3));
+					
+					String sum = "";
+					String sumkg = "";
+
+					    try {sum = (row.getCell((short) 4).getStringCellValue());
+						} catch (Exception e) {
+							try { sum = (int) (row.getCell((short) 4).getNumericCellValue()) + "";	
+						} catch (Exception u) {}}
+						
+						try {sumkg = (row.getCell((short) 5).getStringCellValue());
+						} catch (Exception e) {
+							try { sumkg = (int) (row.getCell((short) 5).getNumericCellValue()) + "";	
+						} catch (Exception u) {}}
+						
+				
+						
+						if(agentID != null && agentID.trim().length() > 0){
+						
+							if(meatGroup != null && meatGroup.trim().length() > 0){
+								System.out.println(agentID + " " + meatGroup + " " + sum + " " + sumkg );
+								Toode tt = new Toode(agentID);
+								tt.setGr1(meatGroup);
+								
+								if(sum != null && sum.length() > 0) {
+									tt.setDonecur(Double.parseDouble(sum));
+								}
+								if(sumkg != null && sumkg.length() > 0) {
+									tt.setDonevol(Double.parseDouble(sumkg));
+								}
+							if(tt.getDonevol() > 0 || tt.getDonecur() > 0 ) {
+								ArrayList arr = new ArrayList();
+								if(hh.get(agentID) != null) {
+									arr = (ArrayList) hh.get(agentID);
+								}
+								  arr.add(tt);
+				                    hh.put(agentID, arr);
+							}
+							    
+				                    
+				                    
+							}}}
+		  
+		  } catch (Exception d) {
+				// System.out.println(row.getCell((short)a).getNumericCellValue());
+			}
+		  System.out.println(" plans " + hh.toString());
+		return hh;
+	}
+
 
    public Vector getPriceMatrixData(){
        Vector result = new Vector();
@@ -252,9 +333,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-     //getPriceMatrixData();
-     //getCustomerProductsList(null);
-   //  getDebt(null);
+  
      try {
        FileReader fr = new FileReader(getDir() + "Agent.csv");
        BufferedReader reader = new BufferedReader(fr);
@@ -700,7 +779,8 @@ public void setNF(NumberFormat nf) {
    */
   public void setBulkSales(Map agents) {
 
-  	
+	 Hashtable plans =  readPlans();
+	 
   		 
   		  String[] list = new File(getDir()).list();
 	        for(int u = 0 ; u < list.length ; u++){

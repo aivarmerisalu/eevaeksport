@@ -7,6 +7,7 @@ package eevaeksport.imp.driver;
 
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -14,6 +15,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -55,6 +58,79 @@ public class SamsonasCSVImportDriver
     }
   }
 
+  
+  private Vector splitOrder (Order order){
+	  Vector result = new Vector();
+      
+	 System.out.println("Enne suurus splitti" + order.getOrderLines().size());
+	
+	  Order ord23 = new Order(order.getCompany(),order.getAgentFirstName());
+	  Order ordOTB = new Order(order.getCompany(),order.getAgentFirstName());
+    
+	  ord23.setAgentCode(order.getAgentCode());
+	  ord23.setDokNr(order.getDokNr());
+	  ord23.setInfo(order.getInfo());
+	  ord23.setReference(order.getReference());
+	  ord23.setTeostaja((order.getTeostaja()));
+	  ord23.setChanged(order.isChanged());
+	  ord23.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord23.setStatus(order.getStatus());
+	  ord23.setShipTime(order.getShipTime());
+	  ord23.setShipDateUsed(order.isShipDateUsed());
+	  ord23.setWarehouse(order.getWarehouse());
+	  ord23.setCurrency("MEAT");
+	  
+	
+
+	  ordOTB.setAgentCode(order.getAgentCode());
+	  ordOTB.setDokNr(order.getDokNr());
+	  ordOTB.setInfo(order.getInfo());
+	  ordOTB.setReference(order.getReference());
+	  ordOTB.setTeostaja((order.getTeostaja()));
+	  ordOTB.setChanged(order.isChanged());
+	  ordOTB.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordOTB.setStatus(order.getStatus());
+	  ordOTB.setShipTime(order.getShipTime());
+	  ordOTB.setShipDateUsed(order.isShipDateUsed());
+	  ordOTB.setWarehouse(order.getWarehouse());
+	  ordOTB.setCurrency("VEGE");
+	  
+	
+	
+	//  System.out.println("Splitin Warehouse " + order.getWarehouse());
+	  
+	  Vector lines = order.getOrderLines();
+	  Enumeration enums = lines.elements();
+	  while  (enums.hasMoreElements()){
+		  OrderLine lin = (OrderLine)enums.nextElement();
+		
+		     String itemid = lin.getToode();
+		  
+		    	 if(itemid != null) {
+		    	
+		    	 if(itemid.startsWith("OTB") ){
+			    	 ordOTB.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+			     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		          }else {
+		        	  ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+				     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+			          } 
+		     } 
+	  }
+
+	  if(ord23.getOrderLines() != null && ord23.getOrderLines().size()>0){
+		  result.add(ord23);  
+	  }
+
+	  if(ordOTB.getOrderLines() != null && ordOTB.getOrderLines().size()>0){
+		  result.add(ordOTB);  
+	  }
+//	 System.out.println("Result =" +order.getDokNr()
+	//		 + " "+ result.size());
+	 //System.exit(0);
+	  return result ;
+  }
+
 
   public String identifyCustomer(String id,String regnr) throws SQLException {
     return null;
@@ -70,8 +146,29 @@ public class SamsonasCSVImportDriver
   public void makeOrder(Order order) throws SQLException{
 
 	  counter = 0;
-	  makeOutput(order); 	    
+	  makeOutput(order,true); 	    
 	  setNumAddedLines(counter);
+	  Vector splitted =  new Vector(); //splitOrder(order);
+      
+	  Enumeration en = splitted.elements();
+	  while(en.hasMoreElements()){
+		  Order ord = (Order)en.nextElement();
+		  
+	       boolean tagastus = false;
+	         Vector lin = order.getOrderLines();
+	         for (int i = 0; i < lin.size(); i++) {
+	        	 OrderLine line = (OrderLine)lin.elementAt(i);
+	        	 if(line.getKogus() < 0 ) {
+	        		 tagastus = true;
+	        	 }
+	         }
+	
+	    if(ord.getCurrency().equals("MEAT")){
+                  makeOutput(ord,true);  
+               } else {
+   				  makeOutput(ord,false);  
+   			  }
+          } 
 
   }
 
@@ -79,12 +176,7 @@ public class SamsonasCSVImportDriver
    
   private String getDateString(Calendar cal){
 	    StringBuffer sb = new StringBuffer();
-	 //yy/mm/dd
-	  
-
-	
-	    sb.append((cal.get(Calendar.YEAR) + "").substring(2)+ "/");
-	    
+	     sb.append((cal.get(Calendar.YEAR) + "").substring(2)+ "/");
 	    String month = String.valueOf(cal.get(Calendar.MONTH) + 1);
 	    if (month.length() == 1){
 	      sb.append("0");
@@ -101,7 +193,7 @@ public class SamsonasCSVImportDriver
 
 
   
-  private void makeOutput(Order order){
+  private void makeOutput(Order order , boolean meat){
 	 	StringBuffer sb = new StringBuffer();
 	 	boolean minus = false;
 	 	try {
