@@ -10190,8 +10190,17 @@ client.close();
 			  				problems++;
 			  			}
 			  			
-			  			if(filterOutOfStock.equals("999")){
+			  			if(filterOutOfStock.startsWith("999")){
 			  				oos=true;
+			  				String res2 = "";
+			  				try {
+			  					if((String)cob.get("resstr2") != null) {
+				  					res2 = (String)cob.get("resstr2");
+				  				}
+			  				}catch(Exception e) {
+			  					
+			  				}
+			  			
 			  				worksheetOOS.createRow(outofstocks);
 			  				worksheetOOS.getRow(outofstocks).createCell(0).setCellValue((String)cob.get("agentid"));
 			  				worksheetOOS.getRow(outofstocks).createCell(1).setCellValue(agid);
@@ -10200,9 +10209,9 @@ client.close();
 			  				worksheetOOS.getRow(outofstocks).createCell(4).setCellValue((String)cob.get("custname"));
 			  				worksheetOOS.getRow(outofstocks).createCell(5).setCellValue(dateOnly);
 			  				worksheetOOS.getRow(outofstocks).createCell(6).setCellValue(timeOnly);
-			  				worksheetOOS.getRow(outofstocks).createCell(7).setCellValue((String)cob.get("resstr2"));
+			  				worksheetOOS.getRow(outofstocks).createCell(7).setCellValue(res2);
 			  				worksheetOOS.getRow(outofstocks).createCell(8).setCellValue((String)cob.get("prodname"));
-			  				worksheetOOS.getRow(outofstocks).createCell(9).setCellValue((String)cob.get(""));
+			  				worksheetOOS.getRow(outofstocks).createCell(9).setCellValue("");
 			  				worksheetOOS.getRow(outofstocks).createCell(10).setCellValue("");
 			  				
 			  				

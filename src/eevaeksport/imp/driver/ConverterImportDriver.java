@@ -334,7 +334,10 @@ private String company = "9998";
 	  if(asi.equals("772")){
 		  res = "F03627";//	P��sk�la SELVER 
 	  }
-	  
+  if(asi.equals("743")){
+		  
+		  res = "F03669";//	priisle SELVER 
+	  }
 	  
 	  if(asi.equals("592")){
 		  

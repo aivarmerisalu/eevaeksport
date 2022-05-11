@@ -452,7 +452,7 @@ public int getKgSales() {
  * @param kgSales The kgSales to set.
  */
 public void setKgSales(int kgSales) {
-	this.kgSales = kgSales;
+	this.kgSales = this.kgSales  + kgSales;
 }
 
 /**

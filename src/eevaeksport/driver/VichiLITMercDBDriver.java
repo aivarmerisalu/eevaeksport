@@ -454,27 +454,7 @@ public class VichiLITMercDBDriver extends AbstractDBDriver implements
 		Vector lines = new Vector();
 
 		
-		  boolean insertassort = true;
-          
-          try {
-        	  String sql = "SELECT sortdate from mj_assortment where  year(sortdate) = year(getdate()) and" +
-  	   		" month(sortdate) = month(getdate()) and day(sortdate) = day(getdate()) and country ='lt' ";
-        	 
-        	    Connection cons = this.getNewConnection();
-    	        Statement stmts = cons.createStatement();
-    	        ResultSet rss = stmts.executeQuery(sql);
-    	        if(rss.next()){
-    	        	insertassort = false;
-    	        }   
-    	        
-    	        rss.close();
-    	        stmts.close();
-    	        cons.close();
-    	        
-          }catch(Exception d){
-       	//   d.printStackTrace();
-          }
-    	
+	
 		
 		try {
 			String cmd = " select s.[Item No_] as toode,s.[Assortment Code] + s.[Assortment Level] as sortcode from" +
@@ -511,9 +491,7 @@ public class VichiLITMercDBDriver extends AbstractDBDriver implements
 						&& prodGroup.trim().length() > 0) {
 					mline.setProdGroup(prodGroup);
 				}
-			    if(insertassort){
-                    insertSortLine(mline);   
-                }
+			
 				lines.add(mline);
 			}
 
@@ -525,25 +503,6 @@ public class VichiLITMercDBDriver extends AbstractDBDriver implements
 		return lines;
 	}
 
-	   private void  insertSortLine(MatrixLine mline){
-			  try{
-					
-				      String sql = "INSERT INTO mj_assortment values (" +
-				         "'" + mline.getCustID() + "'," + 
-				         "getdate()," + 
-				         "'" + mline.getCliGroup() + "'," + 
-				         "'" + mline.getProdID() + "'," + 
-				         "0," + 
-				         "0,'','lt')" ;
-				  
-				  	     Connection  con2 = this.getNewConnection();      
-					     Statement stmt2 = con2.createStatement();
-					     stmt2.executeUpdate(sql);
-					     con2.close();
-			  }catch(Exception e){
-				  e.printStackTrace();
-			  }		  
-		  }
 	
 	public DealerProduct getDealerProductsList() {
 		return null;

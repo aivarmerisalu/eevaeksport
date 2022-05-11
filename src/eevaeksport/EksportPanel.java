@@ -1157,6 +1157,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("AxaAmberAT")
 					    || driver.getDriverVersion().equals("NaviValdo")
 					    || driver.getDriverVersion().equals("SamsonasCSV")
+					    || driver.getDriverVersion().equals("RivileTridens")
 	                	 )
                   
                   {
@@ -1257,6 +1258,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("AxaFazerLT")
 					    || driver.getDriverVersion().equals("AxaFazerLV")
 					    || driver.getDriverVersion().equals("SkaiteKM")
+					    || driver.getDriverVersion().equals("SamsonasCSV")
 					  ){
                 	 
                 	  System.out.println("Teen Fixi " + jsonDate(Calendar.getInstance().getTime()) );
@@ -1304,8 +1306,8 @@ public class EksportPanel extends JPanel implements ActionListener,
                 int sales = agent.getMonthSales();
                 int foodsales = agent.getMonthFoodSales();
                 int alcosales = agent.getMonthAlkoSales();
-                    int horeca = agent.getMonthHorecaSales();
-                    int offtrade = agent.getMonthOFFSales();
+                int horeca = agent.getMonthHorecaSales();
+                int offtrade = agent.getMonthOFFSales();
                 int salesvol = agent.getMonthSalesVol();
                 int salesvol3 = agent.getMonthSales3();
                 int saleskg = agent.getKgSales();

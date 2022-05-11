@@ -2440,7 +2440,10 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		if(getParent().getProps().getProperty("namepartend") != null){
 			namepartend = getParent().getProps().getProperty("namepartend");
 		}
-		
+		String noprods = null;
+		if(getParent().getProps().getProperty("noprods") != null){
+			noprods = getParent().getProps().getProperty("noprods");
+		}
 		
 		try {
 			
@@ -2782,6 +2785,15 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 														   goes = false;
 													   }
 												   }
+												   
+												   if(noprods != null) {
+													   if(noprods.contains(prod.getID().substring(0, prod.getID().length()-2))) {
+														   System.out.println("Nimi noprods " + prod.getName());
+														   goes = false;
+													   }
+												   }
+												   
+												   
 												   
 												   if(goes){
 													 //  System.out.println("Nimi " + prod.getName());

@@ -1166,7 +1166,7 @@ try{
      	String cmd = " SELECT [No_] AS toode,(t.[Description]) AS nimi, var.[Qty_ per Unit of Measure] as kordaja , pr.[Unit Price] AS myygihind, [Product Group Code] AS grupp,[Subgroup Code] AS grupp2 \r\n" + 
      			"     			     					,[Sales Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
      			"     			     						   vat.[Qty_ per Unit of Measure] AS kastis,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc  \r\n" + 
-     			"     			     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup  ,t.[Type] AS type FROM [VICIUNAI-POL$Item] t \r\n" + 
+     			"     			     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup  ,t. [Class Code] AS type FROM [VICIUNAI-POL$Item] t \r\n" + 
      			"     										  left join [VICIUNAI-POL$Sales Price] pr ON pr.[Item No_] = [No_] and pr.[Sales Code] = ''\r\n" + 
      			"     										  LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] vat ON (vat.[Item No_]=[No_] and vat.[Code]='KARTON' ) \r\n" + 
      			"											   LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] var ON var.[Item No_]=[No_] and var.[Code]=[Sales Unit of Measure]  \r\n" + 
@@ -1266,8 +1266,17 @@ try{
                  }
                  
                  String type = rs.getString("type");
-                 if(type != null && type.trim().length()>0){   
-                	 prod.setType(type.trim());
+                 if(type != null && type.trim().length()>0){  
+                	 if(type.startsWith("1")) {
+                		 prod.setType("Mrozone");
+                	 } 
+                	 if(type.startsWith("2")) {
+                		 prod.setType("Chlodzone"); 
+                	 }
+                	 if(type.startsWith("3")) {
+                		 prod.setType("Other"); 
+                	 }
+                	
                  }
                  
                  
@@ -1283,8 +1292,6 @@ try{
                 
                    
                   
-                   
-              
                   
              
                  

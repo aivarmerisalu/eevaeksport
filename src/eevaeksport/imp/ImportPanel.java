@@ -9906,6 +9906,9 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 		if (fil.equals("897")) {
 			return "Pärnu Delice";
 		}
+		if (fil.equals("743")) {
+			return "Priisle Selver";
+		}
 		if (fil.equals("4402")) {
 			return "Kadaka Selver Teine korrus";
 		}

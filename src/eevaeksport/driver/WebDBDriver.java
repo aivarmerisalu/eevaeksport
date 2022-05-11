@@ -238,6 +238,7 @@ public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discoun
 	  	algus.set(Calendar.HOUR, 0);
 	  	lopp.set(Calendar.HOUR, 23);
 	  	lopp.set(Calendar.MINUTE, 59);
+	  	lopp.add(Calendar.DATE, +1);
 	  
 	  ArrayList<String> arr = Converter.createExcelProductProblemsOosReport(algus, lopp, this.getExcelDir(), rcompany, user, pass);
 	  System.out.println(arr);

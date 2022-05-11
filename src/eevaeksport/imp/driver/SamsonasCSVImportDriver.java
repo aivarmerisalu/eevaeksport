@@ -6,7 +6,9 @@
 package eevaeksport.imp.driver;
 
 
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -18,11 +20,15 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 
+import eevaeksport.Agent;
+import eevaeksport.Product;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -61,7 +67,9 @@ public class SamsonasCSVImportDriver
   
   private Vector splitOrder (Order order){
 	  Vector result = new Vector();
-      
+      if(prods == null) {
+    	  this.getProducts();
+      }
 	 System.out.println("Enne suurus splitti" + order.getOrderLines().size());
 	
 	  Order ord23 = new Order(order.getCompany(),order.getAgentFirstName());
@@ -106,14 +114,18 @@ public class SamsonasCSVImportDriver
 		
 		     String itemid = lin.getToode();
 		  
-		    	 if(itemid != null) {
-		    	
-		    	 if(itemid.startsWith("OTB") ){
+		    	 if(itemid != null && prods.get(itemid) != null) {
+		    	  
+		          Product pr = (Product)  prods.get(itemid);
+		    		 
+		    	  if(pr.getGroup().startsWith("2") ){
 			    	 ordOTB.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-		          }else {
-		        	  ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-				     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		              }
+		    	 
+		    	  if(pr.getGroup().startsWith("1") ){
+		        	ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+				     		 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
 			          } 
 		     } 
 	  }
@@ -139,29 +151,29 @@ public class SamsonasCSVImportDriver
  
   public String identifyProduct(String ean, String prodID) throws SQLException{
      return prodID;
-  }
+    }
 
 
   
   public void makeOrder(Order order) throws SQLException{
 
 	  counter = 0;
-	  makeOutput(order,true); 	    
-	  setNumAddedLines(counter);
-	  Vector splitted =  new Vector(); //splitOrder(order);
+	//  makeOutput(order,true); 	    
+	
+	  Vector splitted =  splitOrder(order);
       
 	  Enumeration en = splitted.elements();
 	  while(en.hasMoreElements()){
 		  Order ord = (Order)en.nextElement();
 		  
-	       boolean tagastus = false;
+	   /*    boolean tagastus = false;
 	         Vector lin = order.getOrderLines();
 	         for (int i = 0; i < lin.size(); i++) {
 	        	 OrderLine line = (OrderLine)lin.elementAt(i);
 	        	 if(line.getKogus() < 0 ) {
 	        		 tagastus = true;
 	        	 }
-	         }
+	         }*/
 	
 	    if(ord.getCurrency().equals("MEAT")){
                   makeOutput(ord,true);  
@@ -169,10 +181,88 @@ public class SamsonasCSVImportDriver
    				  makeOutput(ord,false);  
    			  }
           } 
-
+	  
+	  setNumAddedLines(counter);
   }
 
+  private TreeMap prods = null;
   
+  public void getProducts(){
+	     prods = new TreeMap();
+	     	     try {
+	         String line = null;
+	         
+			 FileReader fr = new FileReader(parent.getProps().getProperty("readin") + "Product.csv");
+			 BufferedReader reader = new BufferedReader(fr);
+
+	        reader.readLine();
+	        while(( line = reader.readLine()) != null ){
+	        line = line.replaceAll(";"," |");
+	     
+	       StringTokenizer st = new StringTokenizer(line, "|");
+	      //Code		Description		Unit	incase	GroupCode	GroupSecCode	UnitPrice	EAN	Inventory	Pallet	Blocked
+
+	       if (st.hasMoreTokens()){
+	    	   String id = st.nextToken().trim();
+	    	   String description = st.nextToken().trim();
+	    	   String unit = st.nextToken().trim();
+	    	   String incase = st.nextToken().trim();
+	    	   String groupcode = st.nextToken().trim();
+	    	   String groupcodesec = st.nextToken().trim();
+	    	   String unitprice = st.nextToken().trim();
+	    	   String ean = st.nextToken().trim();
+	    	   String inventory = st.nextToken().trim();
+
+	    	   Product prod = new Product(id);
+	    	   //System.out.println(description);
+
+				 if(Double.parseDouble(inventory) > 1) {
+					 prod.setStock(Double.parseDouble(inventory));
+				 }
+				 
+				 if(Double.parseDouble(incase) > 1) {
+					 prod.setInCases(Double.parseDouble(incase));
+				 }
+				 
+				 if(unit.length() > 0) {
+					 prod.setUnit(unit);
+				 }
+				 
+				 if(groupcode.length() > 0) {
+					 prod.setGroup(groupcode);
+				 }
+				 
+				 if(description.length() > 0) {
+					 prod.setName(description + " "+ id);
+				 
+		
+					 if(Double.parseDouble(unitprice) > 0) {
+						 prod.setPrice(Double.parseDouble(unitprice));
+					 }
+					 
+					 if(ean.length() > 0) {
+						 prod.setEAN(ean);
+					 }
+					 
+					 prod.setVat("21");
+					 prods.put(prod.getID(), prod);
+				 
+				 }
+				 
+				 
+				 
+
+	         }
+	       }
+	        
+	        reader.close();
+	     } catch (Exception e){
+	       e.printStackTrace();
+	     }
+	     
+	     
+	   }
+
    
   private String getDateString(Calendar cal){
 	    StringBuffer sb = new StringBuffer();
@@ -192,6 +282,7 @@ public class SamsonasCSVImportDriver
 	  
 
 
+  
   
   private void makeOutput(Order order , boolean meat){
 	 	StringBuffer sb = new StringBuffer();
@@ -291,8 +382,12 @@ quantity
 	      
 	      setNumAddedLines(counter); 
 
+	      String vahe = "meat/";
+	      if(!meat) {
+	    	  vahe = "vege/";
+	      }
 	    
-	         	  String fileName = Converter.escapeXML(parent.getProps().getProperty("conv.dir")) +  "t-" + order.getAgent() +"."+ order.getCompany()+"." +fn  + ".csv";
+	         	  String fileName = Converter.escapeXML(parent.getProps().getProperty("conv.dir"))+ vahe +  "t-" + order.getAgent() +"."+ order.getCompany()+"." +fn  + ".csv";
 			      System.out.println(fileName);		
 			      if(minus){
 			    	//  fileName = escape(parent.getProps().getProperty("conv.dir2")) +  "t-" + order.getAgent() +"."+ order.getCompany()+"." +fn  + ".csv";

@@ -85,6 +85,9 @@ public double getDonevol() {
 public void setDonevol(double donevol) {
 	this.donevol = donevol;
 }
+public void addDonevol(double kogus){
+    this.donevol = this.donevol + kogus;
+  }
 
 public double getPlancur() {
 	return plancur;
@@ -97,6 +100,10 @@ public void setPlancur(double plancur) {
 public double getDonecur() {
 	return donecur;
 }
+
+public void addDonecur(double kogus){
+    this.donecur = this.donecur + kogus;
+  }
 
 public void setDonecur(double donecur) {
 	this.donecur = donecur;

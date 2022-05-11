@@ -720,8 +720,10 @@ String ex = parent.getProps().getProperty("products");
         prod.setName(Converter.enCodeEst(nimetus));
 
         prod.setInCases( (rs.getDouble("tykke")));
-        prod.setPrice( (rs.getDouble("hind")));
+        Double hh = rs.getDouble("hind");
+        prod.setPrice(hh);
         prices.put(kood, prod.getPrice() +"");
+        prod.setPriceSecond(hh);
         String grupp = rs.getString("grupp") ;
          if (grupp != null && grupp.trim().length()>0) {
            prod.setGroup(grupp.trim());

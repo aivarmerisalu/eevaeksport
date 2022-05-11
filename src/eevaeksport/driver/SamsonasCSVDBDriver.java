@@ -117,17 +117,17 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 						if(agentID != null && agentID.trim().length() > 0){
 						
 							if(meatGroup != null && meatGroup.trim().length() > 0){
-								System.out.println(agentID + " " + meatGroup + " " + sum + " " + sumkg );
+							//	System.out.println(agentID + " " + meatGroup + " " + sum + " " + sumkg );
 								Toode tt = new Toode(agentID);
 								tt.setGr1(meatGroup);
 								
 								if(sum != null && sum.length() > 0) {
-									tt.setDonecur(Double.parseDouble(sum));
+									tt.setPlancur(Double.parseDouble(sum));
 								}
 								if(sumkg != null && sumkg.length() > 0) {
-									tt.setDonevol(Double.parseDouble(sumkg));
+									tt.setPlanvol(Double.parseDouble(sumkg));
 								}
-							if(tt.getDonevol() > 0 || tt.getDonecur() > 0 ) {
+							if(tt.getPlanvol() > 0 || tt.getPlancur() > 0 ) {
 								ArrayList arr = new ArrayList();
 								if(hh.get(agentID) != null) {
 									arr = (ArrayList) hh.get(agentID);
@@ -143,7 +143,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 		  } catch (Exception d) {
 				// System.out.println(row.getCell((short)a).getNumericCellValue());
 			}
-		  System.out.println(" plans " + hh.toString());
+		//  System.out.println(" plans " + hh.toString());
 		return hh;
 	}
 
@@ -212,6 +212,75 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	      }
 
    
+   public Hashtable readCustSales(){
+	   
+	   Hashtable result = new Hashtable();
+	   agGrSales = new Hashtable();
+	   this.getCustomers(null);
+	         try {
+	          
+	        	 FileReader fr = new FileReader(getDir() + "CustomerSales.csv");
+	             BufferedReader reader = new BufferedReader(fr);
+	           String line = null;
+	           reader.readLine();
+	            while((line = reader.readLine()) != null ){
+
+	                 line = line.replaceAll(";"," | ");
+	            	StringTokenizer st = new StringTokenizer(line, "|");
+
+	              if (st.hasMoreTokens()) {
+  
+                     String custid = st.nextToken().trim();
+                     String group = st.nextToken().trim();
+                     double saleskg = Double.parseDouble(st.nextToken().trim());
+                     double saleseur = Double.parseDouble(st.nextToken().trim());
+                     Toode tt = new Toode(custid);
+                     tt.setGr1(group);
+                     tt.setDonecur(saleseur);
+                     tt.setDonevol(saleskg);
+                     ArrayList arr = new ArrayList();
+                     if(result.get(custid) != null) {
+                    	 arr = (ArrayList)result.get(custid);
+                     }
+                     arr.add(tt);
+                     result.put(custid, arr);
+                    
+   	               
+                    if (custAgents.get(custid) != null){
+                    	ArrayList arrag =  (ArrayList)custAgents.get(custid) ;
+                    	for(int u = 0; u< arrag.size(); u++ ) {
+                    		String agg = (String)arrag.get(u);
+                    		
+                    		TreeMap tree = new TreeMap();
+                        	if(agGrSales.get(agg) != null) {
+                        		tree = (TreeMap)agGrSales.get(agg);
+                        	}
+                        	Toode dd = new Toode(agg);
+                             if(tree.get(group) != null) {
+                            	 dd = (Toode)tree.get(group) ;
+                             }
+                        	dd.addDonecur(saleseur);
+                        	dd.addDonevol(saleskg);
+                        	tree.put(group, dd);
+                        	agGrSales.put(agg, tree);
+                    	}
+                      }
+	       
+	             }
+	            }
+	            
+	            reader.close();
+	            fr.close();
+	         }catch(Exception e){
+	         e.printStackTrace();
+	         }
+		
+	        // System.out.println(result.toString());
+	    return result;
+	      }
+
+   Hashtable agGrSales = null;
+   Hashtable custAgents = null;
 
 
    public ManagerData getManagerData() throws SQLException{
@@ -331,9 +400,10 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    private Hashtable custagents = new Hashtable();
    private String teamx = null;
    
+   
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-  
+     agents = new TreeMap();
      try {
        FileReader fr = new FileReader(getDir() + "Agent.csv");
        BufferedReader reader = new BufferedReader(fr);
@@ -356,7 +426,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
               agent.setObject(objekt);
             }
                 tm.put(agent.getName(), agent);	
-      
+                agents.put(agent.getID(), agent);
           }
         }
       }
@@ -366,6 +436,8 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
      } catch (Exception e){
        e.printStackTrace();
      }
+     
+  
      return tm;
    }
 
@@ -420,7 +492,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 
    public TreeMap getCustomers(Agent agent){
      TreeMap tm = new TreeMap();
-     
+     custAgents = new Hashtable();
 
      try {
      FileReader fr = new FileReader(getDir() + "DebtList.csv");
@@ -535,6 +607,12 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
            
            if(agentcode.length() > 0) {
         	   customer.addAgent(new Agent(agentcode));
+        	   ArrayList arr = new ArrayList();
+        	   if(custAgents.get(customer.getID()) != null) {
+        		   arr = (ArrayList) custAgents.get(customer.getID());
+        	   }
+        	   arr.add(agentcode);
+        	   custAgents.put(customer.getID(), arr);
            }
            
            
@@ -554,6 +632,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 
          if(payer.length() > 0){
              customer.setPayer(payer);  
+             customer.addFixSortCode(payer);
              if(dueSums.get(payer) != null) {
             	 customer.setDebt(Double.parseDouble(dueSums.get(payer) +""));
              }
@@ -780,49 +859,173 @@ public void setNF(NumberFormat nf) {
   public void setBulkSales(Map agents) {
 
 	 Hashtable plans =  readPlans();
-	 
-  		 
-  		  String[] list = new File(getDir()).list();
-	        for(int u = 0 ; u < list.length ; u++){
-			  String fname = list[u];
-			  
-		if(fname.indexOf("ManagerSales") != -1 && fname.indexOf((String)dates.get("ManagerSales")) != -1){
-			 try {
-        FileReader fr = new FileReader(getDir() + fname);
-         BufferedReader reader = new BufferedReader(fr);
-         String line = null;
-         
-    line=reader.readLine();
-    while((line = reader.readLine()) != null){
-       line = line.replaceAll(";"," |");
-     
-       StringTokenizer st = new StringTokenizer(line, "|");
-        if (st.hasMoreTokens()){
-        	 String agentID = st.nextToken().trim();
-          double sales = Double.parseDouble(st.nextToken().trim());
-          double volume = Double.parseDouble(st.nextToken().trim());
-               
-        //  System.out.println("nnn " + sales + " " + volume + " " + agentID + ".");
+	if( agGrSales == null) {
+		readCustSales();
+	}
+	
+	 int d1 = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+     int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+
+	TreeMap plandone = new TreeMap();
+	
+	Enumeration enume =  agGrSales.keys();
+  	 while(enume.hasMoreElements()) {
+               String agentID = (String)enume.nextElement();
+               TreeMap tree  = (TreeMap)agGrSales.get(agentID);
+               Iterator itera =   tree.keySet().iterator();
+                while(itera.hasNext()) {
+            	  String grid = (String)itera.next();
+                 Toode dd = (Toode)tree.get(grid);
                  Agent agent = (Agent)agents.get(agentID);
                  if (agent != null){
-                   agent.setMonthSales((int)(sales));
-                   agent.setKgSales((int)volume);
-            }
-         }
-      }
-    reader.close();
-    fr.close();
-      } catch (IOException e){
-        e.printStackTrace();
-      }
-  	
-			}
-		        }
+                   agent.setMonthSales((int)(dd.getDonecur()));
+                   agent.setKgSales((int)dd.getDonevol());
+                   
+                   TreeMap hh = new TreeMap();
+                   if(plandone.get(agentID) != null) {
+                	   hh = (TreeMap) plandone.get(agentID);
+                   }
+                   
+                   if(grid.equals("1") || grid.equals("2") || grid.equals("3") || grid.equals("4") || grid.equals("5") 
+                		   || grid.equals("11") || grid.equals("15") ) {
+                	Toode yy = new Toode("Gaminiai");
+                	 if(  hh.get("Gaminiai") != null ) {
+                		 yy = (Toode)hh.get("Gaminiai");
+                	 }
+                	   yy.addDonecur(dd.getDonecur());
+                	   yy.addDonevol(dd.getDonevol());
+                	   hh.put("Gaminiai", yy);
+                   }
+            
+                   
+                   if(grid.equals("29") ) {
+                   	Toode yy = new Toode("Mar. gaminiai");
+                   	 if(  hh.get("Mar. gaminiai") != null ) {
+                   		 yy = (Toode)hh.get("Mar. gaminiai");
+                   	 }
+                   	   yy.addDonecur(dd.getDonecur());
+                   	   yy.addDonevol(dd.getDonevol());
+                   	   hh.put("Mar. gaminiai", yy);
+                      }
+                   
+               
+                   if( grid.equals("27") || grid.equals("24") || grid.equals("25") || grid.equals("14")
+                		   || grid.equals("12") || grid.equals("10") || grid.equals("9") || grid.equals("7") || grid.equals("6")) {
+                      	Toode yy = new Toode("Sv.Mesa");
+                      	 if(  hh.get("Sv.Mesa") != null ) {
+                      		 yy = (Toode)hh.get("Sv.Mesa");
+                      	 }
+                      	   yy.addDonecur(dd.getDonecur());
+                      	   yy.addDonevol(dd.getDonevol());
+                      	   hh.put("Sv.Mesa", yy);
+                         }
+                      
+                   plandone.put(agentID, hh);
+                  }
+               }
+      	    }
+  	 
+  Enumeration enume2 = plans.keys();
+  	 while(enume2.hasMoreElements()) {
+  		 String agid = (String)enume2.nextElement();
+  		  Agent agent = (Agent)agents.get(agid);
+  		  if(agent != null) {
+  			  TreeMap doneall = (TreeMap)plandone.get(agid);
+  			  ArrayList<Toode> pl = (ArrayList<Toode>)plans.get(agid);
+  			  
+  		for(Toode tt : pl) {
+  			
+  		  double kgplan = tt.getPlanvol();
+  		  double eurplan = tt.getPlancur();
+  		  double kgsold = 0;
+  		  double eursold = 0;
+  		  double estkg = 0;
+ 		  double esteur = 0;
+  		 
+  		//  System.out.println("rida " + agid + " " + kgplan + " " + eurplan + " " + tt.getGr1()+ "\n " + doneall.keySet().toString());
+  		  
+  		 if(doneall.get(tt.getGr1()) != null) {
+  			 Toode hhh = (Toode) doneall.get(tt.getGr1());
+  			   kgsold = hhh.getDonevol();
+  	   		   eursold = hhh.getDonecur();
+  	   	       double plaanitavMyykKG = d2 * kgsold/d1;
+			   estkg = plaanitavMyykKG/kgplan;
+			   double plaanitavMyykEUR = d2 * eursold/d1;
+			   esteur = plaanitavMyykEUR/eurplan;
+  		 }
+  		
+  		 String asi = tt.getGr1() +  (" Plan/Pard/Est% |") + (int)kgplan + "/" + (int)kgsold + "/"  +(int)(estkg*100) + "% kg|";
+  		  asi = asi + (int)eurplan + "/" + (int)eursold  + "/"  +(int)(esteur*100) + "% €| |";
+  		 agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
+  			
+  		}	
+  		}
+  	 }
+  		
+		        
   }
 
+  
+  
 public Vector getFixedAssortmentData() {	
-	return null;
+	  Vector result = new Vector();
+      try {
+       
+     	 FileReader fr = new FileReader(getDir() + "PriceMatrix.csv");
+          BufferedReader reader = new BufferedReader(fr);
+        String line = null;
+        reader.readLine();
+         while((line = reader.readLine()) != null ){
+
+              line = line.replaceAll(";"," | ");
+         	StringTokenizer st = new StringTokenizer(line, "|");
+
+           if (st.hasMoreTokens()) {
+         	//System.out.println( line );
+//00012;;00012;0019D;;;7.6;;
+              st.nextToken();
+              st.nextToken();
+              
+              String clGroup = st.nextToken().trim();
+              String prodID = st.nextToken().trim();
+              st.nextToken();
+              st.nextToken();
+              double price = Double.parseDouble(st.nextToken().trim());
+              String sdate =  st.nextToken().trim();
+                 String edate = st.nextToken().trim();
+            
+          MatrixLine mline = new MatrixLine();
+          if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
+            mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
+          }
+
+          if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
+         	 mline.setStartDate(sdate.substring(0,10));
+          }
+          if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
+         	 mline.setEndDate(edate.substring(0,10));
+          }
+          if (prodID != null && prodID.length() > 0) {
+            mline.setProdID(prodID);
+          }
+         
+
+              result.add(mline);    
+            
+          }
+         }
+         
+         reader.close();
+         fr.close();
+      }catch(Exception e){
+      e.printStackTrace();
+      }
+	
+     System.out.println("fixed " + result.toString());
+ return result;
 }
+
+
 @Override
 public String getStartingTime() {
 	// TODO Auto-generated method stub
