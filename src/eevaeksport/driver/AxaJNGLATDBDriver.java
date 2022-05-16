@@ -190,10 +190,11 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
 	              	if(!inpda.exists()){
 	                  	Converter.shrinkAndCopyFile(in,inpda,400);
-          	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-	                    	}
-          	  	          }  
+          	  
+          	  	          } 
+	                if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
+                		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+                	}
 	              	   }
 	                 }
 	               }

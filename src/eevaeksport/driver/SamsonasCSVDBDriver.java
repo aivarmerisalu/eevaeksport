@@ -716,6 +716,7 @@ private Hashtable prodNames = null;
 				 prod.setStock(Double.parseDouble(inventory));
 			 }
 			 
+			 
 			 if(Double.parseDouble(incase) > 1) {
 				 prod.setInCases(Double.parseDouble(incase));
 			 }
@@ -724,6 +725,9 @@ private Hashtable prodNames = null;
 				 prod.setUnit(unit);
 			 }
 			 
+			
+				 prod.setType(groupcode);
+			
 			 if(groupcodesec.length() > 0) {
 				 prod.setGroup(groupcodesec);
 			 }

@@ -118,12 +118,12 @@ public class SamsonasCSVImportDriver
 		    	  
 		          Product pr = (Product)  prods.get(itemid);
 		    		 
-		    	  if(pr.getGroup().startsWith("2") ){
+		    	  if(pr.getGroup().toLowerCase().startsWith("me") ){
 			    	 ordOTB.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
 		              }
 		    	 
-		    	  if(pr.getGroup().startsWith("1") ){
+		    	  if(pr.getGroup().toLowerCase().startsWith("ki") ){
 		        	ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     		 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
 			          } 
@@ -281,6 +281,23 @@ public class SamsonasCSVImportDriver
 	  }
 	  
 
+  private String getDateString2(Calendar cal){
+	    StringBuffer sb = new StringBuffer();
+	     sb.append((cal.get(Calendar.YEAR) + "").substring(2)+ "");
+	    String month = String.valueOf(cal.get(Calendar.MONTH) + 1);
+	    if (month.length() == 1){
+	      sb.append("0");
+	    }
+	    sb.append(month + "");
+	    String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+	    if (day.length() == 1){
+	      sb.append("0");
+	    }
+	    sb.append(day);
+	    return sb.toString();
+	  }
+	  
+
 
   
   
@@ -334,7 +351,7 @@ public class SamsonasCSVImportDriver
 	        	minus = true;
 	        }
 	    	
-	        String sep = ",";
+	        String sep = "|";
 	         String lineSep = System.getProperty("line.separator");
 	        
 	         double ale = ol.getDiscount();
@@ -342,7 +359,18 @@ public class SamsonasCSVImportDriver
 	        	 ale = 0;
 	         }
 	         double hind = ol.getPrice();
+	         Calendar cal = Calendar.getInstance();
+	         if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+	        	  cal.add(Calendar.DAY_OF_YEAR, 3);
+	         }else {
+	        	  cal.add(Calendar.DAY_OF_YEAR, 1);
+	         }
+	       
+	         String shipd = getDateString(cal);
 	         
+	         if( order.isShipDateUsed()){
+   	    	  shipd = getDateString(order.getShipCal());; 
+   	         }
 	         
 	         /*document(order) No
 companyCode
@@ -357,7 +385,7 @@ quantity
 	         sb.append(order.getCompany() + sep );
 	         sb.append(agent + sep);
 	         sb.append(getDateString(Calendar.getInstance()) + sep);
-	         sb.append(getDateString(order.getShipCal()) + sep);
+	         sb.append(shipd + sep);
 	         sb.append(counter + sep);
 	         sb.append(ol.getToode() + sep);
 	         sb.append(ol.getKogus() + sep);
@@ -383,11 +411,11 @@ quantity
 	      setNumAddedLines(counter); 
 
 	      String vahe = "meat/";
-	      if(!meat) {
+	      if(meat) {
 	    	  vahe = "vege/";
 	      }
 	    
-	         	  String fileName = Converter.escapeXML(parent.getProps().getProperty("conv.dir"))+ vahe +  "t-" + order.getAgent() +"."+ order.getCompany()+"." +fn  + ".csv";
+	         	  String fileName = Converter.escapeXML(parent.getProps().getProperty("conv.dir"))+ vahe +  fn +"_" + order.getCompany() + "_" + getDateString2(Calendar.getInstance()) + ".csv";
 			      System.out.println(fileName);		
 			      if(minus){
 			    	//  fileName = escape(parent.getProps().getProperty("conv.dir2")) +  "t-" + order.getAgent() +"."+ order.getCompany()+"." +fn  + ".csv";

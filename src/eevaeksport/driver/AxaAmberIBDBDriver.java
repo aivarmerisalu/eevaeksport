@@ -308,7 +308,7 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                  }
                                  
                                  if(clGroup != null && clGroup.equals("ARKA_STD")) {
-                                	 goes = false;
+                                	// goes = false;
                                  }
                                  
                                  if(goes){
@@ -418,7 +418,7 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                                       mline.setProdLevel(pri); 
                                                       
                                                       if(clGroup != null && clGroup.equals("ARKA_STD")) {
-                                                     	 goes = false;
+                                                     	// goes = false;
                                                       }
                                                       
                                                     if(goes){

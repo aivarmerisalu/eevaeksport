@@ -2189,7 +2189,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		             
 		             if(order.getStatus() == 98 || order.getCompany().equals("T01044") 
 		            		 || order.getCompany().equals("T1072-20") || order.getCompany().equals("T24161")
-		            		 || order.getCompany().equals("T62481") || order.getCompany().equals("T62482")
+		            		 || order.getCompany().startsWith("T6248") 
 		            		 || order.getCompany().startsWith("T5739")
 		            		 || order.getCompany().startsWith("T8587")//lidl
 		            		 ||  (order.getILN() != null && order.getILN().equals("4740660999899"))
