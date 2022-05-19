@@ -102,14 +102,14 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 					String sum = "";
 					String sumkg = "";
 
-					    try {sum = (row.getCell((short) 4).getStringCellValue());
+					    try {sum = (row.getCell((short) 5).getStringCellValue());
 						} catch (Exception e) {
-							try { sum = (int) (row.getCell((short) 4).getNumericCellValue()) + "";	
+							try { sum = (int) (row.getCell((short) 5).getNumericCellValue()) + "";	
 						} catch (Exception u) {}}
 						
-						try {sumkg = (row.getCell((short) 5).getStringCellValue());
+						try {sumkg = (row.getCell((short) 4).getStringCellValue());
 						} catch (Exception e) {
-							try { sumkg = (int) (row.getCell((short) 5).getNumericCellValue()) + "";	
+							try { sumkg = (int) (row.getCell((short) 4).getNumericCellValue()) + "";	
 						} catch (Exception u) {}}
 						
 				
@@ -232,8 +232,19 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
   
                      String custid = st.nextToken().trim();
                      String group = st.nextToken().trim();
-                     double saleskg = Double.parseDouble(st.nextToken().trim());
-                     double saleseur = Double.parseDouble(st.nextToken().trim());
+                     double saleskg = 0;
+                     try {
+                    	 saleskg = Double.parseDouble(st.nextToken().trim()); 
+                     }catch(Exception e){
+                    	 
+                     }
+                    
+                     double saleseur = 0;
+                     try {
+                    	 saleseur = Double.parseDouble(st.nextToken().trim()); 
+                     }catch(Exception e){
+                    	 
+                     }
                      Toode tt = new Toode(custid);
                      tt.setGr1(group);
                      tt.setDonecur(saleseur);
@@ -304,14 +315,49 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    
    
    
-   
+   HashMap stocks = null;
 
 
 
-       public String getSaveStockInfo(){
-       return null;
-       }
+	  public String getSaveStockInfo(){
+	    	   stocks = new HashMap();
+	  	         StringBuffer products = new StringBuffer();
+	         
+	         try {
+	             FileReader fr = new FileReader(getDir() + "Stocks.csv");
+	             BufferedReader reader = new BufferedReader(fr);
+	           String line = null;
+	           reader.readLine();
+	            while((line = reader.readLine()) != null ){
 
+	                 line = line.replaceAll(";"," |");
+	            	StringTokenizer st = new StringTokenizer(line, "|");
+
+	              if (st.hasMoreTokens()) {
+	            	   String kood = st.nextToken().trim();
+	            	   if(kood.length() > 0) {
+	            		try {
+	            			   double seis = Double.parseDouble(st.nextToken());
+	      	  	             if(seis > 0){
+	      	  	            	 stocks.put(kood, seis+ "");
+	      	  	                 products.append(kood +  ";");
+	      	  	                 products.append(" ;");
+	      	  	                 products.append(getParent().getNF().format(seis) + "; "  +  "\n"); 
+	      	  	               }		
+	            		}catch(Exception e) {
+	            		}
+	  	             }
+	              }
+	           }
+	             reader.close();
+	             fr.close();
+	             //System.out.println(tm);
+	           } catch (Exception e){
+	             e.printStackTrace();
+	           }
+	         
+	         return products.toString();
+	     }
 
 
 
@@ -493,6 +539,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    public TreeMap getCustomers(Agent agent){
      TreeMap tm = new TreeMap();
      custAgents = new Hashtable();
+     debtList = new Vector();
 
      try {
      FileReader fr = new FileReader(getDir() + "DebtList.csv");
@@ -585,7 +632,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
            String usedcredit = st.nextToken().trim();
 
            Customer customer = new Customer(id);
-           customer.setName(Converter.enCodeEst(name));
+           customer.setName(Converter.enCodeEst(name) + " " + id);
            
             
            if( address.length() > 0){
@@ -660,7 +707,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
         }
    
         
-	tm.put(Converter.cleanLitLatEst(name), customer);
+	tm.put(Converter.cleanLitLatEst(name + " "+ id), customer);
     
        }
      }
@@ -680,7 +727,9 @@ private Hashtable prodNames = null;
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
      
-
+if(stocks == null) {
+	getSaveStockInfo();
+}
      try {
 
      	//laoseisude lugemine ja liitmine algab
@@ -707,15 +756,17 @@ private Hashtable prodNames = null;
     	   String groupcodesec = st.nextToken().trim();
     	   String unitprice = st.nextToken().trim();
     	   String ean = st.nextToken().trim();
-    	   String inventory = st.nextToken().trim();
+    	  // String inventory = st.nextToken().trim();
 
     	   Product prod = new Product(id);
     	   //System.out.println(description);
-
-			 if(Double.parseDouble(inventory) > 1) {
-				 prod.setStock(Double.parseDouble(inventory));
+            if(stocks.get(id) != null) {
+           	 if(Double.parseDouble(stocks.get(id)+"") > 1) {
+				 prod.setStock(Double.parseDouble(stocks.get(id)+""));
 			 }
-			 
+			 	
+            }
+		
 			 
 			 if(Double.parseDouble(incase) > 1) {
 				 prod.setInCases(Double.parseDouble(incase));
@@ -790,7 +841,7 @@ private Hashtable prodNames = null;
     	   String custID = st.nextToken().trim();
         	String prodID = st.nextToken().trim();
 			double sold = Double.parseDouble(st.nextToken().trim());							
-			String last = st.nextToken().trim();
+			String last = st.nextToken().trim().substring(4);
 			String lastdoc = st.nextToken().trim();
 			double lastprice = Double.parseDouble(st.nextToken().trim());	
 			

@@ -4352,6 +4352,8 @@ if(agprods != null && agprods.size() >0){
       
       NN3.setGroupingUsed(false);
       NN3.setMaximumFractionDigits(4);
+      NN = getNF();
+      NN.setMaximumFractionDigits(3);
       if(this.getDriver().getDriverVersion().equals("MovexLAT")){
       getNF().setMaximumFractionDigits(4);
       }
@@ -4467,9 +4469,8 @@ if(agprods != null && agprods.size() >0){
         buf.append(NN3.format(prod.getPrice()));
 
         buf.append(EksportPanel.separator);
-        NN = getNF();
-        NN.setMaximumFractionDigits(3);
-        buf.append(NN.format(prod.getInCases()));
+       
+        buf.append(NN3.format(prod.getInCases()));
 
         buf.append(EksportPanel.separator);
         buf.append(getNF().format(prod.getStock()));

@@ -460,8 +460,10 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
 
                                        //   mline.setProdLevel(pri); 
                                           mline.setPrice(price);
-                                 
-                                          lines.add(mline);
+                                          if (custID != null && custID.trim().length() > 0) {
+                                        	    lines.add(mline);
+                                          }
+                                      
                                   }
 
                         // System.out.println("lines2 " + lines.size());

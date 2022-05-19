@@ -16,9 +16,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -28,6 +30,8 @@ import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 
 import eevaeksport.Agent;
+import eevaeksport.Customer;
+import eevaeksport.Debt;
 import eevaeksport.Product;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
@@ -70,7 +74,10 @@ public class SamsonasCSVImportDriver
       if(prods == null) {
     	  this.getProducts();
       }
-	 System.out.println("Enne suurus splitti" + order.getOrderLines().size());
+      if(customers == null) {
+    	  this.getCustomers();
+      }
+	// System.out.println("Enne suurus splitti" + order.getOrderLines().size());
 	
 	  Order ord23 = new Order(order.getCompany(),order.getAgentFirstName());
 	  Order ordOTB = new Order(order.getCompany(),order.getAgentFirstName());
@@ -185,7 +192,78 @@ public class SamsonasCSVImportDriver
 	  setNumAddedLines(counter);
   }
 
+  
+  public void getCustomers(){
+	  customers = new TreeMap();
+	     
+	     try {
+	     FileReader fr = new FileReader(parent.getProps().getProperty("readin")  + "Customer.csv");
+	     BufferedReader reader = new BufferedReader(fr);
+	     String line = null;
+	     //Custcode	 CustName	PayerCode	Address	City	Post Code	DebtDue	SalespersonCode	Contact	PhoneNo	PaymentTerm	CreditLimit	UsedCredit	CustDiscount	Blocked
+
+	       line=reader.readLine();
+	     while((line = reader.readLine()) != null){
+	    	 
+	    	 line = line.replaceAll(";"," |");
+	        StringTokenizer st = new StringTokenizer(line, "|");
+	       if (st.hasMoreTokens()){
+
+	           String id = st.nextToken().trim();
+	           String name = st.nextToken().trim();
+	           String payer = st.nextToken().trim();
+	           String city = st.nextToken().trim();
+	           String address = st.nextToken().trim();
+	           String zipcode = st.nextToken().trim();
+	           String deptdue = st.nextToken().trim();
+	           String agentcode = st.nextToken().trim();
+	           String contactname = st.nextToken().trim();
+	           String contactphone = st.nextToken().trim();
+	           String payterm = st.nextToken().trim();
+	           String crlimit = st.nextToken().trim();
+	           String usedcredit = st.nextToken().trim();
+
+	           Customer customer = new Customer(id);
+	           customer.setName(Converter.enCodeEst(name));
+	           
+	            
+	           if( address.length() > 0){
+	        	   if(city.length() > 0) {
+	        		   address = address + " " + city;
+	            	   if(zipcode.length() > 0) {
+	            		   address = address + " " + zipcode;
+	            	   }
+	        	   }
+	             customer.setAddress(Converter.enCodeEst(Converter.adressLink(address,"Lithuania")));           
+	           }
+	           
+		       	double dept = 0;
+		       	try{
+		       		dept = Double.parseDouble(deptdue);
+		       		customer.setDebt(dept);
+		       	}catch(Exception e ){
+		       	}
+	           
+	           if(agentcode.length() > 0) {
+	        	   customer.addAgent(new Agent(agentcode));
+	        	  customers.put(customer.getID(), agentcode);
+	           }
+	
+	       }
+	     }
+	     
+	     reader.close();
+	     fr.close();
+	    	
+	     } catch (IOException e){
+	       e.printStackTrace();
+	     }
+	   ;
+	   }
+  
+  
   private TreeMap prods = null;
+  private TreeMap customers = null;
   
   public void getProducts(){
 	     prods = new TreeMap();
@@ -314,12 +392,16 @@ public class SamsonasCSVImportDriver
 		      }
 		  
 		      String agent = order.getAgent();
+		      if(customers != null  && customers.get(order.getCompany()) != null) {
+		    	agent = (String) customers.get(order.getCompany());
+		      }
 			    
 			      if(agent == null || agent.trim().length()== 0){
 			    	 agent = "xxx";
 			      } else{
 			    	  agent = agent.trim();
 			      }
+			      
 			String ref = order.getTeostaja(); //mobiilse telli ref number
 			if ( ref == null ){
 				ref =  "";

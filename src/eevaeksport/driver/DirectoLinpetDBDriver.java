@@ -920,7 +920,13 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
   
    public TreeMap getProdGroups2() throws SQLException {
     
-     
+	   String lang = null;
+	   
+	     if(getParent().getProps().getProperty("productgroup.lang") != null){
+	      	 lang = getParent().getProps().getProperty("productgroup.lang");
+	      	// System.out.println("product.lang="+ lang);
+	      }
+	   
   	try {
   		  File f = new File (getDir() + "tootegrupid.xml");
   	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -942,6 +948,21 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                			 String name  = rida.getAttributes().getNamedItem("default_name").getNodeValue(); 
                    		 group = Converter.cleanLitLatEst(group);
                    		  name  =  Converter.enCodeEst(name);
+                   		  
+                   		  if(lang != null) {
+                   			  try {
+                   			  Node lan=	  rida.getChildNodes().item(0);
+                   		     name = Converter.enCodeEst( lan.getAttributes().getNamedItem("content").getNodeValue());
+                   		 System.out.println("gr name " + name);
+                   			  }catch(Exception e) {
+                   				  
+                   			  }
+                   			
+                   				
+                   			
+                   		  }
+                   		  
+                   		
                    		  prGroups.put(group, name);  
                		 }catch(Exception r){
                			 
@@ -2120,6 +2141,12 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       	 lang = getParent().getProps().getProperty("product.lang");
       	// System.out.println("product.lang="+ lang);
       }
+     String lang2 = null;
+     
+     if(getParent().getProps().getProperty("product.langdefault") != null){
+      	 lang2 = getParent().getProps().getProperty("product.langdefault");
+      	// System.out.println("product.lang="+ lang);
+      }
       
     
      if("true".equals(getParent().getProps().getProperty("sortbybrands"))){
@@ -2392,7 +2419,57 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       	 		 }
       	 	      	 	 }
       	 
-      	 	 
+      	 	 if(lang2 != null && line.indexOf("param=\"" + lang2 + "\"") != -1) {
+           	 	
+          	 	 len = line.indexOf("data code=\"ART_LANG\""); 
+          	 	 if(len != -1){
+          	 		 try {
+          	 		   String   vahe =  line.substring(len + 30); 
+           	 	    String  areto = vahe.substring(0,vahe.indexOf(">"));
+                      //System.out.println("areto " + areto  + "\n vahe: " + vahe);
+                      if(areto.contains("param=\"" + lang2 + "\"")) {
+                    	  prod.setName(areto.substring(0,areto.indexOf("\""))); 
+                      } else {
+                    	  len = vahe.indexOf("data code=\"ART_LANG\""); 
+                    	//  System.out.println("len2 " + len);
+                    	  if(len != -1){
+                   	 		
+                   	 		    vahe =  vahe.substring(len + 30); 
+                    	 	     areto = vahe.substring(0,vahe.indexOf(">"));
+                    	 	     
+                    	 	   // System.out.println("areto2 " + areto );
+                                if(areto.contains("param=\"" + lang2 + "\"")) {
+                              	  prod.setName(areto.substring(0,areto.indexOf("\""))); 
+                                }else {
+                                	len = vahe.indexOf("data code=\"ART_LANG\""); 
+                              	  
+                              	  if(len != -1){
+                             	 		 try {
+                             	 		    vahe =  vahe.substring(len + 30); 
+                              	 	     areto = vahe.substring(0,vahe.indexOf(">"));
+                              	 	     
+                              	 	    //System.out.println("areto3 " + areto );
+                                          if(areto.contains("param=\"" + lang2 + "\"")) {
+                                        	  prod.setName(areto.substring(0,areto.indexOf("\""))); 
+                                          }	
+                                
+                   	 	 }catch(Exception ee) {
+              	 			 
+              	 		 }
+                    	  
+                              	  }  
+                      }
+                    	  }
+           	 	  
+          	 	      	 	 
+                    	  }
+          	 	 }catch(Exception ee) {
+      	 			 
+      	 		 }
+          	 	 }
+          	 //	 System.out.println(prod.getName());
+          	 //System.exit(0);	 
+          	  } 
       	 	 
       	 	 
       	  if(lang != null && line.indexOf("param=\"" + lang + "\"") != -1) {
