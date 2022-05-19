@@ -393,13 +393,22 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	  Calendar cal = Calendar.getInstance();
 	  String reqID = cal.getTimeInMillis()+"";
 	  body.put("RequestID", reqID.substring(3));
-	  body.put("Function", function);
+	  if (function != null) {
+		  body.put("Function", function);
+	  }
 	  JSONObject params= new JSONObject();
-	  params.put("ids", id );
-	  
-	  
-	  
-	  
+	  if(id != null) {
+		  params.put("ids", id );
+	  }
+	 if (id == null) {
+		 Calendar a = Calendar.getInstance();
+		 a.add(Calendar.YEAR, -1);
+		 Calendar b = Calendar.getInstance();
+		 b.add(Calendar.DATE, 3);
+		 
+		 params.put("startDate",  Converter.jsonDate(a.getTime()));
+		 params.put("endDate", Converter.jsonDate(b.getTime()));
+	 }
 	  body.put("Parameters", params);
 	  System.out.println(body.toJSONString());
 	 
@@ -1098,7 +1107,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 			Row row = null;
 			TreeMap groups = new TreeMap();
 			row = sheet.getRow(1);
-			// Mï¿½ï¿½RAME ï¿½RA MIS Vï¿½LJAS ASUVAD Sortimendi tï¿½hised.
+			// M��RAME �RA MIS V�LJAS ASUVAD Sortimendi t�hised.
 
 			// System.out.println("rownum " + row.getLastCellNum());
 			for (int a = 3; a < row.getLastCellNum(); a++) {
@@ -1129,8 +1138,8 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 					
                    if(!prodID.equals("")){
                 	
-					// Siin lï¿½heme reasisse rokkima ja vaatama kas se toode
-					// lï¿½heb kaasa
+					// Siin l�heme reasisse rokkima ja vaatama kas se toode
+					// l�heb kaasa
 					for (int a = 3; a < row.getLastCellNum(); a++) {
 
 						String group = (String) groups.get(a + "");
@@ -1144,7 +1153,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 
 							MatrixLine mline = new MatrixLine();
 							// Vaatame kas selles veerus on sellel tootel pandud
-							// mingi tï¿½his
+							// mingi t�his
 							if (row.getCell((short) a) != null) {
 
 								try {
@@ -1718,11 +1727,11 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 			    
 			        
 			        if(total - paid  > 0 ){
-			    	 Date dd = getDate(date); //vï¿½ljastamise kuupï¿½ev 
+			    	 Date dd = getDate(date); //v�ljastamise kuup�ev 
 			    	  Calendar cal = Calendar.getInstance();
 			    	  cal.setTime(dd);
 			    	  cal.add(Calendar.DAY_OF_YEAR, paevi);
-			    	 // cal on maksekuupï¿½ev
+			    	 // cal on maksekuup�ev
 			    
 			    	  Calendar now  = Calendar.getInstance();
 			    	int due =(int)daysBetween(cal,now);
@@ -2098,12 +2107,34 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
    }
    private void saveWebFiles() {
 	     try {
-	    		String asi =this.postProNetIds("getClientIds" ,"getIDs").toString();
+	    	
 	    			JSONParser parser = new JSONParser();
-	    			JSONObject json = (JSONObject) parser.parse(asi);
+	    			
+	    			
+	    				String asi =this.postProNetData(null ,"invoiceLines", null).toString();
+	    				 parser = new JSONParser();
+	    				 JSONObject json = (JSONObject) parser.parse(asi);
+	    				 System.out.println(asi);
+	    				 Converter.saveFile("Data/invoiceLines.txt", asi);
+	    				
+	    				 
+	    					 asi =this.postProNetData(null ,"unpaidInvoices", null).toString();
+		    				 parser = new JSONParser();
+		    				 json = (JSONObject) parser.parse(asi);
+		    				 System.out.println(asi);
+		    				 Converter.saveFile("Data/debts.txt", asi);
+		    				
+	    				 
+	    				 
+	    			
+	    		
+	    			//kliendid
+	    			asi =this.postProNetIds("getClientIds" ,"getIDs").toString();
+	    			 json = (JSONObject) parser.parse(asi);
 	    			JSONArray ids = (JSONArray) json.get("ClientIds");
 	    			Vector<JSONArray> vec = getSplit(ids, 2000);
 	    			int counter = 1;
+	    		
 	    			for(JSONArray arr: vec) {
 	    				asi =this.postProNetData("getClientData" ,"getData", arr).toString();
 	    				 parser = new JSONParser();
@@ -2115,7 +2146,6 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 }
 	    				 counter++;
 	    			}
-	    			
 	    			
 	    			//laod
 	    			asi =this.postProNetIds("getWarehouseIds" ,"getIDs").toString();
@@ -2134,6 +2164,27 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 if (counter == 3){
 	    				
 	    				 }
+	    				 counter++;
+	    			}
+	    			
+	    			
+	    			//agendilist
+	    			asi =this.postProNetIds("getClientManagerListIds" ,"getIDs").toString();
+	    			 parser = new JSONParser();
+	    			 json = (JSONObject) parser.parse(asi);
+	    			 ids = (JSONArray) json.get("ClientManagerListIds");
+	    		     vec = getSplit(ids, 500);
+	    			 counter = 1;
+	    			for(JSONArray arr: vec) {
+	    				asi =this.postProNetData("getClientManagerListData" ,"getData", arr).toString();
+	    				 parser = new JSONParser();
+	    				 System.out.println(asi);
+	    				 json = (JSONObject) parser.parse(asi);
+	    				 System.out.println(asi);
+	    				 Converter.saveFile("Data/agent.txt", asi);
+
+	    				
+	    				 
 	    				 counter++;
 	    			}
 	    			
@@ -2210,7 +2261,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 }
 	    				 counter++;
 	    			}
-	    			System.exit(0);
+	    			
 	    			
 	    		
 	    			
@@ -2275,18 +2326,63 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
    
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-     saveAssetFile();
-
-
+    // this.saveWebFiles();
+ 
+    
+     
+     
      agent1 = new TreeMap();
      agents = new TreeMap();
      
-     this.getProducts(null);
+    // this.getProducts(null);
+
+     
+ 
      
      Agent sm = new Agent ("TEST");
 		       		
 		 sm.setName("ERIK");
      tm.put("TEST", sm); 
+     
+     
+     try {
+		   
+		   FileListFilter fil = new FileListFilter("klient","txt");
+	    	 String[] ll = new File (getDir()).list(fil);
+	    	 for (int i = 0; i < ll.length; i++) {
+	    		
+	    		
+	    		 String fname = ll[i];
+	    		//System.out.println(name);
+	 		  File f = new File (getDir() + fname);
+	 		  JSONObject obj = (JSONObject) this.readJsonFile(f);
+	 		  JSONArray customers = (JSONArray) obj.get("ClientData");
+	 		 for(Object custo: customers) {
+	 			 JSONObject cust = (JSONObject) custo;
+	 			String manager = null;
+	 			String managern = null;
+	 			JSONObject man = (JSONObject) cust.get("clientManager");
+	 			if(man != null) {
+	 				manager = man.get("id").toString();
+	 				managern = man.get("name").toString();
+	 				 Agent aa = new Agent (manager);
+			       		
+	 				 aa.setName(managern);
+	 		     tm.put(manager, aa); 
+
+
+	 			}
+	 			
+	 			
+	 		 } 
+	    	 }
+	 	}catch(Exception e){
+	 		e.printStackTrace();
+	 	}
+	    System.out.println("tmsuurus " + tm.size());
+     
+     
+     
      return tm;
    }
 
@@ -2423,7 +2519,6 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 		//System.out.println( dnimi +" "+ kood);
 	 }
 	 Converter.saveFileInUTF8("Inventorydata.txt", sisu);
-	 System.exit(0);
 	
 }
    private String lnonull(Long a) {
@@ -2767,10 +2862,20 @@ private Object readJsonFile(File f){
 	 			String address = (String) cust.get("address");
 	 			String billingClientId = (String) cust.get("billingClientId");
 	 			String active = (String) cust.get("active");
+	 			String id = (String) cust.get("id");
+	 			String manager = null;
+	 			JSONObject man = (JSONObject) cust.get("clientManager");
+	 			if(man != null) {
+	 				manager = man.get("id").toString();
+
+	 			}
 	 			
-	 			Customer cc = new Customer(code);
-	 			cc.setName(name);
+	 			Customer cc = new Customer(id);
+	 			cc.setName(name + " " + code);
 	 			cc.addAgent(new Agent("TEST"));
+	 			if(manager != null) {
+	 				cc.addAgent(new Agent(manager));
+	 			}
 	 			if(address != null) {
 		 			cc.setAddress(address);
 	 			}
@@ -2870,13 +2975,21 @@ private Object readJsonFile(File f){
 	 		 for(Object prodo: products) {
 	 			 JSONObject prod = (JSONObject) prodo;
 	 			 String code = (String) prod.get("code");
+	 			 String id = (String) prod.get("id");
 	 			String name = (String) prod.get("name");
 	 			String active = (String) prod.get("active");
 	 			String barcode = (String) prod.get("barcode");
 	 			JSONObject group1 = (JSONObject) prod.get("group1");
-	 			String gr1ID = (String) group1.get("id");
+	 			String gr1ID = null;
+	 			if(group1 != null) {
+	 				 gr1ID = (String) group1.get("id");
+	 			}
+	 			
 	 			JSONObject group2 = (JSONObject) prod.get("group2");
-	 			String gr2ID = (String) group2.get("id");
+	 			String gr2ID = null;
+	 			if(group2 != null) {
+	 			 gr2ID = (String) group2.get("id");
+	 			}
 	 			String pri = (String) prod.get("wholesalePrice");
 	 			JSONObject unito = (JSONObject) prod.get("unit");
 	 			String unit = (String) unito.get("name");
@@ -2884,13 +2997,13 @@ private Object readJsonFile(File f){
 	 			String vat = (String) vt.get("rate");
 	 		
 	 			
-	 			Product pp = new Product(code);
+	 			Product pp = new Product(id);
 	 			if(barcode != null){
 	 				pp.setEAN(barcode);
 	 			}
 	 			
 	 			pp.setVat(vat);
-	 			pp.setName(name);
+	 			pp.setName(name + " " + code);
 	 			if(gr1ID != null) {
 	 				pp.setGroup(gr1ID);
 	 			}
@@ -3173,7 +3286,7 @@ private Object readJsonFile(File f){
 	            	 String  asi = "";
 	            	
 	            	 if(tt != null) {
-	            		 asi = (((int)(teh/tt.getPlancur()*100))+ "% Plan.: " +(int) tt.getPlancur() + " â‚¬  Sales.: " + (int) teh + " â‚¬||");
+	            		 asi = (((int)(teh/tt.getPlancur()*100))+ "% Plan.: " +(int) tt.getPlancur() + " €  Sales.: " + (int) teh + " €||");
 	     	     	 }
 	            	 
 	            	   if(myygideelm.get(code) != null && day < 6 ) {
