@@ -471,6 +471,7 @@ HashMap pants = null;
       }
       
       
+      
       String addr =  null;
 	try {
 		addr = identifyCustomerADDR(cust);
@@ -485,6 +486,16 @@ HashMap pants = null;
       if(order.getInfo() != null && order.getInfo().trim().length() > 0) {
     	  lisa = order.getInfo().trim();
       }
+      if(order.getShipTime() != null && order.getShipTime().trim().length() > 0) {
+    	  if(lisa == null) {
+    		  lisa = "laikas: " +  order.getShipTime().trim();
+    	  }else {
+    		  lisa = "laikas: " + order.getShipTime().trim()+ " " +lisa;
+    	  }
+    	 
+      }
+      
+      
       if(lisa != null){
     	//  sb.append(getLineNr(cou));
           sb.append("          <I06_PASTABOS>" + escape(lisa) + "</I06_PASTABOS>" + ls);
