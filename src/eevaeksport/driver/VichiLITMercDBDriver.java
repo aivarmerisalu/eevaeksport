@@ -481,7 +481,7 @@ public class VichiLITMercDBDriver extends AbstractDBDriver implements
 					mline.setCustID(custID.trim());
 				}
 				if (clGroup != null && clGroup.trim().length() > 0) {
-					mline.setCliGroup(clGroup.trim());
+					mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
 				}
 
 				if (prodID != null && prodID.trim().length() > 0) {
@@ -1178,7 +1178,7 @@ public class VichiLITMercDBDriver extends AbstractDBDriver implements
 				String grupp = rs.getString("sort");
 				if (grupp != null && grupp.trim().length() > 0) {
 					Vector vv = new Vector ();
-					vv.add(grupp.trim());
+					vv.add(Converter.cleanLitLatEst(grupp.trim()));
 					customer.setFixSortCode(vv);
 					
 				}

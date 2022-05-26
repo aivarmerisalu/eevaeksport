@@ -124,6 +124,7 @@ public class ScalaPrikeEstDBDriver extends AbstractDBDriver implements BulkUpdat
         	  String cmd = "select SC33001 as toode ,sum( SC33005)  as stock  from SC330100 where " +
               " SC33005 >0 and SC33002='01' and SC33004 <> 'TAG' and " +
              " SC33003  not in (Select distinct BatchID from PXSCPRBatchAllocations01) group by SC33001 ";
+        	  cmd = "Select * from Mobilejava_laosaldo";
         	  stocks = new HashMap();
 
 		       if (isDebug()) System.out.println(cmd);
@@ -1726,7 +1727,7 @@ System.out.println("fixed size " + result.size());
        " SC33005 >0 and SC33002='01' and SC33004 <> 'TAG' and  " +
        "SC33003  not in (Select distinct BatchID from PXSCPRBatchAllocations01) group by SC33001 " ;
 
-        
+        cmd2 = "Select * from Mobilejava_laosaldo";
         
    	if (isDebug()) {
 	    System.out.println(cmd);
@@ -1753,7 +1754,7 @@ System.out.println("fixed size " + result.size());
 	    ResultSet	      rs = st.executeQuery(cmd2);
 	    while (rs.next()) {
 	    	String kood = rs.getString("toode").trim();
-	    	double kogus = rs.getDouble("kogus");
+	    	double kogus = rs.getDouble("stock");
 	    	aktiiv.put(kood, kogus + "");
 	    }
 			

@@ -38,18 +38,18 @@ import eevaeksport.imp.OrderLine;
        Class.forName(databaseDriverName).newInstance();
       
        con2 = DriverManager.getConnection(url + "import"
-       		, "sa", "sql");
+       		, "sa", "SLT4dmin");
        con3 = DriverManager.getConnection(url + "import"
-       		, "sa", "sql");
+       		, "sa", "SLT4dmin");
        con4 = DriverManager.getConnection(url + "saf"
-       		, "sa", "sql");
+       		, "sa", "SLT4dmin");
        con5 = DriverManager.getConnection(url + "saf"
-       		, "sa", "sql");
+       		, "sa", "SLT4dmin");
        con6 = DriverManager.getConnection(url + "import"
-       		, "sa", "sql");
+       		, "sa", "SLT4dmin");
         
        con9 = DriverManager.getConnection(url + "saf"
-            , "sa", "sql"); 
+            , "sa", "SLT4dmin"); 
       
  /*
        POP3Reader pop3 = new POP3Reader(parent.getEksportFrame().getString(
@@ -183,7 +183,7 @@ import eevaeksport.imp.OrderLine;
      addInvoiceLines(getNewSalesid());
      String sql4 = "update tp set staatus=1 where ltrim(tp_id) = ?";
     Connection con9 = DriverManager.getConnection(url + "import"
-            , "sa", "sql");
+            , "sa", "SLT4dmin");
      PreparedStatement st2 = con9.prepareStatement(sql4);
      st2.setString(1, getNewSalesid() + "");
      st2.executeUpdate();

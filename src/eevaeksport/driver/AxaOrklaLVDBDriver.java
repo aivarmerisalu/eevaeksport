@@ -4563,19 +4563,23 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 	//	3. Vastustega
 		
 		  
-		  final DateTime input = new DateTime();
 		  //System.out.println(input);
 		
 		  
-		 // Teeme tsykli et saame iga päeva eraldi kätte
-		  for(int u = 0 ; u < 14 ;u++) {
-			  final DateMidnight startOfLastWeek2 = 
-			             new DateMidnight(input.minusDays(u+2));
-			  final DateMidnight endOfLastWeek2 =  new DateMidnight(input.minusDays(u+1));
+		  DateMidnight nn = new DateMidnight();
+		     final DateTime input = new DateTime(nn.getMillis());
+		    
+		     
+		     for(int u = 0 ; u < 28 ;u++) {
+				  final DateTime startOfLastWeek2 = 
+				             new DateTime(input.minusHours(u*12+12));
+				  final DateTime endOfLastWeek2 =  new DateTime(input.minusHours(u*12));
+				
+			  
 				System.out.println("algus " +startOfLastWeek2.toString());
 				System.out.println("lopp " +endOfLastWeek2.toString());
 			  String filenameSV =   Converter.getSVData(startOfLastWeek2.getMillis(), endOfLastWeek2.getMillis(),
-					  rcompanyx, user, pass,true,"SELYNLIST",null,"answers"+ u);
+					  rcompanyx, user, pass,false,"SELYNLIST",null,"answers"+ u+ "-");
 				 System.out.println("filenameSV "+  filenameSV);
 		  }
 		  

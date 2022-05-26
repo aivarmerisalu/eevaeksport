@@ -4487,21 +4487,49 @@ try{
 				
 				String yyyy = (from.getYear()+1900)+ "";
 				String ww = "";
+				Calendar cc = Calendar.getInstance();
+				cc.setTime(from);
 				if(week) {
-					Calendar cc = Calendar.getInstance();
-					cc.setTime(from);
 					ww = cc.get(Calendar.WEEK_OF_YEAR)+"";
-					if(ww.length() == 1) {
-						ww = "0"+ww;
-					}
+				 }else {
+					ww = cc.get(Calendar.DAY_OF_MONTH)+"";
 				}
-				res = "svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" ;
+				if(ww.length() == 1) {
+					ww = "0"+ww;
+				}
 				
-				File ff = new File("svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" );
-				//if(!ff.exists()) {
-					org.json.JSONArray array = serv.getSVdata(from, to , type , subTypes);
-					Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + ww + mm  + yyyy + ".json" , array.toString());
-				//}
+				String tt = "";
+				if(type != null) {
+					tt = type + "-";
+				}
+				if(subTypes != null) {
+					tt = subTypes.replaceAll(",", "-") + "-";
+				}
+				res = "svdata/svdata-" + nameadd + tt + ww + mm  + yyyy + ".json" ;
+				
+				File ff = new File("svdata/svdata-" + nameadd + tt + ww + mm  + yyyy + ".json" );
+			
+				org.json.JSONArray array = serv.getSVdata(from, to , type , subTypes);
+				
+				if(array.length() == 1000) {
+					//teeme tundideks aja vahe
+					for(int i = 0; i<6;i++) {
+						Date fr = new Date(from.getTime() + (7200000*i));
+						
+						Date t = new Date(from.getTime()+(7200000*i)+7200000);
+						array = serv.getSVdata(fr, t , type , subTypes);
+						if(array.length() > 0) {
+							Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + tt  + i + ww + mm  + yyyy + ".json" , array.toString());
+						}
+						
+					}
+					
+					
+				}else if(array.length() > 0) {
+					Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + tt  + ww + mm  + yyyy + ".json" , array.toString());
+				}
+					
+			
 					
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -7842,6 +7870,22 @@ client.close();
 		    return sb.toString();
 		  }
 	  
+	  public static String getYYYYMMString(Date dd){
+		    StringBuffer sb = new StringBuffer();
+		    Calendar cal= Calendar.getInstance();
+		    cal.setTime(dd);
+		    sb.append("" + cal.get(Calendar.YEAR));
+			String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+			if (day.length() == 1) {day = "0" + day;}
+
+			String month = String.valueOf(cal.get(Calendar.MONTH ) + 1);
+			if (month.length() == 1){month = ("0") + month;}
+		
+			
+			sb.append("" + month  );
+		    return sb.toString();
+		  }
+	  
 	  public static String getYYYYmMMmDDmString(Date dd){
 		    StringBuffer sb = new StringBuffer();
 		    Calendar cal= Calendar.getInstance();
@@ -7859,7 +7903,6 @@ client.close();
 			sb.append(day );
 		    return sb.toString();
 		  }
-	  
 	  
 	  public static String getDDpMMpYYYYpString(Calendar cc){
 		    StringBuffer sb = new StringBuffer();

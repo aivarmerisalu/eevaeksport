@@ -582,7 +582,7 @@ private TreeMap getExcelStuff(){
            public TreeMap getProdGroupsSecond()  throws SQLException {
       	     TreeMap   tm = new TreeMap();
       	    
-      	     String cmd = "SELECT  t.[Product Group Code] AS kood ,g.[Description] AS nimi FROM [VOLDEMĀRS SIA$Item] t inner join [VOLDEMĀRS SIA$Product Group] g ON t.[Product Group Code]=g.[Code]\r\n"
+      	 /*    String cmd = "SELECT  t.[Product Group Code] AS kood ,g.[Description] AS nimi FROM [VOLDEMĀRS SIA$Item] t inner join [VOLDEMĀRS SIA$Product Group] g ON t.[Product Group Code]=g.[Code]\r\n"
       	     		+ "where t.[Gen_ Prod_ Posting Group] = 'PRECES'   and t.[Product Group Code]  != ''\r\n"
       	     		+ "group by t.[Product Group Code],g.[Description] order by t.[Product Group Code] 	 ";
       	       	 Connection con = getNewConnection2();
@@ -596,7 +596,7 @@ private TreeMap getExcelStuff(){
       	   	        }
       	   	      rs.close();
       	   	      con.close();
-
+*/
 
       	         return tm;
       	   }
@@ -1269,7 +1269,7 @@ con3.close();
                 String grupp = Converter.cleanLitLatEst(rs.getString("grupp"));
                 
               if(grupp != null && grupp.trim().length()>0 ){
-                 prod.setGroupSecond(grupp.trim());
+                // prod.setGroupSecond(grupp.trim());
               }
               String grupp2 = Converter.cleanLitLatEst(rs.getString("grupp2"));
               
@@ -1351,8 +1351,8 @@ con3.close();
                        	
                        	
                 	 String ee = "";
-                	 if (ean != null &&ean.trim().length()>3){
-                         ee = " " + ean.substring(ean.trim().length()-3);
+                	 if (ean != null &&ean.trim().length()>4){
+                         ee = " " + ean.substring(ean.trim().length()-4);
                        }
                 	 
                 	 prod.setNameSorting(Converter.cleanLitLatEst(name));

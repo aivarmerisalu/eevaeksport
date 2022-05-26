@@ -281,6 +281,38 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
 
    public Vector getLastThreeData() {
 		Vector result = new Vector();
+		try {
+		
+
+					String sq3 = "SELECT * FROM InvoiceLastFive order by kuupaev desc,arvenr ";
+					
+					Connection con3 = getNewConnection2();
+					Statement st3 = con3.createStatement();
+					ResultSet rs3 = st3.executeQuery(sq3);
+					while (rs3.next()) {
+						MatrixLine ml = new MatrixLine();
+						ml.setCustID(rs3.getString("klkood").trim());
+						ml.setStartDate(rs3.getString("kuupaev").substring(5,10));
+						ml.setLineinfo(rs3.getString("arvenr").trim());
+						double kordaja = 1;
+						String liik  = rs3.getString("liik").trim();
+						if(liik != null & liik.equals("kreedit")) {
+							kordaja = -1;
+						}
+					 	ml.setProdID(rs3.getString("toode").trim());
+						ml.setPrice(rs3.getDouble("kogus")* kordaja);
+						ml.setDiscount(rs3.getDouble("price"));
+						
+						result.add(ml);
+					}
+					rs3.close();
+					st3.close();
+					con3.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return result;
 	}
 

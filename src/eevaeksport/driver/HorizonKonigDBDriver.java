@@ -355,9 +355,14 @@ public class HorizonKonigDBDriver extends AbstractDBDriver  implements Manager,P
 	       ResultSet  rs2 = stmt3.executeQuery();
 	   
 		    while(rs2.next()){
-		    	sb.append("[" +nf.format(rs2.getDouble("amount"))+"] " 
-		       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").toLowerCase().replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
-		    }
+		    	try {
+		    	  	sb.append("[" +nf.format(rs2.getDouble("amount"))+"] " 
+		    			       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").toLowerCase().replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
+		    			 	
+		    	}catch(Exception e) {
+		    		
+		    	}
+		     }
 	   
 		    rs2.close();
 	        stmt3.close();
@@ -1437,7 +1442,12 @@ try{
         		if(asi.startsWith("-")) {
         			asi = asi.substring(1); // et kriips maha saada 
         		}
-        		cust.setCity("Piegades dienas :" + asi + "|  nākamā piegāde :" + Converter.getDDpMMpYYYYpString(getNextShipCal(tarne)));
+        		try {
+        			cust.setCity("Piegades dienas :" + asi + "|  nākamā piegāde :" + Converter.getDDpMMpYYYYpString(getNextShipCal(tarne.trim())));
+                		
+        		}catch(Exception e) {
+        			
+        		}
         	
         	}
         	

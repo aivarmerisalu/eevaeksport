@@ -35,6 +35,8 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateMidnight;
+import org.joda.time.DateTime;
 
 import ee.mobilejava.wrapper.DefectiveLineWrapper;
 import ee.mobilejava.wrapper.DefectiveWrapper;
@@ -218,8 +220,10 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	   agGrSales = new Hashtable();
 	   this.getCustomers(null);
 	         try {
+	        	Calendar cal =  Calendar.getInstance();
+	        	 String date = Converter.getYYYYMMString(cal.getTime());
 	          
-	        	 FileReader fr = new FileReader(getDir() + "CustomerSales.csv");
+	        	 FileReader fr = new FileReader(getDir() + "CustomerSales" + date + ".csv");
 	             BufferedReader reader = new BufferedReader(fr);
 	           String line = null;
 	           reader.readLine();
@@ -449,6 +453,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
+ 
      agents = new TreeMap();
      try {
        FileReader fr = new FileReader(getDir() + "Agent.csv");
@@ -632,10 +637,9 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
            String usedcredit = st.nextToken().trim();
 
            Customer customer = new Customer(id);
-           customer.setName(Converter.enCodeEst(name) + " " + id);
+          
            
             
-           if( address.length() > 0){
         	   if(city.length() > 0) {
         		   address = address + " " + city;
             	   if(zipcode.length() > 0) {
@@ -643,7 +647,9 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
             	   }
         	   }
              customer.setAddress(Converter.enCodeEst(Converter.adressLink(address,"Lithuania")));           
-           }
+           
+           
+           customer.setName(Converter.enCodeEst(name) + " " + id + " " + Converter.enCodeEst(Converter.adressLink(address,"Lithuania")));
            
 	       	double dept = 0;
 	       	try{
@@ -999,7 +1005,7 @@ public void setNF(NumberFormat nf) {
   		 
   		//  System.out.println("rida " + agid + " " + kgplan + " " + eurplan + " " + tt.getGr1()+ "\n " + doneall.keySet().toString());
   		  
-  		 if(doneall.get(tt.getGr1()) != null) {
+  		 if(doneall != null && doneall.get(tt.getGr1()) != null) {
   			 Toode hhh = (Toode) doneall.get(tt.getGr1());
   			   kgsold = hhh.getDonevol();
   	   		   eursold = hhh.getDonecur();

@@ -159,7 +159,7 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 	    		"                                                                 (Select top 1  pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchFrom   \r\n" + 
 	    		"                                                       and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'BP') as balt  from  BBsMilkJournalTrans ost inner join bbsMilkJournalTable jou\r\n" + 
 	    		"													   on ost.JournalID = jou.JournalID and JournalType=1\r\n" + 
-	    		"                                                       where ost.dataareaid ='zp' and ost.transdate > getdate() -15  and purchqty  != 0  and ost.smssentdatetime < getdate()-20 \r\n" + 
+	    		"                                                       where ost.dataareaid ='zp' and ost.transdate > getdate() -21  and purchqty  != 0  and ost.smssentdatetime < getdate()-22 \r\n" + 
 	    		"													   ) as tt \r\n" + 
 	    		"                                                                  where ISNUMERIC(tt.rieb)= 1 or   tt.typefrom = 0  order by 1,2 desc,3 ";
 	    

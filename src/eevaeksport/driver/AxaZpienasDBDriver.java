@@ -1498,7 +1498,7 @@ try{
          "                      (select max (blocked) from  custtable cc  WITH (NOLOCK) where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = cus.dataareaid ) " +
           "               as payerblock ,(select l.locator  from  LOGISTICSELECTRONICADDRESS l WITH (NOLOCK)  where l.recid = dp.primarycontactphone)  " +
 		"				  as info , linedisc as grupp, MINORDERAMOUNT_BBS as minord , " +
-         "                    ROUTECODE_TR as transa,'' as discount ,'' as samm , SubGroupCode_BBS as tyyp , " +
+         "                    ROUTECODE_TR as transa,'' as discount ,'' as samm , SubGroupCode_BBS as tyyp ,TURNOVERLEVEL_BBS as tyyp2 " +
 			"				 (Select top 1 DISPLAYVALUE from DIMENSIONATTRIBUTEVALUESETITEM dv WITH (NOLOCK) where dv.DIMENSIONATTRIBUTEVALUESET = cus.DEFAULTDIMENSION    ) as osad, SHELFAREA_BBS as sharea, " +
             " SHELFSHARE_BBS As shshare ,'' as pictemail ,(select top  1 defaultagreementlineexpirationdate from agreementheader ah WITH (NOLOCK) where ah.custaccount=cus.invoiceaccount order by defaultagreementlineexpirationdate desc)  as contrend  "
             + " FROM  custtable cus with(nolock) inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join " +
@@ -1888,6 +1888,15 @@ try{
           cust.setMakeAmountRounding(true);        
         }
         
+        String tyyp2 = rs.getString("tyyp2");
+        if (tyyp2 != null && tyyp2.trim().length() > 0) {
+
+        	if(cust.getCity()== null || cust.getCity().length() == 0 ){
+        		cust.setCity("Apyv.lygis :" + tyyp2.trim());
+        	}else{
+        		cust.setCity(cust.getCity() + "| Apyv.lygis :" + tyyp2.trim());
+        	}     
+        }
         
         if(this.klpover.get(cust.getID()) != null){
         	if(cust.getCity()== null || cust.getCity().length() == 0 ){

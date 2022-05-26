@@ -611,7 +611,7 @@ System.out.println(cmd);
 					mline.setCustID(custID.trim());
 				}
 				if (clGroup != null && clGroup.trim().length() > 0) {
-					mline.setCliGroup(clGroup.trim());
+					mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
 				}
 
 				if (prodID != null && prodID.trim().length() > 0) {
@@ -1268,9 +1268,9 @@ System.out.println(cmd);
 				String grupp = rs.getString("sort");
 				if (grupp != null && grupp.trim().length() > 0) {
 					Vector vv = new Vector();
-					vv.add(grupp.trim());
+					vv.add(Converter.cleanLitLatEst(grupp.trim()));
 					customer.setFixSortCode(vv);
-					customer.setCustType(grupp.trim());				
+					customer.setCustType(Converter.cleanLitLatEst(grupp.trim()));				
 				}
 				
 				if(!asi.equals("3") && !asi.equals("4") && !asi.equals("5") && !asi.equals("6") &&  !asi.equals("7") 
