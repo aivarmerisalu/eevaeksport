@@ -21,6 +21,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -866,9 +867,9 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
        cust.setUsedCredit(debt);
        
        if (rs3.getInt("days") > 30 && debt > 50){
-    	   cust.setSalesBlockT(true);
+    	   cust.setSalesBlock(true);
         } else {
-    	   cust.setSalesBlockT(false);
+    	   cust.setSalesBlock(false);
        }
    }
    
@@ -1172,6 +1173,15 @@ return bomKount;
 
     public TreeMap getProducts(Agent agent){
         connectionUp(url);
+        String opt = getParent().getProps().getProperty("optimumAmountProducts");
+        HashSet opts = new HashSet();
+        if(opt != null) {
+        	StringTokenizer st = new StringTokenizer(opt,",");
+        	while(st.hasMoreTokens()) {
+        		opts.add(st.nextToken());
+        	}
+        }
+        
         TreeMap links= getLinks();
         
         if(asendused == null) {
@@ -1242,6 +1252,9 @@ return bomKount;
                 }
                 prod.setStock(0);
                 prod.setInCases(parseDouble(rs.getString("tykke").trim()));
+                if(opts.contains(prod.getID())) {
+                	prod.setOptAmountInUnits(prod.getInCases());
+                }
                
                 if(girteka){
                   if( gir.get(prod.getID())!= null ){

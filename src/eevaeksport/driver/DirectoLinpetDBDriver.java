@@ -1530,7 +1530,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	  if(!useold) {
 		  makeData();
 	  }
-	   System.out.println("kliendid a");
+	//   System.out.println("kliendid a");
 		
 		 
 	     this.customers = new ArrayList();
@@ -1538,7 +1538,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	     
 	     this.debtList = makeDebtlist();
 	     
-	     System.out.println("kliendid b");  
+	   //  System.out.println("kliendid b");  
 	     
 	   try {
 	 		  File f = new File (getDir() + "kliendid.xml");
@@ -1558,6 +1558,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	         	 // System.out.println("node name " + rida.getNodeName());
 	         	  if(rida.getNodeName().equals("customer")){
 	         		 String name = null;
+	         		boolean addaadr = true;
 		         	  try{
 		         		   name =  rida.getAttributes().getNamedItem("name").getNodeValue();
 		         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
@@ -1594,6 +1595,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		 	         		  sendaadr =  rida.getAttributes().getNamedItem("send_address_street").getNodeValue(); 
 		 	         		  customer.restStreet = sendaadr.replaceAll(";", ",");
 		 	         		  name = name + " " + sendaadr;
+		 	         		addaadr = false;
 		 	         		String maa = "";
 		 	         		try{
 		 	         	  maa =  rida.getAttributes().getNamedItem("send_address_country").getNodeValue().replaceAll(";", ","); 
@@ -1654,7 +1656,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		 	         	 }catch(Exception ee){
 		         		 }
 		         		
-		         		  customer.setName(name);
+		         		
 		         		 String aadr = "";
 		         		 String aadr2 = "";
 		         		 try{ 
@@ -1663,9 +1665,16 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 			 	         	  customer.restStreet = aadr;
 			 	         	  customer.restCity = aadr2;
 		 	         		  customer.setAddress(Converter.adressLink(aadr, country));
-		         		 }catch(Exception ee){
-
-			 		         		 }
+		 	         		  
+		 	         		  if("true".equals(getParent().getProps().getProperty("use.county")) && addaadr){
+		 	         			 name = name + " " + aadr;
+		 	         		  }
+		 	         			 
+		 	         		  
+		         		 }catch(Exception ee){ }
+		         		 
+		         		 
+		         		  customer.setName(name);
 		         		 
 		         		try{ 
 		         			country =  rida.getAttributes().getNamedItem("address_country").getNodeValue(); 

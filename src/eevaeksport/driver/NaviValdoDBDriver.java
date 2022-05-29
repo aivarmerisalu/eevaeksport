@@ -1515,7 +1515,7 @@ con3.close();
     	 		"    		    (r.[Unit Price]*(100-r.[Line Discount _])/100) as lastprice	, [External Document No_]  as lastdoc , [Order No_]  as lastdoc1 " + 
     	 		"    			FROM [VOLDEMĀRS SIA$Sales Invoice Line] r \r\n" + 
     	 		"    		      INNER JOIN [VOLDEMĀRS SIA$Sales Invoice Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_] \r\n" + 
-    	 		"    		   WHERE   d.[Posting Date]> GETDATE()-365 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date] desc";
+    	 		"    		   WHERE   d.[Posting Date]> GETDATE()-90 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date] desc";
     	 
     	 
     	 
@@ -1525,7 +1525,7 @@ con3.close();
     		+ "		FROM [VOLDEMĀRS SIA$Sales Shipment Line] r " + 
     		"      INNER JOIN [VOLDEMĀRS SIA$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [VOLDEMĀRS SIA$Item] t ON t.[No_]=r.[No_] "
     		+  "  LEFT JOIN [VOLDEMĀRS SIA$Sales Invoice Header] dd ON dd.[Linked Sales Shipment No_] = d.[No_] WHERE " + 
-    		"      d.[Posting Date]> GETDATE()-365 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date] desc";
+    		"      d.[Posting Date]> GETDATE()-90 ORDER BY  d.[Sell-to Customer No_], d.[Ship-to Code], t.[Search Description],r.[No_],d.[Posting Date] desc";
     
     System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupÃ¯Ā¿Ā½ev","viimane kogus"

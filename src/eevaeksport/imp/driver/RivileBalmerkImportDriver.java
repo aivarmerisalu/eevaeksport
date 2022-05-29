@@ -331,7 +331,7 @@ HashMap pants = null;
   
   
   public void makeOrder(Order order) throws SQLException{
- 
+	  getNF();
 	  setOrder(order);
 	     
 	     
@@ -1663,6 +1663,7 @@ String gg = "0";
 
   public NumberFormat getNF() {
 		nf.setGroupingUsed(false);
+		
 		return this.nf;
 	}
   

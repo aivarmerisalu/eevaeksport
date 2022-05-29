@@ -14,6 +14,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -121,7 +122,7 @@ import eevaeksport.util.Converter;
 		    return grupp;
 		  }
 	  
-	  
+	  private HashSet zeros = null;
 	  
 	  public String identfyGroup(String prodID){
 		  	
@@ -185,6 +186,39 @@ import eevaeksport.util.Converter;
 		
 		
     }
+	
+	private HashSet zeroStatus() {
+		HashSet res = new HashSet();
+		
+		try {
+			
+		
+        String sql6 = "SELECT SL01001 as klient, SUM( case when SL03006<=getdate() then SL03013-SL03053 else 0 end ) AS debtover,\r\n" + 
+        		"        		SUM(SL03013-SL03053) AS debt , max(datediff(dd, SL03006,getdate())) as days\r\n" + 
+        		"        		 FROM SL030500 INNER JOIN SL010500 ON SL03001 = SL01001  WHERE \r\n" + 
+        		"        NOT(SL03013=SL03053)  GROUP BY SL01001 having SUM(SL03013-SL03053) > 0  and   max(datediff(dd, SL03006,getdate())) >29";
+        Connection  con2 = DriverManager.getConnection(url,"iscalaerp","Search2016" );
+Statement stm = con2.createStatement();
+ResultSet rs3 = stm.executeQuery(sql6);
+
+while(rs3.next()){ 
+	String klient = rs3.getString("klient");
+    double debt = Double.parseDouble(rs3.getString("debt").trim());
+
+    if (rs3.getInt("days") > 29 && debt > 50){
+       res.add(klient.trim());
+     }
+}
+
+rs3.close();
+stm.close();
+con2.close();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+System.out.println(res.toString());
+return res;
+	}
 	
 	  private String getDateString(Calendar cal){
 		    StringBuffer sb = new StringBuffer();
@@ -652,7 +686,9 @@ import eevaeksport.util.Converter;
 
 	  public void makeOrder(Order order) throws SQLException{
 		
-		  
+		  if(zeros == null) {
+			 zeros =  zeroStatus() ;
+		  }
 		  setOrder(order);
 		    makeOutput(order);
 	/*	  Vector splitted =  splitOrder(order);
@@ -882,12 +918,15 @@ import eevaeksport.util.Converter;
 		         
 		         String type = "1";
 		        
-		         try{
-		        	   // status = getStat(cust);   	 
-		         }catch (Exception e){
-		        	 e.printStackTrace();
+		         String payer = order.getCompany();
+		         if(payer.length() > 5) {
+		        	 payer = payer.substring(1,5);
 		         }
-		     
+		      
+		        if(zeros.contains(payer)) {
+		        	status = "0";
+		        }
+		        System.out.println("payer " + payer + " " + status);
 		         
 		         
 		         sb2.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" + ls);
