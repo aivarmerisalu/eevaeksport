@@ -271,7 +271,7 @@ public class RivileLednaImportDriver
   	
   	if(addr == null && !cust.equals("2-1") && !cust.equals("FA-10-1") && !cust.equals("1-1")) {
   		parent.sendExceptionEmail(err , null);
-  		System.exit(0);
+  		//System.exit(0);
   	}
       
       String agent = order.getAgent();
@@ -331,11 +331,13 @@ public class RivileLednaImportDriver
       sb.append("          <I06_KODAS_KS>" + escape(cust.substring(0,cust.lastIndexOf("-"))) + "</I06_KODAS_KS>" + ls);
       cou++;
       System.out.println("aadress "+ addr);
-    
-	sb.append(getLineNr(cou));
-      sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
-      cou++;
-    
+    if(addr != null) {
+    	sb.append(getLineNr(cou));
+        sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
+        cou++;
+      	
+    }
+	
     
      
     Vector lines = order.getOrderLines();

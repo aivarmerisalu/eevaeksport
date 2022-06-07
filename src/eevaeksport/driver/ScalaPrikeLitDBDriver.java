@@ -867,7 +867,7 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
        cust.setUsedCredit(debt);
        
        if (rs3.getInt("days") > 30 && debt > 50){
-    	   cust.setSalesBlock(true);
+    	   cust.setSalesBlockT(true);
         } else {
     	   cust.setSalesBlock(false);
        }

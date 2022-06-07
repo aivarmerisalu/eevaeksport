@@ -124,16 +124,16 @@ public class SamsonasCSVImportDriver
 		    	 if(itemid != null && prods.get(itemid) != null) {
 		    	  
 		          Product pr = (Product)  prods.get(itemid);
-		    		 
-		    	  if(pr.getGroup().toLowerCase().startsWith("me") ){
+		    		// Võtame maha hetkel spliti.
+		    	//  if(pr.getGroup().toLowerCase().startsWith("me") ){
 			    	 ordOTB.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-		              }
+		          //    }
 		    	 
-		    	  if(pr.getGroup().toLowerCase().startsWith("ki") ){
+		    	  /*if(pr.getGroup().toLowerCase().startsWith("ki") ){
 		        	ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     		 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-			          } 
+			          }*/ 
 		     } 
 	  }
 

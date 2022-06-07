@@ -183,10 +183,10 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	             }
 
 	             if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setStartDate(sdate.substring(0,10));
+	            	 mline.setStartDate(sdate.substring(0,8));
 	             }
 	             if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setEndDate(edate.substring(0,10));
+	            	 mline.setEndDate(edate.substring(0,8));
 	             }
 	             if (prodID != null && prodID.length() > 0) {
 	               mline.setProdID(prodID);
@@ -405,23 +405,39 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 		             
 		          
 		             if (parentgroupcode.equals("15")) {
-		        		 name = "PaDeLe " + name;
+		        		 name = "PrDlės " + name;
 		        	 }
 		             if (parentgroupcode.equals("3")) {
-		        		 name = "PaDeRo " + name;
+		        		 name = "PrDros " + name;
 		        	 }
 
+		             if (parentgroupcode.equals("24")) {
+		        		 name = "J.Pusf " + name;
+		        	 }
+		             if (parentgroupcode.equals("27")) {
+		        		 name = "Š.Pusf " + name;
+		        	 }
+		             if (parentgroupcode.equals("25")) {
+		        		 name = "K.Pusf " + name;
+		        	 }
+		             if (parentgroupcode.equals("5")) {
+		        		 name = "KrGami " + name;
+		        	 }
+		             if (parentgroupcode.equals("14")) {
+		        		 name = "Skerdi " + name;
+		        	 }
+		             
 		        	 if (parentgroupcode.equals("4")) {
-		        		 name = "SaruDe " + name;
+		        		 name = "ŠrDros " + name;
 		        	 }
 		        	 if (parentgroupcode.equals("11")) {
-		        		 name = "SaruGa " + name;
+		        		 name = "ŠrGami " + name;
 		        	 }
 		        	 if (parentgroupcode.equals("1")) {
-		        		 name = "ViDeRo " + name;
+		        		 name = "VDšros " + name;
 		        	 }
 		        	 if (parentgroupcode.equals("2")) {
-		        		 name = "ViDeLe " + name;
+		        		 name = "VDrlės " + name;
 		        	 }
 		        	 if(name.length()> 2) {
 		        		 tm.put(Converter.cleanLitLatEst(parentgroupcode), Converter.enCodeEst(name));
@@ -476,6 +492,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
               String objekt = st.nextToken().trim();
               agent.setObject(objekt);
             }
+            
                 tm.put(agent.getName(), agent);	
                 agents.put(agent.getID(), agent);
           }
@@ -545,6 +562,16 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
      TreeMap tm = new TreeMap();
      custAgents = new Hashtable();
      debtList = new Vector();
+     
+    String tsales =  parent.getProps().getProperty("telesales");
+    HashSet tsal = new HashSet();
+    if(tsales != null) {
+    	StringTokenizer st = new StringTokenizer(tsales,",");
+    	while (st.hasMoreElements()) {
+    		tsal.add(st.nextElement());
+    	}
+    }
+    System.out.println("Telesales " + tsales + " " + tsal.toString() );
 
      try {
      FileReader fr = new FileReader(getDir() + "DebtList.csv");
@@ -668,6 +695,11 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
         	   custAgents.put(customer.getID(), arr);
            }
            
+         //  Lisame telesalestele kõik kliendid
+       Iterator itera =     tsal.iterator();
+       while(itera.hasNext()) {
+    	   customer.addAgent(new Agent(itera.next()+""));
+       }
            
            String cont = "";
            if(contactname.length() > 0) {
@@ -802,7 +834,7 @@ if(stocks == null) {
 				 }
 				 
 				 prod.setVat("21");
-				 tm.put(Converter.cleanLitLatEst(description + prod.getUnit()), prod);
+				 tm.put(Converter.cleanLitLatEst(description + prod.getUnit() + prod.getID()), prod);
 			 
 			 }
 			 
@@ -1059,13 +1091,17 @@ public Vector getFixedAssortmentData() {
           if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
             mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
           }
-
-          if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
-         	 mline.setStartDate(sdate.substring(0,10));
-          }
-          if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
-         	 mline.setEndDate(edate.substring(0,10));
-          }
+try {
+	if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
+    	 mline.setStartDate(sdate.substring(0,8));
+     }
+     if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
+    	 mline.setEndDate(edate.substring(0,8));
+     }
+}catch(Exception e) {
+	
+}
+          
           if (prodID != null && prodID.length() > 0) {
             mline.setProdID(prodID);
           }

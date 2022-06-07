@@ -228,7 +228,7 @@ public class FileSender {
 	    	               // s3Client.putObject(bucketName, dirOut, "Uploaded String Object");
 
 	    	                // Upload a file as a new object with ContentType and title specified.
-	    	        		if(f.getName().contains("stockref") || f.getName().contains("customerorders")
+	    	        		if(f.getName().contains("stockref") || f.getName().contains("customerorders") || f.getName().contains("prodactions")
 	    	        				|| f.getName().contains("debtref") ||  f.getName().startsWith("st")) {
 	    	        			  PutObjectRequest request = new PutObjectRequest(bucketName, dirOut + f.getName(), f);
 	  	    	                ObjectMetadata metadata = new ObjectMetadata();
@@ -257,14 +257,23 @@ public class FileSender {
 	        if(this.sendPicts) {
 	        	 System.out.println(time + " Sees Picts " + new File(dirPictLoc).listFiles() + " " + dirOutLoc);
 	        	  TreeMap<String,Long> sizes = new TreeMap<String,Long>();
-	        	 
-	             ObjectListing   objectListing = s3Client.listObjects(bucketName, dirPict);
-	    	          //  System.out.println(time + " Sees " + f.getName() + " " + objectListing.getObjectSummaries().toString());
-	    	            for (S3ObjectSummary objectSummary :    objectListing.getObjectSummaries()) {
-	    	             // System.out.println( " - " + objectSummary.getKey() + "  " +
-	    	              //    "(size = " + objectSummary.getSize() +  ")");
-	    	               sizes.put(objectSummary.getKey(), objectSummary.getSize());
-	    	            }
+	        	 try {
+	        		if("true".equals(mjProps.getProperty("aws.nopictlist"))) {
+	        			
+	        		}else {
+	        			 ObjectListing   objectListing = s3Client.listObjects(bucketName, dirPict);
+		    	          //  System.out.println(time + " Sees " + f.getName() + " " + objectListing.getObjectSummaries().toString());
+		    	            for (S3ObjectSummary objectSummary :    objectListing.getObjectSummaries()) {
+		    	             // System.out.println( " - " + objectSummary.getKey() + "  " +
+		    	              //    "(size = " + objectSummary.getSize() +  ")");
+		    	               sizes.put(objectSummary.getKey(), objectSummary.getSize());
+		    	            }	
+	        		}
+	        		
+	        	 }catch(Exception e) {
+	        		 
+	        	 }
+	            
 	    	            
 	    	        for (File f : new File(dirPictLoc).listFiles())  {
 	    	        	

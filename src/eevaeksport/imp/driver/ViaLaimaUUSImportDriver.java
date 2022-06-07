@@ -172,7 +172,8 @@ try{
 	
   public String postJson(String json, String filename) throws Exception{
 	  Converter.trustAllHttpsURLConnection();
-	  String urls = "https://info2.via3l.ee:8084/edimap2/index.php?loc=tellimiskeskus/json/createorderclientver1.php";
+	  String urls = "https://84.50.148.253/edimap2/index.php?loc=tellimiskeskus/json/createorderclientver1.php";
+	  // vana info2.via3l.ee:8084
 	  URL url = new URL (urls);
 	 	
 	 	HttpURLConnection con = (HttpURLConnection)url.openConnection();

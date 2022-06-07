@@ -817,15 +817,19 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
             
             while (rs.next()) {
                 String klient = rs.getString("kood").trim();
-                String ag = rs.getString("agent").trim();
-                Vector<String> vec  = new Vector<String>();
-                if(custAgents.get(klient) != null) {
-                	vec = custAgents.get(klient);
+                String ag = rs.getString("agent");
+                if(ag != null) {
+                	ag = ag.trim();
+                	  Vector<String> vec  = new Vector<String>();
+                      if(custAgents.get(klient) != null) {
+                      	vec = custAgents.get(klient);
+                      }
+                      if(!vec.contains(ag)) {
+                      	  vec.add(ag);
+                      }
+                      custAgents.put(klient, vec);
                 }
-                if(!vec.contains(ag)) {
-                	  vec.add(ag);
-                }
-                custAgents.put(klient, vec);
+              
             }
             rs.close();
             

@@ -793,10 +793,14 @@ try{
 							         }
 								Product prod = getProduct(toode, ork);
 								System.out.println("aaa " + prod + " " + toode);
-								String ean = prod.getEAN();
-								if (ean == null) {
-									ean = prod.getID();
+								String ean = toode ;
+								String tnimi = toode;
+								if(prod != null) {
+									ean = prod.getEAN();
+									tnimi = prod.getName();
 								}
+								
+								
 						
 								
 							         String disc = "0";
@@ -817,8 +821,8 @@ try{
 										
 								        
 								sb.append("<tr><td>" + (i+1) + ".</td><td>" + ean + 
-											"</td><td>" + prod.getID() + 
-											"</td><td>" + prod.getName() + 
+											"</td><td>" + toode + 
+											"</td><td>" + tnimi + 
 											"</td><td>" + ol.getKogus() *-1+ 
 											"</td><td>" + disc + 
 											"%</td><td>" + nf2.format( sum ) + 
@@ -954,11 +958,20 @@ try{
 							         }
 								Product prod = getProduct(toode, ork);
 								
-								String ean = prod.getEAN();
-								if (ean == null) {
-									ean = prod.getID();
-								}
-						
+							
+								
+								if(prod == null) {
+									prod =  new Product(toode);
+									prod.setEAN(toode);
+									prod.setName(toode);
+									prod.setPrice(ol.getPrice());
+									prod.setUnit("pc");
+
+	                                }
+									
+							
+								
+								
 								 	    	         
 								
 								
@@ -970,7 +983,7 @@ try{
 								        }
 						     // siia vahele sii loogika teha et kui on PL = 9 siis jagame muidu ei jaga 
 								     double jaga = 1;
-								     System.out.println("PL trykk " + ol.getPl() + " " + ol.getToode() + " " + prod.getPrice() );
+								    // System.out.println("PL trykk " + ol.getPl() + " " + ol.getToode() + " " + prod.getPrice() );
 								     
 								     
 								     String jagaja = "1";
@@ -1047,7 +1060,7 @@ try{
 							      c.setCellValue(Converter.getDDpMMpYYYYpString(cal));
 							      
 							}
-
+	                    
 	
 	                System.out.println("totals " + nf.format(total) );
 						      row1 = worksheet.getRow(57);  //0 = row number

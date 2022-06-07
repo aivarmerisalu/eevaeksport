@@ -252,6 +252,7 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
                 if(email.length() > 1){
               	  agent.setActive(true);
               	activeAgents.add(kood);
+              	System.out.println("Active " + name);
                 }
 				
                 agents1.put(agent.getID(), agent);
@@ -408,7 +409,7 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 			Connection con = getNewConnection();
 			Statement st = con.createStatement();
 
-			String cmd2 = "select * from Kliendid where agent != '' or kliendikood = 'UUS_KLIENT' ";
+			String cmd2 = "select * from Kliendid where agent != '' or kliendikood = 'UUS_KLIENT' or  kliendikood = '973099' ";
 //kliendikood nimi Aadress  lisainfo Agent
 			
 
@@ -471,10 +472,18 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 		                              cust.addAgent( new Agent( ag));
 		                           }
 		                      } 
+		                       //paneme kõigile kõik külge 
+		                       Iterator itera =  activeAgents.iterator();
+			                      while (itera.hasNext()) {
+			                    	  cust.addAgent(new Agent(itera.next()+""));  
+			                      }
+			                }
 		                       goes = true;
 	                      }
 	                      
-	                }
+	                    
+	                      
+	               
 			
 				 if ( salesman != null){
 					 cust.addAgent(new Agent(salesman.trim()));
@@ -494,7 +503,11 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 	                              cust.addAgent( new Agent( ag));
 	                           }
 	                      }
-	                       goes = true;
+	                       goes = true; //paneme kõigile kõik külge 
+	                       Iterator itera =  activeAgents.iterator();
+		                      while (itera.hasNext()) {
+		                    	  cust.addAgent(new Agent(itera.next()+""));  
+		                      }
 	                       }
 	                }
 					
@@ -502,7 +515,7 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 						 cust.addAgent(new Agent(salesman2.trim()));
 			    	 }
 				
-				 if(cust.getID().equals("UUS_KLIENT")){
+				 if(cust.getID().equals("UUS_KLIENT") || cust.getID().equals("973099") ){
                 	Enumeration enume = getParent().getAgentsHash().elements();
                     while (enume.hasMoreElements()) {
                       Agent a = (Agent) enume.nextElement();

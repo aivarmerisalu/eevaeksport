@@ -840,7 +840,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  ord10d.setPaymTerm(order.getPaymTerm());
 	  ord10d.setWarehouse(order.getWarehouse());
 	  ord10d.setShipDateUsed(order.isShipDateUsed());
-	  ord10d.setDealer("81853");
+	  ord10d.setDealer("81161");
 	  ord10d.setCurrency(getType(order.getDealer(),12,order));
 	  
 	  Order ord10pp = new Order((order.getCompany()+ "_" + lisaV),order.getAgentFirstName()); // D tähega tellimus 
@@ -1128,7 +1128,7 @@ private String getERI(String ware) {
 
 	if(ware.equals("53268") || ware.equals("22013")){ // n01 riga 
 		
-		return "81853";
+		return "81161";
 	}
 	if(ware.equals("53269") || ware.equals("46801")){ // n02 daugavpils 
 		

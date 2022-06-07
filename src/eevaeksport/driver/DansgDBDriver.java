@@ -669,11 +669,7 @@ public class DansgDBDriver extends AbstractDBDriver implements Discounter, Manag
             double kogus = rs.getDouble("kogus");
             double price = rs.getDouble("price");
             Date dd = rs.getDate("kuupaev");
-            Customer cust = (Customer)kliendid.get(kliendikood);
-            if (cust == null){
-              cust = new Customer(kliendikood);
-            }
-           Product prod = new Product(tootekood);
+            
               CustProd cp = new CustProd(kliendikood, tootekood, kogus, 0, 0,
                                            Converter.getYYYYpMMpDDpString(dd).substring(0,5), price, 0, 0, " ");
             
@@ -690,15 +686,11 @@ public class DansgDBDriver extends AbstractDBDriver implements Discounter, Manag
              cp.setAbiKood("LYSM "  + kogused.get(kliendikood + tootekood));                    
            }
          
-           if(kliendikood.indexOf("1001") != -1) {
-        	   System.out.println("Kood " + kliendikood + " "+ tootekood);
-           }
+        
           
-              cust.addProduct(prod,cp,false);
-              kliendid.put(kliendikood, cust);
-            //  if(!pandud.contains(  kliendikood +"-"+ tootekood)) {
+              if(!pandud.contains(  kliendikood +"-"+ tootekood)) {
             	  custProds.add(cp);
-             // }
+              }
               
               pandud.add(kliendikood +"-"+ tootekood);
               
