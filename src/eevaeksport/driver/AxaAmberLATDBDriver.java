@@ -2282,8 +2282,10 @@ stmt.close();
         prod.setInCases(rs.getDouble("kastis"));
         prod.setOnPallet(rs.getDouble("alusel"));
         double price = rs.getDouble("price"); 
+        boolean hasprice = false;
         if(price > 0){
             prod.setPrice(price);
+            hasprice = true;
         }  else if(!prod.getID().startsWith("60")){
      		  // goes = false;
         }
@@ -2334,13 +2336,14 @@ stmt.close();
        
        
        prod.setAgentGroup("ALL");
-  
+    boolean nostock = true;
        String ette = "";
        if(kogused.get(kood) != null){
     	  
     	   double lseis = Double.parseDouble(kogused.get(kood)+"");
     	   if(lseis > 0){
     		   prod.setStock((int)lseis);
+    		   nostock = false;
     		   if(prod.getID().startsWith("60")){
     			   ette = "xx "; 
     			 //  prod.setAgentGroup("HORECA");
@@ -2349,6 +2352,11 @@ stmt.close();
     	   }else if(prod.getID().startsWith("60") && !posmust.contains(prod.getID())){
     		   goes = false;
     	   }
+       
+       if(!hasprice && nostock) {
+    	//   System.out.println("välja eiladu + ei hind  " + prod.getID());
+    	   goes = false;
+       }
       
        String bre = "";
        //lisa kilo hind 

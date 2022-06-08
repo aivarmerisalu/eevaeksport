@@ -336,6 +336,9 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
    		String cmd =  "    select  toode.aktsiis,dok.dokumnr , rid.toode , dok.klient from dok inner join klient on dok.klient = klient.kood inner join rid on rid.dokumnr = dok.dokumnr inner join toode on rid.toode = toode.toode " + 
    				"    where kuupaev > date()-45 and dok.doktyyp='G' and (otsekorral != '' or dok.klient like 'ARAXES%' or dok.klient like 'A-SELVER%') "
    				+ " and dok.yksus = '1' and rid.toode != 'KM' and rid.toode not like '00%'  "; //and toode.aktsiis > 0
+   		cmd = "select  toode.aktsiis,dok.dokumnr , rid.toode , dok.klient  from dok inner join klient on dok.klient = klient.kood inner join rid on rid.dokumnr = dok.dokumnr inner join toode on rid.toode = toode.toode  " + 
+   				"   				    where kuupaev > date()-40 and dok.doktyyp='G' and toode.aktsiis != rid.kulum " + 
+   				"   				 and dok.yksus = '1' and rid.toode != 'KM' and rid.toode not like '00%'";
    	Vector doks = new Vector();
    		log(cmd);
    		
@@ -353,6 +356,11 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
    			System.out.println("Tehtud " + sss);
    			}
    			rs.close();
+   			
+   			
+   			
+   			
+   			
    			cc.close();
    			stmt.close();
    			con.close();

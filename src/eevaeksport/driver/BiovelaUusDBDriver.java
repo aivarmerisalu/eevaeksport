@@ -394,220 +394,225 @@ System.out.println("re " + re.toString());
 		return priceass;
 	}
 	
-   public Vector getPriceMatrixDataXX() {
-
-   	Vector lines = new Vector();
-   	TreeMap vahe = new TreeMap();
-   	fixedass = new Vector();
-   	prices = new HashMap();
-   	usedCustCodes = new HashSet();
-   	
-   		InputSource xml = new InputSource(new StringReader(getStringFromFile("PriceMeriEsb.xml")));	
-		XPath xPath =  XPathFactory.newInstance().newXPath();
-		 try{
-		NodeList nodeList = (NodeList) xPath.compile("//pi_mstr").evaluate(xml, XPathConstants.NODESET);
-			
-		for (int i = 0 ; i < nodeList.getLength() ; i++){
-			Node o = nodeList.item(i);
-			   
-			double price = 0;
-				String custID = null;
-				String clGroup = null;
-				String prodID = null;
-				String discGroup = null;
-				String start = null;
-				String end = null;
-				String listname = null;
-				String lineinfo = null;
-				String discT = null;
-				double discount = 0;
-	            String type = null;  
-	
-				NodeList ll = o.getChildNodes();
-			for (int r = 0 ; r < ll.getLength() ; r++){
-				Node nn = ll.item(r);
+	 public Vector getPriceMatrixDataXX() {
+			TreeMap vahe = new TreeMap();
+	   	Vector lines = new Vector();
+	   	fixedass = new Vector();
+	   	prices = new HashMap();
+	   	usedCustCodes = new HashSet();
+	   	
+	   		InputSource xml = new InputSource(new StringReader(getStringFromFile("PriceMeriEsb.xml")));	
+			XPath xPath =  XPathFactory.newInstance().newXPath();
+			 try{
+			NodeList nodeList = (NodeList) xPath.compile("//pi_mstr").evaluate(xml, XPathConstants.NODESET);
 				
-				  if(nn.getNodeName().equals("piAmtType")){
-					   try{  type = nn.getFirstChild().getNodeValue();
-					   }catch(Exception e){ }
-				   }
-	
-				  
-				  if(nn.getNodeName().equals("piList")){
-					   try{  listname = nn.getFirstChild().getNodeValue();
-					   }catch(Exception e){ }
-				   }
-	
-				  if(nn.getNodeName().equals("piStart")){
-					   try{  start = nn.getFirstChild().getNodeValue();
-					   }catch(Exception e){ }
-				   }
-				  if(nn.getNodeName().equals("piExpire")){
-					   try{  end = nn.getFirstChild().getNodeValue();
-					   }catch(Exception e){ }
-				   }
-				  
-				  
-				  
-		  if(nn.getNodeName().equals("piCsCode")){
-			   try{  clGroup = nn.getFirstChild().getNodeValue();
-			   if(clGroup.equals("BND")){
-				   clGroup = "BNDx";
+			for (int i = 0 ; i < nodeList.getLength() ; i++){
+				Node o = nodeList.item(i);
+				   
+				double price = 0;
+					String custID = null;
+					String clGroup = null;
+					String prodID = null;
+					String discGroup = null;
+					String start = null;
+					String end = null;
+					String listname = null;
+					String lineinfo = null;
+					String discT = null;
+					double discount = 0;
+		            String type = null;  
+		
+					NodeList ll = o.getChildNodes();
+				for (int r = 0 ; r < ll.getLength() ; r++){
+					Node nn = ll.item(r);
+					
+					  if(nn.getNodeName().equals("piAmtType")){
+						   try{  type = nn.getFirstChild().getNodeValue();
+						   }catch(Exception e){ }
+					   }
+		
+					  
+					  if(nn.getNodeName().equals("piList")){
+						   try{  listname = nn.getFirstChild().getNodeValue();
+						   }catch(Exception e){ }
+					   }
+		
+					  if(nn.getNodeName().equals("piStart")){
+						   try{  start = nn.getFirstChild().getNodeValue();
+						   }catch(Exception e){ }
+					   }
+					  if(nn.getNodeName().equals("piExpire")){
+						   try{  end = nn.getFirstChild().getNodeValue();
+						   }catch(Exception e){ }
+					   }
+			  if(nn.getNodeName().equals("piCsCode")){
+				   try{  clGroup = nn.getFirstChild().getNodeValue();
+				   }catch(Exception e){ }
 			   }
-			   }catch(Exception e){ }
-		   }
-		  if(nn.getNodeName().equals("piPartCode")){
-			   try{  prodID = nn.getFirstChild().getNodeValue();
-			   }catch(Exception e){ }
-		   }
-		  if(nn.getNodeName().equals("piListPrice")){
-			   try{  price = Double.parseDouble(nn.getFirstChild().getNodeValue());
-			   }catch(Exception e){ }
-		   }
- 
-		  
-	
-		 				
+			  if(nn.getNodeName().equals("piPartCode")){
+				   try{  prodID = nn.getFirstChild().getNodeValue();
+				   }catch(Exception e){ }
+			   }
+			  if(nn.getNodeName().equals("piListPrice")){
+				   try{  price = Double.parseDouble(nn.getFirstChild().getNodeValue());
+				   }catch(Exception e){ }
+			   }
+	 
+			  
+			  /*
+			          <qdoc:pid_det>
+	                  <qdoc:operation/>
+	                  <qdoc:pidAmt>0.74</qdoc:pidAmt>
+	                  <qdoc:pidDomain>D012LT</qdoc:pidDomain>
+	                  <qdoc:pidListId>103218</qdoc:pidListId>
+	                  <qdoc:pidQty>0</qdoc:pidQty>
+	               </qdoc:pid_det>
+	*/
+			 				
+				
 			
-		
-		  if(nn.getNodeName().equals("pid_det")){
-			  
- NodeList llx = nn.getChildNodes();
-			  
-			  for (int rr = 0 ; rr < llx.getLength() ; rr++){
-				  Node nnn = llx.item(rr);
-				  if(nnn.getNodeName().equals("pidAmt")){
-					   try{ 
-						   if(discount == 0){
-							   discount = Double.parseDouble(nnn.getFirstChild().getNodeValue());
-							   discT = discount + "";
-							}else{
-								discT = nnn.getFirstChild().getNodeValue();
-							}
-					   }catch(Exception e){ }
-				  }
+			  if(nn.getNodeName().equals("pid_det")){
 				  
-				  if(nnn.getNodeName().equals("pidQty")){
-					   try{ 
-						   String aaa =  nnn.getFirstChild().getNodeValue();
-						   if(!aaa.equals("0")){
-							   if(lineinfo == null){
-								   lineinfo = "Kiek." + aaa + " Kain." + discT + "€";
-							   }else{
-								   lineinfo = lineinfo + "|Kiek." + aaa + " Kain." + discT + "€";
-							   }
-							}
-					   }catch(Exception e){ }
-				  }
-			 }
-		   }
-		}
-		  
-		  
-			 MatrixLine mline = new MatrixLine();
-
-		if (custID != null && custID.trim().length() > 0) {
-			mline.setCustID(custID.trim());
-			if(!usedCustCodes.contains(custID.trim())){
-				usedCustCodes.add(custID.trim());
+	 NodeList llx = nn.getChildNodes();
+				  
+				  for (int rr = 0 ; rr < llx.getLength() ; rr++){
+					  Node nnn = llx.item(rr);
+					  if(nnn.getNodeName().equals("pidAmt")){
+						   try{ 
+							   if(discount == 0){
+								   discount = Double.parseDouble(nnn.getFirstChild().getNodeValue());
+								   discT = discount + "";
+								}else{
+									discT = nnn.getFirstChild().getNodeValue();
+								}
+						   }catch(Exception e){ }
+					  }
+					  
+					  if(nnn.getNodeName().equals("pidQty")){
+						   try{ 
+							   String aaa =  nnn.getFirstChild().getNodeValue();
+							   if(!aaa.equals("0")){
+								   if(lineinfo == null){
+									   lineinfo = "Kiek." + aaa + " Kain." + discT + "€";
+								   }else{
+									   lineinfo = lineinfo + "|Kiek." + aaa + " Kain." + discT + "€";
+								   }
+								}
+						   }catch(Exception e){ }
+					  }
+				 }
+			   }
 			}
-		}
-		if (mline.getCustID() == null && clGroup != null
-				&& clGroup.trim().length() > 0) {
-			String ddd = clGroup.trim();
-			if(ddd.equals("AIBE")) {
-				ddd = ddd + "00";
-			}
-			mline.setCliGroup(ddd);
-			if(!usedCustCodes.contains(ddd)){
-				usedCustCodes.add(ddd);
-			}
-		}
-
-		if (prodID != null && prodID.trim().length() > 0) {
-			mline.setProdID(prodID.trim());
-		}
-		if (mline.getProdID() == null && discGroup != null
-				&& discGroup.trim().length() > 0) {
-			mline.setDiscGroup(discGroup);
-			
-		}
-		//mline.setDiscount(discount);
-		boolean action = false;
-		
-		if((listname != null && listname.trim().startsWith("AK"))){
-			//System.out.println( clGroup + "'" + prodID + "'" + discGroup + "'" + discount +  " " 
-				//		+ type + " " + start + " " + end + " " + lineinfo) ;
-				
-			     
-			     if(start != null ){
-						mline.setStartDate(start);
-						if(end != null){
-							mline.setEndDate(end);
-						}else{
-							mline.setEndDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
-						}
-						action = true;
-					}
-				}
-		 mline.setProdLevel("000");
-		
-		if((type != null && type.equals("4")) ){
-	//System.out.println("'" + custID + "'" + clGroup + "'" + prodID + "'" + discGroup + "'" + discount +  " " 
-			//	+ type + " " + start + " " + end + " " + lineinfo) ;
-		
-			if(start != null ){
-				mline.setStartDate(start);
-				if(end != null){
-					mline.setEndDate(end);
-				}else{
-					mline.setEndDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
-				}
-				action = true;
-			 mline.setProdLevel("004");
-			}
-		}
-		
-
-		
-		
-		 
-		
-		//vaatame ka on hapu 
-		boolean validdate = true;
-		
-		
-		
-		if(validdate){
-			
-		
-		if (price != 0 || discount  > 0) {
-			 if(discount > 0){
-					price = discount;
-				}
-				mline.setPrice(price);
-			
-			   if(prices.get(prodID) != null){
-					double pr = Double.parseDouble((String)prices.get(prodID));
-					if(price > pr)
-					prices.put(prodID, price + "");
-				}else{
-					prices.put(prodID, price + "");
-				}
 			  
-		}
+			  
+				 MatrixLine mline = new MatrixLine();
+
+			if (custID != null && custID.trim().length() > 0) {
+				mline.setCustID(custID.trim());
+				if(!usedCustCodes.contains(custID.trim())){
+					usedCustCodes.add(custID.trim());
+				}
+			}
 		
-		
-		if(clGroup != null && prodID != null && price > 0){
-			if(lineinfo != null){
-				mline.setLineinfo(lineinfo);
-				//System.out.println("Lineinfo " + lineinfo);
+			
+			if (mline.getCustID() == null && clGroup != null
+					&& clGroup.trim().length() > 0) {
+				String ddd = clGroup.trim();
+				if(ddd.equals("AIBE")) {
+					ddd = ddd + "00";
+				}
+				mline.setCliGroup(ddd);
+				if(!usedCustCodes.contains(ddd)){
+					usedCustCodes.add(ddd);
+				}
+			}
+
+			if (prodID != null && prodID.trim().length() > 0) {
+				mline.setProdID(prodID.trim());
+			}
+			if (mline.getProdID() == null && discGroup != null
+					&& discGroup.trim().length() > 0) {
+				mline.setDiscGroup(discGroup);
+				
+			}
+			//mline.setDiscount(discount);
+
+			boolean action = false;
+			
+			if((listname != null && listname.trim().startsWith("AK"))){
+				//System.out.println( clGroup + "'" + prodID + "'" + discGroup + "'" + discount +  " " 
+					//		+ type + " " + start + " " + end + " " + lineinfo) ;
+					
+				     
+				     if(start != null ){
+							mline.setStartDate(start);
+							if(end != null){
+								mline.setEndDate(end);
+							}else{
+								mline.setEndDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
+							}
+							action = true;
+						}
+					}
+					
+			 mline.setProdLevel("000");
+			 
+			if((type != null && type.equals("4")) ){
+		//System.out.println("'" + custID + "'" + clGroup + "'" + prodID + "'" + discGroup + "'" + discount +  " " 
+				//	+ type + " " + start + " " + end + " " + lineinfo) ;
+			
+				if(start != null ){
+					mline.setStartDate(start);
+					if(end != null){
+						mline.setEndDate(end);
+					}else{
+						mline.setEndDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
+					}
+
+					action = true;
+					mline.setProdLevel("004");
+				}
 			}
 			
-			String idd = clGroup+"|"+prodID;
+
+			
+			
+			 
+			
+			//vaatame ka on hapu 
+			boolean validdate = true;
+			
+			
+			
+			if(validdate){
 				
-				if(vahe.get(idd) != null ) {
-					if( action) {
+			
+			if (price != 0 || discount  > 0) {
+				 if(discount > 0){
+						price = discount;
+					}
+					mline.setPrice(price);
+				
+				   if(prices.get(prodID) != null){
+						double pr = Double.parseDouble((String)prices.get(prodID));
+						if(price > pr)
+						prices.put(prodID, price + "");
+					}else{
+						prices.put(prodID, price + "");
+					}
+				  
+			}
+			
+			
+			if(clGroup != null && prodID != null && price > 0){
+				if(lineinfo != null){
+					mline.setLineinfo(lineinfo);
+					//System.out.println("Lineinfo " + lineinfo);
+				}
+				String idd = clGroup+"|"+prodID;
+			
+				if(vahe.get(idd) != null )  {
+					if( action ) {
 						vahe.put(idd, mline);
 					}
 					
@@ -626,16 +631,15 @@ System.out.println("re " + re.toString());
 		}
 				
 		
-	
-	} catch (Exception ex) {
-		ex.printStackTrace();
-	}
-   	System.out.println("Price matrix tehtud " + lines.size() + "\nPrices size" + prices.size());
-   	fixedass = (Vector)lines.clone();
-	return lines;
 
-   }
-   
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	   	System.out.println("Price matrix tehtud " + lines.size() + "\nPrices size" + prices.size());
+	   	fixedass = (Vector)lines.clone();
+		return lines;
+
+	   }
    
    private HashSet usedCustCodes = null;
 
