@@ -521,6 +521,9 @@ System.out.println("re " + re.toString());
 				if(ddd.equals("AIBE")) {
 					ddd = ddd + "00";
 				}
+				if(ddd.equals("BND")){
+					ddd = "BNDx";
+				   }
 				mline.setCliGroup(ddd);
 				if(!usedCustCodes.contains(ddd)){
 					usedCustCodes.add(ddd);
@@ -600,6 +603,10 @@ System.out.println("re " + re.toString());
 					}else{
 						prices.put(prodID, price + "");
 					}
+				  if(clGroup.equals("BND")) {
+					  prices.put("X" + prodID, price);
+				  }
+				   
 				  
 			}
 			
@@ -911,7 +918,7 @@ System.out.println("re " + re.toString());
 			   }
 			   
 		
-	   System.out.println("stocks" + products.toString());
+	   //System.out.println("stocks" + products.toString());
 	   
    return products.toString();
 
@@ -2077,7 +2084,7 @@ System.out.println(" Node size " + nodeList.getLength());
 		        	//goes = false;
 		        	customer.noOrder = true;
 		        	//customer.diffBack = true;
-		        	System.out.println("del days " + customer.getID() + "  null");
+		        	//System.out.println("del days " + customer.getID() + "  null");
 		        }
 				
 				customer.restActive = goes ;
@@ -2410,6 +2417,11 @@ if(stocks.get(kood) != null) {
 			if(prices.get(prod.getID()) != null){
 				try{
 					prod.setPrice(Double.parseDouble(prices.get(prod.getID())+""));
+				}catch(Exception e){
+					
+				}
+				try{
+					//prod.setPrice(Double.parseDouble(prices.get("X" + prod.getID())+""));
 				}catch(Exception e){
 					
 				}

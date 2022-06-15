@@ -2021,7 +2021,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
     	  
     	  
     	  if(pdgroupid.equals("MĀRR_SINEP") || pdgroupid.equals("MĒRCES") || pdgroupid.equals("MAISIJUMI") || pdgroupid.equals("KEČUPI") || pdgroupid.equals("IEVĀRĪJUMI") 
-    			  || pdgroupid.equals("PIPARI") || pdgroupid.equals("ZIVJUKONS") || pdgroupid.equals("SĪRUPI") || pdgroupid.equals("PICAS") 
+    			  || pdgroupid.equals("PIPARI") || pdgroupid.equals("ZIVJUKONS") || pdgroupid.equals("VEGAN") || pdgroupid.equals("SĪRUPI") || pdgroupid.equals("PICAS") 
     			  || pdgroupid.equals("CITAS_PIED")  || pdgroupid.equals("MARINĀDES")  || pdgroupid.equals("GARŠV_MAIS")  || pdgroupid.equals("TOMĀTU MĒR") 
     			  || pdgroupid.equals("UZTUR_BAG")  || pdgroupid.equals("MAJONĒZES")  || pdgroupid.equals("GARŠAUGI")){
     		  

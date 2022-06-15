@@ -738,9 +738,9 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 		
 
 		String cmd = " select Siffer,nimetus,hind,Ühik,ÜhikutKastis,ean,YlemGrupp"
-				+ ",AlamGrupp,Hetkeseis,PildiLink,SoovituslikJaehind,Hooaeg,tähtsusgrupp from KaubadProff"
+				+ ",AlamGrupp,Hetkeseis,PildiLink,SoovituslikJaehind,Hooaeg,tähtsusgrupp, 0 as tladu from KaubadProff"
 				+ " union all select  Siffer,nimetus,hind,Ühik,ÜhikutKastis,ean,YlemGrupp " + 
-			    ",AlamGrupp,Hetkeseis,PildiLink,SoovituslikJaehind,Hooaeg,tähtsusgrupp  from Kaubad  ";
+			    ",AlamGrupp,Hetkeseis,PildiLink,SoovituslikJaehind,Hooaeg,tähtsusgrupp, Hetkeseis_Tartu as tladu  from Kaubad  ";
 		// Siffer   Nimetus Hind Ühik  ÜhikutKastis   EAN   
 		//YlemGrupp AlamGrupp Hetkeseis   MinHind  Kaal  Brutokaal  Pildilink   
 
@@ -826,7 +826,7 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 					prod.setStock(0);
 				}
 
-				prod.setName( Converter.enCodeEst(nimetus + " " +  add).trim());
+				
 
 				String weblink = rs.getString("PildiLink");
 				if (weblink != null && weblink.trim().length() > 0) {
@@ -865,8 +865,13 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 					goes = true;
 				//	System.out.println("OIOI "+ prod.getName());
 				}
-				
-				
+				double tladu = rs.getDouble("tladu"); 
+				String add2 = "";
+				if (tladu > 0){
+					prod.setPartii("@Tartu:" + (int)tladu );
+					add2 = " @Tar:" + (int)tladu;
+				}
+				prod.setName( Converter.enCodeEst(nimetus + " " +  add + add2).trim());
 				if(goes) {
 					products.put(prod.getName(), prod);
 					

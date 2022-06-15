@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -1650,7 +1651,7 @@ Statement stmtw = conw.createStatement();
 		        	  vv.addElement(custid);
 	        	  shops.put(sort, vv);
 				}catch(Exception k){
-					k.printStackTrace();
+					//k.printStackTrace();
 				}
 				
 			}
@@ -1679,9 +1680,11 @@ Statement stmtw = conw.createStatement();
 
 		//	 System.out.println(groups.toString());
 
-			for (int i = 7; i < sheet.getLastRowNum(); i++) {
-				row = sheet.getRow(i);
-				String prodID = "";
+			 DataFormatter formatter = new DataFormatter();
+				
+				for (int i = 7; i < sheet.getLastRowNum(); i++) {
+					row = sheet.getRow(i);
+					String prodID = formatter.formatCellValue(row.getCell(1));
 
 				if (row.getCell((short) 1) != null) {
 
@@ -1696,6 +1699,7 @@ Statement stmtw = conw.createStatement();
 						}
 					}
 					
+					System.out.println(prodID + " " + i);
 					  if(!prodID.equals("0") && !prodID.equals("")){
                   	
 					// Siin l�heme reasisse rokkima ja vaatama kas se toode
@@ -1758,25 +1762,17 @@ Statement stmtw = conw.createStatement();
 										&& prodGroup.trim().length() > 0) {
 									mline.setProdGroup(prodGroup);
 								}
-							 Contract cc = new Contract(clGroup);
-                              if(tm.get(clGroup) != null){
-                            	  cc = (Contract)tm.get(clGroup);
-                            	  ContractLine ll = new ContractLine(prodID.trim());
-                            	  if(cc.lines == null){
-                            		  cc.lines = new Vector();
-                            	  }
-                            	  cc.lines.add(ll);
-                              }else{
-                            	  cc.name = clGroup;
-                            	  if(shops.get(clGroup) != null){
-                            		 cc.customers = new Vector();
-                            		 cc.customers.addAll(((Vector)shops.get(clGroup)));
-                            	//	 Collections.copy(cc.customers, );
-                            		//System.out.println(cc.customers.toString());
-                            	  }
-                              }
-								tm.put(clGroup, cc);
+							
+							
 								result.add(mline);
+								if(clGroup.equals("A02") && "CUM009".equals(prodID.trim())) {
+									System.out.println(go + " ss " + a +" " +mline.getStringForFixedAssortment() + " " + sheet.getLastRowNum());
+								}
+							}
+							
+							
+							if(clGroup.equals("A02") && "CUM009".equals(prodID.trim())) {
+								System.out.println(go + " " + a +" " +mline.getStringForFixedAssortment()+ " " + sheet.getLastRowNum());
 							}
 						}
 					}

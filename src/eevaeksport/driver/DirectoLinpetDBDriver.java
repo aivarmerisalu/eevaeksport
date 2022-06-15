@@ -35,9 +35,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -1084,6 +1087,9 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	   return res ;
    }
    
+
+
+   
    public TreeMap getProdGroupsSecond() throws SQLException {
       return prGroups;
         }
@@ -1093,9 +1099,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-     
-    // getFixedAssortmentData();
-     //getProducts(null);
+ 
     // makeData();
     // System.out.println( getPricelists("1").toString());
    //  this.getProducts(null);

@@ -705,16 +705,16 @@ System.out.println(cmd);
 					id = "5.1.";//5.01.
 				}
 				if (id.equals("1.10.")) {
-					id = "1.a.";//5.01.
+				//	id = "1.a.";//5.01.
 				}
 				if (id.equals("1.11.")) {
-					id = "1.b.";//5.01.
+					//id = "1.b.";//5.01.
 				}
 				if (id.equals("1.12.")) {
-					id = "1.c.";
+					//id = "1.c.";
 				}
 				if (id.equals("1.13.")) {
-					id = "1.d.";
+					//id = "1.d.";
 				}
 				
 				String name = rs.getString("nimi");
@@ -800,7 +800,7 @@ System.out.println(cmd);
 					groupID = "5.1.9.";
 				}
 
-				
+				/*
 				
 				if (cleardots(groupID).equals("1101")) {
 					groupID = "1.a.1.";
@@ -880,7 +880,7 @@ System.out.println(cmd);
 				}
 				if (cleardots(groupID).equals("1139")) {
 					groupID = "1.d.9.";
-				}
+				}*/
 				
 				
 				String name = rs.getString("nimi");
@@ -1790,6 +1790,7 @@ System.out.println(cmd);
 				}
 				
 				String gr1 = rs.getString("grupp");
+				/*
 				if (gr1.equals("1.10.")) {
 					gr1 = "1.a.";//5.01.
 				}
@@ -1801,7 +1802,7 @@ System.out.println(cmd);
 				}
 				if (gr1.equals("1.13.")) {
 					gr1 = "1.d.";//5.01.
-				}
+				}*/
 			
 				String grupp = cleardots(gr1);
 				if (grupp.equals("208")) {
@@ -1825,7 +1826,7 @@ System.out.println(cmd);
   
 				String gr2 = rs.getString("grupp2");
    
-				
+				/*
 				if (cleardots(gr2).equals("1101")) {
 					gr2 = "1.a.1.";
 				}
@@ -1877,7 +1878,7 @@ System.out.println(cmd);
 				if (cleardots(gr2).equals("1129")) {
 					gr2 = "1.c.9.";
 				}
-				
+				*/
 				
 				
 				
