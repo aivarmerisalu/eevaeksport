@@ -1412,6 +1412,14 @@ HashSet olemas = new HashSet();
                      "month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) and I06_PERKELTA='2'" +
                      " and I06_R_DATE <= getdate() " +
                      "GROUP BY  I06_KODAS_MS";
+       
+       cmd= "SELECT n08_kodas_ms_p AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + \r\n" + 
+       		"SUM(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss\r\n" + 
+       		"FROM i06_parh inner join n08_klij on i06_kodas_ks=n08_kodas_ks\r\n" + 
+       		"WHERE month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) and I06_PERKELTA='2'\r\n" + 
+       		"and I06_R_DATE <= getdate() \r\n" + 
+       		"GROUP BY n08_kodas_ms_p\r\n" + 
+       		"";
 
        log(cmd);
 

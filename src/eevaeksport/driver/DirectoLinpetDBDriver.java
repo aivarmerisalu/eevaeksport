@@ -3294,8 +3294,11 @@ if( getParent().getProps().getProperty("stockcode") != null){
       seisx = ((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
 	 }
 }
-products.append(id +  "; ;");
-products.append(getParent().getNF().format(seisx) + "; "  +  "\n"); 
+if(seisx > 0) {
+	products.append(id +  "; ;");
+	products.append(getParent().getNF().format(seisx) + "; "  +  "\n"); 
+}
+
        	  }}
       reader.close();
     	  }catch(Exception tt){

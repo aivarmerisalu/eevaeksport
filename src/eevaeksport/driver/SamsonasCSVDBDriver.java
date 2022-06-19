@@ -693,13 +693,14 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
         	   }
         	   arr.add(agentcode);
         	   custAgents.put(customer.getID(), arr);
+        	   Iterator itera =     tsal.iterator();
+               while(itera.hasNext()) {
+            	   customer.addAgent(new Agent(itera.next()+""));
+               }
            }
            
          //  Lisame telesalestele kõik kliendid
-       Iterator itera =     tsal.iterator();
-       while(itera.hasNext()) {
-    	   customer.addAgent(new Agent(itera.next()+""));
-       }
+     
            
            String cont = "";
            if(contactname.length() > 0) {

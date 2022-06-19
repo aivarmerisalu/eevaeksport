@@ -412,8 +412,8 @@ HashMap pants = null;
       String agent = order.getAgent();
       
       //sb.append(getLineNr(cou));
-      sb.append("          <I06_KODAS_MS>" + escape(agent) + "</I06_KODAS_MS>" + ls);
-      cou++;
+   //   sb.append("          <I06_KODAS_MS>" + escape(agent) + "</I06_KODAS_MS>" + ls);
+     // cou++;
       
       if(tag) {
     	//  sb.append(getLineNr(cou));

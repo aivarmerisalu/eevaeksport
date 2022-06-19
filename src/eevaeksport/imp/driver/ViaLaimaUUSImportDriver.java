@@ -224,7 +224,7 @@ try{
       String signature = order.getSignature();
       
       
-	  if(signature != null && signatures.contains(signature)){
+	  if(false && signature != null && signatures.contains(signature)){
 		  this.troubles.append( "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany()) ;
 	  }else{
 		  makeOutput(order);  
