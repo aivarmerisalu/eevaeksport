@@ -872,6 +872,9 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 					add2 = " @Tar:" + (int)tladu;
 				}
 				prod.setName( Converter.enCodeEst(nimetus + " " +  add + add2).trim());
+				if(prod.getID().startsWith("9999")) {
+					goes = true;
+				}
 				if(goes) {
 					products.put(prod.getName(), prod);
 					
