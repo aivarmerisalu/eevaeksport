@@ -335,10 +335,15 @@ amm.setMinimumFractionDigits(4);
 	      if(order.getAgent().startsWith("Z-")) {
 	    	  typ = "53";
 	      }
+	      
+	      String doknr = order.getDokNr();
+	      if(doknr.contains(" 2022")) {
+	    	  doknr = "U00" + doknr.substring(0 ,doknr.indexOf(" "));
+	      }
 	      sb.append("<OrderHeader ID=\""+ Calendar.getInstance().getTimeInMillis() + "\"  PartnerID=\"" + partner + "\" " +
 	      		" DateFinished=\"" +  getDateTimeString(order.getShipCal()) + "\" DateDelivery=\"" +  getDateString(order.getShipCal()) +
 	      		"\"" + 
-	    		  "  SummTotal=\"" + (sum+"").replace('.', ',') + "\" Notes=\"" + order.getDokNr() + reference + "\"" +
+	    		  "  SummTotal=\"" + (sum+"").replace('.', ',') + "\" Notes=\"" + doknr + reference + "\"" +
 	    		  		" CashDocument=\"\" CashSumm=\"0\" TypeID=\""+ typ + "\" PartnerNotes=\" \"  WarehouseID=\"" + ware + "\"  >"+ ls);
 	      sb.append(sb2);
 	      

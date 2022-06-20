@@ -412,7 +412,7 @@ JSONObject ord = new JSONObject();
 	   
 	   if(com != null && com.trim().length()>0){
 			
-			 
+		
             String KT = "";
 			String KOMPL = "";
 			String ARVE = "";
