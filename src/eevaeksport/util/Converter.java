@@ -932,6 +932,7 @@ public class Converter {
 					XSSFWorkbook workbook = new XSSFWorkbook(ff); 
 					XSSFSheet sheet = workbook.getSheetAt(0); 
 					XSSFSheet sheet2 = workbook.getSheetAt(1); 
+					 DataFormatter formatter = new DataFormatter();
 					ff.close();	
 					TreeMap prodSortLevels = new TreeMap();
 				
@@ -960,9 +961,9 @@ public class Converter {
 							}
 						}
 						
-						System.out.println("Groups " +  groups.toString());
+					//	System.out.println("Groups " +  groups.toString());
 					
- 
+						
 						 //siin käime kõik grupid läbi ja otsime tooteid 
 						Iterator itera = groups.keySet().iterator();
 						int loe = 0;
@@ -974,7 +975,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							 
-							 DataFormatter formatter = new DataFormatter();
+							
 							 //System.out.println("uu " + (1+start));
 								String ean = formatter.formatCellValue(row.getCell(1+start));
 								//System.out.println("uu " + ean);
@@ -982,7 +983,8 @@ public class Converter {
 										
 								String tnimi = formatter.formatCellValue(row.getCell(2+start));
 								String toode = getToode(prods,ean);
-								String level = loe +  "|" + formatter.formatCellValue(row.getCell(3+start));;
+								String level = loe +  "|" + formatter.formatCellValue(row.getCell(3+start));
+								
 								nimed.put(toode, tnimi);
 							  if(toode.equals(ean)  ) { //  && false
 								  
@@ -1006,7 +1008,7 @@ public class Converter {
 								  arr.add(tt);
 								  
 								  prodSortLevels.put(start, arr); 
-								  
+								//  System.out.println("uu " + start + " " + i + " "+ toode);
 								  }
 							  }
 							  
@@ -1025,27 +1027,28 @@ public class Converter {
 					while(itera.hasNext()) {
 					
 						
-						loe2++;
+						
 				        int gr = Integer.parseInt(itera.next()+"");
-				        int start = gr/5 * 4;
-				      //  System.out.println("start " + start);
-						if(start != 0) {
-						//	start = start-1;
-						}
-						//System.out.println("start " + start);
-					 
+				        int start = gr/5 * 4 ;//loe2 * 4;
+				        
+				    //	System.out.println("start " + start + " " + gr );
+					
+						loe2++;
 					for(int i = 1 ; i < sheet2.getLastRowNum()+1;i++){
 						Row row = sheet2.getRow(i);
 						
 						
-						  DataFormatter formatter = new DataFormatter();
+						 
 							String pood = formatter.formatCellValue(row.getCell(start));
 							String level = formatter.formatCellValue(row.getCell(2+start));
-							
-							
+							// if(start == 32) 
+								// System.out.println("start " + start + " " + gr + " " + pood);
+						
 							 
 						 if(pood.trim().length() > 0) {
-						
+						//	 if(pood.equals("T287")) 
+							// System.out.println("start " + start + " " + gr + " " + pood);
+							 
 						 pood = "MAX-" + pood;
 						  Contract con = new Contract(pood);
 			                   //	 System.out.println("Sees " + pood);
@@ -1058,12 +1061,13 @@ public class Converter {
 							
 							//siin siis vaatame läbi mis tooted kaasa panna 
 							ArrayList arr = (ArrayList)prodSortLevels.get(gr);
-							
-							
-							 //System.out.println("gr10" + " " + pood + " "+ level + " " +start );
-							 
+							//if(pood.equals("MAX-T287")) 
+							 //System.out.println("gr11" + " " + gr + " "+ arr);
 							 
 							if(arr != null) {
+								//if(pood.equals("MAX-T287")) 
+						 //System.out.println("gr10" + " " + gr + " "+ level + " " +start + " " + arr.size() );
+									 
 								
 								for(int y = 0; y < arr.size() ; y++ ) {
 									Toode tt = (Toode)arr.get(y);
@@ -1074,24 +1078,28 @@ public class Converter {
 									try {
 									
 									int aaa = Integer.parseInt(tt.comment.substring(2)) ;
+									
+									// if(pood.equals("MAX-T287")) 
+										// System.out.println("gr188" +  " "+ level + " " +aaa );
+									
 									if(lll == loe2 && aaa <=  Integer.parseInt(level) ) {
 										ContractLine ll = new ContractLine(tt.getID());
 									      if(con.lines == null){
 						       		           con.lines = new Vector();
 						       	            }
 						       	          con.lines.add(ll);
-						       	       //if(pood.equals("MAX-T227")) {
-										//	System.out.println("Toode  " + tt.getID() + " " + tt.getLadu() + " " + tt.comment + " "
-											//	+ level + " " + loe2 + " " + tt.comment + " " + gr + " "+pood +" "+ level);
-										//}
+						       	     /* if(pood.equals("MAX-T287")) {
+											System.out.println("Toode  " + tt.getID()  + " " + tt.comment + " "
+												+ level + " " + loe2 + " " + tt.comment + " " + gr + " "+ level);
+										}*/
 						       	          
 						       	         res.put(pood, con);
 									}
 									
 									} catch(Exception e) {
 										
-									}
-								}
+								   }
+							    }
 							}
 			             }
 					  }
@@ -1102,7 +1110,7 @@ public class Converter {
 					 }	 
 		 
 	
-			//System.out.println(  "MAX-T227 " +((Contract) res.get("MAX-T227")).lines.size());
+			//System.out.println(  "MAX-T287 " +((Contract) res.get("MAX-T287")).lines.size());
 		
 		//System.exit(0);
 		 
@@ -1110,6 +1118,7 @@ public class Converter {
 			 sendFixLoadErrorEmail(errors, parent, "maxima",true);
 		 }
 		 sendFixLoadErrorEmail("\n Maxima imported " + res.keySet().size() + " shops fixed sortiments", parent, "maxima",false);
+		// System.exit(0);
 	return res;
 }
 	

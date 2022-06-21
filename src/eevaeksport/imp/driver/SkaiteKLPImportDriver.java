@@ -261,10 +261,7 @@ import eevaeksport.util.Converter;
 	    	  
 	      }
 	      
-	      String reference = "";
-	      if(order.getTeostaja() != null && order.getTeostaja().trim().length() > 0 ){
-	        reference = "##" + order.getTeostaja().replace('|', ' ' ).replace('|', ' ' ).trim();
-	      }
+	    
 	      
 	      String partner = "1111";
 	      try{
@@ -337,9 +334,20 @@ amm.setMinimumFractionDigits(4);
 	      }
 	      
 	      String doknr = order.getDokNr();
-	      if(doknr.contains(" 2022")) {
+	      if(doknr.contains(" 202")) {
 	    	  doknr = "U00" + doknr.substring(0 ,doknr.indexOf(" "));
 	      }
+	      String reference = "";
+	      if(order.getTeostaja() != null && order.getTeostaja().trim().length() > 0 ){
+	    	  reference = order.getTeostaja().replace('|', ' ' ).replace('|', ' ' ).trim(); 
+	    	  if(reference.contains(" 202")) {
+		    	  reference = "U00" + reference.substring(0 ,reference.indexOf(" "));
+		      }
+	        reference = "##" + reference;
+	      }
+	     
+	      System.out.println(doknr + " " + reference);
+	      
 	      sb.append("<OrderHeader ID=\""+ Calendar.getInstance().getTimeInMillis() + "\"  PartnerID=\"" + partner + "\" " +
 	      		" DateFinished=\"" +  getDateTimeString(order.getShipCal()) + "\" DateDelivery=\"" +  getDateString(order.getShipCal()) +
 	      		"\"" + 

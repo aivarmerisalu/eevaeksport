@@ -2198,7 +2198,7 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
 	" INNER JOIN INVENTDIM dim with (nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +
 	" WHERE  summ.DATAAREAID='spil' and CLOSED = 0 AND dim.inventlocationid in ('GPP-VT-BR') " +
 	" GROUP BY  summ.itemid  having sum(availphysical) > 0";
-
+    HashSet tx = new HashSet();
     TreeMap brakis = new TreeMap();
     
     try { 
@@ -2453,7 +2453,7 @@ stmt.close();
       if(goes){
      	  products.put(Converter.cleanLitLatEst(ette) + nimetus, prod);
           prodHash.put(prod.getID(), prod);   
-    
+       tx.add(prod.getID());
       }
        
 
@@ -2545,7 +2545,7 @@ stmt.close();
     
 
       
-    makeTexts();
+    makeTexts(tx);
       
       
     } catch (Exception e){
@@ -2556,7 +2556,7 @@ stmt.close();
   }
 
 
- private void makeTexts() throws Exception{
+ private void makeTexts(HashSet tx) throws Exception{
 	  
 	  
 	  String    sql = " SELECT inv.itemid as kood,  itemfreetextannotation  as asi FROM inventtable inv  " +  
@@ -2571,8 +2571,25 @@ stmt.close();
    while (rs.next()) {
      String kood=rs.getString("kood").trim();
     	 String nimetus=rs.getString("asi");
-    			 if(nimetus != null){
+    			 if(nimetus != null && tx.contains(kood)){
     				 nimetus = nimetus.trim().replaceAll("\\r\\n|\\r|\\n", "|").replaceAll(";", ":"); 
+    				 nimetus = nimetus.trim().replaceAll("\\r\\n|\\r|\\n", "|").replaceAll(";", ":"); 
+    				 if(nimetus.contains("|Izplat")) {
+    					 nimetus = nimetus.substring(0,nimetus.indexOf("|Izplat"));
+    				 }
+    				 if(nimetus.contains("Izplat")) {
+    					 nimetus = nimetus.substring(0,nimetus.indexOf("Izplat"));
+    				 }
+    				 if(nimetus.contains("|Import")) {
+    					 nimetus = nimetus.substring(0,nimetus.indexOf("|Import"));
+    				 }
+    				 if(nimetus.contains("Import")) {
+    					 nimetus = nimetus.substring(0,nimetus.indexOf("Import"));
+    				 }
+    				 if(nimetus.contains("SIA ")) {
+    					 nimetus = nimetus.substring(0,nimetus.indexOf("SIA "));
+    				 }
+    				  
     				   sb.append(kood + ";" + nimetus + "\n");
     			 }
       }
