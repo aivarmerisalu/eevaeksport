@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -45,6 +46,7 @@ import eevaeksport.CustProd;
 import eevaeksport.Customer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
+import eevaeksport.EksportFrame;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
@@ -148,10 +150,24 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 		//  System.out.println(" plans " + hh.toString());
 		return hh;
 	}
-
-
+   
+   private Vector prlists = null;
+   
+   
    public Vector getPriceMatrixData(){
-       Vector result = new Vector();
+	   Vector result = new Vector();
+	   if(prlists != null) {
+		   return prlists;
+	   }
+	   return result;
+   }
+       
+       
+       
+   public HashMap getPriceMatrixDataCreate(){
+	   HashMap culist = new HashMap();
+        prlists = new Vector();
+        HashSet check = new HashSet();
 	         try {
 	          
 	        	 FileReader fr = new FileReader(getDir() + "PriceMatrix.csv");
@@ -169,38 +185,63 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
                      st.nextToken();
                      st.nextToken();
                      
-                     String clGroup = st.nextToken().trim();
+                     String client = st.nextToken().trim();
                      String prodID = st.nextToken().trim();
                      st.nextToken();
                      st.nextToken();
                      double price = Double.parseDouble(st.nextToken().trim());
                      String sdate =  st.nextToken().trim();
    	                 String edate = st.nextToken().trim();
+   	                 String act = st.nextToken().trim();
+   	                 String code = st.nextToken().trim();
+   	                 if(code.equals("0")) {
+   	                	 code = "0000";
+   	                 }
    	            
-	             MatrixLine mline = new MatrixLine();
-	             if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
-	               mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
+   	             
+   	             MatrixLine mline = new MatrixLine();
+	             if (code !=null && code.trim().length() > 0) {
+	               mline.setCliGroup(Converter.cleanLitLatEst(code.trim()));
 	             }
-
-	             if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
+	             
+	             if(act.equals("Akc")) {
+	           	 if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
 	            	 mline.setStartDate(sdate.substring(0,8));
 	             }
 	             if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
 	            	 mline.setEndDate(edate.substring(0,8));
 	             }
+	             } 
+	             
 	             if (prodID != null && prodID.length() > 0) {
 	               mline.setProdID(prodID);
 	             }
-	            
-
+	         
 	             if (price != 0) {
 	                 mline.setPrice(price);
                  }
 	             
-	             if(mline.getPrice() > 0 ){
-	                 result.add(mline);    
+	             
+	             
+	             String key = code + "." + prodID + "." + price;
+	             
+            	 if(culist.get(client) != null) {
+            		 
+            		String olemas = (String)culist.get(client);
+            		if(!olemas.contains(code) ) {
+            			culist.put(client,culist.get(client) + "|" + code);
+            		}
+            		 
+            	  } else {
+            		 culist.put(client, code);
+            	 }
+            	
+	             if(mline.getPrice() > 0 && !check.contains(key)){
+	            	
+	            	 prlists.add(mline); 
+	            	 check.add(key);
 	               }
-	             }
+	              }
 	            }
 	            
 	            reader.close();
@@ -208,10 +249,11 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	         }catch(Exception e){
 	         e.printStackTrace();
 	         }
-		
-	        // System.out.println(result.toString());
-	    return result;
+		System.out.println("culist " + culist.size());
+		System.out.println("prlist " + prlists.size());
+	       return culist;
 	      }
+
 
    
    public Hashtable readCustSales(){
@@ -469,7 +511,15 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
- 
+     
+   
+     Properties propse =  new Properties();
+	    try{
+	    	propse =  EksportFrame.loadProps("emails.txt");
+	  	  
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    }
      agents = new TreeMap();
      try {
        FileReader fr = new FileReader(getDir() + "Agent.csv");
@@ -562,6 +612,8 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
      TreeMap tm = new TreeMap();
      custAgents = new Hashtable();
      debtList = new Vector();
+    HashMap culist = getPriceMatrixDataCreate();
+    System.out.println("tete " + culist.get("11585"));
      
     String tsales =  parent.getProps().getProperty("telesales");
     HashSet tsal = new HashSet();
@@ -571,7 +623,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
     		tsal.add(st.nextElement());
     	}
     }
-    System.out.println("Telesales " + tsales + " " + tsal.toString() );
+  //  System.out.println("Telesales " + tsales + " " + tsal.toString() );
 
      try {
      FileReader fr = new FileReader(getDir() + "DebtList.csv");
@@ -642,6 +694,14 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
       line = null;
      //Custcode	 CustName	PayerCode	Address	City	Post Code	DebtDue	SalespersonCode	Contact	PhoneNo	PaymentTerm	CreditLimit	UsedCredit	CustDiscount	Blocked
 
+      Properties propse =  new Properties();
+	    try{
+	    	propse =  EksportFrame.loadProps("emails.txt");
+	  	  
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    }
+      
      line=reader.readLine();
      while((line = reader.readLine()) != null){
     	 
@@ -693,10 +753,13 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
         	   }
         	   arr.add(agentcode);
         	   custAgents.put(customer.getID(), arr);
-        	   Iterator itera =     tsal.iterator();
-               while(itera.hasNext()) {
-            	   customer.addAgent(new Agent(itera.next()+""));
-               }
+        	   if(propse.containsKey(agentcode)) {
+        		   Iterator itera =     tsal.iterator();
+                   while(itera.hasNext()) {
+                	   customer.addAgent(new Agent(itera.next()+""));
+                   }  
+        	   }
+        	  
            }
            
          //  Lisame telesalestele kõik kliendid
@@ -718,7 +781,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 
          if(payer.length() > 0){
              customer.setPayer(payer);  
-             customer.addFixSortCode(payer);
+            
              if(dueSums.get(payer) != null) {
             	 customer.setDebt(Double.parseDouble(dueSums.get(payer) +""));
              }
@@ -745,6 +808,25 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
         	customer.setPaymTerm(payterm);
         }
    
+        if(culist.get(customer.getID()) != null) {
+        	String list = (String)culist.get(customer.getID());
+        	customer.setGroup(list);
+        //	System.out.println(customer.getGroup());
+        	StringTokenizer st1 = new StringTokenizer(list, "|");
+        	while(st1.hasMoreElements()) {
+        		 customer.addFixSortCode(st1.nextToken());
+        	}
+        	
+        }else if(culist.get(customer.getPayer()) != null) {
+        	String list = (String)culist.get(customer.getPayer());
+        	customer.setGroup(list);
+        	//System.out.println(customer.getGroup());
+        	StringTokenizer st1 = new StringTokenizer(list, "|");
+        	while(st1.hasMoreElements()) {
+        		 customer.addFixSortCode(st1.nextToken());
+        	}
+        }
+        
         
 	tm.put(Converter.cleanLitLatEst(name + " "+ id), customer);
     
@@ -1062,8 +1144,9 @@ public void setNF(NumberFormat nf) {
   
   
 public Vector getFixedAssortmentData() {	
-	  Vector result = new Vector();
-      try {
+	//  Vector result = new Vector();
+	  return prlists;
+     /* try {
        
      	 FileReader fr = new FileReader(getDir() + "PriceMatrix.csv");
           BufferedReader reader = new BufferedReader(fr);
@@ -1087,11 +1170,16 @@ public Vector getFixedAssortmentData() {
               double price = Double.parseDouble(st.nextToken().trim());
               String sdate =  st.nextToken().trim();
                  String edate = st.nextToken().trim();
+                 String act = st.nextToken().trim();
             
           MatrixLine mline = new MatrixLine();
           if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
             mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
           }
+          
+          if(act.equals("Akc")) {
+        	  
+         
 try {
 	if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
     	 mline.setStartDate(sdate.substring(0,8));
@@ -1102,6 +1190,8 @@ try {
 }catch(Exception e) {
 	
 }
+          }  
+          
           
           if (prodID != null && prodID.length() > 0) {
             mline.setProdID(prodID);
@@ -1119,8 +1209,8 @@ try {
       e.printStackTrace();
       }
 	
-     System.out.println("fixed " + result.toString());
- return result;
+    // System.out.println("fixed " + result.toString());
+ return result;*/
 }
 
 
