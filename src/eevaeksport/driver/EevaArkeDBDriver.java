@@ -30,7 +30,7 @@ import eevaeksport.util.Converter;
  * @author Tarmo Tubro
  * @version 1.0
  */
-public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,Discounter,PictureMaker {
+public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,Discounter,PictureMaker,FixLoader {
 
     /**
      * Constructor declaration
@@ -279,14 +279,19 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
                           Product prod = new Product(kood);
                           prod.setName(nimetus);
                           prod.setPrice(rs.getDouble("myygihind"));
-                          prod.setInCases(rs.getDouble("tykke"));
+                          prod.setInCases(rs.getDouble("tykke"));	
                           if(yhik != null) {
                         	  prod.setUnit(yhik.trim()); 
                           }
                          
                           prod.setGroup(parent.make(rs.getString("liik")));
                           prod.setEAN(parent.make(rs.getString("ribakood")));
-                          
+                       	
+	                      	if(eanprods == null) {
+	                      		eanprods= new TreeMap();
+	                      	}
+	                    
+	                      eanprods.put(prod.getEAN(), prod.getID());
                          // if(!prod.getGroup().startsWith("X")) {
                         	  products.put(nimetus, prod);
                         //  }
@@ -642,6 +647,25 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 
 		return result;
 	}
+	
+	
+	  private TreeMap eanprods = null;
+	  
+	@Override
+	public void FixLoader() {
+		
+eanprods =  Converter.loadMore();
+		  
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
+		this.getProducts(null);
+		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+		System.out.println("Contracts " + contracts.toString());
+		Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+		System.exit(0);
+	}
+	
 }
 
 
