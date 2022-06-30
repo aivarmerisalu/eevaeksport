@@ -1061,11 +1061,11 @@ public class Converter {
 							
 							//siin siis vaatame läbi mis tooted kaasa panna 
 							ArrayList arr = (ArrayList)prodSortLevels.get(gr);
-							//if(pood.equals("MAX-T287")) 
-							 //System.out.println("gr11" + " " + gr + " "+ arr);
+							//if(pood.equals("MAX-T293")) 
+							// System.out.println("gr11" + " " + gr + " "+ arr);
 							 
 							if(arr != null) {
-								//if(pood.equals("MAX-T287")) 
+							//	if(pood.equals("MAX-T293")) 
 						 //System.out.println("gr10" + " " + gr + " "+ level + " " +start + " " + arr.size() );
 									 
 								
@@ -1079,7 +1079,7 @@ public class Converter {
 									
 									int aaa = Integer.parseInt(tt.comment.substring(2)) ;
 									
-									// if(pood.equals("MAX-T287")) 
+									// if(pood.equals("MAX-T293")) 
 										// System.out.println("gr188" +  " "+ level + " " +aaa );
 									
 									if(lll == loe2 && aaa <=  Integer.parseInt(level) ) {
@@ -1088,10 +1088,10 @@ public class Converter {
 						       		           con.lines = new Vector();
 						       	            }
 						       	          con.lines.add(ll);
-						       	     /* if(pood.equals("MAX-T287")) {
-											System.out.println("Toode  " + tt.getID()  + " " + tt.comment + " "
-												+ level + " " + loe2 + " " + tt.comment + " " + gr + " "+ level);
-										}*/
+						       	    //  if(pood.equals("MAX-T293")) {
+										//	System.out.println("Toode  " + tt.getID()  + " " + tt.comment + " "
+											//	+ level + " " + loe2 + " " + tt.comment + " " + gr + " "+ level);
+										//}
 						       	          
 						       	         res.put(pood, con);
 									}
@@ -1110,9 +1110,9 @@ public class Converter {
 					 }	 
 		 
 	
-			//System.out.println(  "MAX-T287 " +((Contract) res.get("MAX-T287")).lines.size());
+			//System.out.println(  "MAX-T293 " +((Contract) res.get("MAX-T293")).lines.size());
 		
-		//System.exit(0);
+	//	System.exit(0);
 		 
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "maxima",true);
@@ -1914,12 +1914,14 @@ public class Converter {
 				XSSFWorkbook workbook = new XSSFWorkbook(ff); 
 				Sheet sheet = workbook.getSheetAt(0); 
 				Sheet sheet1 = workbook.getSheetAt(1); 
-				System.out.println("Rimi lugemine " + file.getName());
+				System.out.println("Rimi2 lugemine " + file.getName());
 				ff.close();	
 			 
 			 
 			 int viimanerida=sheet.getLastRowNum();
-			 for(int xx=0 ; xx<viimanerida; xx++) { 		
+			 
+			 int xx  = 1;
+					
 				 if(sheet.getRow(xx)!=null) {			
 					 
 					 int cellsInRow=sheet.getRow(xx).getLastCellNum();
@@ -1935,17 +1937,37 @@ public class Converter {
 								 System.out.println("Products Row: "+xx+ "Col: "+yy);
 								 productLoc=yy;
 							 }
+							 
+							 System.out.println(celliSisu);
 							 if(celliSisu.isEmpty()==false && celliSisu!=null && (celliSisu.contains("EEH") || celliSisu.contains("EEMR") )) { //rimi
-								 System.out.println("Cluster Row: "+xx+ "Col: "+yy);
+								
 								 if(clusterLoc!=0) {break;} //otsime ainult esimese klastri veeru tabelis - sealt edasi ainult klustrid lehe lopuni
 								 clusterLoc=yy;
 								 clusterLocx=xx;
+								 System.out.println("Cluster Row: "+xx+ "Col: "+yy);
 							 }
+							 }
+						 }
+				 }
+			 
+			 
+		
+			 
+			 
+			 for( xx=0 ; xx<viimanerida; xx++) { 		
+				 if(sheet.getRow(xx)!=null) {			
+					 
+					 int cellsInRow=sheet.getRow(xx).getLastCellNum();
+					 
+					 for(int yy=0 ; yy<cellsInRow; yy++) {							//loeme cellid read
+						 if(sheet.getRow(xx).getCell(yy)!=null) {
+							 
+							 String celliSisu=formatter2.formatCellValue(sheet.getRow(xx).getCell(yy));	//loeme celli stringina
 							 
 							 
 							 if(yy>=clusterLoc && xx>clusterLocx) {
 								 
-								 if(celliSisu.contains("x") || celliSisu.contains("X") || celliSisu.contains("add")) {
+								 if(celliSisu.contains("x") || celliSisu.contains("X") || celliSisu.toLowerCase().contains("add")) {
 									 String currentCluster=formatter2.formatCellValue(sheet.getRow(clusterLocx).getCell(yy)).replaceAll(" " , "");
 									 String currentProduct=formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc));
 									 String currentProductEAN=formatter2.formatCellValue(sheet.getRow(xx).getCell(productLoc-1));
@@ -1957,7 +1979,7 @@ public class Converter {
 										 prod.setEAN(currentProductEAN);
 										 tooted.add(prod);
 										 klaster.put(currentCluster, tooted);
-										 //System.out.println("Uustoode: " +currentProduct+"  klaster: "+ currentCluster);
+										// System.out.println("Uustoode: " +currentProductEAN+"  klaster: "+ currentCluster);
 									 } else {
 									 	 /*if(currentCluster.contains("EEHM A.12.01 ALL Large1 460")) {
 											 System.out.println("Lisame: "+ currentCluster+" "+currentProduct);
@@ -1967,7 +1989,7 @@ public class Converter {
 										 Product prod = new Product(currentProduct);
 										 prod.setName(currentProduct);
 										 prod.setEAN(currentProductEAN);
-										 //System.out.println("lisasime: "+currentProduct +" " +klaster.get(currentCluster).contains(currentProduct)+"  klaster: "+ currentCluster);
+										// System.out.println("lisasime: "+currentProductEAN +" " +klaster.get(currentCluster).contains(prod)+"  klaster: "+ currentCluster);
 										 klaster.get(currentCluster).add(prod);
 										 
 									 }
@@ -2001,10 +2023,82 @@ public class Converter {
 
 			 }
 			 
-				TreeMap <String,Vector> cluster= new TreeMap<String,Vector>();				//loeme teise lehe andmed
-				for(int x=2 ; x<sheet1.getLastRowNum()+1; x++) { //andmed algavad 3realt
-					String clusterkey=formatter2.formatCellValue(sheet1.getRow(x).getCell(3)).trim().replaceAll(" " , "");
-					String clustervalue=formatter2.formatCellValue(sheet1.getRow(x).getCell(1)).trim();
+				TreeMap <String,Vector> cluster= new TreeMap<String,Vector>();	
+				//loeme teise lehe andmed
+				int aa = 2;
+				int klust = 3;
+				int poodx = 1;
+				
+				for(int x=0 ; x<sheet1.getLastRowNum()+1; x++) { //andmed algavad 3realt
+					Row rr = sheet1.getRow(x);
+					if(rr != null) {
+						String test = formatter2.formatCellValue(rr.getCell(1));
+						//System.out.println("test " + test);
+						if(test.startsWith("EE")) {
+							klust = 1;
+						}
+						
+						if(test.startsWith("EN") || test.startsWith("E0") ) {
+							poodx = 1;
+						}
+						
+						test = formatter2.formatCellValue(rr.getCell(2));
+						if(test.startsWith("EE")) {
+							klust = 2;
+						}
+						if(test.startsWith("EN") || test.startsWith("E0") ) {
+							poodx = 2;
+						}
+						
+						test = formatter2.formatCellValue(rr.getCell(3));
+						if(test.startsWith("EE")) {
+							klust = 3;
+						}
+						if(test.startsWith("EN") || test.startsWith("E0") ) {
+							poodx = 3;
+						}
+						
+						
+						//System.out.println("test " + test);
+						test = formatter2.formatCellValue(rr.getCell(4));
+						if(test.startsWith("EE")) {
+							klust = 4;
+						}
+						if(test.startsWith("EN") || test.startsWith("E0") ) {
+							poodx = 4;
+						}
+						
+						test = formatter2.formatCellValue(rr.getCell(5));
+						if(test.startsWith("EE")) {
+							klust = 5;
+						}
+						if(test.startsWith("EN") || test.startsWith("E0") ) {
+							poodx = 5;
+						}
+						
+						test = formatter2.formatCellValue(rr.getCell(6));
+						if(test.startsWith("EE")) {
+							klust = 6;
+						}
+						
+						if(test.startsWith("EN") || test.startsWith("E0") ) {
+							poodx = 6;
+						}
+						
+					    if(!test.isEmpty()) {
+					    	aa = x;
+					    	break;
+					    }
+					}
+					
+				}
+				System.out.println("aa " + aa + " " + klust + " " + poodx);
+				
+				
+				
+				for(int x=aa ; x<sheet1.getLastRowNum()+1; x++) { //andmed algavad 3realt
+					String clusterkey=formatter2.formatCellValue(sheet1.getRow(x).getCell(klust)).trim().replaceAll(" " , "");
+					String clustervalue=formatter2.formatCellValue(sheet1.getRow(x).getCell(poodx)).trim();
 					//System.out.println("info: " + clusterkey);
 						
 					Vector <String> sisuvektor = new Vector<String>();
@@ -2016,7 +2110,7 @@ public class Converter {
 					cluster.put(clusterkey, sisuvektor);
 				}
 				
-				//System.out.println(klaster.get("EEHM A.12.01 ALL Large1 460"));
+				System.out.println("cluster " + cluster.toString());
 
 				//System.out.println(klaster.get("EEHM A.12.01 ALL Large1 460").toString());
 			 
@@ -2076,7 +2170,7 @@ public class Converter {
 						 e.printStackTrace(); 
 					 }	 
 		 
-		// System.out.println("res " + check.toString().replaceAll(", ", "\n"));
+		// System.out.println("res " + res.toString());
 		 
 		// System.exit(0);
 		 if(errors != null) {
@@ -2129,7 +2223,7 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("Groups " +  groups.size());
+						//System.out.println("Groups " +  groups.toString());
 						
 						
 						for(int i = rida+1 ; i < sheet.getLastRowNum()+1;i++){
@@ -2163,7 +2257,7 @@ public class Converter {
                        
                         
                         if(value.trim().length() > 0 && value.trim().toLowerCase().equals("1")) {
-                        //	 System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
+                        	 System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
                         
 							if(res.get(pood) != null){
             	                 con = (Contract)res.get(pood);
@@ -2182,7 +2276,7 @@ public class Converter {
 					 }
 					
 					
-				//System.out.println("RIMIsorts size " + res.toString() );
+				System.out.println("RIMIsorts size " + res.toString() );
 					//System.exit(0);
 						
 					 }catch(Exception e) {
@@ -2756,8 +2850,8 @@ public class Converter {
 						 
 						 
 						 
-				//	 System.out.println("u " + u +" " + tnim + " "+ seis + " "+ eanp );
-					
+				 System.out.println("u " + u +" " + tnim + " "+ seis + " "+ eanp );
+				
 					
 						for(int i = u ; i < sheet.getLastRowNum()+1;i++){
 							XSSFRow row = sheet.getRow(i);
@@ -2798,7 +2892,7 @@ public class Converter {
 							Contract con = new Contract(pood);
 							String toode = getToode(prods,ean);
 							// if(ean.equals("4744136010477"))
-							//System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
+					//	System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
 							  if(toode.equals(ean) && !toode.equals("EAN")) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Coop formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
@@ -2833,7 +2927,7 @@ public class Converter {
 						 e.printStackTrace();
 					 }	 
 		 
-	//	System.exit(0);
+		//System.exit(0);
 		 
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "coop", true);

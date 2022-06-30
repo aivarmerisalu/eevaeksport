@@ -338,6 +338,9 @@ public class RivileSalcioImportDriver
       String mode = order.getShipMode();
       if(mode != null && mode.trim().length() >0){
     	  ag = mode.trim();
+    	  if(ag.contains("|")) {
+    		  ag = ag.substring(ag.indexOf("|")+1);
+    	  }
       }
       
       sb.append(getLineNr(cou));

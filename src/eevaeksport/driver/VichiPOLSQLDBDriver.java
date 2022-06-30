@@ -1165,9 +1165,10 @@ try{
      try {
      	String cmd = " SELECT [No_] AS toode,(t.[Description]) AS nimi, var.[Qty_ per Unit of Measure] as kordaja , pr.[Unit Price] AS myygihind, [Product Group Code] AS grupp,[Subgroup Code] AS grupp2 \r\n" + 
      			"     			     					,[Sales Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
-     			"     			     						   vat.[Qty_ per Unit of Measure] AS kastis,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc  \r\n" + 
+     			"     			     						   vat.[Qty_ per Unit of Measure] AS kastis,  vau.[Qty_ per Unit of Measure] AS layer ,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc  \r\n" + 
      			"     			     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup  ,t. [Class Code] AS type FROM [VICIUNAI-POL$Item] t \r\n" + 
      			"     										  left join [VICIUNAI-POL$Sales Price] pr ON pr.[Item No_] = [No_] and pr.[Sales Code] = ''\r\n" + 
+     			"LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] vau ON (vau.[Item No_]=[No_] and vau.[Code]='WARSTWA' ) " + 
      			"     										  LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] vat ON (vat.[Item No_]=[No_] and vat.[Code]='KARTON' ) \r\n" + 
      			"											   LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] var ON var.[Item No_]=[No_] and var.[Code]=[Sales Unit of Measure]  \r\n" + 
      			"     			     						  LEFT JOIN [VICIUNAI-POL$Item Cross Reference] ref ON (ref.[Item No_]=[No_] and ref.[Unit of Measure]='SZT'  and ref.[Cross-Reference Type] = 3)\r\n" + 
@@ -1231,6 +1232,11 @@ try{
                 	if(cases>0){
                       prod.setInCases(cases/kordaja);
                 	}
+               
+                double	kihis = rs.getDouble("layer");
+                 	if(kihis>0){
+                       prod.layer = (kihis/kordaja);
+                 	}
 
                 	
              	weight = kordaja;

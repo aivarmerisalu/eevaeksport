@@ -2247,12 +2247,12 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    			 json = (JSONObject) parser.parse(asi);
 	    			 ids = (JSONArray) json.get("RetailPriceListIds");
 	    		
-	    			 vec = getSplit(ids, 1000);
+	    			 vec = getSplit(ids, 700);
 	    			 counter = 1;
 	    			for(JSONArray arr: vec) {
 	    				asi =this.postProNetData("getRetailPricelistData" ,"getData", arr).toString();
 	    				 parser = new JSONParser();
-	    				 System.out.println(asi);
+	    				// System.out.println(asi);
 	    				 json = (JSONObject) parser.parse(asi);
 	    				 System.out.println(asi.substring(0, 3000));
 	    				 Converter.saveFile("Data/KliendiHind"+ counter +".txt", asi);
@@ -3016,7 +3016,7 @@ private Object readJsonFile(File f){
 		 			pp.setPrice(price);	
 	 			}
 	 			pp.setUnit(unit);
-	 			if(active.equals("1") && name != null) {
+	 			if(active.equals("1") && name != null && !name.startsWith("*") && !name.startsWith("/")) {
 	 			tm.put(name, pp);
 	 			}
 	 			

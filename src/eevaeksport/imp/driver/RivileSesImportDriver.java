@@ -333,12 +333,11 @@ public class RivileSesImportDriver
       sb.append("          <I06_DOK_REG>" + escape(doknr)  + "</I06_DOK_REG>" + ls);
       cou++;
       String auto = "AUTO001";
-      if(agent.equals("VLADAS")){
-    	  auto = "AUTO002";
+
+      if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 0){
+     	 auto = order.getWarehouse();
       }
-      if(agent.equals("VYTAUTAS")){
-    	  auto = "AUTO003";
-      }
+      
       
       String ag = agent;
       String mode = order.getShipMode();
@@ -434,12 +433,13 @@ public class RivileSesImportDriver
 Fillial 02   -  agent 020
 Fillial 03    - agent 016*/
           String ladu = "AUTO001";
-          if(agent.equals("VLADAS")){
-        	  ladu = "AUTO002";
-          }
-          if(agent.equals("VYTAUTAS")){
-        	  ladu = "AUTO003";
-          }
+
+         if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 0){
+        	 ladu = order.getWarehouse();
+         }
+         
+         
+         
 	
           sb.append(getLineNr(cou));
           sb.append("               <I07_KODAS_IS>" + ladu + "</I07_KODAS_IS>" + ls);

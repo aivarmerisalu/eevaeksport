@@ -37,7 +37,7 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
      *
      *
      * @param parent
-     *
+     
      * @see
      */
     public EevaArkeDBDriver(EksportPanel parent) {
@@ -262,10 +262,9 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
         
 
 
-          // String cmd = "SELECT toode, nimetus, yhik, myygihind FROM toode WHERE (length(trim(toode)) > 3) AND (trim(toode.grupp) = 'L')";
           String cmd = " SELECT toode, nimetus, aktsiis as tykke, myygihind, yhik ,t.liik ,ribakood   FROM firma1.toode t  inner join  firma1.artliik k on k.liik =t.liik \r\n" + 
           		"			  and k.grupp = 'L' and k.arttyyp = 'Toode' WHERE \r\n" + 
-          		"             t.grupp ='L' and nimetus is not null and left(toode,1) in ('1','2','3','4','5','6') and myygihind > 0 and length(ribakood) > 0  ORDER BY toode";
+          		"             t.grupp ='L' and nimetus is not null and left(toode,1) in ('1','2','3','4','5','6') and myygihind > 0 and length(ribakood) > 0  ORDER BY toode ";
 
 
           stmt = con.createStatement();
@@ -662,7 +661,7 @@ eanprods =  Converter.loadMore();
 		this.getProducts(null);
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
 		System.out.println("Contracts " + contracts.toString());
-		Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+		Converter.sendContractJson(contracts ,  rcompanyx,  user ,  pass);
 		System.exit(0);
 	}
 	
