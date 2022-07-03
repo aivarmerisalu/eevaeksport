@@ -1187,6 +1187,10 @@ SELECT  [MasterProductCode] as klient
 					}
 				}
 				
+				if(cust.getID().startsWith("INTR5")) {
+					cust.addAgent(new Agent(cust.getID()));
+				}
+				
 				
 				String custinfo = null;
 
