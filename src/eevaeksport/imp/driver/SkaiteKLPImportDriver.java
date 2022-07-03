@@ -9,6 +9,7 @@ package eevaeksport.imp.driver;
  */
 
 import java.io.FileOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,12 +18,20 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.Vector;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 
+import eevaeksport.Email;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -147,7 +156,30 @@ import eevaeksport.util.Converter;
 		  return res;
 	   }
    
- 
+   public String identifyWareCode(String ware) throws SQLException {
+		 
+		
+		  String  sql = "SELECT      masm.MusuAsmenysId  AS EmployeeAsId, sand.Kodas AS yksus, \r\n"
+		  		+ "		 LTRIM(masm.Vardas + ' ' + masm.Pavarde) AS nimi,abi.MOBIL_Sand  as ladu ,MPAL_Email,Padalinys as asi,* FROM dbo.MusuAsmenys AS masm\r\n"
+		  		+ "			 INNER JOIN pl_musuasmenys abi ON masm.MusuAsmenysId =abi.MusuAsmenysId INNER JOIN dbo.Sandeliai AS sand on sand.SandeliaiId = abi.MOBIL_Sand \r\n"
+		  		+ "			 where  masm.Kodas  ='"+ ware +"'";
+		  
+		  String res = "1111";
+		  Connection  con = this.getNewConnection();
+		  PreparedStatement st2 = con.prepareStatement(sql);
+		    ResultSet rs = st2.executeQuery();
+		 
+		    while (rs.next()){
+		    	res =  rs.getString("yksus").trim();
+		     }
+		    rs.close();
+		    st2.close();
+		    con.close();
+		   
+		  return res;
+	   }
+   
+   
    
    public String getImportFile(){
     return parent.getProps().getProperty("imp.read");
@@ -179,12 +211,42 @@ import eevaeksport.util.Converter;
    con.close();
     return prod;
    }
+   
+   
+   public TreeMap getProductNames() throws SQLException{
+
+	
+  	String sql2 = "SELECT Kodas AS toode, Pavad AS nimi FROM Prekes ";
+
+    TreeMap res = new TreeMap();
+    Connection  con = this.getNewConnection();
+    Statement st1 = con.createStatement();
+    ResultSet rs1 = st1.executeQuery(sql2);
+    
+   
+    while (rs1.next()) {
+      res.put(rs1.getString("toode"), rs1.getString("nimi").trim());
+    }
+    
+    rs1.close();
+    st1.close();
+   con.close();
+    return res;
+    
+   }
 
    public void makeOrder(Order order) throws SQLException{
      setOrder(order);
      String aiai = parent.getProps().getProperty("testing");
    // 	  String salesid = addInvoiceHeader(doknr,refr,order.getInfo()) + "";
-       makeOutput(order);    	 
+     
+     if(order.getCompany().equals("999999")) {
+    	 makeOutput2(order); 
+     }else {
+    	 makeOutput(order);  
+     }
+     
+         	 
      }
      
    private String getDateString(Calendar cal){
@@ -271,10 +333,10 @@ import eevaeksport.util.Converter;
 	      }
 	      sb.append("<ImportData UserID=\"" + userid + "\">" + ls);
 	 
-double sum = 0;
-NumberFormat amm = NumberFormat.getInstance(Locale.ENGLISH);
-amm.setGroupingUsed(false);
-amm.setMinimumFractionDigits(4);
+			double sum = 0;
+			NumberFormat amm = NumberFormat.getInstance(Locale.ENGLISH);
+			amm.setGroupingUsed(false);
+			amm.setMinimumFractionDigits(4);
 	       Vector lines = order.getOrderLines();
 	      for (int i = 0; i < lines.size(); i++) {
 	      	OrderLine line = (OrderLine)lines.elementAt(i);
@@ -385,8 +447,177 @@ amm.setMinimumFractionDigits(4);
 		}
 	 }
 
+
+   
+   private void sendEmail(String body,String subjekt,String to ){
+ 		Email mail = new Email(null);
+ 		mail.setSMTP(parent.getProps().getProperty("smtphost"));
+ 		mail.setFrom(parent.getProps().getProperty("from"));
+ 		mail.setSubjectFilesTo(subjekt);
+ 		mail.setEncoding("UTF-8");
+ 		//mail.addAttach(f.getAbsolutePath());
+ 		mail.setSendNotice(false);
+ 		try {
+ 			mail.setBody(body);
+ 		} catch (MessagingException e1) {
+ 			// TODO Auto-generated catch block
+ 			e1.printStackTrace();
+ 		}
+ 		
+ 		
+ 		StringTokenizer st = new StringTokenizer(to,",");
+ 		while(st.hasMoreTokens()){
+ 			String mai = st.nextToken();
+ 			mail.setFilesTo(mai);
+ 			try {
+ 				mail.send();
+ 			} catch (AddressException e) {
+ 				e.printStackTrace();
+ 			} catch (UnsupportedEncodingException e) {
+ 				e.printStackTrace();
+ 			} catch (MessagingException e) {
+ 				e.printStackTrace();
+ 			}
+ 		}	
+   }
+   
+   
+   
+   private void makeOutput2(Order order){
+	   
+	   String agent = order.getAgent();
+	   try {
+		 	 
+	   String ware = identifyWareCode(order.getAgent());
+	   
+	   String from = "KAUNAS_KP";
+	   if(agent.startsWith("KL")) {
+		   from = "KLAIPEDA_KP";
+	   }else if(agent.startsWith("AL")) {
+		   from = "ALYTUS_KP";
+	   }else if(agent.startsWith("KA")) {
+		   from = "KAUNAS_KP";
+	   }else if(agent.startsWith("PA")) {
+		   from = "PANEVEZYS_KP";
+	   }else if(agent.startsWith("TE")) {
+		   from = "TELSIAI_KP";
+	   }else if(agent.startsWith("VI")) {
+		   from = "VILNIUS_KP";
+	   }else if(agent.startsWith("SI")) {
+		   from = "SIAULIAI_KP";
+	   }else if(agent.startsWith("AN")) {
+		   from = "ANYKSCIAI_KP";
+	   }
+	   
+	   
+	   /*
+	    * 
+Unikalus nepasikartojantis ID išorinėje sistemoje – Unikalnyj ID
+Operacijos data                    - data pogruzki
+Dokumento numeris              - No dokumenta
+Sandėlio kodas iš kurio reikia perkelti prekes. – Sklad From (raznye po filialam)
+Sandėlio kodas į kurį reikia perkelti prekes. - Sklad voditelia                   
+Atsakingo asmens kodas       - kod voditelia (agenta)
+Prekės kodas                       - kod tovara
+Prekės kiekis                        - Q-ty
+Prekės mato vnt.                   - Measurement
+
+Test0001;2022.06.27;KA22-0001;KAUNAS_KP;KAJASAS;KA22;41321002;40;vnt
+Test0001;2022.06.27;KA22-0001;KAUNAS_KP;KAJASAS;KA22;41311001;64;vnt
+	    */
+	   
+	 	StringBuffer sb = new StringBuffer();
+	    
+	 	String ls = System.getProperty("line.separator");
+	 	String telnr = ("" + Calendar.getInstance().getTimeInMillis()).substring(5);
+	 	
+	 	 
+       
+
+       
+			NumberFormat amm = NumberFormat.getInstance(Locale.ENGLISH);
+			amm.setGroupingUsed(false);
+			amm.setMinimumFractionDigits(4);
+	       Vector lines = order.getOrderLines();
+	      for (int i = 0; i < lines.size(); i++) {
+	    	  
+	      	  OrderLine line = (OrderLine)lines.elementAt(i);
+
+	          sb.append(agent + "-" + telnr + ";");
+	          sb.append(Converter.getYYYYpMMpDDpString(new Date()) + ";");
+	          sb.append(telnr + ";");
+	          sb.append(from + ";");
+	          sb.append(ware + ";");
+	          sb.append(agent + ";");
+	          sb.append(line.getToode() + ";");
+	          sb.append(line.getKogus() + ";");
+	          sb.append(line.getUnit() + ls);
+	          
+
+	          addNumLine();
+	      }
+	      
+
+	      System.out.println(sb.toString());
+	      
+	      //System.exit(0);
+
+	      String fileName = escape(parent.getProps().getProperty("conv.dirown") + order.getAgent())  + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(4,13)   +  ".csv";
+	        
+	        	 FileOutputStream fos = new FileOutputStream(fileName);
+                 fos.write(sb.toString().getBytes());
+                 fos.close();
+                 System.out.println(parent.getProps().getProperty(ware) + " " + ware);
+                 if(parent.getProps().getProperty(from) != null) {
+                	 
+                	 TreeMap names = getProductNames();               	 
+                	 sendEmail("Order number: " + telnr +  "\nKlients : " + agent 
+		        			 + "\n\nKrājuma kods Krājuma nosaukums Cena Daudzums" 
+		        			 + getOrderText(order,names) + "\n", 
+		        			  " Dat.:" +
+		        			getDateString(order.getShipCal())
+		        			,parent.getProps().getProperty(from)); //mail.trim()
+                	 System.out.println("EMAIL SENT");
+                 }
+	     
+                 
+                 
+            //System.out.println(fileName + " zzzz " + order.getDokNr() + " zzz");
+         
    
 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	 }
+   
+	private String getOrderText(Order order,TreeMap names) {
+		String res = "\n";
+		 Iterator iter = order.getOrderLines().iterator();
+	        while (iter.hasNext()){
+	          OrderLine line = (OrderLine)iter.next();
+	          String toode  = line.getToode();
+	 	     if(toode!= null){
+	 	    	 toode = toode.trim();
+	 	     }else{
+	 	    	 toode = "";
+	 	     }
+	 	     String name = line.getTooteNimi();
+	 	     if(name.trim().length() == 0){
+	 	    	 name = toode;
+	 	     }
+	 	     if(names != null && names.get(toode) != null){
+	 	    	 name = names.get(toode) + "";
+	 	     }
+	 	     
+	          if(line.getKogus()!= 0 && !toode.equals("")){
+	           res = res + "  [" + line.getKogus() + "] " + toode + " " + name + " " + line.getPrice() + " \n";  
+	          }
+	          }
+
+		return res;
+	}
+   
    private String escape(String s){
      if (s == null) return s;
      StringBuffer sb = new StringBuffer();

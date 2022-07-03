@@ -686,6 +686,9 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 		
    }
     
+   
+    private TreeMap agents = new TreeMap();
+    
     public TreeMap getAgents() {
     
     	
@@ -712,7 +715,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
   	   }
   	  		
     	
-           	TreeMap agents = new TreeMap();
+           	
         try {  
     			 connectionUp(url);
         String  cmd = "SELECT      masm.MusuAsmenysId  AS EmployeeAsId, masm.Kodas AS yksus, " +
@@ -1250,8 +1253,16 @@ private Vector baashk = null;
 	    }
             rs.close();
             stmt.close();
-           
-
+            
+            
+           Customer cc = new Customer("999999");
+           cc.setName("x FILL YOUR WAREHOUSE");
+           Iterator itera = agents.values().iterator();
+           while(itera.hasNext()) {
+        	   cc.addAgent((Agent) itera.next());
+           }
+           custMap.put(cc.getID(), cc);
+           customers.put("x FILL YOUR WAREHOUSE", cc);
             
 
 
