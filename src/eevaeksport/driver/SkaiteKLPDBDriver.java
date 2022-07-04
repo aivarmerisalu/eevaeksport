@@ -357,10 +357,12 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
             public String getDealerCustomerCSV(String agent){
              return null;
              }
-
+   
+          private TreeMap<String,String> stocksTXT = null;
 
         public String getSaveStockInfo(){
         	  connectionUp(url);
+        	  stocksTXT = new TreeMap<String,String>();
         	  String  cmd = "  SELECT     CONVERT(varchar(20), sand.Kodas) AS LADU, pr.kodas AS toode, CONVERT(Int, ps.Likutis_PP) AS UnitsInStock, CONVERT(Int,  " +
                     "  ps.Likutis_PP - ps.KiekisRezervuotas) AS stock " +
 " FROM   dbo.Sandeliai AS sand INNER JOIN " +
@@ -386,12 +388,46 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 		               products.append(dealer + ";");
 		               products.append(getParent().getNF().format(seis) + "; "  +  "\n"); // + dealer +  "\n");
 		             }
-		           }
+		           
+		         if(dealer.equals("KAUNAS_KP") ) {
+		        	 if(stocksTXT.get(kood) != null) {
+		        		 String value = stocksTXT.get(kood) + "|  KAUN:" + (int)seis; 
+		        		 stocksTXT.put(kood, value);
+		        	 } else {
+		        		 String value = "  KAUN:" + (int)seis; 
+		        		 stocksTXT.put(kood, value);
+		        	 }
+		         }
+		         
+		         if(dealer.equals("VILNIUS_KP") ) {
+		        	 if(stocksTXT.get(kood) != null) {
+		        		 String value = stocksTXT.get(kood) + "|  VILN:" + (int)seis; 
+		        		 stocksTXT.put(kood, value);
+		        	 } else {
+		        		 String value = "  VILN:" + (int)seis; 
+		        		 stocksTXT.put(kood, value);
+		        	 }
+		         }
+		         if(dealer.equals("PANEVEZYS_KP") ) {
+		        	 if(stocksTXT.get(kood) != null) {
+		        		 String value = stocksTXT.get(kood) + "|  PANEV:" + (int)seis; 
+		        		 stocksTXT.put(kood, value);
+		        	 } else {
+		        		 String value = "  PANEV:" + (int)seis; 
+		        		 stocksTXT.put(kood, value);
+		        	 }
+		         }
+		         
+		         
+		         
+		         }
 		           rs.close();
 		           con.close();
 		       } catch (Exception e) {
 		           getParent().showError(e);
 		       }
+		       
+		       System.out.println("stocksTXT suurus " + stocksTXT.size());
 		       return products.toString();
 		   }
         
@@ -1256,13 +1292,13 @@ private Vector baashk = null;
             
             
            Customer cc = new Customer("999999");
-           cc.setName("x FILL YOUR WAREHOUSE");
+           cc.setName("x Pakrovos užsakymas sandėliui");
            Iterator itera = agents.values().iterator();
            while(itera.hasNext()) {
         	   cc.addAgent((Agent) itera.next());
            }
            custMap.put(cc.getID(), cc);
-           customers.put("x FILL YOUR WAREHOUSE", cc);
+           customers.put("x Pakrovos užsakymas sandėliui", cc);
             
 
 
@@ -1527,6 +1563,7 @@ private Vector baashk = null;
 	TreeMap hinnad = getKPHinnad();
 	prcodes = new TreeMap();
 	this.getLogistics();
+	this.getSaveStockInfo();
 	
 	TreeMap inde = new TreeMap();
 	 
@@ -1648,9 +1685,12 @@ try{
              
               }
               
-    prod.setStock(0);          
+              prod.setStock(0);          
               prod.setVat("21");
           
+              if(this.stocksTXT != null && this.stocksTXT.get(prod.getID()) != null) {
+            	  prod.setOldName("Likutis sandėliuose:|" + stocksTXT.get(prod.getID()));
+              }
               
               if(logistics.get(prod.getID()) != null){
             	  Product pp = (Product)logistics.get(prod.getID());

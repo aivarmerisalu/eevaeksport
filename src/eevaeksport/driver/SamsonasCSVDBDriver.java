@@ -68,8 +68,15 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	super(parent);
 	this.subjectFilesTo = parent.getString("filemsg");
 
-
-  }
+	     user =  getParent().getProps().getProperty("rest.user");
+	     pass = getParent().getProps().getProperty("rest.pass");
+	    rcompany = getParent().getProps().getProperty("rest.companyx");
+	     }
+  
+  
+	  String user =  null;
+	  String pass = null;
+	  String rcompany = null;
   private Hashtable dates = new Hashtable();
    public String getPilotDayData(Agent agent){
      return null;
@@ -613,8 +620,14 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
      custAgents = new Hashtable();
      debtList = new Vector();
     HashMap culist = getPriceMatrixDataCreate();
-    System.out.println("tete " + culist.get("11585"));
-     
+   
+
+    try{
+ 	   Converter.getManagersReplacements(agents, rcompany, user, pass); 
+ 		
+ }catch(Exception e){
+ 	
+ }
     String tsales =  parent.getProps().getProperty("telesales");
     HashSet tsal = new HashSet();
     if(tsales != null) {
@@ -722,6 +735,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
            String payterm = st.nextToken().trim();
            String crlimit = st.nextToken().trim();
            String usedcredit = st.nextToken().trim();
+           String block = st.nextToken().trim();
 
            Customer customer = new Customer(id);
           
@@ -759,6 +773,18 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
                 	   customer.addAgent(new Agent(itera.next()+""));
                    }  
         	   }
+        	   
+         if ( agents.get(agentcode.trim()) != null){
+   			  Agent aa = (Agent)agents.get(agentcode.trim());
+   			  Vector vec = aa.getDubbler();
+   				if(vec!= null && vec.size() >0){
+   					Enumeration en = vec.elements();
+   					while(en.hasMoreElements()){
+   						String ag = (String) en.nextElement();
+   						customer.addAgent(new Agent(ag));
+   					}
+   				}
+   			}
         	  
            }
            
@@ -827,6 +853,10 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
         	}
         }
         
+        
+        if(block != null && block.equals("B")) {
+        	customer.setSalesBlockT(true);
+        }
         
 	tm.put(Converter.cleanLitLatEst(name + " "+ id), customer);
     

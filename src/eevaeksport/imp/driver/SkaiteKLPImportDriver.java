@@ -438,7 +438,7 @@ import eevaeksport.util.Converter;
 	        }
 	     
 	     
-            System.out.println(fileName + " zzzz " + order.getDokNr() + " zzz" + reference);
+         //   System.out.println(fileName + " zzzz " + order.getDokNr() + " zzz" + reference);
          
    
 
@@ -508,43 +508,24 @@ import eevaeksport.util.Converter;
 	   }else if(agent.startsWith("AN")) {
 		   from = "ANYKSCIAI_KP";
 	   }
-	   
-	   
-	   /*
-	    * 
-Unikalus nepasikartojantis ID išorinėje sistemoje – Unikalnyj ID
-Operacijos data                    - data pogruzki
-Dokumento numeris              - No dokumenta
-Sandėlio kodas iš kurio reikia perkelti prekes. – Sklad From (raznye po filialam)
-Sandėlio kodas į kurį reikia perkelti prekes. - Sklad voditelia                   
-Atsakingo asmens kodas       - kod voditelia (agenta)
-Prekės kodas                       - kod tovara
-Prekės kiekis                        - Q-ty
-Prekės mato vnt.                   - Measurement
-
-Test0001;2022.06.27;KA22-0001;KAUNAS_KP;KAJASAS;KA22;41321002;40;vnt
-Test0001;2022.06.27;KA22-0001;KAUNAS_KP;KAJASAS;KA22;41311001;64;vnt
-	    */
+	
 	   
 	 	StringBuffer sb = new StringBuffer();
 	    
 	 	String ls = System.getProperty("line.separator");
 	 	String telnr = ("" + Calendar.getInstance().getTimeInMillis()).substring(5);
-	 	
-	 	 
-       
-
-       
+	 	       
 			NumberFormat amm = NumberFormat.getInstance(Locale.ENGLISH);
 			amm.setGroupingUsed(false);
 			amm.setMinimumFractionDigits(4);
 	       Vector lines = order.getOrderLines();
-	      for (int i = 0; i < lines.size(); i++) {
+	
+	       for (int i = 0; i < lines.size(); i++) {
 	    	  
 	      	  OrderLine line = (OrderLine)lines.elementAt(i);
 
 	          sb.append(agent + "-" + telnr + ";");
-	          sb.append(Converter.getYYYYpMMpDDpString(new Date()) + ";");
+	          sb.append(Converter.getYYYYpMMpDDpString(Calendar.getInstance()) + ";");
 	          sb.append(telnr + ";");
 	          sb.append(from + ";");
 	          sb.append(ware + ";");
@@ -571,11 +552,10 @@ Test0001;2022.06.27;KA22-0001;KAUNAS_KP;KAJASAS;KA22;41311001;64;vnt
                  if(parent.getProps().getProperty(from) != null) {
                 	 
                 	 TreeMap names = getProductNames();               	 
-                	 sendEmail("Order number: " + telnr +  "\nKlients : " + agent 
-		        			 + "\n\nKrājuma kods Krājuma nosaukums Cena Daudzums" 
+                	 sendEmail("Užsakymas nr: " + order.getAgent() + "-" + telnr +  "\nKlientas : " + agent 
+		        			 + "\n\nKiekis     Kodas     Pavad " 
 		        			 + getOrderText(order,names) + "\n", 
-		        			  " Dat.:" +
-		        			getDateString(order.getShipCal())
+		        			  " Pakrovos užsakymas sandėliui " + order.getAgent() + "-" + telnr + " " + getDateString(order.getShipCal())
 		        			,parent.getProps().getProperty(from)); //mail.trim()
                 	 System.out.println("EMAIL SENT");
                  }
@@ -610,8 +590,13 @@ Test0001;2022.06.27;KA22-0001;KAUNAS_KP;KAJASAS;KA22;41311001;64;vnt
 	 	    	 name = names.get(toode) + "";
 	 	     }
 	 	     
+	 	     
 	          if(line.getKogus()!= 0 && !toode.equals("")){
-	           res = res + "  [" + line.getKogus() + "] " + toode + " " + name + " " + line.getPrice() + " \n";  
+	           String kogus = "[" + line.getKogus() + "] ";
+	        	  while (kogus.length() < 11) {
+	        		  kogus = kogus + " ";
+	        	  }
+	        	  res = res + kogus + toode + "  " + name + " "  + " \n";  
 	          }
 	          }
 

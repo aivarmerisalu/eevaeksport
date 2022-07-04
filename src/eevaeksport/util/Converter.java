@@ -8026,6 +8026,25 @@ client.close();
 		    return sb.toString();
 		  }
 	  
+	  public static String getYYYYpMMpDDpString(Calendar cc){
+		    StringBuffer sb = new StringBuffer();
+		    Calendar cal= Calendar.getInstance();
+		    if(cc != null)
+		    cal.setTime(cc.getTime());
+		    
+			String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+			if (day.length() == 1) {day = "0" + day;}
+
+			String month = String.valueOf(cal.get(Calendar.MONTH ) + 1);
+			if (month.length() == 1){month = ("0") + month;}
+		
+			sb.append("" + cal.get(Calendar.YEAR));
+			sb.append("." + month  + ".");
+			sb.append(day );
+			
+		    return sb.toString();
+		  }
+	  
 	  public static String getDDsMMMString(Date dd){
 	      String pattern = "dd MMM";
 	      SimpleDateFormat simpleDateFormat =
