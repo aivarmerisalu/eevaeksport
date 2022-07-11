@@ -84,7 +84,9 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
     if( parent.getProps().getProperty("stock.dir") != null){
     	stockConn = parent.getProps().getProperty("stock.dir");
     }
-
+    if("true".equals(getParent().getProps().getProperty("use.olddata"))){
+		  useold = true;
+		  }
   }
   
 
@@ -951,6 +953,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                			 String name  = rida.getAttributes().getNamedItem("default_name").getNodeValue(); 
                    		 group = Converter.cleanLitLatEst(group);
                    		  name  =  Converter.enCodeEst(name);
+                   		  name = name.replaceAll("Turtle Wax", "TW");
                    		  
                    		  if(lang != null) {
                    			  try {
@@ -1091,6 +1094,9 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 
    
    public TreeMap getProdGroupsSecond() throws SQLException {
+	   if(getParent().getProps().getProperty("usedataforgroups") != null){
+		   return null;
+	   }
       return prGroups;
         }
 
@@ -1523,14 +1529,12 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
        public String getDistribution() {
          return null;
        }
-
+      private  boolean useold = false;
+ 	 
 
    public TreeMap getCustomers(Agent agent){
 	   TreeMap tm = new TreeMap();
-	  boolean useold = false;
-	  if("true".equals(getParent().getProps().getProperty("use.olddata"))){
-		  useold = true;
-		  }
+	 
 	  if(!useold) {
 		  makeData();
 	  }
@@ -2055,7 +2059,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      
      
      
-     if(custProds.size() == 0){
+     if(custProds.size() == 0 && !useold){
          prodCodes = new HashSet();
     	getCustomerProductsList2();
      }
@@ -2225,6 +2229,12 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
        	  //   System.out.println("uuuu " + longt);
        	     longt = longt.substring(0,longt.indexOf("\""));
          	 longt = longt.trim().replaceAll("\\r\\n|\\r|\\n", "|").replaceAll(";", ":"); 
+         	 longt = longt.replaceAll("&#x0A:", " ");
+         	 longt = longt.replaceAll("&#x0D:", " ");
+         	 longt = longt.replaceAll("&#x09:", " ");
+         	 longt = longt.replaceAll("   ", " ");
+         	 longt = longt.replaceAll("  ", " ");
+         	
    				sb.append(id + ";" + longt + "\n");
        	       }
    			 }
@@ -2665,7 +2675,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       	}
 
       	 
-      	if(!prodCodes.contains(prod.getID())){
+      	if(prodCodes != null && !prodCodes.contains(prod.getID())){
       	  goes = false;
       	  if(prod.getStock() > 0){
       		  goes = true;

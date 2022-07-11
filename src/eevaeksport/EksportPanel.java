@@ -4646,7 +4646,11 @@ if(agprods != null && agprods.size() >0){
        buf.append(prod.greendisc);
        
        buf.append(EksportPanel.separator);
-       buf.append(prod.layer);
+       String lay = "0";
+      	if(prod.layer > 0) {
+   		lay = getNF().format(prod.layer) ;
+   	   }
+       buf.append(lay);
        
        
        buf.append(EksportPanel.separator);

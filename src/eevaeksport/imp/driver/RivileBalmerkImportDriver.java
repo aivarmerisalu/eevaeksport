@@ -633,7 +633,7 @@ if(ladu.trim().length()!=0){
         fos.close();
 
         
-  
+    	try {
         
         
         if(APIKEY != null) {
@@ -657,10 +657,16 @@ if(ladu.trim().length()!=0){
         	   this.sendOrderEmail(order, tag, pandikas);
         }
          
-        
+    	} catch (Exception o) {
+    		o.printStackTrace();
+    		this.log.info(o);
+    	
+    		System.exit(0);
+    	}
         
 	} catch (Exception e) {
 		e.printStackTrace();
+		
 	}
  }
   

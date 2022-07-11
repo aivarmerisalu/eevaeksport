@@ -665,16 +665,25 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	        
 	        		 double vv = Double.parseDouble(volg);
 	        		 if(vv != 0){
-	        			 if(isDueDate(duedate)){
+	        			// if(isDueDate(duedate)){
 				        		     Debt dd = new Debt();
 				     				  dd.setCustID(custid);
 				     				  dd.setPayerID(payer);
 				     				  dd.setDoknr(number);
 				     				  dd.setDate(getDate(date));
-				     				  dd.setDuedate(getDate(duedate));
+				     				  Calendar cc = Calendar.getInstance();
+				     				  cc.setTime(getDate(date));
+				     				  cc.add(Calendar.DAY_OF_YEAR, 14);
 				     				  
-				     				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
-				     				  dd.setDue(ff + "");
+				     				  
+				     				  if(duedate != null && duedate.length() == 8) {
+				     					 cc.setTime(getDate(duedate));
+				     				  }
+				     				  
+				     				 dd.setDuedate(cc.getTime());
+				     				 int ff = (int)((Calendar.getInstance().getTimeInMillis() - cc.getTime().getTime())/86400000);
+				     				  dd.setDue(ff + "");  
+				     				 
 				     				  dd.setSum(vv);
 				     				//	System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " +ff);	
 						        			  
@@ -687,7 +696,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 				     				 debtList.add(dd);
 
 							        		
-				        	 }
+				        	// }
 	        			 
 
 	     				  if(usedCredit.get(payer) != null){
@@ -735,11 +744,14 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
            String payterm = st.nextToken().trim();
            String crlimit = st.nextToken().trim();
            String usedcredit = st.nextToken().trim();
+           String custdisc = st.nextToken().trim();
            String block = st.nextToken().trim();
-
+  
            Customer customer = new Customer(id);
           
-           
+           if(id.equals("27860")) {
+        	   System.out.println(name + "'" + crlimit + "'"  +usedcredit + "'"  + block+ "'"+payterm + "'") ;
+           }
             
         	   if(city.length() > 0) {
         		   address = address + " " + city;
@@ -854,8 +866,9 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
         }
         
         
-        if(block != null && block.equals("B")) {
+        if(block != null && block.trim().equals("B")) {
         	customer.setSalesBlockT(true);
+        	System.out.println("Blocked " + customer.getName());
         }
         
 	tm.put(Converter.cleanLitLatEst(name + " "+ id), customer);
