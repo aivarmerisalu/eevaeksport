@@ -277,6 +277,7 @@ public class Product {
     private double price = 0;
     private double stock = -1;
     private long timeToSell = 0;
+    private long arrivesToStock = 0;
     private String group = " ";
     private String groupname = null;
     private String groupSecname = null;
@@ -812,6 +813,14 @@ public class Product {
 
 	public void setGroupSecname(String groupSecname) {
 		this.groupSecname = groupSecname;
+	}
+
+	public long getArrivesToStock() {
+		return arrivesToStock;
+	}
+
+	public void setArrivesToStock(long arrivesToStock) {
+		this.arrivesToStock = arrivesToStock;
 	}
 }
 

@@ -169,7 +169,7 @@ try{
 	  		    }else{
 	  		    	this.trouble = null;
 	  			  counter = 0;
-	  			  makeOutput2(order);
+	  			  makeOutput2(order,tagastus);
 	  			  log.error("made Output 2 " + order.getCompany() + " " + fileName);
 	  		      
 	  		    }
@@ -306,20 +306,8 @@ private HashMap prodnames = null;
          String fixagent = order.getAgent(); 
      
          String custID = order.getCompany();
-         String ladu = null;
-             Calendar  shipDate = order.getShipCal();
-             
-             String code = order.getWarehouse();        
-             if (code != null){
-               ladu = code;
-             }
-           
-           if (ladu == null) {
-             ladu = "";
-           }
-  
-      
-       
+        
+           Calendar  shipDate = order.getShipCal();
            Calendar cal = Calendar.getInstance();
           
            if (shipDate != null) {
@@ -410,19 +398,13 @@ private HashMap prodnames = null;
            sb.append("<OrderDate>" +escape(getDateString(Calendar.getInstance())) + "</OrderDate>" + ls);
            sb.append("<DeliveryDateRequested>" +  escape(getDateString(cal)) + "</DeliveryDateRequested>" + ls); //aeg taha panna  T10:00:00
            sb.append("</DateInfo>" + ls);
+           if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 0) {
+        	   sb.append("<Warehouse>" +escape(order.getWarehouse().trim()) + "</Warehouse>" + ls);
+           }
+           
            sb.append("</DocumentInfo>" + ls);
            
-          // sb.append("<DocumentSumGroup>" + ls );
-          // sb.append("<Currency>EUR</Currency>" + ls);
-           
-          // sb.append("<DocumentSum>10.81</DocumentSum>" + ls );
-           //sb.append("<VAT><SumBeforeVAT>10.81</SumBeforeVAT><VATRate>20</VATRate><VATSum>2.162</VATSum></VAT>" + ls);
-        //   sb.append("<TotalSum>12.972</TotalSum>" + ls);
-          // sb.append("</DocumentSumGroup>" + ls);    	  
            sb.append("   <DocumentItem>" + ls);
-
-
-
            
            Vector sortedLines = order.getOrderLines();
            for (int i = 0; i < sortedLines.size(); i++) {
@@ -430,7 +412,6 @@ private HashMap prodnames = null;
                double ale = line.getDiscount();     
                counter++;
                
-               String yhik = line.getUnit();
                if (ale == -1 ){
                    ale = 0 ;
                    }
@@ -573,7 +554,7 @@ private HashMap prodnames = null;
  private  String fileName = null;
  
  
- private void makeOutput2(Order order){
+ private void makeOutput2(Order order , boolean tagastus){
 	 	StringBuffer sb = new StringBuffer();
 		StringBuffer sbmiinus = new StringBuffer();
 	 	 nf.setGroupingUsed(false);
@@ -601,25 +582,11 @@ private HashMap prodnames = null;
 	                 
 
 	         String ls = System.getProperty("line.separator");
-	         String fixagent = order.getAgent(); 
-	         if(fixagent.equals("mand")){
-	           //   fixagent = "m�nd";
-	         }
 	     
 	         String custID = order.getCompany();
-	         String ladu = null;
-	             Calendar  shipDate = order.getShipCal();
+	         Calendar  shipDate = order.getShipCal();
 	             
-	             String code = order.getWarehouse();        
-	             if (code != null){
-	               ladu = code;
-	             }
-	           
-	           if (ladu == null) {
-	             ladu = "";
-	           }
-	  
-	      
+	                
 
 	       
 	           Calendar cal = Calendar.getInstance();
@@ -650,6 +617,9 @@ private HashMap prodnames = null;
 	           String cuname = getCustName(custID);
 	           
 	           String type = "order";
+	           if(tagastus) {
+	        	   type = "retann";
+	           }
 	      
 	           sb.append("<DocumentType>" + type + "</DocumentType> " + ls);
 	           sb.append("<DocumentParties>" + ls);
@@ -679,12 +649,6 @@ private HashMap prodnames = null;
 	            	  sbmiinus.append( "<Name>" +escape( cuname)  + "</Name>" + ls); 	  
 	              }
 	         String agent = order.getAgent();
-	           if(fixagent != null){
-	         	  agent = fixagent;
-	           }
-	           if(agent.equals("mand")){
-	            //   agent = "m�nd";
-	          }
 	           
 	           sb.append("<UserId>" +  agent + "</UserId>" + ls);
 	           sb.append("</DeliveryParty>" + ls);

@@ -8747,7 +8747,11 @@ client.close();
 		if(addr == null || addr.trim().length() == 0){
 			return " ";
 		}
-		return ("." + addr.replace('.', '.').replace('.', '.')+ "," + country+ ".").replaceAll(",,", ",").replaceAll(" ", "_");
+		country =  "," + country;
+		if(country.trim().length() == 1) {
+			country = "";
+		}
+		return ("." + addr.replace('.', '.').replace('.', '.')+ country + ".").replaceAll(",,", ",").replaceAll(" ", "_");
 	}
 	private static void save(String dirout, String name, StringBuffer sb){
 		try{

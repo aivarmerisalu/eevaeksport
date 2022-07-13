@@ -165,7 +165,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       	 	 File res2 = new File (pictspda);
 	             String[] ff2 = res2.list();
 	         	 for(int i = 0;ff2.length>i;i++){
-	             	(new File ( pictspda + ff2[i])).delete(); 
+	         		 
+	             	//(new File ( pictspda + ff2[i])).delete(); 
 	             }
 //	         	 Lõppes kustutamine 
 	         	custProds.add("suva");
@@ -194,13 +195,13 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
             	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
 	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
 	                    	}
-            	  	 }  
-	              	}
+            	  	     }  
+	              	   }
 	                 }
 	               }
 	             }
 	       }
-	         try {
+	      try {
      		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
      		os.write(buf.toString());
      		os.close();

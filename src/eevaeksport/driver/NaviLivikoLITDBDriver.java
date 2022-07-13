@@ -177,6 +177,11 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
 	             double disc = rs.getDouble("disc");
 	             Date date = rs.getDate("endday");
 	             Date sdate = rs.getDate("startday");
+	             Calendar dateC = Calendar.getInstance();
+	             dateC.setTime(date);
+	             Calendar sdateC = Calendar.getInstance();
+	             sdateC.setTime(date);
+	             
 	             int type = rs.getInt("salestype");
 	          boolean goes = true;
 	           //  int paevi = rs.getInt("paevi");
@@ -206,12 +211,12 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
 	            	 if(green) {
 	            		 
 	            	 if(sdate != null  && !sdate.toLocaleString().startsWith("1753")){
-	                	 mline.setStartDate(Converter.getDDsMMMsYYYYString(sdate));
+	                	 mline.setStartDate(Converter.getYYYY_MM_DDpString(sdateC));
 	                 }
 	            	 
 	            	
 	            		 if(date != null && !date.toLocaleString().startsWith("1753")){
-	                    	 mline.setEndDate(Converter.getDDsMMMsYYYYString(date));
+	                    	 mline.setEndDate(Converter.getYYYY_MM_DDpString(dateC));
 	                     }	 
 	            	 }else {
 	            		 mline.setProdLevel("pr");
@@ -413,7 +418,7 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
     		          
     		             
     		             if(seis > 0 && usedProds.contains(kood) ){
-    		            	 if(ladu.equals("SMART-H")) {
+    		            	 if(ladu.equals("AKS")) {
     		                     products.append(kood +  ";");
         		                 products.append(" ;");
         		                 products.append(getParent().getNF().format(seis) + "; \n"); 
@@ -593,7 +598,7 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
 	
 
 		   String sql2 =  "select  tellimusenr AS id, max(tellimuseseeria) as tyyp, klkood AS kkood , "+ 
-" tellimusenr as number ,kuupaev AS kuup  "+
+" tellimusenr as number ,kuupaev AS kuup , max(tellimusesumma) as summ "+
 "from OpenOrders group by tellimusenr,klkood ,kuupaev order by klkood,tellimusenr " ;
 		   
 		   
@@ -606,6 +611,7 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
 	   ResultSet  rs = stmt2.executeQuery();
 	   StringBuffer sb = new StringBuffer();
 
+	   
 	while(rs.next()){
 		
 		String id = rs.getString("id");
@@ -619,11 +625,13 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
 		//DPP00488444 (‘Pabeigts’ – 01.06.2018; merisoft).
 	    sb.append(rs.getString("number").trim() + "  ");
 		sb.append(turn(rs.getString("kuup").trim().substring(0,10)) + " " + text + " ");
+		 sb.append("|" );	
+		sb.append("Sum: " + nf.format(rs.getDouble("summ")) + "€ ");
 		
     	 sb.append("|" );	
 		
 	  
-	    String sql3 = "select kogus as amount,  'pdl' as unit  , t.nimi as name from  " +
+	    String sql3 = "select kogus as amount,  'pdl' as unit , price , t.nimi as name from  " +
 				   " OpenOrders rid  inner join  products t on t.toode = rid.toode where   tellimusenr =  '" + id + "'";
 	 //   System.out.println("sql 3 " + sql3 );
 	    Connection cc = this.getNewConnection2();
@@ -642,7 +650,9 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
 	   
 		    while(rs2.next()){
 		    	sb.append("[" +nf.format(rs2.getDouble("amount"))+"] " 
-		       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").toLowerCase().replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
+		       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim() 
+		       + "(" + nf.format(rs2.getDouble("price")) + ") " 
+		       + rs2.getString("name").toLowerCase().replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
 		    }
 	   
 		    rs2.close();
@@ -928,7 +938,7 @@ con3.close();
         	             String aadress = rs.getString("aadress");
         	           
         	             if( aadress != null && aadress.trim().length()>0){
-        	               customer.setAddress(Converter.adressLink(Converter.enCodeEst(aadress.trim()),"Lithuania"));
+        	               customer.setAddress(Converter.adressLink(Converter.enCodeEst(aadress.trim()),""));
         	               name = name + " " + Converter.enCodeEst(aadress.trim());
         	              customer.setName(Converter.enCodeEst(name));
         	             }
@@ -942,7 +952,11 @@ con3.close();
     	             if(sbb.equals("2")){
       	               customer.setSalesBlockT(true);
       	             }
-    	             	 
+
+    	             if(sbb.equals("3")){
+        	               customer.setSalesBlockPrepay(true);
+        	             }
+
     	             
     	         if(fixsort.get(customer.getID())!= null){
     	        	StringTokenizer st = new StringTokenizer(fixsort.get(customer.getID())+"" ,"|"  ) ;
@@ -1197,7 +1211,7 @@ con3.close();
   	            double	seis = rs.getDouble("kogus");
   	          String ladu  =rs.getString("ladu").trim();
   	          
-  	          if(ladu.equals("SMART-H")) {
+  	          if(ladu.equals("AKS")) {
   	           	ladutr.put(toode, seis + "");
   	          }
   	       
@@ -1206,7 +1220,7 @@ con3.close();
     	  	      }
   	  	      
   	          
-  	        if(ladu.startsWith("SMART-A")){
+  	        if(ladu.startsWith("LOBRS") && seis != 0){
   	          	ladumuu.put(toode, seis + "");
   	          }
   	          
@@ -1216,7 +1230,8 @@ con3.close();
   	      stmt.close();
   	      con.close();
 
-  	    System.out.println(cmd);
+  	    System.out.println("laod " + ladumuu.size() + " " + ladutr.size());
+  	    
    } catch (Exception e) {
        e.printStackTrace();
    }
@@ -1255,16 +1270,7 @@ con3.close();
             	  prod.setStock(new Double((String)ladutr.get(id)).doubleValue());
               }
 
-              if(ladumuu.get(id) != null ){
-            	  if(prod.getPartii() != null && prod.getPartii().length() > 1){
-            		  prod.setPartii(prod.getPartii() +"|AKT. : " + ((int) new Double((String)ladumuu.get(id)).doubleValue()));
-                        
-            	  }else{
-            		  prod.setPartii("AKT. : " + ((int) new Double((String)ladumuu.get(id)).doubleValue()));
-                      		  
-            	  }
-            	//  prod.setStock(new Double((String)ladutr.get(id)).doubleValue());
-              }
+          
               
                 String grupp = Converter.cleanLitLatEst(rs.getString("prodgroup"));
                  
@@ -1284,11 +1290,18 @@ con3.close();
               String ean = (rs.getString("ean"));
                  if (ean != null &&ean.trim().length()>3){
                    prod.setEAN(ean.trim());
-                   name = name + " " + ean.substring(ean.length()-4) + " ";
+                   name = name + " " + ean.substring(ean.length()-4) ;
                  }
         
             
-             
+                 if(ladumuu.get(id) != null ){
+               	  if(prod.getPartii() != null && prod.getPartii().length() > 1){
+               		  prod.setPartii(prod.getPartii() +"|Br. : " + ((int) new Double((String)ladumuu.get(id)).doubleValue()));
+                    }else{
+               		  prod.setPartii("Br. : " + ((int) new Double((String)ladumuu.get(id)).doubleValue()));
+                  }
+               	     name = name + " @BR" + ((int) new Double((String)ladumuu.get(id)).doubleValue()) ; 
+                 }
                  
                //  [status] [nvarchar](10) NULL, -- UUS VÄLI 'lõpumüük', 'uudistoode'
                //  [statustop] [int] NULL, -- UUS VÄLI 0-tava, 1-top toode
@@ -1336,6 +1349,21 @@ con3.close();
                    if (liik != null && liik.trim().length()>0){
                 	   prod.setType(liik.trim());
                    }
+                     
+                   
+                   Date lattu = (rs.getDate("saabublattu"));
+                   if (lattu != null ){
+                	 if(lattu.getYear() > 100) {
+                		 prod.setArrivesToStock(lattu.getTime());
+                	 }
+                	   
+                   }
+                   
+                   String pant = (rs.getString("pant"));
+                   if (pant != null && pant.trim().length()>0){
+                	   prod.setPandPakendiKood(pant.trim());
+                   }
+                        
                           
                        
                 

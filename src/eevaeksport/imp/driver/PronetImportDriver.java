@@ -1077,6 +1077,12 @@ hind =   Converter.Round((float)hind, 2);
 		 	 System.out.println(ord.toJSONString());
 	
 		 	String data = ord.toJSONString();
+		    String doknr = order.getDokNr();
+		      String fn = doknr;
+		      if(doknr.trim().length()== 0){
+		    	  fn =( Calendar.getInstance().getTimeInMillis() + "").substring(3);
+		      }
+		 	
 	 	try {
 	 	    // Construct data
 	 	    
@@ -1084,18 +1090,21 @@ hind =   Converter.Round((float)hind, 2);
 	 	    // Send data
 	 	  String result = postProNetOrder(ord);
 	 	  System.out.println(result);
-	 	   String doknr = order.getDokNr();
-		      String fn = doknr;
-		      if(doknr.trim().length()== 0){
-		    	  fn =( Calendar.getInstance().getTimeInMillis() + "").substring(3);
-		      }
-	 	   String fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-" + fn  +  ".txt";
+	 	
+	 	   String fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-" + fn  +  "-answer.txt";
+		      System.out.println(fileName);
+		       
+		      Converter.saveFileInUTF8(fileName, result);
+		      
+		      
+		      fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-" + fn  +  "-orig.json";
 		      System.out.println(fileName);
 		       
 		      Converter.saveFileInUTF8(fileName, data);
-		      if(data.contains("error code")){
+		      
+		      if(result.contains("error code")){
 		    	  trouble = "ORDER Was not Imported :" + data;
-		      }else{
+		       } else {
 		    	  trouble = null;
 		      }
 	 	    
@@ -1104,29 +1113,13 @@ hind =   Converter.Round((float)hind, 2);
 	 		e.printStackTrace();
 	 	}
        
-
-	      
-	 	
 	      setNumAddedLines(counter); 
-	      
-	    String doknr = order.getDokNr();
-	      String fn = doknr;
-	      if(doknr.trim().length()== 0){
-	    	  fn =( Calendar.getInstance().getTimeInMillis() + "").substring(3);
-	      }
-	    
-	      
-	      String fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-" + fn  +  ".xml";
-	      System.out.println(fileName);
-	       
-	      Converter.saveFileInUTF8(fileName, data);
-
+	   
 	      if( sendcomm) {
 	    	
-	    	  
 	    		   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
 	    		   System.out.println("Saadan emaili sisse");
-	    	   sendCommentEmail( comm ,null,doknr,order.getCompany(),  " " , " ",false,ag,parent);
+	    	   sendCommentEmail( comm ,null,fn,order.getCompany(),  " " , " ",false,ag,parent);
 	    	 System.out.println("Saadan emaili tehstud");
 	    }
 

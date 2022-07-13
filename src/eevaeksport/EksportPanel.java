@@ -4675,6 +4675,8 @@ if(agprods != null && agprods.size() >0){
        buf.append(EksportPanel.separator);
        buf.append(prod.statusSmallPack);
    
+       buf.append(EksportPanel.separator);
+       buf.append(prod.getArrivesToStock());
        
        buf.append(lineSeparator);
        
