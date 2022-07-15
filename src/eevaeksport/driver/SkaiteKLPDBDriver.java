@@ -843,30 +843,11 @@ String email = " ";
         Vector lines = new Vector();
        TreeMap hinnad =  getKPHinnad(); //saame baas hinnad mida kasa ei pane 
      this.getProducts(null);
-    
-     
-     String sqlp = "select  hh.DataNuo_Int as start from  " +
-	   " NuolaiduAprasymai apr INNER JOIN dbo.NuolaiduKainininkuSudetis hh on  " +
-	    " apr.NuolaiduKainininkaiId= hh.NuolaiduKainininkaiId  " +
-	 	"right join dbo.NuolaiduInfoPrekiuGrupes r  on r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId  " +
-		" INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId  " +
-	 	" where  " +
-	 	" (CONVERT (date, GETDATE()) between   cast(hh.DataNuo_Int as datetime) and  cast(hh.DataIki_Int as datetime) or (hh.DataNuo_Int = 0 and hh.DataIki_Int = 999999)) " +
-	" group by hh.DataNuo_Int " +
-    	" union  select r.DataNuo_Int  as start from   dbo.NuolaiduInfoPrekes r   " +
-     	"   INNER JOIN  dbo.NuolaiduAprasymai  AS apr ON r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId  " + 
-    	"  INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId and  (r.NuolaiduSutartysId = sut.NuolaiduSutartysId or  r.NuolaiduSutartysId = 1 )  " +  
-    "	  and (CONVERT (date, GETDATE()) between   cast(r.DataNuo_Int as datetime) and  cast(r.DataIki_Int as datetime) or (r.DataNuo_Int = 0 and r.DataIki_Int = 999999)) group by r.DataNuo_Int " +
-     "   union select  sud.DataNuo_Int as start " +
-	" from KainosPrekiuKategorijoms as t INNER JOIN PrekiuKainuKategorijos as abi on t.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId " +
-	"	 INNER JOIN NuolaiduKainininkuSudetis sud on sud.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId  where kaina > 0 and " +
-	"	 (CONVERT (date, GETDATE()) between   cast(sud.DataNuo_Int as datetime) and  cast(sud.DataIki_Int as datetime) or (sud.DataNuo_Int = 0 and sud.DataIki_Int = 99999)) " +
-  " group by sud.DataNuo_Int order by 1";
-     
+   
      
      
 String    sql = " select  '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clgroup ,'' AS prodid,r.PrekiuGrupesId AS prodgroup,NuolaidosProc AS discount,0 AS price ,  " +
-	  "  cast(hh.DataNuo_Int as datetime) as start  , cast(hh.DataIki_Int as datetime) as endday ,  hh.DataNuo_Int as  prior  from  " +
+	  "  cast(hh.DataNuo_Int as datetime) as start  , cast(hh.DataIki_Int as datetime) as endday ,  hh.DataNuo_Int as  prior ,registravimodata from  " +
 	   " NuolaiduAprasymai apr INNER JOIN dbo.NuolaiduKainininkuSudetis hh on  " +
 	   "  apr.NuolaiduKainininkaiId= hh.NuolaiduKainininkaiId  " +
 	 "	right join dbo.NuolaiduInfoPrekiuGrupes r  on r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId  " +
@@ -876,53 +857,28 @@ String    sql = " select  '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clg
 	 
     "	union  " +
      "	   select '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clgroup ,r.prekesID AS prodid,'' AS prodgroup,NuolaidosProc AS discount,KainaBePVM AS price ,cast(r.DataNuo_Int as datetime) as start " +   
-     "	   , cast(r.DataIki_Int as datetime) as endday ,   sut.DataNuo_Int as prior  from   dbo.NuolaiduInfoPrekes r   " +
+     "	   , cast(r.DataIki_Int as datetime) as endday ,   sut.DataNuo_Int as prior , cast(sut.DataNuo_Int as datetime) from   dbo.NuolaiduInfoPrekes r   " +
      "	   INNER JOIN  dbo.NuolaiduAprasymai  AS apr ON r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId   " +
     "	  INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId and  (r.NuolaiduSutartysId = sut.NuolaiduSutartysId or  r.NuolaiduSutartysId = 1 )    " +
     "	  and (CONVERT (date, GETDATE()) between   cast(r.DataNuo_Int as datetime) and  cast(r.DataIki_Int as datetime) or (r.DataNuo_Int = 0 and r.DataIki_Int = 999999)) " +
      "   union " +
 	" select  '' AS custid,'K'+ ltrim(str(sud.NuolaiduKainininkaiId)) AS clgroup ,t.prekesID AS prodid,'' AS prodgroup,0 AS discount,t.Kaina AS price ,cast(sud.DataNuo_Int as datetime) as start " +
-	" , cast(sud.DataIki_Int as datetime) as endday ,   sud.DataNuo_Int as prior" +
+	" , cast(sud.DataIki_Int as datetime) as endday ,   sud.DataNuo_Int as prior , cast(sud.DataNuo_Int as datetime) " +
 	" from KainosPrekiuKategorijoms as t INNER JOIN PrekiuKainuKategorijos as abi on t.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId " +
 	"	 INNER JOIN NuolaiduKainininkuSudetis sud on sud.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId " +
 	"	 where kaina > 0 and " +
 	"	 (CONVERT (date, GETDATE()) between   cast(sud.DataNuo_Int as datetime) and  cast(sud.DataIki_Int as datetime) or (sud.DataNuo_Int = 0 and sud.DataIki_Int = 99999)) " +
-	"  order by 8,2,3,7 " ;
+	"   order by 10 desc,2,3,7 " ; //oli 8 järgi sorditud
 
 
 Statement st = null;
            try {
-             TreeMap prior = new TreeMap(); 
+             
         	   
              Connection con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
                      getParent().getProps().getProperty("dsn.pass"));
              st = con.createStatement();
-             ResultSet rs = st.executeQuery(sqlp);
-             
-           int i = 1;
-             while (rs.next()) {
-            	 
-                 String prr = rs.getString("start").trim();
-                 String aa = i +"";
-                 if(aa.length() == 1){
-                	 aa = "00" + aa;
-                 }
-                 if(aa.length() == 2){
-                	 aa = "0" + aa;
-                 }
-                 prior.put(prr, aa);
-                  
-              i++;    
-             }
-             
-             rs.close();
-             
-             
-             //Baas hinnad
-             
-             
-             
-             rs = st.executeQuery(sql);
+             ResultSet  rs = st.executeQuery(sql);
 
              while (rs.next()) {
 

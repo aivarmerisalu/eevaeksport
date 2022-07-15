@@ -192,10 +192,11 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
 	              	if(!inpda.exists()){
 	                  	Converter.shrinkAndCopyFile(in,inpda,400);
-            	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-	                    	}
-            	  	     }  
+            	  
+            	  	     } 
+	                if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
+                		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+                	}
 	              	   }
 	                 }
 	               }
@@ -1221,13 +1222,16 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            in.close();
            
            if(inputLineBuf.length() > 2){
-             
+        	   String str = inputLineBuf.toString();
+               if(str.startsWith("True")) {
+              	 str = str.substring(4);
+               }
                  try {
                	  File f = new File (getDir() + "tootegrupid.xml");
                	  if(f.exists())f.delete();
                	  
                	  
-             	 Converter.saveFileInUTF8(getDir() + "tootegrupid.xml", inputLineBuf.toString());
+             	 Converter.saveFileInUTF8(getDir() + "tootegrupid.xml", str);
            	
            	  }catch (Exception ex) {
            		ex.printStackTrace();
@@ -1255,11 +1259,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
           in.close();
           
           if(inputLineBuf.length() > 2){
-         
+        	  String str = inputLineBuf.toString();
+              if(str.startsWith("True")) {
+             	 str = str.substring(4);
+              }
                 try {
               	  File f = new File (getDir() + "laoseis.xml");
               	  if(f.exists())f.delete();
-              	 Converter.saveFileInUTF8(getDir() + "laoseis.xml", inputLineBuf.toString());
+              	 Converter.saveFileInUTF8(getDir() + "laoseis.xml", str);
           	
           	  }catch (Exception ex) {
           		ex.printStackTrace();
@@ -1286,11 +1293,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
           in.close();
           
           if(inputLineBuf.length() > 2){
-         
+         String str = inputLineBuf.toString();
+         if(str.startsWith("True")) {
+        	 str = str.substring(4);
+         }
                 try {
               	  File f = new File (getDir() + "hinnakiri.xml");
               	  if(f.exists())f.delete();
-              	 Converter.saveFileInUTF8(getDir() + "hinnakiri.xml", inputLineBuf.toString());
+              	 Converter.saveFileInUTF8(getDir() + "hinnakiri.xml", str);
           	
           	  }catch (Exception ex) {
           		ex.printStackTrace();
@@ -1322,11 +1332,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
          in.close();
          
          if(inputLineBuf.length() > 2){
-        
+        	  String str = inputLineBuf.toString();
+              if(str.startsWith("True")) {
+             	 str = str.substring(4);
+              }
                try {
              	  File f = new File (getDir() + "supplier.xml");
              	  if(f.exists())f.delete();
-             	 Converter.saveFileInUTF8(getDir() + "supplier.xml", inputLineBuf.toString());
+             	 Converter.saveFileInUTF8(getDir() + "supplier.xml", str);
          	
          	  }catch (Exception ex) {
          		ex.printStackTrace();
@@ -1350,11 +1363,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
          in.close();
          
          if(inputLineBuf.length() > 2){
-        
+        	  String str = inputLineBuf.toString();
+              if(str.startsWith("True")) {
+             	 str = str.substring(4);
+              }
                try {
              	  File f = new File (getDir() + "brands.xml");
              	  if(f.exists())f.delete();
-             	 Converter.saveFileInUTF8(getDir() + "brands.xml", inputLineBuf.toString());
+             	 Converter.saveFileInUTF8(getDir() + "brands.xml", str);
          	
          	  }catch (Exception ex) {
          		ex.printStackTrace();
@@ -1392,11 +1408,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            in.close();
            
            if(inputLineBuf.length() > 2){
-          
+        	   String str = inputLineBuf.toString();
+               if(str.startsWith("True")) {
+              	 str = str.substring(4);
+               }
                  try {
                	  File f = new File (getDir() + "tooted.xml");
                	  if(f.exists())f.delete();
-               	Converter.saveFileInUTF8(getDir() + "tooted.xml", inputLineBuf.toString());
+               	Converter.saveFileInUTF8(getDir() + "tooted.xml", str);
               	
            	  }catch (Exception ex) {
            		ex.printStackTrace();
@@ -1424,11 +1443,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
               in.close();
               
               if(inputLineBuf.length() > 2){
-             
+            	  String str = inputLineBuf.toString();
+                  if(str.startsWith("True")) {
+                 	 str = str.substring(4);
+                  }
                     try {
                   	  File f = new File (getDir() + "tooted" + getParent().getProps().getProperty("stockcode1") +".xml");
                   	  if(f.exists())f.delete();
-                  	Converter.saveFileInUTF8(getDir() + "tooted" + getParent().getProps().getProperty("stockcode1") + ".xml", inputLineBuf.toString());
+                  	Converter.saveFileInUTF8(getDir() + "tooted" + getParent().getProps().getProperty("stockcode1") + ".xml", str);
                  	
               	  }catch (Exception ex) {
               		ex.printStackTrace();
@@ -1464,7 +1486,11 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
              
                  try {
                     String res = "";
-               	  StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
+                    String str = inputLineBuf.toString();
+                    if(str.startsWith("True")) {
+                   	 str = str.substring(4);
+                    }
+               	  StringTokenizer st = new StringTokenizer(str,"\n");
                	  while(st.hasMoreTokens()){
                		String line = st.nextToken();
                		//if(line.indexOf("\"10173\"") == -1 && line.indexOf("\"13543\"") == -1 && line.indexOf("<contact code=\"2575\"") == -1 ){
@@ -1473,7 +1499,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                	  }
                	  File f = new File (getDir() + "kliendid.xml");
                	  if(f.exists())f.delete();
-               	Converter.saveFileInUTF8(getDir() + "kliendid.xml", inputLineBuf.toString());
+               	 
+               	Converter.saveFileInUTF8(getDir() + "kliendid.xml", str);
               	
            	  }catch (Exception ex) {
            		ex.printStackTrace();
@@ -1809,6 +1836,10 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	   tm.put("Ladu tagastus", cc);
 	   
 	   System.out.println("kliendid b");
+	   
+	   if(tm.size()< 2) {
+		   System.exit(0);
+	   }
 		   
      return tm;
    }
