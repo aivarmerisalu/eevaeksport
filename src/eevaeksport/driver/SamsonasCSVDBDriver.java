@@ -3,6 +3,7 @@ package eevaeksport.driver;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -33,6 +34,9 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -82,6 +86,179 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
      return null;
    }
    public String getSaveDebtInfo() {
+	   Map codeMap = new HashMap();
+	   codeMap.put("17", "D598");
+	   codeMap.put("2", "D2617");
+	   codeMap.put("3", "D2199");
+	   codeMap.put("14", "D4220");
+	   codeMap.put("31", "D4328");
+	   codeMap.put("21", "3302");
+	   codeMap.put("5", "D3405");
+	   codeMap.put("34", "D5385");
+	   codeMap.put("26", "D5242");
+	   codeMap.put("12", "D4904");
+	   codeMap.put("40", "D5608");
+	   codeMap.put("37", "D5440");
+	   codeMap.put("13", "D2501");
+	   codeMap.put("36", "D5216");
+	   
+	   boolean templatee=true;
+	   //faili avamine ja kuupaevaga kontrollimine
+	   	File template = new File("/home/gpc/Documents/Merisoft/mobilejava/excel/cashtemplate.xlsx");
+
+	   	Calendar today = Calendar.getInstance();
+		  File direct = new File(getParent().getProps().getProperty("cash.read")+"exceloutput/");
+		    
+		  //  System.out.println("vvv "+ driver.getImportFile());
+		    File[] filess = direct.listFiles();
+		    for (int i = 0; i < filess.length ; i++){
+		      File filee = filess[i];
+		      
+		      if (filee.isFile()){
+		    	  if(filee.getName().contains(Converter.getYYYY_MM_DDpString(today))) {		//kui on vana fail tanase kuupaevaga olemas 
+		    		  template = new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + filee.getName());
+		    		  templatee=false;
+		    	  }
+		    	  }
+		      }
+	      
+	      
+	      
+	      
+	      
+	      //Avame workbooki
+	      File dire = new File("/home/gpc/Documents/Merisoft/mobilejava/cash/exceloutput/");
+	      Workbook workbook = null;
+			 Sheet sheet = null;
+						try{
+							//File template = new File("/home/gpc/Documents/Merisoft/mobilejava/excel/cashtemplate.xlsx");
+						      FileReader fail = new FileReader(template);
+							 
+							       FileInputStream	 ff = new FileInputStream(template);
+							       if(template.getName().endsWith(".xlsx")) {
+							    	   workbook = new XSSFWorkbook(ff); 
+										 sheet = workbook.getSheetAt(0); 
+							       }else {
+							    	    workbook = new HSSFWorkbook(ff); 
+										 sheet = workbook.getSheetAt(0); 
+									
+							       }
+									
+									
+									ff.close();	
+						}catch(Exception e){
+				    		  e.printStackTrace();
+				    	  }
+	   
+	   
+	   // Siin teeme Cashi ära.
+	  
+		  File dir = new File(getParent().getProps().getProperty("cash.read"));
+		    
+		  //  System.out.println("vvv "+ driver.getImportFile());
+		    File[] files = dir.listFiles();
+		  this.getCustomers(null);
+		    HashSet loetud = new HashSet();
+		    for (int i = 0; i < files.length ; i++){
+		      File file = files[i];
+		      if (file.isFile()){
+		    	  try{
+		    		
+		    	  FileReader fr = new FileReader(file);
+					BufferedReader br = new BufferedReader(fr);
+					
+					String line = br.readLine();
+						line = br.readLine().replaceAll(";;", "; ;");
+				        
+						StringTokenizer st = new StringTokenizer(line, ";");
+						if (st.hasMoreElements()){
+							//CUS_REALID	SUMA	KVID	USRREALID	ANSPOSTED	ST	VAL
+							//10002654	300.0	abc=123	1046	25.09.2015	VO	EUR
+	      String cuid = st.nextToken();
+
+	      double summa = Double.parseDouble(st.nextToken());
+	      String docid = st.nextToken();
+	      String user = st.nextToken();
+	      String date = st.nextToken();
+	      date = date.replace('.', '-').replace('.', '-');//substring(8)+ "-"+date.substring(4, 6)+"-"+date.substring(0,1);
+	      
+	      //System.out.println("CodeMAP: " + codeMap.get(user));
+	      //System.out.println("date " + date);
+	      
+	      String uniq = docid + user + (summa+"") ;
+	      
+	      if(sheet != null){
+	    	  int lastrow = sheet.getLastRowNum();
+	    	  if(templatee) {
+	    		  lastrow = 2;
+	    		  templatee=false;
+	    	  }
+	    	  sheet.createRow(lastrow+1);
+	    	  sheet.getRow(lastrow+1).createCell(0);
+	    	  sheet.getRow(lastrow+1).getCell(0).setCellValue("PINGAV");
+	    	  sheet.getRow(lastrow+1).createCell(1);
+	    	  sheet.getRow(lastrow+1).getCell(1).setCellValue("S");
+	    	  sheet.getRow(lastrow+1).createCell(2);
+	    	  sheet.getRow(lastrow+1).getCell(2).setCellValue("10000");
+	    	  sheet.getRow(lastrow+1).createCell(3);
+	    	  sheet.getRow(lastrow+1).getCell(3).setCellValue("Pirkėjas");
+	    	  sheet.getRow(lastrow+1).createCell(4);
+	    	  sheet.getRow(lastrow+1).getCell(4).setCellValue(cuid);
+	    	  sheet.getRow(lastrow+1).createCell(5);
+	    	  sheet.getRow(lastrow+1).getCell(5).setCellValue(date);
+	    	  
+	    	  sheet.getRow(lastrow+1).createCell(6);
+	    	  sheet.getRow(lastrow+1).getCell(6).setCellValue("Mokėjimas");
+	    	  sheet.getRow(lastrow+1).createCell(7);
+	    	  sheet.getRow(lastrow+1).getCell(7).setCellValue(docid);
+	    	  sheet.getRow(lastrow+1).createCell(8);
+	    	  sheet.getRow(lastrow+1).getCell(8).setCellValue(codeMap.get(user).toString());
+	    	  sheet.getRow(lastrow+1).createCell(9);
+	    	  sheet.getRow(lastrow+1).getCell(9).setCellValue(-summa);
+	    	  sheet.getRow(lastrow+1).createCell(10);
+	    	  sheet.getRow(lastrow+1).getCell(10).setCellValue("PIRKL SKOL");
+	    	  sheet.getRow(lastrow+1).createCell(11);
+	    	  sheet.getRow(lastrow+1).getCell(11).setCellValue("Banko sąsk.");
+	    	  sheet.getRow(lastrow+1).createCell(12);
+	    	  sheet.getRow(lastrow+1).getCell(12).setCellValue(date);
+	    	  sheet.getRow(lastrow+1).createCell(13);
+	    	  sheet.getRow(lastrow+1).getCell(13).setCellValue("COMM");
+	    	  
+	    	  
+	      }
+
+						}
+						
+						
+					br.close();
+					fr.close();
+					  
+		    	  }catch(Exception e){
+		    		  e.printStackTrace();
+		    	  }
+		    	  
+		    	  }
+		      
+		    }
+		    
+		    try {
+		    	if(template.getName().contains(Converter.getYYYY_MM_DDpString(today))) {
+		    		FileOutputStream out = new FileOutputStream(new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + template.getName()));
+		    		workbook.write(out);
+					out.close();
+		    	}else {
+		    		FileOutputStream out = new FileOutputStream(new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + Converter.getYYYY_MM_DDpString(today) + "-cash.xlsx"));
+		    		workbook.write(out);
+					out.close();
+		    	}
+		    	
+		    			
+		    }catch(Exception e){
+	    		  e.printStackTrace();
+	    	  }
+		    
+		    System.exit(0);
+
    	return null;
    }
    
@@ -868,7 +1045,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
         
         if(block != null && block.trim().equals("B")) {
         	customer.setSalesBlockT(true);
-        	System.out.println("Blocked " + customer.getName());
+        	//System.out.println("Blocked " + customer.getName());
         }
         
 	tm.put(Converter.cleanLitLatEst(name + " "+ id), customer);
