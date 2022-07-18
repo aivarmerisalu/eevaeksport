@@ -465,7 +465,7 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
            public TreeMap getProdGroups() throws SQLException {
         	     TreeMap   tm = new TreeMap();
         	   //  setTreeGroup(true);
-        	     String cmd = " select left(kood,3) as kood  ,max(nimi)as nimi from prodgroups group by left(kood,3)";
+        	     String cmd = " select kood as kood , (nimi)as nimi from prodgroups ";
         	     	  try {
         	       	 Connection con = getNewConnection2();
         	       	System.out.println(cmd);
@@ -476,7 +476,7 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
         	                String name = rs.getString("nimi").trim() ;
         	                
         	                if(name.indexOf(" ") != -1) {
-        	                	name = name.substring(0,name.indexOf(" "));
+        	                //	name = name.substring(0,name.indexOf(" "));
         	                }
         	            
         	                tm.put(id, name.trim());  	             
@@ -1275,7 +1275,7 @@ con3.close();
                 String grupp = Converter.cleanLitLatEst(rs.getString("prodgroup"));
                  
               if(grupp != null && grupp.trim().length()>0 ){
-                 prod.setGroup(grupp.trim().substring(0,3));  
+                 prod.setGroup(grupp.trim());  
               }
           
               String country = Converter.cleanLitLatEst(rs.getString("country"));

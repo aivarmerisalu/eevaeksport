@@ -2,12 +2,16 @@
 
 package eevaeksport.driver;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -24,6 +28,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -112,7 +117,7 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 					rs6.close();
 					pstm.close();
 					con.close();
-					System.out.println("smas " + smas.size());
+					//System.out.println("smas " + smas.size());
 					
 				}catch(Exception e) {
 					e.printStackTrace();
@@ -169,10 +174,84 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 				System.exit(0);
 			}
 		
+		 
+		 private void loadPictures() {
+			 	
+	            connectionUp();
+	        	String  cmd2 = "SELECT t.toode,pi.pilt ,  pi.id, pildityyp FROM firma1.toode t   INNER JOIN firma1.artpilt pi ON pi.toode=t.toode  \r\n"  ;
+	        	
+	        	
+	        	String picts = parent.getProps().getProperty("pict.dir");
+	      	  
+	        	try {
+	        		Converter.doTrustToCertificates();
+			       	Converter.trustAllHttpsURLConnection();
+	        		
+	        		Statement st = con.createStatement();
+	         		    ResultSet	      rs = st.executeQuery(cmd2);
+	        	    while (rs.next()) {
+	                      String toode = rs.getString("toode").trim();
+	                      byte[] bufbyte = rs.getBytes("pilt");
+	                      
+	                      String id = rs.getString("id");
+	                      String laiend = rs.getString("pildityyp").trim().toLowerCase();
+	                      
+	                      System.out.println(toode + " " + bufbyte.length);
+	                      
+	                      if(bufbyte != null){
+	                          String filename = picts + toode+"."+laiend; // Function for generating temporary filenames basing on GUID 
+	                          File fp = new File(filename);
+	                          if(!fp.exists()){
+	                        	 // fp.delete();
+	                         
+	                          
+	                       	Converter.doTrustToCertificates();
+	                       	Converter.trustAllHttpsURLConnection();
+	                    /*       URL myurl = new URL("https://erp.eetasoft.ee/interaltus/Image/ProductDetail?id=" + id);
+	                           HttpURLConnection con = (HttpURLConnection)myurl.openConnection();
+	                           
+	                           
+	                           InputStream ins = con.getInputStream();
+	                           
+	                           FileUtils.copyInputStreamToFile(ins, fp);
+	                      */     
+	                         // System.out.println(filename);
+	                        /* if(fp.createNewFile()) {
+	                        	  FileOutputStream fos = new FileOutputStream(fp); 
+	                              fos.write(bufbyte);
+	                              fos.close();     
+	                          }*/
+	                         
+	                          FileUtils.copyURLToFile(
+	                        		  new URL("https://erp.eetasoft.ee/interaltus/Image/ProductDetail?id=" + id), 
+	                        		  new File(filename), 
+	                        		  2000, 
+	                        		  10000);
+	                          }
+	                       /*   try (BufferedInputStream in = new BufferedInputStream(new URL("https://erp.eetasoft.ee/interaltus/Image/ProductDetail?id=" + id).openStream());
+	                        		  FileOutputStream fileOutputStream = new FileOutputStream(filename)) {
+	                        		    byte dataBuffer[] = new byte[1024];
+	                        		    int bytesRead;
+	                        		    while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+	                        		        fileOutputStream.write(dataBuffer, 0, bytesRead);
+	                        		    }
+	                        		} catch (IOException e) {
+	                        		   e.printStackTrace();
+	                        		}
+*/	                          
+	                        }
+	                      }
+	        	    rs.close();
+	        	    st.close();
+	        	    connectionDown(); 
+	        	}catch(Exception e) {
+	        		e.printStackTrace();
+	        	}
+		 }
 		
 		  private void makePictureCat(){
 		  	    
-		    	
+		    	loadPictures();
 		    	String pictssou = parent.getProps().getProperty("pict.dir");
 		  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
 		  	   
