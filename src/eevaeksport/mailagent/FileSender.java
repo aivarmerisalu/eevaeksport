@@ -27,6 +27,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import eevaeksport.Email;
+import eevaeksport.util.Converter;
 
 
 
@@ -68,6 +69,7 @@ public class FileSender {
 	
 		   String dirInCash = mjProps.getProperty("aws.dircash");
 		   String dirOutCashLoc = mjProps.getProperty("aws.dircashout");
+		   String dirOutCashLoc2 = mjProps.getProperty("aws.dircashout2");
 	
 	  	 
 		   String dirPictLoc = mjProps.getProperty("aws.dirpictloc");
@@ -168,6 +170,10 @@ public class FileSender {
 		    	        		 String filen = dirOutCashLoc + keyy.substring(keyy.lastIndexOf("/")+1).replaceAll("\n", " " );
 		    	            FileUtils.copyInputStreamToFile(s3Client.getObject(bucketName, keyy)
 		    	            		.getObjectContent(), new File(filen));
+		    	            if(dirOutCashLoc2 != null) {
+		    	            	String filen2 = dirOutCashLoc2 + keyy.substring(keyy.lastIndexOf("/")+1).replaceAll("\n", " " );
+		    	            	Converter.copyFile(new File(filen), new File(filen2));
+		    	            }
 		    	            
 		    	            log(time + " Downloaded Cash file from AWS : " + filen);
 		    	            System.out.println(time + " downing " + filen);

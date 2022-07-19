@@ -85,26 +85,16 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    public String getPilotDayData(Agent agent){
      return null;
    }
+   
+  private  Map codeMap = new HashMap();
+   
    public String getSaveDebtInfo() {
-	   Map codeMap = new HashMap();
-	   codeMap.put("17", "D598");
-	   codeMap.put("2", "D2617");
-	   codeMap.put("3", "D2199");
-	   codeMap.put("14", "D4220");
-	   codeMap.put("31", "D4328");
-	   codeMap.put("21", "3302");
-	   codeMap.put("5", "D3405");
-	   codeMap.put("34", "D5385");
-	   codeMap.put("26", "D5242");
-	   codeMap.put("12", "D4904");
-	   codeMap.put("40", "D5608");
-	   codeMap.put("37", "D5440");
-	   codeMap.put("13", "D2501");
-	   codeMap.put("36", "D5216");
+	 
 	   
-	   boolean templatee=true;
+	   
+	   boolean templatee = true;
 	   //faili avamine ja kuupaevaga kontrollimine
-	   	File template = new File("/home/gpc/Documents/Merisoft/mobilejava/excel/cashtemplate.xlsx");
+	   	File template = new File(this.getExcelDir() + "cashtemplate.xlsx");
 
 	   	Calendar today = Calendar.getInstance();
 		  File direct = new File(getParent().getProps().getProperty("cash.read")+"exceloutput/");
@@ -117,22 +107,15 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 		      if (filee.isFile()){
 		    	  if(filee.getName().contains(Converter.getYYYY_MM_DDpString(today))) {		//kui on vana fail tanase kuupaevaga olemas 
 		    		  template = new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + filee.getName());
-		    		  templatee=false;
+		    		  templatee = false;
 		    	  }
 		    	  }
 		      }
 	      
-	      
-	      
-	      
-	      
-	      //Avame workbooki
-	      File dire = new File("/home/gpc/Documents/Merisoft/mobilejava/cash/exceloutput/");
+	    
 	      Workbook workbook = null;
 			 Sheet sheet = null;
 						try{
-							//File template = new File("/home/gpc/Documents/Merisoft/mobilejava/excel/cashtemplate.xlsx");
-						      FileReader fail = new FileReader(template);
 							 
 							       FileInputStream	 ff = new FileInputStream(template);
 							       if(template.getName().endsWith(".xlsx")) {
@@ -143,8 +126,6 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 										 sheet = workbook.getSheetAt(0); 
 									
 							       }
-									
-									
 									ff.close();	
 						}catch(Exception e){
 				    		  e.printStackTrace();
@@ -158,8 +139,8 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 		  //  System.out.println("vvv "+ driver.getImportFile());
 		    File[] files = dir.listFiles();
 		  this.getCustomers(null);
-		    HashSet loetud = new HashSet();
-		    for (int i = 0; i < files.length ; i++){
+		
+		  for (int i = 0; i < files.length ; i++){
 		      File file = files[i];
 		      if (file.isFile()){
 		    	  try{
@@ -180,12 +161,8 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	      String docid = st.nextToken();
 	      String user = st.nextToken();
 	      String date = st.nextToken();
-	      date = date.replace('.', '-').replace('.', '-');//substring(8)+ "-"+date.substring(4, 6)+"-"+date.substring(0,1);
-	      
-	      //System.out.println("CodeMAP: " + codeMap.get(user));
-	      //System.out.println("date " + date);
-	      
-	      String uniq = docid + user + (summa+"") ;
+	      date = date.replace('.', '-').replace('.', '-');
+	
 	      
 	      if(sheet != null){
 	    	  int lastrow = sheet.getLastRowNum();
@@ -223,10 +200,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	    	  sheet.getRow(lastrow+1).getCell(12).setCellValue(date);
 	    	  sheet.getRow(lastrow+1).createCell(13);
 	    	  sheet.getRow(lastrow+1).getCell(13).setCellValue("COMM");
-	    	  
-	    	  
-	      }
-
+	               }
 						}
 						
 						
@@ -238,7 +212,15 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 		    	  }
 		    	  
 		    	  }
-		      
+		      File dest = new File(getParent().getProps().getProperty("cash.read") + "done/" + file.getName());
+				if(dest.exists()){
+					dest.delete();
+				}
+				if(file.isFile()) {
+				     boolean rn =  file.renameTo(dest);
+				     System.out.println("rename " + file.getName() + " " + rn);
+				}
+		
 		    }
 		    
 		    try {
@@ -726,7 +708,19 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
               String objekt = st.nextToken().trim();
               agent.setObject(objekt);
             }
+          
+            if (st.hasMoreTokens()) {
+            	 st.nextToken();
+            }
+            if (st.hasMoreTokens()) {
+           	 st.nextToken();
+           }
+            if (st.hasMoreTokens()) {
+            	
+            	  codeMap.put(id, st.nextToken().trim());
+            }
             
+     	  
                 tm.put(agent.getName(), agent);	
                 agents.put(agent.getID(), agent);
           }
@@ -734,7 +728,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
       }
        reader.close();
        fr.close();
-       //System.out.println(tm);
+      // System.out.println(codeMap.toString());
      } catch (Exception e){
        e.printStackTrace();
      }
