@@ -90,158 +90,47 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    
    public String getSaveDebtInfo() {
 	 
-	   
-	   
-	   boolean templatee = true;
-	   //faili avamine ja kuupaevaga kontrollimine
-	   	File template = new File(this.getExcelDir() + "cashtemplate.xlsx");
 
-	   	Calendar today = Calendar.getInstance();
-		  File direct = new File(getParent().getProps().getProperty("cash.read")+"exceloutput/");
-		    
-		  //  System.out.println("vvv "+ driver.getImportFile());
-		    File[] filess = direct.listFiles();
-		    for (int i = 0; i < filess.length ; i++){
-		      File filee = filess[i];
-		      
-		      if (filee.isFile()){
-		    	  if(filee.getName().contains(Converter.getYYYY_MM_DDpString(today))) {		//kui on vana fail tanase kuupaevaga olemas 
-		    		  template = new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + filee.getName());
-		    		  templatee = false;
-		    	  }
-		    	  }
-		      }
-	      
-	    
-	      Workbook workbook = null;
-			 Sheet sheet = null;
-						try{
-							 
-							       FileInputStream	 ff = new FileInputStream(template);
-							       if(template.getName().endsWith(".xlsx")) {
-							    	   workbook = new XSSFWorkbook(ff); 
-										 sheet = workbook.getSheetAt(0); 
-							       }else {
-							    	    workbook = new HSSFWorkbook(ff); 
-										 sheet = workbook.getSheetAt(0); 
-									
-							       }
-									ff.close();	
-						}catch(Exception e){
-				    		  e.printStackTrace();
-				    	  }
-	   
-	   
-	   // Siin teeme Cashi ära.
+		StringBuffer products = new StringBuffer();
+		try {
+
+          TreeMap custs = this.getCustomers(null);
+
+          Iterator itera =  custs.values().iterator();
+			while (itera.hasNext()) {
+           Customer cc = (Customer) itera.next();
+				String kood = cc.getID();
+				double volg = cc.getDebt();
+				boolean blokk1 = cc.isSalesBlockT();
+				boolean blokk2 = cc.isSalesBlock();
+				String bl = "0";
+				
+				if(blokk2 ) {
+					bl = "1";
+				}
+				
+				if(blokk1 ) {
+					bl = "2";
+				}
+				
+				if (volg > 0 || !bl.equals("0")) {
+					products.append(kood + ";"
+							+ getParent().getNF().format(volg) + ";" + bl
+							+ "\n");
+				}
+			}
+			
+			
+			
+
+		
+		} catch (Exception e) {
+			getParent().showError(e);
+		}
+		
+		this.connectionDown();
+		return products.toString();
 	  
-		  File dir = new File(getParent().getProps().getProperty("cash.read"));
-		    
-		  //  System.out.println("vvv "+ driver.getImportFile());
-		    File[] files = dir.listFiles();
-		  this.getCustomers(null);
-		
-		  for (int i = 0; i < files.length ; i++){
-		      File file = files[i];
-		      if (file.isFile()){
-		    	  try{
-		    		
-		    	  FileReader fr = new FileReader(file);
-					BufferedReader br = new BufferedReader(fr);
-					
-					String line = br.readLine();
-						line = br.readLine().replaceAll(";;", "; ;");
-				        
-						StringTokenizer st = new StringTokenizer(line, ";");
-						if (st.hasMoreElements()){
-							//CUS_REALID	SUMA	KVID	USRREALID	ANSPOSTED	ST	VAL
-							//10002654	300.0	abc=123	1046	25.09.2015	VO	EUR
-	      String cuid = st.nextToken();
-
-	      double summa = Double.parseDouble(st.nextToken());
-	      String docid = st.nextToken();
-	      String user = st.nextToken();
-	      String date = st.nextToken();
-	      date = date.replace('.', '-').replace('.', '-');
-	
-	      
-	      if(sheet != null){
-	    	  int lastrow = sheet.getLastRowNum();
-	    	  if(templatee) {
-	    		  lastrow = 2;
-	    		  templatee=false;
-	    	  }
-	    	  sheet.createRow(lastrow+1);
-	    	  sheet.getRow(lastrow+1).createCell(0);
-	    	  sheet.getRow(lastrow+1).getCell(0).setCellValue("PINGAV");
-	    	  sheet.getRow(lastrow+1).createCell(1);
-	    	  sheet.getRow(lastrow+1).getCell(1).setCellValue("S");
-	    	  sheet.getRow(lastrow+1).createCell(2);
-	    	  sheet.getRow(lastrow+1).getCell(2).setCellValue("10000");
-	    	  sheet.getRow(lastrow+1).createCell(3);
-	    	  sheet.getRow(lastrow+1).getCell(3).setCellValue("Pirkėjas");
-	    	  sheet.getRow(lastrow+1).createCell(4);
-	    	  sheet.getRow(lastrow+1).getCell(4).setCellValue(cuid);
-	    	  sheet.getRow(lastrow+1).createCell(5);
-	    	  sheet.getRow(lastrow+1).getCell(5).setCellValue(date);
-	    	  
-	    	  sheet.getRow(lastrow+1).createCell(6);
-	    	  sheet.getRow(lastrow+1).getCell(6).setCellValue("Mokėjimas");
-	    	  sheet.getRow(lastrow+1).createCell(7);
-	    	  sheet.getRow(lastrow+1).getCell(7).setCellValue(docid);
-	    	  sheet.getRow(lastrow+1).createCell(8);
-	    	  sheet.getRow(lastrow+1).getCell(8).setCellValue(codeMap.get(user).toString());
-	    	  sheet.getRow(lastrow+1).createCell(9);
-	    	  sheet.getRow(lastrow+1).getCell(9).setCellValue(-summa);
-	    	  sheet.getRow(lastrow+1).createCell(10);
-	    	  sheet.getRow(lastrow+1).getCell(10).setCellValue("PIRKL SKOL");
-	    	  sheet.getRow(lastrow+1).createCell(11);
-	    	  sheet.getRow(lastrow+1).getCell(11).setCellValue("Banko sąsk.");
-	    	  sheet.getRow(lastrow+1).createCell(12);
-	    	  sheet.getRow(lastrow+1).getCell(12).setCellValue(date);
-	    	  sheet.getRow(lastrow+1).createCell(13);
-	    	  sheet.getRow(lastrow+1).getCell(13).setCellValue("COMM");
-	               }
-						}
-						
-						
-					br.close();
-					fr.close();
-					  
-		    	  }catch(Exception e){
-		    		  e.printStackTrace();
-		    	  }
-		    	  
-		    	  }
-		      File dest = new File(getParent().getProps().getProperty("cash.read") + "done/" + file.getName());
-				if(dest.exists()){
-					dest.delete();
-				}
-				if(file.isFile()) {
-				     boolean rn =  file.renameTo(dest);
-				     System.out.println("rename " + file.getName() + " " + rn);
-				}
-		
-		    }
-		    
-		    try {
-		    	if(template.getName().contains(Converter.getYYYY_MM_DDpString(today))) {
-		    		FileOutputStream out = new FileOutputStream(new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + template.getName()));
-		    		workbook.write(out);
-					out.close();
-		    	}else {
-		    		FileOutputStream out = new FileOutputStream(new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + Converter.getYYYY_MM_DDpString(today) + "-cash.xlsx"));
-		    		workbook.write(out);
-					out.close();
-		    	}
-		    	
-		    			
-		    }catch(Exception e){
-	    		  e.printStackTrace();
-	    	  }
-		    
-		    System.exit(0);
-
-   	return null;
    }
    
    private Hashtable readPlans(){
@@ -568,7 +457,160 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	             e.printStackTrace();
 	           }
 	         
-	         return products.toString();
+	        
+	         
+	         
+	         
+	  	   boolean templatee = true;
+	  	   //faili avamine ja kuupaevaga kontrollimine
+	  	   	File template = new File(this.getExcelDir() + "cashtemplate.xlsx");
+
+	  	   	Calendar today = Calendar.getInstance();
+	  		  File direct = new File(getParent().getProps().getProperty("cash.read")+"exceloutput/");
+	  		    
+	  		  //  System.out.println("vvv "+ driver.getImportFile());
+	  		    File[] filess = direct.listFiles();
+	  		    for (int i = 0; i < filess.length ; i++){
+	  		      File filee = filess[i];
+	  		      
+	  		      if (filee.isFile()){
+	  		    	  if(filee.getName().contains(Converter.getYYYY_MM_DDpString(today))) {		//kui on vana fail tanase kuupaevaga olemas 
+	  		    		  template = new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + filee.getName());
+	  		    		  templatee = false;
+	  		    	  }
+	  		    	  }
+	  		      }
+	  	      
+	  	    
+	  	      Workbook workbook = null;
+	  			 Sheet sheet = null;
+	  						try{
+	  							 
+	  							       FileInputStream	 ff = new FileInputStream(template);
+	  							       if(template.getName().endsWith(".xlsx")) {
+	  							    	   workbook = new XSSFWorkbook(ff); 
+	  										 sheet = workbook.getSheetAt(0); 
+	  							       }else {
+	  							    	    workbook = new HSSFWorkbook(ff); 
+	  										 sheet = workbook.getSheetAt(0); 
+	  									
+	  							       }
+	  									ff.close();	
+	  						}catch(Exception e){
+	  				    		  e.printStackTrace();
+	  				    	  }
+	  	   
+	  	   
+	  	   // Siin teeme Cashi ära.
+	  	  
+	  		  File dir = new File(getParent().getProps().getProperty("cash.read"));
+	  		    
+	  		  //  System.out.println("vvv "+ driver.getImportFile());
+	  		    File[] files = dir.listFiles();
+	  		  this.getCustomers(null);
+	  		
+	  		  for (int i = 0; i < files.length ; i++){
+	  		      File file = files[i];
+	  		      if (file.isFile()){
+	  		    	  try{
+	  		    		
+	  		    	  FileReader fr = new FileReader(file);
+	  					BufferedReader br = new BufferedReader(fr);
+	  					
+	  					String line = br.readLine();
+	  						line = br.readLine().replaceAll(";;", "; ;");
+	  				        
+	  						StringTokenizer st = new StringTokenizer(line, ";");
+	  						if (st.hasMoreElements()){
+	  							//CUS_REALID	SUMA	KVID	USRREALID	ANSPOSTED	ST	VAL
+	  							//10002654	300.0	abc=123	1046	25.09.2015	VO	EUR
+	  	      String cuid = st.nextToken();
+
+	  	      double summa = Double.parseDouble(st.nextToken());
+	  	      String docid = st.nextToken();
+	  	      String user = st.nextToken();
+	  	      String date = st.nextToken();
+	  	      date = date.replace('.', '-').replace('.', '-');
+	  	
+	  	      
+	  	      if(sheet != null){
+	  	    	  int lastrow = sheet.getLastRowNum();
+	  	    	  if(templatee) {
+	  	    		  lastrow = 2;
+	  	    		  templatee=false;
+	  	    	  }
+	  	    	  sheet.createRow(lastrow+1);
+	  	    	  sheet.getRow(lastrow+1).createCell(0);
+	  	    	  sheet.getRow(lastrow+1).getCell(0).setCellValue("PINGAV");
+	  	    	  sheet.getRow(lastrow+1).createCell(1);
+	  	    	  sheet.getRow(lastrow+1).getCell(1).setCellValue("S");
+	  	    	  sheet.getRow(lastrow+1).createCell(2);
+	  	    	  sheet.getRow(lastrow+1).getCell(2).setCellValue("10000");
+	  	    	  sheet.getRow(lastrow+1).createCell(3);
+	  	    	  sheet.getRow(lastrow+1).getCell(3).setCellValue("Pirkėjas");
+	  	    	  sheet.getRow(lastrow+1).createCell(4);
+	  	    	  sheet.getRow(lastrow+1).getCell(4).setCellValue(cuid);
+	  	    	  sheet.getRow(lastrow+1).createCell(5);
+	  	    	  sheet.getRow(lastrow+1).getCell(5).setCellValue(date);
+	  	    	  
+	  	    	  sheet.getRow(lastrow+1).createCell(6);
+	  	    	  sheet.getRow(lastrow+1).getCell(6).setCellValue("Mokėjimas");
+	  	    	  sheet.getRow(lastrow+1).createCell(7);
+	  	    	  sheet.getRow(lastrow+1).getCell(7).setCellValue(docid);
+	  	    	  sheet.getRow(lastrow+1).createCell(8);
+	  	    	  sheet.getRow(lastrow+1).getCell(8).setCellValue(codeMap.get(user).toString());
+	  	    	  sheet.getRow(lastrow+1).createCell(9);
+	  	    	  sheet.getRow(lastrow+1).getCell(9).setCellValue(-summa);
+	  	    	  sheet.getRow(lastrow+1).createCell(10);
+	  	    	  sheet.getRow(lastrow+1).getCell(10).setCellValue("PIRKL SKOL");
+	  	    	  sheet.getRow(lastrow+1).createCell(11);
+	  	    	  sheet.getRow(lastrow+1).getCell(11).setCellValue("Banko sąsk.");
+	  	    	  sheet.getRow(lastrow+1).createCell(12);
+	  	    	  sheet.getRow(lastrow+1).getCell(12).setCellValue(date);
+	  	    	  sheet.getRow(lastrow+1).createCell(13);
+	  	    	  sheet.getRow(lastrow+1).getCell(13).setCellValue("COMM");
+	  	               }
+	  						}
+	  						
+	  						
+	  					br.close();
+	  					fr.close();
+	  					  
+	  		    	  }catch(Exception e){
+	  		    		  e.printStackTrace();
+	  		    	  }
+	  		    	  
+	  		    	  }
+	  		      File dest = new File(getParent().getProps().getProperty("cash.read") + "done/" + file.getName());
+	  				if(dest.exists()){
+	  					dest.delete();
+	  				}
+	  				if(file.isFile()) {
+	  				     boolean rn =  file.renameTo(dest);
+	  				     System.out.println("rename " + file.getName() + " " + rn);
+	  				}
+	  		
+	  		    }
+	  		    
+	  		    try {
+	  		    	if(template.getName().contains(Converter.getYYYY_MM_DDpString(today))) {
+	  		    		FileOutputStream out = new FileOutputStream(new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + template.getName()));
+	  		    		workbook.write(out);
+	  					out.close();
+	  		    	}else {
+	  		    		FileOutputStream out = new FileOutputStream(new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + Converter.getYYYY_MM_DDpString(today) + "-cash.xlsx"));
+	  		    		workbook.write(out);
+	  					out.close();
+	  		    	}
+	  		    	
+	  		    			
+	  		    }catch(Exception e){
+	  	    		  e.printStackTrace();
+	  	    	  }
+	  		    
+	  		   // System.exit(0);
+
+	  		  return products.toString();
 	     }
 
 
