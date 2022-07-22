@@ -207,20 +207,7 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 	                          
 	                       	Converter.doTrustToCertificates();
 	                       	Converter.trustAllHttpsURLConnection();
-	                    /*       URL myurl = new URL("https://erp.eetasoft.ee/interaltus/Image/ProductDetail?id=" + id);
-	                           HttpURLConnection con = (HttpURLConnection)myurl.openConnection();
-	                           
-	                           
-	                           InputStream ins = con.getInputStream();
-	                           
-	                           FileUtils.copyInputStreamToFile(ins, fp);
-	                      */     
-	                         // System.out.println(filename);
-	                        /* if(fp.createNewFile()) {
-	                        	  FileOutputStream fos = new FileOutputStream(fp); 
-	                              fos.write(bufbyte);
-	                              fos.close();     
-	                          }*/
+	                  
 	                         
 	                          FileUtils.copyURLToFile(
 	                        		  new URL("https://erp.eetasoft.ee/interaltus/Image/ProductDetail?id=" + id), 
@@ -228,17 +215,7 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 	                        		  2000, 
 	                        		  10000);
 	                          }
-	                       /*   try (BufferedInputStream in = new BufferedInputStream(new URL("https://erp.eetasoft.ee/interaltus/Image/ProductDetail?id=" + id).openStream());
-	                        		  FileOutputStream fileOutputStream = new FileOutputStream(filename)) {
-	                        		    byte dataBuffer[] = new byte[1024];
-	                        		    int bytesRead;
-	                        		    while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-	                        		        fileOutputStream.write(dataBuffer, 0, bytesRead);
-	                        		    }
-	                        		} catch (IOException e) {
-	                        		   e.printStackTrace();
-	                        		}
-*/	                          
+	                                  
 	                        }
 	                      }
 	        	    rs.close();
@@ -262,9 +239,9 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 	            //Kataloogi sisude kustutamine
 	        	 	 File res2 = new File (pictspda);
 		             String[] ff2 = res2.list();
-		         	 for(int i = 0;ff2.length>i;i++){
-		             	(new File ( pictspda + ff2[i])).delete(); 
-		             }
+		         	// for(int i = 0;ff2.length>i;i++){
+		             	//(new File ( pictspda + ff2[i])).delete(); 
+		             //}
 //		         	 L�ppes kustutamine 
 		  		 
 		  		 TreeMap prods = this.getProducts(null);

@@ -929,10 +929,7 @@ con3.close();
         	            // customer.setRegnr(payer);
         	             }
                        
-        	          
-        	           	if(minordsum > 0){
-                    	   customer.setMinsum(minordsum);
-                       }
+        	        
         	           	
                        
         	             String aadress = rs.getString("aadress");
@@ -1047,6 +1044,14 @@ con3.close();
     	           if(openOrders.get(customer.getID()) != null){
     	        	   customer.addToCustDataVec(customer.getID() + ";tarasaldo; ;Open Order |"   +  openOrders.get(customer.getID()));
     	           }
+    	           
+    	           
+    	           
+     	          minordsum = rs.getInt("minsum");
+     	          
+     	           	if(minordsum > 0){
+                 	   customer.setMinsum(minordsum);
+                    }
     	           
     	          //
     	           String cont = rs.getString("kontakt");
