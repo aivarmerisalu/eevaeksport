@@ -580,13 +580,27 @@ private Vector signatures = new Vector();
 			String comm = "";
 System.out.println("info " + order.getInfo());
 System.out.println("teostaja " + order.getTeostaja());
+boolean n1 = false;
+String inff = order.getTeostaja();
+if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+	reason = inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
+	inff = inff.substring(inff.indexOf("]")+1);
+	 if(ret && inff != null && inff.trim().length() > 0){
+     	Node Note1 = doc.createElement("Note1");
+	     Text Note1Val = doc.createTextNode(inff);
+	     Note1.appendChild(Note1Val);
+	     header.appendChild(Note1);	
+	     n1 = true;
+     }
+}
+
 			if(order.getInfo() != null && order.getInfo().trim().length() >0){
 	 			Node com = doc.createElement("Remarks");
 		        Text comVal = doc.createTextNode(order.getInfo());
 		        com.appendChild(comVal);
 		        header.appendChild(com);
 		        comm = order.getInfo();
-		        if(ret){
+		        if(ret && !n1){
 		        	Node Note1 = doc.createElement("Note1");
    			     Text Note1Val = doc.createTextNode(comm);
    			     Note1.appendChild(Note1Val);
@@ -596,11 +610,7 @@ System.out.println("teostaja " + order.getTeostaja());
 	 		 
 	 		 
 	 		if(ret){
-                String inff = order.getTeostaja();
-                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
-                	reason = inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
-    		    
-                }
+               
 	 			
 		       
 	 			Node WebOrderRegion = doc.createElement("WebOrderRegion");
