@@ -266,10 +266,11 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 		              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
 		              	if(!inpda.exists()){
 		                  	Converter.shrinkAndCopyFile(in,inpda,400);
-	              	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-		                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-		                    	}
-	              	     }  
+	              	   
+	              	     }
+		              	 if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
+	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+	                    	}
 		              	}
 		                 }
 		               }

@@ -666,6 +666,11 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 					bl = "2";
 				}
 				
+	       }else if(mood != null && mood.trim().startsWith("B") ){  
+				if(blockedBBcusts.contains(cust.getID())){
+					bl = "2";
+				}
+				
 	       }else {
 				if(blockedcusts.contains(cust.getID())){
 					bl = "2";
@@ -1608,14 +1613,19 @@ System.out.println(cmd);
         		   this.blocked1custs.add(custID); 
         	   }
              }
-           if(dueint > 11){
+           if(dueint > 26){
         	   if(!blocked11custs.contains(custID)){
         		   this.blocked11custs.add(custID); 
         	   }
              }
-           if(dueint > 30){
+           if(dueint > 26){
         	   if(!blocked30custs.contains(custID)){
         		   this.blocked30custs.add(custID); 
+        	   }
+             }
+           if(dueint > 11){
+        	   if(!blockedBBcusts.contains(custID)){
+        		   this.blockedBBcusts.add(custID); 
         	   }
              }
            }
@@ -1820,6 +1830,12 @@ System.out.println(cmd);
              }else if(mood != null && mood.trim().startsWith("P") ){ 
             	 
             	 if( blocked1custs.contains(customer.getID())){
+                	 customer.setSalesBlockT(true);
+                 }
+            	 
+             }else if(mood != null && mood.trim().startsWith("B") ){ 
+            	 
+            	 if( blockedBBcusts.contains(customer.getID())){
                 	 customer.setSalesBlockT(true);
                  }
             	 
@@ -2529,6 +2545,7 @@ System.out.println("CP suurus2 " + vec.size());
    private Vector blocked6custs = new Vector();
    private Vector blocked11custs = new Vector();
    private Vector blocked30custs = new Vector();
+   private Vector blockedBBcusts = new Vector();
    private Vector debtList = new Vector();
    private HashMap sortimendid = null;
    private Vector klient = new Vector();

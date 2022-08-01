@@ -53,6 +53,8 @@ import eevaeksport.util.Converter;
      catch (Exception e) {
        parent.showError(e);
      }
+     
+     
    }
 
    
@@ -212,6 +214,30 @@ import eevaeksport.util.Converter;
     return prod;
    }
    
+   private  TreeMap<String,Double> getProds() throws SQLException{
+
+		
+
+	  	String sql2 = "SELECT Kodas AS toode , MV_Pastaba as kastis FROM Prekes  where MV_Pastaba > 0";
+
+	 
+	    
+	    TreeMap<String,Double> prods = new TreeMap<String,Double>();
+	    Connection  con = this.getNewConnection();
+	    Statement st1 = con.createStatement();
+	    ResultSet rs1 = st1.executeQuery(sql2);
+	   
+	     while (rs1.next()) {
+	      prods.put(rs1.getString("toode").trim(),rs1.getDouble("kastis"));
+	     }
+	    
+	    rs1.close();
+	    st1.close();
+	    con.close();
+	    
+	    return prods;
+	   }
+	   
    
    public TreeMap getProductNames() throws SQLException{
 
@@ -236,8 +262,14 @@ import eevaeksport.util.Converter;
    }
 
    public void makeOrder(Order order) throws SQLException{
+	   
+	   
+	   nf3.setGroupingUsed(false);
+	   nf3.setMaximumFractionDigits(3);
+	   nf3.setMinimumFractionDigits(0);
+	   
      setOrder(order);
-     String aiai = parent.getProps().getProperty("testing");
+   //  String aiai = parent.getProps().getProperty("testing");
    // 	  String salesid = addInvoiceHeader(doknr,refr,order.getInfo()) + "";
      
      if(order.getCompany().equals("999999")) {
@@ -396,13 +428,18 @@ import eevaeksport.util.Converter;
 	      }
 	      
 	      String doknr = order.getDokNr();
-	      if(doknr.contains(" 202")) {
+	      if(doknr.contains(" 202") && !doknr.contains("P")) {
+	    	  doknr =  doknr.substring(0 ,doknr.indexOf(" "));
+	      } else if(doknr.contains(" 202") ) {
 	    	  doknr = "U00" + doknr.substring(0 ,doknr.indexOf(" "));
 	      }
+	      
 	      String reference = "";
 	      if(order.getTeostaja() != null && order.getTeostaja().trim().length() > 0 ){
 	    	  reference = order.getTeostaja().replace('|', ' ' ).replace('|', ' ' ).trim(); 
-	    	  if(reference.contains(" 202")) {
+	    	  if(reference.contains(" 202") && !reference.contains("P")) {
+		    	  reference =  reference.substring(0 ,reference.indexOf(" "));
+		      }else if(reference.contains(" 202") ) {
 		    	  reference = "U00" + reference.substring(0 ,reference.indexOf(" "));
 		      }
 	        reference = "##" + reference;
@@ -481,9 +518,18 @@ import eevaeksport.util.Converter;
  		}	
    }
    
-   
+   private TreeMap<String,Double> prods = null;
    
    private void makeOutput2(Order order){
+	   
+	   if(prods == null) {
+		   try {
+			prods = getProds();
+		} catch (SQLException e) {
+		
+			e.printStackTrace();
+		}
+	   }
 	   
 	   String agent = order.getAgent();
 	   try {
@@ -532,7 +578,17 @@ import eevaeksport.util.Converter;
 	          sb.append(agent + ";");
 	          sb.append(line.getToode() + ";");
 	          sb.append(line.getKogus() + ";");
-	          sb.append(line.getUnit() + ls);
+	        
+	          sb.append(line.getUnit() + ";");
+	          
+	          
+	         if(prods != null && prods.get(line.getToode()) != null) {
+	        	 sb.append(nf3.format(line.getKogus()/prods.get(line.getToode())) + ";"); 
+	         }else {
+	        	 sb.append(line.getKogus() + ";");
+	         }
+	         
+	          sb.append("dėž" + ls);
 	          
 
 	          addNumLine();
@@ -573,6 +629,17 @@ import eevaeksport.util.Converter;
    
 	private String getOrderText(Order order,TreeMap names) {
 		String res = "\n";
+		  if(prods == null) {
+    		  try {
+				prods = getProds();
+			} catch (SQLException e) {
+				
+				e.printStackTrace();
+			}
+    	  }
+		  
+	//	  System.out.println("prods " + prods.size());
+		
 		 Iterator iter = order.getOrderLines().iterator();
 	        while (iter.hasNext()){
 	          OrderLine line = (OrderLine)iter.next();
@@ -592,14 +659,25 @@ import eevaeksport.util.Converter;
 	 	     
 	 	     
 	          if(line.getKogus()!= 0 && !toode.equals("")){
-	           String kogus = "[" + line.getKogus() + "] ";
-	        	  while (kogus.length() < 11) {
+	        	  
+	        	  String kaste = "";
+	        	  
+	        	
+	        	  
+	        	  if(prods != null && prods.get(toode) != null) {
+	        		  kaste =  nf3.format((line.getKogus() / prods.get(toode)));
+	        	  }else {
+	        		  kaste = "" +((int)line.getKogus());
+	        	  }
+	        	  
+	           String kogus = "[" + ((int)line.getKogus())+"] / [" + kaste +"] ";
+	        	  while (kogus.length() < 15) {
 	        		  kogus = kogus + " ";
 	        	  }
 	        	  res = res + kogus + toode + "  " + name + " "  + " \n";  
 	          }
 	          }
-
+System.out.println(res);
 		return res;
 	}
    
@@ -681,6 +759,7 @@ import eevaeksport.util.Converter;
 
 
    private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
+   private NumberFormat nf3 = NumberFormat.getInstance(Locale.ENGLISH);
    private ImportPanel parent;
    private Order order = null;
    private boolean isAmount = false;

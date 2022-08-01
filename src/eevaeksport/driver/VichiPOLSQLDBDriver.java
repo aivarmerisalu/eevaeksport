@@ -1244,12 +1244,13 @@ try{
                             	 prod.setMeasure(weight);
                            }      	 
                                                       
-                   String vv = rs.getString("vat").substring(3);        
+                  
           
                    try {
+                	   String vv = rs.getString("vat").substring(3);        
                 		prod.setVat(vv);
                    }catch(Exception k) {
-                	   
+                	   System.out.println("vat " + prod.getID());
                    }
                      
                     

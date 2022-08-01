@@ -1275,7 +1275,7 @@ private Vector baashk = null;
 		StringBuffer buf = new StringBuffer();
 		while(rs.next()){
 			String ordnum = rs.getString("Doknr");
-			if(ordnum.trim().length() > 7) {
+			if(ordnum.trim().length() > 7 && !ordnum.startsWith("P")) {
 				int ll = ordnum.trim().length();
 				ordnum = ordnum.substring(ll-7,ll);
 			}

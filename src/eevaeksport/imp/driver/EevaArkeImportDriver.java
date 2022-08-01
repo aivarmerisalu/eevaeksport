@@ -45,7 +45,7 @@ public class EevaArkeImportDriver
     this.parent = parent;
     try {
       Class.forName(databaseDriverName).newInstance();
-      con = DriverManager.getConnection(url );
+    
     }
     catch (Exception e) {
       parent.showError(e);
@@ -62,7 +62,7 @@ public class EevaArkeImportDriver
   	}
     System.out.println(sql1);
     String acc = null;
-
+    Connection con = DriverManager.getConnection(url);
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -85,6 +85,7 @@ public class EevaArkeImportDriver
     
     rs1.close();
     st1.close();
+    con.close();
 
    // System.out.println("Klient: " + acc);
     return acc;
@@ -98,7 +99,7 @@ public class EevaArkeImportDriver
     String sql2 = "SELECT toode FROM firma1.toode where toode='" + prodID + "'";
 
     String prod = null;
-
+    Connection con = DriverManager.getConnection(url);
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -118,7 +119,7 @@ public class EevaArkeImportDriver
     //System.out.println("prod1" + prod);
     rs1.close();
     st1.close();
-
+    con.close();
     return prod;
   }
 
@@ -129,7 +130,7 @@ public class EevaArkeImportDriver
 	    String sql2 = "SELECT nimetus FROM firma1.toode where toode='" + prodID + "'";
 
 	    String prod = null;
-
+	    Connection con = DriverManager.getConnection(url);
 	    Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql2);
 
@@ -139,6 +140,7 @@ public class EevaArkeImportDriver
 
 	    rs1.close();
 	    st1.close();
+	    con.close();
 
 	    return prod;
 	  }
@@ -158,13 +160,17 @@ public class EevaArkeImportDriver
   private int getNextID() throws SQLException{
 	  
 	    String sql =  " select nextval('firma1.dok_dokumnr_seq') as seeralgus";
-
+	    Connection con = DriverManager.getConnection(url);
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 	    int intNr = -1;
 	    while(rs.next()){
 	      intNr = rs.getInt("seeralgus");
 	    }
+	    rs.close();
+	    st.close();
+	    con.close();
+	    
 	    return intNr;
 }
 
@@ -215,6 +221,7 @@ public class EevaArkeImportDriver
     if(agent.equals("KATTLIN")) {
     	agent = "KÄTTLIN";
     }
+    Connection con = DriverManager.getConnection(url);
     PreparedStatement stmt = con.prepareStatement(sql);
     stmt.setInt(1, invID);
     stmt.setString(2, order.getCompany());
@@ -230,6 +237,7 @@ public class EevaArkeImportDriver
 
     stmt.executeUpdate();
     stmt.close();
+    con.close();
   }
 
 
@@ -285,12 +293,13 @@ public class EevaArkeImportDriver
 	      
 	    
 	    System.out.println(invID + " " + sql);
-
+	    Connection con = DriverManager.getConnection(url);
 	      PreparedStatement st = con.prepareStatement(sql);
 	      st.setInt(1, invID);
 	      st.executeUpdate();
 	      count++;
-          st.close(); 
+          st.close();
+          con.close();
 	      setNumAddedLines(getNumAddedLines() + 1);
 	    }
 
@@ -515,9 +524,8 @@ return result;
 	  }
 	  
   private ImportPanel parent;
-
-  private String url = "jdbc:odbc:PostgreSQL30";
-  private Connection con;
+  private String url2 = "jdbc:odbc:PostgreSQL30";
+  private String	       url = "jdbc:odbc:merisoft";
   private Order order = null;
 
 public String getTrouble() {

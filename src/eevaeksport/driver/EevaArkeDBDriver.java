@@ -89,29 +89,12 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
     /**
      *
      */
-    public void connectionUp(){
-      if (con == null){
-        try {
-           con = DriverManager.getConnection(url);
-           stmt = con.createStatement();
-        } catch (Exception e) {
-            getParent().showError(e);
-        }
-      }
-    }
+  
 
     /**
      *
      */
-    public void connectionDown(){
-        try {
-           stmt.close();
-           con.close();
-           con = null;
-        } catch (Exception e) {
-            getParent().showError(e);
-        }
-    }
+ 
 
     /**
      * Method declaration
@@ -122,30 +105,35 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
      * @see
      */
     public TreeMap getAgents() {
-        connectionUp();
+     
         String  cmd = "SELECT yksus,nimetus FROM firma1.yksus2 a inner join firma1.klient k on k.objekt2 = a.yksus group by yksus,nimetus";
         TreeMap agents = new TreeMap();
 
         try {
-            ResultSet	      rs = stmt.executeQuery(cmd);
+        	 Connection con = DriverManager.getConnection(url);
+        	 Statement stmt = con.createStatement();
+             ResultSet	      rs = stmt.executeQuery(cmd);
 
             while (rs.next()) {
               Agent agent = new Agent(Converter.cleanLitLatEst(rs.getString("yksus").trim()));
               String name = rs.getString("nimetus").trim();
              
               
-              agent.setName(name);
+                agent.setName(name);
                 agents.put(name, agent);
             }
+            rs.close();
+            stmt.close();
+            con.close();
         } catch (Exception e) {
             getParent().showError(e);
         }
-        connectionDown();
+      
         return agents;
     }
 
     public TreeMap getCustomers(Agent agent) {
-        connectionUp();
+      
         // String cmd = "SELECT k.kood, k.nimi FROM (klient k INNER JOIN omrid ON k.kood = omrid.klient INNER JOIN rid ON rid.dokumnr = omrid.tasudjrk) WHERE omrid.rid2obj='" + agentCode + "' AND (length(rid.toode) > 2) GROUP BY k.kood";
         String cmd =
         	" select k.kood,k.maksja, k.nimi,aadress,regnr, tanav , piirkond ,postiindek as inex,k.hinnak AS ale," + 
@@ -156,6 +144,8 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
         TreeMap customers = new TreeMap();
 
         try {
+        	 Connection con = DriverManager.getConnection(url);
+        	 Statement stmt = con.createStatement();
             ResultSet	      rs = stmt.executeQuery(cmd);
 
             while (rs.next()) {
@@ -236,6 +226,11 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
          
                 customers.put(nimi, cust);
             }
+            
+            rs.close();
+            stmt.close();
+            con.close();
+            
         } catch (Exception e) {
             getParent().showError(e);
         }
@@ -252,7 +247,7 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 
 
     public TreeMap getProducts(Agent agent) {
-        connectionUp();
+        
       
     
         
@@ -266,9 +261,9 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
           		"			  and k.grupp = 'L' and k.arttyyp = 'Toode' WHERE \r\n" + 
           		"             t.grupp ='L' and nimetus is not null and left(toode,1) in ('1','2','3','4','5','6') and myygihind > 0 and length(ribakood) > 0  ORDER BY toode ";
 
-
-          stmt = con.createStatement();
-                     ResultSet rs = stmt.executeQuery(cmd);
+         Connection con = DriverManager.getConnection(url);
+         Statement stmt = con.createStatement();
+         ResultSet rs = stmt.executeQuery(cmd);
 
                       while (rs.next()) {
                           String kood = rs.getString("toode").trim();
@@ -297,6 +292,9 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
                          
 
                       }
+                      rs.close();
+                      stmt.close();
+                      con.close();
 
         } catch (Exception e) {
             getParent().showError(e);
@@ -307,10 +305,12 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
         return products;
     }
     public TreeMap getProdGroups() throws SQLException {
-    	   this.connectionUp();
+    	  
     	     TreeMap   tm = new TreeMap();
     	     String    sql = " select k.liik, k.artlnimi  from firma1.artliik k where grupp = 'L' and arttyyp = 'Toode' ";
     	     
+    	 	 Connection con = DriverManager.getConnection(url);
+        	 Statement stmt = con.createStatement();
     	     ResultSet rs = stmt.executeQuery(sql);
 
     	     while (rs.next()) {
@@ -321,13 +321,15 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
     	       }
     	     }
     	     rs.close();
+    	     stmt.close();
+    	     con.close();
 
-    	     connectionDown();
+    	    
     	     return tm;
     	 }
 
     public Vector getCustomerProductsList(String agentCode) {
-        connectionUp();
+    
 	/*
 	 * String cmd = "SELECT omrid.klient,rid.toode FROM omrid INNER JOIN rid ON omrid.tasudjrk = rid.dokumnr WHERE omrid.rid2obj='" +
 	 * agentCode + "' AND (length(omrid.klient) > 1) AND (length(rid.toode) > 2) AND omrid.tasudtyyp='G' AND omrid.reakuupaev >= " +
@@ -347,6 +349,8 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 	Vector custProds = new Vector();
 
 	try {
+	 	 Connection con = DriverManager.getConnection(url);
+    	 Statement stmt = con.createStatement();
 	    ResultSet	      rs = stmt.executeQuery(cmd);
 
 	    while (rs.next()) {
@@ -363,11 +367,13 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 	    }
 
             rs.close();
+            stmt.close();
+            con.close();
 
 	} catch (Exception e) {
 	    getParent().showError(e);
 	}
-        connectionDown();
+     
 	return custProds;
     }
 
@@ -380,7 +386,8 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
                      "firma1.dok WHERE  tasukuup<current_date+5 AND doktyyp='G' AND tasumata<>0 " +
                      "ORDER BY klient";
 
-        connectionUp();
+    	 Connection con = DriverManager.getConnection(url);
+    
         PreparedStatement st = con.prepareStatement(sql);
        // st.setString(1, agentCode);
         ResultSet rs = st.executeQuery();
@@ -398,7 +405,9 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
           }
          
         }
+        rs.close();
         st.close();
+        con.close();
         return list;
       }
 
@@ -483,13 +492,13 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 
     // private String url = "jdbc:DBF:///c://work/avallone/dbf";
     public static final String DRIVER_VERSION = "EevaArke";
-    private String	       url = "jdbc:odbc:PostgreSQL30";
-    private Connection	       con = null;
-    private Statement	       stmt;
+    private String	       url2 = "jdbc:odbc:PostgreSQL30";
+    private String	       url = "jdbc:odbc:merisoft";
+   
     private String	       subjectFilesTo = null;
 	@Override
 	public void setBulkSales(Map agents) {
-		  connectionUp();
+		
   		String cmd =  "  select sum(doksumma)/1.20 as sales , dok.pais2obj  AS agent   from firma1.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) " +
 			  "  GROUP BY dok.pais2obj" ;
   	
@@ -497,7 +506,8 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
   		
   		try {
   			
-  			Statement stmt = con.createStatement();		
+  			 Connection con = DriverManager.getConnection(url);
+            Statement stmt = con.createStatement();		
   		
   			
   			ResultSet	      rs = stmt.executeQuery(cmd);
@@ -517,7 +527,7 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
   		} catch (Exception e) {
   			getParent().showError(e);
   		}
-  		connectionDown();
+  		
 		
 	}
 
@@ -536,7 +546,8 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
           Statement st = null;
           try {
         	  
-            connectionUp();
+        	 	 Connection con = DriverManager.getConnection(url);
+            	 
             st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
 
@@ -584,7 +595,7 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 
             rs.close();
             st.close();
-            this.connectionDown();
+            con.close();
           }
           catch (SQLException ex) {
           }
@@ -620,7 +631,7 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 							"													       tra.dokumnr = jou.dokumnr \r\n" + 
 							"															  WHERE  jou.kuupaev >=  current_date -14 and jou.doktyyp = 'G' and tra.toode != 'KM' \r\n" + 
 							"															                GROUP BY jou.saaja,jou.tasudok,jou.kuupaev , tra.toode ORDER BY jou.saaja,jou.tasudok desc,jou.kuupaev desc , tra.toode " ;
-					 connectionUp();
+					 Connection con = DriverManager.getConnection(url);
 					Statement st3 = con.createStatement();
 					ResultSet rs3 = st3.executeQuery(sq3);
 					while (rs3.next()) {
@@ -636,7 +647,7 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 					}
 					rs3.close();
 					st3.close();
-					//con.close();
+					con.close();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -653,7 +664,7 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 	@Override
 	public void FixLoader() {
 		
-eanprods =  Converter.loadMore();
+      eanprods =  Converter.loadMore();
 		  
 		  if(eanprods == null) {
 			  eanprods = new TreeMap();
@@ -663,6 +674,18 @@ eanprods =  Converter.loadMore();
 		System.out.println("Contracts " + contracts.toString());
 		Converter.sendContractJson(contracts ,  rcompanyx,  user ,  pass);
 		System.exit(0);
+	}
+
+	@Override
+	public void connectionUp() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void connectionDown() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
