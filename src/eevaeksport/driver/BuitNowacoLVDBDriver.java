@@ -517,7 +517,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 
    public String getSaveDebtInfo() {
 	   String cmd =  " SELECT k.klient_id AS kood,k.kodas AS payer ,k.kl_mode as mood ,filialas "
-	   		+ " FROM klientai k  WHERE filialas = 1 or k.kl_mode in( 'A','AS' ,'AF','ASW','ASF' ) " ;
+	   		+ " FROM klientai k  WHERE filialas = 1 or k.kl_mode in( 'A','AS' ,'AF','ASW','ASF','BS','B','BF' ) " ;
 
 	   //kellel on blokid 
 
@@ -679,10 +679,19 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 			}
 		
 		
-		  
+		  if(!cust.getID().equals(""))
 		 products.append(cust.getID() + ";" + getParent().getNF().format(cust.getDebt()) + ";" + bl + "\n");
 		}
        
+	Enumeration enume = 	blockedcusts.elements();
+	while (enume.hasMoreElements()) {
+		String cuid = enume.nextElement() + "";
+		if(custs.get(cuid) == null) {
+			 products.append(cuid + ";0;2\n");
+		}
+	}
+		
+		
 		return products.toString();
 
       }
@@ -996,7 +1005,7 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
               		 result.add(mm); 
               	 }
               }
-              System.out.println("aaa " + mline.getCustID());
+            //  System.out.println("aaa " + mline.getCustID());
               result.add(mline);  
            }
         }
@@ -1414,17 +1423,17 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
 	        		  StringTokenizer stag = new StringTokenizer(dubs, ",");
 					    while(stag.hasMoreTokens()){  	
 		                 agent.addDubbler(stag.nextToken());
-		                 System.out.println("Lisan Duubleid " + "dub." +agent.getID() + " " + agent.getDubbler().toString());
+		               //  System.out.println("Lisan Duubleid " + "dub." +agent.getID() + " " + agent.getDubbler().toString());
 					    }  
 	        	  }else  if(dubs.indexOf(";") != -1 ){
 	        		  StringTokenizer stag = new StringTokenizer(dubs, ";");
 					    while(stag.hasMoreTokens()){  	
 		                 agent.addDubbler(stag.nextToken());
-		                 System.out.println("Lisan Duubleid " + "dub." +agent.getID() + " " + agent.getDubbler().toString());
+		               //  System.out.println("Lisan Duubleid " + "dub." +agent.getID() + " " + agent.getDubbler().toString());
 					    }  
 	        	  }else{
 	        		  agent.addDubbler(dubs.trim()); 
-	        		   System.out.println("Lisan Duubleid " + "dub." +agent.getID() + " " + agent.getDubbler().toString());
+	        		 //  System.out.println("Lisan Duubleid " + "dub." +agent.getID() + " " + agent.getDubbler().toString());
 						  
 	        	  }
 	        	 
@@ -1716,11 +1725,7 @@ System.out.println(cmd);
            	payer = rs.getString("payer");
            	if(payer != null && payer.trim().length()>0){
              customer.setPayer(payer.trim());
-             if(!payer.startsWith("LV")){
-            	 // customer.setRegnr("LV" + payer.trim());
-               }else{
-            	  //customer.setRegnr(payer.trim());
-             }
+            
              }
            	
            	if(discs.get(customer.getID()) != null){
@@ -1912,7 +1917,10 @@ System.out.println(cmd);
         	   customer.setCredit(credit + "");
            }
          
-           
+           if(customer.getPayer().equals("LV40203073916")) {
+        	   System.out.println("otaldebts.get(customer.getPayer()) "+  totaldebts.get(customer.getPayer()) + " " + credit);
+        	   System.out.println("otaldebts.get(customer.getPayer()) "+  totaldebts.get(customer.getID()) + " " + credit);
+           }
            
            if(customer.getPayer() != null  && this.totaldebts.get(customer.getPayer()) != null){
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getPayer())));
@@ -1920,6 +1928,11 @@ System.out.println(cmd);
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
             	blocked1custs.add(customer.getID());
+            	blockedcusts.add(customer.getPayer());
+            	blocked1custs.add(customer.getPayer());
+            	                 
+
+            	System.out.println("payerBlokki ");
             }
            }else if( this.totaldebts.get(customer.getID()) != null){
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
@@ -1927,6 +1940,7 @@ System.out.println(cmd);
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
             	blocked1custs.add(customer.getID());
+            	System.out.println("kliendiBlokki " + customer.getID());
             }
            }
            	

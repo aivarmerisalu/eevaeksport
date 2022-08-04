@@ -976,13 +976,19 @@ try{
 	 
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
-	 			comm = "comment=\""+ order.getInfo()+ "\" " ;
+	 			comm =  order.getInfo();
+	 			 comm = comm.replace('"', ' ');
+		 		 comm = comm.replace('"', ' ');
+		 		 comm = comm.replace('"', ' ');
+	 			
+	 			comm = "comment=\""+comm+ "\" " ;
 	 			if(order.getStatus() > 5){
 		 			comm = "cutomer_orderno=\""+ order.getInfo()+ "\" " ;
 		 		}
 	 		}
 	 		
 	 		 comm = protectSpecialCharacters(comm);
+	 	
 	 		System.out.println("comm " + comm);
 	 		String gr = "";
 	 		if(ccc != null && ccc.getGroup()!= null){

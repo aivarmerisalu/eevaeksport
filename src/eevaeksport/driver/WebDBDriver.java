@@ -241,7 +241,7 @@ public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discoun
 	  	lopp.add(Calendar.DATE, +1);
 	  
 	  ArrayList<String> arr = Converter.createExcelProductProblemsOosReport(algus, lopp, this.getExcelDir(), rcompany, user, pass);
-	  System.out.println(arr);
+	  System.out.println("tulemus " + arr);
 	  for(String fname : arr) {
 		  String tekst = " ";
 		  if(fname.contains("oos")) {

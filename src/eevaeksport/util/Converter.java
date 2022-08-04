@@ -10236,31 +10236,9 @@ client.close();
 				f.mkdir();
 			}
 
-
-		  	
 			
 			JSONArray prodsjson = Converter.getWebProducts(rcompany, user, pass);
-			//TreeMap managers = Converter.getManagerList(rcompany, user, pass);
-			
-		/*	TreeMap<String, ArrayList> custagents = new TreeMap();	//populate and merge TreeMap with TreeMap
-			Iterator itera = managers.keySet().iterator();
-			while(itera.hasNext()) {
-				TreeMap<String, ArrayList> temp = Converter.getWebMercagents(rcompany, user, pass, false, itera.next().toString());
-				for (String k : temp.keySet()) {
-					ArrayList arr = custagents.get(k);
-					if(arr == null) {
-						arr = new ArrayList();
-					}
-					arr.add(temp.get(k));
-					custagents.put(k, arr);
-				} 
-				//System.out.println(custagents.size());
-			}*/
-			//System.out.println("manas" + managers.toString());
-
-			
-			//String exceldir = this.getExcelDir();
-			String fnamePROB = exceldir + "productdetailproblembase.xlsx";
+					String fnamePROB = exceldir + "productdetailproblembase.xlsx";
 			try {	
 				FileInputStream excelifailOOS = new FileInputStream(fnamePROB);
 				FileInputStream excelifailPROB = new FileInputStream(fnamePROB);
@@ -10302,7 +10280,16 @@ client.close();
 					borderCenteredPROB.setBorderRight(BorderStyle.THIN);
 					borderCenteredPROB.setFont(defaultFontPROB);
 					
-
+					HashSet done = null;
+					try {
+						done = (HashSet) Converter.readObject("signadone.obj");
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+					
+					if(done == null) {
+						 done = new HashSet();
+					}
 					
 				//teeme ja loeme sv jsoni ja paneme excelisse
 			  	try {
@@ -10310,7 +10297,7 @@ client.close();
 			  		org.json.JSONArray cc = Converter.getSVDataArray(calAlgus.getTime(), calLopp.getTime(), rcompany, user, pass, false, null, null, "test");
 			  		
 			  		TreeMap prods = new TreeMap();
-			  		for(int z=0; z<prodsjson.length(); z++) {
+			  		for(int z = 0; z < prodsjson.length(); z++) {
 			  			if(prodsjson.getJSONObject(z).has("code") && prodsjson.getJSONObject(z).has("EAN")) {
 				  			prods.put(prodsjson.getJSONObject(z).get("code"), prodsjson.getJSONObject(z).get("EAN"));
 			  			}
@@ -10318,23 +10305,26 @@ client.close();
 
 			  		
 			  		
-			  		int problems=1;int outofstocks=1;
+			  		int problems = 1;
+			  		int outofstocks = 1;
+			  		
 			  		for (int i = 0; i < cc.length(); i++) {
 			  			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
 			  			
 			  			String filterProblem = (String)cob.get("resstr1");
 			  			String filterOutOfStock = (String)cob.get("resint3").toString();
-			  			
 			  			String dateAndTime = (String)cob.get("recetime");
 			  			String dateOnly = dateAndTime.split("T")[0];
 			  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
 			  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
 			  			
-			  			//String agid = "" +((ArrayList) (custagents.get(cob.get("custid")+"")).get(0)).get(0);
-			  			String agid = (String)cob.get("custagent");
+			  	    	String agid = (String)cob.get("custagent");
 			  			String agname = (String)cob.get("custagname");
 			  			
-			  			if(filterProblem.equals("PRODUCTDIST")) {
+			  			String signa = dateOnly + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") ;
+			  			System.out.println("signa " + signa + " " + filterOutOfStock + " " + filterProblem);
+			  			
+			  			if(filterProblem != null && filterProblem.equals("PRODUCTDIST") && done != null &&  !done.contains(signa + "dist")) {
 			  				prob=true;
 			  				worksheetPROB.createRow(problems);
 			  				worksheetPROB.getRow(problems).createCell(0).setCellValue((String)cob.get("agentid"));
@@ -10357,9 +10347,10 @@ client.close();
 			  					}
 			  				}
 			  				problems++;
+			  				done.add(signa+ "dist");
 			  			}
-			  			
-			  			if(filterOutOfStock.startsWith("999")){
+			  		
+			  			if(filterOutOfStock != null && filterOutOfStock.startsWith("999") && done != null && !done.contains(signa + "oos")){
 			  				oos=true;
 			  				String res2 = "";
 			  				try {
@@ -10392,6 +10383,7 @@ client.close();
 			  					}
 			  				}
 			  				outofstocks++;
+			  				done.add(signa);
 			  			}
 			  			
 			  			
@@ -10402,7 +10394,7 @@ client.close();
 			  		e.printStackTrace();
 				}
 			  	
-			  	
+			  	Converter.saveObject(done, "signadone.obj");
 
 				exceldir = exceldir + "reports/";
 		  		File ff = new File(exceldir);

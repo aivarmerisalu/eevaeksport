@@ -531,6 +531,8 @@ public class IceAxaUusImportDriver
       counter = counter + cou;
     	//
       String fn = doknr;
+      fn = fn.replace('/', '-');
+      fn = fn.replace('\\', '-');
       if(doknr.trim().length()== 0){
     	  fn =( Calendar.getInstance().getTimeInMillis() + "").substring(3);
       }
