@@ -357,12 +357,19 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                           Date alg = getCalXML(start); 
                           Date lopp = getCalXML(end); 
                           
+                          long diff = lopp.getTime() - alg.getTime();
+                          float days = (diff / (1000*60*60*24));
+                          if(days > 100) {
+                        	  mline.setStartDate(" ");
+                        	  mline.setEndDate(" ");
+                          }
+                          
                           if(alg.before(new Date()) && lopp.after(new Date())){
-                         	
                          	 lines.add(mline);	
                           }
                         
-                      }else{
+                          
+                      } else {
                      	 lines.add(mline);	
   	                 }
                  
@@ -1908,6 +1915,19 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 
 	   Vector result = new Vector();
 	   try{
+		   File cpdata = new File("cpdata/" + number+".vec");
+		   if(cpdata.exists()) {
+			   Vector vec = (Vector)Converter.readObject("cpdata/" + number+".vec");
+			   for(int i = 0; i < vec.size(); i++) {
+				   CustProd cp = (CustProd)vec.elementAt(i);
+				   if(!prodCodes.contains(cp.getProdID())){
+				        prodCodes.add(cp.getProdID());	
+			        }
+			   }
+			   return vec ;
+		   }else {
+			   
+		 
 			String httpsURL = logurl  + company + "/xmlcore.asp?what=invoice_row&get=1&number=" + number;
 		       // System.out.println("httpsURL " + httpsURL);
 				URL myurl = new URL(httpsURL);
@@ -1965,7 +1985,12 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		        }
 		        in.close();
 		      //  System.out.println("buffer " + result);
-		        
+		        Converter.saveObject(result, "cpdata/" + number + ".vec");
+		   }
+		   
+		   
+		   
+		   
 	   }catch(Exception e){
 		   e.printStackTrace();
 		   return null;
@@ -2018,9 +2043,9 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 			                             end =  rida.getAttributes().getNamedItem("end_date").getNodeValue();
 			                    	  }catch(Exception aa){ }
 	                 	  
-	                      String mode = rida.getAttributes().getNamedItem("what").getNodeValue();
+	               //       String mode = rida.getAttributes().getNamedItem("what").getNodeValue();
 	                     
-	                      try{
+	                  /*    try{
 	                     
 	                    	  double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
 	                    	
@@ -2028,14 +2053,14 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	                    		  
 	                    // System.out.println("qqq " +  mode + " " + code + " " + clGroup + " " + value + " "+ prodID) ;
 	                     
-	                     if(mode.equals("8") ){
+	                   //  if(mode.equals("8") ){
 	                    	//  re.put(prodID.trim(), value );
-	                      }
+	                     // }
 	                    	  }
 	 	                     
 	                    	  }catch(Exception aa){
 	                    		  aa.printStackTrace();
-	                    	  }
+	                    	  }*/
                     	 
 	                     
 	 	                     	                 
@@ -3051,6 +3076,11 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    
    public Vector getCustomerProductsList2(){
 	   //1.teeme klientide arvete nimekirja .
+	   
+	   File cpdatadir = new File("cpdata");
+	   if(!cpdatadir.exists()) {
+		   cpdatadir.mkdir();
+	   }
 	    custProds = new Vector();
 	
 	   Calendar cal = Calendar.getInstance();

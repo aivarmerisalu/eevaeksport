@@ -11,13 +11,27 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.StringTokenizer;
 import javax.mail.Address;
 import javax.mail.Authenticator;
@@ -32,9 +46,28 @@ import javax.mail.URLName;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+
+import com.github.scribejava.apis.LinkedInApi20;
+import com.github.scribejava.apis.MicrosoftAzureActiveDirectory20Api;
+import com.github.scribejava.core.builder.ScopeBuilder;
+import com.github.scribejava.core.builder.ServiceBuilder;
+import com.github.scribejava.core.model.OAuth2AccessToken;
+import com.github.scribejava.core.model.OAuthRequest;
+import com.github.scribejava.core.model.Verb;
+import com.github.scribejava.core.oauth.OAuth20Service;
+import com.github.scribejava.core.oauth.OAuthService;
+import com.microsoft.aad.msal4j.IAccount;
+import com.microsoft.aad.msal4j.IAuthenticationResult;
+import com.microsoft.aad.msal4j.ITokenCacheAccessAspect;
+import com.microsoft.aad.msal4j.ITokenCacheAccessContext;
+import com.microsoft.aad.msal4j.InteractiveRequestParameters;
+import com.microsoft.aad.msal4j.MsalException;
+import com.microsoft.aad.msal4j.PublicClientApplication;
+import com.microsoft.aad.msal4j.SilentParameters;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.pop3.POP3Folder;
@@ -72,7 +105,55 @@ public class MailAgent  {
   
   private String time = "";
   
+  
  
+  private static IAuthenticationResult acquireTokenInteractive(String applicationId, String authEndpoint, String redirectURI, Set<String> SCOPE) throws Exception {
+
+      // Load token cache from file and initialize token cache aspect. The token cache will have
+      // dummy data, so the acquireTokenSilently call will fail.
+      TokenCacheAspect tokenCacheAspect = new TokenCacheAspect("sample_cache.json");
+
+      PublicClientApplication pca = PublicClientApplication.builder(applicationId)
+              .authority(authEndpoint)
+              .setTokenCacheAccessAspect((ITokenCacheAccessAspect) tokenCacheAspect)
+              .build();
+
+      Set<IAccount> accountsInCache = pca.getAccounts().join();
+      // Take first account in the cache. In a production application, you would filter
+      // accountsInCache to get the right account for the user authenticating.
+      IAccount account = accountsInCache.iterator().next();
+
+      IAuthenticationResult result;
+      try {
+          SilentParameters silentParameters =
+                  SilentParameters
+                          .builder(SCOPE, account)
+                          .build();
+
+          // try to acquire token silently. This call will fail since the token cache
+          // does not have any data for the user you are trying to acquire a token for
+          result = pca.acquireTokenSilently(silentParameters).join();
+      } catch (Exception ex) {
+          if (ex.getCause() instanceof MsalException) {
+
+              InteractiveRequestParameters parameters = InteractiveRequestParameters
+                      .builder(new URI(redirectURI))
+                      .scopes(SCOPE)
+                      .build();
+
+              // Try to acquire a token interactively with system browser. If successful, you should see
+              // the token and account information printed out to console
+              result = pca.acquireToken(parameters).join();
+          } else {
+              // Handle other exceptions accordingly
+              throw ex;
+          }
+      }
+      return result;
+  }
+
+  
+  
  private String  getMSToken() {
 	 String res = null;
 	 
@@ -82,9 +163,104 @@ public class MailAgent  {
 	 
   props.put("appid", appID);
   props.put("scope", scope);
-	 
+ 
+//  public static final Set<String> SCOPE = Set.of("Mail.ReadAll","Mail.SendAll");
+  
+/*  IAuthenticationResult authresult = null;
+  try {
+      
+    
+    
+      String scopes[]=scope.split(",");
+      Set<String> SCOPE = new HashSet<String>();
+      SCOPE.add("https://outlook.office.com/IMAP.AccessAsUser.All");
+     
+      String authEndpoint="https://login.microsoftonline.com/" + secret + "/oauth2/v2.0/authorize";
+      String redirectURI=  "http://localhost" ; 
+    		  
+    		  //prop.getProperty("redirectURI");
+      
+      //applicationId=xxxxyyy
+    		 // authEndpoint=
+    		  //redirectURI=http://localhost
+    		  //scopes=https://outlook.office365.com/SMTP.Send,https://outlook.office365.com/Mail.Read,https://outlook.office365.com/Mail.Send
+
+
+      authresult = acquireTokenInteractive(appID,authEndpoint,redirectURI, SCOPE);
+    System.out.println("uhuu " + authresult.accessToken());
+    
+  
+            
+  } catch (Exception e) {
+      e.printStackTrace();
+  }
+  System.exit(0); */
+  
+  ScopeBuilder sp = new ScopeBuilder();
+  sp.withScope("offline_access");
+  sp.withScope("IMAP.AccessAsUser.All");
+  sp.withScope("SMTP.Send");
 	 try {
-		//MSUserPassFlowToken.getToken(props);
+		//  final OAuthRequest request = new OAuthRequest(Verb.GET, "https://graph.microsoft.com/v1.0/me");
+		  final OAuth20Service service = new ServiceBuilder(appID)
+	                .apiSecret(secret)
+	                .defaultScope(sp)
+	               // .defaultScope("SMTP.Send")
+	              
+	               // .callback("https://outlook.office.com/IMAP.AccessAsUser.All")
+	                .build(MicrosoftAzureActiveDirectory20Api.instance());
+		 
+		  final String authorizationUrl = service.getAuthorizationUrl();
+	      
+	        System.out.println(authorizationUrl);
+	        String url = authorizationUrl;
+			URL urlst = null;
+			try {
+				urlst = new URL(url);
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			
+		
+			
+			HttpsURLConnection	 https = (HttpsURLConnection) urlst.openConnection();
+			
+            String code0 = "";
+			
+			InputStream is = https.getInputStream();
+			BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			try {
+			    while (r.readLine() != null) {
+			        code0 = code0 + (r.readLine());
+			    }  
+			 } catch (IOException e) {
+			    // TODO Auto-generated catch block
+			    e.printStackTrace();
+			 }
+	        
+			System.out.println("code0 " + code0);
+			System.out.println(authorizationUrl);
+			
+	        System.out.println("And paste the authorization code here");
+	        System.out.print(">>");
+	        final Scanner in = new Scanner(System.in, "UTF-8");
+	        System.out.println("=== "  + "'s OAuth Workflow ===");
+	        System.out.println();
+	        // Obtain the Authorization URL
+	        System.out.println("Fetching the Authorization URL...");
+	        final String code = in.nextLine();
+		 
+		 System.out.println("Trading the Authorization Code for an Access Token...");
+	        final OAuth2AccessToken accessToken = service.getAccessToken(code);
+	        System.out.println("Got the Access Token!");
+	        System.out.println("(The raw response looks like this: " + accessToken.getAccessToken() + "')");
+		res =   accessToken.getAccessToken();
+		
+		  
+		//  service.execute(request);
+		 
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
@@ -251,11 +427,43 @@ public class MailAgent  {
     socketFactory.setTrustAllHosts(true);
      
      Properties prop = new Properties();
-     prop.put("mail.imap.ssl.enable", "true"); // required for Gmail
-     prop.put("mail.imap.sasl.enable", "true");
-     prop.put("mail.imap.sasl.mechanisms", "XOAUTH2");
-     prop.put("mail.imap.auth.login.disable", "true");
-     prop.put("mail.imap.auth.plain.disable", "true");
+   //  prop.put("mail.imap.ssl.enable", "true"); // required for Gmail
+  //   prop.put("mail.imap.sasl.enable", "true");
+   //  prop.put("mail.imap.sasl.mechanisms", "XOAUTH2");
+    // prop.put("mail.imap.auth.login.disable", "true");
+    // prop.put("mail.imap.auth.plain.disable", "true");
+     
+     
+     
+  // props.put("mail.imap.ssl.enable", "true"); // required for Gmail
+   /*  prop.put("mail.smtp.auth.xoauth2.disable","false");
+     prop.put("mail.smtp.sasl.enable", "true");
+     prop.put("mail.imap.auth.mechanisms", "XOAUTH2");
+     prop.put("mail.smtp.auth.mechanisms","XOAUTH2");
+     prop.put("mail.smtp.port", "587");
+     prop.put("mail.smtp.starttls.enable", "true");*/
+     
+     prop.put("mail.smtp.auth", "true");
+     prop.put("mail.transport.protocol", "smtp");
+     prop.put("mail.smtp.starttls.enable", "true");
+     prop.put("mail.smtp.auth.mechanisms", "XOAUTH2");
+     prop.put("mail.smtp.auth.login.disable","true");
+     prop.put("mail.smtp.auth.plain.disable","true");
+     prop.put("mail.debug.auth", "true");
+     
+     //prop.put("mail.transport.protocol","smtp");
+    // prop.put("mail.smtp.host","smtp.office365.com"); 
+    
+     prop.put("mail.debug",true);
+     
+     
+
+   //  props.put("mail.imap.ssl.enable", "true"); // required for Gmail
+   //  prop.put("mail.imap.sasl.enable", "true");
+   //  prop.put("mail.imap.sasl.mechanisms", "XOAUTH2");
+    // prop.put("mail.imap.auth.login.disable", "true");
+     // prop.put("mail.imap.auth.plain.disable", "true");
+   
     
      String token = props.getProperty("oauth.accesstoken");
      
@@ -263,10 +471,12 @@ public class MailAgent  {
     	token = getMSToken();
     }
      
+    System.out.println("token" + token);
+    
     Session session = Session.getInstance(prop);
      store = session.getStore("imaps");
      store.connect(props.getProperty("pop3.host"), props.getProperty("pop3.user"), token);
-
+     
      
 } else if (PROTOCOL.equals("imapssl")){
 	

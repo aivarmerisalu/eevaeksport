@@ -757,7 +757,7 @@ public class EksportPanel extends JPanel implements ActionListener,
       }
 
     Vector res   = sortAgs(agentsq,terr);
-    System.out.println("res " + res.toString());
+  //  System.out.println("res " + res.toString());
       
       if (driver instanceof BulkUpdater){
         generateForBulk(res);
@@ -6137,7 +6137,7 @@ System.out.println("cp ending");
 
             agentBox.addItem(boxLine);
         }
-        System.out.println("res 122 " + agentCodes.toString());
+      //  System.out.println("res 122 " + agentCodes.toString());
         if (selected != -1) {
             agentBox.setSelectedIndex(selected);
         }
