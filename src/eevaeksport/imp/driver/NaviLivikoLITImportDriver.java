@@ -455,13 +455,14 @@ private HashMap prodnames = null;
                 
 
                   String ccc = "";
-               if(line.getDiscount() > 0){
+               if(line.getDiscount() > 0 || tagastus){
              	 // double discprice = line.getPrice()/(100d -line.getDiscount())*100d ;
              	 sb.append("         <ItemPrice>" +
                    	   escape(getNF().format(line.getPrice())) + "</ItemPrice>" + ls); 
              	  
                  sb.append("         <Addition addCode=\"DSC\"><AddRate>" +
              	   escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
+                 if(!tagastus)
                  ccc =  "-" + nf.format(line.getDiscount()) + "% ";
                }
               

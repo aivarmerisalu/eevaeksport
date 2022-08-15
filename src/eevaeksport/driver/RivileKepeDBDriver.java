@@ -800,8 +800,8 @@ HashSet olemas = new HashSet();
                 }
        
              // }
-              agent.setName(name);
-              agents.put(name, agent);
+              agent.setName(name );
+              agents.put(name+ " " + agent.getID(), agent);
               agents1.put(agent.getID(), agent);
               if(sb2.length() > 2){
                 	try{

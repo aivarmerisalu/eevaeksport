@@ -533,11 +533,29 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
    
    public Vector getPriceMatrixData() {
 	   
-	   String sql = "select max(klient_id) as custid, k.kodas AS clgroup,preke AS prodid,grup_id AS prodgroup, " +
-	    "  kaina AS price ,procentas as disc, data_iki as paev,data_nuo as startday " +
-	    "    from  nuolaid ale inner join klientai k  ON ale.klientas=k.klientas left join  grupes g on g.grupe=ale.grupe " +	
-	    "	where   data_iki is null  and (procentas != 0 or kaina > 0) and (preke >0 or grup_id >0) " +
-	    " group by  k.kodas,preke,grup_id,kaina,procentas,data_nuo,data_iki";
+	   String sql = "select max(klient_id) as custid, k.kodas AS clgroup,preke AS prodid,grup_id AS prodgroup, \r\n" + 
+	   		"	      kaina AS price ,procentas as disc, data_iki as paev,data_nuo as startday from\r\n" + 
+	   		"	        klientai k left JOIN nuolaid ale ON ale.klientas = k.sistema left join  grupes g on g.grupe=ale.grupe 	\r\n" + 
+	   		"	    	where  data_iki is null  and (procentas != 0 or kaina > 0) and (preke >0 or grup_id >0) \r\n" + 
+	   		"	    group by  k.kodas,preke,grup_id,kaina,procentas,data_nuo,data_iki";
+	   //see oli esialgne
+	   sql = "select max(klient_id) as custid, k.kodas AS clgroup,preke AS prodid,grup_id AS prodgroup, " +
+			    "  kaina AS price ,procentas as disc, data_iki as paev,data_nuo as startday " +
+			    "    from  nuolaid ale inner join klientai k  ON ale.klientas=k.klientas left join  grupes g on g.grupe=ale.grupe " +	
+			    "	where   data_iki is null  and (procentas != 0 or kaina > 0) and (preke >0 or grup_id >0) " +
+			    " group by  k.kodas,preke,grup_id,kaina,procentas,data_nuo,data_iki";
+			   
+	   sql = " select max(klient_id) as custid, k.kodas AS clgroup,preke AS prodid,grup_id AS prodgroup,\r\n" + 
+	   		"	   			      kaina AS price ,procentas as disc, data_iki as paev,data_nuo as startday from\r\n" + 
+	   		"	   			        klientai k left JOIN nuolaid ale ON ale.klientas = k.sistema left join  grupes g on g.grupe=ale.grupe 	 \r\n" + 
+	   		"	   			    	 where  data_iki is null  and (procentas != 0 or kaina > 0) and (preke >0 or grup_id >0) \r\n" + 
+	   		"	   			  group by  k.kodas,preke,grup_id,kaina,procentas,data_nuo,data_iki\r\n" + 
+	   		"				UNION  \r\n" + 
+	   		"				  select max(klient_id) as custid, k.kodas AS clgroup,preke AS prodid,grup_id AS prodgroup, \r\n" + 
+	   		"	     kaina AS price ,procentas as disc, data_iki as paev,data_nuo as startday \r\n" + 
+	   		"	        from  nuolaid ale inner join klientai k  ON ale.klientas=k.klientas left join  grupes g on g.grupe=ale.grupe 	\r\n" + 
+	   		"	    	where   data_iki is null  and (procentas != 0 or kaina > 0) and (preke >0 or grup_id >0) \r\n" + 
+	   		"		 group by  2,3,4,5,6,7,8 ";
 	   
 		//pï¿½si allahindlused toodetele ja gruppidele 
 	  	 String    sql1 = "  select(klient_id) AS custid,k.kodas AS clgroup,  sistema as grupp " +
@@ -594,7 +612,7 @@ while (rs.next()) {
 	         rs = stmt.executeQuery(sql);
    
 	 while (rs.next()) {
-      String custID = rs.getString("custid").trim();
+      String custID = rs.getString("custid");
       String clGroup = rs.getString("clgroup");
       String prodID = rs.getString("prodid");
       String prodGroup = rs.getString("prodgroup");
@@ -604,8 +622,8 @@ while (rs.next()) {
   
       MatrixLine mline = new MatrixLine();
 
-      if (custID != null && custID.length() > 0) {
-        mline.setCustID(custID);
+      if (custID != null && custID.trim().length() > 0) {
+        mline.setCustID(custID.trim());
       //  mline.setProdLevel("pr");
         
         mline.setStartDate(Converter.getDDsMMMString(now.getTime()));
@@ -3058,7 +3076,7 @@ private TreeMap makePlans(){
 	   				profit = Double.parseDouble(row.getCell((short) 2).getStringCellValue());
 						}
 						
-						System.out.println(agent + " " + i + " " + plan + " " + profit);
+						//System.out.println(agent + " " + i + " " + plan + " " + profit);
 						    res.put(agent,(int)plan);
 					
 							planprofit.put(agent,(int)profit);
@@ -3071,8 +3089,8 @@ private TreeMap makePlans(){
 	   }catch (Exception e){
 		   e.printStackTrace();
 	   }
-		System.out.println("jooksevplaan " + res.toString());
-		System.out.println("jooksevprofit " + planprofit.toString());
+		//System.out.println("jooksevplaan " + res.toString());
+		//System.out.println("jooksevprofit " + planprofit.toString());
 	//	System.exit(0);
 	   return res;
 }

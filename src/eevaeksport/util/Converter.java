@@ -3104,6 +3104,9 @@ public class Converter {
 		        
 		          String format = identifyXLS(file);
 		          System.out.println("Format tuvastatud " + format + " " + file.getName());
+		          if(format != null) {
+		        	  
+		       
 		        //System.exit(0);
 		        
 		        if(format.equals("mjsortiment")) {
@@ -3180,7 +3183,7 @@ public class Converter {
 		    	System.out.println("renamed " +   file.renameTo(new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn)));
 		      
 		    }
-		    	
+		      }
 		    }
 		
 	 

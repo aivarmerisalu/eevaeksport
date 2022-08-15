@@ -173,10 +173,14 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 		      Statement stmt = ss.createStatement();
 			      ResultSet rs = stmt.executeQuery(cmd);
 			      
+			      HashSet olemas = new HashSet();
 			        while(rs.next()){
 			        	 
 				         
 				      	 String custid = rs.getString("cust").trim();
+				      	 if(!olemas.contains(custid)) {
+				      		 olemas.add(custid);
+				      	 }
 		    	    	 String  routes = rs.getString("route").trim();
 		    	    	 String  routeName = rs.getString("routeName").replaceAll(","," ").replaceAll("\"", "'").trim();
 		    	    	String doknr =   rs.getString("waybill").trim();
@@ -271,9 +275,42 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 			        
 			        rs.close();
 			        stmt.close();
+			        ss.close();
 		   
-		 
-	 
+			 Iterator itera =  custMap.keySet().iterator();
+			 while(itera.hasNext()) {
+				 String custid = (String)itera.next();
+				 if(!olemas.contains(custid)) {
+					 
+					 
+					 
+					 Vector<Product> lines = new Vector<Product>();
+	         		 Product pr = new Product("P");
+	         		 double kogus = 1;
+	         		  pr.setInCases(kogus);
+	         		 lines.add(pr);
+	         		 Calendar ccc = Calendar.getInstance();
+	         		 Date now = new Date(ccc.getTimeInMillis());
+	         		SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+	         		
+	       			
+	         		Order shipit = new Order(custid,"autosender");
+	         			shipit.prodLines = lines;
+	         			shipit.docType = "COLLECTION";
+	         			shipit.origId = null;
+	         			shipit.completedMsisdn = null;
+	         			shipit.completedDate = null;
+	         			shipit.completedComment = null;
+	         			shipit.deliveryDate = now;
+	         			shipit.extDoc = "noOrder";
+	         			shipit.id = Calendar.getInstance().getTimeInMillis() + "";
+	         		 
+	         			 res.add(shipit);
+					 
+				 }
+			 }
+				        
+					  
 	         	
 	        System.out.println("Dokumente salvestama " + res.size() );
 	        Converter.saveShipitListJson(res, custs) ;
