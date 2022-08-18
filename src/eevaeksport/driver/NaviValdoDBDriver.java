@@ -186,7 +186,7 @@ private TreeMap getExcelStuff(){
                           "  union  SELECT '' AS custid,[Sales Code] AS clgroup,[Item No_]  AS prodid,'' AS prodgroup,  " +
              "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi , [Akcija] + ' ' + [Campaign Category] as camp from  " +
              "  [VOLDEMĀRS SIA$Sales Price] where ( getdate()+1 between [Starting Date] and [Ending Date] or (getdate()+1 > [Starting Date]) and  year ([Ending Date]) = 1753) " +
-			  "  and [Sales Type] = 1 " +   
+			  "  and [Sales Type] = 1  and [Minimum Quantity] = 0  " +   
                           "  union  select [Sales Code] AS custid, '' AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
             "   0 AS price ,[Line Discount _] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency Code] as val ,  datediff(dd,[Starting Date],[Ending Date]) as paevi ,'' as camp " +
                        "  from [VOLDEMĀRS SIA$Sales Line Discount] where [Type] = 1 and [Sales Type] = 0   " +     

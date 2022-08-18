@@ -4446,7 +4446,7 @@ try{
 			try {
 				passx = ag.getString("passWord");
 			}catch(Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			
 			

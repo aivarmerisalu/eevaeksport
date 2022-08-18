@@ -298,6 +298,7 @@ private  HashSet custo = null;
 		}
 		
 		boolean POS = false ;
+		boolean INDIRECT = false ;
 		
 		 Vector lin1 = order.getOrderLines();
 	 	 for (int i = 0; i < lin1.size(); i++) {
@@ -309,6 +310,10 @@ private  HashSet custo = null;
 	 	
 	 	 if(samplesacc != null && samplesacc.contains(order.getCompany())) {
 	 		 POS = true;
+	 	 }
+	 	 
+	 	 if(order.getCompany().startsWith("ABG")) {
+	 		INDIRECT = true;
 	 	 }
      
 	 if( POS) {
@@ -333,6 +338,34 @@ private  HashSet custo = null;
 	    		 // sendConfirmEmail( emailto, order.getInfo() ,order.getDokNr(),order.getCompany(),  " " + this.custName(order.getCompany()) , " ", order,true); 
 	    	 }
 	          		  signatures.add(signature);
+		     }
+		   try {
+				saveObject(signatures, "signatures.vec");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		 
+		 
+	 } else  if( INDIRECT ) {
+		 System.out.println("ON INDIRECT TELLIMUS");
+		 
+		 String signature = order.getSignature();
+		  if(signatures.contains(signature)){
+			  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
+		  } else {
+			
+		 	 String emailto = null;
+	    	  if(props.get(order.getAgent()) != null) {
+	    		  emailto = props.get(order.getAgent()) + "";
+	    	  }
+	    	  
+	    	 if(emailto != null) {
+	    		 System.out.println("saadan maili " + order.getInfo() + "\n"  + order.getTeostaja()+ "\n" + order.getEmailBody() + "\n" + order.getReference());
+	    		  sendConfirmEmail( emailto, order.getInfo() ,order.getDokNr(),order.getCompany(),  " " + this.custName(order.getCompany()) , " ", order,false ,true); 
+	    	 }
+	          		  signatures.add(signature);
+	          		counter = order.getOrderLines().size();
+	          		setNumAddedLines(counter);
 		     }
 		   try {
 				saveObject(signatures, "signatures.vec");
@@ -1707,6 +1740,22 @@ if(text.indexOf("\"")!=-1){
    private String getOOSEmailText( Order ord, String custn ,String agent , boolean axa, boolean sampl) {
 		int i = 0;
 		int j = 0;
+		   Properties props = new Properties();
+		   
+			try {
+				props = EksportFrame.loadProps("warehouseprop.txt");
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			String ware = "no ware";
+			
+			System.out.println("ware " + ord.getWarehouse() + "\n " + props.toString());
+			if(ord.getWarehouse() != null && ord.getWarehouse().trim().length() > 0 && props.getProperty(ord.getWarehouse()) != null) {
+				ware = props.getProperty(ord.getWarehouse());
+			}
+			
 		Vector lines = ord.getOrderLines();
 		double total = 0;
 		String custname = custn;
@@ -1730,12 +1779,14 @@ if(text.indexOf("\"")!=-1){
 		
 		String axat = "";
 		if(axa) {
-			axat = "IMPORTED to AXAPTA";
+			axat = "ORDER to INDIRECT CUSTOMER";
 		}
 		
 		StringBuffer sb = new StringBuffer();
-		String subtext = (axat +  " Cellar Trends Ltd.' \n &emsp;&emsp;&emsp;&emsp; Stonehouse Farm/Ashby Rd, Swadlincote DE11 7BP, United Kingdom\n").trim();
-		String regno = ("&emsp;&emsp;&emsp;&emsp; No. 3705002<br>" + agname);
+		String subtext = (axat +  " Amber Beverage Austria GmbH.' \n &emsp;&emsp;&emsp;&emsp; Gewerbepark – In der Au 2, A-6341 Ebbs, Austria\n").trim();
+		String regno = ("<br><br>Manager: " + agname);
+		
+		regno = regno +  ("<br><br>Wholeseller: " + ware);
 		
 			subtext = subtext + " " + regno;
 		
@@ -1848,10 +1899,7 @@ if(text.indexOf("\"")!=-1){
    
    private void sendConfirmEmail(String emailto,String comment,String doknr,String custid, String nimi , String chain , Order ord , boolean axa, boolean sampl){
 	   	try{
-	   		
-	   		
-	   			
-	   			System.out.println(comment);
+	   				//System.out.println(comment);
 	   			Email mail = new Email(null);
 		  		   String sub = "Order Indirect ";
 		  		   if(axa) {
@@ -1869,16 +1917,16 @@ if(text.indexOf("\"")!=-1){
 		  	  		mail.setFrom(parent.getProps().getProperty("from"));
 		  	  		mail.setSubjectFilesTo(sub + custid);
 		  	  		mail.setEncoding("utf-8");
-		  	  		mail.setBody("\nOrder :" +  doknr + " \nCustomer code :" + custid +  "\nCustomer Name :" + comment + "\n" +
-		  	  			  "Customer Chain :" + chain + "\n" +  "\n" + comment);
+		  	  		//mail.setBody("\nOrder :" +  doknr + " \nCustomer code :" + custid +  "\nCustomer Name :" + comment + "\n" +
+		  	  			//  "Customer Chain :" + chain + "\n" +  "\n" + comment);
 		  	  		
 		  	  	mail.setBodyHtml(getOOSEmailText(ord,comment,emailto , axa, sampl));
 		  	  		mail.setSendNotice(false);
 		  	  		mail.send();
 		  	  		
 		  	  	if("true".equals( parent.getProps().getProperty("copydev"))){
-		  	  	mail.setFilesTo("aivar@mobilejava.ee");
-		  	  	mail.send();
+		  	  	    mail.setFilesTo("aivar@mobilejava.ee");
+		  	  	    mail.send();
 		  	  		}
 		  	  		System.out.println("\nOrder Comment " +  doknr + " " + custid + "\n\n" +
 		  	  				  "\n >>>>>" + comment + "<<<<<");

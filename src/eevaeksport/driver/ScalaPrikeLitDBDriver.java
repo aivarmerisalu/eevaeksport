@@ -35,6 +35,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -539,6 +543,8 @@ TreeMap res = new TreeMap();
 
     public TreeMap getCustomers(Agent agent){
     	
+    	TreeMap deldays = this.getDeliveryDays();
+    	
     	  Converter.getManagersReplacements(getAgents1(), rcompany, user , pass);
         connectionUp(url);
         connectionUp2(url);
@@ -763,7 +769,7 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
 	    while (rs.next()) {
 		String nimi = rs.getString("nimi").trim();
                 Customer cust = new Customer(rs.getString("kood").trim());
-                cust.setAddress(Converter.adressLink(Converter.enCodeEst(rs.getString("aadress").trim()),"Lihuania"));
+                cust.setAddress(Converter.adressLink(Converter.enCodeEst(rs.getString("aadress").trim()),"Lithuania"));
                 nimi = nimi + " " + cust.getAddress();
                 
                 cust.setName(nimi);
@@ -783,6 +789,11 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 if(agen != null){
                   cust.addAgent(new Agent(agen.trim()));
                 }
+                
+                if(deldays.get(cust.getID())  != null){
+                 	//cust.setDelDays((String)deldays.get(cust.getID()));
+                 }
+                
                 
                 Agent agg = ((Agent)this.getAgents1().get(agen.trim()));
 				
@@ -845,7 +856,7 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
             	  cust.setInfo("Tara Saldo " + taraSaldo.get(cust.getID()) +  " kegs");
               }
 
-                String delday = rs.getString("delday");
+                String delday =(String) deldays.get(cust.getID()+"aeg");
                 if(delday != null && delday.trim().length()>0){
                 	cust.setPersonalData(delday.trim().replaceAll(";", ":"));              	
                 }
@@ -1057,7 +1068,164 @@ return bomKount;
   private TreeMap braakGir = null;
   private TreeMap nepaGir = null;
   
+	private TreeMap getDeliveryDays() {
+		  TreeMap<String,String> res = new TreeMap<String,String>();
+		  
+		  Vector result = new Vector();
+  		File f = new File(this.getExcelDir() + "logistics.xlsx");
+  		try {
+  			DataFormatter formatter = new DataFormatter();
+  			 
+  			FileInputStream ff = new FileInputStream(f);
+  			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+  			XSSFSheet sheet = workbook.getSheetAt(0);
+  			XSSFRow row = null;
+  		TreeMap olemas = new TreeMap();
+			for(int ii = 1 ; ii < sheet.getLastRowNum()+1;ii++){
+				 row = sheet.getRow(ii);
+				
+					String klient = formatter.formatCellValue(row.getCell(1));
+					String aeg = formatter.formatCellValue(row.getCell(11));
+					String paevad = formatter.formatCellValue(row.getCell(16));
+					StringTokenizer st1 = new StringTokenizer(klient,",");
+					while(st1.hasMoreElements()) {
+						String kk = st1.nextToken().trim();
+						
+						
+						res.put(kk+"aeg","Log.info: [" + paevad + "] " + aeg);
+						if(olemas.get(kk) != null) {
+							res.put(kk+"aeg","Log.info: [" + olemas.get(kk) + "," + paevad + "] " + aeg);
+						}
+						
+						String tul = "";
+						
+					char[] pp =	paevad.toCharArray();
+	                 for(int i = 0; i< pp.length; i++) {
+	                	 char cc = pp[i];
+	                	 if(Converter.isNumeric(cc)) {
+	                		 if(tul.equals("")) {
+	                			 tul =  getcal(cc);
+	                			 olemas.put(kk, cc);
+	                		 } else {
+	                			 tul = tul + "," + getcal(cc); 
+	                			 if(olemas.get(kk) != null) {
+	                				 olemas.put(kk,olemas.get(kk) + "," +  cc); 
+	                			 }else {
+	                				 olemas.put(kk,  cc);
+	                			 }
+	                			
+	                		 }
+	                		
+	                	 }
+	                 }
+					
+	                 res.put( kk, tul );
+	                 
+					}
+				
+			}
+  			
+  		}catch(Exception e) {
+  			e.printStackTrace();
+  		}
+		 // System.out.println("paevad " + res.toString());  
+  		
+		  return res;
+	}
 	
+	  private String getcal(char day){
+		  String res = null;
+		  Calendar cal = Calendar.getInstance();
+		  int weekday = cal.get(Calendar.DAY_OF_WEEK);
+		
+		  if(day =='1'){
+			  if (weekday != Calendar.MONDAY){
+				  while (weekday != Calendar.MONDAY) {
+					    cal.add(Calendar.DATE, 1);
+					    weekday = cal.get(Calendar.DAY_OF_WEEK);
+					}
+			  }else{
+				  cal.add(Calendar.DAY_OF_YEAR, 7); 
+			  }
+		  }
+		  
+
+		  if(day =='2'){
+			  if (weekday != Calendar.TUESDAY){
+				  while (weekday != Calendar.TUESDAY) {
+					    cal.add(Calendar.DATE, 1);
+					    weekday = cal.get(Calendar.DAY_OF_WEEK);
+					}
+			   }else{
+				  cal.add(Calendar.DAY_OF_YEAR, 7); 
+			  }
+		  }
+
+		  if(day =='3'){
+			  if (weekday != Calendar.WEDNESDAY){
+				  while (weekday != Calendar.WEDNESDAY) {
+					    cal.add(Calendar.DATE, 1);
+					    weekday = cal.get(Calendar.DAY_OF_WEEK);
+					}
+			  }else{
+				  cal.add(Calendar.DAY_OF_YEAR, 7); 
+			  }
+		  }
+		  
+
+		  if(day =='4'){
+			  if (weekday != Calendar.THURSDAY){
+				  while (weekday != Calendar.THURSDAY) {
+					    cal.add(Calendar.DATE, 1);
+					    weekday = cal.get(Calendar.DAY_OF_WEEK);
+					}
+			  }else{
+				  cal.add(Calendar.DAY_OF_YEAR, 7); 
+			  }
+		  }
+
+		  if(day =='5'){
+			  if (weekday != Calendar.FRIDAY){
+				  while (weekday != Calendar.FRIDAY) {
+					    cal.add(Calendar.DATE, 1);
+					    weekday = cal.get(Calendar.DAY_OF_WEEK);
+					}
+			  }else{
+				  cal.add(Calendar.DAY_OF_YEAR, 7); 
+			  }
+		  }
+		  
+
+		  if(day =='6'){
+			  if (weekday != Calendar.SATURDAY){
+				  while (weekday != Calendar.SATURDAY) {
+					    cal.add(Calendar.DATE, 1);
+					    weekday = cal.get(Calendar.DAY_OF_WEEK);
+					}
+			  }else{
+				  cal.add(Calendar.DAY_OF_YEAR, 7); 
+			  }
+		  }
+
+		  if(day =='7'){
+			  if (weekday != Calendar.SUNDAY){
+				  while (weekday != Calendar.SUNDAY) {
+					    cal.add(Calendar.DATE, 1);
+					    weekday = cal.get(Calendar.DAY_OF_WEEK);
+					}
+			  }else{
+				  cal.add(Calendar.DAY_OF_YEAR, 7); 
+			  }
+		  }
+		  
+		  res = cal.getTimeInMillis() + "";
+		  cal.add(Calendar.DATE, 7);
+		  res = res + "," + cal.getTimeInMillis() + "";  
+		  
+		  
+		  return res ;
+	  }
+  
    private TreeMap getGirStock(){
 		
 	   TreeMap<String,Double> res = new TreeMap<String,Double>();

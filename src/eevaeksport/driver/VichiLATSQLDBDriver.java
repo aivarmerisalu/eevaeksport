@@ -322,15 +322,21 @@ public class VichiLATSQLDBDriver extends AbstractDBDriver implements
 	             
 	             MatrixLine mline = new MatrixLine();
 	             String check = "";
+	             boolean goes = false;
 
 	             if (custID != null && custID.length() > 0) {
 	               mline.setCustID(custID);
 	               check = custID;
+	               goes = true;
 	             }
+	             
 	             if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
 	               mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
 	               check = check + clGroup.trim();
+	               goes = true;
 	             }
+	             
+	             
 	             
 	            if( sdate != null  && !sdate.startsWith("2030") && !sdate.startsWith("1753") && edate != null && !edate.startsWith("2030")  ){
 	            	//kui on mõlemad siis paneme kuupäevad 
@@ -353,8 +359,11 @@ public class VichiLATSQLDBDriver extends AbstractDBDriver implements
 	             
 	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
 	            	 if(!hset.contains(check)){
-	            	      result.add(mline);
-	            	      hset.add(check);
+	            		 if(goes) {
+	            			 result.add(mline);
+		            	      hset.add(check); 
+	            		 }
+	            	     
 	            	 }
 	              }
 	           }
@@ -1503,14 +1512,6 @@ cn.close();
 				}
 				prod.setGroup(grupp);
 
-				if("true".equals(parent.getProps().getProperty("split.order"))){
-					String split = prod.getGroup().substring(0, 1);
-					if (split.equals("1")) {
-					//	prod.setSendSeparate("1");
-					} else {
-						//prod.setSendSeparate("2");
-					}	
-				}
 				
   
 				String gr2 = rs.getString("grupp2");
@@ -1625,10 +1626,6 @@ cn.close();
 					prod.setStatusSellout("1");
 				}
 
-				String discou = rs.getString("maxdiscount");
-				if (discou != null && discou.trim().length() > 0) {
-
-				}
 
 				double cases = rs.getDouble("kastis");
 				if (cases > 0) {
@@ -1659,7 +1656,7 @@ cn.close();
 				if (discT.containsKey(id)) {
 					String aaa = (String) discT.get(id);
 					prod.setMaxDiscount(Double.parseDouble(aaa));
-					prod.setStatusDiscount("1");
+					//prod.setStatusDiscount("1");
 				}
 
 				double opt = rs.getDouble("optimum");
