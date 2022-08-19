@@ -1255,7 +1255,9 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
 	}catch(Exception s){
 		s.printStackTrace();
 	}
-    System.out.println("mercs size " + mercs.size());
+   
+   
+   //System.out.println("mercs size " + mercs.size());
     
 	HashMap<String,ArrayList> agss = new HashMap<String,ArrayList>();
     try{
@@ -1281,7 +1283,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
 		s.printStackTrace();
 	}
     
-    System.out.println("agss size " + agss.size());
+  //  System.out.println("agss size " + agss.size());
     
     
     try {
@@ -1545,10 +1547,10 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
 			cust.addFixSortCode(Converter.cleanLitLatEst(fixed.trim()));
 		}
 		
-		double minam = rs.getDouble("minam");
-		if(minam > 0){
+	//	double minam = rs.getDouble("minam");
+		//if(minam > 0){
 			//cust.setMinsum(minam);
-		}
+	//	}
        
 		String ette = rs.getString("ette");
 		if (ette != null && ette.trim().length() > 0 && ette.trim().equals("Priek")) {
@@ -1651,6 +1653,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
            con.close();
     } catch (Exception e){
       getParent().showError(e);
+      System.exit(0);
     }
     
     
@@ -2200,7 +2203,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
 			"	  else (case when len (sortidx) = 2 then '0'+ sortidx else sortidx end ) end) end ,cus.itemname "
 			+ ",jou.deliverydate ,tra.qtyordered , RemainSalesPhysical  ";
 	 
-	    if (isDebug()) System.out.println(cmd);
+	   // if (isDebug()) System.out.println(cmd);
 
 	    try {
         Connection con = this.getNewConnection();
@@ -2504,7 +2507,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
   "  AND MONTH(sal.invoicedate) = MONTH(getdate()) GROUP BY traagentsid";
 
 
-         if (isDebug()) System.out.println(cmd);
+      //   if (isDebug()) System.out.println(cmd);
             try {
             	
             	
@@ -2525,7 +2528,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
                     try {
                     	 Toode tt = (Toode)tr.get(this.groupsCat.get(grupp));
                          
-                         System.out.println("myygi uurimine " + grupp + " " +  this.groupsCat.get(grupp) + " " + tt);
+                        // System.out.println("myygi uurimine " + grupp + " " +  this.groupsCat.get(grupp) + " " + tt);
                          
                           if(tt != null) {
                         	  tt.setDonecur(tt.getDonecur() + sum);  
@@ -2533,7 +2536,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
                            
                           
                     }catch(Exception o ) {
-                    	System.out.println("vvvv " + grupp + " " + groupsCat.get(grupp) );
+                    	//System.out.println("vvvv " + grupp + " " + groupsCat.get(grupp) );
                     }
                   }    
                 }
@@ -2639,7 +2642,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
        	                	    }
        	                   
                            aa.setStart( Converter.enCodeEst(asi ) + "|" + asi2 );
-                           System.out.println(Converter.enCodeEst(asi ) + "|" + asi2 );
+                         //  System.out.println(Converter.enCodeEst(asi ) + "|" + asi2 );
                            
                         	}
             } catch (Exception e) {
@@ -2804,7 +2807,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
  		   e.printStackTrace();
  	   }
  	
- 	  System.out.println("groupsCat  "+ groupsCat.toString() );
+ 	 // System.out.println("groupsCat  "+ groupsCat.toString() );
  	   return res;
     }
 
@@ -3245,7 +3248,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
  	
  		XSSFWorkbook workbook = new XSSFWorkbook((ff));
  		XSSFSheet sheet = workbook.getSheet(jooksev);
- 		System.out.println("jooksev " + jooksev + " " + sheet);
+ 		//System.out.println("jooksev " + jooksev + " " + sheet);
  		XSSFRow row = null; 
  				ff.close();	
  				if(sheet != null){
@@ -3926,7 +3929,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 		               Statement  stmt =  con.createStatement();
 		                ResultSet	      rs = stmt.executeQuery(sqlover);
 		                double yldplaan = totalPlanSum;
-		                System.out.println("üld plaan " + totalPlanSum );
+		              //  System.out.println("üld plaan " + totalPlanSum );
 		                while(rs.next()) {
 		                   Date daat = rs.getDate("daat");
 		                  int sum = (int)rs.getDouble("summa");
@@ -4480,7 +4483,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 			                  
 			                }
 			                
-			                System.out.println("array suurus nyyd " + array.size());
+			             //   System.out.println("array suurus nyyd " + array.size());
 			                Converter.saveFileInUTF8("asjake.txt", array.toString());
 
 			                rs.close();
@@ -4532,7 +4535,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 				                  
 				                }
 				                
-				                System.out.println("array suurus nyyd " + array.size());
+				              //  System.out.println("array suurus nyyd " + array.size());
 				                Converter.saveFileInUTF8("asjake.txt", array.toString());
 
 				                rs.close();
@@ -4592,7 +4595,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 		
 		 
 			String filenameTask =   Converter.getTaskData(startOfLastWeek.getMillis(), endOfLastWeek.getMillis(), rcompanyx, user, pass,"Tasks");
-			 System.out.println("filenameTask "+  filenameTask);
+			// System.out.println("filenameTask "+  filenameTask);
 		 
 		 
 		 System.exit(0);
