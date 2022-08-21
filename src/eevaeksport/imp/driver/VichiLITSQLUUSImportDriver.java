@@ -1,16 +1,31 @@
 package eevaeksport.imp.driver;
 
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
@@ -47,6 +62,40 @@ public class VichiLITSQLUUSImportDriver extends AbstractImportDriver{
   public String getImportFile(){
 	    return parent.getProps().getProperty("imp.read");
 	  }
+  
+  private HashMap prodNames() {
+	  HashMap res = new HashMap();
+	  
+	 	try{
+	 	    String sql2 = " SELECT [No_] AS toode,([Search Description]) AS nimi  FROM [Vičiūnai ir Ko$Item] LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] " + 
+	 	    		" vat ON (vat.[Item No_]=[No_] and vat.[Code]='DĖŽ.' ) ";
+	 	    System.out.println(sql2);
+
+	 	   Connection con = DriverManager.getConnection(url + parent.getProps().getProperty("dsn")
+	 	            , parent.getProps().getProperty("dsna.user"), parent.getProps().getProperty("dsna.pass"));
+
+	 	    Statement st2 = con.createStatement();
+	 	    ResultSet rs2 = st2.executeQuery(sql2);
+
+	 	    while (rs2.next()) {
+	 	    	String kood = rs2.getString("toode");
+	 	    	String nimi = rs2.getString("nimi");
+	 	    	if(kood != null && nimi != null && kood.trim().length() > 0 && kood.trim().length() > 0) {
+	 	    		  res.put(kood.trim(), nimi.trim());
+	 	    	}
+	 	    
+
+	 	    }
+	 	    rs2.close();
+	 	    st2.close();
+	 	    con.close();
+	 	    
+	 	}catch(Exception e) {
+	 		e.printStackTrace();
+	 	}
+		  
+		  return res;
+  }
 
   public String identifyCustomer(String id,String regnr)  {
 
@@ -374,190 +423,343 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 
   public void makeOrder(Order order) throws SQLException{
 
-    	String salesid =  (Calendar.getInstance().getTimeInMillis()+"") ;	    
+    
         setOrder(order);
-        addInvoiceLines(salesid);
+        makeOutput(order);
+     
   }
 
-
-  private void addInvoiceLines(String salesid) throws SQLException{
-	  
-	    String cust = order.getCompany();
-        if(cust == null && order.getCompName() != null){
-      	  cust = order.getCompName();
-        }
-
-	  
-	  
-    Enumeration enumr = order.getOrderLines().elements();
-    int counter = 0;
-    int laks = 0;
-    
-  	String sql1 = "select [Order Splitting Level] as tulem  " +
-    " FROM [Vičiūnai ir Ko$Customer]  where [No_]   = '" + order.getCompany() + "'";
- 
-  	  Connection con5 = DriverManager.getConnection(url + parent.getProps().getProperty("dsn")
-              , parent.getProps().getProperty("dsna.user"), parent.getProps().getProperty("dsna.pass"));
-    Statement st = con5.createStatement();
-    ResultSet rs = st.executeQuery(sql1);
   
-    if(rs.next()){
-  	  laks = rs.getInt("tulem");
-    }
-    rs.close();
-    st.close();
-    
-    
-    System.out.println("laks " + laks);
-    while (enumr.hasMoreElements()){
-      counter++;
-      log.info("ORDER_LINE_COUNTER:" + counter);
-      OrderLine orderLine = (OrderLine)enumr.nextElement();
-      String itemid = orderLine.getToode();
-      double kogus = orderLine.getKogus();
+  HashMap names = null;
 
-      
-      //String entry = "(select max([Entry No_])+1 as entry from  [Vièiûnai ir Ko$Uþsakymai ið L2B])";
-      String entry = "(select getdate() as paev)";
-      st = con5.createStatement();
-       rs = st.executeQuery(entry);
-      String nextEntry = "";
-      if(rs.next()){
-    	  nextEntry = rs.getString("paev").substring(0,19);
-      }
-      rs.close();
-      st.close();
-     // 
-      
-      String sql0 = "SELECT ([Search Description]) AS nimi, [Unit Price] AS myygihind, [Grupės kodas] AS grupp " +
-		",[Base Unit of Measure] AS unit,  [Net Weight] AS kaal " +
-	"		,[Blocked] as blokk , [Order separator] as separator  FROM [Vičiūnai ir Ko$Item] t LEFT JOIN " +
-	" [Vičiūnai ir Ko$Item Unit of Measure] vat ON (vat.[Item No_]=[No_] and vat.[Code]='DĖŽ.' ) " +
-	"		  LEFT JOIN [Vičiūnai ir Ko$Prekių grupavimas] gr ON gr.[Kodas] = t.[Pogrupio kodas] WHERE [No_] =  '" + itemid + "' ";
-    log.info("SALES_LINE_SQL: " + sql0);
-   
-    st = con5.createStatement();
-     rs = st.executeQuery(sql0);
+	private void makeOutput(Order order) {
 
-    String unit = " ";
-    int blokk = 0;
-    String separator = "";
-    while(rs.next()){
-       unit = rs.getString("unit");
-       blokk = rs.getInt("blokk");
-       separator = rs.getString("separator");
-      
-       if(separator == null ||  separator.trim().length() == 0){
-    	   separator = "";
-       }else{
-    	   separator = "." + separator.trim();
-       }
-      if (unit !=null && unit.trim().length()>0){
-      	unit = unit.trim();
-    
-      }else {
-      	unit = " ";
-      }
-    }
-    rs.close();
-    st.close();
-    con5.close();
-    
-  if(orderLine.getUnit().trim().length()>0){
-    unit = orderLine.getUnit();
-  }
-       
-  if(unit != null && unit.equals("DPA") && orderLine.getBonus() > 0){ 
-	   kogus = kogus * orderLine.getBonus();	
-         }
+	  if(names == null) {
+		  names = prodNames();
+	  }
 
-          String agent = this.identifyAgent(order.getCompany());
-         	if(agent == null){
-               	agent = "";
-               }
-         
-         	 System.out.println("agent '" + agent + "'");
-          
-//[Vièiûnai ir Ko$Uþsakymai ið L2B]
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
-          
-      
-         
-          if(cust.length()>20){
-        	  cust = cust.substring(0,20);
-          }
-          
-          String type = "";
-          if(order.getStatus()== 98 ){
-        	 
-        	  if(order.getCompName() != null && (order.getCompName().equals("680") || order.getCompName().startsWith("R680"))){
-        		  type = "3";
-        		  cust = "872";
-        	  }
-        	  if(order.getCompName() != null && (order.getCompName().equals("R520") || order.getCompName().equals("520") )){
-        		  type = "4";
-        		  cust = "872";
-        	  }
-          }
-          
-          
-    
-          
-       System.out.println("Status " + order.getStatus() + " " + order.getCompName());
-        
-          String doknr = order.getDokNr();
-          if(laks > 0){
-        	  String sep = separator;
-        	  try{
-        		  sep = separator.substring(0,laks+1);
-        	  }catch(Exception e){
-        		  
-        	  }
-        	  
-        	  doknr = order.getDokNr() + sep;
-          }
-          
-          if(doknr.length() > 20){
-        	  doknr = doknr.substring(doknr.length()-20);
-          }
-          String sql ="INSERT INTO [Vičiūnai ir Ko$Užsakymai iš L2B]    ([Link2Business Order No_],[Order Line No_],[Entry No_],[Order date]" +
-    		",[Customer No_], " +
-					"[Salesperson Code],[Item No_],[Unit of measure],[Quantity], [Amount],[Unit Price],[Discount Pct],[Error Str], " +
-					"[Navision Order No_], [Bin code],[Importo data ir laikas] ,[Order date time], "  +
-				    "[Perduotas į užsakymus],[Atmestas],[Suma],[Ship-to Code],[Posting Date])  values " +
-					"('" + doknr + "'," + counter + "000,0,'" + nextEntry + "','" + cust + "', " +
-					" '" + agent + "','"+itemid+"','" + unit + "', "+kogus+" ,0,0,0,'', " +
-					" '" + doknr + "',0,getdate(), " +
-					" ?,'','',0,'" + type + "',?) " ;
-          
-              log.info("Blokk" +  blokk + " " + itemid +  "SALES_LINE_SQL: "  + sql);
-              String aiai = parent.getProps().getProperty("testing");
-              if(aiai != null && aiai.equals("true")){
-            	  System.out.print( "laks" + laks +   "('" + doknr + "'," + counter + "000,0,'" + nextEntry + "','" + cust + "', " +
-					" '" + agent + "','"+itemid+"','" + unit + "', "+kogus+" ,0,0,0,'', " +
-					" '" + doknr + "',0,getdate(), " +
-					" ?,'','',0,'" + type + "'getdate()) ");
-              }else{
-            	  Connection con3 = DriverManager.getConnection(url + parent.getProps().getProperty("dsn")
-            	            , parent.getProps().getProperty("dsna.user"), parent.getProps().getProperty("dsna.pass"));
-            	  PreparedStatement st2 = con3.prepareStatement(sql);
-                  if(blokk == 0){
-                	  st2.setTimestamp(1, new java.sql.Timestamp(order.getShipCal().getTimeInMillis()));
-                	  Calendar cc = order.getShipCal();
-                	  cc.set(Calendar.HOUR_OF_DAY, 0);
-                	  cc.set(Calendar.MINUTE, 0);
-                	  cc.set(Calendar.SECOND, 0);
-                	  cc.set(Calendar.MILLISECOND, 0);
-                	  
-                	  st2.setTimestamp(2, new java.sql.Timestamp(cc.getTimeInMillis()));
-                      st2.executeUpdate();
-                      addNumLine();  
-                  }
-                  st2.close();
-                  con3.close();
-              }
-         }
-  }
+		try {
+
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.newDocument();
+			Element root = doc.createElement("Document-Order");
+			doc.appendChild(root);
+
+			// String filiaalStr = null;
+			// String tarnijaKoodStr = null;
+
+			Node docheader = doc.createElement("Document-Header");
+			root.appendChild(docheader);
+
+			Node un2 = doc.createElement("DocumentType");
+			Text unVal2 = doc.createTextNode("MeriSoft");
+			un2.appendChild(unVal2);
+			docheader.appendChild(un2);
+
+			Node un3 = doc.createElement("DocumentSource");
+			Text unVal3 = doc.createTextNode("S");
+			un3.appendChild(unVal3);
+			docheader.appendChild(un3);
+			try {
+
+				long ll = Long.parseLong(order.getAgentCode());
+				Node un4 = doc.createElement("DateCreated");
+
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new java.util.Date(ll));
+
+				String month = (cal.get(Calendar.MONTH) + 1) + "";
+				if (month.length() == 1)
+					month = "0" + month;
+				String day = cal.get(Calendar.DAY_OF_MONTH) + "";
+				if (day.length() == 1)
+					day = "0" + day;
+
+				String hour = cal.get(Calendar.HOUR_OF_DAY) + "";
+				if (hour.length() == 1)
+					hour = "0" + hour;
+				String minute = cal.get(Calendar.MINUTE) + "";
+				if (minute.length() == 1)
+					minute = "0" + minute;
+
+				String second = cal.get(Calendar.SECOND) + "";
+				if (second.length() == 1)
+					second = "0" + second;
+
+				// [ HH:MM:SS]
+
+				String dateString = cal.get(Calendar.YEAR) + "-" + month + "-" + day + "[" + hour + ":" + minute + ":"
+						+ second + "]";
+
+				Text unVal4 = doc.createTextNode(dateString);
+				un4.appendChild(unVal4);
+				docheader.appendChild(un4);
+
+			} catch (Exception e) {
+
+			}
+
+			String number = order.getDokNr();
+			if (number == null || number.length() == 0) {
+				number = (Calendar.getInstance().getTimeInMillis() + "").substring(5);
+			}
+
+			long uni = Calendar.getInstance().getTimeInMillis();
+			Node header = doc.createElement("Order-Header");
+
+			Node nr = doc.createElement("OrderNumber");
+			Text nrVal = doc.createTextNode("MS-" + number + "");
+			nr.appendChild(nrVal);
+			header.appendChild(nr);
+
+			Node age = doc.createElement("SalesAgent");
+			Text ageVal = doc.createTextNode( order.getAgent());
+			age.appendChild(ageVal);
+			header.appendChild(age);
+
+			String comm = "";
+			if (order.getInfo() != null && order.getInfo().trim().length() > 0) {
+
+				Node com = doc.createElement("Remarks");
+				Text comVal = doc.createTextNode(order.getInfo());
+				com.appendChild(comVal);
+				header.appendChild(com);
+				comm = order.getInfo();
+
+				Node com2 = doc.createElement("comment");
+				Text comVal2 = doc.createTextNode(order.getInfo());
+				com2.appendChild(comVal2);
+				header.appendChild(com2);
+
+			}
+			System.out.println("Remarks " + comm);
+
+			Node kuupaev = doc.createElement("OrderDate");
+			Calendar cal = Calendar.getInstance();
+
+			String month = (cal.get(Calendar.MONTH) + 1) + "";
+			if (month.length() == 1)
+				month = "0" + month;
+			String day = cal.get(Calendar.DAY_OF_MONTH) + "";
+			if (day.length() == 1)
+				day = "0" + day;
+			String year = cal.get(Calendar.YEAR) + "";
+			if (year.length() == 2) {
+				year = "20" + year;
+			}
+			String dateString = year + "-" + month + "-" + day;
+			Text kuupaevVal = doc.createTextNode(dateString);
+			kuupaev.appendChild(kuupaevVal);
+			header.appendChild(kuupaev);
+
+			Node curr = doc.createElement("OrderCurrency");
+			Text currVal = doc.createTextNode("EUR");
+			curr.appendChild(currVal);
+			header.appendChild(curr);
+
+			Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
+			Calendar delcal = Calendar.getInstance();
+			delcal.setTime(order.getShipCal().getTime());
+
+			month = (delcal.get(Calendar.MONTH) + 1) + "";
+			if (month.length() == 1)
+				month = "0" + month;
+			day = delcal.get(Calendar.DAY_OF_MONTH) + "";
+			if (day.length() == 1)
+				day = "0" + day;
+			year = delcal.get(Calendar.YEAR) + "";
+			if (year.length() == 2) {
+				year = "20" + year;
+			}
+			dateString = year + "-" + month + "-" + day;
+			Text delkuupaevVal = doc.createTextNode(dateString);
+			delkuupaev.appendChild(delkuupaevVal);
+			header.appendChild(delkuupaev);
+
+			Node expectedDeliveryTime = doc.createElement("ExpectedDeliveryTime");
+			Text expectedDeliveryTimeVal = doc.createTextNode("00:00");
+			expectedDeliveryTime.appendChild(expectedDeliveryTimeVal);
+			header.appendChild(expectedDeliveryTime);
+
+			root.appendChild(header);
+
+			Node parties = doc.createElement("Document-Parties");
+			Node seller = doc.createElement("DeliveryPoint");
+
+			
+			String cust = order.getCompany();
+			
+		
+
+		
+			
+			Node ise = doc.createElement("CodeBySupplier");
+			Text nimiVal = doc.createTextNode(cust.substring(0,cust.lastIndexOf("_")));
+			ise.appendChild(nimiVal);
+			Node ise2 = doc.createElement("ILN");
+			Text nimiVal2 = doc.createTextNode(cust.substring(cust.lastIndexOf("_")+1));
+			ise2.appendChild(nimiVal2);
+
+			seller.appendChild(ise);
+			seller.appendChild(ise2);
+
+			parties.appendChild(seller);
+
+			Node receiver = doc.createElement("Receiver");
+
+			Node iseR = doc.createElement("CodeBySupplier");
+			Text nimiRVal = doc.createTextNode(order.getCompany());
+			iseR.appendChild(nimiRVal);
+			Node ise2R = doc.createElement("ILN");
+			Text nimiVal2R = doc.createTextNode(order.getCompany());
+			ise2R.appendChild(nimiVal2R);
+
+			receiver.appendChild(iseR);
+			receiver.appendChild(ise2R);
+
+			parties.appendChild(receiver);
+
+			Node buyer = doc.createElement("Buyer");
+
+			Node iseX2 = doc.createElement("ILN");
+			Text nimiXVal2 = doc.createTextNode(order.getCompany());
+			iseX2.appendChild(nimiXVal2);
+
+			Node iseX = doc.createElement("CodeByBuyer");
+			Text nimiXVal = doc.createTextNode(order.getCompany());
+			iseX.appendChild(nimiXVal);
+
+			buyer.appendChild(iseX2);
+			buyer.appendChild(iseX);
+
+			parties.appendChild(seller);
+
+			root.appendChild(parties);
+
+			// RIDADE LISAMINE
+			Node read = doc.createElement("Order-Lines");
+
+			int coun = 0;
+			Iterator iter = order.getOrderLines().iterator();
+			while (iter.hasNext()) {
+				OrderLine line = (OrderLine) iter.next();
+				String toode = line.getToode();
+				if (toode != null) {
+					toode = toode.trim();
+				} else {
+					toode = "";
+				}
+				if (line.getKogus() != 0 && !toode.equals("")) {
+
+					coun++;
+					addLine(line, read, doc, coun, order);
+				}
+			}
+
+			root.appendChild(read);
+
+			String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim()
+					+ ".xml";
+			System.out.println(fileName);
+			OutputFormat of = new OutputFormat();
+			of.setIndenting(true);
+			of.setLineSeparator(System.getProperty("line.separator"));
+			of.setEncoding("ISO-8859-1");
+			XMLSerializer ser = new XMLSerializer(of);
+			FileOutputStream fos = new FileOutputStream(fileName);
+			PrintWriter out = new PrintWriter(fos);
+			ser.setOutputCharStream(out);
+			ser.serialize(doc);
+			out.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void addLine(OrderLine line, Node read, Document doc, int counter, Order order) throws SQLException {
+
+		Node rida = doc.createElement("Line");
+		read.appendChild(rida);
+
+		Node ridaitem = doc.createElement("Line-Item");
+
+		Node linenum = doc.createElement("LineNumber");
+		Text linnum = doc.createTextNode(counter + "");
+		linenum.appendChild(linnum);
+		ridaitem.appendChild(linenum);
+
+		/*
+		 * Node toote_ean = doc.createElement("EAN"); Text toote_eanVal =
+		 * doc.createTextNode(line.getEAN());
+		 * toote_ean.appendChild(toote_eanVal); ridaitem.appendChild(toote_ean);
+		 */
+
+		String toode = line.getToode();
+
+		Node btoote_kood = doc.createElement("BuyerItemCode");
+		Text btoote_koodVal = doc.createTextNode(toode);
+		btoote_kood.appendChild(btoote_koodVal);
+		ridaitem.appendChild(btoote_kood);
+
+		Node toote_kood = doc.createElement("SupplierItemCode");
+		Text toote_koodVal = doc.createTextNode(toode);
+		toote_kood.appendChild(toote_koodVal);
+		ridaitem.appendChild(toote_kood);
+
+		String nimi = (toode);
+		if(names.get(toode) != null) {
+			nimi = (String)names.get(toode);
+		}
+		if (nimi != null) {
+			Text nimetusVal = doc.createTextNode(nimi.replace('`', ' ').replace('´', ' '));
+			Node nimetus = doc.createElement("ItemDescription");
+			nimetus.appendChild(nimetusVal);
+			ridaitem.appendChild(nimetus);
+		}
+
+		double kogus = line.getKogus();
+		double price = line.getPrice();
+		double disc = line.getDiscount();
+		String unit = line.getUnit();
+
+		Node koGus = doc.createElement("OrderedQuantity");
+
+		Text kogusVal = doc.createTextNode(getNF().format(kogus));
+		koGus.appendChild(kogusVal);
+		ridaitem.appendChild(koGus);
+
+		if (disc > 0) {
+			// price = price * (100-disc)/100;
+			Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
+			Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
+			yhiku_hind.appendChild(yhiku_hindVal);
+			ridaitem.appendChild(yhiku_hind);
+		}
+
+		Node yhiku_va = doc.createElement("TaxRate");
+		Text yhiku_vaVla = doc.createTextNode("21");
+		yhiku_va.appendChild(yhiku_vaVla);
+		ridaitem.appendChild(yhiku_va);
+
+		Node yhik = doc.createElement("UnitOfMeasure");
+		Text yhikVal = doc.createTextNode(unit);
+		yhik.appendChild(yhikVal);
+		ridaitem.appendChild(yhik);
+
+		rida.appendChild(ridaitem);
+		addNumLine();
+	}
+
+	public NumberFormat getNF() {
+		nf.setGroupingUsed(false);
+		return this.nf;
+	}
+
+	private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
+
 
 
 
