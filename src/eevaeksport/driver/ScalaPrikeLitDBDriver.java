@@ -1084,9 +1084,9 @@ return bomKount;
 			for(int ii = 1 ; ii < sheet.getLastRowNum()+1;ii++){
 				 row = sheet.getRow(ii);
 				
-					String klient = formatter.formatCellValue(row.getCell(1));
-					String aeg = formatter.formatCellValue(row.getCell(11));
-					String paevad = formatter.formatCellValue(row.getCell(16));
+					String klient = formatter.formatCellValue(row.getCell(16));
+					String aeg = formatter.formatCellValue(row.getCell(10));
+					String paevad = formatter.formatCellValue(row.getCell(14));
 					StringTokenizer st1 = new StringTokenizer(klient,",");
 					while(st1.hasMoreElements()) {
 						String kk = st1.nextToken().trim();
