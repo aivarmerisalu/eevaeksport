@@ -2158,13 +2158,18 @@ try{
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 
+    HashSet names = new HashSet();
     while (rs.next()) {
       String liik = rs.getString("liik").trim();
       String nim = rs.getString("nimi").trim();
       if(nim.indexOf(" ") != -1){
     	  nim = nim.substring(nim.indexOf(" ")).trim();
       }
-      
+      if(names.contains(nim)) {
+    	  nim = nim + " .";
+      }else {
+    	  names.add(nim);
+      }
         tm.put(liik,  Converter.enCodeEst(nim));
     }
     rs.close();

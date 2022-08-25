@@ -619,7 +619,7 @@ StringBuffer sb = new StringBuffer();
 					StringTokenizer stag = new StringTokenizer(agentAGENTS, ",");
 					while (stag.hasMoreTokens()) {
 						agent.addDubbler(stag.nextToken());
-					System.out.println("asendajad " + agent + " " + agent.getDubbler());
+					//System.out.println("asendajad " + agent + " " + agent.getDubbler());
 					}
 
 				}
@@ -810,7 +810,7 @@ StringBuffer sb = new StringBuffer();
 	  		for(int a = 1 ; a < sheet.getLastRowNum()+3;a++){
 	  			try{
 	  				row = sheet.getRow(a);
-	  				if (row.getCell((short) 1) != null) {
+	  				if (row != null && row.getCell((short) 1) != null) {
 	  	    			   String kood = null;
 	  	    			  if(row.getCell((short)1) != null){
 		    	    			  	try{
@@ -1660,7 +1660,7 @@ SELECT  [MasterProductCode] as klient
 				    mline.setProdGroup("a6");
                    	mline.setDiscount(a6);
 						result.add(mline);
-						System.out.println("Lisan " + mline.toString());
+						//System.out.println("Lisan " + mline.toString());
 					}
 				
 				double a7 = rs.getDouble("a7");

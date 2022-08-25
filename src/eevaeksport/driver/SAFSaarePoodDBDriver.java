@@ -324,11 +324,12 @@ public class SAFSaarePoodDBDriver extends AbstractDBDriver implements Manager,Pr
     		"inner join GRCompany C on C.ID=CCR.IDGRCOMPANY " + 
     		"where CC.Code='Merisoftiga Lihaletid' ";
     
-    StringBuffer sb2 = new StringBuffer();
     if (isDebug()) System.out.println(cmd);
   
     try {
-      ResultSet rs = stmt.executeQuery(cmd);
+        Connection con = getNewConnection();
+        Statement st = con.createStatement();
+      ResultSet rs = st.executeQuery(cmd);
         while(rs.next()){
           Agent agent = new Agent(rs.getString("agent").trim());
           String name = rs.getString("nimetus").trim();
@@ -337,6 +338,7 @@ public class SAFSaarePoodDBDriver extends AbstractDBDriver implements Manager,Pr
           aHash.put(agent.getID(), agent);
         }
     rs.close();
+    st.close();
     con.close();
 
     } catch (Exception e){
@@ -496,7 +498,7 @@ public class SAFSaarePoodDBDriver extends AbstractDBDriver implements Manager,Pr
     }
 
 
-
+         rs.close();
          st.close();
          con.close();
 
@@ -577,7 +579,7 @@ public class SAFSaarePoodDBDriver extends AbstractDBDriver implements Manager,Pr
          // tooted.put(id,toode);
         }
         
-        
+        rs2.close();
         
         ResultSet rs3 = st2.executeQuery(cmd3);
         Hashtable tooteinfo = new Hashtable();
@@ -602,6 +604,9 @@ public class SAFSaarePoodDBDriver extends AbstractDBDriver implements Manager,Pr
            }
          
           }
+          rs3.close();
+          st2.close();
+          con2.close();
         
         
        // System.out.println(tooted.toString() + tooted.size());
@@ -823,7 +828,8 @@ public class SAFSaarePoodDBDriver extends AbstractDBDriver implements Manager,Pr
 	               }
 	               cou++;
 	             }
-
+   rs2.close();
+   stmt2.close();
 
             
             
