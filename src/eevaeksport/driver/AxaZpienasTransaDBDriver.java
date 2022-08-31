@@ -276,7 +276,7 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 			        rs.close();
 			        stmt.close();
 			        ss.close();
-		   
+			        System.out.println("Dokumente salvestama 1 " + res.size() );
 			 Iterator itera =  custMap.keySet().iterator();
 			 while(itera.hasNext()) {
 				 String custid = (String)itera.next();
@@ -312,7 +312,7 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 				        
 					  
 	         	
-	        System.out.println("Dokumente salvestama " + res.size() );
+	        System.out.println("Dokumente salvestama 2 " + res.size() );
 	        Converter.saveShipitListJson(res, custs) ;
 	          
 	   } catch (Exception e){

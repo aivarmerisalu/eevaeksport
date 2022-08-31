@@ -923,8 +923,8 @@ System.out.println(cmd);
 		TreeMap tm = new TreeMap();
 		this.customers = new ArrayList();
 
-		String sql = "SELECT k.kood  +'_'+a.[code] as kood1 , a.name as nimi2 , a.address as aadress12 ,a.[address 2]  as aadress22, a.City as city2, a. [Shipping Agent Code]as agent2 ,a.* , k.* "
-				+ " FROM [Vičiūnai ir Ko$Ship-to Address] a   inner join dbo.v_VIK_Customers k on  a.[Customer No_] = k.Kood	" ;
+		String sql = "SELECT k.kood  +'_'+k.[Ship-to Address ILN] as kood1 , k.nimi as nimi2 , k.aadress as aadress12 ,k.kood as payer2 , k.agent as agent2 , k.* from" + 
+				"				 dbo.v_VIK_Customers k	" ;
 
 		System.out.println(sql);
 		
@@ -936,11 +936,8 @@ System.out.println(cmd);
 				String id = rs.getString("kood1").trim();
 				String name2 = rs.getString("nimi2").trim();
 				String aadress12 = rs.getString("aadress12");
-				String aadress22 = rs.getString("aadress22");
-				String city2 = rs.getString("city2");
 				
-				
-				String name = rs.getString("nimi").trim() + " " + name2;
+				String name =  name2;
 				
 				
 				//String id = rs.getString("kood").trim();
@@ -950,25 +947,20 @@ System.out.println(cmd);
 				if (name.equals(""))
 					name = "<" + id + ">";
 				customer.setName(name);
-				payer = rs.getString("payer");
+				payer = rs.getString("payer2");
 				if (payer != null && payer.trim().length() > 0) {
 					customer.setPayer(payer.trim());
 				}
 
-				String aadress = rs.getString("aadress");
+			
 				if (aadress12 != null && aadress12.trim().length() > 0) {
 					String addr = aadress12;
-					if (aadress22 != null && aadress22.trim().length() > 0) {
-						addr = addr + " " +aadress22;
-					}
-					if (city2 != null && city2.trim().length() > 0) {
-						addr = addr + " " +city2;
-					}
+					
 					customer.setAddress(Converter.enCodeEst(addr));
 					customer.setName(Converter.enCodeEst(customer.getName() + " " + addr));
 				}
             
-				String ag = rs.getString("agent").trim();
+				String ag = rs.getString("agent2").trim();
 				customer.addAgent(new Agent(ag));
 				customer.addAgent(new Agent("HOUSE1"));
 				customer.addAgent(new Agent("WARE"));
@@ -1548,6 +1540,21 @@ System.out.println(cmd);
 					"                     and  [Starting Date]<=getdate()  and   [Ending Date]>=getdate()   \r\n" + 
 					"                      WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0 and t2.[Not for Merisoft] <> 1) ORDER BY t.[No_]\r\n" + 
 					"";
+			
+			cmd = "SELECT t.[No_] AS toode,(t.[Search Description]) AS nimi, t.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp,t.[Pogrupio kodas] AS grupp2 \r\n" + 
+					"                      ,[Base Unit of Measure] AS unit,[Brūkšninis kodas] AS ean,[Product Status] AS status ,[Line Discount %] AS maxdiscount, \r\n" + 
+					"                        t.[Type] AS type, [Qty_ per Unit of Measure] AS kastis,  [Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, [Description] AS vatdesc , '' as type\r\n" + 
+					"                      ,[Order Multiple] as optimum, [Minimum Order Quantity] as minimum , [Country of Origin Code] as origi \r\n" + 
+					"                      FROM [Vičiūnai ir Ko$Item] t \r\n" + 
+					"                       INNER JOIN [Vičiūnai ir Ko$Item 2] t2 ON t.[No_] = t2.[No_]\r\n" + 
+					"						INNER JOIN (SELECT [Item No_], [Unit Price], ROW_NUMBER() OVER (PARTITION BY [Item No_] ORDER BY [Starting Date] DESC) AS [Priority]\r\n" + 
+					"									FROM Navision.dbo.[Vičiūnai ir Ko$Sales Price] \r\n" + 
+					"									WHERE [Sales Type] = 2 AND CAST(GETDATE() As Date) BETWEEN [Starting Date] AND ISNULL(NULLIF([Ending Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date))) ) AS sp \r\n" + 
+					"							ON t.No_ = sp.[Item No_] AND sp.[Priority] = 1\r\n" + 
+					"                      LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] vat ON (vat.[Item No_]=t.[No_] and vat.[Code]='DĖŽ.' ) \r\n" + 
+					"                        LEFT JOIN  [Vičiūnai ir Ko$Sales Line Discount] sd  on  sd.[Code]= t.[No_] and [Sales Type] = 1 and  [Sales Code] = 'AGENT' \r\n" + 
+					"                     and  [Starting Date]<=getdate()  and   [Ending Date]>=getdate()   \r\n" + 
+					"                      WHERE ([Blocked]=0 AND sp.[Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0 and t2.[Not for Merisoft] <> 1) ORDER BY t.[No_]" ;
 			
 			System.out.println(cmd);
 			Connection con = getNewConnection2();

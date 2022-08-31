@@ -564,7 +564,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	  	    	  sheet.getRow(lastrow+1).createCell(10);
 	  	    	  sheet.getRow(lastrow+1).getCell(10).setCellValue("PIRKL SKOL");
 	  	    	  sheet.getRow(lastrow+1).createCell(11);
-	  	    	  sheet.getRow(lastrow+1).getCell(11).setCellValue("Banko sąsk.");
+	  	    	  sheet.getRow(lastrow+1).getCell(11).setCellValue("Banko sąskaita");
 	  	    	  sheet.getRow(lastrow+1).createCell(12);
 	  	    	  sheet.getRow(lastrow+1).getCell(12).setCellValue(date);
 	  	    	  sheet.getRow(lastrow+1).createCell(13);

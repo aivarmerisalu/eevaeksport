@@ -1784,7 +1784,7 @@ if(text.indexOf("\"")!=-1){
 		
 		StringBuffer sb = new StringBuffer();
 		String subtext = (axat +  " Amber Beverage Austria GmbH.' \n &emsp;&emsp;&emsp;&emsp; Gewerbepark – In der Au 2, A-6341 Ebbs, Austria\n").trim();
-		String regno = ("<br><br>Manager: " + agname);
+		String regno = ("<br><br>Sales-MA: " + agname);
 		
 		regno = regno +  ("<br><br>Wholeseller: " + ware);
 		
@@ -1802,15 +1802,15 @@ if(text.indexOf("\"")!=-1){
 		
 		
 		
-		sb.append("<font face=\"Arial\" size=\"2\" color=\"#E42217\"> Date "
+		sb.append("<font face=\"Arial\" size=\"2\" color=\"#E42217\"> Datum "
 				+ Converter.getDDpMMpYYYYpString(null) + "</font><br> ") ;
 		sb.append("<br><font face=\"Arial\" size=\"2\" color=\"#000000\"><b></b> " + subtext + "</font>") ;
 		sb.append("<br><font face=\"Arial\" size=\"2\" color=\"#000000\">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</font><br> ") ;
-       sb.append("<br><font face=\"Arial\" size=\"2\" color=\"#000000\"><b>Customer:</b> " + name +"<br>" + aadr +"<br>" +  "</font> ") ;
+       sb.append("<br><font face=\"Arial\" size=\"2\" color=\"#000000\"><b>Kunde:</b> " + name +"<br>" + aadr +"<br>" +  "</font> ") ;
 		sb.append("<br><font face=\"Arial\" size=\"2\" color=\"#000000\">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;" + "</font><br><br>") ;
 														sb.append("</font>");
 		
-		sb.append("<font face=\"Arial\" size=\"4\"  color=\"#382D2C\"><b>Order Confirmation " + axat + "</b><br><br>" );
+		sb.append("<font face=\"Arial\" size=\"4\"  color=\"#382D2C\"><b>Auftragsbestätigung " + axat + "</b><br><br>" );
 														
 		sb.append("	<style type=\"text/css\">");
 		sb.append("table.tb-table {");
@@ -1825,7 +1825,7 @@ if(text.indexOf("\"")!=-1){
 		sb.append("color: #00000;");
 		sb.append("		font-weight: bold;}");
 		sb.append("</style><table class=\"tb-table\">" );
-		sb.append("<tr><th>Nr.</th><th>EAN</th><th>Code</th><th>Description</th><th>Unit</th><th>Amount</th>"
+		sb.append("<tr><th>Nr.</th><th>EAN</th><th>Code</th><th>Beschreibung</th><th>Einheit</th><th>Menge</th>"
 				+ "</tr>" );
 
 		
@@ -1859,7 +1859,7 @@ if(text.indexOf("\"")!=-1){
 							   String unit = ol.getUnit();
 							 
 							   if(sampl) {
-							    	 unit = "BTL";
+							    	// unit = "BTL";
 							     }
 				        
 				sb.append("<tr><td>" + (i+1) + ".</td><td>" + ean + 
@@ -1878,7 +1878,7 @@ if(text.indexOf("\"")!=-1){
 					"</th><th>" + 
 					
 				 
-					"</th><td>Total units:" +
+					"</th><td>Gesamtmenge:" +
 					"</td><td></td><td>" + nf.format(total) +
 						" </td></tr>" );
 			
@@ -1901,7 +1901,7 @@ if(text.indexOf("\"")!=-1){
 	   	try{
 	   				//System.out.println(comment);
 	   			Email mail = new Email(null);
-		  		   String sub = "Order Indirect ";
+		  		   String sub = "Überweiser ";
 		  		   if(axa) {
 		  			   sub = "Order DIRECT ";
 		  		   }

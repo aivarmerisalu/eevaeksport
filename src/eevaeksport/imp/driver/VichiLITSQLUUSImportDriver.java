@@ -584,57 +584,51 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 			header.appendChild(expectedDeliveryTime);
 
 			root.appendChild(header);
-
-			Node parties = doc.createElement("Document-Parties");
-			Node seller = doc.createElement("DeliveryPoint");
-
 			
 			String cust = order.getCompany();
+            String kood = cust.substring(0,cust.lastIndexOf("_"));
+			String lisa = "";
+			if(!cust.endsWith("_")) {
+				lisa = cust.substring(cust.lastIndexOf("_")+1);
+			}else {
+				lisa = kood;
+			}
 			
-		
-
-		
-			
+			Node parties = doc.createElement("Document-Parties");
+			Node seller = doc.createElement("DeliveryPoint");
 			Node ise = doc.createElement("CodeBySupplier");
-			Text nimiVal = doc.createTextNode(cust.substring(0,cust.lastIndexOf("_")));
-			ise.appendChild(nimiVal);
+			Text nimiVal = doc.createTextNode(kood);
+			 ise.appendChild(nimiVal);
 			Node ise2 = doc.createElement("ILN");
-			Text nimiVal2 = doc.createTextNode(cust.substring(cust.lastIndexOf("_")+1));
-			ise2.appendChild(nimiVal2);
-
+			Text nimiVal2 = doc.createTextNode(lisa);
+			 ise2.appendChild(nimiVal2);
+			Node ise3 = doc.createElement("DeliveryILN");
+			Text nimiVal3 = doc.createTextNode(lisa);
+			Node ise3R = doc.createElement("SenderILN");
+			Text nimiVal3R = doc.createTextNode(kood);
+			ise3R.appendChild(nimiVal3R);
+			ise3.appendChild(nimiVal3);
 			seller.appendChild(ise);
 			seller.appendChild(ise2);
-
+			seller.appendChild(ise3);
+			seller.appendChild(ise3R);
 			parties.appendChild(seller);
+			
 
 			Node receiver = doc.createElement("Receiver");
-
 			Node iseR = doc.createElement("CodeBySupplier");
-			Text nimiRVal = doc.createTextNode(order.getCompany());
+			Text nimiRVal = doc.createTextNode(kood);
 			iseR.appendChild(nimiRVal);
 			Node ise2R = doc.createElement("ILN");
-			Text nimiVal2R = doc.createTextNode(order.getCompany());
+			Text nimiVal2R = doc.createTextNode(lisa);
 			ise2R.appendChild(nimiVal2R);
-
-			receiver.appendChild(iseR);
+						receiver.appendChild(iseR);
 			receiver.appendChild(ise2R);
-
 			parties.appendChild(receiver);
 
-			Node buyer = doc.createElement("Buyer");
+		
 
-			Node iseX2 = doc.createElement("ILN");
-			Text nimiXVal2 = doc.createTextNode(order.getCompany());
-			iseX2.appendChild(nimiXVal2);
-
-			Node iseX = doc.createElement("CodeByBuyer");
-			Text nimiXVal = doc.createTextNode(order.getCompany());
-			iseX.appendChild(nimiXVal);
-
-			buyer.appendChild(iseX2);
-			buyer.appendChild(iseX);
-
-			parties.appendChild(seller);
+			//parties.appendChild(buyer);
 
 			root.appendChild(parties);
 

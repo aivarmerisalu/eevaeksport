@@ -2299,7 +2299,7 @@ try{
     String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, sui.qty  AS kastis,'' AS alusel, disc.amount AS price " +
   "     , bar.itembarcode AS ean ,inv.CATEGORYPRODUCTLINE_BBS AS grupp2, inv.CATEGORYINVENTGROUP_BBS   AS grupp , "
   + " ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 21 as vat , " +
-  "   0  as samm ,sortcode as sorting    FROM  inventtable inv  " +
+  "   0  as samm ,sortcode as sorting  ,  0 as nosales  FROM  inventtable inv  " +
   "       left  JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation  and " +
   "   disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)  and disc.accountcode='2' and disc.currency = 'EUR' " +
   "      left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  " +
@@ -2370,6 +2370,11 @@ String add = "";
       String top = rs.getString("sorting");
       if(top != null && top.trim().length()>0 && top.trim().equals("TOP")){
        prod.setStatusTop("1");
+    }
+      
+      String nosales = rs.getString("nosales");
+      if(nosales != null && nosales.trim().length()>0 && nosales.trim().equals("1")){
+       prod.noOrder = true;
     }
         products.put(add + nimetus, prod);
         prodHash.put(prod.getID(), prod);

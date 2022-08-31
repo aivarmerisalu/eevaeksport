@@ -1281,7 +1281,9 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            }
           
           System.out.println("Laoseisud tehtud" );
-           
+          try {
+        	  
+        
            
            httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=priceformula";
            myurl = new URL(httpsURL);
@@ -1299,6 +1301,9 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 
           in.close();
           
+          }catch (Exception e) {
+        	  e.printStackTrace();
+          }
           if(inputLineBuf.length() > 2){
          String str = inputLineBuf.toString();
          if(str.startsWith("True")) {

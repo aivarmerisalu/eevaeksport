@@ -10386,7 +10386,7 @@ client.close();
 			  					}
 			  				}
 			  				outofstocks++;
-			  				done.add(signa);
+			  				done.add(signa + "oos");
 			  			}
 			  			
 			  			
