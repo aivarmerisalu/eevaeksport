@@ -325,6 +325,7 @@ public class RivileLednaImportDriver
       sb.append("          <I06_DOK_DATA>" +  getDateString(Calendar.getInstance()) + "</I06_DOK_DATA>" + ls);
       cou++;
   
+      
 
     
 	sb.append(getLineNr(cou));
