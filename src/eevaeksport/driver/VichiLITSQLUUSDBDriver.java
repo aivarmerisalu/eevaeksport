@@ -1541,20 +1541,21 @@ System.out.println(cmd);
 					"                      WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0 and t2.[Not for Merisoft] <> 1) ORDER BY t.[No_]\r\n" + 
 					"";
 			
-			cmd = "SELECT t.[No_] AS toode,(t.[Search Description]) AS nimi, t.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp,t.[Pogrupio kodas] AS grupp2 \r\n" + 
-					"                      ,[Base Unit of Measure] AS unit,[Brūkšninis kodas] AS ean,[Product Status] AS status ,[Line Discount %] AS maxdiscount, \r\n" + 
-					"                        t.[Type] AS type, [Qty_ per Unit of Measure] AS kastis,  [Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, [Description] AS vatdesc , '' as type\r\n" + 
-					"                      ,[Order Multiple] as optimum, [Minimum Order Quantity] as minimum , [Country of Origin Code] as origi \r\n" + 
-					"                      FROM [Vičiūnai ir Ko$Item] t \r\n" + 
-					"                       INNER JOIN [Vičiūnai ir Ko$Item 2] t2 ON t.[No_] = t2.[No_]\r\n" + 
-					"						INNER JOIN (SELECT [Item No_], [Unit Price], ROW_NUMBER() OVER (PARTITION BY [Item No_] ORDER BY [Starting Date] DESC) AS [Priority]\r\n" + 
-					"									FROM Navision.dbo.[Vičiūnai ir Ko$Sales Price] \r\n" + 
-					"									WHERE [Sales Type] = 2 AND CAST(GETDATE() As Date) BETWEEN [Starting Date] AND ISNULL(NULLIF([Ending Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date))) ) AS sp \r\n" + 
-					"							ON t.No_ = sp.[Item No_] AND sp.[Priority] = 1\r\n" + 
-					"                      LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] vat ON (vat.[Item No_]=t.[No_] and vat.[Code]='DĖŽ.' ) \r\n" + 
-					"                        LEFT JOIN  [Vičiūnai ir Ko$Sales Line Discount] sd  on  sd.[Code]= t.[No_] and [Sales Type] = 1 and  [Sales Code] = 'AGENT' \r\n" + 
-					"                     and  [Starting Date]<=getdate()  and   [Ending Date]>=getdate()   \r\n" + 
-					"                      WHERE ([Blocked]=0 AND sp.[Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0 and t2.[Not for Merisoft] <> 1) ORDER BY t.[No_]" ;
+			cmd = "SELECT t.[No_] AS toode, (t.[Search Description]) AS nimi, sp.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp\r\n" + 
+					"	, t.[Pogrupio kodas] AS grupp2  , [Base Unit of Measure] AS unit\r\n" + 
+					"	, [Brūkšninis kodas] AS ean, [Product Status] AS [status], [Line Discount %] AS maxdiscount, t.[Type] AS [type]\r\n" + 
+					"	, [Qty_ per Unit of Measure] AS kastis, [Net Weight] AS kaal\r\n" + 
+					"	, [VAT Prod_ Posting Group] AS vat, [Description] AS vatdesc , '' AS [type]\r\n" + 
+					"    , [Order Multiple] AS optimum, [Minimum Order Quantity] AS minimum , [Country of Origin Code] as origi \r\n" + 
+					"FROM [Vičiūnai ir Ko$Item] t INNER JOIN [Vičiūnai ir Ko$Item 2] t2 ON t.[No_] = t2.[No_]\r\n" + 
+					"	INNER JOIN (SELECT [Item No_], [Unit Price], [Unit of Measure Code], ROW_NUMBER() OVER (PARTITION BY [Item No_] ORDER BY [Starting Date] DESC) AS [Priority]\r\n" + 
+					"	FROM Navision.dbo.[Vičiūnai ir Ko$Sales Price] WHERE [Sales Type] = 2 AND CAST(GETDATE() As Date) BETWEEN [Starting Date] AND ISNULL(NULLIF([Ending Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date))) ) AS sp \r\n" + 
+					"	ON t.No_ = sp.[Item No_] AND t.[Base Unit of Measure] = sp.[Unit of Measure Code] AND sp.[Priority] = 1\r\n" + 
+					"    LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] AS vat ON vat.[Item No_] = t.[No_] AND vat.[Code] = 'DĖŽ.'\r\n" + 
+					"    LEFT JOIN [Vičiūnai ir Ko$Sales Line Discount] AS sd ON sd.[Code] = t.[No_] AND [Sales Type] = 1 AND [Sales Code] = 'AGENT' \r\n" + 
+					"   AND [Starting Date] <= GETDATE() AND [Ending Date] >= GETDATE()   \r\n" + 
+					"WHERE ([Blocked] = 0 AND sp.[Unit Price] > 0 AND LEN([Grupės kodas]) > 0 AND LEN([Search Description]) != 0 AND t2.[Not for Merisoft] <> 1) \r\n" + 
+					"ORDER BY t.[No_]" ;
 			
 			System.out.println(cmd);
 			Connection con = getNewConnection2();

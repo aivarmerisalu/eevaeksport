@@ -1486,7 +1486,7 @@ try{
  
   public TreeMap getCustomers(Agent agent){
 
-	  makeFixHash();
+	 // makeFixHash();
 	  getKLPCustomers();
 	  System.out.println("Alustan Kliendid");
 	  
@@ -1742,7 +1742,7 @@ try{
         
         Vector grupp = (Vector)fixGroups.get( accountnum);
           if(grupp != null  ){
-          	cust.setFixSortCode(grupp);
+          //	cust.setFixSortCode(grupp);
           	//System.out.println("Tere panen gruppi " + accountnum+ " "+ grupp.toString());
           }
         name = name + " " + accountnum;
