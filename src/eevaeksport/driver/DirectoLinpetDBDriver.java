@@ -935,7 +935,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    public TreeMap getProdGroups2() throws SQLException {
     
 	   String lang = null;
-	   
+	   TreeMap res = new TreeMap();
 	     if(getParent().getProps().getProperty("productgroup.lang") != null){
 	      	 lang = getParent().getProps().getProperty("productgroup.lang");
 	      	// System.out.println("product.lang="+ lang);
@@ -977,8 +977,9 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                    			
                    		  }
                    		  
-                   		
+                   		  res.put(group, name); 
                    		  prGroups.put(group, name);  
+                   		  
                		 }catch(Exception r){
                			 
                		 }
@@ -1044,7 +1045,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		e.printStackTrace();
 	}
   	
-  	return prGroups;
+  	return res;
    }
 
    private boolean hasSupplier(){
@@ -1103,10 +1104,17 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 
    
    public TreeMap getProdGroupsSecond() throws SQLException {
+	   
+	   if("true".equals(getParent().getProps().getProperty("usesecondclass"))){
+		   return  getProdGroups2();
+	   }
+	   
 	   if(getParent().getProps().getProperty("usedataforgroups") != null){
 		   return null;
 	   }
-      return prGroups;
+	   TreeMap res2 =  getProdGroups2();
+	  
+      return res2;
         }
 
 

@@ -196,22 +196,7 @@ public class RivileKurybaImportDriver
   public void makeOrder(Order order) throws SQLException{
  
 	  setOrder(order);
-	     
-	     String salesid = null ;
-	     
-	    // addInvoiceHeader(salesid);	     
-	     //addInvoiceLines(salesid);
-	/*     String sql4 = "update lp set staatus=1 where ltrim(lp_id) = ?";
-	    Connection con9 = DriverManager.getConnection(url + "import"
-	            , "sa", "apr16ill");
-	     PreparedStatement st2 = con9.prepareStatement(sql4);
-	     st2.setString(1, getNewSalesid() + "");
-	     st2.executeUpdate();
-	     st2.close();
-	     con9.close();
-*/
-	  
-    makeOutput(order);
+	  makeOutput(order);
   }
   
   
@@ -385,7 +370,42 @@ public class RivileKurybaImportDriver
 		e1.printStackTrace();
 	}
 
-      
+    if(order.getShipMode() != null && order.getShipMode().trim().length() > 0){
+    	
+    	String cod = "";
+    	String shipm = order.getShipMode();
+    	if(shipm.contains("|")) {
+    		cod = "-COD";
+    		shipm = shipm.substring(0,shipm.indexOf("|"));
+    	}
+    	
+    	sb.append(getLineNr(cou));
+        sb.append("          <I06_PASTABOS>" + order.getAgent() + "-" + order.getDokNr() + "-"+ shipm + cod+  "</I06_PASTABOS>" + ls);
+        cou++;
+        sb.append(getLineNr(cou));
+        sb.append("          <I06_DOK_PR>" + order.getDokNr() + cod + "</II06_DOK_PR>" + ls);
+        cou++;
+        
+    }
+	
+	/*
+	<I06_PASTABOS>[DATA1]</I06_PASTABOS>
+	<I06_DOK_PR>[DATA2]</I06_DOK_PR>
+
+	Specifics of those data fields are different:
+	DATA1 - char[40] (syntax: OrderNo-Carrier-COD)
+	DATA2 - char[20] (syntax: OrderNo-COD)
+
+	Examples with COD:
+	DATA1 = vadyba2-123456-venipak-COD
+	DATA2 = 123456-COD
+
+	Examples without COD:
+	DATA1 = vadyba2-123456-venipak
+	DATA2 = 123456 
+*/
+	
+	
      
     Vector lines = order.getOrderLines();
       for (int i = 0; i < lines.size(); i++) {

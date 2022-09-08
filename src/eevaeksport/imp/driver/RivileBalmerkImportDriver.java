@@ -648,11 +648,15 @@ if(ladu.trim().length()!=0){
      //  StringBuffer sbb = postData(data);
      //  System.out.println("Response " + sbb);
        
+        
         fileName = escape(cat + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  "response.txt";
        System.out.println(fileName);
           fos = new FileOutputStream(fileName);
          fos.write(sbb.toString().getBytes());
          fos.close();
+         if(sbb.contains("<h1>Error: Server Error")) {
+            System.exit(0);	
+         }
         } else {
         	   this.sendOrderEmail(order, tag, pandikas);
         }

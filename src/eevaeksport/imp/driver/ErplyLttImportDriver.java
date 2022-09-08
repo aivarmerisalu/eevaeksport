@@ -446,7 +446,6 @@ public class ErplyLttImportDriver extends AbstractImportDriver{
 	  }
 	  
 	  double miinus = 1;
-	  boolean fullDelOnly = false;
 	  
 	  if( "true".equals(parent.getProps().getProperty("returnmode"))){
 		  miinus = -1;
@@ -601,6 +600,10 @@ public class ErplyLttImportDriver extends AbstractImportDriver{
 	 	 			doctype = "OFFER"; 
 	 	 		  }
 	 	 		
+	 	 		if(kapp) {
+	 	 			doctype = "WAYBILL";
+	 	 			//confirm = "confirmInvoice=1&"; 
+	 	 		}
 	 	 		
 	 	 		String wareinfo = "";
 	 	 		if(parent.getProps().getProperty("kapid") != null && order.getWarehouse() != null && order.getWarehouse().trim().length() > 0){

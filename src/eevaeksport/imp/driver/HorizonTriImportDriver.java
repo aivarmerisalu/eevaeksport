@@ -141,7 +141,8 @@ try{
 	"  LEFT OUTER JOIN APV06161.NMINMAX aa ON aa.PK_NOM=t.PK_NOM and aa.PK_NOL=22013 " +
 	"   LEFT OUTER JOIN [APV06161].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
 	"   LEFT OUTER JOIN [APV06161].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
-	"  where t.STATUSS = 0  and PAMVID = 2015  and (t.kods like 'NIC%' or t.kods  like 'PRV%')   ";
+	"  where t.STATUSS = 0  and PAMVID = 2015  and (t.kods like 'NIC%' or t.kods "
+	+ " like 'PRV%' or t.kods  like 'MYC%')   ";
 			    		
 			//	 tubakas mitte jätta .
 	

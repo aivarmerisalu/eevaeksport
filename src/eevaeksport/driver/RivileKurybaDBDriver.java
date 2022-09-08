@@ -2,7 +2,11 @@
 
 package eevaeksport.driver;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -563,17 +567,49 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
         		s.printStackTrace();
         	}
         
+        	  String sql3 = " SELECT  as kood , as nimi  FROM MJ_getShipMode  ";
+              
+        	  stmt = con.prepareStatement(sql3);
+              ResultSet	  rs = stmt.executeQuery();
+
+               StringBuffer sb1 = new StringBuffer();
+              while (rs.next()) {
+            	  String kood = Converter.enCodeEst(rs.getString("kood").trim());
+              	String name = Converter.enCodeEst(rs.getString("nimi").trim());
+              	sb1.append(kood + ";" + name + "\n");
+              }
+              rs.close();
             
+              if(sb1.toString().length() > 0) {
+                try{
+                      Converter.saveFileInUTF8("shipmode.txt", sb1);
+                	} catch (Exception r){
+                  }
+              }
         	
-        	
-            stmt = con.prepareStatement(cmd);
-            //stmt.setInt(1, Integer.parseInt(agent.getID()));
-            //stmt.setDate(2, getStartingDate());
-            ResultSet	      rs = stmt.executeQuery();
+             TreeMap<String,Double> bonus = new TreeMap<String,Double>(); 
+              
+           String sql4 = " SELECT  as klient , as summa  FROM MJ_getShipMode ";
+              
+        	      stmt = con.prepareStatement(sql4);
+              	  rs = stmt.executeQuery();
+
+              while (rs.next()) {
+            	   String kood = Converter.enCodeEst(rs.getString("klient").trim());
+              	   Double sum = rs.getDouble("summa");
+              	   bonus.put(kood, sum);
+              }
+              rs.close();
+              
+              
+              
+              stmt = con.prepareStatement(cmd);
+               rs = stmt.executeQuery();
 
 
             while (rs.next()) {
               String accountnum = rs.getString("kood1").trim();
+              String kkood = accountnum;
               String maks = accountnum;
               String acc = rs.getString("kood");
               if (acc != null && acc.trim().length()>0){
@@ -608,10 +644,6 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
               if(salesres.get(accountnum) != null){
               	cust.setInfo("CHART Sales :|Year Month|Sales EUR|" + salesres.get(accountnum) );
               }
-              
-                          
-              
-              if(name == null ) name = "";
              
               cust.restName = name.trim();
              
@@ -679,6 +711,11 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
             	  }
             	 
               }
+              
+              if(bonus.get(kkood) != null) {
+            	  cust.setCity("Bonus available: " + Integer.parseInt(bonus.get(kkood)+"€"));
+              }
+              
              //System.out.println(cust.getID() +" " + cust.getAgents().toString());
               customers.put(name, cust);
               custMap.put(cust.getPayer(), cust);

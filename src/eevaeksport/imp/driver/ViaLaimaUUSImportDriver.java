@@ -406,6 +406,13 @@ JSONObject ord = new JSONObject();
 			  
 			  
 		   
+	   }else {
+		   System.out.println("Reference " + order.getTeostaja());
+		   
+		   if(order.getTeostaja() != null && order.getTeostaja().trim().length() != 0){
+			   header.put( "OrigOrder", order.getTeostaja());
+	 		}
+		 
 	   }
 	   
 	   String com = (order.getInfo());

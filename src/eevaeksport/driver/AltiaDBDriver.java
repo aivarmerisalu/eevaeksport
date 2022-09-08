@@ -539,15 +539,14 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
 		         				
                                 if(end != null && end.indexOf("9999") == -1){
                                 	mline.setEndDate(end);
-                                	
-		         				}
+                                }
                                 
                                 if(end.indexOf("9999") != -1){
                                 	mline.setStartDate(today);
                                 	mline.setProdLevel("pr");
                                 }
                                 
-		         				if (price != 0) {
+		         				if (price > 0) {
 		         					mline.setPrice(price);
 		         				}
 		         				
@@ -555,6 +554,10 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
 		         				if(discount >0){
 		         					mline.setDiscount(discount);
 		         					mline.setPrice(0);
+		         				}
+		         				
+		         				if(discount == 0 && price == 0) {
+		         					goes = false;
 		         				}
 		         				if (mline.getProdID() == null && prodGroup != null
 		         						&& prodGroup.trim().length() > 0) {
@@ -1176,8 +1179,10 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
 	                  try{
                        String grupp  =  getNode(rida,"PricatPartyCode").getFirstChild().getNodeValue();
 	                  if(customer.getGroup() != null && customer.getGroup().trim().length() > 0 ) {
-	                	   customer.setGroup(customer.getGroup()+ "|" + deCode(grupp.trim()));
-	                  }else {
+	                	  if(!customer.getGroup().contains(grupp)) {
+	                		   customer.setGroup(customer.getGroup()+ "|" + deCode(grupp.trim()));
+	       	              }
+	                  } else {
 		         		     customer.setGroup(deCode(grupp.trim()));
 	                  }
 	         		     Vector vv = new Vector();

@@ -2314,14 +2314,26 @@ try{
     //z p algusega
   
     
+    String sss = "select itemid , itembarcode from inventitembarcode  bb where bb.dataareaid = 'zp' and bb.useforprinting = 1 group by itemid , itembarcode";
 
     
     if (isDebug()) System.out.println(cmd);
     TreeMap products = new TreeMap();
     try {
-Connection ccc = getNewConnection();
+     Connection ccc = getNewConnection();
     	Statement stmt =  ccc.createStatement();
-      ResultSet rs = stmt.executeQuery(cmd);
+      ResultSet rs = stmt.executeQuery(sss);
+      
+      
+      HashMap eans = new HashMap();
+      while(rs.next()){
+    	  String kood = rs.getString("itemid").trim();
+    	  String ean = rs.getString("itembarcode").trim();
+    	  eans.put(kood, ean);
+      }
+      rs.close();
+      
+      rs = stmt.executeQuery(cmd);
       HashMap prodHash = new HashMap();
       while(rs.next()){
         String kood = rs.getString("itemid").trim();
@@ -2335,9 +2347,13 @@ Connection ccc = getNewConnection();
         prod.setType("ZP");
         String ean = rs.getString("ean");
         if(ean!=null && ean.trim().length()>0){
-        prod.setEAN(ean);
-      }
-String add = "";
+          prod.setEAN(ean);
+        } else if(eans.get(kood) != null) {
+    	  prod.setEAN(eans.get(kood)+"");
+        }
+        
+        
+    String add = "";
       String grupp = rs.getString("grupp");
        if(grupp!=null && grupp.trim().length()>0){
         prod.setGroup(grupp.trim());
