@@ -177,7 +177,7 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 		       String klient = rs.getString("klient").trim();
 		       String station = rs.getString("stationid");
 		       boolean stati = false;
-		       if(station != null && station.trim().length() > 0) {
+		       if(station != null && station.trim().length() > 0 && !station.trim().equals(klient)) {
 		    	   klient = station;
 		    	   stati = true;
 		       }

@@ -1849,7 +1849,7 @@ try{
         
         if(old<dueint){
            debtDays.put(custID,dueint+"") ;
-           if(dueint > 210){
+           if(dueint > 28){
         	  	  // System.out.println("siit 2 tuleb block" + custID);
                 	   
         	 this.blockedcusts.add(custID);  
@@ -2018,10 +2018,7 @@ try{
             }
             	
           
-            if(customer.getID().equals("17493")) {
-            	System.out.println("oioioioioi " +  customer.getDebt() + " " + customer.getPayer() + " " + overdebts.get(customer.getPayer()) + " " + overdebts.get(customer.getID()));
-            }
-            	
+      
    
           
            if(paym != null && paym.trim().length()>0){

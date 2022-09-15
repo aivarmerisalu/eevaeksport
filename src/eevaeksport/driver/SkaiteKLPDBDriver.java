@@ -985,13 +985,18 @@ private Vector baashk = null;
       
       public TreeMap getCustomers(Agent agent){
     	  
+    	  try {
+			debts = getDebt2();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+    	  
         String cmd = "SELECT CONVERT(Int, part.PartneriaiId) AS CustomerASId, CONVERT(varchar(20), part.Kodas) AS kood,"
         		+ " adr.Adresas as tanav,adr.Miestas as linn, '' as regioon,adr.Indeksas as indeks ,CONVERT(varchar(40), part.Pavad) AS nimi,   " +
                    "   part.regnr AS payer ,  rtrim(adr.Adresas)  + case when adr.Indeksas IS NULL then '' else ' ' + rtrim(adr.Indeksas)end + ' ' + " +
                    " case when adr.Miestas IS NULL then '' else ' ' + rtrim(adr.Miestas)end AS Address,part.pvmnr as vatno, " +
                    "    CONVERT(char(1), 'N') AS Blocked, CONVERT(char(1), 'Y') AS Valid, CONVERT(Int, ROUND(part.Kreditas, 0)) AS CreditLimit, CONVERT(SmallInt, msal.Terminas)  " +
-                   "    AS paym,  CONVERT(nvarchar(30),  " +
-                   "    adr.Miestas) AS City, CONVERT(nvarchar(40), LTRIM(ats.Vardas + ' ' + ats.Pavarde)) AS ContactName, CONVERT(nvarchar(30), ats.Pareigos) AS ContactTitle, " +  
+                   "    AS paym, pl.Tipas1 as typex, CONVERT(nvarchar(30), adr.Miestas) AS City, CONVERT(nvarchar(40), LTRIM(ats.Vardas + ' ' + ats.Pavarde)) AS ContactName, CONVERT(nvarchar(30), ats.Pareigos) AS ContactTitle, " +  
                    "    CONVERT(varchar(50), adr.Tel1) AS CustPhone , " +
                    "   CONVERT(Money, ISNULL  ((SELECT     SUM(ROUND((op.Suma - op.ApmoketaSuma) * op.Kursas, 2) * (CASE pot.PartOperacijosTipas WHEN 1 THEN 1 ELSE - 1 END)) AS Expr1   " +
                    "            FROM         dbo.Operacijos AS op INNER JOIN  " +
@@ -1139,6 +1144,12 @@ private Vector baashk = null;
 		  String term = rs.getString("paym");
                 cust.setPayer(payer);
                 cust.setRegnr(payer);
+                
+                String type = rs.getString("typex");
+                
+                if(oDue.contains(payer) && type != null && type.trim().equals("SM")) {
+                	cust.setSalesBlockT(true);
+                }
                 
                 if(nimi.startsWith("UAB ")){
                 	nimi = (nimi.substring(4,nimi.length()) + " UAB").trim();
@@ -1382,9 +1393,23 @@ private Vector baashk = null;
     public TreeMap getDealers() {
         return dealers;
       }
+    
+    Vector debts = null;
+    Vector oDue = null;
     public Vector getDebt(String agentCode) throws SQLException{
+    	
+    	return debts;
+    }
+    
+    public Vector getDebt2() throws SQLException{
       Vector list = new Vector();
-      String sql = " select  CustomerCode AS klient, billcode AS number,billissuedate+paymenttime AS kuupaev, " + 
+       oDue = new Vector();
+       TreeMap<String,Double> ylekl = new TreeMap<String,Double>();
+       
+      
+       
+       
+      String sql = " select  CustomerCode AS klient,Payer as payer, billcode AS number,billissuedate+paymenttime AS kuupaev, " + 
 		" (case when OperacijosTipoId =64 then -1 else 1 end)*billamount-paidamount AS summa  , datediff(day,billissuedate+paymenttime ,getdate())as yle from  " +
 	 " (  SELECT     OrderAsID = CONVERT(varchar(20), op.OperacijosId), DeliveredOrderAsID = CONVERT(varchar(20), " + 
          "             (CASE WHEN op.OperacijosTipoId = 50 THEN op.OperacijosId ELSE NULL END)), OrderDate = op.Data, OrderDiscount = CONVERT(Real, 0),  " +
@@ -1392,7 +1417,7 @@ private Vector baashk = null;
           "            PaidAmount = CONVERT(Money, op.ApmoketaSuma), CustomerAsID = CONVERT(Int, part.PartneriaiId), EmployeeAsID = CONVERT(varchar(35), masm.MusuAsmenysId), " +
           "             Employeecode = CONVERT(varchar(35), masm.Kodas), OrderState = CONVERT(Int, NULL), OrderStateExt = CONVERT(Int, NULL), CurrencyCode = CONVERT(varchar(2), " + 
           "            op.Valiuta), DeliveryAddressNo = CONVERT(varchar(2), NULL), OrderRemark = CONVERT(varchar(35), SUBSTRING(okp.Pastaba1, 1, 35)), op.OperacijosId,  " +
-          "            CustomerCode = part.Kodas, PaymentTime = CONVERT(SmallInt, msal.Terminas), PayerCode = part.regnr, op.OperacijosTipoId " +
+          "            CustomerCode = part.Kodas, Payer = part.regnr, PaymentTime = CONVERT(SmallInt, msal.Terminas), PayerCode = part.regnr, op.OperacijosTipoId " +
           "       FROM         Operacijos AS op INNER JOIN " +
           "            Pard_BendraInf AS pbi ON op.OperacijosId = pbi.OperacijosId INNER JOIN " +
           "            Partneriai AS part ON pbi.PartneriaiId = part.PartneriaiId INNER JOIN " +
@@ -1404,13 +1429,13 @@ private Vector baashk = null;
           "            OperacijuKuneliuPastabos AS okp ON op.OperacijosId = okp.OperacijosId " +
          " WHERE     0 = 1 AND op.Kilme = 35 " +
  " UNION ALL " +
-" SELECT     OrderAsID = CONVERT(varchar(20), CASE WHEN op.OperacijosTipoId = 50 THEN op2.KilmeInfo ELSE NULL END), DeliveredOrderAsID = CONVERT(varchar(20),  " +
+" SELECT     OrderAsID = CONVERT(varchar(20) ,CASE WHEN op.OperacijosTipoId = 50 THEN op2.KilmeInfo ELSE NULL END), DeliveredOrderAsID = CONVERT(varchar(20),  " +
   "                    op.OperacijosId), OrderDate = op.Data, OrderDiscount = CONVERT(Real, 0), BillCode = CONVERT(varchar(20), op.DokNr), BillIssueDate = op.Data,  " +
    "                   BillPaymentDate = CONVERT(DateTime, NULL), BillAmount = CONVERT(Money, op.Suma), PaidAmount = CONVERT(Money, op.ApmoketaSuma),  " +
     "                  CustomerAsID = CONVERT(Int, part.PartneriaiId), EmployeeAsID = CONVERT(varchar(35), masm.MusuAsmenysId), Employeecode = CONVERT(varchar(35),  " +
      "                 masm.Kodas), OrderState = CONVERT(Int, NULL), OrderStateExt = CONVERT(Int, NULL), CurrencyCode = CONVERT(varchar(2), op.Valiuta),  " +
       "                DeliveryAddressNo = CONVERT(varchar(2), NULL), OrderRemark = CONVERT(varchar(35), SUBSTRING(okp.Pastaba1, 1, 35)), op.OperacijosId,  " +
-       "               customercode = part.Kodas, PaymentTime = CONVERT(SmallInt, msal.Terminas), PayerCode = part.regnr, op.OperacijosTipoId " +
+       "               customercode = part.Kodas, Payer = part.regnr, PaymentTime = CONVERT(SmallInt, msal.Terminas), PayerCode = part.regnr, op.OperacijosTipoId " +
 "FROM         Operacijos AS op INNER JOIN " +
  "                     Pard_BendraInf AS pbi ON op.OperacijosId = pbi.OperacijosId INNER JOIN " +
   "                    Partneriai AS part ON pbi.PartneriaiId = part.PartneriaiId INNER JOIN " +
@@ -1427,7 +1452,10 @@ private Vector baashk = null;
 
       Connection con = this.getNewConnection();
     PreparedStatement  stmt = con.prepareStatement(sql);
-
+   int lisa = 5;
+   if(getParent().getProps().getProperty("debt.extradays") != null) {
+	   lisa = Integer.parseInt(getParent().getProps().getProperty("debt.extradays").trim());
+   }
 
       ResultSet rs = stmt.executeQuery();
 
@@ -1435,7 +1463,8 @@ private Vector baashk = null;
     	  try{
     		    Debt debt = new Debt();
     	        debt.setCustID(rs.getString("klient").trim());
-    	     
+    	        debt.setPayerID(rs.getString("payer").trim());
+    	        
     	        String dok = rs.getString("number");
     	        if(dok != null){
     	        	 dok = dok.trim();
@@ -1444,8 +1473,18 @@ private Vector baashk = null;
     	    	        }
     	    	        debt.setDoknr(dok);   	    	        
     	    	        debt.setDuedate(rs.getDate("kuupaev"));
-    	    	        debt.setSum(rs.getDouble("summa"));       
-    	    	        debt.setDue(rs.getString("yle")); 	    	        
+    	    	        debt.setSum(rs.getDouble("summa")); 
+    	    	        int duu = rs.getInt("yle");
+    	    	        debt.setDue(duu+""); 	
+    	    	        if((duu - lisa) >= 0) {
+    	    	        	   if(ylekl.get(debt.getPayerID()) != null) {
+    	    	    	        	ylekl.put(debt.getPayerID(),ylekl.get(debt.getPayerID()) + debt.getSum());
+    	    	    	        } else {
+    	    	    	        	ylekl.put(debt.getPayerID(), debt.getSum());
+    	    	    	        }
+    	    	    	          
+    	    	        }
+    	    	     	        
     	    	        list.addElement(debt);	
     	        }
     	       
@@ -1457,6 +1496,17 @@ private Vector baashk = null;
       rs.close();
       stmt.close();
       con.close();
+      
+      
+   Iterator itera =  ylekl.keySet().iterator();
+   while (itera.hasNext()) {
+	   String payer = itera.next()+"";
+	   if(ylekl.get(payer) > 0.1) {
+		   oDue.add(payer);
+	   }
+	   
+   }
+      
       System.out.println("debtlist size " + list.size());
       return list;
     }

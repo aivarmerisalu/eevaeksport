@@ -741,7 +741,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 		    custTop =   getCustomerTopProds(custTypes , mustCon);
      }
 	  
-	  System.out.println("custTop " + custTop.size() + " " + custTop.toString());
+	 // System.out.println("custTop " + custTop.size() + " " + custTop.toString());
 	  
 
 	  double minordsum = 0;
@@ -946,7 +946,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                     			
                     			Agent aaa = new Agent(age);
                     			if(!paev.equals("0")) {
-                    				aaa.setVisit(paev);
+                    				//aaa.setVisit(paev);
                     			}
                     			
                     			if(!age.contains("|") )

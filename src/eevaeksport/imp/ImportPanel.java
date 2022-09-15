@@ -10025,6 +10025,9 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 		if (fil.equals("772")) {
 			return "Pääsk�la Selver";
 		}
+		if (fil.equals("744")) {
+			return "Tabasalu Selver";
+		}
 		
 		if (fil.equals("571")) {
 			return "Jaamam�isa Selver";

@@ -1846,6 +1846,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 		
 		if(lisagrupid != null) {
 			for(String gr : lisagrupid) {
+				if(gr != null)
 				grs.put(gr,"yy " + gr);
 			}
 		}

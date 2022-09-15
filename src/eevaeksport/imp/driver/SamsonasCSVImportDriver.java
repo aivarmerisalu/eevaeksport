@@ -502,13 +502,19 @@ quantity
 			      if(minus){
 			    	//  fileName = escape(parent.getProps().getProperty("conv.dir2")) +  "t-" + order.getAgent() +"."+ order.getCompany()+"." +fn  + ".csv";
 			      }
-			      FileOutputStream fos = new FileOutputStream(fileName);
-			        fos.write(sb.toString().getBytes());
-			        fos.close();
+			      if(sb.toString().length() > 1) {
+			    	  FileOutputStream fos = new FileOutputStream(fileName);
+				        fos.write(sb.toString().getBytes());
+				        fos.close(); 
+			      }else {
+			    	  System.exit(0);;
+			      }
+			      
 	    		
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(0);
 		}
 	 }
 	  

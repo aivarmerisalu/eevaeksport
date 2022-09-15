@@ -205,9 +205,7 @@ private String company = "9998";
 	  if(asi.equals("520")){
 		  res = "F03615";//	SAARE SELVER TALLINNA TN 67 F03615
 	  }
-	  if(asi.equals("744")){
-		  res = "F03638";//	KOTKA TALLINNA TN 67 F03615
-	  }
+	
 	  if(asi.equals("5152")){
 		  res = "F036141";//	TORUPILLI SELVER II KORRUS VESIV11115xxRAVA 37 F036141
 	  }
@@ -333,6 +331,9 @@ private String company = "9998";
 	  
 	  if(asi.equals("772")){
 		  res = "F03627";//	P��sk�la SELVER 
+	  }
+	  if(asi.equals("744")){
+		  res = "F03671";//	P��sk�la SELVER 
 	  }
   if(asi.equals("743")){
 		  
@@ -507,9 +508,7 @@ private String company = "9998";
 	  if(asi.equals("740")){
 		  res = "4740581999633";//	LAAGRI SELVER TALLINNA TN 67 F03615
 	  }
-	  if(asi.equals("744")){
-		  res = "4740581999640";//	KOTKA SELVER TALLINNA TN 67 F03615
-	  }
+	 
 	  if(asi.equals("5152")){
 		  res = "4740581999428";//	TORUPILLI SELVER II KORRUS VESIV11115xxRAVA 37 F036141
 	  }
@@ -633,6 +632,9 @@ private String company = "9998";
 	  
 	  if(asi.equals("772")){
 		  res = "4740581999282";//	P��sk�la SELVER 
+	  }
+	  if(asi.equals("744")){
+		  res = "4740581999930";//	P��sk�la SELVER 
 	  }
 	  
 	  

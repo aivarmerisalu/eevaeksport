@@ -106,7 +106,7 @@ File[] dd1 = d1.listFiles();
 for(int i = 0;dd1.length>i;i++){
 	File fil = dd1[i];
 	String name = fil.getName();
-	System.out.println(name);
+//	System.out.println(name);
 	if(name.contains("(") && name.contains(")") && name.toLowerCase().endsWith("jpg")) {
 		String ean = name.substring(name.lastIndexOf("(")+1,name.lastIndexOf(")"));
 		
@@ -182,7 +182,7 @@ for(int i = 0;dd1.length>i;i++){
              
 	   	    	if(c == 100){
 	   	    		  c = 0;
-	   	    		  System.out.println("Piltide leidmine "  + a);	
+	   	    		//  System.out.println("Piltide leidmine "  + a);	
 	   	   		}
 	   	           
 	                 File f = new File(pictspda + toode+".jpg");
@@ -286,7 +286,7 @@ for(int i = 0;dd1.length>i;i++){
       		      }
       		       
       		      date = date.replace('.', '-').replace('.', '-');//substring(8)+ "-"+date.substring(4, 6)+"-"+date.substring(0,1);
-      		      System.out.println("date " + date);
+      		   //   System.out.println("date " + date);
       		      
       		   hasdata= true;
       		   sb.append(cuids + "," + aadr + "," + cuname + "," + summa + "," + docid + "," + date + "," + user + "," + comment + "\n") ;
@@ -408,7 +408,7 @@ HashSet olemas = new HashSet();
 				
 
 		
-				System.out.println("Lines1 " + lines.size());
+			//	System.out.println("Lines1 " + lines.size());
 				
 
 				 sql = " SELECT n51_kodas_ks as custid, n51_kodas_ks as clgroup, n52_kodas as prodid, n52_nuolaida AS discount, n52_kaina as price ,n51_beg_date as algus, n51_end_date as lopp "
@@ -482,7 +482,7 @@ HashSet olemas = new HashSet();
 					st.close();
 					con.close();
 				
-					System.out.println("Lines2 " + lines.size());
+				//	System.out.println("Lines2 " + lines.size());
 		
 		} catch (SQLException ex) {
 			ex.printStackTrace();
@@ -500,8 +500,15 @@ HashSet olemas = new HashSet();
 		}
 	
 
-    public Vector getDebt(String agentCode) throws SQLException{
-      Vector list = new Vector();
+		 public Vector getDebt(String agentCode) throws SQLException{
+			 return this.debtV;
+		 }
+		
+		 private Vector debtV = new Vector();
+		 private Vector d60 = new Vector();
+		 
+    public Vector getDebt() throws SQLException{
+       debtV = new Vector();
      String sql = "SELECT I44_KODAS_KS AS klient,I44_DOK_NR AS number ,max(I44_DATA_MOK) AS maksepaev , " +
          " sum(i44_suma_db-i44_suma_cr) AS tasumata ,min(I44_DATA_DOK) AS kuupaev , max(datediff(day,I44_DATA_MOK,getdate())) as yle FROM i44_skol,n08_klij WHERE " +
          " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
@@ -525,13 +532,21 @@ HashSet olemas = new HashSet();
          debt.setDuedate(rs.getDate("maksepaev"));
          debt.setSum(rs.getDouble("tasumata"));
          debt.setDate(rs.getDate("kuupaev"));
-         debt.setDue(rs.getInt("yle")+"");
-         list.addElement(debt);
+         int yle = rs.getInt("yle");
+         debt.setDue(yle+"");
+         if(yle > 60 && !d60.contains(kl) && debt.getSum() > 0) {
+        	 d60.add(kl);
+        	 if(kl.equals("757")) {
+        		 System.out.println("võlgu " + kl + " " + number);
+        	 }
+         }
+        	 
+         debtV.addElement(debt);
         }
-        
       }
+     
       st.close();
-      return list;
+      return debtV;
     }
 
 
@@ -748,6 +763,11 @@ HashSet olemas = new HashSet();
     private TreeMap agents1 = new TreeMap();
     
     public TreeMap getCustomers(Agent agent){
+    	try {
+    		getDebt();
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
     	
     	
     	 try{
@@ -761,7 +781,7 @@ HashSet olemas = new HashSet();
         String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, " +
         		" N08_PAV as nimetus, N33_kodas_ak AS nimetus2, N08_CREDIT_LIM as cred, " +
 				" N33_ADRESAS AS aadress, ltrim(N08_NUOL_GR)   AS ale , " +
-				" ' ' AS visit ,N08_KODAS_KS AS payer ,  " +
+				" ' ' AS visit ,N08_KODAS_KS AS payer , N08_KODAS_LS_8 as konsig , " +
 				" (CASE WHEN LEN(LTRIM(N33_KODAS_MS))=0 or N33_KODAS_MS  IS NULL THEN  N08_KODAS_MS_P ELSE N33_KODAS_MS  END) AS agent ,  " +
 				" (case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm , N33_TEL as phone , N33_SHIP_FOB  as deld " +
 				"  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where N08_PAV is not null order by N08_PAV ";
@@ -808,7 +828,7 @@ HashSet olemas = new HashSet();
            rs1.close();
            stmt.close();
         
-        	System.out.println(salesres.toString());
+        	//System.out.println(salesres.toString());
         	
         	
         	
@@ -897,7 +917,7 @@ HashSet olemas = new HashSet();
             	  cust.setCredit(cred+"");
               }
               
-              
+             
               if(salesres.get(accountnum) != null){
               	cust.setInfo(Converter.enCodeEst("CHART sales :|Month & year|Sales |" )+ salesres.get(accountnum) );
               }
@@ -921,9 +941,10 @@ HashSet olemas = new HashSet();
               
               
               String payer =rs.getString("payer");
+            
               if(payer != null && payer.trim().length()> 0){
                 cust.setPayer(payer.trim());
-
+               
                 if(volad.get(payer.trim()) != null){
               	  cust.setDebt(Double.parseDouble("" +volad.get(payer.trim())));
                 }
@@ -934,6 +955,21 @@ HashSet olemas = new HashSet();
 
               }
               
+              if(maks.equals("757")) {
+         		 System.out.println("võlgu2 757 " + maks + " " + d60.contains(maks) +" " + d60.contains(cust.getID()));
+         	 }
+              
+              if(d60.contains(cust.getID()) || d60.contains(maks)) {
+            	  cust.setSalesBlockT(true);
+              }
+              
+              String konsig = rs.getString("konsig");
+              if(cust.isSalesBlockT() && konsig != null && konsig.trim().equals("ATSISK_PO_RE")){
+            	  cust.setSalesBlockT(false);
+            	 // System.out.println("Blokk maha " + cust.getID());
+              }
+                 
+
 
              String ag = rs.getString("agent").trim();
               cust.addAgent(new Agent(ag));
@@ -995,7 +1031,7 @@ HashSet olemas = new HashSet();
     
     public TreeMap getProducts(Agent agent){
     	this.getSaveStockInfo();
-    	System.out.println("stocks suurus " + stocks.size() + " " + stocks6.size());
+    //	System.out.println("stocks suurus " + stocks.size() + " " + stocks6.size());
   
    String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus,dbo.papn(L11_LAUKAS , 8, 'c')  AS tykke,dbo.papn(L11_LAUKAS , 9, 'c')  AS alusel, 0 AS myygihind,\r\n" + 
    		"   		N17_KODAS_PS AS ean, \r\n" + 
@@ -1019,7 +1055,7 @@ HashSet olemas = new HashSet();
         	
     String    sql = "select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from I33_PKAI "
     		+ " where I33_KODAS_iS = 'SAND1'  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
-            System.out.println("hind");
+           // System.out.println("hind");
           if (isDebug()) System.out.println(sql);
           connectionUp(url2);
           TreeMap tooted = new TreeMap();
@@ -1039,8 +1075,6 @@ HashSet olemas = new HashSet();
 
              
                  sql = " select n19_kodas_gs as nogr from N19_PGR where N19_pav_k3 = 'IG' " ;
-                     System.out.println("hind");
-                   if (isDebug()) System.out.println(sql);
                    connectionUp(url2);
                    TreeMap nogroups = new TreeMap();
                        stm = con.createStatement();
@@ -1312,9 +1346,9 @@ HashSet olemas = new HashSet();
     	   if(files.length>0){
     		   for (int i = 0;i<files.length;i++){      		  
         		   if (files[i].toLowerCase().indexOf(agent.getID().toLowerCase())!= -1 && files[i].toLowerCase().endsWith("log")){
-        			   System.out.println(files[i]);  
+        			 //  System.out.println(files[i]);  
         			   File f = new File(getParent().getProps().getProperty("pop3.dir") + (files[i].substring(0,files[i].indexOf(".")) + ".LOG").toUpperCase());
-        			   System.out.println(f.getAbsolutePath());  
+        			//   System.out.println(f.getAbsolutePath());  
         			   if(f.exists()){
         				   FileReader fr = new FileReader(f.getAbsoluteFile());
         				  
@@ -1322,7 +1356,7 @@ HashSet olemas = new HashSet();
         			        String line = " ";
         			        
         			      while( ((line = reader.readLine())!= null )){
-        			    	  System.out.println(line); 
+        			    	 // System.out.println(line); 
         			    	  if(line.trim().startsWith("Sufor")){
         			    		  sb.append(line.substring(line.indexOf("Klientas")+9) + "\n");
         			    	  }
@@ -1339,7 +1373,7 @@ HashSet olemas = new HashSet();
                         } catch (Exception e) {
                             getParent().showError(e);
                         }
-                        System.out.println(agent.getID() + sb.toString());
+                       // System.out.println(agent.getID() + sb.toString());
            if(sb.toString().trim().length()>0){
         	try{
         		Email mail = new Email(null);

@@ -224,7 +224,7 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		 
 		   private String toUpper(String asi ){
 			   
-			 //  asi = asi.substring(0,asi.length()-4) + asi.substring(asi.lastIndexOf(".")).toLowerCase();
+			   asi = asi.substring(0,asi.length()-4) + asi.substring(asi.lastIndexOf(".")).toLowerCase();
 			   
 			   return asi ;
 		   }

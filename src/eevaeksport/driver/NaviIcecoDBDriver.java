@@ -1,10 +1,14 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,11 +19,14 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import org.apache.commons.io.FileUtils;
 
 import ee.mobilejava.wrapper.SupervisorInfoWrapper;
 import eevaeksport.Agent;
@@ -44,7 +51,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager {
+public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,PictureMaker {
 
   public NaviIcecoDBDriver(EksportPanel parent) {
     super(parent);
@@ -1204,5 +1211,136 @@ public void setBulkSales(Map agents) {
 
  }
 
+private void makePictureCat(){
+	    
+  	
+  	String pictssou = parent.getProps().getProperty("pict.dir");
+	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	    TreeMap phsize = new TreeMap();
+	    
+	    
+	 try {
+   	  File f = new File(pictspda +"list.txt");
+        if (f.exists())f.delete();
+        //Kataloogi sisude kustutamine
+    	  File res2 = new File (pictspda);
+           String[] ff2 = res2.list();
+      
+//       	 Lõppes kustutamine 
+		 
+		 TreeMap prods = this.getProducts(null);
+       StringBuffer buf = new StringBuffer();
+       Iterator enume = prods.keySet().iterator();
+  
+       while (enume.hasNext()) {
+  	    	String asi = (String)enume.next();
+  	    	Product prod = (Product)prods.get(asi);
+  	    	String toode = prod.getID();  
+             if(toode.length() > 0){
+              	
+  	   	  res2 = new File (pictssou);
+            ff2 = res2.list();
+          
+       	 for(int i = 0;ff2.length>i;i++){
+           	if( ff2[i].startsWith(toode)){
+             // System.out.println("pilt olemas " + ff2[i]);
+          	File in = new File ( pictssou + ff2[i]); 
+            	if(in.isFile()){
+            	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+            	if(!inpda.exists()) {
+            		Converter.shrinkAndCopyFile(in,inpda,250);
+            	}
+                	
+                	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
+                	phsize.put(prod.getID(), kkk.length());
+          	    }
+               }
+             }
+           }
+  	   }
+      
+       
+     Iterator itera =   phsize.keySet().iterator();
+     while(itera.hasNext()) {
+  	   String prid = (String)itera.next();
+  		buf.append(prid +".jpg;"  + phsize.get(prid) + "\n");
+             
+     }
+      
+       
+       try {
+   		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+   		os.write(buf.toString());
+   		os.close();
+   	  }catch (Exception ex) {
+   		ex.printStackTrace();
+   	  }
+	 
+	 } catch (Exception e) {
+  	    getParent().showError(e);
+  	}
+    
+}
+
+
+
+
+@Override
+public void PictureMaker() {
+	loadPictures();
+    makePictureCat();
+	  System.exit(0);	
+}
+
+
+
+private void loadPictures() {
+ 	
+    connectionUp();
+	String  cmd2 = "SELECT t.toode,pi.pilt ,  pi.id, pildityyp FROM firma1.toode t   INNER JOIN firma1.artpilt pi ON pi.toode=t.toode  \r\n"  ;
+	
+	
+	String picts = parent.getProps().getProperty("pict.dir");
+	  
+	try {
+		Converter.doTrustToCertificates();
+       	Converter.trustAllHttpsURLConnection();
+        Connection con = getNewConnection2();
+		Statement st = con.createStatement();
+ 		    ResultSet	      rs = st.executeQuery(cmd2);
+	    while (rs.next()) {
+              String toode = rs.getString("toode").trim();
+              byte[] bufbyte = rs.getBytes("pilt");
+              
+              String id = rs.getString("id");
+              String laiend = rs.getString("pildityyp").trim().toLowerCase();
+              
+              System.out.println(toode + " " + bufbyte.length);
+              
+              if(bufbyte != null){
+                  String filename = picts + toode+"."+laiend; // Function for generating temporary filenames basing on GUID 
+                  File fp = new File(filename);
+                  
+                	  if(fp.exists()){
+                    	  fp.delete();
+                      }
+                     // System.out.println(filename);
+                      if(fp.createNewFile()) {
+                    	  FileOutputStream fos = new FileOutputStream(fp); 
+                          fos.write(bufbyte);
+                          fos.close();     
+                      }   
+                  }
+                }
+              
+	    
+	    rs.close();
+	    st.close();
+	    con.close();
+	    
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+}
 
 }
