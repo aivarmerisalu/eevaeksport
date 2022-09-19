@@ -223,7 +223,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 					try {
 						cal.setTimeInMillis(Long.parseLong(cr3));
 					} catch (Exception e) {
-						System.out.println("cr3 '" + cr3 + "'");
+					//	System.out.println("cr3 '" + cr3 + "'");
 
 						// e.printStackTrace();
 
@@ -371,7 +371,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
  " WHERE     (sand.SandeliaiId > 1) and  (CONVERT(Int, ps.Likutis_PP - ps.KiekisRezervuotas) >0 or  CONVERT(Int, ps.Likutis_PP) >0)" ;
 
 
-		       if (isDebug()) System.out.println(cmd);
+		    //   if (isDebug()) System.out.println(cmd);
 		       StringBuffer products = new StringBuffer();
 		       try {
 
@@ -427,7 +427,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 		           getParent().showError(e);
 		       }
 		       
-		       System.out.println("stocksTXT suurus " + stocksTXT.size());
+		     //  System.out.println("stocksTXT suurus " + stocksTXT.size());
 		       return products.toString();
 		   }
         
@@ -545,7 +545,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
     	    rs.close();
     	    st.close();
     	    con.close();
-    	    System.out.println("KPL tootegrupid ending ");
+    	  //  System.out.println("KPL tootegrupid ending ");
     	 
     	    return gr;
     	 }
@@ -919,7 +919,7 @@ String    sql = " select  '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clg
                }
                
                if(action == 0) {
-            	   System.out.println("ACTION " + mline.toString());
+            	 //  System.out.println("ACTION " + mline.toString());
             	   mline.setProdLevel("99999");  
                }
                
@@ -977,7 +977,7 @@ String    sql = " select  '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clg
            } catch (Exception ex) {
              ex.printStackTrace();
            }
-           System.out.println("Maatrix suurus " + lines.size());
+          // System.out.println("Maatrix suurus " + lines.size());
          return lines;
     	
        }
@@ -1147,10 +1147,12 @@ private Vector baashk = null;
                 
                 String type = rs.getString("typex");
                 
-                if(oDue.contains(payer) && type != null && type.trim().equals("SM")) {
+                if(payer.length() > 0 && !payer.equals("ND") && oDue.contains(payer) && type != null && type.trim().equals("SM")) {
                 	cust.setSalesBlockT(true);
                 }
-                
+                if(oDue.contains(cust.getID()) && type != null && type.trim().equals("SM")) {
+                	cust.setSalesBlockT(true);
+                }
                 if(nimi.startsWith("UAB ")){
                 	nimi = (nimi.substring(4,nimi.length()) + " UAB").trim();
                 }
@@ -1174,7 +1176,10 @@ private Vector baashk = null;
               
                 double debti = rs.getDouble("debt");
                
+                if(debti > 0.1 || debti< -0.1) {
                 	cust.setDebt(debti);
+                }
+                	
                 //cust.setVisit(rs.getString("visit"));
                 
                 //String info = rs.getString("info");
@@ -1463,7 +1468,8 @@ private Vector baashk = null;
     	  try{
     		    Debt debt = new Debt();
     	        debt.setCustID(rs.getString("klient").trim());
-    	        debt.setPayerID(rs.getString("payer").trim());
+    	        String payer = rs.getString("payer").trim();
+    	        //debt.setPayerID(rs.getString("payer").trim());
     	        
     	        String dok = rs.getString("number");
     	        if(dok != null){
@@ -1476,16 +1482,21 @@ private Vector baashk = null;
     	    	        debt.setSum(rs.getDouble("summa")); 
     	    	        int duu = rs.getInt("yle");
     	    	        debt.setDue(duu+""); 	
-    	    	        if((duu - lisa) >= 0) {
-    	    	        	   if(ylekl.get(debt.getPayerID()) != null) {
-    	    	    	        	ylekl.put(debt.getPayerID(),ylekl.get(debt.getPayerID()) + debt.getSum());
+    	    	        if((duu - lisa) >= 0 && payer.length() > 0) {
+    	    	        	if(payer.equals("ND")) {
+    	    	        		payer = debt.getCustID();
+    	    	        	}
+    	    	        	   if(ylekl.get(payer) != null) {
+    	    	    	        	ylekl.put(payer,ylekl.get(payer) + debt.getSum());
     	    	    	        } else {
-    	    	    	        	ylekl.put(debt.getPayerID(), debt.getSum());
+    	    	    	        	ylekl.put(payer, debt.getSum());
     	    	    	        }
     	    	    	          
     	    	        }
-    	    	     	        
-    	    	        list.addElement(debt);	
+    	    	     	  if(debt.getSum() < - 0.1 || debt.getSum() > 0.1)  {
+    	    	     		  list.addElement(debt);	 
+    	    	     	  }
+    	    	      
     	        }
     	       
     	  }catch (Exception e){
@@ -1501,13 +1512,13 @@ private Vector baashk = null;
    Iterator itera =  ylekl.keySet().iterator();
    while (itera.hasNext()) {
 	   String payer = itera.next()+"";
-	   if(ylekl.get(payer) > 0.1) {
+	   if(ylekl.get(payer) > 0.1 && payer.length() > 0) {
 		   oDue.add(payer);
 	   }
 	   
    }
       
-      System.out.println("debtlist size " + list.size());
+    // System.out.println("debtlist size " + list.size());
       return list;
     }
     
