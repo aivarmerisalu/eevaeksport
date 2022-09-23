@@ -696,6 +696,8 @@ String ex = parent.getProps().getProperty("products");
         	deflist  = "";
         }
         
+        
+       
      
    String cmd = "SELECT * FROM CESU.MJDAILYITEMS";
 

@@ -286,7 +286,7 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 		con.close();
 		
 		} catch (Exception e) {
-		getParent().showError(e);
+		  getParent().showError(e);
 		}
 		
 		
@@ -1852,7 +1852,11 @@ try{
            if(dueint > 28){
         	  	  // System.out.println("siit 2 tuleb block" + custID);
                 	   
-        	 this.blockedcusts.add(custID);  
+        	 this.blockedcusts.add(custID); 
+        	 if(debt.getPayerID() != null && debt.getPayerID().length() > 0 ) {
+        		 this.blockedcusts.add(debt.getPayerID());  
+        	 }
+        	  
            }
         }
         if(debt.getDoknr() != null){

@@ -60,7 +60,7 @@ public class KalevDBDriver extends AbstractDBDriver implements Manager, Promo,
 		BulkUpdater, Discounter,SalesSetter,ClientBlock,PictureMaker ,FixLoader{
 
 	public KalevDBDriver(EksportPanel parent) {
-		super(parent);
+		super(parent); 
 		this.subjectFilesTo = parent.getString("filemsg");
 		String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 		try {
@@ -828,7 +828,7 @@ StringBuffer sb = new StringBuffer();
 			    	    			  		 try{
 			    	    			  			sort = row.getCell((short)3).getNumericCellValue()+"";  
 					    	    	    	  }catch(Exception k){
-			    	    			  			k.printStackTrace(); 
+			    	    			  		//	k.printStackTrace(); 
 			    	    			  		 }
 			    	    			  	} 
 			    	    			  	 
@@ -1742,7 +1742,12 @@ SELECT  [MasterProductCode] as klient
  
 				Product prod = new Product(kood);
 				prod.setEdiname(nimetus);
-				prod.setPrice(parseDouble(rs.getString("myygihind").trim()));
+				try {
+					prod.setPrice(parseDouble(rs.getString("myygihind").trim()));
+				}catch(Exception e){
+					System.out.println("Hind puudu " + prod.getID());
+				}
+			
 				if(prod.getPrice() == 0){
 					prod.setPrice(1);
 				}

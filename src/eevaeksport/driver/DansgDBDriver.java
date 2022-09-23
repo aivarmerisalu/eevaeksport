@@ -459,6 +459,7 @@ public class DansgDBDriver extends AbstractDBDriver implements Discounter, Manag
 		   "INNER JOIN klienti a ON a.id_klients=dok.id_klients " +
 		   " where summa-APMAKSATS<>0 and dok.APMAKSAS_TERMINS<current_timestamp" +
 		   " GROUP BY a.klienta_kods ORDER BY a.klienta_kods";
+            sql3 = "select klienta_kods  AS klient, parads as summa from PARADI";
             System.out.println(sql3);
                ResultSet rst = smt.executeQuery(sql3);
                while(rst.next()){

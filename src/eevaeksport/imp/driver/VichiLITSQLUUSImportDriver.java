@@ -727,10 +727,17 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 
 		if (disc > 0) {
 			// price = price * (100-disc)/100;
-			Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
+		/*	Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
 			Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
 			yhiku_hind.appendChild(yhiku_hindVal);
 			ridaitem.appendChild(yhiku_hind);
+			*/
+			
+			
+			Node yhiku_ale = doc.createElement("LineDiscount");
+			Text yhiku_aleVal = doc.createTextNode(disc+"");
+			yhiku_ale.appendChild(yhiku_aleVal);
+			ridaitem.appendChild(yhiku_ale);
 		}
 
 		Node yhiku_va = doc.createElement("TaxRate");

@@ -462,8 +462,8 @@ private HashMap prodnames = null;
              	  
                  sb.append("         <Addition addCode=\"DSC\"><AddRate>" +
              	   escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
-                 if(!tagastus)
-                 ccc =  "-" + nf.format(line.getDiscount()) + "% ";
+                // if(!tagastus)
+                // ccc =  "-" + nf.format(line.getDiscount()) + "% ";
                }
               
              

@@ -774,7 +774,7 @@ public class VichiESTSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 
 
    public String getSaveStockInfo(){
-   	sendDistributionReport(null);
+  // 	sendDistributionReport(null);
    	System.exit(0);
     return null;
    }

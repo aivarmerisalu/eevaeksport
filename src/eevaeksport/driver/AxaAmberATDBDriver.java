@@ -5335,11 +5335,11 @@ int i = 0;
         String name = Converter.enCodeEst(rs.getString("name").trim()).replace('*', ' ').trim();
         boolean addDebt = true;
         
-      String alias = rs.getString("nimelisa");
+    /*  String alias = rs.getString("nimelisa");
         if(alias != null && alias.trim().length()>0 && !alias.trim().equals(name)){
         	if(!name.trim().startsWith(alias.trim()))
         	name =  name + " " + alias.replace('*', ' ').trim() ;
-        }
+        }*/
                  
         
         String accountnum = rs.getString("accountnum").trim();
@@ -5352,16 +5352,10 @@ int i = 0;
         if(payer == null || payer.trim().length()== 0){
         	cust.setPayer(cust.getID());
         	cust.setIsPayer(true);
-        	
-        	
-        //	System.out.println("is Payer " + cust.getID() + " " + payer.trim());
         }else{
         	cust.setPayer(payer.trim());
         
-        	if(cust.getID().equals(payer.trim())) {
-        		
-        		//System.out.println("is Payer " + cust.getID() + " " + cust.getName());
-        	}
+        	
         }
         
         
@@ -5402,7 +5396,7 @@ int i = 0;
 
         String aadr = rs.getString("address");
         if (aadr != null) {
-          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',',')),"UK"));
+          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',',')),""));
         }
         String visit = rs.getString("visit");
         if (visit != null && visit.trim().length()>0) {
@@ -5439,7 +5433,7 @@ int i = 0;
         String teles = rs.getString("teles");
         if (teles != null && teles.trim().length() > 0) {
          cust.addAgent(new Agent(teles.trim()));
-         System.out.println("lisan telesales  " + teles.trim());
+       //  System.out.println("lisan telesales  " + teles.trim());
 		
         }
         
@@ -5463,7 +5457,9 @@ int i = 0;
             cust.setSalesBlockT(true);
            // goes = false;
           }
-       
+       if(payers.contains(cust.getID())) {
+    	   goes = false;  //maksjaid ei saada
+       }
         
         int payerblock = rs.getInt("payerblock");
         if (payerblock == 1) {
@@ -5489,10 +5485,7 @@ int i = 0;
         	cust.setInfo(Converter.enCodeEst("CHART Sales :|Month and year|sales |" )+ salesres.get(accountnum) );
         }
         
-        if(transa.get(cust.getID())!= null){
-        	
-        	
-        }
+      
         
         if(visits.get(cust.getID())!= null){
         	cust.setVisit(visits.get(cust.getID())+"");
@@ -5567,10 +5560,7 @@ int i = 0;
   	cust.setInfo(cuinfo.trim().replaceAll("\\r\\n|\\r|\\n", " ").replaceAll(";", ":"));
  }
             
- 
- if(cust.isPayer() && !samples.contains(cust.getID())) {
-	 cust.setInfo("Seems that it's PAYER - do not make order to this account");
- }
+
  
  if(samples.contains(cust.getID())) {
 	 cust.setInfo("This account is for SAMPLES ONLY, "
