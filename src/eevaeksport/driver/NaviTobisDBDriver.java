@@ -1016,7 +1016,35 @@ System.out.println(cmd);
 }
 
 
+HashMap points = new HashMap();
 
+try{
+String cmd = " SELECT c.no_ as klient, isnull(l.valid_points,0) as valid_points, isnull(l.unpaid_points,0) as unpaid_points \r\n" + 
+		"from [2015_Tobis$Customer] c left join [_Merisoft$Tobis$Customer_loyalty_program] l on c.No_ = l.customer_no where c.[Lojalumo programa] = 1";
+
+System.out.println(cmd);
+
+ con = getNewConnection2();
+ Statement stmt1 = con.createStatement();
+ ResultSet rs1 = stmt1.executeQuery(cmd);
+ while(rs1.next()){
+	 
+ String custID = rs1.getString("klient").trim();
+ double xx = rs1.getDouble("valid_points");
+ double yy = rs1.getDouble("unpaid_points");
+ 
+	   points.put(custID,"Sukaupti taškai: " + (int) xx + " (=" + (int) xx + "€ dovanų kortelei)" + "|Įsigalios apmokėjus SF: " + (int)yy); 
+  }
+ 
+ rs1.close();
+ stmt1.close();
+ con.close();
+ 
+ System.out.println("points " + points.size());
+ 
+} catch (Exception e){
+  e.printStackTrace();
+}
 
 
 /// KLIENDI ANDMETE LEIDMINE
@@ -1031,7 +1059,7 @@ System.out.println(cmd);
     	   	 "   AS aadress , a.[Address]+' '+a.[Address 2]+a.[City] as addr2 ,k.[Salesperson Code] AS agent ,  Blocked AS blokk,   " +
              "    [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,[Route Code] AS visit,'' AS type,  " +
              "  0 AS extradays ,'' AS sort,'' AS debt , 0 AS minsum ,k.Contact +' ' + k.[Phone No_] + ' ' + k.[E-Mail] as kontakt  , " +
-			 "  [Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 ,av.AVG_Line_Count as lines,av.AVG_Amount as summa,av.Last_Invoice_Date as lastdeal " +
+			 "  [Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 ,av.AVG_Line_Count as lines,av.AVG_Amount as summa,av.Last_Invoice_Date as lastdeal , [Lojalumo programa] as loyal " +
              "  	  , k.[Address] as a1,k.[Address 2] as a2,k.[City] as a3, k.[Country Code]as coun , k.[Secondary Salesperson Code] as ag2 FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] " +
               "     and a.Code=k.[Ship-to Code]  " +
 				"   LEFT join [_MERISOFT$Tobis$Customer_Average_Invoice] av on  av.[Customer_No]=k.[No_] " +
@@ -1193,6 +1221,20 @@ System.out.println(cmd);
     	        	   		"   Suma: " + (int)summa + " €." ));
     	           }
     	          
+    	           String loyal  = rs.getString("loyal");
+    	           if(loyal != null) {
+    	        	   if( loyal.trim().equals("0")) {
+    	        		   customer.setCity("Lojalumo statusas: Nedalyvauja");
+    	               }else {
+    	            	   String add = "";
+    	            	   if(points.get(customer.getID()) != null) {
+    	            		   add = (String)points.get(customer.getID());
+    	            	   }
+    	            	   customer.setCity("Lojalumo statusas: Taškai kaupiami|" + add );
+    	                 }
+    	        	   
+    	           }
+    	           
     	           String a1 = rs.getString("a1");
     	           if(a1 != null && a1.trim().length()>0){
     	        	   String str = a1.trim();

@@ -121,9 +121,9 @@ public class SamsonasCSVImportDriver
 		
 		     String itemid = lin.getToode();
 		  
-		    	 if(itemid != null && prods.get(itemid) != null) {
+		    	// if(itemid != null && prods.get(itemid) != null) {
 		    	  
-		          Product pr = (Product)  prods.get(itemid);
+		      //    Product pr = (Product)  prods.get(itemid);
 		    		// Võtame maha hetkel spliti.
 		    	//  if(pr.getGroup().toLowerCase().startsWith("me") ){
 			    	 ordOTB.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
@@ -134,7 +134,7 @@ public class SamsonasCSVImportDriver
 		        	ord23.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     		 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
 			          }*/ 
-		     } 
+		    // } 
 	  }
 
 	  if(ord23.getOrderLines() != null && ord23.getOrderLines().size()>0){

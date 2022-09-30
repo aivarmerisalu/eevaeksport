@@ -2,6 +2,7 @@ package eevaeksport.driver;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
@@ -12,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -2296,12 +2298,44 @@ try{
 
   public TreeMap getProducts(Agent agent){
 
+	   ArrayList extraProds = new ArrayList();
+	    File f = new File ("extracodes.txt");
+	    try {
+			Converter.readFile(f, "utf-8", extraProds);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	    
+	    System.out.println("Exstra prods " + extraProds);
+	    String addsql  = "";
+	    if(extraProds.size() > 0) {
+	    	addsql = " or inv.itemid in (";
+	    	
+	    	
+	    	String sisu = "";
+	    	Iterator itera = extraProds.listIterator();
+	    	while (itera.hasNext()) {
+	    		String tok = (String)itera.next();
+	    		if(tok.length() > 0) {
+	    			sisu = sisu + "'" + tok + "'";
+		    		if(itera.hasNext()) {
+		    			sisu = sisu + ", ";
+		    		}	
+	    		}
+	    		
+	    	}
+	    	
+	    	
+	    	addsql = addsql + sisu + ") ";
+	    }
+	    
+	  
     String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, sui.qty  AS kastis,'' AS alusel, disc.amount AS price " +
   "     , bar.itembarcode AS ean ,inv.CATEGORYPRODUCTLINE_BBS AS grupp2, inv.CATEGORYINVENTGROUP_BBS   AS grupp , "
   + " ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 21 as vat , " +
   "   0  as samm ,sortcode as sorting  ,  0 as nosales  FROM  inventtable inv  " +
   "       left  JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation  and " +
-  "   disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)  and disc.accountcode='2' and disc.currency = 'EUR' " +
+  "   disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)  and disc.accountcode='2' and disc.currency = 'EUR' and disc.dataareaid='zp' " +
   "      left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  " +
   "     left join  inventitembarcode bar  ON bar.useforprinting = 1 and bar.itemid=inv.itemid and  " +
   "     bar.DATAAREAID =inv.DATAAREAID  and bar.inventdimid = 'AllBlank' " +
@@ -2310,12 +2344,13 @@ try{
 "   left join EcoResCategory e on  inv. CATEGORYINVENTGROUP_BBS= e.recid " +
  "  left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension " + 
 		"	 and  dimensionattribute = 5637146830 " +
-  "    WHERE   moduletype=2 and (blocked = 0 or blocked is null) and  inv.dataareaid='zp'  and Assortment_bbs = 1  and disc.dataareaid='zp'   ";
+  "    WHERE   moduletype=2 and (blocked = 0 or blocked is null) and  inv.dataareaid='zp'  and ( Assortment_bbs = 1 " + addsql + " )  ";
     //z p algusega
   
     
     String sss = "select itemid , itembarcode from inventitembarcode  bb where bb.dataareaid = 'zp' and bb.useforprinting = 1 group by itemid , itembarcode";
 
+ 
     
     if (isDebug()) System.out.println(cmd);
     TreeMap products = new TreeMap();
@@ -2343,7 +2378,13 @@ try{
   
         prod.setInCases(rs.getDouble("kastis"));
        // prod.setOnPallet(rs.getDouble("alusel"));
-        prod.setPrice(rs.getDouble("price"));
+        Double price = rs.getDouble("price");
+        if(price != null) {
+        	 prod.setPrice(price);
+        }else {
+        	prod.setPrice(1);
+        }
+       
         prod.setType("ZP");
         String ean = rs.getString("ean");
         if(ean!=null && ean.trim().length()>0){

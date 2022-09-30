@@ -1331,9 +1331,15 @@ con3.close();
                  }
 
                  double	maxdisc = rs.getDouble("maxdiscount");
-             	if(maxdisc > 0){
-                   prod.setMaxDiscount(maxdisc);
-                   name = name  +  " MD-"  + (int)maxdisc + "%";
+             	if(maxdisc > -1){
+             		if(maxdisc == 0 ) {
+             			 prod.setMaxDiscount(-1);
+                         
+             		}else {
+             			 prod.setMaxDiscount(maxdisc);
+                         name = name  +  " MD-"  + (int)maxdisc + "%";
+             		}
+                  
                  }
                  
                 double	cases = rs.getDouble("kastis");

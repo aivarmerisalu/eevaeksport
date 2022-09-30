@@ -17275,6 +17275,7 @@ shipdate = getCalXML(asi);
             				           || driver.getDriverVersion().equals("IceAxaUusImport")
             				           || driver.getDriverVersion().equals("NaviValdoImport")
             				           || driver.getDriverVersion().equals("SamsonasCSVImport")
+            				           || driver.getDriverVersion().equals("KosmelitaImport")
             				           
             						  )){
             	  dokNr = agordnum;         	  

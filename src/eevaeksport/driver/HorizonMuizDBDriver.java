@@ -127,7 +127,7 @@ public class HorizonMuizDBDriver extends AbstractDBDriver  implements Manager,Pr
 				ResultSet rs2 = st2.executeQuery(sq1);
 				while (rs2.next()) {
 					Date kuup = rs2.getDate("kuupaev");
-					String sq3 = "SELECT  g.PK_ADRESE as abi, K.kods as klient,N.kods as toode ,r.DAUDZ as kogus " +
+					String sq3 = "SELECT  g.PK_ADRESE as abi, K.kods as klient,N.kods as toode ,r.DAUDZ as kogus,(D.DOK_NR) as doknr " +
 	 " FROM   APV06517.NDOK r LEFT OUTER JOIN APV06517.NNOM N ON r.PK_NOM=N.PK_NOM AND r.RN_VEIDS IN (0,3,5) " +
 	 " LEFT OUTER JOIN APV06517.NVIEN VIEN ON r.PK_VIEN=VIEN.PK_VIEN, APV06517.DPIRMDOK D " +
 	 " LEFT JOIN APV06517.NDOKG G ON D.PK_DOK = G.PK_DOK " +
@@ -145,6 +145,7 @@ public class HorizonMuizDBDriver extends AbstractDBDriver  implements Manager,Pr
 							ml.setProdID(rs3.getString("toode").trim());
 							ml.setPrice(rs3.getDouble("kogus"));
 							ml.setStartDate(kuup + "");
+							ml.setLineinfo(rs3.getString("doknr").trim());
 							//System.out.println("L5 "  + ml.getStringForLastThree());
 							
 							result.add(ml);	

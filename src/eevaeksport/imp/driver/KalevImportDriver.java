@@ -50,7 +50,8 @@ import eevaeksport.util.Converter;
  * Title:        Eeva eksport
  * Description:
  * Copyright:    Copyright (c) 2002
- * Company:
+ * Company:prisma
+ * 
  * @version 1.0
  */
 
@@ -611,7 +612,7 @@ private HashSet getXXX(){
   	String sql1 = null;
   	
   	
-  	if(id.equals("stockmann")){
+  	if( id != null && id.equals("stockmann")){
   		return "M10620";
   	}
   	if(regnr != null && regnr.equals("laima")){
@@ -1692,7 +1693,8 @@ private long getAndUpdateNext() throws SQLException{
  		
  		 String scala = getAndUpdateNext()+ "";
  	      export = isExportCustomer(order.getCompany());
-      boolean isPrisma =isPrisma(order.getCompany());
+      boolean isPrisma = isPrisma(order.getCompany());
+      StringBuffer prismaProds = new StringBuffer();
       
     //  System.out.println("isPrisma" + isPrisma);
       
@@ -2033,6 +2035,7 @@ private long getAndUpdateNext() throws SQLException{
       	OrderLine line = (OrderLine)lines.elementAt(i);
           String toode = line.getToode();
           
+      
           String pant = getPandiPakend(toode);
           
           
@@ -2189,7 +2192,7 @@ private long getAndUpdateNext() throws SQLException{
      //     System.out.println( "Teine kontroll kui peatootel pole aktiivne pdas tunnus\n" 
        //   +  " " + rounder + " " +notInt(kogus/rounder)  ); 
       	
-           
+       
           
              String unit = line.getUnit();
              if(unit != null && unit.equals("DPA")){ 
@@ -2334,7 +2337,11 @@ private long getAndUpdateNext() throws SQLException{
     	 nimi = line.getTooteNimi();
      }
         
-    
+     if(isPrisma && parent.getProps().getProperty("prismaPalletProds") != null 
+   		  && parent.getProps().getProperty("prismaPalletProds").contains(toode+",")) {
+   	  prismaProds.append("[" + (int)line.getKogus() + "] " + line.getToode() + " " + nimi + "\n");
+     }
+     
      
      if(order.getWarehouse() == null){
     	 order.setWarehouse("SKSM1");
@@ -2622,6 +2629,11 @@ if(order.getStatus() < 5 && sendcomm) {
 }
 
 
+if(prismaProds.length() > 0) {
+	   sendPrismaEmail(prismaProds.toString(),doknr,order.getCompany() + " " + getCustName(order.getCompany()),parent);
+		
+}
+
 
 	  
 	} catch (Exception e) {
@@ -2693,6 +2705,59 @@ if(order.getStatus() < 5 && sendcomm) {
 		  	
 	   }
  
+	
+	private void sendPrismaEmail(String comment1 ,String doknr,String custidName , ImportPanel parent){
+	   	try{
+	   		
+	  
+	   		String comment = null ;
+	   		if(comment1 != null && comment1.trim().length() > 0) {
+	   			comment =   comment1 + "\n\n" ;
+	   		}
+	   		
+	   	
+	   		
+	   		if(comment != null && comment.trim().length() >0){
+	   			
+	   			//System.out.println(comment);
+	   			Email mail = new Email(null);
+		  		   
+	   			
+	                mail.setSMTP(parent.getProps().getProperty("smtphost"));
+	                if(parent.getProps().getProperty("smtpuser") != null)
+	                mail.setUser(parent.getProps().getProperty("smtpuser"));
+	                
+	                if(parent.getProps().getProperty("smtppass") != null)
+	                mail.setPass(parent.getProps().getProperty("smtppass"));
+	                
+	                if(parent.getProps().getProperty("smtpport") != null)
+	                mail.setPort(parent.getProps().getProperty("smtpport"));
+	                
+		  	  		mail.setFilesTo(parent.getProps().getProperty("prismaemail"));
+		  	  		mail.setFrom(parent.getProps().getProperty("from"));
+		  	  		String agent = "";
+		  	  
+		  	  		mail.setSubjectFilesTo("Prisma Aluse teema : " + custidName + " " + doknr );
+		  	  		String lisa = "";
+		  	  		
+		  	  		mail.setEncoding("utf-8");
+		  	  		
+		  	  		
+		  	  		mail.setBodyHtml( "Klient : " + custidName +  "<br>Tellimuse nr: " + doknr+  "<br><br>"+ comment.replaceAll("\n", "<br>") + lisa  + "<br><br>");
+		  	  		//mail.setBody("\nOrder :" +  doknr + " \nCustomer code :" + custid +  "\nCustomer Name :" + nimi + "\n" +
+		  	  			//    "Manager :" + agent + "\n" +  "\n" + lisa + comment + "\n\n.");
+		  	  		mail.setSendNotice(false);
+		  	  		
+		  	  		mail.send();
+		  	  		
+		  				
+	   		}
+		  	
+		  			}catch(Exception e){
+		  			e.printStackTrace();	
+		  			}
+		  	
+	   }
  
  private HashSet getFelProds() {
 	 String cmd = "SELECT  RTRIM(t.SC01001) AS toode, SC01164 as kate FROM SC010100 t  where SC01164 = 'FOODS'" ;

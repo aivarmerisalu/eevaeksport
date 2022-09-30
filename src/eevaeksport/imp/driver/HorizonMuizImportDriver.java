@@ -340,7 +340,7 @@ try{
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 	 			comm =  order.getInfo() ;
 	 		}
-	 		System.out.println("Comment " + comm);
+	 	//	System.out.println("Comment " + comm);
 			
 	 		String doknr = order.getDokNr();
 	 		 Calendar  shipDate = order.getShipCal();
@@ -383,18 +383,11 @@ try{
 		           if(agg.equals("6")) {
 		        	   agg = "57";
 		           }
-		           if(agg.equals("20")) {
-		        	   agg = "38";
-		           }
+		      
 		           if(agg.equals("19")) {
 		        	   agg = "54";
 		           }
-		           if(agg.equals("17")) {
-		        	   agg = "62";
-		           }
-		           if(agg.equals("16")) {
-		        	   agg = "66";
-		           }
+		        
 		           String  order_xml = "<resource> <description>Merisoft Order</description>" +
 		           "<entity xsi:schemaLocation=\"TNdmPvzSale.xsd TNdmPvzSale.xsd\" xmlns=\"TNdmPvzSale.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
 	 		    "   <PK_DOKT> " +
@@ -437,7 +430,10 @@ try{
 		         //   <TEKSTS>Rindā Piezīmes</TEKSTS>
 		         //  <TEMPERAT>Rindā raksturojums</TEMPERAT>
 			      order_xml = order_xml +  "<V_KODS>" + line.getUnit() + "</V_KODS>";
-			      if(line.getDiscount() > 0 || line.getDiscount() < -1){
+			      if(line.getDiscount() == -2) {
+			    	  order_xml = order_xml +"<CENA>0.01</CENA>";
+                      order_xml = order_xml +"<ATLAIDE>99.99</ATLAIDE>";
+			      }else  if(line.getDiscount() > 0 || line.getDiscount() < -1){
                       order_xml = order_xml +"<CENA>"+ line.getPrice() + "</CENA>";
                       order_xml = order_xml +"<ATLAIDE>"+ line.getDiscount() + "</ATLAIDE>";
 			      }

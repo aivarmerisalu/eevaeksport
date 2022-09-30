@@ -4102,7 +4102,8 @@ private TreeMap afterOrders = null;
     	                 
     	                 try{
  		  	         		String payer  =  getNode(rida,"payerID").getFirstChild().getNodeValue();
- 		         		            customer.setPayer(payer);
+ 		  	         		if(!payer.equals("0")) {
+ 		  	         		         customer.setPayer(payer);
  		         		          if(groupsPayer.get(payer) != null) {
  		         		        	  if(prlist == null) {
  		         		        		  prlist = (String)groupsPayer.get(payer) ;
@@ -4121,6 +4122,7 @@ private TreeMap afterOrders = null;
  		         		        	  }
  		         		        
  		         		          }
+ 		  	         		}
  		  	         		 }catch(Exception ee){
  		  		        	 }
  		  	         
