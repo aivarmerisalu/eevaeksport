@@ -509,6 +509,7 @@ public void setShowfullpricelist(boolean showfullpricelist) {
 	public boolean restActive = true;
 	public String nfctag = null;
 	public String setSMS = null;
+	public int bonusAvailable = 0;
 	    public boolean isMakeAmountRounding() {
 			return makeAmountRounding;
 		}

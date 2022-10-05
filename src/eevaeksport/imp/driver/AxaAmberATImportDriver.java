@@ -1928,6 +1928,14 @@ if(text.indexOf("\"")!=-1){
 		  	  	    mail.setFilesTo("aivar@mobilejava.ee");
 		  	  	    mail.send();
 		  	  		}
+		  	  	
+		  	  if( parent.getProps().getProperty("copyoffice") != null){
+		  	  	    mail.setFilesTo(parent.getProps().getProperty("copyoffice"));
+		  	  	    mail.send();
+		  	  		}
+		  	  	
+		  	  	
+		  	  	
 		  	  		System.out.println("\nOrder Comment " +  doknr + " " + custid + "\n\n" +
 		  	  				  "\n >>>>>" + comment + "<<<<<");
 		  				

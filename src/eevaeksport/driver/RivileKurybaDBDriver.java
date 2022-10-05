@@ -567,7 +567,8 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
         		s.printStackTrace();
         	}
         
-        	  String sql3 = " SELECT  as kood , as nimi  FROM MJ_getShipMode  ";
+        	  String sql3 = " SELECT N35_KODAS_LS as kood , N35_PAV as nimi FROM"
+        	  		+ " N35_LGST where N35_TEVAS = '01'  ";
               
         	  stmt = con.prepareStatement(sql3);
               ResultSet	  rs = stmt.executeQuery();
@@ -589,7 +590,7 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
         	
              TreeMap<String,Double> bonus = new TreeMap<String,Double>(); 
               
-           String sql4 = " SELECT  as klient , as summa  FROM MJ_getShipMode ";
+           String sql4 = " SELECT  as klient , as summa  FROM MJ_bonus ";
               
         	      stmt = con.prepareStatement(sql4);
               	  rs = stmt.executeQuery();
@@ -714,6 +715,7 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
               
               if(bonus.get(kkood) != null) {
             	  cust.setCity("Bonus available: " + Integer.parseInt(bonus.get(kkood)+"€"));
+            	  cust.bonusAvailable = Integer.parseInt(bonus.get(kkood)+"");
               }
               
              //System.out.println(cust.getID() +" " + cust.getAgents().toString());

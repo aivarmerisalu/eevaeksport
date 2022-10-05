@@ -4034,6 +4034,8 @@ if(agprods != null && agprods.size() >0){
            }
            buf.append(tdeal); 
            
+           buf.append(EksportPanel.separator);
+           buf.append(cust.bonusAvailable); 
            
            buf.append(lineSeparator);
       }

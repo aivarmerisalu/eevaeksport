@@ -357,13 +357,19 @@ public class RivileKurybaImportDriver
       sb.append("          <I06_KODAS_KS>" + escape(cust.substring(0,cust.lastIndexOf("-"))) + "</I06_KODAS_KS>" + ls);
       cou++;
       
+      
+  	sb.append(getLineNr(cou));
+    sb.append("          <I06_KODAS_AK>" + escape(cust.substring(cust.lastIndexOf("-")+1)) + "</I06_KODAS_AK>" + ls);
+    cou++;
+    
+    
       String addr =  null;
 	try {
 		addr = identifyCustomerADDR(cust);
 		if(addr != null){
-			sb.append(getLineNr(cou));
-		      sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
-		      cou++;	
+			//sb.append(getLineNr(cou));
+		      //sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
+		      //cou++;	
 		}
 	
 	} catch (SQLException e1) {

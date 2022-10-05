@@ -5889,8 +5889,6 @@ int i = 0;
   
        String ette = "";
        if(kogused.get(kood) != null){
-    	  
-    	  
     
        }else if(prod.getID().startsWith("60") || prod.getID().startsWith("70")){
     		   goes = false;

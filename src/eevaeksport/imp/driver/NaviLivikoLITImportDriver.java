@@ -396,7 +396,9 @@ private HashMap prodnames = null;
            
            sb.append("<DateInfo>" + ls);
            sb.append("<OrderDate>" +escape(getDateString(Calendar.getInstance())) + "</OrderDate>" + ls);
-           sb.append("<DeliveryDateRequested>" +  escape(getDateString(cal)) + "</DeliveryDateRequested>" + ls); //aeg taha panna  T10:00:00
+           if(order.isShipDateUsed()) {
+        	   sb.append("<DeliveryDateRequested>" +  escape(getDateString(cal)) + "</DeliveryDateRequested>" + ls); //aeg taha panna  T10:00:00
+           }
            sb.append("</DateInfo>" + ls);
            if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 0) {
         	   sb.append("<Warehouse>" +escape(order.getWarehouse().trim()) + "</Warehouse>" + ls);
