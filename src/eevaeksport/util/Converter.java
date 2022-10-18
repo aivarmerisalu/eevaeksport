@@ -262,15 +262,17 @@ public class Converter {
 									String gg = row.getCell((short) a).getStringCellValue().trim();
 									if(gg.toLowerCase().indexOf("ean") != -1) {
 										ea = a;
-										if(gg.toLowerCase().indexOf("järve") != -1) {
-											r = a;
-											found = true;
-											addrow = 1;
-											break;
-										}}
+										}
 									
-									if(gg.toLowerCase().indexOf("kadaka") != -1) {
+									
+									if(gg.toLowerCase().indexOf("järve") != -1) {
 										r = a;
+										found = true;
+										addrow = 1;
+										break;
+									}
+									if(gg.toLowerCase().indexOf("kadaka") != -1) {
+											r = a;	
 										found = true;
 										addrow = 1;
 										break;
@@ -398,7 +400,7 @@ public class Converter {
 							}
 						}
 						
-						//System.out.println("r "  + r + " "+ ea + " " + addrow + " " + groups.toString());
+					//	System.out.println("r "  + r + " "+ ea + " " + addrow + " " + groups.toString());
 						//System.exit(0);
 						
 						  

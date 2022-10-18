@@ -1,5 +1,8 @@
 package eevaeksport.driver;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -46,7 +49,7 @@ import eevaeksport.util.Converter;
  */
 
 public class KosmelitaDBDriver extends AbstractDBDriver implements Manager, Promo,
-		BulkUpdater, Discounter {
+		BulkUpdater, Discounter, PictureMaker {
 	public KosmelitaDBDriver(EksportPanel parent) {
 		super(parent);
 		if (parent.getParentFrame().isDaySales()) {
@@ -75,6 +78,79 @@ public class KosmelitaDBDriver extends AbstractDBDriver implements Manager, Prom
 	  String rcompany = null;
 	  String rcompanyx = null;
 	
+	  @Override
+		public void PictureMaker() {
+			makePictureCat();
+			 System.exit(0);
+			
+		}
+	 
+	  
+	    
+		
+		  private void makePictureCat(){
+		  	    
+		    	
+		    	String pictssou = parent.getProps().getProperty("pict.dir");
+		  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+		       
+		  	 try {
+	       	  
+	            File f = new File(pictspda +"list.txt");
+	            if (f.exists())f.delete();
+	            //Kataloogi sisude kustutamine
+	        	 	 File res2 = new File (pictspda);
+		             String[] ff2 = res2.list();
+		         	 for(int i = 0;ff2.length>i;i++){
+		             	(new File ( pictspda + ff2[i])).delete(); 
+		             }
+//		         	 Lõppes kustutamine 
+		  		 
+		  		 TreeMap prods = this.getProducts(null);
+
+		         StringBuffer buf = new StringBuffer();
+		         Iterator enume = prods.keySet().iterator();
+		    
+		         while (enume.hasNext()) {
+		    	    	String asi = (String)enume.next();
+		    	    	Product prod = (Product)prods.get(asi);
+		    	    	String toode = prod.getID().trim();  
+		    	    
+		               if(toode.length() > 0){
+		                	
+		    	   	  res2 = new File (pictssou);
+		              ff2 = res2.list();
+		             
+		         	 for(int i = 0;ff2.length>i;i++){
+		             	if( ff2[i].startsWith(toode + ".")){
+		               System.out.println("pilt olemas " + ff2[i]);
+		            	File in = new File ( pictssou + ff2[i]); 
+		              	if(in.isFile()){
+		              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
+		              	if(!inpda.exists()){
+		                  	Converter.shrinkAndCopyFile(in,inpda,400);
+	              	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
+		                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+		                    	}
+	              	  	}   }
+		                 }
+		               }
+		             }
+		       }
+		         try {
+	       		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+	       		os.write(buf.toString());
+	       		os.close();
+	       	  }catch (Exception ex) {
+	       		ex.printStackTrace();
+	       	  }
+		  	 
+		  	 } catch (Exception e) {
+		    	    getParent().showError(e);
+		    	}
+		     
+		  }
+		  
 	
 	public String getDealerCustomerCSV(String agent) {
 		return null;
@@ -331,8 +407,11 @@ TreeMap groups = new TreeMap();
 				
 			
 				cust.setName(Converter.enCodeEst(name));
-				String group = rs.getString("CustGroup");		
-				
+				String group = rs.getString("CustGroup");
+				if(group != null && group.trim().length() > 0) {
+					cust.setGroup(group);
+				}
+			
 				
 				String aadress1 = rs.getString("Address");
 				if (aadress1 != null) {
@@ -415,7 +494,7 @@ TreeMap groups = new TreeMap();
 				
 				String blokk = rs.getString("Blocked");
 
-				if (!blokk.trim().equals("0")) {
+				if (blokk != null && blokk.trim().equals("0")) {
 					cust.setSalesBlock(true);
 				}
 			
@@ -971,7 +1050,7 @@ TreeMap groups = new TreeMap();
 //ProductCode ProductGroupCode                                   Discount                                           Price       StartDay   EndDay     
 		Vector lines = new Vector();
 		TreeMap products = new TreeMap();
-	/*	try {
+		try {
 
 			Connection con = getNewConnection();
 			Statement st = con.createStatement();
@@ -979,9 +1058,9 @@ TreeMap groups = new TreeMap();
 
 			while (rs.next()) {
 
-				String kood = rs.getString("kood").trim();
+				String kood = rs.getString("ProductCode").trim();
 			
-				String hind = rs.getDouble("hind") + "";
+				String hind = rs.getDouble("Price") + "";
 
 				products.put(kood, hind);
 
@@ -991,7 +1070,7 @@ TreeMap groups = new TreeMap();
 		}
 
 	
-		String sql = "kampaaniad";
+		String sql = "select * from PriceConditions";
 		Vector check = new Vector();
 
 		try {
@@ -1002,44 +1081,43 @@ TreeMap groups = new TreeMap();
 
 			while (rs.next()) {
 
-				String clGroup = rs.getString("MaksjaKood");
-				String klient = rs.getString("Klient").trim();
-				String algDate = rs.getString("AlgusPaev").substring(0, 10);
-				String endDate = rs.getString("LoppPaev").substring(0, 10);
-				String prodID = rs.getString("TooteKood");
-
-				double discount = rs.getDouble("Allahindlus");
-				double price = rs.getDouble("Hind");
-
-				if (products.get(prodID.trim()) != null) {
-					try {
-
-						if (price == 0) {
-							price = Double.parseDouble((String) products
-									.get(prodID.trim()))
-									* (100 - discount)
-									/ 100;
-							discount = 0;
-						} else {
-							price = price / 100;
+			/*	[CustomerCode]
+					      ,[CustomerGroup]
+					      ,[PayerCode]
+					      ,[ProductCode]
+					      ,[ProductGroupCode]
+					      ,[Discount]
+					      ,[Price]
+					      ,[StartDay]
+					      ,[EndDay
+				*/
+				
+				String klient = rs.getString("CustomerCode");
+				String clGroup = rs.getString("CustomerGroup");
+				String prodID = rs.getString("ProductCode");
+				double discount = rs.getDouble("Discount");
+				double price = rs.getDouble("Price");
+				String algDate = rs.getString("StartDay");
+						if(algDate != null) {
+						algDate = algDate.substring(0, 10);
 						}
-
-						// System.out.println("arvutan hinda " + prodID.trim() +
-						// " " + price + " " +
-						// (String)products.get(prodID.trim()));
-					} catch (Exception a) {
-						a.printStackTrace();
+						
+				String endDate = rs.getString("EndDay");
+			
+				if(endDate != null) {
+					endDate = endDate.substring(0, 10);
 					}
-				}
+				
+			
+
 
 				MatrixLine mline = new MatrixLine();
 
-				mline.setCustID(klient);
+				//mline.setCustID(klient);
 				
-				if (mline.getCustID() == null && clGroup != null
-						&& clGroup.trim().length() > 0) {
+	
 					mline.setCliGroup(clGroup.trim());
-				}
+				
 
 				if (prodID != null && prodID.trim().length() > 0) {
 					mline.setProdID(prodID.trim());
@@ -1052,12 +1130,12 @@ TreeMap groups = new TreeMap();
 					mline.setStartDate(algDate);
 				}
 
-				mline.setDiscount(discount);
+				//mline.setDiscount(discount);
 
 				if (price != 0) {
 					mline.setPrice(price);
 				}
-				if (!check.contains(klient.trim() + prodID.trim())) {
+				if (!check.contains(clGroup.trim() + prodID.trim())) {
 					lines.add(mline);
 				}
 
@@ -1067,7 +1145,7 @@ TreeMap groups = new TreeMap();
 			rs.close();
 			this.connectionDown();
 		} catch (SQLException ex) {
-		}*/
+		}
 		return lines;
 	}
 

@@ -108,7 +108,7 @@ public class KosmelitaImportDriver extends AbstractImportDriver{
 		    st2.executeUpdate();
 		    st2.close();
 		    con.close();
-		    System.exit(0); 
+		  //  System.exit(0); 
 	  }
   
   //  makeOutput(order);

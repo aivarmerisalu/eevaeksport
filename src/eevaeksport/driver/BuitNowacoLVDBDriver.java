@@ -1611,7 +1611,7 @@ System.out.println(cmd);
         			 this.blockedcusts.add(custID);  
         	   }
              }
-           if(dueint > 6){
+           if(dueint >= 6){
         	   if(!blocked6custs.contains(custID)){
         		   this.blocked6custs.add(custID); 
         	   }
@@ -1622,17 +1622,17 @@ System.out.println(cmd);
         		   this.blocked1custs.add(custID); 
         	   }
              }
-           if(dueint > 26){
+           if(dueint >= 26){
         	   if(!blocked11custs.contains(custID)){
         		   this.blocked11custs.add(custID); 
         	   }
              }
-           if(dueint > 26){
+           if(dueint >= 26){
         	   if(!blocked30custs.contains(custID)){
         		   this.blocked30custs.add(custID); 
         	   }
              }
-           if(dueint > 11){
+           if(dueint >= 11){
         	   if(!blockedBBcusts.contains(custID)){
         		   this.blockedBBcusts.add(custID); 
         	   }

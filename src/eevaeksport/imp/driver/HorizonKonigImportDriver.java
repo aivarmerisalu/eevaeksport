@@ -1729,7 +1729,7 @@ private String getType(String ware , int num , Order ord ){
 			res = "NPARKS";
 		}
 		if(num == 2){
-			res = "MEDR";
+			res = "NPARKMM"; //;"MEDR";
 		}
 		if(num == 3){
 			res = "NPARK2K";
@@ -1773,7 +1773,7 @@ private String getType(String ware , int num , Order ord ){
 			res = "NPAD";
 		}
 		if(num == 2){
-			res = "MEDD";
+			res = "NPADMM";//"MEDD";
 		}
 		if(num == 3){
 			res = "NPAD";
@@ -1820,7 +1820,7 @@ private String getType(String ware , int num , Order ord ){
 			res = "NPARE";
 		}
 		if(num == 2){
-			res = "NPARE3";
+			res = "NPARMM"; //"NPARE3";
 		}
 		if(num == 3){
 			res = "NPARE";
@@ -1920,7 +1920,7 @@ private String getTypeHRC(String ware , int num , Order ord ){
 			res = "NPARK2K";
 		}
 		if(num == 2){
-			res = "MEDR";
+			res = "NPARKMM";//"MEDR";
 		}
 		if(num == 4){
 			res = "NPARH";
