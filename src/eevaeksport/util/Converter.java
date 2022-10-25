@@ -10342,7 +10342,7 @@ client.close();
 			  				worksheetPROB.getRow(problems).createCell(7).setCellValue(prods.get(cob.get("prodid"))+"");
 			  				worksheetPROB.getRow(problems).createCell(8).setCellValue((String)cob.get("prodname"));
 			  				worksheetPROB.getRow(problems).createCell(9).setCellValue((String)cob.get("resstr2"));
-			  				worksheetPROB.getRow(problems).createCell(10).setCellValue("");
+			  				worksheetPROB.getRow(problems).createCell(10).setCellValue((String)cob.get("comment"));
 			  				
 			  				for(int x=0; x<11; x++) {
 			  					if(x == 0 || x == 1 || x == 3) {

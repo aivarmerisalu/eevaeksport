@@ -505,7 +505,8 @@ HashSet olemas = new HashSet();
 		 }
 		
 		 private Vector debtV = new Vector();
-		 private Vector d60 = new Vector();
+		 private Vector d30 = new Vector();
+		 private Vector d15 = new Vector();
 		 
     public Vector getDebt() throws SQLException{
        debtV = new Vector();
@@ -534,8 +535,15 @@ HashSet olemas = new HashSet();
          debt.setDate(rs.getDate("kuupaev"));
          int yle = rs.getInt("yle");
          debt.setDue(yle+"");
-         if(yle > 60 && !d60.contains(kl) && debt.getSum() > 0) {
-        	 d60.add(kl);
+         if(yle > 30 && !d30.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
+        	 d30.add(kl);
+        	 if(kl.equals("757")) {
+        		 System.out.println("võlgu " + kl + " " + number);
+        	 }
+         }
+         
+         if(yle > 15 && !d15.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
+        	 d15.add(kl);
         	 if(kl.equals("757")) {
         		 System.out.println("võlgu " + kl + " " + number);
         	 }
@@ -956,10 +964,14 @@ HashSet olemas = new HashSet();
               }
               
               if(maks.equals("757")) {
-         		 System.out.println("võlgu2 757 " + maks + " " + d60.contains(maks) +" " + d60.contains(cust.getID()));
+         		 System.out.println("võlgu2 757 " + maks + " " + d30.contains(maks) +" " + d30.contains(cust.getID()));
          	 }
               
-              if(d60.contains(cust.getID()) || d60.contains(maks)) {
+              if(d30.contains(cust.getID()) || d30.contains(maks)) {
+            	  cust.setSalesBlockT(true);
+              }
+             //siia vaja siis panna tingimus 
+              if( true || d15.contains(cust.getID()) || d15.contains(maks)) {
             	  cust.setSalesBlockT(true);
               }
               

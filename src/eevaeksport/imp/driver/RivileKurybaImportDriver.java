@@ -17,6 +17,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Locale;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.Category;
@@ -26,6 +27,7 @@ import eevaeksport.Agent;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
@@ -131,6 +133,65 @@ public class RivileKurybaImportDriver
 
   }
   
+  
+  private Double getMinSum()  throws SQLException {
+	   
+	  
+	  String	sql1 = "  	SELECT [N31_MINIMUM] as summa FROM [N31_NUOD] where"
+	  		+ " N31_KODAS_NS = 'nuol  nuol' and N31_NUOL_PROC = 0 "; 
+	  	
+	    System.out.println(sql1);
+	    Double acc = 0d;
+
+	    Statement st1 = con.createStatement();
+	    ResultSet rs1 = st1.executeQuery(sql1);
+
+	    if (rs1.next()) {
+	    	
+	    	Double summa = rs1.getDouble("summa");
+	    	
+	    	if(summa > 0) {
+	    		 acc = summa; 
+	    	}
+	   	    }
+	    
+	    rs1.close();
+	    st1.close();
+	    System.out.println("minSum0 " + acc);
+	    return acc;
+
+}
+  
+  private TreeMap<String , Double> getTransaprice()  throws SQLException {
+	   
+		  
+		  String	sql1 = "SELECT [N35_KODAS_LS] as kood ,[N35_PAV_K1] as summa " + 
+		  		"		  FROM [N35_LGST]  where LEFT(n35_tevas,2) = '01'"; 
+		  	
+		    System.out.println(sql1);
+		    TreeMap<String , Double> acc = new TreeMap<String , Double>();
+
+		    Statement st1 = con.createStatement();
+		    ResultSet rs1 = st1.executeQuery(sql1);
+
+		    while (rs1.next()) {
+		    	String kood = rs1.getString("kood").trim();
+		    	Double summa = rs1.getDouble("summa");
+		    	
+		    	if(summa > 0) {
+		    		 acc.put(kood, summa ); 
+		    	}
+		     
+
+		    }
+		    
+		    rs1.close();
+		    st1.close();
+		    
+		    return acc;
+
+  }
+  
   public String identifyCustomerAGENT(String id) throws SQLException {
  	 String	sql1 = "SELECT N33_SHIP_VIA AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
  	 		"  trim(N08_KODAS_KS)||'-'|| N33_kodas_ak = '" + id +"'"; 
@@ -194,125 +255,39 @@ public class RivileKurybaImportDriver
   private Order order = null;
   
   public void makeOrder(Order order) throws SQLException{
- 
+    if(this.minSum < 1) {
+    	minSum = getMinSum();
+       }
+    System.out.println("minSum " + minSum );
 	  setOrder(order);
 	  makeOutput(order);
   }
   
-  
-  private void addInvoiceLines(String salesid) throws SQLException{
-
-	     Enumeration enums = order.getOrderLines().elements();
-	     int counter = 0;
-	     while (enums.hasMoreElements()){
-	       counter++;
-	       log.info("ORDER_LINE_COUNTER:" + counter);
-	       OrderLine orderLine = (OrderLine)enums.nextElement();
-	       String itemid = orderLine.getToode();
-	         double kogus = orderLine.getKogus();
-    	     double ale = orderLine.getDiscount();
-	         double hind = orderLine.getPrice();
-	         String kood = orderLine.getToode();
-	         String nimi = orderLine.getTooteNimi();
-	        
-	         
-	       String  sql = "INSERT INTO DBA.i_mobili_uzsakymaid (uzsakymaid_kodas,uzsakymaid_kodas_ps,uzsakymaid_kodas_us,uzsakymaid_kodas_os" +
-	       		",uzsakymaid_serija,uzsakymaid_kiekis,uzsakymaid_kaina,uzsakymaid_nuolaida," +
-	       		"uzsakymaid_frakcija,uzsakymaid_ivykdyta,uzsakymaid_pasiulymas)" +
-	         " VALUES( " +
-	           salesid + "," +
-	           kood + ",'" +
-	           itemid + "'," +
-	           kogus + "," +
-	           hind +", ?)";
-
-	           log.info("SALES_LINE_SQL: " + sql);
-	           PreparedStatement st2 = con.prepareStatement(sql);
-	           st2.setString(1, nimi);
-	           st2.executeUpdate();
-	          
-	           addNumLine();
-	           st2.close();
-	        }  
-	     }
+ 
 
 
-	   private void addInvoiceHeader(String salesid) throws SQLException{
-	   	
-	   	System.out.println("doknr " + order.getDokNr());
-	   	String agent = order.getAgent();
-	   	System.out.println("agent " +  agent);
-    	   String  ladu = order.getWarehouse();
-	    if(ladu == null || ladu.equals(" ")){
-	    	ladu = "1";
-	     }
-	  
-	   
-	   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(agent);
-	   
-      
-	          String text = order.getEmailBody();
-	          System.out.println("text " + text);
-	   		if (text != null && text.trim().length()>0){
-	   			text = " " + text.trim().replaceAll("\'", " ");
-	   		}
-	   		
-	   		if(text == null){
-	   			text = "";
-	   		}
-	   		
-	   		
-	   		String text2 = order.getInfo();
-	   		if (text2 != null && text2.trim().length()>0){
-	   			text2 = " " + text2.trim().replaceAll("\'", " ");
-	   		}
-	   		
-	   		if(text2 == null){
-	   			text2 = "";
-	   		}
-	   	
-	   		
-	   		System.out.println("info sisselugemisel " + order.getInfo());
-	                 		
-	                 		String ref = order.getDokNr();
-	                 		if(ref == null || ref.trim().length()==0){
-	                 			ref =  "";
-	                 		}
-	  /*CREATE TABLE DBA.i_mobili_uzsakymai(
-	uzsakymai_kodas_im   char(12) NOT NULL PRIMARY KEY,
-	uzsakymai_klientas   char(12) NOT NULL,
-	uzsakymai_sutartis   char(12) NOT NULL,
-	uzsakymai_padalinys  char(12) NOT NULL,
-	uzsakymai_r_date     timestamp NOT NULL
-)
-
-)*/               		
-	                 		
-
-	         String sql = "INSERT INTO i_mobili_uzsakymai (uzsakymai_kodas_im,uzsakymaid_kodas_ps,uzsakymai_sutartis,uzsakymai_padalinys" +
-	         		",uzsakymai_r_date ) " +
-	              "VALUES (' " + order.getInfo() + "','" + order.getCompany() + "',?,'" + agent + "',?)";
-
-	     log.info("addInvoiceHeader2: " + sql);
-	     System.out.println(sql);
 	
-	     PreparedStatement stmt2 = con.prepareStatement(sql);
-	         stmt2.setTimestamp(1, new java.sql.Timestamp(order.getShipCal().getTimeInMillis())); //lahtine mis see on 
-	         stmt2.setTimestamp(2, new java.sql.Timestamp(order.getShipCal().getTimeInMillis()));
-	         stmt2.executeUpdate();
-	         stmt2.close();
-	         addLog("lisatud arve p�is -> " + order.getCompany() + "\n");
-	
-	   }
 
 	   private void addLog(String line){
 		     parent.addLog(line);
 		   }
   
+	   private double minSum = -1; 
 
  private void makeOutput(Order order){
  	StringBuffer sb = new StringBuffer();
-    
+ 	TreeMap<String , Double> trprices = null;
+ 	boolean less = false;
+ 	System.out.println("minsum " + minSum + " " + order.getCalcSum());
+ 	if(order.getCalcSum() *1.21 < minSum ) {
+ 		less = true;
+ 		try {
+ 			 trprices = getTransaprice();
+ 		} catch (SQLException e2) {
+ 			e2.printStackTrace();
+ 		}
+ 	}
+ 	
  	String ls = System.getProperty("line.separator");
  	try {
  	  int cou = 1;
@@ -358,10 +333,15 @@ public class RivileKurybaImportDriver
       cou++;
       
       
-  	sb.append(getLineNr(cou));
-    sb.append("          <I06_KODAS_AK>" + escape(cust.substring(cust.lastIndexOf("-")+1)) + "</I06_KODAS_AK>" + ls);
-    cou++;
-    
+      String acode = escape(cust.substring(cust.lastIndexOf("-")+1));
+      
+      if(!acode.equals("1")) {
+    	  sb.append(getLineNr(cou));
+    	    sb.append("          <I06_KODAS_AK>" + acode + "</I06_KODAS_AK>" + ls);
+    	    cou++;
+    	     
+      }
+  	
     
       String addr =  null;
 	try {
@@ -375,23 +355,34 @@ public class RivileKurybaImportDriver
 	} catch (SQLException e1) {
 		e1.printStackTrace();
 	}
-
-    if(order.getShipMode() != null && order.getShipMode().trim().length() > 0){
+	
+     System.out.println("shipmode " + order.getShipMode());
+     String shipm = null;
+     if(order.getShipMode() != null && order.getShipMode().trim().length() > 0){
     	
     	String cod = "";
-    	String shipm = order.getShipMode();
+    	shipm = order.getShipMode();
+    	String money = "";
+    	
     	if(shipm.contains("|")) {
     		cod = "-COD";
+    		money = shipm.substring(shipm.indexOf("|")+4);
     		shipm = shipm.substring(0,shipm.indexOf("|"));
     	}
-    	
+    	  System.out.println("shipmode2 " + money);
+    	  
     	sb.append(getLineNr(cou));
         sb.append("          <I06_PASTABOS>" + order.getAgent() + "-" + order.getDokNr() + "-"+ shipm + cod+  "</I06_PASTABOS>" + ls);
         cou++;
         sb.append(getLineNr(cou));
-        sb.append("          <I06_DOK_PR>" + order.getDokNr() + cod + "</II06_DOK_PR>" + ls);
+        sb.append("          <I06_DOK_PR>" + order.getDokNr() + cod + "</I06_DOK_PR>" + ls);
         cou++;
-        
+        sb.append(getLineNr(cou));
+        sb.append("          <I06_KODAS_LS_1>" + shipm + "</I06_KODAS_LS_1>" + ls);
+        cou++;
+        sb.append(getLineNr(cou));
+        sb.append("          <I06_APRASYMAS3>" + money + "</I06_APRASYMAS3>" + ls);
+        cou++;
     }
 	
 	/*
@@ -461,6 +452,24 @@ if(ladu.trim().length()!=0){
 		  sb.append(getLineNr(cou));
           sb.append("               <I07_KAINA_BE>" + escape(nf.format(0.01)) + "</I07_KAINA_BE>" + ls);
           cou++;
+    	  sb.append(getLineNr(cou));
+          sb.append("               <i07_aprasymas2>akcija</i07_aprasymas2>" + ls);
+          cou++;
+          
+          
+          
+	  } else if(ale == -4){
+		  sb.append(getLineNr(cou));
+          sb.append("               <I07_NUOLAIDA>100</I07_NUOLAIDA>" + ls);
+          cou++; 
+          sb.append(getLineNr(cou));
+          sb.append("               <i07_aprasymas2>" + line.getPrice() + "</i07_aprasymas2>" + ls);
+          cou++; 
+          
+         // <i07_aprasymas2>product price before 100% discount</i07_aprasymas2>
+         // <i07_nuolaida>100</i07_nuolaida>
+
+          
 	  }else{
 		   sb.append(getLineNr(cou));
 	          sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
@@ -486,6 +495,52 @@ if(ladu.trim().length()!=0){
           cou++;
       }
 
+      System.out.println("minsun " +  less + " " + minSum + " " + shipm);
+      
+      if(less && shipm != null && trprices != null && trprices.get(shipm) != null) {
+    	 sb.append(getLineNr(cou));
+    	 sb.append("<I07>" + ls);
+    	 cou++;
+    	 sb.append(getLineNr(cou));
+    	 sb.append(" <I07_TIPAS>2</I07_TIPAS>" + ls);
+    	 cou++;
+    	 sb.append(getLineNr(cou));
+    	 sb.append(" <I07_KODAS>5001</I07_KODAS>" + ls);
+    	 cou++;
+    	 sb.append(getLineNr(cou));
+    	 sb.append(" <I07_KIEKIS>1</I07_KIEKIS>" + ls);
+    	 cou++;
+    	 
+    	 double price = Converter.Round((trprices.get(shipm)).floatValue() /1.21f, 4);
+    	 double vatprice  = Converter.Round((trprices.get(shipm)).floatValue() , 4);
+    	 double vat = vatprice-price;
+    	 double lineSum = Converter.Round((trprices.get(shipm)).floatValue() /1.21f + 0.001f, 2);
+    	 
+    	 sb.append(getLineNr(cou));
+    	 sb.append(" <I07_KAINA_BE>" +   Converter.Round((float)price ,4) + "</I07_KAINA_BE>"+ ls);
+    	 cou++;
+    	 
+    	 sb.append(getLineNr(cou));
+    	 sb.append(" <I07_KAINA_SU>" +  Converter.Round((float)vatprice ,4) + "</I07_KAINA_SU>"+ ls);
+    	 cou++;
+    	 
+    	 sb.append(getLineNr(cou));
+    	 sb.append(" <I07_PVM>" +  Converter.Round((float)vat ,2)+ "</I07_PVM>"+ ls);
+    	 cou++;
+    	 
+    	 sb.append(getLineNr(cou));
+    	 sb.append(" <I07_SUMA>" + Converter.Round((float)(price+0.001) ,2)  + "</I07_SUMA>"+ ls);
+    	 cou++;
+    	
+  
+    	 
+    	 sb.append(getLineNr(cou));
+    	 sb.append("</I07>" + ls);
+    	 cou++;
+      }
+      
+      
+      
       sb.append(getLineNr(cou));
       sb.append("          </I06>" + ls);
       cou++;

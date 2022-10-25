@@ -581,6 +581,7 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
               }
               rs.close();
             
+              
               if(sb1.toString().length() > 0) {
                 try{
                       Converter.saveFileInUTF8("shipmode.txt", sb1);
@@ -590,14 +591,14 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
         	
              TreeMap<String,Double> bonus = new TreeMap<String,Double>(); 
               
-           String sql4 = " SELECT  as klient , as summa  FROM MJ_bonus ";
+           String sql4 = "  select klsu_kodas ,  viso_sukaupta    from tmp_sukaupta ";
               
         	      stmt = con.prepareStatement(sql4);
               	  rs = stmt.executeQuery();
 
               while (rs.next()) {
-            	   String kood = Converter.enCodeEst(rs.getString("klient").trim());
-              	   Double sum = rs.getDouble("summa");
+            	   String kood = Converter.enCodeEst(rs.getString("klsu_kodas").trim());
+              	   Double sum = rs.getDouble("viso_sukaupta");
               	   bonus.put(kood, sum);
               }
               rs.close();
@@ -714,8 +715,8 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
               }
               
               if(bonus.get(kkood) != null) {
-            	  cust.setCity("Bonus available: " + Integer.parseInt(bonus.get(kkood)+"€"));
-            	  cust.bonusAvailable = Integer.parseInt(bonus.get(kkood)+"");
+            	  cust.setCity("Bonus available: " + Double.parseDouble(bonus.get(kkood)+"")+"€");
+            	  cust.bonusAvailable = Double.parseDouble(bonus.get(kkood)+"");
               }
               
              //System.out.println(cust.getID() +" " + cust.getAgents().toString());

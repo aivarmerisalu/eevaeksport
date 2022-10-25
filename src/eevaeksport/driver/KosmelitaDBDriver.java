@@ -547,11 +547,13 @@ TreeMap groups = new TreeMap();
 		return tm;
 	}
 
+	TreeMap<String,Double> prices = new TreeMap<String, Double>();
+	
 	public TreeMap getProducts(Agent agent) {
 
 		Hashtable stocks = new Hashtable();
 
-		String cmd = "select * from Products";
+		String cmd = "select * from Products where Blocked != '1'";
 		
 		if (isDebug())
 			System.out.println(cmd);
@@ -585,6 +587,17 @@ TreeMap groups = new TreeMap();
 				//UniqueCode  ItemCode     Description          
 				//InCase      GroupCode  GroupSecCode UnitPrice  
 				
+				String unit = rs.getString("Unit");
+
+				if (unit != null && unit.trim().length() > 0) {
+					unit = unit.trim();
+					prod.setUnit(unit);
+
+				} else {
+					prod.setUnit("vnt");
+				}
+				
+				
 				prod.setInCases((rs.getDouble("InCase")));
 				
 
@@ -596,36 +609,51 @@ TreeMap groups = new TreeMap();
 				if (grupp2 != null && grupp2.trim().length() > 0) {
 					prod.setGroupSecond(grupp2.trim());
 				}
-				
+				prod.setVat("21");
 				Double hind = rs.getDouble("UnitPrice");
 				if(hind != null && hind > 0) {
 					prod.setPrice(hind);
+					prices.put(kood, hind);
 				}else {
 					prod.setPrice(1);
 				}
 				prod.setName(nimetus);
 			
-				// EAN                         Inventory           Pallet      Blocked    
-					
+				 
+              //   Inventory                LongTermQty              TesterQty                ReservedQty 	
+				
+				
 				String ean = rs.getString("EAN");
 				if (ean != null && ean.trim().length() > 7) {
 					prod.setEAN(ean.trim());
 				}
 
-				String unit = null;//rs.getString("unit");
-
-				if (unit != null && unit.trim().length() > 0) {
-					unit = unit.trim();
-					prod.setUnit(unit);
-
-				} else {
-					prod.setUnit("vnt");
-				}
+			  Double stock = rs.getDouble("Inventory");
+			  if(stock > 0) {
+				  prod.setStock(stock);
+			  }
 
 				if (stocks.get(kood) != null) {
 					prod.setStock(Double.parseDouble((String) stocks.get(kood)));
 				}
 
+				String newI = rs.getString("NewItem");
+				if (newI != null && newI.trim().equals("1")) {
+					//prod.setStatusNew("1");
+					prod.setStatusTop("1");
+				}
+				
+				String itemLevel  = rs.getString("ItemLevel");
+				if (itemLevel != null) {
+					prod.setName(itemLevel.trim() + " " +prod.getName());;
+				}
+				
+				String vat  = rs.getString("Vat");
+				if (vat != null && vat.trim().length() > 1) {
+					prod.setVat(vat.trim());
+				}
+				
+				
 				products.put(prod.getName(), prod);
 				// }
 			}
@@ -1107,9 +1135,11 @@ TreeMap groups = new TreeMap();
 				if(endDate != null) {
 					endDate = endDate.substring(0, 10);
 					}
-				
+				boolean goes = true;
 			
-
+              if(prices.get(prodID) != null && price == prices.get(prodID)) {
+            	  goes = false;
+              }
 
 				MatrixLine mline = new MatrixLine();
 
@@ -1135,7 +1165,7 @@ TreeMap groups = new TreeMap();
 				if (price != 0) {
 					mline.setPrice(price);
 				}
-				if (!check.contains(clGroup.trim() + prodID.trim())) {
+				if (!check.contains(clGroup.trim() + prodID.trim()) && goes) {
 					lines.add(mline);
 				}
 
@@ -1145,7 +1175,10 @@ TreeMap groups = new TreeMap();
 			rs.close();
 			this.connectionDown();
 		} catch (SQLException ex) {
+			ex.printStackTrace();
 		}
+		//System.out.println("matrix " + lines.size());
+		
 		return lines;
 	}
 

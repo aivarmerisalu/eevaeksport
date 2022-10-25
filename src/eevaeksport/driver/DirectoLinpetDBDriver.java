@@ -178,7 +178,11 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	         while (enume.hasNext()) {
 	    	    	String asi = (String)enume.next();
 	    	    	Product prod = (Product)prods.get(asi);
-	    	    	String toode = prod.getID().trim();  
+	    	    	String toode = prod.getID().trim(); 
+	    	    	
+	    	    	  toode = toode.replace('/', '_');
+	    	          toode = toode.replace('/', '_');
+	    	          
 	               if(toode.length() > 0){
 	                	
 	    	   	  res2 = new File (pictssou);
@@ -189,13 +193,13 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	               // System.out.println("pilt olemas " + ff2[i]);
 	            	File in = new File ( pictssou + ff2[i]); 
 	              	if(in.isFile()){
-	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
+	              	File inpda = new File ( pictspda + toode+ ".jpg");
 	              	if(!inpda.exists()){
 	                  	Converter.shrinkAndCopyFile(in,inpda,400);
             	  
             	  	     } 
-	                if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-                		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+	                if(buf.toString().indexOf(toode +".jpg;"  + inpda.length()) == -1){
+                		buf.append(toode +".jpg;"  + inpda.length() + "\n");
                 	}
 	              	   }
 	                 }

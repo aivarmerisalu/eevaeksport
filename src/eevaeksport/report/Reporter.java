@@ -259,6 +259,9 @@ public class Reporter {
     	POP3Reader pop3 = null;			
     	ArrayList files = null;  
     	if( makeall){
+    	
+    		try {
+    			
     		
     	
     	 pop3 = getPop3("defective",0);
@@ -266,21 +269,34 @@ public class Reporter {
    		 pop3.deleteFiles();
    	     }
     	 files = pop3.readFiles(true);
-    	}
+    	
+    	}catch (Exception r) {
+			
+		}
+    	try {
+			
+		
     	  pop3 = getPop3("supervisor",0);
           files = pop3.readFiles(true);
+    	  }catch (Exception r) {
+  			
+  		}
       	if(toDB)
           insertSuperVisorData();
+      	
+      	try {
       	  pop3.deleteFiles();
           System.out.println("Supervisor");
-
-          
+  }catch (Exception r) {
+  			
+  		}
+      
       	
           String ass = "MobileJava DayReport";
       	 if(props.getProperty("report.subject") != null){
       	 	ass = props.getProperty("report.subject");
       	 }
-
+      	try {
       	 pop3 = getPop3(ass,0);
       	 boolean save = true;
       	 if(props.getProperty("report.nodayfile") != null && props.getProperty("report.nodayfile").equals("true")){
@@ -289,13 +305,17 @@ public class Reporter {
       	 pop3.setSaveAttach(save);
   	     files = pop3.readFiles(false);
   	     System.out.println("sub " + ass + " size" + files.size());
+    	  }catch (Exception r) {
+    			
+    		}
   	     try {
   	    	  parseFiles(files);
+  	    	 pop3.deleteFiles();
   	     }catch(Exception e) {
   	    	 e.printStackTrace();
   	     }
   	   
-           pop3.deleteFiles();
+          try {
           
     	pop3 = getPop3("PICTURES",1);
     	if(propspict != null && propspict.size() > 0 ){
@@ -326,14 +346,20 @@ public class Reporter {
         if("true".equals(props.getProperty("picture.folderdelivery"))){
         	 pictureFolderDelivery();	
        }
-
+    	 }catch (Exception r) {
+   			
+   		}
     	
         if( makeall){
         
     		
-    	
+    	try {
     	pop3 = getPop3("EVENTINFO",0);
     	files = pop3.readFiles(true);
+    	
+ }catch (Exception r) {
+  			
+  		}
     	if(toDB) {
     		
     		insertEventInfo(files,false);
@@ -356,7 +382,7 @@ public class Reporter {
         	System.out.println("EVENTINFO");
     	}
     	
-        
+      try {  
         pop3 = getPop3("EMAILLOG",0);
 	    files = pop3.readFiles(true);
         updateEmailLog(files);
@@ -371,9 +397,13 @@ public class Reporter {
        
         pop3 = getPop3("TASKINFO",0);
         files = pop3.readFiles(true);
-    	if(toDB)
-        insertTASKData(files);
-        System.out.println("TASKINFO 2");
+        if(toDB)
+            insertTASKData(files);
+            System.out.println("TASKINFO 2");
+ }catch (Exception r) {
+  			
+  		}
+    	
 
     	
         }
@@ -401,7 +431,7 @@ public class Reporter {
 	updateClientBlock(files);
 	System.out.println("Blok");
 	
-    }
+    }}
 
 
         
@@ -1456,7 +1486,7 @@ if (files.size() > 0) {
   
     private void insertEventInfo(ArrayList files, boolean delete)
     throws IOException, SQLException {
-if (files.size() > 0) {
+if (files != null && files.size() > 0) {
   
     System.out.println("EventInfo entering");
 
