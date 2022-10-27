@@ -24,6 +24,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.Category;
@@ -120,6 +121,30 @@ try{
 
 
   
+  private TreeMap getReturnReasons(){
+	  TreeMap res = new TreeMap();
+	   try {
+		   
+	   Statement stmt1 = con.createStatement();
+ 	   ResultSet  rs1 = stmt1.executeQuery("select Code as id, description as nimi from ReturnReason");
+	    while(rs1.next()){
+	    	String id = rs1.getString("id");
+	    	String name = rs1.getString("nimi");
+	    	if(name != null && name.trim().length() > 0){
+	    		res.put(id.trim(), name.trim());
+	    	}
+	    }
+	
+	    rs1.close();
+	    stmt1.close();
+	   
+       } catch(Exception r) {
+		  r.printStackTrace(); 
+	   }
+	 //  System.out.println("res  " + res.toString());
+	   return res;
+  }
+  
   public void makeOrder(Order order) throws SQLException{
 
 	   if (signatures == null){
@@ -128,7 +153,10 @@ try{
 	  
 	   String signature = order.getSignature();
 	   
+	   if(reasons == null)
+	   reasons = getReturnReasons();
 	   
+	 // System.out.println("reasons " + reasons.size());
 	   
 		  if(signatures.contains(signature)){
 			  this.trouble = "REPRETEATING ORDER agent :" + order.getAgent() + " customer :" 
@@ -158,7 +186,7 @@ try{
 	      		    	salvesta = false;
 	      		    }		 
 
-	      			System.out.println("XXXXX salvesta " + order.getStatus() + " " + salvesta + " "+ tagastus);
+	      		//	System.out.println("XXXXX salvesta " + order.getStatus() + " " + salvesta + " "+ tagastus);
 	      		  log.error("sisenen tellimust tegeama " + order.getCompany() + order.getOrderLines().size());
 	      		    
 	      		if(salvesta){
@@ -278,7 +306,7 @@ private HashMap prodnames = null;
 	    return sb.toString();
 	  }
 	  
-  
+  TreeMap reasons = null;
   
  private void makeOutput(Order order , boolean tagastus){
  	
@@ -299,7 +327,7 @@ private HashMap prodnames = null;
 		}		
 		
 		String ware = order.getWarehouse();
-		System.out.println("ladu tellimusel " + ware);
+		System.out.println("ladu tellimusel " + ware + " " + order.getStatus());
 		
 		 String doknr = order.getDokNr();
          String ls = System.getProperty("line.separator");
@@ -314,6 +342,24 @@ private HashMap prodnames = null;
                  cal = shipDate;
                }
          
+           
+           String inff = order.getTeostaja();
+           String reason = null;
+           if (inff != null && inff.trim().length()>0 && inff.indexOf("|") !=-1){
+           	reason = " " + inff.substring(inff.indexOf("|")+1, inff.indexOf("]"));
+		    reason = reason.replace('|', ' ');
+		    String code = reason.substring(reason.indexOf("[")+1).trim();
+		    System.out.println("ret code " + code);
+		    String rname = (String)reasons.get(code) ; 
+		    if(rname == null) {
+		    	rname ="";
+		    }
+		    reason = (reason.replace('[', ' ') + " " + rname).trim();
+		   
+           }
+           
+           
+           
            sb.append("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + ls);
            sb.append("<E-Document>" + ls);
       
@@ -328,7 +374,9 @@ private HashMap prodnames = null;
            if(tagastus) {
         	   type = "retann";
            }
-      
+        if(order.getStatus() == 7) {
+        	type = "delivery_note";
+        }
            sb.append("<DocumentType>" + type + "</DocumentType> " + ls);
            sb.append("<DocumentParties>" + ls);
        //    String regnr = getRegKood(custID);
@@ -350,6 +398,7 @@ private HashMap prodnames = null;
             	  sb.append( "<Name>" + escape(cuname)  + "</Name>" + ls); 	  
               }
             
+            
          
          String agent = order.getAgent();
            if(fixagent != null){
@@ -369,6 +418,13 @@ private HashMap prodnames = null;
          			  if(ref.trim().indexOf(" ") != -1) {
          				  ref = ref.substring(0,ref.indexOf(" "));
          			  }
+         			 if(ref.trim().indexOf("|") != -1) {
+        				  ref = ref.substring(0,ref.indexOf("|"));
+        			  }
+         			if(ref.trim().indexOf("[") != -1) {
+      				  ref = ref.substring(0,ref.indexOf("["));
+      			  }
+         			  
          		  }
          		  
                sb.append("<SourceDocument type=\"order\">" + ls);
@@ -467,11 +523,16 @@ private HashMap prodnames = null;
                 // if(!tagastus)
                 // ccc =  "-" + nf.format(line.getDiscount()) + "% ";
                }
-              
+               
              
                if(line.getPartii() != null && line.getPartii().trim().length() > 0 ){
             	   ccc = ccc + line.getPartii();
                }
+               
+              if (reason != null) {
+            	ccc = (ccc + reason).trim();   
+               }
+               
                if(ccc.length() > 0) {
                    sb.append("   <AdditionalInfo>" +ls);
                    sb.append("       <Extension extensionId=\"remarks\">" + ls);
@@ -489,10 +550,20 @@ private HashMap prodnames = null;
            sb.append("   </DocumentItem>" + ls);
            
      	    String comm = order.getInfo();
-             if(comm != null && comm.length()>100){
-             	comm = comm.substring(0,100);
-             }
+            
              
+             if (reason != null) {
+            	 if(comm == null) {
+            		 comm = reason.trim();
+            	 }else {
+            		 comm = (comm + reason).trim();
+            	 }
+             	 
+                }
+             
+             if(comm != null && comm.length()>100){
+              	comm = comm.substring(0,100);
+              }
              if(comm != null && comm.trim().length() > 0 ){
              	  sb.append("   <AdditionalInfo>" +ls);
                    sb.append("       <Extension extensionId=\"remarks\">" + ls);

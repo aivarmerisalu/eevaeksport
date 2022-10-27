@@ -1069,8 +1069,8 @@ con.close();
         String cmd =
             "SELECT te.saaja  AS klient,pr.siffer AS toode,pr.kogus AS kogus,te.regaeg AS kuupaev FROM osmy/my_toode pr " +
             "INNER JOIN osmy/my_tell te ON te.nr=pr.recnr INNER JOIN osmy/lm_mat a ON a.siffer =pr.siffer  WHERE " +
-            "regaeg >? AND olek in (904,905) AND  a.uhik not in ('------') " +
-            "GROUP BY te.saaja,pr.siffer ";
+            "regaeg >? AND olek in (904,905) AND  a.uhik not in ('------') order by te.saaja ,pr.siffer, te.regaeg desc " ;
+           // "GROUP BY te.saaja,pr.siffer ";
         String cmd2 =
             "SELECT te.saaja  AS klient,pr.siffer AS toode,pr.kogus AS puudu ,te.regaeg AS kuupaev FROM osmy/my_toode pr " +
             "INNER JOIN osmy/my_tell te ON te.nr=pr.recnr INNER JOIN osmy/lm_mat a ON a.siffer =pr.siffer   WHERE " +
@@ -1102,7 +1102,7 @@ con.close();
               }    	
             }
           
-           
+           HashSet done = new HashSet();
            
            while (rs.next()) {
              String kliendikood = rs.getString("klient").trim();
@@ -1116,6 +1116,9 @@ con.close();
              }
 
              Product prod = new Product(tootekood);
+             if(!done.contains(kliendikood + "|" + tootekood )) {
+            
+             
              if(ei == null){
              
              cust.addProduct(prod,
@@ -1132,6 +1135,8 @@ con.close();
         kliendid.put(kliendikood, cust);
         custProds.add(new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
                                      kuup.substring(5,kuup.length()), 0, 0,0," "));
+             }
+        	 done.add(kliendikood + "|" + tootekood);
              }
            }
            rs.close();

@@ -13799,7 +13799,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 
 					 if (firma == null || firma.trim().length() == 0){
 					       addLog(parent.getString("nocompid") + " " + tellijaKood + "\n" + fileName + "\n" + parent.getString("fixcompid") +"\n" );
-					       troubles.append("Customer CANNOT BE RESOLVED Kalev XLSX format \n" + "Dok Nr: " + doknr + "\n"
+					       troubles.append("Customer CANNOT BE RESOLVED Kalev EANPDA XLSX format \n" + "Dok Nr: " + doknr + "\n"
 									 + "\t\tRegNr:" + tellijaRegnr + " Code:" + kood + " Number:" + dokNr + "\n\n");
 					       doknr=dokNr;
 					     }
@@ -13852,7 +13852,9 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 						}
 				    }
 			       
-			          	
+			         if(ean != null && ean.length() > 13) {
+			        	  ean = ean.substring(0,13);
+			          }
 			      
 					double kogus = 0;
 					try{
@@ -13875,7 +13877,14 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 			          if(eans.indexOf(".") != -1){
 			        	  eans = eans.substring(0,eans.indexOf("."));
 			          }
-			          String name =  row.getCell((short)2).getStringCellValue();
+			         
+			          String name = "noname product";
+			          try {
+			        	  name = row.getCell((short)2).getStringCellValue();
+			          }catch(Exception r) {
+			        	  
+			          }
+			         
 			        String oldpro = prod;
 			     
 			          try{
@@ -13884,6 +13893,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 			            e.printStackTrace();	
 			         }
 			         
+			        //  System.out.println("Prod peale std " + prod);
 			          if (prod == null){
 			          try{
 		            	  if (driver instanceof KalevImportDriver){
@@ -13896,6 +13906,8 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 		                	
 		                }
 			          }
+			          
+			        //  System.out.println("Prod peale otsi3 " + prod);
 			       
 			       if (prod == null){
 			         addLog(parent.getString("noprodid") + "\n " + ean + "\n" + fileName + "\n" + parent.getString("fixprodid") +"\n\n");
@@ -13903,15 +13915,15 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 			         //break;
 			         prod = " ";
 			         if(prod.trim().length() == 0 ){
-			        	 troubles.append("PRODUCT HAS NOT BEING RECOGNIZED Kalev XLSX : \n" + "Dok Nr: " + doknr + "\n"
+			        	 troubles.append("PRODUCT HAS NOT BEING RECOGNIZED Kalev EANPDA XLSX : \n" + "Dok Nr: " + doknr + "\n"
 			        			 + "\tLineNum: "  +  (counter+1) + " " + name +" EAN:"  + eans +  " Code:" + oldpro + " amount: " + kogus + "\n\n");
 			     		 doknr=dokNr;
 			        }
 			       }
 			       if(kogus != 0 && prod!= null &&  prod.trim().length() > 0){
 			       
-			       prod = oldpro;
-						System.out.println(i + "*"+firma+"*"+ eans +"*"+ name +"*"+kogus+"*"+ dokNr  );
+			      // prod = oldpro;
+						System.out.println(i + "*" + firma + "*" + eans +"*"+ name + "*" + kogus + "*" + dokNr + "***" + prod  );
 					      //	System.exit(0);
 					          orders.setInfo(dokNr);
 					          orders.add(firma, prod, name ,kogus, dokNr, null, 0, 0,shipdate,"0",0,0,false,"",
@@ -14143,7 +14155,9 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 					
 			//		 System.out.println("EAN TEST "  + ean + " " + kogus);
 					
-			        	
+			        	if(ean != null && ean.trim().length() > 13) {
+			        		ean = ean.substring(0,13);
+			        	}
 			        		
 			          String eans = ean;
 			          if(eans.indexOf(".") != -1){
@@ -14185,7 +14199,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 			       if(kogus != 0 && prod!= null &&  prod.trim().length() > 0){
 			       
 			       prod = oldpro;
-						System.out.println(i + "*"+firma+"*"+ eans +"*"+ name +"*"+kogus+"*"+ dokNr  );
+						System.out.println(i + "*" + firma + "*" + eans +"*"+ name + "*" + kogus + "*" + dokNr + "***" + prod  );
 					      //	System.exit(0);
 					          orders.setInfo(dokNr);
 					          orders.add(firma, prod, name ,kogus, dokNr, null, 0, 0,shipdate,"0",0,0,false,"",

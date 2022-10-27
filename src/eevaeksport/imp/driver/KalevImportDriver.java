@@ -854,8 +854,7 @@ if(acc == null){
 	  
 	  
 	   
-  String sql2 = " SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE (RTRIM(SC01132)=   '" + ea 
-                            + "' or RTRIM(SC01003) = '" + ea + "')   and SC01014 != ''   order by len(SC01001)  ";
+ 
 
   String sql1 = "SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE  SC01014 != ''  and RTRIM(SC01001)=  '" + pr + "' ";
 
@@ -870,11 +869,17 @@ if(acc == null){
     prod = rs1.getString("toode").trim();
    }
 //  System.out.println(ean + " prod0 " + prod);
+  if(ea != null) {
+	  ea = ea.trim();
+  }
+  if(ea.length() > 13) {
+	  ea = ea.substring(0,13);
+  }
  
- 
- 
+  String sql2 = " SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE (RTRIM(SC01132)=   '" + ea 
+  + "' or RTRIM(SC01003) = '" + ea + "')   and SC01014 != ''   order by len(SC01001)  ";
   if(prod == null && ean != null){
-
+	
     rs1 = st1.executeQuery(sql2);
     if (rs1.next()) {
       prod = rs1.getString("toode").trim();
@@ -905,7 +910,7 @@ if(acc == null){
        coe.close();
   }
 
-//  System.out.println(prodID + " prod1 " + prod);
+  System.out.println(prodID + "  "  + ean + " prod1 " + prod + " " + sql2);
   rs1.close();
   st1.close();
 
@@ -1234,7 +1239,7 @@ private long getAndUpdateNext() throws SQLException{
 		oos.writeObject(obj);
 		oos.close();
 	}
-  
+  private HashSet pdaProds = null;
 
   public void makeOrder(Order order) throws SQLException{
 	  
@@ -1250,6 +1255,25 @@ private long getAndUpdateNext() throws SQLException{
 		  }
 		   
 	   }
+	   
+	   if(pdaProds == null) {
+		   String sql1 = "SELECT RTRIM(SC01001) AS toode FROM SC010100  WHERE  SC01014 != ''";
+
+			  
+		   pdaProds = new HashSet();
+
+		    Statement st1 = con.createStatement();
+		    ResultSet rs1 = st1.executeQuery(sql1);
+		   
+		  
+		    while (rs1.next()) {
+		    	pdaProds.add(rs1.getString("toode").trim());
+		     }
+		   
+		    rs1.close();
+		    st1.close();
+	   }
+	   
 	    excludeProds = getExclude();
 	    cou = 0;
 	   Vector splitted =  splitOrder(order);
@@ -1885,7 +1909,7 @@ private long getAndUpdateNext() throws SQLException{
 	          
 	      int xmlcounter = 0;
 	      
-	      System.out.println("SEES lines size " + order.getOrderLines().size());
+	   //   System.out.println("SEES lines size " + order.getOrderLines().size());
     Vector lines = order.getOrderLines();
     String ref1= null;
       for (int i = 0; i < lines.size(); i++) {
@@ -2121,7 +2145,7 @@ private long getAndUpdateNext() throws SQLException{
             	  
            	  String sql = "  SELECT  RTRIM(SC01001) AS toode    " +
         	      "  FROM SC010100  WHERE RTRIM(SC01001) = '" + toode + "' and (SC01014 != '' or SC01115 = 'L')";
-        	  Statement st1 = con.createStatement();//and SC01014 != '' 
+        	  Statement st1 = con.createStatement();
         	  ResultSet rs1 = st1.executeQuery(sql);
         //	  System.out.println("666");
         	  boolean ok = false;
@@ -2348,7 +2372,7 @@ private long getAndUpdateNext() throws SQLException{
      }
     
      
-     boolean allowed = isAllowed(cust,toode);
+     boolean allowed = isAllowed(cust,toode,order.getStatus());
      
 	    if(kogus < 100000){
 	    if(logistika != null){
@@ -2378,6 +2402,8 @@ private long getAndUpdateNext() throws SQLException{
      sb.append(getTarne(order));//532
      sb.append(addSpaces("",306));//525
 
+     System.out.println("Toode ja allowed " + toode + " " + allowed);
+     
 if(toode.trim().length() > 0 && allowed){
 	xmlcounter ++;
      sb2.append("      <dta:OrderLine>" + ls);
@@ -2790,7 +2816,7 @@ if(prismaProds.length() > 0) {
 	return res;
 }
 
-private boolean isAllowed(String cust, String toode) throws SQLException {
+private boolean isAllowed(String cust, String toode, int status) throws SQLException {
 	String pay =  this.identifyCustomerPayer(cust);
 	if(excludeProds != null){
 		if(excludeProds.get(cust) != null){
@@ -2805,6 +2831,17 @@ private boolean isAllowed(String cust, String toode) throws SQLException {
 			}
 		}
 	}
+	
+	
+	if(status != 77) {
+		//kontrollime kas on pda tunnus - kui ei siis maha V.A. nende exceli vorm.
+		System.out.println("uuring allow " + pdaProds.size() + " " + toode+ " " + pdaProds.contains(toode));
+		 if(!pdaProds.contains(toode)) {
+			 return false;
+		 }
+	}
+	
+	
 	
 	return true;
 }

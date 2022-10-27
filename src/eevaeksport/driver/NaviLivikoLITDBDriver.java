@@ -716,6 +716,36 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
        public TreeMap getCustomers(Agent agent){
     	   
     	   TreeMap openOrders = this.getOpenOrders();
+    	   
+    	   try {
+    		   
+    	   
+    	   
+    		   Connection conv = getNewConnection2();
+     	       Statement stmt1 = conv.createStatement();
+     	     
+    	 	StringBuffer sb = new StringBuffer();
+    	   ResultSet  rs1 = stmt1.executeQuery("select Code as id, description as nimi from ReturnReason");
+    	    while(rs1.next()){
+    	    	String id = rs1.getString("id");
+    	    	String name = rs1.getString("nimi");
+    	    	if(name != null && name.trim().length() > 0){
+    	    	      sb.append( id+ ";" +Converter.enCodeEst(name.trim()) + "\n");	
+    	    	}
+    	    }
+    	   rs1.close();
+    	   stmt1.close();
+    	   conv.close();
+    	  // System.out.println("REASON " + sb.toString());
+    	   if(sb.length() > 0){
+    		   Converter.saveFile("returnreason.txt", sb.toString());
+    	   }
+    	       
+    	   
+           }catch(Exception r) {
+    		  r.printStackTrace(); 
+    	   }
+    	   
 
     	/// KLIENDI ANDMETE LEIDMINE
     	  	  if(debtList == null) {
