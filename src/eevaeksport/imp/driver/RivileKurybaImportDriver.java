@@ -287,6 +287,17 @@ public class RivileKurybaImportDriver
  			e2.printStackTrace();
  		}
  	}
+ 	boolean has001 = false;
+    Vector liness = order.getOrderLines();
+    for (int i = 0; i < liness.size(); i++) {
+
+      	OrderLine line = (OrderLine)liness.elementAt(i);
+          
+          double ale = line.getDiscount();
+          if(ale == -2) {
+        	  has001 = true;
+          }
+    }
  	
  	String ls = System.getProperty("line.separator");
  	try {
@@ -342,6 +353,13 @@ public class RivileKurybaImportDriver
     	     
       }
   	
+      if(has001) {
+    	  sb.append(getLineNr(cou));
+          sb.append("               <I06_aprasymas2>akcija</I06_aprasymas2>" + ls);
+          cou++;
+         
+      }
+      
     
       String addr =  null;
 	try {
@@ -366,10 +384,12 @@ public class RivileKurybaImportDriver
     	
     	if(shipm.contains("|")) {
     		cod = "-COD";
-    		money = shipm.substring(shipm.indexOf("|")+4);
+    		money = shipm.substring(shipm.lastIndexOf("|")+4).replace(',', '.');
+    		
     		shipm = shipm.substring(0,shipm.indexOf("|"));
     	}
     	  System.out.println("shipmode2 " + money);
+    	  
     	  
     	sb.append(getLineNr(cou));
         sb.append("          <I06_PASTABOS>" + order.getAgent() + "-" + order.getDokNr() + "-"+ shipm + cod+  "</I06_PASTABOS>" + ls);

@@ -792,7 +792,7 @@ if(acc == null){
       }
     }
     
-    if(prod == null && ean != null){
+    if(prod == null && ean != null && ean.trim().length() > 1 && !ean.contains("XXXX")){
     	
     	  String sqlea = "SELECT  nimetus , toode FROM toode  WHERE TRIM(ribakood)=  '" + ean + "' ";
 
@@ -868,7 +868,7 @@ if(acc == null){
   while (rs1.next()) {
     prod = rs1.getString("toode").trim();
    }
-//  System.out.println(ean + " prod0 " + prod);
+  System.out.println(ea + " prod0 " + prod);
   if(ea != null) {
 	  ea = ea.trim();
   }
@@ -2423,7 +2423,7 @@ if(toode.trim().length() > 0 && allowed){
   
 }  	
 if(!allowed){
-	trouble = "Tellimuselt eemaldatti toode " + toode + " " + nimi;
+	trouble = trouble +  "\nTellimuselt eemaldatti toode " + toode + " " + nimi;
 }
      
      

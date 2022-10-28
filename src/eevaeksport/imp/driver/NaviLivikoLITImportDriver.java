@@ -374,9 +374,7 @@ private HashMap prodnames = null;
            if(tagastus) {
         	   type = "retann";
            }
-        if(order.getStatus() == 7) {
-        	type = "delivery_note";
-        }
+       
            sb.append("<DocumentType>" + type + "</DocumentType> " + ls);
            sb.append("<DocumentParties>" + ls);
        //    String regnr = getRegKood(custID);
@@ -411,7 +409,12 @@ private HashMap prodnames = null;
            sb.append("<DocumentInfo>" + ls);
            sb.append("<DocumentSubType>MERISOFT</DocumentSubType>" + ls);
            sb.append("<DocumentName>MERISOFT-ORDER</DocumentName>" + ls );
-                  
+           String asi = "order";
+   		 if(order.getStatus() == 7) {
+   			asi = "delivery_note";
+         }
+   		 
+           	
          	  sb.append("<RefInfo>" + ls);
          	  if(ref != null && ref.trim().length() > 0){
          		  if(tagastus) {
@@ -426,10 +429,13 @@ private HashMap prodnames = null;
       			  }
          			  
          		  }
-         		  
-               sb.append("<SourceDocument type=\"order\">" + ls);
+         		
+               sb.append("<SourceDocument type=\"" + asi+ "\">" + ls);
                sb.append("    <SourceDocumentNum>" + escape(ref) + "</SourceDocumentNum>" + ls );
                sb.append("</SourceDocument>" + ls);
+         	  }else if(order.getStatus() == 7) {
+         		 sb.append("<SourceDocument type=\"" + asi+ "\">" + ls);
+         	    sb.append("</SourceDocument>" + ls);
          	  }
                sb.append("</RefInfo>" + ls); 
          	

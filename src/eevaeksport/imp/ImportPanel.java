@@ -13819,20 +13819,20 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 				      // System.out.println(ean);
 			        }catch (Exception e ){
 						try{
-							prod = row.getCell((short)0).getNumericCellValue() + "";
-						     
-						     if(prod.indexOf("E") != -1){
-						    	 prod = prod.substring(0,prod.indexOf("E") );
-						     }
-						 //   
-						     prod = prod.substring(0,1) + prod.substring(2,prod.length());
+							double produ = row.getCell((short)0).getNumericCellValue() ;
+						//	System.out.println("prod " + produ);
+								
+							int ii = (int)produ;
+						    
+						    	 prod = ii+"";
+					
 						}catch(Exception rr){
 							
 						}
 				       
 			        }
 			        
-			    //	System.out.println("prod  " + prod);
+			    	System.out.println("prod mis saime   " + prod);
 					
 			        
 			         try{
@@ -13869,7 +13869,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 					}
 					
 					
-			//		 System.out.println("EAN TEST "  + ean + " " + kogus);
+					 System.out.println("EAN TEST "  + ean + " " + kogus);
 					
 			        	
 			        		
@@ -13887,14 +13887,14 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 			         
 			        String oldpro = prod;
 			     
-			          try{
-			           prod = driver.identifyProduct(eans,prod);
+			       /*   try{
+			          // prod = driver.identifyProduct(eans,prod);
 			         } catch (SQLException e) {
 			            e.printStackTrace();	
-			         }
+			         }*/
 			         
 			        //  System.out.println("Prod peale std " + prod);
-			          if (prod == null){
+			          if (prod == null || prod.trim().length() < 2){
 			          try{
 		            	  if (driver instanceof KalevImportDriver){
 		                   String  prod1 =  ((KalevImportDriver)driver).identifyProduct3(ean, prod);
