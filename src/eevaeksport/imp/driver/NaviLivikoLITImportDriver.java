@@ -327,7 +327,7 @@ private HashMap prodnames = null;
 		}		
 		
 		String ware = order.getWarehouse();
-		System.out.println("ladu tellimusel " + ware + " " + order.getStatus());
+	//	System.out.println("ladu tellimusel " + ware + " " + order.getStatus());
 		
 		 String doknr = order.getDokNr();
          String ls = System.getProperty("line.separator");
@@ -345,6 +345,7 @@ private HashMap prodnames = null;
            
            String inff = order.getTeostaja();
            String reason = null;
+       
            if (inff != null && inff.trim().length()>0 && inff.indexOf("|") !=-1){
            	reason = " " + inff.substring(inff.indexOf("|")+1, inff.indexOf("]"));
 		    reason = reason.replace('|', ' ');
@@ -355,10 +356,13 @@ private HashMap prodnames = null;
 		    	rname ="";
 		    }
 		    reason = (reason.replace('[', ' ') + " " + rname).trim();
-		   
-           }
+		   }
+           String reasonCode = null;
+           if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+        	   reasonCode =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
+   		   }
            
-           
+           System.out.println("reason " + reason);
            
            sb.append("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + ls);
            sb.append("<E-Document>" + ls);
@@ -414,22 +418,24 @@ private HashMap prodnames = null;
    			asi = "delivery_note";
          }
    		 
-           	
+   	  System.out.println("Tagastus " + tagastus + " " + ref);
          	  sb.append("<RefInfo>" + ls);
          	  if(ref != null && ref.trim().length() > 0){
+         		  
+         		
          		  if(tagastus) {
-         			  if(ref.trim().indexOf(" ") != -1) {
-         				  ref = ref.substring(0,ref.indexOf(" "));
-         			  }
-         			 if(ref.trim().indexOf("|") != -1) {
-        				  ref = ref.substring(0,ref.indexOf("|"));
+         			 if( ref.trim().indexOf("|") != -1) {
+      				      ref = ref.substring(0,ref.indexOf("|"));
+      			     } else if(ref.trim().indexOf(" ") != -1) {
+        				  ref = ref.substring(0,ref.indexOf(" "));
         			  }
+        			
          			if(ref.trim().indexOf("[") != -1) {
       				  ref = ref.substring(0,ref.indexOf("["));
       			  }
          			  
          		  }
-         		
+         		  System.out.println("Tagastus0 " + tagastus + " " + ref);
                sb.append("<SourceDocument type=\"" + asi+ "\">" + ls);
                sb.append("    <SourceDocumentNum>" + escape(ref) + "</SourceDocumentNum>" + ls );
                sb.append("</SourceDocument>" + ls);
@@ -544,6 +550,8 @@ private HashMap prodnames = null;
                    sb.append("       <Extension extensionId=\"remarks\">" + ls);
                    sb.append("       <InfoName>Notes</InfoName>");
                    sb.append("            <InfoContent>" + Converter.escapeXML(ccc) + "</InfoContent>" + ls );
+                   sb.append("            <CustomContent>" + Converter.escapeXML(reason) + "</CustomContent>" + ls );
+                
                    sb.append("       </Extension>");
                    sb.append("   </AdditionalInfo>" + ls);	
                }
@@ -575,6 +583,10 @@ private HashMap prodnames = null;
                    sb.append("       <Extension extensionId=\"remarks\">" + ls);
                    sb.append("       <InfoName>Notes</InfoName>");
                    sb.append("            <InfoContent>" + escape(comm) + "</InfoContent>" + ls );
+                   if(reason != null) {
+                	   sb.append("            <CustomContent>" + Converter.escapeXML(reasonCode) + "</CustomContent>" + ls );
+                   }
+                   
                    sb.append("       </Extension>");
                      //-<Extension extensionId="externalremarks"><InfoContent>K�esoleva arve aluseks olev n�ue on loovutatud AS-ile SEB Liising ja k�ik arvel toodud summad tuleb maksta AS-i SEB Liising arvelduskontole 10052045861006 SEB Pangas (kood 401). Kogu k�esoleva arvega seotud info tuleb teatavaks teha AS-ile SEB Liisingule.</InfoContent></Extension>
                    sb.append("   </AdditionalInfo>" + ls);	
@@ -666,7 +678,26 @@ private HashMap prodnames = null;
 	         String custID = order.getCompany();
 	         Calendar  shipDate = order.getShipCal();
 	             
-	                
+	         String inff = order.getTeostaja();
+	           String reason = null;
+	           if (inff != null && inff.trim().length()>0 && inff.indexOf("|") !=-1){
+	           	reason = " " + inff.substring(inff.indexOf("|")+1, inff.indexOf("]"));
+			    reason = reason.replace('|', ' ');
+			    String code = reason.substring(reason.indexOf("[")+1).trim();
+			    System.out.println("ret code " + code);
+			    String rname = (String)reasons.get(code) ; 
+			    if(rname == null) {
+			    	rname ="";
+			    }
+			    reason = (reason.replace('[', ' ') + " " + rname).trim();
+			   }
+	           
+	           
+	           String reasonCode = null;
+	           if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+	        	   reasonCode =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
+	   		   }
+	           System.out.println("reason2 " + reason + " " + reasonCode);
 
 	       
 	           Calendar cal = Calendar.getInstance();
@@ -744,17 +775,46 @@ private HashMap prodnames = null;
 	           sbmiinus.append("<DocumentSubType>MERISOFT</DocumentSubType>" + ls);
 	           sbmiinus.append("<DocumentName>MMT-ORDER</DocumentName>" + ls );
 	           sbmiinus.append("<RefInfo>" + ls);
+	           
+	           
+	           String asi = "order";
+	     		 if(order.getStatus() == 7) {
+	     			asi = "delivery_note";
+	           }
+	           
 	         	  if(ref != null && ref.trim().length() > 0){
+	         		  System.out.println("Tagastus 2 " + ref);
 	         		  
-	               sb.append("<SourceDocument type=\"order\">" + ls);
+	         		 if( ref.trim().indexOf("|") != -1) {
+       				      ref = ref.substring(0,ref.indexOf("|"));
+       			     } else if(ref.trim().indexOf(" ") != -1) {
+         				  ref = ref.substring(0,ref.indexOf(" "));
+         			  }
+         			
+         			if(ref.trim().indexOf("[") != -1) {
+      				  ref = ref.substring(0,ref.indexOf("["));
+      			    }
+         			
+         		  System.out.println("Tagastus0 " + tagastus + " " + ref);
+           
+	         		  
+	               sb.append("<SourceDocument type=\"" + asi + "\">" + ls);
 	               sb.append("    <SourceDocumentNum>" + escape(ref) + "</SourceDocumentNum>" + ls );
 	               sb.append("</SourceDocument>" + ls);
 	               
-	               sbmiinus.append("<SourceDocument type=\"order\">" + ls);
+	               sbmiinus.append("<SourceDocument type=\"" + asi + "\">" + ls);
 	               sbmiinus.append("    <SourceDocumentNum>" + escape(ref) + "</SourceDocumentNum>" + ls );
 	               sbmiinus.append("</SourceDocument>" + ls);
-	         	
-	         	  }
+	         
+	         	  } else if(order.getStatus() == 7) {
+	          		 sb.append("<SourceDocument type=\"" + asi+ "\">" + ls);
+	          	     sb.append("</SourceDocument>" + ls);
+	          	     sbmiinus.append("<SourceDocument type=\"" + asi+ "\">" + ls);
+	          	     sbmiinus.append("</SourceDocument>" + ls);
+	          	  }
+	         	  
+	         	  
+	         	  
 	               sb.append("</RefInfo>" + ls); 
 	               sbmiinus.append("</RefInfo>" + ls); 
 	         	
@@ -854,14 +914,22 @@ private HashMap prodnames = null;
 	             	  sb.append("   <AdditionalInfo>" +ls);
 	                   sb.append("       <Extension extensionId=\"remarks\">" + ls);
 	                   sb.append("       <InfoName>Notes</InfoName>");
-	                   sb.append("            <InfoContent>Hinnamuudatus</InfoContent>" + ls );
+	                   sb.append("            <InfoContent>" + Converter.escapeXML(reason)+ "</InfoContent>" + ls );
+	                   if(reason != null) {
+	                	   sb.append("            <CustomContent>" + Converter.escapeXML(reasonCode) + "</CustomContent>" + ls );
+	                   }
+	                
 	                   sb.append("       </Extension>");
 	                   sb.append("   </AdditionalInfo>" + ls);	
 	                   
 	                   sbmiinus.append("   <AdditionalInfo>" +ls);
 	                   sbmiinus.append("       <Extension extensionId=\"remarks\">" + ls);
 	                   sbmiinus.append("       <InfoName>Notes</InfoName>");
-	                   sbmiinus.append("            <InfoContent>Hinnamuudatus</InfoContent>" + ls );
+	                   sbmiinus.append("            <InfoContent>" + Converter.escapeXML(reason)+ "</InfoContent>" + ls );
+	                   if(reason != null) {
+	                	   sbmiinus.append("            <CustomContent>" + Converter.escapeXML(reasonCode) + "</CustomContent>" + ls );
+	                   }
+	                
 	                   sbmiinus.append("       </Extension>");
 	                   sbmiinus.append("   </AdditionalInfo>" + ls);
 	             
