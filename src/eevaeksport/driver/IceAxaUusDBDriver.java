@@ -2065,7 +2065,7 @@ public Vector getPriceMatrixData() {
                     }
                     }
                     
-                    if(paevi < 70){
+                    if(paevi < 180){
                     	mline.setStartDate(fromdate.substring(0,10));
                         mline.setEndDate(todate.substring(0,10));
                     }else {
@@ -2132,7 +2132,7 @@ HashSet conta = new HashSet();
                     }
                      
                    
-                    if(paevi < 70){
+                    if(paevi < 180){
                         
                     	mline.setStartDate(fromdate.substring(0,10));
                         mline.setEndDate(todate.substring(0,10));

@@ -542,7 +542,7 @@ private HashMap prodnames = null;
                }
                
               if (reason != null) {
-            	ccc = (ccc + reason).trim();   
+            //	ccc = (ccc + reason).trim();   
                }
                
                if(ccc.length() > 0) {
@@ -550,7 +550,7 @@ private HashMap prodnames = null;
                    sb.append("       <Extension extensionId=\"remarks\">" + ls);
                    sb.append("       <InfoName>Notes</InfoName>");
                    sb.append("            <InfoContent>" + Converter.escapeXML(ccc) + "</InfoContent>" + ls );
-                   sb.append("            <CustomContent>" + Converter.escapeXML(reason) + "</CustomContent>" + ls );
+                  // sb.append("            <CustomContent>" + Converter.escapeXML(reason) + "</CustomContent>" + ls );
                 
                    sb.append("       </Extension>");
                    sb.append("   </AdditionalInfo>" + ls);	

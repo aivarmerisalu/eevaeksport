@@ -5721,7 +5721,7 @@ int i = 0;
 	    	  nimi = "POS sell";
 	      }
   	     if(liik.equals("POS0")){
-    	  nimi = "POS consumable";
+    	  nimi = "a-POS";
           }
   	      
   	        tm.put(liik,  Converter.enCodeEst(nimi.toLowerCase()));
@@ -5821,8 +5821,11 @@ int i = 0;
 
 
      boolean goes = true;
-     
-        prod.setInCases(rs.getDouble("kastis"));
+     double kastis = rs.getDouble("kastis");
+      if(kastis > 1) {
+    	  prod.setInCases(kastis);
+      }
+      
         double kord = 1;
         if(prod.getInCases()> 1) {
         	kord = prod.getInCases();
@@ -5894,7 +5897,7 @@ int i = 0;
     		   goes = false;
     	   }
       
-       prod.setInCases(1);
+      // prod.setInCases(1);
       
       String unit = rs.getString("unit");
       if(unit!=null && unit.trim().length()>0){
