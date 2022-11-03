@@ -1922,6 +1922,11 @@ int i = 0;
  String cuinfo = rs.getString("cuinfo");
  if (cuinfo != null && cuinfo.trim().length() > 2) {
   	cust.setInfo(cuinfo.trim().replaceAll("\\r\\n|\\r|\\n", " ").replaceAll(";", ":"));
+  	if(cust.getCity().length()>1){
+	 	cust.setCity(cust.getCity() + "|" +Converter.enCodeEst(cuinfo.trim().replaceAll("\\r\\n|\\r|\\n", " ").replaceAll(";", ":")));
+	} else{
+	 	cust.setCity(Converter.enCodeEst(cuinfo.trim().replaceAll("\\r\\n|\\r|\\n", " ").replaceAll(";", ":")));
+	}
  }
                     String cmd3 = " SELECT     TOP (100) PERCENT ASSETID + ' ' + NAME AS Kylmik ,ASSETID as idd FROM " +  
                            " ASSETTABLE  WHERE (DATAAREAID = 'spil') and  LOCATION='" + accountnum + "'";

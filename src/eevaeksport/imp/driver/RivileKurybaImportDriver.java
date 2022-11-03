@@ -472,9 +472,9 @@ if(ladu.trim().length()!=0){
 		  sb.append(getLineNr(cou));
           sb.append("               <I07_KAINA_BE>" + escape(nf.format(0.01)) + "</I07_KAINA_BE>" + ls);
           cou++;
-    	  sb.append(getLineNr(cou));
-          sb.append("               <i07_aprasymas2>akcija</i07_aprasymas2>" + ls);
-          cou++;
+    	//  sb.append(getLineNr(cou));
+          //sb.append("               <i07_aprasymas2>akcija</i07_aprasymas2>" + ls);
+          //cou++;
           
           
           

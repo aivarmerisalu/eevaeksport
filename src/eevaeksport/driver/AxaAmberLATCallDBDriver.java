@@ -1319,7 +1319,12 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 
         String cuinfo = rs.getString("cuinfo");
         if (cuinfo != null && cuinfo.trim().length() > 2) {
-         	cust.setInfo(cuinfo.trim().replaceAll("\\r\\n|\\r|\\n", " ").replaceAll(";", ":"));
+        	  if(cust.getCity().length()>1){
+            	 	cust.setCity(cust.getCity() + "|" +Converter.enCodeEst(cuinfo.trim().replaceAll("\\r\\n|\\r|\\n", " ").replaceAll(";", ":")));
+            	} else{
+            	 	cust.setCity(Converter.enCodeEst(cuinfo.trim().replaceAll("\\r\\n|\\r|\\n", " ").replaceAll(";", ":")));
+            	}
+        	
         }
         
         double minam = rs.getDouble("minam");
