@@ -1680,6 +1680,12 @@ public class EksportPanel extends JPanel implements ActionListener,
                 if(wh.exists()){
                     zip.addFile("warehouse.txt");
                 }
+                File whq = new File("assortment.txt");
+                if(whq.exists()){
+                    zip.addFile("assortment.txt");
+                }
+                
+                
                 
                 File wh22 = new File("taraoptimum.txt");
                 if(wh22.exists()){
@@ -1734,8 +1740,8 @@ public class EksportPanel extends JPanel implements ActionListener,
                     zip.addFile("inventprods.txt");
                 }
              
-                File whq = new File("xcust.txt");
-                if(whq.exists()){
+                File whqa = new File("xcust.txt");
+                if(whqa.exists()){
                     zip.addFile("xcust.txt");
                 }
                 

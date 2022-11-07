@@ -558,7 +558,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
     	    
 		Vector result = new Vector();
 		File f = new File(this.getExcelDir() + "Sortiments.xlsx");
-		
+		 StringBuffer sb  = new StringBuffer();
 		try {
 			// System.out.println("rownum exists" + f.exists() );
 			
@@ -646,7 +646,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 
 							}
 
-							if (go != null && go.equals("1")) {
+							if (go != null && (go.equals("1") || go.equals("2")) ) {
 
 						// System.out.println( a + " " + prodID + " " +
 							//	 clGroup + " " + go);
@@ -668,6 +668,10 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 										&& prodGroup != null
 										&& prodGroup.trim().length() > 0) {
 									mline.setProdGroup(prodGroup);
+								}
+								if(go.equals("2")) {
+									mline.setLineinfo("MULTI" );
+									sb.append(" ;" +clGroup + "; ;" + prodID + "\n" );
 								}
 								 /*if(insertassort){
 		                               insertSortLine(mline);   
@@ -692,8 +696,18 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 		}
 
 		 System.out.println("fixed Suurus " + result.size());
+		 System.out.println("Soovit Suurus " + sb.toString().length());
 			try {
 				Converter.saveObject(result, "fix.vec");
+				if(sb.toString().length() > 0 ) {
+					Converter.saveFile("assortment.txt", sb.toString());
+				}else {
+					File ff = new File("assortment.txt");
+					if(ff.exists()) {
+					//	ff.delete();
+					}
+				}
+				
 			} catch (IOException e) {
 			
 				e.printStackTrace();
@@ -2325,6 +2339,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 								
 							
 					   		customer.addFixSortCode(Converter.cleanLitLatEst(customer.getID()));
+					   		customer.suggAssortCode = Converter.cleanLitLatEst(customer.getID());
 					   		if(tm.get(name) == null) {
 					   			tm.put(name, customer);
 								this.customers.add(customer.getID());

@@ -2160,8 +2160,8 @@ con.close();
                     ps.setString(1, wr.getInfo().getAgentID());
                		
                     String comm = Converter.deCode( lw.getLine().getComment());
-                    if(comm != null && comm.length()>200){
-                    comm = comm.substring(0,193);
+                    if(comm != null && comm.length()>500){
+                    comm = comm.substring(0,493);
                     }else if (comm == null) {
                     	comm = "";
                     }

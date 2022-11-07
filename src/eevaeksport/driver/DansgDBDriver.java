@@ -413,6 +413,7 @@ public class DansgDBDriver extends AbstractDBDriver implements Discounter, Manag
 
                 String info = rs.getString("info");
                 if(info != null && info.trim().length()>0){
+                	info = info.replaceAll(";", "|Tel:");
                 	cust.setPersonalData(Converter.enCodeEst(info.trim()));
                 }
 

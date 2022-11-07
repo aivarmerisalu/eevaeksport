@@ -590,9 +590,13 @@ if (files.size() > 0) {
 	    	System.out.println(line);
 	    	br.mark(1000);
 	    	String line2 = br.readLine();
+	    	String line3 = br.readLine();
 	    	br.reset();
-	    	if(line2 != null && line2.length() < 100){
+	    	if(line2 != null && line2.length() < 1000){
 	    		line = line + line2;
+	    	}
+	    	if(line3 != null && line3.length() < 1000){
+	    		line = line + line3;
 	    	}
 	    	
 	    	if(line.startsWith(";")){

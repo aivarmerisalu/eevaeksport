@@ -790,7 +790,7 @@ StringBuffer sb = new StringBuffer();
 		}
 		
 		  TreeMap openOrders = this.getOpenOrders();
-		  sortimendid = new HashMap();
+	/*	  sortimendid = new HashMap();
 		  File fff = new File(this.getExcelDir() + "/SortimentDroid.xlsx" );
 	      File fffx = new File(this.getExcelDir() + "/SortimentFel.xlsx" );
 		      TreeMap groups = new TreeMap(); 
@@ -955,7 +955,7 @@ StringBuffer sb = new StringBuffer();
 	  	}
 	  	 
 
-
+*/
 		
 		
 		connectionUp(url);
@@ -1234,7 +1234,7 @@ SELECT  [MasterProductCode] as klient
 
 			
 				
-				if (groups.get(cust.getID()) != null) {
+				/*if (groups.get(cust.getID()) != null) {
 					Vector vv = new Vector();
 					String gr = groups.get(cust.getID())+ "";
 					StringTokenizer stj = new StringTokenizer(gr,",");
@@ -1244,8 +1244,10 @@ SELECT  [MasterProductCode] as klient
 					}
 					
 					cust.setFixSortCode(vv);
-				}
-				
+				}*/
+				Vector vv = new Vector();
+				vv.add(cust.getID());
+				cust.setFixSortCode(vv);
 				
 				
 				if (cust.getID().substring(0, 2).equals("M3") && !isChrist) {
@@ -2705,8 +2707,50 @@ SELECT  [MasterProductCode] as klient
 	private TreeMap agents1 = new TreeMap();
 	private NumberFormat NF = NumberFormat.getInstance();
 	
-
 	public Vector getFixedAssortmentData() {
+		Vector result = new Vector();
+		//this.getProducts(null);
+		String sql = "select DeliveryCustomerCode as cuid, ProductCode as toode from AssortmentRegisterNEW ";
+try {
+	
+
+	
+      Connection con = getNewCon();
+		Statement ps = con.createStatement();
+		ResultSet rs = ps.executeQuery(sql);
+		while (rs.next()) {
+			MatrixLine mline = new MatrixLine();
+			// Vaatame kas selles veerus on sellel tootel pandud
+			// mingi t�his
+			 String custID =  rs.getString("cuid").trim();
+             String prodID =  rs.getString("toode").trim();
+				if (custID != null
+						&& custID.trim().length() > 0) {
+					//mline.setCustID(custID.trim());
+					mline.setCliGroup(custID.trim());
+				}
+			
+
+				if (prodID != null
+						&& prodID.trim().length() > 0 ) {
+					mline.setProdID(prodID.trim());
+				
+				}
+				
+		   result.add(mline);
+		}
+		rs.close();
+		ps.close();
+		con.close();
+}catch(Exception e) {
+  e.printStackTrace();
+}
+
+System.out.println("Fixed Result " + result.size());
+		return result;
+	}
+
+	public Vector getFixedAssortmentDataOld() {
 		Vector result = new Vector();
 		this.getProducts(null);
 		File f = new File(this.getExcelDir() + "/SortimentDroid.xlsx");
