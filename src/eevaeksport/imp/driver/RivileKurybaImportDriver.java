@@ -483,7 +483,7 @@ if(ladu.trim().length()!=0){
           sb.append("               <I07_NUOLAIDA>100</I07_NUOLAIDA>" + ls);
           cou++; 
           sb.append(getLineNr(cou));
-          sb.append("               <i07_aprasymas2>" + line.getPrice() + "</i07_aprasymas2>" + ls);
+          sb.append("               <i07_aprasymas2>" + line.getPrice()*1.21 + "</i07_aprasymas2>" + ls);
           cou++; 
           
          // <i07_aprasymas2>product price before 100% discount</i07_aprasymas2>

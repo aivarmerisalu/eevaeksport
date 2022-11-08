@@ -1358,6 +1358,8 @@ HashMap partiid = getBatch();
     
     try { 
 
+    
+    	
     	
     	
     	
@@ -1404,6 +1406,24 @@ HashMap aleprods = new HashMap();
 		tt.setKastis(hind);
 		tt.setKogus(hindb);
 		aleprods.put(item, tt );
+		}
+		rs.close();
+		st.close();
+
+		
+		HashMap minprods = new HashMap();
+
+		 sql = "SELECT  ITEMID, PRICE FROM dbo.NLTRAWMATMINPRICES WHERE (PRICEDATE =(SELECT MAX(PRICEDATE) AS Expr1 FROM dbo.NLTRAWMATMINPRICES AS PR))";
+
+
+		 st = con.createStatement();
+		  rs = st.executeQuery(sql);
+
+		while (rs.next()) {
+		String item = rs.getString("ITEMID").trim();
+		double hind = rs.getDouble("PRICE");
+	
+		minprods.put(item, hind );
 		}
 		rs.close();
 		st.close();
@@ -1572,6 +1592,15 @@ HashMap aleprods = new HashMap();
     		  prod.setPartii("Partii :" + partiid.get(prod.getID()) );
     	  }
       }
+      
+     if( minprods.get(prod.getID()) != null ){
+    	 double pr = Double.parseDouble(minprods.get(prod.getID())+"");
+    	 if(prod.getPartii() != null && prod.getPartii().trim().length() > 0) {
+   		  prod.setPartii(prod.getPartii() + "|MinHind :" + this.getNF().format(pr));
+   	  }else {
+   		  prod.setPartii("MinHind :" + this.getNF().format(pr));
+   	  }
+     }
       
       
  	 String info =rs.getString("info");

@@ -654,7 +654,7 @@ if(ladu.trim().length()!=0){
           fos = new FileOutputStream(fileName);
          fos.write(sbb.toString().getBytes());
          fos.close();
-         if(sbb.contains("<h1>Error: Server Error")) {
+         if(sbb.contains("<h1>Error: Server Error") || sbb.contains("Connection refused")) {
             System.exit(0);	
          }
         } else {

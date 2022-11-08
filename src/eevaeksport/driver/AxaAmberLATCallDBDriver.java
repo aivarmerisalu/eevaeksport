@@ -1324,6 +1324,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
             	} else{
             	 	cust.setCity(Converter.enCodeEst(cuinfo.trim().replaceAll("\\r\\n|\\r|\\n", " ").replaceAll(";", ":")));
             	}
+        	//  System.out.println("city " + cust.getCity());
         	
         }
         

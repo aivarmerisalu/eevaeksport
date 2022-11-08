@@ -1,11 +1,14 @@
 package eevaeksport.driver;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -16,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +29,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 
@@ -50,6 +56,7 @@ import eevaeksport.util.Converter;
  * @author unascribed
  * @version 1.0
  */
+
 
 public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,PictureMaker {
 
@@ -1288,7 +1295,7 @@ private void makePictureCat(){
 @Override
 public void PictureMaker() {
 	loadPictures();
-    makePictureCat();
+  //  makePictureCat();
 	  System.exit(0);	
 }
 
@@ -1297,7 +1304,7 @@ public void PictureMaker() {
 private void loadPictures() {
  	
     connectionUp();
-	String  cmd2 = "SELECT t.toode,pi.pilt ,  pi.id, pildityyp FROM firma1.toode t   INNER JOIN firma1.artpilt pi ON pi.toode=t.toode  \r\n"  ;
+	String  cmd2 = "select t.No_ as toode,p.[Mime Type] as type , p.Content as pilt  from [UAB ICECO Trade$ActiveSalesItem] t INNER JOIN [Tenant Media Set] v on v.ID = t.Picture INNER JOIN [Tenant Media] p on v.[Media ID]=p.ID"  ;
 	
 	
 	String picts = parent.getProps().getProperty("pict.dir");
@@ -1310,27 +1317,28 @@ private void loadPictures() {
  		    ResultSet	      rs = st.executeQuery(cmd2);
 	    while (rs.next()) {
               String toode = rs.getString("toode").trim();
-              byte[] bufbyte = rs.getBytes("pilt");
+              String type = rs.getString("type").trim();
+              type= type.substring(type.indexOf("/")+1);
+            
               
-              String id = rs.getString("id");
-              String laiend = rs.getString("pildityyp").trim().toLowerCase();
-              
-              System.out.println(toode + " " + bufbyte.length);
-              
-              if(bufbyte != null){
-                  String filename = picts + toode+"."+laiend; // Function for generating temporary filenames basing on GUID 
-                  File fp = new File(filename);
-                  
-                	  if(fp.exists()){
-                    	  fp.delete();
-                      }
-                     // System.out.println(filename);
-                      if(fp.createNewFile()) {
-                    	  FileOutputStream fos = new FileOutputStream(fp); 
-                          fos.write(bufbyte);
-                          fos.close();     
-                      }   
-                  }
+             
+               String filename = picts + toode + "." + type; // Function for generating temporary filenames basing on GUID 
+                 
+               File image = new File(filename);
+               FileOutputStream fos = new FileOutputStream(image);
+               byte[] buffer = new byte[1];
+               InputStream is = rs.getBinaryStream("pilt");
+               is.read();
+               is.read();
+               is.read();
+               is.read();
+               
+               while (is.read(buffer) > 0) {
+                 fos.write(buffer);
+               }
+               fos.close();  
+               
+               
                 }
               
 	    
