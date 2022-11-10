@@ -1294,61 +1294,12 @@ private void makePictureCat(){
 
 @Override
 public void PictureMaker() {
-	loadPictures();
-  //  makePictureCat();
+	
+    makePictureCat();
 	  System.exit(0);	
 }
 
 
 
-private void loadPictures() {
- 	
-    connectionUp();
-	String  cmd2 = "select t.No_ as toode,p.[Mime Type] as type , p.Content as pilt  from [UAB ICECO Trade$ActiveSalesItem] t INNER JOIN [Tenant Media Set] v on v.ID = t.Picture INNER JOIN [Tenant Media] p on v.[Media ID]=p.ID"  ;
-	
-	
-	String picts = parent.getProps().getProperty("pict.dir");
-	  
-	try {
-		Converter.doTrustToCertificates();
-       	Converter.trustAllHttpsURLConnection();
-        Connection con = getNewConnection2();
-		Statement st = con.createStatement();
- 		    ResultSet	      rs = st.executeQuery(cmd2);
-	    while (rs.next()) {
-              String toode = rs.getString("toode").trim();
-              String type = rs.getString("type").trim();
-              type= type.substring(type.indexOf("/")+1);
-            
-              
-             
-               String filename = picts + toode + "." + type; // Function for generating temporary filenames basing on GUID 
-                 
-               File image = new File(filename);
-               FileOutputStream fos = new FileOutputStream(image);
-               byte[] buffer = new byte[1];
-               InputStream is = rs.getBinaryStream("pilt");
-               is.read();
-               is.read();
-               is.read();
-               is.read();
-               
-               while (is.read(buffer) > 0) {
-                 fos.write(buffer);
-               }
-               fos.close();  
-               
-               
-                }
-              
-	    
-	    rs.close();
-	    st.close();
-	    con.close();
-	    
-	}catch(Exception e) {
-		e.printStackTrace();
-	}
-}
 
 }

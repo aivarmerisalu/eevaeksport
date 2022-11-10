@@ -874,13 +874,13 @@ System.out.println(cmd);
 	rscn.close();
 	stcn.close();
 	cn.close();
-		  	String cmd = " select a.[Sell-to Customer No_]  + '_' + h.[Ship-to Code] as klient , a.[Customer No_] AS maksja,a.[External Document No_] AS number" + //+ '_' + a.[Ship-to code]
+		  	String cmd = " select a.[Sell-to Customer No_]  as klient , h.[Ship-to Code] as kl2 , a.[Customer No_] AS maksja,a.[External Document No_] AS number" + //+ '_' + a.[Ship-to code]
 					", a.[Due Date] AS kuupaev, sum((case when a.[Posting Date] < 2105 then 0.2896 else 1 end) * b.[Amount]) AS summa, "
 					+ " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer  FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join "
 					+ " [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] "
 					+ " inner join  [Vičiūnai ir Ko$Sales Invoice Header] h  on h.[No_] = a.[Document No_] "
 					+ " where a.[Document type] = 2 AND  a.[Posting Date] > getdate()-200 AND a.[Open]= 1 "
-				+	" group by a.[Sell-to Customer No_]  + '_' + h.[Ship-to Code],a.[Customer No_] ,a.[External Document No_], "
+				+	" group by a.[Sell-to Customer No_] , h.[Ship-to Code],a.[Customer No_] ,a.[External Document No_], "
 					+ " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount]) <> 0 ";
 
 			System.out.println(cmd);
@@ -891,8 +891,13 @@ System.out.println(cmd);
 			while (rs1.next()) {
 				Debt debt = new Debt();
 				String custID = rs1.getString("klient");
+				String kl2 = rs1.getString("kl2");
+				if(kl2 != null && kl2.trim().length() > 0) {
+					custID = custID + "_" + kl2.trim();
+				}
 			    String payer = rs1.getString("maksja");
 				debt.setCustID(custID);
+				debt.setPayerID(payer);
 
 				String doknr = rs1.getString("number");
 				if (doknr.trim().length() > 6) {
@@ -923,7 +928,7 @@ System.out.println(cmd);
 		TreeMap tm = new TreeMap();
 		this.customers = new ArrayList();
 
-		String sql = "SELECT k.kood  +'_'+k.[Ship-to Address ILN] as kood1 , k.nimi as nimi2 , k.aadress as aadress12 ,k.kood as payer2 , k.agent as agent2 , k.* from" + 
+		String sql = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2 , k.nimi as nimi2 , k.aadress as aadress12 ,k.kood as payer2 , k.agent as agent2 , k.* from" + 
 				"				 dbo.v_VIK_Customers k	" ;
 
 		System.out.println(sql);
@@ -934,6 +939,10 @@ System.out.println(cmd);
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				String id = rs.getString("kood1").trim();
+				String id2 = rs.getString("kood2");
+				if(id2 != null && id2.trim().length() > 0) {
+					id = id + "_" + id2.trim();
+				}
 				String name2 = rs.getString("nimi2").trim();
 				String aadress12 = rs.getString("aadress12");
 				
@@ -1882,20 +1891,25 @@ System.out.println(cmd);
 				String lastdate = " ";
 				amount = rs.getDouble("kogus");
 				lastdate = rs.getString("lastdate").trim().substring(5, 10);
-				Customer cust = (Customer) kliendid.get(custID+ "_" + custAbi);
+				
+				String cu = custID;
+				if(custAbi != null && custAbi.trim().length() > 0) {
+					cu = custID + "_" + custAbi.trim();
+				}
+				Customer cust = (Customer) kliendid.get(cu);
 				if (cust == null) {
-					cust = new Customer(custID+ "_" + custAbi);
+					cust = new Customer(cu);
 				}
 				double saamatta = rs.getDouble("saamatta");
 				if(saamatta > -1 && saamatta < 1){
 					saamatta = 0;
 				}
 				Product prod = new Product(prodID);
-				CustProd cp = new CustProd(custID+ "_" + custAbi, prodID, amount, 0, 0,
+				CustProd cp = new CustProd(cu, prodID, amount, 0, 0,
 						lastdate, 0,saamatta , 0, " ");
 
 				cust.addProduct(prod, cp,false);
-				kliendid.put(custID+ "_" + custAbi, cust);
+				kliendid.put(cu, cust);
 				vec.addElement(cp);
 
 			}
@@ -1919,8 +1933,14 @@ System.out.println(cmd);
 
 			while (rs2.next()) {
 				String klient = rs2.getString("klient").trim();
-				String custAbi = rs2.getString("abiklient").trim();
-				klient = klient+ "_" + custAbi;
+				String custAbi = rs2.getString("abiklient");
+				
+				String cu = klient;
+				if(custAbi != null && custAbi.trim().length() > 0) {
+					cu = klient + "_" + custAbi.trim();
+				}
+				
+				
 				String toode = rs2.getString("toode").trim();
 				String kogus = "0";
 				String date = " ";
@@ -1932,19 +1952,19 @@ System.out.println(cmd);
 				date = rs2.getString("lastdate").trim().substring(0, 10);
 
 				if (cou == 0) {
-					oldklient = klient;
+					oldklient = cu;
 					olddate = date;
 					oldtoode = toode;
 				}
-				if (!oldklient.equals(klient)) {
+				if (!oldklient.equals(cu)) {
 					counter = 0;
-					oldklient = klient;
+					oldklient = cu;
 					olddate = date;
 				}
 				if (!toode.equals(oldtoode)) {
 					counter = 0;
 				}
-				Customer c = (Customer) kliendid.get(klient);
+				Customer c = (Customer) kliendid.get(cu);
 				if (c != null) {
 
 					ArrayList al = (ArrayList) c.getProducts().get(toode);
@@ -1973,7 +1993,7 @@ System.out.println(cmd);
 							vec.add(cp);
 						}
 					}
-					oldklient = klient;
+					oldklient = cu;
 					olddate = date;
 					oldtoode = toode;
 				}
