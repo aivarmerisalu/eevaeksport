@@ -33,6 +33,9 @@ import java.util.Vector;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import ee.mobilejava.wrapper.SupervisorInfoWrapper;
 import eevaeksport.Agent;
@@ -757,9 +760,35 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
     	 TreeMap webmerc3 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC3");
     	 TreeMap webmerc4 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC4");
     	 TreeMap webmerc5 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC5");
+    	 Calendar now = Calendar.getInstance();
+    	 long en = now.getTimeInMillis();
+    	 now.add(Calendar.DAY_OF_MONTH, -32);
+    	 long st = now.getTimeInMillis();
+    	 HashSet contacted = new HashSet();
+    	 JSONArray dayr =  Converter.getWebDayReport(st, en, rcompany, user, pass);
     	 
-    	 
-    try{
+    	// System.out.println("dayr " + dayr);
+    	 int lennx = dayr.length();
+			for (int u = 0; u < lennx; u++) {
+         	JSONObject gr = null;
+			try {
+				gr = dayr.getJSONObject(u);
+				 String key = (String)gr.get("custid");
+				 contacted.add(key);
+	           String agentname = null;
+			    try {
+				  agentname = (String)gr.get("agentid");
+				  agentname = agentname.replaceAll("\t", ",");
+			     }catch (Exception e){
+			     }
+	         	
+			} catch (JSONException e) {
+			  e.printStackTrace();
+			}
+         
+			}
+    System.out.println("contacted "+ contacted.size()); 
+      try{
        	   Converter.getManagersReplacements(agents1, rcompany, user, pass); 
        		
        }catch(Exception e){
@@ -994,6 +1023,10 @@ con3.close();
     	               name = name + " " + Converter.enCodeEst(aadress.trim());
     	              customer.setName(Converter.enCodeEst(name));
     	             }
+    	             if(!contacted.contains(customer.getID())) {
+    	            	 customer.diffBack2 = true;
+    	            	 customer.needsToBeVisited = true;
+    	             }
     	         
     	         	String ag = rs.getString("agent").trim();
     	             
@@ -1007,9 +1040,9 @@ con3.close();
     	             	 
     	             
     	         if(fixsort.get(customer.getID())!= null){
-    	        	StringTokenizer st = new StringTokenizer(fixsort.get(customer.getID())+"" ,"|"  ) ;
-    	        	while(st.hasMoreTokens()) {
-    	        		customer.addFixSortCode(st.nextToken());
+    	        	StringTokenizer st2 = new StringTokenizer(fixsort.get(customer.getID())+"" ,"|"  ) ;
+    	        	while(st2.hasMoreTokens()) {
+    	        		customer.addFixSortCode(st2.nextToken());
     	        	}
     	         }
     	      
@@ -1022,9 +1055,9 @@ con3.close();
     	           	
     	       		Vector vec = aa1.getDubbler();
     	       		if(vec!= null && vec.size() >0){
-    	       			Enumeration en = vec.elements();
-    	       			while(en.hasMoreElements()){
-    	       				String age = (String) en.nextElement();
+    	       			Enumeration en2 = vec.elements();
+    	       			while(en2.hasMoreElements()){
+    	       				String age = (String) en2.nextElement();
     	       				customer.addAgent(new Agent(age));
     	       			}
     	       		}

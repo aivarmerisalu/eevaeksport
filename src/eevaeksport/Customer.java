@@ -32,6 +32,7 @@ public class Customer {
   public String currency = null;
   public String taraDeal = null;
   public String category = null;
+  public boolean noCashSales = false;
   public String restdirect = null;
   public String level = null;
   public Vector<MatrixLine> fixedLines = null;
@@ -510,6 +511,7 @@ public void setShowfullpricelist(boolean showfullpricelist) {
 	public String nfctag = null;
 	public String setSMS = null;
 	public double bonusAvailable = 0;
+	public boolean needsToBeVisited = false;
 	    public boolean isMakeAmountRounding() {
 			return makeAmountRounding;
 		}

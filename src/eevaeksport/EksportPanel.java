@@ -1685,7 +1685,10 @@ public class EksportPanel extends JPanel implements ActionListener,
                     zip.addFile("assortment.txt");
                 }
                 
-                
+                File who = new File("payments.txt");
+                if(who.exists()){
+                    zip.addFile("payments.txt");
+                }
                 
                 File wh22 = new File("taraoptimum.txt");
                 if(wh22.exists()){
@@ -4042,6 +4045,21 @@ if(agprods != null && agprods.size() >0){
            
            buf.append(EksportPanel.separator);
            buf.append(cust.bonusAvailable); 
+           
+           buf.append(EksportPanel.separator);
+           String diff5 = "0";
+           if(cust.noCashSales){
+           	diff5 = "1";
+           }
+           buf.append(diff5); 
+         
+           
+           buf.append(EksportPanel.separator);
+           String diff3 = "0";
+           if(cust.needsToBeVisited){
+           	diff3 = "1";
+           }
+           buf.append(diff3); 
            
            buf.append(lineSeparator);
       }

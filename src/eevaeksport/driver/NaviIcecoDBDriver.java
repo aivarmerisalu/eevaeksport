@@ -1255,7 +1255,7 @@ private void makePictureCat(){
             	if(in.isFile()){
             	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
             	if(!inpda.exists()) {
-            		Converter.shrinkAndCopyFile(in,inpda,250);
+            		Converter.shrinkAndCopyFile(in,inpda,400);
             	}
                 	
                 	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 

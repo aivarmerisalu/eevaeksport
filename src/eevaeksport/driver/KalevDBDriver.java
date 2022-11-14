@@ -2733,6 +2733,9 @@ try {
 
 				if (prodID != null
 						&& prodID.trim().length() > 0 ) {
+					if(prodID.startsWith("F")) {
+						prodID = "FE" + prodID.trim();
+					}
 					mline.setProdID(prodID.trim());
 				
 				}

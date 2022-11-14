@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -18,6 +19,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -859,9 +861,127 @@ Statement st = null;
          return lines;
     	
        }
+    public void makePaymentsFile()  {
 
+    	 
+        
+        
+    	   String    sql = "select * from vwMES_Merisoft_Pinigai order by PartneriaiId, data desc " ; 
+    			 HashMap hh = new HashMap();
+
+    	           try {
+    	         
+    	        	   
+    	             Connection con = this.getNewConnection();
+    	             Statement  st = con.createStatement();
+    	             ResultSet rs = st.executeQuery(sql);
+    	     String oldcust = null;
+    	     int cou = 0;
+    	     String asi = "";
+    	             while (rs.next()) {
+    	              
+    	               String custid = rs.getString("Moketojo_Kodas").trim();
+    	               if(oldcust == null) {
+    	            	   oldcust = custid;
+    	               }
+    	               
+    	               if(!oldcust.equals(custid) ) {
+    	            	   cou = 0;
+    	            	   asi = "";  
+    	               }
+    	               
+    	              // String payer = rs.getString("Moketojo_Kodas").trim();
+    	              String type = rs.getString("Operacija").trim();
+    	              if(type.contains("ccc")) {
+    	            	  type = "Pingui";
+    	              }else {
+    	            	  type =  type;
+    	              }
+    	              String date = rs.getString("data").substring(0,10);
+    	              double summa = rs.getDouble("Suma");
+    	             
+    	               if(cou < 5) {
+    	            	//  System.out.println("aaaa " + cou  + " " + oldcust + "" + custid);
+    	            	   asi = asi + "|" + ((int)summa) + " € " +  date + " "  + type;
+    	            	   hh.put(custid , asi); 
+    	            	   
+    	            	  
+    	               }else {
+    	            	   asi = "";  
+    	               }
+    	               
+    	              
+    	               oldcust = custid;
+    	               cou++; 
+    	             }
+    	             rs.close();
+    	             st.close();
+    	             con.close();
+    	            	   
+    	           }
+    	           catch (SQLException ex) {
+    	             ex.printStackTrace();
+    	           }
+    	         
+    	           
+    	          // System.out.println("Suurus " + hh.size());
+    	           
+    	           StringBuffer sb = new StringBuffer();
+    	           
+    	          Iterator itera =  hh.keySet().iterator();
+    	           
+    	          while (itera.hasNext()) {
+    	           String cuid = itera.next()+"";
+    	          // System.out.println(hh.get(cuid));
+    	           sb.append(cuid + ";" +hh.get(cuid) + "\n");
+    	        	  
+    	          }
+    	           if(sb.length() > 2){
+    	           
+    	              Converter.saveFileInUTF8("payments.txt", sb.toString());
+    	           	
+    	            }	  
+    	          
+    	       }
+    	    
     
     
+    public TreeMap get4Thousand()  {
+    	TreeMap lines = new TreeMap();
+    
+     
+   String    sql = "select *  from vwMES_Merisoft_Apyvarta  " ; 
+		
+
+           try {
+         
+        	   
+             Connection con = this.getNewConnection();
+             Statement  st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql);
+
+             while (rs.next()) {
+
+               String custid = rs.getString("PartneriaiId").trim();
+               String payer = rs.getString("Moketojo_Kodas").trim();
+               double summa = rs.getDouble("SumaSuPVM");
+               if(summa > 4000) {
+                lines.put(custid, summa);
+                lines.put("P" + payer, summa);
+               }
+             }
+             rs.close();
+             st.close();
+             con.close();
+            	   
+           }
+           catch (SQLException ex) {
+             ex.printStackTrace();
+           }
+           System.out.println("tousand suurus " + lines.size());
+         return lines;
+    	
+       }
     
     
     private Vector baashk = null;
@@ -978,8 +1098,8 @@ Statement st = null;
 			 
 		System.out.println("Degusum " + deguSumm.toString());	 
 
-		
-		 
+		  TreeMap fourThousand= get4Thousand();
+		 this.makePaymentsFile();
 		 
 		 
 		 String sqlb = "SELECT Partneriai.PartneriaiId as klient,(SELECT  Nuolaidukainininkusudetis.PrekiuKainuKategorijosId AS hk FROM " +
@@ -1167,8 +1287,28 @@ Statement st = null;
                  }*/
                  
                  if(deguSumm.get(cust.getID()) != null){
-                	cust.setCity("DeguSuma : " + deguSumm.get(cust.getID()) + " eur");
+                	cust.setCity("DeguSuma : " + ((int)Double.parseDouble(deguSumm.get(cust.getID())+"")) + " eur");
                  }
+                 
+                 if(fourThousand.get(payer) != null) {
+                     cust.noCashSales = true;
+                     cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(payer) +""))+"€");
+                     } else if(fourThousand.get("P" + payer) != null) {
+                       cust.noCashSales = true;
+                       cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" + payer) +""))+"€");
+                     } else if(fourThousand.get(cust.getID()) != null) {
+                       cust.noCashSales = true;
+                       cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(cust.getID()) +""))+"€");
+                     } else if(fourThousand.get(payid) != null) {
+                       cust.noCashSales = true;
+                       cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(payid) +""))+"€");
+                     } else if(fourThousand.get("P" + cust.getID()) != null) {
+                         cust.noCashSales = true;
+                         cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" + cust.getID()) +""))+"€");
+                       } else if(fourThousand.get("P" +payid) != null) {
+                         cust.noCashSales = true;
+                         cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" +payid) +""))+"€");
+                       }
                  
                  if(baasMap.get(id) != null){
                 	 if(cust.getGroup().trim().length() > 0 ){
