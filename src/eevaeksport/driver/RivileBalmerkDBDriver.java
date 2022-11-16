@@ -112,12 +112,15 @@ for(int i = 0;dd1.length>i;i++){
 		
 		if(ean.length() > 4) {
 			 File fff =  new File (picts + ean + ".jpg");
-	       	  try {
-				Converter.copyFile(fil,fff);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}  	
+			 if(!fff.exists()) {
+				  try {
+						Converter.copyFile(fil,fff);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}  
+			 }
+	        	
 		}
 	}
 	
@@ -132,7 +135,7 @@ for(int i = 0;dd1.length>i;i++){
      	        	 File res2 = new File (pictspda);
      	            String[] ff2 = res2.list();
      	        	 for(int i = 0;ff2.length>i;i++){
-     	            	(new File ( pictspda + ff2[i])).delete(); 
+     	            	//(new File ( pictspda + ff2[i])).delete(); 
      	            }
          	
          	
@@ -176,7 +179,11 @@ for(int i = 0;dd1.length>i;i++){
              	File in = new File ( picts + ean + ".jpg"); 
              	if(in.isFile()){            	
              	File inpda = new File ( pictspda + toode + ".jpg" ); 
-             	Converter.shrinkAndCopyFile(in,inpda);
+             	
+             	  if(!inpda.exists()) {
+             		  Converter.shrinkAndCopyFile(in,inpda);
+             	  }
+             
              	}
              
              
@@ -925,6 +932,7 @@ HashSet olemas = new HashSet();
             	  cust.setCredit(cred+"");
               }
               
+              
              
               if(salesres.get(accountnum) != null){
               	cust.setInfo(Converter.enCodeEst("CHART sales :|Month & year|Sales |" )+ salesres.get(accountnum) );
@@ -971,8 +979,8 @@ HashSet olemas = new HashSet();
             	  cust.setSalesBlockT(true);
               }
              //siia vaja siis panna tingimus 
-              if( true || d15.contains(cust.getID()) || d15.contains(maks)) {
-            	  cust.setSalesBlockT(true);
+              if( d15.contains(cust.getID()) || d15.contains(maks)) {
+            	//  cust.setSalesBlockT(true);
               }
               
               String konsig = rs.getString("konsig");

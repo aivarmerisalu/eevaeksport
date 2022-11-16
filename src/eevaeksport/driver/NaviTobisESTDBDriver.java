@@ -1168,7 +1168,7 @@ System.out.println(cmd);
     	" as nimi,  t.[Unit Price] AS myygihind,  '' AS grupp2, t.[Global Dimension 2 Code] AS grupp  , " +
     	" t.[Base Unit of Measure] AS unit, [No_ 2] AS ean, '' AS status , 0 AS maxdiscount,  '' aS type, [Units per Parcel] AS kastis, " +
     	" [Item Disc_ Group] as alegr ,  '' AS kaal,[VAT Prod_ Posting Group] AS vat , [Units per Pallet] as pallet  , " +
-    	" [Unit List Price] as listprice ,[New until] as newprod FROM [2015_Tobis$Item] t   LEFT JOIN [2015_Tobis$Translations] est on  est.TableNo=27  " +
+    	" [Unit List Price] as listprice ,[New until] as newprod ,[Nelikvidas]  as status2 FROM [2015_Tobis$Item] t   LEFT JOIN [2015_Tobis$Translations] est on  est.TableNo=27  " +
     	" and est.Field=3  and est.Language='EST' and t.No_=est.[Primary Key Value 1]  	 LEFT JOIN [2015_Tobis$Translations] enu on  " +
     	" enu.TableNo=27  and enu.Field=3  and enu.Language='ENU' and t.No_=enu.[Primary Key Value 1]  WHERE t.[Blocked]=0  " +
     	"  and t.[Show in mob_ device]=1  ORDER BY t.[No_] " ;
@@ -1280,6 +1280,7 @@ System.out.println(cmd);
                 	   int status = rs.getInt("status2");
                        if(status > 0) {
                     	   prod.setStatusSellout("1");
+                    	   System.out.println("OUT " + prod.getID());
                        }   
                    }catch(Exception e) {
                 	   

@@ -892,10 +892,10 @@ Statement st = null;
     	               
     	              // String payer = rs.getString("Moketojo_Kodas").trim();
     	              String type = rs.getString("Operacija").trim();
-    	              if(type.contains("ccc")) {
-    	            	  type = "Pingui";
+    	              if(type.contains("apmo")) {
+    	            	  type = "Gryni";
     	              }else {
-    	            	  type =  type;
+    	            	  type = "Bankas";
     	              }
     	              String date = rs.getString("data").substring(0,10);
     	              double summa = rs.getDouble("Suma");

@@ -406,6 +406,11 @@ JSONObject ord = new JSONObject();
 	       		 ll.put("Discount", line.getDiscount());
 	       		 ll.put("SumBeforeVAT", line.getPrice() * line.getKogus());
 		     }
+	       	if(line.getDiscount() == -2) {
+	       		 ll.put("Price", line.getPrice());
+	       		 ll.put("Discount", 100);
+	       		 ll.put("SumBeforeVAT", line.getPrice() * line.getKogus());
+		     }
 	       	 
 	       	 
 	      // 	 if(order.getWarehouse() != null && order.getWarehouse().trim().equals("L6") ) {

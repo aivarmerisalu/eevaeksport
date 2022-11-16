@@ -571,7 +571,7 @@ private HashSet getXXX(){
 				     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
 			          }else{
 			        	  String sorting =  identfySorting(itemid);
-			        	  if((order.getCompany().startsWith("INTR")  || order.getCompany().equals("M12320")) && xxxprods.contains(itemid)) {
+			        	  if((order.getCompany().startsWith("INTR")  || order.getCompany().equals("M12320") || order.getCompany().equals("M19031")) && xxxprods.contains(itemid)) {
 			        		  ordJ1.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 						     			sorting + " " + lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType); 
 			        	  }else {
@@ -1999,7 +1999,7 @@ private long getAndUpdateNext() throws SQLException{
 		    //  sb2.append("          <dta:AccDim1>"escape(getTarne(order)) + agent + "</dta:AccDim1>" + ls);
 		    //  sb2.append("      </dta:AccStr>" + ls);
 		      String agg = agent;
-		      if(agg.startsWith("INTR") || agg.equals("M12320")) {
+		      if(agg.startsWith("INTR") || agg.equals("M12320")  || agg.equals("M19031")  ) {
 		    	  agg = "";
 		      }
 		      sb2.append("      <dta:SalesmanNum>" + agg + "</dta:SalesmanNum>" + ls);
@@ -3012,6 +3012,11 @@ private String getDateStringPool(Calendar cal){
 	  if(intr.equals("M12320")){
 			 return true;
 		  }
+	  if(intr.equals("M19031")){
+			 return true;
+		  }
+	  
+	  
 	  if(intr.equals("K501")){
 			 return true;
 		  }
