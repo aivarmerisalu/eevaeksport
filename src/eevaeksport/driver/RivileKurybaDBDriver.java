@@ -568,7 +568,7 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
         	}
         
         	  String sql3 = " SELECT N35_KODAS_LS as kood , N35_PAV as nimi FROM"
-        	  		+ " N35_LGST where N35_TEVAS = '01'  ";
+        	  		+ " N35_LGST where  LEFT(n35_tevas,2) = '01'  ";
               
         	  stmt = con.prepareStatement(sql3);
               ResultSet	  rs = stmt.executeQuery();

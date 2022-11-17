@@ -2733,9 +2733,13 @@ try {
 
 				if (prodID != null
 						&& prodID.trim().length() > 0 ) {
-					if(prodID.startsWith("F")) {
+					if(prodID.startsWith("F") || prodID.startsWith("E") || prodID.startsWith("H") || prodID.startsWith("B")) {
 						prodID = "FE" + prodID.trim();
 					}
+					if(prodID.startsWith("K")) {
+						prodID = "OTB" + prodID.trim();
+					}
+					
 					mline.setProdID(prodID.trim());
 				
 				}
