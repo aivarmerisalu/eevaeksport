@@ -624,8 +624,10 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
               }
           
               String tanav = rs.getString("tanav");
+              String add = "";
               if (tanav != null && tanav.length() > 0){
                 cust.restStreet = tanav.trim();
+                add = tanav.trim();
               }
               String linn = rs.getString("linn");
               if (linn != null && linn.length() > 0){
@@ -653,6 +655,10 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
               if(aadr != null && aadr.trim().length()>0){
                 cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim()),"Lithuania"));
                 name = name + " " + cust.getAddress();
+              }
+              
+              if(add.length() > 0) {
+            	  name =  cust.restName + " " + add;
               }
               
             String adde = "";

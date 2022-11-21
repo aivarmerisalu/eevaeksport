@@ -774,13 +774,17 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
 			try {
 				gr = dayr.getJSONObject(u);
 				 String key = (String)gr.get("custid");
-				 contacted.add(key);
+				
 	           String agentname = null;
 			    try {
 				  agentname = (String)gr.get("agentid");
 				  agentname = agentname.replaceAll("\t", ",");
 			     }catch (Exception e){
 			     }
+			    if(agentname != null && !agentname.contains("MERC")) {
+			    	 contacted.add(key);
+			    }
+			   
 	         	
 			} catch (JSONException e) {
 			  e.printStackTrace();

@@ -544,16 +544,18 @@ HashSet olemas = new HashSet();
          debt.setDue(yle+"");
          if(yle > 30 && !d30.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
         	 d30.add(kl);
-        	 if(kl.equals("757")) {
-        		 System.out.println("võlgu " + kl + " " + number);
-        	 }
+        	// if(kl.equals("757")) {
+        		// System.out.println("võlgu " + kl + " " + number);
+        	// }
          }
          
          if(yle > 15 && !d15.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
         	 d15.add(kl);
-        	 if(kl.equals("757")) {
-        		 System.out.println("võlgu " + kl + " " + number);
-        	 }
+        	// if(kl.equals("757")) {
+        		// System.out.println("võlgu " + kl + " " + number);
+        	 
+         
+         //}
          }
         	 
          debtV.addElement(debt);
@@ -976,7 +978,7 @@ HashSet olemas = new HashSet();
          	 }
               
               if(d30.contains(cust.getID()) || d30.contains(maks)) {
-            	  cust.setSalesBlockT(true);
+            	  cust.setSalesBlock(true);
               }
              //siia vaja siis panna tingimus 
               if( d15.contains(cust.getID()) || d15.contains(maks)) {
@@ -984,8 +986,8 @@ HashSet olemas = new HashSet();
               }
               
               String konsig = rs.getString("konsig");
-              if(cust.isSalesBlockT() && konsig != null && konsig.trim().equals("ATSISK_PO_RE")){
-            	  cust.setSalesBlockT(false);
+              if(cust.isSalesBlock() && konsig != null && konsig.trim().equals("ATSISK_PO_RE")){
+            	  cust.setSalesBlock(false);
             	 // System.out.println("Blokk maha " + cust.getID());
               }
                  

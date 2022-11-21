@@ -1569,7 +1569,7 @@ public class Converter {
 							 String value =  formatter.formatCellValue(row.getCell(a));
                              
                               
-                              if(value.trim().length() > 0 && (value.trim().equals("x") || value.trim().equals("1")  || value.trim().equals("Yes"))) {
+                              if(value.trim().length() > 0 && (value.toLowerCase().trim().equals("x") || value.trim().equals("1")  || value.trim().equals("Yes"))) {
                               	 System.out.println("Sees " +a + " " + value + " '" + ean + "' " + pood + " " + tnimi);
                               
 							if(res.get(pood) != null){

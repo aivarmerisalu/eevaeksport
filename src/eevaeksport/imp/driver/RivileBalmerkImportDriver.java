@@ -25,6 +25,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -67,6 +68,7 @@ import org.w3c.dom.Text;
 
 import eevaeksport.Agent;
 import eevaeksport.Customer;
+import eevaeksport.Debt;
 import eevaeksport.EksportFrame;
 import eevaeksport.Email;
 import eevaeksport.Product;
@@ -132,8 +134,9 @@ HashMap pants = null;
 		    String sql1 = " SELECT N26_KODAS_PS as toode , RTRIM(N26_KODAS_PS_K) AS pant FROM N26_KOMP  where N26_KODAS_PS_K not like 'MI%' ";
 		   
 		    try {
+		    	 con = DriverManager.getConnection(url + "rivile","","");
 		    	
-		    	Statement st1 = con.createStatement();
+		    	 Statement st1 = con.createStatement();
 		   	    ResultSet rs1 = st1.executeQuery(sql1);
 		   	    while (rs1.next()) {
 		   	    	
@@ -145,7 +148,7 @@ HashMap pants = null;
 		   	       
 		   	    rs1.close();
 		   	    st1.close();	
-
+                con.close();
 		    }catch(Exception e) {
 		    	e.printStackTrace();
 		    } 
@@ -166,7 +169,7 @@ HashMap pants = null;
 	
     System.out.println(sql1);
     String acc = null;
-
+    con = DriverManager.getConnection(url + "rivile","","");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -176,7 +179,7 @@ HashMap pants = null;
     }
     rs1.close();
     st1.close();
-
+   con.close();
    // System.out.println("Klient: " + acc);
     return acc;
 
@@ -188,7 +191,7 @@ HashMap pants = null;
 	  	
 	    System.out.println(sql1);
 	    String acc = null;
-
+	    con = DriverManager.getConnection(url + "rivile","","");
 	    Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -198,7 +201,7 @@ HashMap pants = null;
 	    }
 	    rs1.close();
 	    st1.close();
-
+        con.close();
 	    return acc;
 
 	  }
@@ -208,6 +211,7 @@ HashMap pants = null;
   	 		"  rtrim(rtrim(N08_KODAS_KS))+'-'+ rtrim(ltrim(N33_kodas_ak)) = '" + id +"'"; 
     System.out.println(sql1);
     String acc = null;
+    con = DriverManager.getConnection(url + "rivile","","");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
     while (rs1.next()) {
@@ -216,6 +220,7 @@ HashMap pants = null;
     }
     rs1.close();
     st1.close();
+    con.close();
     return acc;
   }
   
@@ -225,7 +230,7 @@ HashMap pants = null;
  	
    System.out.println(sql1);
    String acc = null;
-
+   con = DriverManager.getConnection(url + "rivile","","");
    Statement st1 = con.createStatement();
    ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -235,7 +240,7 @@ HashMap pants = null;
    }
    rs1.close();
    st1.close();
-
+  con.close();
    return acc;
 
  }
@@ -245,7 +250,7 @@ HashMap pants = null;
 	 	
 	   System.out.println(sql1);
 	   String acc = null;
-
+	   con = DriverManager.getConnection(url + "rivile","","");
 	   Statement st1 = con.createStatement();
 	   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -255,7 +260,7 @@ HashMap pants = null;
 	   }
 	   rs1.close();
 	   st1.close();
-
+       con.close();
 	   return acc;
 
 	 }
@@ -272,7 +277,7 @@ HashMap pants = null;
    	"  WHERE  N17_KODAS_PS = '" + prodID.trim() + "'";
 
     String prod = null;
-
+    con = DriverManager.getConnection(url + "rivile","","");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -292,7 +297,7 @@ HashMap pants = null;
    // System.out.println(prodID + " prod1 " + prod);
     rs1.close();
     st1.close();
-
+   con.close();
     return prod;
   }
 
@@ -311,7 +316,7 @@ HashMap pants = null;
 	            System.out.println("hind");
 	       try {
 	    	   
-	      
+	    	   con = DriverManager.getConnection(url + "rivile","","");
 	            Statement st1 = con.createStatement();
 	            ResultSet rst = st1.executeQuery(sql);
 	            
@@ -321,7 +326,7 @@ HashMap pants = null;
 	                }
 	             rst.close();
 	             st1.close();
-	             
+	             con.close();
            }catch(Exception e ) {
 	    	   
 	       }
@@ -329,26 +334,250 @@ HashMap pants = null;
 			  
   }
   
+	
+	 private Vector d30 = new Vector();
+	 private Vector d15 = new Vector();
+	 
+public void getDebt() throws SQLException{
+
+ String sql = "SELECT I44_KODAS_KS AS klient,I44_DOK_NR AS number ,max(I44_DATA_MOK) AS maksepaev , " +
+     " sum(i44_suma_db-i44_suma_cr) AS tasumata ,min(I44_DATA_DOK) AS kuupaev , max(datediff(day,I44_DATA_MOK,getdate())) as yle FROM i44_skol,n08_klij WHERE " +
+     " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
+     " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
+     " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok <= getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr " +
+    " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_DOK_NR,I44_KODAS_KS order by I44_KODAS_KS,i44_dok_nr ";
+
+ con = DriverManager.getConnection(url + "rivile","","");
+  PreparedStatement st = con.prepareStatement(sql);
+  //st.setString(1, agentCode);
+  ResultSet rs = st.executeQuery();
+  while(rs.next()){
+   
+    String kl = rs.getString("klient").trim();
+    if(!kl.equals("140")) { // maximat pole vaja 
+   	 Debt debt = new Debt();
+     debt.setCustID(kl);
+     String number = rs.getString("number").trim();
+     debt.setPayerID(debt.getCustID());
+     debt.setDoknr(number);
+     debt.setDuedate(rs.getDate("maksepaev"));
+     debt.setSum(rs.getDouble("tasumata"));
+     debt.setDate(rs.getDate("kuupaev"));
+     int yle = rs.getInt("yle");
+     debt.setDue(yle+"");
+     if(yle > 30 && !d30.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
+    	 d30.add(kl);
+    	 
+     }
+     
+     if(yle > 15 && !d15.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
+    	 d15.add(kl);
+    	 
+       }
+    }
+  }
+  
+  rs.close();
+  st.close();
+  con.close();
+  
+}
+  
+  public TreeMap getCustomers(Agent agent){
+  	try {
+  		getDebt();
+  	  }catch(Exception e) {
+  		e.printStackTrace();
+  	 }
+  	
+  	System.out.println("d30.size() " + d30.size());
+
+
+      String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, " +
+      		" N08_PAV as nimetus, N33_kodas_ak AS nimetus2, N08_CREDIT_LIM as cred, " +
+				" N33_ADRESAS AS aadress, ltrim(N08_NUOL_GR)   AS ale , " +
+				" ' ' AS visit ,N08_KODAS_KS AS payer , N08_KODAS_LS_8 as konsig , " +
+				" (CASE WHEN LEN(LTRIM(N33_KODAS_MS))=0 or N33_KODAS_MS  IS NULL THEN  N08_KODAS_MS_P ELSE N33_KODAS_MS  END) AS agent ,  " +
+				" (case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm , N33_TEL as phone , N33_SHIP_FOB  as deld " +
+				"  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where N08_PAV is not null order by N08_PAV ";
+     
+      TreeMap customers = new TreeMap();
+    
+
+      try {
+
+
+   
+
+    	  con = DriverManager.getConnection(url + "rivile","","");
+           PreparedStatement   stmt = con.prepareStatement(cmd);
+           ResultSet	      rs = stmt.executeQuery();
+
+          while (rs.next()) {
+            String accountnum = rs.getString("kood1").trim();
+            String maks = accountnum;
+            String acc = rs.getString("kood");
+        
+            if (acc != null && acc.trim().length()>2){
+            	accountnum = accountnum + "-" + acc.trim();
+            }
+            String name = rs.getString("nimetus").trim() ;
+          		 String nim2 = rs.getString("nimetus2");
+            if(nim2 != null) {
+          	  name = name + " " + nim2.trim();
+            }
+          		  
+           
+          	name = name + " "  + accountnum;
+          
+          Customer cust = new Customer(accountnum);
+          //  System.out.println("Name " + name);
+         
+            
+            String aadr = rs.getString("aadress");
+            if(aadr != null && aadr.trim().length()>0){
+              cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim()),"Lithuania"));
+              name = name + " " + cust.getAddress();
+            }
+            cust.setName(Converter.enCodeEst(name).replaceAll("  ", " ").replaceAll("  ", " "));
+
+            String discStr = rs.getString("ale");
+            if (discStr != null && discStr.trim().length() >0 ){
+          		     cust.setGroup(discStr.trim());
+            }
+            
+            String visit = rs.getString("visit");
+            if (visit != null && visit.trim().length()>0){
+              cust.setVisit(visit.trim());
+            }
+            
+            
+            String payer =rs.getString("payer");
+          
+            if(payer != null && payer.trim().length()> 0){
+              cust.setPayer(payer.trim());
+             
+            
+
+            }
+            
+          
+            if(d30.contains(cust.getID()) || d30.contains(maks)) {
+          	  cust.setSalesBlockT(true);
+          	System.out.println("Blokk peale " + cust.getID());
+            }
+           //siia vaja siis panna tingimus 
+            if( d15.contains(cust.getID()) || d15.contains(maks)) {
+          	//  cust.setSalesBlockT(true);
+            }
+            
+            String konsig = rs.getString("konsig");
+            if(cust.isSalesBlockT() && konsig != null && konsig.trim().equals("ATSISK_PO_RE")){
+          	  cust.setSalesBlockT(false);
+          	 // System.out.println("Blokk maha " + cust.getID());
+            }
+               
+         
+                customers.put(cust.getID(), cust);
+         
+          }
+          rs.close();
+
+          stmt.close();
+          con.close();
+        }
+        catch (Exception e) {
+          e.printStackTrace();
+        }
+
+        return customers;
+  }
+  
+  TreeMap custs = null;
   
   public void makeOrder(Order order) throws SQLException{
 	  getNF();
 	  setOrder(order);
 	     
-	     
+	  if(custs == null) {
+		custs =   this.getCustomers(null);
+	  }
+	  
 	  boolean tag = false;
 	  OrderLine ol = (OrderLine)order.getOrderLines().get(0);
 	  if(ol.getKogus() < 0) {
 		  tag = true;
 	  }
 	  
-	  System.out.println("On Tagastus " + tag );
-    makeOutput(order,tag);
+	  boolean volgu = false;
+	  
+	  if(custs.get(order.getCompany()) != null && ((Customer)custs.get(order.getCompany())).isSalesBlockT()) {
+		volgu = true;  
+	  }
+	  
+	  System.out.println("On Tagastus/Võlgu " + tag + " " + volgu );
+    makeOutput(order,tag, volgu);
+    
+    
+    if(volgu) {
+    	
+    	Properties props = new Properties();
+		try {
+			props = EksportFrame.loadProps("emailsown.txt");
+        	} catch (Exception e) {
+			   e.printStackTrace();
+		   }
+		
+	          String emailto = (String)props.get(order.getAgent());
+		
+    	 sendConfirmEmail( emailto, order.getCompany()); 
+    }
  
   }
   
+  
+  private void sendConfirmEmail(String emailto,String custid){
+	   	try{
+	   		
+	   		System.out.println("\nemail sending " +  custid  + " " + emailto);
+	   		
+	   			Email mail = new Email(null);
+		  		   String sub = custid  + " Užsakymas blokuotas ir perduotas į Rivilės saugyklą";
+		  		
+
+		            mail.setSMTP(parent.getProps().getProperty("smtphost"));
+		            mail.setUser(parent.getProps().getProperty("smtpuser"));
+		            mail.setPass(parent.getProps().getProperty("smtppass"));
+		          //  mail.setPort(parent.getProps().getProperty("smtpport"));
+		  	  		
+		  	  		mail.setFrom(parent.getProps().getProperty("from"));
+		  	  		mail.setSubjectFilesTo(sub);
+		  	  		mail.setEncoding("utf-8");
+		  	  		String name = this.identifyCustomerName(custid);
+		  	  		
+		  	  		mail.setBody("Customer code :" + custid +  "\nCustomer Name :" + name + "\n" +
+		  	  			  "Užsakymas blokuotas ir perduotas į Rivilės saugyklą");
+		  	  		
+		  	  	   mail.setBodyHtml("Customer code :" + custid +  "\nCustomer Name :" + name + "\n" +
+		  	  			  "Užsakymas blokuotas ir perduotas į Rivilės saugyklą");
+		  	  		mail.setSendNotice(false);
+		  	  		
+		  	  	if("true".equals( parent.getProps().getProperty("copydev"))){
+			  	  	mail.setFilesTo("aivar@mobilejava.ee");
+			  	  	mail.send();
+			  	  		}
+		  	        
+		  	  	    mail.setFilesTo(emailto);
+		  	  		mail.send();
+		  	  		
+		  			}catch(Exception e){
+		  			e.printStackTrace();	
+		  			}
+		  	
+	   }
  
 
- private void makeOutput(Order order,boolean tag){
+ private void makeOutput(Order order,boolean tag, boolean volgu){
  	StringBuffer sb = new StringBuffer();
    
 	Hashtable pandikas =  new Hashtable();
@@ -398,6 +627,10 @@ HashMap pants = null;
       String type = "51"; //tellimus
       if(tag) {
     	  type = "52";
+      }
+      
+      if(volgu) {
+    	  type = "53";
       }
       //sb.append(getLineNr(cou));
       sb.append("          <I06_OP_TIP>" + type + "</I06_OP_TIP>" + ls);
@@ -454,8 +687,7 @@ HashMap pants = null;
   //    sb.append(getLineNr(cou));
       sb.append("          <I06_DOK_DATA>" +  getDateString(order.getShipCal()) + "</I06_DOK_DATA>" + ls);
       cou++;
-  
-
+ 
 
 	//sb.append(getLineNr(cou));
       sb.append("          <I06_KODAS_KS>" + escape(cust.substring(0,cust.lastIndexOf("-"))) + "</I06_KODAS_KS>" + ls);
@@ -497,6 +729,12 @@ HashMap pants = null;
           cou++;  
       }
      
+      if(volgu) {
+    	  sb.append("          <I06_CODE_LS_3>BLOCK</I06_CODE_LS_3>" + ls);
+          cou++;
+      }
+          
+      
     lines = order.getOrderLines();
       for (int i = 0; i < lines.size(); i++) {
       //	 sb.append(getLineNr(cou));
@@ -658,7 +896,8 @@ if(ladu.trim().length()!=0){
             System.exit(0);	
          }
         } else {
-        	   this.sendOrderEmail(order, tag, pandikas);
+        	
+        	//   this.sendOrderEmail(order, tag, pandikas);
         }
          
     	} catch (Exception o) {
@@ -748,7 +987,7 @@ if(ladu.trim().length()!=0){
           System.out.println(cmd);
 
       try {
-      	
+    	  con = DriverManager.getConnection(url + "rivile","","");
     	  Statement st1 = con.createStatement();
     	    ResultSet rs = st1.executeQuery(cmd);
 
@@ -795,6 +1034,7 @@ if(ladu.trim().length()!=0){
           }
           rs.close();
           st1.close();
+          con.close();
       } catch (Exception e) {
           e.printStackTrace();
           }
