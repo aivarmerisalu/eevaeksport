@@ -374,7 +374,7 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
         String    sql2 = "	 select k.id AS custid, ''  AS clgroup,pr.code  AS prodid,' ' AS prodgroup,pl.price AS price ,begindate ,enddate , DATEDIFF(dd, begindate, enddate) as days " +
          "    FROM grcpricelistrel pl INNER JOIN grcpricelist u on u.id=pl.idgrcpricelist INNER JOIN " +
 		"	 dbo.GRCPriceLCompany cpl  on cpl.idgrcpricelist=pl.idgrcpricelist inner join grcompany k on k.id=cpl.idgrcompany INNER JOIN grarticle pr ON  pl.idgrarticle = pr.id " +
-		"	 where getdate()>begindate and getdate()<enddate  ORDER BY 1,2";
+		"	 where getdate()>begindate-1 and getdate()<enddate  ORDER BY 1,2";
           Statement st = null;
           try {
             Connection con = getNewConnection();

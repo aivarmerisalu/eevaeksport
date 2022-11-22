@@ -348,12 +348,42 @@ public void getDebt() throws SQLException{
     " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_DOK_NR,I44_KODAS_KS order by I44_KODAS_KS,i44_dok_nr ";
 
  con = DriverManager.getConnection(url + "rivile","","");
-  PreparedStatement st = con.prepareStatement(sql);
-  //st.setString(1, agentCode);
-  ResultSet rs = st.executeQuery();
+ 
+ 
+ String sql2 = "select l11_kodas1 as klient , dbo.pap(l11_laukas,11,1) as paevi from l11_pap1 where l11_kodas_nr='KSN08' ";
+
+ 
+ PreparedStatement st = con.prepareStatement(sql2);
+ ResultSet rs = st.executeQuery();
+ TreeMap<String, Integer> paeviT = new TreeMap<String, Integer> ();
+ while(rs.next()){
+	 String kl = rs.getString("klient").trim();
+	 String  pv = rs.getString("paevi");
+	 
+	 if(pv != null && pv.trim().length() > 0) {
+		 Integer paevi = Integer.parseInt(pv.trim());
+  	  if(paevi != null) {
+  		  paeviT.put(kl, paevi);
+  	  } 
+	 }
+   }
+ 
+ rs.close();
+ st.close();
+
+ 
+ st = con.prepareStatement(sql);
+ rs = st.executeQuery();
+  
   while(rs.next()){
    
     String kl = rs.getString("klient").trim();
+    int days = 30;
+   
+    if(paeviT.get(kl) != null) {
+    	days = paeviT.get(kl);
+    }
+    
     if(!kl.equals("140")) { // maximat pole vaja 
    	 Debt debt = new Debt();
      debt.setCustID(kl);
@@ -365,15 +395,11 @@ public void getDebt() throws SQLException{
      debt.setDate(rs.getDate("kuupaev"));
      int yle = rs.getInt("yle");
      debt.setDue(yle+"");
-     if(yle > 30 && !d30.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
-    	 d30.add(kl);
-    	 
-     }
      
-     if(yle > 15 && !d15.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
-    	 d15.add(kl);
-    	 
-       }
+     if(yle > days && !d30.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
+    	 d30.add(kl);
+     }
+   
     }
   }
   
@@ -503,10 +529,20 @@ public void getDebt() throws SQLException{
 		custs =   this.getCustomers(null);
 	  }
 	  
+	  
+	  boolean kaup = false;
+	  
+	 
+	  
 	  boolean tag = false;
 	  OrderLine ol = (OrderLine)order.getOrderLines().get(0);
 	  if(ol.getKogus() < 0) {
 		  tag = true;
+		  if("true".equals(parent.getProps().getProperty("return.goods"))){
+			 if(!ol.getToode().startsWith("MED")) {
+				 kaup = true;
+			 }
+		  }
 	  }
 	  
 	  boolean volgu = false;
@@ -515,8 +551,9 @@ public void getDebt() throws SQLException{
 		volgu = true;  
 	  }
 	  
-	  System.out.println("On Tagastus/Võlgu " + tag + " " + volgu );
-    makeOutput(order,tag, volgu);
+	  System.out.println("On Tagastus/Võlgu " + tag + " " + volgu + " " + kaup);
+	  
+      makeOutput(order, tag, volgu, kaup);
     
     
     if(volgu) {
@@ -577,7 +614,7 @@ public void getDebt() throws SQLException{
 	   }
  
 
- private void makeOutput(Order order,boolean tag, boolean volgu){
+ private void makeOutput(Order order,boolean tag, boolean volgu , boolean kaup){
  	StringBuffer sb = new StringBuffer();
    
 	Hashtable pandikas =  new Hashtable();
@@ -629,7 +666,7 @@ public void getDebt() throws SQLException{
     	  type = "52";
       }
       
-      if(volgu) {
+      if(volgu || kaup) {
     	  type = "53";
       }
       //sb.append(getLineNr(cou));
@@ -730,7 +767,7 @@ public void getDebt() throws SQLException{
       }
      
       if(volgu) {
-    	  sb.append("          <I06_CODE_LS_3>BLOCK</I06_CODE_LS_3>" + ls);
+    	  sb.append("          <I06_KODAS_LS_3>BLOCK</I06_KODAS_LS_3>" + ls);
           cou++;
       }
           

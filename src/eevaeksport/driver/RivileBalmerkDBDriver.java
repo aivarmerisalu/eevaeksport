@@ -524,13 +524,38 @@ HashSet olemas = new HashSet();
          " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok <= getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr " +
         " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_DOK_NR,I44_KODAS_KS order by I44_KODAS_KS,i44_dok_nr ";
 
+     
+     String sql2 = "select l11_kodas1 as klient , dbo.pap(l11_laukas,11,1) as paevi from l11_pap1 where l11_kodas_nr='KSN08' ";
       connectionUp();
-      PreparedStatement st = con.prepareStatement(sql);
-      //st.setString(1, agentCode);
+      
+      PreparedStatement st = con.prepareStatement(sql2);
       ResultSet rs = st.executeQuery();
+      TreeMap<String, Integer> paeviT = new TreeMap<String, Integer> ();
       while(rs.next()){
-       
+    	 String kl = rs.getString("klient").trim();
+    	 String  pv = rs.getString("paevi");
+    	 
+    	 if(pv != null && pv.trim().length() > 0) {
+    		 Integer paevi = Integer.parseInt(pv.trim());
+       	  if(paevi != null) {
+       		  paeviT.put(kl, paevi);
+       	  } 
+    	 }
+        }
+      
+      rs.close();
+      st.close();
+     
+      
+      st = con.prepareStatement(sql);
+      rs = st.executeQuery();
+    
+       while(rs.next()){
+       int days = 30;
         String kl = rs.getString("klient").trim();
+        if(paeviT.get(kl) != null) {
+        	days = paeviT.get(kl);
+        }
         if(!kl.equals("140")) { // maximat pole vaja 
        	 Debt debt = new Debt();
          debt.setCustID(kl);
@@ -542,27 +567,19 @@ HashSet olemas = new HashSet();
          debt.setDate(rs.getDate("kuupaev"));
          int yle = rs.getInt("yle");
          debt.setDue(yle+"");
-         if(yle > 30 && !d30.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
+         if(yle > days && !d30.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
         	 d30.add(kl);
-        	// if(kl.equals("757")) {
-        		// System.out.println("võlgu " + kl + " " + number);
-        	// }
          }
          
-         if(yle > 15 && !d15.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
-        	 d15.add(kl);
-        	// if(kl.equals("757")) {
-        		// System.out.println("võlgu " + kl + " " + number);
-        	 
-         
-         //}
-         }
+  
         	 
          debtV.addElement(debt);
         }
       }
-     
+      rs.close();
       st.close();
+      
+      
       return debtV;
     }
 
