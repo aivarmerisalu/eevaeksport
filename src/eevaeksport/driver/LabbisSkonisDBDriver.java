@@ -1091,7 +1091,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
      TreeMap tm = new TreeMap();
       TreeMap  ladutr = new TreeMap();
       HashSet laosmyyk = new HashSet();
-      addSales(laosmyyk);
+    //  addSales(laosmyyk);
       System.out.println();
      try {
    	  

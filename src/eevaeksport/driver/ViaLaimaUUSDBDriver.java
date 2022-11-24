@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,9 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import eevaeksport.Agent;
@@ -390,7 +394,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 
     	          if(ean != null) {
     	        	  prod.setEAN(ean);
-    	        	  System.out.println("ean " + prodid + " " + ean);
+    	        	 // System.out.println("ean " + prodid + " " + ean);
     	          }
     	          prod.noOrder = true;
     	          
@@ -2005,13 +2009,58 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 	
 	public TreeMap getCustomers(Agent agent) {
 
+        
+        
+        HashSet contacted = new HashSet();
+        
+        if ("true".equals(getParent().getProps().getProperty("notcontacted30d"))) { 
+        Calendar now = Calendar.getInstance();
+   	 long end = now.getTimeInMillis();
+   	 now.add(Calendar.DAY_OF_MONTH, -32);
+   	 long sta = now.getTimeInMillis();
+   	
+  
+    
+   	 JSONArray dayr =  Converter.getWebDayReport(sta, end, rcompanyx, user, pass);
+   	 
+   	// System.out.println("dayr " + dayr);
+   	 int lennx = dayr.length();
+			for (int u = 0; u < lennx; u++) {
+        	JSONObject gr = null;
+			try {
+				gr = dayr.getJSONObject(u);
+				 String key = (String)gr.get("custid");
+				
+	           String agentname = null;
+			    try {
+				  agentname = (String)gr.get("agent");
+				  agentname = agentname.replaceAll("\t", ",");
+			     }catch (Exception e){
+			     }
+			    
+			    if(agentname != null && !agentname.contains("MERC")) {
+			    	 contacted.add(key);
+			    }
+			
+			} catch (JSONException e) {
+			  e.printStackTrace();
+			}
+        
+			}
+  
+			
+			System.out.println("contacted "+ contacted.size() ); 
+			 
+     }
+        
+        
+
         try{
      	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
      		
      }catch(Exception e){
      	
      }
-        
         
         try {
 			fixed =  (Vector) Converter.readObject("fix.vec");
@@ -2190,7 +2239,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		                    	
 		                     }
 		              
-		                      
+		                    
+	                		 
 			                   
 		                	 if (("78".equals(getParent().getProps().getProperty("stockcode")) || "17".equals(getParent().getProps().getProperty("stockcode"))) 
 		                			 && custAgs != null) {
@@ -2227,8 +2277,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		                         	}
 		                          }
 		                         
-		                		 
-		                		 
+		                        
 		                    	String ags = (String)custAgs.get(customer.getID());
 		                    	if(ags != null) {
 		                    	
@@ -2340,6 +2389,12 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 							
 					   		customer.addFixSortCode(Converter.cleanLitLatEst(customer.getID()));
 					   		customer.suggAssortCode = Converter.cleanLitLatEst(customer.getID());
+					   		
+					   	 if(!contacted.contains(customer.getID())) {
+        	            	 customer.diffBack2 = true;
+        	            	 customer.needsToBeVisited = true;
+        	            	// System.out.println(" ei ole külas " + customer.getID() );
+        	             }
 					   		if(tm.get(name) == null) {
 					   			tm.put(name, customer);
 								this.customers.add(customer.getID());

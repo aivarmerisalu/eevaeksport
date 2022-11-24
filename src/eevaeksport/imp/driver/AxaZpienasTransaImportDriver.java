@@ -206,7 +206,11 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		   String trip = "1";
 		  	try{
 		    	  StringBuffer sb = new StringBuffer();
-		  		  Calendar cal = Calendar.getInstance();
+		  		  Calendar cal = order.getShipCal();
+		  	    Calendar tod = Calendar.getInstance();
+		  	    if(tod.getTime().before(cal.getTime())) {
+		  	    	cal.setTime(tod.getTime());
+		  	    }
 		  	        String month = (cal.get(Calendar.MONTH) + 1) + "";
 			        if (month.length() == 1) month = "0" + month;
 			        String day = cal.get(Calendar.DAY_OF_MONTH) + "";

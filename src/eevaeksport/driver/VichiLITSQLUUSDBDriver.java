@@ -279,17 +279,22 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		               mline.setDiscGroup(prodGroup.trim());
 		             }
 
-		             if (price != 0) {
+		             if (price > -1) {
 		               mline.setPrice(price);
 
 		             }
 		             if (disc != 0) {
 		                 mline.setDiscount(disc);
-
 		               }
-		             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
-		                 result.add(mline);    
+		             
+		             if(price == 0) {
+		            	 mline.setProdLevel("pr");
+		            	 
 		             }
+
+		          //   if(mline.getPrice() > 0 || mline.getDiscount() > 0){
+		                 result.add(mline);    
+		            // }
 		             
 		           }
 		           rs.close();

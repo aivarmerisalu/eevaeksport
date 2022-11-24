@@ -371,10 +371,14 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
         String    sql = "select '' AS custid, pl.idgrpricelist AS clgroup,pr.code  AS prodid,' ' AS prodgroup,pl.price AS price ,'' as begindate ,'' as enddate " +
            "  FROM grpricelistrel pl INNER JOIN grarticle pr ON  pl.idgrarticle = pr.id where pr.code not like '%arh%'  ORDER BY 1,2 " ;
 		
-        String    sql2 = "	 select k.id AS custid, ''  AS clgroup,pr.code  AS prodid,' ' AS prodgroup,pl.price AS price ,begindate ,enddate , DATEDIFF(dd, begindate, enddate) as days " +
-         "    FROM grcpricelistrel pl INNER JOIN grcpricelist u on u.id=pl.idgrcpricelist INNER JOIN " +
-		"	 dbo.GRCPriceLCompany cpl  on cpl.idgrcpricelist=pl.idgrcpricelist inner join grcompany k on k.id=cpl.idgrcompany INNER JOIN grarticle pr ON  pl.idgrarticle = pr.id " +
-		"	 where getdate()>begindate-1 and getdate()<enddate  ORDER BY 1,2";
+        String    sql2 = "	  select str(k.id) AS custid, ''  AS clgroup,pr.code  AS prodid,' ' AS prodgroup,pl.price AS price ,begindate ,enddate , DATEDIFF(dd, begindate, enddate) as days \r\n" + 
+        		"            FROM grcpricelistrel pl INNER JOIN grcpricelist u on u.id=pl.idgrcpricelist INNER JOIN \r\n" + 
+        		"			 dbo.GRCPriceLCompany cpl  on cpl.idgrcpricelist=pl.idgrcpricelist inner join grcompany k on k.id=cpl.idgrcompany INNER JOIN grarticle pr ON  pl.idgrarticle = pr.id \r\n" + 
+        		"			 where getdate()>begindate-1 and getdate()<enddate \r\n" + 
+        		"			 union\r\n" + 
+        		"			  select '' as custid,  str(pr.id) as clgroup ,t.code as prodid, ' ' AS prodgroup,price AS price ,rel.begindate ,rel.enddate , DATEDIFF(dd, rel.begindate, rel.enddate) as days \r\n" + 
+        		"			    from grpricelist pr INNER JOIN grpricelistrel rel ON pr.id =rel.idgrpricelist  \r\n" + 
+        		"			 INNER JOIN grarticle t on t.id = rel.idgrarticle where getdate()>rel.begindate-1 and getdate()<rel.enddate  and pr.code like '%Coop%'  ORDER BY 1,2";
           Statement st = null;
           try {
             Connection con = getNewConnection();
@@ -467,7 +471,7 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
                 mline.setCliGroup(custID.trim());
               }
               if ( clGroup !=null && clGroup.trim().length() > 0) {
-               // mline.setCliGroup(clGroup.trim());
+                  mline.setCliGroup(clGroup.trim());
               }
 
               if (prodID != null && prodID.trim().length() > 0) {
@@ -485,7 +489,7 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
                 mline2.setDiscount(Double.parseDouble(discount));
 
 
-              if (Double.parseDouble(discount) == 0 && price != 0) {
+              if (Double.parseDouble(discount) == 0 && price > -1) {
                 mline.setPrice(price);
                 mline2.setPrice(price);
 
@@ -499,12 +503,13 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
                   mline.setEndDate(end.trim().substring(0,10));
                   mline2.setEndDate(end.trim().substring(0,10));
                 }
+              
               if(days > 32){
             	 // System.out.println("P�evad " + days);
             	  mline.setProdLevel("pr"); //m�rgime et on tegemist pika hinnaga mitte kampaania 
             	  mline2.setProdLevel("pr");
               }
-              if(mline.getPrice() > 0 || mline.getDiscount() > 0) {
+              if(mline.getPrice() > -1 || mline.getDiscount() > 0) {
            	   lines.add(mline);  
            	  lines.add(mline2);  
              }
@@ -1449,6 +1454,9 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
           
          String grupp = rs.getString("grupp");
           if(grupp != null && grupp.trim().length()>0){
+        	  if(grupp.trim().equals("232")) {
+        		  grupp = "232|1194";
+        	  }
         	  if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
         		  cust.setGroup(grupp.trim() + "|" + cust.getGroup());
         	  }else {

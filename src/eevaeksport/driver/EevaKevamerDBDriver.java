@@ -4,8 +4,10 @@ package eevaeksport.driver;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,12 +16,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -84,17 +88,60 @@ public class EevaKevamerDBDriver extends AbstractDBDriver implements BulkUpdater
 	  
 		@Override
 		public void PictureMaker() {
+			 loadPictures();
 			makePictureCat();
 			 System.exit(0);
 			
 		}
 	  
+		 private void loadPictures() {
+			 	
+			 
+			 this.getProducts(null);
+			 String picts = parent.getProps().getProperty("pict.dir");
+			 if(prods.size() > 0) {
+				 connectionUp();
+			Iterator itera = 	 prods.iterator();
+			while (itera.hasNext()) {
+				String prodid = (String)itera.next();
+			
+	        	  String filename = picts + prodid.replace("/", "_") + ".jpg"; // Function for generating temporary filenames basing on GUID 
+                  File fp = new File(filename);
+                  if(!fp.exists()) {
+                
+	        	try {
+	 	           
+		        	String  cmd2 = " SELECT pi.pilt ,  pildityyp FROM firma34.artpilt pi where pi.toode='" + prodid + "'"  ;
+	        		    Statement st = con.createStatement();
+	         		    ResultSet	      rs = st.executeQuery(cmd2);
+	        	        while (rs.next()) {
+	                      byte[] bufbyte = rs.getBytes("pilt");
+	                      String laiend = rs.getString("pildityyp").trim().toLowerCase();
+	                      if(bufbyte != null){
+	                    	  System.out.println(cmd2);
+	                         	  FileOutputStream fos = new FileOutputStream(filename); 
+	                        		    fos.write(bufbyte);
+	                        		    fos.close();
+	                          }
+	                      }
+	                      
+	        	    rs.close();
+	        	    st.close();
+	        	  
+	        	}catch(Exception e) {
+	        		System.out.println(filename);
+	        		e.printStackTrace();
+	        	}
+	      	      }
+	           }
+			 }
+			 	connectionDown();
+		 }
 		
 		
 		  private void makePictureCat(){
-		  	    
-		    	
-		    	String pictssou = parent.getProps().getProperty("pict.dir");
+		
+			  String pictssou = parent.getProps().getProperty("pict.dir");
 		  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
 		  	   
 		  	 try {
@@ -105,19 +152,19 @@ public class EevaKevamerDBDriver extends AbstractDBDriver implements BulkUpdater
 	        	 	 File res2 = new File (pictspda);
 		             String[] ff2 = res2.list();
 		         	 for(int i = 0;ff2.length>i;i++){
-		             	(new File ( pictspda + ff2[i])).delete(); 
+		             	//(new File ( pictspda + ff2[i])).delete(); 
 		             }
 //		         	 L�ppes kustutamine 
 		  		 
 		  		 TreeMap prods = this.getProducts(null);
-
+		  		 
 		         StringBuffer buf = new StringBuffer();
 		         Iterator enume = prods.keySet().iterator();
 		    
 		         while (enume.hasNext()) {
 		    	    	String asi = (String)enume.next();
 		    	    	Product prod = (Product)prods.get(asi);
-		    	    	String toode = prod.getID().trim();  
+		    	    	String toode = prod.getID().trim().replace("/", "_");  
 		               if(toode.length() > 0){
 		                	
 		    	   	  res2 = new File (pictssou);
@@ -128,13 +175,13 @@ public class EevaKevamerDBDriver extends AbstractDBDriver implements BulkUpdater
 		               // System.out.println("pilt olemas " + ff2[i]);
 		            	File in = new File ( pictssou + ff2[i]); 
 		              	if(in.isFile()){
-		              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
+		              	File inpda = new File ( pictspda + toode+ ".jpg");
 		              	if(!inpda.exists()){
 		                  	Converter.shrinkAndCopyFile(in,inpda,400);
-	              	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-		                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-		                    	}
-	              	     }  
+	              	     }
+		              	 if(buf.toString().indexOf(toode+".jpg;"  + inpda.length()) == -1){
+	                    		buf.append(toode+".jpg;"  + inpda.length() + "\n");
+	                    	}
 		              	}
 		                 }
 		               }
@@ -752,7 +799,7 @@ try{
                          
                          if(goes) {
                         	 products.put(nimetus, prod);
-                        	 
+                        	 prods.add(prod.getID());
                          }
 
                       }
@@ -771,6 +818,7 @@ System.out.println("tooted " + products.size());
         return products;
     }
 
+    HashSet prods = new HashSet();
     /**
      * Method declaration
      *

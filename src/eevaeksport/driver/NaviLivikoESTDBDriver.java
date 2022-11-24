@@ -785,10 +785,7 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
 			    	 contacted.add(key);
 			    }
 			   
-			    
-			    if(key.equals("S7774AZ")) {
-			    	System.out.println("S7774AZ " + agentname + " " + gr.toString());
-			    }
+		
 	         	
 			} catch (JSONException e) {
 			  e.printStackTrace();
