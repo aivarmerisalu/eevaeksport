@@ -586,7 +586,11 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 			root.appendChild(header);
 			
 			String cust = order.getCompany();
-            String kood = cust.substring(0,cust.lastIndexOf("_"));
+			 String kood = cust;
+			 if(kood.indexOf("_") != -1) {
+				 kood = cust.substring(0,cust.lastIndexOf("_"));
+			 }
+           
 			String lisa = "";
 			if(!cust.endsWith("_")) {
 				lisa = cust.substring(cust.lastIndexOf("_")+1);

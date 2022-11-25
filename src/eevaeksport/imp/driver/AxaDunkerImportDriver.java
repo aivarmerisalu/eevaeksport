@@ -398,10 +398,44 @@ public class AxaDunkerImportDriver
 	        	
 	        }
 	       
+	        
+	        boolean tagastus = false;
+		 	 Vector lin = order.getOrderLines();
+	        
+	        int nega = 0;
+		 	 for (int i = 0; i < lin.size(); i++) {
+		 		OrderLine ol = (OrderLine) lin.elementAt(i);
+		 		if(ol.getKogus() < 0 && (order.getStatus() == 5 || order.getStatus() == 4 || order.getStatus() == 2)){
+		 			nega++;
+		 		}
+		 	 }  
+		
+		 	
+		 	 
+		 	 if(nega == lin.size()){
+			    	tagastus = true;
+			    }
+		 	 
+		 	 
+		 	  boolean repr = false;
+		 	 	 for (int i = 0; i < lin.size(); i++) {
+		 	 		OrderLine ol = (OrderLine) lin.elementAt(i);
+		 	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0.1 && (order.getStatus() == 5 || order.getStatus() == 4)){
+		 	 			repr = true;
+		 	 			tagastus = false;
+		 	 		}
+		 	 	 } 
+	        
 	         
 	         String sep = ",";
 	         String lineSep = System.getProperty("line.separator");
-	         sb.append("tellimus" + lineSep);
+	         String type = "tellimus";
+	         
+	         if( repr ) {
+	        	 type = "ymberhindlus";
+	         }
+	         
+	         sb.append(type + lineSep);
 
 	         sb.append("tellija.regnr:" + sep  + ""+ lineSep);
 	         sb.append("tellija_kood:" + sep  + order.getCompany() + lineSep );
@@ -447,11 +481,7 @@ public class AxaDunkerImportDriver
 	          
 	          sb.append( sep +  "0" );
 
-	          double disc = ol.getDiscount();
-	          if (disc < 0){
-	            disc = 0;
-	          }
-
+	        
 	          String text = "";
 	          
 	          if(ol.getPartii() != null && ol.getPartii().trim().length() > 0){
@@ -459,6 +489,15 @@ public class AxaDunkerImportDriver
 	          }
 	          
 	          sb.append( sep +  text );
+	          
+	          if(repr) {
+	        	  double disc = ol.getDiscount();
+		          if (disc < 0){
+		            disc = 0;
+		          }
+
+	        	  sb.append( sep +  disc );
+	          }
  
 	          sb.append(lineSep);
 	 
