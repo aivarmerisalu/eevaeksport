@@ -284,13 +284,14 @@ Connection ccc = DriverManager.getConnection(url + "saf"
          }
      
          String	sql = "INSERT INTO [2015_Tobis$MOFF Prekiu krepselio eilute] ([Krepselio Nr],[Eilutes Nr], [Prietaiso Nr],[Prekes Nr]," +
-         		"    [Kiekis],[Dovana],[Nuolaidos proc_])" +
+         		"    [Kiekis],[Dovana],[Nuolaidos proc_],[Unit Of Measure Code],[Ret_ From ILE No_],[End Customer Discount %],"
+         		+ "[End Customer price],[Uzs_Eil_Nr_],[KS prekes Nr],[Suma],[Suma su PVM],[Aprasas],[Kaina])" +
              " VALUES( " +
                salesid + "," +
                counter + ",'MS-" +
                agent + "',?," +
                kogus + "," +
-               alex +"," + ale + ")";
+               alex +"," + ale + ",'',0,0,0,0,'',0,0,'',0)";
 System.out.println(sql);
                log.info("SALES_LINE_SQL: " + sql);
                PreparedStatement st2 = con3.prepareStatement(sql);
@@ -431,14 +432,25 @@ System.out.println(sql);
 		}
 
         String  sql = "INSERT INTO [2015_Tobis$MOFF Uzsakymu krepselis] ([Nr],[Prietaiso Nr],[Pirkejo Nr],[Registravimo data],[Merisoft]," +
-        		" [Nuoroda],[External Document No_],[Sandelys],[Document Type],[ShipMode],[SalesPersoncode],[Order source]) " +
+        		" [Nuoroda],[External Document No_],[Sandelys],[Document Type],[ShipMode],[SalesPersoncode],[Order source],[Order Date],[Shipment Date],[Invoice To Payer],[Suma]"
+        		+ " ,[Suma su PVM], [Importuota], [Uzsakymo Nr], [Uzsakymo Sukurimo data],[Uzsakymo Sukurimo laikas],[Naujas],[WEB B2B],[End Cust_ Due Date],[Payment Method Code],"
+        		+ " [Prices include VAT],[Your Reference],[Coupon Code],[Coupon Amount],[ShippingCost],[Direct Delivery via Payer],"
+        		+ "[Payer No_],[End_Cust_ Paym_Method],[Ship-To Name],[Ship-To Name 2],[Ship-To Address],\r\n" + 
+        		"[Ship-To Address 2],[Ship-To City],[Ship-To Post Code],[Ship-To Country],[Ship-To VAT Reg_ No_],\r\n" + 
+        		"[Ship-To Phone],[Ship-To e-mail],[Bill-To Name],[Bill-To Name 2],[Bill-To Address],\r\n" + 
+        		"[Bill-To Address 2],[Bill-To City],[Bill-To Post Code],[Bill-To Country],[Bill-To Reg_ No_],\r\n" + 
+        		"[Bill-To VAT Reg_ No_],[Reply-To email],[Ship-To Info Modified],[Payer Info Modified],[StockMgt Order],[DeliveryDate],[Priority],[Customer No_] ) " +
                 " VALUES ( " + salesid + ",'MS-" + agent + "','" + custid + "',cast(? as date),1,'"+ tekst.replaceAll("'", " ")+"','" +  
-              ref + "','" + ladu  + "'," + status + ",'" + smode + "','" + order.getAgent() + "','MOB')";
+              ref + "','" + ladu  + "'," + status + ",'" + smode + "','" + order.getAgent() + "','MOB',(CAST('1753-01-01 00:00:00.000' AS DateTime)),"
+              		+ "(CAST('1753-01-01 00:00:00.000' AS DateTime)),0,0,0,'','',(CAST('1753-01-01 00:00:00.000' AS DateTime)),(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',0,(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',1,'','',0,0,0,"
+              		+ " '','','','','','','','','','','','','','','','','','','','','','',0,0,0,cast(? as date),0,'')";
 
      log.info("addInvoiceHeader2: " + sql);
      System.out.println("addInvoiceHeader2: " + sql);
          PreparedStatement stmt2 = con6.prepareStatement(sql);
          stmt2.setTimestamp(1, new java.sql.Timestamp(cal.getTimeInMillis()));
+         stmt2.setTimestamp(2, new java.sql.Timestamp(cal.getTimeInMillis()));
+
          String aiai = parent.getProps().getProperty("testing");
          if(aiai != null && aiai.equals("true")){
       	   
