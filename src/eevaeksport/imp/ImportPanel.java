@@ -7367,7 +7367,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	        
 	        	 	try{
 	       	              
-	           	ean = getNode(rida, "GTIN").getFirstChild().getNodeValue();//ol.getPartnerProdID();
+	           	ean = getNode(rida, "GTIN").getFirstChild().getNodeValue().trim();//ol.getPartnerProdID();
 	         System.out.println("toode "+ean);
 	         
 	      	}catch(Exception e ){

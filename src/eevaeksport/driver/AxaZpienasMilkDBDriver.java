@@ -148,20 +148,20 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 	  
 	  
 	    String   cmd = " select tt.klient as klient,  tt.stationid , cast(tt.rec as varchar)  as dok \r\n" + 
-	    		"                                                        ,(tt.kokku) as koik,  tt.kuup, tt.riebsta as fatsta ,tt.baltsta as protsta, tt.rieb as fat ,tt.balt as prot    from \r\n" + 
-	    		"                                                       ( select ost.codefrom as klient,ost.stationid,ost.typefrom, ost.purchqty as kokku ,(ost.recid) as rec ,  ost.transdate as kuup, purchqty  as purchqty,   \r\n" + 
-	    		"                                                       (Select top 1 pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchTo  \r\n" + 
-	    		"                                                       and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'RP' and  vendaccount_bbs = ost.codefrom) as riebsta ,\r\n" + 
-	    		"                                                                 (Select top 1  pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchTo    \r\n" + 
-	    		"                                                       and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'BP' and  vendaccount_bbs = ost.codefrom) as baltsta ,\r\n" + 
-	    		"                                                        (Select top 1 pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchFrom  \r\n" + 
-	    		"                                                       and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'RP') as rieb ,\r\n" + 
-	    		"                                                                 (Select top 1  pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchFrom   \r\n" + 
-	    		"                                                       and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'BP') as balt  from  BBsMilkJournalTrans ost inner join bbsMilkJournalTable jou\r\n" + 
-	    		"													   on ost.JournalID = jou.JournalID and JournalType=1\r\n" + 
-	    		"                                                       where ost.dataareaid ='zp' and ost.transdate > getdate() -21  and purchqty  != 0  and ost.smssentdatetime < getdate()-22 \r\n" + 
-	    		"													   ) as tt \r\n" + 
-	    		"                                                                  where ISNUMERIC(tt.rieb)= 1 or   tt.typefrom = 0  order by 1,2 desc,3 ";
+	    		"         ,(tt.kokku) as koik,  tt.kuup, tt.riebsta as fatsta ,tt.baltsta as protsta, tt.rieb as fat ,tt.balt as prot    from \r\n" + 
+	    		"         ( select ost.codefrom as klient,ost.stationid,ost.typefrom, ost.purchqty as kokku ,(ost.recid) as rec ,  ost.transdate as kuup, purchqty  as purchqty,   \r\n" + 
+	    		"        (Select top 1 pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchTo  \r\n" + 
+	    		"       and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'RP' and  vendaccount_bbs = ost.codefrom) as riebsta ,\r\n" + 
+	    		"      (Select top 1  pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchTo    \r\n" + 
+	    		"       and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'BP' and  vendaccount_bbs = ost.codefrom) as baltsta ,\r\n" + 
+	    		"       (Select top 1 pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchFrom  \r\n" + 
+	    		"       and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'RP') as rieb ,\r\n" + 
+	    		"     (Select top 1  pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchFrom   \r\n" + 
+	    		"      and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'BP') as balt  from  BBsMilkJournalTrans ost inner join bbsMilkJournalTable jou\r\n" + 
+	    		"		 on ost.JournalID = jou.JournalID and JournalType=1\r\n" + 
+	    		"      where ost.dataareaid ='zp' and ost.transdate > getdate() -21  and purchqty  != 0  and ost.smssentdatetime < getdate()-22 \r\n" + 
+	    		"		) as tt \r\n" + 
+	    		"     where ISNUMERIC(tt.rieb)= 1 or   tt.typefrom = 0  order by 1,2 desc,3 ";
 	    
 	    
 	    if (isDebug()) System.out.println(cmd);
@@ -191,21 +191,34 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 		         String p = "-";
 		         String a = "-";
 		         
+		         double fatSta = rs.getDouble("fatsta");	
+		         double protSta = rs.getDouble("protsta");
+		         double fat = rs.getDouble("fat");	
+		         double prot = rs.getDouble("prot");
 		         
 		         if(stati) {
-		        	 double fatSta = rs.getDouble("fatsta");	
-			         double protSta = rs.getDouble("protsta");
+		        	   if(fatSta == 0) {
+		        		   fatSta = fat;
+		        	   }
+		        	   if(protSta == 0) {
+		        		   protSta = prot;
+		        	   }
+		        	 
 			         double arvest = kogus *Converter.Round((float)(1+(fatSta-3.4)*0.178+(protSta-3)*0.267),3); 
-			         
 			            a =  NF.format(arvest);
 				        f =  NF.format(fatSta);
 				        p =  NF.format(protSta);
 		         
 		         } else {
 		        	 try {
-			        	 double fat = rs.getDouble("fat");	
-				         double prot = rs.getDouble("prot");
-				         double arvest = kogus * Converter.Round((float)(1+(fat-3.4)*0.178+(prot-3)*0.267),3); 
+			         if(fat == 0) {
+			        	 fat = fatSta;
+			         }
+		        	
+			         if(prot == 0) {
+			        	 prot = protSta;
+			         }
+				      double arvest = kogus * Converter.Round((float)(1+(fat-3.4)*0.178+(prot-3)*0.267),3); 
 				        a =  NF.format(arvest);
 				        f =  NF.format(fat);
 				        p =  NF.format(prot);

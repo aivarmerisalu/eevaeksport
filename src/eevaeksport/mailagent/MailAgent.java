@@ -48,9 +48,20 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 
+import com.amazonaws.util.IOUtils;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.scribejava.apis.LinkedInApi20;
 import com.github.scribejava.apis.MicrosoftAzureActiveDirectory20Api;
 import com.github.scribejava.core.builder.ScopeBuilder;
@@ -105,171 +116,47 @@ public class MailAgent  {
   
   private String time = "";
   
-  
- 
-  private static IAuthenticationResult acquireTokenInteractive(String applicationId, String authEndpoint, String redirectURI, Set<String> SCOPE) throws Exception {
-
-      // Load token cache from file and initialize token cache aspect. The token cache will have
-      // dummy data, so the acquireTokenSilently call will fail.
-      TokenCacheAspect tokenCacheAspect = new TokenCacheAspect("sample_cache.json");
-
-      PublicClientApplication pca = PublicClientApplication.builder(applicationId)
-              .authority(authEndpoint)
-              .setTokenCacheAccessAspect((ITokenCacheAccessAspect) tokenCacheAspect)
-              .build();
-
-      Set<IAccount> accountsInCache = pca.getAccounts().join();
-      // Take first account in the cache. In a production application, you would filter
-      // accountsInCache to get the right account for the user authenticating.
-      IAccount account = accountsInCache.iterator().next();
-
-      IAuthenticationResult result;
-      try {
-          SilentParameters silentParameters =
-                  SilentParameters
-                          .builder(SCOPE, account)
-                          .build();
-
-          // try to acquire token silently. This call will fail since the token cache
-          // does not have any data for the user you are trying to acquire a token for
-          result = pca.acquireTokenSilently(silentParameters).join();
-      } catch (Exception ex) {
-          if (ex.getCause() instanceof MsalException) {
-
-              InteractiveRequestParameters parameters = InteractiveRequestParameters
-                      .builder(new URI(redirectURI))
-                      .scopes(SCOPE)
-                      .build();
-
-              // Try to acquire a token interactively with system browser. If successful, you should see
-              // the token and account information printed out to console
-              result = pca.acquireToken(parameters).join();
-          } else {
-              // Handle other exceptions accordingly
-              throw ex;
-          }
-      }
-      return result;
-  }
 
   
   
  private String  getMSToken() {
 	 String res = null;
 	 
-	 String secret = "vPcy.o_8iA-VSCst-g16fOAB8UGI527EC~"; 
-	 String appID = "4ff5c689-a2ee-427a-a78b-6246855d0b39";
-	 String scope = "https://outlook.office.com/IMAP.AccessAsUser.All";
-	 
-  props.put("appid", appID);
-  props.put("scope", scope);
- 
-//  public static final Set<String> SCOPE = Set.of("Mail.ReadAll","Mail.SendAll");
-  
-/*  IAuthenticationResult authresult = null;
+	 String secret = props.getProperty("mail.secret"); //"I~c8Q~fgLOHhFnFcIe2RHUSX6HWlPHXN8fon9b4Q"; 
+	 String tenantID = props.getProperty("mail.tenantID"); //"bcf61030-52c2-4048-9e18-042d8a0c856f";
+	 String clientID =  props.getProperty("mail.clientID"); //"075984fb-65fc-45e1-9a26-168935061542";
+	
   try {
-      
-    
-    
-      String scopes[]=scope.split(",");
-      Set<String> SCOPE = new HashSet<String>();
-      SCOPE.add("https://outlook.office.com/IMAP.AccessAsUser.All");
-     
-      String authEndpoint="https://login.microsoftonline.com/" + secret + "/oauth2/v2.0/authorize";
-      String redirectURI=  "http://localhost" ; 
-    		  
-    		  //prop.getProperty("redirectURI");
-      
-      //applicationId=xxxxyyy
-    		 // authEndpoint=
-    		  //redirectURI=http://localhost
-    		  //scopes=https://outlook.office365.com/SMTP.Send,https://outlook.office365.com/Mail.Read,https://outlook.office365.com/Mail.Send
-
-
-      authresult = acquireTokenInteractive(appID,authEndpoint,redirectURI, SCOPE);
-    System.out.println("uhuu " + authresult.accessToken());
-    
-  
-            
-  } catch (Exception e) {
-      e.printStackTrace();
-  }
-  System.exit(0); */
-  
-  ScopeBuilder sp = new ScopeBuilder();
-  sp.withScope("offline_access");
-  sp.withScope("IMAP.AccessAsUser.All");
-  sp.withScope("SMTP.Send");
-	 try {
-		//  final OAuthRequest request = new OAuthRequest(Verb.GET, "https://graph.microsoft.com/v1.0/me");
-		  final OAuth20Service service = new ServiceBuilder(appID)
-	                .apiSecret(secret)
-	                .defaultScope(sp)
-	               // .defaultScope("SMTP.Send")
-	              
-	               // .callback("https://outlook.office.com/IMAP.AccessAsUser.All")
-	                .build(MicrosoftAzureActiveDirectory20Api.instance());
-		 
-		  final String authorizationUrl = service.getAuthorizationUrl();
-	      
-	        System.out.println(authorizationUrl);
-	        String url = authorizationUrl;
-			URL urlst = null;
-			try {
-				urlst = new URL(url);
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-			
-		
-			
-			HttpsURLConnection	 https = (HttpsURLConnection) urlst.openConnection();
-			
-            String code0 = "";
-			
-			InputStream is = https.getInputStream();
-			BufferedReader r = new BufferedReader(new InputStreamReader(is));
-			try {
-			    while (r.readLine() != null) {
-			        code0 = code0 + (r.readLine());
-			    }  
-			 } catch (IOException e) {
-			    // TODO Auto-generated catch block
-			    e.printStackTrace();
-			 }
-	        
-			System.out.println("code0 " + code0);
-			System.out.println(authorizationUrl);
-			
-	        System.out.println("And paste the authorization code here");
-	        System.out.print(">>");
-	        final Scanner in = new Scanner(System.in, "UTF-8");
-	        System.out.println("=== "  + "'s OAuth Workflow ===");
-	        System.out.println();
-	        // Obtain the Authorization URL
-	        System.out.println("Fetching the Authorization URL...");
-	        final String code = in.nextLine();
-		 
-		 System.out.println("Trading the Authorization Code for an Access Token...");
-	        final OAuth2AccessToken accessToken = service.getAccessToken(code);
-	        System.out.println("Got the Access Token!");
-	        System.out.println("(The raw response looks like this: " + accessToken.getAccessToken() + "')");
-		res =   accessToken.getAccessToken();
-		
-		  
-		//  service.execute(request);
-		 
-	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+	return getAuthToken(tenantID,clientID,secret);
+   } catch (ClientProtocolException e2) {
+	e2.printStackTrace();
+   } catch (IOException e2) {
+	e2.printStackTrace();
+   }
 	 
 	 return res;
  }
    
    
+ 
+ public String getAuthToken(String tanantId,String clientId,String client_secret) throws ClientProtocolException, IOException {
+	    CloseableHttpClient client = HttpClients.createDefault();
+	    HttpPost loginPost = new HttpPost("https://login.microsoftonline.com/" + tanantId + "/oauth2/v2.0/token");
+	    String scopes = "https://outlook.office365.com/.default";
+	    String encodedBody = "client_id=" + clientId + "&scope=" + scopes + "&client_secret=" + client_secret
+	            + "&grant_type=client_credentials";
+	    loginPost.setEntity(new StringEntity(encodedBody, ContentType.APPLICATION_FORM_URLENCODED));
+	    loginPost.addHeader(new BasicHeader("cache-control", "no-cache"));
+	    CloseableHttpResponse loginResponse = client.execute(loginPost);
+	    InputStream inputStream = loginResponse.getEntity().getContent();
+	    byte[] response = IOUtils.toByteArray(inputStream);
+	    ObjectMapper objectMapper = new ObjectMapper();
+	    JavaType type = objectMapper.constructType(
+	            objectMapper.getTypeFactory().constructParametricType(Map.class, String.class, String.class));
+	    Map<String, String> parsed = new ObjectMapper().readValue(response, type);
+	    return parsed.get("access_token");
+	}
+ 
    
   public MailAgent() throws IOException{
 	  PropertyConfigurator.configure("log4j.properties");
@@ -427,56 +314,39 @@ public class MailAgent  {
     socketFactory.setTrustAllHosts(true);
      
      Properties prop = new Properties();
-   //  prop.put("mail.imap.ssl.enable", "true"); // required for Gmail
-  //   prop.put("mail.imap.sasl.enable", "true");
-   //  prop.put("mail.imap.sasl.mechanisms", "XOAUTH2");
-    // prop.put("mail.imap.auth.login.disable", "true");
-    // prop.put("mail.imap.auth.plain.disable", "true");
-     
-     
-     
-  // props.put("mail.imap.ssl.enable", "true"); // required for Gmail
-   /*  prop.put("mail.smtp.auth.xoauth2.disable","false");
-     prop.put("mail.smtp.sasl.enable", "true");
-     prop.put("mail.imap.auth.mechanisms", "XOAUTH2");
-     prop.put("mail.smtp.auth.mechanisms","XOAUTH2");
-     prop.put("mail.smtp.port", "587");
-     prop.put("mail.smtp.starttls.enable", "true");*/
-     
-     prop.put("mail.smtp.auth", "true");
-     prop.put("mail.transport.protocol", "smtp");
-     prop.put("mail.smtp.starttls.enable", "true");
-     prop.put("mail.smtp.auth.mechanisms", "XOAUTH2");
-     prop.put("mail.smtp.auth.login.disable","true");
-     prop.put("mail.smtp.auth.plain.disable","true");
-     prop.put("mail.debug.auth", "true");
-     
-     //prop.put("mail.transport.protocol","smtp");
-    // prop.put("mail.smtp.host","smtp.office365.com"); 
-    
-     prop.put("mail.debug",true);
-     
-     
 
-   //  props.put("mail.imap.ssl.enable", "true"); // required for Gmail
-   //  prop.put("mail.imap.sasl.enable", "true");
-   //  prop.put("mail.imap.sasl.mechanisms", "XOAUTH2");
-    // prop.put("mail.imap.auth.login.disable", "true");
-     // prop.put("mail.imap.auth.plain.disable", "true");
-   
     
-     String token = props.getProperty("oauth.accesstoken");
+    // prop.put("mail.debug",true);
+     
+     
+     String token = null; 
      
     if("outlook.office365.com".equals( props.getProperty("pop3.host"))) {
     	token = getMSToken();
     }
-     
-    System.out.println("token" + token);
     
-    Session session = Session.getInstance(prop);
-     store = session.getStore("imaps");
-     store.connect(props.getProperty("pop3.host"), props.getProperty("pop3.user"), token);
+
+     prop.put("mail.store.protocol", "imap");
+     prop.put("mail.imap.host", props.getProperty("pop3.host"));
+     prop.put("mail.imap.port", "993");
+     prop.put("mail.imap.ssl.enable", "true");
+     prop.put("mail.imap.starttls.enable", "true");
+     prop.put("mail.imap.auth", "true");
+     prop.put("mail.imap.auth.mechanisms", "XOAUTH2");
+     prop.put("mail.imap.user", props.getProperty("pop3.user"));
+   //  prop.put("mail.debug", "true");
+    // prop.put("mail.debug.auth", "true");
+ 
+     // open mailbox....
+    
+     Session session = Session.getInstance(prop);
+    // session.setDebug(true);
+      store = session.getStore("imap"); 
+      store.connect(props.getProperty("pop3.host"), props.getProperty("pop3.user"), token);
      
+
+     
+   
      
 } else if (PROTOCOL.equals("imapssl")){
 	
@@ -555,9 +425,10 @@ public class MailAgent  {
     }
 
     Folder folder;
-    if (PROTOCOL.equals("imap") || PROTOCOL.equals("imaps") || PROTOCOL.equals("imapssl")){
+    if (PROTOCOL.equals("imap") || PROTOCOL.equals("imaps") || PROTOCOL.equals("imapssl") 
+    		|| PROTOCOL.equals("imapoath")){
       folder = (IMAPFolder)store.getFolder("INBOX");
-    }	else {
+    } else {
       folder = (POP3Folder)store.getFolder("INBOX");
     }
 
@@ -566,12 +437,16 @@ public class MailAgent  {
      if(logi){
     log(time + " Number of messages in EMAIL Server : " + msgs.length);
      }
+    // System.out.println("msg. subject " + msgs.length );
     for (int i = 0 ; i < msgs.length ; i++){
       Message msg = msgs[i];
       String subject = null;
       try{
     	  subject = msg.getSubject();//siis tee subjekti  
-    	  System.out.println("msg. subject " + msg.getSubject() + " " + msg.getDescription() + " "+msg.getContentType());
+    	  System.out.println("msg. subject " + msg.getSubject() );
+       	 // System.out.println("msg. subject " + msg.getDescription());
+       	//  System.out.println("msg. subject "  + " "+msg.getContentType());
+       	 
       }catch (Exception eee ){
     	  eee.printStackTrace();
     	  log(eee.toString());
@@ -580,6 +455,8 @@ public class MailAgent  {
      
       File f = null;
       log(time + " Subject : " + subject);
+      
+    //subject = "E-ARVE";
       
       if("true".equals(props.getProperty("pop3.nosubject"))){
     	  if(subject == null || subject.equals("null")){
@@ -621,16 +498,18 @@ public class MailAgent  {
     				subject.trim().toLowerCase().indexOf(props.getProperty("pop3.subjectcheck2").toLowerCase()) != -1 
     				|| subject.trim().toLowerCase().startsWith(props.getProperty("pop3.subjectcheck3").toLowerCase()) || pdf )){
      
+    	System.out.println("class instance00 " + msg.getFileName());
+    	
     	Object o = null;
     	try{
     		o = msg.getContent();
     	}catch(Exception k){
     		
     	}
+    	  
+      
     	if(o != null){
-    		
     	
-        
         System.out.println("class instance" + o.getClass().toString());
         if(logi){
               log(time + " class instance" + o.getClass().toString());
@@ -974,6 +853,8 @@ if("true".equals( props.getProperty("addtime"))){
         }
       }
     }
+    
+   
       msg.setFlag(Flags.Flag.DELETED, true);
       //folder.expunge();
 

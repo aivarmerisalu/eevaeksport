@@ -367,7 +367,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 			
 	 	 String summa = NF.format(rs.getDouble("summa"));
 	 	 
-	  	oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
+	
 	 	
 		    String sql3 = "  select kiekis as amount,  r.mato_vien as unit  , pavad as name \r\n" + 
 		    		"		    			    						    FROM   apyv_gr r INNER JOIN prekes t ON t.preke = r.preke\r\n" + 
@@ -377,21 +377,25 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 		    PreparedStatement stmt3 = cc.prepareStatement(sql3);
 		
 		       ResultSet  rs2 = stmt3.executeQuery();
-		   
+		      boolean  goes = false;
 			    while(rs2.next()){
-			    	sb.append("[" +NF.format(rs2.getDouble("amount"))+"] " 
-			       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").toLowerCase().replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
+			    	 sb.append("[" +NF.format(rs2.getDouble("amount"))+"] " 
+			          + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").toLowerCase().replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
+			         goes = true;
 			    }
 		   
 			    rs2.close();
 		        stmt3.close();
 		        cc.close();
-		        
-		       if(res.get(nimi) != null){
-		    	   res.put(nimi,res.get(nimi) +" | |" + sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
-		   	     } else {
-		    	   res.put(nimi, sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
-		   	   }
+		        if(goes) {
+		          	oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
+		        	 if(res.get(nimi) != null){
+				    	   res.put(nimi,res.get(nimi) +" | |" + sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
+				   	     } else {
+				    	   res.put(nimi, sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
+				   	     }
+		        }
+		      
 		   	sb = new StringBuffer();
 		       
 		}
