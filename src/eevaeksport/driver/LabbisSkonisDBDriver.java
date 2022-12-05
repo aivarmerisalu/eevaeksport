@@ -1220,7 +1220,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
      try {
      	String cmd = " SELECT  distinct t.KOD AS toode,t.PAV AS nimi, t.RK3 AS myygihind,R0 AS grupp,t.GRP_KOD AS grupp2  " +
 		" ,t.VNT AS unit, (case when BARKOD != '' then BARKOD else  user_EANKodasDidmenai end) AS ean,'' AS status ,0 AS maxdiscount, " +
-		"	 '' AS type, PKIEKIS AS kastis,  NETO AS kaal, MOKEST AS vat  ,  RK1 as jaehind  " +
+		"	 '' AS type, PKIEKIS AS kastis,user_RetailSoldInPacks as optimum , NETO AS kaal, MOKEST AS vat  ,  RK1 as jaehind  " +
 		"	 , t.R1 as goes ,t.R5 as newprod ,t.r1 ,sutart FROM dba.[son] t WHERE  " +
 		"	   t.R1='DID'  ORDER BY t.[KOD]"; 
      	
@@ -1286,9 +1286,13 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
                 double	cases = rs.getDouble("kastis");
                 	if(cases>0){
                       prod.setInCases(cases);
+                      int uu = rs.getInt("optimum");
+                      if(uu == 1) {
+                     	 prod.setOptAmountInUnits(cases);
+                      }
                 	}
 
-
+            
 
                  	 String vat = rs.getString("vat");
                  	 
