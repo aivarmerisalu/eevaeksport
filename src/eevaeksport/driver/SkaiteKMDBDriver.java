@@ -743,6 +743,13 @@ Statement st = null;
 			"	   (CONVERT (date, GETDATE()) between   cast(sut.DataNuo_Int as datetime) and "
 			+ " cast(sut.DataIki_Int as datetime) or (sut.DataNuo_Int = 0 and sut.DataIki_Int = 999999)) and sut.ArAsortimentas = 0 and SandeliaiID != 214185";
      
+        try {
+			getDebt2();
+		} catch (SQLException e1) {
+			
+			e1.printStackTrace();
+		}
+        
         HashMap lepMap = new HashMap();
         HashMap baasMap = new HashMap();
         HashMap fixMap = new HashMap();
@@ -878,7 +885,12 @@ Statement st = null;
 		 
 		   if(payid != null){
 				  cust.setPayer(payid);
-	             // cust.setRegnr(payer);
+	            
+				  if(blist.contains(payid)) {
+				//	  System.out.println("LÄHEB BLOKKI " + cust.getName());
+					  cust.setSalesBlockT(true);
+				  }
+				  
 	          }
 		   
 		   String nim = rs.getString("nimi").replaceAll("\""," ").trim();
@@ -1132,10 +1144,21 @@ Statement st = null;
         return dealers;
       }
 
-    
-    
     public Vector getDebt(String agentCode) throws SQLException{
-      Vector list = new Vector();
+    	if(dlist == null) {
+    		return getDebt2();
+    	}
+    	return dlist;
+    }
+    
+    
+    Vector dlist = null;
+    Vector blist = null;
+    
+    
+    public Vector getDebt2() throws SQLException{
+      dlist = new Vector();
+      blist = new Vector();
       String sql = " select  CustomerCode AS klient, billcode AS number,billissuedate+paymenttime AS kuupaev, " + 
 		" (case when OperacijosTipoId =64 then -1 else 1 end)*billamount-paidamount AS summa  , datediff(day,billissuedate+paymenttime ,getdate())as yle ,billissuedate as kuup ,billamount as origsum , payercode as payer from  " +
 	 " (  SELECT     OrderAsID = CONVERT(varchar(20), op.OperacijosId), DeliveredOrderAsID = CONVERT(varchar(20), " + 
@@ -1204,12 +1227,24 @@ Statement st = null;
     	    	        if(origsum != debt.getSum()){
     	    	        	 debt.setTara(origsum);
     	    	        }
+    	    	        
+    	    	        
     	    	        String payer = rs.getString("payer");
     	    	        if(payer != null){
     	    	            debt.setPayerID(payer.trim());
     	     	    	}
     	    	   
-    	    	        list.addElement(debt);	
+    	    	        try {
+    	    	        	int yle = Integer.parseInt(debt.getDue());
+    	    	        	int pv = Integer.parseInt(getParent().getProps().getProperty("overdue.days"));
+    	    	        	if( yle >= pv ) {
+    	    	        		blist.add(debt.getPayerID());
+    	    	        	}
+    	    	        }catch(Exception e) {
+    	    	        	e.printStackTrace();
+    	    	        }
+    	    	        
+    	    	        dlist.addElement(debt);	
     	        }
     	       
     	  }catch (Exception e){
@@ -1220,8 +1255,9 @@ Statement st = null;
       rs.close();
       stmt.close();
       con.close();
-      System.out.println("debtlist size " + list.size());
-      return list;
+      System.out.println("debtlist size " + dlist.size());
+      System.out.println("blocklist size " + blist.size());
+      return dlist;
     }
     
     

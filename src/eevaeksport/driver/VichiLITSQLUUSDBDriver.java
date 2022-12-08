@@ -81,8 +81,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		    pass = getParent().getProps().getProperty("rest.pass");
 		    rcompany = getParent().getProps().getProperty("rest.company");
 		    rcompanyx = getParent().getProps().getProperty("rest.companyx");
-		   
-	  }
+	    }
 
 	  
 
@@ -236,8 +235,8 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	
 	  public Vector getPriceMatrixData(){
 		  
-		  	 String sql =" SELECT  custid, clgroup,prodid, startday, enddate, price from v_VIK_AkcijuKainos where "
-		  	 		+ " len(clgroup) >0 or  len(custid) >0 ";
+		  	 String sql =" SELECT  custid, clgroup,prodid, startday, enddate, price ,discountpct as disc , salespricetype as type  from v_VIK_AkcijuKainos where " + 
+		  	 		"		  	 	 len(clgroup) >0 or  len(custid) >0 ";
 
 		       Vector result = new Vector();
 		         try {
@@ -253,10 +252,12 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		             String prodGroup = null;
 		            
 		         
-		             double disc = 0;
 		             String sdate = rs.getString("startday");
 		             String edate = rs.getString("enddate");
 		             double price = rs.getDouble("price");
+		             double disc = rs.getDouble("disc");
+		             String type = rs.getString("type");
+		             
 		             MatrixLine mline = new MatrixLine();
 
 		             if (custID != null && custID.length() > 0) {
@@ -287,11 +288,13 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		                 mline.setDiscount(disc);
 		               }
 		             
-		             if(price == 0) {
+		             if(price == 0 && disc == 0) {
 		            	 mline.setProdLevel("pr");
-		            	 
 		             }
-
+		             
+                   if(type != null && type.trim().length() > 0) {
+                	   mline.setLineinfo(type.trim());
+                   }
 		          //   if(mline.getPrice() > 0 || mline.getDiscount() > 0){
 		                 result.add(mline);    
 		            // }
@@ -815,7 +818,7 @@ System.out.println(cmd);
 			String ccc =  "select custcode as cust ,Code+ ' ' +name as last from v_VIK_FA ";
 			 
 			 String qqq = "select Agent as agent , Customer  as klient , [Route Code]as day from " +
-			 		"Navision.dbo. [Vičiūnai ir Ko$Route sequence]	 ";
+			 		" [Vičiūnai ir Ko$Route sequence]	 ";
 			 
 			  Connection cone = this.getNewConnection2();
 		    
@@ -1090,7 +1093,9 @@ System.out.println(cmd);
             	  Vector vv = (Vector) freeze.get(customer.getID());
             	  Enumeration enume = vv.elements();
             	  while (enume.hasMoreElements()){
-            		  customer.setInfo(customer.getInfo() + "|" + enume.nextElement());
+            		  String nn = enume.nextElement()+"";
+            		  if(customer.getInfo().indexOf(nn) == -1)
+            		  customer.setInfo(customer.getInfo() + "|" + nn);
             	  }
               }
               
@@ -1098,7 +1103,9 @@ System.out.println(cmd);
             	  Vector vv = (Vector) freeze.get(customer.getPayer());
             	  Enumeration enume = vv.elements();
             	  while (enume.hasMoreElements()){
-            		  customer.setInfo(customer.getInfo() + "|" + enume.nextElement());
+            		  String nn = enume.nextElement()+"";
+            		  if(customer.getInfo().indexOf(nn) == -1)
+            		  customer.setInfo(customer.getInfo() + "|" + nn);
             	  }
               }
 				String yes = rs.getString("debt");
@@ -1563,7 +1570,7 @@ System.out.println(cmd);
 					"    , [Order Multiple] AS optimum, [Minimum Order Quantity] AS minimum , [Country of Origin Code] as origi \r\n" + 
 					"FROM [Vičiūnai ir Ko$Item] t INNER JOIN [Vičiūnai ir Ko$Item 2] t2 ON t.[No_] = t2.[No_]\r\n" + 
 					"	INNER JOIN (SELECT [Item No_], [Unit Price], [Unit of Measure Code], ROW_NUMBER() OVER (PARTITION BY [Item No_] ORDER BY [Starting Date] DESC) AS [Priority]\r\n" + 
-					"	FROM Navision.dbo.[Vičiūnai ir Ko$Sales Price] WHERE [Sales Type] = 2 AND CAST(GETDATE() As Date) BETWEEN [Starting Date] AND ISNULL(NULLIF([Ending Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date))) ) AS sp \r\n" + 
+					"	FROM [Vičiūnai ir Ko$Sales Price] WHERE [Sales Type] = 2 AND CAST(GETDATE() As Date) BETWEEN [Starting Date] AND ISNULL(NULLIF([Ending Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date))) ) AS sp \r\n" + 
 					"	ON t.No_ = sp.[Item No_] AND t.[Base Unit of Measure] = sp.[Unit of Measure Code] AND sp.[Priority] = 1\r\n" + 
 					"    LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] AS vat ON vat.[Item No_] = t.[No_] AND vat.[Code] = 'DĖŽ.'\r\n" + 
 					"    LEFT JOIN [Vičiūnai ir Ko$Sales Line Discount] AS sd ON sd.[Code] = t.[No_] AND [Sales Type] = 1 AND [Sales Code] = 'AGENT' \r\n" + 

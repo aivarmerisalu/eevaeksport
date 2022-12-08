@@ -98,7 +98,46 @@ public class BuitNowacoLTDBDriver extends AbstractDBDriver implements BulkUpdate
   String pass = null;
   String rcompany = null;
     
-  
+  private TreeMap custSuggPrices() {
+	  TreeMap res = new TreeMap();
+	  try {
+		   DataFormatter formatter = new DataFormatter();
+		   Workbook workbook = null;
+	   File f = new File (getExcelDir() + "Rekomenduojamu kainu ataskaita.xlsx");
+	   boolean xs = true;
+	   if(!f.exists()) {
+		   f = new File (getExcelDir() + "Rekomenduojamu kainu ataskaita.xls"); 
+		   xs = false;
+	   }
+	   
+		  FileInputStream	 ff = new FileInputStream(f);
+		if(xs) {
+		     workbook = new XSSFWorkbook((ff));
+		}else {
+			 workbook = new HSSFWorkbook((ff));
+		}
+		Sheet sheet = workbook.getSheetAt(0);
+	      Row row = null; 
+				ff.close();	
+				if(sheet != null){
+				  int yy = sheet.getLastRowNum();
+					
+					for(int i = 0 ; i < yy+1 ;i++){
+						 row = sheet.getRow(i);
+						if(row != null) {
+							
+							String custID = formatter.formatCellValue(row.getCell(0));
+							String prodID = formatter.formatCellValue(row.getCell(2));
+							String price = formatter.formatCellValue(row.getCell(4));
+						  res.put(custID + "|" + prodID , price);
+						}}}
+				
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }
+	//  System.out.println("res " + res.toString());
+	  return res;
+  }
   
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
 	  
@@ -2847,6 +2886,7 @@ try{
    public Vector getCustomerProductsList(String agentCode){
      Vector vec = new Vector();
      HashMap kliendid = new HashMap();
+     TreeMap suggPr = custSuggPrices();
      try {
     String cmd =  "  SELECT  b.klient_id AS klient,r.preke AS toode,(kiekis) AS kogus, (Data) AS lastdate, " + 
     		"    		 kaina as price FROM apyv_gr r " + 
@@ -2864,6 +2904,10 @@ try{
 
              String custID = rs.getString("klient").trim();
                String prodID = rs.getString("toode").trim();
+               String add = "";
+               if(suggPr.get(custID + "|" + prodID) != null) {
+            	   add = " rek:" + suggPr.get(custID + "|" + prodID)+"€";
+               }
                  String lastdate = " ";
                String xx = custID + "_" +prodID;
                  double  amount = rs.getDouble("kogus");
@@ -2876,8 +2920,8 @@ try{
                     double price = rs.getDouble("price");
                
                     Product prod = new Product(prodID);
-                    CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate + "_" + price + "€",price,0,0," ");
-
+                    CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate + "_" + price + "€" + add,price,0,0," ");
+                       
                     if(!olemas.contains(xx)) {
                     	   cust.addProduct(prod,cp,false);
                            kliendid.put(custID, cust);

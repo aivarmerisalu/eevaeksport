@@ -583,53 +583,7 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
     }
 
     
-    private TreeMap getKPHinnad(){
-    	  TreeMap res = new TreeMap();
-    	  String  hk = "79001";
-    	  
-    	 
-    	  
-    	  try{
-    		  
-    		  String baas = "(select PrekiuKainuKategorijosID as hk from NuolaiduKainininkuSudetis " +
-    		  		"where nuolaidukainininkaiid= 1 and DataIki_Int = 999999)";
-    		  
-    		  Connection con = this.getNewConnection();
-    	    PreparedStatement  stmt = con.prepareStatement(baas);
 
-
-    	      ResultSet rs = stmt.executeQuery();
-
-    	      while(rs.next()){
-    	    	hk = rs.getInt("hk") + "";  
-    	      }
-    	      rs.close();
-    	      stmt.close();
-    	      con.close();
-    		  
-    		  String sql = "uspv_Kainininkas '" + hk + "', 'eur' ,0";
-    		  con = getNewConnection();
-    		  CallableStatement  msProcedure = con.prepareCall( sql );
-    		     
-    			
-    	       //  System.exit(0);
-    	         //stmt2.setTimestamp(2, new java.sql.Timestamp(order.getShipCal().getTimeInMillis()));
-    	      ResultSet rs3 = msProcedure.executeQuery();
-    	      while(rs3.next()){
-    	    	  String toode = rs3.getString("prekesid");
-    	    	  String hind = rs3.getString("kaina");
-    	    //  	System.out.println( "Toode " +  toode + " hind " + hind);
-    	      	res.put(toode, hind);
-    	      }
-    	       rs3.close();
-    	       msProcedure.close();
-    	       con.close();
-    	  }catch (Exception e){
-    		 e.printStackTrace();
-    	  }
-    	  
-    	  return res;
-      }
 
 
 

@@ -1059,7 +1059,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
 	            this.customers.add(cust.getID());
    	          
    	       Customer cust2 = new Customer("SKOFFICE1");
-	         cust.setName("SK centrinis ofisas");
+	         cust2.setName("SK centrinis ofisas");
 	        enume = getParent().getAgentsHash().elements();
 	          while (enume.hasMoreElements()) {
 	            Agent a = (Agent) enume.nextElement();
