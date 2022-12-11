@@ -10301,6 +10301,8 @@ client.close();
 			  		
 			  		org.json.JSONArray cc = Converter.getSVDataArray(calAlgus.getTime(), calLopp.getTime(), rcompany, user, pass, false, null, null, "test");
 			  		
+			  		Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
+			  		
 			  		TreeMap prods = new TreeMap();
 			  		for(int z = 0; z < prodsjson.length(); z++) {
 			  			if(prodsjson.getJSONObject(z).has("code") && prodsjson.getJSONObject(z).has("EAN")) {

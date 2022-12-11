@@ -831,8 +831,8 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
         
         String alias = rs.getString("nimelisa");
         if(alias != null && alias.trim().length()>0 && !alias.trim().equals(name)){
-        	if(!name.trim().startsWith(alias.trim()))
-        	name = " " + alias + " " + name ;
+        	//if(!name.trim().startsWith(alias.trim()))
+        	//name = " " + alias + " " + name ;
         }
         
         

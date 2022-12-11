@@ -4349,6 +4349,7 @@ if(ccc.get(Calendar.HOUR_OF_DAY) > 13){
 		//mail.addAttach(f.getAbsolutePath());
 		mail.setSendNotice(false);
 		try {
+			body = "Prekių užsakymas: " + body;
 			mail.setBody(body);
 			if(filename != null){
 				mail.addAttach(filename);
