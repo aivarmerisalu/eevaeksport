@@ -590,15 +590,13 @@ public class HansaSatcomImportDriver
                  
                 if(line.getDiscount() > 0){
               	  double discprice = (100d -line.getDiscount())*line.getPrice()/100d ;
-                sb.append("         <ItemPrice>" + escape(getNF().format(discprice)) + "</ItemPrice>" + ls); 
-              
-                 
-                }
-                
-                if(order.getStatus() == 59 && line.getPrice() > 0 ){//telema variant readprice seadega 
+                  sb.append("         <ItemPrice>" + escape(getNF().format(discprice)) + "</ItemPrice>" + ls); 
+                 } else if(order.getStatus() == 59 && line.getPrice() > 0 ){//telema variant readprice seadega 
                 	   sb.append("         <ItemPrice>" + escape(getNF().format(line.getPrice())) + "</ItemPrice>" + ls); 
                        
-                }
+                  } else {
+              	 // sb.append("         <ItemPrice>" + escape(getNF().format(line.getPrice())) + "</ItemPrice>" + ls); 
+                 } 
                
             
       /*          sb.append("         <VAT>" + ls + "                <VATRate>" +  + "</VATRate>" + ls);

@@ -784,7 +784,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
             " cus.address, DunVisitDay AS visit ,agent AS agent , numofdays AS term, blocked AS block ,  " +
             " (select max (blocked) from custtable cc where cc.invoiceaccount=cus.invoiceaccount and cc.dataareaid = 'vir')  " +
             " as payerblock ,phone + ', ' + CellularPhone as info , PriceGroup as grupp ,dunorderinfomail  as confmail, '' as abiagent, ''" +
-            " as abipaev ,  (select  abi.CreditMax  from DunCustContractTable abi where (case when len(cus.invoiceaccount)=0 then cus.accountnum else " + 
+            " as abipaev ,  (select top 1 abi.CreditMax  from DunCustContractTable abi where (case when len(cus.invoiceaccount)=0 then cus.accountnum else " + 
             " cus.invoiceaccount end )= abi.CustAccount " +
             " AND abi.Status=1 and abi.dataareaid='du2') as credit ,cus.affiliatedgroup as chain" +
             " FROM custtable cus left outer JOIN paymterm " +

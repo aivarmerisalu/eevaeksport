@@ -230,7 +230,7 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
     public String getSaveStockInfo(){
         
   	  String  cmd = "SELECT  I17_KODAS_PS AS toode, I17_KIEKIS-I17_ATIDUOTA-I17_REZERVAS AS STOCK , I17_KODAS_IS AS LADU  " + 
-            "   from i17_vpro where I17_KODAS_IS in ('02') and I17_KIEKIS > 0  ORDER BY I17_KODAS_PS" ;
+            "   from i17_vpro where I17_KODAS_IS in ('02','18') and I17_KIEKIS > 0  ORDER BY I17_KODAS_PS" ;
 
 
          if (isDebug()) System.out.println(cmd);
@@ -361,7 +361,7 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
         try {
 
           String  sql = " SELECT  I17_KODAS_PS AS toode, I17_KIEKIS-I17_ATIDUOTA-I17_REZERVAS AS STOCK , I17_KODAS_IS AS LADU  " + 
-            "   from i17_vpro where I17_KODAS_IS in ('02') and I17_KIEKIS > 0  ORDER BY I17_KODAS_PS" ;
+            "   from i17_vpro where I17_KODAS_IS in ('02','18') and I17_KIEKIS > 0  ORDER BY I17_KODAS_PS" ;
 //and n17_kodas_ks not like '%*'
              if (isDebug()) System.out.println(sql);
              connectionUp(url2);

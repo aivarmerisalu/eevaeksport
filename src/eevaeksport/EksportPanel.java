@@ -3,6 +3,7 @@ package eevaeksport;
 import java.awt.BorderLayout;
 
 
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -58,6 +59,7 @@ import eevaeksport.driver.BulkUpdater;
 import eevaeksport.driver.Discounter;
 import eevaeksport.driver.Manager;
 import eevaeksport.driver.MustDister;
+import eevaeksport.driver.WebReporter;
 import eevaeksport.driver.Outputter;
 import eevaeksport.driver.PictureMaker;
 import eevaeksport.driver.FixLoader;
@@ -228,6 +230,9 @@ public class EksportPanel extends JPanel implements ActionListener,
         if(parent.isFixReporter()) {
             createFixreport();	
            }
+        if(parent.isWebReporter()) {
+            createWebreport();	
+           }
         
         if (parent.isMakePicture2()){
         	makePictures2();
@@ -374,6 +379,9 @@ public class EksportPanel extends JPanel implements ActionListener,
     
     private void createFixreport(){
     	((FixReporter)driver).FixReporter();
+    }
+    private void createWebreport(){
+    	((WebReporter)driver).WebReporter();
     }
     
     private void makePictures2(){

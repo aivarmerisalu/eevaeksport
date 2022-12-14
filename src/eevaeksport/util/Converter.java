@@ -4747,7 +4747,10 @@ try{
 	public static void loadUploadedFiles(Date algus, Date lopp ,String company, String user , String pass){
 		
 		try {
-			
+			File f = new File("svdata");
+			if(!f.exists()) {
+				f.mkdir();
+			}
 			 eevaeksport.util.ReportingService serv = new ReportingService();
 			  serv.user =  user;
 				serv.pass = pass;
@@ -4755,7 +4758,7 @@ try{
 	
 			
 				JSONArray array = serv.getUploadedFileList(algus,lopp);
-				Converter.saveFile(  "uploadedfileslist.json" , array.toString());
+				Converter.saveFile(  f.getPath() + "/uploadedfileslist.json" , array.toString());
 			
 			
 					serv.closeClient();	
@@ -4767,6 +4770,79 @@ try{
 		
 	}
 	
+	 public static TreeMap makeWebFilesTree(Date algus, Date lopp ,String company, String user , String pass) {
+			
+		 
+		 TreeMap res = new TreeMap();
+		   Converter.loadUploadedFiles(algus, null ,company,  user ,  pass);
+		
+		  StringBuffer sb  = new StringBuffer();
+		
+			 try {
+				
+				 JSONParser parser = new JSONParser();
+				 Object obj =  parser.parse(new FileReader( "svdata/uploadedfileslist.json"));
+				
+				 
+				 
+				
+				   	
+		            org.json.simple.JSONArray tagList = (org.json.simple.JSONArray) obj;
+		            
+		            Iterator<org.json.simple.JSONObject> iterator = ((List) tagList).iterator();
+		            while (iterator.hasNext()) {
+		            	org.json.simple.JSONObject cob = iterator.next();
+		            	
+		            	String key = (String)cob.get("url");
+		            	
+		            	try {
+		            	     key = java.net.URLDecoder.decode(key, StandardCharsets.UTF_8.name());
+		            	} catch (UnsupportedEncodingException e) {
+		            	  
+		            	}
+		            	
+		            	System.out.println(key);
+		            	
+		                String agent = key.substring(key.lastIndexOf("/")+1, key.indexOf("-{"));
+		            	String cuid = key.substring(key.indexOf("{")+1, key.indexOf("}"));
+		            	String date = key.substring(key.indexOf("}")+2, key.indexOf("}")+8);
+		            	String time = key.substring(key.indexOf("}")+9, key.indexOf("}")+17).replaceAll("_", ".");
+		            	String gr = " "; 
+		            	try {
+		            		gr = key.substring(key.indexOf("[")+1, key.indexOf("]"));
+	            		} catch (Exception e) {
+		            		
+		            	}
+		            	
+		            	date = "20" + date.substring(0,2) + "-" + date.substring(2,4) + "-" + date.substring(4,6);
+		            	
+		            	
+		            	
+		            	sb.append( cuid + ";" + agent + ";" + date + ";" + time + ";" + gr + ";" + key + "\n" );
+		            	Toode t = new Toode(agent);
+		            	t.setBrand(gr);
+		            	t.setGr1(date);
+		            	t.setGr2(time);
+		            	t.setLadu(key);
+		            	
+		            	ArrayList arr = new ArrayList();
+		            	if(res.get(cuid) != null) {
+		            		arr = (ArrayList)res.get(cuid);
+		            	}
+		            	arr.add(t);
+		            	res.put(cuid, arr);
+		              
+		            	
+		            }
+		           		 }catch(Exception e) {
+		           			 e.printStackTrace();
+		           		 }
+			
+		     
+		      return res;
+		           		 
+	  }
+	
 	 public static void makeWebFilesList(Date algus, Date lopp ,String company, String user , String pass, String dir, String comp) {
 			
 		   Converter.loadUploadedFiles(algus, null ,company,  user ,  pass);
@@ -4776,7 +4852,7 @@ try{
 			 try {
 				
 				 JSONParser parser = new JSONParser();
-				 Object obj =  parser.parse(new FileReader( "uploadedfileslist.json"));
+				 Object obj =  parser.parse(new FileReader( "svdata/uploadedfileslist.json"));
 				
 				 
 				 

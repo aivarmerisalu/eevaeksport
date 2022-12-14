@@ -53,7 +53,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter, FixReporter {
+public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter, FixReporter  {
   public AxaZpienasDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -2297,7 +2297,7 @@ try{
   }
 
   public TreeMap getProducts(Agent agent){
-
+	  codeEanprods = new TreeMap();
 	   ArrayList extraProds = new ArrayList();
 	    File f = new File ("extracodes.txt");
 	    try {
@@ -2392,7 +2392,7 @@ try{
         } else if(eans.get(kood) != null) {
     	  prod.setEAN(eans.get(kood)+"");
         }
-        
+        codeEanprods.put(prod.getID(), prod.getEAN());
         
     String add = "";
       String grupp = rs.getString("grupp");
@@ -2459,7 +2459,7 @@ try{
 
 
 
-  
+  private TreeMap codeEanprods = null;
   
   
   public void KpienasProds(TreeMap products){
