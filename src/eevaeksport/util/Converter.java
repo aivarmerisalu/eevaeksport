@@ -4758,6 +4758,10 @@ try{
 	
 			
 				JSONArray array = serv.getUploadedFileList(algus,lopp);
+				File ff = new File( f.getPath() + "/uploadedfileslist.json");
+				if(ff.exists()) {
+					ff.delete();
+				}
 				Converter.saveFile(  f.getPath() + "/uploadedfileslist.json" , array.toString());
 			
 			
@@ -4783,11 +4787,9 @@ try{
 				 JSONParser parser = new JSONParser();
 				 Object obj =  parser.parse(new FileReader( "svdata/uploadedfileslist.json"));
 				
-				 
-				 
-				
 				   	
 		            org.json.simple.JSONArray tagList = (org.json.simple.JSONArray) obj;
+		            System.out.println(tagList.toJSONString());
 		            
 		            Iterator<org.json.simple.JSONObject> iterator = ((List) tagList).iterator();
 		            while (iterator.hasNext()) {
@@ -4801,7 +4803,7 @@ try{
 		            	  
 		            	}
 		            	
-		            	System.out.println(key);
+		            	
 		            	
 		                String agent = key.substring(key.lastIndexOf("/")+1, key.indexOf("-{"));
 		            	String cuid = key.substring(key.indexOf("{")+1, key.indexOf("}"));
@@ -4813,13 +4815,19 @@ try{
 	            		} catch (Exception e) {
 		            		
 		            	}
+		            	String prodid = "prodid" ;
+		            	if(key.indexOf("!") != -1) {
+		            		prodid = key.substring(key.indexOf("!")+1, key.lastIndexOf("!"));	
+		            	}
 		            	
 		            	date = "20" + date.substring(0,2) + "-" + date.substring(2,4) + "-" + date.substring(4,6);
 		            	
 		            	
+		            	//if(cuid.equals("747724"))
+		            	//System.out.println( prodid + ";" +cuid + ";" + agent + ";" + date + ";"  + key  );
 		            	
-		            	sb.append( cuid + ";" + agent + ";" + date + ";" + time + ";" + gr + ";" + key + "\n" );
-		            	Toode t = new Toode(agent);
+		            	Toode t = new Toode(prodid);
+		            	t.comment = agent;
 		            	t.setBrand(gr);
 		            	t.setGr1(date);
 		            	t.setGr2(time);
@@ -4831,9 +4839,8 @@ try{
 		            	}
 		            	arr.add(t);
 		            	res.put(cuid, arr);
-		              
-		            	
-		            }
+		             	
+		             }
 		           		 }catch(Exception e) {
 		           			 e.printStackTrace();
 		           		 }

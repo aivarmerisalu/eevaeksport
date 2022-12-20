@@ -434,6 +434,9 @@ public class AxaDunkerImportDriver
 	         if( repr ) {
 	        	 type = "ymberhindlus";
 	         }
+	         if( tagastus ) {
+	        	 type = "tagastus";
+	         }
 	         
 	         sb.append(type + lineSep);
 

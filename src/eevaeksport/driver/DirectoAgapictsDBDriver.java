@@ -1298,7 +1298,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
        public static boolean isToday14(long lll){
 	    	Calendar cc = Calendar.getInstance();
 	    	cc.set(Calendar.HOUR_OF_DAY, 1);
-	    	cc.add(Calendar.DAY_OF_YEAR, -14);
+	    	cc.add(Calendar.DAY_OF_YEAR, -4);
 	    	if(cc.getTime().getTime() < lll){
 	    		return true;
 	    	}else{
