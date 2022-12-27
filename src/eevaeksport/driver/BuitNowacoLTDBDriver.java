@@ -2091,7 +2091,9 @@ try{
         	   customer.setCredit(credit + "");
            }
          
-         
+           if( this.totaldebts.get(customer.getID()) != null){
+       		customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
+          }
            
            if(customer.getPayer() != null && !customer.getPayer().equals("ND") && this.totaldebts.get(customer.getPayer()) != null 
         		   && customer.getName().indexOf("Rimi") == -1){
@@ -2115,9 +2117,7 @@ try{
             }
            }
            
-           if( this.totaldebts.get(customer.getID()) != null){
-        		customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
-           }
+      
               
          
            String phone = rs.getString("phone");

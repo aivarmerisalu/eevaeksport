@@ -932,6 +932,9 @@ if(ladu.trim().length()!=0){
          if(sbb.contains("<h1>Error: Server Error") || sbb.contains("Connection refused")) {
             System.exit(0);	
          }
+         if(sbb.contains("<errorMessage></errorMessage>") ) {
+             System.exit(0);	
+          }
         } else {
         	
         	//   this.sendOrderEmail(order, tag, pandikas);

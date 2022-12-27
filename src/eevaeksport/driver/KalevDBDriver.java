@@ -2710,7 +2710,7 @@ SELECT  [MasterProductCode] as klient
 	public Vector getFixedAssortmentData() {
 		Vector result = new Vector();
 		//this.getProducts(null);
-		String sql = "select DeliveryCustomerCode as cuid, ProductCode as toode from AssortmentRegisterNEW where Listing != 0 "  ;
+		String sql = "select DeliveryCustomerCode as cuid, ProductCode as toode from AssortmentRegisterNEW where Listing != 0 and Period = 'current' "  ;
 try {
 	
 
