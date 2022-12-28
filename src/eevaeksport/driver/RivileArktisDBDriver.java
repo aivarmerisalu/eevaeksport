@@ -16,6 +16,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -730,14 +731,17 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
     public Vector getCustomerProductsList(String agentCode) {
         connectionUp(url2+odbc);
         
-        String cmd =" SELECT rtrim(I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else rtrim((N33_kodas_ak)) end) as kood," +
-        		"I07_KODAS AS toode,I07_KIEKIS AS kogus, " +
-				"I06_DOK_DATA AS kuupaev ,max(I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end ) as lastprice FROM i07_pard p" +
-				"  INNER JOIN i06_parh ON p.I07_KODAS_PO=I06_KODAS_PO "+
-				" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-				" WHERE I06_DOK_DATA > ? "+
-				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else rtrim((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS";
-    
+        String cmd ="  SELECT rtrim(I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else rtrim((N33_kodas_ak)) end) as kood,\r\n" + 
+        		"        		I07_KODAS AS toode,I07_KIEKIS AS kogus, \r\n" + 
+        		"				I06_DOK_DATA AS kuupaev ,(I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end ) as lastprice FROM i07_pard p\r\n" + 
+        		"				  INNER JOIN i06_parh ON p.I07_KODAS_PO=I06_KODAS_PO\r\n" + 
+        		"				 left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS \r\n" + 
+        		"				 WHERE I06_DOK_DATA > ? \r\n" + 
+        		"				 GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else rtrim((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS,\r\n" + 
+        		"				 (I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end )\r\n" + 
+        		"				  order by \r\n" + 
+        		"				 rtrim(I06_KODAS_KS) ,(case when (N33_kodas_ak) is null then '1' else rtrim((N33_kodas_ak)) end) ,\r\n" + 
+        		"        		I07_KODAS,I06_DOK_DATA desc ";
         if (isDebug()) {
            System.out.println(cmd);
        }
@@ -745,7 +749,7 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
        Vector custProds = new Vector();
        HashMap kliendid = new HashMap();
 
-
+  HashSet done = new HashSet();
        try {
           stmt = con.prepareStatement(cmd);
           stmt.setTimestamp(1, getStartingStamp());
@@ -772,15 +776,20 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
              }
 
              Product prod = new Product(tootekood);
-             cust.addProduct(prod,
-                             new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
-                                          kuup, lastprice, 0,0," "),false);
-             kliendid.put(kliendikood, cust);
-             custProds.add(new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
-                                          kuup, lastprice, 0,0," "));
+             if(!done.contains(kliendikood + tootekood)) {
+            	  cust.addProduct(prod,
+                          new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
+                                       kuup, lastprice, 0,0," "),false);
+              kliendid.put(kliendikood, cust);
+              custProds.add(new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
+                                       kuup, lastprice, 0,0," "));
+              done.add(kliendikood + tootekood); 
+             }
+           
            }
+           
            rs.close();
-           } catch (Exception e) {
+            } catch (Exception e) {
            getParent().showError(e);
        }
        connectionDown();

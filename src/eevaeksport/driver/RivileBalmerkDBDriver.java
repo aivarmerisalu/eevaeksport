@@ -990,8 +990,8 @@ HashSet olemas = new HashSet();
 
               }
               
-              if(maks.equals("757")) {
-         		 System.out.println("võlgu2 757 " + maks + " " + d30.contains(maks) +" " + d30.contains(cust.getID()));
+              if(maks.equals("1040")) {
+         		 System.out.println("võlgu2 1040 " + maks + " " + d30.contains(maks) +" " + d30.contains(cust.getID()));
          	 }
               
               if(d30.contains(cust.getID()) || d30.contains(maks)) {

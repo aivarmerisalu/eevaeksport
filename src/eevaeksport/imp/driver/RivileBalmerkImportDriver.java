@@ -336,10 +336,17 @@ HashMap pants = null;
   
 	
 	 private Vector d30 = new Vector();
-	 private Vector d15 = new Vector();
 	 
-public void getDebt() throws SQLException{
 
+	 public Vector getDebt(String agentCode) throws SQLException{
+		 return this.debtV;
+	 }
+	
+	 private Vector debtV = new Vector();
+	
+	 
+public Vector getDebt() throws SQLException{
+   debtV = new Vector();
  String sql = "SELECT I44_KODAS_KS AS klient,I44_DOK_NR AS number ,max(I44_DATA_MOK) AS maksepaev , " +
      " sum(i44_suma_db-i44_suma_cr) AS tasumata ,min(I44_DATA_DOK) AS kuupaev , max(datediff(day,I44_DATA_MOK,getdate())) as yle FROM i44_skol,n08_klij WHERE " +
      " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
@@ -347,43 +354,38 @@ public void getDebt() throws SQLException{
      " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok <= getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr " +
     " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_DOK_NR,I44_KODAS_KS order by I44_KODAS_KS,i44_dok_nr ";
 
- con = DriverManager.getConnection(url + "rivile","","");
- 
  
  String sql2 = "select l11_kodas1 as klient , dbo.pap(l11_laukas,11,1) as paevi from l11_pap1 where l11_kodas_nr='KSN08' ";
-
- 
- PreparedStatement st = con.prepareStatement(sql2);
- ResultSet rs = st.executeQuery();
- TreeMap<String, Integer> paeviT = new TreeMap<String, Integer> ();
- while(rs.next()){
+ Connection con = DriverManager.getConnection(url + "rivile","","");
+  
+  PreparedStatement st = con.prepareStatement(sql2);
+  ResultSet rs = st.executeQuery();
+  TreeMap<String, Integer> paeviT = new TreeMap<String, Integer> ();
+  while(rs.next()){
 	 String kl = rs.getString("klient").trim();
 	 String  pv = rs.getString("paevi");
 	 
 	 if(pv != null && pv.trim().length() > 0) {
 		 Integer paevi = Integer.parseInt(pv.trim());
-  	  if(paevi != null) {
-  		  paeviT.put(kl, paevi);
-  	  } 
+   	  if(paevi != null) {
+   		  paeviT.put(kl, paevi);
+   	  } 
 	 }
-   }
- 
- rs.close();
- st.close();
-
- 
- st = con.prepareStatement(sql);
- rs = st.executeQuery();
+    }
   
-  while(rs.next()){
-   
+  rs.close();
+  st.close();
+ 
+  
+  st = con.prepareStatement(sql);
+  rs = st.executeQuery();
+
+   while(rs.next()){
+   int days = 30;
     String kl = rs.getString("klient").trim();
-    int days = 30;
-   
     if(paeviT.get(kl) != null) {
     	days = paeviT.get(kl);
     }
-    
     if(!kl.equals("140")) { // maximat pole vaja 
    	 Debt debt = new Debt();
      debt.setCustID(kl);
@@ -395,18 +397,20 @@ public void getDebt() throws SQLException{
      debt.setDate(rs.getDate("kuupaev"));
      int yle = rs.getInt("yle");
      debt.setDue(yle+"");
-     
      if(yle > days && !d30.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
     	 d30.add(kl);
      }
-   
+     
+
+    	 
+     debtV.addElement(debt);
     }
   }
-  
   rs.close();
   st.close();
   con.close();
   
+  return debtV;
 }
   
   public TreeMap getCustomers(Agent agent){
@@ -492,10 +496,7 @@ public void getDebt() throws SQLException{
           	  cust.setSalesBlockT(true);
           	System.out.println("Blokk peale " + cust.getID());
             }
-           //siia vaja siis panna tingimus 
-            if( d15.contains(cust.getID()) || d15.contains(maks)) {
-          	//  cust.setSalesBlockT(true);
-            }
+         
             
             String konsig = rs.getString("konsig");
             if(cust.isSalesBlockT() && konsig != null && konsig.trim().equals("ATSISK_PO_RE")){
