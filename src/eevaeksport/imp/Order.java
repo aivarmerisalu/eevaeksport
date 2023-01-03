@@ -267,6 +267,7 @@ public class Order {
   public int trasec1 = 0;
   public int trasec2 = 0;
   public int trasec3 = 0;
+  public int trasec4 = 0;
   public String dstart = null;
   public double wplanned = 0;
   public String dend = null;

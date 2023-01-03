@@ -230,11 +230,88 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		   }
 		   
 
+		   public Vector getPriceMatrixData(){
+				  
+			  	 String sql =" SELECT  custid, clgroup,prodid, startday, enddate, price ,discountpct as disc , salespricetype as type  from v_VIK_AkcijuKainos where " + 
+			  	 		"		  	 	 len(clgroup) >0 or  len(custid) >0 ";
+
+			       Vector result = new Vector();
+			         try {
+			          
+			      	   Connection con = getNewConnection2();
+			   	        Statement stmt = con.createStatement();
+			   	        ResultSet rs = stmt.executeQuery(sql);
+			           while (rs.next()) {
+
+			             String custID = Converter.enCodeEst(rs.getString("custid"));
+			             String clGroup = rs.getString("clgroup");
+			             String prodID = rs.getString("prodid").trim();
+			             String prodGroup = null;
+			            
+			         
+			             String sdate = rs.getString("startday");
+			             String edate = rs.getString("enddate");
+			             double price = rs.getDouble("price");
+			             double disc = rs.getDouble("disc");
+			             String type = rs.getString("type");
+			             
+			             MatrixLine mline = new MatrixLine();
+
+			             if (custID != null && custID.length() > 0) {
+			               mline.setCustID(custID.trim());
+			             }
+			             if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
+			               mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
+			             }
+
+			             if(sdate != null  && !sdate.startsWith("1753")){
+			            	 mline.setStartDate(sdate.substring(0,10));
+			             }
+			             if(edate != null && !edate.startsWith("1753")){
+			            	 mline.setEndDate(edate.substring(0,10));
+			             }
+			             if (prodID != null && prodID.length() > 0) {
+			               mline.setProdID(prodID);
+			             }
+			             if (mline.getProdID() == null &&  prodGroup != null && prodGroup.trim().length() > 0) {
+			               mline.setDiscGroup(prodGroup.trim());
+			             }
+
+			             if (price > -1) {
+			               mline.setPrice(price);
+
+			             }
+			             if (disc != 0) {
+			                 mline.setDiscount(disc);
+			               }
+			             
+			             if(price == 0 && disc == 0) {
+			            	 mline.setProdLevel("pr");
+			             }
+			             
+	                   if(type != null && type.trim().length() > 0) {
+	                	   mline.setLineinfo(type.trim());
+	                   }
+			          //   if(mline.getPrice() > 0 || mline.getDiscount() > 0){
+			                 result.add(mline);    
+			            // }
+			             
+			           }
+			           rs.close();
+			           stmt.close();
+			           con.close();
+			         }catch(Exception e){
+			        	 e.printStackTrace();
+			         }
+				
+			    return result;
+			      }
+		  
 
 	
 	
 	
-	  public Vector getPriceMatrixData(){
+	  public Vector getPriceMatrixDataOLD(){
 		  
 		  	 String sql =" SELECT  custid, clgroup,prodid, startday, enddate, price from v_VIK_AkcijuKainos where "
 		  	 		+ " len(clgroup) >0 or  len(custid) >0 ";

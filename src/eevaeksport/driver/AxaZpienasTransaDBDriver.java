@@ -161,7 +161,7 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 		   
 		   String  cmd = "select companyref as cust ,r.routeid as route ,\r\n" + 
 		   		"g.name as routeName, waybillid as waybill, h.personnelnumber as driver, transdate as kuup ,vehicle as car\r\n" + 
-		   		" ,c.milksection1 as carsec1,c.milksection2 as carsec2,c.milksection3 as carsec3, trailer,t.milksection1 as trasec1,t.milksection2 as trasec2,t.milksection3 as trasec3 ,s.noteid "
+		   		" ,c.milksection1 as carsec1,c.milksection2 as carsec2,c.milksection3 as carsec3, trailer,t.milksection1 as trasec1,t.milksection2 as trasec2,t.milksection3 as trasec3 , t.milksection4 as trasec4 ,s.noteid "
 		   		+ " ,g.departuretime as dstart, g.arrivaltime as dend , r.weightplanned as wp \r\n" + 
 		   		" from TRRouteWaypoint r   inner join TRWayBill d on d.routeid = r.routeid \r\n" + 
 		   		"										  and d.transdate > getdate()-1 and d.transdate < getdate() inner join trroutetable g on g.routeid= r.routeid \r\n" + 
@@ -203,6 +203,7 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 		         		 int trasec1 = rs.getInt("trasec1");
 		         		 int trasec2 = rs.getInt("trasec2");
 		         		 int trasec3 = rs.getInt("trasec3");
+		         		 int trasec4 = rs.getInt("trasec4");
 		         		 String note = rs.getString("noteid");
 		         		 long dstart  = rs.getLong("dstart") *1000L;
 		         		 long dend  = rs.getLong("dend")*1000L;
@@ -253,6 +254,7 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 		         			shipit.trasec1 = trasec1;
 		         			shipit.trasec2 = trasec2;
 		         			shipit.trasec3 = trasec3;
+		         			shipit.trasec4 = trasec4;
 		         			shipit.routeName = routeName + " (" + routes + ")";
 		         			shipit.colorStatus = note;
 		         			if(dend > 0) {

@@ -1058,7 +1058,7 @@ System.out.println(cmd);
     	   String sql =  "   SELECT k.[Name] AS nimi,k.[No_] AS kood,k.[Bill-to Customer No_] AS payer,k.[Address]+' ' +k.[Address 2]+k.[City] " +
     	   	 "   AS aadress , a.[Address]+' '+a.[Address 2]+a.[City] as addr2 ,k.[Salesperson Code] AS agent ,  Blocked AS blokk,   " +
              "    [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,[Route Code] AS visit,'' AS type,  " +
-             "  0 AS extradays ,'' AS sort,'' AS debt , 0 AS minsum ,k.Contact +' ' + k.[Phone No_] + ' ' + k.[E-Mail] as kontakt  , " +
+             "  0 AS extradays ,'' AS sort,'' AS debt , 0 AS minsum ,k.Contact + '|' + k.[Phone No_] + '|' + k.[E-Mail] as kontakt  , " +
 			 "  [Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 ,av.AVG_Line_Count as lines,av.AVG_Amount as summa,av.Last_Invoice_Date as lastdeal , [Lojalumo programa] as loyal " +
              "  	  , k.[Address] as a1,k.[Address 2] as a2,k.[City] as a3, k.[Country Code]as coun , k.[Secondary Salesperson Code] as ag2 FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] " +
               "     and a.Code=k.[Ship-to Code]  " +

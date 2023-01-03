@@ -6376,6 +6376,7 @@ try{
 		    int trasec1 = ord.trasec1;
 		    int trasec2 = ord.trasec2;
 		    int trasec3 = ord.trasec3;
+		    int trasec4 = ord.trasec4;
 		    String color = ord.colorStatus;
 			  
 			if(extDoc == null){
@@ -6414,9 +6415,9 @@ try{
 	    
 	    if(trailer != null && !trailer.equals("-1") ){
 	    	if(add != null){
-	    		add = add + ", trailer: {code: \""+ trailer + "\" , trasec1: " + trasec1 + " , trasec2: " + trasec2 + " , trasec3: " + trasec3 + "}";
+	    		add = add + ", trailer: {code: \""+ trailer + "\" , trasec1: " + trasec1 + " , trasec2: " + trasec2 + " , trasec3: " + trasec3 + " , trasec4: " + trasec4 + "}";
 	    	}else{
-	    		add = ", trailer: {code: \""+ trailer + "\" , trasec1: " + trasec1 + " , trasec2: " + trasec2 + " , trasec3: " + trasec3 + "}";
+	    		add = ", trailer: {code: \""+ trailer + "\" , trasec1: " + trasec1 + " , trasec2: " + trasec2 + " , trasec3: " + trasec3 + " , trasec4: " + trasec4 + "}";
 	    	}
 	    }
 	    
@@ -7921,7 +7922,7 @@ client.close();
 	  }
 
     public static String visitTurn(String input) {
-    	 String res = "";
+    	 String res = input;
     	 
     	 if(input.equals("E1")) {
     		 res= "E2";

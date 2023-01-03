@@ -2442,11 +2442,11 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		if (st.hasMoreTokens()) {
      		String visit = st.nextToken();
      		if (visit != null && visit.trim().length()>0){
-     			abi.setVisit(visit);								
+     			abi.setVisit(Converter.visitTurn(visit));				
      		}
+		   }
 		  }
-		}
-        }
+         }
         }
 		}catch (Exception e){
      	 // e.printStackTrace();

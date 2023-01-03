@@ -1382,7 +1382,7 @@ HashSet olemas = new HashSet();
              double lastprice = rs.getDouble("lastprice");
              
              double lastale = 0;
-             if(kuup.contains("2021") && oldPr.get(tootekood) != null) {
+             if(kuup.contains("2022") && oldPr.get(tootekood) != null) {
             	 lastale = 100 -( lastprice/Double.parseDouble(oldPr.get(tootekood)+"") * 100 ); 
              }
              kuup = kuup.substring(5,10).trim();

@@ -171,8 +171,42 @@ public class HansaSatcomDBDriver extends AbstractDBDriver implements BulkUpdater
 	  }
 	  
 	  
-	  
-	  
+   	  private FileInputStream getCleanInputStream(File xmlFile)throws FileNotFoundException, IOException {
+    		FileInputStream in = new FileInputStream(xmlFile);
+    		int bomKount = getBOMCount(xmlFile);
+    		if (bomKount > 0) {
+    		byte[] buf = new byte[bomKount];
+    		in.read(buf);
+    		}
+    		return in;
+    		}
+
+    	  
+    	  private int getBOMCount(File xmlFile) throws FileNotFoundException,
+    	  IOException {
+    	  DataInputStream din = new DataInputStream(new FileInputStream(xmlFile));
+    	  int bomKount = 0;
+    	  byte b = din.readByte();
+    	  while (b < 0) {
+    	  bomKount++;
+    	  b = din.readByte();
+    	  }
+    	  din.close();
+    	//   System.out.println("Skipping BOM, " + bomKount + " bytes");
+    	  return bomKount;
+    	  }   
+    	   private  Node getNode(Node node, String name){
+    		    for (int i = 0 ; i < node.getChildNodes().getLength() ; i++){
+    		      Node nd = node.getChildNodes().item(i);
+    		  //    System.out.println(nd.getNodeName());
+    		      if (nd.getNodeName().equals(name)){
+    		        return nd;
+    		      }
+    		    }
+    		    return null;
+    		  }
+    	  
+    	  
   	public String getSaveStockInfo(){
   		getProducts(new Agent ("stock"));
   		return getSaveStockInfo2();
@@ -184,7 +218,7 @@ public class HansaSatcomDBDriver extends AbstractDBDriver implements BulkUpdater
 			getWeb("itemstatusvc");
 		} catch (ParseException e1) {
 			e1.printStackTrace();
-		} catch (IOException e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 		  
@@ -192,137 +226,103 @@ public class HansaSatcomDBDriver extends AbstractDBDriver implements BulkUpdater
 		  
    	   StringBuffer products = new StringBuffer();
    	   try {
-   		   
+   		 File f = new File(getDir() + "itemstatusvc.xml");
    		
-   		
-   		
-   		 FileReader fr = new FileReader(getDir() + "itemstatusvc.xml");
-   	
-   		  BufferedReader reader = new BufferedReader(fr);
-          String line = null;
-
-          //line = reader.readLine();
-          
-       //   System.out.println("suurus " +prodsInUse.size());
-           while((line = reader.readLine()) != null  ){
-        	   String kood = null;
-    		   String kog = null;
-        	   while( line != null && !line.trim().startsWith("</ItemStatusVc") ){
-        		   line = reader.readLine();
-        		  
-        		 
-        		   
-          		 if( line != null && line.trim().startsWith("<Code")) {
-          			
-          			try {
-          				kood = line.trim().substring(6); 
-          				kood = kood.substring(0,kood.indexOf("<")); 
-             			// System.out.println("suuruss " + line + " " + kood );
-          			}catch(Exception e) {
-          				
-          			}
-          			
-          		 }
+   	    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+ 	     DocumentBuilder db;
+ 		db = dbf.newDocumentBuilder();      	
+     	FileInputStream in = getCleanInputStream(f);
+     	String handler = null;
+         Document doc = db.parse(in,handler);
+       
+        // System.out.println(root);
+      	Node read = getNode(doc, "data");
+          for (int i = 0; i < read.getChildNodes().getLength(); i++){
+          	  Node rida = read.getChildNodes().item(i);
+          	 String kood = null;
+  		   String kog = null;
+  		   
+  		  
+  		 for (int u = 0; u < rida.getChildNodes().getLength(); u++){
+         	  Node sisu = rida.getChildNodes().item(u);
+          	  if(sisu.getNodeName().equals("Code") &&  sisu.getFirstChild() != null){
+          		  
+          		  kood =  sisu.getFirstChild().getNodeValue();
+          		  kog =  getNode(rida,"Instock").getFirstChild().getNodeValue();
+          		// System.out.println("rida.getNodeName() " +  kood + " "+ kog);
           		 
-          		 if( line != null && line.trim().startsWith("<Instock>")) {
-          			//System.out.println("suurusoo " + line + " " + kood + " " + kog);
-          			try {
-           			kog = line.trim().substring(9); 
-           			kog = kog.substring(0,kog.indexOf("<")); 
-           		
-           	   
-           			// System.out.println("suurusoo " + line + " " + kog);
-          		}catch(Exception e) {
-      				
-      			}
-          		}
           		 
-          	
-          	  } 
-        	   
-        	 
-        	   if(kood != null && kood.trim().length() > 0 
-        			   && !prodsx.contains(kood)  && !(kood.endsWith("PN"))) {
-        		   if(Double.parseDouble(kog) > 0) {
-                	   
-        		   products.append(kood +  ";");
-                   products.append(" ;");
-                   products.append(kog.trim()   +  "\n"); // + dealer +  "\n"); 
-                  
-                   if(prods != null && prods.contains(kood+"P")) {
-                	   products.append(kood +  "P;");
-                       products.append(" ;");
-                       products.append(kog.trim()   +  "\n"); // + dealer +  "\n"); 
-                      
-                   }
+          	   if(kood != null && kood.trim().length() > 0 
+          			   && !prodsx.contains(kood)  && !(kood.endsWith("PN"))) {
+          		   if(Double.parseDouble(kog) > 0) {
+                  	   
+          		   products.append(kood +  ";");
+                     products.append(" ;");
+                     products.append(kog.trim()   +  "\n"); // + dealer +  "\n"); 
+                    
+                     if(prods != null && prods.contains(kood+"P")) {
+                  	   products.append(kood +  "P;");
+                         products.append(" ;");
+                         products.append(kog.trim()   +  "\n"); // + dealer +  "\n"); 
+                        
+                     }
+                     
                    
-                 
-                   
-                   if(prods != null && prods.contains(kood+"PN")) {
-                	   if (Double.parseDouble(kog) > 0) {
-                		   
-                	   
-                	   products.append(kood +  "PN;");
-                       products.append(" ;");
-                       products.append(kog.trim()   +  "\n"); // + dealer +  "\n");
-                	   }
-                   }
-                   try {
-                	   if (Double.parseDouble(kog) > 0) {
-                		   stocks.put(kood, kog.trim());
-                  	      stocks.put(kood+"P", kog.trim());
-                         stocks.put(kood+"PN", kog.trim());    
-                	   }
-                    	
-                       
-                   }catch(Exception h) {
-                	   
-                   }
+                     
+                     if(prods != null && prods.contains(kood+"PN")) {
+                  	   if (Double.parseDouble(kog) > 0) {
+                  		   
+                  	   
+                  	   products.append(kood +  "PN;");
+                         products.append(" ;");
+                         products.append(kog.trim()   +  "\n"); // + dealer +  "\n");
+                  	   }
+                     }
+                     try {
+                  	   if (Double.parseDouble(kog) > 0) {
+                  		   stocks.put(kood, kog.trim());
+                    	      stocks.put(kood+"P", kog.trim());
+                           stocks.put(kood+"PN", kog.trim());    
+                  	   }
+                      	
+                         
+                     }catch(Exception h) {
+                  	   
+                     }
 
-                   }
-                 
-                //   System.out.println("suurus0 "  + " " + kood + " " + kog);
-        	   }
-        	   if(kood != null && kood.trim().length() > 0  && Double.parseDouble(kog) > 0 
-        			   && !prodsx.contains(kood)  && kood.endsWith("PN")) {
-        		   stocks.put(kood, kog.trim());
-          	      stocks.put(kood.substring(0,kood.length()-1), kog.trim());
-          	    stocks.put(kood.substring(0,kood.length()-2), kog.trim());
-          	  products.append(kood +  ";");
-              products.append(" ;");
-              products.append(kog.trim()   +  "\n");
-              
-              products.append(kood.substring(0,kood.length()-1) +  ";");
-              products.append(" ;");
-              products.append(kog.trim()   +  "\n");
-              
-              products.append(kood.substring(0,kood.length()-2) +  ";");
-              products.append(" ;");
-              products.append(kog.trim()   +  "\n");
-          	    
-          	    
-        	   }
-        	   
-        	   
-        	 
-        	prodsx.add(kood);
-        	  
-           }
-         	  reader.close();
-         	  
-      			/*if(kog.trim().length() > 0) {
-	  			
-	                 System.out.println("toode " + id + " " + kog);
-	  		}
-          	  } */
-          
-          	  
-      	  
+                     }
+                   
+                  //   System.out.println("suurus0 "  + " " + kood + " " + kog);
+          	   }
+          	   if(kood != null && kood.trim().length() > 0  && Double.parseDouble(kog) > 0 
+          			   && !prodsx.contains(kood)  && kood.endsWith("PN")) {
+          		   stocks.put(kood, kog.trim());
+            	      stocks.put(kood.substring(0,kood.length()-1), kog.trim());
+            	    stocks.put(kood.substring(0,kood.length()-2), kog.trim());
+            	  products.append(kood +  ";");
+                products.append(" ;");
+                products.append(kog.trim()   +  "\n");
+                
+                products.append(kood.substring(0,kood.length()-1) +  ";");
+                products.append(" ;");
+                products.append(kog.trim()   +  "\n");
+                
+                products.append(kood.substring(0,kood.length()-2) +  ";");
+                products.append(" ;");
+                products.append(kog.trim()   +  "\n");
+            	    
+            	    
+          	   }
+          	   
+          	   
           	 
-   		
-   		
-   		
-   		
+          	prodsx.add(kood);
+          	  }  
+          	  }
+          	  
+          }
+   	
+   	 	
 
 
    	   } catch (Exception e) {
@@ -723,7 +723,7 @@ TreeMap tr = new TreeMap();
 	   
 	   
 	   
-	  
+	 //  getSaveStockInfo2();
 	   
 	   
      TreeMap tm = new TreeMap();

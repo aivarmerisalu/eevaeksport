@@ -1718,30 +1718,7 @@ con.close();
     public String getPilotDayData(Agent agent){
 
     	
-    	String sss = "SELECT c.oaorno AS nr,d.okcunm as nimi,a.oacuor AS kliendi_tell_nr, " +
-" CASE WHEN b.evstat='15' THEN 'ERR_HEADER' WHEN b.evstat='20' THEN 'ERR_LINES_0' WHEN b.evstat='25' THEN 'ERR_IN_LINE' WHEN b.evstat='30' THEN 'ERR_CRED_BLOCK' " +
-" WHEN b.evstat='90' THEN 'OK' ELSE b.evstat " +
-" END AS stat1, CASE WHEN c.oaorsl='20' THEN 'ERR_LINES_0' WHEN c.oaorsl='90' THEN 'ERR_DELETED90' WHEN c.oaorsl='99' THEN 'ERR_DELETED99' ELSE 'OK' END AS stat2 " +
-" FROM mvxjdta.oxhead a,mvxjdta.OXCNTR b,mvxjdta.oohead c,mvxjdta.ocusma d   " +
-" WHERE  a.oacuno=d.okcuno AND a.oaorno=b.evorno AND b.evornr=c.oaorno AND " +
-" a.oaordt='" + this.getDateStr() + "' and ((case when (substr(OKSMCD,3,1) not in ('1','2','3','4') OR substr(OKSMCD,3,1) is null ) then OKSMCD else " +
-         " (case when (substr(OKSMCD,4,1) not in ('1','2','3','4') OR substr(OKSMCD,4,1) is null ) " +
-         " then substr(OKSMCD,0,2) else substr(OKSMCD,0,3) end)end) = '" + agent.getID()+ "' or (CASE WHEN d.okresp='*USER' THEN ' ' ELSE d.okresp END) ='" + agent.getID()+ "' )ORDER BY a.oaorno";
-
-    	sss = "SELECT c.oaorno AS nr,d.okcunm as nimi,a.oacuor AS kliendi_tell_nr,  CASE WHEN b.evstat='15' THEN 'ERR_HEADER' WHEN b.evstat='20' THEN 'ERR_LINES_0' WHEN b.evstat='25' THEN 'ERR_IN_LINE' WHEN b.evstat='30' THEN 'ERR_CRED_BLOCK' " + 
-    			" WHEN b.evstat='90' THEN 'OK' ELSE b.evstat  END AS stat1, CASE WHEN c.oaorsl='20' THEN 'ERR_LINES_0' WHEN c.oaorsl='90' THEN 'ERR_DELETED90' WHEN c.oaorsl='99' THEN 'ERR_DELETED99' ELSE 'OK' END AS stat2 " + 
-    			" FROM mvxjdta.oxhead a,mvxjdta.OXCNTR b,mvxjdta.oohead c,mvxjdta.ocusma d   " + 
-    			" WHERE  a.oacuno=d.okcuno AND a.oaorno=b.evorno AND b.evornr=c.oaorno " + 
-    			"  AND  a.oaordt='" + this.getDateStr() +  "'" + 
-    			"  and ( oksmcd='" + agent.getID()+ "'  " + 
-    			"    or " + 
-    			"        CASE WHEN d.okresp='*USER' THEN ' ' ELSE d.okresp END ='" + agent.getID()+ "' " + 
-    			"      )" + 
-    			"ORDER BY a.oaorno" + 
-    			"";
-    	
-    	
-    	sss=" SELECT " + 
+    	String 	sss=" SELECT " + 
     			  " nr,nimi,kliendi_tell_nr "+
     			  " ,listagg(stat1,',') within GROUP (ORDER BY stat1) AS stat1 "+
     			  " ,listagg(stat2,',') within GROUP (ORDER BY stat2) AS stat2 "+
@@ -1762,16 +1739,10 @@ con.close();
     			" GROUP BY nr,nimi,kliendi_tell_nr "+
     			" ORDER BY nr ";
 
+    	 sss = "SELECT * FROM alc.mj_made_orders WHERE oksmcd='" + agent.getID()+ "' AND oaordt=" + this.getDateStr() + " order by nr";
     	
     	
-    	
-      String sql = "SELECT t.MMspe2 AS grupp,SUM(UCSAAM) AS summa " +
-          "FROM mvxjdta.OSBSTD d ,mvxjdta.MITMAS t WHERE t.MMITNO=d.UCITNO " +
-          "AND substr(UCIVDT,0,6) = '" + getYearMonth() + "' "+
-          "AND UCSMCD='" +agent.getID() + "' AND UCITTY = '01'  GROUP BY t.MMspe2 ORDER BY t.MMspe2 ";
-
-      
-      sql = " SELECT t.MMspe2 AS grupp,SUM(UCSAAM) AS summa " + 
+      String   sql = " SELECT t.MMspe2 AS grupp,SUM(UCSAAM) AS summa " + 
       		"          FROM mvxjdta.OSBSTD d ,mvxjdta.MITMAS t WHERE t.MMITNO=d.UCITNO " + 
       		"          AND substr(UCIVDT,0,6) = '" + getYearMonth() + "' " + 
       		"          AND UCSMCD='" +agent.getID() + "' AND UCITTY = '10'  GROUP BY t.MMspe2 ORDER BY t.MMspe2" + 

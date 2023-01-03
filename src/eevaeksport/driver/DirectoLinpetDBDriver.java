@@ -2764,6 +2764,12 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
           
       	}
       	
+      	if(line.indexOf("E_AGENT\" content=\"N") != -1){
+      		goes = false;
+      	//  System.out.println("eilähe " + line);
+          
+      	}
+      
       	//if(prod.getID().equals("760651"))
       //	System.out.println("Tooted " + prod.getName() + " " + prod.getID() + " " + goes + " " + prod.getStock() );
       	
