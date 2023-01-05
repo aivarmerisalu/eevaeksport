@@ -232,7 +232,8 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 
 		   public Vector getPriceMatrixData(){
 				  
-			  	 String sql =" SELECT  custid, clgroup,prodid, startday, enddate, price ,discountpct as disc , salespricetype as type  from v_VIK_AkcijuKainos where " + 
+			  	 String sql =" SELECT  custid, clgroup,prodid, startday, enddate, price ,discountpct as disc , "
+			  	 		+ " salespricetype as type  from v_VIK_AkcijuKainos where " + 
 			  	 		"		  	 	 len(clgroup) >0 or  len(custid) >0 ";
 
 			       Vector result = new Vector();
@@ -1076,7 +1077,7 @@ System.out.println(cmd);
 	private TreeMap agent1 = new TreeMap();
 
 	public TreeMap getCustomers(Agent agent) {
-		
+		TreeMap<String,Double> odebts = new TreeMap<String, Double>();
 		
 		try{
 			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
@@ -1095,14 +1096,7 @@ System.out.println(cmd);
 	    Vector kliendid = new Vector();
 		try {
 
-			String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number" +
-					", a.[Due Date] AS kuupaev, sum((case when a.[Posting Date] < 2105 then 0.2896 else 1 end) * b.[Amount]) AS summa, "
-					+ " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer  FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join "
-					+ " [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] "
-					+ " where a.[Document type] = 2 AND  a.[Posting Date] > getdate()-200 AND a.[Open]= 1 "
-				+	" group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[External Document No_], "
-					+ " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount])<> 0 ";
-
+		
 			
 			String ccc =  "select custcode as cust ,Code+ ' ' +name as last from v_VIK_FA ";
 			 
@@ -1176,6 +1170,17 @@ System.out.println(cmd);
 	stcn.close();
 	cn.close();
 	
+	
+	String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number" +
+			", a.[Due Date] AS kuupaev, sum((case when a.[Posting Date] < 2105 then 0.2896 else 1 end) * b.[Amount]) AS summa, "
+			+ " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer  FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join "
+			+ " [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] "
+			+ " where a.[Document type] = 2 AND  a.[Posting Date] > getdate()-200 AND a.[Open]= 1 "
+		+	" group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[External Document No_], "
+			+ " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount])<> 0 ";
+
+	
+	
 			System.out.println(cmd);
 			this.debtList = new Vector();
 			con = getNewConnection2();
@@ -1183,9 +1188,13 @@ System.out.println(cmd);
 			ResultSet rs1 = stmt1.executeQuery(cmd);
 			while (rs1.next()) {
 				Debt debt = new Debt();
-				String custID = rs1.getString("klient");
-				// String custID = rs1.getString("maksja");
+				String custID = rs1.getString("klient").trim();
+				 String payer = rs1.getString("maksja");
 				debt.setCustID(custID);
+				if(payer != null && payer.trim().length() > 0) {
+					debt.setPayerID(payer.trim());
+				}
+				
 
 				String doknr = rs1.getString("number");
 				if (doknr.trim().length() > 6) {
@@ -1197,6 +1206,20 @@ System.out.println(cmd);
 				int dueint = rs1.getInt("due");
 				debt.setDue(dueint + "");
 				int old = 0;
+				if(dueint > 0) {
+					if(payer != null && payer.trim().length() > 0) {
+					if (odebts.get(payer) != null) {
+						odebts.put(payer, odebts.get(payer) + debt.getSum());
+					}else {
+						odebts.put(payer,  debt.getSum());
+					}
+					}
+				/*	if (odebts.get(custID) != null) {
+						odebts.put(custID, odebts.get(custID) + debt.getSum());
+					}else {
+						odebts.put(custID,  debt.getSum());
+					}*/
+				}
 				if (debtDays.get(custID) != null) {
 					old = Integer.parseInt((String) debtDays.get(custID));
 				}
@@ -1211,6 +1234,10 @@ System.out.println(cmd);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		System.out.println("odebt " + odebts.toString());
+		//System.exit(0);
+		
 		// / KLIENDI ANDMETE LEIDMINE
 
 		TreeMap tm = new TreeMap();
@@ -1381,27 +1408,25 @@ System.out.println(cmd);
 					customer.setMinsum(minsum);
 				}
 
-				if ( !customer.isNodebt()) {
+			//	if ( !customer.isNodebt()) {
+					if(odebts.get(customer.getID()) != null) {
+						if(odebts.get(customer.getID()) != 0) {
+						//	customer.setDebt(odebts.get(customer.getID()));
+						}
+					}
+					
+					if(odebts.get(customer.getPayer()) != null) {
+						System.out.println("üle " + odebts.get(customer.getPayer()) + " " + customer.getPayer());
+						
+							customer.setDebt(odebts.get(customer.getPayer()));
+						
+					}
 
-					String sql3 = "  SELECT  No_ AS kood, CASE WHEN k.[Bill-to Customer No_] = '' THEN "
-							+ "(SELECT    SUM(de.[Amount (LCY)] ) FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] c INNER JOIN  "
-							+ " [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] "
-							+ "  WHERE   c.[Customer No_] = k.No_) WHEN k.[Bill-to Customer No_] <> '' THEN (SELECT   SUM(de.[Amount (LCY)] " +
-									" ) "
-							+ "  FROM  [Vičiūnai ir Ko$Cust_ Ledger Entry] c INNER JOIN "
-							+ "   [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] "
-							+ "  WHERE  c.[Customer No_] = k.[Bill-to Customer No_] AND [OPEN] = 1 AND c.[Sell-to Customer No_] = k.No_ "
-							+ "	 and [Due Date] <getdate()+7    and c.[Posting Date] > getdate()- 100) "
-							+ "	 END AS yle FROM [Vičiūnai ir Ko$Customer] k "
-							+ "	WHERE  (No_ = '"
-							+ id
-							+ "') AND (Blocked <> 3) AND ([Salesperson Code] <> '') ";
-
-					      sql3 = "select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join " + 
+				/*	String  sql3 = "select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join " + 
     	                         " [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_]  " +
     	                         " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] <getdate() " +
 								 " and a.[Posting Date] > getdate()- 1000 " +
-    	                         " and a.[Customer No_] = '" + id + "' group by a.[Customer No_]  having sum(b.[Amount])<> 0 ";
+    	                         " and (a.[Customer No_] = '" + id + "' or a.[Customer No_] = '" + customer.getPayer() + "')  group by a.[Customer No_]  having sum(b.[Amount])<> 0 ";
 					
 					try {
 						Connection con3 = getNewConnection2();
@@ -1423,9 +1448,9 @@ System.out.println(cmd);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-
+*/
 					// customer.setUsedCredit(Double.parseDouble(used.replaceAll(",",".").replaceAll(" ","")));
-				}
+			//	}
 				   String cont = rs.getString("kontakt");
 		           if(cont != null && cont.trim().length()>0){
 		               customer.setPersonalData(Converter.enCodeEst(cont.trim()));   

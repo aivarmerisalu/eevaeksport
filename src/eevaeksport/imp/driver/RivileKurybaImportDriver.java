@@ -307,7 +307,7 @@ public class RivileKurybaImportDriver
       cou++;
 
       sb.append(getLineNr(cou));
-      sb.append("          <I06_OP_TIP>53</I06_OP_TIP>" + ls);
+      sb.append("          <I06_OP_TIP>54</I06_OP_TIP>" + ls);
       cou++;
 
       sb.append(getLineNr(cou));

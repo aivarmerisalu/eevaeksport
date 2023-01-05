@@ -3002,8 +3002,14 @@ private Object readJsonFile(File f){
 	 				pp.setEAN(barcode);
 	 			}
 	 			
+	 			String add = "";
+	 			if(barcode != null && barcode.trim().length() > 4) {
+	 				add = " " + barcode.substring(barcode.length()-4);
+	 			}
+	 			
 	 			pp.setVat(vat);
-	 			pp.setName(name + " " + code);
+	 			name = name.replace('/', ' ').trim();
+	 			pp.setName(code + " " + name +  add);
 	 			if(gr1ID != null) {
 	 				pp.setGroup(gr1ID);
 	 			}
@@ -3016,7 +3022,10 @@ private Object readJsonFile(File f){
 		 			pp.setPrice(price);	
 	 			}
 	 			pp.setUnit(unit);
-	 			if(active.equals("1") && name != null && !name.startsWith("*") && !name.startsWith("/")) {
+	 			if(stocks.get(id) != null) {
+	 				pp.setStock(stocks.get(id));
+	 			}
+	 			if(active.equals("1") && name != null && !name.startsWith("*") ) {
 	 			tm.put(name, pp);
 	 			}
 	 			

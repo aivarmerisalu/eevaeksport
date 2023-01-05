@@ -769,7 +769,7 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
                   
         // String cmd = "SELECT toode, nimetus, yhik, myygihind FROM toode WHERE (len(trim(toode)) > 3) AND (trim(toode.grupp) = 'L')";
          String  cmd = "SELECT toode, rusnimetus ,nimetus , kastis as tykke, myygihind, yhik,liik AS grupp,ribakood AS ean,markused,maxale,ended,tasusumma as link , toptoode as top , uuskuni as uus FROM toode WHERE " +
-         " (myygikood = 'K' OR  myygikood = '5%' ) AND len(trim(toode)) >2 AND (keeld2=.F. )  ORDER BY toode";
+         " (myygikood = 'K' OR  myygikood = '5%' OR  myygikood = 'TUB' OR  myygikood = 'M') AND len(trim(toode)) >2 AND (keeld2=.F. )  ORDER BY toode";
        if (isDebug()) {
            	System.out.println(cmd);
            	}
