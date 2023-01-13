@@ -2,8 +2,12 @@ package eevaeksport.driver;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -28,11 +32,20 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.common.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import org.json.simple.parser.JSONParser;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -56,7 +69,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class HorizonKonigDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker {
+public class HorizonKonigDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter,PictureMaker, WebReporter {
   public HorizonKonigDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -2403,7 +2416,302 @@ try{
 	  }
   
 
-	
+	  @Override
+	  public void WebReporter() {
+		  
+		  ArrayList<String> filenames = new ArrayList<String>();
+		// teeme kataloogi salvestamiseks
+				File f = new File("svdata");
+				if(!f.exists()) {
+					f.mkdir();
+				}
+				
+				
+	// loeme signatuurid sisse kui on olemas	
+				HashSet done = null;
+				try {
+					done = (HashSet) Converter.readObject("signadone.obj");
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+				
+				if(done == null) {
+					 done = new HashSet();
+				}
+				
+				
+	//teeme perioodi valmis
+				Calendar algus = Calendar.getInstance();  
+			  	Calendar lopp = Calendar.getInstance();  	
+			  	Integer days = 20;
+			  if(	parent.getProps().getProperty("webreport.days") != null) {
+				  try {
+					  days = Integer.parseInt(parent.getProps().getProperty("webreport.days"));
+				  }catch(Exception e) {
+					  
+				  }
+			  };
+
+			  	algus.add(Calendar.DATE, -1 * days);
+			  	algus.set(Calendar.HOUR, 0);
+			  	lopp.set(Calendar.HOUR, 23);
+			  	lopp.set(Calendar.MINUTE, 59);
+			  	lopp.add(Calendar.DATE, +2);
+				
+			  	
+			  	try {
+			  		String fnameBASE = this.getExcelDir() + "reportbase.xlsx";
+			  		FileInputStream excelifailBase = new FileInputStream(fnameBASE);
+			  		XSSFWorkbook  wbBASE = new XSSFWorkbook(excelifailBase);
+					XSSFSheet worksheetBASE = wbBASE.getSheetAt(0);
+					
+					CreationHelper createHelper = wbBASE.getCreationHelper();
+					
+					 XSSFCellStyle hlinkstyle = wbBASE.createCellStyle();
+				      XSSFFont hlinkfont = wbBASE.createFont();
+				      hlinkfont.setUnderline(XSSFFont.U_SINGLE);
+				      hlinkfont.setColor(IndexedColors.BLUE.getIndex());
+				      hlinkstyle.setFont(hlinkfont);
+
+				  	
+				  		
+				  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass);
+				  	//	System.out.println("files " + files.toString());
+				 
+			  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
+			  		
+			  		Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
+			  		int palletrow = 1;
+			  		boolean savefile = false;
+			  		
+			  		for (int i = 0; i < cc.length(); i++) {
+			  			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
+			  		   	String filterOutOfStock = (String)cob.get("resint3").toString();
+			  			String dateAndTime = (String)cob.get("recetime");
+			  			String dateOnly = dateAndTime.split("T")[0];
+			  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
+			  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
+			  		  String signa = dateAndTime + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") ;
+			  		  
+			  			if(filterOutOfStock != null && filterOutOfStock.startsWith("333") && done != null && !done.contains(signa )){  	
+			  			String filterProblem = (String)cob.get("resstr1");
+			  			
+			  		  savefile = true;
+			  			
+			  	    //	String cagid = (String)cob.get("custagent");
+			  		//	String cagname = (String)cob.get("custagname");
+			  			String agid = (String)cob.get("agentid");
+			  			String custname = "";
+			  			String custchain = "";
+			  			String custaddr = "";
+			  			try {
+			  				custchain = (String)cob.get("custchain");
+			  			} catch(Exception e) {
+			  				
+			  			}
+			  			
+			  			try {
+			  				custname = (String)cob.get("custname");
+			  				if(custname.indexOf(",") != -1) {
+			  					custaddr = custname.substring(custname.indexOf(",")+1);
+			  					custname = custname.substring(0,custname.indexOf(","));
+			  				}
+			  			} catch(Exception e) {
+			  				
+			  			}
+			  			
+			  		
+			  			
+			  		//	System.out.println(chain + chDaily + " " + chDaily.contains(chain));
+			  	    	
+			  			//System.out.println("signa " + signa + " " + filterOutOfStock + " " + filterProblem);
+			  	    	 JSONParser parser = new JSONParser();
+			  	    	 
+			  	    	org.json.simple.JSONObject obj1 = (org.json.simple.JSONObject) parser.parse((cob.get("comment").toString()));
+			  	    
+			  	    	String comID = "";
+			  	    	String comment = "";
+			  	    	
+			  	    	try {
+			  	    		org.json.simple.JSONObject obj2 = (org.json.simple.JSONObject) parser.parse((cob.get("custcomme").toString()));
+			  	    		comID = ((String)obj2.get("comID"));
+			  	    		comment = ((String)obj2.get("comNa"));
+			  	    	}catch(Exception e) {
+			  	    	}
+			  	    	String typeid = (String)obj1.get("disID");
+			  	    	String typename = (String)obj1.get("disNa");
+			  	    	Double typekogus = (Double)obj1.get("disAm");
+			  	    	
+			  	    	String bonusid = (String)obj1.get("bonID");
+			  	    	String bonusname = (String)obj1.get("bonNa");
+			  	    	Double bonuskogus = 0d;
+			  	    	try {
+			  	    		bonuskogus = Double.parseDouble((String)obj1.get("bonAm"));
+			  	    	}catch(Exception e) {
+			  	    	}
+			  	    	
+			  	    	Date fromdate = null; //new Date((Long)obj1.get("sDay"));
+			  	    	Date todate = null; //new Date((Long)obj1.get("eDay"));
+			  	    	try {
+			  	    	  fromdate = new Date((Long)obj1.get("sDay"));
+			  	    	  todate = new Date((Long)obj1.get("eDay"));
+			  	  	     } catch(Exception k) {
+		  	    		  k.printStackTrace();
+		  	    	     }
+			  	    	
+			  	    	Date created = new Date(Long.parseLong(((String)cob.get("resstr3"))));
+			  	    	
+			  	  
+			  		
+			  				
+			  				
+			  				worksheetBASE.createRow(palletrow);
+			  				
+			  				worksheetBASE.getRow(palletrow).createCell(0).setCellValue("LV");
+			  				String cuname = (String)cob.get("custname");
+			  				String cuid = (String)cob.get("custid");
+			  				if(cuname.endsWith(cuid)) {
+			  					cuname = cuname.substring(0,cuname.indexOf(cuid)-1);
+			  				}
+			  				worksheetBASE.getRow(palletrow).createCell(1).setCellValue(cuid);
+			  			
+			  				worksheetBASE.getRow(palletrow).createCell(2).setCellValue(typeid);
+			  				worksheetBASE.getRow(palletrow).createCell(3).setCellValue(typename);
+			  				
+			  				worksheetBASE.getRow(palletrow).createCell(4).setCellValue(typekogus);
+			  				XSSFCell cellk1 = worksheetBASE.getRow(palletrow).getCell(4);
+			  				XSSFCellStyle pstyle = worksheetBASE.getRow(0).getCell(4).getCellStyle();
+			  				cellk1.setCellStyle(pstyle);
+			  				
+			  				 
+			  				worksheetBASE.getRow(palletrow).createCell(5).setCellValue(fromdate);
+			  				XSSFCell celld1 = worksheetBASE.getRow(palletrow).getCell(5);
+			  				XSSFCellStyle cellStyle = (XSSFCellStyle)celld1.getCellStyle();
+				  	        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+			  				
+			  				worksheetBASE.getRow(palletrow).createCell(6).setCellValue(todate);
+			  				XSSFCell celld2 = worksheetBASE.getRow(palletrow).getCell(6);
+			  				XSSFCellStyle cellStyle2 = (XSSFCellStyle)celld2.getCellStyle();
+				  	        cellStyle2.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+				  	       
+				  	        worksheetBASE.getRow(palletrow).createCell(7).setCellValue((String)cob.get("resstr2"));
+			  			
+			  				worksheetBASE.getRow(palletrow).createCell(8).setCellValue(bonusid);
+			  				
+			  				worksheetBASE.getRow(palletrow).createCell(9);
+			  				XSSFCell cellk2 = worksheetBASE.getRow(palletrow).getCell(9);
+			  				XSSFCellStyle pstyle2 = worksheetBASE.getRow(0).getCell(4).getCellStyle();
+			  				cellk2.setCellStyle(pstyle2);
+			  				cellk2.setCellValue(bonuskogus);
+			  		
+			  				 worksheetBASE.getRow(palletrow).createCell(10).setCellValue(comID);
+			  				 worksheetBASE.getRow(palletrow).createCell(11).setCellValue(comment);
+			  				
+			  				
+			  				
+			  				try {
+			  				String foto = null;
+			  				org.json.simple.JSONArray phs = (org.json.simple.JSONArray)parser.parse((cob.get("pictureLinks").toString()));
+			  				
+			  				if(files != null && files.get(cuid) != null && phs != null) {
+			  					int a = 0;
+			  				//	if(cuid.equals("747724"))
+			  						System.out.println("phs " + phs.toString());
+			  						for(int y = 0; y < phs.size() ; y++) {
+			  							String fname = (String)phs.get(y);
+			  						
+			  					
+			  				
+			  					ArrayList arr = (ArrayList)files.get(cuid);
+			  					for(int e = 0; e<arr.size(); e++) {
+			  						Toode t = (Toode)arr.get(e);
+			  						foto = t.getLadu();
+			  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
+			  							
+			  							
+			  							
+			  								
+			  				  		         Cell  cell = worksheetBASE.getRow(palletrow).createCell(12+a);
+			  				  		         cell.setCellValue("Photo Link "+(a+1) );
+			  				  		         XSSFHyperlink link = (XSSFHyperlink)createHelper.createHyperlink(Hyperlink.LINK_URL);
+			  				  		         link.setAddress(URLEncoder.encode(foto, StandardCharsets.UTF_8.toString()));
+			  				  		         cell.setHyperlink((XSSFHyperlink) link);
+			  				  		         cell.setCellStyle(hlinkstyle);
+			  				  		     a++;
+			  				  				
+			  						}
+			  					}
+			  						}
+			  						
+			  				}
+			  				}catch(Exception e) {
+			  					e.printStackTrace();
+			  				}
+			  				 //URL Link
+			  				
+			  				
+			  				
+			  				 worksheetBASE.getRow(palletrow).createCell(16).setCellValue(created);
+			  				 
+				  				XSSFCell celld3 = worksheetBASE.getRow(palletrow).getCell(16);
+				  				XSSFCellStyle cellStyle3 = (XSSFCellStyle)celld3.getCellStyle();
+					  	        cellStyle3.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+			  				worksheetBASE.getRow(palletrow).createCell(17).setCellValue(agid);
+			  				worksheetBASE.getRow(palletrow).createCell(18).setCellValue((String)cob.get("agentname"));
+			  				worksheetBASE.getRow(palletrow).createCell(19).setCellValue(custname);
+			  				worksheetBASE.getRow(palletrow).createCell(20).setCellValue(custchain);
+			  				worksheetBASE.getRow(palletrow).createCell(21).setCellValue(custaddr);
+			  				
+			  				
+			  				
+			  			/*	for(int x=0; x<11; x++) {
+			  					if(x == 0 || x == 1 || x == 3) {
+			  						worksheetBASE.getRow(outofstocks).getCell(x).setCellStyle(borderCenteredOOS);
+			  					}else {
+			  						worksheetBASE.getRow(outofstocks).getCell(x).setCellStyle(borderOOS);
+			  					}
+			  				}*/
+			  				palletrow++;
+			  				done.add(signa );
+			  			
+			       			
+			       			
+			  			}
+			  		}
+			  		String exceldir = this.getExcelDir() + "reports/";
+			  		File ff = new File( exceldir );
+			  		if(!ff.exists()) {
+			  			ff.mkdir();
+			  		}
+			  		excelifailBase.close();
+			  		
+if(savefile) {
+	FileOutputStream output_file_oos =new FileOutputStream(exceldir + "productPallet-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+		//filenames.add(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+		wbBASE.write(output_file_oos); //write changes
+		output_file_oos.close();  //close the stream
+		System.out.println("report saved " + exceldir + "productPallet-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+      
+}else {
+	System.out.println("no data to save");
+}
+			  	
+			  	}catch(Exception e) {
+					 e.printStackTrace(); 
+				  }
+			  	
+			  	
+				try {
+					Converter.saveObject(done, "signadone.obj");
+				} catch (IOException e) {
+					
+					e.printStackTrace();
+				}
+			  
+			  System.exit(0);
+	  }
+	  
+	  
 	
 	
 }

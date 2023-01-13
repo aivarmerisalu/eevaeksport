@@ -1720,7 +1720,7 @@ System.out.println("fixed size " + result.size());
 " case when  SC01031 = 1 then 1 else 0 end AS out ,SC01037 as grupp1 ,SC01128 AS grupp2,SC01067 as riik ,SC01132 AS ean  , SC01016 as letter ,SC01161 as statustop" +
 " FROM SC010100 left outer JOIN SC030100 on SC03001=SC01001 and SC03002='01' AND SC03003!=0 left outer JOIN SC390100 ON SC01001 " +
 " = SC39001 and SC39002='00' " +
-"    WHERE  ( LEN(LTRIM(SC01128))>0 and SC39004 > 0 and rtrim(ltrim(SC01016)) not in ( 'S','L' ,'U','R') ) " + lisa  ;
+"    WHERE  ( LEN(LTRIM(SC01128))>0 and SC39004 > 0 and rtrim(ltrim(SC01016)) not in ( 'S','L' ,'U','R','E') ) " + lisa  ;
         
         
         String cmd2 = "select SC33001 as toode ,sum( SC33005)  as kogus  from SC330100 where  " +

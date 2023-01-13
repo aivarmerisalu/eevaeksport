@@ -1718,28 +1718,8 @@ con.close();
     public String getPilotDayData(Agent agent){
 
     	
-    	String 	sss=" SELECT " + 
-    			  " nr,nimi,kliendi_tell_nr "+
-    			  " ,listagg(stat1,',') within GROUP (ORDER BY stat1) AS stat1 "+
-    			  " ,listagg(stat2,',') within GROUP (ORDER BY stat2) AS stat2 "+
-    			" FROM ( "+
-    			  " SELECT DISTINCT c.oaorno AS nr,d.okcunm as nimi,a.oacuor AS kliendi_tell_nr,  CASE WHEN b.evstat='15' THEN 'ERR_HEADER' WHEN b.evstat='20' THEN 'ERR_LINES_0' WHEN b.evstat='25' THEN 'ERR_IN_LINE' WHEN b.evstat='30' THEN 'ERR_CRED_BLOCK' "+
-    			  " WHEN b.evstat='90' THEN 'OK' ELSE b.evstat  END AS stat1, CASE WHEN c.oaorsl='20' THEN 'ERR_LINES_0' WHEN c.oaorsl='90' THEN 'ERR_DELETED90' WHEN c.oaorsl='99' THEN 'ERR_DELETED99' ELSE 'OK' END AS stat2 "+
-    			  " FROM mvxjdta.oxhead a,mvxjdta.OXCNTR b,mvxjdta.oohead c,mvxjdta.ocusma d "+  
-    			  " WHERE "+ 
-    			  " a.oacono=100 AND b.evcono=100 AND c.oacono=100 AND d.okcono=100 AND "+
-    			  " a.oafaci='200' AND "+
-    			  " a.oacuno=d.okcuno AND a.oaorno=b.evorno AND b.evornr=c.oaorno "+  
-    			  " AND  a.oaordt='" + this.getDateStr() +  "'" +
-    			  " and ( oksmcd='" + agent.getID()+ "' "+
-    			  "   or  "+
-    			  "       CASE WHEN d.okresp='*USER' THEN ' ' ELSE d.okresp END ='" + agent.getID()+ "' "+
-    			  "     )  "+
-    			" ) "+
-    			" GROUP BY nr,nimi,kliendi_tell_nr "+
-    			" ORDER BY nr ";
-
-    	 sss = "SELECT * FROM alc.mj_made_orders WHERE oksmcd='" + agent.getID()+ "' AND oaordt=" + this.getDateStr() + " order by nr";
+    	String  sss = "SELECT * FROM alc.mj_made_orders WHERE "
+    			+ "oksmcd='" + agent.getID()+ "' AND oaordt=" + this.getDateStr() + " order by nr";
     	
     	
       String   sql = " SELECT t.MMspe2 AS grupp,SUM(UCSAAM) AS summa " + 

@@ -1569,7 +1569,8 @@ con.close();
     public String getPilotDayData(Agent agent){
 
     	
-      	 String  sss = "SELECT * FROM alc.mj_made_orders WHERE oksmcd='" + agent.getID()+ "' AND oaordt=" + this.getDateStr() + " order by oaorno";
+      	 String  sss = "SELECT * FROM alc.mj_made_orders WHERE oksmcd='" + agent.getID()+ "'"
+      	 		+ " AND oaordt=" + this.getDateStr() + " order by nr";
       			    	
       			    	
       	  String sql = " SELECT t.MMspe2 AS grupp,SUM(UCSAAM) AS summa " + 

@@ -138,6 +138,8 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		         toode = toode.replace('/', '_');
 		         olemas.add(toode + ".jpg");
 		         olemas.add(toode + ".JPG");
+		         olemas.add(toode + ".png");
+		         olemas.add(toode + ".PNG");
 		   	    	if(c == 500){
 		   	    		  c = 0;
 		   	    		  System.out.println("Piltide leidmine "  + a);	
@@ -158,6 +160,16 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		                 	buf.append(toode+".jpg;"  + len + "\n");
 		           	    	b++;
 		                 }
+		                 
+		                 
+		                 f = new File(picts + toode+".png");
+		                 len = "0";
+		                 if(f.exists()){
+		                   len =	f.length() + "";
+		                   buf.append(toode+".jpg;"  + len + "\n");
+		           	    	b++;
+		                 } 
+		                 
 		                 }
 		   	    rs.close();
 		   	    stmt.close();

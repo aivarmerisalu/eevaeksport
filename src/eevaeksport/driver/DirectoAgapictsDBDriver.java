@@ -398,7 +398,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
                       
                       if (clGroup != null
                           && clGroup.trim().length() > 0) {
-                        mline.setCliGroup(clGroup.trim());
+                        mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
                       }
 
                       if (prodID != null && prodID.trim().length() > 0) {
@@ -513,7 +513,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	                        		 mline.setProdID(pr+"");
 	                        		// System.out.println(" " + pr + " " + clGroup);
 	                        		 if (clGroup != null && clGroup.trim().length() > 0) {
-	  		                           mline.setCliGroup(clGroup.trim()+ "00");
+	  		                           mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()+ "XX"));
 	  		                         }
 		                        	if(start != null && end != null) {
 		                        		 Date alg = getCalXML(start); 
@@ -1547,9 +1547,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		         		  
 		         		  try{
 		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("price_list").getNodeValue());         	
-			         		   customer.setGroup(Converter.deCode(price_list));
+			         		   customer.setGroup(Converter.cleanLitLatEst(price_list));
 			         		 
-			       			   customer.addFixSortCode(Converter.deCode(price_list+"00")); 
+			       			   customer.addFixSortCode(Converter.cleanLitLatEst(price_list+"XX")); 
 			       		       
 		         		  }catch(Exception e){
 		         		  }
@@ -1994,12 +1994,12 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
            BufferedReader reader = new BufferedReader(fr);
          String line = null;
 
-         //line = reader.readLine();
+         line = reader.readLine();
          
       //   System.out.println("suurus " +prodsInUse.size());
           while((line = reader.readLine()) != null  ){
         	  
-        	  if((line.trim().length()) > 40 ){
+        	  if((line.trim().length()) > 30 ){
         	
         	      
         	  int len = line.indexOf("code=");
@@ -2010,10 +2010,14 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
       	      len = line.indexOf("default_name=");
       	    String namec  = line.substring(len + 14);
       	     	 namec = namec.substring(0,namec.indexOf("\""));
-      
-      	      len = line.indexOf("long_description=");
-           	    String nameb  = line.substring(len + 18);
-           	     	 nameb = nameb.substring(0,nameb.indexOf("\""));
+      	     	 String nameb = "";
+      	     	 
+      if(line.indexOf("long_description=") != -1) {
+    	  len = line.indexOf("long_description=");
+     	     nameb  = line.substring(len + 18);
+     	     	 nameb = nameb.substring(0,nameb.indexOf("\""));
+      }
+      	     
            	     	 
            	     	 
       	       String shelf = "";
@@ -2108,7 +2112,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    	 		 goes = true;
    	 	 }
       	  
-      	  	 prod.setName((shelf + " " + pesa + " " +Converter.enCodeEst(namec + " " + nameb) + " " + id + " " + add + shelf).trim()); 
+      	  	 prod.setName((shelf + " " + pesa + " " +Converter.enCodeEst(namec + " " + nameb) + " " + id + " " + add ).trim()); 
      		
         	  if(getParent().getProps().getProperty("vat") != null){
         		  prod.setVat(getParent().getProps().getProperty("vat"));
@@ -2209,9 +2213,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
            	}
       	 	  
       	 	 if(christCodes != null ){
-      	 		 if(prod.getID().equals("PA000940")) {
-      	 			 System.out.println("PA940 "+ grupp + " " + christCodes.contains(grupp));
-      	 		 }
+      	 		 
       	 	if( christCodes.contains(grupp) ) {
       	 		prod.setStatusTop("5");
       	 		prod.setType("Christmas");

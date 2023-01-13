@@ -2219,7 +2219,7 @@ try{
     				  System.out.println(order.getCompany() + " " + nlvKlients.contains(order.getCompany()));
     				if(nlvKlients.contains(order.getCompany())) {
     					order.setCurrency("NPARK2");
-    					 makeOutput(order,order);  
+    					 makeOutput(order,order,hrccustomer);  
     				}else {
     				
     				  
@@ -2230,19 +2230,20 @@ try{
     					  
     					  while(en.hasMoreElements()){
     						  Order ord = (Order)en.nextElement();
-    	    				  makeOutput(ord,order);  
+    	    				  makeOutput(ord,order, hrccustomer);  
     	        		  }
     					  
     				  }else{
     					 // System.out.println("OffTrade");
-    					  Vector splitted =  splitOrderHRC(order);
+    					 /* Vector splitted =  splitOrderHRC(order);
     			    	  Enumeration en = splitted.elements();
     			    	  while(en.hasMoreElements()){
     			    		  
     						  Order ord = (Order)en.nextElement();
     					        makeOutput(ord,order);  
         	        		 
-    					  }
+    					  }*/
+    					  makeOutput(order,order, hrccustomer);   
     				  }
     					
     				}
@@ -2378,7 +2379,7 @@ try{
 	}
   
 
- private void makeOutput(Order order, Order orig){
+ private void makeOutput(Order order, Order orig, boolean isHoreca){
 	 
 	 Hashtable pandikas =  new Hashtable();
 	
@@ -2468,9 +2469,50 @@ try{
 						ref =  "";
 					}
 				 //  System.out.println("refnr " + ref);
+					 String ref2 = ref;
+					 if(isHoreca) {
+						 ref2 = "+FF";
+						 boolean isFrozen = true;
+						 Vector ll = order.getOrderLines();
+						 for (int i = 0; i < ll.size(); i++) {
+					    	  OrderLine line = (OrderLine) ll.elementAt(i);
+					    	  String prodid = line.getToode();
+					    	  if(!prodid.startsWith("I") && !prodid.startsWith("F")) {
+					    		  isFrozen = false;
+					    		  break;
+					    	  }
+					    	  
+						 }
+						 
+						 if(isFrozen) {
+							 ref2 = "FF"; 
+						 } 
+					 }
 					 
-		           
-				   String ladu = "53268";
+					 if(isHoreca) {
+					 if(order.getStatus() > 6 && defDealers == null){
+						  loadWares();
+					  }
+					 
+					 
+					  if(order.getDealer() == null || order.getDealer().trim().length() == 0){
+						  order.setDealer("53268");
+					  }
+					  
+					  
+					  if(order.getStatus() > 6 && defDealers != null && defDealers.get(order.getCompany()) != null){
+						  order.setWarehouse(""+defDealers.get(order.getCompany()));
+						  order.setDealer(""+defDealers.get(order.getCompany())+"");
+					   }else if(order.getStatus() > 6){
+						   order.setWarehouse("53268");
+							 order.setDealer("53268");
+							 this.trouble = " Nav noliktava in Horizon ";
+					   }
+					
+					  order.setCurrency(getType(order.getDealer(),1,order));
+					 }
+				   
+					 String ladu = "53268";
 				   
 				   String dealer = order.getDealer();
 				   if(dealer != null && dealer.trim().length() > 0){
@@ -2507,7 +2549,7 @@ try{
 		           }
 		         
 		          
-		           entity.put("PAP_NR", ref );
+		           entity.put("PAP_NR", ref2 );
 		           
 		           JSONObject href5  = new JSONObject();
 		           href5.put("DAT_PIEG",getDateNiceString(shipDate) );
@@ -2539,6 +2581,22 @@ try{
 
 
 	     	 Vector lines = order.getOrderLines();
+	     	 if(isHoreca) {
+	     		 System.out.println("OLines 1 " + lines.toString());
+	        	 java.util.Collections.sort(lines, new java.util.Comparator(){
+				        public boolean equals(Object obj) {
+					       return false;
+					     }
+					     public int compare(Object o1, Object o2) {
+					       OrderLine ol1 = (OrderLine)o1;
+					       OrderLine ol2 = (OrderLine)o2;
+					       return ol1.getToode().compareTo(ol2.getToode());
+					     }
+					   });
+						        	 
+						        	 
+	        	 System.out.println("OLines 2 " + lines.toString());
+	     	 }
 		      for (int i = 0; i < lines.size(); i++) {
 		    	  OrderLine line = (OrderLine) lines.elementAt(i);
 		    	  JSONObject lin  = new JSONObject(); 

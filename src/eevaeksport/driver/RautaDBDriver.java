@@ -3320,7 +3320,7 @@ public static String getYYYYpMMpDD(Date dd){
 		         			 String phone =  getNode(rida,"telefon").getFirstChild().getNodeValue();
 		         			 customer.restPerPhone = phone;
 		         			 if(customer.getPersonalData() != null){
-				         		  customer.setPersonalData(customer.getPersonalData() + " " + deCode(phone.replaceAll(";", " , ")));  
+				         		  customer.setPersonalData(customer.getPersonalData() + "|" + deCode("Tel:" + phone.replaceAll(";", " , ")));  
 		         			 }else{
 				         		  customer.setPersonalData(deCode(phone.replaceAll(";", " , "))); 
 		         			 } 	  
@@ -3329,7 +3329,7 @@ public static String getYYYYpMMpDD(Date dd){
 	         		  
 		         		 try{ String email =  getNode(rida,"mail").getFirstChild().getNodeValue(); 
 		         			 if(customer.getPersonalData() != null){
-				         		  customer.setPersonalData(customer.getPersonalData() + " " + deCode(email.replaceAll(";", " , ")));  
+				         		  customer.setPersonalData(customer.getPersonalData() + "| " + deCode(email.replaceAll(";", " , ")));  
 		         			 }else{
 				         		  customer.setPersonalData(deCode(email.replaceAll(";", " , "))); 
 		         			 } 	  
