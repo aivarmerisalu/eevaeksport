@@ -250,9 +250,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 	        	   }
 	        	  String custid = "";
 	        	  try {
-	        		  custid = (row.getCell((short) 0).getStringCellValue());
+	        		  custid = (row.getCell((short) 0).getStringCellValue()).trim();
 	        	  }catch(Exception e) {
-	        		  custid = ((int)(row.getCell((short) 0).getNumericCellValue())+"");
+	        		  custid = ((int)(row.getCell((short) 0).getNumericCellValue())+"").trim();
 	        		//  System.out.println("Jama koodiga " + custid + " " + a);
 	        	  }
 	        	  if(!abicusts.contains(custid))

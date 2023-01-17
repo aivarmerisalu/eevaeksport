@@ -1170,7 +1170,7 @@ SELECT  [MasterProductCode] as klient
 				
 				String visit = rs.getString("visit");
 				if (visit != null && visit.trim().length() > 0) {
-					cust.setVisit(getVisitDay(visit.trim()));
+					cust.setVisit(Converter.visitTurn(getVisitDay(visit.trim())));
 				}
 
 				String agen = rs.getString("agent");

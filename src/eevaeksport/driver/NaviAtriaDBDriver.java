@@ -365,6 +365,12 @@ public class NaviAtriaDBDriver extends AbstractDBDriver implements BulkUpdater,D
    
    @Override
 	public void FixLoader() {
+	   
+	   eanprods =  Converter.loadMore();
+		  
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
 		this.getProducts(null);
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
 		System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
@@ -958,39 +964,7 @@ con3.close();
   
    /**/
    
-   private TreeMap loadMore() {
-	   TreeMap res = new TreeMap();
-	   try {
-		   FileInputStream is = new FileInputStream(new File("eans.txt"));
-			InputStreamReader isr = new InputStreamReader(is, "utf-8");
-			BufferedReader reader = new BufferedReader(isr);
-			
-			
-		    String         line = null;
-		 
-		    try {
-		        while((line = reader.readLine()) != null) {
-		      StringTokenizer st = new StringTokenizer(line,";");
-		      while(st.hasMoreTokens()) {
-		    	  res.put(st.nextToken(), st.nextToken());
-		      }
-		        }
-
-		       
-		    } finally {
-		        reader.close();
-		    }
-		 
-	   }catch(Exception e) {
-		   
-	   }
-	   
-	
-	   
-	 System.out.println("lis suurus " + res.size());
-	   
-	   return res;
-   }
+ 
    
    private TreeMap eanprods = null;
    
@@ -998,7 +972,7 @@ con3.close();
      TreeMap tm = new TreeMap();
      
      
-     eanprods =  loadMore();
+  
        ladutr = new TreeMap<String,Double>();
        ladupraak = new TreeMap<String,Double>();
        this.getSaveStockInfo();
@@ -1100,6 +1074,9 @@ con3.close();
                 }
                 if (ean != null && ean.trim().length()>3){
                    prod.setEAN(ean.trim());
+                   if(eanprods == null) {
+                   	eanprods =new TreeMap();
+                   }
                    eanprods.put(ean.trim(), prod.getID());
                    
                  }
