@@ -338,7 +338,7 @@ public class VichiLATSQLDBDriver extends AbstractDBDriver implements
 	             
 	             
 	             
-	            if( sdate != null  && !sdate.startsWith("2030") && !sdate.startsWith("1753") && edate != null && !edate.startsWith("2030")  ){
+	            if( sdate != null  && !sdate.startsWith("2030") && !sdate.startsWith("1753") && edate != null && (!edate.startsWith("2030") && !edate.startsWith("1753"))  ){
 	            	//kui on mõlemad siis paneme kuupäevad 
 	            		 mline.setStartDate(sdate.substring(0,10));
 		            	 mline.setEndDate(edate.substring(0,10));

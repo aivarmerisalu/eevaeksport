@@ -408,18 +408,28 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(ea));
+								String ean = formatter.formatCellValue(row.getCell(ea)).trim();
 								String tnimi = formatter.formatCellValue(row.getCell(ea+2));
-								String toode = getToode(prods,ean);
+								
+								if(ean.length() > 13) {
+									if(ean.startsWith("4")) {
+										ean = ean.substring(0,13);
+									}else {
+										ean = ean.substring(1);
+									}
+									
+								}
+								String toode = getToode(prods,ean.trim());
 							 if(!"Nimetus".equals(tnimi)) {
 								 
 							 
-							  if(toode.equals(ean) ) {
+							  if(toode.equals(ean.trim()) ) {
 								  if(errors == null) {
-									  errors = "Tuvastamatta tooted sortimendis\n Selver formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+									  errors = "Tuvastamatta tooted sortimendis\n Selver formaat\n fail : "
+								  + file.getName() +"\n\nEAN     Nimetus\n";
 								  }
 								  if(!errors.contains(ean)) {
-									  errors = errors + ean + "   " + tnimi + "\n";
+									  errors = errors + "'" + ean + "'   " + tnimi + "\n";
 								  }
 								
 							  }

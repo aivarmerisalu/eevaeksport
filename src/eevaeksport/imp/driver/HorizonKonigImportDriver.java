@@ -2471,23 +2471,39 @@ try{
 				 //  System.out.println("refnr " + ref);
 					 String ref2 = ref;
 					 if(isHoreca) {
-						 ref2 = "+FF";
-						 boolean isFrozen = true;
+						
+						 
+						 boolean hasFrozen = false;
 						 Vector ll = order.getOrderLines();
 						 for (int i = 0; i < ll.size(); i++) {
 					    	  OrderLine line = (OrderLine) ll.elementAt(i);
 					    	  String prodid = line.getToode();
+					    	  if(prodid.startsWith("I") || prodid.startsWith("F")) {
+					    		  hasFrozen = true;
+					    		  ref2 = "+FF";
+					    		  break;
+					    	  }
+						 }
+						 
+						 
+						 if(hasFrozen) {
+						 boolean isOnlyFrozen = true;
+						 ll = order.getOrderLines();
+						 for (int i = 0; i < ll.size(); i++) {
+					    	  OrderLine line = (OrderLine) ll.elementAt(i);
+					    	  String prodid = line.getToode();
 					    	  if(!prodid.startsWith("I") && !prodid.startsWith("F")) {
-					    		  isFrozen = false;
+					    		  isOnlyFrozen = false;
 					    		  break;
 					    	  }
 					    	  
 						 }
 						 
-						 if(isFrozen) {
+						 if(isOnlyFrozen) {
 							 ref2 = "FF"; 
 						 } 
 					 }
+						 }
 					 
 					 if(isHoreca) {
 					 if(order.getStatus() > 6 && defDealers == null){
