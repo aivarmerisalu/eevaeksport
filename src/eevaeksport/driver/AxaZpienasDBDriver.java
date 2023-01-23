@@ -2361,7 +2361,10 @@ try{
     //z p algusega
   
     
-    String sss = "select itemid , itembarcode from inventitembarcode  bb where bb.dataareaid = 'zp' and bb.useforprinting = 1 group by itemid , itembarcode";
+    String sss = "select bb.itemid, itembarcode from inventitembarcode  bb " + 
+    		" left join inventdim dd on bb.inventdimid = dd.inventdimid " + 
+    		" left join inventtable tbl on bb.itemid = tbl.itemid " + 
+    		" where bb.dataareaid = 'zp' and bb.useforprinting = 1  and tbl.standardconfigid = dd.configid";
 
  
     

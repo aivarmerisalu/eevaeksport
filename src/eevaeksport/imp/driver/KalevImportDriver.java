@@ -619,11 +619,11 @@ private HashSet getXXX(){
   		return "M20240";
   	}
   	
-  	// System.out.println("Kliendi M��ramine: "  + id + " " + regnr);
+  	 System.out.println("Kliendi M��ramine: "  + id + " " + regnr);
   	
   	    sql1 = "SELECT SL01001 AS kood FROM SL010100 where SL01125  =  '" + id + "'";	
 	
-  //  System.out.println(sql1);
+    System.out.println(sql1);
     String acc = null;
 
     Statement st1 = con.createStatement();
@@ -634,14 +634,31 @@ private HashSet getXXX(){
     }
     rs1.close();
     st1.close();
+    
+    
+    if(acc == null){
+    	  sql1 = "SELECT SL01001 AS kood FROM SL010100 where SL01001  =  '" + id + "'";	
+    	    System.out.println(sql1);
+    	     st1 = con.createStatement();
+    	     rs1 = st1.executeQuery(sql1);
+
+    	    while (rs1.next()) {
+    	      acc = rs1.getString("kood").trim() ;
+    	    }
+    	    
+    	    rs1.close();
+    	    st1.close();   
+    		
+    	}    
+    
     String uus = null;
-    if(id!= null &&id.trim().length() >10){
+    if(id!= null && id.trim().length() >10){
     	uus = id.trim().substring(id.trim().length()-10,id.trim().length());
     }
     
     if(uus != null && acc == null){
     	sql1 = "SELECT SL01001 AS kood FROM SL010100 where SL01125  =  '" + uus + "'";	
-     //   System.out.println(sql1);
+       System.out.println(sql1);
 
          st1 = con.createStatement();
          rs1 = st1.executeQuery(sql1);
@@ -655,22 +672,9 @@ private HashSet getXXX(){
  
 
     
-if(acc == null){
-  sql1 = "SELECT SL01001 AS kood FROM SL010100 where SL01001  =  '" + id + "'";	
-  //  System.out.println(sql1);
-     st1 = con.createStatement();
-     rs1 = st1.executeQuery(sql1);
 
-    while (rs1.next()) {
-      acc = rs1.getString("kood").trim() ;
-    }
     
-    rs1.close();
-    st1.close();   
-	
-}    
-    
-   // System.out.println("Klient: " + acc + " " + id);
+    System.out.println("Klient: " + acc + " " + id);
     return acc;
 
   }

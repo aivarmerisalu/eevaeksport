@@ -166,7 +166,7 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		                 len = "0";
 		                 if(f.exists()){
 		                   len =	f.length() + "";
-		                   buf.append(toode+".jpg;"  + len + "\n");
+		                   buf.append(toode+".png;"  + len + "\n");
 		           	    	b++;
 		                 } 
 		                 
