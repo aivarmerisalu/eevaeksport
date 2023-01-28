@@ -2008,13 +2008,24 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
 // panenme grupp2 paika 
       if(pdgroupid!=null && pdgroupid.trim().length()>0){
     	  String asi = null;
+    	
+
     	  if(pdgroupid.equals("Choco") || pdgroupid.equals("Sugar")  
     			  || pdgroupid.equals("Zephyr") || pdgroupid.equals("Kalev") || pdgroupid.equals("ŽELAT_PROD") ){
               asi = "Confectionary";
+              
+              
+              
+              
+              
+              
+              
       } else if(pdgroupid.equals("Chips") || pdgroupid.equals("Pelets") || pdgroupid.equals("Extruders") 
 		|| pdgroupid.equals("Nuts") || pdgroupid.equals("Dipi")  || pdgroupid.equals("SMUTIJI") || pdgroupid.equals("SULAS DZĒR")
 		|| pdgroupid.equals("GĀZĒTS ŪD") || pdgroupid.equals("NEKTĀRI")|| pdgroupid.equals("NEGĀZĒTSŪD")
-		|| pdgroupid.equals("KVASS")  || pdgroupid.equals("SULAS") || pdgroupid.equals("Other") || pdgroupid.equals("DZĒRIENI")){
+		|| pdgroupid.equals("KVASS")  || pdgroupid.equals("SULAS") || pdgroupid.equals("Other") || pdgroupid.equals("DZĒRIENI")
+		|| pdgroupid.equals("Drinkables")
+){
 	  
     	  asi = "Chips and Drinks";
    
@@ -2305,41 +2316,52 @@ String sqlo = " SELECT  jou.orderaccount as agent,pdgroupid as grupp ,round(SUM(
                 int sum = (int)rs.getDouble("summa");
                 if (custplans.get(custID) != null){
                   TreeMap tr = (TreeMap) custplans.get(custID);
-if(grupp.equals("Choco") || grupp.equals("Sugar") || grupp.equals("Other") || grupp.equals("Zephyr") ||grupp.equals("Kalev")){
-                  Toode tt = (Toode)tr.get("1");
+if(grupp.equals("Choco") || grupp.equals("Sugar") || grupp.equals("Other") || grupp.equals("Maigums sver") 
+		|| grupp.equals("Cocoa prod.") || grupp.equals("ExclChocProd") || grupp.equals("Product sets") || grupp.equals("Trial products")
+		|| grupp.equals("Zephyr") ||grupp.equals("Kalev") || grupp.equals("Choc.bars") ||grupp.equals("Choc.boxes")
+		|| grupp.equals("Choc.candies") ||grupp.equals("Choc.tablets") || grupp.equals("SourcedJellyCan") || grupp.equals("BaltZefMais")
+		|| grupp.equals("Caramels") || grupp.equals("Dragees") || grupp.equals("Maigums mais")|| grupp.equals("Maigums karb") || grupp.equals("BaltZefSver")
+		|| grupp.equals("Jelly candies") || grupp.equals("Marmelade") || grupp.equals("Marzipan") || grupp.equals("Sherbert")){
+	
+	
+	              Toode tt = (Toode)tr.get("1");
                   tt.setDonecur(tt.getDonecur() + sum);
                   }
 
-if(grupp.equals("Flour")){
+if(grupp.equals("Flour") || grupp.equals("Flour products") ||
+		grupp.equals("Biscuits") || grupp.equals("Wafer cakes")	
+		|| grupp.equals("WaferCakesMini") || grupp.equals("Wafers")
+		|| grupp.equals("Trial products") || grupp.equals("Wafer cakes")
+		|| grupp.equals("Cakes") || grupp.equals("Other pastry")
+		|| grupp.equals("Other products") || grupp.equals("Pastry")){
+	
+	
+	
+	
     Toode tt = (Toode)tr.get("2");
     tt.setDonecur(tt.getDonecur() + sum);
     }
-if(grupp.equals("Chips") || grupp.equals("Pelets") || grupp.equals("Extruders") || grupp.equals("Nuts") ||grupp.equals("Dipi")){
-    Toode tt = (Toode)tr.get("3");
+if(grupp.equals("Chips") || grupp.equals("Pelets") || grupp.equals("Extruders") || grupp.equals("Water") ||grupp.equals("Dipi")
+		|| grupp.equals("Dipi subcat.")
+		|| grupp.equals("Kettle chips") || grupp.equals("Packed nuts") || grupp.equals("Soft drinks") ||grupp.equals("Syrups")
+		|| grupp.equals("Pellets") || grupp.equals("Regular chips") || grupp.equals("Smoothies") ||grupp.equals("Juice")){
+	
+	Toode tt = (Toode)tr.get("3");
     tt.setDonecur(tt.getDonecur() + sum);
     }
 
-if(grupp.equals("Cakes") || grupp.equals("Pedro")){
+if(grupp.equals("Mayo") || grupp.equals("Fish products") || grupp.equals("Flour products") || grupp.equals("Nutrition")
+		|| grupp.equals("Pizza") || grupp.equals("Spices") || grupp.equals("Sweet group") || grupp.equals("VEGAN")
+		|| grupp.equals("Mustard") || grupp.equals("MERCES") || grupp.equals("MĀRR_SINEP") || grupp.equals("Horseradish")
+		|| grupp.equals("Preserve foods") || grupp.equals("Ready meal") || grupp.equals("Ketchup") || grupp.equals("Tomato sauce")
+		|| grupp.equals("Dressings") ){
+	
+
     Toode tt = (Toode)tr.get("4");
     tt.setDonecur(tt.getDonecur() + sum);
     }
 
 
-
-     /*
-1  Choco
-1  Sugar
-1  Other
-1  Zephyr
-1  Kalev
-2  Flour
-3  Chips
-3  Pelets
-3  Extruders
-3  Nuts
-3  Dipi
-4 Cakes
-4 Pedro*/
                 }
               }
               rs.close();

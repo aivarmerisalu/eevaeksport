@@ -106,20 +106,11 @@ public class VichiLATSQLDBDriver extends AbstractDBDriver implements
      	String picts2 = parent.getProps().getProperty("pict.dir2");
      	String pictsUnion = parent.getProps().getProperty("pict.dir3");
      	
-     	//1. kustutame tulemuse kataloogi sisu 
-     	 //Kataloogi sisude kustutamine
-		   
-   	 File res2 = new File (pictsUnion);
-       String[] ff2 = res2.list();
-   	 for(int i = 0;ff2.length>i;i++){
-       //	(new File ( pictsUnion + ff2[i])).delete(); 
-    }
-
-   	 
+   
    	 
      	
      	String cmd2 = "SELECT t.[No_] AS toode  , (select top 1 ref.[Item No_] from Navision.dbo.[Vičiūnai ir Ko$Item Cross Reference] ref " +   
- 	   "    WHERE  ref.[Cross-Reference Type No_] = 'LAT'  and ref.[Item No_] = t.[No_] ) as littoode " +
+ 	   "    WHERE  ref.[Cross-Reference Type No_] = 'LAT'  and ref.[Cross-Reference No_]  = t.[No_] ) as littoode " +
   "FROM [Vičiūnai-LAT$Item] t WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0) " +
  	"				  or [Pogrupio kodas] like '%2.8.1%' " ;
  			

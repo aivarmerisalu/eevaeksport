@@ -406,6 +406,10 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
      *
      * @see
      */
+    
+    TreeMap agents1 = new TreeMap();
+    
+    
     public TreeMap getAgents() {
         connectionUp(url2);
         String  cmd = "select distinct N08_ATSTOVAS as kood ,N08_ATSTOVAS  as nimi, '' as objekt from n08_klij where N08_ATSTOVAS like '%vad%'";
@@ -453,9 +457,19 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
                 	  agent.setActive(true);
                   }
             	  
+              	String agentAGENTS = getParent().getProps().getProperty("dub." +agent.getID());
+				if(agentAGENTS != null){
+    	           StringTokenizer stag = new StringTokenizer(agentAGENTS, ",");
+			    while(stag.hasMoreTokens()){  	
+                 agent.addDubbler(stag.nextToken());
+                 System.out.println("Lisan Duubleid " + "dub." +agent.getID() + " " + agent.getDubbler().toString());
+			    }
+
+				}
             	  
               agent.setName(name);
               agents.put(name, agent);
+              agents1.put(agent.getID(),agent);
             }
             
             if(sb2.length() > 2){
@@ -696,9 +710,23 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
                  String ag = rs.getString("agent").trim();
               cust.addAgent(new Agent(ag));
               cust.addAgent(new Agent("vadyba"));
-              cust.addAgent(new Agent("vadyba9"));
-              cust.addAgent(new Agent("HOUSE"));
-              cust.setMainAgent(ag);
+              
+              if (ag != null ){
+     				Agent agg = ((Agent)this.agents1.get(ag));
+   				
+     				if(agg != null && agg.getDubbler().size()>0){
+     					//System.out.println("dubbing " + agg + "  " + agg.getDubbler().toString());
+     					for (int r = 0 ; r < agg.getDubbler().size() ; r++){
+     						Agent dub = new Agent((String)agg.getDubbler().elementAt(r));
+     						cust.addAgent(dub);
+     					}
+     				}
+     			}
+              
+              // cust.addAgent(new Agent("vadyba9"));
+              // cust.addAgent(new Agent("HOUSE"));
+              // cust.setMainAgent(ag);
+              
               String paym = rs.getString("paymterm");
               if(paym != null && paym.trim().length() >0){
             	  cust.setPaymTerm(paym.trim());  
@@ -1235,8 +1263,10 @@ Active customer past 7 days  :  20
        String cmd = "  SELECT  I06_ATSTOVAS AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + " +
                    " SUM(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh  WHERE " +
                    "  month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) and I06_PERKELTA='2' " +
-                   "   and I06_R_DATE <= getdate() and I06_ATSTOVAS like '%vad%' " +
+                   "   and I06_R_DATE <= getdate() and I06_ATSTOVAS like '%vad%' and I06_KODAS_LS_2 in ('021','022','023','025')  " +
                    "  GROUP BY  I06_ATSTOVAS";
+//I06_KODAS_LS_2 = 021 or
+    //   I06_KODAS_LS_2 = 022 or I06_KODAS_LS_2 = 023 or I06_KODAS_LS_2 = 025
 
        log(cmd);
 

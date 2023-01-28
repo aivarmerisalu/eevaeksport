@@ -775,7 +775,7 @@ try{
    		"   			  [Customer Price Group] as hinnak, k.[Currency Code] as currency ,  0 as credit \r\n" + 
    		"   			  FROM [VICIUNAI-POL$Customer] k  LEFT JOIN [VICIUNAI-POL$Ship-to Address] adr ON adr.[Customer No_]  = k.[No_]  \r\n" + 
    		"			  LEFT JOIN [VICIUNAI-POL$Sales Line Discount] d ON d.[Sales Code] = k.[Customer Disc_ Group] \r\n" + 
-   		"   			 WHERE k.[Salesperson Code] != ''  AND blocked != 3 " ;
+   		"   			 WHERE (k.[Salesperson Code] != ''  AND blocked != 3) or k.[No_] = '2' " ;
    System.out.println(sql);
    try {
         Connection con = getNewConnection2();
@@ -917,6 +917,14 @@ try{
  					}
  				}
  			}
+            
+              if(customer.getID().equals("2_00")) {
+             Enumeration enume = getParent().getAgentsHash().elements();
+             while (enume.hasMoreElements()) {
+               Agent a = (Agent) enume.nextElement();
+                 customer.addAgent(a);
+              }
+             }
            
 
    String bl = rs.getString("blokk");

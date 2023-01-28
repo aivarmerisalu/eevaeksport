@@ -341,6 +341,7 @@ public class MailAgent  {
     
      Session session = Session.getInstance(prop);
     // session.setDebug(true);
+     System.out.println("token " + token);
       store = session.getStore("imap"); 
       store.connect(props.getProperty("pop3.host"), props.getProperty("pop3.user"), token);
      

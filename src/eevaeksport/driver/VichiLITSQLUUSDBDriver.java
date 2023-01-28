@@ -936,7 +936,7 @@ System.out.println(cmd);
 		TreeMap tm = new TreeMap();
 		this.customers = new ArrayList();
 
-		String sql = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2 , k.nimi as nimi2 , k.aadress as aadress12 ,k.kood as payer2 , k.agent as agent2 , k.* from" + 
+		String sql = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2 , k.nimi as nimi2, k.[Ship-to address name]  as nimi3, k.aadress as aadress12 ,k.kood as payer2 , k.agent as agent2 , k.* from" + 
 				"				 dbo.v_VIK_Customers k	" ;
 
 		System.out.println(sql);
@@ -952,9 +952,13 @@ System.out.println(cmd);
 					id = id + "_" + id2.trim();
 				}
 				String name2 = rs.getString("nimi2").trim();
+				String name3 = rs.getString("nimi3");
 				String aadress12 = rs.getString("aadress12");
 				
 				String name =  name2;
+				if(name3 != null && name3.trim().length() > 0) {
+					name = name3;
+				}
 				
 				
 				//String id = rs.getString("kood").trim();
@@ -963,7 +967,7 @@ System.out.println(cmd);
 				String payer = null;
 				if (name.equals(""))
 					name = "<" + id + ">";
-				customer.setName(name);
+				customer.setName(name.trim());
 				payer = rs.getString("payer2");
 				if (payer != null && payer.trim().length() > 0) {
 					customer.setPayer(payer.trim());
@@ -972,9 +976,8 @@ System.out.println(cmd);
 			
 				if (aadress12 != null && aadress12.trim().length() > 0) {
 					String addr = aadress12;
-					
 					customer.setAddress(Converter.enCodeEst(addr));
-					customer.setName(Converter.enCodeEst(customer.getName() + " " + addr));
+					customer.setName(Converter.enCodeEst(customer.getName()));
 				}
             
 				String ag = rs.getString("agent2").trim();
@@ -1154,6 +1157,20 @@ System.out.println(cmd);
 		           if(cont != null && cont.trim().length()>0){
 		               customer.setPersonalData(Converter.enCodeEst(cont.trim()));   
 		           }
+		            cont = rs.getString("Ship-to Address contact");
+		           if(cont != null && cont.trim().length()>0){
+		               customer.setPersonalData(Converter.enCodeEst(cont.trim()));   
+		           }
+		           
+     boolean goes = true;
+		           
+		           String blokk = rs.getString("Blocked");
+		           if(blokk != null && blokk.trim().length()>0){
+		               if(blokk.trim().equals("1")) {
+		            	   goes = false;
+		               }
+		           }
+		           
 		           String alegr = rs.getString("alegr");
 		           if(alegr != null && alegr.trim().length()>0){
 		               customer.setGroup(alegr);   
@@ -1173,7 +1190,7 @@ System.out.println(cmd);
 		            
 		           
 				// customer.setPayer(id);
-				if ( !customer.getID().substring(0, 1).equals("A")) {
+				if(goes) {
 					tm.put(customer.getName()+ customer.getID(), customer);
 					this.customers.add(customer.getID());
 					  custs.add(customer.getID());

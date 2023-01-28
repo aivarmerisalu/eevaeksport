@@ -2769,9 +2769,20 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       	//  System.out.println("eilähe " + line);
           
       	}
+      	
+      /*	<item code="O64150NBS-HCB" default_name="H1 55W 12V NBS+100% 2gb.HALOG11131xxNLAMPA" 
+      	stripe_code="4052899992252" base_price="10.73" vat_price="12.98" purchase_price="3.9" 
+      			long_description="OSRAM NIGHT BRAKER SILVER  augstas veiktsp11132xxjas spuldzes ar vislab11124xxk sabalans11132xxto darbsp11132xxjas m11148xx11121xxu. OSRAM NIGHT BRAKER SILVER sp11136xxd par 100% spo11121xx11124xxk par standart11124xx noteikto minimumu. 11135xxpa11120xxi izstr11124xxd11124xxtais kv11132xxldiegs nodro11120xxina liel11124xxku gaismas atdevi. T11124xxd11132xxj11124xxdi automobi11142xxa lampas izstaro l11136xxdz pat 130m garu gaismas k11148xxli. Vair11124xxk gaismas un uzlabota redzam11136xxba pal11136xxdz vad11136xxt11124xxjiem laic11136xxgi paman11136xxt ce11142xxaz11136xxmes, 11120xx11140xx11132xxr11120xx11142xxus un rea11134xx11132xxt uz b11136xxstam11124xxm ce11142xxu satiksmes situ11124xxcij11124xxm. OSRAM NIGHT BREAKER SILVER produktu kl11124xxsts ietver  H4, H7, H11 spuldzes. Lab11124xxka izv11132xxle augst11124xxkai veiktsp11132xxjai un gar11124xxkam darbm11148xx11121xxam. Paredz11132xxtas lieto11120xxanai uz koplieto11120xxanas ce11142xxiem, ECE sertific11132xxtas." 
+      			special_price1="0" special_price2="0" web_price2="0" web_price1="0" stock_level="-14" package1="10"
+      			package2="1" unit="GAB" purchase_date="2021-08-31" class="OSRAM" max_discount="0" 
+      			supplier_code="OSRAM" country_code="DE" type="1"><data code="E_AGENT" content="J11124xx"/><data
+      			code="ASSORTMENT" content="Active"/><data code="BUDGET_GROUP" content="NO"/>
+      			<data code="SEASON" content="ALL"/><data code="PKK" content="PK-14"/><data code="PGK" 
+      			content="PG-14114"/><data code="OLD_CODE" content="O64150NBSDUO"/></item>
+     */
       
-      	//if(prod.getID().equals("760651"))
-      //	System.out.println("Tooted " + prod.getName() + " " + prod.getID() + " " + goes + " " + prod.getStock() );
+      	if(prod.getID().equals("O64150NBS-HCB"))
+        	System.out.println("Tooted " + prod.getName() + " " + prod.getID() + " " + goes + " " + prod.getStock() );
       	
       	    if(goes ){
       	    	if(!usedGroups.contains(prod.getGroup())){

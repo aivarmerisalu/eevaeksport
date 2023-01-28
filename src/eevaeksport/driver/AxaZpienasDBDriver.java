@@ -3509,9 +3509,9 @@ public TreeMap getPRLisa()  {
      					if(!hasWednesday.contains(chain))
      						hasWednesday.add(chain);
      				}
-         				if(chWED.contains(chain)) {
-         					if(!hasWednesday.contains(chain))
-         						hasWednesday.add(chain);
+         				if(chDaily.contains(chain)) {
+         					if(!hasDaily.contains(chain))
+         						hasDaily.add(chain);
          				}
            			}
        			

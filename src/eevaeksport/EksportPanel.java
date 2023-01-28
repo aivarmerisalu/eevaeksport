@@ -1123,6 +1123,9 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("GlobalMar")
 					    || driver.getDriverVersion().equals("NaviIceco")
 					    || driver.getDriverVersion().equals("DirectoLinpet")
+					    || driver.getDriverVersion().equals("DirectoAgapics")
+					    
+				
 					    || driver.getDriverVersion().equals("HorizonMuiz")
 					    || driver.getDriverVersion().equals("HorizonKonig")
 					    || driver.getDriverVersion().equals("NaviNematekas")
@@ -1243,6 +1246,8 @@ public class EksportPanel extends JPanel implements ActionListener,
      						|| driver.getDriverVersion().equals("BuitNowacoLV")
                              || driver.getDriverVersion().equals("VS")
                              || driver.getDriverVersion().equals("DirectoLinpet")
+                             || driver.getDriverVersion().equals("DirectoAgapics")
+                             
                             || driver.getDriverVersion().equals("ViaLaima")
                             || driver.getDriverVersion().equals("AxaOrklaLV")
                 	  || driver.getDriverVersion().equals("IceAxa")
@@ -3428,7 +3433,7 @@ if(agprods != null && agprods.size() >0){
         String fileName = "assortment.txt";
         
         if (driver.getDriverVersion().equals("Movex") || driver.getDriverVersion().equals("AxaBuraLat") 
-        		|| driver.getDriverVersion().equals("KMAHorti")){
+        		|| driver.getDriverVersion().equals("KMAHorti")  || driver.getDriverVersion().equals("DirectoAgapics")){
         	
            System.out.println("Bufri0 suurus " + buf.length());
            
