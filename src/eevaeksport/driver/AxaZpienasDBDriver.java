@@ -1094,6 +1094,16 @@ String email = " ";
     Agent aa2 = new Agent ("WARE3");
     aa2.setName("WARE3");
     agents.put("WARE3", aa2);
+    Agent aa3 = new Agent ("WARE4");
+    aa3.setName("WARE4");
+    agents.put("WARE4", aa3);
+    
+    Agent aa4 = new Agent ("WARE5");
+    aa4.setName("WARE5");
+    agents.put("WARE5", aa4);
+    Agent aa5 = new Agent ("WARE6");
+    aa5.setName("WARE6");
+    agents.put("WARE6", aa5);
     
     if(sb2.length() > 2){
     	try{
@@ -1813,6 +1823,9 @@ try{
           cust.addAgent(new Agent("WARE1"));
           cust.addAgent(new Agent("WARE2"));
           cust.addAgent(new Agent("WARE3"));
+          cust.addAgent(new Agent("WARE4"));
+          cust.addAgent(new Agent("WARE5"));
+          cust.addAgent(new Agent("WARE6"));
           cust.setMainAgent(agen.trim());
           
           

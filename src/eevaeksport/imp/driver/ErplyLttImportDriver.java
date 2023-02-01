@@ -21,6 +21,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -308,7 +309,10 @@ public class ErplyLttImportDriver extends AbstractImportDriver{
        
          userstuff = "&clientCode=" + company +"&version=" + apiversion + "&responseType=" + returntype + "&sessionKey=" + session;         
 		//System.exit(0);
-         makeOutput(order);   
+        
+        	  makeOutput(order);   
+         
+       
   }
   
   private String getTarne(Order order){
@@ -465,9 +469,15 @@ public class ErplyLttImportDriver extends AbstractImportDriver{
 	 	 		boolean kapp = false;
 	 	 		Calendar cal = Calendar.getInstance();
 	 	 		//System.out.println("kapp " + order.getStatus());
+	 	 		
+	 	 		String firma = order.getCompany();
+	 	 		
 	 	 		if(order.getStatus() == 100){
 	 	 			kapp = true;
 	 	 			cal.setTime(order.getShipCal().getTime());
+	 	 			if(firma.indexOf("|") != -1 ) {
+		 	 			firma = firma.substring(0,firma.indexOf("|"));
+		 	 		}
 	 	 		}
 	 	 		
 	 	 		SimpleDateFormat time_format = new SimpleDateFormat("HH:mm:ss");
@@ -551,16 +561,16 @@ public class ErplyLttImportDriver extends AbstractImportDriver{
 	 	 		String date = getTarne(null);
 	 	 		String sdate = getTarne(order);
 	 	 		
-	 		       String custID = "customerID=" + order.getCompany();
+	 		       String custID = "customerID=" + firma;
 	 		        
 	 	 	try {
 	 	 	  try {
 	 	 		  String payerID = "";
 	 	 		  String addressID = "";
-	 	 		  if(order.getCompany() != null && customers.get(order.getCompany()) != null){
-	 	 			  Customer cust = (Customer)customers.get(order.getCompany()) ;
+	 	 		  if(firma != null && customers.get(firma) != null){
+	 	 			  Customer cust = (Customer)customers.get(firma) ;
 	 	 			  if(cust.getPayer() != null && cust.getPayer().trim().length() != 0){
-	 	 				 payerID = "&payerID=" + cust.getPayer() +"&shipToID="+order.getCompany();
+	 	 				 payerID = "&payerID=" + cust.getPayer() +"&shipToID="+firma;
 	 	 				 
 	 	 				if("true".equals(parent.getProps().getProperty("erply.newAPI"))){
 	 		 	 			custID = "customerID=" + cust.getPayer();

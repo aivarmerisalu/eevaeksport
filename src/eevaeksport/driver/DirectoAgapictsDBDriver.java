@@ -3218,7 +3218,10 @@ public void WebReporter() {
 			String name = Converter.deCode(cc.getName());
 			if(name.startsWith("Rimi")) {
 			sb.append(name + "\n");
-			sb.append(uns.toString()+ "\n\n");
+			for (Object ob : uns) {
+				sb.append(ob+ "\n");
+			}
+			sb.append( "\n");
 			}
 		}
 	}

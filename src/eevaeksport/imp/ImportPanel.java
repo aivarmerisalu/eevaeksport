@@ -2282,10 +2282,10 @@ public String parseFirstEmail(String emails) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		  
-		  
 	  }
   }
+  
+  
   private void importOrder(Orders orders,StringBuffer troubles) throws SQLException{
 
     Enumeration enume = orders.getOrders().elements();
@@ -9572,7 +9572,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	  //  System.exit(0);
 	        
 	      
-	orders.add(firma, prod, name ,kogus*kordaja , null, null, 0, 0,datelong,
+	orders.add(firma + "|" + ladu , prod, name ,kogus*kordaja , null, null, 0, 0,datelong,
 	        		  vat + "",0,0,false,teostaja,100,unit,ladu,"",ean,null,true,teostaja,null);
 	      }
 	     }

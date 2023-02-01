@@ -2515,11 +2515,12 @@ String cmd ="  SELECT  jou.orderaccount as agent,round(SUM(lineamount),0) AS sum
  
  //System.out.println(brandplans.toString());
   
-String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(lineamount),0) AS summa " +
-  " FROM bmssa.custinvoicetrans sal  with (nolock) INNER JOIN bmssa.inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid INNER JOIN bmssa.custinvoicejour jou with (nolock) ON " +
-  " sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid INNER JOIN bmssa.custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid WHERE " +
-  " inv.dataareaid='olv'  AND YEAR(sal.invoicedate) = YEAR(getdate())  " +
-  "  AND MONTH(sal.invoicedate) = MONTH(getdate()) and traagentsid != '' and pdgroupid != '' GROUP BY traagentsid,pdgroupid";
+String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(SUM(lineamount),0) AS summa \r\n" + 
+		"   FROM bmssa.custinvoicetrans sal  with (nolock) INNER JOIN bmssa.inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid INNER JOIN bmssa.custinvoicejour jou with (nolock) ON \r\n" + 
+		"   sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid INNER JOIN bmssa.custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid\r\n" + 
+		"   LEFT JOIN bmssa.INVENTITEMGROUP gr ON inv.ITEMGROUPID = gr.ITEMGROUPID AND  Inv.DATAAREAID = gr.DATAAREAID   WHERE \r\n" + 
+		"   inv.dataareaid='olv'  AND YEAR(sal.invoicedate) = YEAR(getdate())  \r\n" + 
+		"    AND MONTH(sal.invoicedate) = MONTH(getdate()) and traagentsid != '' and pdgroupid != '' GROUP BY traagentsid,inventovergroupid";
   
   
   String cmd ="  SELECT  traagentsid as agent,round(SUM(lineamount),0) AS summa " +
@@ -2711,7 +2712,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
   		
 		for(int i = 1 ; i < a + 1;i++){
 			 row = sheet.getRow(i);
-			String gr = (row.getCell((short) 0).getStringCellValue());
+			String gr = (row.getCell((short) 1).getStringCellValue());
 			String sub = (row.getCell((short) 2).getStringCellValue());
 			if(gr != null && gr.trim().length() > 0)
 			groupsCat.put(gr.trim(), sub.trim());
@@ -2871,7 +2872,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 			String gr = (row.getCell((short) 0).getStringCellValue());
 			String sub = (row.getCell((short) 1).getStringCellValue());
 			if(gr != null && gr.trim().length() > 0)
-			groupsSub.put(gr.trim(), sub.trim());
+			groupsSub.put(sub.trim(), sub.trim());
 		  		
 		}
 			

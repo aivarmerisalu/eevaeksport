@@ -639,14 +639,12 @@ public Vector getDebt() throws SQLException{
      
 	
      boolean shipmodeown  = false ;
-     boolean noinvoice = false; 
+    
      
      if(order.getShipMode() != null && order.getShipMode().trim().length() > 0) {
      	String uu =  order.getShipMode();
      	
-     	if(uu.contains("-3")) {
-     		noinvoice = true;
-     	}
+     	
      	
      	if( uu.contains("B")) {
      		shipmodeown = true;
@@ -663,12 +661,14 @@ public Vector getDebt() throws SQLException{
       cou++;
 
       String type = "51"; //tellimus
-      if(tag) {
-    	  type = "52";
-      }
+     
       
       if(volgu || kaup) {
     	  type = "53";
+      }
+      
+      if(tag) {
+    	  type = "52";
       }
       //sb.append(getLineNr(cou));
       sb.append("          <I06_OP_TIP>" + type + "</I06_OP_TIP>" + ls);
@@ -767,7 +767,7 @@ public Vector getDebt() throws SQLException{
           cou++;  
       }
      
-      if(volgu) {
+      if(volgu && !tag) {
     	  sb.append("          <I06_KODAS_LS_3>BLOCK</I06_KODAS_LS_3>" + ls);
           cou++;
       }

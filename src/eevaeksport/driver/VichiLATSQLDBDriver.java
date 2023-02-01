@@ -310,6 +310,12 @@ public class VichiLATSQLDBDriver extends AbstractDBDriver implements
 	             String sdate = rs.getString("startday");
 	             String edate = rs.getString("enddate");
 	             double price = rs.getDouble("price");
+	             String type = rs.getString("salespricetype");// see on uus rida
+	             if(type == null) {
+	            	 type = " ";
+	             }else {
+	            	 type = type.trim();
+	             }
 	             
 	             MatrixLine mline = new MatrixLine();
 	             String check = "";
@@ -329,7 +335,10 @@ public class VichiLATSQLDBDriver extends AbstractDBDriver implements
 	             
 	             
 	             
-	            if( sdate != null  && !sdate.startsWith("2030") && !sdate.startsWith("1753") && edate != null && (!edate.startsWith("2030") && !edate.startsWith("1753"))  ){
+	            if( type.equals("AKC") &&
+	            		(sdate != null  && !sdate.startsWith("2030") && !sdate.startsWith("1753") && edate != null &&
+	            		(!edate.startsWith("2030") && !edate.startsWith("1753"))) 
+	            		){
 	            	//kui on mõlemad siis paneme kuupäevad 
 	            		 mline.setStartDate(sdate.substring(0,10));
 		            	 mline.setEndDate(edate.substring(0,10));

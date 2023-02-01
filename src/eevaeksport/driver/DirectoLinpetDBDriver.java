@@ -937,7 +937,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
   }
   
    public TreeMap getProdGroups2() throws SQLException {
-    
+    HashSet names = new HashSet();
 	   String lang = null;
 	   TreeMap res = new TreeMap();
 	     if(getParent().getProps().getProperty("productgroup.lang") != null){
@@ -972,7 +972,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                    			  try {
                    			  Node lan=	  rida.getChildNodes().item(0);
                    		     name = Converter.enCodeEst( lan.getAttributes().getNamedItem("content").getNodeValue());
-                   		 System.out.println("gr name " + name);
+                   		
                    			  }catch(Exception e) {
                    				  
                    			  }
@@ -980,10 +980,17 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                    				
                    			
                    		  }
+                   		 if(names.contains(name + " 1")) {
+                  			  name = name + " 2";
+                  		  }
                    		  
+                   		  if(names.contains(name)) {
+                   			  name = name + " 1";
+                   		  }
                    		  res.put(group, name); 
-                   		  prGroups.put(group, name);  
-                   		  
+                   		  prGroups.put(group, name); 
+                   		 System.out.println("gr name " + name + " " + group);
+                   		names.add(name);
                		 }catch(Exception r){
                			 
                		 }

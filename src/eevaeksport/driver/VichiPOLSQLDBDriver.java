@@ -829,6 +829,7 @@ try{
            name = name .replaceAll("nY ", "ną ");  
            
            name = name .replaceAll("iY ", "ią ");
+           if(!name.contains("NOWY"))
            name = name .replaceAll("Y ", "ą ");
            name = name .replaceAll("1cłtki", "Źółtki");
            name = name .replaceAll("GaRNA", "GÓRNA");
