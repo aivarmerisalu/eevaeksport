@@ -3578,9 +3578,12 @@ public class Converter {
 		  	  		mail.addAttach(fileName);
 		  	  	 StringTokenizer st = new StringTokenizer(parent.getProps().getProperty("report.email"),",");
 		  	  	 while(st.hasMoreTokens()) {
-		  	  	    mail.setFilesTo(st.nextToken());
+		  	  		 String tt = st.nextToken();
+		  	  	    mail.setFilesTo(tt);
 		  	  		mail.send(); 
+		  	  	 System.out.println(tt + " " + fileName);
 		  	  	 }
+		  	  	
 	               	
 	   		}
 		  	

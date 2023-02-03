@@ -3396,7 +3396,16 @@ public TreeMap getPRLisa()  {
      		
      		TreeMap kllisa = getKLLisa();
      		TreeMap prlisa = getPRLisa();
-     		
+     		Calendar cal = Calendar.getInstance();
+     		String hh = cal.getTime().getHours()+"";
+     		if(hh.length() == 1) {
+     			hh = "0" + hh;
+     		}
+     		String mm = cal.getTime().getMinutes()+"";
+     		if(mm.length() == 1) {
+     			mm = "0" + mm;
+     		}
+     		String time2 = "_" + hh +"-" +mm;
      	// loeme signatuurid sisse kui on olemas	
      		HashSet done = null;
      		try {
@@ -3480,7 +3489,7 @@ public TreeMap getPRLisa()  {
        			String filterOutOfStock = (String)cob.get("resint3").toString();
        			String dateAndTime = (String)cob.get("recetime");
        		
-       			Calendar cal = Calendar.getInstance();
+       			 cal = Calendar.getInstance();
  	  			try {
  	  				cal.setTimeInMillis(Long.parseLong(filterOutOfStock));
  	  			}catch(Exception e) {
@@ -3620,8 +3629,9 @@ public TreeMap getPRLisa()  {
        		excelifailBase.close();
        		
 
-       		FileOutputStream output_file_oos =new FileOutputStream(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-       		//filenames.add(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+       		FileOutputStream output_file_oos =new FileOutputStream(exceldir +
+       				"productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
+       		filenames.add(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date())+ time2 + ".xlsx");
        		wbBASE.write(output_file_oos); //write changes
        		output_file_oos.close();  //close the stream
        		
@@ -3657,7 +3667,7 @@ public TreeMap getPRLisa()  {
      	  			String filterProblem = (String)cob.get("resstr1");
      	  			String filterOutOfStock = (String)cob.get("resint3").toString();
      	  			String dateAndTime = (String)cob.get("recetime");
-     	  			Calendar cal = Calendar.getInstance();
+     	  			 cal = Calendar.getInstance();
      	  			try {
      	  				cal.setTimeInMillis(Long.parseLong(filterOutOfStock));
      	  			}catch(Exception e) {
@@ -3757,8 +3767,8 @@ public TreeMap getPRLisa()  {
      			
        			excelifailChain.close();
        		  if(!empty) {
-     	  		FileOutputStream output_file_chain =new FileOutputStream(exceldir + "productOOSChain-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-     	  		filenames.add(exceldir + "productOOSChain-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+     	  		FileOutputStream output_file_chain =new FileOutputStream(exceldir + "productOOSChain-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
+     	  		filenames.add(exceldir + "productOOSChain-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
      	  	//	arreturn.add(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
      		  	
      	  		wbCHAIN.write(output_file_chain); //write changes
@@ -3799,7 +3809,7 @@ public TreeMap getPRLisa()  {
      	  			String filterProblem = (String)cob.get("resstr1");
      	  			String filterOutOfStock = (String)cob.get("resint3").toString();
      	  			String dateAndTime = (String)cob.get("recetime");
-     	  			Calendar cal = Calendar.getInstance();
+     	  			 cal = Calendar.getInstance();
      	  			
      	  			try {
      	  				cal.setTimeInMillis(Long.parseLong(filterOutOfStock));
@@ -3906,8 +3916,8 @@ public TreeMap getPRLisa()  {
      			
        			excelifailChain.close();
        		  if(!empty) {
-     	  		FileOutputStream output_file_chain =new FileOutputStream(exceldir + "productOosChainWed-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-     	  		filenames.add(exceldir + "productOosChainWed-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+     	  		FileOutputStream output_file_chain =new FileOutputStream(exceldir + "productOosChainWed-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date())+ time2 + ".xlsx");
+     	  		filenames.add(exceldir + "productOosChainWed-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
      	  	//	arreturn.add(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
      		  	
      	  		wbCHAIN.write(output_file_chain); //write changes
