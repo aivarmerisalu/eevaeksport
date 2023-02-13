@@ -37,7 +37,6 @@ public class ReportingService {
 		boolean res = false;
 		
 		
-		//module "shipit"
 		  
   		try {
   		  

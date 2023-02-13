@@ -938,8 +938,8 @@ try{
            	String num = rs.getString("alekood");
            	if(num != null && num.trim().length()>0){
            	double dd = Double.parseDouble(num.trim());
-           	if(dd > 0)
-             customer.setCity("Discount : " + getNF().format(Double.parseDouble(num.trim())) + " %");
+          // 	if(dd > 0)
+          //   customer.setCity("Discount : " + getNF().format(Double.parseDouble(num.trim())) + " %");
            	}
 
 

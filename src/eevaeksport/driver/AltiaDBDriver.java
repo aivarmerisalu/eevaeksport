@@ -24,6 +24,7 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -1260,24 +1261,31 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
      	
      	
      	File f = new File(this.getExcelDir() + "links.xlsx");
+     	 System.out.println(f.exists() +  " " + f.getAbsolutePath());
  		try {
  			FileInputStream ff = new FileInputStream(f);
  			XSSFWorkbook workbook = new XSSFWorkbook((ff));
- 			XSSFSheet sheet = workbook.getSheetAt(0);
+ 			XSSFSheet sheet = workbook.getSheet("Sheet1");
  			XSSFRow row = null;
  		
  			row = sheet.getRow(0);
  			// M��RAME �RA MIS V�LJAS ASUVAD Sortimendi t�hised.
 
- 			// System.out.println("rownum " + row.getLastCellNum());
+ 			// System.out.println("rownum " + row.getLastCellNum() + " " + sheet.getSheetName() + " " + sheet.getLastRowNum());
+ 			 
+ 			 DataFormatter formatter = new DataFormatter();
+				
+
+ 			 
  			for (int a = 0; a <  sheet.getLastRowNum(); a++) {
  				row = sheet.getRow(a);
  				String link = "";
  				String toode = "";
  				try {
  					// System.out.println(row.getCell((short)a).getStringCellValue());
- 					link =  row.getCell((short) 0).getStringCellValue();
+ 					link =  formatter.formatCellValue(row.getCell((short) 0));
  				} catch (Exception e) {
+ 					e.printStackTrace();
  					try {
  						
      					// System.out.println(row.getCell((short)a).getStringCellValue());
@@ -1288,7 +1296,7 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
  				}
  				
  				try {
- 					toode =  row.getCell((short) 1).getStringCellValue();
+ 					toode =  formatter.formatCellValue(row.getCell((short) 1));
  				} catch (Exception e) {
  					try {
  						
@@ -1298,13 +1306,13 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
  				}
  				
  				if(link.length()> 0 && 
- 						link.indexOf("https://joogikultuur.ee/tooted/") != -1){
- 					link = link.substring("https://joogikultuur.ee/tooted/".length());
+ 						link.indexOf("https://joogikultuur.ee/") != -1){
+ 					link = link.substring("https://joogikultuur.ee/".length());
  					res.put(toode, link);
  		     		
- 	 			//	 System.out.println(toode +  " " + link);
+ 	 				// System.out.println(toode +  " " + link);
  				}
- 				
+ 				//System.out.println(toode +  " " + link);
  				
  	 			
  			}
@@ -1419,7 +1427,7 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
      System.out.println("Tooted alustan");
      
      TreeMap links= getLinks();
-   
+     System.out.println("links" + links.size());
       try {
      	 Vector koodid = new Vector();
          

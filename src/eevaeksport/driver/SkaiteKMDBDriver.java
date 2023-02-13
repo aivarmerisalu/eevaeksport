@@ -883,7 +883,7 @@ Statement st = null;
 			   cust.setRegnr(regno.trim());
 		   }
 		 
-		   if(payid != null){
+		   if(payid != null && payid.trim().length() > 0){
 				  cust.setPayer(payid);
 	            
 				  if(blist.contains(payid)) {
