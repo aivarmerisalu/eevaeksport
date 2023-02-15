@@ -7384,7 +7384,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
           	}catch(Exception e ){
           	}
 	          	try{
-	              	name = getNode(rida, "ItemDescription").getFirstChild().getNodeValue();	
+	              	name = toode + " " +getNode(rida, "ItemDescription").getFirstChild().getNodeValue();	
 	              	// System.out.println("prodname " + name);
 	          	}catch(Exception e ){
 	          	}
@@ -7458,7 +7458,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	                  if (prod == null){
 	                    addLog(parent.getString("noprodid") + "\n " + ean + " " + toode + "\n" + fileName + "\n" + parent.getString("fixprodid") +"\n\n");
 	                   	troubles.append("PRODUCT CANNOT BE RESOLVED Telema Uus XML format : \n" + "Dok Nr: " + doknr + " " + reference+  " Custname: " + delyveryName + "\n"
-	                				 + "\tLineNum: "  +  (counter+1) + " " + "\tOrderNr:" + reference + " " + name + " Code:" + toode + " EAN:" + ean + " amount: " + kogus + " tyyp: " + type  + "\n\n");
+	                				 + "\tLineNum: "  +  (counter+1) + " " + "\t Code:" + toode + " EAN:" + ean + " " + name  + " amount: " + kogus +  "  OrderNr:" + reference   + " tyyp: " + type  + "\n\n");
 	                   prod =  " ";
 	                  }
 	                  boolean up = false;
