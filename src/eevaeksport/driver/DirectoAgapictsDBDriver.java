@@ -1645,6 +1645,21 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	     cc.addAgent(new Agent("LADU"));
 	   tm.put("Ladu tagastus", cc);
 	   
+	   unse =  this.getUnsoldEans();
+	   Iterator itera = unse.keySet().iterator();
+	   while(itera.hasNext()) {
+		   String id = (String)itera.next();
+		   Vector vv = (Vector)unse.get(id);
+		   if(custMap.get(id) != null) {
+			   Customer ccc = (Customer)custMap.get(id);
+			   String name = Converter.deCode(ccc.getName());
+				if(name.startsWith("Rimi")) {
+					ccc.setInfo("NB! Müümata EAN koode : " + vv.size() + "|Kasuta soovituslikku sortimentti");
+				}
+			   
+		   }
+	   }
+	   
 	   System.out.println("kliendid b");
 		   
      return tm;
@@ -1738,7 +1753,10 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		   Vector vec = (Vector)Converter.readObject("cpdata/" + number+".vec");
 		   for(int i = 0; i < vec.size(); i++) {
 			   CustProd cp = (CustProd)vec.elementAt(i);
-			   if(!prodCodes.contains(cp.getProdID())){
+			   if(prodCodes == null) {
+				   prodCodes = new HashSet();
+			   }
+			   if(	 !prodCodes.contains(cp.getProdID())){
 			        prodCodes.add(cp.getProdID());	
 		        }
 		   }
@@ -2574,18 +2592,18 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   if(custPRlists == null) {
 		   this.getCustomers(null);
 	   }
-	   System.out.println("custPRlists " + custPRlists.size());
+	  // System.out.println("custPRlists " + custPRlists.size());
 	   // loeme sisse fix sortide eanid.
 	   if(fixEans == null) {
 		   this.getFixedAssortmentData();
 	   }
-	   System.out.println("fixEans " + fixEans.size());
+	  // System.out.println("fixEans " + fixEans.size());
 	   //nüüd teeme valmis müüdud toodete eanObjekti
 	   if(last60Sold == null) {
 		   getCustomerProductsList2();
 	   }
 	   TreeMap soldEans = new TreeMap();
-	   System.out.println("last60Sold " + last60Sold.size());
+	  // System.out.println("last60Sold " + last60Sold.size());
 	   
 	 
 	   Iterator itera = last60Sold.keySet().iterator();
@@ -2613,8 +2631,6 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   
 	   System.out.println("soldEans " + soldEans.size() + " " + prodEans.size());
 	   
-	  
-	   
 	   
 	   // nyyd vaatame kes mida poel ostnud
 	   
@@ -2641,29 +2657,20 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			   }
 		   }
 	   }}
-	   
-	   
-	   if(soldEans.get("10867") != null) {
-		//   System.out.println("soldEans 10867 " + soldEans.get("10867"));
-	   }
 
-	   if(unsoldEans.get("10867") != null) {
-		  // System.out.println("unsoldEans 10867 " + unsoldEans.get("10867"));
-	   }
-	  
-	   if(fixEans.get( custPRlists.get("10867")) != null) {
-		  // System.out.println("fixEans 10867 " + fixEans.get(custPRlists.get("10867")));
-		 //  System.exit(0);
-	   }
-	   //System.out.println("unsoldEans " + unsoldEans.size() );
-	   
 	   return unsoldEans;
    };
    
+  private TreeMap unSoldWarning = null;
+  private TreeMap unse = null;
+   
    public String getAssortmentStr(Agent agent){
-	 
+	   unSoldWarning = new TreeMap();
 	   StringBuffer sb = new StringBuffer();
-	 TreeMap unse =  this.getUnsoldEans();
+	   if(unse == null) {
+		   unse =  this.getUnsoldEans();
+	   }
+	    
 	// Nyyd on vaja igale kliendile teha sortiment mis on puudu daga ainult need mis on 
 	 
 	 Iterator itera = unse.keySet().iterator();
@@ -2677,11 +2684,13 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			if(cc != null) {
 				String name = Converter.deCode(cc.getName());
 				if(name.startsWith("Rimi")) {
+					
 		 Vector vv = (Vector)unse.get(cuid);
 		 for(int a = 0 ; a< vv.size() ;a++) {
 			 String prodID = vv.get(a)+"";
 			 ArrayList arr = (ArrayList) eans.get(prodID);
              //  System.out.println(" " + arr.toString());
+			 // siin sii spanna ka kliendile kylge hoiatus 
 			 if(arr != null) {
           	for(Object pr : arr) {
           		
@@ -2691,7 +2700,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			 } 
 		 }}}
 	 }
-	   System.out.println(sb.toString().substring(0,50000));
+	  // System.out.println(sb.toString().substring(0,50000));
     return sb.toString();
   }
 

@@ -3521,10 +3521,13 @@ if(agprods != null && agprods.size() >0){
         }
         String missingprods = "missing.txt";
         String custdata = "custdata.txt";
+        String payments = "payments.txt";
         StringBuffer buf2 = new StringBuffer();
         StringBuffer buf3 = new StringBuffer();
+        StringBuffer buf4 = new StringBuffer();
         appendCustMissingInfo(buf2, agCusts.iterator(),agentCode);
         appendCustDataInfo(buf3, agCusts.iterator(),agentCode);
+        appendCustPaymentsInfo(buf4, agCusts.iterator(),agentCode);
         appendCustInfo(buf, agCusts.iterator(),agentCode);
         try {            
        
@@ -3535,6 +3538,9 @@ if(agprods != null && agprods.size() >0){
             }
             if(buf3.length()>0){
                 zip.addFile(custdata, buf3.toString());
+                }
+            if(buf4.length()>0){
+                zip.addFile(payments, buf4.toString());
                 }
         } catch (Exception e) {
             EksportFrame.showError(e);
@@ -3657,6 +3663,17 @@ if(agprods != null && agprods.size() >0){
               }
     	 }
     }
+  private void appendCustPaymentsInfo(StringBuffer buf4, Iterator codes, String agent){
+    	
+    	while (codes.hasNext()) {
+    	 Customer cust = (Customer)codes.next();
+             if(cust.payments != null){
+                 	   if(buf4.indexOf(cust.getPayer() + ";" + cust.payments) == -1){
+                		     buf4.append(cust.getPayer() + ";" + cust.payments);
+                             buf4.append(lineSeparator);   
+              }
+    	 }
+    }}
     
     
     private void appendCustInfo(StringBuffer buf, Iterator codes, String agent){

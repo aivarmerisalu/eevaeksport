@@ -270,7 +270,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	 }
 	  
 	public Vector getPriceMatrixData() {
-
+   String sdate = Converter.getDDpMMpYYYYpString(Calendar.getInstance());
    	Vector lines = new Vector();
     
     try {
@@ -355,6 +355,16 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                         mline.setProdGroup(prodGroup);
                       }   
                       
+                      if("true".equals(getParent().getProps().getProperty("add.startdate"))){
+                    	  if(clGroup != null  && clGroup.trim().length() > 0) {
+                    		  if (prodID != null && prodID.trim().length() > 0) {
+                    			  if(mline.getDiscount() > 0) {
+                    				  mline.setStartDate(sdate);
+                    			  }
+                    		  }
+                    	  }
+                      }
+                      
                       if(start != " " && end != " "){
                      	 mline.setStartDate(start);
                      	 mline.setEndDate(end);
@@ -366,6 +376,16 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                           if(days > 100) {
                         	  mline.setStartDate(" ");
                         	  mline.setEndDate(" ");
+                        	  
+                        	  if("true".equals(getParent().getProps().getProperty("add.startdate"))){
+                            	  if(clGroup != null  && clGroup.trim().length() > 0) {
+                            		  if (prodID != null && prodID.trim().length() > 0) {
+                            			  if(mline.getDiscount() > 0) {
+                            				  mline.setStartDate(sdate);
+                            			  }
+                            		  }
+                            	  }
+                              }
                           }
                           
                           if(alg.before(new Date()) && lopp.after(new Date())){
@@ -989,7 +1009,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                    		  }
                    		  res.put(group, name); 
                    		  prGroups.put(group, name); 
-                   		 System.out.println("gr name " + name + " " + group);
+                   		// System.out.println("gr name " + name + " " + group);
                    		names.add(name);
                		 }catch(Exception r){
                			 

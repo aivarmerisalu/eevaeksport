@@ -1849,6 +1849,8 @@ System.out.println(cmd2);
        		"             and (kitas_dok) > 0 and dok_serija not in ( 'KRV5', 'LKS' ,'KRV7', 'LKP1','LDS','URM') and " + 
        		"             DATE_ADD(a.data,interval 500 day) > current_date() and operacija like 'Pardav%' "; 
        
+       
+     
       ketid = new HashMap();
       sortimendid = new HashMap();
   //System.out.println(cmd);
@@ -1922,7 +1924,7 @@ try{
    		"	 filialas AS blokk, 0 AS yle,'' AS visit,kainos_nr AS type,\r\n" + 
    		"  atstovas as kontakt , k.kl_grupe as kett , max_skola as credit, kainos_nr as hinnak ,telefonai as phone , nuolaida as maxdisc , ma.dienos as mars \r\n" + 
    		"	,k.kl_grupe as rcatrgory , k.miestas AS rcity , k.indeksas AS rindex , k.sritis AS rmaakond , k.salis as rcountry,k.atstovas as rkontakt \r\n" + 
-   		"	 ,k.telefonai as rperphone, k.e_mail as remail \r\n" + 
+   		"	 ,k.telefonai as rperphone, k.e_mail as remail ,   moketojas as onmaksja \r\n" + 
    		"	  FROM klientai k  INNER JOIN \r\n" + 
    		"	 ( select klientas, tab_nr from(\r\n" + 
    		"	   select klientas, tab_nr from (select * from manager order by klientas,data desc,tab_nr )as man \r\n" + 
@@ -2221,6 +2223,13 @@ try{
            if(remail != null && remail.trim().length() > 0){
         	      customer.restPerEmail = (remail);
         	   
+           }
+           
+           String om = rs.getString("onmaksja");
+           if(om == null || om.trim().length() == 0){
+        	      customer.setIsPayer(true);
+        	   //   customer.diffBack = true;
+        	      System.out.println("Maksja " + customer.getID());
            }
           
           

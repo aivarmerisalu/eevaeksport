@@ -6031,11 +6031,13 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
     String regnr = null;
     int counter = 0;
     String datelong = "";
+    String deliveryd = "";
     String reference = "";
     String doctype  = "";
     String saatja = null;
     try{
-    	datelong = parseDate(getNode(getNode(root, "Order-Header"),"ExpectedDeliveryDate").getFirstChild().getNodeValue()).getTime()+"";	
+    	deliveryd = getNode(getNode(root, "Order-Header"),"ExpectedDeliveryDate").getFirstChild().getNodeValue();
+    	datelong = parseDate(deliveryd).getTime()+"";	
     }catch(Exception w){
 	 	
 	 }
@@ -6134,6 +6136,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
               addLog(parent.getString("nocompid") + " " + tellijaKood + "\n" + fileName + "\n" + parent.getString("fixcompid") +"\n" );
               troubles.append("Customer CANNOT BE RESOLVED Edisoft XML format \n" + "Dok Nr: " + doknr + " " + reference+  " CustomerCode: "  + firma +" ImportCode: " + tellijaKood + " Custname: " + tellijaNimekood +  "\n"
        				 + "\t\tRegNr:" + regnr + " Code:" + tellijaKood + "\n\n");
+              
              System.out.println(troubles);
           }
     	
@@ -6262,9 +6265,12 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
                    // break;
                 	prod = " ";
                 	if(prod.trim().length() == 0 ){
-                		troubles.append("PRODUCT CANNOT BE RESOLVED Edisoft XML format : \n" + "Dok Nr: " + doknr + " " + reference+  " Custname: " + tellijaNimekood +"\n"
-                				 + "\tLineNum: "  +  (counter+1) + " " + name +" EAN:" + ean + " Code:" + toode + prodName + " amount: " + kog + "\n\n");
-                   }
+                	//	troubles.append("PRODUCT CANNOT BE RESOLVED Edisoft XML format : \n" + "Dok Nr: " + doknr + " " + reference+  " Custname: " + tellijaNimekood +"\n"
+                		//		 + "\tLineNum: "  +  (counter+1) + " " + name +" EAN:" + ean + " Code:" + toode + prodName + " amount: " + kog + "\n\n");
+                	 	troubles.append("PRODUCT CANNOT BE RESOLVED Edisoft Uus XML format : \n" + "Dok Nr: " + doknr + " " + reference+  "<br>Custname: " + tellijaKood + " " + tellijaNimekood + "<br>DeliveryDate: " + deliveryd +   "\n"
+               				 + "\tLineNum: "  +  (counter+1) + " " + "<br> Code:" + toode + " EAN:" + ean + " " + name  + "<br> amount: " + kog +  "<br> OrderNr:" + reference   + " tyyp: " + doctype  + "\n\n");
+                
+                	}
                   }
                   double convert = 1 ;
                   boolean up = false;
@@ -7457,9 +7463,9 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	                  
 	                  if (prod == null){
 	                    addLog(parent.getString("noprodid") + "\n " + ean + " " + toode + "\n" + fileName + "\n" + parent.getString("fixprodid") +"\n\n");
-	                   	troubles.append("PRODUCT CANNOT BE RESOLVED Telema Uus XML format : \n" + "Dok Nr: " + doknr + " " + reference+  " Custname: " + delyveryName + "\n"
-	                				 + "\tLineNum: "  +  (counter+1) + " " + "\t Code:" + toode + " EAN:" + ean + " " + name  + " amount: " + kogus +  "  OrderNr:" + reference   + " tyyp: " + type  + "\n\n");
-	                   prod =  " ";
+	                   	troubles.append("PRODUCT CANNOT BE RESOLVED Telema Uus XML format : \n" + "Dok Nr: " + doknr + " " + reference+  "<br>Custname: " + tellijaKood + " " + delyveryName + "<br>DeliveryDate: " + delivery +   "\n"
+	                				 + "\tLineNum: "  +  (counter+1) + " " + "<br> Code:" + toode + " EAN:" + ean + " " + name  + "<br> amount: " + kogus +  "<br> OrderNr:" + reference   + " tyyp: " + type  + "\n\n");
+	                     prod =  " ";
 	                  }
 	                  boolean up = false;
 	                  double convert = 1;
@@ -9031,6 +9037,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	    String tellijaKood = null;
 	     firma = "";
 	     String datelong = "";
+	     String deliveryd = "";
 	    String tellijaRegnr = null;
 	    String kood = null;
 	    double price = 0;
@@ -9070,6 +9077,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	      } else if (line.indexOf("tarne_kuupaev:") > -1){
 	     	 List list0 = parseLine(line, ",");
 	     	  datelong = (String)list0.get(1);
+	     	 deliveryd = datelong;
 	      } else if(counter > 15){
 	        String ol = null;
 	        String prod = " ";
@@ -9113,8 +9121,12 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	       if (prod == null){	       
 	         prod = " ";
 	         if(prod.trim().length() == 0 ){
-	        	 troubles.append("PRODUCT CANNOT BE RESOLVED CSV format : \n" + "Dok Nr: " + doknr + " " + reference+ "\n"
-	        			 + "\tLineNum: "  +  (counter+1) + " " + name + " Code:" + toode + " amount: " + kogus + "\n\n");
+	        	// troubles.append("PRODUCT CANNOT BE RESOLVED CSV format : \n" + "Dok Nr: " + doknr + " " + reference+ "\n"
+	        		//	 + "\tLineNum: "  +  (counter+1) + " " + name + " Code:" + toode + " amount: " + kogus + "\n\n");
+	        	 
+	        		troubles.append("PRODUCT CANNOT BE RESOLVED CSV format : \n" + "Dok Nr: " + doknr + " " + reference+  "<br>Custname: " + tellijaKood  + "<br>DeliveryDate: " + deliveryd +   "\n"
+              				 + "\tLineNum: "  +  (counter+1) + " " + "<br> Code:" + toode + " EAN:" + toode + " " + name  + "<br> amount: " + kog +  "<br> OrderNr:" + reference   + "\n\n");
+               
 	            }
 	       }
 

@@ -2427,7 +2427,7 @@ if(toode.trim().length() > 0 && allowed){
   
 }  	
 if(!allowed){
-	trouble = trouble +  "\nTellimuselt eemaldatti toode " + toode + " " + nimi;
+	trouble = trouble +  "\nTellimuselt eemaldatti toode " + nimi;
 }
      
      

@@ -1090,7 +1090,7 @@ HashSet olemas = new HashSet();
     	//System.out.println("tooted suurus " + tooted.size() + " " + tooted.toString());
     }
     
-    private void getPricesFromExcel(TreeMap tooted) {
+    private void getPricesFromExcel(TreeMap toote) {
     	try {
     		
     	
@@ -1140,7 +1140,7 @@ HashSet olemas = new HashSet();
  						}
  						
  						if(prod != null && hi > 0 ) {
- 							tooted.put(prod, hi);
+ 							toote.put(prod, hi);
  						}
  						
   					}
@@ -1160,6 +1160,8 @@ HashSet olemas = new HashSet();
     }
 
     private HashMap custNAMES = new HashMap();
+    
+    private TreeMap tooted = null;
     
     public TreeMap getProducts(Agent agent){
     	this.getSaveStockInfo();
@@ -1189,7 +1191,7 @@ HashSet olemas = new HashSet();
             System.out.println("hind");
           if (isDebug()) System.out.println(sql);
           connectionUp(url2);
-          TreeMap tooted = new TreeMap();
+           tooted = new TreeMap();
           Statement    stm = con.createStatement();
             ResultSet  rst = stm.executeQuery(sql);
 
@@ -1382,8 +1384,12 @@ HashSet olemas = new HashSet();
              double lastprice = rs.getDouble("lastprice");
              
              double lastale = 0;
-             if( (kuup.contains("2023") || kuup.contains("2022") ) && oldPr.get(tootekood) != null) {
+             if( ( kuup.contains("2022") ) && oldPr.get(tootekood) != null) {
             	 lastale = 100 -( lastprice/Double.parseDouble(oldPr.get(tootekood)+"") * 100 ); 
+             } else {
+            	 if(tooted.get(tootekood) != null) {
+            	  lastale = 100 -( lastprice/Double.parseDouble(tooted.get(tootekood)+"") * 100 ); 
+            	 }
              }
              kuup = kuup.substring(5,10).trim();
             
@@ -1398,8 +1404,7 @@ HashSet olemas = new HashSet();
             	 cp.ale = Converter.Round((float)lastale,3);
              }
            
-             cust.addProduct(prod,
-                             cp,false);
+             cust.addProduct(prod, cp,false);
              kliendid.put(kliendikood, cust);
              custProds.add(cp);
            }

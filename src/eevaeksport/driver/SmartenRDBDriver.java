@@ -1065,7 +1065,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 
     while (rs.next()) {
       String liik = rs.getString("liik").trim();
-        tm.put(liik, Converter.enCodeEst(rs.getString("nimi").trim()).replaceAll("ROYAL UNIBREW", " ").trim());
+        tm.put(liik, Converter.enCodeEst(rs.getString("nimi").trim()).replaceAll("TANKER BREWERY", " ").trim());
     }
     rs.close();
     st.close();
