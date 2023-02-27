@@ -192,11 +192,24 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 		         String a = "-";
 		         
 		         String fff = rs.getString("fatsta");
+		         double protSta = 0;
 		         double fatSta =  0 ;
 		         try {
 		         fatSta = Double.parseDouble(fff);
+		         }catch(Exception e) {
+		        	
+		        	 e.printStackTrace();
+		         }
+		         
+		         try {
+		        	 protSta = rs.getDouble("protsta");;
+			         }catch(Exception e) {
+			        	
+			        	 e.printStackTrace();
+			         }
 		        
-		         double protSta = rs.getDouble("protsta");
+		          
+		         
 		         double fat = rs.getDouble("fat");	
 		         double prot = rs.getDouble("prot");
 		         
@@ -235,10 +248,7 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 		          messages.put(dok,klient + "_" + nimi +  "|Data:" + getYYYYpMMpDDpString(daat)+":" + klient
 		        		  +";Kiekis:"+ NF.format(kogus) +";R:"+ f
 		          + ";B:" + p + ";PK:" + a);
-		         }catch(Exception e) {
-		        	 System.out.println("klient " + klient + " " + dok);
-		        	 e.printStackTrace();
-		         }
+		        
 		         }
 	        }
 	        
