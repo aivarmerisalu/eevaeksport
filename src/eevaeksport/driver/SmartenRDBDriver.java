@@ -266,9 +266,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 		        		String aa = st.nextToken();
 		        		if(aa.indexOf(":") != -1) {
 		        			aa = aa.substring(0,aa.indexOf(":"));
-		        			uu = uu + ":" + aa;
+		        			uu = uu + ":" + aa.trim();
 		        		}else {
-		        			uu = uu + ":" + aa;
+		        			uu = uu + ":" + aa.trim();
 		        		}
 		        		
 		        		asi.put(custid, uu);
@@ -982,6 +982,11 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
       		  goes = false;
       	  }
         }
+        
+        //if(cust.getID().indexOf("7345") != -1) {
+       // 	System.out.println("!!!!! 1187345 " + cust.getID() + " " + goes  + " "+  cust.getAgents().toString());
+        //}
+          
     
                 if(outside == null){
                     cust.addAgent(new Agent(getParent().getProps().getProperty("officerep")));
@@ -1018,8 +1023,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
                           cust.addAgent(new Agent(getParent().getProps().getProperty("officerep2")));
                       }
                       
-                    
-                      
+                 
                       if(goes) {
                     	  customers.put(name, cust);
                           custMap.put(cust.getID(),cust);  

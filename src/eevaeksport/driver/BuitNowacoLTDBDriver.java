@@ -2229,7 +2229,7 @@ try{
            if(om == null || om.trim().length() == 0){
         	      customer.setIsPayer(true);
         	   //   customer.diffBack = true;
-        	      System.out.println("Maksja " + customer.getID());
+        	     // System.out.println("Maksja " + customer.getID());
            }
           
           
@@ -3164,19 +3164,34 @@ private TreeMap makePlans(){
 	  
   	 try {
   	 	
-  		String cmd2 = "               SELECT d.manager ,sum( kiekis * (kaina -r.savik_3)) as profit FROM apyv_gr r \r\n" + 
-  				"                    INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 300 day) > current_date()  INNER JOIN klientai b ON b.klientas=d.gavejas  \r\n" + 
-  				"                               where month(Data) =month(current_date()) and YEAR(Data) = YEAR(current_date()) \r\n" + 
-  				"                               and day(Data) <= day(current_date()) and operacija  not like'%Reklam%' and operacija  not like'%Pirkimas%' and \r\n" + 
-  				"                (d.tiekejas is null or d.tiekejas like '%idfood%' ) \r\n" + 
-  				"               group  by d.manager ";
+  		String cmd2 = "     SELECT d.manager, SUM(Case when d.operacija LIKE 'Grąžino%' then (kiekis * (kaina -r.savik_3) * -1) ELSE (kiekis * (kaina -r.savik_3)) END )AS profit\r\n" + 
+  				"FROM apyv_gr r\r\n" + 
+  				"INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id  AND DATE_ADD(DATA, INTERVAL 300 DAY) > CURRENT_DATE()\r\n" + 
+  				"WHERE MONTH(DATA) = MONTH(CURRENT_DATE())\r\n" + 
+  				"      AND YEAR(DATA) = YEAR(current_date()) \r\n" + 
+  				"      AND DAY(DATA) <= DAY(current_date()) \r\n" + 
+  				"      AND d.operacija NOT LIKE '%Reklam%' \r\n" + 
+  				"      AND d.operacija NOT LIKE '%Pirkimas%' \r\n" + 
+  				"      AND d.operacija NOT LIKE '%Sand%'\r\n" + 
+  				"      AND d.operacija NOT LIKE 'GP %'\r\n" + 
+  				"      AND d.operacija NOT LIKE 'Pardavimas per%'\r\n" + 
+  				"      AND d.ivestas =1\r\n" + 
+  				"GROUP BY d.manager\r\n" + 
+  				" ";
   		 
-     String cmd = "select sum(viso_1) AS summa,a.manager as agent FROM apyvarta a " +
-                          "   where month(Data) =month(current_date()) and YEAR(Data) = YEAR(current_date()) " +
-						"	  and day(Data) <= day(current_date())" +
-					"		and operacija  not like'%Reklam%' and operacija  not like'%Pirkimas%' and " +
-					"		(tiekejas is null or tiekejas like '%idvest%' ) group by a.manager" +
-					"		order by gavejas";
+     String cmd = "SELECT SUM(CASE when a.operacija LIKE 'Grąžino%' then (a.viso_1*-1) ELSE (a.viso_1) end) AS summa, a.manager AS agent\r\n" + 
+     		"FROM apyvarta a\r\n" + 
+     		"WHERE MONTH(DATA) =MONTH(CURRENT_DATE())\r\n" + 
+     		"      AND YEAR(DATA) = YEAR(CURRENT_DATE()) \r\n" + 
+     		"AND DAY(DATA) <= DAY(current_date()) \r\n" + 
+     		"      AND a.operacija NOT LIKE '%Reklam%' \r\n" + 
+     		"      AND a.operacija NOT LIKE '%Pirkimas%' \r\n" + 
+     		"      AND a.operacija NOT LIKE '%Sand%'\r\n" + 
+     		"      AND a.operacija NOT LIKE 'GP %'\r\n" + 
+     		"      AND a.operacija NOT LIKE 'Pardavimas per%'\r\n" + 
+     		"      AND a.ivestas = 1\r\n" + 
+     		"GROUP BY a.manager\r\n" + 
+     		"ORDER BY gavejas";
   	 	
 
      TreeMap<String,Integer> profiit = new TreeMap<String,Integer>();
@@ -3273,7 +3288,7 @@ private TreeMap makePlans(){
     	           
     	           
     	           agent.setStart( Converter.enCodeEst(asi ));
-    	           System.out.println(Converter.enCodeEst(agentID + "' " +asi  + " "  + plans.get(agent.getID())) );
+    	        //   System.out.println(Converter.enCodeEst(agentID + "' " +asi  + " "  + plans.get(agent.getID())) );
                    }
     	                  	
                          

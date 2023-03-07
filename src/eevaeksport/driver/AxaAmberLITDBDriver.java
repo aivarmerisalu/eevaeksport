@@ -138,7 +138,8 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
       
       
 	   String    sql = " select a.accountnum as payer,a.offsettransvoucher AS number,transdate AS data, "
-	   		+ "sum(a.settleamountcur) AS suma from custsettlement a  WHERE a.dataareaid='bd' and transdate > getdate()-180 "
+	   		+ "sum(a.settleamountcur) AS suma from custsettlement a  WHERE a.dataareaid='bd' and transdate > getdate()-180 and "
+	   		+ "a.offsettransvoucher like '%DM00%' "
 	   		+ " group by a.offsettransvoucher,a.accountnum,transdate" + 
 	   		"	 having sum(a.settleamountcur) > 0 order by a.accountnum, transdate desc"; 
 			 HashMap hh = new HashMap();

@@ -2609,8 +2609,12 @@ try{
 				  	        
 				  	        
 				  	        worksheetBASE.getRow(palletrow).createCell(9).setCellValue((String)cob.get("prodgroupname"));
+				  	      try {
+				  	    	  worksheetBASE.getRow(palletrow).createCell(10).setCellValue((String)cob.get("resstr2"));  
+				  	      }catch(Exception e) {
+				  	    	  
+				  	      }
 				  	      
-				  	        worksheetBASE.getRow(palletrow).createCell(10).setCellValue((String)cob.get("resstr2"));
 				  	        worksheetBASE.getRow(palletrow).createCell(11).setCellValue((String)cob.get("prodname"));
 			  			
 			  				//worksheetBASE.getRow(palletrow).createCell(12).setCellValue(bonusid);
