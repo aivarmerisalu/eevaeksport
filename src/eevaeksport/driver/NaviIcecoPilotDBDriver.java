@@ -525,7 +525,7 @@ public class NaviIcecoPilotDBDriver extends AbstractDBDriver implements BulkUpda
     	"  [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type,  " +
     	"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt , 0 AS minsum ,k.Contact +' ' + k.[Phone No_] as kontakt , 0 as sendall " +
     	" ,[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 ,k.[VAT Registration No_] as vatno ,"
-    	+ " k.[Registration No_] as regno , (select a.[Address]  as addr3 from [UAB ICECO Trade$Customer] a where a.[No_]  = k.[Bill-to Customer No_]) + ' ' + " +
+    	+ " k.[Registration No_] as regno , (select a.[Address]  as addr3 , [Service Zone Code] as logist  from [UAB ICECO Trade$Customer] a where a.[No_]  = k.[Bill-to Customer No_]) + ' ' + " +
 		 "	 (select a.[City]  as addr3 from [UAB ICECO Trade$Customer] a where a.[No_]  = k.[Bill-to Customer No_])  as juridics  FROM ["+ base + "$Customer] k  " +
 	  	"	  WHERE k.[Salesperson Code] != ''  and k.[Remove Card] = 0 AND Blocked != 3  " ;
 
@@ -753,6 +753,12 @@ public class NaviIcecoPilotDBDriver extends AbstractDBDriver implements BulkUpda
                    customer.setJuridics(Converter.enCodeEst(aadrjur.trim()));
                  }
     	  		 
+                 
+                 String logist = rs.getString("logist");
+  	           if(logist != null && logist.trim().length() > 0){
+  	        	   customer.setCity("Pristatymo " + logist.trim());
+  	           }
+  	             
     	            tm.put(customer.getName(), customer);
     	            this.customers.add(customer.getID());
     	           

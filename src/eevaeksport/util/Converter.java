@@ -3649,19 +3649,20 @@ public class Converter {
 	
 	
 	
-	public static void sendCommentEmail(String comment1 ,String comment2,String doknr,String custid, String nimi , String chain, boolean price, Agent ag ,ImportPanel parent){
+	public static void sendCommentEmail(String comment1 ,String commentPrice,String doknr,String custid, String nimi , String chain, boolean price, Agent ag 
+			,ImportPanel parent, String filename){
 	   	try{
 	   		String comment = null ;
 	   		if(comment1 != null && comment1.trim().length() > 0) {
 	   			comment = "Comment : " + comment1 + "\n\n" ;
 	   		}
 	   		
-	   		if(comment2 != null && comment2.trim().length() > 0) {
+	   		if(commentPrice != null && commentPrice.trim().length() > 0) {
 	   			if(comment == null) {
 	   				comment = "";
 	   			}
 	   			
-	   			comment = comment + "Price info : " + comment2 + "\n" ;
+	   			comment = comment + "Price info : " + commentPrice + "\n" ;
 	   		}
 	   		
 	   		if(comment != null && comment.trim().length() >0){
@@ -3699,6 +3700,9 @@ public class Converter {
 		  	  		//mail.setBody("\nOrder :" +  doknr + " \nCustomer code :" + custid +  "\nCustomer Name :" + nimi + "\n" +
 		  	  			//    "Manager :" + agent + "\n" +  "\n" + lisa + comment + "\n\n.");
 		  	  		mail.setSendNotice(false);
+		  	  		if(filename != null) {
+		  	  		 mail.addAttach(filename);
+		  	  		}
 		  	  		
 		  	  		mail.send();
 		  	  		System.out.println("\nOrder Comment " +  doknr + " " + lisa + custid + " "+ nimi + " " + agent + "\n\n" +

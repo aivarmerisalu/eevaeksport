@@ -650,7 +650,8 @@ public class HansaSatcomImportDriver
     	   
 		   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
 	    Converter.sendCommentEmail( comm,info
-	    		,order.getDokNr(),order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
+	    		,order.getDokNr(),order.getCompany(), 
+	    		" " + getCustName(order.getCompany()) , " ",false,ag,parent,null);
 	 }
 
  	} catch (Exception e) {

@@ -191,7 +191,7 @@ public class DtlImportDriver
     System.out.println("comm " + comm2 + " " + aletext);
 	   if((comm2 != null || aletext != null) && order.getStatus() < 5){
 		   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
-	    Converter.sendCommentEmail( comm2,aletext,order.getDokNr(),order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
+	    Converter.sendCommentEmail( comm2,aletext,order.getDokNr(),order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent,null);
 	 }
 
   }

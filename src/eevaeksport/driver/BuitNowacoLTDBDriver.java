@@ -346,8 +346,9 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 		if(blockedcusts.contains(cust.getPayer())){
 			bl = "2";
 		}
-		
+		if(cust.getID() != null && cust.getID().length() > 0) {
 		 products.append(cust.getID() + ";" + getParent().getNF().format(cust.getDebt()) + ";" + bl + "\n");
+		}
 		}
        
 		return products.toString();
@@ -1897,6 +1898,7 @@ try{
         	 if(debt.getPayerID() != null && debt.getPayerID().length() > 0 ) {
         		 this.blockedcusts.add(debt.getPayerID());  
         	 }
+        	
         	  
            }
         }
@@ -2106,6 +2108,9 @@ try{
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
             	blockedcusts.add(customer.getPayer());
+            	  if(customer.getName().indexOf("Stateta") != -1) {
+               	   System.out.println("siin1" + customer.getID() + "  " + customer.getPayer());
+                  }
             	
             }
            }else if( this.totaldebts.get(customer.getID()) != null){
@@ -2116,10 +2121,13 @@ try{
              	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
+            	 if(customer.getName().indexOf("Stateta") != -1) {
+                 	   System.out.println("siin3" + customer.getID() + "  " + customer.getPayer());
+                    }
             }
            }
            
-      
+   
               
          
            String phone = rs.getString("phone");

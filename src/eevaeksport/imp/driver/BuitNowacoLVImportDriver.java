@@ -25,9 +25,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+import eevaeksport.Agent;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title: Eeva eksport Description: Copyright: Copyright (c) 2002 Company:
@@ -194,6 +196,31 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 		return res;
 	}
 
+	private String getCustNimi(String custid) {
+
+		String sql = " SELECT k.klientas  AS nimi FROM klientai k  where  k.klient_id =  " + custid ;
+		System.out.println(sql);
+	
+		
+		String res = "<No Name>";
+		try {
+			Connection con = getNewConnection();
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+
+			if (rs.next()) {
+				res = rs.getString("nimi").trim();
+			}
+
+			rs.close();
+			stmt.close();
+			con.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
 	public void makeOrder(Order order) throws SQLException {
 
 		counter = 0;
@@ -222,11 +249,20 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 		return sb.toString();
 	}
 
+	
+	
+	
+	
+	
 	private void makeOutput(Order order) {
 
-		if (names == null) {
-			// names = this.custNames();
-		}
+		  boolean sendcomm = false;
+		  if("true".equals(parent.getProps().getProperty("sendemail.allorders"))) {
+			  sendcomm = true;
+		  }
+		
+	
+		
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -323,6 +359,8 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 				com2.appendChild(comVal2);
 				header.appendChild(com2);
 
+			}else {
+				comm = " ";
 			}
 			System.out.println("Remarks " + comm);
 
@@ -456,10 +494,23 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 			ser.setOutputCharStream(out);
 			ser.serialize(doc);
 			out.close();
-
+			if(sendcomm) {
+				   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
+				    String name = (String)this.getCustNimi(order.getCompany());
+				    if(order.isShipDateUsed()) {
+				    	 comm = comm + "Piegades datums :" + dateString + "\n";	
+				    }
+				   
+				    
+				Converter.sendCommentEmail(comm, null, "MS-" + number , order.getCompany(),
+						name, null, false, ag, parent, fileName);
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 
 	private void addLine(OrderLine line, Node read, Document doc, int counter, Order order) throws SQLException {

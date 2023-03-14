@@ -506,7 +506,7 @@ static int login(String url, String db, String login, String password) throws Xm
 			  if(comm != null){
 				  Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
 		    	    Converter.sendCommentEmail( comm,null,order.getDokNr(),order.getCompany(), 
-		    	    		" " +  currName  , " ",false,ag,parent);
+		    	    		" " +  currName  , " ",false,ag,parent,null);
 		         }
 			  currName = null;
 			//System.exit(0);
