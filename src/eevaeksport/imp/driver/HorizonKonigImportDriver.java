@@ -2025,7 +2025,7 @@ try{
 		//  System.out.println("weburl " + weburl);
 		  DefaultHttpClient httpClient = new DefaultHttpClient();
 		//  Credentials defaultcreds = new UsernamePasswordCredentials("testa", "asdf"); // "evgeney", "5697110" 
-		  Credentials defaultcreds = new UsernamePasswordCredentials("EVGENEY", "5697110"); // "evgeney", "5697110" 
+		  Credentials defaultcreds = new UsernamePasswordCredentials("EXCELL", "5697110"); // "evgeney", "5697110" 
 			 
 		  httpClient.getCredentialsProvider().setCredentials(
                    AuthScope.ANY, defaultcreds);

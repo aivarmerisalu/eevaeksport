@@ -299,8 +299,13 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		 return in;
 	 }
 	  
+	 private Vector selverEpoodProds = null;
+	 
 	public Vector getPriceMatrixData() {
 
+		//Loeme sisse tooted 
+	
+		
    	Vector lines = new Vector();
     
     try {
@@ -442,10 +447,18 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    
    public Vector getFixedAssortmentData() {
 		
+		
+		if(selverEpoodProds == null ) {
+			this.getProducts(null);
+		}
+		if(this.eShopPrl == null) {
+			this.getCustomers(null);
+		}
+	   
 		 Vector lines = new Vector();
 	       TreeMap prods = this.getProducts2();
 	       fixEans = new TreeMap();
-	      System.out.println("prods " + prods.size() + " " + eans.size());
+	      System.out.println("prods " + eShopPrl.toString() + " " + selverEpoodProds.toString());
 	       
 	       try {
 	   		  File f = new File (getDir() + "hinnakiri.xml");
@@ -504,6 +517,11 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	                        		 if (clGroup != null && clGroup.trim().length() > 0) {
 	  		                           mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()+ "XX"));
 	  		                         }
+	                        		 
+	                        		 if(selverEpoodProds.contains(pr+"") && eShopPrl.contains(mline.getCliGroup())) {
+	                        			 mline.setLineinfo("TOP");
+	                        		 }
+	                        		 
 		                        	if(start != null && end != null) {
 		                        		 Date alg = getCalXML(start); 
 		                                 Date lopp = getCalXML(end); 
@@ -781,6 +799,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
      tm.put("LADU", aaa);
 
     // setBulkSales(tm);
+     
      return tm;
    }
 
@@ -1333,10 +1352,11 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
        TreeMap custPRlists = null;
        TreeMap custMap = null;
        TreeMap custAgs = null;
+       Vector eShopPrl = null;
 
    public TreeMap getCustomers(Agent agent){
 	   TreeMap tm = new TreeMap();
-	   
+	   eShopPrl = new Vector();
 	   custPRlists = new TreeMap();
 	   custMap = new TreeMap();
 	   custAgs = new TreeMap();
@@ -1576,13 +1596,19 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 
 		         		 try {
 		         			 
-		         		
+		         		//<data code="KL_SELVER_E_POOD" content="Jah"/>
 		         		 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
 		   	         	  Node rid = rida.getChildNodes().item(r);
 		   	         	 // System.out.println("node name " + rid.getNodeName());
 		   	         	  if(rid.getNodeName().equals("data")){
 		   	         		 String nn = rid.getAttributes().getNamedItem("code").getNodeValue();
-		   	         		
+		   	         		if(nn.equals("KL_SELVER_E_POOD")) {
+			   	         		 Node uu = rid.getAttributes().getNamedItem("content");
+			   	         		  if (uu != null && uu.getNodeValue().trim().length()>0
+			   	         				  && uu.getNodeValue().contains("Jah")){
+				                  	  this.eShopPrl.add(custPRlists.get(customer.getID())+"XX") ;      	
+				                  }
+			   	         		}
 		   	         		
 		   	         		if(nn.equals("KL_ARVE_MEIL")) {
 		   	         		 Node uu = rid.getAttributes().getNamedItem("content");
@@ -1591,6 +1617,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			                  	customer.setConfirmEmail(uu.getNodeValue().trim().replaceAll(";", ","));          	
 			                  }
 		   	         		}
+		   	         		
 		   	         	  }
 		         		 }
 		         		 }catch(Exception e) {
@@ -1928,7 +1955,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    
    public TreeMap getProducts(Agent agent){
 	   TreeMap otherStocks = this.getProductsOther();
-	  
+	   selverEpoodProds = new Vector();
 	 
 	   boolean addShelf = false ;
 	   try {
@@ -2154,6 +2181,18 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
               goes = true;
         
    	 	 }
+   	  len = line.indexOf(   "data code=\"ART_SELVER__E_POOD\""); 
+	
+	 	 if(len != -1){
+	 		pesa =  line.substring(len + 40); 
+	     	pesa = pesa.substring(0,pesa.indexOf("\""));
+         if(pesa.contains("Jah")) {
+              selverEpoodProds.add(prod.getID());
+          }
+  //   System.out.println("Etooted " + pesa  );
+	 	 }
+   	 	
+   	 	 
    	 	 if(company.equals("agapics_lv")) {
    	 		 goes = true;
    	 	 }
