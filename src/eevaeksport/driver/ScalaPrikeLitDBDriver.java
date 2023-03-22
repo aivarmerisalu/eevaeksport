@@ -537,14 +537,80 @@ TreeMap res = new TreeMap();
        }
 
 
+    public HashMap makePaymentsFile()  {
 
+    	 
+        
+        
+ 	   String    sql = " Select SL21001 as payer,SL21002 AS number,SL21005 AS data, SL21007 AS suma from SL210500 where SL21005 > getdate()-100  and SL21007 > 0.01" + 
+ 	   		"				 order by SL21001, SL21005 desc"; 
+ 			 HashMap hh = new HashMap();
+
+ 	           try {
+ 	         
+ 	        	   
+ 	             Connection  con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
+ 	                    getParent().getProps().getProperty("dsn.pass"));
+ 	             Statement  st = con.createStatement();
+ 	             ResultSet rs = st.executeQuery(sql);
+ 	     String oldcust = null;
+ 	     int cou = 0;
+ 	     String asi = "";
+ 	             while (rs.next()) {
+ 	              
+ 	               String custid = rs.getString("payer").trim();
+ 	               if(oldcust == null) {
+ 	            	   oldcust = custid;
+ 	               }
+ 	               
+ 	               if(!oldcust.equals(custid) ) {
+ 	            	   cou = 0;
+ 	            	   asi = "";  
+ 	               }
+ 	               
+ 	              // String payer = rs.getString("Moketojo_Kodas").trim();
+ 	              String type = "Bank";
+ 	             
+ 	              String date = rs.getString("data").substring(0,10);
+ 	              double summa = rs.getDouble("Suma");
+ 	             
+ 	               if(cou < 5 ) {
+ 	            	//  System.out.println("aaaa " + cou  + " " + oldcust + "" + custid);
+ 	            	   asi = asi + "|" + (getNF().format(summa)) + " EUR " +  date + " "  + type;
+ 	            	   
+ 	            	      hh.put(custid , asi); 
+ 	            	   
+ 	            	   
+ 	            	  
+ 	               } else {
+ 	            	   asi = "";  
+ 	               }
+ 	               
+ 	              
+ 	               oldcust = custid;
+ 	               cou++; 
+ 	             }
+ 	             rs.close();
+ 	             st.close();
+ 	             con.close();
+ 	            	   
+ 	           }
+ 	           catch (SQLException ex) {
+ 	             ex.printStackTrace();
+ 	           }
+ 	         
+ 	           return hh;
+ 	       }
+ 	    
+   
+   
 
 
 
     public TreeMap getCustomers(Agent agent){
     	
     	TreeMap deldays = this.getDeliveryDays();
-    	
+    	HashMap payments = makePaymentsFile();
     	  Converter.getManagersReplacements(getAgents1(), rcompany, user , pass);
         connectionUp(url);
         connectionUp2(url);
@@ -851,6 +917,10 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 	cust.setPayer(payer); 
                 	
                 }
+                
+                if(payments.get(cust.getPayer()) != null){
+               	 cust.payments = (String) payments.get(cust.getPayer());
+               }
                 
               if(taraSaldo.get(cust.getID()) != null) {
             	  cust.setInfo("Tara Saldo " + taraSaldo.get(cust.getID()) +  " kegs");

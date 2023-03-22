@@ -396,6 +396,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
       connectionUp();
       Iterator iter = clients.keySet().iterator();
       String dlr = (String)iter.next();
+      if(dlr != null && dlr.trim().length() < 3){
       String sql = "UPDATE klient SET blokk" + dlr + "='',debtdate" + dlr + "='' ";
       Statement st = con.createStatement();
       st.executeUpdate(sql);
@@ -415,7 +416,9 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
           pst.executeUpdate();
         }
       }
+      
       pst.close();
+      }
     }
 
 
@@ -490,7 +493,8 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
       connectionUp();
       Iterator iter = products.keySet().iterator();
       String dlr = (String)iter.next();
-      if(dlr != null){
+      System.out.println("Dealer '" +  dlr + "'");
+      if(dlr != null && dlr.trim().length() < 3){
         String sql = "UPDATE toode SET stock" + dlr + "=0,stockdat" + dlr + "='' ";
         Statement st = con.createStatement();
         st.executeUpdate(sql);
@@ -502,6 +506,8 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
       iter = products.keySet().iterator();
       while(iter.hasNext()){
         String dealer = (String)iter.next();
+        
+        if(dealer != null && dealer.trim().length() < 3){
         ArrayList al = (ArrayList)products.get(dealer);
 
         for (int i = 0 ; i < al.size() ; i++){
@@ -510,7 +516,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
           pst.setString(2, getStartingTime());
           pst.setString(3, p.getID());
           pst.executeUpdate();
-        }
+        }}
       }
       pst.close();
     }

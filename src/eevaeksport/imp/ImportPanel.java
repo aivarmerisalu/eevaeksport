@@ -6268,7 +6268,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
                 	//	troubles.append("PRODUCT CANNOT BE RESOLVED Edisoft XML format : \n" + "Dok Nr: " + doknr + " " + reference+  " Custname: " + tellijaNimekood +"\n"
                 		//		 + "\tLineNum: "  +  (counter+1) + " " + name +" EAN:" + ean + " Code:" + toode + prodName + " amount: " + kog + "\n\n");
                 	 	troubles.append("PRODUCT CANNOT BE RESOLVED Edisoft Uus XML format : \n" + "Dok Nr: " + doknr + " " + reference+  "<br>Custname: " + tellijaKood + " " + tellijaNimekood + "<br>DeliveryDate: " + deliveryd +   "\n"
-               				 + "\tLineNum: "  +  (counter+1) + " " + "<br> Code:" + toode + " EAN:" + ean + " " + name  + "<br> amount: " + kog +  "<br> OrderNr:" + reference   + " tyyp: " + doctype  + "\n\n");
+               				 + "\tLineNum: "  +  (counter+1) + " " + "<br> Code:" + toode + " EAN:" + ean + " " + prodName  + "<br> amount: " + kog +  "<br> OrderNr:" + reference   + " tyyp: " + doctype  + "\n\n");
                 
                 	}
                   }

@@ -704,9 +704,14 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	  }
 		this.getProducts(null);
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
-		System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+		System.out.println("Contracts Fixx " + contracts.keySet().size() + " " + contracts.keySet().toString());
 		if(contracts.size() > 0) {
-			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass, "FIXED");
+		}
+		contracts = Converter.loadSuggFromExcels("excelsugg",eanprods,parent);
+		System.out.println("Contracts Sugg " + contracts.keySet().size() + " " + contracts.keySet().toString());
+		if(contracts.size() > 0) {
+			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass, "SUGGESTED");
 		}
 		
 		

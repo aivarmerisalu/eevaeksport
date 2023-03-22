@@ -1465,13 +1465,15 @@ if (files.size() > 0) {
 			    dealerID = st.nextToken();
 			    while (st.hasMoreTokens()) {
 				custCodes.add(st.nextToken());
+				  if(dealerID.length() < 3 && dealerID.trim().length() >0) {
+					    hm.put(dealerID, custCodes);
+					    }
 			    }
 			}
 		    }
 
 		    br.close();
-		    hm.put(dealerID, custCodes);
-
+		  
 		    if (hm.size() > 0) {
 		    	try{
 		    		((ClientBlock) driver).blockClients(hm);
@@ -1636,6 +1638,7 @@ if (files != null && files.size() > 0) {
 		    ArrayList      prods = new ArrayList();
 
 		    while ((line = br.readLine()) != null) {
+		    	 System.out.println("line " +  line);
 			StringTokenizer st = new StringTokenizer(line, ";");
 
 			if (st.hasMoreTokens() && line.trim().length()>0) {
@@ -1659,13 +1662,19 @@ if (files != null && files.size() > 0) {
 				}
 
 				prods.add(p);
+				 if(dealerID.length() < 3 && dealerID.trim().length() >0 && prods.size()>1) {
+				       hm.put(dealerID, prods);
+				    }
 			    }
+			   
 			}
 		    }
-                    System.out.println(dealerID);
+                    System.out.println("DEaler " + dealerID);
 		    br.close();
-		    hm.put(dealerID, prods);
-
+		   
+		    
+		    System.out.println("hm " + hm.toString());
+		    
 		    if (hm.size() > 0) {
 			((StockSetter) driver).setStocks(hm);
 		    }
