@@ -1777,7 +1777,7 @@ System.out.println(cmd);
                       }
                  }
            }
-             if(ag != null && ag.trim().length() > 0) {
+             if(ag != null && ag.trim().length() > 0 && !ag.trim().equals("26")) {
             	   customer.addAgent(new Agent("171"));
                    customer.addAgent(new Agent("172"));	 
                    customer.addAgent(new Agent("176"));

@@ -1145,7 +1145,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	  "  LEFT JOIN UNITCONVERT u ON inv.ITEMID=u.ITEMID AND u.DATAAREAID=inv.dataareaid  AND u.TOUNIT='kast'" +
 	  " WHERE disc.dataareaid='vir' and inv.dataareaid='vir' and inv.ssOrdererAccount='DUNKER' and u.dataareaid='vir'   AND mod.dataareaid='vir'  " +
 	  " and (disc.todate>getdate()-1 OR (disc.fromdate<=getdate() AND disc.todate=('1900-01-01 00:00:00.00') ) )  "+
-	  " AND moduletype=2 and blocked = 0  and inv.itemgroupid not in ('91','92','94') "+
+	  " AND moduletype=2 and blocked = 0  and inv.itemgroupid not in ('91','94') "+
 	  "  and disc.accountrelation=''";
     
     getSaveStockInfo();

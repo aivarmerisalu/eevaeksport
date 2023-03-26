@@ -1335,7 +1335,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
      
         double min = rs.getDouble("minimum");
         if(min > 1) {
-        	prod.setMinAmountInUnits(min);
+        	//prod.setMinAmountInUnits(min);
         }
         
         double opt = rs.getDouble("optimum");

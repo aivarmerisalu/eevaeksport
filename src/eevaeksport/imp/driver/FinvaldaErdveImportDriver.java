@@ -252,7 +252,7 @@ public class FinvaldaErdveImportDriver extends AbstractImportDriver{
 	        doc.appendChild(root);
 
 
-	        Node pardavimas = doc.createElement("pardavimoRezervavimas");
+	        Node pardavimas = doc.createElement("pardavimas");
 	        root.appendChild(pardavimas);
 
 

@@ -890,6 +890,23 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  ord10r.setWarehouse(order.getWarehouse());
 	  ord10r.setShipDateUsed(order.isShipDateUsed());
 	  
+	  
+	  Order ord92 = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName());
+	  String taht92 = "z"; 
+	  ord92.setAgentCode(order.getAgentCode());
+	  ord92.setDokNr(order.getDokNr() + taht92 + mills);
+	  ord92.setInfo(order.getInfo());
+	  ord92.setTeostaja((order.getTeostaja()));
+	  ord92.setChanged(order.isChanged());
+	  ord92.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord92.setStatus(order.getStatus());
+	  ord92.setShipTime(order.getShipTime());
+	  ord92.setPaymTerm(order.getPaymTerm());
+	  ord92.setShipDateUsed(order.isShipDateUsed());
+	  ord92.setWarehouse(order.getWarehouse());
+	  ord92.setDealer("82450");
+	  ord92.setCurrency("NPARMP"); // G tähega
+	  
 	  String dea = "53277";
 	  if(order.getDealer().equals("53269")) {
 		  dea = "81208";
@@ -930,7 +947,12 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
       		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
                 	
                 
-                } else if(itemid.startsWith("P") ){
+                } else  if(itemid.startsWith("Z") ){
+          	    	 
+          	    	 ord92.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+          		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+          	  
+                    }else if(itemid.startsWith("P") ){
                     boolean FF = true;
           	    	 if(defOsak.get(lin.getToode()) != null && defOsak.get(lin.getToode()).equals("NF")){
           	    		 FF = false;
@@ -1061,7 +1083,9 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  if(ordcD.getOrderLines() != null && ordcD.getOrderLines().size()>0){
 		  result.add(ordcD);  
 	  }
-
+	  if(ord92.getOrderLines() != null && ord92.getOrderLines().size()>0){
+		  result.add(ord92);  
+	  }
 	  if(ord2.getOrderLines() != null && ord2.getOrderLines().size()>0){
 		  result.add(ord2);  
 	  }
@@ -1294,7 +1318,21 @@ private Vector splitOrderHRC (Order order){
     	  ord2.setDealer(order.getDealer());
     	  ord2.setCurrency(getTypeHRC(order.getDealer(),1,order)); // M
     		
-
+    	  Order ord92 = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName());
+    	  String taht92 = "z"; 
+    	  ord92.setAgentCode(order.getAgentCode());
+    	  ord92.setDokNr(order.getDokNr() + taht92 + mills);
+    	  ord92.setInfo(order.getInfo());
+    	  ord92.setTeostaja((order.getTeostaja()));
+    	  ord92.setChanged(order.isChanged());
+    	  ord92.setShipCal(order.getShipCal().getTimeInMillis() +"");
+    	  ord92.setStatus(order.getStatus());
+    	  ord92.setShipTime(order.getShipTime());
+    	  ord92.setPaymTerm(order.getPaymTerm());
+    	  ord92.setShipDateUsed(order.isShipDateUsed());
+    	  ord92.setWarehouse(order.getWarehouse());
+    	  ord92.setDealer("82450");
+    	  ord92.setCurrency("NPARMP"); // G tähega
 	  
 	  System.out.println("Splitin Warehouse agendid " + order.getWarehouse());
 	  
@@ -1309,7 +1347,12 @@ private Vector splitOrderHRC (Order order){
      	    	 ord9.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
      		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
      	  
-               } else {
+               } else  if(itemid.startsWith("Z") ){
+       	    	 
+       	    	 ord92.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+       		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+       	  
+                 } else {
 		    	 
 	    		 ord2.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
@@ -1323,7 +1366,9 @@ private Vector splitOrderHRC (Order order){
 	  if(ord2.getOrderLines() != null && ord2.getOrderLines().size()>0){
 		  result.add(ord2);  
 	  }
-
+	  if(ord92.getOrderLines() != null && ord92.getOrderLines().size()>0){
+		  result.add(ord92);  
+	  }
 
 	  if(ord9.getOrderLines() != null && ord9.getOrderLines().size()>0){
 		  result.add(ord9);  

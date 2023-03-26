@@ -1027,9 +1027,7 @@ System.out.println(cmd);
 			      					}
 			      				}
 			      			}
-			        		
 			        	}
-			        	
 			        }
 				
 
@@ -1248,9 +1246,9 @@ System.out.println(cmd);
 		    	  Vector vec = new Vector(); 
 		    	  String cmd3 = "SELECT [No_] as Code, [Description] as Name, '' as ean ,'' as nfcTag, [Freezer Serial No_] as factoryID ,[Freezer Model] as Type ,[Serial No_] as Description , " +
                             " [Įsigijimo data] as Born, [Serial No_] as Contract , [Freezer Customer] as custcode" + 
-                            "  FROM [Vičiūnai ir Ko$Fixed Asset] WHERE ([Blocked] = 0) AND ([FA Subclass Code] = '11') "; // and qty_lv = 0
+                            "  FROM [Vičiūnai ir Ko$Fixed Asset] a left join [Ship-to Address] s on  WHERE ([Blocked] = 0) AND ([FA Subclass Code] = '11') "; // and qty_lv = 0
 		    	
-		    	  cmd3 = "select * from v_VIK_FA";
+		    	  cmd3 = "select  * from v_VIK_FA   ";
 		    	  Connection con4 = getNewConnection2();
 		    	Statement stm = con4.createStatement();
 					
@@ -1260,6 +1258,7 @@ System.out.println(cmd);
 		                	
 		                	 JSONObject obj = new JSONObject();
 		                	 
+		                	  
 		                        String code = rs1.getString("code").trim();
 		                        obj.put("code", code);
 		                        asses.add(code);
@@ -1363,7 +1362,7 @@ System.out.println(cmd);
 		     	   cmd3 = "select [No_] as itemcode , '' as contract , [Freezer Customer]  as custcode " +
 		  		   "  FROM [Vičiūnai ir Ko$Fixed Asset] WHERE ([Blocked] = 0) AND ([FA Subclass Code] = '11') and [Freezer Customer] != ''";
 		            
-		     	 cmd3 = " select * from v_VIK_FA where custcode != ''" ;
+		 cmd3 = " select  a.*, k.[Customer No_] as kl from v_VIK_FA a  left join dbo.[Vièiûnai ir Ko$Ship-to Address] k  on a.custcode = k.[Code]  where a.custcode != ''" ;
 		     	   int cou = 0;
 		              int coua = 0;
 		     	  rs1 = stm.executeQuery(cmd3);
@@ -1377,7 +1376,8 @@ System.out.println(cmd);
 		                        // Date contract = rs1.getDate("contract");
 		                        // obj.put("contractDate",contract.getTime() );
 		                         String custcode = rs1.getString("custcode").trim();
-		                         obj.put("customerCode", custcode);
+		                         String kl = rs1.getString("kl").trim();
+		                         obj.put("customerCode", kl + "_" + custcode);
 		                         
 		                       
 		                         if(asses.contains(code) && custs.contains(custcode) ){
