@@ -530,7 +530,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
           "           pal.dataareaid=dim.dataareaid and   pal.sssticker=1 " +
 "WHERE summ.DATAAREAID='vin' and dim.DATAAREAID='vin' and inv.DATAAREAID='vir' and " +
 "CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('LK_AKTSIIS','LK_TAVA','ITELLA') and " +
-"itt.itemgroupid < 80 GROUP BY summ.itemid having sum(availphysical) >0 order by summ.itemid ";
+"itt.itemgroupid < 93 GROUP BY summ.itemid having sum(availphysical) >0 order by summ.itemid ";
 
 
 	  

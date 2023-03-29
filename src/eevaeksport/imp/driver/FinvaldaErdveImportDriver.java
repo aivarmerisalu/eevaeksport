@@ -3,7 +3,9 @@ package eevaeksport.imp.driver;
 
 
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,6 +16,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -223,7 +226,47 @@ public class FinvaldaErdveImportDriver extends AbstractImportDriver{
 	    }
 	    return sb.toString();
 	  }
+  public static Properties loadProps(String fileName){
+      Properties props = new Properties();
+      try {
+        FileInputStream in = new FileInputStream(fileName);
+        props.load(in);
+        in.close();
+      } catch (IOException e){
+         // showError(e);
+        }
+      return props;
+    }
   
+
+  public static void saveProps(Properties props, String fileName){
+	    try {
+	      FileOutputStream out =
+	          new FileOutputStream(fileName);
+	      props.store(out, "");
+	      out.close();
+	    } catch (IOException e) {
+	     
+	    }
+	  }
+
+  private long getAndUpdateRecID() {
+      long nextRecID = 0;
+       Properties props = loadProps("numerator.properties"); 
+         if(props == null){
+      	   props = new Properties();
+         }
+       String asi = (String) props.get("nextval");
+       if(asi == null){
+      	 nextRecID = 1;
+       }else{
+      	 nextRecID = Long.parseLong(asi) + 1;
+      	 
+       }
+       props.put("nextval", nextRecID  + "");
+       saveProps(props,"numerator.properties");
+      return nextRecID;
+    }
   
   private void makeOutput(Order order){
 	  Vector lin = order.getOrderLines();
@@ -236,15 +279,41 @@ public class FinvaldaErdveImportDriver extends AbstractImportDriver{
 	 		}
 	 		
 	 	 }  
-	  String comm = escape(order.getInfo());
+	 	 String mana = order.getAgent();
+	 	 
+	  String comm =  escape(order.getInfo());
       if(comm != null && comm.length()>200){
-      	comm = comm.substring(0,200);
+      	comm =  mana + " " + comm.substring(0,190);
+      }else {
+    	  comm = mana;
       }
 	 	  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	    
 	      try {
 	    	
 	    	  
+    	        String add = getAndUpdateRecID() + "";
+    	        if(add.length() == 1){
+    	          add = "000000" + add;
+    	        }
+    	      if(add.length() == 2){
+    	          add = "00000" + add;
+    	        }
+    	    if(add.length() == 3){
+    	          add = "0000" + add;
+    	        }
+  	
+    	  if(add.length() == 4){
+	          add = "000" + add;
+	        }
+  		        
+    	if(add.length() == 5){
+	          add = "00" + add;
+	        }
+    	if(add.length() == 6){
+	          add = "0" + add;
+	        }
+String number =  add ;
 	        DocumentBuilder db = dbf.newDocumentBuilder();
 	        Document doc = db.newDocument();
 	        Element root = doc.createElement("fvsdata");
@@ -262,7 +331,8 @@ public class FinvaldaErdveImportDriver extends AbstractImportDriver{
 	        pardavimas.appendChild(serija);
 	        
 	        Node dokumentas = doc.createElement("dokumentas");
-	        Text unVal22 = doc.createTextNode(order.getDokNr());
+	        
+	        Text unVal22 = doc.createTextNode(number);
 	        dokumentas.appendChild(unVal22);
 	        pardavimas.appendChild(dokumentas);
 	        String type = "order";
@@ -305,7 +375,7 @@ public class FinvaldaErdveImportDriver extends AbstractImportDriver{
 	        } else if(comm.length()<100){
 	        	
 	        	   Node pavadinimas1 = doc.createElement("pavadinimas1");
-			        Text pavadinimas1Val = doc.createTextNode(comm.substring(0,50));
+			        Text pavadinimas1Val = doc.createTextNode( comm.substring(0,50));
 			        pavadinimas1.appendChild(pavadinimas1Val);
 			        pardavimas.appendChild(pavadinimas1);
 			        

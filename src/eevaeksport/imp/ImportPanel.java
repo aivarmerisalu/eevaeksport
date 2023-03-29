@@ -16532,6 +16532,10 @@ shipdate = getCalXML(asi);
       if (counter == 1){
         dokNr = line;
       } else if(counter == 3){
+    	 
+    	  if(line.startsWith("Delivery date: ")) {
+    		  line = line.substring(15).trim();
+    	  }
     	  System.out.println("kuup�eva otsing " + line);
       	shipdate = getCal(line);
       } else if(counter == 5){
@@ -16566,11 +16570,12 @@ shipdate = getCalXML(asi);
          
         }
       } else if(counter > 7 ){
+    	  
         String ol = null;
         String prod = " ";
         while( (ol = br.readLine()) != null ){
         //	System.out.println(ol);
-                if(ol.trim().length()>0){
+                if(ol.trim().length()>0 && !ol.startsWith(";Item")){
                 
             ol = ol.replaceAll("\t\t","| | ");
 

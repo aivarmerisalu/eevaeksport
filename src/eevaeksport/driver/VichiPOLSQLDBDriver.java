@@ -888,11 +888,19 @@ try{
              String ag = rs.getString("agent");
              if(ag != null){
                 customer.addAgent(new Agent(ag.trim()));
+                if(ag.trim().startsWith("PHD")) {
+                	 customer.addAgent(new Agent("PHD 01"));
+                	 customer.addAgent(new Agent("PHD 02"));
+                }
                } 
               
                ag = rs.getString("agent2");
                  if(ag != null){
                     customer.addAgent(new Agent(ag.trim()));
+                    if(ag.trim().startsWith("PHD")) {
+                   	 customer.addAgent(new Agent("PHD 01"));
+                   	 customer.addAgent(new Agent("PHD 02"));
+                   }
                  }
              
           

@@ -349,6 +349,12 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 		if(cust.getID() != null && cust.getID().length() > 0) {
 		 products.append(cust.getID() + ";" + getParent().getNF().format(cust.getDebt()) + ";" + bl + "\n");
 		}
+		if(cust.getPayer().equals("150040692")) {
+			System.out.println( " asi 1111 " + blockedcusts.contains(cust.getPayer()) + " " +
+					blockedcusts.contains(cust.getPayer()) + " " + cust.isSalesBlockT() + " " + cust.getID());
+		
+		}
+		
 		}
        
 		return products.toString();
@@ -1892,8 +1898,12 @@ try{
         if(old<dueint){
            debtDays.put(custID,dueint+"") ;
            if(dueint > 28){
-        	  	  // System.out.println("siit 2 tuleb block" + custID);
-                	   
+        	  	 
+        	   if(debt.getPayerID() != null && debt.getPayerID().equals("150040692")) {
+        		    System.out.println("siit 2 tuleb block" + custID + " " + debt.getDoknr());
+        	   }
+
+        		   
         	 this.blockedcusts.add(custID); 
         	 if(debt.getPayerID() != null && debt.getPayerID().length() > 0 ) {
         		 this.blockedcusts.add(debt.getPayerID());  
@@ -2030,9 +2040,9 @@ try{
              if( blokk != null && blokk.trim().equals("1") && customer.getName().indexOf("Rimi") == -1){
                customer.setSalesBlockT(true);
                blockedcusts.add(customer.getID());
-               if(customer.getName().indexOf("Rimi") != -1){
-             	  // System.out.println("siit 3 tuleb block");
-                }
+               if(customer.getPayer().equals("150040692")) {
+       		    System.out.println("siit 2 tuleb block" + customer.getID());
+       	       }
                
              }
 
@@ -2091,7 +2101,7 @@ try{
            }
            
            double credit = rs.getDouble("credit");
-           if(credit > 0){
+           if(credit > 1){
         	   customer.setCredit(credit + "");
            }
          
@@ -2104,25 +2114,28 @@ try{
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getPayer())));
            	
            	
-          if(credit > 0 && (credit - Double.parseDouble((String)totaldebts.get(customer.getPayer()))) < -100){
+          if(credit > 1 && (credit - Double.parseDouble((String)totaldebts.get(customer.getPayer()))) < -100){
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
             	blockedcusts.add(customer.getPayer());
-            	  if(customer.getName().indexOf("Stateta") != -1) {
-               	   System.out.println("siin1" + customer.getID() + "  " + customer.getPayer());
+            	if(customer.getPayer().equals("150040692")) {
+        		
+               	   System.out.println("siin222" + customer.getID() +
+               			   "  " + customer.getPayer() + " " + totaldebts.get(customer.getPayer()) 
+               			   + " " + credit + " ? " );
                   }
             	
             }
            }else if( this.totaldebts.get(customer.getID()) != null){
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
            
-           	if(credit > 0 && (credit - Double.parseDouble((String)totaldebts.get(customer.getID()))) < -100
+           	if(credit > 1 && (credit - Double.parseDouble((String)totaldebts.get(customer.getID()))) < -100
             		 && customer.getName().indexOf("Rimi") == -1){
              	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
-            	 if(customer.getName().indexOf("Stateta") != -1) {
-                 	   System.out.println("siin3" + customer.getID() + "  " + customer.getPayer());
+            	if(customer.getPayer().equals("150040692")) {
+            			   System.out.println("siin3333" + customer.getID() + "  " + customer.getPayer());
                     }
             }
            }
@@ -2420,6 +2433,7 @@ try{
      HashMap<String,Double>  ladub1o = new HashMap<String,Double>();
      
      HashSet higherCodes = getHigher();
+     HashSet lowerCodes = getHigher();
      
      HashMap<String,Double> suggDisc = getSuggDisc();
      
