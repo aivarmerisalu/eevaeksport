@@ -271,7 +271,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 	     
 		 	     if(line.getPartii() != null && line.getPartii().trim().length() > 0){
 		 	    	 if(line.getPartii().equals("22")){
-		 	    		 type = "EK"; 
+		 	    		 type = "A2"; 
 		 	    	 }
 		 	    	if(line.getPartii().equals("33")){
 		 	    		 type = "DZ"; 

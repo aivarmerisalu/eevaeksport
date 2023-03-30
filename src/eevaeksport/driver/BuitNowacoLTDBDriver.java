@@ -2374,11 +2374,52 @@ try{
 	   }catch(Exception e) {
 		   e.printStackTrace();
 	   }				
-	   System.out.println("hh " + hh.toString());
+	   System.out.println("hhigher " + hh.toString());
 	   return hh;
    }
    
    
+   private HashSet getLower() {
+	   HashSet hh = new HashSet();
+	   try {
+		   DataFormatter formatter = new DataFormatter();
+		   Workbook workbook = null;
+	   File f = new File (getExcelDir() + "ProductCost.xlsx");
+	   boolean xs = true;
+	   if(!f.exists()) {
+		   f = new File (getExcelDir() + "ProductCost.xls"); 
+		   xs = false;
+	   }
+	   
+		  FileInputStream	 ff = new FileInputStream(f);
+		if(xs) {
+		     workbook = new XSSFWorkbook((ff));
+		}else {
+			 workbook = new HSSFWorkbook((ff));
+		}
+		Sheet sheet = workbook.getSheetAt(0);
+	      Row row = null; 
+				ff.close();	
+				if(sheet != null){
+				  int yy = sheet.getLastRowNum();
+					
+					for(int i = 0 ; i < yy+1 ;i++){
+						 row = sheet.getRow(i);
+						if(row != null) {
+							
+							String ean = formatter.formatCellValue(row.getCell(0));
+							String ok = formatter.formatCellValue(row.getCell(1));
+							if(ok.equals("-1")) {
+								hh.add(ean.trim());
+							}
+						}}}
+				
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }				
+	   System.out.println("hhlower " + hh.toString());
+	   return hh;
+   }
    
    private HashMap<String, Double> getSuggDisc() {
 	   HashMap<String, Double> hh = new HashMap<String, Double>();
@@ -2433,7 +2474,7 @@ try{
      HashMap<String,Double>  ladub1o = new HashMap<String,Double>();
      
      HashSet higherCodes = getHigher();
-     HashSet lowerCodes = getHigher();
+     HashSet lowerCodes = getLower();
      
      HashMap<String,Double> suggDisc = getSuggDisc();
      
@@ -2745,6 +2786,9 @@ try{
                  if(higherCodes.contains(prod.getID())){
                           prod.setStatusTop("3");
                          }
+                 if(lowerCodes.contains(prod.getID())){
+                     prod.setStatusTop("4");
+                    }
                  
                  String origp = rs.getString("origpak");
                  String klimes = rs.getString("klimes");

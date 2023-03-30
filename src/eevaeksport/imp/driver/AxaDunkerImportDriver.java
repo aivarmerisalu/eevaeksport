@@ -6,7 +6,10 @@
 package eevaeksport.imp.driver;
 
 
+import java.io.BufferedWriter;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,6 +18,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -24,6 +28,7 @@ import org.apache.log4j.PropertyConfigurator;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
@@ -115,6 +120,7 @@ public class AxaDunkerImportDriver
  }
  
   
+
   
   public String getMTKood(int paevad) throws SQLException{
  	 
@@ -189,6 +195,30 @@ public class AxaDunkerImportDriver
     return prod;
   }
 
+  private String getCustName(String cuid) throws SQLException{
+		 
+		
+		 String name = null;
+	 	 
+		    String sql2 = "SELECT cus.name as nimi FROM custtable cus " +
+		            " WHERE cus.dataareaid='vir' and cus.accountnum = '" + cuid + "' ";
+				
+				Statement st1 = con.createStatement();
+				ResultSet rs1 = st1.executeQuery(sql2);
+				
+				 while (rs1.next()) {
+					 name = rs1.getString("nimi").trim();
+				 }
+				
+		rs1.close();
+		st1.close();
+		
+	  	
+	  	
+	  	System.out.println("oioi " + eans.size() );
+	  	
+	  	return name ;
+	  }
 
   
   public void makeOrder(Order order) throws SQLException{
@@ -198,20 +228,366 @@ public class AxaDunkerImportDriver
 	  if(!order.getCompany().equals("OTHERSTUFF")){
 		  Vector splitted =  splitOrder(order);
 	 	  Enumeration en = splitted.elements();
+	 	 makeEans();
 	 	  while(en.hasMoreElements()){
 	 		  Order ord = (Order)en.nextElement();
-	 		 makeOutput(ord); 	    
+	 		 makeOutput(ord); 	 
+	 		 
+	 		  boolean salvesta = true;
+	      	 	 Vector lin = ord.getOrderLines();
+	      	 	 
+	      	 	 boolean laks = false;
+	      	 	 boolean tagastus = false;
+	      	 	 for (int i = 0; i < lin.size(); i++) {
+	      	 		OrderLine ol = (OrderLine) lin.elementAt(i);
+	      	 	
+	      	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0 && (ord.getStatus() == 5 || ord.getStatus() == 4)){
+	      	 			laks = true;
+	      	 			tagastus = true;
+	      	 		}
+	      	 		if(ol.getKogus() < 0 ) {
+	      	 			tagastus = true;
+	      	 		}
+	      	 		
+	      	 	 }  
+	      		    if(laks){
+	      		    	salvesta = false;
+	      		    }		
+	 		 
+	 		 makeOutputTelema(ord,tagastus);
 	    }
 	    
 	  }else{
 		  counter = order.getOrderLines().size();
 	  }
 		
-	  
+	 
     //  makeOutput(order);
       setNumAddedLines(counter);
   }
   
+  
+  private HashMap eans = null;
+  private HashMap prodnames = null;
+    
+    private HashMap makeEans() throws SQLException{
+  	 
+  	  	
+  	  	if(eans == null){
+  	  		eans = new HashMap();
+  	  		prodnames = new HashMap();
+  	  	
+  	 	 String	 sql2 = "SELECT inv.itemid as toode, inv.itemname +' '+RTRIM(CAST(CAST(inv.DUNALCOHOLPERCENT AS decimal(15,1))"
+  	 	 		+ " AS char(5)))+'%' AS nimetus , bar.itembarcode AS ean  FROM inventtable inv  " +
+  	 		  " left JOIN pricedisctable disc ON inv.itemid=disc.itemrelation and disc.dataareaid= inv.dataareaid " +
+  	 		  " left JOIN inventtablemodule mod ON mod.itemid = inv.itemid and mod.dataareaid=inv.dataareaid "+
+  	 		  " left join inventitembarcode bar ON bar.dataareaid = inv.dataareaid and bar.itemid=inv.itemid and bar.useforinput  = 1 " +
+  	 		  "  LEFT JOIN UNITCONVERT u ON inv.ITEMID=u.ITEMID AND u.DATAAREAID=inv.dataareaid  AND u.TOUNIT='kast'" +
+  	 		  " WHERE disc.dataareaid='vir' and inv.dataareaid='vir' and inv.ssOrdererAccount='DUNKER' and u.dataareaid='vir'   AND mod.dataareaid='vir'  " +
+  	 		  " and (disc.todate>getdate()-1 OR (disc.fromdate<=getdate() AND disc.todate=('1900-01-01 00:00:00.00') ) )  "+
+  	 		  " AND moduletype=2 and blocked = 0  and inv.itemgroupid not in ('91','94') "+
+  	 		  "  and disc.accountrelation = ''";
+  				
+  				Statement st1 = con.createStatement();
+  				ResultSet rs1 = st1.executeQuery(sql2);
+  				
+  				 while (rs1.next()) {
+  					 String id = rs1.getString("toode").trim();
+  					 String name = rs1.getString("nimetus").trim();
+  					  String ean = (rs1.getString("ean"));
+  		                 if (ean != null &&ean.trim().length()>3){
+  						 eans.put(id,ean);
+  					 }
+  		                 prodnames.put(id, name);
+  				    
+  				 }
+  				
+  		rs1.close();
+  		st1.close();
+  		
+  	  	}
+  	  	
+  	  	System.out.println("oioi " + eans.size() );
+  	  	
+  	  	return eans ;
+  	  }
+  
+  
+  private void makeOutputTelema(Order order , boolean tagastus){	
+	 StringBuffer sb = new StringBuffer();
+	 nf.setGroupingUsed(false);
+
+	try {
+		
+	  String ref = order.getTeostaja();
+		if ( ref == null ){
+			ref =  " ";
+		}
+	
+		String com = order.getEmailBody();
+		if ( com == null ){
+			com =  " ";
+		}		
+		
+		String ware = order.getWarehouse();
+		System.out.println("ladu tellimusel " + ware);
+		
+		 String doknr = order.getDokNr();
+      String ls = System.getProperty("line.separator");
+      String fixagent = order.getAgent(); 
+  
+      String custID = order.getCompany();
+      String ladu = null;
+          Calendar  shipDate = order.getShipCal();
+          
+          String code = order.getWarehouse();        
+          if (code != null){
+            ladu = code;
+          }
+        
+        if (ladu == null) {
+          ladu = "";
+        }
+
+   
+    
+        Calendar cal = Calendar.getInstance();
+       
+        if (shipDate != null) {
+              cal = shipDate;
+            }
+      
+        sb.append("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + ls);
+        sb.append("<E-Document>" + ls);
+   
+        sb.append("<Header>" + ls);
+        sb.append("<DateIssued>" + escape(getDateString(Calendar.getInstance())) + "</DateIssued>" + ls);
+        sb.append("<SenderID>Balmerk</SenderID>" + ls);
+        sb.append("<ReceiverID>" + order.getCompany() + "</ReceiverID>" + ls); 	
+        sb.append("</Header>" + ls);
+        sb.append("<Document>" + ls);
+        
+        String type = "order";
+        if(tagastus) {
+     	   type = "retann";
+        }
+   
+        sb.append("<DocumentType>" + type + "</DocumentType> " + ls);
+        sb.append("<DocumentParties>" + ls);
+    //    String regnr = getRegKood(custID);
+      	  sb.append("<BuyerParty>" + ls);
+           sb.append( "<PartyCode>" +  escape((custID)) + "</PartyCode>" + ls); 
+       //    sb.append( "<RegNum>" +  escape(regnr) + "</RegNum>" + ls); 
+           sb.append("</BuyerParty>" + ls);
+        
+           sb.append("<OrderParty>" + ls);
+           sb.append( "<PartyCode>" +  escape(custID) + "</PartyCode>" + ls);
+         //  sb.append( "<RegNum>" +  escape(regnr) + "</RegNum>" + ls); 
+           sb.append("</OrderParty>" + ls);
+        
+           sb.append("<DeliveryParty>" + ls);
+           sb.append("<PartyCode>" +  escape(custID) + "</PartyCode>" + ls); 
+           
+           String cuname = getCustName(custID);
+           if(cuname != null) {
+         	  sb.append( "<Name>" + escape(cuname)  + "</Name>" + ls); 	  
+           }
+         
+      
+      String agent = order.getAgent();
+        if(fixagent != null){
+      	  agent = fixagent;
+        }
+        
+        sb.append("<UserId>" +  agent + "</UserId>" + ls);
+        sb.append("</DeliveryParty>" + ls);
+        sb.append("</DocumentParties>" + ls);
+        sb.append("<DocumentInfo>" + ls);
+        sb.append("<DocumentSubType>MERISOFT</DocumentSubType>" + ls);
+        sb.append("<DocumentName>MERISOFT-ORDER</DocumentName>" + ls );
+               
+      	  sb.append("<RefInfo>" + ls);
+      	  if(ref != null && ref.trim().length() > 0){
+      		  if(tagastus) {
+      			  if(ref.trim().indexOf(" ") != -1) {
+      				  ref = ref.substring(0,ref.indexOf(" "));
+      			  }
+      		  }
+      		  
+            sb.append("<SourceDocument type=\"order\">" + ls);
+            sb.append("    <SourceDocumentNum>" + escape(ref) + "</SourceDocumentNum>" + ls );
+            sb.append("</SourceDocument>" + ls);
+      	  }
+            sb.append("</RefInfo>" + ls); 
+      	
+
+     /* if(smarten){
+     	   sb.append(" <CreatedBy>" + agent + "</CreatedBy>" + ls ) ;	
+      	  subType = "myyk";
+      	  sb.append("<DocumentName>tellimus</DocumentName>" + ls); 
+     }*/
+        
+    String    sss = (Calendar.getInstance().getTime().getTime()+ "").substring(4) ;
+    
+    if(ref != null && ref.trim().length() > 0){
+ 	   sb.append("<DocumentNum>" + escape(ref)+ "</DocumentNum>" + ls); 
+    }else {
+ 	   sb.append("<DocumentNum>" + escape(agent + "-" + sss )+ "</DocumentNum>" + ls);   
+    }
+       
+        sb.append("<CreatedBy>" + escape(agent)+ "</CreatedBy>" + ls); 
+        
+        sb.append("<DateInfo>" + ls);
+        sb.append("<OrderDate>" +escape(getDateString(Calendar.getInstance())) + "</OrderDate>" + ls);
+        sb.append("<DeliveryDateRequested>" +  escape(getDateString(cal)) + "</DeliveryDateRequested>" + ls); //aeg taha panna  T10:00:00
+        sb.append("</DateInfo>" + ls);
+        sb.append("</DocumentInfo>" + ls);
+        
+       // sb.append("<DocumentSumGroup>" + ls );
+       // sb.append("<Currency>EUR</Currency>" + ls);
+        
+       // sb.append("<DocumentSum>10.81</DocumentSum>" + ls );
+        //sb.append("<VAT><SumBeforeVAT>10.81</SumBeforeVAT><VATRate>20</VATRate><VATSum>2.162</VATSum></VAT>" + ls);
+     //   sb.append("<TotalSum>12.972</TotalSum>" + ls);
+       // sb.append("</DocumentSumGroup>" + ls);    	  
+        sb.append("   <DocumentItem>" + ls);
+
+
+
+        
+        Vector sortedLines = order.getOrderLines();
+        for (int i = 0; i < sortedLines.size(); i++) {
+            OrderLine line = (OrderLine)sortedLines.elementAt(i);
+            double ale = line.getDiscount();     
+          //  counter++;
+            
+            String yhik = line.getUnit();
+            if (ale == -1 ){
+                ale = 0 ;
+                }
+            sb.append("      <ItemEntry>" + ls);
+            sb.append("      <LineItemNum>"  + (i+1) + "</LineItemNum>" + ls);
+          
+           
+           // <GTIN>4740072222752</GTIN> 
+           // <BaseUnit>TK</BaseUnit> 
+            sb.append("         <SellerItemCode>" + line.getToode() + "</SellerItemCode>" + ls);
+            try{
+
+                String ean = eans.get(line.getToode())+"";
+                if(ean != null && !ean.trim().equals("null")){
+          	      sb.append("         <GTIN>" + ean + "</GTIN>" + ls);
+                }else {
+             	   log.error(" File Saved " + "EAN-i pole " + agent + " " + order.getCompany() + " " + line.getToode() + " " + line.getKogus() );
+             	   sb.append("         <GTIN>" + line.getToode() + "</GTIN>" + ls);
+                }
+                     
+            }catch(Exception e){
+         	   
+            }
+            
+           sb.append("         <BaseUnit>tk</BaseUnit>" + ls);
+          	  sb.append("         <ItemUnitRecord>" + ls);
+               sb.append("                <ItemUnit>tk</ItemUnit>" + ls);
+               sb.append("         </ItemUnitRecord>" + ls);
+               
+            if(prodnames.get(line.getToode()) != null) {
+         	    sb.append("          <ItemDescription>" + (escape(prodnames.get(line.getToode())+"")) + "</ItemDescription>" + ls);               
+            }
+               
+               if(tagastus) {
+             	  sb.append("         <AmountToReturn>" + escape(getNF().format(line.getKogus()*-1)) + "</AmountToReturn>" + ls);
+             	  
+               }else {
+             	  sb.append("         <AmountOrdered>" + escape(getNF().format(line.getKogus())) + "</AmountOrdered>" + ls);
+	  
+               }
+             
+
+               String ccc = "";
+            if(line.getDiscount() > 0){
+          	  double discprice = (100d -line.getDiscount())*line.getPrice()/100d ;
+              sb.append("         <Addition addCode=\"DSC\"><AddRate>" +
+          	   escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
+              ccc =  "-" + nf.format(line.getDiscount()) + "% ";
+            }
+           
+          
+            if(line.getPartii() != null && line.getPartii().trim().length() > 0 ){
+         	   ccc = ccc + line.getPartii();
+            }
+            if(ccc.length() > 0) {
+                sb.append("   <AdditionalInfo>" +ls);
+                sb.append("       <Extension extensionId=\"remarks\">" + ls);
+                sb.append("       <InfoName>Notes</InfoName>");
+                sb.append("            <InfoContent>" + Converter.escapeXML(ccc) + "</InfoContent>" + ls );
+                sb.append("       </Extension>");
+                sb.append("   </AdditionalInfo>" + ls);	
+            }
+     
+            sb.append("      </ItemEntry>" + ls);
+            
+        }
+        
+
+        sb.append("   </DocumentItem>" + ls);
+        
+  	    String comm = order.getInfo();
+          if(comm != null && comm.length()>100){
+          	comm = comm.substring(0,100);
+          }
+          
+          if(comm != null && comm.trim().length() > 0 ){
+          	  sb.append("   <AdditionalInfo>" +ls);
+                sb.append("       <Extension extensionId=\"remarks\">" + ls);
+                sb.append("       <InfoName>Notes</InfoName>");
+                sb.append("            <InfoContent>" + escape(comm) + "</InfoContent>" + ls );
+                sb.append("       </Extension>");
+                  //-<Extension extensionId="externalremarks"><InfoContent>K�esoleva arve aluseks olev n�ue on loovutatud AS-ile SEB Liising ja k�ik arvel toodud summad tuleb maksta AS-i SEB Liising arvelduskontole 10052045861006 SEB Pangas (kood 401). Kogu k�esoleva arvega seotud info tuleb teatavaks teha AS-ile SEB Liisingule.</InfoContent></Extension>
+                sb.append("   </AdditionalInfo>" + ls);	
+          }
+        
+          
+        sb.append("</Document>" + ls);
+        sb.append("</E-Document>" + ls);
+
+ //  counter = counter + cou;
+ 	//
+   try{
+ 	  Thread.sleep(10); 
+   }catch(Exception e){
+ 	 e.printStackTrace(); 
+   }
+   
+   
+  String  fileName = escape(parent.getProps().getProperty("conv.dirxml") + agent) + "-" + counter + "." + sss  +  ".xml";
+   System.out.println(fileName);
+   Writer out = new BufferedWriter(new OutputStreamWriter(
+			    new FileOutputStream(fileName), "UTF-8"));
+			try {
+			    out.write(sb.toString());
+			} finally {
+			    out.close();
+			}
+			
+			 log.error(" File Saved " + fileName );
+			 fileName = escape(parent.getProps().getProperty("conv.dircxml") + agent) + "-" + counter + "." + sss  +  ".xml";
+		      System.out.println(fileName);
+		       out = new BufferedWriter(new OutputStreamWriter(
+					    new FileOutputStream(fileName), "UTF-8"));
+					try {
+					    out.write(sb.toString());
+					} finally {
+					    out.close();
+					}
+					 log.error(" copy Saved " + fileName );
+	} catch (Exception e) {
+		 log.error(" Output error 1 " + order.getCompany() );
+		 log.error(e);
+		e.printStackTrace();
+	}
+}
+
  
   public String identfySorting (String prodID){
 	  	

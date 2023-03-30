@@ -870,8 +870,11 @@ con3.close();
                 }
                 
               String ean = (rs.getString("ean"));
-                 if (ean.trim().length()>0){
-                   prod.setEAN(ean);
+                 if (ean != null && ean.trim().length()>0){
+                   prod.setEAN(ean.trim());
+                   if(eanprods == null) {
+                	   eanprods = new TreeMap();
+                   }
                    eanprods.put(ean.trim(), prod.getID());
                  }
       
