@@ -254,7 +254,18 @@ public class AxaDunkerImportDriver
 	      		    	salvesta = false;
 	      		    }		
 	 		 
-	 		 makeOutputTelema(ord,tagastus);
+	      		    
+	      		  
+	  		 	  boolean repr = false;
+	  		 	 	 for (int i = 0; i < lin.size(); i++) {
+	  		 	 		OrderLine ol = (OrderLine) lin.elementAt(i);
+	  		 	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0.1 && (order.getStatus() == 5 || order.getStatus() == 4)){
+	  		 	 			repr = true;
+	  		 	 			tagastus = false;
+	  		 	 		}
+	  		 	 	 } 
+	      		    
+	 		 makeOutputTelema(ord,tagastus, repr);
 	    }
 	    
 	  }else{
@@ -313,7 +324,7 @@ public class AxaDunkerImportDriver
   	  }
   
   
-  private void makeOutputTelema(Order order , boolean tagastus){	
+  private void makeOutputTelema(Order order , boolean tagastus, boolean ymber){	
 	 StringBuffer sb = new StringBuffer();
 	 nf.setGroupingUsed(false);
 
@@ -371,6 +382,9 @@ public class AxaDunkerImportDriver
         if(tagastus) {
      	   type = "retann";
         }
+        if(ymber) {
+      	   type = "reprice";
+         }
    
         sb.append("<DocumentType>" + type + "</DocumentType> " + ls);
         sb.append("<DocumentParties>" + ls);
