@@ -1121,7 +1121,7 @@ public class SolcraftAutoDBDriver extends AbstractDBDriver implements Discounter
                 	nimetus = (String)names.get(kood);
                 }
                 
-                	nimetus  = nimetus.trim().replaceAll("\n", " ")  + " " + kood;
+                	nimetus  = kood  + " " + nimetus.trim().replaceAll("\n", " ")  ;
                 Product prod = new Product(kood);
                 prod.setPrice(rs.getDouble("myygihind"));
                 prod.setVat(rs.getDouble("VAT") + "");

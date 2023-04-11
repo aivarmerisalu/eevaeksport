@@ -1331,8 +1331,8 @@ SELECT  [MasterProductCode] as klient
 				
 				String chain = rs.getString("chain");
 				if (chain != null && chain.trim().length() > 0) {
-					if(!chain.trim().startsWith("Hinnakiri"))
-					cust.setChain(Converter.enCodeEst(chain.trim().replaceAll("&", "ja")));
+					//if(!chain.trim().startsWith("Hinnakiri"))
+				//	cust.setChain(Converter.enCodeEst(chain.trim().replaceAll("&", "ja")));
 				}
 
 				String tekst = rs.getString("tekst");

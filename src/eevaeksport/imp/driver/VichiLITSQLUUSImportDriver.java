@@ -421,7 +421,44 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
   }
 
 
-  
+
+  private HashMap getCustILNs() {
+	  HashMap res = new HashMap();
+	  
+	 	try{
+	 	    String sql2 = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2,k.[Customer ILN] as kood3 "
+	 	    		+ " from  dbo.v_VIK_Customers k where k.[Customer ILN] != '' ";
+	 	    System.out.println(sql2);
+
+	 	   Connection con = DriverManager.getConnection(url + parent.getProps().getProperty("dsn")
+	 	            , parent.getProps().getProperty("dsna.user"), parent.getProps().getProperty("dsna.pass"));
+
+	 	    Statement st2 = con.createStatement();
+	 	    ResultSet rs2 = st2.executeQuery(sql2);
+
+	 	    while (rs2.next()) {
+	 	    	String id = rs2.getString("kood1").trim();
+				String id2 = rs2.getString("kood2");
+				String id3 = rs2.getString("kood3");
+				if(id2 != null && id2.trim().length() > 0) {
+					id = id + "_" + id2.trim();
+				}
+	 	    	if(id != null && id2 != null && id.trim().length() > 0 && id2.trim().length() > 0) {
+	 	    		  res.put(id, id3);
+	 	    	}
+	 	    
+
+	 	    }
+	 	    rs2.close();
+	 	    st2.close();
+	 	    con.close();
+	 	    
+	 	}catch(Exception e) {
+	 		e.printStackTrace();
+	 	}
+		  
+		  return res;
+  }
   
   private HashMap getILNs() {
 	  HashMap res = new HashMap();
@@ -471,6 +508,7 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
   
   HashMap names = null;
   HashMap ilns = null;
+  HashMap ilnsC = null;
 
 	private void makeOutput(Order order) {
 
@@ -480,6 +518,12 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	  if(ilns == null) {
 		  ilns = getILNs();
 	  }
+	  
+	  if(ilnsC == null) {
+		  ilnsC = getCustILNs();
+	  }
+	  
+	  
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -631,6 +675,11 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 			String cust = order.getCompany();
 			 String kood = cust;
 			 String ILN = (String)ilns.get(kood);
+			 String ILNC = (String)ilnsC.get(kood);
+			 if(ILNC == null) {
+				 ILNC = "";
+			 }
+			 
 			 if(kood.indexOf("_") != -1) {
 				 kood = cust.substring(0,cust.indexOf("_"));
 			 }
@@ -649,12 +698,14 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 			 ise.appendChild(nimiVal);
 			Node ise2 = doc.createElement("ILN");
 			Text nimiVal2 = doc.createTextNode(lisa);
+			
 			 ise2.appendChild(nimiVal2);
 			Node ise3 = doc.createElement("DeliveryILN");
 			Text nimiVal3 = doc.createTextNode(lisa);
+			
 			Node ise3R = doc.createElement("SenderILN");
-			if(ILN != null) {
-		    	Text nimiVal3R = doc.createTextNode(ILN);
+			if(ILNC != null) {
+		    	Text nimiVal3R = doc.createTextNode(ILNC);
 			    ise3R.appendChild(nimiVal3R);
 			}
 			
@@ -672,7 +723,7 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 			iseR.appendChild(nimiRVal);
 			Node ise2R = doc.createElement("ILN");
 			if(ILN != null) {
-			Text nimiVal2R = doc.createTextNode(ILN);
+			Text nimiVal2R = doc.createTextNode(ILNC);
 			ise2R.appendChild(nimiVal2R);
 			}
 			receiver.appendChild(iseR);

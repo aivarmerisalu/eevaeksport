@@ -4433,8 +4433,8 @@ if(agprods != null && agprods.size() >0){
           
         buf.append(prod.getID());
         buf.append(EksportPanel.separator);
-        
-     //   String name3 =  ;
+       
+     //jj   String name3 =  ;
 //     /   System.out.println("driver Version " + driver.getDriverVersion() );
         /*}else  if(driver.getDriverVersion().equals("NaviVilandra")){
         	buf.append((prod.getName().replace(';', ':')).substring(5,prod.getName().length()));
@@ -4450,8 +4450,8 @@ if(agprods != null && agprods.size() >0){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(5,prod.getName().length()));
         }else if(driver.getDriverVersion().equals("Dansg")){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(2,prod.getName().length()));
-        }else if(driver.getDriverVersion().equals("Movexxxxx")){
-        	buf.append( prod.getOldName() + (prod.getName().replace(';', '-').replace(':', '-')).substring(5,prod.getName().length()));
+        }else if(driver.getDriverVersion().equals("AxaJNGLATww")){
+        	buf.append(  (prod.getName().replace(';', '-').replace(':', '-')).substring(3,prod.getName().length()));
         }else if(driver.getDriverVersion().equals("SAFSaaremaa")){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(3,prod.getName().length()).replaceAll("\\r\\n|\\r|\\n", " "));
         }else if(driver.getDriverVersion().equals("Rakvere")){
@@ -5626,7 +5626,9 @@ while (itra.hasNext()){
         }
  // vaat siin on agProds mis on vaja sorterida prod.getname j?rgi
         System.out.println(" agProds hashxx " + result.size());
- java.util.Collections.sort(agProds, new java.util.Comparator(){
+        if(!"true".equals(getProps().getProperty("use.prodsorting"))) {
+        
+           java.util.Collections.sort(agProds, new java.util.Comparator(){
 	 
 
         public boolean equals(Object obj) {
@@ -5640,6 +5642,7 @@ while (itra.hasNext()){
           return prod1.getNameSorting().compareTo(prod2.getNameSorting());
         }
       });
+        }
  
  
         StringBuffer buf = new StringBuffer();

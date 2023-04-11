@@ -1362,6 +1362,31 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
       }
      
 
+        String sort =  ""; 
+        if("true".equals(getParent().getProps().getProperty("use.prodsorting"))) {
+        sort = rs.getString("sorting");
+       
+        if(sort != null && sort.trim().length()>0){
+         if(sort.length() < 3) {
+        	 sort = "0" + sort;
+         }
+         if(sort.length() < 3) {
+        	 sort = "0" + sort;
+         }
+       
+        	 
+        	
+        	 // nimetus = sort + nimetus;
+        	 
+        	 sort = prod.getGroup() + " " + sort; 
+        	  prod.setNameSorting(sort + nimetus);
+         
+       
+      }else {
+    	  sort = "xxx";
+      }
+        
+        }
       
       prod.setName(nimetus + add);
    
@@ -1379,7 +1404,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
     
       }else {
     	  if(!otc.equals("SHELL")) {
-    		  products.put(nimetus, prod);
+    		  products.put(sort + nimetus, prod);
               prodHash.put(prod.getID(), prod); 	  
     	  }else {
     		  shell.add(prod.getID());
@@ -1406,9 +1431,9 @@ HashSet<String> shell = null;
 	 
 	
 	    
-	    String cmd = "select KLIENT ,TOODE,max(KOGUS) as KOGUS ,KUUPAEV, max(DAYS30) as DAYS30,max(LPRICE) as LPRICE ,max(BILL) as BILL"
-	    		+ " from getcustomerproductlist where KUUPAEV > getdate()-180 and len(KLIENT) > 0 \r\n" + 
-	    		" GROUP BY klient,toode,kuupaev  ORDER BY klient,toode,kuupaev" ;
+	    String cmd = " select KLIENT ,r.TOODE,max(KOGUS) as KOGUS ,KUUPAEV, max(DAYS30) as DAYS30,max(LPRICE) as LPRICE ,max(BILL) as BILL ,max(pr.grupp), max(pr.sorting)\r\n" + 
+	    		"	    		 from getcustomerproductlist r inner join getproducts pr on pr.toode= r.toode  where KUUPAEV > getdate()-180 and len(KLIENT) > 0 \r\n" + 
+	    		"	    		 GROUP BY klient,r.toode,kuupaev  ORDER BY klient,max(pr.grupp),max(pr.sorting),r.toode,kuupaev " ;
 
 	    
 	    

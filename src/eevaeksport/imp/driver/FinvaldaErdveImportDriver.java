@@ -321,7 +321,7 @@ String number =  add ;
 	        doc.appendChild(root);
 
 
-	        Node pardavimas = doc.createElement("pardavimas");
+	        Node pardavimas = doc.createElement("pardavimoRezervavimas");
 	        root.appendChild(pardavimas);
 
 

@@ -2132,12 +2132,12 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
 
   public Vector getDebt(String agentCode) throws SQLException{
     Vector list = new Vector();
-    String sql = "SELECT kl.id AS maksja,d.sourcedocno AS arve, d.promptdate AS kuupaev, " +
+    String sql = "SELECT kl.id AS maksja,d.sourcedocno AS arve, d.promptdate AS kuupaev,  d.docdate AS kuupaev2," +
     "  d.totalamount - sum(case when m.amountbase is null then 0 else m.amountbase end ) AS summa ,-datediff(day,getdate(),d.promptdate)  AS paevi " +
     "  FROM sdinvoice d INNER JOIN grcompany kl on kl.id=d.idgrcompany " +
     " LEFT JOIN vdvoucherrow m ON m.idsourcedoc=d.id " +
     "  WHERE docstate !='F'  and d.partnername not like '%Selver%' and d.partnername not like '%Comarket%' and d.partnername not like '%Maxima%' and d.partnername not like '%Rimi%' and d.partnername not like '%S��stu%'" + //AND d.promptdate <= getdate()
-    "   group by  d.sourcedocno,kl.id,d.promptdate,d.totalamount  HAVING d.totalamount - sum(case when m.amountbase is null then 0 else m.amountbase end ) != 0  ORDER BY kl.id " ;
+    "   group by  d.sourcedocno,kl.id,d.docdate,d.promptdate,d.totalamount  HAVING d.totalamount - sum(case when m.amountbase is null then 0 else m.amountbase end ) != 0  ORDER BY kl.id " ;
 
   if (isDebug()) System.out.println(sql);
   Connection  con = getNewConnection();     
@@ -2149,6 +2149,7 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
       debt.setCustID(rs.getString("maksja").trim());
       debt.setDoknr(rs.getString("arve").trim());
       debt.setDuedate(rs.getDate("kuupaev"));
+      debt.setDate(rs.getDate("kuupaev2"));
       
       double summa = rs.getDouble("summa");
       debt.setDue(rs.getString("paevi"));
