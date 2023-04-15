@@ -1,19 +1,12 @@
 package eevaeksport.driver;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,7 +31,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
-import eevaeksport.Dealer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;

@@ -3230,7 +3230,7 @@ private TreeMap makePlans(){
 	  
   	 try {
   	 	
-  		String cmd2 = "     SELECT d.manager, SUM(Case when d.operacija LIKE 'Grąžino%' then (kiekis * (kaina -r.savik_3) * -1) ELSE (kiekis * (kaina -r.savik_3)) END )AS profit\r\n" + 
+  		String cmd2 = "  SELECT d.manager, ROUND(SUM(Case when d.operacija = 'Grąžino pirkėjas' then (r.kiekis *(r.kaina -r.savik_3) * -1) when d.operacija = 'GP Kainų skirtumas' then (kiekis*kaina * -1) ELSE (r.kiekis * (kaina -r.savik_3)) END ),0)AS profit\r\n" + 
   				"FROM apyv_gr r\r\n" + 
   				"INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id  AND DATE_ADD(DATA, INTERVAL 300 DAY) > CURRENT_DATE()\r\n" + 
   				"WHERE MONTH(DATA) = MONTH(CURRENT_DATE())\r\n" + 
@@ -3239,25 +3239,25 @@ private TreeMap makePlans(){
   				"      AND d.operacija NOT LIKE '%Reklam%' \r\n" + 
   				"      AND d.operacija NOT LIKE '%Pirkimas%' \r\n" + 
   				"      AND d.operacija NOT LIKE '%Sand%'\r\n" + 
-  				"      AND d.operacija NOT LIKE 'GP %'\r\n" + 
-  				"      AND d.operacija NOT LIKE 'Pardavimas per%'\r\n" + 
+  				"      AND d.operacija NOT LIKE '%Pajam%'\r\n" + 
+  				"      AND d.operacija NOT LIKE '%aslaug%'\r\n" + 
   				"      AND d.ivestas =1\r\n" + 
-  				"GROUP BY d.manager\r\n" + 
-  				" ";
+  				"GROUP BY d.manager\r\n";
   		 
-     String cmd = "SELECT SUM(CASE when a.operacija LIKE 'Grąžino%' then (a.viso_1*-1) ELSE (a.viso_1) end) AS summa, a.manager AS agent\r\n" + 
+     String cmd = "SELECT ROUND(SUM(CASE when a.operacija LIKE 'Grąžino%' then (a.viso_1*-1) when a.operacija LIKE 'GP Kain%' then (a.viso_1*-1) ELSE (a.viso_1) END),0) AS summa, a.manager AS agent\r\n" + 
      		"FROM apyvarta a\r\n" + 
      		"WHERE MONTH(DATA) =MONTH(CURRENT_DATE())\r\n" + 
      		"      AND YEAR(DATA) = YEAR(CURRENT_DATE()) \r\n" + 
-     		"AND DAY(DATA) <= DAY(current_date()) \r\n" + 
+     		"            AND DAY(DATA) <= DAY(current_date()) \r\n" + 
      		"      AND a.operacija NOT LIKE '%Reklam%' \r\n" + 
      		"      AND a.operacija NOT LIKE '%Pirkimas%' \r\n" + 
      		"      AND a.operacija NOT LIKE '%Sand%'\r\n" + 
-     		"      AND a.operacija NOT LIKE 'GP %'\r\n" + 
-     		"      AND a.operacija NOT LIKE 'Pardavimas per%'\r\n" + 
+     		"      AND a.operacija NOT LIKE '%Pajam%'\r\n" + 
+     		"      AND a.operacija NOT LIKE '%aslaug%'\r\n" + 
      		"      AND a.ivestas = 1\r\n" + 
      		"GROUP BY a.manager\r\n" + 
-     		"ORDER BY gavejas";
+     		"ORDER BY gavejas\r\n" + 
+     		"";
   	 	
 
      TreeMap<String,Integer> profiit = new TreeMap<String,Integer>();

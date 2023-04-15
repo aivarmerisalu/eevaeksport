@@ -791,7 +791,9 @@ System.out.println(cmd);
 		return null;
 	}
 	private TreeMap agent1 = new TreeMap();
-
+    
+	private TreeMap aad = new TreeMap();
+  
 	public TreeMap getCustomers(Agent agent) {
 		
 		
@@ -882,25 +884,45 @@ System.out.println(cmd);
 	rscn.close();
 	stcn.close();
 	cn.close();
+	
+	
+	   String cc2 = "select [Code] as klient , [EDI ILN] as iln from  dbo.[Vičiūnai ir Ko$Ship-to Address] where [EDI ILN] != ''";
+	   con = getNewConnection2();
+	   
+	   Statement stmt1 = con.createStatement();
+		ResultSet rs1 = stmt1.executeQuery(cc2);
+		while (rs1.next()) {
+			String addID = rs1.getString("klient").trim();
+		String ilnID = rs1.getString("iln").trim();
+		
+			aad.put(addID, ilnID);
+		}
+		rs1.close();
+		stmt1.close();
+		
 		  	String cmd = " select a.[Sell-to Customer No_]  as klient , h.[Ship-to Code] as kl2 , a.[Customer No_] AS maksja,a.[External Document No_] AS number" + //+ '_' + a.[Ship-to code]
 					", a.[Due Date] AS kuupaev, sum((case when a.[Posting Date] < 2105 then 0.2896 else 1 end) * b.[Amount]) AS summa, "
 					+ " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer  FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join "
 					+ " [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] "
 					+ " inner join  [Vičiūnai ir Ko$Sales Invoice Header] h  on h.[No_] = a.[Document No_] "
-					+ " where a.[Document type] = 2 AND  a.[Posting Date] > getdate()-200 AND a.[Open]= 1 "
+					
+					+ " where a.[Document type] = 2 AND  a.[Posting Date] > getdate()-150 AND a.[Open]= 1 and a.[Sell-to Customer No_] not in ('A10595') "
 				+	" group by a.[Sell-to Customer No_] , h.[Ship-to Code],a.[Customer No_] ,a.[External Document No_], "
 					+ " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount]) <> 0 ";
-
+		  	
 			System.out.println(cmd);
 			this.debtList = new Vector();
-			con = getNewConnection2();
-			Statement stmt1 = con.createStatement();
-			ResultSet rs1 = stmt1.executeQuery(cmd);
+			
+			 stmt1 = con.createStatement();
+			 rs1 = stmt1.executeQuery(cmd);
 			while (rs1.next()) {
 				Debt debt = new Debt();
 				String custID = rs1.getString("klient");
 				String kl2 = rs1.getString("kl2");
 				if(kl2 != null && kl2.trim().length() > 0) {
+					if(aad.get(kl2.trim()) != null) {
+						kl2 = (String)aad.get(kl2.trim());
+					}
 					custID = custID + "_" + kl2.trim();
 				}
 			    String payer = rs1.getString("maksja");
@@ -933,6 +955,40 @@ System.out.println(cmd);
 		}
 		// / KLIENDI ANDMETE LEIDMINE
 
+		TreeMap<String,Double> yle = new TreeMap<String,Double>();
+		String   sql3 = "select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join " + 
+                " [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_]  " +
+                " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] <getdate() " +
+				 " and a.[Posting Date] > getdate()- 1000 group by a.[Customer No_]  having sum(b.[Amount])<> 0 ";
+	
+	try {
+		Connection con3 = getNewConnection2();
+		Statement stmt3 = con3.createStatement();
+		ResultSet rs3 = stmt3.executeQuery(sql3);
+		while (rs3.next()) {
+            String cuid = rs3.getString("maksja").trim();
+			double sum = rs3.getDouble("yle");
+			if (sum != 0) {
+				yle.put(cuid, sum);
+				// System.out.println("yle " + id+ " " + sum);
+			}
+
+		}
+
+		rs3.close();
+		stmt3.close();
+		con3.close();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+		
+		
+		
+		
+		
+		
+		
+		
 		TreeMap tm = new TreeMap();
 		this.customers = new ArrayList();
 
@@ -947,6 +1003,7 @@ System.out.println(cmd);
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				String id = rs.getString("kood1").trim();
+				String idorig = id; 
 				String id2 = rs.getString("kood2");
 				if(id2 != null && id2.trim().length() > 0) {
 					id = id + "_" + id2.trim();
@@ -1122,35 +1179,10 @@ System.out.println(cmd);
 
 				if ( !customer.isNodebt()) {
 
-					String   sql3 = "select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join " + 
-    	                         " [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_]  " +
-    	                         " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] <getdate() " +
-								 " and a.[Posting Date] > getdate()- 1000 " +
-    	                         " and a.[Customer No_] = '" + id + "' group by a.[Customer No_]  having sum(b.[Amount])<> 0 ";
-					
-					try {
-						Connection con3 = getNewConnection2();
-						Statement stmt3 = con3.createStatement();
-						ResultSet rs3 = stmt3.executeQuery(sql3);
-						while (rs3.next()) {
-
-							double sum = rs3.getDouble("yle");
-							if (sum != 0) {
-								customer.setDebt(sum);
-								// System.out.println("yle " + id+ " " + sum);
-							}
-
-						}
-
-						rs3.close();
-						stmt3.close();
-						con3.close();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					// customer.setUsedCredit(Double.parseDouble(used.replaceAll(",",".").replaceAll(" ","")));
-				}
+				   if(yle.containsKey(idorig)) {
+					   customer.setDebt(yle.get(idorig));
+				   }
+            	}
 				   String cont = rs.getString("kontakt");
 		           if(cont != null && cont.trim().length()>0){
 		               customer.setPersonalData(Converter.enCodeEst(cont.trim()));   
@@ -1160,7 +1192,7 @@ System.out.println(cmd);
 		               customer.setPersonalData(Converter.enCodeEst(cont.trim()));   
 		           }
 		           
-     boolean goes = true;
+                boolean goes = true;
 		           
 		           String blokk = rs.getString("Blocked");
 		           if(blokk != null && blokk.trim().length()>0){
@@ -1362,7 +1394,7 @@ System.out.println(cmd);
 		     	   cmd3 = "select [No_] as itemcode , '' as contract , [Freezer Customer]  as custcode " +
 		  		   "  FROM [Vičiūnai ir Ko$Fixed Asset] WHERE ([Blocked] = 0) AND ([FA Subclass Code] = '11') and [Freezer Customer] != ''";
 		            
-		 cmd3 = " select  a.*, k.[Customer No_] as kl from v_VIK_FA a  left join dbo.[Vièiûnai ir Ko$Ship-to Address] k  on a.custcode = k.[Code]  where a.custcode != ''" ;
+		 cmd3 = " select a.code,  custcode, k.[EDI ILN] as kl from v_VIK_FA a  left join dbo.[Vičiūnai ir Ko$Ship-to Address] k  on a.custcode = k.[Code]  where a.custcode != ''" ;
 		     	   int cou = 0;
 		              int coua = 0;
 		     	  rs1 = stm.executeQuery(cmd3);
@@ -1376,8 +1408,10 @@ System.out.println(cmd);
 		                        // Date contract = rs1.getDate("contract");
 		                        // obj.put("contractDate",contract.getTime() );
 		                         String custcode = rs1.getString("custcode").trim();
-		                         String kl = rs1.getString("kl").trim();
-		                         obj.put("customerCode", kl + "_" + custcode);
+		                         
+		                         String kl = rs1.getString("kl");
+		                         if(kl != null) {
+		                         obj.put("customerCode", kl.trim() + "_" + custcode);
 		                         
 		                       
 		                         if(asses.contains(code) && custs.contains(custcode) ){
@@ -1392,7 +1426,7 @@ System.out.println(cmd);
 		                        		  //}
 		                        	  }
 		                          }
-		                       }
+		                       }}
 		                  
 		                  stm.close();
 		                     con4.close();
@@ -1897,13 +1931,14 @@ System.out.println(cmd);
 		HashMap kliendid = new HashMap();
 		try {
 
-			String cmd = " select  d.[Sell-to Customer No_]  AS klient,  d.[Ship-to Code]  as abiklient , r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate ,  " +
-					" r.[Užsakytas kiekis] -r.[Quantity] as saamatta FROM [Vičiūnai ir Ko$Sales Line] r INNER JOIN [Vičiūnai ir Ko$Sales Header] d ON r.[Document No_]= d.[No_] " +
-					"  WHERE d.[Shipment Date]> GETDATE()-30 " +
+			String cmd = " select  d.[Sell-to Customer No_]  AS klient,  d.[Ship-to Code] as abiklient , r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate ,  " +
+					" r.[Užsakytas kiekis] -r.[Quantity] as saamatta FROM [Vičiūnai ir Ko$Sales Line] r INNER JOIN [Vičiūnai ir Ko$Sales Header] d ON r.[Document No_]= d.[No_] "
+					+"  WHERE d.[Shipment Date]> GETDATE()-30 " +
 					"  UNION ALL " +
-				    "	select  d.[Sell-to Customer No_] AS klient, d.[Ship-to Code]  as abiklient, r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate , " + 
+				    "	select  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]   as abiklient, r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate , " + 
 				    "	 r.[Užsakytas kiekis] -r.[Quantity] as saamatta FROM [Vičiūnai ir Ko$Sales Shipment Line] r INNER JOIN [Vičiūnai ir Ko$Sales Shipment Header] d ON r.[Document No_]= d.[No_] " +
-				    "	  WHERE d.[Shipment Date]> GETDATE()-30 ";
+				   
+					"	  WHERE d.[Shipment Date]> GETDATE()-30 ";
 			System.out.println(cmd);
 			// "klient","toode","kogus","viimane kuupļæ½ev","viimane kogus"
 			Connection con = getNewConnection2();
@@ -1913,6 +1948,8 @@ System.out.println(cmd);
 
 				String custID = rs.getString("klient").trim();
 				 String custAbi = rs.getString("abiklient").trim();
+				
+				 
 				String prodID = rs.getString("toode").trim();
 				
 
@@ -1923,6 +1960,11 @@ System.out.println(cmd);
 				
 				String cu = custID;
 				if(custAbi != null && custAbi.trim().length() > 0) {
+					
+					 if(aad.get(custAbi.trim()) != null) {
+						 custAbi = (String)aad.get(custAbi.trim());
+						}
+					
 					cu = custID + "_" + custAbi.trim();
 				}
 				Customer cust = (Customer) kliendid.get(cu);
@@ -1951,8 +1993,9 @@ System.out.println(cmd);
 			String olddate = " ";
 			String oldtoode = null;
 
-			String cmd2 = "SELECT  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]  as abiklient, r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate FROM [Vičiūnai ir Ko$Sales Invoice Line] r "
-					+ " INNER JOIN [Vičiūnai ir Ko$Sales Invoice Header] d ON r.[Document No_]= d.[No_] WHERE d.[Shipment Date]> GETDATE()-30 "
+			String cmd2 = "SELECT  d.[Sell-to Customer No_] AS klient,   d.[Ship-to Code]  as abiklient, r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate FROM [Vičiūnai ir Ko$Sales Invoice Line] r "
+					+ " INNER JOIN [Vičiūnai ir Ko$Sales Invoice Header] d ON r.[Document No_]= d.[No_] "
+					+ "  WHERE d.[Shipment Date]> GETDATE()-30 "
 					+ " Order by d.[Sell-to Customer No_],r.[No_],d.[Shipment Date] desc ";
 			System.out.println(cmd2);
 			// "klient","toode","kogus","viimane kuupļæ½ev","viimane kogus"
@@ -1966,6 +2009,9 @@ System.out.println(cmd);
 				
 				String cu = klient;
 				if(custAbi != null && custAbi.trim().length() > 0) {
+					if(aad.get(custAbi.trim()) != null) {
+						 custAbi = (String)aad.get(custAbi.trim());
+						}
 					cu = klient + "_" + custAbi.trim();
 				}
 				
@@ -2061,7 +2107,7 @@ System.out.println(cmd);
 
 	private Vector klient = new Vector();
 	private TreeMap agents = new TreeMap();
-	private String url2 = "jdbc:odbc:navtest";
+	private String url2 = "jdbc:odbc:navi";
 	private Connection con;
 	private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
 	private TreeMap debtDays = new TreeMap();

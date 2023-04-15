@@ -612,8 +612,8 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	          agent.setName(pol(name));
 
 
-              agent.setLanguage("EST");
-	          agent.setCountry("et");
+              agent.setLanguage("POL");
+	          agent.setCountry("pl");
 	          agent.setPassWord("0000");
 	          String email = parent.parseFirstEmail(parent.getEmail(agent.getID()));
 	          if(email.length() > 1){
@@ -891,6 +891,11 @@ try{
                 if(ag.trim().startsWith("PHD")) {
                 	 customer.addAgent(new Agent("PHD 01"));
                 	 customer.addAgent(new Agent("PHD 02"));
+                	 customer.addAgent(new Agent("PHD 03"));
+                	 customer.addAgent(new Agent("PHD 04"));
+                	 customer.addAgent(new Agent("PHD 05"));
+                	 customer.addAgent(new Agent("PHD 06"));
+                	 customer.addAgent(new Agent("PHD 07"));
                 }
                } 
               
@@ -900,6 +905,11 @@ try{
                     if(ag.trim().startsWith("PHD")) {
                    	 customer.addAgent(new Agent("PHD 01"));
                    	 customer.addAgent(new Agent("PHD 02"));
+                   	 customer.addAgent(new Agent("PHD 03"));
+                   	 customer.addAgent(new Agent("PHD 04"));
+                   	customer.addAgent(new Agent("PHD 05"));
+               	 customer.addAgent(new Agent("PHD 06"));
+               	 customer.addAgent(new Agent("PHD 07"));
                    }
                  }
              

@@ -1342,8 +1342,8 @@ return bomKount;
     			//  1 – Tavaline laoseis mida on näha kohe sellel tootereal -  
                  // Laoseis saadakse ainult ladude LK1 ja NEAT ning ainult nende staatuste „Paruošta KL“ ja „Paruošta NB“ korral vastavaid laoseise kokku liites:
   
-    			  if( (busena.equals("Paruošta NB") || busena.equals("Paruošta KL"))
-    					  && (sandelis.equals("LK1") || sandelis.equals("NEAT")) ){ //|| ladu.equals("Grąžinimas")
+    			  if( (busena.equals("Paruošta NB") || busena.equals("Paruošta KL") || busena.equals("Grąžinimas"))
+    					  && (sandelis.equals("LK1") || sandelis.equals("NEAT") || sandelis.equals("KLC1")) ){ //|| ladu.equals("Grąžinimas")
     					if(res.get(prodcode) != null){
     	               	   res.put(prodcode, res.get(prodcode) + kogus);
     	                }else{

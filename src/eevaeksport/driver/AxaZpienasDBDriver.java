@@ -3510,8 +3510,18 @@ public TreeMap getPRLisa()  {
  	  			}
  	  			String timeOnly = hour+":"+minute;
        			
-       	    	String cagid = (String)cob.get("custagent");
-       			String cagname = (String)cob.get("custagname");
+       	    	String cagid = "";
+       	    	try{
+       	    		cagid =	(String)cob.get("custagent");
+       	    	}catch(Exception e) {
+       	    		
+       	    	}
+       			String cagname = "";
+       			try{
+       				cagname =	(String)cob.get("custagname");
+       	    	}catch(Exception e) {
+       	    		
+       	    	}
        			String agid = (String)cob.get("agentid");
        			String agname = (String)cob.get("managerName");
        			String chain = (String)cob.get("custchain");
@@ -3689,8 +3699,18 @@ public TreeMap getPRLisa()  {
      	  			}
      	  			String timeOnly = hour+":"+minute;
      	  			
-     	  	    	String cagid = (String)cob.get("custagent");
-     	  			String cagname = (String)cob.get("custagname");
+     	  			String cagid = "";
+           	    	try{
+           	    		cagid =	(String)cob.get("custagent");
+           	    	}catch(Exception e) {
+           	    		
+           	    	}
+           			String cagname = "";
+           			try{
+           				cagname =	(String)cob.get("custagname");
+           	    	}catch(Exception e) {
+           	    		
+           	    	}
      	  			String agid = (String)cob.get("agentid");
      	  			String agname = (String)cob.get("managerName");
      	  			String chJ = (String)cob.get("custchain");
@@ -3831,8 +3851,18 @@ public TreeMap getPRLisa()  {
      	  			}
      	  			String timeOnly = hour+":"+minute;
      	  			
-     	  	    	String cagid = (String)cob.get("custagent");
-     	  			String cagname = (String)cob.get("custagname");
+     	  			String cagid = "";
+           	    	try{
+           	    		cagid =	(String)cob.get("custagent");
+           	    	}catch(Exception e) {
+           	    		
+           	    	}
+           			String cagname = "";
+           			try{
+           				cagname =	(String)cob.get("custagname");
+           	    	}catch(Exception e) {
+           	    		
+           	    	}
      	  			String agid = (String)cob.get("agentid");
      	  			String agname = (String)cob.get("managerName");
      	  			String chJ = (String)cob.get("custchain");
