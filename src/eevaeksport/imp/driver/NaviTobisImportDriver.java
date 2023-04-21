@@ -275,7 +275,10 @@ Connection ccc = DriverManager.getConnection(url + "saf"
        double kogus = orderLine.getKogus();
        double ale = orderLine.getDiscount();
     
-       
+       String ccc = "";
+       if(orderLine.selActCode != null && orderLine.selActCode.trim().length() > 0) {
+    	   ccc = orderLine.selActCode;
+       }
     
        String agent = order.getAgent();
          int alex = 0;
@@ -291,7 +294,7 @@ Connection ccc = DriverManager.getConnection(url + "saf"
                counter + ",'MS-" +
                agent + "',?," +
                kogus + "," +
-               alex +"," + ale + ",'',0,0,0,0,'',0,0,'',0,'')";
+               alex +"," + ale + ",'',0,0,0,0,'',0,0,'',0,'" + ccc + "')";
 System.out.println(sql);
                log.info("SALES_LINE_SQL: " + sql);
                PreparedStatement st2 = con3.prepareStatement(sql);

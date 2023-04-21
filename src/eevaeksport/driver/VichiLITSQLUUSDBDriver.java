@@ -1022,9 +1022,16 @@ System.out.println(cmd);
 				// System.out.println(line);
 				Customer customer = new Customer(id);
 				String payer = null;
-				if (name.equals(""))
+				if (name.equals("")) {
 					name = "<" + id + ">";
-				customer.setName(name.trim());
+				}
+				
+				if (aadress12 != null && aadress12.trim().length() > 0) {
+					 customer.setName(name.trim() + " " + aadress12.trim());
+				} else {
+				    customer.setName(name.trim());
+				}
+				
 				payer = rs.getString("payer2");
 				if (payer != null && payer.trim().length() > 0) {
 					customer.setPayer(payer.trim());
