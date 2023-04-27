@@ -920,9 +920,11 @@ System.out.println(cmd);
 				String custID = rs1.getString("klient");
 				String kl2 = rs1.getString("kl2");
 				if(kl2 != null && kl2.trim().length() > 0) {
-					if(aad.get(kl2.trim()) != null) {
-						kl2 = (String)aad.get(kl2.trim());
-					}
+					if(kl2.equals("1")) {
+						kl2 = custID + "_1";  
+					   } else if(aad.get(kl2.trim()) != null) {
+						   kl2 = (String)aad.get(kl2.trim());
+					   }
 					custID = custID + "_" + kl2.trim();
 				}
 			    String payer = rs1.getString("maksja");
@@ -992,7 +994,7 @@ System.out.println(cmd);
 		TreeMap tm = new TreeMap();
 		this.customers = new ArrayList();
 
-		String sql = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2 , k.nimi as nimi2, k.[Ship-to address name]  as nimi3, k.aadress as aadress12 ,k.kood as payer2 , k.agent as agent2 , k.* from" + 
+		String sql = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2,k.[Ship-to-address code] as kood3 , k.nimi as nimi2, k.[Ship-to address name]  as nimi3, k.aadress as aadress12 ,k.kood as payer2 , k.agent as agent2 , k.* from" + 
 				"				 dbo.v_VIK_Customers k	" ;
 
 		System.out.println(sql);
@@ -1005,12 +1007,15 @@ System.out.println(cmd);
 				String id = rs.getString("kood1").trim();
 				String idorig = id; 
 				String id2 = rs.getString("kood2");
+				String acode = rs.getString("kood3");
+				
 				if(id2 != null && id2.trim().length() > 0) {
 					id = id + "_" + id2.trim();
 				}
 				String name2 = rs.getString("nimi2").trim();
 				String name3 = rs.getString("nimi3");
 				String aadress12 = rs.getString("aadress12");
+				
 				
 				String name =  name2;
 				if(name3 != null && name3.trim().length() > 0) {
@@ -1021,6 +1026,9 @@ System.out.println(cmd);
 				//String id = rs.getString("kood").trim();
 				// System.out.println(line);
 				Customer customer = new Customer(id);
+				if(acode != null) {
+					customer.setCity("AddrCode: " + acode.trim());
+				}
 				String payer = null;
 				if (name.equals("")) {
 					name = "<" + id + ">";
@@ -1968,10 +1976,13 @@ System.out.println(cmd);
 				String cu = custID;
 				if(custAbi != null && custAbi.trim().length() > 0) {
 					
-					 if(aad.get(custAbi.trim()) != null) {
+					if(custAbi.equals("1")) {
+						custAbi = custID + "_1";  
+					   } else if(aad.get(custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(custAbi.trim());
-						}
+					   }
 					
+					 
 					cu = custID + "_" + custAbi.trim();
 				}
 				Customer cust = (Customer) kliendid.get(cu);
@@ -2016,9 +2027,13 @@ System.out.println(cmd);
 				
 				String cu = klient;
 				if(custAbi != null && custAbi.trim().length() > 0) {
-					if(aad.get(custAbi.trim()) != null) {
+					
+					if(custAbi.equals("1")) {
+						custAbi = klient + "_1";  
+					   } else if(aad.get(custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(custAbi.trim());
-						}
+					   }
+				
 					cu = klient + "_" + custAbi.trim();
 				}
 				

@@ -7068,7 +7068,7 @@ try{
 	public static void savePodJson(TreeMap tm ){
 	
 		
-		Vector<MyJSON> json = new Vector<MyJSON> ();
+
 	    JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		

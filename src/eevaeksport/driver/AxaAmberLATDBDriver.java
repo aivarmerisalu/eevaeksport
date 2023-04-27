@@ -746,7 +746,8 @@ rs.close();
                                 sql4 = "select  PRI.PROMONUM as grupp,l.ITEMID as toode ,l.PRICE as hind ,PRI.FROMDATE as algus ,PRI.FROMDATE as algus2" +
                 "   	 ,PRI.TODATE as lopp,DATEDIFF(week, PRI.FROMDATE, PRI.TODATE)  as kamp,PRIORITY as prior " +
  " from astPromoGMLine l INNER JOIN astPromoJournal pri on pri.dataareaid = l.dataareaid and pri.promonum = l.promonum " +
- " where l.dataareaid = 'spil' and ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) " +
+ " where l.dataareaid = 'spil' and ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND "
+ + " PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1) then 2  when DATEPART(DW, PRI.TODATE) in (2) then 3 else 0 end)) " +
 	"   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900)  " +
 	"   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
 	"   or( GETDATE()<=PRI.TODATE+1)  and year(PRI.fromDATE) =1900 ) and accepted = 2 and onlycrmaction = 0 and fromqty = 0 and promostatus in (1,4)  and maxdiscountpromo = 0 " ;

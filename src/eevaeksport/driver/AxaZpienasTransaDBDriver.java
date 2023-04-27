@@ -26,6 +26,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -139,6 +141,9 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
  	 }catch(Exception e){
  		 e.printStackTrace();
  	 }
+	  
+	
+ 	 
  	 
  	   sendShipitDocs(custMap);
 	
@@ -146,6 +151,33 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
    	return null;
    }
  
+  
+  private  void saveAllPodJson(TreeMap custs , HashSet olemas){
+
+
+	   StringBuffer sb = new StringBuffer();
+		Iterator itera = custs.values().iterator();
+		
+
+		
+		while (itera.hasNext()){
+			Customer ag = (Customer)itera.next();
+		 if(!olemas.contains(ag.getID())) {
+	          sb.append(Converter.deCode(ag.getID()) + ";" + Converter.deCode(ag.getName()) + "\n");
+		 }
+	}
+	
+		
+		System.out.println("MYJSON POD jääk " + sb.length() );
+		
+		try {
+			Converter.saveFile("json" + System.getProperty("file.separator") 
+			+ "podsall.txt" , sb.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	
+  }
   
 
   private  void sendShipitDocs(TreeMap custs){
@@ -155,7 +187,7 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 	    
          int cou = 0;
          Vector<Order> res = new Vector<Order>();
-	     
+	
 	   try {
 		
 		   
@@ -312,7 +344,11 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 				 }
 			 }
 				        
-					  
+			 try{
+				  saveAllPodJson(custMap , olemas);
+			 }catch(Exception e){
+				 e.printStackTrace();
+			 }	  
 	         	
 	        System.out.println("Dokumente salvestama 2 " + res.size() );
 	        Converter.saveShipitListJson(res, custs) ;
@@ -324,7 +360,7 @@ public class AxaZpienasTransaDBDriver extends AbstractDBDriver  implements Manag
 	   }  
 
 
-  
+ 
   
   
   public Vector getFixedAssortmentData() {

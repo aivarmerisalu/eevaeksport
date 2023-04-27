@@ -1485,6 +1485,10 @@ public class EksportPanel extends JPanel implements ActionListener,
                 }
                 
                 
+                File sv22 = new File("json/podsall.txt");
+                if(sv22.exists()){
+                    zip.addFile("json/podsall.txt");
+                }
                 
                 File sv = new File("supervisor.txt");
                 if(sv.exists()){
