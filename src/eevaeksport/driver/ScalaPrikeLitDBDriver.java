@@ -867,24 +867,20 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 String agen = rs.getString("agent");
                 if(agen != null){
                   cust.addAgent(new Agent(agen.trim()));
+                  Agent agg = ((Agent)this.getAgents1().get(agen.trim()));
+  				
+  				if(agg != null && agg.getDubbler().size()>0){
+  					for (int i = 0 ; i < agg.getDubbler().size() ; i++){
+  						String iid= (String)((Agent)this.getAgents1().get(agen.trim())).getDubbler().elementAt(i);
+  						if(!cust.hasAgent(iid)){
+      						cust.addAgent(new Agent(iid));	
+  						}
+  					}
+  				}
+                  
                 }
-                
-                if(deldays.get(cust.getID())  != null){
-                 	//cust.setDelDays((String)deldays.get(cust.getID()));
-                 }
-                
-                
-                Agent agg = ((Agent)this.getAgents1().get(agen.trim()));
-				
-				if(agg != null && agg.getDubbler().size()>0){
-					for (int i = 0 ; i < agg.getDubbler().size() ; i++){
-						String iid= (String)((Agent)this.getAgents1().get(agen.trim())).getDubbler().elementAt(i);
-						if(!cust.hasAgent(iid)){
-    						cust.addAgent(new Agent(iid));	
-						}
-					}
-				}
-                
+        
+            
                 String paym = rs.getString("paym");
                 if(paym != null && paym.trim().length()>0){
                 	cust.setPaymTerm(paym.trim());

@@ -407,7 +407,7 @@ String picts = parent.getProps().getProperty("pict.dir");
     public String getSaveStockInfo(){
         
     	String  cmd = "  SELECT  I17_KODAS_PS AS toode, I17_KIEKIS-I17_ATIDUOTA AS STOCK , I17_KODAS_IS AS LADU  " + 
-          		" from i17_vpro where I17_KODAS_IS in ('010000000049','010000000052') and I17_KIEKIS > 0 "
+          		" from i17_vpro where I17_KODAS_IS in ('010000000049','010000000052','010000000058') and I17_KIEKIS > 0 "
           		+ " ORDER BY I17_KODAS_PS" ;
 
 
@@ -545,7 +545,7 @@ String picts = parent.getProps().getProperty("pict.dir");
         try {
 
           String  sql = "  SELECT  I17_KODAS_PS AS toode, I17_KIEKIS-I17_ATIDUOTA AS STOCK , I17_KODAS_IS AS LADU  " + 
-          		" from i17_vpro where I17_KODAS_IS in ('010000000022','010000000052', '010000000029','010000000057','010000000045','010000000047','010000000049'"
+          		" from i17_vpro where I17_KODAS_IS in ('010000000022','010000000052','010000000058', '010000000029','010000000057','010000000045','010000000047','010000000049'"
           		+ ",'SA0000000002', 'MD0000000003') and I17_KIEKIS > 0 "
           		+ " ORDER BY I17_KODAS_PS" ;
 
@@ -565,7 +565,7 @@ String picts = parent.getProps().getProperty("pict.dir");
                     		lll = lll + stocksabi.get(toode);
                     	}
                     	stocksabi.put(toode, lll);
-                    	if(ladu.equals("010000000049") || ladu.equals("010000000052")){
+                    	if(ladu.equals("010000000049") || ladu.equals("010000000052") || ladu.equals("010000000058")){
                     		if(stocks.get(toode) != null) {
                         		stocks.put(toode, (stocks.get(toode) +seis));
                         	}else {
