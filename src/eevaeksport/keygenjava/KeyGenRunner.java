@@ -230,6 +230,7 @@ public class KeyGenRunner extends Frame implements TextListener
                  customer = true;
                }
         }
+    	 
         KeyGenRunner keygen = new KeyGenRunner();
         keygen.show();
        
