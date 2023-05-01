@@ -250,9 +250,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 	        	   }
 	        	  String custid = "";
 	        	  try {
-	        		  custid = (row.getCell((short) 0).getStringCellValue());
+	        		  custid = (row.getCell((short) 0).getStringCellValue()).trim();
 	        	  }catch(Exception e) {
-	        		  custid = ((int)(row.getCell((short) 0).getNumericCellValue())+"");
+	        		  custid = ((int)(row.getCell((short) 0).getNumericCellValue())+"").trim();
 	        		//  System.out.println("Jama koodiga " + custid + " " + a);
 	        	  }
 	        	  if(!abicusts.contains(custid))
@@ -266,9 +266,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 		        		String aa = st.nextToken();
 		        		if(aa.indexOf(":") != -1) {
 		        			aa = aa.substring(0,aa.indexOf(":"));
-		        			uu = uu + ":" + aa;
+		        			uu = uu + ":" + aa.trim();
 		        		}else {
-		        			uu = uu + ":" + aa;
+		        			uu = uu + ":" + aa.trim();
 		        		}
 		        		
 		        		asi.put(custid, uu);
@@ -982,6 +982,11 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
       		  goes = false;
       	  }
         }
+        
+        //if(cust.getID().indexOf("7345") != -1) {
+       // 	System.out.println("!!!!! 1187345 " + cust.getID() + " " + goes  + " "+  cust.getAgents().toString());
+        //}
+          
     
                 if(outside == null){
                     cust.addAgent(new Agent(getParent().getProps().getProperty("officerep")));
@@ -1018,8 +1023,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
                           cust.addAgent(new Agent(getParent().getProps().getProperty("officerep2")));
                       }
                       
-                    
-                      
+                 
                       if(goes) {
                     	  customers.put(name, cust);
                           custMap.put(cust.getID(),cust);  
@@ -1065,7 +1069,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 
     while (rs.next()) {
       String liik = rs.getString("liik").trim();
-        tm.put(liik, Converter.enCodeEst(rs.getString("nimi").trim()).replaceAll("ROYAL UNIBREW", " ").trim());
+        tm.put(liik, Converter.enCodeEst(rs.getString("nimi").trim()).replaceAll("TANKER BREWERY", " ").trim());
     }
     rs.close();
     st.close();
@@ -1224,6 +1228,11 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 	  name = name.replaceAll("   ", " ");
 	  name = name.replaceAll("  ", " ");
 	  name = name.replaceAll("  ", " ");
+	  name = name.replaceAll("  ", " ");
+	  
+	  if(name.contains("alusel")) {
+		  prod.setDiffColor(true);
+	  }
 
       String grupp = rs.getString("grupp");
        if(grupp!=null && grupp.trim().length()>0){

@@ -346,8 +346,15 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 		if(blockedcusts.contains(cust.getPayer())){
 			bl = "2";
 		}
-		
+		if(cust.getID() != null && cust.getID().length() > 0) {
 		 products.append(cust.getID() + ";" + getParent().getNF().format(cust.getDebt()) + ";" + bl + "\n");
+		}
+		if(cust.getPayer().equals("150040692")) {
+			System.out.println( " asi 1111 " + blockedcusts.contains(cust.getPayer()) + " " +
+					blockedcusts.contains(cust.getPayer()) + " " + cust.isSalesBlockT() + " " + cust.getID());
+		
+		}
+		
 		}
        
 		return products.toString();
@@ -1849,6 +1856,8 @@ System.out.println(cmd2);
        		"             and (kitas_dok) > 0 and dok_serija not in ( 'KRV5', 'LKS' ,'KRV7', 'LKP1','LDS','URM') and " + 
        		"             DATE_ADD(a.data,interval 500 day) > current_date() and operacija like 'Pardav%' "; 
        
+       
+     
       ketid = new HashMap();
       sortimendid = new HashMap();
   //System.out.println(cmd);
@@ -1889,12 +1898,17 @@ try{
         if(old<dueint){
            debtDays.put(custID,dueint+"") ;
            if(dueint > 28){
-        	  	  // System.out.println("siit 2 tuleb block" + custID);
-                	   
+        	  	 
+        	   if(debt.getPayerID() != null && debt.getPayerID().equals("150040692")) {
+        		    System.out.println("siit 2 tuleb block" + custID + " " + debt.getDoknr());
+        	   }
+
+        		   
         	 this.blockedcusts.add(custID); 
         	 if(debt.getPayerID() != null && debt.getPayerID().length() > 0 ) {
         		 this.blockedcusts.add(debt.getPayerID());  
         	 }
+        	
         	  
            }
         }
@@ -1922,7 +1936,7 @@ try{
    		"	 filialas AS blokk, 0 AS yle,'' AS visit,kainos_nr AS type,\r\n" + 
    		"  atstovas as kontakt , k.kl_grupe as kett , max_skola as credit, kainos_nr as hinnak ,telefonai as phone , nuolaida as maxdisc , ma.dienos as mars \r\n" + 
    		"	,k.kl_grupe as rcatrgory , k.miestas AS rcity , k.indeksas AS rindex , k.sritis AS rmaakond , k.salis as rcountry,k.atstovas as rkontakt \r\n" + 
-   		"	 ,k.telefonai as rperphone, k.e_mail as remail \r\n" + 
+   		"	 ,k.telefonai as rperphone, k.e_mail as remail ,   moketojas as onmaksja \r\n" + 
    		"	  FROM klientai k  INNER JOIN \r\n" + 
    		"	 ( select klientas, tab_nr from(\r\n" + 
    		"	   select klientas, tab_nr from (select * from manager order by klientas,data desc,tab_nr )as man \r\n" + 
@@ -2026,9 +2040,9 @@ try{
              if( blokk != null && blokk.trim().equals("1") && customer.getName().indexOf("Rimi") == -1){
                customer.setSalesBlockT(true);
                blockedcusts.add(customer.getID());
-               if(customer.getName().indexOf("Rimi") != -1){
-             	  // System.out.println("siit 3 tuleb block");
-                }
+               if(customer.getPayer().equals("150040692")) {
+       		    System.out.println("siit 2 tuleb block" + customer.getID());
+       	       }
                
              }
 
@@ -2087,7 +2101,7 @@ try{
            }
            
            double credit = rs.getDouble("credit");
-           if(credit > 0){
+           if(credit > 1){
         	   customer.setCredit(credit + "");
            }
          
@@ -2100,24 +2114,33 @@ try{
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getPayer())));
            	
            	
-          if(credit > 0 && (credit - Double.parseDouble((String)totaldebts.get(customer.getPayer()))) < -100){
+          if(credit > 1 && (credit - Double.parseDouble((String)totaldebts.get(customer.getPayer()))) < -100){
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
             	blockedcusts.add(customer.getPayer());
+            	if(customer.getPayer().equals("150040692")) {
+        		
+               	   System.out.println("siin222" + customer.getID() +
+               			   "  " + customer.getPayer() + " " + totaldebts.get(customer.getPayer()) 
+               			   + " " + credit + " ? " );
+                  }
             	
             }
            }else if( this.totaldebts.get(customer.getID()) != null){
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
            
-           	if(credit > 0 && (credit - Double.parseDouble((String)totaldebts.get(customer.getID()))) < -100
+           	if(credit > 1 && (credit - Double.parseDouble((String)totaldebts.get(customer.getID()))) < -100
             		 && customer.getName().indexOf("Rimi") == -1){
              	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
+            	if(customer.getPayer().equals("150040692")) {
+            			   System.out.println("siin3333" + customer.getID() + "  " + customer.getPayer());
+                    }
             }
            }
            
-      
+   
               
          
            String phone = rs.getString("phone");
@@ -2221,6 +2244,13 @@ try{
            if(remail != null && remail.trim().length() > 0){
         	      customer.restPerEmail = (remail);
         	   
+           }
+           
+           String om = rs.getString("onmaksja");
+           if(om == null || om.trim().length() == 0){
+        	      customer.setIsPayer(true);
+        	   //   customer.diffBack = true;
+        	     // System.out.println("Maksja " + customer.getID());
            }
           
           
@@ -2344,11 +2374,52 @@ try{
 	   }catch(Exception e) {
 		   e.printStackTrace();
 	   }				
-	   System.out.println("hh " + hh.toString());
+	   System.out.println("hhigher " + hh.toString());
 	   return hh;
    }
    
    
+   private HashSet getLower() {
+	   HashSet hh = new HashSet();
+	   try {
+		   DataFormatter formatter = new DataFormatter();
+		   Workbook workbook = null;
+	   File f = new File (getExcelDir() + "ProductCost.xlsx");
+	   boolean xs = true;
+	   if(!f.exists()) {
+		   f = new File (getExcelDir() + "ProductCost.xls"); 
+		   xs = false;
+	   }
+	   
+		  FileInputStream	 ff = new FileInputStream(f);
+		if(xs) {
+		     workbook = new XSSFWorkbook((ff));
+		}else {
+			 workbook = new HSSFWorkbook((ff));
+		}
+		Sheet sheet = workbook.getSheetAt(0);
+	      Row row = null; 
+				ff.close();	
+				if(sheet != null){
+				  int yy = sheet.getLastRowNum();
+					
+					for(int i = 0 ; i < yy+1 ;i++){
+						 row = sheet.getRow(i);
+						if(row != null) {
+							
+							String ean = formatter.formatCellValue(row.getCell(0));
+							String ok = formatter.formatCellValue(row.getCell(1));
+							if(ok.equals("-1")) {
+								hh.add(ean.trim());
+							}
+						}}}
+				
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }				
+	   System.out.println("hhlower " + hh.toString());
+	   return hh;
+   }
    
    private HashMap<String, Double> getSuggDisc() {
 	   HashMap<String, Double> hh = new HashMap<String, Double>();
@@ -2403,6 +2474,7 @@ try{
      HashMap<String,Double>  ladub1o = new HashMap<String,Double>();
      
      HashSet higherCodes = getHigher();
+     HashSet lowerCodes = getLower();
      
      HashMap<String,Double> suggDisc = getSuggDisc();
      
@@ -2714,6 +2786,9 @@ try{
                  if(higherCodes.contains(prod.getID())){
                           prod.setStatusTop("3");
                          }
+                 if(lowerCodes.contains(prod.getID())){
+                     prod.setStatusTop("4");
+                    }
                  
                  String origp = rs.getString("origpak");
                  String klimes = rs.getString("klimes");
@@ -3155,19 +3230,34 @@ private TreeMap makePlans(){
 	  
   	 try {
   	 	
-  		String cmd2 = "               SELECT d.manager ,sum( kiekis * (kaina -r.savik_3)) as profit FROM apyv_gr r \r\n" + 
-  				"                    INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 300 day) > current_date()  INNER JOIN klientai b ON b.klientas=d.gavejas  \r\n" + 
-  				"                               where month(Data) =month(current_date()) and YEAR(Data) = YEAR(current_date()) \r\n" + 
-  				"                               and day(Data) <= day(current_date()) and operacija  not like'%Reklam%' and operacija  not like'%Pirkimas%' and \r\n" + 
-  				"                (d.tiekejas is null or d.tiekejas like '%idfood%' ) \r\n" + 
-  				"               group  by d.manager ";
+  		String cmd2 = "  SELECT d.manager, ROUND(SUM(Case when d.operacija = 'Grąžino pirkėjas' then (r.kiekis *(r.kaina -r.savik_3) * -1) when d.operacija = 'GP Kainų skirtumas' then (kiekis*kaina * -1) ELSE (r.kiekis * (kaina -r.savik_3)) END ),0)AS profit\r\n" + 
+  				"FROM apyv_gr r\r\n" + 
+  				"INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id  AND DATE_ADD(DATA, INTERVAL 300 DAY) > CURRENT_DATE()\r\n" + 
+  				"WHERE MONTH(DATA) = MONTH(CURRENT_DATE())\r\n" + 
+  				"      AND YEAR(DATA) = YEAR(current_date()) \r\n" + 
+  				"      AND DAY(DATA) <= DAY(current_date()) \r\n" + 
+  				"      AND d.operacija NOT LIKE '%Reklam%' \r\n" + 
+  				"      AND d.operacija NOT LIKE '%Pirkimas%' \r\n" + 
+  				"      AND d.operacija NOT LIKE '%Sand%'\r\n" + 
+  				"      AND d.operacija NOT LIKE '%Pajam%'\r\n" + 
+  				"      AND d.operacija NOT LIKE '%aslaug%'\r\n" + 
+  				"      AND d.ivestas =1\r\n" + 
+  				"GROUP BY d.manager\r\n";
   		 
-     String cmd = "select sum(viso_1) AS summa,a.manager as agent FROM apyvarta a " +
-                          "   where month(Data) =month(current_date()) and YEAR(Data) = YEAR(current_date()) " +
-						"	  and day(Data) <= day(current_date())" +
-					"		and operacija  not like'%Reklam%' and operacija  not like'%Pirkimas%' and " +
-					"		(tiekejas is null or tiekejas like '%idvest%' ) group by a.manager" +
-					"		order by gavejas";
+     String cmd = "SELECT ROUND(SUM(CASE when a.operacija LIKE 'Grąžino%' then (a.viso_1*-1) when a.operacija LIKE 'GP Kain%' then (a.viso_1*-1) ELSE (a.viso_1) END),0) AS summa, a.manager AS agent\r\n" + 
+     		"FROM apyvarta a\r\n" + 
+     		"WHERE MONTH(DATA) =MONTH(CURRENT_DATE())\r\n" + 
+     		"      AND YEAR(DATA) = YEAR(CURRENT_DATE()) \r\n" + 
+     		"            AND DAY(DATA) <= DAY(current_date()) \r\n" + 
+     		"      AND a.operacija NOT LIKE '%Reklam%' \r\n" + 
+     		"      AND a.operacija NOT LIKE '%Pirkimas%' \r\n" + 
+     		"      AND a.operacija NOT LIKE '%Sand%'\r\n" + 
+     		"      AND a.operacija NOT LIKE '%Pajam%'\r\n" + 
+     		"      AND a.operacija NOT LIKE '%aslaug%'\r\n" + 
+     		"      AND a.ivestas = 1\r\n" + 
+     		"GROUP BY a.manager\r\n" + 
+     		"ORDER BY gavejas\r\n" + 
+     		"";
   	 	
 
      TreeMap<String,Integer> profiit = new TreeMap<String,Integer>();
@@ -3264,7 +3354,7 @@ private TreeMap makePlans(){
     	           
     	           
     	           agent.setStart( Converter.enCodeEst(asi ));
-    	           System.out.println(Converter.enCodeEst(agentID + "' " +asi  + " "  + plans.get(agent.getID())) );
+    	        //   System.out.println(Converter.enCodeEst(agentID + "' " +asi  + " "  + plans.get(agent.getID())) );
                    }
     	                  	
                          

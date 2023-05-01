@@ -203,7 +203,7 @@ Connection con = this.getNewConnection();
                		"               		    ((GETDATE() between PRI.FROMDATE AND PRI.TODATE+1) " + 
                		"               			   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " + 
                		"               			   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " + 
-               		"               			   or( GETDATE()<=PRI.TODATE+1) and year(PRI.FROMDATE) =1900 )  and PRI.ACCOUNTRELATION not like 'BAAS10_22%' " + 
+               		"               			   or( GETDATE()<=PRI.TODATE+1) and year(PRI.FROMDATE) =1900 )  and PRI.ACCOUNTRELATION not like 'BAAS04_23%' " + 
                		"               		       ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation" ;
                                     
                        //and percent1 > 0.1
@@ -270,7 +270,7 @@ Connection con = this.getNewConnection();
         "   ((GETDATE() between PRI.FROMDATE AND PRI.TODATE+1) "+
 	  " or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
 	  " or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
-	  " or( GETDATE()<=PRI.TODATE+1) )  and PRI.ACCOUNTRELATION not like 'BAAS10_22%' " +
+	  " or( GETDATE()<=PRI.TODATE+1) )  and PRI.ACCOUNTRELATION not like 'BAAS04_23%' " +
         "    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation" ;
                              
                              rs = stmt.executeQuery(sql4);
@@ -1051,7 +1051,7 @@ Connection con = this.getNewConnection();
         
         
         String grupp = rs.getString("grupp");
-        if (grupp != null && grupp.trim().length()>0 && grupp.indexOf("BAAS10_22") == -1) {
+        if (grupp != null && grupp.trim().length()>0 && grupp.indexOf("BAAS04_23") == -1) {
         	grupp = Converter.cleanLitLatEst(grupp);
         	if(cust.getGroup() != null && cust.getGroup().trim().length() > 0 ){
         		   cust.setGroup(cust.getGroup() + "|" + grupp.trim());
@@ -1345,9 +1345,9 @@ HashMap partiid = getBatch();
  
     String cmd = "       SELECT inv.itemid, inv.itemname AS nimetus, inv.iteitemqtyinbox AS kastis, disc.amount AS price   " + 
     		"    		 , bar.itembarcode AS ean ,inv.NLTSTATGROUP4ID AS grupp ,mod.unitid As unit, '20' as vat, mod.LineDisc as alegr  " + 
-    		"    		  , '' as type ,0 as mini , 0 as opti, 0 as uus ,0 as out , 0 as tops , 0 as gift , 0 as nocount ,  storageinfo as temp , bestbeforedays as red,  iteitemingredients  as info FROM inventtable inv   " + 
+    		"    		  , '' as type ,0 as mini , 0 as opti, 0 as uus ,0 as out , 0 as tops , 0 as gift , 0 as nocount ,  storageinfo as temp , bestbeforedays as red , NLTProductInfo as temp2 ,  iteitemingredients  as info FROM inventtable inv   " + 
     		"    		   inner join pricedisctable as disc on ltrim(inv.itemid)=ltrim(disc.itemrelation) and disc.dataareaid=inv.dataareaid  " + 
-    		"    		  and disc.module = 1  and disc.relation=4  and disc.itemcode=0 and disc.accountcode=1 and accountrelation like 'BAAS10_22%' and (disc.todate > getdate() or year( disc.todate ) = 1900) and  (disc.fromdate < getdate()+1 or year( disc.fromdate ) = 1900 ) " + 
+    		"    		  and disc.module = 1  and disc.relation=4  and disc.itemcode=0 and disc.accountcode=1 and accountrelation like 'BAAS04_23%' and (disc.todate > getdate() or year( disc.todate ) = 1900) and  (disc.fromdate < getdate()+1 or year( disc.fromdate ) = 1900 ) " + 
     		"    		  inner join inventitembarcode bar   on bar.dataareaid = inv.dataareaid  and  ltrim(bar.itemid) = ltrim(inv.itemid) and bar.barcodesetupid ='NLT1' and ltrim(bar.inventdimid) = 'Axapta'   " + 
     		"    		 left JOIN inventtablemodule mod ON ltrim(mod.itemid) = ltrim(inv.itemid) and mod.dataareaid=inv.dataareaid  " + 
     		"    		 WHERE  inv.dataareaid='nlt'    AND mod.dataareaid='nlt'    " + 
@@ -1580,16 +1580,39 @@ HashMap aleprods = new HashMap();
     	  }catch(Exception t) {
     		  
     	  }
+    	
     	 
+    	  if(temp.contains(".00")) {
+    		  temp = temp.substring(0,temp.indexOf(".00"));
+    	  }
     	  prod.setPartii(temp.trim() + days);
     	  
       }
       
+      
+       temp = rs.getString("temp2");
+      if(temp != null && temp.trim().length() > 0) {
+    	  
+        	  if(prod.getPartii() != null && prod.getPartii().trim().length() > 0) {
+        		  prod.setPartii(prod.getPartii() + "|" + temp.trim());
+        	  }else {
+        		  prod.setPartii(temp.trim());
+        	  }
+    	  
+      }
+      
       if(partiid.containsKey(prod.getID())) {
+    	  temp = partiid.get(prod.getID())+ "";
+    	  temp = temp.replaceAll(   "0000000000", " ");
+    	  temp = temp.replaceAll(   "000000000", " ");
+	    	 temp = temp.replaceAll("00000000", " ");
+	    	 temp = temp.replaceAll("0000000", " ");
     	  if(prod.getPartii() != null && prod.getPartii().trim().length() > 0) {
-    		  prod.setPartii(prod.getPartii() + "|Partii :" + partiid.get(prod.getID()));
+    		  
+    		
+    		  prod.setPartii(prod.getPartii() + "|Partii :" + temp.trim());
     	  }else {
-    		  prod.setPartii("Partii :" + partiid.get(prod.getID()) );
+    		  prod.setPartii("Partii :" + temp.trim() );
     	  }
       }
       

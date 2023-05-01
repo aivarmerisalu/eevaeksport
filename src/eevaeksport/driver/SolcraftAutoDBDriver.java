@@ -754,6 +754,10 @@ public class SolcraftAutoDBDriver extends AbstractDBDriver implements Discounter
             	if(kk.equals("Mārcis")) {
             		kk = "Marcis";
             	}
+            
+            	if(kk.equals("Māris")) {
+            		kk = "Maris";
+            	}
             	
               Agent agent = new Agent(kk);
               String nimi = rs.getString("nimi").trim();
@@ -928,6 +932,9 @@ public class SolcraftAutoDBDriver extends AbstractDBDriver implements Discounter
             	  
             	  if(agentc.equals("Mārcis")) {
             		  agentc = "Marcis";
+              	}
+            	  if(agentc.equals("Māris")) {
+            		  agentc = "Maris";
               	}
             		cust.addAgent(new Agent(agentc.trim()));
             		cust.addAgent(new Agent("KA"));
@@ -1114,7 +1121,7 @@ public class SolcraftAutoDBDriver extends AbstractDBDriver implements Discounter
                 	nimetus = (String)names.get(kood);
                 }
                 
-                	nimetus  = nimetus.trim().replaceAll("\n", " ")  + " " + kood;
+                	nimetus  = kood  + " " + nimetus.trim().replaceAll("\n", " ")  ;
                 Product prod = new Product(kood);
                 prod.setPrice(rs.getDouble("myygihind"));
                 prod.setVat(rs.getDouble("VAT") + "");

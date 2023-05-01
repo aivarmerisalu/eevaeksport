@@ -619,11 +619,11 @@ private HashSet getXXX(){
   		return "M20240";
   	}
   	
-  	// System.out.println("Kliendi M��ramine: "  + id + " " + regnr);
+  	 System.out.println("Kliendi M��ramine: "  + id + " " + regnr);
   	
   	    sql1 = "SELECT SL01001 AS kood FROM SL010100 where SL01125  =  '" + id + "'";	
 	
-  //  System.out.println(sql1);
+    System.out.println(sql1);
     String acc = null;
 
     Statement st1 = con.createStatement();
@@ -634,14 +634,31 @@ private HashSet getXXX(){
     }
     rs1.close();
     st1.close();
+    
+    
+    if(acc == null){
+    	  sql1 = "SELECT SL01001 AS kood FROM SL010100 where SL01001  =  '" + id + "'";	
+    	    System.out.println(sql1);
+    	     st1 = con.createStatement();
+    	     rs1 = st1.executeQuery(sql1);
+
+    	    while (rs1.next()) {
+    	      acc = rs1.getString("kood").trim() ;
+    	    }
+    	    
+    	    rs1.close();
+    	    st1.close();   
+    		
+    	}    
+    
     String uus = null;
-    if(id!= null &&id.trim().length() >10){
+    if(id!= null && id.trim().length() >10){
     	uus = id.trim().substring(id.trim().length()-10,id.trim().length());
     }
     
     if(uus != null && acc == null){
     	sql1 = "SELECT SL01001 AS kood FROM SL010100 where SL01125  =  '" + uus + "'";	
-     //   System.out.println(sql1);
+       System.out.println(sql1);
 
          st1 = con.createStatement();
          rs1 = st1.executeQuery(sql1);
@@ -655,22 +672,9 @@ private HashSet getXXX(){
  
 
     
-if(acc == null){
-  sql1 = "SELECT SL01001 AS kood FROM SL010100 where SL01001  =  '" + id + "'";	
-  //  System.out.println(sql1);
-     st1 = con.createStatement();
-     rs1 = st1.executeQuery(sql1);
 
-    while (rs1.next()) {
-      acc = rs1.getString("kood").trim() ;
-    }
     
-    rs1.close();
-    st1.close();   
-	
-}    
-    
-   // System.out.println("Klient: " + acc + " " + id);
+    System.out.println("Klient: " + acc + " " + id);
     return acc;
 
   }
@@ -1119,6 +1123,27 @@ private long getAndUpdateNext() throws SQLException{
 	      if(rs.next()){
 	    	  String aa = rs.getString("kood").trim();
 	    	  if(aa.equals("M13598")){
+	    		  result = true; 
+	    	  }
+	        
+	      }
+	      
+	     
+	      rs.close();
+	      st.close();
+
+	    return result;
+	  }
+  
+  private boolean isRealik(String  cust )throws SQLException{
+	    boolean result = false;
+	    String sql = "SELECT SL01056 AS kood FROM SL010100 where SL01001  =  '" + cust + "'  ";
+	    log.info("getAndUpdateRecID(): " + sql);
+	      Statement st = con.createStatement();
+	      ResultSet rs = st.executeQuery(sql);
+	      if(rs.next()){
+	    	  String aa = rs.getString("kood").trim();
+	    	  if(aa.equals("M16554")){
 	    		  result = true; 
 	    	  }
 	        
@@ -1718,7 +1743,9 @@ private long getAndUpdateNext() throws SQLException{
  		 String scala = getAndUpdateNext()+ "";
  	      export = isExportCustomer(order.getCompany());
       boolean isPrisma = isPrisma(order.getCompany());
+      boolean isRealik = isRealik(order.getCompany());
       StringBuffer prismaProds = new StringBuffer();
+      StringBuffer realikProds = new StringBuffer();
       
     //  System.out.println("isPrisma" + isPrisma);
       
@@ -2356,15 +2383,22 @@ private long getAndUpdateNext() throws SQLException{
           	}         	
           }
 
-          String nimi = getNimi(toode);
+          String nimi =  getNimi(toode);
      if(nimi == null){
     	 nimi = line.getTooteNimi();
+     }
+     if(!nimi.contains(toode)) {
+      nimi = toode + " " + nimi;
      }
         
      if(isPrisma && parent.getProps().getProperty("prismaPalletProds") != null 
    		  && parent.getProps().getProperty("prismaPalletProds").contains(toode+",")) {
    	  prismaProds.append("[" + (int)line.getKogus() + "] " + line.getToode() + " " + nimi + "\n");
      }
+     if(isRealik && parent.getProps().getProperty("realiPalletProds") != null 
+      		  && parent.getProps().getProperty("realiPalletProds").contains(toode+",")) {
+      	  realikProds.append("[" + (int)line.getKogus() + "] " + line.getToode() + " " + nimi + "\n");
+        }
      
      
      if(order.getWarehouse() == null){
@@ -2423,7 +2457,7 @@ if(toode.trim().length() > 0 && allowed){
   
 }  	
 if(!allowed){
-	trouble = trouble +  "\nTellimuselt eemaldatti toode " + toode + " " + nimi;
+	trouble = trouble +  "\nTellimuselt eemaldatti toode " + nimi;
 }
      
      
@@ -2660,7 +2694,10 @@ if(prismaProds.length() > 0) {
 		
 }
 
-
+if(realikProds.length() > 0) {
+	   sendRealikEmail(realikProds.toString(),doknr,order.getCompany() + " " + getCustName(order.getCompany()),parent);
+		
+}
 	  
 	} catch (Exception e) {
 		e.printStackTrace();
@@ -2764,6 +2801,58 @@ if(prismaProds.length() > 0) {
 		  	  		String agent = "";
 		  	  
 		  	  		mail.setSubjectFilesTo("Prisma Aluse teema : " + custidName + " " + doknr );
+		  	  		String lisa = "";
+		  	  		
+		  	  		mail.setEncoding("utf-8");
+		  	  		
+		  	  		
+		  	  		mail.setBodyHtml( "Klient : " + custidName +  "<br>Tellimuse nr: " + doknr+  "<br><br>"+ comment.replaceAll("\n", "<br>") + lisa  + "<br><br>");
+		  	  		//mail.setBody("\nOrder :" +  doknr + " \nCustomer code :" + custid +  "\nCustomer Name :" + nimi + "\n" +
+		  	  			//    "Manager :" + agent + "\n" +  "\n" + lisa + comment + "\n\n.");
+		  	  		mail.setSendNotice(false);
+		  	  		
+		  	  		mail.send();
+		  	  		
+		  				
+	   		}
+		  	
+		  			}catch(Exception e){
+		  			e.printStackTrace();	
+		  			}
+		  	
+	   }
+	private void sendRealikEmail(String comment1 ,String doknr,String custidName , ImportPanel parent){
+	   	try{
+	   		
+	  
+	   		String comment = null ;
+	   		if(comment1 != null && comment1.trim().length() > 0) {
+	   			comment =   comment1 + "\n\n" ;
+	   		}
+	   		
+	   	
+	   		
+	   		if(comment != null && comment.trim().length() >0){
+	   			
+	   			//System.out.println(comment);
+	   			Email mail = new Email(null);
+		  		   
+	   			
+	                mail.setSMTP(parent.getProps().getProperty("smtphost"));
+	                if(parent.getProps().getProperty("smtpuser") != null)
+	                mail.setUser(parent.getProps().getProperty("smtpuser"));
+	                
+	                if(parent.getProps().getProperty("smtppass") != null)
+	                mail.setPass(parent.getProps().getProperty("smtppass"));
+	                
+	                if(parent.getProps().getProperty("smtpport") != null)
+	                mail.setPort(parent.getProps().getProperty("smtpport"));
+	                
+		  	  		mail.setFilesTo(parent.getProps().getProperty("realiemail"));
+		  	  		mail.setFrom(parent.getProps().getProperty("from"));
+		  	  	
+		  	  
+		  	  		mail.setSubjectFilesTo("Realiseerimiskeskuse toodete teema : " + custidName + " " + doknr );
 		  	  		String lisa = "";
 		  	  		
 		  	  		mail.setEncoding("utf-8");

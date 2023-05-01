@@ -300,6 +300,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	            
 	             if (mline.getProdID() == null &&  prodGroup != null && prodGroup.trim().length() > 0) {
 	               mline.setDiscGroup(prodGroup.trim());
+	               check = check + prodGroup.trim();
 	             }
 
 	             if (price != 0) {
@@ -611,8 +612,8 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	          agent.setName(pol(name));
 
 
-              agent.setLanguage("EST");
-	          agent.setCountry("et");
+              agent.setLanguage("POL");
+	          agent.setCountry("pl");
 	          agent.setPassWord("0000");
 	          String email = parent.parseFirstEmail(parent.getEmail(agent.getID()));
 	          if(email.length() > 1){
@@ -772,10 +773,10 @@ try{
    		"   			 [Payment Terms Code] AS payment,[Line Discount %] AS alekood, 0 AS yle,'' AS visit,'' AS type,   \r\n" + 
    		"   			   [Blocking after overdue days] AS extradays ,'' AS sort, '' AS debt , 0 AS minsum , \r\n" + 
    		"   			  adr.contact +' ' + adr.[Phone no_] + ' ' + adr.[E-Mail] as kontakt ,' 'as kett  , '' as chain , \r\n" + 
-   		"   			  [Customer Price Group] as hinnak, k.[Currency Code] as currency ,  0 as credit \r\n" + 
+   		"   			  [Customer Price Group] as hinnak, k.[Currency Code] as currency ,  k.[Credit Limit (LCY)] as credit \r\n" + 
    		"   			  FROM [VICIUNAI-POL$Customer] k  LEFT JOIN [VICIUNAI-POL$Ship-to Address] adr ON adr.[Customer No_]  = k.[No_]  \r\n" + 
    		"			  LEFT JOIN [VICIUNAI-POL$Sales Line Discount] d ON d.[Sales Code] = k.[Customer Disc_ Group] \r\n" + 
-   		"   			 WHERE k.[Salesperson Code] != ''  AND blocked != 3 " ;
+   		"   			 WHERE (k.[Salesperson Code] != ''  AND blocked != 3) or k.[No_] = '2' " ;
    System.out.println(sql);
    try {
         Connection con = getNewConnection2();
@@ -829,6 +830,7 @@ try{
            name = name .replaceAll("nY ", "ną ");  
            
            name = name .replaceAll("iY ", "ią ");
+           if(!name.contains("NOWY"))
            name = name .replaceAll("Y ", "ą ");
            name = name .replaceAll("1cłtki", "Źółtki");
            name = name .replaceAll("GaRNA", "GÓRNA");
@@ -886,11 +888,29 @@ try{
              String ag = rs.getString("agent");
              if(ag != null){
                 customer.addAgent(new Agent(ag.trim()));
+                if(ag.trim().startsWith("PHD")) {
+                	 customer.addAgent(new Agent("PHD 01"));
+                	 customer.addAgent(new Agent("PHD 02"));
+                	 customer.addAgent(new Agent("PHD 03"));
+                	 customer.addAgent(new Agent("PHD 04"));
+                	 customer.addAgent(new Agent("PHD 05"));
+                	 customer.addAgent(new Agent("PHD 06"));
+                	 customer.addAgent(new Agent("PHD 07"));
+                }
                } 
               
                ag = rs.getString("agent2");
                  if(ag != null){
                     customer.addAgent(new Agent(ag.trim()));
+                    if(ag.trim().startsWith("PHD")) {
+                   	 customer.addAgent(new Agent("PHD 01"));
+                   	 customer.addAgent(new Agent("PHD 02"));
+                   	 customer.addAgent(new Agent("PHD 03"));
+                   	 customer.addAgent(new Agent("PHD 04"));
+                   	customer.addAgent(new Agent("PHD 05"));
+               	 customer.addAgent(new Agent("PHD 06"));
+               	 customer.addAgent(new Agent("PHD 07"));
+                   }
                  }
              
           
@@ -917,6 +937,14 @@ try{
  					}
  				}
  			}
+            
+              if(customer.getID().equals("2_00")) {
+             Enumeration enume = getParent().getAgentsHash().elements();
+             while (enume.hasMoreElements()) {
+               Agent a = (Agent) enume.nextElement();
+                 customer.addAgent(a);
+              }
+             }
            
 
    String bl = rs.getString("blokk");
@@ -929,8 +957,8 @@ try{
            	String num = rs.getString("alekood");
            	if(num != null && num.trim().length()>0){
            	double dd = Double.parseDouble(num.trim());
-           	if(dd > 0)
-             customer.setCity("Discount : " + getNF().format(Double.parseDouble(num.trim())) + " %");
+          // 	if(dd > 0)
+          //   customer.setCity("Discount : " + getNF().format(Double.parseDouble(num.trim())) + " %");
            	}
 
 
@@ -1047,7 +1075,7 @@ try{
            
            
            Double credit = rs.getDouble("credit");
-           if(credit != null && credit > 0) {
+           if(credit != null && credit > 1) {
         	   customer.setCredit(credit +"");
            }
            
@@ -1140,7 +1168,7 @@ try{
       
      try {
    	  String cmd = "SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [VICIUNAI-POL$Item Ledger Entry] l " +
-         " INNER JOIN [VICIUNAI-POL$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('MAG15','MAG12','MAG17') " +
+         " INNER JOIN [VICIUNAI-POL$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('MAG15','MAG12','MAG17','MAG30') " +
          " AND t.[Blocked]=0 AND len(t.[Product Group Code])>0 " +
          " GROUP BY l.[Location Code],l.[Item No_] HAVING sum(l.[Quantity]) > 0 ORDER BY l.[Item No_] ";
 

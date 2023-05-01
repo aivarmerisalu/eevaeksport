@@ -275,7 +275,10 @@ Connection ccc = DriverManager.getConnection(url + "saf"
        double kogus = orderLine.getKogus();
        double ale = orderLine.getDiscount();
     
-       
+       String ccc = "";
+       if(orderLine.selActCode != null && orderLine.selActCode.trim().length() > 0) {
+    	   ccc = orderLine.selActCode;
+       }
     
        String agent = order.getAgent();
          int alex = 0;
@@ -285,13 +288,13 @@ Connection ccc = DriverManager.getConnection(url + "saf"
      
          String	sql = "INSERT INTO [2015_Tobis$MOFF Prekiu krepselio eilute] ([Krepselio Nr],[Eilutes Nr], [Prietaiso Nr],[Prekes Nr]," +
          		"    [Kiekis],[Dovana],[Nuolaidos proc_],[Unit Of Measure Code],[Ret_ From ILE No_],[End Customer Discount %],"
-         		+ "[End Customer price],[Uzs_Eil_Nr_],[KS prekes Nr],[Suma],[Suma su PVM],[Aprasas],[Kaina])" +
+         		+ "[End Customer price],[Uzs_Eil_Nr_],[KS prekes Nr],[Suma],[Suma su PVM],[Aprasas],[Kaina],[Campaign No])" +
              " VALUES( " +
                salesid + "," +
                counter + ",'MS-" +
                agent + "',?," +
                kogus + "," +
-               alex +"," + ale + ",'',0,0,0,0,'',0,0,'',0)";
+               alex +"," + ale + ",'',0,0,0,0,'',0,0,'',0,'" + ccc + "')";
 System.out.println(sql);
                log.info("SALES_LINE_SQL: " + sql);
                PreparedStatement st2 = con3.prepareStatement(sql);

@@ -1,6 +1,7 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,12 +14,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -29,8 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -42,21 +39,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.fluent.Content;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.entity.ContentType;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.json.simple.parser.JSONParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -67,6 +49,7 @@ import eevaeksport.Customer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
+import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.util.Converter;
@@ -82,7 +65,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,FixLoader{
+public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,FixLoader, WebReporter{
 
   public DirectoAgapictsDBDriver(EksportPanel parent) {
     super(parent);
@@ -316,8 +299,13 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		 return in;
 	 }
 	  
+	 private Vector selverEpoodProds = null;
+	 
 	public Vector getPriceMatrixData() {
 
+		//Loeme sisse tooted 
+	
+		
    	Vector lines = new Vector();
     
     try {
@@ -455,13 +443,22 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    }
 
 	
-   
+   TreeMap fixEans = null;
    
    public Vector getFixedAssortmentData() {
 		
+		
+		if(selverEpoodProds == null ) {
+			this.getProducts(null);
+		}
+		if(this.eShopPrl == null) {
+			this.getCustomers(null);
+		}
+	   
 		 Vector lines = new Vector();
 	       TreeMap prods = this.getProducts2();
-	      System.out.println("prods " + prods.size() + " " + eans.size());
+	       fixEans = new TreeMap();
+	      System.out.println("prods " + eShopPrl.toString() + " " + selverEpoodProds.toString());
 	       
 	       try {
 	   		  File f = new File (getDir() + "hinnakiri.xml");
@@ -501,7 +498,12 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	                        if(nnn != null && (nnn.getNodeValue().equals("ART_EAN") || nnn.getNodeValue().equals("ARTIKULA_EAN")))	{
 	                        
 //System.out.println("aaaa " +clGroup + " " + prodID );
-		                        
+	                        	Vector vv = (Vector)fixEans.get(clGroup);
+	                        	if(vv == null) {
+	                        			vv = new Vector();
+	                        	}
+	                        	vv.add(prodID);
+		                        fixEans.put(clGroup, vv);
 
 		                         if (prodID != null && prodID.trim().length() > 0 && eans.get(prodID) != null) {
 		                          
@@ -515,6 +517,11 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	                        		 if (clGroup != null && clGroup.trim().length() > 0) {
 	  		                           mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()+ "XX"));
 	  		                         }
+	                        		 
+	                        		 if(selverEpoodProds.contains(pr+"") && eShopPrl.contains(mline.getCliGroup())) {
+	                        			 mline.setLineinfo("TOP");
+	                        		 }
+	                        		 
 		                        	if(start != null && end != null) {
 		                        		 Date alg = getCalXML(start); 
 		                                 Date lopp = getCalXML(end); 
@@ -792,6 +799,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
      tm.put("LADU", aaa);
 
     // setBulkSales(tm);
+     
      return tm;
    }
 
@@ -1323,18 +1331,13 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
  	         	  Node rida = read.getChildNodes().item(i);
  	         	  
  	         	  if(rida.getNodeName().equals("customer")){
- 	         		 String name = null;
+ 	         		
  		         	  try{
- 		         		   name =  rida.getAttributes().getNamedItem("name").getNodeValue();
  		         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
-
- 		         		  
- 	         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
- 	         		  
+ 	         		      String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
  	         		    tm.put(id, salesman);
  	         		
- 	         	
- 		         	  }catch(Exception e){
+ 		         	  } catch(Exception e){
  	         		
  	         		  e.printStackTrace();
  	         	  }
@@ -1346,12 +1349,22 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
     	   return tm;
        }
        
+       TreeMap custPRlists = null;
+       TreeMap custMap = null;
+       TreeMap custAgs = null;
+       Vector eShopPrl = null;
 
    public TreeMap getCustomers(Agent agent){
 	   TreeMap tm = new TreeMap();
-	  
+	   eShopPrl = new Vector();
+	   custPRlists = new TreeMap();
+	   custMap = new TreeMap();
+	   custAgs = new TreeMap();
 	   
-	   makeData();
+	   if(!"true".equals(getParent().getProps().getProperty("use.olddata"))){
+		   makeData();
+		 }
+	 
 	   
 	   try{
     	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
@@ -1550,7 +1563,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			         		   customer.setGroup(Converter.cleanLitLatEst(price_list));
 			         		 
 			       			   customer.addFixSortCode(Converter.cleanLitLatEst(price_list+"XX")); 
-			       		       
+			       			custPRlists.put(customer.getID(), Converter.cleanLitLatEst(price_list));
 		         		  }catch(Exception e){
 		         		  }
 		         		  
@@ -1583,13 +1596,19 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 
 		         		 try {
 		         			 
-		         		
+		         		//<data code="KL_SELVER_E_POOD" content="Jah"/>
 		         		 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
 		   	         	  Node rid = rida.getChildNodes().item(r);
 		   	         	 // System.out.println("node name " + rid.getNodeName());
 		   	         	  if(rid.getNodeName().equals("data")){
 		   	         		 String nn = rid.getAttributes().getNamedItem("code").getNodeValue();
-		   	         		
+		   	         		if(nn.equals("KL_SELVER_E_POOD")) {
+			   	         		 Node uu = rid.getAttributes().getNamedItem("content");
+			   	         		  if (uu != null && uu.getNodeValue().trim().length()>0
+			   	         				  && uu.getNodeValue().contains("Jah")){
+				                  	  this.eShopPrl.add(custPRlists.get(customer.getID())+"XX") ;      	
+				                  }
+			   	         		}
 		   	         		
 		   	         		if(nn.equals("KL_ARVE_MEIL")) {
 		   	         		 Node uu = rid.getAttributes().getNamedItem("content");
@@ -1598,6 +1617,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			                  	customer.setConfirmEmail(uu.getNodeValue().trim().replaceAll(";", ","));          	
 			                  }
 		   	         		}
+		   	         		
 		   	         	  }
 		         		 }
 		         		 }catch(Exception e) {
@@ -1627,7 +1647,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	                  if(sm != null && sm.length() > 1){
 	                	//  System.out.println(sm);
 	            	      tm.put(customer.getName(), customer);
+	            	      custMap.put(customer.getID(),customer);
 	                      this.customers.add(customer.getID());
+	                      custAgs.put(customer.getID(),salesman.toUpperCase());
 	                  }
 	         	
 		         	  }catch(Exception e){
@@ -1649,6 +1671,21 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	     cc.setName("Ladu tagastus");
 	     cc.addAgent(new Agent("LADU"));
 	   tm.put("Ladu tagastus", cc);
+	   
+	   unse =  this.getUnsoldEans();
+	   Iterator itera = unse.keySet().iterator();
+	   while(itera.hasNext()) {
+		   String id = (String)itera.next();
+		   Vector vv = (Vector)unse.get(id);
+		   if(custMap.get(id) != null) {
+			   Customer ccc = (Customer)custMap.get(id);
+			   String name = Converter.deCode(ccc.getName());
+				if(name.startsWith("Rimi")) {
+					ccc.setInfo("NB! Müümata EAN koode : " + vv.size() + "|Kasuta soovituslikku sortimentti");
+				}
+			   
+		   }
+	   }
 	   
 	   System.out.println("kliendid b");
 		   
@@ -1676,6 +1713,25 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		
 		ca.add(Calendar.DAY_OF_YEAR, -days);
 		
+		if(cal.after(ca)){
+			return true;
+		}else{
+			return false;
+		}
+		
+	  }
+   
+   private boolean isOkDate60(String mmddyy){
+	  	long lon = 0;
+	  	Calendar cal = Calendar.getInstance();
+	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
+	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(5, 7))-1);
+	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(8, 10)));
+	  // System.out.println(mmddyy + " " +cal.getTime()); 
+	   Date date = new Date(lon);
+	   date.setTime(cal.getTimeInMillis());
+		Calendar ca = Calendar.getInstance();
+		ca.add(Calendar.DAY_OF_YEAR, -60);
 		if(cal.after(ca)){
 			return true;
 		}else{
@@ -1718,7 +1774,23 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    private Vector getCP(String custid , String number, String date,HashSet check ){
 
 	   Vector result = new Vector();
+	   File cpdata = new File("cpdata/" + number+".vec");
 	   try{
+	   if(cpdata.exists()) {
+		   Vector vec = (Vector)Converter.readObject("cpdata/" + number+".vec");
+		   for(int i = 0; i < vec.size(); i++) {
+			   CustProd cp = (CustProd)vec.elementAt(i);
+			   if(prodCodes == null) {
+				   prodCodes = new HashSet();
+			   }
+			   if(	 !prodCodes.contains(cp.getProdID())){
+			        prodCodes.add(cp.getProdID());	
+		        }
+		   }
+		   return vec ;
+	   }else {
+	   
+	 
 			String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice_row&get=1&number=" + number;
 		       // System.out.println("httpsURL " + httpsURL);
 				URL myurl = new URL(httpsURL);
@@ -1783,8 +1855,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		        	
 		        }
 		        in.close();
+		        Converter.saveObject(result, "cpdata/" + number + ".vec");
 		      //  System.out.println("buffer " + result);
-		        
+	   }
 	   }catch(Exception e){
 		   e.printStackTrace();
 		   return null;
@@ -1882,7 +1955,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    
    public TreeMap getProducts(Agent agent){
 	   TreeMap otherStocks = this.getProductsOther();
-	  
+	   selverEpoodProds = new Vector();
 	 
 	   boolean addShelf = false ;
 	   try {
@@ -2108,6 +2181,18 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
               goes = true;
         
    	 	 }
+   	  len = line.indexOf(   "data code=\"ART_SELVER__E_POOD\""); 
+	
+	 	 if(len != -1){
+	 		pesa =  line.substring(len + 40); 
+	     	pesa = pesa.substring(0,pesa.indexOf("\""));
+         if(pesa.contains("Jah")) {
+              selverEpoodProds.add(prod.getID());
+          }
+  //   System.out.println("Etooted " + pesa  );
+	 	 }
+   	 	
+   	 	 
    	 	 if(company.equals("agapics_lv")) {
    	 		 goes = true;
    	 	 }
@@ -2386,18 +2471,20 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	
 	   
 	
-		TreeMap contracts = Converter.loadFixFromExcels("excelsort" , prods, parent);
+		TreeMap contracts = Converter.loadSuggFromExcels("excelsort" , prods, parent);
 		System.out.println("Contracts " + contracts.size() + " " +  contracts.toString());
 		System.exit(0);
 		
 	}
    
    TreeMap eans = new TreeMap();
+   TreeMap prodEans = new TreeMap();
    
    public TreeMap getProducts2(){
 
 	    TreeMap tm = new TreeMap();
 	    eans = new TreeMap();
+	    prodEans = new TreeMap();
 	    prods = new TreeMap();
 	     try {
 	 
@@ -2444,6 +2531,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		          	     }
 		          	     arr.add(prod.getID());
 		          	   eans.put(ean, arr);
+		          	   prodEans.put(prod.getID(), ean);
 		      	    }
 		      	    
 		   
@@ -2534,9 +2622,125 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	     
 	   }
 
+   private String  assortment = null;
+   
+   private TreeMap getUnsoldEans() {
+	   TreeMap res = new TreeMap();
+	   // peame siis kliendi haaval tekitama puuduolevad tooted mida polemüüdud viimase 60p jooksul fix sordiga võrreldes
+	   // 1. meil on vaja kliendi listi kellel on Fix sortiment olmas
+	   if(custPRlists == null) {
+		   this.getCustomers(null);
+	   }
+	  // System.out.println("custPRlists " + custPRlists.size());
+	   // loeme sisse fix sortide eanid.
+	   if(fixEans == null) {
+		   this.getFixedAssortmentData();
+	   }
+	  // System.out.println("fixEans " + fixEans.size());
+	   //nüüd teeme valmis müüdud toodete eanObjekti
+	   if(last60Sold == null) {
+		   getCustomerProductsList2();
+	   }
+	   TreeMap soldEans = new TreeMap();
+	  // System.out.println("last60Sold " + last60Sold.size());
+	   
+	 
+	   Iterator itera = last60Sold.keySet().iterator();
+	   while (itera.hasNext()) {
+		   String clid = (String)itera.next();
+		   Vector vv = (Vector)last60Sold.get(clid);
+	      for(int a = 0 ; a < vv.size(); a++) {
+	    	  String prid = (String)vv.get(a);
+	    	  
+	    	  Vector aa = (Vector)soldEans.get(clid);
+	    	  if( aa == null) {
+	    		  aa = new Vector();
+	    	  }
+	    	  String ea = (String)prodEans.get(prid);
+	    	  
+	    	 // System.out.println("ea ja prod " + ea + " " + prid);
+	    	  if(ea != null) {
+	    		  if(!aa.contains(ea)) {
+	    			aa.add(ea);
+	    			soldEans.put(clid, aa);
+	    		  }
+	    		  }
+	      }
+	   }
+	   
+	   System.out.println("soldEans " + soldEans.size() + " " + prodEans.size());
+	   
+	   
+	   // nyyd vaatame kes mida poel ostnud
+	   
+	   TreeMap unsoldEans = new TreeMap();
+	   
+	   Iterator iterax = soldEans.keySet().iterator();
+	   while(iterax.hasNext()) {
+		   String cuid = (String)iterax.next();
+		   String clFix =(String) custPRlists.get(cuid);
+		   if(clFix != null) {
+		   Vector vv = (Vector)soldEans.get(cuid);
+		   Vector fv = (Vector)fixEans.get(clFix);
+		   if(fv != null) {
+			   for(int a = 0; a < fv.size(); a++) {
+				   String prf = (String)fv.get(a);
+				   if(!vv.contains(prf)) {
+					 Vector us = (Vector) unsoldEans.get(cuid); 
+					 if(us == null) {
+						 us = new Vector();
+					 }
+					 us.add(prf);
+					 unsoldEans.put(cuid, us);
+				   }
+			   }
+		   }
+	   }}
+
+	   return unsoldEans;
+   };
+   
+  private TreeMap unSoldWarning = null;
+  private TreeMap unse = null;
    
    public String getAssortmentStr(Agent agent){
-    return null;
+	   unSoldWarning = new TreeMap();
+	   StringBuffer sb = new StringBuffer();
+	   if(unse == null) {
+		   unse =  this.getUnsoldEans();
+	   }
+	    
+	// Nyyd on vaja igale kliendile teha sortiment mis on puudu daga ainult need mis on 
+	 
+	 Iterator itera = unse.keySet().iterator();
+	 while(itera.hasNext()) {
+		 String cuid = (String)itera.next();
+		 String ag = " ";
+		 if(custAgs.get(cuid) != null) {
+			 ag = custAgs.get(cuid)+"";
+		 }
+		 Customer cc = (Customer)custMap.get(cuid);
+			if(cc != null) {
+				String name = Converter.deCode(cc.getName());
+				if(name.startsWith("Rimi")) {
+					
+		 Vector vv = (Vector)unse.get(cuid);
+		 for(int a = 0 ; a< vv.size() ;a++) {
+			 String prodID = vv.get(a)+"";
+			 ArrayList arr = (ArrayList) eans.get(prodID);
+             //  System.out.println(" " + arr.toString());
+			 // siin sii spanna ka kliendile kylge hoiatus 
+			 if(arr != null) {
+          	for(Object pr : arr) {
+          		
+          	     sb.append(cuid + "; ; ;" + pr + "; ; ; ; ;," + ag + ","+ "\n");
+          	
+               }
+			 } 
+		 }}}
+	 }
+	  // System.out.println(sb.toString().substring(0,50000));
+    return sb.toString();
   }
 
    private Hashtable dueSums = new Hashtable();
@@ -2681,6 +2885,12 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   //1.teeme klientide arvete nimekirja .
 	    custProds = new Vector();
 	    
+	    
+		   File cpdatadir = new File("cpdata");
+		   if(!cpdatadir.exists()) {
+			   cpdatadir.mkdir();
+		   }
+	    
 	    HashSet check = new HashSet();
 	
 	   Calendar cal = Calendar.getInstance();
@@ -2782,16 +2992,27 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 				        		
 		     					Vector cps = this.getCP(Converter.deCode(custid),number,date ,check);
 		     					if(cps != null){
+		     				if(this.isOkDate60(date)) {
+		     					if(last60Sold == null) {
+		     						last60Sold = new TreeMap();
+		     					}
+		     					Enumeration eee = cps.elements();
+	     						while( eee.hasMoreElements()){
+	     							CustProd cp = (CustProd) eee.nextElement();
+	     							Vector v = (Vector)last60Sold.get(cp.getCustID());
+	     							if(v == null) {
+	     								v = new Vector();
+	     							}
+	     							v.add(cp.getProdID());
+	     							last60Sold.put(cp.getCustID(), v);
+		     					}
+		     				}
+		     						
 		     						Enumeration eee = cps.elements();
 		     						while( eee.hasMoreElements()){
-		     							
-		     						
-		     							
-			     						custProds.add(eee.nextElement());
-			     					//	System.out.println(date + " " + number + " " + custid);
-		     						}			     				
-				        			 	
-		     					}
+		     							custProds.add(eee.nextElement());
+			     					}			     				
+				        		}
 		     				}
 		        	}
 		        	
@@ -2805,8 +3026,12 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		   } catch (Exception a){
 		   }
 	   }
+	   System.out.println("last60Sold " + last60Sold.size());
+	   
 	   return custProds;
    }
+   
+   private TreeMap last60Sold = null;
 
    public  Vector upsideVector(Vector inVec){
 	   Vector sorted = new Vector(inVec.size());
@@ -2821,7 +3046,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
      return null;
    }
    public String getDriverVersion(){
-     return "DirectoLinpet";
+     return "DirectoAgapics";
    }
    public String getSubjectFilesTo(){
      return this.subjectFilesTo;
@@ -3008,5 +3233,87 @@ products.append(getParent().getNF().format(seisx) + "; "  +  "\n");
  
  return products.toString();
  
+}
+
+
+
+
+
+@Override
+public void WebReporter() {
+	
+	StringBuffer sb = new StringBuffer();
+	if(custMap == null) {
+		prodCodes = new HashSet();
+		this.getCustomers(null);
+		this.getProducts(null);
+	}
+	TreeMap unsEans = this.getUnsoldEans();
+	Calendar ccc = Calendar.getInstance();
+	Calendar then = Calendar.getInstance();
+	then.add(Calendar.DAY_OF_YEAR, -60);
+	
+	String periood = "Periood " + Converter.getDDpMMpYYYYpString(then) 
+	+ " -> " + Converter.getDDpMMpYYYYpString(ccc) + "<br><br>";
+	
+	Iterator itera = unsEans.keySet().iterator();
+	
+	while(itera.hasNext()) {
+		String cuid = (String)itera.next();
+		Vector uns = (Vector)unsEans.get(cuid);
+		Customer cc = (Customer)custMap.get(cuid);
+		if(cc != null) {
+			String name = Converter.deCode(cc.getName());
+			if(name.startsWith("Rimi")) {
+			sb.append(name + "\n");
+			for (Object ob : uns) {
+				sb.append(ob+ "\n");
+			}
+			sb.append( "\n");
+			}
+		}
+	}
+	
+	System.out.println(sb.toString());
+	try {
+		
+	
+	Email mail = new Email(null);
+	   
+		
+    mail.setSMTP(parent.getProps().getProperty("smtphost"));
+    if(parent.getProps().getProperty("smtpuser") != null)
+    mail.setUser(parent.getProps().getProperty("smtpuser"));
+    
+    if(parent.getProps().getProperty("smtppass") != null)
+    mail.setPass(parent.getProps().getProperty("smtppass"));
+    
+    if(parent.getProps().getProperty("smtpport") != null)
+    mail.setPort(parent.getProps().getProperty("smtpport"));
+      	
+    mail.setSubjectFilesTo("Müümata ean koodid " + Converter.getDDpMMpYYYYpString(then) 
+	+ " -> " + Converter.getDDpMMpYYYYpString(ccc)  );
+ 		
+		mail.setFrom(parent.getProps().getProperty("from"));
+		
+
+	
+		String lisa = "";
+		
+		mail.setEncoding("utf-8");
+		mail.setBodyHtml("<br>" + periood + sb.toString().replaceAll("\n", "<br>") + "<br><br>");
+		mail.setSendNotice(false);
+		
+	 StringTokenizer st = new StringTokenizer(parent.getProps().getProperty("unsold.email"),",");
+	 while(st.hasMoreTokens()) {
+	    mail.setFilesTo(st.nextToken());
+		mail.send(); 
+	 }
+   	
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+	System.exit(0);
+	
 }
 }

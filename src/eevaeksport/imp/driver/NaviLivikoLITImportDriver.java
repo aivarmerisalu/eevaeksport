@@ -432,7 +432,10 @@ private HashMap prodnames = null;
         			
          			if(ref.trim().indexOf("[") != -1) {
       				  ref = ref.substring(0,ref.indexOf("["));
-      			  }
+      			    }
+         			if(ref.trim().indexOf("[") == 0) {
+        				  ref = ref.substring(0,ref.indexOf("["));
+        			    }
          			  
          		  }
          		  System.out.println("Tagastus0 " + tagastus + " " + ref);
@@ -541,9 +544,7 @@ private HashMap prodnames = null;
             	   ccc = ccc + line.getPartii();
                }
                
-              if (reason != null) {
-            //	ccc = (ccc + reason).trim();   
-               }
+          
                
                if(ccc.length() > 0) {
                    sb.append("   <AdditionalInfo>" +ls);
@@ -578,12 +579,15 @@ private HashMap prodnames = null;
              if(comm != null && comm.length()>100){
               	comm = comm.substring(0,100);
               }
-             if(comm != null && comm.trim().length() > 0 ){
+             if((comm != null && comm.trim().length() > 0)  || reasonCode != null){
              	  sb.append("   <AdditionalInfo>" +ls);
                    sb.append("       <Extension extensionId=\"remarks\">" + ls);
                    sb.append("       <InfoName>Notes</InfoName>");
+                   if(comm == null) {
+                	   comm = "Na.";
+                   }
                    sb.append("            <InfoContent>" + escape(comm) + "</InfoContent>" + ls );
-                   if(reason != null) {
+                   if(reasonCode != null) {
                 	   sb.append("            <CustomContent>" + Converter.escapeXML(reasonCode) + "</CustomContent>" + ls );
                    }
                    

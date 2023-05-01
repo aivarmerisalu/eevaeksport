@@ -506,7 +506,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  
 	  
 	  Vector result = new Vector();
-	  if(order.getStatus() > 6 && defDealers == null){
+	  if(defDealers == null){
 		  loadWares();
 	  }
 	  
@@ -541,7 +541,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		   }else if(order.getStatus() > 6){
 			   order.setWarehouse("53268");
 				 order.setDealer("53268");
-				 this.trouble = " Nav noliktava in Horizon ";
+				 this.trouble = " Nav noliktava in Horizon SPLIT NO HRC";
 		   }
 		
           String cuKont = kontOK.get(order.getCompany())+"";
@@ -890,6 +890,23 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  ord10r.setWarehouse(order.getWarehouse());
 	  ord10r.setShipDateUsed(order.isShipDateUsed());
 	  
+	  
+	  Order ord92 = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName());
+	  String taht92 = "z"; 
+	  ord92.setAgentCode(order.getAgentCode());
+	  ord92.setDokNr(order.getDokNr() + taht92 + mills);
+	  ord92.setInfo(order.getInfo());
+	  ord92.setTeostaja((order.getTeostaja()));
+	  ord92.setChanged(order.isChanged());
+	  ord92.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord92.setStatus(order.getStatus());
+	  ord92.setShipTime(order.getShipTime());
+	  ord92.setPaymTerm(order.getPaymTerm());
+	  ord92.setShipDateUsed(order.isShipDateUsed());
+	  ord92.setWarehouse(order.getWarehouse());
+	  ord92.setDealer("82450");
+	  ord92.setCurrency("NPARMP"); // G tähega
+	  
 	  String dea = "53277";
 	  if(order.getDealer().equals("53269")) {
 		  dea = "81208";
@@ -930,7 +947,12 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
       		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
                 	
                 
-                } else if(itemid.startsWith("P") ){
+                } else  if(itemid.startsWith("Z") ){
+          	    	 
+          	    	 ord92.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+          		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+          	  
+                    }else if(itemid.startsWith("P") ){
                     boolean FF = true;
           	    	 if(defOsak.get(lin.getToode()) != null && defOsak.get(lin.getToode()).equals("NF")){
           	    		 FF = false;
@@ -1061,7 +1083,9 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  if(ordcD.getOrderLines() != null && ordcD.getOrderLines().size()>0){
 		  result.add(ordcD);  
 	  }
-
+	  if(ord92.getOrderLines() != null && ord92.getOrderLines().size()>0){
+		  result.add(ord92);  
+	  }
 	  if(ord2.getOrderLines() != null && ord2.getOrderLines().size()>0){
 		  result.add(ord2);  
 	  }
@@ -1141,7 +1165,84 @@ private String getERI(String ware) {
 }
 
 
+private Vector splitOrderByAm (Order order, int num){
+Vector result = new Vector();
 
+Order ord9 = new Order(order.getCompany(),order.getAgentFirstName());
+
+ord9.setAgentCode(order.getAgentCode());
+ord9.setDokNr(order.getDokNr());
+ord9.setInfo(order.getInfo());
+ord9.setTeostaja((order.getTeostaja()));
+ord9.setChanged(order.isChanged());
+ord9.setShipCal(order.getShipCal().getTimeInMillis() +"");
+ord9.setStatus(order.getStatus());
+ord9.setShipTime(order.getShipTime());
+ord9.setPaymTerm(order.getPaymTerm());
+ord9.setShipDateUsed(order.isShipDateUsed());
+ord9.setWarehouse(order.getWarehouse());
+ord9.setDealer(order.getDealer());
+ord9.setCurrency(order.getCurrency()); // G tähega
+
+Order ord2 = new Order((order.getCompany() ),order.getAgentFirstName());
+ord2.setAgentCode(order.getAgentCode());
+ord2.setDokNr(order.getDokNr() + "+");
+ord2.setInfo(order.getInfo());
+ord2.setTeostaja((order.getTeostaja()));
+ord2.setShipDateUsed(order.isShipDateUsed());
+ord2.setChanged(order.isChanged());
+ord2.setShipCal(order.getShipCal().getTimeInMillis() +"");
+ord2.setStatus(order.getStatus());
+ord2.setShipTime(order.getShipTime());
+ord2.setPaymTerm(order.getPaymTerm());
+ord2.setWarehouse(order.getWarehouse());
+ord2.setDealer(order.getDealer());
+ord2.setCurrency(order.getCurrency()); // M
+	
+
+
+System.out.println("Splitin Warehouse agendid " + order.getWarehouse());
+
+Vector lines = order.getOrderLines();
+Enumeration enums = lines.elements();
+int coun = 1;
+while  (enums.hasMoreElements()){
+OrderLine lin = (OrderLine)enums.nextElement();
+
+   if(coun < num+1){
+   	 ord9.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+	     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+ 
+     } else {
+  	 
+		 ord2.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+   			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+	
+      }
+   coun++;
+
+}
+
+
+if(ord2.getOrderLines() != null && ord2.getOrderLines().size()>0){
+result.add(ord2);  
+}
+
+
+if(ord9.getOrderLines() != null && ord9.getOrderLines().size()>0){
+result.add(ord9);  
+}
+
+
+
+
+
+
+System.out.println("Result =" +order.getDokNr()
+		 + " "+ result.size());
+//System.exit(0);
+return result ;
+}
 
 
 private Vector splitOrderHRC (Order order){
@@ -1151,7 +1252,7 @@ private Vector splitOrderHRC (Order order){
 	  
 	  
 	  Vector result = new Vector();
-	  if(order.getStatus() > 6 && defDealers == null){
+	  if(defDealers == null){
 		  loadWares();
 	  }
 	  
@@ -1175,7 +1276,7 @@ private Vector splitOrderHRC (Order order){
 		   }else if(order.getStatus() > 6){
 			   order.setWarehouse("53268");
 				 order.setDealer("53268");
-				 this.trouble = " Nav noliktava in Horizon ";
+				 this.trouble = " Nav noliktava in Horizon HRC ";
 		   }
 		
           String cuKont = kontOK.get(order.getCompany())+"";
@@ -1184,325 +1285,54 @@ private Vector splitOrderHRC (Order order){
           System.out.println("CuKont " + order.getCompany() + " " + cuKont);
           
           
-          Order ordc = new Order(order.getCompany()+ "_" + cuKont ,order.getAgentFirstName());
+ 
 
-    	  
-    	  String tahtc = "c";
-    	  ordc.setAgentCode(order.getAgentCode());
-    	  ordc.setDokNr(order.getDokNr() + tahtc + mills);
-    	  ordc.setInfo(order.getInfo());
-    	  ordc.setTeostaja((order.getTeostaja()));
-    	  ordc.setChanged(order.isChanged());
-    	  ordc.setShipCal(order.getShipCal().getTimeInMillis() +"");
-    	  ordc.setStatus(order.getStatus());
-    	  ordc.setShipDateUsed(order.isShipDateUsed());
-    	  ordc.setShipTime(order.getShipTime());
-    	  ordc.setWarehouse(order.getWarehouse());
-    	  ordc.setDealer(order.getDealer());
-    	  ordc.setPaymTerm(order.getPaymTerm());
-    	  ordc.setCurrency(getType(order.getDealer(),1,order)); // p mitte
-    	  
-    	  Order ordcFI = new Order(order.getCompany()+ "_" + cuKont ,order.getAgentFirstName());
-
-    	  
-    	  String tahtcFI = "cf";
-    	  ordcFI.setAgentCode(order.getAgentCode());
-    	  ordcFI.setDokNr(order.getDokNr() + tahtcFI + mills);
-    	  ordcFI.setInfo(order.getInfo());
-    	  ordcFI.setTeostaja((order.getTeostaja()));
-    	  ordcFI.setChanged(order.isChanged());
-    	  ordcFI.setShipCal(order.getShipCal().getTimeInMillis() +"");
-    	  ordcFI.setStatus(order.getStatus());
-    	  ordcFI.setShipDateUsed(order.isShipDateUsed());
-    	  ordcFI.setShipTime(order.getShipTime());
-    	  ordcFI.setWarehouse(order.getWarehouse());
-    	  ordcFI.setDealer(order.getDealer());
-    	  ordcFI.setPaymTerm(order.getPaymTerm());
-    	  ordcFI.setCurrency(getType(order.getDealer(),1,order)); // p mitte
-    	  
-    	  
-    	  
-    	  
-     Order ordcD = new Order(order.getCompany()+ "_" + cuKont ,order.getAgentFirstName());
-
-    	  
-    	  String tahtcD = "cd";
-    	  ordcD.setAgentCode(order.getAgentCode());
-    	  ordcD.setDokNr(order.getDokNr() + tahtcD + mills);
-    	  ordcD.setInfo(order.getInfo());
-    	  ordcD.setTeostaja((order.getTeostaja()));
-    	  ordcD.setChanged(order.isChanged());
-    	  ordcD.setShipCal(order.getShipCal().getTimeInMillis() +"");
-    	  ordcD.setStatus(order.getStatus());
-    	  ordcD.setShipDateUsed(order.isShipDateUsed());
-    	  ordcD.setShipTime(order.getShipTime());
-    	
-    	  String eridealer = getERI(order.getDealer());
-    	  ordcD.setWarehouse(eridealer);
-    	  ordcD.setDealer(eridealer);
-    	  ordcD.setPaymTerm(order.getPaymTerm());
-    	  ordcD.setCurrency(getType(order.getDealer(),20,order)); // p mitte
-    	  
-    	  System.out.println("eridealer!! " + order.getDealer() + " " + eridealer + " " + ordcD.getCurrency());
-    	  
-    	  Order ordw = new Order(order.getCompany()+ "_" + cuKont ,order.getAgentFirstName());
-    	  String tahtw = "w";
-    	  ordw.setAgentCode(order.getAgentCode());
-    	  ordw.setDokNr(order.getDokNr() + tahtw + mills);
-    	  ordw.setInfo(order.getInfo());
-    	  ordw.setTeostaja((order.getTeostaja()));
-    	  ordw.setChanged(order.isChanged());
-    	  ordw.setShipCal(order.getShipCal().getTimeInMillis() +"");
-    	  ordw.setStatus(order.getStatus());
-    	  ordw.setShipDateUsed(order.isShipDateUsed());
-    	  ordw.setShipTime(order.getShipTime());
-    	  ordw.setWarehouse(order.getWarehouse());
-    	  ordw.setDealer(order.getDealer());
-    	  ordw.setPaymTerm(order.getPaymTerm());
-    	  ordw.setCurrency(getType(order.getDealer(),1,order)); // p mitte
+          Order ord9 = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName());
+    	  String taht9 = "g"; 
+    	  ord9.setAgentCode(order.getAgentCode());
+    	  ord9.setDokNr(order.getDokNr() + taht9 + mills);
+    	  ord9.setInfo(order.getInfo());
+    	  ord9.setTeostaja((order.getTeostaja()));
+    	  ord9.setChanged(order.isChanged());
+    	  ord9.setShipCal(order.getShipCal().getTimeInMillis() +"");
+    	  ord9.setStatus(order.getStatus());
+    	  ord9.setShipTime(order.getShipTime());
+    	  ord9.setPaymTerm(order.getPaymTerm());
+    	  ord9.setShipDateUsed(order.isShipDateUsed());
+    	  ord9.setWarehouse(order.getWarehouse());
+    	  ord9.setDealer("53271");
+    	  ord9.setCurrency("NDM3"); // G tähega
           
-	  Order ord1 = new Order(order.getCompany()+ "_" + cuKont ,order.getAgentFirstName());
-
-	  String taht1 = "a";
-	  ord1.setAgentCode(order.getAgentCode());
-	  ord1.setDokNr(order.getDokNr() + taht1 + mills);
-	  ord1.setInfo(order.getInfo());
-	  ord1.setTeostaja((order.getTeostaja()));
-	  ord1.setChanged(order.isChanged());
-	  ord1.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord1.setStatus(order.getStatus());
-	  ord1.setShipTime(order.getShipTime());
-	  ord1.setWarehouse(order.getWarehouse());
-	  ord1.setShipDateUsed(order.isShipDateUsed());
-	  ord1.setPaymTerm(order.getPaymTerm());
-	  ord1.setDealer(order.getDealer());
-	  ord1.setCurrency(getTypeHRC(order.getDealer(),1,order)); // p mitte
-	 
-	  Order ord2 = new Order((order.getCompany() + "_" + cuKont ),order.getAgentFirstName());
-	  ord2.setAgentCode(order.getAgentCode());
-	  ord2.setDokNr(order.getDokNr()+ "m"+ mills);
-	  ord2.setInfo(order.getInfo());
-	  ord2.setTeostaja((order.getTeostaja()));
-	  ord2.setShipDateUsed(order.isShipDateUsed());
-	  ord2.setChanged(order.isChanged());
-	  ord2.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord2.setStatus(order.getStatus());
-	  ord2.setShipTime(order.getShipTime());
-	  ord2.setPaymTerm(order.getPaymTerm());
-	  ord2.setWarehouse(order.getWarehouse());
-	  ord2.setDealer(order.getDealer());
-	  ord2.setCurrency(getTypeHRC(order.getDealer(),2,order)); // M
-		
-
-	  Order ord3 = new Order((order.getCompany() + "_" + cuKont ),order.getAgentFirstName());
-	  ord3.setAgentCode(order.getAgentCode());
-	  ord3.setDokNr(order.getDokNr()+ "n"+ mills);
-	  ord3.setInfo(order.getInfo());
-	  ord3.setTeostaja((order.getTeostaja()));
-	  ord3.setShipDateUsed(order.isShipDateUsed());
-	  ord3.setChanged(order.isChanged());
-	  ord3.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord3.setStatus(order.getStatus());
-	  ord3.setShipTime(order.getShipTime());
-	  ord3.setWarehouse(order.getWarehouse());
-	  ord3.setPaymTerm(order.getPaymTerm());
-	  ord3.setDealer(order.getDealer());
-	  ord3.setCurrency(getTypeHRC(order.getDealer(),3,order)); // RM N
-
-	  
-	  Order ord4 = new Order((order.getCompany() + "_" + cuKont),order.getAgentFirstName());
-	  String taht4 = "f";
-	  ord4.setAgentCode(order.getAgentCode());
-	  ord4.setDokNr(order.getDokNr()+ taht4+ mills);
-	  ord4.setInfo(order.getInfo());
-	  ord4.setTeostaja((order.getTeostaja()));
-	  ord4.setChanged(order.isChanged());
-	  ord4.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord4.setStatus(order.getStatus());
-	  ord4.setShipTime(order.getShipTime());
-	  ord4.setShipDateUsed(order.isShipDateUsed());
-	  ord4.setWarehouse(order.getWarehouse());
-	  ord4.setPaymTerm(order.getPaymTerm());
-	  ord4.setDealer(order.getDealer());
-	  ord4.setCurrency(getTypeHRC(order.getDealer(),4,order));
-		 
-	 
-	  String taht5 = "b";	  
-
-      Order ord5 = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName());
-	  ord5.setAgentCode(order.getAgentCode());
-	  ord5.setDokNr(order.getDokNr()+ taht5+ mills);
-	  ord5.setInfo(order.getInfo());
-	  ord5.setTeostaja((order.getTeostaja()));
-	  ord5.setShipDateUsed(order.isShipDateUsed());
-	  ord5.setChanged(order.isChanged());
-	  ord5.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord5.setStatus(order.getStatus());
-	  ord5.setShipTime(order.getShipTime());
-	  ord5.setWarehouse(order.getWarehouse());
-	  ord5.setPaymTerm(order.getPaymTerm());
-	  ord5.setDealer(order.getDealer());
-	  ord5.setCurrency(getTypeHRC(order.getDealer(),5,order)); // täht H
-		 
-
-      Order ord6 = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName());
-	  String taht6 = "x"; 
-	  ord6.setAgentCode(order.getAgentCode());
-	  ord6.setDokNr(order.getDokNr() + taht6+ mills);
-	  ord6.setInfo(order.getInfo());
-	  ord6.setTeostaja((order.getTeostaja()));
-	  ord6.setChanged(order.isChanged());
-	  ord6.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord6.setStatus(order.getStatus());
-	  ord6.setShipTime(order.getShipTime());
-	  ord6.setWarehouse(order.getWarehouse());
-	  ord6.setShipDateUsed(order.isShipDateUsed());
-	  ord6.setPaymTerm(order.getPaymTerm());
-	  ord6.setDealer(order.getDealer());
-	  ord6.setCurrency(getTypeHRC(order.getDealer(),6,order)); // täht X
-		 
-
-
-      Order ord7 = new Order((order.getCompany() + "_" + cuKont),order.getAgentFirstName());
-	  String taht7 = "b";
-	  ord7.setAgentCode(order.getAgentCode());
-	  ord7.setDokNr(order.getDokNr() + taht7+ mills);
-	  ord7.setInfo(order.getInfo());
-	  ord7.setTeostaja((order.getTeostaja()));
-	  ord7.setShipDateUsed(order.isShipDateUsed());
-	  ord7.setChanged(order.isChanged());
-	  ord7.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord7.setStatus(order.getStatus());
-	  ord7.setShipTime(order.getShipTime());
-	  ord7.setPaymTerm(order.getPaymTerm());
-	  ord7.setWarehouse(order.getWarehouse());
-	  ord7.setDealer(order.getDealer());
-	  ord7.setCurrency(getTypeHRC(order.getDealer(),7,order)); // täht B
-	  
-		/*  53268	RĪGAS NOLIKTAVA (Galvena)	N01
-	  53269	Daugavpils noliktava	N02
-	  53270	Liepājas noliktava	N03
-	  53271	Atdzesetas GAĻAS noliktava BAJARDS	N04
-	  53272	Atdzesetas ZIVIS noliktava ROTANS	N05
-*/  
-	  Order ord8 = new Order((order.getCompany() + "_" + cuKont),order.getAgentFirstName());
-	  String taht8 = "u";
-	 
-	  ord8.setAgentCode(order.getAgentCode());
-	  ord8.setDokNr(order.getDokNr() + taht8+ mills);
-	  ord8.setInfo(order.getInfo());
-	  ord8.setTeostaja((order.getTeostaja()));
-	  ord8.setChanged(order.isChanged());
-	  ord8.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord8.setStatus(order.getStatus());
-	  ord8.setShipTime(order.getShipTime());
-	  ord8.setPaymTerm(order.getPaymTerm());
-	  ord8.setWarehouse(order.getWarehouse());
-	  ord8.setShipDateUsed(order.isShipDateUsed());
-	  ord8.setDealer(order.getDealer());
-	  ord8.setCurrency(getTypeHRC(order.getDealer(),8,order)); // P tähega
-
-	  
-	  
-	  Order ord9 = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName());
-	  String taht9 = "g"; 
-	  ord9.setAgentCode(order.getAgentCode());
-	  ord9.setDokNr(order.getDokNr() + taht9 + mills);
-	  ord9.setInfo(order.getInfo());
-	  ord9.setTeostaja((order.getTeostaja()));
-	  ord9.setChanged(order.isChanged());
-	  ord9.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord9.setStatus(order.getStatus());
-	  ord9.setShipTime(order.getShipTime());
-	  ord9.setPaymTerm(order.getPaymTerm());
-	  ord9.setShipDateUsed(order.isShipDateUsed());
-	  ord9.setWarehouse(order.getWarehouse());
-	  ord9.setDealer("53271");
-	  ord9.setCurrency(getTypeHRC(order.getDealer(),9,order)); // G tähega
-	  
-
-
-	  Order ord10 = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName()); // J tähega tellimus 
-	  String taht10 = "j";
-	  ord10.setAgentCode(order.getAgentCode());
-	  ord10.setDokNr(order.getDokNr() + taht10 + mills);
-	  ord10.setInfo(order.getInfo());
-	  ord10.setTeostaja((order.getTeostaja()));
-	  ord10.setChanged(order.isChanged());
-	  ord10.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord10.setStatus(order.getStatus());
-	  ord10.setShipTime(order.getShipTime());
-	  ord10.setWarehouse(order.getWarehouse());
-	  ord10.setPaymTerm(order.getPaymTerm());
-	  ord10.setShipDateUsed(order.isShipDateUsed());
-	  ord10.setDealer("53272");
-	  ord10.setCurrency(getTypeHRC(order.getDealer(),10,order));
-	 
-	  
-	  Order ord10a = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName()); // J tähega tellimus 
-	  String taht10a = "o";
-	  ord10a.setAgentCode(order.getAgentCode());
-	  ord10a.setDokNr(order.getDokNr() + taht10a + mills);
-	  ord10a.setInfo(order.getInfo());
-	  ord10a.setShipDateUsed(order.isShipDateUsed());
-	  ord10a.setTeostaja((order.getTeostaja()));
-	  ord10a.setChanged(order.isChanged());
-	  ord10a.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord10a.setStatus(order.getStatus());
-	  ord10a.setShipTime(order.getShipTime());
-	  ord10a.setPaymTerm(order.getPaymTerm());
-	  ord10a.setWarehouse(order.getWarehouse());
-	  ord10a.setDealer((order.getDealer()));
-	  ord10a.setCurrency(getTypeHRC(order.getDealer(),11,order));
-	 
-	  
-	  String lisaV = cuKont;
-	  if(propsVEGE.containsKey(order.getCompany())) {
-		  lisaV = propsVEGE.getProperty(order.getCompany());
-	  }
-	  
-	  Order ord10d = new Order((order.getCompany()+ "_" + lisaV),order.getAgentFirstName()); // D tähega tellimus 
-	  String taht1d = "d";
-	  ord10d.setAgentCode(order.getAgentCode());
-	  ord10d.setDokNr(order.getDokNr() + taht1d + mills);
-	  ord10d.setInfo(order.getInfo());
-	  ord10d.setTeostaja((order.getTeostaja()));
-	  ord10d.setChanged(order.isChanged());
-	  ord10d.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord10d.setStatus(order.getStatus());
-	  ord10d.setShipTime(order.getShipTime());
-	  ord10d.setPaymTerm(order.getPaymTerm());
-	  ord10d.setShipDateUsed(order.isShipDateUsed());
-	  ord10d.setWarehouse(eridealer);
-	  ord10d.setDealer(eridealer);
-	 
-	
-	  ord10d.setCurrency(getTypeHRC(order.getDealer(),20,order));
-	  
-	  
-	  Order ord10r = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName()); // D tähega tellimus 
-	  String taht1r = "r";
-	  ord10r.setAgentCode(order.getAgentCode());
-	  ord10r.setDokNr(order.getDokNr() + taht1r + mills);
-	  ord10r.setInfo(order.getInfo());
-	  ord10r.setTeostaja((order.getTeostaja()));
-	  ord10r.setChanged(order.isChanged());
-	  ord10r.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ord10r.setStatus(order.getStatus());
-	  ord10r.setShipTime(order.getShipTime());
-	  ord10r.setWarehouse(order.getWarehouse());
-	  ord10r.setPaymTerm(order.getPaymTerm());
-	  ord10r.setShipDateUsed(order.isShipDateUsed());
-	  String dea = "53277";
-	  if(order.getDealer().equals("53269")) {
-		  dea = "81209";
-	  }else if(order.getDealer().equals("53270")) {
-		  dea = "81208";
-	  }
-	  
-	  ord10r.setDealer(dea);
-	  ord10r.setCurrency(getTypeHRC(order.getDealer(),13,order));
-	  
+    	  Order ord2 = new Order((order.getCompany() + "_" + cuKont ),order.getAgentFirstName());
+    	  ord2.setAgentCode(order.getAgentCode());
+    	  ord2.setDokNr(order.getDokNr()+ "m"+ mills);
+    	  ord2.setInfo(order.getInfo());
+    	  ord2.setTeostaja((order.getTeostaja()));
+    	  ord2.setShipDateUsed(order.isShipDateUsed());
+    	  ord2.setChanged(order.isChanged());
+    	  ord2.setShipCal(order.getShipCal().getTimeInMillis() +"");
+    	  ord2.setStatus(order.getStatus());
+    	  ord2.setShipTime(order.getShipTime());
+    	  ord2.setPaymTerm(order.getPaymTerm());
+    	  ord2.setWarehouse(order.getWarehouse());
+    	  ord2.setDealer(order.getDealer());
+    	  ord2.setCurrency(getTypeHRC(order.getDealer(),1,order)); // M
+    		
+    	  Order ord92 = new Order((order.getCompany()+ "_" + cuKont),order.getAgentFirstName());
+    	  String taht92 = "z"; 
+    	  ord92.setAgentCode(order.getAgentCode());
+    	  ord92.setDokNr(order.getDokNr() + taht92 + mills);
+    	  ord92.setInfo(order.getInfo());
+    	  ord92.setTeostaja((order.getTeostaja()));
+    	  ord92.setChanged(order.isChanged());
+    	  ord92.setShipCal(order.getShipCal().getTimeInMillis() +"");
+    	  ord92.setStatus(order.getStatus());
+    	  ord92.setShipTime(order.getShipTime());
+    	  ord92.setPaymTerm(order.getPaymTerm());
+    	  ord92.setShipDateUsed(order.isShipDateUsed());
+    	  ord92.setWarehouse(order.getWarehouse());
+    	  ord92.setDealer("82450");
+    	  ord92.setCurrency("NPARMP"); // G tähega
 	  
 	  System.out.println("Splitin Warehouse agendid " + order.getWarehouse());
 	  
@@ -1512,144 +1342,40 @@ private Vector splitOrderHRC (Order order){
 		  OrderLine lin = (OrderLine)enums.nextElement();
 		
 		     String itemid = lin.getToode();
-		     
-		     if( order.getPaymTerm() == -1 ){
-      	    	 
-		    	 if(itemid.startsWith("F") || itemid.startsWith("I") ){
-	                	ordcFI.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-	   		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-	                } else if(itemid.startsWith("D") ){
-	                	ordcD.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-	      		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-	                } else {
-	                	ordc.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-	    		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-	                }
-      	  
-                }  else if(itemid.startsWith("P") || itemid.startsWith("H") ||itemid.startsWith("X") 
-		    		  || itemid.startsWith("N") || itemid.startsWith("A") ){
-		    	 
-	    		 ord1.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-	    	
-                }else if( itemid.startsWith("O") ){
-          	    	 
-          	    	 ord10a.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-          		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-          	  
-                    } else if( itemid.startsWith("W") ){
-             	    	 
-             	    	 ordw.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-             		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-             	  
-                       }else  if(itemid.startsWith("B")){
-       	    	 
-       	    	 ord5.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-       		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-       	  
-                 } else  if(itemid.startsWith("M") ){
-       	    	 
-       	    	 ord2.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-       		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-       	  
-                 } else if(itemid.startsWith("F") || itemid.startsWith("I") ){
-          	    	 
-  	                ord4.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-	     			    lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-
-                } else  if(itemid.startsWith("J") ){
+		     if(itemid.startsWith("G") ){
      	    	 
-     	    	 ord10.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+     	    	 ord9.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
      		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
      	  
-               } else if(itemid.startsWith("G") ){
-         	    	 
-         	    	 ord9.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-         		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-         	  
-                   }
-               else if(itemid.startsWith("D") ){
+               } else  if(itemid.startsWith("Z") ){
        	    	 
-       	    	 ord10d.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+       	    	 ord92.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
        		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
        	  
-                 }
-		   
-		     
-               else if(itemid.startsWith("RM") ){
-         	    	 
-         	    	 ord10r.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-         		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-         	  
-                   }
-		     
+                 } else {
+		    	 
+	    		 ord2.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+	    	
+                }
+            
 
 	  }
 
-	  if(ordw.getOrderLines() != null && ordw.getOrderLines().size()>0){
-		  result.add(ordw);  
-	  }
-
-	  if(ord1.getOrderLines() != null && ord1.getOrderLines().size()>0){
-		  result.add(ord1);  
-	  }
-
+	
 	  if(ord2.getOrderLines() != null && ord2.getOrderLines().size()>0){
 		  result.add(ord2);  
 	  }
-
-	  if(ord3.getOrderLines() != null && ord3.getOrderLines().size()>0){
-		  result.add(ord3);  
-	  }
-	  
-	  if(ordc.getOrderLines() != null && ordc.getOrderLines().size()>0){
-		  result.add(ordc);  
-	  }
-	  
-	  if(ordcFI.getOrderLines() != null && ordcFI.getOrderLines().size()>0){
-		  result.add(ordcFI);  
-	  }
-	  if(ordcD.getOrderLines() != null && ordcD.getOrderLines().size()>0){
-		  result.add(ordcD);  
-	  }
-	  
-	  if(ord4.getOrderLines() != null && ord4.getOrderLines().size()>0){
-		  result.add(ord4);  
+	  if(ord92.getOrderLines() != null && ord92.getOrderLines().size()>0){
+		  result.add(ord92);  
 	  }
 
-	  if(ord5.getOrderLines() != null && ord5.getOrderLines().size()>0){
-		  result.add(ord5);  
-	  }
-
-	  if(ord6.getOrderLines() != null && ord6.getOrderLines().size()>0){
-		  result.add(ord6);  
-	  }
-
-	  if(ord7.getOrderLines() != null && ord7.getOrderLines().size()>0){
-		  result.add(ord7);  
-	  }
-	  
-	  if(ord8.getOrderLines() != null && ord8.getOrderLines().size()>0){
-		  result.add(ord8);  
-	  }
 	  if(ord9.getOrderLines() != null && ord9.getOrderLines().size()>0){
 		  result.add(ord9);  
 	  }
-	  if(ord10.getOrderLines() != null && ord10.getOrderLines().size()>0){
-		  result.add(ord10);  
-	  }
-	  if(ord10a.getOrderLines() != null && ord10a.getOrderLines().size()>0){
-		  result.add(ord10a);  
-	  }
 	  
-	  if(ord10d.getOrderLines() != null && ord10d.getOrderLines().size()>0){
-		  result.add(ord10d);  
-	  }
 	  
 
-	  if(ord10r.getOrderLines() != null && ord10r.getOrderLines().size()>0){
-		  result.add(ord10r);  
-	  }
 	 System.out.println("Result =" +order.getDokNr()
 			 + " "+ result.size());
 	 //System.exit(0);
@@ -1657,7 +1383,6 @@ private Vector splitOrderHRC (Order order){
 	 return result ;
   }
   
-
 
 
 private String getType(String ware , int num , Order ord ){
@@ -1917,7 +1642,7 @@ private String getTypeHRC(String ware , int num , Order ord ){
 	if(ware.equals("53268") || ware.equals("22013")){ // n01 riga 
 		
 		if(num == 1){
-			res = "NPARK2K";
+			res = "NPARK2KHRC";
 		}
 		if(num == 2){
 			res = "NPARKMM";//"MEDR";
@@ -1949,7 +1674,7 @@ private String getTypeHRC(String ware , int num , Order ord ){
 	
 	if(ware.equals("53269") || ware.equals("46801") ){ // n02 daugavpils 
 		if(num == 1){
-			res = "NPAD";
+			res = "NPADHRC";
 		}
 		
 		if(num == 2){
@@ -1984,7 +1709,7 @@ private String getTypeHRC(String ware , int num , Order ord ){
 	if(ware.equals("53270") || ware.equals("45112")){ // n03 liepaja
 		
 		if(num == 1){
-			res = "NPARE";
+			res = "NPAREHRC";
 		}
 
 		if(num == 2){
@@ -2219,7 +1944,17 @@ try{
     				  System.out.println(order.getCompany() + " " + nlvKlients.contains(order.getCompany()));
     				if(nlvKlients.contains(order.getCompany())) {
     					order.setCurrency("NPARK2");
-    					 makeOutput(order,order,hrccustomer);  
+    					
+    					 //makeOutput(order,order,hrccustomer);  
+    					 Vector splitted2 =  this.splitOrderByAm(order, 38);
+   			    	  Enumeration en2 = splitted2.elements();
+   			    	  while(en2.hasMoreElements()){
+   			    		  
+   						  Order ord2 = (Order)en2.nextElement();
+   						  
+   						  
+					        makeOutput(ord2,order,hrccustomer);
+   			    	  }
     				}else {
     				
     				  
@@ -2230,20 +1965,40 @@ try{
     					  
     					  while(en.hasMoreElements()){
     						  Order ord = (Order)en.nextElement();
-    	    				  makeOutput(ord,order, hrccustomer);  
+    	    				 // makeOutput(ord,order, hrccustomer);  
+    	    				  
+    	    				  Vector splitted2 =  this.splitOrderByAm(ord, 38);
+        			    	  Enumeration en2 = splitted2.elements();
+        			    	  while(en2.hasMoreElements()){
+        			    		  
+        						  Order ord2 = (Order)en2.nextElement();
+        						  
+        						  
+    					        makeOutput(ord2,order,hrccustomer);
+        			    	  }
     	        		  }
     					  
     				  }else{
     					 // System.out.println("OffTrade");
-    					 /* Vector splitted =  splitOrderHRC(order);
+    					  Vector splitted =  splitOrderHRC(order);
     			    	  Enumeration en = splitted.elements();
     			    	  while(en.hasMoreElements()){
     			    		  
     						  Order ord = (Order)en.nextElement();
-    					        makeOutput(ord,order);  
+    						  //makeOutput(ord,order,hrccustomer);
+    						  
+    						  Vector splitted2 =  this.splitOrderByAm(ord, 38);
+        			    	  Enumeration en2 = splitted2.elements();
+        			    	  while(en2.hasMoreElements()){
+        			    		  
+        						  Order ord2 = (Order)en2.nextElement();
+        						  
+        						  
+    					        makeOutput(ord2,order,hrccustomer);
+        			    	  }
         	        		 
-    					  }*/
-    					  makeOutput(order,order, hrccustomer);   
+    					  }
+    					//  makeOutput(order,order, hrccustomer);   
     				  }
     					
     				}
@@ -2261,7 +2016,8 @@ try{
        
   }
   
-  
+
+ 
   public static void saveObject(Object obj, String file) throws IOException {
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
 		oos.writeObject(obj);
@@ -2314,7 +2070,7 @@ try{
 		//  System.out.println("weburl " + weburl);
 		  DefaultHttpClient httpClient = new DefaultHttpClient();
 		//  Credentials defaultcreds = new UsernamePasswordCredentials("testa", "asdf"); // "evgeney", "5697110" 
-		  Credentials defaultcreds = new UsernamePasswordCredentials("EVGENEY", "5697110"); // "evgeney", "5697110" 
+		  Credentials defaultcreds = new UsernamePasswordCredentials("EXCELL", "5697110"); // "evgeney", "5697110" 
 			 
 		  httpClient.getCredentialsProvider().setCredentials(
                    AuthScope.ANY, defaultcreds);
@@ -2384,7 +2140,7 @@ try{
 	 Hashtable pandikas =  new Hashtable();
 	
 	 TreeMap pantHinnad = null;
-		
+	
 	 TreeMap	pants = getPandiPakend();
 			System.out.println("pants " + pants.size());
 	
@@ -2471,26 +2227,52 @@ try{
 				 //  System.out.println("refnr " + ref);
 					 String ref2 = ref;
 					 if(isHoreca) {
-						 ref2 = "+FF";
-						 boolean isFrozen = true;
+						
+						 
+						 boolean hasFrozen = false;
 						 Vector ll = order.getOrderLines();
 						 for (int i = 0; i < ll.size(); i++) {
 					    	  OrderLine line = (OrderLine) ll.elementAt(i);
 					    	  String prodid = line.getToode();
+					    	  if(prodid.startsWith("I") || prodid.startsWith("F")) {
+					    		  hasFrozen = true;
+					    		  ref2 = "+FF";
+					    		  break;
+					    	  }
+						 }
+						 
+						 
+						 if(hasFrozen) {
+						 boolean isOnlyFrozen = true;
+						 ll = order.getOrderLines();
+						 for (int i = 0; i < ll.size(); i++) {
+					    	  OrderLine line = (OrderLine) ll.elementAt(i);
+					    	  String prodid = line.getToode();
 					    	  if(!prodid.startsWith("I") && !prodid.startsWith("F")) {
-					    		  isFrozen = false;
+					    		  isOnlyFrozen = false;
 					    		  break;
 					    	  }
 					    	  
 						 }
 						 
-						 if(isFrozen) {
+						 if(isOnlyFrozen) {
 							 ref2 = "FF"; 
+						 } 
+					 }
+						 ll = order.getOrderLines();
+						 for (int i = 0; i < ll.size(); i++) {
+					    	  OrderLine line = (OrderLine) ll.elementAt(i);
+					    	  String prodid = line.getToode();
+					    	  if(prodid.startsWith("M") ) {
+					    		  ref2 = ref2 + "M";
+					    		  break;
+					    	  }
+					    	  
 						 } 
 					 }
 					 
 					 if(isHoreca) {
-					 if(order.getStatus() > 6 && defDealers == null){
+					 if(defDealers == null){
 						  loadWares();
 					  }
 					 
@@ -2499,25 +2281,34 @@ try{
 						  order.setDealer("53268");
 					  }
 					  
+
+
+					  String aaa = order.getCompany();
+					  if(aaa.indexOf("_") != -1) {
+						  aaa = aaa.substring(aaa.indexOf("_")+1);
+					  }
 					  
-					  if(order.getStatus() > 6 && defDealers != null && defDealers.get(order.getCompany()) != null){
-						  order.setWarehouse(""+defDealers.get(order.getCompany()));
-						  order.setDealer(""+defDealers.get(order.getCompany())+"");
+					  
+					  if(order.getStatus() > 6 && defDealers != null && defDealers.get(aaa) != null){
+						  order.setWarehouse(""+defDealers.get(aaa));
+						  order.setDealer(""+defDealers.get(aaa)+"");
 					   }else if(order.getStatus() > 6){
 						   order.setWarehouse("53268");
 							 order.setDealer("53268");
-							 this.trouble = " Nav noliktava in Horizon ";
+							 this.trouble = " Nav noliktava in Horizon OUTPUT";
 					   }
-					
-					  order.setCurrency(getType(order.getDealer(),1,order));
+					  System.out.println("dealer " + defDealers.size() + " " + aaa + " " + defDealers.get(aaa));
+					 // order.setCurrency(getType(order.getDealer(),1,order));
 					 }
 				   
+					
+					 
 					 String ladu = "53268";
 				   
 				   String dealer = order.getDealer();
 				   if(dealer != null && dealer.trim().length() > 0){
 					   ladu = dealer.trim();
-					  // System.out.println("dealer " + ladu);
+					  
 				   }
 		           
 		           JSONObject resource  = new JSONObject();

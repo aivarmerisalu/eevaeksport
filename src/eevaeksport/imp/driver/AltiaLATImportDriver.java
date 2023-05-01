@@ -250,7 +250,7 @@ return null;
   				  }
   			  }		  
   		  }
-  		  System.out.println(dates.toString());
+  		//  System.out.println(dates.toString());
   	  }
   	   
 
@@ -912,7 +912,7 @@ if( parent.getProps().getProperty("regnum")!= null){
            if(agent.length() > 5){
         	   agent = agent.substring(0,5);
            }
-           String nummer = "MS" + agent + "" + (Calendar.getInstance().getTimeInMillis()+ "").substring(6);
+           String nummer = "MS" + agent + "" + (Calendar.getInstance().getTimeInMillis()+ "").substring(5);
            if(nummer.length()>20){
         	   nummer = nummer.substring(0,20);
            }
@@ -929,7 +929,7 @@ if( parent.getProps().getProperty("regnum")!= null){
            
            if(order.getDokNr() != null && order.getDokNr().trim().length() != 0 && has){
         	   if(!order.getDokNr().trim().equals("null") ){
-        		   nummer = "MS" + agent + "" + order.getDokNr();
+        		   nummer = "MS" + agent + "" + order.getDokNr() + (Calendar.getInstance().get(Calendar.MILLISECOND)+"");
             	   if(nummer.length()>20){
                 	   nummer = nummer.substring(0,20);
                    }      
@@ -939,7 +939,7 @@ if( parent.getProps().getProperty("regnum")!= null){
            System.out.println("nummer " + nummer);
            
            if(nummer.indexOf("null") != -1){
-        	   nummer = "MS" + agent + "" + (Calendar.getInstance().getTimeInMillis()+ "").substring(6); 
+        	   nummer = "MS" + agent + "" + (Calendar.getInstance().getTimeInMillis()+ "").substring(5); 
            }
            
            sb.append("<BGM02-DocumentMessageNumber>" + nummer + "</BGM02-DocumentMessageNumber>" + ls);

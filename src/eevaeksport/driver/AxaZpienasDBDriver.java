@@ -1094,6 +1094,16 @@ String email = " ";
     Agent aa2 = new Agent ("WARE3");
     aa2.setName("WARE3");
     agents.put("WARE3", aa2);
+    Agent aa3 = new Agent ("WARE4");
+    aa3.setName("WARE4");
+    agents.put("WARE4", aa3);
+    
+    Agent aa4 = new Agent ("WARE5");
+    aa4.setName("WARE5");
+    agents.put("WARE5", aa4);
+    Agent aa5 = new Agent ("WARE6");
+    aa5.setName("WARE6");
+    agents.put("WARE6", aa5);
     
     if(sb2.length() > 2){
     	try{
@@ -1813,6 +1823,9 @@ try{
           cust.addAgent(new Agent("WARE1"));
           cust.addAgent(new Agent("WARE2"));
           cust.addAgent(new Agent("WARE3"));
+          cust.addAgent(new Agent("WARE4"));
+          cust.addAgent(new Agent("WARE5"));
+          cust.addAgent(new Agent("WARE6"));
           cust.setMainAgent(agen.trim());
           
           
@@ -2361,7 +2374,10 @@ try{
     //z p algusega
   
     
-    String sss = "select itemid , itembarcode from inventitembarcode  bb where bb.dataareaid = 'zp' and bb.useforprinting = 1 group by itemid , itembarcode";
+    String sss = "select bb.itemid, itembarcode from inventitembarcode  bb " + 
+    		" left join inventdim dd on bb.inventdimid = dd.inventdimid " + 
+    		" left join inventtable tbl on bb.itemid = tbl.itemid " + 
+    		" where bb.dataareaid = 'zp' and bb.useforprinting = 1  and tbl.standardconfigid = dd.configid";
 
  
     
@@ -3380,7 +3396,16 @@ public TreeMap getPRLisa()  {
      		
      		TreeMap kllisa = getKLLisa();
      		TreeMap prlisa = getPRLisa();
-     		
+     		Calendar cal = Calendar.getInstance();
+     		String hh = cal.getTime().getHours()+"";
+     		if(hh.length() == 1) {
+     			hh = "0" + hh;
+     		}
+     		String mm = cal.getTime().getMinutes()+"";
+     		if(mm.length() == 1) {
+     			mm = "0" + mm;
+     		}
+     		String time2 = "_" + hh +"-" +mm;
      	// loeme signatuurid sisse kui on olemas	
      		HashSet done = null;
      		try {
@@ -3464,7 +3489,7 @@ public TreeMap getPRLisa()  {
        			String filterOutOfStock = (String)cob.get("resint3").toString();
        			String dateAndTime = (String)cob.get("recetime");
        		
-       			Calendar cal = Calendar.getInstance();
+       			 cal = Calendar.getInstance();
  	  			try {
  	  				cal.setTimeInMillis(Long.parseLong(filterOutOfStock));
  	  			}catch(Exception e) {
@@ -3485,8 +3510,18 @@ public TreeMap getPRLisa()  {
  	  			}
  	  			String timeOnly = hour+":"+minute;
        			
-       	    	String cagid = (String)cob.get("custagent");
-       			String cagname = (String)cob.get("custagname");
+       	    	String cagid = "";
+       	    	try{
+       	    		cagid =	(String)cob.get("custagent");
+       	    	}catch(Exception e) {
+       	    		
+       	    	}
+       			String cagname = "";
+       			try{
+       				cagname =	(String)cob.get("custagname");
+       	    	}catch(Exception e) {
+       	    		
+       	    	}
        			String agid = (String)cob.get("agentid");
        			String agname = (String)cob.get("managerName");
        			String chain = (String)cob.get("custchain");
@@ -3506,9 +3541,9 @@ public TreeMap getPRLisa()  {
      					if(!hasWednesday.contains(chain))
      						hasWednesday.add(chain);
      				}
-         				if(chWED.contains(chain)) {
-         					if(!hasWednesday.contains(chain))
-         						hasWednesday.add(chain);
+         				if(chDaily.contains(chain)) {
+         					if(!hasDaily.contains(chain))
+         						hasDaily.add(chain);
          				}
            			}
        			
@@ -3604,8 +3639,9 @@ public TreeMap getPRLisa()  {
        		excelifailBase.close();
        		
 
-       		FileOutputStream output_file_oos =new FileOutputStream(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-       		//filenames.add(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+       		FileOutputStream output_file_oos =new FileOutputStream(exceldir +
+       				"productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
+       		filenames.add(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date())+ time2 + ".xlsx");
        		wbBASE.write(output_file_oos); //write changes
        		output_file_oos.close();  //close the stream
        		
@@ -3641,7 +3677,7 @@ public TreeMap getPRLisa()  {
      	  			String filterProblem = (String)cob.get("resstr1");
      	  			String filterOutOfStock = (String)cob.get("resint3").toString();
      	  			String dateAndTime = (String)cob.get("recetime");
-     	  			Calendar cal = Calendar.getInstance();
+     	  			 cal = Calendar.getInstance();
      	  			try {
      	  				cal.setTimeInMillis(Long.parseLong(filterOutOfStock));
      	  			}catch(Exception e) {
@@ -3663,8 +3699,18 @@ public TreeMap getPRLisa()  {
      	  			}
      	  			String timeOnly = hour+":"+minute;
      	  			
-     	  	    	String cagid = (String)cob.get("custagent");
-     	  			String cagname = (String)cob.get("custagname");
+     	  			String cagid = "";
+           	    	try{
+           	    		cagid =	(String)cob.get("custagent");
+           	    	}catch(Exception e) {
+           	    		
+           	    	}
+           			String cagname = "";
+           			try{
+           				cagname =	(String)cob.get("custagname");
+           	    	}catch(Exception e) {
+           	    		
+           	    	}
      	  			String agid = (String)cob.get("agentid");
      	  			String agname = (String)cob.get("managerName");
      	  			String chJ = (String)cob.get("custchain");
@@ -3741,8 +3787,8 @@ public TreeMap getPRLisa()  {
      			
        			excelifailChain.close();
        		  if(!empty) {
-     	  		FileOutputStream output_file_chain =new FileOutputStream(exceldir + "productOOSChain-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-     	  		filenames.add(exceldir + "productOOSChain-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+     	  		FileOutputStream output_file_chain =new FileOutputStream(exceldir + "productOOSChain-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
+     	  		filenames.add(exceldir + "productOOSChain-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
      	  	//	arreturn.add(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
      		  	
      	  		wbCHAIN.write(output_file_chain); //write changes
@@ -3783,7 +3829,7 @@ public TreeMap getPRLisa()  {
      	  			String filterProblem = (String)cob.get("resstr1");
      	  			String filterOutOfStock = (String)cob.get("resint3").toString();
      	  			String dateAndTime = (String)cob.get("recetime");
-     	  			Calendar cal = Calendar.getInstance();
+     	  			 cal = Calendar.getInstance();
      	  			
      	  			try {
      	  				cal.setTimeInMillis(Long.parseLong(filterOutOfStock));
@@ -3805,8 +3851,18 @@ public TreeMap getPRLisa()  {
      	  			}
      	  			String timeOnly = hour+":"+minute;
      	  			
-     	  	    	String cagid = (String)cob.get("custagent");
-     	  			String cagname = (String)cob.get("custagname");
+     	  			String cagid = "";
+           	    	try{
+           	    		cagid =	(String)cob.get("custagent");
+           	    	}catch(Exception e) {
+           	    		
+           	    	}
+           			String cagname = "";
+           			try{
+           				cagname =	(String)cob.get("custagname");
+           	    	}catch(Exception e) {
+           	    		
+           	    	}
      	  			String agid = (String)cob.get("agentid");
      	  			String agname = (String)cob.get("managerName");
      	  			String chJ = (String)cob.get("custchain");
@@ -3890,8 +3946,8 @@ public TreeMap getPRLisa()  {
      			
        			excelifailChain.close();
        		  if(!empty) {
-     	  		FileOutputStream output_file_chain =new FileOutputStream(exceldir + "productOosChainWed-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
-     	  		filenames.add(exceldir + "productOosChainWed-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+     	  		FileOutputStream output_file_chain =new FileOutputStream(exceldir + "productOosChainWed-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date())+ time2 + ".xlsx");
+     	  		filenames.add(exceldir + "productOosChainWed-" + chain + "-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
      	  	//	arreturn.add(exceldir + "productdetailproblem-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
      		  	
      	  		wbCHAIN.write(output_file_chain); //write changes

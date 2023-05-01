@@ -1,19 +1,12 @@
 package eevaeksport.driver;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,7 +31,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
-import eevaeksport.Dealer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
@@ -1335,7 +1327,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
      
         double min = rs.getDouble("minimum");
         if(min > 1) {
-        	prod.setMinAmountInUnits(min);
+        	//prod.setMinAmountInUnits(min);
         }
         
         double opt = rs.getDouble("optimum");
@@ -1362,6 +1354,31 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
       }
      
 
+        String sort =  ""; 
+        if("true".equals(getParent().getProps().getProperty("use.prodsorting"))) {
+        sort = rs.getString("sorting");
+       
+        if(sort != null && sort.trim().length()>0){
+         if(sort.length() < 3) {
+        	 sort = "0" + sort;
+         }
+         if(sort.length() < 3) {
+        	 sort = "0" + sort;
+         }
+       
+        	 
+        	
+        	 // nimetus = sort + nimetus;
+        	 
+        	 sort = prod.getGroup() + " " + sort; 
+        	  prod.setNameSorting(sort + nimetus);
+         
+       
+      }else {
+    	  sort = "xxx";
+      }
+        
+        }
       
       prod.setName(nimetus + add);
    
@@ -1379,7 +1396,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
     
       }else {
     	  if(!otc.equals("SHELL")) {
-    		  products.put(nimetus, prod);
+    		  products.put(sort + nimetus, prod);
               prodHash.put(prod.getID(), prod); 	  
     	  }else {
     		  shell.add(prod.getID());
@@ -1406,9 +1423,9 @@ HashSet<String> shell = null;
 	 
 	
 	    
-	    String cmd = "select KLIENT ,TOODE,max(KOGUS) as KOGUS ,KUUPAEV, max(DAYS30) as DAYS30,max(LPRICE) as LPRICE ,max(BILL) as BILL"
-	    		+ " from getcustomerproductlist where KUUPAEV > getdate()-180 and len(KLIENT) > 0 \r\n" + 
-	    		" GROUP BY klient,toode,kuupaev  ORDER BY klient,toode,kuupaev" ;
+	    String cmd = " select KLIENT ,r.TOODE,max(KOGUS) as KOGUS ,KUUPAEV, max(DAYS30) as DAYS30,max(LPRICE) as LPRICE ,max(BILL) as BILL ,max(pr.grupp), max(pr.sorting)\r\n" + 
+	    		"	    		 from getcustomerproductlist r inner join getproducts pr on pr.toode= r.toode  where KUUPAEV > getdate()-180 and len(KLIENT) > 0 \r\n" + 
+	    		"	    		 GROUP BY klient,r.toode,kuupaev  ORDER BY klient,max(pr.grupp),max(pr.sorting),r.toode,kuupaev " ;
 
 	    
 	    

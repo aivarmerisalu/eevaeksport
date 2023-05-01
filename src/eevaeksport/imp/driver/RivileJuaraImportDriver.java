@@ -299,7 +299,7 @@ if(ladu.trim().length()!=0){
 
 }  else {
 	 sb.append(getLineNr(cou));
-     sb.append("               <I07_KODAS_IS>010000000052</I07_KODAS_IS>" + ls);
+     sb.append("               <I07_KODAS_IS>010000000058</I07_KODAS_IS>" + ls);
      cou++;
 }
 

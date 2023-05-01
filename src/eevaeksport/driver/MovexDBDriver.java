@@ -2668,6 +2668,9 @@ public void eventInfo(Vector lines) throws SQLException {
 	String yid = "";
 	String ring = "";
 	
+	String ericoord = "";
+	String erivedu = "0";
+	
 	
 		 id = st.nextToken();
 		 yid = getDateSt(id);
@@ -2693,7 +2696,14 @@ public void eventInfo(Vector lines) throws SQLException {
 		 prodname =  st.nextToken().replace('+', ' ').replace('\'', ' ');
 		 prodkogus =  st.nextToken();
 		 prodcomment =  st.nextToken().replace('+', ' ').replace('\'', ' ');	
-    	 ring =  st.nextToken();	
+    	 ring =  st.nextToken();
+    	 if(st.hasMoreTokens()) {
+    			tarne = st.nextToken();
+    			erivedu = "1";
+    	 }
+    	 if(st.hasMoreTokens()) {
+		    ericoord = st.nextToken();
+ 	       }
 	
 
 	
@@ -2703,7 +2713,7 @@ public void eventInfo(Vector lines) throws SQLException {
 	
 
 	 String sql = "INSERT into alc.horeca_yritused2 (ME_ID,ME_NAME, ENTER_DATE, STAATUS,CUNO,CUNM,ADDR,YR_NAME,SUPPLIER,BEGIN_DATE,END_DATE" +
-	 		",RESP_ID,RESP_NAME,TRANS1,TRANS2,CONTACT,GROUPID,GROUPNAME,QTY,COMM,EVENT_ID,LINE_ID,KAUBAGA,DELIVERED,RING) values ("
+	 		",RESP_ID,RESP_NAME,TRANS1,TRANS2,CONTACT,GROUPID,GROUPNAME,QTY,COMM,EVENT_ID,LINE_ID,KAUBAGA,DELIVERED,RING, ERIVEDU, COORDS) values ("
           + "'" + agent + "', "   //   
           + "'" + agentname + "',"   // 
           + " sysdate, "   //   
@@ -2725,7 +2735,7 @@ public void eventInfo(Vector lines) throws SQLException {
           + "'" + prodcomment + "'," 
           + "'" + yid + "'," 
           + "'" + lineno + "'," 
-          + "" + inventar + ",'Ei','" + ring + "')" ; 
+          + "" + inventar + ",'Ei','" + ring + "',"+erivedu+",'" + ericoord + "')" ; 
   try{
 	 Connection c =  getNewConnection();
            PreparedStatement ps = c.prepareStatement(sql);

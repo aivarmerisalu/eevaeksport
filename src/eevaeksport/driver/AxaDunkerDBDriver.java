@@ -82,132 +82,7 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
 	     }
 
 	 public void insertSuperVisorSQLMeri(SupervisorInfoWrapperMeri wr){
-	     String sql = "INSERT into supervisor values ("
-	       + "?, "   //   agent	C(50),
-	       + "?,"   //   agentname	C(200),
-	       + "?,"   //   clientid	C(50),
-	       + "?,"   //   clientname	C(200),
-	       + "?,"   //	prodid	C(50),
-	       + "?,"   //   prodname	C(200),
-	       + "getdate() ,"   //	sentdate	D,
-	       + " '' ,"   //	receivedTime	D,
-	       + "?,"   //normalpr	N,
-	       + "?,"   // amoun	N,
-	       + "?,"   // grouptotal	N,
-	       + "?,"   // cattotal	N,
-	       + "?,"   // pertotcat	I,
-	       + "?,"   // percolcat	I,
-	       + "?,"   // perpalcat	I,
-	       + "?,"   // pershecat	I,
-	       + "?,"   // perrescat	I,
-	       + "?,"   // isaction	L,
-	       + "?,"   // ispartner	L,
-	       + "?,"   // isbrand	L,
-	       + "?,"   // isgroup	L
-	       + "?,"   // actionaeva	N,
-	       + "?,"   // actionbeva N,
-	       + "?,"   // actiontota	N,
-	       + "?,"   // custeval	N,
-	       + "?,"   // custcomme	C(200),
-	       + "?,"   // comment	C(200),
-	       + "?,"   // custagent	C(200),
-	       + "?,"   // custagentname	C(200),
-	       + "?,"   // mustbe	I,
-	       + "?,"   // ideal	I,
-	       + "?,"   // resstr1	C(200),
-	       + "?,"   // resstr2	C(200),
-	       + "?,"   // resstr3	C(200),
-	       + "?,"   // resint1	I,
-	       + "?,"   // resint2	I,
-		      + "?)" ; //	resint3	L
-
-	       try {
-	       	System.out.println("jam");
-	        Connection con = getNewConnection(url2);
-	           PreparedStatement ps = con.prepareStatement(sql);
-
-	           for (Iterator iter = wr.getInfo().getLines().iterator(); iter.hasNext(); ) {
-	        	   eevaeksport.report.SuperVisorLineWrapperMeri lw = new eevaeksport.report.SuperVisorLineWrapperMeri(iter.next());
-	             ps.setString(1, wr.getInfo().getAgentID());
-	             ps.setString(2, wr.getInfo().getAgentName());
-	             ps.setString(3, lw.getLine().getCustID());
-	             ps.setString(4, lw.getLine().getCustName());
-	             ps.setString(5, lw.getLine().getProdID());
-	             ps.setString(6, lw.getLine().getProdName());
-	             ps.setDouble(7, lw.getLine().getNormalPrice());
-	             ps.setDouble(8, lw.getLine().getAmount());
-	             ps.setDouble(9, 0);
-	             ps.setDouble(10, 0);
-	             ps.setInt(11, lw.getLine().getPercentageFromTotalCategory());
-	             ps.setInt(12, lw.getLine().getPercentageFromColdCategory());
-	             ps.setInt(13, lw.getLine().getPercentageFromPallCategory());
-	             ps.setInt(14, lw.getLine().getPercentageFromShelfCategory());
-	             ps.setInt(15, lw.getLine().getPercentageFromRestCategory());
-	             ps.setBoolean(16, lw.getLine().isAction());
-	             ps.setBoolean(17, lw.getLine().isPartner());
-	             ps.setBoolean(18, lw.getLine().isBrand());
-	             ps.setBoolean(19, lw.getLine().isGroup());
-	             ps.setDouble(20, lw.getLine().getAction1Eval()*100);
-	             ps.setDouble(21, lw.getLine().getAction2Eval()*100);
-	             ps.setDouble(22, lw.getLine().getActionTotalEval()*100);
-	             ps.setDouble(23, lw.getLine().getCustEval()*100);
-	             String cc = lw.getLine().getCustComment();
-	             if (cc == null){
-	             	cc = " ";
-	             }
-	             ps.setString(24, cc);
-
-	             String cd = lw.getLine().getComment();
-	             if (cd == null){
-	             	cd = " ";
-	             }
-	             ps.setString(25, cd);
-
-	             String ce = lw.getLine().getCustAgentId();
-	             if (ce == null){
-	             	ce = " ";
-	             }
-
-	             ps.setString(26, ce);
-
-	             String cf = lw.getLine().getCustAgentName();
-	             if (cf == null){
-	             	cf = " ";
-	             }
-	             ps.setString(27, cf);
-	             ps.setInt(28, lw.getLine().getDealNr());
-	             ps.setInt(29, lw.getLine().getIdealNr());
-
-	             String cr1 = lw.getLine().getResStr1();
-	             if (cr1 == null){
-	             	cr1 = " ";
-	             }
-	             ps.setString(30, cr1);
-
-
-	             String cr2 = lw.getLine().getResStr2();
-	             if (cr2 == null){
-	             	cr2 = " ";
-	             }
-	             ps.setString(31, cr2);
-
-
-	             String cr3 = lw.getLine().getResStr3();
-	             if (cr3 == null){
-	             	cr3 = " ";
-	             }
-	             ps.setString(32, cr3);
-	             ps.setInt(33, lw.getLine().getResInt1());
-	             ps.setInt(34, lw.getLine().getResInt2());
-	             ps.setInt(35, 111); //111 on eesti andmed
-	             ps.executeUpdate();
-	           }
-
-	           ps.close();
-	           con.close();
-	       } catch (SQLException e) {
-	           e.printStackTrace();
-	       }
+	    
 	     }
 
   /**
@@ -530,7 +405,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
           "           pal.dataareaid=dim.dataareaid and   pal.sssticker=1 " +
 "WHERE summ.DATAAREAID='vin' and dim.DATAAREAID='vin' and inv.DATAAREAID='vir' and " +
 "CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('LK_AKTSIIS','LK_TAVA','ITELLA') and " +
-"itt.itemgroupid < 80 GROUP BY summ.itemid having sum(availphysical) >0 order by summ.itemid ";
+"itt.itemgroupid < 93 GROUP BY summ.itemid having sum(availphysical) >0 order by summ.itemid ";
 
 
 	  
@@ -704,9 +579,14 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	  }
 		this.getProducts(null);
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
-		System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+		System.out.println("Contracts Fixx " + contracts.keySet().size() + " " + contracts.keySet().toString());
 		if(contracts.size() > 0) {
-			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass, "FIXED");
+		}
+		contracts = Converter.loadSuggFromExcels("excelsugg",eanprods,parent);
+		System.out.println("Contracts Sugg " + contracts.keySet().size() + " " + contracts.keySet().toString());
+		if(contracts.size() > 0) {
+			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass, "SUGGESTED");
 		}
 		
 		
@@ -1088,40 +968,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 		return agents1;
 	}
   
-  private TreeMap loadMore() {
-	   TreeMap res = new TreeMap();
-	   try {
-		   FileInputStream is = new FileInputStream(new File("eans.txt"));
-			InputStreamReader isr = new InputStreamReader(is, "utf-8");
-			BufferedReader reader = new BufferedReader(isr);
-			
-			
-		    String         line = null;
-		 
-		    try {
-		        while((line = reader.readLine()) != null) {
-		      StringTokenizer st = new StringTokenizer(line,";");
-		      while(st.hasMoreTokens()) {
-		    	  res.put(st.nextToken(), st.nextToken());
-		      }
-		        }
 
-		       
-		    } finally {
-		        reader.close();
-		    }
-		 
-	   }catch(Exception e) {
-		   
-	   }
-	   
-	
-	   
-	 System.out.println("lis suurus " + res.size());
-	   
-	   return res;
-  }
-  
 
   private TreeMap agents1 = new TreeMap();
   private TreeMap eanprods = null;
@@ -1140,7 +987,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	  "  LEFT JOIN UNITCONVERT u ON inv.ITEMID=u.ITEMID AND u.DATAAREAID=inv.dataareaid  AND u.TOUNIT='kast'" +
 	  " WHERE disc.dataareaid='vir' and inv.dataareaid='vir' and inv.ssOrdererAccount='DUNKER' and u.dataareaid='vir'   AND mod.dataareaid='vir'  " +
 	  " and (disc.todate>getdate()-1 OR (disc.fromdate<=getdate() AND disc.todate=('1900-01-01 00:00:00.00') ) )  "+
-	  " AND moduletype=2 and blocked = 0  and inv.itemgroupid not in ('91','92','94') "+
+	  " AND moduletype=2 and blocked = 0  and inv.itemgroupid not in ('91','94') "+
 	  "  and disc.accountrelation=''";
     
     getSaveStockInfo();

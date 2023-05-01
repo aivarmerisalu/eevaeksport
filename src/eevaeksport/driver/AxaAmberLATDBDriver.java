@@ -746,7 +746,8 @@ rs.close();
                                 sql4 = "select  PRI.PROMONUM as grupp,l.ITEMID as toode ,l.PRICE as hind ,PRI.FROMDATE as algus ,PRI.FROMDATE as algus2" +
                 "   	 ,PRI.TODATE as lopp,DATEDIFF(week, PRI.FROMDATE, PRI.TODATE)  as kamp,PRIORITY as prior " +
  " from astPromoGMLine l INNER JOIN astPromoJournal pri on pri.dataareaid = l.dataareaid and pri.promonum = l.promonum " +
- " where l.dataareaid = 'spil' and ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) " +
+ " where l.dataareaid = 'spil' and ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND "
+ + " PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1) then 2  when DATEPART(DW, PRI.TODATE) in (2) then 3 else 0 end)) " +
 	"   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900)  " +
 	"   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
 	"   or( GETDATE()<=PRI.TODATE+1)  and year(PRI.fromDATE) =1900 ) and accepted = 2 and onlycrmaction = 0 and fromqty = 0 and promostatus in (1,4)  and maxdiscountpromo = 0 " ;
@@ -1059,116 +1060,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
   
   private TreeMap agent1 = new TreeMap();
 
-  private TreeMap loadCustAgents(){
-  	TreeMap res = new TreeMap();
-  	
-  	File f = new File(this.getExcelDir() + "Merisoft-Client-Agent.xlsx");
-		try {
-			
-			
-			
-			FileInputStream ff = new FileInputStream(f);
-			XSSFWorkbook workbook = new XSSFWorkbook((ff));
-			XSSFSheet sheet = workbook.getSheetAt(0);
-			XSSFRow row = null;
-			TreeMap groups = new TreeMap();
-			row = sheet.getRow(0);
-			// MÄÄRAME ÄRA MIS VÄLJAS ASUVAD Sortimendi tähised.
-
-			for (int a = 5; a < row.getLastCellNum(); a++) {
-				try {
-					// System.out.println(row.getCell((short)a).getStringCellValue());
-					String gg = row.getCell((short) a).getStringCellValue().trim();
-					
-					if(gg.length()>1){
-				      groups.put(a + "", gg);
-				   
-				      
-				    }
-				
-				} catch (Exception e) {
-					 //System.out.println(row.getCell((short)a).getNumericCellValue());
-					 String gg = ((int)row.getCell((short)a).getNumericCellValue()) +"";
-					 if(gg.length()>1){
-					      groups.put(a + "", gg);
-					      
-					    }
-				}
-			}
-			
-		
-			System.out.println("groups " + groups.toString());
-			
-			
-			
-			
-			for (int i = 2; i <= sheet.getLastRowNum(); i++) {
-				row = sheet.getRow(i);
-				
-				String custID = "";
-
-				if (row.getCell((short) 0) != null) {
-
-					try {
-						custID = (int) (row.getCell((short) 0)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						custID = (row.getCell((short) 0).getStringCellValue());
-					}
-					
-                       if(!custID.equals("0")){
-                    	
-                    	
-					// Siin läheme reasisse rokkima ja vaatama kas se toode
-					// läheb kaasa
-					for (int a = 6; a < row.getLastCellNum(); a++) {
-
-						String group = (String) groups.get(a + "");
-						if (group != null && group.trim().length() > 0) {
-							String go = null;
-							// Vaatame kas selles veerus on sellel tootel pandud
-							// mingi tähis
-							if (row.getCell((short) a) != null) {
-                             	try {
-									go = (int) (row.getCell((short) a)
-											.getNumericCellValue()) + "";
-								} catch (Exception e) {
-									go = (row.getCell((short) a)
-											.getStringCellValue());
-								}
-                             }
-
-							if (go != null && ( go.toLowerCase().equals("1") || 
-									go.toLowerCase().equals("2"))) {
-								Vector ags = new Vector();
-								if(res.get(custID) != null){
-									ags = (Vector)res.get(custID);
-								}
-								ags.add(group);
-								res.put(custID,ags);
-								if(group.equals("73")){
-									System.out.println("CustAgents   " + group + " "+ custID);
-	
-								}
-                           	   }
-						    }    
-                          }
-                       }
-                       
-                }    
-                }
-			
-			
-			
-			
-		}catch(Exception r){
-			r.printStackTrace();	
-			}
-			System.out.println("CustAgents size  " + res.size());
-  	System.exit(0);
-  	return res;
-  }
-
+ 
   
   
   public TreeMap getAgents(){
@@ -2218,13 +2110,47 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
         while (rs.next()) {
            String kood = rs.getString("toode").trim();
            double seis = rs.getDouble("stock");
-           brakis.put(kood, seis + "");
+           brakis.put(kood, (int)seis + "");
         }
 
     	rs.close();
     	st.close();
-    	
-    	
+
+
+    	 TreeMap aktsiis = new TreeMap();
+    	    
+    	    	 String cmdy = " select  summ.itemid  AS toode ,dim.configId as kleeps, SUM( AVAILPHYSICAL ) AS stock " +
+    	    				" FROM INVENTSUM summ with (nolock) " +
+    	    				" INNER JOIN INVENTDIM dim with (nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +
+    	    				" WHERE  summ.DATAAREAID='spil' and CLOSED = 0 AND dim.inventlocationid in ('GPP-AK-LB ') " +
+    	    				" GROUP BY  summ.itemid, dim.configId having sum(availphysical) > 0";
+    	    	
+    	    	 if (isDebug()) System.out.println(cmdx);
+    		      
+    	  	    con = this.getNewConnection();
+    	        st = con.createStatement();
+    	        rs = st.executeQuery(cmdy);
+    	   
+    	        while (rs.next()) {
+    	           String kood = rs.getString("toode").trim();
+    	          
+    	           String kleeps = rs.getString("kleeps").trim();
+    	           if(kleeps.equals("AM")) {
+    	        	   kleeps = "Aplī";
+    	           } else {
+    	        	   kleeps = "Neap";
+    	           }
+    	           double seis = rs.getDouble("stock");
+    	           if(aktsiis.get(kood) !=null) {
+    	        	    aktsiis.put(kood, aktsiis.get(kood) + " , " + kleeps + ": " + (int)seis + "");
+    	           }else {
+    	        	    aktsiis.put(kood, kleeps + ": " + (int)seis + ""); 
+    	           }
+    	       
+    	        }
+
+    	    	rs.close();
+    	    	st.close();
     	
      this.getSaveStockInfo();
 
@@ -2369,6 +2295,16 @@ stmt.close();
     	 bre  =  " @BR"  + brakis.get(prod.getID()) + "@";
     	 prod.setPartii("BRAKIS: "  + brakis.get(prod.getID()));
       }
+      
+      if(aktsiis.get(prod.getID()) != null){
+    	  String i = "";
+    	  if(prod.getPartii() != null && prod.getPartii().trim().length()>0) {
+    		  i = prod.getPartii()+"|";
+    	  }
+     	 prod.setPartii(i + "AKC: "  + aktsiis.get(prod.getID()));
+       }
+      
+      
       
        
       prod.setName(Converter.enCodeEst(ette + nimetus + add + bre));

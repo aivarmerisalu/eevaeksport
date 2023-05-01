@@ -1522,7 +1522,7 @@ con3.close();
      Vector vec = new Vector();
      HashMap kliendid = new HashMap();
      try {
-    String cmd =  " select * from CustomerProductsList order by klient,toode,lastdate desc ";
+    String cmd =  " select *, lastdiscount as ldisc from CustomerProductsList order by klient,toode,lastdate desc ";
     System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupï¿½ev","viimane kogus"
     Connection con = getNewConnection2();
@@ -1546,12 +1546,16 @@ con3.close();
                     }
                     
                    double lprice = rs.getDouble("lastprice");
+                  
                    String arve = rs.getString("docno");
-               
+                   double ldisc = rs.getDouble("ldisc");
                     
                     Product prod = new Product(prodID);
                     CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate,lprice,0,0," ");
                      cp.setAbiKood(arve);
+                     if(ldisc > 0) {
+                         cp.ale = ldisc; 
+                     }
                      
                      if(!donehash.contains(custID +" "+ prodID)) {
                     	   cust.addProduct(prod,cp,false);

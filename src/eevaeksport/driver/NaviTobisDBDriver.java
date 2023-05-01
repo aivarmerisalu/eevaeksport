@@ -1329,7 +1329,7 @@ System.out.println(cmd);
    }
      
      Hashtable dateOut = new Hashtable();
-     StringBuffer buf = new StringBuffer();
+    
 
 
     
@@ -1371,6 +1371,8 @@ System.out.println(cmd);
            rs.close();
            stmt.close();
            con.close();
+           
+           
            
            
     	 String cmd = "  SELECT  t.[No_] AS toode,(t.[Description] + ' ' +   t.[Description 2] ) AS nimi, t.[Unit Price] AS myygihind,"
@@ -1493,9 +1495,222 @@ System.out.println(cmd);
   	  String inP = parent.getProps().getProperty("doc.origpath");
       String outP = parent.getProps().getProperty("doc.destination");
       Converter.prepareDocCatalogue(inP, outP, docCodes, false);
+      
+      
+   
+      
+      
         rs.close();
         stmt.close();
         con.close();
+        
+        StringBuffer buf = new StringBuffer();
+         cmd = " SELECT [Sales Code] AS action,[Item No_] AS prodid, \r\n" + 
+        		"      [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val from\r\n" + 
+        		"       [2015_Tobis$Sales Price] where [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or\r\n" + 
+        		"                year ([Ending Date]) = 1753)  and [Sales Type] = 3  \r\n" + 
+        		"				union \r\n" + 
+        		"    select [Sales Code] AS action,[Code] AS prodid,  0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val \r\n" + 
+        		"               from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 3 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or \r\n" + 
+        		"                 year ([Ending Date]) = 1753) ";
+      
+    	 System.out.println(cmd);
+     	 con = getNewConnection2();
+         stmt = con.createStatement();
+         rs = stmt.executeQuery(cmd);
+        while(rs.next()){
+        	 String  gruppx = rs.getString("action").trim();
+           	String  toodex = rs.getString("prodid").trim();
+           	try{
+           		double  hind  = rs.getDouble("price");
+            	double  disc  = rs.getDouble("disc");
+             	double  kogus = 0;//rs.getDouble("kogus");
+              
+               	
+                java.sql.Date end = rs.getDate("paev");
+                long ttt = 0;
+                if(end.after(new Date())) {
+               	 ttt = end.getTime();
+                }
+               	if(kogus == 0){
+               		//kogus = 1;
+               	}
+               	
+               
+               	
+               	// siia teha number format 
+               	
+               	      buf.append(toodex+ ";" + gruppx + ";" + gruppx + ";" + NF.format(hind).replace(',', '.') + "; ;" + kogus + "; ;" + ttt + ";" + disc );
+                       buf.append("\n");	
+                       
+                       
+                /*   	id = st.nextToken();
+                	 	actcode = st.nextToken();
+                   	 	actname = st.nextToken();        	 
+                       	String hind  = st.nextToken();
+                       		actgrupp = st.nextToken();
+                       		actamount = Double.valueOf(st.nextToken()).doubleValue();
+                       			bonamount = Double.valueOf(st.nextToken()).doubleValue();
+                       		end = Long.parseLong(st.nextToken());
+                    	  disc = Double.valueOf(st.nextToken()).doubleValue();
+                    	  cust = 
+                   	*/
+                       
+                       
+           		
+           	}catch(Exception e){
+           		
+           	}
+            
+        }
+        
+        rs.close();
+        
+        
+       
+        // siin kliendi põhised koguselised
+                 cmd = "  SELECT [Sales Code] AS action,[Item No_] AS prodid, \r\n" + 
+                 		"        [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val, [Minimum Quantity] as am from\r\n" + 
+                 		"         [2015_Tobis$Sales Price] where [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or\r\n" + 
+                 		"                  year ([Ending Date]) = 1753)  and [Sales Type] = 0 and  [Minimum Quantity] > 1\r\n" + 
+                 		"					union \r\n" + 
+                 		"	select [Sales Code] AS action,[Code] AS prodid,  0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val ,[Minimum Quantity] as am\r\n" + 
+                 		"                 from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 0 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or \r\n" + 
+                 		"                   year ([Ending Date]) = 1753) and  [Minimum Quantity] > 1 ";
+               
+             	 System.out.println(cmd);
+              	 con = getNewConnection2();
+                  stmt = con.createStatement();
+                  rs = stmt.executeQuery(cmd);
+                 while(rs.next()){
+                 	    String  gruppx = rs.getString("action").trim();
+                    	String  toodex = rs.getString("prodid").trim();
+                    	try{
+                        double  hind  = rs.getDouble("price");
+                     	double  disc  = rs.getDouble("disc");
+                      
+                         java.sql.Date end = rs.getDate("paev");
+                         long ttt = 0;
+                         if(end.after(new Date())) {
+                        	 ttt = end.getTime();
+                         }
+                        	
+                     	double  kogus = rs.getDouble("am");
+                        	if(kogus == 0){
+                        		kogus = 1;
+                        	}
+                        	
+                        
+                        	
+                        	// siia teha number format 
+                        	
+                        	      buf.append(toodex+ ";" + " " + ";" + " " + ";" + NF.format(hind).replace(',', '.') + ";" 
+                        	      + " " + ";" + (int)(kogus+0.001) + "; ;" + ttt + ";" + disc + ";" + gruppx);
+                                buf.append("\n");	
+                                
+                                
+                         /*   	id = st.nextToken();
+                         	 	actcode = st.nextToken();
+                            	 	actname = st.nextToken();        	 
+                                	String hind  = st.nextToken();
+                                		actgrupp = st.nextToken();
+                                		actamount = Double.valueOf(st.nextToken()).doubleValue();
+                                			bonamount = Double.valueOf(st.nextToken()).doubleValue();
+                                		end = Long.parseLong(st.nextToken());
+                             	  disc = Double.valueOf(st.nextToken()).doubleValue();
+                             	  custid
+                            	*/
+                                
+                                
+                    		
+                    	}catch(Exception e){
+                    		
+                    	}
+                     
+                 }
+                 
+                 rs.close();
+                 
+                 // siin mitte kliendi põhised koguselised
+                 cmd = "  SELECT [Sales Code] AS action,[Item No_] AS prodid, \r\n" + 
+                 		"        [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val, [Minimum Quantity] as am from\r\n" + 
+                 		"         [2015_Tobis$Sales Price] where [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or\r\n" + 
+                 		"                  year ([Ending Date]) = 1753)  and [Sales Type] = 2 and  [Minimum Quantity] > 1\r\n" + 
+                 		"					union \r\n" + 
+                 		"	select [Sales Code] AS action,[Code] AS prodid,  0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val ,[Minimum Quantity] as am\r\n" + 
+                 		"                 from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 2 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or \r\n" + 
+                 		"                   year ([Ending Date]) = 1753) and  [Minimum Quantity] > 1 ";
+               
+             	 System.out.println(cmd);
+              	 con = getNewConnection2();
+                  stmt = con.createStatement();
+                  rs = stmt.executeQuery(cmd);
+                 while(rs.next()){
+                 	    String  gruppx = rs.getString("action").trim();
+                    	String  toodex = rs.getString("prodid").trim();
+                    	try{
+                        double  hind  = rs.getDouble("price");
+                     	double  disc  = rs.getDouble("disc");
+                      
+                         java.sql.Date end = rs.getDate("paev");
+                         long ttt = 0;
+                         if(end.after(new Date())) {
+                        	 ttt = end.getTime();
+                         }
+                        	
+                     	double  kogus = rs.getDouble("am");
+                        	if(kogus == 0){
+                        		kogus = 1;
+                        	}
+                        	
+                        
+                        	
+                        	// siia teha number format 
+                        	
+                        	      buf.append(toodex+ "; ; ;" + NF.format(hind).replace(',', '.') + ";" 
+                        	      + " " + ";" + (int)(kogus + 0.001) + "; ;" + ttt + ";" + disc + ";" );
+                                buf.append("\n");	
+                                
+                 
+                                
+                    		
+                    	}catch(Exception e){
+                    		
+                    	}
+                     
+                 }
+                 
+                 rs.close();
+                 
+        
+        stmt.close();
+        con.close();  
+        
+        
+        if(buf.length() > 2){
+            File f = new File("prodactions.txt");
+            if (f.exists())f.delete();
+              try {
+        		PrintWriter os = new PrintWriter(new FileWriter(
+        				 "prodactions.txt", true));
+        		os.write(buf.toString());
+        		os.close();
+        	  }catch (IOException ex) {
+        		ex.printStackTrace();
+        	  }
+         }else{
+            File f = new File("prodactions.txt");
+            if (f.exists())f.delete();
+              try {
+        		PrintWriter os = new PrintWriter(new FileWriter(
+        				 "prodactions.txt", true));
+        		os.write("");
+        		os.close();
+        	  }catch (IOException ex) {
+        		ex.printStackTrace();
+        	  }
+         }
+        
      } catch (Exception e){
        e.printStackTrace();
      }

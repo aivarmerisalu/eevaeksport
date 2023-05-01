@@ -549,7 +549,7 @@ public class IceAxaUusImportDriver
 			  if(comm != null){
 				  Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
 		    	    Converter.sendCommentEmail( comm,null,order.getDokNr(),order.getCompany(), 
-		    	    		" " + getCustName(order.getCompany()) , " ",false,ag,parent);
+		    	    		" " + getCustName(order.getCompany()) , " ",false,ag,parent,null);
 		         }
 			
 	} catch (Exception e) {

@@ -112,7 +112,7 @@ for(int i = 0;dd1.length>i;i++){
 		
 		if(ean.length() > 4) {
 			 File fff =  new File (picts + ean + ".jpg");
-			 if(!fff.exists()) {
+			 if(!fff.exists() || fff.length() != fil.length()) {
 				  try {
 						Converter.copyFile(fil,fff);
 					} catch (Exception e) {
@@ -180,7 +180,7 @@ for(int i = 0;dd1.length>i;i++){
              	if(in.isFile()){            	
              	File inpda = new File ( pictspda + toode + ".jpg" ); 
              	
-             	  if(!inpda.exists()) {
+             	  if(!inpda.exists() || inpda.length() != in.length()) {
              		  Converter.shrinkAndCopyFile(in,inpda);
              	  }
              

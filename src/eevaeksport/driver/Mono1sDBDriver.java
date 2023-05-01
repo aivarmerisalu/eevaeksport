@@ -228,7 +228,7 @@ public class Mono1sDBDriver
       pstmt.close();
 
       String sql = "SELECT k.code AS klid,d.docno AS doknr,iif(sp261>date()-1000,sp261,d.date) AS maksepaev,-sp440 AS debt,date()-iif(sp261>date()-1000,sp261,d.date) AS yle,sp1425 AS rece FROM RG441 alg " +
-          "  left JOIN 1sjourn d ON  ltrim(RIGHT(alg.sp439,7)) = rtrim(ltrim(d.iddoc)) left JOIN dh272 info ON ltrim(rtrim(info.iddoc))=ltrim(rtrim(d.iddoc)) " +
+          "  left JOIN 1sjourn d ON  ltrim(RIGHT(alg.sp439,9)) = rtrim(ltrim(d.iddoc)) left JOIN dh272 info ON ltrim(rtrim(info.iddoc))=ltrim(rtrim(d.iddoc)) " +
           " left JOIN dt272 abi ON abi.iddoc=info.iddoc left JOIN  sc96 k ON k.id = sp437 " +
           " WHERE ((ltrim(rtrim(sp715)) != '' OR ltrim(rtrim(sp640)) != '' ) AND MONTH(date())=MONTH(alg.period) AND YEAR(date())=YEAR(alg.period) " +
           " AND k.descr!='') AND sp440<>0 ORDER BY k.descr,sp261 GROUP BY d.docno ";
@@ -262,8 +262,9 @@ public class Mono1sDBDriver
         if (debt.getCustID() == null) {
           debt.setCustID(klid);
         }
-
-        debt.setDoknr(rs.getString("doknr").trim());
+  String doknr = rs.getString("doknr");
+  if(doknr != null) {
+        debt.setDoknr(doknr.trim());
         Date dat = rs.getDate("maksepaev");
         if (dat != null) {
           debt.setDuedate(dat);
@@ -288,7 +289,7 @@ public class Mono1sDBDriver
 
           debts.addElement(debt);
         }
-
+      }
 
         rs.close();
         pstmt.close();

@@ -537,14 +537,80 @@ TreeMap res = new TreeMap();
        }
 
 
+    public HashMap makePaymentsFile()  {
 
+    	 
+        
+        
+ 	   String    sql = " Select SL21001 as payer,SL21002 AS number,SL21005 AS data, SL21007 AS suma from SL210500 where SL21005 > getdate()-100  and SL21007 > 0.01" + 
+ 	   		"				 order by SL21001, SL21005 desc"; 
+ 			 HashMap hh = new HashMap();
+
+ 	           try {
+ 	         
+ 	        	   
+ 	             Connection  con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
+ 	                    getParent().getProps().getProperty("dsn.pass"));
+ 	             Statement  st = con.createStatement();
+ 	             ResultSet rs = st.executeQuery(sql);
+ 	     String oldcust = null;
+ 	     int cou = 0;
+ 	     String asi = "";
+ 	             while (rs.next()) {
+ 	              
+ 	               String custid = rs.getString("payer").trim();
+ 	               if(oldcust == null) {
+ 	            	   oldcust = custid;
+ 	               }
+ 	               
+ 	               if(!oldcust.equals(custid) ) {
+ 	            	   cou = 0;
+ 	            	   asi = "";  
+ 	               }
+ 	               
+ 	              // String payer = rs.getString("Moketojo_Kodas").trim();
+ 	              String type = "Bank";
+ 	             
+ 	              String date = rs.getString("data").substring(0,10);
+ 	              double summa = rs.getDouble("Suma");
+ 	             
+ 	               if(cou < 5 ) {
+ 	            	//  System.out.println("aaaa " + cou  + " " + oldcust + "" + custid);
+ 	            	   asi = asi + "|" + (getNF().format(summa)) + " EUR " +  date + " "  + type;
+ 	            	   
+ 	            	      hh.put(custid , asi); 
+ 	            	   
+ 	            	   
+ 	            	  
+ 	               } else {
+ 	            	   asi = "";  
+ 	               }
+ 	               
+ 	              
+ 	               oldcust = custid;
+ 	               cou++; 
+ 	             }
+ 	             rs.close();
+ 	             st.close();
+ 	             con.close();
+ 	            	   
+ 	           }
+ 	           catch (SQLException ex) {
+ 	             ex.printStackTrace();
+ 	           }
+ 	         
+ 	           return hh;
+ 	       }
+ 	    
+   
+   
 
 
 
     public TreeMap getCustomers(Agent agent){
     	
     	TreeMap deldays = this.getDeliveryDays();
-    	
+    	HashMap payments = makePaymentsFile();
     	  Converter.getManagersReplacements(getAgents1(), rcompany, user , pass);
         connectionUp(url);
         connectionUp2(url);
@@ -556,7 +622,16 @@ TreeMap res = new TreeMap();
 		 "  ON SL01036=SC45003    LEFT OUTER JOIN SL140500 ON SL01001=SL14001 AND SL14002='00'" +
          " LEFT OUTER JOIN SY240500 ON SL01035=SY24002 AND SY24001='BK'" +
          " LEFT OUTER JOIN SL220500 ON SL01024=SL22002 AND SL22001='0' " +
-         " WHERE len(SL01001)>4 ORDER BY SL01002";//WHERE ( SL01002 != ''  AND SL01129 != '') or SL01129 = '0100000' 
+         " WHERE len(SL01001)>4 "
+         + "union "
+         + "SELECT SL01002 AS nimi,SL01001 AS kood,(SL01003 + ' (' + SL01004 + ')') AS aadress, SC45004 AS ale,SL01036 AS ale2 ,\r\n" + 
+         "           ' ' AS visit, ' ' AS info ,SL01035 as agent,0 as paym , '' as klgrupp, 0 as block ,\r\n" + 
+         "           0 as block2 ,SL01056 as payer ,SL14007 as delday \r\n" + 
+         "         , 0 as limiit  FROM SL010500_MORE k left JOIN SC450500 \r\n" + 
+         "		   ON SL01036=SC45003    LEFT OUTER JOIN SL140500 ON SL01001=SL14001 AND SL14002='00'\r\n" + 
+         "          LEFT OUTER JOIN SY240500 ON SL01035=SY24002 AND SY24001='BK'\r\n" + 
+         "        \r\n" + 
+         "          WHERE len(SL01001)>4 ORDER BY 1";//WHERE ( SL01002 != ''  AND SL01129 != '') or SL01129 = '0100000' 
 
         connectionUp(url);
         String cmd3 = "SELECT SL01056 as pea   FROM SL010500 left JOIN SC450500   ON SL01036=SC45003 " +
@@ -769,6 +844,10 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
 	    while (rs.next()) {
 		String nimi = rs.getString("nimi").trim();
                 Customer cust = new Customer(rs.getString("kood").trim());
+                if(cust.getID().endsWith("M1")) {
+                	cust.noOrder = true;
+                	
+                }
                 cust.setAddress(Converter.adressLink(Converter.enCodeEst(rs.getString("aadress").trim()),"Lithuania"));
                 nimi = nimi + " " + cust.getAddress();
                 
@@ -788,24 +867,20 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 String agen = rs.getString("agent");
                 if(agen != null){
                   cust.addAgent(new Agent(agen.trim()));
+                  Agent agg = ((Agent)this.getAgents1().get(agen.trim()));
+  				
+  				if(agg != null && agg.getDubbler().size()>0){
+  					for (int i = 0 ; i < agg.getDubbler().size() ; i++){
+  						String iid= (String)((Agent)this.getAgents1().get(agen.trim())).getDubbler().elementAt(i);
+  						if(!cust.hasAgent(iid)){
+      						cust.addAgent(new Agent(iid));	
+  						}
+  					}
+  				}
+                  
                 }
-                
-                if(deldays.get(cust.getID())  != null){
-                 	//cust.setDelDays((String)deldays.get(cust.getID()));
-                 }
-                
-                
-                Agent agg = ((Agent)this.getAgents1().get(agen.trim()));
-				
-				if(agg != null && agg.getDubbler().size()>0){
-					for (int i = 0 ; i < agg.getDubbler().size() ; i++){
-						String iid= (String)((Agent)this.getAgents1().get(agen.trim())).getDubbler().elementAt(i);
-						if(!cust.hasAgent(iid)){
-    						cust.addAgent(new Agent(iid));	
-						}
-					}
-				}
-                
+        
+            
                 String paym = rs.getString("paym");
                 if(paym != null && paym.trim().length()>0){
                 	cust.setPaymTerm(paym.trim());
@@ -851,6 +926,10 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 	cust.setPayer(payer); 
                 	
                 }
+                
+                if(payments.get(cust.getPayer()) != null){
+               	 cust.payments = (String) payments.get(cust.getPayer());
+               }
                 
               if(taraSaldo.get(cust.getID()) != null) {
             	  cust.setInfo("Tara Saldo " + taraSaldo.get(cust.getID()) +  " kegs");
@@ -1259,8 +1338,8 @@ return bomKount;
     			//  1 – Tavaline laoseis mida on näha kohe sellel tootereal -  
                  // Laoseis saadakse ainult ladude LK1 ja NEAT ning ainult nende staatuste „Paruošta KL“ ja „Paruošta NB“ korral vastavaid laoseise kokku liites:
   
-    			  if( (busena.equals("Paruošta NB") || busena.equals("Paruošta KL"))
-    					  && (sandelis.equals("LK1") || sandelis.equals("NEAT")) ){ //|| ladu.equals("Grąžinimas")
+    			  if( (busena.equals("Paruošta NB") || busena.equals("Paruošta KL") || busena.equals("Grąžinimas"))
+    					  && (sandelis.equals("LK1") || sandelis.equals("NEAT") || sandelis.equals("KLC1")) ){ //|| ladu.equals("Grąžinimas")
     					if(res.get(prodcode) != null){
     	               	   res.put(prodcode, res.get(prodcode) + kogus);
     	                }else{

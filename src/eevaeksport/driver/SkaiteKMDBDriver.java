@@ -313,9 +313,9 @@ public class SkaiteKMDBDriver extends AbstractDBDriver implements BulkUpdater,Ma
               	       rs.close();
               	       con.close();*/
               	       
-              	       System.out.println("FIXI ALGUS " + prcodes + " " + baashk);
+              	      // System.out.println("FIXI ALGUS " + prcodes + " " + baashk);
               	     if(baashk != null && baashk.size() > 0){
-              	    	System.out.println("FIXI ALGUS " + prcodes.size() + " " + baashk.size());
+              	    	//System.out.println("FIXI ALGUS " + prcodes.size() + " " + baashk.size());
                          for(int r = 0; r<baashk.size();r++){
                         	 
                      String asi = (baashk.elementAt(r) + "");
@@ -414,7 +414,7 @@ public class SkaiteKMDBDriver extends AbstractDBDriver implements BulkUpdater,Ma
     	    rs.close();
     	    st.close();
     	    con.close();
-    	 
+    	 System.out.println(gr.toString());
     	    return gr;
     	 }
 
@@ -640,8 +640,8 @@ Statement st = null;
              rs.close();
              st.close();
              con.close();
-     System.out.println("baashk "+  baashk.size());
-     System.out.println("Maatrix suurus " + lines.size());
+    // System.out.println("baashk "+  baashk.size());
+    // System.out.println("Maatrix suurus " + lines.size());
              
              if(baashk != null && baashk.size() > 0){
             	
@@ -824,7 +824,7 @@ Statement st = null;
 			 stmt.close();
 			
 			 
-		System.out.println("Degusum " + deguSumm.toString());	 
+		//System.out.println("Degusum " + deguSumm.toString());	 
 			 
 		 
 		 
@@ -883,7 +883,7 @@ Statement st = null;
 			   cust.setRegnr(regno.trim());
 		   }
 		 
-		   if(payid != null){
+		   if(payid != null && payid.trim().length() > 0){
 				  cust.setPayer(payid);
 	            
 				  if(blist.contains(payid)) {
@@ -1255,8 +1255,8 @@ Statement st = null;
       rs.close();
       stmt.close();
       con.close();
-      System.out.println("debtlist size " + dlist.size());
-      System.out.println("blocklist size " + blist.size());
+     // System.out.println("debtlist size " + dlist.size());
+     // System.out.println("blocklist size " + blist.size());
       return dlist;
     }
     

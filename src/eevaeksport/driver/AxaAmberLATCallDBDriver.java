@@ -401,7 +401,7 @@ Connection con = this.getNewConnection();
                      		" ,PRI.TODATE as lopp,month(PRI.TODATE -PRI.FROMDATE)  as kamp " +
          " FROM PRICEDISCTABLE pri INNER JOIN INVENTTABLE inv on inv.dataareaid=pri.dataareaid and inv.itemid =pri.itemrelation " +
    	  " WHERE PRI.DATAAREAID='spil' AND PRI.RELATION=4 AND PRI.ACCOUNTCODE=0 AND pri.itemcode=0  and " +
-       "   ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.FROMDATE) = 2 then 3 else 1 end) AND PRI.TODATE -(case when DATEPART(DW, PRI.TODATE) in (1,2) then 3 else 0 end)) "+
+       "   ((GETDATE() between PRI.FROMDATE-(case when DATEPART(DW, PRI.TODATE) in (1) then 2  when DATEPART(DW, PRI.TODATE) in (2) then 3 else 0 end)) " +
   " or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
   " or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
   " or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION not like 'Stan%'" +

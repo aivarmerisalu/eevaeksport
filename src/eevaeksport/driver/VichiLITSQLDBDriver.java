@@ -166,7 +166,7 @@ public class VichiLITSQLDBDriver extends AbstractDBDriver implements
 		                 len = "0";
 		                 if(f.exists()){
 		                   len =	f.length() + "";
-		                   buf.append(toode+".jpg;"  + len + "\n");
+		                   buf.append(toode+".png;"  + len + "\n");
 		           	    	b++;
 		                 } 
 		                 
@@ -1428,7 +1428,7 @@ System.out.println(cmd);
 					}
 					
 					if(odebts.get(customer.getPayer()) != null) {
-						System.out.println("üle " + odebts.get(customer.getPayer()) + " " + customer.getPayer());
+						//System.out.println("üle " + odebts.get(customer.getPayer()) + " " + customer.getPayer());
 						
 							customer.setDebt(odebts.get(customer.getPayer()));
 						
@@ -1467,6 +1467,16 @@ System.out.println(cmd);
 		           if(cont != null && cont.trim().length()>0){
 		               customer.setPersonalData(Converter.enCodeEst(cont.trim()));   
 		           }
+		           
+  boolean goes = true;
+		           
+		           String blokk = rs.getString("Blocked");
+		           if(blokk != null && blokk.trim().length()>0){
+		               if(blokk.trim().equals("1")) {
+		            	   goes = false;
+		               }
+		           }
+		           
 		           String alegr = rs.getString("alegr");
 		           if(alegr != null && alegr.trim().length()>0){
 		               customer.setGroup(alegr);   
@@ -1483,7 +1493,8 @@ System.out.println(cmd);
 		               customer.setCredit(CreditLimitLCY+"");   
 		           }
 		           
-		            
+		        if(goes) {
+		       
 		           
 				// customer.setPayer(id);
 				if ("Lithuanian".equals(lang)
@@ -1497,6 +1508,8 @@ System.out.println(cmd);
 					this.customers.add(customer.getID());
 					   custs.add(customer.getID());
 				}
+			 	
+		        }
 			}
 
 			rs.close();

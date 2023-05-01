@@ -592,7 +592,7 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	"   	,k.[Salesperson Code] AS agent ,  k.Blocked AS blokk,   " +
     	"  [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type,  " +
     	"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt , 0 AS minsum ,k.Contact +' ' + k.[Phone No_] as kontakt , 0 as sendall " +
-    	" ,[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 FROM ["+ base + "$Customer] k  " +
+    	" ,[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 , [Service Zone Code] as logist  FROM ["+ base + "$Customer] k  " +
 	  	"	  WHERE k.[Salesperson Code] != '' and k.[Remove Card] = 0 AND Blocked != 3  " ;
 
     	   System.out.println(sql);
@@ -780,6 +780,10 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	        	}
     	           }
     	           
+    	           String logist = rs.getString("logist");
+    	           if(logist != null && logist.trim().length() > 0){
+    	        	   customer.setCity("Pristatymo " + logist.trim());
+    	           }
     	              
     	            tm.put(customer.getName(), customer);
     	            this.customers.add(customer.getID());

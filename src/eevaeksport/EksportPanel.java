@@ -1123,6 +1123,9 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("GlobalMar")
 					    || driver.getDriverVersion().equals("NaviIceco")
 					    || driver.getDriverVersion().equals("DirectoLinpet")
+					    || driver.getDriverVersion().equals("DirectoAgapics")
+					    
+				
 					    || driver.getDriverVersion().equals("HorizonMuiz")
 					    || driver.getDriverVersion().equals("HorizonKonig")
 					    || driver.getDriverVersion().equals("NaviNematekas")
@@ -1243,6 +1246,8 @@ public class EksportPanel extends JPanel implements ActionListener,
      						|| driver.getDriverVersion().equals("BuitNowacoLV")
                              || driver.getDriverVersion().equals("VS")
                              || driver.getDriverVersion().equals("DirectoLinpet")
+                             || driver.getDriverVersion().equals("DirectoAgapics")
+                             
                             || driver.getDriverVersion().equals("ViaLaima")
                             || driver.getDriverVersion().equals("AxaOrklaLV")
                 	  || driver.getDriverVersion().equals("IceAxa")
@@ -1480,6 +1485,10 @@ public class EksportPanel extends JPanel implements ActionListener,
                 }
                 
                 
+                File sv22 = new File("json/podsall.txt");
+                if(sv22.exists()){
+                    zip.addFile("json/podsall.txt");
+                }
                 
                 File sv = new File("supervisor.txt");
                 if(sv.exists()){
@@ -3428,7 +3437,7 @@ if(agprods != null && agprods.size() >0){
         String fileName = "assortment.txt";
         
         if (driver.getDriverVersion().equals("Movex") || driver.getDriverVersion().equals("AxaBuraLat") 
-        		|| driver.getDriverVersion().equals("KMAHorti")){
+        		|| driver.getDriverVersion().equals("KMAHorti")  || driver.getDriverVersion().equals("DirectoAgapics")){
         	
            System.out.println("Bufri0 suurus " + buf.length());
            
@@ -3516,10 +3525,13 @@ if(agprods != null && agprods.size() >0){
         }
         String missingprods = "missing.txt";
         String custdata = "custdata.txt";
+        String payments = "payments.txt";
         StringBuffer buf2 = new StringBuffer();
         StringBuffer buf3 = new StringBuffer();
+        StringBuffer buf4 = new StringBuffer();
         appendCustMissingInfo(buf2, agCusts.iterator(),agentCode);
         appendCustDataInfo(buf3, agCusts.iterator(),agentCode);
+        appendCustPaymentsInfo(buf4, agCusts.iterator(),agentCode);
         appendCustInfo(buf, agCusts.iterator(),agentCode);
         try {            
        
@@ -3530,6 +3542,9 @@ if(agprods != null && agprods.size() >0){
             }
             if(buf3.length()>0){
                 zip.addFile(custdata, buf3.toString());
+                }
+            if(buf4.length()>0){
+                zip.addFile(payments, buf4.toString());
                 }
         } catch (Exception e) {
             EksportFrame.showError(e);
@@ -3652,6 +3667,17 @@ if(agprods != null && agprods.size() >0){
               }
     	 }
     }
+  private void appendCustPaymentsInfo(StringBuffer buf4, Iterator codes, String agent){
+    	
+    	while (codes.hasNext()) {
+    	 Customer cust = (Customer)codes.next();
+             if(cust.payments != null){
+                 	   if(buf4.indexOf(cust.getPayer() + ";" + cust.payments) == -1){
+                		     buf4.append(cust.getPayer() + ";" + cust.payments);
+                             buf4.append(lineSeparator);   
+              }
+    	 }
+    }}
     
     
     private void appendCustInfo(StringBuffer buf, Iterator codes, String agent){
@@ -4411,8 +4437,8 @@ if(agprods != null && agprods.size() >0){
           
         buf.append(prod.getID());
         buf.append(EksportPanel.separator);
-        
-     //   String name3 =  ;
+       
+     //jj   String name3 =  ;
 //     /   System.out.println("driver Version " + driver.getDriverVersion() );
         /*}else  if(driver.getDriverVersion().equals("NaviVilandra")){
         	buf.append((prod.getName().replace(';', ':')).substring(5,prod.getName().length()));
@@ -4428,8 +4454,8 @@ if(agprods != null && agprods.size() >0){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(5,prod.getName().length()));
         }else if(driver.getDriverVersion().equals("Dansg")){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(2,prod.getName().length()));
-        }else if(driver.getDriverVersion().equals("Movexxxxx")){
-        	buf.append( prod.getOldName() + (prod.getName().replace(';', '-').replace(':', '-')).substring(5,prod.getName().length()));
+        }else if(driver.getDriverVersion().equals("AxaJNGLATww")){
+        	buf.append(  (prod.getName().replace(';', '-').replace(':', '-')).substring(3,prod.getName().length()));
         }else if(driver.getDriverVersion().equals("SAFSaaremaa")){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(3,prod.getName().length()).replaceAll("\\r\\n|\\r|\\n", " "));
         }else if(driver.getDriverVersion().equals("Rakvere")){
@@ -5604,7 +5630,9 @@ while (itra.hasNext()){
         }
  // vaat siin on agProds mis on vaja sorterida prod.getname j?rgi
         System.out.println(" agProds hashxx " + result.size());
- java.util.Collections.sort(agProds, new java.util.Comparator(){
+        if(!"true".equals(getProps().getProperty("use.prodsorting"))) {
+        
+           java.util.Collections.sort(agProds, new java.util.Comparator(){
 	 
 
         public boolean equals(Object obj) {
@@ -5618,6 +5646,7 @@ while (itra.hasNext()){
           return prod1.getNameSorting().compareTo(prod2.getNameSorting());
         }
       });
+        }
  
  
         StringBuffer buf = new StringBuffer();

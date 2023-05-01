@@ -161,7 +161,7 @@ public class InteraltusImportDriver
 	   
 	   if((comm2 != null) && order.getStatus() < 5){
 		   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
-	    Converter.sendCommentEmail( comm2,null,order.getDokNr(),order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
+	    Converter.sendCommentEmail( comm2,null,order.getDokNr(),order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent,null);
 	 }
    }
    

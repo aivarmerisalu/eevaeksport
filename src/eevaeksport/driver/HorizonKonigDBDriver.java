@@ -2501,6 +2501,10 @@ try{
 			  	    //	String cagid = (String)cob.get("custagent");
 			  		//	String cagname = (String)cob.get("custagname");
 			  			String agid = (String)cob.get("agentid");
+			  			String agname = (String)cob.get("managerName");
+			  			if(agname.contains(agid)) {
+			  				agname = agname.substring(0,agname.indexOf(agid)).trim();
+			  			}
 			  			String custname = "";
 			  			String custchain = "";
 			  			String custaddr = "";
@@ -2562,50 +2566,67 @@ try{
 			  	    	Date created = new Date(Long.parseLong(((String)cob.get("resstr3"))));
 			  	    	
 			  	  
-			  		
+			  	    	String cuname = (String)cob.get("custname");
+		  				String cuid = (String)cob.get("custid");
+		  				if(cuname.endsWith(cuid)) {
+		  					cuname = cuname.substring(0,cuname.indexOf(cuid)-1);
+		  				}
 			  				
 			  				
 			  				worksheetBASE.createRow(palletrow);
 			  				
-			  				worksheetBASE.getRow(palletrow).createCell(0).setCellValue("LV");
-			  				String cuname = (String)cob.get("custname");
-			  				String cuid = (String)cob.get("custid");
-			  				if(cuname.endsWith(cuid)) {
-			  					cuname = cuname.substring(0,cuname.indexOf(cuid)-1);
-			  				}
-			  				worksheetBASE.getRow(palletrow).createCell(1).setCellValue(cuid);
-			  			
-			  				worksheetBASE.getRow(palletrow).createCell(2).setCellValue(typeid);
-			  				worksheetBASE.getRow(palletrow).createCell(3).setCellValue(typename);
+			  				worksheetBASE.getRow(palletrow).createCell(0).setCellValue(agname);
 			  				
-			  				worksheetBASE.getRow(palletrow).createCell(4).setCellValue(typekogus);
-			  				XSSFCell cellk1 = worksheetBASE.getRow(palletrow).getCell(4);
-			  				XSSFCellStyle pstyle = worksheetBASE.getRow(0).getCell(4).getCellStyle();
+			  			    worksheetBASE.getRow(palletrow).createCell(1).setCellValue(created);
+			  				XSSFCell celld3 = worksheetBASE.getRow(palletrow).getCell(1);
+			  				XSSFCellStyle cellStyle3 = (XSSFCellStyle)celld3.getCellStyle();
+				  	        cellStyle3.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+				  	       
+			  				worksheetBASE.getRow(palletrow).createCell(2).setCellValue(cuname);
+			  				worksheetBASE.getRow(palletrow).createCell(3).setCellValue(custchain);
+			  				worksheetBASE.getRow(palletrow).createCell(4).setCellValue(custaddr);
+
+			  				
+			  			
+			  				//worksheetBASE.getRow(palletrow).createCell(2).setCellValue(typeid);
+			  				worksheetBASE.getRow(palletrow).createCell(5).setCellValue(typename);
+			  				worksheetBASE.getRow(palletrow).createCell(6).setCellValue(typekogus);
+			  				XSSFCell cellk1 = worksheetBASE.getRow(palletrow).getCell(6);
+			  				XSSFCellStyle pstyle = worksheetBASE.getRow(0).getCell(6).getCellStyle();
 			  				cellk1.setCellStyle(pstyle);
 			  				
 			  				 
-			  				worksheetBASE.getRow(palletrow).createCell(5).setCellValue(fromdate);
-			  				XSSFCell celld1 = worksheetBASE.getRow(palletrow).getCell(5);
+			  				worksheetBASE.getRow(palletrow).createCell(7).setCellValue(fromdate);
+			  				XSSFCell celld1 = worksheetBASE.getRow(palletrow).getCell(7);
 			  				XSSFCellStyle cellStyle = (XSSFCellStyle)celld1.getCellStyle();
 				  	        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
 			  				
-			  				worksheetBASE.getRow(palletrow).createCell(6).setCellValue(todate);
-			  				XSSFCell celld2 = worksheetBASE.getRow(palletrow).getCell(6);
+			  				worksheetBASE.getRow(palletrow).createCell(8).setCellValue(todate);
+			  				XSSFCell celld2 = worksheetBASE.getRow(palletrow).getCell(8);
 			  				XSSFCellStyle cellStyle2 = (XSSFCellStyle)celld2.getCellStyle();
 				  	        cellStyle2.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
-				  	       
-				  	        worksheetBASE.getRow(palletrow).createCell(7).setCellValue((String)cob.get("resstr2"));
+				  	        
+				  	        
+				  	        
+				  	        worksheetBASE.getRow(palletrow).createCell(9).setCellValue((String)cob.get("prodgroupname"));
+				  	      try {
+				  	    	  worksheetBASE.getRow(palletrow).createCell(10).setCellValue((String)cob.get("resstr2"));  
+				  	      }catch(Exception e) {
+				  	    	  
+				  	      }
+				  	      
+				  	        worksheetBASE.getRow(palletrow).createCell(11).setCellValue((String)cob.get("prodname"));
 			  			
-			  				worksheetBASE.getRow(palletrow).createCell(8).setCellValue(bonusid);
+			  				//worksheetBASE.getRow(palletrow).createCell(12).setCellValue(bonusid);
 			  				
-			  				worksheetBASE.getRow(palletrow).createCell(9);
-			  				XSSFCell cellk2 = worksheetBASE.getRow(palletrow).getCell(9);
+			  				worksheetBASE.getRow(palletrow).createCell(12);
+			  				XSSFCell cellk2 = worksheetBASE.getRow(palletrow).getCell(12);
 			  				XSSFCellStyle pstyle2 = worksheetBASE.getRow(0).getCell(4).getCellStyle();
 			  				cellk2.setCellStyle(pstyle2);
 			  				cellk2.setCellValue(bonuskogus);
 			  		
-			  				 worksheetBASE.getRow(palletrow).createCell(10).setCellValue(comID);
-			  				 worksheetBASE.getRow(palletrow).createCell(11).setCellValue(comment);
+			  				// worksheetBASE.getRow(palletrow).createCell(12).setCellValue(comID);
+			  				 worksheetBASE.getRow(palletrow).createCell(13).setCellValue(comment);
 			  				
 			  				
 			  				
@@ -2631,7 +2652,7 @@ try{
 			  							
 			  							
 			  								
-			  				  		         Cell  cell = worksheetBASE.getRow(palletrow).createCell(12+a);
+			  				  		         Cell  cell = worksheetBASE.getRow(palletrow).createCell(14+a);
 			  				  		         cell.setCellValue("Photo Link "+(a+1) );
 			  				  		         XSSFHyperlink link = (XSSFHyperlink)createHelper.createHyperlink(Hyperlink.LINK_URL);
 			  				  		         link.setAddress(URLEncoder.encode(foto, StandardCharsets.UTF_8.toString()));
@@ -2651,16 +2672,14 @@ try{
 			  				
 			  				
 			  				
-			  				 worksheetBASE.getRow(palletrow).createCell(16).setCellValue(created);
-			  				 
-				  				XSSFCell celld3 = worksheetBASE.getRow(palletrow).getCell(16);
-				  				XSSFCellStyle cellStyle3 = (XSSFCellStyle)celld3.getCellStyle();
-					  	        cellStyle3.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
-			  				worksheetBASE.getRow(palletrow).createCell(17).setCellValue(agid);
-			  				worksheetBASE.getRow(palletrow).createCell(18).setCellValue((String)cob.get("agentname"));
-			  				worksheetBASE.getRow(palletrow).createCell(19).setCellValue(custname);
-			  				worksheetBASE.getRow(palletrow).createCell(20).setCellValue(custchain);
-			  				worksheetBASE.getRow(palletrow).createCell(21).setCellValue(custaddr);
+			  			 
+			  				worksheetBASE.getRow(palletrow).createCell(18).setCellValue((String)cob.get("prodid"));
+			  				worksheetBASE.getRow(palletrow).createCell(19).setCellValue(agid);
+			  				worksheetBASE.getRow(palletrow).createCell(20).setCellValue("LV");
+			  				worksheetBASE.getRow(palletrow).createCell(21).setCellValue((String)cob.get("custid"));
+			  				worksheetBASE.getRow(palletrow).createCell(22).setCellValue(bonusid);
+			  				worksheetBASE.getRow(palletrow).createCell(23).setCellValue(comID);
+			  				//
 			  				
 			  				
 			  				

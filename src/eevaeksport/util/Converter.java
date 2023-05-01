@@ -408,18 +408,28 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(ea));
+								String ean = formatter.formatCellValue(row.getCell(ea)).trim();
 								String tnimi = formatter.formatCellValue(row.getCell(ea+2));
-								String toode = getToode(prods,ean);
+								
+								if(ean.length() > 13) {
+									if(ean.startsWith("4")) {
+										ean = ean.substring(0,13);
+									}else {
+										ean = ean.substring(1);
+									}
+									
+								}
+								String toode = getToode(prods,ean.trim());
 							 if(!"Nimetus".equals(tnimi)) {
 								 
 							 
-							  if(toode.equals(ean) ) {
+							  if(toode.equals(ean.trim()) ) {
 								  if(errors == null) {
-									  errors = "Tuvastamatta tooted sortimendis\n Selver formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+									  errors = "Tuvastamatta tooted sortimendis\n Selver formaat\n fail : "
+								  + file.getName() +"\n\nEAN     Nimetus\n";
 								  }
 								  if(!errors.contains(ean)) {
-									  errors = errors + ean + "   " + tnimi + "\n";
+									  errors = errors + "'" + ean + "'   " + tnimi + "\n";
 								  }
 								
 							  }
@@ -2815,9 +2825,10 @@ public class Converter {
 								 seis = 11;
 							 }
 						 }
-						 
+						 int poo = 0;
 						 pais = formatter.formatCellValue(rowu.getCell(2));
 						 if (pais.equals("Kauplus")) {
+							 poo = 2;
 							 u = 3;
 							 
 							 pais = formatter.formatCellValue(rowu.getCell(8));
@@ -2837,6 +2848,11 @@ public class Converter {
 							 if(pais.equals("Seisund")) {
 								 seis = 13;
 							 }
+							 pais = formatter.formatCellValue(rowu.getCell(12));
+							 if(pais.equals("Seisund")) {
+								 seis = 12;
+							 }
+							 
 							 
 							 pais = formatter.formatCellValue(rowu.getCell(10));
 							 if(pais.equals("Nimetus")) {
@@ -2846,31 +2862,38 @@ public class Converter {
 							 if(pais.equals("Nimetus")) {
 								 tnim = 8;
 							 }
+							 pais = formatter.formatCellValue(rowu.getCell(7));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 7;
+							 }
 						 }
 							
 						 
 						 
 						 
 						 
-				 System.out.println("u " + u +" " + tnim + " "+ seis + " "+ eanp );
 				
 					
 						for(int i = u ; i < sheet.getLastRowNum()+1;i++){
 							XSSFRow row = sheet.getRow(i);
-							 int poo = 0;
-                          if(u == 6) {
-                        	  poo = 3;
-                          }
-                          if(seis == 15) {
-                        	  poo = 2;
-                          }
-                          if(seis == 13) {
-                        	  poo = 2;
-                          }
-                          if(seis == 100) {
-                        	  poo = 1;
-                          }
-							 
+							
+							 if(poo == 0) {
+		                          if(u == 6) {
+		                        	  poo = 3;
+		                          }
+		                          if(seis == 15) {
+		                        	  poo = 2;
+		                          }
+		                          if(seis == 13) {
+		                        	  poo = 2;
+		                          }
+		                          if(seis == 100) {
+		                        	  poo = 1;
+		                          }
+									}
+                        
+                         
+          					 
 							Cell nnn = row.getCell(poo);
 							if(nnn != null) {
 						
@@ -2884,7 +2907,8 @@ public class Converter {
 									seisund = false;
 								}
 								
-								//System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi+ " "+ ean + " " + pood);
+					//	System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi 
+						//		+" " + tnimi+ " "+ ean + " " + pood);
 								
 							}
 							
@@ -2939,6 +2963,282 @@ public class Converter {
     	return res;
     }
 	
+
+	 public static TreeMap loadSuggcoop(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
+			String errors = null;
+		 try{
+			 
+			       FileInputStream	 ff = new FileInputStream(file);
+					XSSFWorkbook workbook = new XSSFWorkbook(ff); 
+					XSSFSheet sheet = workbook.getSheetAt(0); 
+					DataFormatter formatter = new DataFormatter();
+					
+					System.out.println("coop lugemine sugg " + file.getName());
+					ff.close();	
+					 if(sheet != null){
+						 
+						 int u = 4;
+						 int eanp = 6;
+						 int tnim = 8;
+						 int seis = 0;
+						 int laos = 14;
+						 XSSFRow rowu = sheet.getRow(0);
+						 String pais = formatter.formatCellValue(rowu.getCell(0));
+						 if (pais.equals("Kauplus")) {
+							 u = 1;
+							 pais = formatter.formatCellValue(rowu.getCell(1));
+							 if(pais.equals("EAN")) {
+								 eanp = 1;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(2));
+							 if(pais.equals("EAN")) {
+								 eanp = 2;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(3));
+							 if(pais.equals("EAN")) {
+								 eanp = 3;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(4));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 4;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(3));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 3;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(2));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 2;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(7));
+							 if(pais.equals("Seisund")) {
+								 seis = 7;
+							 }
+						 }
+						 
+						 
+						 pais = formatter.formatCellValue(rowu.getCell(1));
+						 if (pais.equals("Kauplus")) {
+							 u = 1;
+							 pais = formatter.formatCellValue(rowu.getCell(2));
+							 if(pais.equals("EAN")) {
+								 eanp = 2;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(3));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 3;
+							 }
+							  seis = 0;
+							 
+						 }
+						 
+						 
+						 
+						 
+						 rowu = sheet.getRow(6);
+						  pais = formatter.formatCellValue(rowu.getCell(3));
+						 if (pais.equals("Kauplus")) {
+							 u = 6;
+							 pais = formatter.formatCellValue(rowu.getCell(11));
+							 if(pais.equals("EAN")) {
+								 eanp = 11;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(13));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 13;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(20));
+							 if(pais.equals("Seisund")) {
+								 seis = 20;
+							 }
+						 }
+						 
+						 rowu = sheet.getRow(3);
+						  pais = formatter.formatCellValue(rowu.getCell(0));
+						 if (pais.equals("Kauplus")) {
+							 u = 3;
+							 pais = formatter.formatCellValue(rowu.getCell(2));
+							 if(pais.equals("EAN")) {
+								 eanp = 2;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(4));
+							 if(pais.equals("EAN")) {
+								 eanp = 4;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(4));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 4;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(6));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 6;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(8));
+							 if(pais.equals("Seisund")) {
+								 seis = 8;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(11));
+							 if(pais.equals("Seisund")) {
+								 seis = 11;
+							 }
+						 }
+						
+						 int poo = 0;
+						 pais = formatter.formatCellValue(rowu.getCell(2));
+						 if (pais.equals("Kauplus")) {
+							 poo = 2;
+							 u = 3;
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(8));
+							 if(pais.equals("EAN")) {
+								 eanp = 8;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(6));
+							 if(pais.equals("EAN")) {
+								 eanp = 6;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(15));
+							 if(pais.equals("Seisund")) {
+								 seis = 15;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(13));
+							 if(pais.equals("Seisund")) {
+								 seis = 13;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(12));
+							 if(pais.equals("Seisund")) {
+								 seis = 12;
+							 }
+							 
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(10));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 10;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(8));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 8;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(7));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 7;
+							 }
+							 
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(14));
+							 if(pais.equals("Laos")) {
+								 laos = 14;
+							 }
+						 }
+							
+						 
+						 
+						 
+						 
+				
+					
+						for(int i = u ; i < sheet.getLastRowNum()+1;i++){
+							XSSFRow row = sheet.getRow(i);
+							if(poo == 0) {
+                          if(u == 6) {
+                        	  poo = 3;
+                          }
+                          if(seis == 15) {
+                        	  poo = 2;
+                          }
+                          if(seis == 13) {
+                        	  poo = 2;
+                          }
+                          if(seis == 100) {
+                        	  poo = 1;
+                          }
+							}
+          					 
+							Cell nnn = row.getCell(poo);
+							if(nnn != null) {
+						
+                            String pood = "COOP-" +nnn.getStringCellValue().trim();
+							String ean = formatter.formatCellValue(row.getCell(eanp));
+							String tnimi = formatter.formatCellValue(row.getCell(tnim));
+							Boolean seisund = true;
+							if(seis != 0 ) {
+								String snimi = formatter.formatCellValue(row.getCell(seis));
+								if(!snimi.equals("Sortimendis") && !snimi.equals("Toote hankimine")) {
+									seisund = false;
+								}
+								
+								
+				
+							}
+							
+							String	snimi = formatter.formatCellValue(row.getCell(laos));
+							if(snimi.equals("Logistikakeskus")) {
+								seisund = false;
+							//	System.out.println("SeesXXXX " + i +" "+ seisund + " " + nnn + " "  
+								//		+" '" + snimi+ "' "+ ean + " " + pood);
+							}
+							
+							if(seisund) {
+								
+										
+							
+							Contract con = new Contract(pood);
+							String toode = getToode(prods,ean);
+							// if(ean.equals("4744136010477"))
+						System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
+							  if(toode.equals(ean) && !toode.equals("EAN")) {
+								  if(errors == null) {
+									  errors = "Tuvastamatta tooted SUGG sortimendis\n Coop formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+								  }
+								  if(!errors.contains(ean)) {
+									  errors = errors + ean + "   " + tnimi + "\n";
+								  }
+							  } else {
+								
+							  
+							if(res.get(pood) != null){
+                           	  con = (Contract)res.get(pood);
+                           	 } 
+							  ContractLine ll = new ContractLine(toode);
+                           	  if(con.lines == null){
+                           		  con.lines = new Vector();
+                           	  }
+                           	  con.lines.add(ll);
+                           	  res.put(pood, con);
+						   }
+							 // System.exit(0);
+							}
+							}
+						}
+					 }
+					
+					
+					//System.out.println("sorts size " + res.toString() + " " + sheet.getLastRowNum());
+				//	System.exit(0);
+						
+					 }catch(Exception e) {
+						 e.printStackTrace();
+					 }	 
+		 
+		//System.exit(0);
+		 
+		 if(errors != null) {
+			 sendSuggLoadErrorEmail(errors, parent, "coop", true);
+		 }
+		 sendSuggLoadErrorEmail("\n Coop imported " + res.keySet().size() + " shops SUGG sortiments", parent, "coop",false);
+			 
+    	return res;
+	 }
 	 
 	 public static TreeMap loadFixOG(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
@@ -3174,6 +3474,55 @@ public class Converter {
 		          if(format.equals("prisma2")) {
 			        	 loadFixPrisma2(res, file , prods, parent);
 				      }
+		       }
+		      String nn = file.getName();
+		    		  
+		    if(!file.isDirectory()) {
+		    	File ii = new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn);
+		    	if(ii.exists()) {
+		    		ii.delete();
+		    	}
+		    	System.out.println("renamed " +   file.renameTo(new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn)));
+		      
+		    }
+		      }
+		    }
+		
+	 
+		
+		return res;
+	}
+	
+	
+	public static TreeMap loadSuggFromExcels(String dirx , TreeMap prods, EksportPanel parent) {
+		TreeMap res = new TreeMap();
+		
+	//	Kammime kataloogi läbi ja määrame mis on mis ja proovime sisse lugeda 
+		String done = "";
+		
+		 File dir = new File(dirx);
+		 File[] files = dir.listFiles();
+		   
+		    
+		    for (int i = 0; i < files.length ; i++){
+		      File file = files[i];
+		     
+		      if (file.isFile() && !file.getName().contains("Thumbs")) {
+					
+		        
+		          String format = identifyXLS(file);
+		          System.out.println("Format tuvastatud " + format + " " + file.getName());
+		          if(format != null) {
+		        	  
+		       
+		        //System.exit(0);
+		        
+		        if(format.equals("mjsortiment")) {
+		        	loadFixMJ(res, file , prods, parent);
+		          }
+		       if(format.equals("coop")) {
+		        	  loadSuggcoop(res, file , prods, parent);
+		          }
 		       }
 		      String nn = file.getName();
 		    		  
@@ -3568,9 +3917,12 @@ public class Converter {
 		  	  		mail.addAttach(fileName);
 		  	  	 StringTokenizer st = new StringTokenizer(parent.getProps().getProperty("report.email"),",");
 		  	  	 while(st.hasMoreTokens()) {
-		  	  	    mail.setFilesTo(st.nextToken());
+		  	  		 String tt = st.nextToken();
+		  	  	    mail.setFilesTo(tt);
 		  	  		mail.send(); 
+		  	  	 System.out.println(tt + " " + fileName);
 		  	  	 }
+		  	  	
 	               	
 	   		}
 		  	
@@ -3634,21 +3986,76 @@ public class Converter {
 		  	
 	   }
 	
+	public static void sendSuggLoadErrorEmail(String comment1 , EksportPanel parent , String format , boolean error){
+	   	try{
+	   		String comment = null ;
+	   		if(comment1 != null && comment1.trim().length() > 0) {
+	   			comment =  comment1 + "\n\n" ;
+	   		}
+	   		
+	   		
+	   		if(comment != null && comment.trim().length() >0){
+	   			
+	   			//System.out.println(comment);
+	   			Email mail = new Email(null);
+		  		   
+	   			
+	                mail.setSMTP(parent.getProps().getProperty("smtphost"));
+	                if(parent.getProps().getProperty("smtpuser") != null)
+	                mail.setUser(parent.getProps().getProperty("smtpuser"));
+	                
+	                if(parent.getProps().getProperty("smtppass") != null)
+	                mail.setPass(parent.getProps().getProperty("smtppass"));
+	                
+	                if(parent.getProps().getProperty("smtpport") != null)
+	                mail.setPort(parent.getProps().getProperty("smtpport"));
+	               
+	                if(error) {
+	                	mail.setSubjectFilesTo("Suggested sortiment loading error report : " + format );
+	                } else {
+	                	mail.setSubjectFilesTo("Suggested sortiment upload : " + format );
+	                }
+		  	  		
+		  	  		mail.setFrom(parent.getProps().getProperty("from"));
+		  	  		
+		  	  
+		  	  	
+		  	  		String lisa = "";
+		  	  		
+		  	  		mail.setEncoding("utf-8");
+		  	  		mail.setBodyHtml("<br>" + lisa + comment.replaceAll("\n", "<br>") + "<br><br>");
+		  	  		mail.setSendNotice(false);
+		  	  		
+		  	  	 StringTokenizer st = new StringTokenizer(parent.getProps().getProperty("fixsort.erroremail"),",");
+		  	  	 while(st.hasMoreTokens()) {
+		  	  	    mail.setFilesTo(st.nextToken());
+		  	  		mail.send(); 
+		  	  	 }
+	               	
+	   		}
+		  	
+		  			}catch(Exception e){
+		  			e.printStackTrace();	
+		  			}
+		  	
+	   }
 	
 	
-	public static void sendCommentEmail(String comment1 ,String comment2,String doknr,String custid, String nimi , String chain, boolean price, Agent ag ,ImportPanel parent){
+	
+	public static void sendCommentEmail(String comment1 ,String commentPrice,String doknr,String custid, String nimi , String chain, boolean price, Agent ag 
+			,ImportPanel parent, String filename){
 	   	try{
 	   		String comment = null ;
 	   		if(comment1 != null && comment1.trim().length() > 0) {
 	   			comment = "Comment : " + comment1 + "\n\n" ;
 	   		}
 	   		
-	   		if(comment2 != null && comment2.trim().length() > 0) {
+	   		if(commentPrice != null && commentPrice.trim().length() > 0) {
 	   			if(comment == null) {
 	   				comment = "";
 	   			}
 	   			
-	   			comment = comment + "Price info : " + comment2 + "\n" ;
+	   			comment = comment + "Price info : " + commentPrice + "\n" ;
 	   		}
 	   		
 	   		if(comment != null && comment.trim().length() >0){
@@ -3686,6 +4093,9 @@ public class Converter {
 		  	  		//mail.setBody("\nOrder :" +  doknr + " \nCustomer code :" + custid +  "\nCustomer Name :" + nimi + "\n" +
 		  	  			//    "Manager :" + agent + "\n" +  "\n" + lisa + comment + "\n\n.");
 		  	  		mail.setSendNotice(false);
+		  	  		if(filename != null) {
+		  	  		 mail.addAttach(filename);
+		  	  		}
 		  	  		
 		  	  		mail.send();
 		  	  		System.out.println("\nOrder Comment " +  doknr + " " + lisa + custid + " "+ nimi + " " + agent + "\n\n" +
@@ -4103,9 +4513,11 @@ System.out.println(asjad.toString());
 	 }
 	 
 
+		public static void sendContractJson(TreeMap tm , String company, String user , String pass){
+			sendContractJson( tm ,  company, user , pass ,  "FIXED");
+		}
 	 
-	 
-	public static void sendContractJson(TreeMap tm , String company, String user , String pass){
+	public static void sendContractJson(TreeMap tm , String company, String user , String pass , String type){
 		Vector<MyJSON> json = new Vector<MyJSON> ();
 		
 		  eevaeksport.util.ReportingService serv = new ReportingService();
@@ -4127,9 +4539,14 @@ System.out.println(asjad.toString());
 			Contract ag = (Contract)itera.next();
 			JSONObject value = new JSONObject();
 try{
-	value.put("code", ag.code);
+	String pre = "";
+	if(type.equals("SUGGESTED")) {
+		pre = "SUGG-";
+	}
+	value.put("code",pre + ag.code);
 	value.put("name", ag.name);
-	value.put("contractType", "FIXED");
+	System.out.println("Type " + type + " " + ag.code + " " + ag.name);
+	value.put("contractType", type);
 	
 	JSONArray arr = new JSONArray();
 	JSONObject level = new JSONObject();
@@ -4181,7 +4598,7 @@ try{
 		if(json.size() > 0){
 			try {
 				String aaa = serv.postJson(array.toString(), myson.getUrl());
-				System.out.println(aaa);
+				System.out.println("response " + aaa);
 				Converter.saveFile("json.txt", array.toString());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -4204,7 +4621,7 @@ try{
 		if(json.size() > 0){
 			try {
 				String aaa = serv.postJson(array.toString(), myson.getUrl());
-				System.out.println(aaa);
+				System.out.println("response " + aaa);
 
 				System.out.println("user " + user + " " + pass + " "  + company + " " + 
 						myson.getUrl());
@@ -6651,7 +7068,7 @@ try{
 	public static void savePodJson(TreeMap tm ){
 	
 		
-		Vector<MyJSON> json = new Vector<MyJSON> ();
+
 	    JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		
@@ -11211,9 +11628,9 @@ return exceldir + "vigestareport" + lastMonday + ".csv";
 			
 			
 			 if(errors != null) {
-				 sendFixLoadErrorEmail(errors, parent, "circlek",true);
+				 sendSuggLoadErrorEmail(errors, parent, "circlek",true);
 			 }
-			 sendFixLoadErrorEmail("\n CircleK imported " + res.keySet().size() + " shops fixed sortiments", parent, "circlek",false);
+			 sendSuggLoadErrorEmail("\n CircleK imported " + res.keySet().size() + " shops fixed sortiments", parent, "circlek",false);
 
 		return res;
 	}

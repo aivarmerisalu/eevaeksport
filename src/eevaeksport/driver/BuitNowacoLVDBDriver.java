@@ -521,7 +521,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 
    public String getSaveDebtInfo() {
 	   String cmd =  " SELECT k.klient_id AS kood,k.kodas AS payer ,k.kl_mode as mood ,filialas "
-	   		+ " FROM klientai k  WHERE filialas = 1 or k.kl_mode in( 'A','AS' ,'AF','ASW','ASF','BS','B','BF' ) " ;
+	   		+ " FROM klientai k  WHERE filialas = 1 or k.kl_mode in( 'A','AS' ,'AF','ASW','ASF','BS','B','BF','N','NS','NL','NF','NSF' ) " ;
 
 	   //kellel on blokid 
 
@@ -1587,7 +1587,7 @@ System.out.println(cmd);
         rs1 = stmt1.executeQuery(cmd);
        while(rs1.next()){
         Debt debt = new Debt();
-       String custID = rs1.getString("klient");
+       String custID = rs1.getString("klient").trim();
         debt.setCustID(custID.trim());
         
         
@@ -1607,7 +1607,9 @@ System.out.println(cmd);
         if(debtDays.get(custID) != null){
          old = Integer.parseInt((String)debtDays.get(custID));
         }
-        
+        if(custID.equals("3978")) {
+        	System.out.println("dueint " + dueint + " " + old + " " +blocked6custs.contains("3978"));
+        }
         if(old<dueint){
            debtDays.put(custID,dueint+"") ;
            if(dueint > 120){// oli 29 Katherina soovil muutsin 
@@ -1775,11 +1777,11 @@ System.out.println(cmd);
                       }
                  }
            }
-             if(ag != null && ag.trim().length() > 0) {
+             if(ag != null && ag.trim().length() > 0 && !ag.trim().equals("26")) {
             	   customer.addAgent(new Agent("171"));
                    customer.addAgent(new Agent("172"));	 
                    customer.addAgent(new Agent("176"));
-                   
+                   customer.addAgent(new Agent("318"));	 
                    customer.addAgent(new Agent("227"));	 
                    customer.addAgent(new Agent("228"));	 
              }
@@ -1811,7 +1813,7 @@ System.out.println(cmd);
             	 while (itera.hasNext()){
             	  	 Agent agg = ((Agent)this.getAgents1().get(itera.next()));
             	    	customer.addAgent(agg); 
-            	    	 System.out.println("ERAISISK lisan agenti " + agg.getID());
+            	    	// System.out.println("ERAISISK lisan agenti " + agg.getID());
             	 }
              }
              
@@ -1921,10 +1923,6 @@ System.out.println(cmd);
         	   customer.setCredit(credit + "");
            }
          
-           if(customer.getPayer().equals("LV40203073916")) {
-        	   System.out.println("otaldebts.get(customer.getPayer()) "+  totaldebts.get(customer.getPayer()) + " " + credit);
-        	   System.out.println("otaldebts.get(customer.getPayer()) "+  totaldebts.get(customer.getID()) + " " + credit);
-           }
            
            if(customer.getPayer() != null  && this.totaldebts.get(customer.getPayer()) != null){
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getPayer())));
@@ -1936,7 +1934,7 @@ System.out.println(cmd);
             	blocked1custs.add(customer.getPayer());
             	                 
 
-            	System.out.println("payerBlokki ");
+            	//System.out.println("payerBlokki ");
             }
            }else if( this.totaldebts.get(customer.getID()) != null){
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
@@ -1944,7 +1942,7 @@ System.out.println(cmd);
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
             	blocked1custs.add(customer.getID());
-            	System.out.println("kliendiBlokki " + customer.getID());
+            //	System.out.println("kliendiBlokki " + customer.getID());
             }
            }
            	
@@ -2185,7 +2183,7 @@ System.out.println(cmd);
  " kaina_5 as hind5, kaina_6 as hind6, kaina_7 as hind7, kaina_8 as hind8, kaina_9 as hind9, kaina_10 as hind10,grup_id AS grupp ,tip_id AS tupe ,t.tipas  " +
 	"		 , t.mato_vien AS unit, t.bar_kodas AS ean,0 AS status ,t.max_nuol AS maxdiscount,  " +
 	"		  t.tipas AS type, t.orig_pak AS kastis,  t.prek_neto AS kaal,21 AS vat,  pak_kiek as opt ,prek_mode as info ,t.vieta as staatus "
-	+ ",sertifikat as topprod , t.savikaina as oma  " +
+	+ ",sertifikat as topprod , t.savik_3 as oma  " +
 	"		  FROM prekes t inner join grupes g on g.grupe=t.grupe inner join tipai ty on ty.tipas=t.tipas " +
 	"		  where kaina_1 > 0 ";
      	

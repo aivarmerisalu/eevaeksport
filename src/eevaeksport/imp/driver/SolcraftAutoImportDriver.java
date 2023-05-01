@@ -153,6 +153,9 @@ System.out.println(sql);
 	  if(agent.equals("Marcis")) {
 		  agent = "Mārcis";
 	}
+	  if(agent.equals("Maris")) {
+		  agent = "Māris";
+	}
     String cc = order.getCompany();
     String cust = cc.substring(0, cc.indexOf("-"));
     String adr = cc.substring(cc.indexOf("-")+1);

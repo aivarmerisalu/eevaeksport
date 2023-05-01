@@ -130,6 +130,99 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
    */
   public void connectionUp(){
   }
+  
+  
+  public HashMap makePaymentsFile()  {
+
+ 	 
+      
+      
+	   String    sql = "select a.accountnum as payer,a.offsettransvoucher AS number,max(transdate) AS data, \r\n" + 
+	   		"	   		sum(a.settleamountcur) AS suma from custsettlement a  WHERE a.dataareaid='bd' and transdate > getdate()-180 and \r\n" + 
+	   		"	   		a.offsettransvoucher like '%DM00%' " + 
+	   		"	   		 group by a.offsettransvoucher,a.accountnum\r\n" + 
+	   		"	   			 having sum(a.settleamountcur) > 0 order by a.accountnum, max(transdate) desc\r\n" + 
+	   		"				 "; 
+			 HashMap hh = new HashMap();
+
+	           try {
+	         
+	        	   
+	             Connection con = this.getNewConnection();
+	             Statement  st = con.createStatement();
+	             ResultSet rs = st.executeQuery(sql);
+	     String oldcust = null;
+	     int cou = 0;
+	     String asi = "";
+	             while (rs.next()) {
+	              
+	               String custid = rs.getString("payer").trim();
+	               if(oldcust == null) {
+	            	   oldcust = custid;
+	               }
+	               
+	               if(!oldcust.equals(custid) ) {
+	            	   cou = 0;
+	            	   asi = "";  
+	               }
+	               
+	              // String payer = rs.getString("Moketojo_Kodas").trim();
+	              String type = "Bank";
+	             
+	              String date = rs.getString("data").substring(0,10);
+	              double summa = rs.getDouble("Suma");
+	             
+	               if(cou < 5) {
+	            	//  System.out.println("aaaa " + cou  + " " + oldcust + "" + custid);
+	            	   asi = asi + "|" + (nf.format(summa)) + " EUR " +  date + " "  + type;
+	            	   
+	            	      hh.put(custid , asi); 
+	            	   
+	            	   
+	            	  
+	               } else {
+	            	   asi = "";  
+	               }
+	               
+	              
+	               oldcust = custid;
+	               cou++; 
+	             }
+	             rs.close();
+	             st.close();
+	             con.close();
+	            	   
+	           }
+	           catch (SQLException ex) {
+	             ex.printStackTrace();
+	           }
+	         
+	           
+	          // System.out.println("Suurus " + hh.size());
+	           
+	           StringBuffer sb = new StringBuffer();
+	           
+	          Iterator itera =  hh.keySet().iterator();
+	           
+	          while (itera.hasNext()) {
+	           String cuid = itera.next()+"";
+	          // System.out.println(hh.get(cuid));
+	           sb.append(cuid + ";" +hh.get(cuid) + "\n");
+	        	  
+	          }
+	           if(sb.length() > 2){
+	           
+	            //  Converter.saveFileInUTF8("payments.txt", sb.toString());
+	           	
+	            }	  
+	        
+	           return hh;
+	       }
+	    
+  
+  
+  
+  
 	public Vector getLastThreeData() {
 		// TODO Auto-generated method stub
 		return null;
@@ -924,7 +1017,7 @@ try{
 }catch(Exception e){
 	e.printStackTrace();
 }
-
+HashMap payments = makePaymentsFile();
 payers = new TreeMap();
 	   
 
@@ -1000,7 +1093,7 @@ payers = new TreeMap();
   if (isDebug()) System.out.println(cmd);
     TreeMap customers = new TreeMap();
     TreeMap custMap = new TreeMap();
-    Vector payers2 =  new Vector();
+    HashSet payers2 =  new HashSet();
     HashMap salesres = new HashMap();
     HashMap visits = new HashMap();
     HashMap transa = new HashMap();
@@ -1079,8 +1172,9 @@ payers = new TreeMap();
 	 rs1 = stmr.executeQuery(ccc);
     
 	 while(rs1.next()){
-   payers2.add(rs1.getString("AccountNum"));
-      
+		 String aaa = rs1.getString("AccountNum");
+   payers2.add(aaa);
+  
     }
    rs1.close();
    stmr.close();
@@ -1163,8 +1257,10 @@ payers = new TreeMap();
             }
         }
       
-        
-      
+        if(payments.get(cust.getPayer()) != null){
+        	 cust.payments = (String) payments.get(cust.getPayer());
+        }
+       
         
         if(contractDates.get(accountnum) != null){
         	cust.setContractOver(contractDates.get(accountnum) + "");
@@ -1428,6 +1524,7 @@ payers = new TreeMap();
         if (city != null ) {
          	cust.restCity = city.trim();
         }
+        
         String street  = rs.getString("street");
         if (street != null ) {
          	cust.restStreet = street.trim();
@@ -1450,10 +1547,6 @@ payers = new TreeMap();
         double minam = rs.getDouble("minam");
         if(minam > 0 ){
      	   cust.setMinsum(minam);
-        }
-        
-        if(cust.getID().equals("DBD024324")) {
-        	System.out.println("OLEMAS KLIENT " + goes + " " + (!payers2.contains(cust.getID()))+ " " +  cust.getAgents().toString());
         }
         
         
@@ -1505,6 +1598,9 @@ payers = new TreeMap();
   con.close();
 
   System.out.println("debt sql ok");
+  
+  
+  
   
     } catch (Exception e){
       getParent().showError(e);

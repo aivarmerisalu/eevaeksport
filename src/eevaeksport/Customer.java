@@ -29,6 +29,7 @@ public class Customer {
   public boolean noOrder = false; 
   public boolean allowGift = false;
   public String GLNCode = null;
+  public String payments = null;
   public String currency = null;
   public String taraDeal = null;
   public String category = null;

@@ -551,7 +551,7 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
         //      agent.setIsPilot(true);
               
               
-              if(agent.getID().equals("19") || agent.getID().equals("18") || agent.getID().equals("21") ){
+              if(agent.getID().equals("19") || agent.getID().equals("18") || agent.getID().equals("21") || agent.getID().equals("4") ){
             	  agent.addProdGroupList("LV");
               }else{
                	  agent.addProdGroupList("LT");

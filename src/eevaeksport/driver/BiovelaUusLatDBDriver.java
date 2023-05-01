@@ -2403,8 +2403,12 @@ if(kood != null && (nimi3 != null || nimi != null)){
 				}catch(Exception e){
 					
 				}
-			
-				prod.setName(add + Converter.enCodeEst(nimi) + " " + kood );
+			   if(nimi.contains(kood)) {
+				   prod.setName(add + Converter.enCodeEst(nimi)  );
+			   }else {
+				   prod.setName(add + Converter.enCodeEst(nimi) + " " + kood );
+			   }
+				
                 		 tm.put(prod.getName() , prod); 
            			     prodHash.put(prod.getID(), prod);
                 		  

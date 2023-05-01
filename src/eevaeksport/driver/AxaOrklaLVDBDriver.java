@@ -1721,10 +1721,10 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
     //Connection con = getNewConnection();
     TreeMap   tm = new TreeMap();
     
-    tm.put("Chips and Drinks", "Chips and Drinks");
-    tm.put("Flour and Cakes" , "Flour and Cakes");
-    tm.put("Confectionary", "Confectionary");
-    tm.put("Foods", "Foods");
+    tm.put("Biscuits and Cakes total", "Biscuits and Cakes total");
+    tm.put("Chips and Drinkables total","Chips and Drinkables total");
+    tm.put("Confectionary total", "Confectionary total");
+    tm.put("Foods total", "Foods total");
     
       /*  String    sql = " SELECT talROUTETYPEID AS liik, talROUTETYPEID AS nimetus FROM inventtable WHERE dataareaid='tal' AND talROUTETYPEID!='' GROUP BY talROUTETYPEID";
     Statement st = con.createStatement();
@@ -1754,7 +1754,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
 	  		"				  and bar.itemid=inv.itemid and bar.useforprinting = 1) AS ean \r\n" + 
 	  		"                  ,inv.itemgroupid AS grupp,mod.unitid As unit, taxitemgroupid as vat,mod.LineDisc as alegr \r\n" + 
 	  		"                 ,mod.QUANTITY as opti , TPdiscount as maxdisc ,StbMinInQty as inpack,  ItemProdTypeId as status , \r\n" + 
-	  		"                 pdgroupid as pgrupp , StbMaxDiscount as max2 , StbMustHave   as topstatus , gr.ocslassortment  as gr1, gr.oflassortment  as gr2 "
+	  		"                 pdgroupid as pgrupp , inventovergroupid as cate2 , StbMaxDiscount as max2 , StbMustHave   as topstatus , gr.ocslassortment  as gr1, gr.oflassortment  as gr2 "
 	  		+ " ,netweight as gross ,InvenQlikGroupId as cate FROM bmssa.inventtable inv  \r\n" + 
 	  		"     left JOIN bmssa.TraCatalogueItem cat ON  inv.itemid=cat.ITEMID and cat.dataareaid= inv.dataareaid \r\n" + 
 	  		"                  left JOIN bmssa.inventtablemodule mod ON mod.itemid = inv.itemid and mod.dataareaid=inv.dataareaid \r\n" + 
@@ -1991,7 +1991,55 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
       
       String pdgroupid = rs.getString("pgrupp");
  
+      pdgroupid = rs.getString("cate2");
+      
+      
+// panenme grupp2 paika 
+      if(pdgroupid!=null && pdgroupid.trim().length()>0){
+    	  String asi = null;
+       if(pdgroupid.equals("Biscuits") || pdgroupid.equals("Cakes")  ){
+              asi = "Biscuits and Cakes total";
+      } else if(pdgroupid.equals("Chips") || pdgroupid.equals("Drinkables")  ){
+	      asi = "Chips and Drinkables total";
+      } else if(pdgroupid.equals("Zephyr") || pdgroupid.equals("Sugar") || pdgroupid.equals("Choco")){
+	      asi = "Confectionary total";
+      }else if(pdgroupid.equals("Other Food") || pdgroupid.equals("Other sauc") || pdgroupid.equals("Preserved") 
+    			  || pdgroupid.equals("Tomato")   || pdgroupid.equals("Mayo")){
+    	  asi = "Foods total";     
+          }
+    	
+    	  if(asi != null){
+    	 	  prod.setGroupSecond(asi.trim());
+    	  }
+    }
+  //    Laima, Staburadze and Spilva 
+    
+      // paneme type siia
+      if(pdgroupid!=null && pdgroupid.trim().length()>0){
+    	  String type = null;
+       if(pdgroupid.equals("Choco") || pdgroupid.equals("Sugar")  
+    			  || pdgroupid.equals("Zephyr") 
+    			  || pdgroupid.equals("Chips") ||  
+		 pdgroupid.equals("Zephyr") 
+		|| pdgroupid.equals("Biscuits")
+		  || pdgroupid.equals("Other") ){
+    	  type = "OLL";
+    	  
+      } else if(pdgroupid.equals("Cakes") || pdgroupid.equals("Pedro") ||
+    		  pdgroupid.equals("Raw Materi") ){
+    	  type = "STK";    
+    	  
+      }else if(pdgroupid.equals("Other sauc") || pdgroupid.equals("Preserved")  
+    			  || pdgroupid.equals("Drinkables") || pdgroupid.equals("Mayo")   
+    			  || pdgroupid.equals("Tomato")	  || pdgroupid.equals("Other Food")) {
+    			   type = "BLS";     
 
+      }
+    	  if(type != null){
+    	 	  prod.setType(type.trim());
+    	  }
+    }
+      
       double max2 = rs.getDouble("max2");
       if(max2 > 0){
     	  prod.setMaxDiscount(100);
@@ -2004,64 +2052,6 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
     	  prod.setMustBe("1");
       }
     
-      
-// panenme grupp2 paika 
-      if(pdgroupid!=null && pdgroupid.trim().length()>0){
-    	  String asi = null;
-    	  if(pdgroupid.equals("Choco") || pdgroupid.equals("Sugar")  
-    			  || pdgroupid.equals("Zephyr") || pdgroupid.equals("Kalev") || pdgroupid.equals("ŽELAT_PROD") ){
-              asi = "Confectionary";
-      } else if(pdgroupid.equals("Chips") || pdgroupid.equals("Pelets") || pdgroupid.equals("Extruders") 
-		|| pdgroupid.equals("Nuts") || pdgroupid.equals("Dipi")  || pdgroupid.equals("SMUTIJI") || pdgroupid.equals("SULAS DZĒR")
-		|| pdgroupid.equals("GĀZĒTS ŪD") || pdgroupid.equals("NEKTĀRI")|| pdgroupid.equals("NEGĀZĒTSŪD")
-		|| pdgroupid.equals("KVASS")  || pdgroupid.equals("SULAS") || pdgroupid.equals("Other") || pdgroupid.equals("DZĒRIENI")){
-	  
-    	  asi = "Chips and Drinks";
-   
-      } else if(pdgroupid.equals("Cakes") || pdgroupid.equals("Pedro") || pdgroupid.equals("Flour")){
-	      asi = "Flour and Cakes";
-      }
-    	  
-    	  
-    	  if(pdgroupid.equals("MĀRR_SINEP") || pdgroupid.equals("MĒRCES") || pdgroupid.equals("MAISIJUMI") || pdgroupid.equals("KEČUPI") || pdgroupid.equals("IEVĀRĪJUMI") 
-    			  || pdgroupid.equals("PIPARI") || pdgroupid.equals("ZIVJUKONS") || pdgroupid.equals("VEGAN") || pdgroupid.equals("SĪRUPI") || pdgroupid.equals("PICAS") 
-    			  || pdgroupid.equals("CITAS_PIED")  || pdgroupid.equals("MARINĀDES")  || pdgroupid.equals("GARŠV_MAIS")  || pdgroupid.equals("TOMĀTU MĒR") 
-    			  || pdgroupid.equals("UZTUR_BAG")  || pdgroupid.equals("MAJONĒZES")  || pdgroupid.equals("GARŠAUGI")){
-    		  
-	      asi = "Foods";     
-  }
-    	  if(asi != null){
-    	 	  prod.setGroupSecond(asi.trim());
-    	  }
-    }
-  //    Laima, Staburadze and Spilva 
-      
-      // paneme type siia
-      if(pdgroupid!=null && pdgroupid.trim().length()>0){
-    	  String type = null;
-       if(pdgroupid.equals("Choco") || pdgroupid.equals("Sugar")  
-    			  || pdgroupid.equals("Zephyr") || pdgroupid.equals("Kalev") || pdgroupid.equals("ŽELAT_PROD") 
-    			  || pdgroupid.equals("Chips") || pdgroupid.equals("Pelets") || pdgroupid.equals("Extruders") 
-		|| pdgroupid.equals("Nuts") || pdgroupid.equals("Dipi") 
-		|| pdgroupid.equals("Flour")
-		  || pdgroupid.equals("Other") ){
-    	  type = "OLL";
-    	  
-      } else if(pdgroupid.equals("Cakes") || pdgroupid.equals("Pedro") ){
-    	  type = "STK";    
-    	  
-      }else if(pdgroupid.equals("MĀRR_SINEP") || pdgroupid.equals("MĒRCES") || pdgroupid.equals("MAISIJUMI") || pdgroupid.equals("KEČUPI") || pdgroupid.equals("IEVĀRĪJUMI") 
-    			  || pdgroupid.equals("PIPARI") || pdgroupid.equals("ZIVJUKONS")  || pdgroupid.equals("SMUTIJI") || pdgroupid.equals("SĪRUPI") || pdgroupid.equals("PICAS") 
-    			  || pdgroupid.equals("SULAS DZĒR")	  || pdgroupid.equals("CITAS_PIED") || pdgroupid.equals("GĀZĒTS ŪD")
-    			  || pdgroupid.equals("MARINĀDES") || pdgroupid.equals("NEKTĀRI") || pdgroupid.equals("NEGĀZĒTSŪD") || pdgroupid.equals("GARŠV_MAIS")  || pdgroupid.equals("TOMĀTU MĒR") 
-    			  || pdgroupid.equals("UZTUR_BAG") || pdgroupid.equals("DZĒRIENI") || pdgroupid.equals("SULAS")  || pdgroupid.equals("MAJONĒZES") || pdgroupid.equals("KVASS")  || pdgroupid.equals("GARŠAUGI")){
-    		  type = "BLS";     
-
-      }
-    	  if(type != null){
-    	 	  prod.setType(type.trim());
-    	  }
-    }
       
       double weig = rs.getDouble("gross");
       if(weig > 0 ) {
@@ -2305,41 +2295,52 @@ String sqlo = " SELECT  jou.orderaccount as agent,pdgroupid as grupp ,round(SUM(
                 int sum = (int)rs.getDouble("summa");
                 if (custplans.get(custID) != null){
                   TreeMap tr = (TreeMap) custplans.get(custID);
-if(grupp.equals("Choco") || grupp.equals("Sugar") || grupp.equals("Other") || grupp.equals("Zephyr") ||grupp.equals("Kalev")){
-                  Toode tt = (Toode)tr.get("1");
+if(grupp.equals("Choco") || grupp.equals("Sugar") || grupp.equals("Other") || grupp.equals("Maigums sver") 
+		|| grupp.equals("Cocoa prod.") || grupp.equals("ExclChocProd") || grupp.equals("Product sets") || grupp.equals("Trial products")
+		|| grupp.equals("Zephyr") ||grupp.equals("Kalev") || grupp.equals("Choc.bars") ||grupp.equals("Choc.boxes")
+		|| grupp.equals("Choc.candies") ||grupp.equals("Choc.tablets") || grupp.equals("SourcedJellyCan") || grupp.equals("BaltZefMais")
+		|| grupp.equals("Caramels") || grupp.equals("Dragees") || grupp.equals("Maigums mais")|| grupp.equals("Maigums karb") || grupp.equals("BaltZefSver")
+		|| grupp.equals("Jelly candies") || grupp.equals("Marmelade") || grupp.equals("Marzipan") || grupp.equals("Sherbert")){
+	
+	
+	              Toode tt = (Toode)tr.get("1");
                   tt.setDonecur(tt.getDonecur() + sum);
                   }
 
-if(grupp.equals("Flour")){
+if(grupp.equals("Flour") || grupp.equals("Flour products") ||
+		grupp.equals("Biscuits") || grupp.equals("Wafer cakes")	
+		|| grupp.equals("WaferCakesMini") || grupp.equals("Wafers")
+		|| grupp.equals("Trial products") || grupp.equals("Wafer cakes")
+		|| grupp.equals("Cakes") || grupp.equals("Other pastry")
+		|| grupp.equals("Other products") || grupp.equals("Pastry")){
+	
+	
+	
+	
     Toode tt = (Toode)tr.get("2");
     tt.setDonecur(tt.getDonecur() + sum);
     }
-if(grupp.equals("Chips") || grupp.equals("Pelets") || grupp.equals("Extruders") || grupp.equals("Nuts") ||grupp.equals("Dipi")){
-    Toode tt = (Toode)tr.get("3");
+if(grupp.equals("Chips") || grupp.equals("Pelets") || grupp.equals("Extruders") || grupp.equals("Water") ||grupp.equals("Dipi")
+		|| grupp.equals("Dipi subcat.")
+		|| grupp.equals("Kettle chips") || grupp.equals("Packed nuts") || grupp.equals("Soft drinks") ||grupp.equals("Syrups")
+		|| grupp.equals("Pellets") || grupp.equals("Regular chips") || grupp.equals("Smoothies") ||grupp.equals("Juice")){
+	
+	Toode tt = (Toode)tr.get("3");
     tt.setDonecur(tt.getDonecur() + sum);
     }
 
-if(grupp.equals("Cakes") || grupp.equals("Pedro")){
+if(grupp.equals("Mayo") || grupp.equals("Fish products") || grupp.equals("Flour products") || grupp.equals("Nutrition")
+		|| grupp.equals("Pizza") || grupp.equals("Spices") || grupp.equals("Sweet group") || grupp.equals("VEGAN")
+		|| grupp.equals("Mustard") || grupp.equals("MERCES") || grupp.equals("MĀRR_SINEP") || grupp.equals("Horseradish")
+		|| grupp.equals("Preserve foods") || grupp.equals("Ready meal") || grupp.equals("Ketchup") || grupp.equals("Tomato sauce")
+		|| grupp.equals("Dressings") ){
+	
+
     Toode tt = (Toode)tr.get("4");
     tt.setDonecur(tt.getDonecur() + sum);
     }
 
 
-
-     /*
-1  Choco
-1  Sugar
-1  Other
-1  Zephyr
-1  Kalev
-2  Flour
-3  Chips
-3  Pelets
-3  Extruders
-3  Nuts
-3  Dipi
-4 Cakes
-4 Pedro*/
                 }
               }
               rs.close();
@@ -2493,11 +2494,12 @@ String cmd ="  SELECT  jou.orderaccount as agent,round(SUM(lineamount),0) AS sum
  
  //System.out.println(brandplans.toString());
   
-String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(lineamount),0) AS summa " +
-  " FROM bmssa.custinvoicetrans sal  with (nolock) INNER JOIN bmssa.inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid INNER JOIN bmssa.custinvoicejour jou with (nolock) ON " +
-  " sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid INNER JOIN bmssa.custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid WHERE " +
-  " inv.dataareaid='olv'  AND YEAR(sal.invoicedate) = YEAR(getdate())  " +
-  "  AND MONTH(sal.invoicedate) = MONTH(getdate()) and traagentsid != '' and pdgroupid != '' GROUP BY traagentsid,pdgroupid";
+String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(SUM(lineamount),0) AS summa \r\n" + 
+		"   FROM bmssa.custinvoicetrans sal  with (nolock) INNER JOIN bmssa.inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid INNER JOIN bmssa.custinvoicejour jou with (nolock) ON \r\n" + 
+		"   sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid INNER JOIN bmssa.custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid\r\n" + 
+		"   LEFT JOIN bmssa.INVENTITEMGROUP gr ON inv.ITEMGROUPID = gr.ITEMGROUPID AND  Inv.DATAAREAID = gr.DATAAREAID   WHERE \r\n" + 
+		"   inv.dataareaid='olv'  AND YEAR(sal.invoicedate) = YEAR(getdate())  \r\n" + 
+		"    AND MONTH(sal.invoicedate) = MONTH(getdate()) and traagentsid != '' and inventovergroupid != '' GROUP BY traagentsid,inventovergroupid";
   
   
   String cmd ="  SELECT  traagentsid as agent,round(SUM(lineamount),0) AS summa " +
@@ -2689,7 +2691,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
   		
 		for(int i = 1 ; i < a + 1;i++){
 			 row = sheet.getRow(i);
-			String gr = (row.getCell((short) 0).getStringCellValue());
+			String gr = (row.getCell((short) 1).getStringCellValue());
 			String sub = (row.getCell((short) 2).getStringCellValue());
 			if(gr != null && gr.trim().length() > 0)
 			groupsCat.put(gr.trim(), sub.trim());
@@ -2849,7 +2851,7 @@ String sqlo = " SELECT  traagentsid as agent,pdgroupid as grupp ,round(SUM(linea
 			String gr = (row.getCell((short) 0).getStringCellValue());
 			String sub = (row.getCell((short) 1).getStringCellValue());
 			if(gr != null && gr.trim().length() > 0)
-			groupsSub.put(gr.trim(), sub.trim());
+			groupsSub.put(sub.trim(), sub.trim());
 		  		
 		}
 			

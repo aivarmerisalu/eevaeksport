@@ -327,6 +327,11 @@ public class RivileKurybaImportDriver
       sb.append("          <I06_DOK_NR>U-" +  escape(agent)+ "-" +  escape(order.getDokNr())  + "</I06_DOK_NR>" + ls);
       cou++;
       
+      
+      sb.append(getLineNr(cou));
+      sb.append("          <I06_KODAS_LS_2>021</I06_KODAS_LS_2>" + ls);
+      cou++;
+       
 
       sb.append(getLineNr(cou));
       sb.append("          <I06_OP_DATA>" +  getDateString(order.getShipCal()) + "</I06_OP_DATA>" + ls);

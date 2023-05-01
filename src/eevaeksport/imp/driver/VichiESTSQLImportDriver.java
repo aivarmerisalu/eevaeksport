@@ -501,7 +501,7 @@ public class VichiESTSQLImportDriver extends AbstractImportDriver{
 	    		if((comm2 != null || aletext != null ) ){
 	    			   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
 	    			 
-	    		   Converter.sendCommentEmail( comm2,aletext,doknr,order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent);
+	    		   Converter.sendCommentEmail( comm2,aletext,doknr,order.getCompany(),  " " + getCustName(order.getCompany()) , " ",false,ag,parent,null);
 	    		 }
 	    	}
 	    	
