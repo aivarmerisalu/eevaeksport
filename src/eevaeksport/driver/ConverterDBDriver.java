@@ -264,6 +264,7 @@ public void WebReporter() {
          
          
          
+         
          NumberFormat formatter = NumberFormat.getNumberInstance();
          formatter.setMaximumFractionDigits(2);
          formatter.setMinimumFractionDigits(2);
