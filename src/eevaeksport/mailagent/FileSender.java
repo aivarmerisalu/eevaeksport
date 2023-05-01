@@ -4,6 +4,10 @@ import java.io.File;
 
 
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -50,6 +54,8 @@ public class FileSender {
 	public boolean sendStock = false;
 	public boolean getOrders = false;
 	public boolean sendPicts = false;
+	public boolean sendKeygen = false;
+	
 	 
 	   boolean getAWS ( Properties mjProps) {
 		 
@@ -94,6 +100,91 @@ public class FileSender {
 	   		Date datee = new Date();
 	   		datee.setTime(Calendar.getInstance().getTimeInMillis());
 	   	   String time = datee.toString();
+	   	   
+	   	   
+	   	   
+	   	   if(this.sendKeygen) {
+	   		   String currentWorkingDirectory = Paths.get(".").toAbsolutePath().normalize().toString();
+		        String sourceDirectoryPath = currentWorkingDirectory + "/toweb/keygen";
+		        String targetDirectoryPath = currentWorkingDirectory + "/toweb/keygen/done";
+		        File sourceDirectory = new File(sourceDirectoryPath);
+		        File targetDirectory = new File(targetDirectoryPath);
+	   		   
+	   		   
+		       	
+		       	//loome /toweb/done kausta
+			    File logDir = new File(currentWorkingDirectory + "/toweb/keygen/done");
+		        if (!logDir.exists()) {
+		            if (logDir.mkdir()) {
+		                System.out.println("The /toweb/keygen/done directory has been created.");
+		            } else {
+		                System.out.println("Failed to create the /toweb/keygen/done directory.");
+		            }
+		        }
+	   		   
+		        
+
+	        	 System.out.println(time + " Sees " + new File(sourceDirectoryPath).listFiles() + " " + sourceDirectoryPath);
+	    	        for (File f : new File(sourceDirectoryPath).listFiles())  {
+	    	        	 System.out.println(time + " Sees " + f.getName());
+	    	        	try {
+
+	    	                // Upload a text string as a new object.
+	    	               // s3Client.putObject(bucketName, dirOut, "Uploaded String Object");
+
+	    	                // Upload a file as a new object with ContentType and title specified.
+	    	        		if(f.getName().contains("_pincode.txt")) {
+	    	        		
+	    	                PutObjectRequest request = new PutObjectRequest(bucketName, dirOut + "pincode/" + f.getName(), f);
+	    	                ObjectMetadata metadata = new ObjectMetadata();
+	    	                metadata.setContentType("plain/text");
+	    	                metadata.addUserMetadata("title", "someTitle");
+	    	                request.setMetadata(metadata);
+	    	                s3Client.putObject(request);
+	    	                log(time + " Uploaded file to AWS : " + f.getName());
+		    	            System.out.println(time + " Uploading " + f.getName());
+		    	        	
+	    	        		}
+		    	           
+	    	            } catch (AmazonServiceException e) {
+	    	                // The call was transmitted successfully, but Amazon S3 couldn't process 
+	    	                // it, so it returned an error response.
+	    	                e.printStackTrace();
+	    	            } catch (SdkClientException e) {
+	    	                // Amazon S3 couldn't be contacted for a response, or the client
+	    	                // couldn't parse the response from Amazon S3.
+	    	                e.printStackTrace();
+	    	            }
+	    	        }
+	    	      
+		        
+		        
+		        
+		        //failide kopimine
+
+		        File[] files = sourceDirectory.listFiles();
+		        for (File file : files) {
+		            if (file.isFile() && file.getName().endsWith(".txt")) {
+		                try {
+		                    Path sourceFilePath = Paths.get(file.getAbsolutePath());
+		                    Path targetFilePath = Paths.get(targetDirectoryPath + "/" + file.getName());
+		                    Files.move(sourceFilePath, targetFilePath);
+		                    System.out.println("Moved file: " + sourceFilePath + " to " + targetFilePath);
+		                } catch (IOException e) {
+		                    System.out.println("An error occurred while moving the file: " + file.getAbsolutePath());
+		                    e.printStackTrace();
+		                }
+		            }
+		        }
+	   		   
+		        
+		        
+		        
+		        
+		        
+	   	   }
+	   	   
+	   	   
 	        if(this.getOrders) {
 	            ObjectListing objects = s3Client.listObjects(bucketName, stringObjKeyName);
 	            log(time + " Starting session download file from AWS" );
@@ -336,6 +427,26 @@ public class FileSender {
 		     log.error(s);
 		   }
 	
+		public void uploadKeygen() throws Exception{
+			sendKeygen = true;
+			
+			Properties props = new Properties();
+			File file = new File("eksport.ini");
+			if (file.exists()) {
+				FileInputStream in = new FileInputStream(file);
+					props = new Properties();
+				props.load(in);
+				in.close();
+			}
+			getAWS(props);
+			
+			
+			
+			//in.close();
+			
+			
+		}
+	   
 	public void start(String[] args) throws Exception{
 		if(args != null) {
 		
