@@ -771,7 +771,7 @@ public class KMPSQLDBDriver extends AbstractDBDriver implements Manager,Promo, B
 			dir = dir + "/";
 		return dir;
 	}
-    private String url2 = "jdbc:odbc:report";
+    private String url2 = "jdbc:odbc:mjava";
     
     public Vector getFixedAssortmentData() {
 		Vector result = new Vector();

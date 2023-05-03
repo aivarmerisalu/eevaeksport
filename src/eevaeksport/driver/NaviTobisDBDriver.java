@@ -1576,7 +1576,11 @@ System.out.println(cmd);
                  		"					union \r\n" + 
                  		"	select [Sales Code] AS action,[Code] AS prodid,  0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val ,[Minimum Quantity] as am\r\n" + 
                  		"                 from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 0 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or \r\n" + 
-                 		"                   year ([Ending Date]) = 1753) and  [Minimum Quantity] > 1 ";
+                 		"                   year ([Ending Date]) = 1753) and  [Minimum Quantity] > 1 union "
+                 		+ "select [Sales Code] AS action,[Code] AS prodid,  0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,\r\n" + 
+                 		"							[Sales Type] as val ,[Minimum Quantity] as am\r\n" + 
+                 		"                 		                 from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] in (3) and [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or \r\n" + 
+                 		"                 		                   year ([Ending Date]) = 1753)";
                
              	 System.out.println(cmd);
               	 con = getNewConnection2();
@@ -1594,7 +1598,12 @@ System.out.println(cmd);
                          if(end.after(new Date())) {
                         	 ttt = end.getTime();
                          }
-                        	
+                         String  val  = rs.getString("val").trim();
+                         String aa = " ";
+                         if(val.equals("3")) {
+                        	 aa = gruppx;
+                        	 gruppx = " ";
+                         }
                      	double  kogus = rs.getDouble("am");
                         	if(kogus == 0){
                         		kogus = 1;
@@ -1604,7 +1613,7 @@ System.out.println(cmd);
                         	
                         	// siia teha number format 
                         	
-                        	      buf.append(toodex+ ";" + " " + ";" + " " + ";" + NF.format(hind).replace(',', '.') + ";" 
+                        	      buf.append(toodex+ ";" + aa + ";" + " " + ";" + NF.format(hind).replace(',', '.') + ";" 
                         	      + " " + ";" + (int)(kogus+0.001) + "; ;" + ttt + ";" + disc + ";" + gruppx);
                                 buf.append("\n");	
                                 
@@ -1634,11 +1643,11 @@ System.out.println(cmd);
                  // siin mitte kliendi põhised koguselised
                  cmd = "  SELECT [Sales Code] AS action,[Item No_] AS prodid, \r\n" + 
                  		"        [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val, [Minimum Quantity] as am from\r\n" + 
-                 		"         [2015_Tobis$Sales Price] where [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or\r\n" + 
+                 		"         [2015_Tobis$Sales Price] where [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or\r\n" + 
                  		"                  year ([Ending Date]) = 1753)  and [Sales Type] = 2 and  [Minimum Quantity] > 1\r\n" + 
                  		"					union \r\n" + 
                  		"	select [Sales Code] AS action,[Code] AS prodid,  0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val ,[Minimum Quantity] as am\r\n" + 
-                 		"                 from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 2 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or \r\n" + 
+                 		"                 from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 2 and [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or \r\n" + 
                  		"                   year ([Ending Date]) = 1753) and  [Minimum Quantity] > 1 ";
                
              	 System.out.println(cmd);

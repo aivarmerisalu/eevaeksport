@@ -76,8 +76,15 @@ public class MiesnieksDBDriver extends AbstractDBDriver implements Manager,Promo
         } catch (Exception e) {
             parent.showError(e);
         }
+        
+        dataarea = getParent().getProps().getProperty("dataarea");
+        if(dataarea == null) {
+        	dataarea = "";
+        }
+        
     }
     static Category log = Category.getInstance(MiesnieksDBDriver.class.getName());
+    private String dataarea = "";
     
     public String getSaveDebtInfo() {
        	return null;
@@ -740,7 +747,7 @@ public class MiesnieksDBDriver extends AbstractDBDriver implements Manager,Promo
 			dir = dir + "/";
 		return dir;
 	}
-    private String url2 = "jdbc:odbc:report";
+    private String url2 = "jdbc:odbc:mjava";
     
     public Vector getFixedAssortmentData() {
 		Vector result = new Vector();
@@ -858,7 +865,7 @@ public class MiesnieksDBDriver extends AbstractDBDriver implements Manager,Promo
 									mline.setProdGroup(prodGroup);
 								}
 								 if(insertassort){
-										  insertSortLine(mline);  
+										//  insertSortLine(mline);  
 									 }
 								result.add(mline);
 							}
