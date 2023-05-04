@@ -135,7 +135,7 @@ public class KeyGenRunner extends Frame implements TextListener
         add(cPanel, "Center");
         setBackground(Color.green);
         Panel sPanel = new Panel();
-        Button genBtn = new Button("Get PIN CODE");
+        genBtn = new Button("Get PIN CODE");
         genBtn.setFont(new Font("Courier", 0, 16));
         genBtn.addActionListener(new ActionListener() {
 
@@ -151,7 +151,7 @@ public class KeyGenRunner extends Frame implements TextListener
     }
 
     private static boolean customer = false;
-    
+    private  Button genBtn = null;
     
     private void generate()
     {
@@ -212,6 +212,7 @@ public class KeyGenRunner extends Frame implements TextListener
         FileSender ff = new FileSender();
         try {
         	ff.uploadKeygen();
+        	genBtn.setBackground(Color.GREEN);
         }catch (Exception e) {
         	e.printStackTrace();
         }

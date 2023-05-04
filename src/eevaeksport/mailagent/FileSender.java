@@ -166,6 +166,10 @@ public class FileSender {
 		        for (File file : files) {
 		            if (file.isFile() && file.getName().endsWith(".txt")) {
 		                try {
+		                	File ff = new File(targetDirectoryPath + "/" + file.getName());
+		                	if(ff.exists()) {
+		                		ff.delete();
+		                	}
 		                    Path sourceFilePath = Paths.get(file.getAbsolutePath());
 		                    Path targetFilePath = Paths.get(targetDirectoryPath + "/" + file.getName());
 		                    Files.move(sourceFilePath, targetFilePath);

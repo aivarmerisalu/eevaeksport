@@ -89,10 +89,10 @@ public class KMPSQLImportDriver
   
   
   private Connection getNewCon() throws SQLException{
-      return DriverManager.getConnection(url, "mobilejava", "javajava");
+      return DriverManager.getConnection(url, "mobilejava_lt", "javajava");
     }
   
-  private String url = "jdbc:odbc:mjava";
+  private String url = "jdbc:odbc:mjavalt";
   
   public TreeMap getProducts(){
 

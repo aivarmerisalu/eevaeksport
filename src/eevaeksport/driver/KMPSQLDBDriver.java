@@ -70,8 +70,8 @@ public class KMPSQLDBDriver extends AbstractDBDriver implements Manager,Promo, B
         String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
         try {
             Class.forName(databaseDriverName).newInstance();
-         ccc = DriverManager.getConnection("jdbc:odbc:mjava", "mobilejava", "javajava");
-         conx = DriverManager.getConnection(url2,"mobilejava", "javajava");  
+         ccc = DriverManager.getConnection("jdbc:odbc:mjavalt", "mobilejava_lt", "javajava");
+         conx = DriverManager.getConnection(url2,"mobilejava_lt", "javajava");  
         } catch (Exception e) {
             parent.showError(e);
         }
@@ -372,7 +372,7 @@ public class KMPSQLDBDriver extends AbstractDBDriver implements Manager,Promo, B
      	  	   HashMap tnimed = new HashMap();
      	  	   
      	  	   try{
-     	  		   Connection con1 = DriverManager.getConnection(url2,"mobilejava", "javajava");
+     	  		   Connection con1 = DriverManager.getConnection(url2,"mobilejava_lt", "javajava");
      	      	   Statement st = con1.createStatement();
      	      	   ResultSet rs = st.executeQuery(sql1);
      	      	   
@@ -746,7 +746,7 @@ public class KMPSQLDBDriver extends AbstractDBDriver implements Manager,Promo, B
     }
 
     private Connection getNewCon() throws SQLException{
-      return DriverManager.getConnection(url, "mobilejava", "javajava");
+      return DriverManager.getConnection(url, "mobilejava_lt", "javajava");
     }
     /**
      *
@@ -771,7 +771,7 @@ public class KMPSQLDBDriver extends AbstractDBDriver implements Manager,Promo, B
 			dir = dir + "/";
 		return dir;
 	}
-    private String url2 = "jdbc:odbc:mjava";
+    private String url2 = "jdbc:odbc:mjavalt";
     
     public Vector getFixedAssortmentData() {
 		Vector result = new Vector();
@@ -1722,7 +1722,7 @@ private void  insertSortLine(MatrixLine mline){
 
 	         try {
 	         	System.out.println("jam");
-	         	Connection  ccc = DriverManager.getConnection("jdbc:odbc:mjava", "mobilejava", "javajava");
+	         	Connection  ccc = DriverManager.getConnection("jdbc:odbc:mjavalt", "mobilejava_lt", "javajava");
 	             PreparedStatement ps = ccc.prepareStatement(sql);
 
 	             for (Iterator iter = wr.getInfo().getLines().iterator(); iter.hasNext(); ) {
@@ -2050,7 +2050,7 @@ private void  insertSortLine(MatrixLine mline){
 
        
     public static final String DRIVER_VERSION = "KMPSQL";
-    private String url = "jdbc:odbc:mjava";
+    private String url = "jdbc:odbc:mjavalt";
     private Connection ccc ;
     private Connection conx ;
     private String	       subjectFilesTo = null;
