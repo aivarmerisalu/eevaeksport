@@ -17309,6 +17309,7 @@ shipdate = getCalXML(asi);
             				           || driver.getDriverVersion().equals("KosmelitaImport")
             				           || driver.getDriverVersion().equals("VichiLITSQL")
             				           || driver.getDriverVersion().equals("FinvaldaErdveImport")
+            				           || driver.getDriverVersion().equals("S1XMLRadexImport")
             				           
             						  )){
             	  dokNr = agordnum;         	  
