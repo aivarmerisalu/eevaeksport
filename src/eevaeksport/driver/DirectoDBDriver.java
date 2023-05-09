@@ -751,76 +751,14 @@ public class DirectoDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 
 
    private String enCode(String res ){
-	  	 
-
-	  	res =res.replaceAll("ä","11111xx");
-	  	res =res.replaceAll("ö","11112xx");
-		res =res.replaceAll("õ","11114xx");
-		res =res.replaceAll("ü","11113xx");
-
-		res =res.replaceAll("Ä","11115xx");
-		res =res.replaceAll("Ö","11116xx");
-		res =res.replaceAll("Õ","11117xx");
-		res =res.replaceAll("Ü","11118xx");
-		res =res.replaceAll("Ú","11122xx");
-		
-		res =res.replaceAll("Š","11119xx");
-		res =res.replaceAll("š","11120xx");
-		res =res.replaceAll("ž","11121xx");
-		res =res.replaceAll("Ž","11122xx");
-
-
-
-	 	 
-	  	return res;
+	 
+	   return Converter.enCodeEst(res);
 	  }
 	  
    
    public static String deCode(String res ){
 	   
-	   while(res.indexOf("11111xx") != -1){
-	   	int aa = res.indexOf("11111xx");
-	   	res = res.substring(0,aa) + "ä" + res.substring(aa+7,res.length()); 	    
-	   }
-	   while(res.indexOf("11112xx") != -1){
-	   	
-	   	int aa = res.indexOf("11112xx");
-	   //	System.out.println(aa + " " +res);
-	   	res = res.substring(0,aa) + "ö" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11113xx") != -1){
-	   	int aa = res.indexOf("11113xx");
-	   	res = res.substring(0,aa) + "ü" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11114xx") != -1){
-	   	int aa = res.indexOf("11114xx");
-	   	res = res.substring(0,aa) + "õ" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11115xx") != -1){
-	   	int aa = res.indexOf("11115xx");
-	   	res = res.substring(0,aa) + "Ä" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11116xx") != -1){
-	   	int aa = res.indexOf("11116xx");
-	   	res = res.substring(0,aa) + "Ö" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11117xx") != -1){
-	   	int aa = res.indexOf("11117xx");
-	   	res = res.substring(0,aa) + "Õ" + res.substring(aa+7,res.length()); 	    
-	   } 
-	   while(res.indexOf("11118xx") != -1){
-	   	int aa = res.indexOf("11118xx");
-	   	res = res.substring(0,aa) + "Ü" + res.substring(aa+7,res.length()); 	    
-	   } 
-
-	   while(res.indexOf("11122xx") != -1){
-	   	int aa = res.indexOf("11122xx");
-	   	res = res.substring(0,aa) + "S" + res.substring(aa+7,res.length()); 	    
-	   } 
-		
-
-	 
- 	return res;
+ 	return Converter.deCode(res);
  }
    
    
