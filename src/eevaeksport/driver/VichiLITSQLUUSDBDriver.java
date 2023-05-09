@@ -1291,11 +1291,7 @@ System.out.println(cmd);
 		    	  
 		    	  System.out.println("Asses size enne  " + asscusts.size());
 		    	  Vector vec = new Vector(); 
-		    	  String cmd3 = "SELECT [No_] as Code, [Description] as Name, '' as ean ,'' as nfcTag, [Freezer Serial No_] as factoryID ,[Freezer Model] as Type ,[Serial No_] as Description , " +
-                            " [Įsigijimo data] as Born, [Serial No_] as Contract , [Freezer Customer] as custcode" + 
-                            "  FROM [Vičiūnai ir Ko$Fixed Asset] a left join [Ship-to Address] s on  WHERE ([Blocked] = 0) AND ([FA Subclass Code] = '11') "; // and qty_lv = 0
-		    	
-		    	  cmd3 = "select  * from v_VIK_FA   ";
+		    	  String  cmd3 = "select  * from v_VIK_FA   ";
 		    	  Connection con4 = getNewConnection2();
 		    	Statement stm = con4.createStatement();
 					
@@ -1406,9 +1402,7 @@ System.out.println(cmd);
 		             		
 		    	   //siin saadame seosed ära jujul kui customer on olemas selline 
 		     	   vec = new Vector(); 
-		     	   cmd3 = "select [No_] as itemcode , '' as contract , [Freezer Customer]  as custcode " +
-		  		   "  FROM [Vičiūnai ir Ko$Fixed Asset] WHERE ([Blocked] = 0) AND ([FA Subclass Code] = '11') and [Freezer Customer] != ''";
-		            
+		     
 		 cmd3 = " select a.code,  custcode, k.[EDI ILN] as kl from v_VIK_FA a  left join dbo.[Vičiūnai ir Ko$Ship-to Address] k  on a.custcode = k.[Code]  where a.custcode != ''" ;
 		     	   int cou = 0;
 		              int coua = 0;
@@ -1616,19 +1610,7 @@ System.out.println(cmd);
 		
 
 		try {
-			String cmd = "SELECT t.[No_] AS toode,(t.[Search Description]) AS nimi, t.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp,t.[Pogrupio kodas] AS grupp2 \r\n" + 
-					"                      ,[Base Unit of Measure] AS unit,[Brūkšninis kodas] AS ean,[Product Status] AS status ,[Line Discount %] AS maxdiscount, \r\n" + 
-					"                        t.[Type] AS type, [Qty_ per Unit of Measure] AS kastis,  [Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, [Description] AS vatdesc , '' as type\r\n" + 
-					"                      ,[Order Multiple] as optimum, [Minimum Order Quantity] as minimum , [Country of Origin Code] as origi \r\n" + 
-					"                                                                FROM [Vičiūnai ir Ko$Item] t \r\n" + 
-					"                                                                INNER JOIN [Vičiūnai ir Ko$Item 2] t2 ON t.[No_] = t2.[No_]\r\n" + 
-					"                                                                LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] vat ON (vat.[Item No_]=t.[No_] and vat.[Code]='DĖŽ.' ) \r\n" + 
-					"                        LEFT JOIN  [Vičiūnai ir Ko$Sales Line Discount] sd  on  sd.[Code]= t.[No_] and [Sales Type] = 1 and  [Sales Code] = 'AGENT' \r\n" + 
-					"                     and  [Starting Date]<=getdate()  and   [Ending Date]>=getdate()   \r\n" + 
-					"                      WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0 and t2.[Not for Merisoft] <> 1) ORDER BY t.[No_]\r\n" + 
-					"";
-			
-			cmd = "SELECT t.[No_] AS toode, (t.[Search Description]) AS nimi, sp.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp\r\n" + 
+			String 	cmd = "SELECT t.[No_] AS toode, (t.[Search Description]) AS nimi, sp.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp\r\n" + 
 					"	, t.[Pogrupio kodas] AS grupp2  , [Base Unit of Measure] AS unit\r\n" + 
 					"	, [Brūkšninis kodas] AS ean, [Product Status] AS [status], [Line Discount %] AS maxdiscount, t.[Type] AS [type]\r\n" + 
 					"	, [Qty_ per Unit of Measure] AS kastis, [Net Weight] AS kaal\r\n" + 
