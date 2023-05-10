@@ -216,12 +216,108 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
    
    private Vector prlists = null;
    
+   private HashMap plistGUID() {
+	   HashMap hm = new HashMap();
+	   
+	 	try {
+	 		  File f = new File (getDir() + "Prices.xml");
+	 	     
+	 	       // System.out.println(getDir() + "Agents.xml");
+	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	     DocumentBuilder db;
+	 		db = dbf.newDocumentBuilder();      	
+	     	FileInputStream in = getCleanInputStream(f);
+	     	String handler = null;
+	         Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "PricesList"); 
+	     	
+	     	//System.out.println("ridu  " + root.getChildNodes().getLength() + root.toString());
+	     	
+	         for (int i = 0; i < root.getChildNodes().getLength(); i++){
+	         	  Node rida = root.getChildNodes().item(i);
+	         	 if(rida.getNodeName().equals("Product")){
+	         		 
+	         	Node pricesNode = getNode(rida, "Prices"); 
+	         	for (int j = 0; j < pricesNode.getChildNodes().getLength(); j++){
+	         		Node pricetypeNode = pricesNode.getChildNodes().item(j);
+	         		if(pricetypeNode.getNodeName().equals("PriceType")) {
+	         			String priceTypeGUID   = getNode(pricetypeNode,"PriceTypeGUID").getFirstChild().getNodeValue();
+	         			String priceTypeCode   = getNode(pricetypeNode,"PriceTypeCode").getFirstChild().getNodeValue();
+	         			hm.put(priceTypeGUID, priceTypeCode);
+	         		}
+	         	}
+	         	  
+	         	  
+	         }
+	         	 }
+	         
+	 	}catch(Exception e){
+	 		e.printStackTrace();
+	 	}
+	   
+	   
+	   return hm;
+   }
+   
    
    public Vector getPriceMatrixData(){
+	   
 	   Vector result = new Vector();
-	   if(prlists != null) {
-		   return prlists;
-	   }
+	   
+	 	try {
+	 		  File f = new File (getDir() + "Prices.xml");
+	 	     
+	 	       // System.out.println(getDir() + "Agents.xml");
+	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	     DocumentBuilder db;
+	 		db = dbf.newDocumentBuilder();      	
+	     	FileInputStream in = getCleanInputStream(f);
+	     	String handler = null;
+	         Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "PricesList"); 
+	     	
+	     	//System.out.println("ridu  " + root.getChildNodes().getLength() + root.toString());
+	     	
+	         for (int i = 0; i < root.getChildNodes().getLength(); i++){
+	         	  Node rida = root.getChildNodes().item(i);
+	         	 if(rida.getNodeName().equals("Product")){
+	         		 
+	         		String prodCode = null;
+	         	  try{
+	         		 prodCode = getNode(rida,"ProductCode").getFirstChild().getNodeValue();
+	         	  }catch(Exception e){
+	         		  e.printStackTrace();
+	         	  }
+	         	  
+	         	Node pricesNode = getNode(rida, "Prices"); 
+	         	for (int j = 0; j < pricesNode.getChildNodes().getLength(); j++){
+	         		Node pricetypeNode = pricesNode.getChildNodes().item(j);
+	         		if(pricetypeNode.getNodeName().equals("PriceType")) {
+	         			String priceTypeGUID   = getNode(pricetypeNode,"PriceTypeGUID").getFirstChild().getNodeValue();
+	         			String priceTypeCode   = getNode(pricetypeNode,"PriceTypeCode").getFirstChild().getNodeValue();
+	         			Double price   = Double.parseDouble(getNode(pricetypeNode,"Price").getFirstChild().getNodeValue());
+	         			//System.out.println(prodCode + " - " + priceTypeGUID + " - " + priceTypeCode + " - " + price);
+	         			MatrixLine ml = new MatrixLine();
+	         			ml.setCliGroup(priceTypeCode);
+	         			ml.setProdID(prodCode);
+	         			ml.setPrice(price);
+	         			result.add(ml);
+	         		}
+	         	}
+	         	  
+	         	  
+	         }
+	         	 }
+	         
+	 	}catch(Exception e){
+	 		e.printStackTrace();
+	 	}
+	 	
+	 	
+	 	
+//System.exit(0);
+	   
+	   
 	   return result;
    }
        
@@ -624,11 +720,104 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 
 
 
-
+	  private int getDue(long dd){
+	      int res = 0;
+	      res =(int) ((-dd+(new java.util.Date()).getTime())/86400000) ;
+	   //   System.out.println("res " + res + " dd" + dd + " " +(( -dd+(new java.util.Date()).getTime())/86400000));
+	      return res ;
+	   }
 
 
    public Vector getDebt(String agentCode){
-        return this.debtList;
+
+	   Vector list = new Vector();
+	   
+	 	try {
+	 		  File f = new File (getDir() + "DebtList.xml");
+	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	     DocumentBuilder db;
+	 		db = dbf.newDocumentBuilder();      	
+	     	FileInputStream in = getCleanInputStream(f);
+	     	String handler = null;
+	         Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "DebtsList"); 
+	     	
+	     	//System.out.println("ridu  " + root.getChildNodes().getLength() + root.toString());
+	     	
+	         for (int i = 0; i < root.getChildNodes().getLength(); i++){
+	         	  Node rida = root.getChildNodes().item(i);
+	         	  
+		         	 if(rida.getNodeName().equals("Customer")){
+		         		String custid = null;
+		         		String custGUID = null;
+		         	  try{
+		         		 custGUID   = getNode(rida,"CustomerGUID").getFirstChild().getNodeValue().substring(0, 8);
+		         		 custid = (String) custGUIDS.get(custGUID);
+		         	  }catch(Exception e){e.printStackTrace();}
+		         	  
+		         	  
+		         	 Node debtsNode = getNode(rida,"Debts");
+		         	for (int j = 0; j < debtsNode.getChildNodes().getLength(); j++){
+		         		
+		         		Debt debt = new Debt();
+		         		if(custid != null) {
+			         		debt.setCustID(custid);
+		         		 }
+		         		
+			         	  Node debtrida = debtsNode.getChildNodes().item(j);
+			         	  if(debtrida.getNodeName().equals("Debt")){
+			         		String debtDocNr   = getNode(debtrida,"DocumentNo").getFirstChild().getNodeValue();
+			         		String debtDocDate   = getNode(debtrida,"DocDate").getFirstChild().getNodeValue();
+			         		String debtPayDate   = getNode(debtrida,"PayDate").getFirstChild().getNodeValue();
+			         		Double debtOpenAmount   = Double.parseDouble(getNode(debtrida,"OpenAmount").getFirstChild().getNodeValue());
+			         		
+			      	        debt.setDoknr(debtDocNr);
+			      	        debt.setDuedate(getDate(debtPayDate));
+			      	        debt.setSum(debtOpenAmount);
+			      	        debt.setDate(getDate(debtDocDate));
+			      	        debt.setDue(getDue(getDate(debtPayDate).getTime()) + "");
+			      	        
+			      	        
+			         		String debtAddressGUID = null;
+			         		try {
+			         			debtAddressGUID   = getNode(debtrida,"AddressGUID").getFirstChild().getNodeValue();
+			         		}catch(Exception e){}
+		         			 if(debtAddressGUID != null) {
+		         				 String addrid = null;
+		         				 addrid = (String) custGUIDS.get(debtAddressGUID);
+		         				if(addrid != null) {
+		         					debt.setCustID(addrid);
+		         					
+		         					debt.setPayerID(custid);
+		         					
+		         				}
+		         				
+		         			 }
+		         			list.addElement(debt);
+			         		
+			         		
+			         	  
+			         		//System.out.println(debtDocNr + " - " + debtDocDate + " - " + debtPayDate);
+			         		
+			         	  }
+		         	}
+		         	  
+		         	
+		         	 }
+	         	 }
+	         
+	 	}catch(Exception e){
+	 		e.printStackTrace();}
+
+	   
+	   
+
+	      
+	      
+
+	   
+	   //System.exit(0);
+	   return list;
   }
 
 
@@ -642,78 +831,13 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 
    public TreeMap getProdGroups() throws SQLException {
 
-	    TreeMap   tm = new TreeMap();
-	    //  setTreeGroup(true);
-	      try {
-	    	  FileReader fr = new FileReader(getDir() + "Group.csv");
-	    	  BufferedReader reader = new BufferedReader(fr);
-	    	  String line = null;
-	  
-	    	  line=reader.readLine();
-		     while((line = reader.readLine()) != null ){
-		        line = line.replaceAll(";","| ");
-		        StringTokenizer st = new StringTokenizer(line, "|");
-		        
-		        //GroupCode		ParentGrCode	Description
-
-		         if (st.hasMoreTokens()){
-		             String groupcode = st.nextToken().trim();
-		             String parentgroupcode = st.nextToken().trim();
-		             String name = st.nextToken().trim();
-		             
-		          
-		             if (parentgroupcode.equals("15")) {
-		        		 name = "PrDlės " + name;
-		        	 }
-		             if (parentgroupcode.equals("3")) {
-		        		 name = "PrDros " + name;
-		        	 }
-
-		             if (parentgroupcode.equals("24")) {
-		        		 name = "J.Pusf " + name;
-		        	 }
-		             if (parentgroupcode.equals("27")) {
-		        		 name = "Š.Pusf " + name;
-		        	 }
-		             if (parentgroupcode.equals("25")) {
-		        		 name = "K.Pusf " + name;
-		        	 }
-		             if (parentgroupcode.equals("5")) {
-		        		 name = "KrGami " + name;
-		        	 }
-		             if (parentgroupcode.equals("14")) {
-		        		 name = "Skerdi " + name;
-		        	 }
-		             
-		        	 if (parentgroupcode.equals("4")) {
-		        		 name = "ŠrDros " + name;
-		        	 }
-		        	 if (parentgroupcode.equals("11")) {
-		        		 name = "ŠrGami " + name;
-		        	 }
-		        	 if (parentgroupcode.equals("1")) {
-		        		 name = "VDšros " + name;
-		        	 }
-		        	 if (parentgroupcode.equals("2")) {
-		        		 name = "VDrlės " + name;
-		        	 }
-		        	 if(name.length()> 2) {
-		        		 tm.put(Converter.cleanLitLatEst(parentgroupcode), Converter.enCodeEst(name));
-		 		        
-		        	 }
-		           }
-		         }
-	     reader.close();
-	     fr.close();
-		    	
-	       } catch (IOException e){
-	         e.printStackTrace();
-	       }
-	          return tm;
-   
- 
+	          return prodGroups;
    }
-
+   
+   
+   private TreeMap prodGroups = null;
+   
+   
    public TreeMap getProdGroupsSecond() throws SQLException {
 	   TreeMap   tm = new TreeMap();
 	   return tm;
@@ -781,7 +905,7 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	         	  //System.out.println(rida.getNodeName() + " " );
 	         	 if(rida.getNodeName().equals("Agent")){
 	         	  try{
-	         		 String salesman   = getNode(rida,"Code").getFirstChild().getNodeValue();
+	         		 String salesman   = getNode(rida,"GUID").getFirstChild().getNodeValue().substring(0, 8);
 	         		 String salesmanN   = getNode(rida,"Name").getFirstChild().getNodeValue();
 	         		 salesman = Converter.deCode(salesman);
 	         		 Agent sm = new Agent (salesman);
@@ -801,6 +925,7 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	 	}
 	     //this.getCustomers(null);
 	     //this.getProducts(null);
+	 	//this.getPriceMatrixData();
 	     return tm;
 	   }
 
@@ -820,9 +945,9 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
        private Date getDate(String mmddyy){
     	  	long lon = 0;
     	  	Calendar cal = Calendar.getInstance();
-    	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
-    	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(4, 6))-1);
-    	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(6, 8)));
+    	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(6, 10)));
+    	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(3, 4))-1);
+    	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(0, 2)));
     	  // System.out.println(cal.getTime()); 
     	   Date date = new Date(lon);
     	   date.setTime(cal.getTimeInMillis());
@@ -852,20 +977,16 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
     		
     	  }
 
-
+       private HashMap custGUIDS = null;
+       
+       
        public TreeMap getCustomers(Agent agent){
 	     TreeMap tm = new TreeMap();
 	     custAgents = new Hashtable();
-	
-		 String CustGUID   = null;
-		 String CustName   = null;		
-		 String CustCode   = null;
-		 String DAddressGUID   = null;
-		String DAddressCode   = null;
-		String DAddress   = null;
-		String DAddressAgentGUID   = null;
-		
-    	 
+	     custGUIDS = new HashMap();
+	     HashMap prg = plistGUID();
+
+
     	 try {
 	 		  File f = new File (getDir() + "Clients.xml");
 	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -877,41 +998,210 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	         Node root = getNode(doc, "CustomersList"); 
 	         
 	         for (int i = 0; i < root.getChildNodes().getLength(); i++){
+	    		 String CustGUID   = null;
+	    		 String CustName   = null;		
+	    		 String CustCode   = null;
+	    		 String CustAgentGUID   = null;
+	    		 String DAddressGUID   = null;
+	    		 String DAddressCode   = null;
+	    		 String DAddress   = null;
+	    		 String DAddressAgentGUID   = null;
+	    		 String DAddressContactName   = null;
+	    		 String CustLegalAddres   = null;
+	    		 String CustActualAddres   = null;
+	    		 String CustPriceTypeGUID   = null;
+	    		 String CustPaymentTerm   = null;
+	    		 String CustCreditLimit   = null;
+	    		 String CustPhone   = null;
+	    		 String CustEmail   = null;
+	    		 String CustBlocked = null;
+	    		 String info = null;
+	    		 
 	         	  Node rida = root.getChildNodes().item(i);
 	         	  //System.out.println(rida.getNodeName() + " " );
 	         	  if(rida.getNodeName().equals("Customer")){
 	         		  try{
 		         		 CustGUID   = getNode(rida,"CustomerGUID").getFirstChild().getNodeValue();
-		         		 CustName   = getNode(rida,"CustomerName").getFirstChild().getNodeValue();		
 		         		 CustCode   = getNode(rida,"CustomerCode").getFirstChild().getNodeValue();
+		         		 
+		         		try{
+			         		 CustName   = getNode(rida,"CustomerName").getFirstChild().getNodeValue();		
+		         		}catch(Exception e){}
+		         		 
+		         		try{
+		         			CustAgentGUID = getNode(rida,"MainAgentGUID").getFirstChild().getNodeValue();
+		         		}catch(Exception e){}
+		         		
+		         		try{	
+			         		 CustLegalAddres = getNode(rida,"LegalAddres").getFirstChild().getNodeValue();
+		         		}catch(Exception e){}
+		         		
+		         		 try{
+			         		 CustActualAddres = getNode(rida,"ActualAddres").getFirstChild().getNodeValue();
+		         		}catch(Exception e){}
+		         		 
+		         		 try{
+			         		 CustPriceTypeGUID = getNode(rida,"PriceTypeGUID").getFirstChild().getNodeValue();
+		         		}catch(Exception e){}
+		         		 
+		         		try{
+		         			CustPaymentTerm = getNode(rida,"PaymentTerm").getFirstChild().getNodeValue();
+		         		}catch(Exception e){}
+
+		         		try{
+		         			CustCreditLimit = getNode(rida,"CreditLimit").getFirstChild().getNodeValue();
+		         		}catch(Exception e){}
+		         		
+		         		try{
+		         			CustPhone = getNode(rida,"Phone").getFirstChild().getNodeValue();
+		         		}catch(Exception e){}
+		         		
+		         		try{
+		         			CustEmail = getNode(rida,"Email").getFirstChild().getNodeValue();
+		         		}catch(Exception e){}
+		         		
+		         		try{
+		         			CustBlocked = getNode(rida,"Blocked").getFirstChild().getNodeValue();
+		         		}catch(Exception e){}
+		         		
+		         		
+		         		if(CustPhone != null) {
+		         			info="Tel:" + CustPhone;
+		         		}
+		         		if(CustEmail != null) {
+		         			if(info == null) {
+		         				info = CustEmail;
+		         			}else {
+		         				info = info + "|" + CustEmail;
+		         			}
+		         		}
+		         		
 		         		 CustName = Converter.deCode(CustName);
 		         		
-		         		 //System.out.println(CustGUID + " " +CustName);
+		         		 //System.out.println(CustGUID + " " + CustName + " " + CustAgentGUID + " " + agentGUID.get(CustAgentGUID));
 		         	  }catch(Exception e){
 		         		  e.printStackTrace();
 		         	  }
-	         	  
+	         		 custGUIDS.put(CustGUID, CustCode + "_0");
+	         		 
+     		  if("false".equals(CustBlocked) || CustBlocked == null) {
+
+	         			  
          		  	Node addressNode = getNode(rida, "DeliveryAddressList");
-	      			for (int j = 0; j < addressNode.getChildNodes().getLength(); j++){
-	      				Node ridaAddress = addressNode.getChildNodes().item(j);
-	      				
-	      				if(ridaAddress.getNodeName().equals("DeliveryAddress")){
-	      				DAddressGUID   = getNode(ridaAddress,"AddressGUID").getFirstChild().getNodeValue();
-	      				DAddressCode   = getNode(ridaAddress,"AddressCode").getFirstChild().getNodeValue();
-	      				DAddress   = getNode(ridaAddress,"Address").getFirstChild().getNodeValue();
-	      				DAddressAgentGUID   = getNode(ridaAddress,"AgentGUID").getFirstChild().getNodeValue();
-	      				//System.out.println("Addressinfo: "+DAddressGUID + " " + DAddressCode + " " + DAddress + " " + DAddressAgentGUID);
-	      				
-	      		         Customer customer = new Customer(CustCode + "_" + DAddressCode);
-	      		         customer.setName(Converter.enCodeEst(CustName) + "_" + DAddressCode);
-	      		         customer.setAddress(Converter.enCodeEst(Converter.adressLink(DAddress,"Latvia")));
+         		  	if(addressNode == null) {
+         		  		
+         		  		Customer customer = new Customer(CustCode + "_0" );
+         		  		
+         		  		if(CustName != null){
+	      		         customer.setName(Converter.enCodeEst(CustName));
 	      		         
-	      		         customer.addAgent(new Agent(agentGUID.get(DAddressAgentGUID)));
+	      		         if(CustActualAddres != null){
+	      		        	customer.setAddress(Converter.enCodeEst(Converter.adressLink(CustActualAddres,"Latvia")));
+	      		         }else {
+	      		        	customer.setAddress(Converter.enCodeEst(Converter.adressLink(CustLegalAddres,"Latvia")));
+	      		         }
 	      		         
-	      		         tm.put(Converter.cleanLitLatEst(CustName + " "+ DAddressCode), customer);
-	      				
-	      				}
-	      			}
+	      		       if(CustPriceTypeGUID != null){
+	      		    	   String type = (String) prg.get(CustPriceTypeGUID);
+	      		    	   if(type != null) {
+	      		    		 customer.setGroup(type);
+	      		    	   }
+	      		        	
+	      		         	}
+		      		       if(CustPaymentTerm != null){
+		      		        	customer.setPaymTerm(CustPaymentTerm);
+		      		         }
+		      		     if(CustCreditLimit != null && !CustCreditLimit.equals("0")){
+		      		        	customer.setCredit(CustCreditLimit);
+		      		         }
+		      		     
+		      		     if(info != null){
+		      		    	customer.setPersonalData(info);
+		      		     }
+		      		       
+		      		     
+		      		     if(CustAgentGUID != null) {
+		      		    	customer.addAgent(new Agent(agentGUID.get(CustAgentGUID)));
+		      		    	tm.put(Converter.cleanLitLatEst(CustName + " "+ DAddressCode), customer);
+		      		    	custGUIDS.put(CustGUID, customer.getID());
+		      		     }
+	      		         
+         		  		
+         		  	}
+         		  		
+         		  	}else {
+         		  		for (int j = 0; j < addressNode.getChildNodes().getLength(); j++){
+    	      				Node ridaAddress = addressNode.getChildNodes().item(j);
+    	      				
+    	      				if(ridaAddress.getNodeName().equals("DeliveryAddress")){
+    	      					try{
+    	      						DAddressGUID   = getNode(ridaAddress,"AddressGUID").getFirstChild().getNodeValue();
+    			         		}catch(Exception e){}
+    	      					
+    	      					try{
+    	      						DAddressCode   = getNode(ridaAddress,"AddressCode").getFirstChild().getNodeValue();
+    			         		}catch(Exception e){}
+    	      					
+    	      					try{
+    	      						DAddress   = getNode(ridaAddress,"Address").getFirstChild().getNodeValue();
+    			         		}catch(Exception e){}
+    	      					
+    	      					try{
+    	      						DAddressAgentGUID   = getNode(ridaAddress,"AgentGUID").getFirstChild().getNodeValue();
+    			         		}catch(Exception e){}
+    	      					
+    	      					try{
+    	      						DAddressContactName   = getNode(ridaAddress,"ContactName").getFirstChild().getNodeValue();
+    			         		}catch(Exception e){}
+    	      				
+    	      				
+    	      				
+    	      				
+    	      				
+    	      				//System.out.println("Addressinfo: "+DAddressGUID + " " + DAddressCode + " " + DAddress + " " + DAddressAgentGUID);
+    	      				
+    	      		         Customer customer = new Customer(CustCode + "_" + DAddressCode);
+    	      		         customer.setName(Converter.enCodeEst(CustName) + "_" + DAddressCode);
+    	      		         customer.setAddress(Converter.enCodeEst(Converter.adressLink(DAddress,"Latvia")));
+    	      		         
+	    	      		       if(DAddressAgentGUID != null){
+	    	      		    	 customer.addAgent(new Agent(agentGUID.get(DAddressAgentGUID)));
+	   	      		         	}
+	    	      		       if(CustAgentGUID != null){
+	    	      		         customer.addAgent(new Agent(agentGUID.get(CustAgentGUID)));
+	   	      		         	}
+	    	      		       if(CustPriceTypeGUID != null){
+	    	      		    	   String type = (String) prg.get(CustPriceTypeGUID);
+	    	      		    	   if(type != null) {
+	    	      		    		 customer.setGroup(type);
+	    	      		    	   }
+	   	      		        	
+	   	      		         	}
+		    	      		     if(CustPaymentTerm != null){
+				      		        	customer.setPaymTerm(CustPaymentTerm);
+				      		      }
+		    	      		   if(CustCreditLimit != null && !CustCreditLimit.equals("0")){
+			      		        	customer.setCredit(CustCreditLimit);
+			      		         }
+		    	      		   
+		    	      		 if(info != null){
+				      		    	if(DAddressContactName != null && DAddressContactName.trim().length() > 0){
+				      		    		customer.setPersonalData(DAddressContactName + "|" + info);
+				      		    	}else {
+				      		    		customer.setPersonalData(info);
+				      		    	}
+			      		     }else if(DAddressContactName != null && DAddressContactName.trim().length() > 0){
+			      		    	customer.setPersonalData(DAddressContactName);
+			      		     }
+		    	      		 
+		    	      		 customer.setPayer(CustCode + "_0");
+	    	      		   
+    	      		         tm.put(Converter.cleanLitLatEst(CustName + " "+ DAddressCode), customer);
+    	      		        custGUIDS.put(DAddressGUID, customer.getID());
+    	      				}
+    	      			}
+         		  	}
+	         	  }
 	      			
 			       }
 	         	 
@@ -949,7 +1239,7 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
    
 
 private Hashtable prodNames = null;
-   
+private HashMap prodsGUID = new HashMap();
 
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
@@ -958,9 +1248,8 @@ private Hashtable prodNames = null;
      
      //Productgroups.xml
      
-     String ProdGroupsGUID=null;
-     String ProdGroupsCode=null;
-     String ProdGroupsDescription=null;
+
+     HashMap prgrGUID = new HashMap();
      //String ProdGroupsParentGrGUID=null;
 		try {
 			StringBuffer sbEAN = new StringBuffer();
@@ -969,23 +1258,39 @@ private Hashtable prodNames = null;
 		     DocumentBuilder db;
 			db = dbf.newDocumentBuilder();      	
 			FileInputStream in = getCleanInputStream(f);
+			prodGroups = new TreeMap();
 			String handler = null;
 		    Document doc = db.parse(in,handler);
 		    Node root = getNode(doc, "ProductGroupsList"); 
+		     
 		    for (int i = 0; i < root.getChildNodes().getLength(); i++){
+		        String ProdGroupsGUID = null;
+		        String ProdGroupsCode = null;
+		        String ProdGroupsDescription = null;
+		    	
 		    	  Node rida = root.getChildNodes().item(i);
 		    	  
 		    	  if(rida.getNodeName().equals("Group")){
 		    		  try{
 		    			  ProdGroupsGUID   = getNode(rida,"GUID").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    		  try{
 		    			  ProdGroupsCode   = getNode(rida,"GroupCode").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    		  try{
 		    			  ProdGroupsDescription   = getNode(rida,"Description").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    			  
+		    			  
+		    			  
 		    			  //rodGroupsParentGrGUID   = getNode(rida,"ParentGrGUID").getFirstChild().getNodeValue();
-
-		        		 System.out.println("ProdGroups: " + ProdGroupsGUID + " " + ProdGroupsCode + " " + ProdGroupsDescription);
-		        	  }catch(Exception e){
-		        		  e.printStackTrace();
-		        	  }
+		    			  prodGroups.put(ProdGroupsCode, ProdGroupsDescription);
+		    			  prgrGUID.put(ProdGroupsGUID, ProdGroupsCode);
+		        		 //System.out.println("ProdGroups: " + ProdGroupsGUID + " " + ProdGroupsCode + " " + ProdGroupsDescription);
+		        	  
 		    	  	}
 		    	  }
 		    		  
@@ -996,13 +1301,7 @@ private Hashtable prodNames = null;
  
      
 		//Product.xml
-     String ProdGUID=null;
-	 String ProdCode=null;   
-	 String ProdDesc=null;   
-	 String ProdUnit=null;  
-	 String GroupGUID=null;
-	 String UnitPrice=null;  
-	 String inventory=null; 
+
      
 		
 		try {
@@ -1017,29 +1316,61 @@ private Hashtable prodNames = null;
 		    Node root = getNode(doc, "ProductsList"); 
 		    
 		    for (int i = 0; i < root.getChildNodes().getLength(); i++){
+		        String ProdGUID = null;
+			   	 String ProdCode = null;   
+			   	 String ProdDesc = null;   
+			   	 String ProdUnit = null;  
+			   	 String GroupGUID = null;
+			   	 String UnitPrice = null;  
+			   	 String ProdBlocked = null; 
+			   	 String inventory = null; 
+		    	
 		    	  Node rida = root.getChildNodes().item(i);
 		    	  
 		    	  //System.out.println(rida.getNodeName() + " " );
 		    	  if(rida.getNodeName().equals("Product")){
 		    		  try{
 		        		  ProdGUID   = getNode(rida,"GUID").getFirstChild().getNodeValue();
-		        		  ProdCode   = getNode(rida,"Code").getFirstChild().getNodeValue();
-		        		  ProdDesc   = getNode(rida,"Description").getFirstChild().getNodeValue();
-		        		  ProdUnit   = getNode(rida,"Unit").getFirstChild().getNodeValue();
-		        		  GroupGUID   = getNode(rida,"GroupGUID").getFirstChild().getNodeValue();
-		        		  //GroupGUID2   = getNode(rida,"GroupSecGUID").getFirstChild().getNodeValue();
-		        		  UnitPrice   = getNode(rida,"UnitPrice").getFirstChild().getNodeValue();
-		        		  inventory   = getNode(rida,"Inventory").getFirstChild().getNodeValue();
-		        		
-		        		 //System.out.println(CustGUID + " " +CustName);
-		        	  }catch(Exception e){
-		        		  e.printStackTrace();
-		        	  }
+		    		  }catch(Exception e){e.printStackTrace();}
 		    		  
+		    		  try{
+		    			  ProdCode   = getNode(rida,"Code").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    		  try{
+		    			  ProdDesc   = getNode(rida,"Description").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    		  try{
+		    			  ProdUnit   = getNode(rida,"Unit").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    		  try{
+		    			  UnitPrice   = getNode(rida,"UnitPrice").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    		  try{
+		    			  inventory   = getNode(rida,"Inventory").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    		  try{
+		    			  ProdBlocked   = getNode(rida,"Blocked").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		        		  
+		        		  
+		        		  
+		        		  //GroupGUID2   = getNode(rida,"GroupSecGUID").getFirstChild().getNodeValue();
+		        		  
+		        		  
+		        		  
+		        		 //System.out.println(CustGUID + " " +CustName);
+		        	  
+		    		  
+		    		  prodsGUID.put(ProdGUID, ProdCode);
+		    		 
 		    		  
 		    		 Product prod = new Product(ProdCode);
-
-
 		   			 prod.setStock(Double.parseDouble(inventory));
 		   			 
 		   			 //if(Double.parseDouble(incase) > 1) {
@@ -1049,7 +1380,10 @@ private Hashtable prodNames = null;
 		   			 if(ProdUnit.length() > 0) {   
 		   				 prod.setUnit(ProdUnit);
 		   			 }
-		   			  prod.setType(GroupGUID);
+		   			 if(GroupGUID != null) {   
+		   				prod.setGroup(prgrGUID.get(GroupGUID) + "");
+		   			 }
+		   			  
 		   			
 		   			 //if(groupcodesec.length() > 0) {
 		   				 //prod.setGroup(GroupGUID2);
@@ -1088,7 +1422,7 @@ private Hashtable prodNames = null;
 		 				Node ridaEAN = EANNode.getChildNodes().item(j);
 		 				if(ridaEAN.getNodeName().equals("EAN")){
 		 				String EANKood   = EANNode.getChildNodes().item(j).getTextContent();
-		 				System.out.println("EANKOOD: "+ EANNode.getChildNodes().item(j).getTextContent());
+		 				//System.out.println("EANKOOD: "+ EANNode.getChildNodes().item(j).getTextContent());
 		 				
 		 				if(x == 0 && EANKood.length() > 0) {
 		   					 prod.setEAN(EANKood);
@@ -1100,8 +1434,10 @@ private Hashtable prodNames = null;
 		 				}
 		 				
 		 			  }
-		 			
-					 tm.put(Converter.cleanLitLatEst(ProdDesc + prod.getUnit() + prod.getID()), prod);
+		 			if("false".equals(ProdBlocked)) {
+		 				tm.put(Converter.cleanLitLatEst(ProdDesc + prod.getUnit() + prod.getID()), prod);
+		 			}
+					 
 
 			       }
 		   			if(sbEAN.length() > 0) {
@@ -1109,123 +1445,12 @@ private Hashtable prodNames = null;
 			     	 }
 		    	}
 		    
-		    	  
-		    
-		    /*	 
-				 
-				 tm.put(Converter.cleanLitLatEst(description + prod.getUnit() + prod.getID()), prod);
-			 
-		     */
-		    //customercode_addresscode
-		    	  
-		
 		    in.close();
 		}catch(Exception k ){
 				k.printStackTrace();
 			}
-		
-		
+		return tm;
 
- 
-
-
-
-
-return tm;
-
-
-
-
-
-
-
-
-
-/*
-
-     try {
-
-     	//laoseisude lugemine ja liitmine algab
-          
-    	
-         String line = null;
-         
-		 FileReader fr = new FileReader(getDir() + "Product.csv");
-		 BufferedReader reader = new BufferedReader(fr);
-
-        reader.readLine();
-        while(( line = reader.readLine()) != null ){
-        line = line.replaceAll(";"," |");
-     
-       StringTokenizer st = new StringTokenizer(line, "|");
-      //Code		Description		Unit	incase	GroupCode	GroupSecCode	UnitPrice	EAN	Inventory	Pallet	Blocked
-
-       if (st.hasMoreTokens()){
-    	   String id = st.nextToken().trim();
-    	   String description = st.nextToken().trim();
-    	   String unit = st.nextToken().trim();
-    	   String incase = st.nextToken().trim();
-    	   String groupcode = st.nextToken().trim();
-    	   String groupcodesec = st.nextToken().trim();
-    	   String unitprice = st.nextToken().trim();
-    	   String ean = st.nextToken().trim();
-    	  // String inventory = st.nextToken().trim();
-
-    	   Product prod = new Product(id);
-    	   //System.out.println(description);
-            if(stocks.get(id) != null) {
-           	 if(Double.parseDouble(stocks.get(id)+"") > 1) {
-				 prod.setStock(Double.parseDouble(stocks.get(id)+""));
-			 }
-			 	
-            }
-		
-			 
-			 if(Double.parseDouble(incase) > 1) {
-				 prod.setInCases(Double.parseDouble(incase));
-			 }
-			 
-			 if(unit.length() > 0) {
-				 prod.setUnit(unit);
-			 }
-			 
-			
-				 prod.setType(groupcode);
-			
-			 if(groupcodesec.length() > 0) {
-				 prod.setGroup(groupcodesec);
-			 }
-			 
-			 if(description.length() > 0) {
-				 prod.setName(description + " "+ id);
-			 
-	
-				 if(Double.parseDouble(unitprice) > 0) {
-					 prod.setPrice(Double.parseDouble(unitprice));
-				 }
-				 
-				 if(ean.length() > 0) {
-					 prod.setEAN(ean);
-				 }
-				 
-				 prod.setVat("21");
-				 tm.put(Converter.cleanLitLatEst(description + prod.getUnit() + prod.getID()), prod);
-			 
-			 }
-			 
-			 
-			 
-
-         }
-       }
-        
-        reader.close();
-     } catch (Exception e){
-       e.printStackTrace();
-     }
-     
-     
-     return tm;*/
    }
 
    
@@ -1240,37 +1465,132 @@ return tm;
 
    public Vector getCustomerProductsList(String agentCode){
 	   Vector custProds = new Vector();
-  try {
-	  
-     FileReader fr = new FileReader(getDir() + "CustomerProducts.csv");
-		 BufferedReader reader = new BufferedReader(fr);
-		 String line = null;
-      
-		 reader.readLine();
-      while(( line = reader.readLine()) != null ){
-    	  line = line.replaceAll(";"," |");
-    	   StringTokenizer st = new StringTokenizer(line, "|"); 
-    	 //  CustCode;ProductCode;Qty;LastDate;InvoiceNo;LastPrice
-    	   String custID = st.nextToken().trim();
-        	String prodID = st.nextToken().trim();
-			double sold = Double.parseDouble(st.nextToken().trim());							
-			String last = st.nextToken().trim().substring(4);
-			String lastdoc = st.nextToken().trim();
-			double lastprice = Double.parseDouble(st.nextToken().trim());	
-			
-			CustProd cp = new CustProd(custID, prodID,
-					 sold, 0,0, last, lastprice, 0, 0, " ");
-	
-			cp.setAbiKood(lastdoc);
-			custProds.addElement(cp);
-      }
-      
-	  reader.close();
-  }catch(Exception e) {
-	  e.printStackTrace();
-  }
-	
-  //System.out.println(custProds.toString());
+
+
+
+	   
+	 	try {
+	 		  File f = new File (getDir() + "CustomerProducts.xml");
+
+	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	     DocumentBuilder db;
+	 		db = dbf.newDocumentBuilder();      	
+	     	FileInputStream in = getCleanInputStream(f);
+	     	String handler = null;
+	         Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "CustomersProductsList"); 
+	     	
+	     	
+	         for (int i = 0; i < root.getChildNodes().getLength(); i++){
+	         	  Node rida = root.getChildNodes().item(i);
+	         	 if(rida.getNodeName().equals("Customer")){
+	         	  try{
+	         		 String custProdGUID   = getNode(rida,"CustomerGUID").getFirstChild().getNodeValue();
+	         		 //String custProdName   = getNode(rida,"CustomerName").getFirstChild().getNodeValue();
+
+	         		Node addressListNode = getNode(rida,"AddressList");
+	         		//System.out.println(addressListNode.toString());
+	         		
+		         		for (int j = 0; j < addressListNode.getChildNodes().getLength(); j++){
+		         			Node addressNode = addressListNode.getChildNodes().item(j);
+		         			if(addressNode.getNodeName().equals("Address")){
+			         			//System.out.println(addressNode.toString());
+		         				if(getNode(addressNode,"AddressGUID").getFirstChild() != null) {
+				   	         		 String addressGUID   = getNode(addressNode,"AddressGUID").getFirstChild().getNodeValue();
+				   	         		System.out.println(addressGUID);
+				   	         		String custid = (String) custGUIDS.get(addressGUID);
+
+				   	         	
+				   	         	if(custid != null) {
+					   	         	Node prodListNode = getNode(addressNode,"ProductsList");
+		         					for (int k = 0; k < prodListNode.getChildNodes().getLength(); k++){
+		         						Node prodNode = prodListNode.getChildNodes().item(k);
+		         					
+		         						if(prodNode.getNodeName().equals("Product")){
+		         			         		 String prodGUID   = getNode(prodNode,"ProductGUID").getFirstChild().getNodeValue();
+		         			         		 String prodLastDate   = getNode(prodNode,"LastDate").getFirstChild().getNodeValue().substring(0,5);
+		         			         		 String prodInvNo   = getNode(prodNode,"InvoiceNo").getFirstChild().getNodeValue();
+		         			         		 
+		         			         		 Double prodQty = 0.0;
+		         			         		try{
+		         			         			prodQty  = Double.parseDouble(getNode(prodNode,"Qty").getFirstChild().getNodeValue());
+		         			         		 }catch(Exception e){}
+		         			         		 
+		         			         		
+		         			         		Double prodLastPrice = 0.0;
+		         			         		try{
+			         			         		 prodLastPrice   = Double.parseDouble(getNode(prodNode,"LastPrice").getFirstChild().getNodeValue());
+		         			         		 }catch(Exception e){}
+		         			         		 
+		         			         		 //System.out.println(prodGUID + " " + prodLastDate);
+		         			         		 String prodid = (String) prodsGUID.get(prodGUID);
+		         			         		 
+		         			         		 if(prodid != null && prodid.length() > 0){
+		         			         			CustProd cp = new CustProd(custid, prodid, prodQty ,0 ,0,prodLastDate,prodLastPrice,0,0," ");
+		         			         			 cp.setAbiKood(prodInvNo);
+			         			         			custProds.add(cp);
+		         			         		 }
+		         						}
+		         					}
+				   	         	}
+				   	         		
+				   	         		
+		         				}else {
+		         					Node prodListNode = getNode(addressNode,"ProductsList");
+		         					for (int k = 0; k < prodListNode.getChildNodes().getLength(); k++){
+		         						Node prodNode = prodListNode.getChildNodes().item(k);
+		         					
+		         						String custid = (String) custGUIDS.get(custProdGUID);
+		         						
+		         						if(prodNode.getNodeName().equals("Product")){
+		         							String prodGUID   = getNode(prodNode,"ProductGUID").getFirstChild().getNodeValue();
+		         			         		 String prodLastDate   = getNode(prodNode,"LastDate").getFirstChild().getNodeValue().substring(0,5);
+		         			         		 String prodInvNo   = getNode(prodNode,"InvoiceNo").getFirstChild().getNodeValue();
+		         			         		 
+		         			         		 Double prodQty = 0.0;
+		         			         		try{
+		         			         			prodQty  = Double.parseDouble(getNode(prodNode,"Qty").getFirstChild().getNodeValue());
+		         			         		 }catch(Exception e){}
+		         			         		 
+		         			         		
+		         			         		Double prodLastPrice = 0.0;
+		         			         		try{
+			         			         		 prodLastPrice   = Double.parseDouble(getNode(prodNode,"LastPrice").getFirstChild().getNodeValue());
+		         			         		 }catch(Exception e){}
+		         			         		 
+		         			         		 //System.out.println(prodGUID + " " + prodLastDate);
+		         			         		 String prodid = (String) prodsGUID.get(prodGUID);
+		         			         		 
+		         			         		 if(prodid != null && prodid.length() > 0){
+		         			         			CustProd cp = new CustProd(custid, prodid, prodQty ,0 ,0,prodLastDate,prodLastPrice,0,0," ");
+		         			         			 cp.setAbiKood(prodInvNo);
+		         			         			custProds.add(cp);
+		         			         		 }
+		         						}
+		         					}
+		         					
+		         				}
+			         			
+
+
+		         			}
+		         			//System.out.println(addressListNode.getChildNodes().item(j));
+		         			
+		         		}
+	         		
+
+	         	  }catch(Exception e){
+	         		  e.printStackTrace();
+	         	  }
+	         }
+	         	 }
+	         
+	 	}catch(Exception e){
+	 		e.printStackTrace();
+	 	}
+
+	    // System.exit(0);
+	   
 	    return custProds;
 	  }
    
@@ -1325,112 +1645,65 @@ public void setNF(NumberFormat nf) {
    * @param agents Map
    */
   public void setBulkSales(Map agents) {
+	  
+	   
+	 	try {
+	 		  File f = new File (getDir() + "AgentSales.xml");
 
-	 Hashtable plans =  readPlans();
-	if( agGrSales == null) {
-		readCustSales();
-	}
-	
-	 int d1 = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-     int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	     DocumentBuilder db;
+	 		db = dbf.newDocumentBuilder();      	
+	     	FileInputStream in = getCleanInputStream(f);
+	     	String handler = null;
+	     	
+	          
+	     	
+	         Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "AgentSalesList"); 
+	     	
+	         for (int i = 0; i < root.getChildNodes().getLength(); i++){
+	         	  Node rida = root.getChildNodes().item(i);
+	         	  //System.out.println(rida.getNodeName() + " " );
+	         	  
+	         	 if(rida.getNodeName().equals("Sale")){
+		         	  try{
+		         		 String agentSaleGUID   = getNode(rida,"AgentGUID").getFirstChild().getNodeValue().substring(0, 8);
+		         		 
+		         		 
+		         		Double agentSaleSum  = Double.parseDouble(getNode(rida,"Sum").getFirstChild().getNodeValue()) ;
+		         		
+		         		Agent agent = (Agent)agents.get(agentSaleGUID);
+		                agent.setMonthSales(agentSaleSum.intValue());
+		                //System.out.println(agentSaleGUID + " " +agentSaleSum);
+		         		
+		         	  }catch(Exception e){
+		         		  e.printStackTrace();
+		         	  }
+	         		}
+	         	 }
+	         
+	 	}catch(Exception e){
+	 		e.printStackTrace();
+	 	}
 
-	TreeMap plandone = new TreeMap();
-	
-	Enumeration enume =  agGrSales.keys();
-  	 while(enume.hasMoreElements()) {
-               String agentID = (String)enume.nextElement();
-               TreeMap tree  = (TreeMap)agGrSales.get(agentID);
-               Iterator itera =   tree.keySet().iterator();
-                while(itera.hasNext()) {
-            	  String grid = (String)itera.next();
-                 Toode dd = (Toode)tree.get(grid);
-                 Agent agent = (Agent)agents.get(agentID);
-                 if (agent != null){
-                   agent.setMonthSales((int)(dd.getDonecur()));
-                   agent.setKgSales((int)dd.getDonevol());
-                   
-                   TreeMap hh = new TreeMap();
-                   if(plandone.get(agentID) != null) {
-                	   hh = (TreeMap) plandone.get(agentID);
-                   }
-                   
-                   if(grid.equals("1") || grid.equals("2") || grid.equals("3") || grid.equals("4") || grid.equals("5") 
-                		   || grid.equals("11") || grid.equals("15") ) {
-                	Toode yy = new Toode("Gaminiai");
-                	 if(  hh.get("Gaminiai") != null ) {
-                		 yy = (Toode)hh.get("Gaminiai");
-                	 }
-                	   yy.addDonecur(dd.getDonecur());
-                	   yy.addDonevol(dd.getDonevol());
-                	   hh.put("Gaminiai", yy);
-                   }
-            
-                   
-                   if(grid.equals("29") ) {
-                   	Toode yy = new Toode("Mar. gaminiai");
-                   	 if(  hh.get("Mar. gaminiai") != null ) {
-                   		 yy = (Toode)hh.get("Mar. gaminiai");
-                   	 }
-                   	   yy.addDonecur(dd.getDonecur());
-                   	   yy.addDonevol(dd.getDonevol());
-                   	   hh.put("Mar. gaminiai", yy);
-                      }
-                   
-               
-                   if( grid.equals("27") || grid.equals("24") || grid.equals("25") || grid.equals("14")
-                		   || grid.equals("12") || grid.equals("10") || grid.equals("9") || grid.equals("7") || grid.equals("6")) {
-                      	Toode yy = new Toode("Sv.Mesa");
-                      	 if(  hh.get("Sv.Mesa") != null ) {
-                      		 yy = (Toode)hh.get("Sv.Mesa");
-                      	 }
-                      	   yy.addDonecur(dd.getDonecur());
-                      	   yy.addDonevol(dd.getDonevol());
-                      	   hh.put("Sv.Mesa", yy);
-                         }
-                      
-                   plandone.put(agentID, hh);
-                  }
-               }
-      	    }
-  	 
-  Enumeration enume2 = plans.keys();
-  	 while(enume2.hasMoreElements()) {
-  		 String agid = (String)enume2.nextElement();
-  		  Agent agent = (Agent)agents.get(agid);
-  		  if(agent != null) {
-  			  TreeMap doneall = (TreeMap)plandone.get(agid);
-  			  ArrayList<Toode> pl = (ArrayList<Toode>)plans.get(agid);
-  			  
-  		for(Toode tt : pl) {
-  			
-  		  double kgplan = tt.getPlanvol();
-  		  double eurplan = tt.getPlancur();
-  		  double kgsold = 0;
-  		  double eursold = 0;
-  		  double estkg = 0;
- 		  double esteur = 0;
-  		 
-  		//  System.out.println("rida " + agid + " " + kgplan + " " + eurplan + " " + tt.getGr1()+ "\n " + doneall.keySet().toString());
-  		  
-  		 if(doneall != null && doneall.get(tt.getGr1()) != null) {
-  			 Toode hhh = (Toode) doneall.get(tt.getGr1());
-  			   kgsold = hhh.getDonevol();
-  	   		   eursold = hhh.getDonecur();
-  	   	       double plaanitavMyykKG = d2 * kgsold/d1;
-			   estkg = plaanitavMyykKG/kgplan;
-			   double plaanitavMyykEUR = d2 * eursold/d1;
-			   esteur = plaanitavMyykEUR/eurplan;
-  		 }
-  		
-  		 String asi = tt.getGr1() +  (" Plan/Pard/Est% |") + (int)kgplan + "/" + (int)kgsold + "/"  +(int)(estkg*100) + "% kg|";
-  		  asi = asi + (int)eurplan + "/" + (int)eursold  + "/"  +(int)(esteur*100) + "% €| |";
-  		 agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
-  			
-  		}	
-  		}
-  	 }
-  		
-		        
+	   
+	     
+	     
+	  /*
+	  while(rs.next()) {
+          String agentID = rs.getString("agent").trim();
+          Agent agent = (Agent)agents.get(agentID);
+          if (agent != null){
+        	  double sales = rs.getDouble("summa");
+            agent.setMonthSales((int)sales);
+                 		
+ 	     }
+          }
+          */
+	  
+	  
+	  
+	  
   }
 
   
