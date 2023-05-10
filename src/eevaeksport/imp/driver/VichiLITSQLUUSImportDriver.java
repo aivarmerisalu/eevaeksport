@@ -588,9 +588,12 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 
 			}
 
+			String add =  (Calendar.getInstance().getTimeInMillis() + "").substring(10);
 			String number = order.getDokNr();
 			if (number == null || number.length() == 0) {
-				number = (Calendar.getInstance().getTimeInMillis() + "").substring(5);
+				number = (Calendar.getInstance().getTimeInMillis() + "").substring(4);
+			}else {
+				number = number+add;
 			}
 
 			long uni = Calendar.getInstance().getTimeInMillis();

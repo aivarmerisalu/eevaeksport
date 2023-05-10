@@ -1133,7 +1133,7 @@ String picts = parent.getProps().getProperty("pict.dir");
          try {
         	 
         	 
-           stmt = con.prepareStatement(cmd);
+    
 
            String cmd2 =
                "SELECT I44_KODAS_MS AS agent, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
