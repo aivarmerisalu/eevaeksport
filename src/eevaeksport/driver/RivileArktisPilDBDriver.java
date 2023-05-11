@@ -252,7 +252,7 @@ public class RivileArktisPilDBDriver extends AbstractDBDriver implements  BulkUp
           con.close();
         }
 
-           con = DriverManager.getConnection(url,"sa","Rivile1");
+           con = DriverManager.getConnection(url,"sa","Rivile_2023");
       } catch (Exception e) {
             getParent().showError(e);
       }

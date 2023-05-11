@@ -1280,7 +1280,7 @@ private HashMap prodsGUID = new HashMap();
 		    		  }catch(Exception e){e.printStackTrace();}
 		    		  
 		    		  try{
-		    			  ProdGroupsDescription   = getNode(rida,"Description").getFirstChild().getNodeValue();
+		    			  ProdGroupsDescription   = Converter.enCodeEst(getNode(rida,"Description").getFirstChild().getNodeValue());
 		    		  }catch(Exception e){e.printStackTrace();}
 		    		  
 		    			  
@@ -1318,6 +1318,7 @@ private HashMap prodsGUID = new HashMap();
 		    for (int i = 0; i < root.getChildNodes().getLength(); i++){
 		        String ProdGUID = null;
 			   	 String ProdCode = null;   
+			   	 String ProdArticle = null;   
 			   	 String ProdDesc = null;   
 			   	 String ProdUnit = null;  
 			   	 String GroupGUID = null;
@@ -1335,6 +1336,10 @@ private HashMap prodsGUID = new HashMap();
 		    		  
 		    		  try{
 		    			  ProdCode   = getNode(rida,"Code").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    		  try{
+		    			  ProdArticle   = getNode(rida,"Article").getFirstChild().getNodeValue();
 		    		  }catch(Exception e){e.printStackTrace();}
 		    		  
 		    		  try{
@@ -1390,7 +1395,7 @@ private HashMap prodsGUID = new HashMap();
 		   			 //}
 		   			 
 		   			 if(ProdDesc.length() > 0) {
-		   				 prod.setName(ProdDesc + " "+ ProdCode);
+		   				 prod.setName(Converter.enCodeEst(ProdDesc + " "+ ProdArticle));
 		   			 }
 		   			 
 	   				 if(Double.parseDouble(UnitPrice) > 0) {

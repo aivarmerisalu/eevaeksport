@@ -47,7 +47,7 @@ public class RivileArktisImportDriver
     try {
       Class.forName(databaseDriverName).newInstance();
       odbc =   parent.getProps().getProperty("odbc");
-      con = DriverManager.getConnection(url + odbc,"sa","Rivile1");
+      con = DriverManager.getConnection(url + odbc,"sa","Rivile_2023");
       prods = getPrices();
       
   }catch (Exception e) {

@@ -1033,7 +1033,7 @@ System.out.println(cmd);
  double xx = rs1.getDouble("valid_points");
  double yy = rs1.getDouble("unpaid_points");
  
-	   points.put(custID,"Sukaupti taškai: " + (int) xx + " (=" + (int) xx + "€ dovanų kortelei)" + "|Įsigalios apmokėjus SF: " + (int)yy); 
+	   points.put(conv(custID),"Sukaupti taškai: " + (int) xx + " (=" + (int) xx + "€ dovanų kortelei)" + "|Įsigalios apmokėjus SF: " + (int)yy); 
   }
  
  rs1.close();

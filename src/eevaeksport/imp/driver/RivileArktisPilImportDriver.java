@@ -66,7 +66,7 @@ public class RivileArktisPilImportDriver
 	  String    sql = "select I33_KODAS_PS AS toode, (I33_KAINA) AS hind from I33_PKAI where I33_KODAS_VL= 'EUR' order by I33_KODAS_PS " ;
       System.out.println("hind");
   try{
-	  Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile1");
+	  Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile_2023");
 	  Statement    stm = con.createStatement();
       ResultSet  rst = stm.executeQuery(sql);
 
@@ -97,7 +97,7 @@ public class RivileArktisPilImportDriver
     System.out.println(sql1);
     String acc = null;
  
-    Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile1");
+    Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile_2023");
 	
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
@@ -121,7 +121,7 @@ public class RivileArktisPilImportDriver
 	  	
 	    System.out.println(sql1);
 	    String acc = null;
-	    Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile1");
+	    Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile_2023");
 		
 	    Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql1);
@@ -142,7 +142,7 @@ public class RivileArktisPilImportDriver
   	 		"  rtrim(N08_KODAS_KS) + '-' + N33_kodas_ak = '" + id.trim() +"'"; 
    
     String acc = null;
-    Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile1");
+    Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile_2023");
 	
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
@@ -163,7 +163,7 @@ public class RivileArktisPilImportDriver
  	
    System.out.println(sql1);
    String acc = null;
-   Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile1");
+   Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile_2023");
 	
    Statement st1 = con.createStatement();
    ResultSet rs1 = st1.executeQuery(sql1);
@@ -186,7 +186,7 @@ public class RivileArktisPilImportDriver
 	 	
 	   System.out.println(sql1);
 	   String acc = null;
-	   Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile1");
+	   Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile_2023");
 		   Statement st1 = con.createStatement();
 	   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -217,7 +217,7 @@ public class RivileArktisPilImportDriver
    	"  WHERE  N17_KODAS_PS = '" + prodID.trim() + "'";
 
     String prod = null;
-    Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile1");
+    Connection con = DriverManager.getConnection(url + odbc,"sa","Rivile_2023");
 	
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
