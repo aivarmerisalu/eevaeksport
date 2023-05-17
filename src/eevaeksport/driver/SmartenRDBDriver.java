@@ -1303,8 +1303,8 @@ name = name.replaceAll("apelsinimahlaga ", " ");
     		ex.printStackTrace();
     	  }
      }
-	
-	if( 20 > products.size() ) {
+	System.out.println("products.size() " + products.size());
+	if( 5 > products.size() ) {
 		System.exit(0);
 	}
     return products;

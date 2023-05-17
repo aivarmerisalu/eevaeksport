@@ -1033,89 +1033,9 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.exit(0);
+		//System.exit(0);
 	}
 
-	private void addLine(OrderLine line, Node read, Document doc, int counter, Order order) throws SQLException {
-
-		Node rida = doc.createElement("Line");
-		read.appendChild(rida);
-
-		Node ridaitem = doc.createElement("Line-Item");
-
-		Node linenum = doc.createElement("LineNumber");
-		Text linnum = doc.createTextNode(counter + "");
-		linenum.appendChild(linnum);
-		ridaitem.appendChild(linenum);
-
-		/*
-		 * Node toote_ean = doc.createElement("EAN"); Text toote_eanVal =
-		 * doc.createTextNode(line.getEAN());
-		 * toote_ean.appendChild(toote_eanVal); ridaitem.appendChild(toote_ean);
-		 */
-
-		String toode = line.getToode();
-
-		Node btoote_kood = doc.createElement("BuyerItemCode");
-		Text btoote_koodVal = doc.createTextNode(toode);
-		btoote_kood.appendChild(btoote_koodVal);
-		ridaitem.appendChild(btoote_kood);
-
-		Node toote_kood = doc.createElement("SupplierItemCode");
-		Text toote_koodVal = doc.createTextNode(toode);
-		toote_kood.appendChild(toote_koodVal);
-		ridaitem.appendChild(toote_kood);
-
-		String nimi = (toode);
-		if(names.get(toode) != null) {
-			nimi = (String)names.get(toode);
-		}
-		if (nimi != null) {
-			Text nimetusVal = doc.createTextNode(nimi.replace('`', ' ').replace('´', ' '));
-			Node nimetus = doc.createElement("ItemDescription");
-			nimetus.appendChild(nimetusVal);
-			ridaitem.appendChild(nimetus);
-		}
-
-		double kogus = line.getKogus();
-		double price = line.getPrice();
-		double disc = line.getDiscount();
-		String unit = line.getUnit();
-
-		Node koGus = doc.createElement("OrderedQuantity");
-
-		Text kogusVal = doc.createTextNode(getNF().format(kogus));
-		koGus.appendChild(kogusVal);
-		ridaitem.appendChild(koGus);
-
-		if (disc > 0) {
-			// price = price * (100-disc)/100;
-		/*	Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
-			Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
-			yhiku_hind.appendChild(yhiku_hindVal);
-			ridaitem.appendChild(yhiku_hind);
-			*/
-			
-			
-			Node yhiku_ale = doc.createElement("LineDiscount");
-			Text yhiku_aleVal = doc.createTextNode(disc+"");
-			yhiku_ale.appendChild(yhiku_aleVal);
-			ridaitem.appendChild(yhiku_ale);
-		}
-
-		Node yhiku_va = doc.createElement("TaxRate");
-		Text yhiku_vaVla = doc.createTextNode("21");
-		yhiku_va.appendChild(yhiku_vaVla);
-		ridaitem.appendChild(yhiku_va);
-
-		Node yhik = doc.createElement("UnitOfMeasure");
-		Text yhikVal = doc.createTextNode(unit);
-		yhik.appendChild(yhikVal);
-		ridaitem.appendChild(yhik);
-
-		rida.appendChild(ridaitem);
-		addNumLine();
-	}
 
 	public NumberFormat getNF() {
 		nf.setGroupingUsed(false);

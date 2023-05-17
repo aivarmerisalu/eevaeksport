@@ -317,183 +317,8 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	 	
 //System.exit(0);
 	   
-	   
 	   return result;
    }
-       
-       
-       
-   public HashMap getPriceMatrixDataCreate(){
-	   HashMap culist = new HashMap();
-        prlists = new Vector();
-        HashSet check = new HashSet();
-	         try {
-	          
-	        	 FileReader fr = new FileReader(getDir() + "PriceMatrix.csv");
-	             BufferedReader reader = new BufferedReader(fr);
-	           String line = null;
-	           reader.readLine();
-	            while((line = reader.readLine()) != null ){
-
-	                 line = line.replaceAll(";"," | ");
-	            	StringTokenizer st = new StringTokenizer(line, "|");
-
-	              if (st.hasMoreTokens()) {
-	            	//System.out.println( line );
-//  00012;;00012;0019D;;;7.6;;
-                     st.nextToken();
-                     st.nextToken();
-                     
-                     String client = st.nextToken().trim();
-                     String prodID = st.nextToken().trim();
-                     st.nextToken();
-                     st.nextToken();
-                     double price = Double.parseDouble(st.nextToken().trim());
-                     String sdate =  st.nextToken().trim();
-   	                 String edate = st.nextToken().trim();
-   	                 String act = st.nextToken().trim();
-   	                 String code = st.nextToken().trim();
-   	                 if(code.equals("0")) {
-   	                	 code = "0000";
-   	                 }
-   	            
-   	             
-   	             MatrixLine mline = new MatrixLine();
-	             if (code !=null && code.trim().length() > 0) {
-	               mline.setCliGroup(Converter.cleanLitLatEst(code.trim()));
-	             }
-	             
-	             if(act.equals("Akc")) {
-	           	 if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setStartDate(sdate.substring(0,8));
-	             }
-	             if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setEndDate(edate.substring(0,8));
-	             }
-	             } 
-	             
-	             if (prodID != null && prodID.length() > 0) {
-	               mline.setProdID(prodID);
-	             }
-	         
-	             if (price != 0) {
-	                 mline.setPrice(price);
-                 }
-	             
-	             
-	             
-	             String key = code + "." + prodID + "." + price;
-	             
-            	 if(culist.get(client) != null) {
-            		 
-            		String olemas = (String)culist.get(client);
-            		if(!olemas.contains(code) ) {
-            			culist.put(client,culist.get(client) + "|" + code);
-            		}
-            		 
-            	  } else {
-            		 culist.put(client, code);
-            	 }
-            	
-	             if(mline.getPrice() > 0 && !check.contains(key)){
-	            	
-	            	 prlists.add(mline); 
-	            	 check.add(key);
-	               }
-	              }
-	            }
-	            
-	            reader.close();
-	            fr.close();
-	         }catch(Exception e){
-	         e.printStackTrace();
-	         }
-		System.out.println("culist " + culist.size());
-		System.out.println("prlist " + prlists.size());
-	       return culist;
-	      }
-
-
-   
-   public Hashtable readCustSales(){
-	   
-	   Hashtable result = new Hashtable();
-	   agGrSales = new Hashtable();
-	   this.getCustomers(null);
-	         try {
-	        	Calendar cal =  Calendar.getInstance();
-	        	 String date = Converter.getYYYYMMString(cal.getTime());
-	          
-	        	 FileReader fr = new FileReader(getDir() + "CustomerSales" + date + ".csv");
-	             BufferedReader reader = new BufferedReader(fr);
-	           String line = null;
-	           reader.readLine();
-	            while((line = reader.readLine()) != null ){
-
-	                 line = line.replaceAll(";"," | ");
-	            	StringTokenizer st = new StringTokenizer(line, "|");
-
-	              if (st.hasMoreTokens()) {
-  
-                     String custid = st.nextToken().trim();
-                     String group = st.nextToken().trim();
-                     double saleskg = 0;
-                     try {
-                    	 saleskg = Double.parseDouble(st.nextToken().trim()); 
-                     }catch(Exception e){
-                    	 
-                     }
-                    
-                     double saleseur = 0;
-                     try {
-                    	 saleseur = Double.parseDouble(st.nextToken().trim()); 
-                     }catch(Exception e){
-                    	 
-                     }
-                     Toode tt = new Toode(custid);
-                     tt.setGr1(group);
-                     tt.setDonecur(saleseur);
-                     tt.setDonevol(saleskg);
-                     ArrayList arr = new ArrayList();
-                     if(result.get(custid) != null) {
-                    	 arr = (ArrayList)result.get(custid);
-                     }
-                     arr.add(tt);
-                     result.put(custid, arr);
-                    
-   	               
-                    if (custAgents.get(custid) != null){
-                    	ArrayList arrag =  (ArrayList)custAgents.get(custid) ;
-                    	for(int u = 0; u< arrag.size(); u++ ) {
-                    		String agg = (String)arrag.get(u);
-                    		
-                    		TreeMap tree = new TreeMap();
-                        	if(agGrSales.get(agg) != null) {
-                        		tree = (TreeMap)agGrSales.get(agg);
-                        	}
-                        	Toode dd = new Toode(agg);
-                             if(tree.get(group) != null) {
-                            	 dd = (Toode)tree.get(group) ;
-                             }
-                        	dd.addDonecur(saleseur);
-                        	dd.addDonevol(saleskg);
-                        	tree.put(group, dd);
-                        	agGrSales.put(agg, tree);
-                    	}
-                      }
-	       
-	             }
-	            }
-	            
-	            reader.close();
-	            fr.close();
-	         }catch(Exception e){
-	         e.printStackTrace();
-	         }
-		
-	        // System.out.println(result.toString());
-	    return result;
-	      }
 
    Hashtable agGrSales = null;
    Hashtable custAgents = null;
@@ -527,192 +352,72 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	  public String getSaveStockInfo(){
 	    	   stocks = new HashMap();
 	  	         StringBuffer products = new StringBuffer();
-	         
-	         try {
-	             FileReader fr = new FileReader(getDir() + "Stocks.csv");
-	             BufferedReader reader = new BufferedReader(fr);
-	           String line = null;
-	           reader.readLine();
-	            while((line = reader.readLine()) != null ){
+	  	       try {
+	 	 		  File f = new File (getDir() + "Inventories.xml");
+	 	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	 	     DocumentBuilder db;
+	 	 		db = dbf.newDocumentBuilder();      	
+	 	     	FileInputStream in = getCleanInputStream(f);
+	 	     	String handler = null;
+	 	         Document doc = db.parse(in,handler);
+	 	         Node root = getNode(doc, "InventoriesList"); 
+	 	     	
+	 	     	
+	 	     	
+	 	         for (int i = 0; i < root.getChildNodes().getLength(); i++){
+	 	         	  Node rida = root.getChildNodes().item(i);
+	 	         	  
+	 		         	 if(rida.getNodeName().equals("Product")){
+	 		         		String prodid = null;
+	 		         		String prodGUID = null;
+	 		         	  try{
+	 		         		 prodGUID   = getNode(rida,"ProductGUID").getFirstChild().getNodeValue().substring(0, 8);
+	 		         		 prodid = getNode(rida,"ProductCode").getFirstChild().getNodeValue();
+	 		         	  }catch(Exception e){e.printStackTrace();}
+	 		         	  
+	 		         	Toode tt = new Toode(prodGUID);
+	 		         	  String lisa = "";
+	 		         	  
+	 		         	Node debtsNode = getNode(rida,"Stocks");
+	 		         
+	 		         	  for (int j = 0; j < debtsNode.getChildNodes().getLength(); j++){
+	 		         		  Node strida = debtsNode.getChildNodes().item(j);
+	 			         	  if(strida.getNodeName().equals("Stock")){
+	 			         		String stn  = getNode(strida,"StockName").getFirstChild().getNodeValue();
+	 			         		Double am   = Double.parseDouble(getNode(strida,"Inventory").getFirstChild().getNodeValue());
+	 			         		if(stn.equals("Pamata noliktava")) {
+	 			         			try {
+	 			         			  tt.setKogus(am);
+	 			         			 products.append(prodid +  ";");
+	 	    		                  products.append(" ;");
+	 	    		                  products.append(am + "; "  +  "\n"); // + dealer +  "\n");
+	 			         			 }catch(Exception e) {
+	 			         				 e.printStackTrace();
+	 			         			 }
+	 			         		} else {
+	 			         			System.out.println("ridu  " + stn);
+	 			         			lisa = lisa + stn + " : "+  parent.getNF().format(am) + "|";
+	 			         		}
+	 			         	  }
+	 			          	}
+	 		         	
+	 		         	  if(lisa.endsWith("|")) {
+	 		         		  lisa = lisa.substring(0,lisa.length()-1);
+	 		         	  }
+	 		         	  
+	 		         	  tt.comment = lisa;
+	 		         	  stocks.put(prodid, tt);
+	 		         	
+	 		         	 }
+	 	         	 }
+	 	         
+	 	 	}catch(Exception e){
+	 	 		e.printStackTrace();}
 
-	                 line = line.replaceAll(";"," |");
-	            	StringTokenizer st = new StringTokenizer(line, "|");
-
-	              if (st.hasMoreTokens()) {
-	            	   String kood = st.nextToken().trim();
-	            	   if(kood.length() > 0) {
-	            		try {
-	            			   double seis = Double.parseDouble(st.nextToken());
-	      	  	             if(seis > 0){
-	      	  	            	 stocks.put(kood, seis+ "");
-	      	  	                 products.append(kood +  ";");
-	      	  	                 products.append(" ;");
-	      	  	                 products.append(getParent().getNF().format(seis) + "; "  +  "\n"); 
-	      	  	               }		
-	            		}catch(Exception e) {
-	            		}
-	  	             }
-	              }
-	           }
-	             reader.close();
-	             fr.close();
-	             //System.out.println(tm);
-	           } catch (Exception e){
-	             e.printStackTrace();
-	           }
-	         
-	        
-	         
-	         
-	         
-	  	   boolean templatee = true;
-	  	   //faili avamine ja kuupaevaga kontrollimine
-	  	   	File template = new File(this.getExcelDir() + "cashtemplate.xlsx");
-
-	  	   	Calendar today = Calendar.getInstance();
-	  		  File direct = new File(getParent().getProps().getProperty("cash.read")+"exceloutput/");
-	  		    
-	  		  //  System.out.println("vvv "+ driver.getImportFile());
-	  		    File[] filess = direct.listFiles();
-	  		    for (int i = 0; i < filess.length ; i++){
-	  		      File filee = filess[i];
-	  		      
-	  		      if (filee.isFile()){
-	  		    	  if(filee.getName().contains(Converter.getYYYY_MM_DDpString(today))) {		//kui on vana fail tanase kuupaevaga olemas 
-	  		    		  template = new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + filee.getName());
-	  		    		  templatee = false;
-	  		    	  }
-	  		    	  }
-	  		      }
-	  	      
-	  	    
-	  	      Workbook workbook = null;
-	  			 Sheet sheet = null;
-	  						try{
-	  							 
-	  							       FileInputStream	 ff = new FileInputStream(template);
-	  							       if(template.getName().endsWith(".xlsx")) {
-	  							    	   workbook = new XSSFWorkbook(ff); 
-	  										 sheet = workbook.getSheetAt(0); 
-	  							       }else {
-	  							    	    workbook = new HSSFWorkbook(ff); 
-	  										 sheet = workbook.getSheetAt(0); 
-	  									
-	  							       }
-	  									ff.close();	
-	  						}catch(Exception e){
-	  				    		  e.printStackTrace();
-	  				    	  }
-	  	   
-	  	   
-	  	   // Siin teeme Cashi ära.
-	  	  
-	  		  File dir = new File(getParent().getProps().getProperty("cash.read"));
-	  		    
-	  		  //  System.out.println("vvv "+ driver.getImportFile());
-	  		    File[] files = dir.listFiles();
-	  		  this.getCustomers(null);
-	  		
-	  		  for (int i = 0; i < files.length ; i++){
-	  		      File file = files[i];
-	  		      if (file.isFile()){
-	  		    	  try{
-	  		    		
-	  		    	  FileReader fr = new FileReader(file);
-	  					BufferedReader br = new BufferedReader(fr);
-	  					
-	  					String line = br.readLine();
-	  						line = br.readLine().replaceAll(";;", "; ;");
-	  				        
-	  						StringTokenizer st = new StringTokenizer(line, ";");
-	  						if (st.hasMoreElements()){
-	  							//CUS_REALID	SUMA	KVID	USRREALID	ANSPOSTED	ST	VAL
-	  							//10002654	300.0	abc=123	1046	25.09.2015	VO	EUR
-	  	      String cuid = st.nextToken();
-
-	  	      double summa = Double.parseDouble(st.nextToken());
-	  	      String docid = st.nextToken();
-	  	      String user = st.nextToken();
-	  	      String date = st.nextToken();
-	  	      date = date.replace('.', '-').replace('.', '-');
-	  	
-	  	      
-	  	      if(sheet != null){
-	  	    	  int lastrow = sheet.getLastRowNum();
-	  	    	  if(templatee) {
-	  	    		  lastrow = 2;
-	  	    		  templatee=false;
-	  	    	  }
-	  	    	  sheet.createRow(lastrow+1);
-	  	    	  sheet.getRow(lastrow+1).createCell(0);
-	  	    	  sheet.getRow(lastrow+1).getCell(0).setCellValue("PINGAV");
-	  	    	  sheet.getRow(lastrow+1).createCell(1);
-	  	    	  sheet.getRow(lastrow+1).getCell(1).setCellValue("S");
-	  	    	  sheet.getRow(lastrow+1).createCell(2);
-	  	    	  sheet.getRow(lastrow+1).getCell(2).setCellValue("10000");
-	  	    	  sheet.getRow(lastrow+1).createCell(3);
-	  	    	  sheet.getRow(lastrow+1).getCell(3).setCellValue("Pirkėjas");
-	  	    	  sheet.getRow(lastrow+1).createCell(4);
-	  	    	  sheet.getRow(lastrow+1).getCell(4).setCellValue(cuid);
-	  	    	  sheet.getRow(lastrow+1).createCell(5);
-	  	    	  sheet.getRow(lastrow+1).getCell(5).setCellValue(date);
-	  	    	  
-	  	    	  sheet.getRow(lastrow+1).createCell(6);
-	  	    	  sheet.getRow(lastrow+1).getCell(6).setCellValue("Mokėjimas");
-	  	    	  sheet.getRow(lastrow+1).createCell(7);
-	  	    	  sheet.getRow(lastrow+1).getCell(7).setCellValue(docid);
-	  	    	  sheet.getRow(lastrow+1).createCell(8);
-	  	    	  sheet.getRow(lastrow+1).getCell(8).setCellValue(codeMap.get(user).toString());
-	  	    	  sheet.getRow(lastrow+1).createCell(9);
-	  	    	  sheet.getRow(lastrow+1).getCell(9).setCellValue(-summa);
-	  	    	  sheet.getRow(lastrow+1).createCell(10);
-	  	    	  sheet.getRow(lastrow+1).getCell(10).setCellValue("PIRKL SKOL");
-	  	    	  sheet.getRow(lastrow+1).createCell(11);
-	  	    	  sheet.getRow(lastrow+1).getCell(11).setCellValue("Banko sąskaita");
-	  	    	  sheet.getRow(lastrow+1).createCell(12);
-	  	    	  sheet.getRow(lastrow+1).getCell(12).setCellValue(date);
-	  	    	  sheet.getRow(lastrow+1).createCell(13);
-	  	    	  sheet.getRow(lastrow+1).getCell(13).setCellValue("COMM");
-	  	               }
-	  						}
-	  						
-	  						
-	  					br.close();
-	  					fr.close();
-	  					  
-	  		    	  }catch(Exception e){
-	  		    		  e.printStackTrace();
-	  		    	  }
-	  		    	  
-	  		    	  }
-	  		      File dest = new File(getParent().getProps().getProperty("cash.read") + "done/" + file.getName());
-	  				if(dest.exists()){
-	  					dest.delete();
-	  				}
-	  				if(file.isFile()) {
-	  				     boolean rn =  file.renameTo(dest);
-	  				     System.out.println("rename " + file.getName() + " " + rn);
-	  				}
-	  		
-	  		    }
-	  		    
-	  		    try {
-	  		    	if(template.getName().contains(Converter.getYYYY_MM_DDpString(today))) {
-	  		    		FileOutputStream out = new FileOutputStream(new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + template.getName()));
-	  		    		workbook.write(out);
-	  					out.close();
-	  		    	}else {
-	  		    		FileOutputStream out = new FileOutputStream(new File(getParent().getProps().getProperty("cash.read") + "exceloutput/" + Converter.getYYYY_MM_DDpString(today) + "-cash.xlsx"));
-	  		    		workbook.write(out);
-	  					out.close();
-	  		    	}
-	  		    	
-	  		    			
-	  		    }catch(Exception e){
-	  	    		  e.printStackTrace();
-	  	    	  }
-	  		    
-	  		   // System.exit(0);
+	 	   
+	 	   
+	  	    // System.out.println("Stocks " + stocks.size());
+	  	         
 
 	  		  return products.toString();
 	     }
@@ -885,10 +590,12 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	  //  makeData();
 	     
 	     // loene võimalikud agendid sisse 
+	     
+
 	   
 	 	try {
 	 		  File f = new File (getDir() + "Agents.xml");
-	 	     
+	 		    Properties props = EksportFrame.loadProps("vacation.txt");
 	 	       // System.out.println(getDir() + "Agents.xml");
 	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	 	     DocumentBuilder db;
@@ -910,10 +617,24 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	         		 salesman = Converter.deCode(salesman);
 	         		 Agent sm = new Agent (salesman);
 	         		 sm.setName(salesmanN);
-	                 tm.put(salesman, sm); 
-	               //System.out.println(salesman + " " + sm);
+
+	     			String agentAGENTS = props.getProperty("dub." +sm.getID());
+	     			if(agentAGENTS != null){
+	     	           StringTokenizer stag = new StringTokenizer(agentAGENTS, ",");
+	     		     while(stag.hasMoreTokens()){  	
+	                     sm.addDubbler(stag.nextToken());
+	                    // System.out.println("Lisan Duubleid " + "dub." +sm.getID() + " " + sm.getDubbler().toString());
+	     		      }
+	     		    }
+	         		 
+	         		 
+	                 tm.put(salesman, sm);
+	                 agents1.put(sm.getID(), sm);
+; 
+	              // System.out.println(salesman + " " + salesmanN);
 	                 String id =  getNode(rida,"GUID").getFirstChild().getNodeValue();
 	                 agentGUID.put(id, salesman);
+	                 
 	         	  }catch(Exception e){
 	         		  e.printStackTrace();
 	         	  }
@@ -979,6 +700,11 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 
        private HashMap custGUIDS = null;
        
+       private TreeMap agents1 = new TreeMap();
+       public TreeMap getAgents1() {
+    	   
+   		return agents1;
+   	}
        
        public TreeMap getCustomers(Agent agent){
 	     TreeMap tm = new TreeMap();
@@ -1124,6 +850,21 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 		      		    	customer.addAgent(new Agent(agentGUID.get(CustAgentGUID)));
 		      		    	tm.put(Converter.cleanLitLatEst(CustName + " "+ DAddressCode), customer);
 		      		    	custGUIDS.put(CustGUID, customer.getID());
+		      		    	customer.addAgent(new Agent("35dde408"));
+                             // lisame Aigarsi kõigile külge
+		      		    	
+		      		    
+			           				Agent agg = ((Agent)this.getAgents1().get(agentGUID.get(CustAgentGUID)));
+			         				
+			           				if(agg != null && agg.getDubbler().size()>0){
+			           					//System.out.println("dubbing " + agg + "  " + agg.getDubbler().toString());
+			           					for (int r = 0 ; r < agg.getDubbler().size() ; r++){
+			           						Agent dub = new Agent((String)agg.getDubbler().elementAt(r));
+			           						customer.addAgent(dub);
+			           					}
+			           				}
+			           			
+		      		    	
 		      		     }
 	      		         
          		  		
@@ -1245,7 +986,7 @@ private HashMap prodsGUID = new HashMap();
      TreeMap tm = new TreeMap();
      
 
-     
+      this.getSaveStockInfo();
      //Productgroups.xml
      
 
@@ -1264,13 +1005,15 @@ private HashMap prodsGUID = new HashMap();
 		    Node root = getNode(doc, "ProductGroupsList"); 
 		     
 		    for (int i = 0; i < root.getChildNodes().getLength(); i++){
-		        String ProdGroupsGUID = null;
-		        String ProdGroupsCode = null;
-		        String ProdGroupsDescription = null;
+		       
 		    	
 		    	  Node rida = root.getChildNodes().item(i);
 		    	  
 		    	  if(rida.getNodeName().equals("Group")){
+		    		  
+		    		  String ProdGroupsGUID = null;
+				        String ProdGroupsCode = null;
+				        String ProdGroupsDescription = null;
 		    		  try{
 		    			  ProdGroupsGUID   = getNode(rida,"GUID").getFirstChild().getNodeValue();
 		    		  }catch(Exception e){e.printStackTrace();}
@@ -1362,7 +1105,10 @@ private HashMap prodsGUID = new HashMap();
 		    			  ProdBlocked   = getNode(rida,"Blocked").getFirstChild().getNodeValue();
 		    		  }catch(Exception e){e.printStackTrace();}
 		    		  
-		        		  
+		    		  try{
+		    			  GroupGUID   = getNode(rida,"GroupGUID").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		    
 		        		  
 		        		  
 		        		  //GroupGUID2   = getNode(rida,"GroupSecGUID").getFirstChild().getNodeValue();
@@ -1376,7 +1122,16 @@ private HashMap prodsGUID = new HashMap();
 		    		 
 		    		  
 		    		 Product prod = new Product(ProdCode);
-		   			 prod.setStock(Double.parseDouble(inventory));
+		    		 
+		    		 if(stocks.get(ProdCode) != null) {
+		    			 Toode tt = (Toode)stocks.get(ProdCode);
+		    			 prod.setStock(tt.getKogus());
+		    		     prod.setPartii(tt.comment);
+		    			 
+		    		 }else {
+		    			 prod.setStock(Double.parseDouble(inventory));
+		    		 }
+		   			
 		   			 
 		   			 //if(Double.parseDouble(incase) > 1) {
 		   				 //prod.setInCases(Double.parseDouble(incase));
@@ -1389,13 +1144,10 @@ private HashMap prodsGUID = new HashMap();
 		   				prod.setGroup(prgrGUID.get(GroupGUID) + "");
 		   			 }
 		   			  
-		   			
-		   			 //if(groupcodesec.length() > 0) {
-		   				 //prod.setGroup(GroupGUID2);
-		   			 //}
-		   			 
+		   		
 		   			 if(ProdDesc.length() > 0) {
 		   				 prod.setName(Converter.enCodeEst(ProdDesc + " "+ ProdArticle));
+		   				 prod.artikkel = ProdArticle;
 		   			 }
 		   			 
 	   				 if(Double.parseDouble(UnitPrice) > 0) {
@@ -1408,27 +1160,12 @@ private HashMap prodsGUID = new HashMap();
 		    		
 				  	Node EANNode = getNode(rida, "EANList");
 				  	
-				  	/*XML CHILD NODE DEBUGIMISEKS
-				  	System.out.println("Number of child nodes: " + EANNode.getChildNodes().getLength());
-				  	for (int j = 0; j < EANNode.getChildNodes().getLength(); j++) {
-				  	    Node childNode = EANNode.getChildNodes().item(j);
-				  	    System.out.println("Child node name: " + childNode.getNodeName());
-				  	    if (childNode.getNodeName().equals("EAN")) {
-				  	        String EANKood = childNode.getTextContent();
-				  	        System.out.println("EANKOOD: " + EANKood);
-				  	    }
-				  	}*/
-				  	
-				  	//System.out.println("EANKOODtk: "+ EANNode.getChildNodes().getLength());
-				  	
-				  	
+				
 				  	int x=0; //ean counter
 		 			for (int j = 0; j < EANNode.getChildNodes().getLength(); j++){
 		 				Node ridaEAN = EANNode.getChildNodes().item(j);
 		 				if(ridaEAN.getNodeName().equals("EAN")){
 		 				String EANKood   = EANNode.getChildNodes().item(j).getTextContent();
-		 				//System.out.println("EANKOOD: "+ EANNode.getChildNodes().item(j).getTextContent());
-		 				
 		 				if(x == 0 && EANKood.length() > 0) {
 		   					 prod.setEAN(EANKood);
 		   				 }
@@ -1502,7 +1239,7 @@ private HashMap prodsGUID = new HashMap();
 			         			//System.out.println(addressNode.toString());
 		         				if(getNode(addressNode,"AddressGUID").getFirstChild() != null) {
 				   	         		 String addressGUID   = getNode(addressNode,"AddressGUID").getFirstChild().getNodeValue();
-				   	         		System.out.println(addressGUID);
+				   	         	//	System.out.println(addressGUID);
 				   	         		String custid = (String) custGUIDS.get(addressGUID);
 
 				   	         	
@@ -1824,9 +1561,11 @@ public void PictureMaker() {
      while (enume.hasNext()) {
 	    	String asi = (String)enume.next();
 	    	Product prod = (Product)prods.get(asi);
-	    	String toode = prod.getEAN().trim();  
+	    	if(prod.artikkel != null) {
+	    	String toode = prod.artikkel.trim(); 
+	    	
 	    	//System.out.println("pildid" + toode);
-           if(toode.length() > 0){
+           
             	
 	   	  res2 = new File (pictssou);
           ff2 = res2.list();
@@ -1842,10 +1581,10 @@ public void PictureMaker() {
       	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
                 		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
                 	}
-      	  	}   }
+      	  	   }
              }
            }
-         }
+         }}
    }
      try {
 		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));

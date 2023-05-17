@@ -3,6 +3,8 @@
  */
 package eevaeksport.imp.driver;
 
+import java.io.File;
+
 /**
  * @author Aivar  Merisalu
  * MobileJava Junior Programmer +37256248034 
@@ -17,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -214,28 +217,55 @@ import eevaeksport.util.Converter;
     return prod;
    }
    
-   private  TreeMap<String,Double> getProds() throws SQLException{
+   private  TreeMap<String,Double> getProds(){
 
-		
+	   TreeMap<String,Double> prods = new TreeMap<String,Double>();
+	   ArrayList<String> arr = new ArrayList<String>();
+	   try {
+	   Converter.readFile(new File("kastis.txt"), "utf-8", arr);
+	   for(String line : arr) {
+		   String p = line.substring(0,line.indexOf(";"));
+		   Double a = Double.parseDouble(line.substring(line.indexOf(";")+1));
+		   prods.put(p, a);
+	   }
+	   } catch(Exception e) {
+			 e.printStackTrace();
+		 }
+	   StringBuffer sb = new StringBuffer();
 
-	  	String sql2 = "SELECT Kodas AS toode , MV_Pastaba as kastis FROM Prekes  where MV_Pastaba > 0";
+	  	String sql2 = "SELECT Kodas AS toode , MV_Pastaba as kastis FROM Prekes   ";
 
-	 
+	 try {
 	    
-	    TreeMap<String,Double> prods = new TreeMap<String,Double>();
 	    Connection  con = this.getNewConnection();
 	    Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql2);
 	   
 	     while (rs1.next()) {
-	      prods.put(rs1.getString("toode").trim(),rs1.getDouble("kastis"));
-	     }
+	    	 String pr = rs1.getString("toode").trim();
+	    	 if(pr.length() > 0) {
+	    	 try {
+	    	 Double am = rs1.getDouble("kastis");
+	    	 prods.put(pr,am);
+	         sb.append(pr + ";" + am + "\n");
+	    	 }catch(Exception r) {
+	    		 
+	    	 }
+	     }}
 	    
+	     Converter.saveFile("kastis.txt", sb.toString());
 	    rs1.close();
 	    st1.close();
 	    con.close();
-	    
-	    return prods;
+	 } catch(Exception e) {
+		 e.printStackTrace();
+	 }
+	 if(prods.size() > 0) {
+		 return prods;
+	 } else {
+		 return null;
+	 }
+	   
 	   }
 	   
    
@@ -271,10 +301,13 @@ import eevaeksport.util.Converter;
      setOrder(order);
    //  String aiai = parent.getProps().getProperty("testing");
    // 	  String salesid = addInvoiceHeader(doknr,refr,order.getInfo()) + "";
-     
+     if(prods == null) {
+			prods = getProds();
+	   }
+    
      if(order.getCompany().equals("999999")) {
     	 makeOutput2(order); 
-     }else {
+     } else {
     	 makeOutput(order);  
      }
      
@@ -523,12 +556,8 @@ import eevaeksport.util.Converter;
    private void makeOutput2(Order order){
 	   
 	   if(prods == null) {
-		   try {
 			prods = getProds();
-		} catch (SQLException e) {
 		
-			e.printStackTrace();
-		}
 	   }
 	   
 	   String agent = order.getAgent();
@@ -565,6 +594,11 @@ import eevaeksport.util.Converter;
 			amm.setGroupingUsed(false);
 			amm.setMinimumFractionDigits(4);
 	       Vector lines = order.getOrderLines();
+	       
+	       
+	       if(prods == null) {
+	 			prods = getProds();
+	 	   }
 	
 	       for (int i = 0; i < lines.size(); i++) {
 	    	  
@@ -630,13 +664,8 @@ import eevaeksport.util.Converter;
 	private String getOrderText(Order order,TreeMap names) {
 		String res = "\n";
 		  if(prods == null) {
-    		  try {
-				prods = getProds();
-			} catch (SQLException e) {
-				
-				e.printStackTrace();
-			}
-    	  }
+    			prods = getProds();
+		  }
 		  
 	//	  System.out.println("prods " + prods.size());
 		

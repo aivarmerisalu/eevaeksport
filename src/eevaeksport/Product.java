@@ -392,6 +392,7 @@ public class Product {
 	public double layer = 0;
 	public Integer points = 0;
 	public boolean noOrder = false;
+	public String artikkel = null;
 	
    
    public double getOptAmountInUnits() {
