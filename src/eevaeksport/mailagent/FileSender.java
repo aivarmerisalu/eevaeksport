@@ -286,6 +286,26 @@ public class FileSender {
 	          
 	        
 	        if(this.sendMaster) {
+	        	
+	        	
+	        	  TreeMap<String,Long> sizes = new TreeMap<String,Long>();
+		        	 try {
+		        		
+		        			 ObjectListing   objectListing = s3Client.listObjects(bucketName, dirOut);
+			    	          //  System.out.println(time + " Sees " + f.getName() + " " + objectListing.getObjectSummaries().toString());
+			    	            for (S3ObjectSummary objectSummary :    objectListing.getObjectSummaries()) {
+			    	             // System.out.println( " - " + objectSummary.getKey() + "  " +
+			    	              //    "(size = " + objectSummary.getSize() +  ")");
+			    	               sizes.put(objectSummary.getKey(), objectSummary.getSize());
+			    	            }	
+		        		
+		        		
+		        	 }catch(Exception e) {
+		        		 
+		        	 }
+		            
+	        	
+	        	
 	        	 System.out.println(time + " Sees " + new File(dirOutLoc).listFiles() + " " + dirOutLoc);
 	    	        for (File f : new File(dirOutLoc).listFiles())  {
 	    	        	 System.out.println(time + " Sees " + f.getName());
@@ -302,7 +322,20 @@ public class FileSender {
 	    	                metadata.setContentType("plain/text");
 	    	                metadata.addUserMetadata("title", "someTitle");
 	    	                request.setMetadata(metadata);
-	    	                s3Client.putObject(request);
+	    	                
+	    	                
+	    	                if ( sizes.get(dirOut + f.getName()) == null ) {
+	  	    	            	 s3Client.putObject(request);
+		  	    	                log(time + " Uploaded ZIP file to AWS : " + f.getName());
+		  		    	            System.out.println(time + " Uploading " + f.getName());	
+	  	    	             } else if(sizes.get( dirOut + f.getName()) != f.length()){
+	  	    	            	 s3Client.putObject(request);
+	  	    	            	 System.out.println(time + " Zip on uue suurusega " + f.getName() + " W" + sizes.get( dirPict + f.getName())+ " L" + f.length() );	
+	  	    	             } else {
+	  	    	            	 System.out.println(time + " ZIP olemas, sama suurusega ei lae " + f.getName());	
+	  	    	             }
+	    	                
+	    	               
 	    	                log(time + " Uploaded file to AWS : " + f.getName());
 		    	            System.out.println(time + " Uploading " + f.getName());
 		    	        	
@@ -319,6 +352,9 @@ public class FileSender {
 	    	            }
 	    	        }
 	    	     }    
+	        
+	        
+	        
 	        if(this.sendStock) {
 	        	 System.out.println(time + " Sees Stock " + new File(dirOutLoc).listFiles() + " " + dirOutLoc);
 	    	        for (File f : new File(dirOutLoc).listFiles())  {

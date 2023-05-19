@@ -1268,7 +1268,7 @@ akc_data_iki                       DATETIME             - Action End Date. NULL 
   " left JOIN N33_KBAN ON   N33_KODAS_KS = I06_KODAS_KS AND I06_kodas_ak=N33_kodas_ak " +
   " WHERE I06_DOK_DATA > ? " +
   "  GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ltrim(N33_kodas_ak) end), " +
-  " I07_KODAS,I06_DOK_DATA,I07_KIEKIS " ;
+  " I07_KODAS,I06_DOK_DATA,I07_KIEKIS order by klient,kood,toode,kuupaev desc " ;
 
 
         if (isDebug()) {
@@ -1277,6 +1277,7 @@ akc_data_iki                       DATETIME             - Action End Date. NULL 
 
        Vector custProds = new Vector();
        HashMap kliendid = new HashMap();
+       HashSet done = new HashSet();
 
 
        try {
@@ -1294,19 +1295,12 @@ akc_data_iki                       DATETIME             - Action End Date. NULL 
              String tootekood = rs.getString("toode").trim();
              double kogus = Double.parseDouble(rs.getString("kogus").trim());
              String kuup = rs.getString("kuupaev").substring(5,10).trim();
-             Customer cust = (Customer) kliendid.get(kliendikood);
-
-             if (cust == null) {
-               cust = new Customer(kliendikood);
-             }
-
-             Product prod = new Product(tootekood);
-             cust.addProduct(prod,
-                             new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
-                                          kuup, 0, 0,0," "),false);
-             kliendid.put(kliendikood, cust);
-             custProds.add(new CustProd(cust.getID(), prod.getID(), kogus, 0, 0,
+         
+            if(!done.contains(kliendikood +"|"+ tootekood)) {
+             custProds.add(new CustProd(kliendikood, tootekood, kogus, 0, 0,
                                           kuup, 0, 0,0," "));
+             done.add( kliendikood +"|"+  tootekood);
+            }
            }
            rs.close();
            } catch (Exception e) {

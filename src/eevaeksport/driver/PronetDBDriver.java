@@ -155,7 +155,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
               Calendar dde = Calendar.getInstance();
               
               
-              System.out.println("kliendisortimendid alustan"  + mm + " kuud" +  Converter.getYYYYmMMmDDmString(dds.getTime()) +"  "+  Converter.getYYYYmMMmDDmString(dde.getTime()));
+            //  System.out.println("kliendisortimendid alustan"  + mm + " kuud" +  Converter.getYYYYmMMmDDmString(dds.getTime()) +"  "+  Converter.getYYYYmMMmDDmString(dde.getTime()));
                
               StringBuffer inputLineBuf = null;
         
@@ -207,24 +207,6 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 
 
 
-  private String getSessionId(String asi ){
-
-	  String data = "clientCode=" + company + "&request=verifyUser" + asi ;
-	//  System.out.println(data);
-	  
-	  try {
-	String res = (postData(data)).toString();
-//	System.out.println("res " + res);
-	session = res.substring(res.indexOf("sessionKey") + 11 ,res.indexOf("</sessionKey"));
-
-	//System.out.println("res " + jwttoken);
-	} catch (Exception e) {
-		e.printStackTrace();
-	}
-	 
-	  return session;
-  }
-  
   
   
   private StringBuffer postData(String data) throws Exception {
@@ -311,7 +293,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	  
 	  
 	  body.put("Parameters", times);
-	  System.out.println(body.toJSONString());
+	 // System.out.println(body.toJSONString());
 	 
 	  
 	  
@@ -410,7 +392,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 		 params.put("endDate", Converter.jsonDate(b.getTime()));
 	 }
 	  body.put("Parameters", params);
-	  System.out.println(body.toJSONString());
+	//  System.out.println(body.toJSONString());
 	 
 	  
 	  
@@ -508,7 +490,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	  
 	  
 	  body.put("Parameters", params);
-	  System.out.println(body.toJSONString());
+	 // System.out.println(body.toJSONString());
 	 
 	  
 	  
@@ -701,7 +683,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
     	  JSONParser parser = new JSONParser();  
     		JSONObject json = (JSONObject) parser.parse(inputLine); 
     		JSONArray arr =(JSONArray)json.get("images");
-    		System.out.println(inputLine);
+    		//System.out.println(inputLine);
     		for(int i = 0; i < arr.size(); i++) {
     			JSONObject aa = (JSONObject)arr.get(i);
     			
@@ -988,7 +970,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	  		//e.printStackTrace();
 	  	}
 	  	 
-	  	 System.out.println("fix grupid suurus " + groups.size() + " " + groups.toString() );
+	 // 	 System.out.println("fix grupid suurus " + groups.size() + " " + groups.toString() );
 	      
 	     return groups; 
 	  	 
@@ -1120,7 +1102,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 				}
 			}
 
-			System.out.println(groups.toString());
+			//System.out.println(groups.toString());
 
 			for (int i = 2; i < sheet.getLastRowNum(); i++) {
 				row = sheet.getRow(i);
@@ -1231,147 +1213,6 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 		return result;
 
 	}
-
-   
-   
-   public void insertSuperVisorSQLMeri(SupervisorInfoWrapperMeri wr ){
-	     String sql = "INSERT into dbo.supervisor values ("
-	       + "?, "   //   agent	C(50),
-	       + "?,"   //   agentname	C(200),
-	       + "?,"   //   clientid	C(50),
-	       + "?,"   //   clientname	C(200),
-	       + "?,"   //	prodid	C(50),
-	       + "?,"   //   prodname	C(200),
-	       + "getdate() ,"   //	sentdate	D,
-	       + " '' ,"   //	receivedTime	D,
-	       + "?,"   //normalpr	N,
-	       + "?,"   // amoun	N,
-	       + "?,"   // grouptotal	N,
-	       + "?,"   // cattotal	N,
-	       + "?,"   // pertotcat	I,
-	       + "?,"   // percolcat	I,
-	       + "?,"   // perpalcat	I,
-	       + "?,"   // pershecat	I,
-	       + "?,"   // perrescat	I,
-	       + "?,"   // isaction	L,
-	       + "?,"   // ispartner	L,
-	       + "?,"   // isbrand	L,
-	       + "?,"   // isgroup	L
-	       + "?,"   // actionaeva	N,
-	       + "?,"   // actionbeva N,
-	       + "?,"   // actiontota	N,
-	       + "?,"   // custeval	N,
-	       + "?,"   // custcomme	C(200),
-	       + "?,"   // comment	C(200),
-	       + "?,"   // custagent	C(200),
-	       + "?,"   // custagentname	C(200),
-	       + "?,"   // mustbe	I,
-	       + "?,"   // ideal	I,
-	       + "?,"   // resstr1	C(200),
-	       + "?,"   // resstr2	C(200),
-	       + "?,"   // resstr3	C(200),
-	       + "?,"   // resint1	I,
-	       + "?,"   // resint2	I,
-		      + "?)" ; //	resint3	L
-
-	       try {
-	       	System.out.println("jam");
-	          this.connectionUp();
-	          con2 = this.getNewConnection(); 
-	          
-	          PreparedStatement ps = con2.prepareStatement(sql);
-
-	           
-	           for (Iterator it = wr.getInfo().getLines().iterator(); it.hasNext(); ) {
-	        	   eevaeksport.report.SuperVisorLineWrapperMeri lw = new  eevaeksport.report.SuperVisorLineWrapperMeri(it.next());
-	             ps.setString(1, wr.getInfo().getAgentID());
-	             String agName =  wr.getInfo().getAgentName();
-	             if(agName == null){
-	            	 agName = (String)this.agents.get(wr.getInfo().getAgentID());
-	             }
-	             ps.setString(2, agName);
-	             ps.setString(3, lw.getLine().getCustID());
-	             ps.setString(4, lw.getLine().getCustName());
-	             ps.setString(5, lw.getLine().getProdID());
-	             ps.setString(6, lw.getLine().getProdName());
-	             ps.setDouble(7, lw.getLine().getNormalPrice()*100);
-	             ps.setDouble(8, lw.getLine().getAmount()*100);
-	             ps.setDouble(9, 0);
-	             ps.setDouble(10, 0);
-	             ps.setInt(11, lw.getLine().getPercentageFromTotalCategory());
-	             ps.setInt(12, lw.getLine().getPercentageFromColdCategory());
-	             ps.setInt(13, lw.getLine().getPercentageFromPallCategory());
-	             ps.setInt(14, lw.getLine().getPercentageFromShelfCategory());
-	             ps.setInt(15, lw.getLine().getPercentageFromRestCategory());
-	             ps.setBoolean(16, lw.getLine().isAction());
-	             ps.setBoolean(17, lw.getLine().isPartner());
-	             ps.setBoolean(18, lw.getLine().isBrand());
-	             ps.setBoolean(19, lw.getLine().isGroup());
-	             ps.setDouble(20, lw.getLine().getAction1Eval()*100);
-	             ps.setDouble(21, lw.getLine().getAction2Eval()*100);
-	             ps.setDouble(22, lw.getLine().getActionTotalEval()*100);
-	             ps.setDouble(23, lw.getLine().getCustEval()*100);
-	             String cc = lw.getLine().getCustComment();
-	             if (cc == null){
-	             	cc = " ";
-	             }
-	             ps.setString(24, cc);
-
-	             String cd = lw.getLine().getComment();
-	             if (cd == null){
-	             	cd = " ";
-	             }
-	             ps.setString(25, cd);
-
-	             String ce = lw.getLine().getCustAgentId();
-	             if (ce == null){
-	             	ce = " ";
-	             }
-
-	             ps.setString(26, ce);
-
-	             String cf = lw.getLine().getCustAgentName();
-	             if (cf == null){
-	             	cf = " ";
-	             }
-	             ps.setString(27, cf);
-	             ps.setInt(28, lw.getLine().getDealNr());
-	             ps.setInt(29, lw.getLine().getIdealNr());
-
-	             String cr1 = lw.getLine().getResStr1();
-	             if (cr1 == null){
-	             	cr1 = " ";
-	             }
-	             ps.setString(30, cr1);
-
-
-	             String cr2 = lw.getLine().getResStr2();
-	             if (cr2 == null){
-	             	cr2 = " ";
-	             }
-	             ps.setString(31, cr2);
-
-
-	             String cr3 = lw.getLine().getResStr3();
-	             if (cr3 == null){
-	             	cr3 = " ";
-	             }
-	             ps.setString(32, cr3);
-	             ps.setInt(33, lw.getLine().getResInt1());
-	             ps.setInt(34, lw.getLine().getResInt2());
-	             ps.setInt(35, lw.getLine().getResInt3());
-	             ps.executeUpdate();
-	             System.out.println("lopp real");
-	           }
-
-	           ps.close();
-	           con2.close();
-	       } catch (SQLException e) {
-	           e.printStackTrace();
-	       }
-	       this.connectionDown();
-	     }
-
 
    
    
@@ -2002,7 +1843,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	 		e.printStackTrace();
 	 	}
    
-  	System.out.println("tm " + tm.size());
+  //	System.out.println("tm " + tm.size());
          return tm;
    }
 
@@ -2035,7 +1876,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 		 		e.printStackTrace();
 		 	}
 	   
-	  	System.out.println("tm " + tm.size());
+	  //	System.out.println("tm " + tm.size());
 	         return tm;
 	   }
 	   
@@ -2095,7 +1936,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 		   if (counter == split) {
 			   vec.add(out);
 			   counter = 0;
-			   System.out.println("Out sisu " + out.toString());
+			 //  System.out.println("Out sisu " + out.toString());
 			   out = new JSONArray();
 		   }
 
@@ -2114,14 +1955,14 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				String asi =this.postProNetData(null ,"invoiceLines", null).toString();
 	    				 parser = new JSONParser();
 	    				 JSONObject json = (JSONObject) parser.parse(asi);
-	    				 System.out.println(asi);
+	    				// System.out.println(asi);
 	    				 Converter.saveFile("Data/invoiceLines.txt", asi);
 	    				
 	    				 
 	    					 asi =this.postProNetData(null ,"unpaidInvoices", null).toString();
 		    				 parser = new JSONParser();
 		    				 json = (JSONObject) parser.parse(asi);
-		    				 System.out.println(asi);
+		    				// System.out.println(asi);
 		    				 Converter.saveFile("Data/debts.txt", asi);
 		    				
 	    				 
@@ -2139,7 +1980,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				asi =this.postProNetData("getClientData" ,"getData", arr).toString();
 	    				 parser = new JSONParser();
 	    				 json = (JSONObject) parser.parse(asi);
-	    				 System.out.println(asi.substring(0, 3000));
+	    				// System.out.println(asi.substring(0, 3000));
 	    				 Converter.saveFile("Data/klient"+ counter +".txt", asi);
 	    				 if (counter == 3){
 	    					// System.exit(0);
@@ -2157,7 +1998,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    			for(JSONArray arr: vec) {
 	    				asi =this.postProNetData("getWarehouseData" ,"getData", arr).toString();
 	    				 parser = new JSONParser();
-	    				 System.out.println(asi);
+	    				// System.out.println(asi);
 	    				 json = (JSONObject) parser.parse(asi);
 	    				 System.out.println(asi.substring(0, 500));
 	    				 Converter.saveFile("Data/Ladu"+ counter +".txt", asi);
@@ -2178,9 +2019,9 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    			for(JSONArray arr: vec) {
 	    				asi =this.postProNetData("getClientManagerListData" ,"getData", arr).toString();
 	    				 parser = new JSONParser();
-	    				 System.out.println(asi);
+	    				// System.out.println(asi);
 	    				 json = (JSONObject) parser.parse(asi);
-	    				 System.out.println(asi);
+	    				// System.out.println(asi);
 	    				 Converter.saveFile("Data/agent.txt", asi);
 
 	    				
@@ -2202,7 +2043,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    			for(JSONArray arr: vec) {
 	    				asi =this.postProNetStockData("getStockData" ,"getStock", "7571").toString();
 	    				 parser = new JSONParser();
-	    				 System.out.println(asi);
+	    				// System.out.println(asi);
 	    				 json = (JSONObject) parser.parse(asi);
 	    				 System.out.println(asi.substring(0, 500));
 	    				 Converter.saveFile("Data/laoseis"+ counter +".txt", asi);
@@ -2228,7 +2069,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 parser = new JSONParser();
 	    				 System.out.println(asi);
 	    				 json = (JSONObject) parser.parse(asi);
-	    				 System.out.println(asi.substring(0, 3000));
+	    				// System.out.println(asi.substring(0, 3000));
 	    				 Converter.saveFile("Data/G2Toode"+ counter +".txt", asi);
 	    				 if (counter == 3){
 	    				
@@ -2279,7 +2120,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 parser = new JSONParser();
 	    				 System.out.println(asi);
 	    				 json = (JSONObject) parser.parse(asi);
-	    				 System.out.println(asi.substring(0, 3000));
+	    				// System.out.println(asi.substring(0, 3000));
 	    				 Converter.saveFile("Data/Toode"+ counter +".txt", asi);
 	    				 if (counter == 3){
 	    					// System.exit(0);
@@ -2304,11 +2145,9 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 parser = new JSONParser();
 	    				 System.out.println(asi);
 	    				 json = (JSONObject) parser.parse(asi);
-	    				 System.out.println(asi.substring(0, 3000));
+	    				// System.out.println(asi.substring(0, 3000));
 	    				 Converter.saveFile("Data/G1Toode"+ counter +".txt", asi);
-	    				 if (counter == 3){
-	    					// System.exit(0);
-	    				 }
+	    				
 	    				 counter++;
 	    		}
 	     }
@@ -2379,7 +2218,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	 	}catch(Exception e){
 	 		e.printStackTrace();
 	 	}
-	    System.out.println("tmsuurus " + tm.size());
+	 //   System.out.println("tmsuurus " + tm.size());
      
      
      
@@ -2956,7 +2795,7 @@ private Object readJsonFile(File f){
 	 	}catch(Exception e){
 	 		e.printStackTrace();
 	 	}
-	    System.out.println("lssuurus " + stocks.toString());
+	  //  System.out.println("lssuurus " + stocks.toString());
 
  
     
@@ -3106,7 +2945,7 @@ private Object readJsonFile(File f){
 	  		e.printStackTrace();
 	  	}
 	  
-	  	   System.out.println("SoldProds size " + soldProds.size());
+	  	  // System.out.println("SoldProds size " + soldProds.size());
 	  
    
    }
@@ -3302,7 +3141,7 @@ private Object readJsonFile(File f){
 	            		  asi = asi + ("|Last Month: " + (int) Double.parseDouble((String)myygideelm.get(code)));  
 	            	   }
 	            	   
-	            	   System.out.println(agent.getID() + " " + asi);
+	            	  // System.out.println(agent.getID() + " " + asi);
 	            	   agent.setStart(asi);
 	             }
 	          }

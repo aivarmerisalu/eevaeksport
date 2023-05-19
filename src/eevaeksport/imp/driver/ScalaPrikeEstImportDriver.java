@@ -2199,8 +2199,9 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		            	 kogus = (int)(kogus /getJagaja(toode));
 		            	 
 		             }
-		             //niv toodete teema maxima + rimi 
-		             if((order.getILN() != null && order.getILN().equals("4751008570045")) || order.getStatus() == 98) {
+		             //niv toodete teema maxima + rimi +lidl
+		             if((order.getILN() != null && order.getILN().equals("4751008570045")) || order.getStatus() == 98
+		            		 || order.getCompany().startsWith("T8587")) { //lidl
 		            	 kogus = (int)(kogus /getJagajaNIV(toode));
 		             }
 		    
