@@ -555,10 +555,13 @@ public class AnkvarsFloraDBDriver extends AbstractDBDriver implements Discounter
 						 DataFormatter formatter = new DataFormatter();
 							String ean = formatter.formatCellValue(row.getCell(0));
 							String tnimi = formatter.formatCellValue(row.getCell(1));
+							
 							if( 0 < ean.length()) {
-								res.put(ean, tnimi);
+								res.put(ean.trim(), tnimi);
 							}
-						
+							if(tnimi.contains("500")) {
+								System.out.println("sorts size " + tnimi + " " + ean  + " " + res.get(ean.trim()));
+							}
 					}
 				 }
 				 System.out.println("sorts size " + res.size() );
@@ -567,7 +570,7 @@ public class AnkvarsFloraDBDriver extends AbstractDBDriver implements Discounter
 					 e.printStackTrace();
 				 }	 
 		      }}
-		    System.out.println("sorts size " + res.toString() );
+		   //System.out.println("sorts size " + res.toString() );
 	return res;
 }
 
@@ -621,14 +624,18 @@ public class AnkvarsFloraDBDriver extends AbstractDBDriver implements Discounter
                 	prod.setEAN(ean.trim());
                 	if(prlist.get(ean.trim()) != null) {
                 		goes = true;
-                		eans.put(ean, prod.getID());
+                		eans.put(ean.trim(), prod.getID());
                 	}
                 }
   
+                if(nimetus.contains("rupjmaizes 500g")) {
+                	System.out.println(nimetus+ " " + prod.getID() + " '" + ean.trim() + "' ppp " + prlist.get(ean.trim()));
+                }
+                
                 prod.setStock(-1);
                 prod.setVat("21");
 
-             //   prod.setName(prod.getGroup()+ " " + kood + " " +  nimetus);
+               // prod.setName(prod.getGroup()+ " " + kood + " " +  nimetus);
                 prod.setName( nimetus);
                 if(goes) {
                 	 products.put(prod.getName(), prod);

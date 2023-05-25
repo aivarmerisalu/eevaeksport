@@ -848,9 +848,11 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 	cust.noOrder = true;
                 	
                 }
-                cust.setAddress(Converter.adressLink(Converter.enCodeEst(rs.getString("aadress").trim()),"Lithuania"));
+                String aadr = rs.getString("aadress");
+                if(aadr != null) {
+                cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim()),"Lithuania"));
                 nimi = nimi + " " + cust.getAddress();
-                
+                }
                 cust.setName(nimi);
                 
                 

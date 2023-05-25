@@ -358,6 +358,22 @@ public class SamsonasCSVImportDriver
 	    return sb.toString();
 	  }
 	  
+  
+  private String getTimeString(Calendar cal){
+	    StringBuffer sb = new StringBuffer();
+	   
+	    String hh = String.valueOf(cal.get(Calendar.HOUR));
+	    if (hh.length() == 1){
+	      sb.append("0");
+	    }
+	    sb.append(hh + ":");
+	    String min = String.valueOf(cal.get(Calendar.MINUTE));
+	    if (min.length() == 1){
+	      sb.append("0");
+	    }
+	    sb.append(min);
+	    return sb.toString();
+	  }
 
   private String getDateString2(Calendar cal){
 	    StringBuffer sb = new StringBuffer();
@@ -474,11 +490,12 @@ quantity
 	         sb.append(hind + sep);
 	        if(ol.getDiscount() > 0) {
 	        	 sb.append("1" + sep);
-	        }else{
+	         } else {
 	        	 sb.append("0" + sep);
 	        }
 	       
 	         sb.append("\"" + comm +"\"" + sep);
+	         sb.append( getTimeString(Calendar.getInstance()) + sep);
 	         
 	         
 	         //  RIISIP	1MARMELAAD00	20.0000	1.5120	0.0000	05/19/2017	""	4

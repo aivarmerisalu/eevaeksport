@@ -542,13 +542,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
    
    private String pol(String in) {
 	 
-	   
-	   if(in.contains("MEDUZA") ) {
-		   System.out.println("NAme " + in );
-		  	for(int i =0 ;  i< in.toCharArray().length;i++) {
-	     		System.out.println(in.toCharArray()[i] + " " + (int)in.toCharArray()[i]);
-	     	}
-	   }
+	 
 	   in = in.replaceAll("\"", " ");
 	   in = in.trim();
 	   in = in.replaceAll("  "  , " ");
@@ -888,29 +882,29 @@ try{
              String ag = rs.getString("agent");
              if(ag != null){
                 customer.addAgent(new Agent(ag.trim()));
-                if(ag.trim().startsWith("PHD")) {
+                /*if(ag.trim().startsWith("PHD")) {
                 	 customer.addAgent(new Agent("PHD 01"));
                 	 customer.addAgent(new Agent("PHD 02"));
                 	 customer.addAgent(new Agent("PHD 03"));
-                	 customer.addAgent(new Agent("PHD 04"));
+                	
                 	 customer.addAgent(new Agent("PHD 05"));
                 	 customer.addAgent(new Agent("PHD 06"));
                 	 customer.addAgent(new Agent("PHD 07"));
-                }
+                }*/
                } 
               
                ag = rs.getString("agent2");
                  if(ag != null){
                     customer.addAgent(new Agent(ag.trim()));
-                    if(ag.trim().startsWith("PHD")) {
+                  /*  if(ag.trim().startsWith("PHD")) {
                    	 customer.addAgent(new Agent("PHD 01"));
                    	 customer.addAgent(new Agent("PHD 02"));
                    	 customer.addAgent(new Agent("PHD 03"));
-                   	 customer.addAgent(new Agent("PHD 04"));
+              
                    	customer.addAgent(new Agent("PHD 05"));
                	 customer.addAgent(new Agent("PHD 06"));
                	 customer.addAgent(new Agent("PHD 07"));
-                   }
+                   }*/
                  }
              
           
@@ -1278,6 +1272,7 @@ try{
                 	   String vv = rs.getString("vat").substring(3);        
                 		prod.setVat(vv);
                    }catch(Exception k) {
+                	  
                 	   System.out.println("vat " + prod.getID());
                    }
                      

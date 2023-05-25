@@ -308,6 +308,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	  try{
 	  urlc = (HttpURLConnection) myurl.openConnection();
 	  String encoded = Base64.getEncoder().encodeToString((username+":"+password).getBytes(StandardCharsets.UTF_8));  //Java 8
+	  System.out.println("encoded " + encoded);
 	  urlc.setRequestProperty("Authorization", "Basic "+encoded);
 	  try{
 	  urlc.setRequestMethod( "POST" );
@@ -392,7 +393,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 		 params.put("endDate", Converter.jsonDate(b.getTime()));
 	 }
 	  body.put("Parameters", params);
-	//  System.out.println(body.toJSONString());
+	  System.out.println(body.toJSONString());
 	 
 	  
 	  
@@ -408,6 +409,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	  urlc = (HttpURLConnection) myurl.openConnection();
 	  String encoded = Base64.getEncoder().encodeToString((username+":"+password).getBytes(StandardCharsets.UTF_8));  //Java 8
 	  urlc.setRequestProperty("Authorization", "Basic "+encoded);
+	  System.out.println("Basic "+encoded );
 	  try{
 	  urlc.setRequestMethod( "POST" );
 	  } catch (ProtocolException e) {
@@ -458,7 +460,7 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	  }
 	  } catch (IOException e)
 	  {
-	  throw new Exception("Connection error (is server running at " + myurl + " ?): " + e);
+	  throw e;
 	  } finally
 	  {
 	  if (urlc != null)
@@ -1950,31 +1952,37 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	     try {
 	    	
 	    			JSONParser parser = new JSONParser();
-	    			
-	    			
-	    				String asi =this.postProNetData(null ,"invoiceLines", null).toString();
+	    			JSONObject json = null;
+	    			String asi = null;
+	    			try {
+	    				 asi =this.postProNetData(null ,"invoiceLines", null).toString();
 	    				 parser = new JSONParser();
-	    				 JSONObject json = (JSONObject) parser.parse(asi);
+	    				  json = (JSONObject) parser.parse(asi);
 	    				// System.out.println(asi);
 	    				 Converter.saveFile("Data/invoiceLines.txt", asi);
-	    				
-	    				 
+	    			  }catch(Exception e) {
+	    					e.printStackTrace();
+	    				}
+	    				try {
 	    					 asi =this.postProNetData(null ,"unpaidInvoices", null).toString();
 		    				 parser = new JSONParser();
 		    				 json = (JSONObject) parser.parse(asi);
 		    				// System.out.println(asi);
 		    				 Converter.saveFile("Data/debts.txt", asi);
-		    				
+	    				} catch(Exception e) {
+			    					e.printStackTrace();
+			    				}
 	    				 
-	    				 
-	    			
-	    		
+		    				 JSONArray ids = null; 
+		    				 Vector<JSONArray> vec = null;
+		    				 int counter = 1;
+		    				 try {
 	    			//kliendid
 	    			asi =this.postProNetIds("getClientIds" ,"getIDs").toString();
 	    			 json = (JSONObject) parser.parse(asi);
-	    			JSONArray ids = (JSONArray) json.get("ClientIds");
-	    			Vector<JSONArray> vec = getSplit(ids, 2000);
-	    			int counter = 1;
+	    			 ids = (JSONArray) json.get("ClientIds");
+	    			 vec = getSplit(ids, 2000);
+	    			 counter = 1;
 	    		
 	    			for(JSONArray arr: vec) {
 	    				asi =this.postProNetData("getClientData" ,"getData", arr).toString();
@@ -1987,8 +1995,12 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 }
 	    				 counter++;
 	    			}
+	    				}catch(Exception e) {
+    					e.printStackTrace();
+    				}
 	    			
 	    			//laod
+	    			try {
 	    			asi =this.postProNetIds("getWarehouseIds" ,"getIDs").toString();
 	    			 parser = new JSONParser();
 	    			 json = (JSONObject) parser.parse(asi);
@@ -2007,8 +2019,10 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 }
 	    				 counter++;
 	    			}
-	    			
-	    			
+	    				}catch(Exception e) {
+    					e.printStackTrace();
+    				}
+	    			try {
 	    			//agendilist
 	    			asi =this.postProNetIds("getClientManagerListIds" ,"getIDs").toString();
 	    			 parser = new JSONParser();
@@ -2029,10 +2043,12 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 counter++;
 	    			}
 	    			
-	    			
+	    				}catch(Exception e) {
+    					e.printStackTrace();
+    				}
 	    			
 	    			//getstock
-	    			
+	    			try {
 	    			asi =this.postProNetIds("getWarehouseIds" ,"getIDs").toString();
 	    			 parser = new JSONParser();
 	    			 json = (JSONObject) parser.parse(asi);
@@ -2053,9 +2069,11 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				 counter++;
 	    		}
 	    			
+	    				}catch(Exception e) {
+    					e.printStackTrace();
+    				}
 	    			
-	    			
-	    			
+	    			try {
 	    			//ProductGroup2
 	    			asi =this.postProNetIds("getProductGroup2Ids" ,"getIDs").toString();
 	    			 parser = new JSONParser();
@@ -2078,9 +2096,10 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    		}
 	    			
 	    			
-	    			
-	    			
-	    			
+	    				}catch(Exception e) {
+    					e.printStackTrace();
+    				}
+	    			try {
 	    			//WholesalePriceList
 	    			asi =this.postProNetIds("getRetailPricelistIds" ,"getIDs").toString();
 	    			 parser = new JSONParser();
@@ -2104,10 +2123,12 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    			}
 	    			
 	    			
-	    		
+	    				}catch(Exception e) {
+    					e.printStackTrace();
+    				}
 	    			
 	    			
-	    			
+	    			try {
 	    			//tooted
 	    			 asi =this.postProNetIds("getProductIds" ,"getIDs").toString();
 	    			 parser = new JSONParser();
@@ -2130,9 +2151,11 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    		
 	    			
 	    			
+	    				}catch(Exception e) {
+    					e.printStackTrace();
+    				}
 	    			
-	    			
-	    			
+	    			try {
 	    			//getProductGroup1Data
 	    			asi =this.postProNetIds("getProductGroup1Ids" ,"getIDs").toString();
 	    			 parser = new JSONParser();
@@ -2150,6 +2173,10 @@ public class PronetDBDriver extends AbstractDBDriver implements BulkUpdater,Disc
 	    				
 	    				 counter++;
 	    		}
+	    			
+	    				}catch(Exception e) {
+    					e.printStackTrace();
+    				}
 	     }
 	    			catch (Exception e2) {
 	    			// TODO Auto-generated catch block

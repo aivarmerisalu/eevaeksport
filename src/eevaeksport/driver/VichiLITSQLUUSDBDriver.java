@@ -900,6 +900,19 @@ System.out.println(cmd);
 		rs1.close();
 		stmt1.close();
 		
+		cc2 = "select [Customer No_] as klient, [Code] as klient2, [EDI ILN] as iln from  dbo.[Vičiūnai ir Ko$Ship-to Address] where [EDI ILN] != ''";
+		stmt1 = con.createStatement();
+		 rs1 = stmt1.executeQuery(cc2);
+		while (rs1.next()) {
+			String addID = rs1.getString("klient").trim();
+			String addCode = rs1.getString("klient2").trim();
+		String ilnID = rs1.getString("iln").trim();
+		if(addCode.equals("1")) {
+			aad.put(addID+"_1", ilnID);
+		}
+		}
+		rs1.close();
+		stmt1.close();
 		  	String cmd = " select a.[Sell-to Customer No_]  as klient , h.[Ship-to Code] as kl2 , a.[Customer No_] AS maksja,a.[External Document No_] AS number" + //+ '_' + a.[Ship-to code]
 					", a.[Due Date] AS kuupaev, sum((case when a.[Posting Date] < 2105 then 0.2896 else 1 end) * b.[Amount]) AS summa, "
 					+ " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer  FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join "
@@ -920,10 +933,12 @@ System.out.println(cmd);
 				String custID = rs1.getString("klient");
 				String kl2 = rs1.getString("kl2");
 				if(kl2 != null && kl2.trim().length() > 0) {
-					if(kl2.equals("1")) {
+					if(kl2.equals("1") && aad.get(custID+"_"+kl2.trim()) == null) {
 						kl2 = custID + "_1";  
 					   } else if(aad.get(kl2.trim()) != null) {
 						   kl2 = (String)aad.get(kl2.trim());
+					   }else if(aad.get(custID+"_"+kl2.trim()) != null) {
+						   kl2 = (String)aad.get(custID+"_"+kl2.trim());
 					   }
 					custID = custID + "_" + kl2.trim();
 				}
@@ -1958,10 +1973,12 @@ System.out.println(cmd);
 				String cu = custID;
 				if(custAbi != null && custAbi.trim().length() > 0) {
 					
-					if(custAbi.equals("1")) {
+					if(custAbi.equals("1") && aad.get(cu+"_"+custAbi.trim()) == null) {
 						custAbi = custID + "_1";  
 					   } else if(aad.get(custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(custAbi.trim());
+					   }else if(aad.get(cu+"_"+custAbi.trim()) != null) {
+						 custAbi = (String)aad.get(cu+"_"+custAbi.trim());
 					   }
 					
 					 
@@ -1995,8 +2012,12 @@ System.out.println(cmd);
 
 			String cmd2 = "SELECT  d.[Sell-to Customer No_] AS klient,   d.[Ship-to Code]  as abiklient, r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate FROM [Vičiūnai ir Ko$Sales Invoice Line] r "
 					+ " INNER JOIN [Vičiūnai ir Ko$Sales Invoice Header] d ON r.[Document No_]= d.[No_] "
-					+ "  WHERE d.[Shipment Date]> GETDATE()-30 "
-					+ " Order by d.[Sell-to Customer No_],r.[No_],d.[Shipment Date] desc ";
+					+ "  WHERE d.[Shipment Date]> GETDATE()-30 " +
+					"  UNION ALL " +
+				    "	select  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]   as abiklient, r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate " + 
+				    "	 FROM [Vičiūnai ir Ko$Sales Shipment Line] r INNER JOIN [Vičiūnai ir Ko$Sales Shipment Header] d ON r.[Document No_]= d.[No_] " +
+				   "	  WHERE d.[Shipment Date]> GETDATE()-30 "
+					+ " Order by 1,3,5 desc ";
 			System.out.println(cmd2);
 			// "klient","toode","kogus","viimane kuupļæ½ev","viimane kogus"
 			Connection con2 = getNewConnection2();
@@ -2010,10 +2031,13 @@ System.out.println(cmd);
 				String cu = klient;
 				if(custAbi != null && custAbi.trim().length() > 0) {
 					
-					if(custAbi.equals("1")) {
+					
+					if(custAbi.equals("1")  && aad.get(cu+"_"+custAbi.trim()) == null) {
 						custAbi = klient + "_1";  
 					   } else if(aad.get(custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(custAbi.trim());
+					   }else if(aad.get(cu+"_"+custAbi.trim()) != null) {
+						 custAbi = (String)aad.get(cu+"_"+custAbi.trim());
 					   }
 				
 					cu = klient + "_" + custAbi.trim();
@@ -2138,13 +2162,7 @@ System.out.println(cmd);
 	public void setBulkSales(Map agents) {
 
 		try {
-			String cmd = " select sum(case when [Currency Factor] <> 0 then [Amount]/[Currency Factor]else [Amount] end) as summa,[Salesperson Code] AS agent "
-					+ " from (select b.[Amount],a.[Currency Factor] ,a.[Salesperson Code]  from [Vičiūnai ir Ko$Sales Invoice Header] a "
-					+ " inner  join [Vičiūnai ir Ko$Sales Invoice Line] b on a.[No_]=b.[Document No_] where Year(getdate())=Year(a.[Shipment Date]) and "
-					+ " Month(getdate())=Month(a.[Shipment Date]) union all select b.[Amount],a.[Currency Factor],a.[Salesperson Code] from "
-					+ " [Vičiūnai ir Ko$Sales Cr_Memo Header] a inner join [Vičiūnai ir Ko$Sales CR_Memo Line] b on a.[No_]=b.[Document No_] "
-					+ " where Year(getdate())=Year(a.[Shipment Date]) and Month(getdate())=Month(a.[Shipment Date])) S "
-					+ " group By [Salesperson Code]";
+			String cmd = " Select * from v_VIK_Turnover";
 			Connection con = getNewConnection2();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
