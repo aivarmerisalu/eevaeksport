@@ -935,10 +935,10 @@ System.out.println(cmd);
 				if(kl2 != null && kl2.trim().length() > 0) {
 					if(kl2.equals("1") && aad.get(custID+"_"+kl2.trim()) == null) {
 						kl2 = custID + "_1";  
-					   } else if(aad.get(kl2.trim()) != null) {
-						   kl2 = (String)aad.get(kl2.trim());
-					   }else if(aad.get(custID+"_"+kl2.trim()) != null) {
+					   } else if(aad.get(custID+"_"+kl2.trim()) != null) {
 						   kl2 = (String)aad.get(custID+"_"+kl2.trim());
+					   }else if(aad.get(kl2.trim()) != null) {
+						   kl2 = (String)aad.get(kl2.trim());
 					   }
 					custID = custID + "_" + kl2.trim();
 				}
@@ -1973,14 +1973,20 @@ System.out.println(cmd);
 				String cu = custID;
 				if(custAbi != null && custAbi.trim().length() > 0) {
 					
+					if(cu.equals("K9569")) {
+						System.out.println("ppp " + cu + " " + custAbi.trim() + " " + aad.get(cu+"_"+custAbi.trim()));
+					}
+					
 					if(custAbi.equals("1") && aad.get(cu+"_"+custAbi.trim()) == null) {
 						custAbi = custID + "_1";  
+					   } else if(aad.get(cu+"_"+custAbi.trim()) != null) {
+						 custAbi = (String)aad.get(cu+"_"+custAbi.trim());
 					   } else if(aad.get(custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(custAbi.trim());
-					   }else if(aad.get(cu+"_"+custAbi.trim()) != null) {
-						 custAbi = (String)aad.get(cu+"_"+custAbi.trim());
 					   }
-					
+					if(cu.equals("K9569")) {
+						System.out.println("ccc " + cu + " " + custAbi.trim() );
+					}
 					 
 					cu = custID + "_" + custAbi.trim();
 				}
@@ -2034,10 +2040,10 @@ System.out.println(cmd);
 					
 					if(custAbi.equals("1")  && aad.get(cu+"_"+custAbi.trim()) == null) {
 						custAbi = klient + "_1";  
-					   } else if(aad.get(custAbi.trim()) != null) {
-						 custAbi = (String)aad.get(custAbi.trim());
-					   }else if(aad.get(cu+"_"+custAbi.trim()) != null) {
+					   } else if(aad.get(cu+"_"+custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(cu+"_"+custAbi.trim());
+					   }else if(aad.get(custAbi.trim()) != null) {
+						 custAbi = (String)aad.get(custAbi.trim());
 					   }
 				
 					cu = klient + "_" + custAbi.trim();

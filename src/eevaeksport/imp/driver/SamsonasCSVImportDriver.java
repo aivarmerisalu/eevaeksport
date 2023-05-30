@@ -26,8 +26,17 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+import org.json.simple.JSONObject;
+
+import com.amazonaws.services.s3.model.S3DataSource.Utils;
 
 import eevaeksport.Agent;
 import eevaeksport.Customer;
@@ -398,6 +407,8 @@ public class SamsonasCSVImportDriver
   private void makeOutput(Order order , boolean meat){
 	 	StringBuffer sb = new StringBuffer();
 	 	boolean minus = false;
+	 	JSONObject json = new JSONObject();
+	 	
 	 	try {
 
 	 		
@@ -437,13 +448,40 @@ public class SamsonasCSVImportDriver
 			if ( comm == null ){
 				comm = " ";
 			}
+			
+			
+			  Calendar cal = Calendar.getInstance();
+		         if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+		        	  cal.add(Calendar.DAY_OF_YEAR, 3);
+		         }else {
+		        	  cal.add(Calendar.DAY_OF_YEAR, 1);
+		         }
+		       
+		         String shipd = getDateString(cal);
+		         
+		         if( order.isShipDateUsed()){
+	   	    	  shipd = getDateString(order.getShipCal());
+	   	    	  cal = order.getShipCal();
+	   	         }
 	         
-	       
+			json.put("SamsKey", "EE_S@msonasK3taviskese#Raugtas###135DaugD@ugKartu");
+			json.put("Action", "EE_SetOrder");
+			json.put("OrderNumber", doknr);
+			json.put("OrderDate", Converter.getYYYY_MM_DDpString(Calendar.getInstance()));
+			json.put("OrderTime", getTimeString(Calendar.getInstance()));
+			json.put("DeliveryDate", Converter.getYYYY_MM_DDpString(cal));
+			json.put( "CustomerNo", order.getCompany());
+			json.put( "CustomerGLN", "");
+            json.put("ManagerNo", agent);
+            json.put("Comment", comm);
+            json.put("DEV", 1);
+            
+            JSONObject data = new JSONObject();
 	         
 	         
 	    Vector lines = order.getOrderLines();
 	      for (int i = 0; i < lines.size(); i++) {
-	    	  
+	    	  JSONObject line = new JSONObject();
 	        OrderLine ol = (OrderLine) lines.elementAt(i);
 	        if(ol.getKogus() < 0){
 	        	minus = true;
@@ -457,28 +495,7 @@ public class SamsonasCSVImportDriver
 	        	 ale = 0;
 	         }
 	         double hind = ol.getPrice();
-	         Calendar cal = Calendar.getInstance();
-	         if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-	        	  cal.add(Calendar.DAY_OF_YEAR, 3);
-	         }else {
-	        	  cal.add(Calendar.DAY_OF_YEAR, 1);
-	         }
 	       
-	         String shipd = getDateString(cal);
-	         
-	         if( order.isShipDateUsed()){
-   	    	  shipd = getDateString(order.getShipCal());; 
-   	         }
-	         
-	         /*document(order) No
-companyCode
-SalespersonCode
-order date
-invoice(delivery) date
-row in document No
-productCode
-quantity
-*/
 	         sb.append(doknr + sep );
 	         sb.append(order.getCompany() + sep );
 	         sb.append(agent + sep);
@@ -488,31 +505,42 @@ quantity
 	         sb.append(ol.getToode() + sep);
 	         sb.append(ol.getKogus() + sep);
 	         sb.append(hind + sep);
+	         line.put("ItemNo", ol.getToode());
+	         line.put("Quantity", ol.getKogus());
+	         line.put("UnitPrice", hind);
 	        if(ol.getDiscount() > 0) {
 	        	 sb.append("1" + sep);
+	        	 line.put("Discount", 1);
 	         } else {
 	        	 sb.append("0" + sep);
+	        	 line.put("Discount", 0);
 	        }
 	       
 	         sb.append("\"" + comm +"\"" + sep);
 	         sb.append( getTimeString(Calendar.getInstance()) + sep);
+	        
 	         
-	         
+	         line.put("Comment", ol.getPartii());
+	       
+
 	         //  RIISIP	1MARMELAAD00	20.0000	1.5120	0.0000	05/19/2017	""	4
 				//  RIISIP	1MARMELAAD04	20.0000	1.5120	0.0000	05/19/2017	""	4
 		  
 	          sb.append(lineSep);
-	 
+	       data.put(counter+"", line );
 	       counter++;
 	      }
-	
+	      json.put("Data",data);
 	      
 	      setNumAddedLines(counter); 
 
 	      String vahe = "meat/";
+	      String respd = "response/";
 	      if(meat) {
 	    	  vahe = "vege/";
 	      }
+	      
+	     
 	    
 	         	  String fileName = Converter.escapeXML(parent.getProps().getProperty("conv.dir"))+ vahe +  fn +"_" + order.getCompany() + "_" + getDateString2(Calendar.getInstance()) + ".csv";
 			      System.out.println(fileName);		
@@ -527,7 +555,16 @@ quantity
 			    	  System.exit(0);;
 			      }
 			      
+	    	try {
+	    		String resp = sendOrderAPI(json);
+	    		Converter.saveFile(parent.getProps().getProperty("imp.read")+  respd + "response-"+  fn +"_" + order.getCompany() + "_" + getDateString2(Calendar.getInstance()) + ".json", resp);
+	    		//System.exit(0); 
+	    		if(resp.length() < 40) {
+	    			System.exit(0);
+	    		}
+	    	}catch(Exception e) {
 	    		
+	    	}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -535,6 +572,22 @@ quantity
 		}
 	 }
 	  
+  
+  private String sendOrderAPI(JSONObject json) throws Exception  {
+	  HttpClient cli =  HttpClients.createDefault();
+	
+		String uri = "https://tab.samsonas.lt:443/bcapi";
+		
+	  HttpPost httpPost = new HttpPost(uri);
+		
+			 httpPost.setEntity(new StringEntity(json.toJSONString(),"utf-8"));
+		        httpPost.setHeader("Accept", "application/json");
+		        httpPost.setHeader("Content-type", "application/json;charset=utf-8");
+		 HttpResponse resp = cli.execute(httpPost);
+		 if (resp.getStatusLine().getStatusCode() != 200) throw new Exception("Login failed! " );
+		 
+			return ( EntityUtils.toString(resp.getEntity()));
+  }
  
 	public NumberFormat getNF() {
 		return this.nf;

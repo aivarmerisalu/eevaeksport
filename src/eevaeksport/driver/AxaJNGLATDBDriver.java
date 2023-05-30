@@ -1047,7 +1047,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
          String alegr = rs.getString("klale");
          if(alegr != null && alegr.trim().length()>0){
          	cust.setGroup(Converter.cleanLitLatEst(alegr.trim()));
-
+            cust.setChain(alegr.trim());
          }
      	 // cust.setSupervisorFilled(true); //vaja  nagu oleks k�igi juures tehtud 
 
@@ -1119,7 +1119,8 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
            
              String rchain  = rs.getString("rchain");
              if(rchain != null && rchain.trim().length() != 0){
-            	 cust.setChain(rchain.trim());
+            	// cust.setChain(rchain.trim());
+            	 
              }
 
              String vedu  = rs.getString("vedu");
