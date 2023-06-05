@@ -324,14 +324,14 @@ try{
   private void makeOutput(Order order){
 	  Hashtable pandikas =  new Hashtable();
 	
-	  TreeMap pants = null;
+	/* // TreeMap pants = null;
 	try {
-		pants = getPandiPakend();
-		System.out.println("pants " + pants.size());
+		//pants = getPandiPakend();
+	//	System.out.println("pants " + pants.size());
 	} catch (SQLException e1) {
 		// TODO Auto-generated catch block
 		e1.printStackTrace();
-	}
+	}*/
 	 	try {
 	 		
 	 	
@@ -440,7 +440,7 @@ try{
 			      order_xml = order_xml + "</row>";
 			 
 			     counter++;
-			     if(pants != null) {
+			   /*  if(pants != null) {
 			    	 String pant = (String) pants.get(prid)  ; 
 				     
 				     if(pant != null){
@@ -450,7 +450,7 @@ try{
 			                 	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+line.getKogus())+"");
 			                 }
 			              } 
-			     }
+			     }*/
 			    
 		             
 	      }

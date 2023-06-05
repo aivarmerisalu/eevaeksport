@@ -615,13 +615,6 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	     customerstm = new TreeMap();
 	     custAgents = new Hashtable();
 	
-		 String CustGUID   = null;
-		 String CustName   = null;		
-		 String CustCode   = null;
-		 String DAddressGUID   = null;
-		String DAddressCode   = null;
-		String DAddress   = null;
-		String DAddressAgentGUID   = null;
 		
  	 
  	 try {
@@ -638,6 +631,16 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	         	  Node rida = root.getChildNodes().item(i);
 	         	  //System.out.println(rida.getNodeName() + " " );
 	         	  if(rida.getNodeName().equals("Customer")){
+	         		  
+
+	         		 String CustGUID   = null;
+	         		 String CustName   = null;		
+	         		 String CustCode   = null;
+	         		 String DAddressGUID   = null;
+	         		String DAddressCode   = null;
+	         		String DAddress   = null;
+	         		String DAddressAgentGUID   = null;
+	         		  
 	         		  try{
 		         		 CustGUID   = getNode(rida,"CustomerGUID").getFirstChild().getNodeValue();
 		         		 
@@ -653,6 +656,12 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 		         		  e.printStackTrace();
 		         	  }
 	         	  
+	         		  Customer customer = new Customer(CustGUID);
+	      		         if(DAddressGUID != null ) {
+	      		        	 customer.setPayer(DAddressGUID);
+	      		         }
+	      		         customer.setName(Converter.enCodeEst(CustName));
+	      		         
       		  	Node addressNode = getNode(rida, "DeliveryAddressList");
       		  	if(addressNode != null){
 	      			for (int j = 0; j < addressNode.getChildNodes().getLength(); j++){
@@ -680,7 +689,7 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	      				
 	      				//System.out.println("Addressinfo: "+DAddressGUID + " " + DAddressCode + " " + DAddress + " " + DAddressAgentGUID);
 	      				
-	      		         Customer customer = new Customer(CustGUID);
+	      		       
 	      		         if(DAddressGUID != null ) {
 	      		        	 customer.setPayer(DAddressGUID);
 	      		         }
@@ -696,6 +705,8 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	      				
 	      				}
 	      			}
+      		  	} else {
+      		  	 customerstm.put(CustCode + "_0" , customer); 
       		  	}
 			       }
 	         	 

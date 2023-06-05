@@ -48,7 +48,9 @@ import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
- * Description:
+ * Description:realireali
+ * 
+ * 
  * Copyright:    Copyright (c) 2002
  * Company:prisma
  * 
@@ -2399,7 +2401,7 @@ private long getAndUpdateNext() throws SQLException{
       		  && parent.getProps().getProperty("realiPalletProds").contains(toode+",")) {
       	  realikProds.append("[" + (int)line.getKogus() + "] " + line.getToode() + " " + nimi + "\n");
         }
-     
+    
      
      if(order.getWarehouse() == null){
     	 order.setWarehouse("SKSM1");

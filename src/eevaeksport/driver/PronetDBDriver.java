@@ -2843,6 +2843,10 @@ private Object readJsonFile(File f){
 	 			 String code = (String) prod.get("code");
 	 			 String id = (String) prod.get("id");
 	 			String name = (String) prod.get("name");
+	 			if(name.startsWith("*") ) {
+	 				name = name.substring(1).trim();
+	 			}
+	 			
 	 			String active = (String) prod.get("active");
 	 			String barcode = (String) prod.get("barcode");
 	 			JSONObject group1 = (JSONObject) prod.get("group1");
@@ -2891,7 +2895,9 @@ private Object readJsonFile(File f){
 	 			if(stocks.get(id) != null) {
 	 				pp.setStock(stocks.get(id));
 	 			}
-	 			if(active.equals("1") && name != null && !name.startsWith("*") ) {
+	 			
+	 			
+	 			if(active.equals("1") && name != null ) {
 	 			tm.put(name, pp);
 	 			}
 	 			

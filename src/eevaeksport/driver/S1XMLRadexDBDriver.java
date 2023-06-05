@@ -844,31 +844,40 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 		      		     if(info != null){
 		      		    	customer.setPersonalData(info);
 		      		     }
-		      		       
+		      		     
+		      		 
 		      		     
 		      		     if(CustAgentGUID != null) {
-		      		    	customer.addAgent(new Agent(agentGUID.get(CustAgentGUID)));
-		      		    	tm.put(Converter.cleanLitLatEst(CustName + " "+ DAddressCode), customer);
-		      		    	custGUIDS.put(CustGUID, customer.getID());
-		      		    	customer.addAgent(new Agent("35dde408"));
-                             // lisame Aigarsi kõigile külge
+		      		    	 try {
 		      		    	
-		      		    
+		      		    		customer.addAgent(new Agent("35dde408"));
+
 			           				Agent agg = ((Agent)this.getAgents1().get(agentGUID.get(CustAgentGUID)));
 			         				
 			           				if(agg != null && agg.getDubbler().size()>0){
-			           					//System.out.println("dubbing " + agg + "  " + agg.getDubbler().toString());
+			           				
 			           					for (int r = 0 ; r < agg.getDubbler().size() ; r++){
 			           						Agent dub = new Agent((String)agg.getDubbler().elementAt(r));
 			           						customer.addAgent(dub);
 			           					}
 			           				}
 			           			
+		      		    		 
+		      		    	customer.addAgent(new Agent(agentGUID.get(CustAgentGUID)));
+		      		    	tm.put(Converter.cleanLitLatEst(CustName + " "+ DAddressCode), customer);
+		      		    	custGUIDS.put(CustGUID, customer.getID());
+		      		   
+                             // lisame Aigarsi kõigile külge
 		      		    	
-		      		     }
-	      		         
+		      		    
+		      		    	
+		      		   
+		      		  	 
+	      		    	 }catch(Exception e) {
+	      		    		 
+	      		    	 }
          		  		
-         		  	}
+         		  	}  }
          		  		
          		  	}else {
          		  		for (int j = 0; j < addressNode.getChildNodes().getLength(); j++){
@@ -905,10 +914,10 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
     	      		         customer.setName(Converter.enCodeEst(CustName) + "_" + DAddressCode);
     	      		         customer.setAddress(Converter.enCodeEst(Converter.adressLink(DAddress,"Latvia")));
     	      		         
-	    	      		       if(DAddressAgentGUID != null){
+	    	      		       if(DAddressAgentGUID != null  && agentGUID.get(DAddressAgentGUID) != null){
 	    	      		    	 customer.addAgent(new Agent(agentGUID.get(DAddressAgentGUID)));
 	   	      		         	}
-	    	      		       if(CustAgentGUID != null){
+	    	      		       if(CustAgentGUID != null && agentGUID.get(CustAgentGUID) != null){
 	    	      		         customer.addAgent(new Agent(agentGUID.get(CustAgentGUID)));
 	   	      		         	}
 	    	      		       if(CustPriceTypeGUID != null){
@@ -934,7 +943,7 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 			      		     }else if(DAddressContactName != null && DAddressContactName.trim().length() > 0){
 			      		    	customer.setPersonalData(DAddressContactName);
 			      		     }
-		    	      		 
+		    	      		customer.addAgent(new Agent("35dde408"));
 		    	      		 customer.setPayer(CustCode + "_0");
 	    	      		   
     	      		         tm.put(Converter.cleanLitLatEst(CustName + " "+ DAddressCode), customer);
@@ -1109,7 +1118,7 @@ private HashMap prodsGUID = new HashMap();
 		    			  GroupGUID   = getNode(rida,"GroupGUID").getFirstChild().getNodeValue();
 		    		  }catch(Exception e){e.printStackTrace();}
 		    		    
-		        		  
+		        		
 		        		  
 		        		  //GroupGUID2   = getNode(rida,"GroupSecGUID").getFirstChild().getNodeValue();
 		        		  
@@ -1154,7 +1163,7 @@ private HashMap prodsGUID = new HashMap();
 	   					 prod.setPrice(Double.parseDouble(UnitPrice));
 	   				 }
 	   				 
-	   				//prod.setVat("21");
+	   				prod.setVat("21");
 
 		    		
 		    		
