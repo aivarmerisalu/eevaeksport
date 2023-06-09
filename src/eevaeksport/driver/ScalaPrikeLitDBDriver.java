@@ -1049,7 +1049,7 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
    while(rs3.next()){    
 	   double debtover = Double.parseDouble(rs3.getString("debtover").trim());
        double debt = Double.parseDouble(rs3.getString("debt").trim());
-     
+     if(debtShow(cust.getPayer())) {
        cust.setDebt(cust.getDebt() + debtover);
        cust.setUsedCredit(debt);
        
@@ -1058,6 +1058,7 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
         } else {
     	   cust.setSalesBlock(false);
        }
+     }
    }
    
    rs3.close();
@@ -1098,6 +1099,15 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
         
 	return customers;
     }
+    
+    private boolean debtShow(String custid) {
+    	boolean res = true;
+    	if(getParent().getProps().getProperty("nodebtlist").contains(custid+",")) {
+    		return false;
+    	}
+    	return res;
+    }
+    
 
     public Vector getDebt(String agentCode) throws SQLException{
       Vector list = new Vector();
@@ -1123,7 +1133,10 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
         debt.setSum(Double.parseDouble(rs.getString("summa").trim()));
         debt.setDue(rs.getString("yle"));
         if(debt.getSum()>0.04 || debt.getSum()<-0.04){
-        	list.addElement(debt);	
+        	if(debtShow(debt.getCustID())) {
+        		list.addElement(debt);	
+        	}
+        	
         }
         }
       rs.close();

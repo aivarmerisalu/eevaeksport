@@ -171,132 +171,10 @@ try {
   public Vector getFixedAssortmentData() {
 
 		Vector result = new Vector();
-		File f = new File(this.getExcelDir() + "Sortiment.xlsx");
-	
-	 
-	
-	
-//	System.out.println("asoortment juurde " + insertassort);
-	
-	
-	try {
-		
-		
-		FileInputStream ff = new FileInputStream(f);
-		XSSFWorkbook workbook = new XSSFWorkbook((ff));
-		XSSFSheet sheet = workbook.getSheetAt(0);
-		XSSFRow row = null;
-		TreeMap groups = new TreeMap();
-		row = sheet.getRow(1);
-		// MÄÄRAME ÄRA MIS VÄLJAS ASUVAD Sortimendi tähised.
-
-		// System.out.println("rownum " + row.getLastCellNum());
-		for (int a = 3; a < row.getLastCellNum(); a++) {
-			try {
-				// System.out.println(row.getCell((short)a).getStringCellValue());
-				groups.put(a + "", row.getCell((short) a)
-						.getStringCellValue());
-			} catch (Exception e) {
-				// System.out.println(row.getCell((short)a).getNumericCellValue());
-			}
-		}
-
-	//	 System.out.println(groups.toString());
-
-		for (int i = 2; i < sheet.getLastRowNum(); i++) {
-			row = sheet.getRow(i);
-			String prodID = "";
-
-			if (row.getCell((short) 0) != null) {
-
-				try {
-					
-					prodID = (row.getCell((short) 0).getStringCellValue());
-				} catch (Exception e) {
-					prodID = (int) (row.getCell((short) 0)
-							.getNumericCellValue()) + "";
-				}
-				
-                if(!prodID.equals("")){
-             	
-				// Siin läheme reasisse rokkima ja vaatama kas se toode
-				// läheb kaasa
-				for (int a = 3; a < row.getLastCellNum(); a++) {
-
-					String group = (String) groups.get(a + "");
-					if (group != null && group.trim().length() > 0) {
-
-						String custID = " ";
-						String clGroup = " ";
-						String prodGroup = " ";
-						String go = null;
-						clGroup = group.trim();
-
-						MatrixLine mline = new MatrixLine();
-						// Vaatame kas selles veerus on sellel tootel pandud
-						// mingi tähis
-						if (row.getCell((short) a) != null) {
-
-							try {
-								go = (int) (row.getCell((short) a)
-										.getNumericCellValue()) + "";
-							} catch (Exception e) {
-								try{
-									go = (row.getCell((short) a)
-											.getStringCellValue());
-										
-								}catch(Exception k){
-									
-								}
-							}
-
-						}
-
-						if (go != null && go.trim().toLowerCase().equals("1")) {
-                               if(a > 10){
-                             // 	 System.out.println( a + " " + prodID + " " +
-          						//		 clGroup + " " + go); 
-                               }
-							 
-
-							if (custID != null
-									&& custID.trim().length() > 0) {
-								mline.setCustID(custID.trim());
-							}
-							if (clGroup != null
-									&& clGroup.trim().length() > 0) {
-								mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
-							}
-
-							if (prodID != null
-									&& prodID.trim().length() > 0) {
-								mline.setProdID(prodID.trim());
-							}
-							
-							if (mline.getProdID() == null
-									&& prodGroup != null
-									&& prodGroup.trim().length() > 0) {
-								mline.setProdGroup(prodGroup);
-							}
-							 
-							result.add(mline);
-						}
-					}
-				}
-				   
-                }
-			}
-		}
-		
-	} catch (Exception e) {
-		e.printStackTrace();
-	}
-
-	// System.exit(0);
-System.out.println("fixed size " + result.size());
 		return result;
 
 	}
+  
   private Connection con2 = null;
  
 	 
@@ -775,7 +653,7 @@ System.out.println("fixed size " + result.size());
         		vv.add(Converter.cleanLitLatEst(gg.trim()));
         		sortimendid.put(cust.getID(), gg.trim());
         	}
-        	cust.setFixSortCode(vv);
+        	//cust.setFixSortCode(vv);
         //	cust.setGroup(grp);
         }
         

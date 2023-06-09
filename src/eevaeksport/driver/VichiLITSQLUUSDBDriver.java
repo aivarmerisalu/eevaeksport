@@ -102,14 +102,23 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	}
 
 	
-	
 	 private void makePictureCat(){
 
-		 String cmd2 = "SELECT t.[No_] AS toode FROM [Vičiūnai ir Ko$Item] t LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] vat ON (vat.[Item No_]=[No_] and vat.[Code]='DĖŽ.' ) "
-				+ "	  LEFT JOIN  [Vičiūnai ir Ko$Sales Line Discount] sd  on  sd.[Code]= [No_] and [Sales Type] = 1 and  [Sales Code] = 'AGENT' "
-				+ " and  [Starting Date]<=getdate()  and   [Ending Date]>=getdate()   "
-				+ "	  WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0) "
-				+ "	  or [Pogrupio kodas] like '%2.8.1%' ORDER BY [No_] ";
+		 String cmd2 = "SELECT t.[No_] AS toode, (t.[Search Description]) AS nimi, sp.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp\r\n" + 
+					"	, t.[Pogrupio kodas] AS grupp2  , [Base Unit of Measure] AS unit\r\n" + 
+					"	, [Brūkšninis kodas] AS ean, [Product Status] AS [status], [Line Discount %] AS maxdiscount, t.[Type] AS [type]\r\n" + 
+					"	, [Qty_ per Unit of Measure] AS kastis, [Net Weight] AS kaal\r\n" + 
+					"	, [VAT Prod_ Posting Group] AS vat, [Description] AS vatdesc , '' AS [type]\r\n" + 
+					"    , [Order Multiple] AS optimum, [Minimum Order Quantity] AS minimum , [Country of Origin Code] as origi \r\n" + 
+					"FROM [Vičiūnai ir Ko$Item] t INNER JOIN [Vičiūnai ir Ko$Item 2] t2 ON t.[No_] = t2.[No_]\r\n" + 
+					"	INNER JOIN (SELECT [Item No_], [Unit Price], [Unit of Measure Code], ROW_NUMBER() OVER (PARTITION BY [Item No_] ORDER BY [Starting Date] DESC) AS [Priority]\r\n" + 
+					"	FROM Navision.dbo.[Vičiūnai ir Ko$Sales Price] WHERE [Sales Type] = 2 AND CAST(GETDATE() As Date) BETWEEN [Starting Date] AND ISNULL(NULLIF([Ending Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date))) ) AS sp \r\n" + 
+					"	ON t.No_ = sp.[Item No_] AND t.[Base Unit of Measure] = sp.[Unit of Measure Code] AND sp.[Priority] = 1\r\n" + 
+					"    LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] AS vat ON vat.[Item No_] = t.[No_] AND vat.[Code] = 'DĖŽ.'\r\n" + 
+					"    LEFT JOIN [Vičiūnai ir Ko$Sales Line Discount] AS sd ON sd.[Code] = t.[No_] AND [Sales Type] = 1 AND [Sales Code] = 'AGENT' \r\n" + 
+					"   AND [Starting Date] <= GETDATE() AND [Ending Date] >= GETDATE()   \r\n" + 
+					"WHERE ([Blocked] = 0 AND sp.[Unit Price] > 0 AND LEN([Grupės kodas]) > 0 AND LEN([Search Description]) != 0 AND t2.[Not for Merisoft] <> 1) \r\n" + 
+					"ORDER BY t.[No_] " ;
 		     	String picts = parent.getProps().getProperty("pict.dir");
 
 		     	String pictspda = parent.getProps().getProperty("pictpda.dir");
@@ -122,9 +131,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 
                 HashSet olemas = new HashSet();
 		        StringBuffer buf = new StringBuffer();
-		        StringBuffer buf0 = new StringBuffer();
 		        int a = 0;
-		        int b = 0;
 		        int c = 0;
 		        
 		        // leiame kataloogid ja peame meeles 
@@ -137,26 +144,48 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		         toode = toode.replace('/', '_');
 		         olemas.add(toode + ".jpg");
 		         olemas.add(toode + ".JPG");
+		         olemas.add(toode + ".png");
+		         olemas.add(toode + ".PNG");
 		   	    	if(c == 500){
 		   	    		  c = 0;
 		   	    		  System.out.println("Piltide leidmine "  + a);	
-		   	    		  
 		   	    	}
 		   	     
+		   	    	
 		              
 		                 File f = new File(picts + toode+".jpg");
 		                 String len = "0";
 		                 if(f.exists()){
-		                   len =	f.length() + "";
-		                 } 
-		                 
-		                 if(len.equals("0")){
-		                 	//System.out.println(toode+".jpg;"  + len);
-		                 	buf0.append(toode+".jpg\n");
-		                 }else{
-		                 	buf.append(toode+".jpg;"  + len + "\n");
-		           	    	b++;
+		                       len =	f.length() + "";
+		                     	buf.append(toode+".jpg;"  + len + "\n");
+		                     	if (toode.equals("16831")) {
+		    		   	    		System.out.println("Olemasd 16831 jpg"  );
+		    		   	    	}
+			             } else {
+			            	  f = new File(picts + toode+".png");
+			            	 if (toode.equals("16831")) {
+		    		   	    		System.out.println("Olemasd 16831 png"  + f.exists() );
+		    		   	    	}
+		                	
+				                 len = "0";
+				                 System.out.println("buf 0 " + picts + toode+".png "+ f.exists());
+				                 if(f.exists()){
+				                   len =	f.length() + "";
+				                   buf.append(toode+".png;"  + len + "\n");
+				           	    	
+				                 }  else {
+				                	 f = new File(picts + toode+".PNG");
+				                	 System.out.println("buf 0 " + picts + toode+".png "+ f.exists());
+					                 if(f.exists()){
+					                   len =	f.length() + "";
+					                   buf.append(toode+".PNG;"  + len + "\n");
+					                 }	
+				                 }
 		                 }
+		                
+		                 
+		               
+		                 
 		                 }
 		   	    rs.close();
 		   	    stmt.close();
@@ -220,7 +249,6 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		   	}
 		   
 		}
-		 
 		   private String toUpper(String asi ){
 			   
 			 //  asi = asi.substring(0,asi.length()-4) + asi.substring(asi.lastIndexOf(".")).toLowerCase();

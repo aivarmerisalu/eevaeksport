@@ -617,7 +617,12 @@ import eevaeksport.util.Converter;
 	          
 	          
 	         if(prods != null && prods.get(line.getToode()) != null) {
-	        	 sb.append(nf3.format(line.getKogus()/prods.get(line.getToode())) + ";"); 
+	        	 double asi  = prods.get(line.getToode());
+	        	 if(asi > 0) {
+	        	 sb.append(nf3.format(line.getKogus()/prods.get(line.getToode())) + ";");
+	        	 }else {
+	        		 sb.append(line.getKogus() + ";");
+	        	 }
 	         }else {
 	        	 sb.append(line.getKogus() + ";");
 	         }

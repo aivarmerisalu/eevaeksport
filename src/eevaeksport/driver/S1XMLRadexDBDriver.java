@@ -1271,6 +1271,7 @@ private HashMap prodsGUID = new HashMap();
 		         			         		Double prodLastPrice = 0.0;
 		         			         		try{
 			         			         		 prodLastPrice   = Double.parseDouble(getNode(prodNode,"LastPrice").getFirstChild().getNodeValue());
+			         			         		prodLastPrice = prodLastPrice /1.21;
 		         			         		 }catch(Exception e){}
 		         			         		 
 		         			         		 //System.out.println(prodGUID + " " + prodLastDate);

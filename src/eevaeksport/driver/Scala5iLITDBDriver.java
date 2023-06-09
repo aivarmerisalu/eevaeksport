@@ -347,7 +347,7 @@ public class Scala5iLITDBDriver extends AbstractDBDriver implements BulkUpdater,
               String id = rs.getString("id").trim();
               double debt = Double.parseDouble(rs.getString("debt").trim());
               Customer cust = (Customer)custMap.get(id);
-              if (cust != null){
+              if (cust != null && debtShow(id)){
                 cust.setDebt(cust.getDebt() + debt);
               }
             }
@@ -389,7 +389,10 @@ public class Scala5iLITDBDriver extends AbstractDBDriver implements BulkUpdater,
 
         debt.setSum(Double.parseDouble(rs.getString("summa").trim()));
         if(debt.getSum()>0.04 || debt.getSum()<-0.04){
-        	list.addElement(debt);	
+        	if(debtShow(debt.getCustID())) {
+        		list.addElement(debt);	
+        	}
+        	
         }
         }
       rs.close();
@@ -397,6 +400,15 @@ public class Scala5iLITDBDriver extends AbstractDBDriver implements BulkUpdater,
       return list;
     }
 
+    private boolean debtShow(String custid) {
+    	boolean res = true;
+    	if(getParent().getProps().getProperty("nodebtlist").contains(custid+",")) {
+    		return false;
+    	}
+    	return res;
+    }
+    
+    
     public TreeMap getProducts(Agent agent){
         connectionUp(url);
 

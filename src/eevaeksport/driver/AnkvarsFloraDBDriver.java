@@ -629,7 +629,7 @@ public class AnkvarsFloraDBDriver extends AbstractDBDriver implements Discounter
                 }
   
                 if(nimetus.contains("rupjmaizes 500g")) {
-               // 	System.out.println(nimetus+ " " + prod.getID() + " '" + ean.trim() + "' ppp " + prlist.get(ean.trim()));
+                	System.out.println(nimetus+ " " + prod.getID() + " '" + ean.trim() + "' ppp " + prlist.get(ean.trim()));
                 }
                 
                 prod.setStock(-1);
