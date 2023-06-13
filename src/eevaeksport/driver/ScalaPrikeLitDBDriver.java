@@ -976,6 +976,16 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 String agen2 = rs.getString("agent2");
                 if(agen2 != null){
                     cust.addAgent(new Agent(agen2.trim()));
+                    Agent agg = ((Agent)this.getAgents1().get(agen2.trim()));
+      				
+      				if(agg != null && agg.getDubbler().size()>0){
+      					for (int i = 0 ; i < agg.getDubbler().size() ; i++){
+      						String iid= (String)((Agent)this.getAgents1().get(agen2.trim())).getDubbler().elementAt(i);
+      						if(!cust.hasAgent(iid)){
+          						cust.addAgent(new Agent(iid));	
+      						}
+      					}
+      				}
                 }
             
                 String paym = rs.getString("paym");

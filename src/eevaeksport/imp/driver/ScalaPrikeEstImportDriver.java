@@ -240,7 +240,7 @@ import eevaeksport.util.Converter;
 				//System.out.println("Haldus kliendid " + haldusklienditooted.toString());
 	  }
 	  
-	  private Product getHaldusCustomerAndProduct(String kl,OrderLine  line){
+	  private Product getHaldusCustomerAndProduct(String kl,OrderLine  line, double kogus){
 		  Product res = null;
 		 String maksja =  getPayer(kl);
 		 String ean = getEan(line.getToode());
@@ -257,7 +257,7 @@ import eevaeksport.util.Converter;
 	    		 
 	    		  if(ean != null && ean.trim().length() > 0 && prod.getID().equals(ean)){
 	    			 // System.out.println("toode "+ line.getKogus()/prod.getStock() + " | " + (int)(line.getKogus()/prod.getStock()));
-		    		  if((line.getKogus()/prod.getStock()) == ((int)(line.getKogus()/prod.getStock()))){ //kui jagatis on t�isarv
+		    		  if((kogus/prod.getStock()) == ((int)(kogus/prod.getStock()))){ //kui jagatis on t�isarv
 		    			//  System.out.println("tagastan toote" + prod );
 		    			  return prod;
 		    		  }
@@ -1075,6 +1075,7 @@ import eevaeksport.util.Converter;
 				         }
 				         
 			       } 
+			       br.close();
 		     }catch(Exception e){
 		    	 
 		     }
@@ -1184,6 +1185,48 @@ import eevaeksport.util.Converter;
 		    	jagaja =  1;
 		    }
 		    System.out.println(toode + " jagajaNIV " + jagaja);
+		    return jagaja;
+		 }
+	  
+	  
+	  public double getKogusRounded(String toode, Integer kogus, String klient) throws SQLException{
+		 	 
+		    String sql1 = " SELECT QtyInBox AS jagaja FROM QtyMultipliers0100  WHERE ProductCode =   '" + toode.trim() + "' and ClientCode = '"+ klient + "'";
+		    double jagaja = kogus;
+		    double kastis = 1;
+		    Statement st1 = con.createStatement();
+		    ResultSet rs1 = st1.executeQuery(sql1);
+		    if (rs1.next()) {
+		    	kastis = rs1.getDouble("jagaja");
+		    }
+		    rs1.close();
+		    st1.close();
+		      
+		    if(kastis == 1) {
+		    	 sql1 = " SELECT QtyInBox AS jagaja FROM QtyMultipliers0100  WHERE ProductCode = '" + toode.trim() + "' and ClientCode = 'Any'";
+				 st1 = con.createStatement();
+			     rs1 = st1.executeQuery(sql1);
+			    
+			     if (rs1.next()) {
+			    	kastis = rs1.getDouble("jagaja");
+			      }
+		    }
+		    
+		    rs1.close();
+		    st1.close();
+		    System.out.println(toode + " " +  kastis +  " getKogusRounded " + kogus );
+		     if(kastis > 1) {
+		    	 if(kogus < kastis) {
+		    		 return kastis;
+		    	 }else {
+		    		double kaste = Math.round(kogus/kastis);
+		    		  System.out.println(toode + " " +  kastis +  " getKogusRounded " + kogus + " "+  kaste);
+		    		  
+		    	     return kaste * kastis;
+		    	 }
+		     }
+		    
+		    System.out.println(toode + " getKogusRounded " + jagaja);
 		    return jagaja;
 		 }
 	  
@@ -2124,49 +2167,14 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 				      sb2.append("     <dta:OrderLines>" + ls);
 		          	
 		          }
-		          
+		        
 		          
 		          if(toode.trim().length() != 0){
 		          if(toode.startsWith("XX")){
 		        	  toode = toode.substring(2);
 		        	  demagoogia = true;
 		          }
-		          String pant = getPandiPakend(toode);
-		          double pandikordaja = getPandiKordaja(toode);
-		          if(pant != null ){
-		        	  
-		        	  double aaa = line.getKogus()*pandikordaja;
-		         	  if(pandikas.get(pant) == null){
-		         		  pandikas.put(pant,aaa+"");
-		               } else {
-		               	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+(aaa))+"");
-		               }
-		         	  
-		         //	 System.out.println("Kordaja " + pandikordaja + "  " + pandikas);
-		            }
-		          
-		       
-		        	 Product prodExtra = this.getHaldusCustomerAndProduct(order.getCompany(), line);
-		        	 if(prodExtra != null){
-		        		 toode = prodExtra.getAgentGroup();
-		        		 if(prodExtra.getGroup() != null && prodExtra.getGroup().trim().length() > 0 ){
-		        			 //kui on ka teised andmed ja tingimused klapivad siis peame lisama toote juurde teeme seda l�bi pandika
-		        			
-		        			 String lisa = prodExtra.getGroup();
-		        			 double kog = line.getKogus()/prodExtra.getStock() * prodExtra.getOnPallet();
-		        			  
-		   		         	  if(pandikas.get(lisa) == null){
-		   		         		  pandikas.put(lisa,(kog) + "");
-		   		               } else {
-		   		               	  pandikas.put(lisa,(new Double((String)pandikas.get(lisa)).doubleValue()+(kog))+"");
-		   		               }
-		   		         }
-		        	  /*Product prod = new Product(ean);
-							prod.setStock(Double.parseDouble(kogus));
-							prod.setGroup(lisakood);
-							prod.setAgentGroup(uuskood);
-							prod.setOnPallet(Double.parseDouble(lisakogus));*/	 
-		        	 }
+		        
 		          
 		        
 		          
@@ -2204,6 +2212,44 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		            		 || order.getCompany().startsWith("T8587")) { //lidl
 		            	 kogus = (int)(kogus /getJagajaNIV(toode));
 		             }
+		             
+		             kogus = (int)(getKogusRounded(toode,kogus,order.getCompany()));
+		             
+		             //viimane loogika siis selle kaudu.
+		           
+		             
+		             String pant = getPandiPakend(toode);
+			          double pandikordaja = getPandiKordaja(toode);
+			          if(pant != null ){
+			        	  
+			        	  double aaa = kogus*pandikordaja;
+			         	  if(pandikas.get(pant) == null){
+			         		  pandikas.put(pant,aaa+"");
+			               } else {
+			               	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+(aaa))+"");
+			               }
+			         	  
+			         //	 System.out.println("Kordaja " + pandikordaja + "  " + pandikas);
+			            }
+			          
+			       
+			        	 Product prodExtra = this.getHaldusCustomerAndProduct(order.getCompany(), line,kogus);
+			        	 if(prodExtra != null){
+			        		 toode = prodExtra.getAgentGroup();
+			        		 if(prodExtra.getGroup() != null && prodExtra.getGroup().trim().length() > 0 ){
+			        			 //kui on ka teised andmed ja tingimused klapivad siis peame lisama toote juurde teeme seda l�bi pandika
+			        			
+			        			 String lisa = prodExtra.getGroup();
+			        			 double kog = kogus/prodExtra.getStock() * prodExtra.getOnPallet();
+			        			  
+			   		         	  if(pandikas.get(lisa) == null){
+			   		         		  pandikas.put(lisa,(kog) + "");
+			   		               } else {
+			   		               	  pandikas.put(lisa,(new Double((String)pandikas.get(lisa)).doubleValue()+(kog))+"");
+			   		               }
+			   		         }
+			        	
+			        	 }
 		    
 		      	sb.append(addSpaces(doknr, 10));
 		      	sb.append(type);//11

@@ -313,7 +313,63 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	 		e.printStackTrace();
 	 	}
 	 	
+	 	System.out.println("result0 - " + result.size());
+	 	 
+	 	try {
+	 		  File f = new File (getDir() + "CustomerDiscounts.xml");
+	 	     
+	 	      
+	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	     DocumentBuilder db;
+	 		db = dbf.newDocumentBuilder();      	
+	     	FileInputStream in = getCleanInputStream(f);
+	     	String handler = null;
+	         Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "CustomersDiscounts"); 
+	     	
+	     	//System.out.println("ridu  " + root.getChildNodes().getLength() + root.toString());
+	     	
+	         for (int i = 0; i < root.getChildNodes().getLength(); i++){
+	         	  Node rida = root.getChildNodes().item(i);
+	         	 if(rida.getNodeName().equals("Customer")){
+	         		 
+	         		String custCode = null;
+	         	  try{
+	         		custCode = getNode(rida,"CustomerGUID").getFirstChild().getNodeValue();
+	         	  }catch(Exception e){
+	         		  e.printStackTrace();
+	         	  }
+	         	  
+	         	  custCode = (String)custGUIDS.get(custCode);
+	         	  
+	         	Node prodNode = getNode(rida, "ProductList"); 
+	         	if(prodNode != null) {
+	         	for (int j = 0; j < prodNode.getChildNodes().getLength(); j++){
+	         		Node pricetypeNode = prodNode.getChildNodes().item(j);
+	         		if(pricetypeNode.getNodeName().equals("Product")) {
+	         			String prodGUID   = getNode(pricetypeNode,"ProductGUID").getFirstChild().getNodeValue();
+	         			String prodCode = (String)prodsGUID.get(prodGUID);
+	         			Double discount   = Double.parseDouble(getNode(pricetypeNode,"ProductDiscount").getFirstChild().getNodeValue());
+	         		//	System.out.println(prodCode + " - " + custCode +  " - " + discount);
+	         		if(prodCode != null && custCode != null) {
+	         			MatrixLine ml = new MatrixLine();
+	         			ml.setCustID(custCode);
+	         			ml.setProdID(prodCode);
+	         			ml.setDiscount(discount);
+	         			//ml.setProdLevel("pr");
+	         			result.add(ml);
+	         		}
+	         		}
+	         	  }
+	            }  
+	          }
+	         	 }
+	         
+	 	}catch(Exception e){
+	 		e.printStackTrace();
+	 	}
 	 	
+	 	System.out.println("result1 - " + result.size());
 	 	
 //System.exit(0);
 	   
@@ -456,7 +512,7 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 		         		String custid = null;
 		         		String custGUID = null;
 		         	  try{
-		         		 custGUID   = getNode(rida,"CustomerGUID").getFirstChild().getNodeValue().substring(0, 8);
+		         		 custGUID   = getNode(rida,"CustomerGUID").getFirstChild().getNodeValue();
 		         		 custid = (String) custGUIDS.get(custGUID);
 		         	  }catch(Exception e){e.printStackTrace();}
 		         	  
@@ -487,16 +543,14 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 			         		try {
 			         			debtAddressGUID   = getNode(debtrida,"AddressGUID").getFirstChild().getNodeValue();
 			         		}catch(Exception e){}
+			         		
 		         			 if(debtAddressGUID != null) {
 		         				 String addrid = null;
 		         				 addrid = (String) custGUIDS.get(debtAddressGUID);
 		         				if(addrid != null) {
 		         					debt.setCustID(addrid);
-		         					
 		         					debt.setPayerID(custid);
-		         					
 		         				}
-		         				
 		         			 }
 		         			list.addElement(debt);
 			         		
@@ -664,39 +718,14 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
        
        
        private Date getDate(String mmddyy){
-    	  	long lon = 0;
     	  	Calendar cal = Calendar.getInstance();
     	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(6, 10)));
-    	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(3, 4))-1);
+    	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(3, 5))-1);
     	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(0, 2)));
-    	  // System.out.println(cal.getTime()); 
-    	   Date date = new Date(lon);
-    	   date.setTime(cal.getTimeInMillis());
-    	    return date;
-    		
+    	    return new Date(cal.getTimeInMillis());
     	  }
       
-       
-       private boolean isDueDate(String yyyymmdd){
-    	  	
-    	  	Calendar cal = Calendar.getInstance();
-    	  	if( yyyymmdd.trim().length() == 0 ) {
-    	  		return false;
-    	  	 }
-    	  
-    	    cal.set(Calendar.YEAR, Integer.parseInt( yyyymmdd.substring(0, 4)));
-    	    cal.set(Calendar.MONTH, Integer.parseInt(yyyymmdd.substring(4, 6))-1);
-    	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(yyyymmdd.substring(6, 8)));
-    		Calendar ca = Calendar.getInstance();
-    		ca.add(Calendar.DAY_OF_YEAR, -1);
-    		
-    		if(cal.before(ca)){
-    			return true;
-    		}else{
-    			return false;
-    		}
-    		
-    	  }
+
 
        private HashMap custGUIDS = null;
        
@@ -1308,7 +1337,8 @@ private HashMap prodsGUID = new HashMap();
 		         			         		Double prodLastPrice = 0.0;
 		         			         		try{
 			         			         		 prodLastPrice   = Double.parseDouble(getNode(prodNode,"LastPrice").getFirstChild().getNodeValue());
-		         			         		 }catch(Exception e){}
+			         			         		prodLastPrice = prodLastPrice /1.21; 
+		         			         		}catch(Exception e){}
 		         			         		 
 		         			         		 //System.out.println(prodGUID + " " + prodLastDate);
 		         			         		 String prodid = (String) prodsGUID.get(prodGUID);

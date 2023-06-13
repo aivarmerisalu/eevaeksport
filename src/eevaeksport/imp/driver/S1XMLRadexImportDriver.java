@@ -1004,8 +1004,8 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 					line.appendChild(ProdCodeNode);
 					line.appendChild(ProdQtyNode);
 					if(ll.getDiscount()>0) {
-						Node ProdPriceNode = doc.createElement("Price");
-						Text ProdPrice = doc.createTextNode(ll.getPrice()+"");
+						Node ProdPriceNode = doc.createElement("Discount");
+						Text ProdPrice = doc.createTextNode(ll.getDiscount()+"");
 						
 						ProdPriceNode.appendChild(ProdPrice);
 						line.appendChild(ProdPriceNode);
