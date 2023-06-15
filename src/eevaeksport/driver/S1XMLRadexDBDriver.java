@@ -877,22 +877,25 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 		      		 
 		      		     
 		      		     if(CustAgentGUID != null) {
-		      		    	 try {
+		      		    	
 		      		    	
 		      		    		customer.addAgent(new Agent("35dde408"));
-
+		      		     try {
+		      		    	 if(agentGUID.get(CustAgentGUID) != null) {
 			           				Agent agg = ((Agent)this.getAgents1().get(agentGUID.get(CustAgentGUID)));
-			         				
-			           				if(agg != null && agg.getDubbler().size()>0){
-			           				
+			         				 if(agg != null && agg.getDubbler().size()>0){
 			           					for (int r = 0 ; r < agg.getDubbler().size() ; r++){
 			           						Agent dub = new Agent((String)agg.getDubbler().elementAt(r));
 			           						customer.addAgent(dub);
 			           					}
-			           				}
-			           			
+			           				 }
+			         				customer.addAgent(new Agent(agentGUID.get(CustAgentGUID)));
+		      		    	 }
+		      		    	 }catch(Exception e) {
+		      		    		 e.printStackTrace();
+		      		    	 }
 		      		    		 
-		      		    	customer.addAgent(new Agent(agentGUID.get(CustAgentGUID)));
+		      		    
 		      		    	tm.put(Converter.cleanLitLatEst(CustName + " "+ DAddressCode), customer);
 		      		    	custGUIDS.put(CustGUID, customer.getID());
 		      		   
@@ -902,9 +905,6 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 		      		    	
 		      		   
 		      		  	 
-	      		    	 }catch(Exception e) {
-	      		    		 
-	      		    	 }
          		  		
          		  	}  }
          		  		

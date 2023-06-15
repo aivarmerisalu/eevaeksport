@@ -78,6 +78,7 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
     	  logurl = parent.getProps().getProperty("logurl");
     }
   }
+  
 
   String logurl = null;
   private String comphelp = null;

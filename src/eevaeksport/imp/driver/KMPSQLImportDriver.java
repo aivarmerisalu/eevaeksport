@@ -199,78 +199,7 @@ public class KMPSQLImportDriver
   }
 
   
-  private String clear (String ss){
-	  //	System.out.println(ss);
-	    String ret =   ss.replace(',','.');
-	    ret =  ret.replace(',','.');
-	    ret =  ret.replace(',','.');
-	    ret =  ret.replace(',','.');
-	    ret =  ret.replace('"',' ').trim();
-	    ret =  ret.replace('"',' ').trim();
-	    ret =  ret.replace('"',' ').trim();
 
-
-	    ret = ret.replaceAll("�","11111xx");
-
-	    ret = ret.replaceAll("�","11112xx");
-
-	    ret = ret.replaceAll("�","11113xx");
-
-
-	    ret = ret.replaceAll("�","11114xx");
-
-	    ret = ret.replaceAll("�","11115xx");
-
-	    ret = ret.replaceAll("�","11116xx");
-
-	    ret = ret.replaceAll("�","11117xx");
-
-	    ret = ret.replaceAll("�","11118xx");
-	    ret = ret.replaceAll("�","11119xx");
-	    //�mon�
-	    ret = ret.replaceAll("�","11130xx");
-	    ret = ret.replaceAll("�","11120xx");
-	    ret = ret.replaceAll("�","11121xx");
-	    ret = ret.replaceAll("�","11122xx");
-	    ret = ret.replaceAll("�","11123xx");
-	    ret = ret.replaceAll("�","11124xx");
-	//O?
-	    ret = ret.replaceAll("�","11224xx");
-	    ret = ret.replaceAll("�","11225xx");
-	    ret = ret.replaceAll("�","11226xx");
-	    ret = ret.replaceAll("�","11227xx");
-	    ret = ret.replaceAll("�","11228xx");
-	    ret = ret.replaceAll("�","11229xx");
-	//�
-	    ret = ret.replaceAll("11224xx","�");
-	    ret = ret.replaceAll("11225xx","�");
-	    ret = ret.replaceAll("11226xx","�");
-	    ret = ret.replaceAll("11227xx","�");
-	    ret = ret.replaceAll("11228xx","�");
-	    ret = ret.replaceAll("11229xx","�");
-	    
-	    ret = ret.replaceAll("11130xx","�");
-	    ret = ret.replaceAll("11119xx","�");
-	    ret = ret.replaceAll("11120xx","�");
-	    ret = ret.replaceAll("11121xx","�");
-	    ret = ret.replaceAll("11122xx","�");
-	    ret = ret.replaceAll("11123xx","�");
-	    ret = ret.replaceAll("11124xx","�");
-	    ret = ret.replaceAll("11118xx","�");
-	    ret = ret.replaceAll("11119xx","�");
-	    ret = ret.replaceAll("11117xx","�");
-	    ret = ret.replaceAll("11116xx","�");
-	    ret = ret.replaceAll("11115xx","�");
-	    ret = ret.replaceAll("11114xx","�");
-	    ret = ret.replaceAll("11113xx","�");
-	    ret = ret.replaceAll("11111xx","�");
-	    ret = ret.replaceAll("11112xx","�");
-	    if(ret == null || ret.trim().length()==0){
-	    return " ";
-	    }else {
-	    return ret;
-	    }
-	  }
 
   private void makeOutput(Order order){
 	    
@@ -409,8 +338,9 @@ public class KMPSQLImportDriver
 	        root.appendChild(read);
 
 	        long uni = Calendar.getInstance().getTimeInMillis();
+	        Thread.sleep(10);
 	 	
-	      String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr() + uni + amoun + coun+  ".xml";
+	      String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr() + uni + ".xml";
 	      System.out.println(fileName);
 	      OutputFormat of = new OutputFormat();
 	        of.setIndenting(true);
@@ -426,6 +356,8 @@ public class KMPSQLImportDriver
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			this.log.error(e);
+			System.exit(0);
 		}
 	 }
   

@@ -1715,7 +1715,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		         			customer.setDebt(Double.parseDouble(dueSums.get(id)+ ""));
 		         		}
 		         		
-		         		 String country = "Estonia";
+		         		 String country = "Lithuania";
 		       		  if(getParent().getProps().getProperty("country") != null){
 		       			  country = getParent().getProps().getProperty("country");
 		       		  }
@@ -1899,6 +1899,19 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 			         		  }catch(Exception e){
 			         		  }
 		         		  
+		         		  
+		         		  boolean goes = true;
+		         		  
+		         		 try{
+		         			 String closed =  ensureLen(rida.getAttributes().getNamedItem("closed").getNodeValue());         	
+			         		  if(closed.equals("1")) {
+			         			  goes = false;
+			         			  System.out.println("closed " + customer.getName());
+			         		  }
+		         		  }catch(Exception e){
+		         		  }
+		         		  
+		         		  
      		try {
 	         		 String salesman  = rida.getAttributes().getNamedItem("agent").getNodeValue(); 
 	         		      customer.addAgent(new Agent(Converter.deCode(salesman.toUpperCase())));
@@ -1906,7 +1919,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	         		      String sm = parent.getEmail(salesman);
 	         		      
 	         		    // System.out.println(salesman);
-	                  if(sm != null && sm.length() > 1){
+	                  if(sm != null && sm.length() > 1 && goes){
 	                	//  System.out.println(sm);
 	            	      tm.put(customer.getName(), customer);
 	                      this.customers.add(customer.getID());
@@ -2732,81 +2745,23 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
       	 		prod.setStock(0);
            	 }
       	 	 
+      	 	
+      	  try{
+       		 Node sto =  getNode(rida ,"stocklevels"); 
+       	 	      	   
       	 	 
-      	 /*	  	 len = line.indexOf("<stocklevels>");
-      	 	 if(len != -1){
-      	 	     String stock   = line.substring(len + 13); 
-      	 	     //System.out.println(stock.substring(0,stock.indexOf("stocklevels")));
-      	 	     stock = stock.substring(0,stock.indexOf("stocklevels"));
-      	 	 if( getParent().getProps().getProperty("stockcode") != null){
+      	 	 if( getParent().getProps().getProperty("stockcode") != null && sto != null){
       	 		 
-      	 		 int ladu = stock.indexOf("stock=\"" + getParent().getProps().getProperty("stockcode") + "\"");
-      	 		// System.out.println(ladu);
-      	 		 if(ladu != -1){
-      	 			 String seis = stock.substring(ladu+5);
-      	 			// System.out.println("seis " + seis);
-      	 					 seis = seis.substring(seis.indexOf("level=") + 7);
-      	 					 seis = seis.substring(0, seis.indexOf("\""));
-      	 					 try{
-      	 						prod.setStock( Double.parseDouble(seis)); 
-      	 					 }catch (Exception e){
-      	 						e.printStackTrace(); 
-      	 					 }
-         		 }
+      	 		 System.out.println("Stock " + sto.getAttributes().getNamedItem("level").getNodeValue());
+      	 		double stoo = Double.parseDouble(sto.getAttributes().getNamedItem("level").getNodeValue());
+      	 		prod.setStock(stoo);
+      	 		
       	 	 }
      	         // prod.setStock((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
-     	 	 }else{
-     	 		len = line.indexOf("stock_level_total=");
-         	 	 if(len != -1){
-         	 	     String stock   = line.substring(len + 19);  
-        	          prod.setStock((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
-        	 	 }
-         	
-     	 	 }
-      	 	len = line.indexOf("stock_level=");
-    	 	 if(len != -1){
-    	 	     String stock   = line.substring(len + 13);  
-    	 	     int st = (int)Double.parseDouble(stock.substring(0,stock.indexOf("\"")));
-    	 	     if(st > 0) {
-    	 	    	 prod.setStock(st);
-    	 	     }
-   	         
-   	 	 }
-      	 	 
-      	 	 if(stockAlter.get(prod.getID()) != null){
-      	 		 prod.setStock((Double)stockAlter.get(prod.getID()));
-      	 	//  System.out.println("olemas "+ prod.getID() +" ");
-        	  
-      	 	 }
-      	 	 
-      	   if(otherStocks.get(prod.getID()) != null){
-        		 try{
-    				 prod.setStock((int)Double.parseDouble(otherStocks.get(prod.getID())+""));  
-    	      		}catch(Exception t){
-    				} 
-        	   }
-      	   
-      	   if(stocksfile != null && stocksfile.get(prod.getID()) != null) {
-      		 try{
-				 prod.setStock((int)Double.parseDouble(stocksfile.get(prod.getID())+""));  
-	      		}catch(Exception t){
-				} 
-      	   }
-      	 	 
-      	 
-      	 	 
-      	 
-      	 if(stockLisa.get(prod.getID()) != null) {
-      		 
-      		// System.out.println("Lisan " +  stockLisa.get(prod.getID())  + " " + prod.getID());
-      		 try{
-				 prod.setPartii( getParent().getProps().getProperty("stockcode1") + ":" + (int)Double.parseDouble(stockLisa.get(prod.getID())+""));  
-	      		}catch(Exception t){
-				} 
-      	   }*/
-      /*	  if(line.indexOf("ARTIKKEL_KAMP") != -1){
-      	    	prod.setStatusDiscount("1");
-      	    }*/
+                   }catch(Exception e) {
+                	   e.printStackTrace();
+      		
+      	}
      
       	 
       	if(prodCodes != null && !prodCodes.contains(prod.getID())){

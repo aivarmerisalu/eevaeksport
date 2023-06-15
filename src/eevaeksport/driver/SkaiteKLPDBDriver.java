@@ -860,7 +860,7 @@ String    sql = " select  '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clg
      "	   , cast(r.DataIki_Int as datetime) as endday ,   sut.DataNuo_Int as prior , cast(sut.DataNuo_Int as datetime), sut.ArAsortimentas as action from   dbo.NuolaiduInfoPrekes r   " +
      "	   INNER JOIN  dbo.NuolaiduAprasymai  AS apr ON r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId   " +
     "	  INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId and  (r.NuolaiduSutartysId = sut.NuolaiduSutartysId or  r.NuolaiduSutartysId = 1 )    " +
-    "	  and (CONVERT (date, GETDATE()) between   cast(r.DataNuo_Int as datetime) and  cast(r.DataIki_Int+2 as datetime) or (r.DataNuo_Int = 0 and r.DataIki_Int = 999999)) " +
+    "	  and (CONVERT (date, GETDATE()) between   cast(r.DataNuo_Int as datetime) and  cast(r.DataIki_Int as datetime) or (r.DataNuo_Int = 0 and r.DataIki_Int = 999999)) " +
      "   union " +
 	" select  '' AS custid,'K'+ ltrim(str(sud.NuolaiduKainininkaiId)) AS clgroup ,t.prekesID AS prodid,'' AS prodgroup,0 AS discount,t.Kaina AS price ,cast(sud.DataNuo_Int as datetime) as start " +
 	" , cast(sud.DataIki_Int as datetime) as endday ,   sud.DataNuo_Int as prior , cast(sud.DataNuo_Int as datetime) , 1 as action" +

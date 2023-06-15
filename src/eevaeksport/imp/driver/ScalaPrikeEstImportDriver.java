@@ -595,10 +595,21 @@ import eevaeksport.util.Converter;
 	   
 		  Order ordBAT = new Order(order.getCompany(),order.getAgentFirstName());
 		  Order ordNIV = new Order(order.getCompany(),order.getAgentFirstName());
+		  Order ordVUS = new Order(order.getCompany(),order.getAgentFirstName());
 		  Order ordMUU = new Order(order.getCompany(),order.getAgentFirstName());
 		  Order ordRekl = new Order(order.getCompany(),order.getAgentFirstName());			 
 		  Order ordNega = new Order(order.getCompany(),order.getAgentFirstName());	
 			 
+		  ordVUS.setAgentCode(order.getAgentCode());
+		  ordVUS.setDokNr(order.getDokNr());
+		  ordVUS.setWarehouse(order.getWarehouse());
+		  ordVUS.setInfo(order.getInfo());
+		  ordVUS.setShipCal(order.getShipCal().getTimeInMillis() +"");
+		  ordVUS.setStatus(order.getStatus());
+		  ordVUS.setPaymTerm(order.getPaymTerm());
+		  ordVUS.setILN(order.getILN());
+		  ordVUS.setChanged(true); // et teaksime et on tegemita tubakaga T t�he lisamiseks
+		 
 		  
 		  ordBAT.setAgentCode(order.getAgentCode());
 		  ordBAT.setDokNr(order.getDokNr());
@@ -661,7 +672,7 @@ import eevaeksport.util.Converter;
 			   // System.out.println("Splitter PL  " + lin.getPl() );
 			    
 			    
-			     if(group.equals("BAT") || group.equals("NIV")){ //|| group.equals("STG")  
+			     if(group.equals("BAT") || group.equals("NIV") || group.equals("VUS")  ){ //|| group.equals("STG")  
 			     
 			    	 if(lin.getKogus() < 0){
 			    		 ordNega.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
@@ -1190,8 +1201,15 @@ import eevaeksport.util.Converter;
 	  
 	  
 	  public double getKogusRounded(String toode, Integer kogus, String klient) throws SQLException{
+		  if(klient.startsWith("T")) {
+			  klient = klient.substring(1);
+			  if(klient.length() != 4) {
+				  klient = klient.substring(0,4);
+			  }
+		  }
 		 	 
 		    String sql1 = " SELECT QtyInBox AS jagaja FROM QtyMultipliers0100  WHERE ProductCode =   '" + toode.trim() + "' and ClientCode = '"+ klient + "'";
+		   // System.out.println(sql1);
 		    double jagaja = kogus;
 		    double kastis = 1;
 		    Statement st1 = con.createStatement();
@@ -1210,23 +1228,24 @@ import eevaeksport.util.Converter;
 			     if (rs1.next()) {
 			    	kastis = rs1.getDouble("jagaja");
 			      }
+			     rs1.close();
+				    st1.close();
 		    }
 		    
-		    rs1.close();
-		    st1.close();
-		    System.out.println(toode + " " +  kastis +  " getKogusRounded " + kogus );
+		   
+		   // System.out.println(toode + " " +  kastis +  " getKogusRounded " + kogus );
 		     if(kastis > 1) {
 		    	 if(kogus < kastis) {
 		    		 return kastis;
 		    	 }else {
 		    		double kaste = Math.round(kogus/kastis);
-		    		  System.out.println(toode + " " +  kastis +  " getKogusRounded " + kogus + " "+  kaste);
+		    		 // System.out.println(toode + " " +  kastis +  " getKogusRounded " + kogus + " "+  kaste);
 		    		  
 		    	     return kaste * kastis;
 		    	 }
 		     }
 		    
-		    System.out.println(toode + " getKogusRounded " + jagaja);
+		   // System.out.println(toode + " getKogusRounded " + jagaja);
 		    return jagaja;
 		 }
 	  
