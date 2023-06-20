@@ -1155,7 +1155,8 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
      
      //makeData();
     // System.out.println( getPricelists("1").toString());
-   //  this.getProducts(null);
+     //this.getProducts(null);
+    // getSaveStockInfo();
      //File ff = new File(this.getExcelDir() + "graafikud.xlsx");
    //  Converter.sendExcelVisits(ff,rcompany,user,pass);
      
@@ -2216,9 +2217,9 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	   System.out.println("tooted a");
 	   TreeMap otherStocks = this.getProductsOther();
 	   
-	   TreeMap stocksfile = null;
+	 
 	   try {
-		   stocksfile = getLaoSeisud(null); 
+		//   stocksfile = getLaoSeisud(null); 
 	   }catch(Exception e) {
 		   
 	   }
@@ -2747,16 +2748,24 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
       	 	 
       	 	
       	  try{
-       		 Node sto =  getNode(rida ,"stocklevels"); 
-       	 	      	   
-      	 	 
-      	 	 if( getParent().getProps().getProperty("stockcode") != null && sto != null){
+      		  
+      		 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
+           	  Node rid = rida.getChildNodes().item(r);
+      		 
+       		 if(rid.getNodeName().equals("stocklevels")) {
+       			 Node sto = this.getNode(rid, "stocklevel");
+       		
+       		//System.out.println("Stock " + rid.getNodeName() + " " + rid.getAttributes().getLength());
+      	
+      	 	 if( getParent().getProps().getProperty("stockcode") != null && sto != null && 
+      	 		sto.getAttributes().getNamedItem("stock").getNodeValue().equals(getParent().getProps().getProperty("stockcode"))){
       	 		 
-      	 		 System.out.println("Stock " + sto.getAttributes().getNamedItem("level").getNodeValue());
+      	 		// System.out.println("Stock " + sto.getAttributes().getNamedItem("level").getNodeValue());
       	 		double stoo = Double.parseDouble(sto.getAttributes().getNamedItem("level").getNodeValue());
       	 		prod.setStock(stoo);
       	 		
       	 	 }
+      		 }}
      	         // prod.setStock((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
                    }catch(Exception e) {
                 	   e.printStackTrace();
@@ -3372,41 +3381,64 @@ public String getSaveStockInfo() {
       
  try{
 	 Converter.doTrustToCertificates();
-   String httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=item";
-    if(getParent().getProps().getProperty("stockcode") != null){
-    	httpsURL = httpsURL + "&stock=" +  getParent().getProps().getProperty("stockcode");
-	  }
-  System.out.println(httpsURL);
-  URL  myurl = new URL(httpsURL);
-  HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-   InputStream ins = con.getInputStream();
-   InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-   BufferedReader in = new BufferedReader(isr);
+	 
+	 
+	 
+
+     
+     String gS = getParent().getProps().getProperty("keyStocks");
+	    if(gS == null) {
+	    	System.out.println("keyStocks is missing!");
+	    	System.exit(0);
+	    }
+	   
+     String urlParameters  = "get=1&what=stocklevel&key=" + gS;
+    String  httpsURL = logurl  + company + "/" + comphelp + "/xmlcore.asp"; //?get=1&what=stocklevel
+    URL myurl = new URL(httpsURL);
+     
+     byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+     int postDataLength = postData.length;
+     HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
+     con.setRequestMethod("POST");
+     con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+     con.setRequestProperty("charset", "utf-8");
+     con.setRequestProperty("Content-Length", Integer.toString(postDataLength ));
+     con.setUseCaches(false);
+     con.setDoOutput(true);
+     try(DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+        wr.write( postData );
+     }
+     
+    InputStream ins = con.getInputStream();
+    InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
+    BufferedReader in = new BufferedReader(isr);
 
     String inputLine = "";
     StringBuffer inputLineBuf = new StringBuffer();
-   while ((inputLine = in.readLine()) != null){
-   	inputLine = Converter.enCodeEst(inputLine);
-   	inputLineBuf.append(inputLine.replaceAll("<item","\n<item" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
-   }
-
-   in.close();
-   
-   if(inputLineBuf.length() > 2){
-         try {
-       	  File f = new File (getDir() + "tooted.xml");
-       	  if(f.exists())f.delete();
-       	Converter.saveFileInUTF8(getDir() + "tooted.xml", inputLineBuf.toString());
-      	
-   	  }catch (Exception ex) {
-   		ex.printStackTrace();
-   	  }
+    while ((inputLine = in.readLine()) != null){
+    	inputLine = Converter.enCodeEst(inputLine);
+    	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
     }
-   
 
-   //lõpeb toodetega tegelemine 
-
-   System.out.println("Tooted tehtud" );
+    in.close();
+    
+    if(inputLineBuf.length() > 2){
+  	  String str = inputLineBuf.toString();
+        if(str.startsWith("True")) {
+       	 str = str.substring(4);
+        }
+          try {
+        	  File f = new File (getDir() + "laoseis.xml");
+        	  if(f.exists())f.delete();
+        	 Converter.saveFileInUTF8(getDir() + "laoseis.xml", str);
+    	
+    	  }catch (Exception ex) {
+    		ex.printStackTrace();
+    	  }
+     }
+    
+    System.out.println("Laoseisud tehtud" );
+    
 
 }catch(Exception e){
 	e.printStackTrace();
@@ -3418,56 +3450,48 @@ public String getSaveStockInfo() {
  try {
 	 
 
-	   FileReader fr = new FileReader(getDir() + "tooted.xml");
-       BufferedReader reader = new BufferedReader(fr);
-     String line = null;
-
+	 File f = new File (getDir() + "laoseis.xml");
+	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	     DocumentBuilder db;
+		db = dbf.newDocumentBuilder();      	
+ 	FileInputStream in = getCleanInputStream(f);
+ 	String handler = null;
+     Document doc = db.parse(in,handler);
+     Node root = getNode(doc, "transport");      
+  //   System.out.println(root);
+ 	Node read = getNode(root, "stocklevels");
+ 	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
+     for (int i = 0; i < read.getChildNodes().getLength(); i++){
+     	  Node rida = read.getChildNodes().item(i);
+     	  
+     	 // System.out.println("node name " + rida.getNodeName());
+     	  if(rida.getNodeName().equals("stocklevel")){
      //line = reader.readLine();
+        double  seisx = 0;
+        String ladu = rida.getAttributes().getNamedItem("stock_code").getNodeValue();
+        String kogus = rida.getAttributes().getNamedItem("stock_level").getNodeValue();
+        String toode = rida.getAttributes().getNamedItem("code").getNodeValue();
      
-  //   System.out.println("suurus " +prodsInUse.size());
-      while((line = reader.readLine()) != null  ){
-    	  
-    	  if((line.trim().length()) > 40 ){
-    	  int len = line.indexOf("code=");
-    	  String id   = line.substring(len +6);
-    	  id = id.substring(0,id.indexOf("\""));
- 	 len = line.indexOf("<stocklevels>");
- 	 double seisx = 0; 
-if(len != -1){
-    String stock   = line.substring(len + 13); 
-    stock = stock.substring(0,stock.indexOf("stocklevels"));
-if( getParent().getProps().getProperty("stockcode") != null){
-	 int ladu = stock.indexOf("stock=\"" + getParent().getProps().getProperty("stockcode") + "\"");
-	 if(ladu != -1){
-		 String seis = stock.substring(ladu+5);
-				 seis = seis.substring(seis.indexOf("level=") + 7);
-				 seis = seis.substring(0, seis.indexOf("\""));
-				 try{
-					seisx = ( Double.parseDouble(seis)); 
-				 }catch (Exception e){
-					e.printStackTrace(); 
-				 }
-	 }
-     }
-}else{
-	len = line.indexOf("stock_level_total=");
-	 if(len != -1){
-	     String stock   = line.substring(len + 19);  
-      seisx = ((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
-	 }
-}
-if(seisx > 0) {
-	products.append(id +  "; ;");
-	products.append(getParent().getNF().format(seisx) + "; "  +  "\n"); 
-}
+		if( getParent().getProps().getProperty("stockcode") != null && ladu.equals(getParent().getProps().getProperty("stockcode"))){
+			
+							seisx = ( Double.parseDouble(kogus)); 
+				
+		}else{
+			seisx = ( Double.parseDouble(kogus)); 
+		}
+		if(seisx > 0) {
+			products.append(toode +  "; ;");
+			products.append(getParent().getNF().format(seisx) + "; "  +  "\n"); 
+		}
 
        	  }}
-      reader.close();
+          in.close();
+          
     	  }catch(Exception tt){
-    			 
+    		tt.printStackTrace();	 
     	  }
 
- 
+ System.out.println("laoseisud " + products.toString());
  return products.toString();
  
 }
