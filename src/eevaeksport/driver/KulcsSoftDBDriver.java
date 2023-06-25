@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -131,7 +132,34 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
         public TreeMap getProdGroups() throws SQLException {
 
             TreeMap   tm = new TreeMap();
-            tm.put( "zpienas", "zpienas");
+            try {
+     		   connectionUp();
+     		 Connection  con = DriverManager.getConnection(url);
+     	        Statement st = con.createStatement();
+     	       
+     	    ResultSet rs = st.executeQuery("select  \"FieldName\" as kood,ct.\"DisplayName\"  as name "
+     	    		+ "from \"CustomField\" cf inner join \"CustomTable\" ct ON cf.\"ForeignTableName\" = ct.\"CustomTableName\"");
+
+     	    while (rs.next()) {
+                  
+                   String kood = rs.getString("kood");
+                   String nimetus = rs.getString("name");
+                   if(kood != null && nimetus != null ){
+                 	  tm.put(kood.trim(), nimetus.trim());
+                   }
+                  
+                
+     	    }
+     	    rs.close();
+     	    st.close();
+     	    con.close();
+     	    
+     	} catch (Exception e) {
+     	    getParent().showError(e);
+     	}
+           
+            
+             tm.put( "zpienas", "zpienas");
             return tm;
         }
 
@@ -196,20 +224,43 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
  
 
         System.out.println("kliendid algus");
-        String cmd =
-	    "select a.\"Id\",c.\"Id\" as pid , c.\"Name\" , a.\"AddressName\" , a.\"Street\", a.\"City\", a.\"Number\" , c.\"PaymentMethodDelayDay\" , c.\"AppliedPriceRule\" "
-	    + " , c.\"ContactName\",c.\"ContactPhone\" ,  c.\"Email\" from \"CustomerAddress\" a INNER JOIN \"Customer\" c ON c.\"Id\" = a.\"Customer\"" ;
+       
 
-
-	log(cmd);
+	
 
 	TreeMap customers = new TreeMap();
+	TreeMap<String, Double> dues = new TreeMap<String, Double>();
+	TreeMap<String, Double> overdues = new TreeMap<String, Double>();
 
 	try {
-		 Connection  con = DriverManager.getConnection(url);
-	        Statement st = con.createStatement();
-	    
-	    ResultSet	      rs = st.executeQuery(cmd);
+		String cmd =
+			    "select  \"Customer\",   sum(\"GrossValue\" - \"AcquitValue\")  as debt, sum(case when datediff(day , \"PaymentDate\" ,CURRENT_DATE ) > 0 then \"GrossValue\" - \"AcquitValue\"  else 0 end) as odebt\r\n" + 
+			    " from \"CustomerStockOut\"\r\n" + 
+			    " where \"VoucherType\"  = 1 and \"AcquitValue\" != \"GrossValue\"  group by 1" ;
+
+	 Connection  con = DriverManager.getConnection(url);
+        Statement st = con.createStatement();
+    
+    ResultSet	      rs = st.executeQuery(cmd);
+
+    while (rs.next()) {
+    	   String kood = rs.getString("Customer").trim();
+    	   double dd = rs.getDouble("debt");
+    	   double ddo = rs.getDouble("odebt");
+    	   dues.put(kood, dd);
+    	   if(ddo > 0) {
+    	   overdues.put(kood, ddo);
+    	   }
+    }
+     rs.close();
+     st.close();
+		
+	 cmd =   "select a.\"Id\",c.\"Id\" as pid , c.\"Name\" , a.\"AddressName\" , a.\"Street\", a.\"City\", a.\"Number\" , c.\"PaymentMethodDelayDay\" , c.\"AppliedPriceRule\" "
+				    + " , c.\"ContactName\",c.\"ContactPhone\" ,  c.\"Email\" from \"CustomerAddress\" a INNER JOIN \"Customer\" c ON c.\"Id\" = a.\"Customer\"" ;
+
+		  
+	         st = con.createStatement();
+	   	      rs = st.executeQuery(cmd);
 
 	    while (rs.next()) {
             String kood = rs.getString("Id").trim();
@@ -230,6 +281,12 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
 		String ag = "HU001";
 		         Agent aa = new Agent(ag);
 		         cust.addAgent(aa);
+		         if(dues.get(payer) != null) {
+		        	 cust.setUsedCredit(dues.get(payer));
+		         }
+		         if(overdues.get(payer) != null) {
+		        	 cust.setDebt(overdues.get(payer));
+		         }
 		
                 cust.setName(Converter.enCodeEst(nimi) + " " + Converter.enCodeEst(nimi2));
                 
@@ -251,6 +308,10 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
 	  System.out.println("kliendid l�pp");
 	return customers;
     }
+    
+    
+    
+    
 
     public TreeMap getProducts(Agent agent) {
         connectionUp();
@@ -261,7 +322,7 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
         
 try{
      String sql = " select \"Product\", \"Price\",  \"ValidFrom\" , \"ValidTo\" from  \"PriceRulePrice\" pr INNER JOIN \"PriceRuleDetail\" d ON d.\"Id\" = pr.\"PriceRuleDetail\" \r\n" + 
-     		" where \"PriceRule\" = 386 and Current_Date between \"ValidFrom\" and \"ValidTo\" and \"Price\" > 0 order by 1 " ; //where osak='LADU' 
+     		" where \"PriceRule\" = 386 and Current_Date between \"ValidFrom\" and \"ValidTo\" and \"Price\" > 0  order by 1 " ; //where osak='LADU' 
            
      Connection  con = DriverManager.getConnection(url);
  PreparedStatement pstm = con.prepareStatement(sql);
@@ -283,9 +344,50 @@ System.out.println("prices " + prices.size());
 r.printStackTrace();
 }
    
+ TreeMap prodsInGroups = new TreeMap();
+
+
+try{
+    String cmd = " Select * from  \"Product\" p where \"Service\" = 0 and \"OutGoingProduct\" != 1 ";
+
+          TreeMap groups = this.getProdGroups();
+    Connection  con = DriverManager.getConnection(url);
+PreparedStatement pstm = con.prepareStatement(cmd);
+ResultSet rs6 = pstm.executeQuery();
+
+while(rs6.next()){
+	String kood = rs6.getString("Id").trim();
+	 Iterator itera =  groups.keySet().iterator();
+	while(itera.hasNext()) {
+		String field = (String)itera.next();
+		try {
+			int gr = rs6.getInt(field);
+			if(gr > 0) {
+				prodsInGroups.put(kood, field);
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+   
+	
+	
+}
+
+
+rs6.close();
+pstm.close();
+con.close();
+
+
+System.out.println("prices " + prodsInGroups.toString());
+
+}catch(Exception r){
+r.printStackTrace();
+}
 
            String cmd = " select p.\"Id\" as toode ,p.\"Code\" as code, p.\"Name\", p.\"Barcode\" as ean,"
-           		+ " p.\"MinimumQuantity\" as minam , p.\"Vat\" , 'db' as unit ,  p.\"StockBalance\" as stock from  \"Product\" p where \"Service\" = 0 ";
+           		+ " p.\"MinimumQuantity\" as minam , p.\"Vat\" , 'db' as unit ,  p.\"StockBalance\" as stock from  \"Product\" p where \"Service\" = 0  and \"OutGoingProduct\" != 1 ";
 //kood AS liik , nimetus AS nimi  FROM artryhm t
 			if (isDebug()) {
 			    System.out.println(cmd);
@@ -308,7 +410,9 @@ r.printStackTrace();
                  if(prices.get(kood)!= null){
                 	 prod.setPrice(Double.parseDouble((String)prices.get(kood)));
                  }
-                 prod.setGroup("zpienas");
+                 if(prodsInGroups.get(kood) != null) {
+                	 prod.setGroup(prodsInGroups.get(kood)+"");
+                 }
                 try {
                 	 prod.setInCases(rs.getDouble("minam"));
                 }catch(Exception e) {
@@ -488,10 +592,9 @@ r.printStackTrace();
 
     public Vector getDebt(String agentCode) throws SQLException{
         Vector list = new Vector();
-       /* System.out.println("debt algus");
-        String sql = "SELECT klient,tasudok AS number,tasukuup AS maksepaev,tasumata, kuupaev ,tasukuup-date() as yle FROM " +
-                     " firma1.dok WHERE   doktyyp='G' AND tasumata<>0 " +
-                     "ORDER BY klient";
+        System.out.println("debt algus");
+        String sql = "select \"VoucherNumber\", \"Customer\", \"CustomerAddress\" , \"VoucherDate\" , \"PaymentDate\",  \"GrossValue\" - \"AcquitValue\"  as debt,"
+        		+ " datediff(day , \"PaymentDate\" ,CURRENT_DATE ) as yle from \"CustomerStockOut\" where \"VoucherType\"  = 1 and \"AcquitValue\" != \"GrossValue\"";
 
 
                  //jee
@@ -500,27 +603,24 @@ r.printStackTrace();
         ResultSet	      rs = stmt.executeQuery(sql);
   	    while(rs.next()){
           Debt debt = new Debt();
-          debt.setCustID(rs.getString("klient").trim());
-          debt.setDoknr(rs.getString("number").trim());
-          Date dd = rs.getDate("maksepaev");
-          debt.setSum(rs.getDouble("tasumata"));
-          debt.setDate(rs.getDate("kuupaev"));
-          if(dd == null){
-        	  debt.setDuedate(new Date(Calendar.getInstance().getTimeInMillis()));
-        	  debt.setDue("0");
-              
-          }else{
+          debt.setDoknr(rs.getString("VoucherNumber").trim());
+          debt.setPayerID(rs.getString("Customer").trim());
+          debt.setCustID(rs.getString("CustomerAddress").trim());
+          debt.setDate(rs.getDate("VoucherDate"));
+          Date dd = rs.getDate("PaymentDate");
+          debt.setSum(rs.getDouble("debt"));
+      
+         
         	  debt.setDuedate(dd);
         	  debt.setDue(rs.getString("yle"));
-                   	  
-          }
+         
           list.addElement(debt);
         }
   	    rs.close();
   	    stmt.close();
   	    con.close();
   	    
-  	    System.out.println("debt lopp");*/
+  	    System.out.println("debt lopp");
         return list;
       }
 

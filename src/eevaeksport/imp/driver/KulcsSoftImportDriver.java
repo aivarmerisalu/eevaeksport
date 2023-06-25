@@ -143,6 +143,7 @@ public class KulcsSoftImportDriver
                  }else {
                  	vat = 27;
                  }
+                 prod.setVat(vat+"%");
                  
                  prod.setPrice(rs.getDouble("price"));
              
@@ -292,12 +293,12 @@ public class KulcsSoftImportDriver
 
   private String getDateString(Calendar cal){
 	    StringBuffer sb = new StringBuffer();
-	    sb.append((cal.get(Calendar.YEAR)+"")+ "-");
+	    sb.append((cal.get(Calendar.YEAR)+"")+ ".");
 	    String month = String.valueOf(cal.get(Calendar.MONTH) + 1);
 	    if (month.length() == 1){
 	      sb.append("0");
 	    }
-	    sb.append(month + "-");
+	    sb.append(month + ".");
 
 	    String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
 	    if (day.length() == 1){
@@ -324,7 +325,7 @@ private TreeMap customers = null;
   		}
   	
  	      String doknr = order.getDokNr();
- 		  String ls = ",";       
+ 		  String ls = ";";       
           String custID = order.getCompany();
           Customer cust = (Customer)customers.get(custID);
          
@@ -381,7 +382,7 @@ private TreeMap customers = null;
             sb.append(" " + ls);
             sb.append(" " + ls);
             sb.append(" " + ls);
-            sb.append(" " + ls);
+            sb.append("RE" + ls);
             sb.append(" " + ls);
             sb.append(" " + ls);
             sb.append(" " + ls);
@@ -398,9 +399,9 @@ private TreeMap customers = null;
             sb.append(" " + ls);
             sb.append(" " + ls);
             sb.append("House 1 " + ls);
-            sb.append(" " + ls);
-            sb.append(" " + ls);
-            sb.append(" " + ls);
+            sb.append("0" + ls);
+            sb.append("0" + ls);
+            sb.append("0" + ls);
             sb.append(" " + ls);
             sb.append(" " + ls);
             sb.append(System.getProperty("line.separator"));
