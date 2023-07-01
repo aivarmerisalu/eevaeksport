@@ -9231,6 +9231,24 @@ client.close();
 			    }
 		}
 	
+	public static void saveFileInANSI(String filename, String sb){
+	      try{
+	    	  
+	    	  File f = new File(filename);
+	          if (f.exists())f.delete();
+	      	  Writer out = new BufferedWriter(new OutputStreamWriter(
+	      			    new FileOutputStream(filename), "ISO-8859-2"));
+	      			try {
+	      			    out.write(sb.toString());
+	      			} finally {
+	      			    out.close();
+	      			}
+		            	
+			    }catch(Exception e){
+			    	e.printStackTrace();
+			    }
+		}
+	
 	public static void saveFile(String filename, String sb){
 	      try{
 	    	  

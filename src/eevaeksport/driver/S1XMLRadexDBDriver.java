@@ -487,10 +487,11 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	   //   System.out.println("res " + res + " dd" + dd + " " +(( -dd+(new java.util.Date()).getTime())/86400000));
 	      return res ;
 	   }
-
+TreeMap<String, Double> odue = null;
 
    public Vector getDebt(String agentCode){
-
+	   odue = new TreeMap<String, Double>();
+   java.util.Date now = Calendar.getInstance().getTime();
 	   Vector list = new Vector();
 	   
 	 	try {
@@ -532,6 +533,16 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 			         		String debtPayDate   = getNode(debtrida,"PayDate").getFirstChild().getNodeValue();
 			         		Double debtOpenAmount   = Double.parseDouble(getNode(debtrida,"OpenAmount").getFirstChild().getNodeValue());
 			         		
+			         		if((getDate(debtPayDate)).before(now)) {
+			         			if(odue.get(custGUID) != null) {
+			         				Double ol = odue.get(custGUID);
+			         				odue.put(custGUID, ol+debtOpenAmount);
+			         			}else {
+			         				odue.put(custGUID, debtOpenAmount);
+			         			}
+			         			
+			         		}
+			         			
 			      	        debt.setDoknr(debtDocNr);
 			      	        debt.setDuedate(getDate(debtPayDate));
 			      	        debt.setSum(debtOpenAmount);
@@ -740,6 +751,7 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	     custAgents = new Hashtable();
 	     custGUIDS = new HashMap();
 	     HashMap prg = plistGUID();
+	     this.getDebt(null);
 
 
     	 try {
@@ -846,6 +858,9 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
          		  	if(addressNode == null) {
          		  		
          		  		Customer customer = new Customer(CustCode + "_0" );
+         		  		if(odue.get(CustGUID) != null) {
+         		  			customer.setDebt(odue.get(CustGUID));
+         		  		}
          		  		
          		  		if(CustName != null){
 	      		         customer.setName(Converter.enCodeEst(CustName));
@@ -942,7 +957,9 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
     	      		         Customer customer = new Customer(CustCode + "_" + DAddressCode);
     	      		         customer.setName(Converter.enCodeEst(CustName) + "_" + DAddressCode);
     	      		         customer.setAddress(Converter.enCodeEst(Converter.adressLink(DAddress,"Latvia")));
-    	      		         
+    	      		       if(odue.get(CustGUID) != null) {
+            		  			customer.setDebt(odue.get(CustGUID));
+            		  		}
 	    	      		       if(DAddressAgentGUID != null  && agentGUID.get(DAddressAgentGUID) != null){
 	    	      		    	 customer.addAgent(new Agent(agentGUID.get(DAddressAgentGUID)));
 	   	      		         	}

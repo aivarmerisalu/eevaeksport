@@ -2,6 +2,8 @@ package eevaeksport.driver;
 
 import java.sql.Date;
 
+import org.json.simple.JSONObject;
+
 /**
  * <p>Title: </p>
  * <p>Description: </p>
@@ -70,6 +72,7 @@ public class Toode {
   private double donecur = 0;
   private String brand = null;
   public String comment = null;
+  public JSONObject json = null;
 public double getPlanvol() {
 	return planvol;
 }

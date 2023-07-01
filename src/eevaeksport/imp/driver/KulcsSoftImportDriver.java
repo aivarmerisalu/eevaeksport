@@ -21,6 +21,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+import org.json.simple.JSONObject;
 
 import eevaeksport.Agent;
 import eevaeksport.Customer;
@@ -147,14 +148,9 @@ public class KulcsSoftImportDriver
                  
                  prod.setPrice(rs.getDouble("price"));
              
-                 
-                 String ean4 = "";
-                 if(prod.getEAN()!= null && prod.getEAN().length() > 6 ){
-                 	ean4 = prod.getEAN().substring(prod.getEAN().length()-4);
-                 }
-                 
+           
                 // name =  name.substring(0,1) + (name.substring(1,name.length())).toLowerCase();
-                 prod.setName(Converter.enCodeEst(name + " " + ean4));
+                 prod.setName(name);
                  
                  String yh = rs.getString("unit");
                  
@@ -183,14 +179,30 @@ public class KulcsSoftImportDriver
  	return products;
      }
 
+  	 
+  	 private String m(String x) {
+  		 if(x == null || x.toString().length() == 0 ) {
+  			 return " ";
+  		 }else {
+  			 return x;
+  		 }
+  	 }
   	   
   	 public TreeMap getCustomers() {
   		 
 
          System.out.println("kliendid algus");
          String cmd =
- 	    "select a.\"Id\",c.\"Id\" as pid , c.\"Name\" , a.\"AddressName\" ,a.\"Zip\", a.\"Street\", a.\"City\", a.\"Number\" , c.\"PaymentMethodDelayDay\" , c.\"AppliedPriceRule\" "
- 	    + ", c.\"ContactName\",c.\"ContactPhone\" ,  c.\"Email\",c.\"TaxNumber\" as vatno ,  c.\"CompanyRegNumber\" as regno from \"CustomerAddress\" a INNER JOIN \"Customer\" c ON c.\"Id\" = a.\"Customer\"" ;
+ 	    "select a.\"Id\", c.\"Code\" as code1 ,c.\"Id\" as pid , c.\"Name\" , a.\"AddressName\" "
+ 	    + ",a.\"Zip\", a.\"Street\", a.\"City\", a.\"Number\" , a.\"Building\" , a.\"Staircase\" , a.\"Floor\" , a.\"Door\" "
+ 	   + ",c.\"CentralZip\", c.\"CentralStreet\", c.\"CentralCity\", c.\"CentralNumber\" , c.\"CentralBuilding\" , c.\"CentralStaircase\" , c.\"CentralFloor\" , c.\"CentralDoor\" "
+ 	    + "c.\"PaymentMethodDelayDay\" , c.\"AppliedPriceRule\" "
+ 	    + ", c.\"ContactName\",c.\"ContactPhone\" ,  c.\"Email\",c.\"TaxNumber\" as vatno ,  c.\"CompanyRegNumber\" as regno"
+ 	    + " from \"CustomerAddress\" a INNER JOIN \"Customer\" c ON c.\"Id\" = a.\"Customer\"" ;
+
+         
+        // Zip  City Street    Building , Staircase  Floor Door  ,  CentralAddress  CentralCountry CentralZip , CentralCity CentralStreet 
+         // CentralNumber CentralBuilding CentralStaircase , CentralFloor  , CentralDoor  Bank  ObligatoryPaymentTerms DateOfFiling 
 
 
 
@@ -204,16 +216,39 @@ public class KulcsSoftImportDriver
 
  	    while (rs.next()) {
              String kood = rs.getString("Id").trim();
+             String code = rs.getString("code1");
              String payer = rs.getString("pid").trim();
  		Customer cust = new Customer(kood);
  		         cust.setPayer(payer);
- 		         
+ 		         if(code != null) {
+ 		         cust.setMainAgent(code.trim());
+ 		         }
+ 		        JSONObject json = new JSONObject();
+ 		 		
+ 		 		
  		String nimi = parent.make(rs.getString("Name"));
  		String nimi2 = parent.make(rs.getString("AddressName"));
  		String zipcode = parent.make(rs.getString("Zip"));
  		String street = parent.make(rs.getString("Street"));
  		String city = parent.make(rs.getString("City"));
  		String number = parent.make(rs.getString("Number"));
+ 		String building = parent.make(rs.getString("Building"));
+ 		String staircase = parent.make(rs.getString("Staircase"));
+ 		String floor = parent.make(rs.getString("Floor"));
+ 		String door = parent.make(rs.getString("Door"));
+ 		
+ 		
+ 		
+ 		String zipcodeC = parent.make(rs.getString("CentralZip"));
+ 		String streetC = parent.make(rs.getString("CentralStreet"));
+ 		String cityC = parent.make(rs.getString("CentralCity"));
+ 		String numberC = parent.make(rs.getString("CentralNumber"));
+ 		String buildingC = parent.make(rs.getString("CentralBuilding"));
+ 		String staircaseC = parent.make(rs.getString("CentralStaircase"));
+ 		String floorC = parent.make(rs.getString("CentralFloor"));
+ 		String doorC = parent.make(rs.getString("CentralDoor"));
+ 		
+ 		
  		String paym = parent.make(rs.getString("PaymentMethodDelayDay"));
  		String pricegr = parent.make(rs.getString("AppliedPriceRule"));
  		String kontakt = parent.make(rs.getString("ContactName"));
@@ -222,16 +257,35 @@ public class KulcsSoftImportDriver
  		String vatno = parent.make(rs.getString("vatno"));
  		String regno =  parent.make(rs.getString("regno"));
  		String ag = "HU001";
+ 		
+ 		json.put("street", m(street));
+ 		json.put("number", m(number));
+ 		json.put("city", m(city));
+ 		json.put("building", m(building));
+ 		json.put("staircase", m(staircase));
+ 		json.put("floor", m(floor));
+ 		json.put("door", m(door));
+ 		json.put("buildingC", m(buildingC));
+ 		json.put("staircaseC",m( staircaseC));
+ 		json.put("floorC", m(floorC));
+ 		json.put("doorC", m(doorC));
+ 		json.put("numberC",m(numberC));
+ 		json.put("cityC", m(cityC));
+ 		json.put("streetC", m(streetC));
+ 		json.put("zipcodeC", m(zipcodeC));
+ 		
+ 		
  		         Agent aa = new Agent(ag);
  		         cust.addAgent(aa);
  		
                  cust.setName(Converter.enCodeEst(nimi) + " " + Converter.enCodeEst(nimi2));
                  
-                    cust.restStreet = street+" "+ number;
+                    cust.restStreet = street;
                     cust.restCity = city;
                     cust.setCity(city);
                     cust.setZipcode(zipcode);
-                	cust.setAddress(street+ " " + number );
+                	cust.setAddress(street);
+                	cust.json = json;
                  	cust.setPersonalData(kontakt + " " + kontaktTel + "|" + email);
                  	cust.setPaymTerm(paym);
                  	cust.setGroup(pricegr);
@@ -331,6 +385,7 @@ private TreeMap customers = null;
          
           
           String custName = cust.getName();
+          JSONObject json = cust.json;
           Calendar  shipDate = order.getShipCal();
           Calendar cal = Calendar.getInstance();
            
@@ -358,7 +413,7 @@ private TreeMap customers = null;
             sb.append((order.getDokNr()).trim() + ls); 
             sb.append("HUF" + ls); 
             sb.append("1" + ls); 
-            sb.append( custID +  ls); 
+            sb.append( cust.getMainAgent() +  ls); 
             sb.append( custName +  ls);
             sb.append( cust.getZipcode() +  ls);
             sb.append( cust.getCity() +  ls);
@@ -370,7 +425,7 @@ private TreeMap customers = null;
             sb.append(getDateString(cal)  + ls);
             
             sb.append( cust.getVatnr() +  ls);
-            sb.append( cust.getPaymTerm() +  ls);
+            sb.append( "átutalás" +  ls);
             sb.append( line.getToode() +  ls);
             sb.append( prodName +  ls);
             sb.append( getNF().format(line.getKogus())+  ls);
@@ -379,26 +434,57 @@ private TreeMap customers = null;
             sb.append( getNF().format(line.getPrice())+  ls);
             sb.append(line.getPartii() + ls);
             sb.append(vatt + ls);
+
             sb.append(" " + ls);
             sb.append(" " + ls);
             sb.append(" " + ls);
             sb.append("RE" + ls);
             sb.append(" " + ls);
-            sb.append(" " + ls);
-            sb.append(" " + ls);
-            sb.append("Public area " + ls);
-            sb.append(" " + ls);
-            sb.append(" " + ls);
-            sb.append(" " + ls);
-            sb.append(" " + ls);
-            sb.append("House 1 " + ls);
-            sb.append(" " + ls);
-            sb.append("Public area " + ls);
-            sb.append(" " + ls);
-            sb.append(" " + ls);
-            sb.append(" " + ls);
-            sb.append(" " + ls);
-            sb.append("House 1 " + ls);
+            sb.append("" + ls);
+            
+      /*  	json.put("building", building);
+     		json.put("staircase", staircase);
+     		json.put("floor", floor);
+     		json.put("door", door);
+     		json.put("buildingC", buildingC);
+     		json.put("staircaseC", staircaseC);
+     		json.put("floorC", floorC);
+     		json.put("doorC", doorC);
+     		json.put("numberC", numberC);
+     		json.put("cityC", cityC);
+     		json.put("streetC", streetC);
+     		json.put("zipcodeC", zipcodeC);*/
+            
+            
+            
+            
+            
+           
+           
+           
+            
+            
+            
+            
+
+            
+            
+
+        
+            sb.append(" " + ls); // Buyer address - Country
+            sb.append(json.get("cityC") + ls); //Customer address - Public area
+            sb.append(json.get("doorC") + ls); //Customer address - Door
+            sb.append(json.get("buildingC") + ls);//Customer address - Building
+            sb.append(json.get("floorC") + ls);// Customer address - Floor
+            sb.append(json.get("staircaseC") + ls);//Customer address - Staircase
+            sb.append(json.get("numberC")  + ls);//Customer address - House number
+            sb.append(" " + ls); // Shipping address - Country
+            sb.append(json.get("city") + ls);// Delivery address - Public area
+            sb.append(json.get("door") + ls);// Shipping address - Door
+            sb.append(json.get("building") + ls);//Delivery address - Building
+            sb.append(json.get("floor") + ls);// Delivery address - Floor
+            sb.append(json.get("staircase") + ls);// Delivery address - Staircase
+            sb.append(json.get("number")  + ls);// Delivery address - House number
             sb.append("0" + ls);
             sb.append("0" + ls);
             sb.append("0" + ls);
@@ -434,7 +520,7 @@ private TreeMap customers = null;
        }
        String fileName = parent.getProps().getProperty("conv.dir") + order.getAgent()  + "." + fn  +  ".csv";
        System.out.println(fileName);
-       Converter.saveFileInUTF8(fileName, sb);
+       Converter.saveFileInANSI(fileName, sb.toString());
 
  	} catch (Exception e) {
  		e.printStackTrace();

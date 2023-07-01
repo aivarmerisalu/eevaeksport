@@ -930,7 +930,7 @@ if(ladu.trim().length()!=0){
           fos = new FileOutputStream(fileName);
          fos.write(sbb.toString().getBytes());
          fos.close();
-         if(sbb.contains("<h1>Error: Server Error") || sbb.contains("Connection refused")) {
+         if(sbb.contains("<h1>Error: Server Error") || sbb.contains("Connection refused") ||  sbb.contains("connect timed out") ||  sbb.contains("errorMessage")) {
             System.exit(0);	
          }
          if(sbb.contains("<errorMessage></errorMessage>") ) {

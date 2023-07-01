@@ -854,7 +854,7 @@ Statement st = null;
     	              String date = rs.getString("data").substring(0,10);
     	              double summa = rs.getDouble("Suma");
     	             
-    	               if(cou < 5) {
+    	               if(cou < 10) {
     	            	//  System.out.println("aaaa " + cou  + " " + oldcust + "" + custid);
     	            	   asi = asi + "|" + ((int)summa) + " € " +  date + " "  + type;
     	            	   hh.put(custid , asi); 
@@ -997,6 +997,7 @@ Statement st = null;
 	    TreeMap customers = new TreeMap();
         HashMap custMap = new HashMap();
         HashMap deguSumm = new HashMap();
+        TreeMap locistics = new TreeMap();
        
         baashk = new Vector();
 	try {
@@ -1017,13 +1018,28 @@ Statement st = null;
 	   }
 		 rs.close();
 		 stmt.close();
-		
+		try {
 		 
-		 
-		
-		 
+		 String logi = "Select Partnerio_Kodas as klient ,Marsruto_Pavad as ring , SavaitesDienos as paev from MES_PartneriuMarsrutai ";
+		 Connection con = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
+                 getParent().getProps().getProperty("dsn.pass"));
+		 stmt = con.prepareStatement(logi);
+	       rs = stmt.executeQuery();
+
+		   while (rs.next()) {
+			 String klient = (rs.getString("klient").trim());
+			 String ring = (rs.getString("ring").trim());
+			 String paev = rs.getString("paev");
+			   locistics.put(klient,ring + " " + paev  ); 
+		     }
+
+		   rs.close();
+		   stmt.close();
+		   con.close();
  
-		 
+		}catch(Exception e) {
+			
+		}
 		 String degu = " SELECT  part.Kodas as klient , pr.Kodas as toode , pk.kiekis*pr.PK_PardKaina as summa,pr.PK_PardKaina as hind " +
  " FROM  PardavimuKunai AS pk WITH(NOLOCK) INNER JOIN Operacijos AS op   ON pk.OperacijosId = op.OperacijosId  INNER JOIN Pard_BendraInf AS pbi WITH(NOLOCK) ON op.OperacijosId = pbi.OperacijosId  " +
  " INNER JOIN  Partneriai AS part WITH(NOLOCK) ON pbi.PartneriaiId = part.PartneriaiId INNER JOIN xPrekes AS pr  WITH(NOLOCK) ON pk.PrekesId = pr.PrekesId  "+
@@ -1272,6 +1288,10 @@ Statement st = null;
                 	 }
                  }
                 
+                 if(locistics.get(cust.getID()) != null) {
+                 	cust.addCity("Log : " + locistics.get(cust.getID()) );
+                 }
+                 
                 if(goes){
                 	 customers.put(Converter.cleanLitLatEst(nim+addr), cust);
                      custMap.put(cust.getID(), cust);	

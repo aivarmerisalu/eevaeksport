@@ -39,6 +39,7 @@ import org.xml.sax.InputSource;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
@@ -251,6 +252,13 @@ try{
   
   
   public void makeOrder(Order order) throws SQLException{
+	  File ff = new File("blocked.txt");
+	  if(ff.exists()) {
+		  System.exit(0);
+	  }
+		
+		  
+	  Converter.saveFile("blocked.txt", "blokk");
 
       if (signatures == null){
    	   signatures = new Vector();
@@ -273,6 +281,9 @@ try{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	   if(ff.exists()) {
+			  ff.delete();
+		  }
   }
   
   

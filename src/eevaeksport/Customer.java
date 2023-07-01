@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.json.simple.JSONObject;
+
 
 /**
  * <p>Title: </p>
@@ -35,6 +37,7 @@ public class Customer {
   public String category = null;
   public boolean noCashSales = false;
   public String restdirect = null;
+  public JSONObject json = null;
   public String level = null;
   public Vector<MatrixLine> fixedLines = null;
 

@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.json.simple.JSONObject;
+
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
@@ -887,7 +889,7 @@ Statement st = null;
               String date = rs.getString("data").substring(0,10);
               double summa = rs.getDouble("Suma");
              
-               if(cou < 5) {
+               if(cou < 10) {
             	//  System.out.println("aaaa " + cou  + " " + oldcust + "" + custid);
             	   asi = asi + "|" + ((int)summa) + " € " +  date + " "  + type;
             	   hh.put(custid , asi); 
@@ -931,17 +933,19 @@ Statement st = null;
           
        }
     
-    
+   private HashMap custAgents = null;
       
       public TreeMap getCustomers(Agent agent){
     	  
+    	  TreeMap locistics = new TreeMap();
     	  
+    	  custBonuses = loadCustBonuses();
     	  try{
     		   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
-    			
-    	}catch(Exception e){
+    	   }catch(Exception e){
     		
-    	}
+    	   }
+    	  custAgents = new HashMap(); // siin on siis kliendi kood ja agent vastavalt
     	  
         String cmd = "SELECT CONVERT(Int, part.PartneriaiId) AS CustomerASId, part.regnr as regno , (select  oo.Kodas from Adresai uu " + 
 				" INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as pay, CONVERT(varchar(20), part.Kodas) AS kood,pl.MES_PAV_Trumpinys as nimi2, CONVERT(varchar(40), part.Pavad) AS nimi,   " +
@@ -1019,14 +1023,31 @@ Statement st = null;
 			 stmt.close();
 			
 			 
-	//	System.out.println("Degusum " + deguSumm.toString());	 
-			 
-	
-		
+			 try {
+				 
+				 String logi = "Select Partnerio_Kodas as klient ,Marsruto_Pavad as ring , SavaitesDienos as paev from MES_PartneriuMarsrutai ";
+				 Connection con = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
+		                 getParent().getProps().getProperty("dsn.pass"));
+				 stmt = con.prepareStatement(logi);
+			       rs = stmt.executeQuery();
+
+				   while (rs.next()) {
+					 String klient = (rs.getString("klient").trim());
+					 String ring = (rs.getString("ring").trim());
+					 String paev = rs.getString("paev");
+					   locistics.put(klient,ring + " " + paev  ); 
+				     }
+
+				   rs.close();
+				   stmt.close();
+				   con.close();
+		 
+				}catch(Exception e) {
+					
+				}
 		 
 		 
-		 
-          stmt = con2.prepareStatement(cmd);
+              stmt = con2.prepareStatement(cmd);
        	      rs = stmt.executeQuery();
 
 	   while (rs.next()) {
@@ -1113,6 +1134,8 @@ Statement st = null;
                   cust.addAgent(new Agent(agen.trim()));
                   cust.setMainAgent(agen.trim());
                   
+                  custAgents.put(cust.getID(), agen.trim());
+                  
                   if (agen != null && agent1.get(agen.trim()) != null){
       				Agent aa = (Agent)agent1.get(agen.trim());
       			
@@ -1148,6 +1171,32 @@ Statement st = null;
                       cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" +payid) +""))+"€");
                     }
                 
+                
+                if(custBonuses.get(cust.getID()) != null) {
+                	Toode tt = custBonuses.get(cust.getID());
+                	
+                	 if(tt.json != null) {
+                			String bonus = "";
+                			
+                			if(tt.json.get("compThis") != null) {
+                				bonus = bonus + "CompThisMon: " + ((Double)tt.json.get("compThis")).intValue() + "€";
+                			}
+                			
+                			if(tt.json.get("compLast") != null) {
+                				bonus = bonus + "|CompLastMon: " + ((Double)tt.json.get("compLast")).intValue() + "€";
+                			}
+                			
+                			if(tt.json.get("compPreLastPerc") != null) {
+                				bonus = bonus + "|CompPreLastMon: " + ((Double)tt.json.get("compPreLastPerc")).intValue() + "€";
+                			}
+                			
+                			if(bonus.trim().length() > 0) {
+                				 cust.addCity(bonus);
+                			}
+                	 }
+                }
+                
+                
                 cust.addAgent(new Agent("HOUSE"));
               
                 String aadrjur = rs.getString("jurid");
@@ -1160,6 +1209,10 @@ Statement st = null;
                   cust.setZipcode(Converter.enCodeEst(aletext.trim()));
                 }
               
+                
+                if(locistics.get(cust.getID()) != null) {
+                	cust.addCity("Log : " + locistics.get(cust.getID()) );
+                }
                
                 
                 	 customers.put(Converter.cleanLitLatEst(nim+addr), cust);
@@ -1658,81 +1711,297 @@ try{
 	return 0;
     }
     
+   private TreeMap<String, Toode> custBonuses = null;
+  
+   
 
+   public TreeMap<String, String> loadAgentBonuses(Map agents) {
+   	
+     
+   	TreeMap<String, String> res = new TreeMap<String, String>();
+        
+       
+   	//1. loeme agendi põhiselt kokku klientide müügid
+   	TreeMap<String, Toode> agT = new TreeMap<String, Toode>();
+    try {	
+   	Iterator<String> itera = custBonuses.keySet().iterator();
+   	
+   	while (itera.hasNext()) {
+   		String custID = itera.next();
+   		Toode tt = custBonuses.get(custID);
+   		Double compThis = null;
+   		try {
+   			compThis = Double.parseDouble(tt.json.get("compThis")+"");
+   		}catch(Exception e) {
+   			
+   		}
+   				
+   		Double compLast = null;
+   		
+try {
+	compLast = Double.parseDouble(tt.json.get("compLast")+"");
+   		}catch(Exception e) {
+   			
+   		}
+   		Double compPreLast = null;
+   		
+try {
+	compPreLast = Double.parseDouble(tt.json.get("compPreLast")+"");	
+   		}catch(Exception e) {
+   			
+   		}
+   		
+   		String age = (String)this.custAgents.get(custID);
+   		if(age != null ) {
+   			Toode tt0 = new Toode(custID);
+   			if(agT.get(age) != null) {
+   				 tt0 = (Toode)agT.get(age) ;
+   			} 
+   			
+   			if(compThis != null) {
+					tt0.addDonecur(compThis);
+				 }
+				 if(compLast != null) {
+				tt0.addDonevol(compLast);
+				 }
+				 if(compPreLast != null) {
+				tt0.addKogus(compPreLast);
+				 }
+   			
+   			agT.put(age, tt0);
+   		}
+   	}
+         
+  
+	 itera = agT.keySet().iterator();
+   	
+   	while (itera.hasNext()) {
+   		String agID = itera.next();
+   		Toode tt = agT.get(agID);
+   	    if(agents.get(agID) != null && tt != null) {
+   	    	
+   	    String re = "||Bonuses|";
+   	    if((int)tt.getDonecur() > 0) {
+   	     re = "This Month: " + (int)tt.getDonecur() + "€|";
+   	    }
+   	   
+   	    	re = re + "Last Month: " + (int)tt.getDonevol() + "€|";
+   	    	re = re + "PreLast Month: " + (int)tt.getKogus() + "€|";
+   	    	res.put(agID, re );
+   	      }
+   	   }
+                
+       
+         } catch (Exception e) {
+             getParent().showError(e);
+         }
+         
+         return res;
 
-    public void setBulkSales(Map agents) {
-       //if (agentCode == null) return 0;
-       connectionUp(url);
+     }
+   
+   
+ public TreeMap<String, Toode> loadCustBonuses() {
+   	
        
+	
+	  
+       //Meil on vaja kulme viimase kuu boonuste jagamine koguda 
        
-         String cmd = "select  a.employeecode AS agent, sum(billamount) AS summa from  "  +
-			" (  SELECT     OrderAsID = CONVERT(varchar(20), op.OperacijosId), DeliveredOrderAsID = CONVERT(varchar(20), " + 
-         "             (CASE WHEN op.OperacijosTipoId = 50 THEN op.OperacijosId ELSE NULL END)), OrderDate = op.Data, OrderDiscount = CONVERT(Real, 0),  " +
-          "            BillCode = CONVERT(varchar(20), op.DokNr), BillIssueDate = op.Data, BillPaymentDate = CONVERT(DateTime, NULL), BillAmount = CONVERT(Money, op.Suma),  " +
-          "            PaidAmount = CONVERT(Money, op.ApmoketaSuma), CustomerAsID = CONVERT(Int, part.PartneriaiId), EmployeeAsID = CONVERT(varchar(35), masm.MusuAsmenysId), " +
-          "             Employeecode = CONVERT(varchar(35), masm.Kodas), OrderState = CONVERT(Int, NULL), OrderStateExt = CONVERT(Int, NULL), CurrencyCode = CONVERT(varchar(2), " + 
-          "            op.Valiuta), DeliveryAddressNo = CONVERT(varchar(2), NULL), OrderRemark = CONVERT(varchar(35), SUBSTRING(okp.Pastaba1, 1, 35)), op.OperacijosId,  " +
-          "            CustomerCode = part.Kodas, PaymentTime = CONVERT(SmallInt, msal.Terminas), PayerCode = part.regnr, op.OperacijosTipoId " +
-          "       FROM         Operacijos AS op INNER JOIN " +
-          "            Pard_BendraInf AS pbi ON op.OperacijosId = pbi.OperacijosId INNER JOIN " +
-          "            Partneriai AS part ON pbi.PartneriaiId = part.PartneriaiId INNER JOIN " +
-          "            PartneriaiPA AS partpa ON part.PartneriaiId = partpa.PartneriaiId INNER JOIN " +
-          "            MokejimoSalygos AS msal ON partpa.MokejimoSalygosId = msal.MokejimoSalygosId INNER JOIN " +
-          "            Pirk_VykdymoInf AS pvi ON pbi.Pirk_VykdymoInfId = pvi.Pirk_VykdymoInfId INNER JOIN " +
-          "            MusuAsmenys AS masm ON pvi.MusuAsmenysId = masm.MusuAsmenysId LEFT OUTER JOIN " +
-          "            OperacijuKuneliuPastabos AS okp ON op.OperacijosId = okp.OperacijosId " +
-         " WHERE     0 = 1 AND op.Kilme = 35 " +
- " UNION ALL " +
-" SELECT     OrderAsID = CONVERT(varchar(20), CASE WHEN op.OperacijosTipoId = 50 THEN op2.KilmeInfo ELSE NULL END), DeliveredOrderAsID = CONVERT(varchar(20),  " +
-  "                    op.OperacijosId), OrderDate = op.Data, OrderDiscount = CONVERT(Real, 0), BillCode = CONVERT(varchar(20), op.DokNr), BillIssueDate = op.Data,  " +
-   "                   BillPaymentDate = CONVERT(DateTime, NULL), BillAmount = CONVERT(Money, op.Suma), PaidAmount = CONVERT(Money, op.ApmoketaSuma),  " +
-    "                  CustomerAsID = CONVERT(Int, part.PartneriaiId), EmployeeAsID = CONVERT(varchar(35), masm.MusuAsmenysId), Employeecode = CONVERT(varchar(35),  " +
-     "                 masm.Kodas), OrderState = CONVERT(Int, NULL), OrderStateExt = CONVERT(Int, NULL), CurrencyCode = CONVERT(varchar(2), op.Valiuta),  " +
-      "                DeliveryAddressNo = CONVERT(varchar(2), NULL), OrderRemark = CONVERT(varchar(35), SUBSTRING(okp.Pastaba1, 1, 35)), op.OperacijosId,  " +
-       "               customercode = part.Kodas, PaymentTime = CONVERT(SmallInt, msal.Terminas), PayerCode = part.regnr, op.OperacijosTipoId " +
-"FROM         Operacijos AS op INNER JOIN " +
- "                     Pard_BendraInf AS pbi ON op.OperacijosId = pbi.OperacijosId INNER JOIN " +
-  "                    Partneriai AS part ON pbi.PartneriaiId = part.PartneriaiId INNER JOIN " +
-   "                   PartneriaiPA AS partpa ON part.PartneriaiId = partpa.PartneriaiId INNER JOIN " +
-    "                  MokejimoSalygos AS msal ON partpa.MokejimoSalygosId = msal.MokejimoSalygosId INNER JOIN " +
-     "                 Pirk_VykdymoInf AS pvi ON pbi.Pirk_VykdymoInfId = pvi.Pirk_VykdymoInfId INNER JOIN " +
-      "                MusuAsmenys AS masm ON pvi.MusuAsmenysId = masm.MusuAsmenysId LEFT OUTER JOIN " +
-       "               OperacijuKuneliuPastabos AS okp ON op.OperacijosId = okp.OperacijosId INNER JOIN " +
-        "              RysioOperacijos AS rop ON op.OperacijosId = rop.OperacijosId INNER JOIN " +
-         "             Operacijos AS op2 ON rop.OperacijosId2 = op2.OperacijosId " +
-" WHERE     op.OperacijosTipoId IN (50, 64) AND rop.RysiuTipaiId = 3 AND rop.OperacijosStatusasId = 778 ) " +
- " d INNER JOIN (SELECT  masm.MusuAsmenysId  AS EmployeeAsId, masm.Kodas AS employeecode, " +
-        		" LTRIM(masm.Vardas + ' ' + masm.Pavarde) AS nimi,masm.Kodas as ladu FROM dbo.MusuAsmenys AS masm) a  ON a.employeeasid=d.employeeasid " +
-			" where MONTH( billissuedate)=MONTH(GETDATE()) AND YEAR( billissuedate)=YEAR(GETDATE()) group by a.employeecode";
+   	TreeMap<String, Toode> res = new TreeMap<String, Toode>();
+        
+       
+         String cmd = "select 	* from MES_Kompensacijos ";
+        
          log(cmd);
-
-
          
          try {
-        	 
-        	 HashMap<String ,Double> grsales = new HashMap<String ,Double>();
+       	  Connection con2 = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
+                     getParent().getProps().getProperty("dsn.pass"));
         
-             stmt = con.prepareStatement(cmd);
-             //stmt.setString(1, agentCode);
-     
+             PreparedStatement stmt = con2.prepareStatement(cmd);
              ResultSet rs = stmt.executeQuery();
 
              while(rs.next()) {
-                String agentID = rs.getString("agent").trim();
-                 Agent agent = (Agent)agents.get(agentID);
-                 
+              
+                String custCode = rs.getString("Partneriai_Kodas");
+                
+                Double soldPreLast = rs.getDouble("Pardavimai_Suma_UzPraeitasMen");
+                Double compPreLast = rs.getDouble("Kompensacijos_Suma_UzPraeitasMen");
+                Double compPreLastPerc = rs.getDouble("Kompensacijos_Procentas_UzPraeitasMen");
+                
+                Double soldLast = rs.getDouble("Pardavimai_Suma_PraeitasMen");
+                Double compLast = rs.getDouble("Kompensacijos_Suma_PraeitasMen");
+                Double compLastPerc = rs.getDouble("Kompensacijos_Procentas_PraeitasMen");
+                
+                Double soldThis = rs.getDouble("Pardavimai_Suma");
+                Double compThis = rs.getDouble("Kompensacijos_Suma");
+                Double compThisPerc = rs.getDouble("Kompensacijos_Procentas");
+                
+                
+                
+                JSONObject json = new JSONObject();
+                json.put("soldThis", soldThis);
+                json.put("compThis", compThis);
+                json.put("compThisPerc", compThisPerc);
+                
+                json.put("soldLast", soldLast);
+                json.put("compLast", compLast);
+                json.put("compLastPerc", compLastPerc);
+                
+                json.put("soldPreLast", soldPreLast);
+                json.put("compPreLast", compPreLast);
+                json.put("compPreLastPerc", compPreLastPerc);
+                
+                Toode tt = new Toode(custCode);
+                    tt.json = json;
+                  
+                res.put(custCode, tt);
                     }
 
              rs.close();
              stmt.close();
-             con.close();
+             con2.close();
 
          } catch (Exception e) {
              getParent().showError(e);
          }
+         
+         return res;
+
+     }
+   
+   
+    public void setBulkSales(Map agents) {
+       //if (agentCode == null) return 0;
+       connectionUp(url);
+       
+ 
+     TreeMap<String, String> agentBonuses =  loadAgentBonuses(agents);
+       
+       
+  	 int yy = Calendar.getInstance().get(Calendar.YEAR);
+     int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+     int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+       // plaan boonus tabeli tekitamine
+       
+       TreeMap<String, Toode> bp = this.getPB();
+       
+       //Meil on vaja kulme viimase kuu boonuste jagamine koguda 
+       Iterator<String> itera = bp.keySet().iterator();
+       while(itera.hasNext()) {
+    	   String agen = itera.next();
+    	   Agent agent = (Agent)agents.get(agen);
+    	   if(agent != null) {
+    		   Toode tt = bp.get(agen);
+    		   
+    		   double psales = tt.getDonecur();
+    		   double msales = tt.getPlancur();
+    		   
+    			
+         		  double  tehtudsalperc = msales/psales;
+             	  double  plaanitavMyykSal = d2 * msales/dd;
+             	  double  prognosalperc = plaanitavMyykSal/psales;
+            
+             String  asi = "";
+             if(psales > 0) {
+             asi = Converter.enCodeEst("SalesPlan ZaliaMesa: ") + (int)psales + " €|";    
+              	  asi = asi + Converter.enCodeEst("Plan done/Estimate :");
+             	  if(tehtudsalperc > 3){
+             		tehtudsalperc = 0;
+             	  }
+             	if(prognosalperc > 3){
+             		prognosalperc = 0;
+             	  }
+             	  
+                   asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %|";  
+                agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
+             }
+                
+                
+                
+                 psales = tt.getDonevol();
+     		     msales = tt.getPlanvol();
+     		   
+     		   if(psales > 0) {
+          		    tehtudsalperc = msales/psales;
+              	    plaanitavMyykSal = d2 * msales/dd;
+              	    prognosalperc = plaanitavMyykSal/psales;
+             
+                asi =  Converter.enCodeEst("||SalesPlan Gaminiai: ") + (int)psales + " €|";    
+               	  asi = asi + Converter.enCodeEst("Plan done/Estimate :");
+              	  if(tehtudsalperc > 3){
+              		tehtudsalperc = 0;
+              	  }
+              	if(prognosalperc > 3){
+              		prognosalperc = 0;
+              	  }
+              	  
+                    asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %|";  
+                 agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
+     		   }
+                
+                if(agentBonuses.get(agen) != null) {
+                	agent.setStart(agent.getStart() +  Converter.enCodeEst(agentBonuses.get(agen)));	
+                }
+    	   }
+    	   
+       }
+       
+       
+         
+        
 
      }
 
+
+    public TreeMap<String, Toode> getPB() {
+    	
+        
+        
+        //Meil on vaja kulme viimase kuu boonuste jagamine koguda 
+        
+    	TreeMap<String, Toode> res = new TreeMap<String, Toode>();
+         
+        
+          String cmd = "select 	VadybininkoKodas as agent ,	Planas_Gaminiai as agentGP , Planas_ZaliaMesa as agentMP , " + 
+          		" Pardavimai_Gaminiai as agentGS , Pardavimai_ZaliaMesa as agentMS from MES_VadybininkuPlanai ";
+         
+          log(cmd);
+          
+          try {
+        	  Connection con2 = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
+                      getParent().getProps().getProperty("dsn.pass"));
+         
+              stmt = con2.prepareStatement(cmd);
+              ResultSet rs = stmt.executeQuery();
+
+              while(rs.next()) {
+                 String agentID = rs.getString("agent").trim();
+                 Double agentGP = rs.getDouble("agentGP");
+                 Double agentMP = rs.getDouble("agentMP");
+                 Double agentGS = rs.getDouble("agentGS");
+                 Double agentMS = rs.getDouble("agentMS");
+               Toode tt = new Toode(agentID);
+                 tt.addDonecur(agentMS);
+                 tt.setPlancur(agentMP);
+                 tt.addDonevol(agentGS);
+                 tt.setPlanvol(agentGP);
+                 
+                 res.put(agentID, tt);
+                     }
+
+              rs.close();
+              stmt.close();
+              con2.close();
+
+          } catch (Exception e) {
+              getParent().showError(e);
+          }
+          
+          return res;
+
+      }
 
 
 
@@ -1741,26 +2010,7 @@ try{
       return null;
     }
 
-    private boolean scrollTo(String id, ResultSet rs) throws SQLException{
-      rs.beforeFirst();
-      while(rs.next()){
-        if (id.equals(rs.getString("kood").trim())){
-          return true;
-        }
-      }
-      return false;
-    }
-
-    private String ensureLen(String str, String replace){
-      if (str == null) str = "";
-      else str = str.trim().replace('\'', ' ').replace('\"', ' ').replace(';',' ');
-      if (str.length() == 0){
-        return replace;
-      } else {
-        return str;
-
-      }
-    }
+  
     /**
      * Method declaration
      *

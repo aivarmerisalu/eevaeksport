@@ -403,112 +403,40 @@ private HashSet getXXX(){
 		    return ring;
 		  }
 
-  
-  
-  
-  private String getKKood(String intr){
-	  String res = intr;
-	  if(intr != null){
-		  if(intr.equals("INTR504")){
-			  res = "K504";
-		  }
-		  
-		  //J�HVIKOMMIPOOD
-		   
-		   
-		  if(intr.equals("INTR501")){
-			  res = "K501";
-		  }
-		
-		//  KURESSAARE  KOMMIPOOD
-		   
-		  
-		  if(intr.equals("INTR506")){
-			  res = "K506";
-		  }
-		 // NUKUTEATRI KOMMIPOOD
-		   
-		  if(intr.equals("INTR513")){
-			  res = "K513";
-		  }
-		
-		//  N�MME KOMMIPOOD
-		   
-		  if(intr.equals("INTR510")){
-			  res = "K510";
-		  }
-		 // PAIDE KOMMIPOOD
-		   
-		  if(intr.equals("INTR512")){
-			  res = "K512";
-		  }
-		 // P�RNU KOMMIPOOD
-		   
-		  if(intr.equals("INTR502")){
-			  res = "K502";
-		  }
+  private HashSet getKylmad() {
 
-//		  P�LVA KOMMIPOOD
-		   
-		  if(intr.equals("INTR509")){
-			  res = "K509";
-		  }
-		
-		//  RAKVERE KOMMIPOOD
-		   
-		  if(intr.equals("INTR517")){
-			  res = "K517";
-		  }
-		//  ROTERMANNI KOMMIPOOD
-		   
-		  
-		  if(intr.equals("INTR503")){
-			  res = "K503";
-		  }
-		 // VALGA KOMMIPOOD
-		   
-		  
-		  if(intr.equals("INTR511")){
-			  res = "K511";
-		  }
-		 // V�RUKOMMIPOOD
-		   
-		   
-		  if(intr.equals("INTR507")){
-			  res = "K507";
-		  }	 // TARTU KOMMIPOOD
-		   
-		  if(intr.equals("INTR515")){
-			  res = "K515";
-		  }
-		
-		//  KIVI�LI KOMMIPOOD
-		   
-		  
-		  if(intr.equals("INTR508")){
-			  res = "K508";
-		  }
-		  //J�RITEHASEPOOD
-		   
-		   
-		  if(intr.equals("INTR516")){
-			  res = "K516";
-		  }
-		  //VILJANDI KOMMIPOOD
-	  
-	  }
-	 	    
-	  return res;
+ HashSet res = new HashSet();
+ 
+	    String sql1 = "SELECT SC01001 AS kood, SC01161 as grupp  FROM SC010100 where SC01161 =  'Pizza' or SC01161 = 'Ice Cream' or SC01161 = 'Frozen Ready Meals'";	
+	     log.info("1_LINE_SQL: " + sql1);
+	  	try {
+			Statement st1 = con.createStatement();
+		    ResultSet rs1 = st1.executeQuery(sql1);
+
+	       while (rs1.next()) {
+	    	res.add(rs1.getString("kood").trim());
+	       }
+
+	    rs1.close();
+	    st1.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	    return res;
   }
+  
   
   private Vector splitOrder (Order order){
 	  Vector result = new Vector();
       
 	 System.out.println("Enne suurus splitti" + order.getOrderLines().size());
 	  HashSet xxxprods = getXXX();
+	  HashSet kylmad =  new HashSet(); //getKylmad();
 	  Order ord23 = new Order(order.getCompany(),order.getAgentFirstName());
 	  Order ordJ1 = new Order((order.getCompany()),order.getAgentFirstName());
       Order ordOTB = new Order(leiaFelixiKlkood(order.getCompany()),order.getAgentFirstName());
+      Order ordKylm = new Order((order.getCompany()),order.getAgentFirstName());
     
 	  ord23.setAgentCode(order.getAgentCode());
 	  ord23.setDokNr(order.getDokNr());
@@ -522,6 +450,19 @@ private HashSet getXXX(){
 	  ord23.setShipDateUsed(order.isShipDateUsed());
 	  ord23.setWarehouse(order.getWarehouse());
 	  ord23.setCurrency("KALEV");
+	  
+	  ordKylm.setAgentCode(order.getAgentCode());
+	  ordKylm.setDokNr(order.getDokNr());
+	  ordKylm.setInfo(order.getInfo());
+	  ordKylm.setReference(order.getReference());
+	  ordKylm.setTeostaja((order.getTeostaja()));
+	  ordKylm.setChanged(order.isChanged());
+	  ordKylm.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordKylm.setStatus(order.getStatus());
+	  ordKylm.setShipTime(order.getShipTime());
+	  ordKylm.setShipDateUsed(order.isShipDateUsed());
+	  ordKylm.setWarehouse("NKSM1");
+	  ordKylm.setCurrency("KYLM");
 	  
 	
 
@@ -568,7 +509,10 @@ private HashSet getXXX(){
 		    	 if(itemid.startsWith("OTB") ){
 			    	 ordOTB.add(lin.getToode().substring(3), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-		          }else if(itemid.startsWith("FE")){
+		          }else if(kylmad.contains(itemid)){
+				    	 ordKylm.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+				     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+			          }else if(itemid.startsWith("FE")){
 				    	 ordOTB.add(lin.getToode().substring(2), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
 			          }else{
@@ -589,6 +533,11 @@ private HashSet getXXX(){
 
 	  if(ord23.getOrderLines() != null && ord23.getOrderLines().size()>0){
 		  result.add(ord23);  
+	  }
+
+
+	  if(ordKylm.getOrderLines() != null && ordKylm.getOrderLines().size()>0){
+		  result.add(ordKylm);  
 	  }
 
 	 
@@ -1334,10 +1283,10 @@ private long getAndUpdateNext() throws SQLException{
 			         }
 			 
 			     
+			  System.out.println("currency " + ord.getCurrency());
 			  
 			  
-			  
-            if(ord.getCurrency().equals("KALEV")){
+            if(ord.getCurrency().equals("KALEV") || ord.getCurrency().equals("KYLM")){
             	System.out.println("Kalevi Tellimus " + ord.getOrderLines().size() + " rida");
             	   if(signatures == null) {
       		        	signatures = new Vector();
@@ -1733,8 +1682,6 @@ private long getAndUpdateNext() throws SQLException{
 	  if(twoeans == null){
 		  twoeans = getTwoEans();
 	  }
-
-	 
 	 
  	try {
  		
@@ -1780,6 +1727,11 @@ private long getAndUpdateNext() throws SQLException{
 		
 		
 		String warex = "SKSM1";
+		
+		if(order.getCurrency().equals("KYLM")) {
+			warex = order.getWarehouse();	
+		}
+		
 		if((order.getWarehouse() != null && order.getWarehouse().equals("23")) || ebast){
 			warex = "23";
 		}
@@ -1788,7 +1740,7 @@ private long getAndUpdateNext() throws SQLException{
 			warex = order.getWarehouse();
 		}
 		
-		 String doknr = order.getDokNr();
+	  String doknr = order.getDokNr();
         if(doknr == null){
         	doknr = ref;
         	if(doknr.indexOf("-") != -1){

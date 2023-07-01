@@ -116,7 +116,7 @@ public class DansgDBDriver extends AbstractDBDriver implements Discounter, Manag
 
             StringBuffer buf = new StringBuffer();
             
-            File d  = new File(picts);
+     
             
        	    while (rs.next()) {
        	    	
@@ -140,13 +140,32 @@ public class DansgDBDriver extends AbstractDBDriver implements Discounter, Manag
             if(inpda.exists()){
               len =	inpda.length() + "";
               } 
-            buf.append(toode+".jpg;"  + len + "\n");
+              buf.append(toode+".jpg;"  + len + "\n");
+              
+            } else {
+            	in = new File ( picts + toode+".jpg"); 
+            
+          	if(in.isFile()){    
+          	 
+          	File inpda = new File ( pictspda + toode+ ".jpg"); 
+          	 if(!inpda.exists()){
+          		Converter.shrinkAndCopyFile(in,inpda);
+         	  }
+          
+          	
+            String len = "0";
+            if(inpda.exists()){
+              len =	inpda.length() + "";
+              } 
+              buf.append(toode+".jpg;"  + len + "\n");
             }
+          	
+          	
           	}
              
              
              
-             
+       	    }
                   
                      
                      
@@ -165,7 +184,7 @@ public class DansgDBDriver extends AbstractDBDriver implements Discounter, Manag
                		os.write(buf.toString());
                		os.close();
                	   File fff =  new File (pictspda +  "list.txt");
-         	       copyFile(f,fff);  
+         	       Converter.copyFile(f,fff);  
                	
                	  }catch (Exception ex) {
                		ex.printStackTrace();
@@ -177,25 +196,9 @@ public class DansgDBDriver extends AbstractDBDriver implements Discounter, Manag
        
     }
      
-       private String toUpper(String asi ){
-    	   
-    	   asi = asi.substring(0,asi.length()-4).toUpperCase() + asi.substring(asi.lastIndexOf("."));
-    	   System.out.println(asi);
-    	   return asi ;
-       }
+     
        
-     public void copyFile(File in, File out) throws Exception {
-         FileInputStream fis  = new FileInputStream(in);
-         FileOutputStream fos = new FileOutputStream(out);
-         byte[] buf = new byte[1024];
-         int i = 0;
-         while((i=fis.read(buf))!=-1) {
-           fos.write(buf, 0, i);
-           }
-         fis.close();
-         fos.close();
-         }
-
+    
     
 	
     public Vector getLastThreeData() {
