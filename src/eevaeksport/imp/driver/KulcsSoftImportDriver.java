@@ -5,6 +5,11 @@
  */
 package eevaeksport.imp.driver;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -13,12 +18,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.simple.JSONObject;
@@ -59,12 +66,41 @@ public class KulcsSoftImportDriver
       calNF.setMaximumIntegerDigits(2);
       calNF.setMinimumIntegerDigits(2);
       calNF.setGroupingUsed(false);
-
+      fileName = parent.getProps().getProperty("conv.dir") + getYYYYpMMpDDpString(new Date())   +  ".csv";
     } catch (Exception e) {
       parent.showError(e);
       log.error(e);
     }
   }
+  
+  
+  public static String getYYYYpMMpDDpString(Date dd){
+	    StringBuffer sb = new StringBuffer();
+	    Calendar cal= Calendar.getInstance();
+	    cal.setTime(dd);
+	    
+		String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+		if (day.length() == 1) {day = "0" + day;}
+
+		String month = String.valueOf(cal.get(Calendar.MONTH ) + 1);
+		if (month.length() == 1){month = ("0") + month;}
+		sb.append("" + cal.get(Calendar.YEAR));
+		sb.append("-" + month  + "-");
+		sb.append(day );
+		
+		
+		String hour = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
+		if (hour.length() == 1) {hour = "0" + hour;}
+	
+		String min = String.valueOf(cal.get(Calendar.MINUTE));
+		if (min.length() == 1) {min = "0" + min;}
+
+		sb.append(" " + hour  + "_" + min);
+		
+	    return sb.toString();
+	  }
+  
+  private  String fileName = null;
   private TreeMap prods = null;
   private TreeMap eans = new TreeMap();
   private String url2 = "jdbc:odbc:dziugas";
@@ -320,7 +356,7 @@ public class KulcsSoftImportDriver
  		         Agent aa = new Agent(ag);
  		         cust.addAgent(aa);
  		
-                 cust.setName(Converter.enCodeEst(nimi) + " " + Converter.enCodeEst(nimi2));
+                 cust.setName((nimi) );
                  
                     cust.restStreet = street;
                     cust.restCity = city;
@@ -481,7 +517,7 @@ private TreeMap customers = null;
             sb.append(" " + ls);
             sb.append(" " + ls);
             sb.append("RE" + ls);
-            sb.append(" " + ls);
+            sb.append("" + ls);
             sb.append("" + ls);
             
       /*  	json.put("building", building);
@@ -540,15 +576,12 @@ private TreeMap customers = null;
 
   
        counter = counter + cou;
-     	//
-       String fn = doknr;
-       if(doknr.trim().length()== 0){
-     	  fn =( Calendar.getInstance().getTimeInMillis() + "").substring(3);
-       }
-       String fileName = parent.getProps().getProperty("conv.dir") + order.getAgent()  + "." + fn  +  ".csv";
+    
+      
        System.out.println(fileName);
-       Converter.saveFileInANSI(fileName, sb.toString());
-
+      // Converter.saveFileInANSI(fileName, sb.toString());
+       
+       FileUtils.writeStringToFile(new File(fileName),sb.toString() , true);
  	} catch (Exception e) {
  		e.printStackTrace();
  	}
@@ -560,7 +593,22 @@ private TreeMap customers = null;
 	}
 	
 	
-	  
+	public static void saveFileInANSI(String filename, String sb ){
+	      try{
+	    	  
+	    
+	      	  Writer out = new BufferedWriter(new OutputStreamWriter(
+	      			    new FileOutputStream(filename), "ISO-8859-2"));
+	      			try {
+	      			    out.write(sb.toString());
+	      			} finally {
+	      			    out.close();
+	      			}
+		            	
+			    }catch(Exception e){
+			    	e.printStackTrace();
+			    }
+		}  
  
  
   public String getDriverVersion(){

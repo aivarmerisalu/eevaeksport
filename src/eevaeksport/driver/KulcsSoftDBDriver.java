@@ -120,7 +120,7 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
            stmt = con.createStatement();
 	} catch (Exception e) {
 	    getParent().showError(e);
-	    System.exit(0);
+	   // System.exit(0);
 	}
       }
     }
@@ -296,7 +296,7 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
                 	cust.setPaymTerm(paym);
                 	cust.setGroup(pricegr);
                 
-                customers.put(nimi, cust);
+                customers.put(nimi + " " + nimi2, cust);
 	    }
 	    rs.close();
 	    st.close();
