@@ -955,7 +955,7 @@ TreeMap<String, Double> odue = null;
     	      				//System.out.println("Addressinfo: "+DAddressGUID + " " + DAddressCode + " " + DAddress + " " + DAddressAgentGUID);
     	      				
     	      		         Customer customer = new Customer(CustCode + "_" + DAddressCode);
-    	      		         customer.setName(Converter.enCodeEst(CustName) + "_" + DAddressCode);
+    	      		         customer.setName(Converter.enCodeEst(CustName) );
     	      		         customer.setAddress(Converter.enCodeEst(Converter.adressLink(DAddress,"Latvia")));
     	      		       if(odue.get(CustGUID) != null) {
             		  			customer.setDebt(odue.get(CustGUID));

@@ -1091,6 +1091,7 @@ Statement st = null;
 		  String term = rs.getString("paym");
 		 
 		  
+		  
                 
                 if(nimi.startsWith("UAB ")){
                 	nimi = (nimi.substring(4,nimi.length()) + " UAB").trim();
@@ -1174,9 +1175,9 @@ Statement st = null;
                 
                 if(custBonuses.get(cust.getID()) != null) {
                 	Toode tt = custBonuses.get(cust.getID());
-                	
+                	String bonus = "";
                 	 if(tt.json != null) {
-                			String bonus = "";
+                		
                 			
                 			if(tt.json.get("compThis") != null) {
                 				bonus = bonus + "CompThisMon: " + ((Double)tt.json.get("compThis")).intValue() + "€";
@@ -1194,6 +1195,9 @@ Statement st = null;
                 				 cust.addCity(bonus);
                 			}
                 	 }
+                	 
+
+                	 cust.addToCustDataVec(cust.getID() + ";bonussaldo; ;"   +  bonus);
                 }
                 
                 

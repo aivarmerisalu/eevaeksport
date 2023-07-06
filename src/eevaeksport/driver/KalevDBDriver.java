@@ -3,12 +3,18 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
@@ -35,10 +41,20 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import ee.mobilejava.wrapper.DefectiveLineWrapper;
 import ee.mobilejava.wrapper.DefectiveWrapper;
@@ -57,7 +73,7 @@ import eevaeksport.report.SalesSetter;
 import eevaeksport.util.Converter;
 
 public class KalevDBDriver extends AbstractDBDriver implements Manager, Promo,
-		BulkUpdater, Discounter,SalesSetter,ClientBlock,PictureMaker ,FixLoader{
+		BulkUpdater, Discounter,SalesSetter,ClientBlock,PictureMaker , PictureMaker2 ,FixLoader{
 
 	public KalevDBDriver(EksportPanel parent) {
 		super(parent); 
@@ -1684,11 +1700,106 @@ SELECT  [MasterProductCode] as klient
 		return result;
 	}
 
+	
+	 private HashMap<String, String> plinks = null;
+	 private HashMap<String, String> pextraInfo = null;
+	 
+	 private void readJson() {
+		  JSONParser parser = new JSONParser();
+		  JSONObject a;
+		  plinks = new HashMap<String, String>();
+		  pextraInfo = new HashMap<String, String>();
+		try {
+			 String dir = getParent().getProps().getProperty("json.data");
+			a = (JSONObject) parser.parse(new FileReader(dir));
+			 JSONArray prods = (JSONArray) a.get("products");
+			
+			//=\\ema\Stibo\Product_Data_For_Internal.json
+
+		  for (Object o : prods) {
+		    JSONObject prod = (JSONObject) o;
+		    
+		    JSONObject prodAttr = (JSONObject) prod.get("attributes");
+		    JSONObject codeO = (JSONObject) prodAttr.get("PRODUCT_CODE");
+		    String code = (String) codeO.get("et");
+		  //  System.out.println(code);
+
+		    
+		    JSONObject assets = (JSONObject) prod.get("assets");
+		    JSONObject urlO = (JSONObject) assets.get("PRODUCT_IMAGE");
+		  try {
+		    String url = (String) urlO.get("et");
+		   // System.out.println(url);
+		    plinks.put(code, url);
+		  }catch(Exception e) {
+			  
+		  }
+
+		  String extraInfo = "";
+		  
+		  JSONObject stoO = (JSONObject) prodAttr.get("CONSUMER_STORAGE_INSTRUCTIONS");
+		  try {
+		    String sto = (String) stoO.get("et");
+		   // System.out.println(sto);
+		    extraInfo = "Säil : " + sto + "||" ;
+          }catch(Exception e) {
+			  
+		  }
+		  
+		  
+		  stoO = (JSONObject) prodAttr.get("CONSUMER_USAGE_INSTRUCTIONS");
+		  try {
+			    String sto = (String) stoO.get("et");
+			    //System.out.println(sto);
+			    extraInfo = extraInfo + "Kasut : " + sto+ "||";
+	           }catch(Exception e) {
+				  
+			  }
+		  
+		  stoO = (JSONObject) prodAttr.get("MARKETING_PRODUCT_DESCRIPTION_SHORT");
+		  try {
+			    String sto = (String) stoO.get("et");
+			    //System.out.println(sto);
+			    extraInfo = extraInfo + "Müügilause : " + sto + "||";
+	           }catch(Exception e) {
+				  
+			  }
+		  
+		  
+		 if(extraInfo.trim().length() > 0) {
+			 pextraInfo.put(code, extraInfo.replaceAll("\\r\\n|\\r|\\n", " "));
+		 }
+		  
+		  
+		  }
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(pextraInfo.size() > 0) {
+		StringBuffer sb = new StringBuffer();
+		 Iterator itera  = pextraInfo.keySet().iterator();
+		   while(itera.hasNext()) {
+			   String kood = (String)itera.next();
+			   String nimetus = (String)pextraInfo.get(kood);
+			   sb.append(kood + ";" + nimetus + "\n");
+		   }
+		       Converter.saveFile("texts.txt", Converter.enCodeEst(sb.toString()));
+		}
+		
+	}
+
 	public TreeMap getProducts(Agent agent) {
 		connectionUp(url);
 		eans = new TreeMap();
 		// 'PR' +
-
+		
 		
 		TreeMap<String,Integer> levels = new TreeMap<String,Integer>();
 
@@ -1720,7 +1831,7 @@ SELECT  [MasterProductCode] as klient
 				+ "SC01015 AS tykke,SC03003 AS stock, " //-SC03004
 				+ " SC01115  AS grupp, SC01031 as alegr,SC01132 AS ean  , SC01016 as letter ,SC01014 as sorting "
 				+ " , case when SC01135 = 0 then  'KG' else 'TK' end as unit  ,  SC01141 as kaal, " +
-						" OptimumKTellimuseKogus as inunit ,SC01107 as type , SC01164 as kate FROM SC010100 t left outer JOIN SC030100 on SC03001=t.SC01001 and SC03002='SKSM1' AND SC03003!=0 left outer JOIN SC390100 ON t.SC01001 "
+						" OptimumKTellimuseKogus as inunit ,SC01107 as type , SC01164 as kate, SC01063 as pallet FROM SC010100 t left outer JOIN SC030100 on SC03001=t.SC01001 and SC03002='SKSM1' AND SC03003!=0 left outer JOIN SC390100 ON t.SC01001 "
 				+ "  = SC39001 and SC39002='00' LEFT OUTER JOIN proov20100 yh ON yh.SC01001= t.SC01001 " +
 						" LEFT OUTER JOIN class ty ON ty.MasterProductCode = t.SC01001 WHERE   (( RTRIM(t.SC01001) like 'X0%' or  RTRIM(t.SC01001) like 'Y0%' or RTRIM(t.SC01001) like 'R0%') and SC01115 = 'K') or SC01115 = 'L' or"
 						+ "  ( LEN(LTRIM(SC01037))>0 and SC39004 > 0 and rtrim(ltrim(SC01016)) != 'S' and SC01014 != '' and SC01014 != 'XXX')  ORDER BY LEFT(RTRIM(SC01037),1),t.SC01001 ";
@@ -1778,9 +1889,10 @@ SELECT  [MasterProductCode] as klient
 					prod.setAlegrupp("a" + alegr.trim());
 				}
 
-
-				prod.setName(gr.trim() + " " + nimetus);
+                 String nameX = gr.trim() + " " + nimetus;
+				
 				gr = rs.getString("ean");
+				
 				
 				
 				boolean goes = true;
@@ -1790,16 +1902,20 @@ SELECT  [MasterProductCode] as klient
 				}
 
 				if (goes && gr != null && gr.trim().length() > 0) {
-					prod.setEAN(gr.trim());
-					if(eans.get(gr.trim()) == null){
-						eans.put(gr.trim(), prod.getID());
+					String ea = gr.trim();
+					prod.setEAN(ea);
+					if(eans.get(ea) == null){
+						eans.put(ea, prod.getID());
 					}
 					
 					 if(eanprods == null) {
 	                	 	eanprods = new TreeMap();
 	                   }
-	                   eanprods.put(gr.trim(), prod.getID());
+	                   eanprods.put(ea, prod.getID());
+	                   nameX = nameX + " " + ea.substring(ea.length()-4);
 				}
+				
+				prod.setName(nameX );
 
 				String unit = rs.getString("unit");
 				if (unit != null && unit.trim().length() > 0) {
@@ -1837,7 +1953,10 @@ SELECT  [MasterProductCode] as klient
 					}
 					
 				}
-				
+				String pall = rs.getString("pallet");
+				if (pall != null && pall.trim().length() > 0) {
+					prod.setOnPallet(Double.parseDouble(pall));
+				}
 				
 				if(levels.get(prod.getID()) != null) {
 					prod.points = levels.get(prod.getID());
@@ -3478,6 +3597,128 @@ try{
         	
 		return res;
 	}
+
+	@Override
+	public void PictureMaker2() {
+		this.readJson();
+		
+		if(plinks != null) {
+			downloadFiles();
+		}
+		makePictureCat();
+		System.exit(0);
+		
+	}
+	  private void downloadFiles() {
+		  Iterator itera = plinks.keySet().iterator();
+		  
+		  while(itera.hasNext()) {
+			 String code = (String)itera.next();
+			 String urr = plinks.get(code);
+			 String ext = urr.substring(urr.length()-4);
+		     String fname = parent.getProps().getProperty("pict.dir")+code + ext;
+		     File ff = new File(fname);
+		     if(!ff.exists()) {
+			try {
+				URL ur = new URL(urr);
+			
+			final HttpParams httpParams = new BasicHttpParams();
+		    HttpConnectionParams.setConnectionTimeout(httpParams, 10000);
+		    HttpConnectionParams.setSoTimeout(httpParams, 10000);
+			HttpClient  httpclient = new DefaultHttpClient(httpParams);
+			HttpGet httpGet= new HttpGet(ur.toString());
+			System.out.println("url " + ur.toString());
+			HttpResponse resp = httpclient.execute(httpGet);
+			InputStream is = resp.getEntity().getContent(); 
+			
+			if(is != null) {
+		    	
+
+			      OutputStream os = new FileOutputStream(fname);
+			      int read = 0;
+			             byte[] bytes = new byte[1024];
+			             int total2 = 0;
+			     		while((read = is.read(bytes))!= -1){
+			     			os.write(bytes, 0, read);
+			     			total2 = total2 + read;
+			     		}
+			   	//	 System.out.println("Faili salvestus " + file.getName() + " " + total2 + " " + total + " " + read);   
+			      	
+			     		
+			      is.close();
+			      os.close();
+			  	
+			    	}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		  }
+		  }
+		  
+	  }
+  
+	  private void makePictureCat(){
+	  	    
+	    	
+	    	String pictssou = parent.getProps().getProperty("pict.dir");
+	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	  	   
+	  	 try {
+   	  
+        File f = new File(pictspda +"list.txt");
+        if (f.exists())f.delete();
+      
+	         	
+	  		 TreeMap prods = this.getProducts(null);
+
+	         StringBuffer buf = new StringBuffer();
+	         Iterator enume = prods.keySet().iterator();
+	    
+	         while (enume.hasNext()) {
+	    	    	String asi = (String)enume.next();
+	    	    	Product prod = (Product)prods.get(asi);
+	    	    	String toode = prod.getID().trim(); 
+	    	    	
+	    	    	  toode = toode.replace('/', '_');
+	    	          toode = toode.replace('/', '_');
+	    	          
+	               if(toode.length() > 0){
+	                	
+	            	   File res2 = new File (pictssou);
+	            	   String[]  ff2 = res2.list();
+	             
+	         	 for(int i = 0;ff2.length>i;i++){
+	             	if( ff2[i].startsWith(toode)){
+	               // System.out.println("pilt olemas " + ff2[i]);
+	            	File in = new File ( pictssou + ff2[i]); 
+	              	if(in.isFile()){
+	              	File inpda = new File ( pictspda + toode+ ".jpg");
+	              	if(!inpda.exists()){
+	                  	Converter.shrinkAndCopyFile(in,inpda,400);
+          	  
+          	  	     } 
+	                if(buf.toString().indexOf(toode +".jpg;"  + inpda.length()) == -1){
+              		buf.append(toode +".jpg;"  + inpda.length() + "\n");
+              	}
+	              	   }
+	                 }
+	               }
+	             }
+	       }
+	      try {
+   		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+   		os.write(buf.toString());
+   		os.close();
+   	  }catch (Exception ex) {
+   		ex.printStackTrace();
+   	  }
+	  	 
+	  	 } catch (Exception e) {
+	    	    getParent().showError(e);
+	    	}
+	     
+	  }
+
 	
 	
 }

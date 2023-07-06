@@ -252,7 +252,8 @@ public class BuitNowacoLTDBDriver extends AbstractDBDriver implements BulkUpdate
 
 String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS debt FROM apyvarta a INNER JOIN klientai b ON b.klientas=a.gavejas " +
       " where a.terminas < CURRENT_DATE() and  dok_serija is not null and (kitas_dok) > 0 and "
-      + "dok_serija not in ( 'KRV5', 'LKS' ,'KRV7', 'LKP1','LDS','URM') and DATE_ADD(a.data,interval 500 day) > current_date() and operacija like 'Pardav%'  group by b.kodas having sum(skola_w) != 0 " ;
+      + "dok_serija not in ( 'KRV5', 'LKS' ,'KRV7', 'LKP1','LDS','URM') and DATE_ADD(a.data,interval 500 day) >"
+      + " current_date() and operacija like 'Pardav%' and b.kodas !='ND' and b.kodas !=' '  group by b.kodas having sum(skola_w) != 0 " ;
 		
 
 
@@ -283,7 +284,7 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 		}
 		if(kood != null){
 			 custw = new Customer (kood.trim());
-			custw.setDebt(volg);
+			 custw.setDebt(volg);
 			if(volg>0){
 				custs.put(kood.trim(),custw);
 			}
@@ -1744,7 +1745,7 @@ rs.close();
 	 String cmd = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS summa FROM apyvarta a INNER JOIN klientai b ON b.klientas=a.gavejas " +
       " where a.terminas < CURRENT_DATE() and  dok_serija is not null and (kitas_dok) > 0 and "
       + " dok_serija not in ( 'KRV5', 'LKS' ,'KRV7' , 'LKP1' , 'LDS', 'URM') and operacija like 'Pardav%'"
-      + " and DATE_ADD(a.data,interval 500 day) > current_date() and b.kodas != 'ND' group by b.kodas having sum(skola_w) != 0 " ;
+      + " and DATE_ADD(a.data,interval 500 day) > current_date() and b.kodas != 'ND' and b.kodas !=' '  group by b.kodas having sum(skola_w) != 0 " ;
 	 
 //System.out.println(cmd);
    Connection   cons = this.getNewConnection();
@@ -1897,7 +1898,7 @@ try{
         
         if(old<dueint){
            debtDays.put(custID,dueint+"") ;
-           if(dueint > 28){
+           if(dueint > 27){
         	  	 
         	   if(debt.getPayerID() != null && debt.getPayerID().equals("150040692")) {
         		    System.out.println("siit 2 tuleb block" + custID + " " + debt.getDoknr());

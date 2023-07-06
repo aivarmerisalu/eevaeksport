@@ -735,7 +735,7 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
         		"        		I07_KODAS AS toode,I07_KIEKIS AS kogus, \r\n" + 
         		"				I06_DOK_DATA AS kuupaev ,(I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end ) as lastprice FROM i07_pard p\r\n" + 
         		"				  INNER JOIN i06_parh ON p.I07_KODAS_PO=I06_KODAS_PO\r\n" + 
-        		"				 left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS \r\n" + 
+        		"				 left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND left (N33_ADRESAS,40) = I06_ADR2 \r\n" + 
         		"				 WHERE I06_DOK_DATA > ? \r\n" + 
         		"				 GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else rtrim((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS,\r\n" + 
         		"				 (I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end )\r\n" + 

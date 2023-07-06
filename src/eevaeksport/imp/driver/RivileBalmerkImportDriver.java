@@ -336,6 +336,7 @@ HashMap pants = null;
   
 	
 	 private Vector d30 = new Vector();
+	 private HashMap<String, Double> usedCr = new HashMap<String, Double>();
 	 
 
 	 public Vector getDebt(String agentCode) throws SQLException{
@@ -346,12 +347,15 @@ HashMap pants = null;
 	
 	 
 public Vector getDebt() throws SQLException{
+	
    debtV = new Vector();
+   usedCr = new HashMap<String, Double>();
+   
  String sql = "SELECT I44_KODAS_KS AS klient,I44_DOK_NR AS number ,max(I44_DATA_MOK) AS maksepaev , " +
      " sum(i44_suma_db-i44_suma_cr) AS tasumata ,min(I44_DATA_DOK) AS kuupaev , max(datediff(day,I44_DATA_MOK,getdate())) as yle FROM i44_skol,n08_klij WHERE " +
      " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
      " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
-     " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok <= getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr " +
+     " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11  group by i44.i44_kodas_ks,i44.i44_dok_nr " + //and i44.i44_data_dok <= getdate()
     " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_DOK_NR,I44_KODAS_KS order by I44_KODAS_KS,i44_dok_nr ";
 
  
@@ -400,10 +404,13 @@ public Vector getDebt() throws SQLException{
      if(yle > days && !d30.contains(kl) && debt.getSum() > 0) {// muutsin 30 peale
     	 d30.add(kl);
      }
-     
-
-    	 
+     double ss = 0;
+     if(usedCr.get(kl) != null) {
+    	 ss = usedCr.get(kl);
+     }
+     usedCr.put(kl, ss +debt.getSum());
      debtV.addElement(debt);
+    
     }
   }
   rs.close();
@@ -413,7 +420,7 @@ public Vector getDebt() throws SQLException{
   return debtV;
 }
   
-  public TreeMap getCustomers(Agent agent){
+  public TreeMap getCustomers(){
   	try {
   		getDebt();
   	  }catch(Exception e) {
@@ -463,7 +470,14 @@ public Vector getDebt() throws SQLException{
           Customer cust = new Customer(accountnum);
           //  System.out.println("Name " + name);
          
+          
+          String cred = rs.getString("cred");
+          if (cred != null && cred.trim().length() >0 ){
+        		     cust.setCredit(cred.trim());
+          }
             
+         
+          
             String aadr = rs.getString("aadress");
             if(aadr != null && aadr.trim().length()>0){
               cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim()),"Lithuania"));
@@ -486,11 +500,13 @@ public Vector getDebt() throws SQLException{
           
             if(payer != null && payer.trim().length()> 0){
               cust.setPayer(payer.trim());
-             
+                         }
             
-
-            }
-            
+            if(usedCr.get(cust.getPayer()) != null) {
+  	          cust.setUsedCredit(usedCr.get(cust.getPayer()));
+             } else if(usedCr.get(accountnum) != null) {
+    	          cust.setUsedCredit(usedCr.get(accountnum));
+             }
           
             if(d30.contains(cust.getID()) || d30.contains(maks)) {
           	  cust.setSalesBlockT(true);
@@ -501,9 +517,9 @@ public Vector getDebt() throws SQLException{
             String konsig = rs.getString("konsig");
             if(cust.isSalesBlockT() && konsig != null && konsig.trim().equals("ATSISK_PO_RE")){
           	  cust.setSalesBlockT(false);
-          	 // System.out.println("Blokk maha " + cust.getID());
+          	 
             }
-               
+            
          
                 customers.put(cust.getID(), cust);
          
@@ -527,7 +543,7 @@ public Vector getDebt() throws SQLException{
 	  setOrder(order);
 	     
 	  if(custs == null) {
-		custs =   this.getCustomers(null);
+		custs =   this.getCustomers();
 	  }
 	  
 	  
@@ -548,8 +564,27 @@ public Vector getDebt() throws SQLException{
 	  
 	  boolean volgu = false;
 	  
-	  if(custs.get(order.getCompany()) != null && ((Customer)custs.get(order.getCompany())).isSalesBlockT()) {
+	  Customer cc = (Customer)custs.get(order.getCompany());
+	  if(custs.get(order.getCompany()) != null && cc.isSalesBlockT()) {
 		volgu = true;  
+	  }
+	  boolean yle = false;
+	  
+	  if(cc.getCredit() != null && cc.getCredit().trim().length() > 0) {
+		  try {
+			  double lim = Double.parseDouble(cc.getCredit());
+			  double used = cc.getUsedCredit();
+			  double ordsum = order.getCalcSum();
+			  
+			  if(lim < (used + ordsum)) {
+				  volgu = true;
+				  yle = true;
+			  }
+		  }catch(Exception e) {
+			  e.printStackTrace();
+		  }
+		  
+		  
 	  }
 	  
 	  System.out.println("On Tagastus/Võlgu " + tag + " " + volgu + " " + kaup);
@@ -557,7 +592,7 @@ public Vector getDebt() throws SQLException{
       makeOutput(order, tag, volgu, kaup);
     
     
-    if(volgu) {
+    if(volgu || yle) {
     	
     	Properties props = new Properties();
 		try {
@@ -568,19 +603,22 @@ public Vector getDebt() throws SQLException{
 		
 	          String emailto = (String)props.get(order.getAgent());
 		
-    	 sendConfirmEmail( emailto, order.getCompany()); 
+    	 sendConfirmEmail( emailto, order.getCompany(), yle); 
     }
  
   }
   
   
-  private void sendConfirmEmail(String emailto,String custid){
+  private void sendConfirmEmail(String emailto,String custid, boolean yle){
 	   	try{
 	   		
 	   		System.out.println("\nemail sending " +  custid  + " " + emailto);
-	   		
+	   		String cre = "";
+	   		if(yle) {
+	   			cre = " LIMIT PROBLEM ";
+	   		}
 	   			Email mail = new Email(null);
-		  		   String sub = custid  + " Užsakymas blokuotas ir perduotas į Rivilės saugyklą";
+		  		   String sub = custid  + cre + " Užsakymas blokuotas ir perduotas į Rivilės saugyklą";
 		  		
 
 		            mail.setSMTP(parent.getProps().getProperty("smtphost"));
@@ -594,10 +632,10 @@ public Vector getDebt() throws SQLException{
 		  	  		String name = this.identifyCustomerName(custid);
 		  	  		
 		  	  		mail.setBody("Customer code :" + custid +  "\nCustomer Name :" + name + "\n" +
-		  	  			  "Užsakymas blokuotas ir perduotas į Rivilės saugyklą");
+		  	  			  cre +  "Užsakymas blokuotas ir perduotas į Rivilės saugyklą");
 		  	  		
 		  	  	   mail.setBodyHtml("Customer code :" + custid +  "\nCustomer Name :" + name + "\n" +
-		  	  			  "Užsakymas blokuotas ir perduotas į Rivilės saugyklą");
+		  	  			  cre +  "Užsakymas blokuotas ir perduotas į Rivilės saugyklą");
 		  	  		mail.setSendNotice(false);
 		  	  		
 		  	  	if("true".equals( parent.getProps().getProperty("copydev"))){

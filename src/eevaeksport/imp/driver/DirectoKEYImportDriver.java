@@ -451,22 +451,32 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	         Node root = getNode(doc, "transport");      
 	      //   System.out.println(root);
 	     	Node read = getNode(root, "customers");
-	     	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
-	         for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	     	 for (int i = 0; i < read.getChildNodes().getLength(); i++){
 	         	  Node rida = read.getChildNodes().item(i);
-	         	  try{
+	         	  
+	         	 if(rida.getNodeName().equals("bi_customer")){
+	        
+	         		//System.out.println("ridu  " + rida.toString());
+	         		 String name = null;
+	         		 try{
 	         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
+	         		
 	         		  Customer customer = new Customer(id);
+	         		// System.out.println("id  " + id);
 
-	         		  String name =  rida.getAttributes().getNamedItem("name").getNodeValue();
+	         		   name =  rida.getAttributes().getNamedItem("name").getNodeValue();
 	         		  customer.setName(deCode(name));
+	         		  
+	         		  
+	         		   //del_address1="E-600 Prekybos centras  Palangos16,Sudmant11146xx km," del_address2="Klaipeda" del_address3="92499"
 	         		  try{ 
-	         		 String aadr =  rida.getAttributes().getNamedItem("send_address_street").getNodeValue(); 
+	         			
+	         		 String aadr =  rida.getAttributes().getNamedItem("del_address1").getNodeValue(); 
 	         		  customer.setAddress(deCode(aadr));
-	         	  }catch(Exception e){
+	         	      }catch(Exception e){
 	         		  
 	         		  try{ 
-	 	         		 String aadr =  rida.getAttributes().getNamedItem("address_street").getNodeValue(); 
+	 	         		 String aadr =  rida.getAttributes().getNamedItem("address1").getNodeValue(); 
 	 	         		  customer.setAddress(deCode(aadr));
 	         		 }catch(Exception ee){
 
@@ -474,11 +484,11 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	         		 }
          		  }
 	         		  try{
-		         			 String city =  rida.getAttributes().getNamedItem("send_address_county").getNodeValue() ;         	
+		         			 String city =  rida.getAttributes().getNamedItem("del_address2").getNodeValue() ;         	
 			         		  customer.setCity(city);
 		         		  }catch(Exception e){
 		         			 try{
-			         			 String city =  rida.getAttributes().getNamedItem("address_county").getNodeValue() ;         	
+			         			 String city =  rida.getAttributes().getNamedItem("address2").getNodeValue() ;         	
 				         		  customer.setCity(city);
 		         			}catch(Exception es){
 
@@ -486,46 +496,34 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 		         			}
 		         		  }
 	         		
-	         		  
+	         		 try{
+	         			 String zip =  rida.getAttributes().getNamedItem("del_address3").getNodeValue() ;         	
+		         		  customer.setZipcode(zip);
+	         		  }catch(Exception e){
+	         			 try{
+		         			 String city =  rida.getAttributes().getNamedItem("address3").getNodeValue() ;         	
+			         		  customer.setCity(city);
+	         			}catch(Exception es){
+
+		         			  customer.setCity("");	
+	         			}
+	         		  }
 	         		  
 	         		  try{
-	         			 String price_list =  rida.getAttributes().getNamedItem("price_list").getNodeValue() ;         	
-		         		  customer.setGroup(deCode(price_list));
+	         			 String price_list =  rida.getAttributes().getNamedItem("priceformula").getNodeValue() ;         	
+		         		  customer.setGroup(price_list);
 	         	  
 	         		  }catch(Exception e){
 	         			  
 	         		  }
 	         		
-	         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
-	         		      customer.addAgent(new Agent(deCode(salesman)));
-	                 //System.out.println(rida.getChildNodes().getLength());
-	                 
-	                 for(int ii = 0;ii<rida.getChildNodes().getLength();ii++){
-	                	 Node nn = rida.getChildNodes().item(ii);
-	                	 if(nn.getNodeName().equals("data") && nn.getAttributes().getNamedItem("code").getNodeValue().equals("IIMP")){
-	                	  	
-	       	                impCodes.put( nn.getAttributes().getNamedItem("content").getNodeValue(),customer.getID());		 
-	                	 }
-	                 }
-	         		      try{
-	         		    	Node contact = getNode(rida,"contact");
-	         		    	String contact_name  = contact.getAttributes().getNamedItem("name").getNodeValue();
-	         		    	customer.setInfo(contact_name);
-	         		    	
-	         		    	String contact_phone  = contact.getAttributes().getNamedItem("telephone").getNodeValue();
-	         		    	customer.setPersonalData(contact_phone);
-	         		    	
-	         		      }catch (Exception e){
-	         		    	// e.printStackTrace();
-	         		    	 customer.setInfo("");
-	         		      }
-	         		      
-	         		     tm.put(customer.getID(), customer);
+	         		   // System.out.println(id);
+	         		     tm.put(id, customer);
 	                      
 	         	  }catch(Exception e){
-	         		  
+	         		 e.printStackTrace(); 
 	         	  }
-	              
+	         	 }
 	         }
 	         
 	 	}catch(Exception e){
@@ -1003,7 +1001,7 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	 	try {
 	 		String ordnum = getNum()+ "";
 	 		Customer ccc = (Customer)kliendid.get(order.getCompany());
-	 
+	        
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 	 			comm = "comment=\""+ order.getInfo()+ "\" " ;
@@ -1013,14 +1011,18 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	 		}
 	 		
 	 		 comm = protectSpecialCharacters(comm);
-	 		System.out.println("comm " + comm);
+	 		System.out.println("comm " + comm + " ccc " +  ccc.getGroup());
 	 		String gr = "";
 	 		if(ccc != null && ccc.getGroup()!= null){
 	 			gr = ccc.getGroup();
 	 		}
-	 		String adr = "";
+	 		String str = "";
 	 		if(ccc != null && ccc.getAddress()!= null){
-	 			adr = deCode(ccc.getAddress());
+	 			str = deCode(ccc.getAddress());
+	 		}
+	 		String zip = "";
+	 		if(ccc != null && ccc.getZipcode()!= null){
+	 			zip = deCode(ccc.getZipcode());
 	 		}
 	 		
 	 		String city = "";
@@ -1063,9 +1065,9 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	         "amount_vat=\"" + order.getSum()* 1.21 + "\" " +
 	         "currency=\"EUR\" language=\"LIT\">" +
 	         "<pricelist>" + gr + "</pricelist>" +
-	       
+	       //del_address1="E-600 Prekybos centras  Palangos16,Sudmant11146xx km," del_address2="Klaipeda" del_address3="92499"
 	         "<send_address>" +
-	         "<street>" + adr + "</street>" +
+	         "<street>" + str + "</street>" +
 	         "<county>" + city + "</county>" +
 	         "<country>0</country>" +
 	         "</send_address>" +

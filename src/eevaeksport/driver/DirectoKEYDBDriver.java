@@ -6,11 +6,13 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -34,6 +36,13 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -44,6 +53,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -69,7 +82,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker {
+public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker  {
 
   public DirectoKEYDBDriver(EksportPanel parent) {
     super(parent);
@@ -93,6 +106,10 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
   }
   
 
+  
+  
+  
+  
   
   private String stockConn = null;
   String user =  null;
@@ -1146,12 +1163,12 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
       return res2;
         }
 
-
+ 
 
      
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-   
+    
      
      //makeData();
     // System.out.println( getPricelists("1").toString());

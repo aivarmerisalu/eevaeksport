@@ -117,6 +117,7 @@ public class KulcsSoftImportDriver
 
  	    while (rs.next()) {
  		String kood = rs.getString("toode").trim();
+ 		String code = rs.getString("code");
  		
  		String name = rs.getString("Name");
  	   
@@ -124,8 +125,9 @@ public class KulcsSoftImportDriver
  		    Product prod = new Product(kood);
  		    name = name.trim();
  		    prod.setEAN(parent.make(rs.getString("ean")));
- 			
- 		     
+ 		    if(code != null) {
+ 			prod.setAgentGroup(code);
+ 		    }
      
                   if(prices.get(kood)!= null){
                  	 prod.setPrice(Double.parseDouble((String)prices.get(kood)));
@@ -194,8 +196,8 @@ public class KulcsSoftImportDriver
          System.out.println("kliendid algus");
          String cmd =
  	    "select a.\"Id\", c.\"Code\" as code1 ,c.\"Id\" as pid , c.\"Name\" , a.\"AddressName\" "
- 	    + ",a.\"Zip\", a.\"Street\", a.\"City\", a.\"Number\" , a.\"Building\" , a.\"Staircase\" , a.\"Floor\" , a.\"Door\" "
- 	   + ",c.\"CentralZip\", c.\"CentralStreet\", c.\"CentralCity\", c.\"CentralNumber\" , c.\"CentralBuilding\" , c.\"CentralStaircase\" , c.\"CentralFloor\" , c.\"CentralDoor\" "
+ 	    + ",a.\"Zip\", a.\"Street\", a.\"City\",a.\"PublicDomain\", a.\"Number\" , a.\"Building\" , a.\"Staircase\" , a.\"Floor\" , a.\"Door\" "
+ 	   + ",c.\"CentralZip\", c.\"CentralStreet\", c.\"CentralCity\", c.\"CentralPublicDomain\", c.\"CentralNumber\" , c.\"CentralBuilding\" , c.\"CentralStaircase\" , c.\"CentralFloor\" , c.\"CentralDoor\", "
  	    + "c.\"PaymentMethodDelayDay\" , c.\"AppliedPriceRule\" "
  	    + ", c.\"ContactName\",c.\"ContactPhone\" ,  c.\"Email\",c.\"TaxNumber\" as vatno ,  c.\"CompanyRegNumber\" as regno"
  	    + " from \"CustomerAddress\" a INNER JOIN \"Customer\" c ON c.\"Id\" = a.\"Customer\"" ;
@@ -231,6 +233,8 @@ public class KulcsSoftImportDriver
  		String zipcode = parent.make(rs.getString("Zip"));
  		String street = parent.make(rs.getString("Street"));
  		String city = parent.make(rs.getString("City"));
+ 		String publicDomain = parent.make(rs.getString("PublicDomain"));
+ 		
  		String number = parent.make(rs.getString("Number"));
  		String building = parent.make(rs.getString("Building"));
  		String staircase = parent.make(rs.getString("Staircase"));
@@ -242,6 +246,8 @@ public class KulcsSoftImportDriver
  		String zipcodeC = parent.make(rs.getString("CentralZip"));
  		String streetC = parent.make(rs.getString("CentralStreet"));
  		String cityC = parent.make(rs.getString("CentralCity"));
+ 		String publicDomainC = parent.make(rs.getString("CentralPublicDomain"));
+ 		
  		String numberC = parent.make(rs.getString("CentralNumber"));
  		String buildingC = parent.make(rs.getString("CentralBuilding"));
  		String staircaseC = parent.make(rs.getString("CentralStaircase"));
@@ -273,7 +279,43 @@ public class KulcsSoftImportDriver
  		json.put("cityC", m(cityC));
  		json.put("streetC", m(streetC));
  		json.put("zipcodeC", m(zipcodeC));
+ 		json.put("country","Magyarország");
+ 		json.put("countryC","Magyarország");
+ 		json.put("zipcode", m(zipcode));
  		
+ 	
+ 		String pd = "út";
+ 		if(publicDomain.equals("2711")) {
+ 			pd = "utca";
+ 		}
+ 		if(publicDomain.equals("2738")) {
+ 			pd = "sétány";
+ 		}
+ 		if(publicDomain.equals("2714")) {
+ 			pd = "körút";
+ 		}
+ 		if(publicDomain.equals("2735")) {
+ 			pd = "park";
+ 		}
+ 		
+ 		json.put("publicDomain", m(pd));
+ 		
+ 		
+ 		pd = "út";
+ 		if(publicDomainC.equals("2711")) {
+ 			pd = "utca";
+ 		}
+ 		if(publicDomainC.equals("2738")) {
+ 			pd = "sétány";
+ 		}
+ 		if(publicDomainC.equals("2714")) {
+ 			pd = "körút";
+ 		}
+ 		if(publicDomainC.equals("2735")) {
+ 			pd = "park";
+ 		}
+ 		json.put("publicDomainC", m(pd));
+ 	
  		
  		         Agent aa = new Agent(ag);
  		         cust.addAgent(aa);
@@ -415,18 +457,18 @@ private TreeMap customers = null;
             sb.append("1" + ls); 
             sb.append( cust.getMainAgent() +  ls); 
             sb.append( custName +  ls);
-            sb.append( cust.getZipcode() +  ls);
-            sb.append( cust.getCity() +  ls);
-            sb.append( cust.getAddress() +  ls);
-            sb.append( cust.getZipcode() +  ls);
-            sb.append( cust.getCity() +  ls);
-            sb.append( cust.getAddress() +  ls);
+            sb.append(json.get("zipcodeC")  + ls);
+            sb.append(json.get("cityC")  + ls);
+            sb.append(json.get("streetC")  + ls);
+            sb.append(json.get("zipcode")  + ls);
+            sb.append(json.get("city")  + ls);
+            sb.append(json.get("street")  + ls);
             sb.append(getDateString(Calendar.getInstance())  + ls);
             sb.append(getDateString(cal)  + ls);
             
             sb.append( cust.getVatnr() +  ls);
             sb.append( "átutalás" +  ls);
-            sb.append( line.getToode() +  ls);
+            sb.append( prod.getAgentGroup()+  ls);
             sb.append( prodName +  ls);
             sb.append( getNF().format(line.getKogus())+  ls);
             sb.append(line.getUnit() + ls);
@@ -454,32 +496,17 @@ private TreeMap customers = null;
      		json.put("cityC", cityC);
      		json.put("streetC", streetC);
      		json.put("zipcodeC", zipcodeC);*/
-            
-            
-            
-            
-            
            
-           
-           
-            
-            
-            
-            
-
-            
-            
-
         
-            sb.append(" " + ls); // Buyer address - Country
-            sb.append(json.get("cityC") + ls); //Customer address - Public area
+            sb.append(json.get("countryC") + ls); // Buyer address - Country
+            sb.append(json.get("publicDomainC") + ls); //Customer address - Public area
             sb.append(json.get("doorC") + ls); //Customer address - Door
             sb.append(json.get("buildingC") + ls);//Customer address - Building
             sb.append(json.get("floorC") + ls);// Customer address - Floor
             sb.append(json.get("staircaseC") + ls);//Customer address - Staircase
             sb.append(json.get("numberC")  + ls);//Customer address - House number
-            sb.append(" " + ls); // Shipping address - Country
-            sb.append(json.get("city") + ls);// Delivery address - Public area
+            sb.append(json.get("country") + ls); // Shipping address - Country
+            sb.append(json.get("publicDomain") + ls);// Delivery address - Public area
             sb.append(json.get("door") + ls);// Shipping address - Door
             sb.append(json.get("building") + ls);//Delivery address - Building
             sb.append(json.get("floor") + ls);// Delivery address - Floor
