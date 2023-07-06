@@ -576,7 +576,7 @@ public Vector getDebt() throws SQLException{
 			  double used = cc.getUsedCredit();
 			  double ordsum = order.getCalcSum();
 			  
-			  if(lim < (used + ordsum)) {
+			  if((lim + 100) < (used + ordsum)) {
 				  volgu = true;
 				  yle = true;
 			  }
