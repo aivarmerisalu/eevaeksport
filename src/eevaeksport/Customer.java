@@ -24,6 +24,7 @@ public class Customer {
     setPayer( id);
   }
   public String restPriority = null;
+  public double criticalDebt = 0;
   public String restPartner = null;
   public String restName = null;
   public boolean diffBack = false;

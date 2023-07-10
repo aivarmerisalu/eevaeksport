@@ -859,6 +859,7 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
 
         TreeMap debtsover  = new TreeMap();
         TreeMap debtsall  = new TreeMap();
+        TreeMap debtscri  = new TreeMap();
     try {
       Connection con3 = getNewConnection2();
       Statement stmt3 = con3.createStatement();
@@ -868,10 +869,17 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
     	//  double sum = rs3.getDouble("koik");
          double yle = rs3.getDouble("yle");
          double used = rs3.getDouble("used");
+         double critical = rs3.getDouble("critical");
+         
+          
          
         if(addDebt(kl)) {
          if(used !=0){
         	 debtsall.put(kl, used);
+         }
+         
+         if(critical !=0){
+        	 debtscri.put(kl, critical);
          }
          
          if(yle !=0){
@@ -1061,6 +1069,14 @@ con3.close();
         	           
         	           if(debtsall.get(customer.getID()) != null){
         	        	   customer.setUsedCredit(Double.parseDouble(debtsall.get(customer.getID())+""));
+        	           }
+        	           
+        	           if(debtscri.get(customer.getPayer()) != null){
+        	        	   customer.criticalDebt = (Double.parseDouble(debtscri.get(customer.getPayer())+""));
+        	           }
+        	           
+        	           if(debtscri.get(customer.getID()) != null){
+        	        	   customer.criticalDebt = (Double.parseDouble(debtscri.get(customer.getID())+""));
         	           }
         	           
         	           if(debtsover.get(customer.getPayer()) != null){

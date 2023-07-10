@@ -4098,6 +4098,13 @@ if(agprods != null && agprods.size() >0){
            }
            buf.append(diff3); 
            
+           buf.append(EksportPanel.separator);
+           String bbb = "0";
+           if(cust.criticalDebt > 0){
+        	   bbb = cust.criticalDebt + "";
+           }
+           buf.append(bbb); 
+           
            buf.append(lineSeparator);
       }
 

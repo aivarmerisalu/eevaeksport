@@ -423,7 +423,9 @@ private String company = "9998";
 			return "F03664";
 		}
 		
-	  
+		if (asi.equals("745")) {
+			return "F03674";
+		}
 	  
 	  
 	  
@@ -563,6 +565,9 @@ private String company = "9998";
 
 	  if(asi.equals("584")){
 		  res = "4740581999329";//	RANNAROOTSI SELVER Rannarootsi tee 1, Uuem11114xxisa F036195
+	  }
+	  if(asi.equals("745")){
+		  res = "4740581999947";//	KURNA SELVERRannarootsi tee 1, Uuem11114xxisa F036195
 	  }
 
 	  if(asi.equals("583")){

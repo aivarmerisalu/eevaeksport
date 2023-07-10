@@ -589,7 +589,7 @@ public Vector getDebt() throws SQLException{
 	  
 	  System.out.println("On Tagastus/Võlgu " + tag + " " + volgu + " " + kaup);
 	  
-      makeOutput(order, tag, volgu, kaup);
+      makeOutput(order, tag, volgu, kaup, yle);
     
     
     if(volgu || yle) {
@@ -653,7 +653,7 @@ public Vector getDebt() throws SQLException{
 	   }
  
 
- private void makeOutput(Order order,boolean tag, boolean volgu , boolean kaup){
+ private void makeOutput(Order order,boolean tag, boolean volgu , boolean kaup , boolean yle){
  	StringBuffer sb = new StringBuffer();
    
 	Hashtable pandikas =  new Hashtable();
@@ -806,7 +806,12 @@ public Vector getDebt() throws SQLException{
       }
      
       if(volgu && !tag) {
-    	  sb.append("          <I06_KODAS_LS_3>BLOCK</I06_KODAS_LS_3>" + ls);
+    	  if(yle) {
+    		  sb.append("          <I06_KODAS_LS_3>BLOCK_CR</I06_KODAS_LS_3>" + ls);  
+    	  }else {
+    		  sb.append("          <I06_KODAS_LS_3>BLOCK</I06_KODAS_LS_3>" + ls);  
+    	  }
+    	  
           cou++;
       }
           
