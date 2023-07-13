@@ -345,6 +345,13 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				.getProperty("dsna.user"),
 				getParent().getProps().getProperty("dsna.pass"));
 	}
+	
+	private Connection getNewConnectionView() throws SQLException {
+		return DriverManager.getConnection(urlV, getParent().getProps()
+				.getProperty("view.user"),
+				getParent().getProps().getProperty("view.pass"));
+	}
+
 
 	public void insertDefective(DefectiveWrapper wr) {
 		
@@ -2170,6 +2177,7 @@ System.out.println(cmd);
 	private Vector klient = new Vector();
 	private TreeMap agents = new TreeMap();
 	private String url2 = "jdbc:odbc:navi";
+	private String urlV = "jdbc:odbc:naviltview";
 	private Connection con;
 	private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
 	private TreeMap debtDays = new TreeMap();
@@ -2196,8 +2204,8 @@ System.out.println(cmd);
 	public void setBulkSales(Map agents) {
 
 		try {
-			String cmd = " Select * from v_VIK_Turnover";
-			Connection con = getNewConnection2();
+			String cmd = " Select  summa, summa from MobilejavaVIK.v_VIK_Turnover";
+			Connection con = this.getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {

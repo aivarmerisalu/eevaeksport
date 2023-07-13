@@ -18,6 +18,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -606,6 +607,37 @@ String picts = parent.getProps().getProperty("pict.dir");
         TreeMap agents = new TreeMap();
         
         
+        HashMap asendajad = new HashMap();
+        
+    	try {
+			 FileReader fr = new FileReader("vacation.txt");
+	         BufferedReader reader = new BufferedReader(fr);
+	       String line = null;
+	 
+	        while((line = reader.readLine()) != null ){
+	           
+	        	StringTokenizer st = new StringTokenizer(line, ";");
+	//  System.out.println(line);
+	          if (st.hasMoreTokens()) {
+	            String ag1 =	st.nextToken();
+	            String man = st.nextToken().trim();
+	            Vector vv = new Vector();
+	            if(asendajad.get(ag1) != null){
+	           	 vv = (Vector)asendajad.get(ag1);
+	           	 vv.add(man);
+	           	 asendajad.put(ag1, vv);
+	            }else{
+	           	 vv.add(man);
+	           	 asendajad.put(ag1, vv); 
+	             }
+	            }
+	          }
+	        reader.close();
+		 
+		}catch(Exception d){
+			
+		}
+        
         Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
         StringBuffer sb2 = new StringBuffer();
         try {
@@ -613,10 +645,18 @@ String picts = parent.getProps().getProperty("pict.dir");
             ResultSet	      rs = stmt.executeQuery();
 
             while (rs.next()) {
-              Agent agent = new Agent(rs.getString("kood").trim());
+            	String salesman = rs.getString("kood").trim(); 
+              Agent agent = new Agent(salesman);
               String name = rs.getString("nimi").trim();
              String ob = null;
              
+             if(asendajad.get(salesman) != null){
+             	Vector vv = (Vector)asendajad.get(salesman);
+             	Enumeration aa = vv.elements();
+             	while(aa.hasMoreElements()){
+             		agent.addDubbler((String)aa.nextElement());
+             	}
+             }
              
           //   00025- 1 manager Klaipedos profesionaia, storage number 45 Kristina Ramonaite,
            //  00027- 1 manager Panevezio profesionalai; storage number 29 Inga Kairiene;
@@ -640,6 +680,7 @@ String picts = parent.getProps().getProperty("pict.dir");
             	// agent.setObject(ob.trim());
                  agent.setName(name + " " + agent.getID());
                  agents.put(name, agent);
+                 agents1.put(salesman, agent);
              }
             	
             }
@@ -650,6 +691,11 @@ String picts = parent.getProps().getProperty("pict.dir");
         connectionDown();
         return agents;
     }
+    
+    public TreeMap getAgents1() {
+  		return agents1;
+  	}
+      private TreeMap agents1 = new TreeMap();
 
     public TreeMap getCustomers(Agent agent){
         connectionUp(url2);
@@ -761,6 +807,17 @@ String picts = parent.getProps().getProperty("pict.dir");
             	  cust.addAgent(new Agent("00024"));  
               }
              
+              
+          	Agent agg = ((Agent)this.getAgents1().get(ag));
+				
+				if(agg != null && agg.getDubbler().size()>0){
+					//System.out.println("dubbing " + agg + "  " + agg.getDubbler().toString());
+					for (int r = 0 ; r < agg.getDubbler().size() ; r++){
+						Agent dub = new Agent((String)agg.getDubbler().elementAt(r));
+						cust.addAgent(dub);
+					}
+				}
+			
              
              cust.setMainAgent(ag);
               try{

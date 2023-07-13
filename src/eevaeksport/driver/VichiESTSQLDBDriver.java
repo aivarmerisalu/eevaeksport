@@ -1245,7 +1245,7 @@ try{
          	String ag = rs.getString("agent");
              customer.addAgent(new Agent(ag));
              if(ag != null){
-                customer.setMainAgent(ag.trim());
+             //   customer.setMainAgent(ag.trim());
                 customer.addAgent(new Agent("21"));
                    customer.addAgent(new Agent("22"));
                    customer.addAgent(new Agent("23"));
@@ -2157,6 +2157,7 @@ con3.close();
    private TreeMap agents = new TreeMap();
    private String url = "jdbc:odbc:vicireport";
    private String url2 = "jdbc:odbc:naviest";
+   private String urlV = "jdbc:odbc:naviestview";
    private Connection con;
    private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
    private TreeMap debtDays = new TreeMap();
@@ -2172,7 +2173,11 @@ public void setNF(NumberFormat nf) {
 	NF = nf;
 }
 
-
+private Connection getNewConnectionView() throws SQLException {
+	return DriverManager.getConnection(urlV, getParent().getProps()
+			.getProperty("view.user"),
+			getParent().getProps().getProperty("view.pass"));
+}
   /**
    * setBulkSales
    *

@@ -1164,7 +1164,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
         prod.setPrice(rs.getDouble("price"));
   String lopp = "";
         String ean = rs.getString("ean");
-        if(ean!=null && ean.trim().length()>0){
+        if(ean!=null && ean.trim().length()>4){
           prod.setEAN(ean);
           lopp = ean.substring(ean.length()-4);
           

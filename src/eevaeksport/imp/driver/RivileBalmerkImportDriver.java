@@ -807,7 +807,7 @@ public Vector getDebt() throws SQLException{
      
       if(volgu && !tag) {
     	  if(yle) {
-    		  sb.append("          <I06_KODAS_LS_3>BLOCK_CR</I06_KODAS_LS_3>" + ls);  
+    		  sb.append("          <I06_KODAS_LS_3>BLOCK_CL</I06_KODAS_LS_3>" + ls);  
     	  }else {
     		  sb.append("          <I06_KODAS_LS_3>BLOCK</I06_KODAS_LS_3>" + ls);  
     	  }

@@ -672,7 +672,7 @@ import eevaeksport.util.Converter;
 			   // System.out.println("Splitter PL  " + lin.getPl() );
 			    
 			    
-			     if(group.equals("BAT") || group.equals("NIV") || group.equals("VUS")  ){ //|| group.equals("STG")  
+			     if(group.equals("BAT")  ){ 
 			     
 			    	 if(lin.getKogus() < 0){
 			    		 ordNega.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
@@ -681,12 +681,11 @@ import eevaeksport.util.Converter;
 			    	 }else{
 			    	 	  ordBAT.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 					     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-					  	 
-			    	 }
+					 }
 			    	
 			      
 			     
-			     }else  if(group.equals("NIVEAGGSG") ){ 
+			     } else if( group.equals("NIV") || group.equals("VUS") ){ 
 			     
 			    	if (lin.getKogus() < 0){
 			    		 ordNega.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
@@ -700,7 +699,7 @@ import eevaeksport.util.Converter;
 			     } else if(itemid.startsWith("XX")){
 			    	 ordRekl.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-				     } else {
+				 } else {
 				    	 
 			    	 if(lin.getKogus() < 0){
 			    		 ordNega.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),

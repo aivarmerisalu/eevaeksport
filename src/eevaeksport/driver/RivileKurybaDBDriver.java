@@ -1259,21 +1259,8 @@ Active customer past 7 days  :  20
     public void setBulkSales(Map agents){
     	
     	 connectionUp(url2);
-    	 
-       String cmd = "  SELECT  I06_ATSTOVAS AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + " +
-                   " SUM(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh  WHERE " +
-                   "  month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) and I06_PERKELTA='2' " +
-                   "   and I06_R_DATE <= getdate() and I06_ATSTOVAS like '%vad%' and I06_KODAS_LS_2 in ('021','022','023','025')  " +
-                   "  GROUP BY  I06_ATSTOVAS";
-//I06_KODAS_LS_2 = 021 or
-    //   I06_KODAS_LS_2 = 022 or I06_KODAS_LS_2 = 023 or I06_KODAS_LS_2 = 025
-
-       log(cmd);
 
          try {
-        	 
-        	 
-           stmt = con.prepareStatement(cmd);
 
            String cmd2 =
                "SELECT I44_KODAS_MS AS agent, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
@@ -1321,6 +1308,30 @@ Active customer past 7 days  :  20
     	 }
      }
      rs.close();
+     
+     
+     
+     String cmd0 = "SELECT [N23_REIKSME1] as aaa FROM [N23_PRMD] where [N23_KODAS_PR] = 'MERISOFT_03'" ;
+     
+     String str = "";
+     stmt = con.prepareStatement(cmd0);  
+      rs = stmt.executeQuery();
+			while(rs.next()) {
+			String aaa = rs.getString("aaa").trim();
+			if(str.length() < 2) {
+				 str =  "'" + aaa +"'";
+			}else {
+				 str = str + ",'" + aaa +"'";
+			}
+		}
+		rs.close();
+	 
+     String cmd = "  SELECT  I06_ATSTOVAS AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + " +
+                 " SUM(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh  WHERE " +
+                 "  month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) and I06_PERKELTA='2' " +
+                 "   and I06_R_DATE <= getdate() and I06_ATSTOVAS like '%vad%' and I06_KODAS_LS_2 in (" + str + " )  " +
+                 "  GROUP BY  I06_ATSTOVAS";
+     
      
      stmt = con.prepareStatement(cmd); 
           rs = stmt.executeQuery();

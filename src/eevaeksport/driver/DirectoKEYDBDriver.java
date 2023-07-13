@@ -1809,28 +1809,25 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		         		 String aadr = "";
 		         		 String aadr2 = "";
 		         		 try{ 
-		 	         		  aadr =  rida.getAttributes().getNamedItem("address_street").getNodeValue(); 
-		 	         		  aadr2 =  rida.getAttributes().getNamedItem("address_county").getNodeValue(); 
-			 	         	  customer.restStreet = aadr;
-			 	         	  customer.restCity = aadr2;
-		 	         		  customer.setAddress(Converter.adressLink(aadr, country));
-		 	         		  
-		 	         		  if("true".equals(getParent().getProps().getProperty("use.county")) && addaadr){
-		 	         			 name = name + " " + aadr;
-		 	         		  }
-		 	         			 
-		 	         		  
-		         		 }catch(Exception ee){ }
-		         		 
-		         		 
-		         		  customer.setName(name);
-		         		 
-		         		try{ 
-		         			country =  rida.getAttributes().getNamedItem("address_country").getNodeValue(); 
-		 	         		  customer.setCountry(country);
+		 	         		  aadr =  rida.getAttributes().getNamedItem("del_address1").getNodeValue(); 
+		 	         		  customer.restStreet = aadr;
 			 	         	  customer.setAddress(Converter.adressLink(aadr, country));
-		         		 }catch(Exception ee){
-			 		         		 }
+			 	         	  if("true".equals(getParent().getProps().getProperty("use.county")) && addaadr){
+			 	         			 name = name + " " + aadr;
+			 	         		  }
+			 	         	  
+		 	         		
+		 	         	 } catch (Exception ee){ }
+		         		 
+		         		
+		         		 try{ 
+		 	         		  aadr2 =  rida.getAttributes().getNamedItem("del_address2").getNodeValue(); 
+			 	         	  customer.restCity = aadr2;
+		 	         	 } catch (Exception ee){ }
+		         		 
+		         		 
+		         		  customer.setName(name + " " + customer.getID());
+		         	
 		         		 
 		         		
 		         		 try{ 
@@ -1840,7 +1837,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		 	            		customer.restPhone = yldphone;
 		 	  		         }
 		 	     		 }catch(Exception ee){
-                        	 customer.setAddress(""); 
+                        	
 		         		 }
 
 		         		  
@@ -1871,19 +1868,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		         			  
 		         		  }
 		         		      		  
-		         		  try{
-			         			 String city =  rida.getAttributes().getNamedItem("send_address_county").getNodeValue().replaceAll(";", ",") ;         	
-				         		  customer.setCity(city);
-			         		  }catch(Exception e){
-			         			 try{
-				         			 String city =  rida.getAttributes().getNamedItem("address_county").getNodeValue().replaceAll(";", ",") ;         	
-					         		  customer.setCity(city);
-			         			}catch(Exception es){
-
-				         			  customer.setCity(" ");	
-			         			}
-			         		  }
-		         		 
+		         		
 		         		  
 		         		  try{
 		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("price_list").getNodeValue());         	
@@ -1939,7 +1924,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	         		    // System.out.println(salesman);
 	                  if(sm != null && sm.length() > 1 && goes){
 	                	//  System.out.println(sm);
-	            	      tm.put(customer.getName(), customer);
+	            	      tm.put(customer.getName() + " " + customer.getID(), customer);
 	                      this.customers.add(customer.getID());
 	                  }
      		  }catch(Exception t){
