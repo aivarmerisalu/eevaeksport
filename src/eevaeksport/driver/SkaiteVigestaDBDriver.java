@@ -992,7 +992,7 @@ Statement st = null;
  " WHERE     op.OperacijosTipoId = (2000018) and year(op.Data) = year(getdate()) and month(op.Data) = month(getdate()) "+
  " order by 1,2";
 		 
-		  TreeMap fourThousand= get4Thousand();
+		//  TreeMap fourThousand= get4Thousand();
 		//
 		  
 		  this.makePaymentsFile();
@@ -1152,7 +1152,7 @@ Statement st = null;
                 }
                 
                 
-                if(fourThousand.get(payer) != null) {
+               /* if(fourThousand.get(payer) != null) {
                   cust.noCashSales = true;
                   cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(payer) +""))+"€");
                   } else if(fourThousand.get("P" + payer) != null) {
@@ -1170,26 +1170,36 @@ Statement st = null;
                     } else if(fourThousand.get("P" +payid) != null) {
                       cust.noCashSales = true;
                       cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" +payid) +""))+"€");
-                    }
+                    }*/
                 
                 
                 if(custBonuses.get(cust.getID()) != null) {
                 	Toode tt = custBonuses.get(cust.getID());
                 	String bonus = "";
                 	 if(tt.json != null) {
-                		
-                			
-                			if(tt.json.get("compThis") != null) {
-                				bonus = bonus + "CompThisMon: " + ((Double)tt.json.get("compThis")).intValue() + "€";
-                			}
-                			
-                			if(tt.json.get("compLast") != null) {
-                				bonus = bonus + "|CompLastMon: " + ((Double)tt.json.get("compLast")).intValue() + "€";
-                			}
-                			
-                			if(tt.json.get("compPreLastPerc") != null) {
-                				bonus = bonus + "|CompPreLastMon: " + ((Double)tt.json.get("compPreLastPerc")).intValue() + "€";
-                			}
+                	
+
+
+             			if(tt.json.get("compThis") != null) {
+             				bonus = bonus + "Komp einamasis men: " + ((Double)tt.json.get("compThis")).intValue() + "€ ";
+             				if(tt.json.get("compThisPerc") != null) {
+                 				bonus = bonus +  ((Double)tt.json.get("compThisPerc")).intValue() + "%";
+                 			}
+             			}
+             			
+             			if(tt.json.get("compLast") != null) {
+             				bonus = bonus + "|Praeitas men: " + ((Double)tt.json.get("compLast")).intValue() + "€ ";
+             				if(tt.json.get("compLastPerc") != null) {
+                 				bonus = bonus +  ((Double)tt.json.get("compLastPerc")).intValue() + "%";
+                 			}
+             			}
+             			
+             			if(tt.json.get("compPreLast") != null) {
+             				bonus = bonus + "|Uzpraeitas men: " + ((Double)tt.json.get("compPreLast")).intValue() + "€ ";
+             				if(tt.json.get("compPreLastPerc") != null) {
+                 				bonus = bonus +  ((Double)tt.json.get("compPreLastPerc")).intValue() + "%";
+                 			}
+             			}
                 			
                 			if(bonus.trim().length() > 0) {
                 				 cust.addCity(bonus);
@@ -1786,16 +1796,16 @@ try {
    	    	
    	    String re = "||Bonuses|";
    	    if((int)tt.getDonecur() > 0) {
-   	     re = "This Month: " + (int)tt.getDonecur() + "€|";
+   	     re = "Komp einamasis men: " + (int)tt.getDonecur() + "€|";
    	    }
    	   
-   	    	re = re + "Last Month: " + (int)tt.getDonevol() + "€|";
-   	    	re = re + "PreLast Month: " + (int)tt.getKogus() + "€|";
+   	    	re = re + "Praeitas men: " + (int)tt.getDonevol() + "€|";
+   	    	re = re + "Uzpraeitas men: " + (int)tt.getKogus() + "€|";
    	    	res.put(agID, re );
    	      }
    	   }
-                
-       
+     
+
          } catch (Exception e) {
              getParent().showError(e);
          }
@@ -1909,8 +1919,8 @@ try {
             
              String  asi = "";
              if(psales > 0) {
-             asi = Converter.enCodeEst("SalesPlan ZaliaMesa: ") + (int)psales + " €|";    
-              	  asi = asi + Converter.enCodeEst("Plan done/Estimate :");
+             asi = Converter.enCodeEst("Planas Zalia: ") + (int)psales + " €|";    
+              	  asi = asi + Converter.enCodeEst("Pardavimai Zalia/Plano vykdymas :");
              	  if(tehtudsalperc > 3){
              		tehtudsalperc = 0;
              	  }
@@ -1932,8 +1942,8 @@ try {
               	    plaanitavMyykSal = d2 * msales/dd;
               	    prognosalperc = plaanitavMyykSal/psales;
              
-                asi =  Converter.enCodeEst("||SalesPlan Gaminiai: ") + (int)psales + " €|";    
-               	  asi = asi + Converter.enCodeEst("Plan done/Estimate :");
+                asi =  Converter.enCodeEst("||Planas Gaminiai: ") + (int)psales + " €|";    
+               	  asi = asi + Converter.enCodeEst("Pardavimai Gaminiai/Plano vykdymas :");
               	  if(tehtudsalperc > 3){
               		tehtudsalperc = 0;
               	  }

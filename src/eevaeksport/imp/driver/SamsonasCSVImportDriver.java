@@ -563,11 +563,13 @@ public class SamsonasCSVImportDriver
 	    			System.exit(0);
 	    		}
 	    	}catch(Exception e) {
-	    		
+	    		log.error(e);
+	    	e.printStackTrace();	
 	    	}
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error(e);
 			System.exit(0);
 		}
 	 }

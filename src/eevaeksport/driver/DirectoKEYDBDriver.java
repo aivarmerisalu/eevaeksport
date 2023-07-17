@@ -342,17 +342,21 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	                    	  try{  	  
                        mode = rida.getAttributes().getNamedItem("what").getNodeValue();
 	                    	  }catch(Exception aa){ }
+	                    	  
+	                   mline.setProdLevel(mode);
+	                    	  
                       try{
                      double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
                      if(mode != null && mode.equals("8")){
                     	 mline.setPrice(value);
+                    	 mline.setProdLevel("pr");
                      }else{
                          mline.setDiscount(value);
                      }
                       }catch(Exception aa){ }
                   
                       
-                      mline.setProdLevel(mode);
+                   
                     
                       
                       if (custID != null && custID.trim().length() > 0) {
@@ -1793,9 +1797,14 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		 	         		customer.setCredit(limit);
 		 	         	 }catch(Exception ee){
 		         		 }
-                         
+		         		String paymentterm = "";
+		         		try{ 
+		         			paymentterm =  rida.getAttributes().getNamedItem("paymentterm").getNodeValue(); 
+		 	         		customer.setPaymTerm(paymentterm);
+		 	         	 }catch(Exception ee){
+		         		 }
 		         		
-		         		
+		         	
 
 		         		try{ 
 		         			double discount  =  Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
@@ -1831,15 +1840,25 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		         		 
 		         		
 		         		 try{ 
-		 	         		 String yldphone =  rida.getAttributes().getNamedItem("telephone").getNodeValue();
+		 	         		 String yldphone =  rida.getAttributes().getNamedItem("phone").getNodeValue();
 		 	         		 if(yldphone.trim().length() > 0){
-		 	            		customer.setPersonalData((yldphone).replaceAll(";", ","));
+		 	            		customer.setPersonalData("Tel: " +(yldphone).replaceAll(";", ","));
 		 	            		customer.restPhone = yldphone;
 		 	  		         }
 		 	     		 }catch(Exception ee){
                         	
 		         		 }
 
+		         		 
+		         		 try{ 
+		 	         		 String email =  rida.getAttributes().getNamedItem("email").getNodeValue();
+		 	         		 if(email.trim().length() > 0){
+		 	            		customer.adPersonalData("|" + (email).replaceAll(";", ","));
+		 	            		
+		 	  		         }
+		 	     		 }catch(Exception ee){
+                        	
+		         		 }
 		         		  
 		         		  try{
 		         			  
@@ -1871,7 +1890,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		         		
 		         		  
 		         		  try{
-		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("price_list").getNodeValue());         	
+		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("priceformula").getNodeValue());         	
 			         		   customer.setGroup(Converter.deCode(price_list));
 			         		  if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
 			       			   customer.addFixSortCode(Converter.deCode(price_list)); 

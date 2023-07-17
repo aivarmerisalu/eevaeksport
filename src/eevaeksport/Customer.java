@@ -251,6 +251,9 @@ public class Customer {
   public void setPersonalData(String pers) {
     this.personalData = pers;
   }
+  public void adPersonalData(String pers) {
+	    this.personalData = this.personalData +  pers;
+	  }
   public String getLicence() {
      return this.licence;
    }
