@@ -427,11 +427,10 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	  
 	 	try{
 	 	    String sql2 = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2,k.[Customer ILN] as kood3 "
-	 	    		+ " from  dbo.v_VIK_Customers k where k.[Customer ILN] != '' ";
+	 	    		+ " from  MobileJavaVIK.v_VIK_Customers k where k.[Customer ILN] != '' ";
 	 	    System.out.println(sql2);
 
-	 	   Connection con = DriverManager.getConnection(url + parent.getProps().getProperty("dsn")
-	 	            , parent.getProps().getProperty("dsna.user"), parent.getProps().getProperty("dsna.pass"));
+	 	   Connection con = DriverManager.getConnection(urlV   , parent.getProps().getProperty("view.user"), parent.getProps().getProperty("view.pass"));
 
 	 	    Statement st2 = con.createStatement();
 	 	    ResultSet rs2 = st2.executeQuery(sql2);
@@ -465,11 +464,10 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	  
 	 	try{
 	 	    String sql2 = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2 "
-	 	    		+ " from  dbo.v_VIK_Customers k where k.[Ship-to Address ILN] != '' ";
+	 	    		+ " from  MobileJavaVIK.v_VIK_Customers k where k.[Ship-to Address ILN] != '' ";
 	 	    System.out.println(sql2);
 
-	 	   Connection con = DriverManager.getConnection(url + parent.getProps().getProperty("dsn")
-	 	            , parent.getProps().getProperty("dsna.user"), parent.getProps().getProperty("dsna.pass"));
+	 	   Connection con = DriverManager.getConnection(urlV   , parent.getProps().getProperty("view.user"), parent.getProps().getProperty("view.pass"));
 
 	 	    Statement st2 = con.createStatement();
 	 	    ResultSet rs2 = st2.executeQuery(sql2);
@@ -896,6 +894,7 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
   }
 
   private String url = "jdbc:odbc:";
+  private String urlV = "jdbc:odbc:naviltview";
 
   private ImportPanel parent;
   private Order order = null;

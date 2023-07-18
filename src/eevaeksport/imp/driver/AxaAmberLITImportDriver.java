@@ -309,8 +309,12 @@ private Vector signatures = new Vector();
 			
 				  if(repr) {
 					  
-					    	
-				    	    sendRepriceEmail(order, comment,order.getDokNr(),order.getCompany());
+					    	try {
+					    		 sendRepriceEmail(order, comment,order.getDokNr(),order.getCompany());
+					    	}catch(Exception e) {
+					    		e.printStackTrace();
+					    	}
+				    	   
 				    	    this.setNumAddedLines(order.getOrderLines().size());
 				         
 					  System.out.println("on ymberhindlus ");

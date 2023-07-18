@@ -263,13 +263,13 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	
 	  public Vector getPriceMatrixData(){
 		  
-		  	 String sql =" SELECT  custid, clgroup,prodid, startday, enddate, price ,discountpct as disc , salespricetype as type  from v_VIK_AkcijuKainos where " + 
+		  	 String sql =" SELECT  custid, clgroup,prodid, startday, enddate, price ,discountpct as disc , salespricetype as type  from MobileJavaVIK.v_VIK_AkcijuKainos where " + 
 		  	 		"		  	 	 len(clgroup) >0 or  len(custid) >0 ";
 
 		       Vector result = new Vector();
 		         try {
 		          
-		      	   Connection con = getNewConnection2();
+		      	   Connection con = getNewConnectionView();
 		   	        Statement stmt = con.createStatement();
 		   	        ResultSet rs = stmt.executeQuery(sql);
 		           while (rs.next()) {
@@ -421,9 +421,9 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 
 		try {
 
-			String cmd = " SELECT grupp ,toode from v_VIK_Asortimentas where len(grupp) > 1 and grupp != 'MINASORT'";
+			String cmd = " SELECT grupp ,toode from MobileJavaVIK.v_VIK_Asortimentas where len(grupp) > 1 and grupp != 'MINASORT'";
 System.out.println(cmd);
-			Connection con = getNewConnection2();
+			 Connection con = this.getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -455,6 +455,7 @@ System.out.println(cmd);
 			}
 
 			rs.close();
+			stmt.close();
 			con.close();
 		} catch (Exception e) {
 			getParent().showError(e);
@@ -471,7 +472,7 @@ System.out.println(cmd);
 
 
 		try {
-			String cmd = "Select * from vik_litstock";
+			String cmd = "Select * from MobileJavaVIK.vik_litstock";
 
 			Connection con = getNewConnection2();
 			Statement stmt = con.createStatement();
@@ -852,7 +853,7 @@ System.out.println(cmd);
 
 		
 			
-			String ccc =  "select custcode as cust ,Code+ ' ' +name as last from v_VIK_FA ";
+			String ccc =  "select custcode as cust ,Code+ ' ' +name as last from MobilejavaVIK.v_VIK_FA ";
 			 
 			 String qqq = "select Agent as agent , Customer  as klient , [Route Code]as day from " +
 			 		" [Vičiūnai ir Ko$Route sequence]	 ";
@@ -894,7 +895,7 @@ System.out.println(cmd);
 		   //   System.out.println("custAgents " + custAgents);
 		      
 		      
-  	Connection cn = getNewConnection2();
+  	Connection cn = getNewConnectionView();
  	Statement stcn = cn.createStatement();
 	ResultSet rscn = stcn.executeQuery(ccc);
 	while (rscn.next()) {
@@ -1045,12 +1046,12 @@ System.out.println(cmd);
 		this.customers = new ArrayList();
 
 		String sql = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2,k.[Ship-to-address code] as kood3 , k.nimi as nimi2, k.[Ship-to address name]  as nimi3, k.aadress as aadress12 ,k.kood as payer2 , k.agent as agent2 , k.* from" + 
-				"				 dbo.v_VIK_Customers k	" ;
+				"				 MobilejavaVIK.v_VIK_Customers k	" ;
 
 		System.out.println(sql);
 		
 		try {
-			Connection con = getNewConnection2();
+		Connection con = this.getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
@@ -1341,8 +1342,8 @@ System.out.println(cmd);
 		    	  
 		    	  System.out.println("Asses size enne  " + asscusts.size());
 		    	  Vector vec = new Vector(); 
-		    	  String  cmd3 = "select  * from v_VIK_FA   ";
-		    	  Connection con4 = getNewConnection2();
+		    	  String  cmd3 = "select  * from MobilejavaVIK.v_VIK_FA   ";
+		    	  Connection con4 = getNewConnectionView();
 		    	Statement stm = con4.createStatement();
 					
 		    	  ResultSet rs1 = stm.executeQuery(cmd3);
@@ -1453,7 +1454,7 @@ System.out.println(cmd);
 		    	   //siin saadame seosed ära jujul kui customer on olemas selline 
 		     	   vec = new Vector(); 
 		     
-		 cmd3 = " select a.code,  custcode, k.[EDI ILN] as kl from v_VIK_FA a  left join dbo.[Vičiūnai ir Ko$Ship-to Address] k  on a.custcode = k.[Code]  where a.custcode != ''" ;
+		 cmd3 = " select a.code,  custcode, k.[Customer ILN] as kl from MobilejavaVIK.v_VIK_FA a  left join MobilejavaVIK.v_VIK_Customers  k  on a.custcode = k.[kood]  where a.custcode != ''" ;
 		     	   int cou = 0;
 		              int coua = 0;
 		     	  rs1 = stm.executeQuery(cmd3);
@@ -1532,9 +1533,9 @@ System.out.println(cmd);
 
 		try {
 			
-			String cmd = "Select * from vik_litstock";
+			String cmd = "Select * from MobilejavaVIK.vik_litstock";
 
-			Connection con = getNewConnection2();
+			Connection con = getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -2204,7 +2205,7 @@ System.out.println(cmd);
 	public void setBulkSales(Map agents) {
 
 		try {
-			String cmd = " Select  summa, summa from MobilejavaVIK.v_VIK_Turnover";
+			String cmd = " Select  summa, agent from MobilejavaVIK.v_VIK_Turnover";
 			Connection con = this.getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
