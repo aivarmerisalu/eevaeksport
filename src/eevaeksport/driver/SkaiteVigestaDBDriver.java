@@ -1731,6 +1731,7 @@ try{
 
    public TreeMap<String, String> loadAgentBonuses(Map agents) {
    	
+
      
    	TreeMap<String, String> res = new TreeMap<String, String>();
         
@@ -1749,7 +1750,33 @@ try{
    		}catch(Exception e) {
    			
    		}
-   				
+   		
+   		
+   		Double soldThis = null;
+   		try {
+   			soldThis = Double.parseDouble(tt.json.get("soldThis")+"");
+   		}catch(Exception e) {
+   			
+   		}
+   			
+   		
+   		Double soldLast = null;
+   		
+   		try {
+   			soldLast = Double.parseDouble(tt.json.get("soldLast")+"");
+   		   		}catch(Exception e) {
+   		   			
+   		   		}
+   		
+   		Double soldPreLast = null;
+   		
+   		try {
+   			soldPreLast = Double.parseDouble(tt.json.get("soldPreLast")+"");	
+   		   		}catch(Exception e) {
+   		   			
+   		   		}
+   		
+   		
    		Double compLast = null;
    		
 try {
@@ -1772,20 +1799,37 @@ try {
    				 tt0 = (Toode)agT.get(age) ;
    			} 
    			
-   			if(compThis != null) {
+   			    if(compThis != null) {
 					tt0.addDonecur(compThis);
 				 }
-				 if(compLast != null) {
-				tt0.addDonevol(compLast);
-				 }
+				 
+   			    if(compLast != null) {
+				   tt0.addDonevol(compLast);
+				    }
+   			    
 				 if(compPreLast != null) {
-				tt0.addKogus(compPreLast);
-				 }
+				    tt0.addKogus(compPreLast);
+				    }
+				 
+				 if(soldThis != null) {
+						tt0.addPlancur(soldThis);
+					}
+					 
+	   			 if(soldLast != null) {
+					   tt0.addPlanvol(soldLast);
+					}
+				 
+	   			if(soldPreLast != null) {
+					   tt0.addKastis(soldPreLast);
+					}
    			
    			agT.put(age, tt0);
    		}
    	}
          
+   	
+   	
+   
   
 	 itera = agT.keySet().iterator();
    	
@@ -1793,14 +1837,20 @@ try {
    		String agID = itera.next();
    		Toode tt = agT.get(agID);
    	    if(agents.get(agID) != null && tt != null) {
-   	    	
+   	     double agentsales = 0;
+   	 	 
+
+	double percThis = tt.getDonecur()/tt.getPlancur() * 100; 
+	double percLast = tt.getDonevol()/tt.getPlanvol() * 100; 
+	double percPreLast = tt.getKogus()/tt.getKastis() * 100; 
+	
    	    String re = "||Bonuses|";
    	    if((int)tt.getDonecur() > 0) {
-   	     re = "Komp einamasis men: " + (int)tt.getDonecur() + "€|";
+   	     re = "Komp einamasis men: " + (int)tt.getDonecur() + "€/" + getNF().format(percThis) + "%|";
    	    }
    	   
-   	    	re = re + "Praeitas men: " + (int)tt.getDonevol() + "€|";
-   	    	re = re + "Uzpraeitas men: " + (int)tt.getKogus() + "€|";
+   	    	re = re + "Praeitas men: " + (int)tt.getDonevol() + "€/" + getNF().format(percLast) + "%|";
+   	    	re = re + "Uzpraeitas men: " + (int)tt.getKogus() + "€/" + getNF().format(percPreLast) + "%|";
    	    	res.put(agID, re );
    	      }
    	   }
@@ -1891,7 +1941,7 @@ try {
        connectionUp(url);
        
  
-     TreeMap<String, String> agentBonuses =  loadAgentBonuses(agents);
+
        
        
   	 int yy = Calendar.getInstance().get(Calendar.YEAR);
@@ -1901,6 +1951,8 @@ try {
        
        TreeMap<String, Toode> bp = this.getPB();
        
+       TreeMap<String, String> agentBonuses =  loadAgentBonuses(agents);
+       
        //Meil on vaja kulme viimase kuu boonuste jagamine koguda 
        Iterator<String> itera = bp.keySet().iterator();
        while(itera.hasNext()) {
@@ -1909,49 +1961,51 @@ try {
     	   if(agent != null) {
     		   Toode tt = bp.get(agen);
     		   
-    		   double psales = tt.getDonecur();
-    		   double msales = tt.getPlancur();
+    		   double msales = tt.getDonecur();
+    		   double psales = tt.getPlancur();
     		   
     			
-         		  double  tehtudsalperc = msales/psales;
+         		  double  tehtudsalperc = psales/msales;
              	  double  plaanitavMyykSal = d2 * msales/dd;
              	  double  prognosalperc = plaanitavMyykSal/psales;
             
              String  asi = "";
              if(psales > 0) {
              asi = Converter.enCodeEst("Planas Zalia: ") + (int)psales + " €|";    
-              	  asi = asi + Converter.enCodeEst("Pardavimai Zalia/Plano vykdymas :");
-             	  if(tehtudsalperc > 3){
+              	  asi = asi + Converter.enCodeEst("Pardavimai Zalia: ")+ (int)msales + " €|";  ;
+             	
+              	  
+              	  if(tehtudsalperc > 3){
              		tehtudsalperc = 0;
              	  }
              	if(prognosalperc > 3){
              		prognosalperc = 0;
              	  }
              	  
-                   asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %|";  
+                   asi = asi + "Plano vykdymas: " + getNF().format(tehtudsalperc*100) + "% |"; 
                 agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
              }
                 
                 
                 
-                 psales = tt.getDonevol();
-     		     msales = tt.getPlanvol();
+                 msales = tt.getDonevol();
+     		     psales = tt.getPlanvol();
      		   
      		   if(psales > 0) {
-          		    tehtudsalperc = msales/psales;
+          		    tehtudsalperc = psales/msales;
               	    plaanitavMyykSal = d2 * msales/dd;
               	    prognosalperc = plaanitavMyykSal/psales;
              
                 asi =  Converter.enCodeEst("||Planas Gaminiai: ") + (int)psales + " €|";    
-               	  asi = asi + Converter.enCodeEst("Pardavimai Gaminiai/Plano vykdymas :");
+               	  asi = asi + Converter.enCodeEst("Pardavimai Gaminiai: ") + (int)msales + " €|";
               	  if(tehtudsalperc > 3){
               		tehtudsalperc = 0;
               	  }
               	if(prognosalperc > 3){
               		prognosalperc = 0;
               	  }
-              	  
-                    asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %|";  
+              	
+              	 asi = asi + "Plano vykdymas: " + getNF().format(tehtudsalperc*100) + "% ||";  
                  agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
      		   }
                 
@@ -2073,12 +2127,11 @@ try {
 	getParent().log(s);
     }
 
-    private static double parseDouble(String s){
-      if (s.length() > 0) return Double.parseDouble(s);
-      else return 0;
-    }
+ 
 
        public NumberFormat getNF(){
+    	   NF.setMaximumFractionDigits(2);
+    	   NF.setMinimumFractionDigits(2);
          return NF;
        }
 

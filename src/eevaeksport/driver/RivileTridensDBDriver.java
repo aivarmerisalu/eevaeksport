@@ -28,6 +28,11 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
@@ -100,7 +105,7 @@ public class RivileTridensDBDriver extends AbstractDBDriver implements  BulkUpda
             public String getSaveDebtInfo() {
       		  // Siin teeme Cashi ära.
             	
-            	this.getCustomers(null);
+            	
       			  File dir = new File(getParent().getProps().getProperty("cash.read"));
       			  //  System.out.println("vvv "+ driver.getImportFile());
       			    File[] files = dir.listFiles();
@@ -411,9 +416,9 @@ HashSet olemas = new HashSet();
     public String getSaveStockInfo(){
     	stocks = new HashMap();
     
-  	  String  cmd = "  SELECT  I17_KODAS_PS AS toode, sum(I17_kiekis - I17_atiduota) AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS " +
-          " where I17_KODAS_IS in ('02','03','04') AND ((I17_kiekis - I17_atiduota) >0 OR (I17_P_PAR_K)>0) and n17_kodas_ls_1<>''  and  N17_POZ_DATE =0 " +
-	      "   GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_atiduota ) >0   ORDER BY I17_KODAS_PS" ;
+  	  String  cmd = "  SELECT  I17_KODAS_PS AS toode, sum(I17_kiekis - I17_PARD_UZS) AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS " +
+          " where I17_KODAS_IS in ('02','03','04') AND ((I17_kiekis - I17_PARD_UZS) > 0 OR (I17_P_PAR_K)>0)  and  N17_POZ_DATE =0 " +
+	      "   GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_PARD_UZS ) >0   ORDER BY I17_KODAS_PS" ;
 
 
          if (isDebug()) System.out.println(cmd);
@@ -597,6 +602,75 @@ HashSet olemas = new HashSet();
     }
 
     
+    private TreeMap getRoutes (){
+     	TreeMap res = new TreeMap();
+     	
+     	
+     	File f = new File(this.getExcelDir() + "Routes.xlsx");
+     	 System.out.println(f.exists() +  " " + f.getAbsolutePath());
+ 		try {
+ 			FileInputStream ff = new FileInputStream(f);
+ 			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+ 			XSSFSheet sheet = workbook.getSheetAt(0);
+ 			XSSFRow row = sheet.getRow(0);
+ 			 
+ 			 DataFormatter formatter = new DataFormatter();
+				
+ 			for (int a = 0; a <  sheet.getLastRowNum(); a++) {
+ 				row = sheet.getRow(a);
+ 				String link = "";
+ 				String aeg = "";
+ 				String klient = "";
+ 				try {
+ 					// System.out.println(row.getCell((short)a).getStringCellValue());
+ 					link =  formatter.formatCellValue(row.getCell((short) 14));
+ 				} catch (Exception e) {
+ 					e.printStackTrace();
+ 					try {
+ 						
+     					// System.out.println(row.getCell((short)a).getStringCellValue());
+     					link =  ((int)row.getCell((short) 0).getNumericCellValue()) + "14";
+     				} catch (Exception r) {
+     					// System.out.println(row.getCell((short)a).getNumericCellValue());
+     				}// System.out.println(row.getCell((short)a).getNumericCellValue());
+ 				}
+ 				
+ 				try {
+ 					// System.out.println(row.getCell((short)a).getStringCellValue());
+ 					aeg =  formatter.formatCellValue(row.getCell((short) 10));
+ 				} catch (Exception e) {
+ 					e.printStackTrace();
+ 					try {
+ 						aeg =  ((int)row.getCell((short) 0).getNumericCellValue()) + "10";
+     				} catch (Exception r) {
+     					// System.out.println(row.getCell((short)a).getNumericCellValue());
+     				}// System.out.println(row.getCell((short)a).getNumericCellValue());
+ 				}
+ 				
+ 				try {
+ 					klient =  formatter.formatCellValue(row.getCell((short) 3));
+ 				} catch (Exception e) {
+ 					try {
+ 						klient =  ((int)row.getCell((short) 3).getNumericCellValue()) + "";
+     				} catch (Exception r) {
+     				}
+ 				}
+ 				
+ 			
+ 					
+ 					res.put(klient.trim(), "Route : " + link + " Time : " + aeg);
+ 		     
+ 	 			
+ 			}
+ 		}catch (Exception d){
+ 			d.printStackTrace();
+ 		}
+     	//System.out.println(res.toString());
+     	return res ;
+     }
+
+    
+    
     private TreeMap agents1 = new TreeMap();
     
     public TreeMap getCustomers(Agent agent){
@@ -609,6 +683,8 @@ HashSet olemas = new HashSet();
       	e.printStackTrace();
       }
     	
+    	 TreeMap<String, String> logistics = getRoutes(); 
+    	 
         connectionUp(url);
         String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, " +
         		" N08_PAV as nimetus, N33_kodas_ak AS nimetus2, N08_CREDIT_LIM as cred, " +
@@ -619,7 +695,7 @@ HashSet olemas = new HashSet();
 				"  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where N08_PAV is not null order by N08_PAV ";
         log(cmd);
         TreeMap customers = new TreeMap();
-        HashMap custMap = new HashMap();
+   
         HashMap volad = new HashMap();
         HashMap used = new HashMap();
         HashMap salesres = new HashMap();
@@ -732,7 +808,7 @@ HashSet olemas = new HashSet();
               }
             		  
               custNAMES.put(accountnum,name);
-            	name = name + " "  + accountnum;
+            	//name = name + " "  + accountnum;
             
             Customer cust = new Customer(accountnum);
             //  System.out.println("Name " + name);
@@ -746,7 +822,7 @@ HashSet olemas = new HashSet();
             
               double cred = rs.getDouble("cred");
               if(cred>0){
-            	  cust.setCredit(cred+"");
+            	//  cust.setCredit(cred+"");
               }
               
               
@@ -818,17 +894,13 @@ HashSet olemas = new HashSet();
               if(phone != null && phone.trim().length() > 0){
             	  cust.setPersonalData("Tel: " + phone.trim());
               }
-              
-              String deld = rs.getString("deld");
-              
-              if(deld != null && deld.trim().length() > 0){
-            	  cust.setCity("Pristat.: " + deld.trim());
+             
+              if(logistics != null && logistics.get(acc.trim()) != null){
+            	  cust.setCity(logistics.get(acc.trim()));
               }
                 
               if(goes) {
-                  customers.put(name, cust);
-                  custMap.put(cust.getPayer(), cust);
-                	  
+                  customers.put(name, cust);  	  
               }
        
             }
@@ -853,7 +925,7 @@ HashSet olemas = new HashSet();
     	
     	System.out.println("stocks suurus " + stocks.size() );
   
-   String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus, N17_KODAS_US as unit ,dbo.papn(L11_LAUKAS , 8, 'c')  AS tykke,dbo.papn(L11_LAUKAS , 9, 'c')  AS alusel, 0 AS myygihind,\r\n" + 
+   String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus, N17_KODAS_US as unit ,dbo.papn(L11_LAUKAS , 6, 'c')  AS tykke,dbo.papn(L11_LAUKAS , 14, 'c')  AS alusel, 0 AS myygihind,\r\n" + 
    		"   		N37_BAR_KODAS AS ean, \r\n" + 
    		"    0 AS kogus,n17_kodas_gs AS grupp2, N17_KODAS_VS_T AS grupp,  N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status ,  N35_PAV_K3 as maks,\r\n" + 
    		"    case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus , ltrim(N17_KODAS_LS_8) as sellout \r\n" + 
@@ -922,7 +994,47 @@ HashSet olemas = new HashSet();
               if(unit != null && unit.trim().length() > 0) {
             	  prod.setUnit(unit.trim());
               }
-             
+              nimetus = nimetus.replaceAll("Aromatizuotas", "Arom.");
+              nimetus = nimetus.replaceAll("GRAND", "Gra.");
+              nimetus = nimetus.replaceAll("PREMIER", "Pre.");
+              nimetus = nimetus.replaceAll("RIESLING", "Ries.");
+              nimetus = nimetus.replaceAll("CREMANT", "Crem.");
+              nimetus = nimetus.replaceAll("Vynas", "Vyn");
+              nimetus = nimetus.replaceAll("baltais", "balt.");
+              nimetus = nimetus.replaceAll("raudonasis", "raud.");
+              nimetus = nimetus.replaceAll("sausas", "sau.");
+              nimetus = nimetus.replaceAll("geografine", "geo.");
+              nimetus = nimetus.replaceAll("nuoroda", "nuo.");
+              nimetus = nimetus.replaceAll("Putojantis", "Put.");
+              
+              nimetus = nimetus.replaceAll("Champagne", "Cham.");
+              nimetus = nimetus.replaceAll("Grande", "Gra.");
+              nimetus = nimetus.replaceAll("Reserve", "Res.");
+              nimetus = nimetus.replaceAll("Aromatizuota", "Arom.");
+              nimetus = nimetus.replaceAll("CHARDONNAY", "CHARD.");
+              
+               
+              nimetus = nimetus.replaceAll("BARREL", "Barr.");
+              nimetus = nimetus.replaceAll("FERMENTED", "Ferm.");
+              nimetus = nimetus.replaceAll("Cellar", "Cell.");
+              nimetus = nimetus.replaceAll("tabakas", "tab.");
+              nimetus = nimetus.replaceAll("PROSECCO", "Pros.");
+              nimetus = nimetus.replaceAll("Rausvasis", "Raus.");
+              nimetus = nimetus.replaceAll("Baltasis", "Balt.");
+              nimetus = nimetus.replaceAll("baltasis", "balt.");
+              nimetus = nimetus.replaceAll("Raudonasis", "Raud.");
+              nimetus = nimetus.replaceAll("Vienkartinio naudojimo", "Vien.naudo");
+              nimetus = nimetus.replaceAll("SAUVIGNON", "SAUV");
+              nimetus = nimetus.replaceAll("Kalifornija", "Kalif");
+              
+              
+              
+              
+              
+              
+              
+              
+              
              
               prod.setName(nimetus);
               try{
@@ -970,7 +1082,7 @@ HashSet olemas = new HashSet();
              }
           
         
-                    	if(grupp.trim().equals("POS")) {
+                    	if(grupp.trim().equals("REKLAM_MEDZ")) {
                      	   prod.setName("x " + prod.getName());
                         }
                     
@@ -995,9 +1107,7 @@ HashSet olemas = new HashSet();
                	prod.setMaxDiscount(max);
                }
                
-               if(prod.getID().contains("GLASSES")) {
-            	   goes = true;
-               }
+          
            
                String sellout = rs.getString("sellout");
                if(sellout!= null && (sellout.trim().toLowerCase().startsWith("stop") || sellout.trim().equals("Active")) ) {
@@ -1198,11 +1308,12 @@ HashSet olemas = new HashSet();
     	
     	 connectionUp(url);
     	 
-       String cmd = " SELECT  I06_KODAS_MS AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + " +
-                     "SUM(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh WHERE " +
-                     "month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) and I06_PERKELTA='2'" +
-                     " and I06_R_DATE <= getdate() " +
-                     "GROUP BY  I06_KODAS_MS";
+       String cmd = " SELECT  N08_KODAS_LS_1  AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + \r\n" + 
+       		"                    sum(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh inner join n08_klij on n08_klij.N08_KODAS_KS = i06_parh.I06_KODAS_KS\r\n" + 
+       		"					  WHERE \r\n" + 
+       		"                     month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) \r\n" + 
+       		"					 and I06_PERKELTA='2'\r\n" + 
+       		"                      and I06_R_DATE <= getdate()   GROUP BY  N08_KODAS_LS_1";
 
        log(cmd);
 
@@ -1212,48 +1323,31 @@ HashSet olemas = new HashSet();
            stmt = con.prepareStatement(cmd);
 
            String cmd2 =
-               "SELECT I44_KODAS_MS AS agent, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
-              " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
-              " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
-              " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_mok<=getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr "+
-                " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_MS order by I44_KODAS_MS ";
-
-        	 
-           String cmd3 =
-               "SELECT I44_KODAS_MS AS agent, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
-              " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
-              " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
-              " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok<=getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr "+
-                " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_MS order by I44_KODAS_MS ";
-
-        	 
+               "SELECT  N08_KODAS_LS_1  AS agent , SUM(i07_kiekis*N37_NETTO / ( case when n17_kodas_gs in  "
+               + "('KOMBUCHA','NEALK_KOKTEI','ALK_KOKTEILI','ALUS','GAZ_GERIMAS','GAZ_VANDUO','N_SIDRAS','NEGAZ_VANDUO','SIDRAS') then 10 else 1 end )) AS liters " + 
+               " FROM i06_parh\r\n" + 
+               "  INNER JOIN i07_pard on  i06_parh.i06_kodas_po = i07_pard.i07_kodas_po  \r\n" + 
+               " inner join n08_klij on n08_klij.N08_KODAS_KS = i06_parh.I06_KODAS_KS\r\n" + 
+               " inner join n17_prod on n17_prod.N17_KODAS_PS =I07_KODAS\r\n" + 
+               " INNER JOIN n37_pmat on N37_KODAS_PS = I07_KODAS\r\n" + 
+               " WHERE  month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) \r\n" + 
+               "	 and I06_PERKELTA='2'  and I06_R_DATE <= getdate()   GROUP BY  N08_KODAS_LS_1 ";
 
       
 
-       HashMap voladkoik = new HashMap ();
-       HashMap voladyle = new HashMap ();
+       HashMap<String,Integer> liitrid = new HashMap<String,Integer>();
        stmt = con.prepareStatement(cmd2);  
      ResultSet	      rs = stmt.executeQuery();
      while(rs.next()) {
     	 String agent = rs.getString("agent");
     	 if(agent != null && agent.trim().length() > 0){
-    		 int volg = rs.getInt("summa");
-    		 voladyle.put(agent.trim(), volg);
+    		 int ltr = rs.getInt("liters");
+    		 liitrid.put(agent.trim(),ltr);
     	 }
      }
      rs.close();
            
-          
-     stmt = con.prepareStatement(cmd3);  
-     	      rs = stmt.executeQuery();
-     while(rs.next()) {
-    	 String agent = rs.getString("agent");
-    	 if(agent != null && agent.trim().length() > 0){
-    		 int volg = rs.getInt("summa");
-    		 voladkoik.put(agent.trim(), volg);
-    	 }
-     }
-     rs.close();
+
      
      stmt = con.prepareStatement(cmd); 
           rs = stmt.executeQuery();
@@ -1261,28 +1355,12 @@ HashSet olemas = new HashSet();
                String agentID = rs.getString("agent").trim();
                Agent agent = (Agent)agents.get(agentID);
                if (agent != null){
-                 agent.setMonthSales((int)rs.getDouble("pluss"));
-                 
-                 int yldvolg = 0;
-                 int overvolg = 0;
-                 if(voladyle.get(agentID)!= null){
-                	 overvolg = Integer.parseInt(""+voladyle.get(agentID));
-                 }
-                 
-                 if(voladkoik.get(agentID)!= null){
-                	 yldvolg = Integer.parseInt(""+voladkoik.get(agentID));
-                 }
-                 
-                 if(overvolg != 0){
-                //	 agent.setStart("Pradelstos skolos : " +overvolg + " €.|" ); 
-                  }          
-
-                 if(yldvolg != 0){
-                	// agent.setStart(agent.getStart() + "Visa skola : " +yldvolg + " €.|" );
+                  agent.setMonthSales((int)rs.getDouble("pluss"));
+                  if(liitrid.get(agentID) != null) {
+                	  agent.setMonthSalesVol(liitrid.get(agentID));
+                	 // System.out.println("Volyyme " + liitrid.get(agentID));
                   }
-                 
-                 
-               }
+                }
              }
              rs.close();
              stmt.close();

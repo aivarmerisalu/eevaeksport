@@ -133,7 +133,7 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
             TreeMap   tm = new TreeMap();
             try {
-     		   connectionUp();
+     		 
      		 Connection  con = DriverManager.getConnection(url);
      	        Statement st = con.createStatement();
      	       
@@ -144,10 +144,14 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
                   
                    String kood = rs.getString("kood");
                    String nimetus = rs.getString("name");
+                   try {
                    if(kood != null && nimetus != null ){
                  	  tm.put(kood.trim(), nimetus.trim());
                    }
                   
+                   }catch(Exception e) {
+                	   e.printStackTrace();
+                   }
                 
      	    }
      	    rs.close();
@@ -187,9 +191,12 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
     public TreeMap getAgents() {
    
 	TreeMap agents = new TreeMap();
-	Agent aa = new Agent("HU001");
-	aa.setName("Hungary 001");
+	Agent aa = new Agent("HUN003");
+	aa.setName("Hungary 003");
 	agents.put(aa.getName(), aa);
+	Agent aa1 = new Agent("HUN005");
+	aa1.setName("Hungary 005");
+	agents.put(aa1.getName(), aa1);
 /*
 	try {
 		   connectionUp();
@@ -278,9 +285,14 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
 		String kontakt = parent.make(rs.getString("ContactName"));
 		String kontaktTel = parent.make(rs.getString("ContactPhone"));
 		String email = parent.make(rs.getString("Email"));
-		String ag = "HU001";
+		         
+		String ag = "HUN003";
 		         Agent aa = new Agent(ag);
 		         cust.addAgent(aa);
+		     	 String ag1 = "HUN005";
+		         Agent a1 = new Agent(ag1);
+		         cust.addAgent(a1);
+		         
 		         if(dues.get(payer) != null) {
 		        	 cust.setUsedCredit(dues.get(payer));
 		         }
@@ -314,7 +326,7 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
     
 
     public TreeMap getProducts(Agent agent) {
-        connectionUp();
+        
 
     	TreeMap products = new TreeMap();
     	TreeMap prices = new TreeMap();
@@ -366,7 +378,7 @@ while(rs6.next()){
 				prodsInGroups.put(kood, field);
 			}
 		}catch(Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
    
@@ -380,7 +392,7 @@ pstm.close();
 con.close();
 
 
-System.out.println("prices " + prodsInGroups.toString());
+System.out.println("prices2 " + prodsInGroups.toString());
 
 }catch(Exception r){
 r.printStackTrace();
@@ -392,6 +404,8 @@ r.printStackTrace();
 			if (isDebug()) {
 			    System.out.println(cmd);
 			}
+			
+			 Connection  con = DriverManager.getConnection(url);
          Statement sst = con.createStatement();
            ResultSet  rs = sst.executeQuery(cmd);
 

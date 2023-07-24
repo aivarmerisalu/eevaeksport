@@ -662,8 +662,8 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 					
 		   }else if(mood != null && mood.trim().startsWith("N") ){
 			   
-			   if(cust.getID().equals("5873")) {
-		        	System.out.println("dueint " + cust.getDebt()+" " +blocked6custs.contains("5873"));
+			   if(cust.getID().equals("5242")) {
+		        	System.out.println("dueint " + cust.getDebt()+" " +blocked6custs.contains("5242") + " " + blockedcusts.contains("5242"));
 		        }
 				if(blocked6custs.contains(cust.getID())){
 					bl = "2";
@@ -1611,8 +1611,8 @@ System.out.println(cmd);
         if(debtDays.get(custID) != null){
          old = Integer.parseInt((String)debtDays.get(custID));
         }
-        if(custID.equals("5873")) {
-        	System.out.println("dueint " + dueint + " " + old + " " +blocked6custs.contains("5873"));
+        if(custID.equals("5242")) {
+        	System.out.println("dueint " + dueint + " " + old + " " +blocked6custs.contains("5242"));
         }
         if(old<dueint){
            debtDays.put(custID,dueint+"") ;

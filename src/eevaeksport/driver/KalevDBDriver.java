@@ -249,7 +249,9 @@ Converter.saveFile(parent.getProps().getProperty("stockrefdir")  + "customerorde
 		  if(eanprods == null) {
 			  eanprods = new TreeMap();
 		  }
-			this.getProducts(null);
+			
+		  
+		  this.getProducts(null);
 			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
 			System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
 			if(contracts.size() > 0) {
@@ -260,6 +262,36 @@ Converter.saveFile(parent.getProps().getProperty("stockrefdir")  + "customerorde
 			System.exit(0);
 		}
 
+		public String loadEans() {
+			
+			String cmd3 = "SELECT CAST(EANcode AS VARCHAR(20)) AS ean,  ProductCode as toode " + 
+					"FROM AssortmentRegisterNEW WHERE Period = 'current' AND Listing >= 1 GROUP BY EANcode, ProductCode ";
+
+			StringBuffer products = new StringBuffer();
+			try {
+
+				this.connectionUp(url);
+				Statement st = con.createStatement();
+				ResultSet rs = st.executeQuery(cmd3);
+
+				while (rs.next()) {
+
+					String ean = rs.getString("ean").trim();
+					String toode = rs.getString("toode").trim();
+					eanprods.put(ean, toode);
+				}
+				
+				rs.close();
+				st.close();
+			} catch (Exception e) {
+				getParent().showError(e);
+			}
+			
+			this.connectionDown();
+			return products.toString();
+
+		}
+	  
 	public String getAssortmentStr(Agent agent) {
 		return null;
 	}
@@ -301,10 +333,9 @@ Converter.saveFile(parent.getProps().getProperty("stockrefdir")  + "customerorde
 				}
 			}
 			
-			
-			
-
 			rs.close();
+			st.close();
+
 		} catch (Exception e) {
 			getParent().showError(e);
 		}
@@ -1911,7 +1942,7 @@ SELECT  [MasterProductCode] as klient
 					 if(eanprods == null) {
 	                	 	eanprods = new TreeMap();
 	                   }
-	                   eanprods.put(ea, prod.getID());
+	                  // eanprods.put(ea, prod.getID());
 	                   nameX = nameX + " " + ea.substring(ea.length()-4);
 				}
 				
@@ -2876,153 +2907,6 @@ System.out.println("Fixed Result " + result.size());
 		return result;
 	}
 
-	public Vector getFixedAssortmentDataOld() {
-		Vector result = new Vector();
-		this.getProducts(null);
-		File f = new File(this.getExcelDir() + "/SortimentDroid.xlsx");
-		
-		//HashSet teemantid = getTeemant();
-		try {
-			
-			
-			FileInputStream ff = new FileInputStream(f);
-			XSSFWorkbook workbook = new XSSFWorkbook((ff));
-			XSSFSheet sheet = workbook.getSheet("Sortiment");
-			XSSFRow row = null;
-			TreeMap groups = new TreeMap();
-			row = sheet.getRow(3);
-			// M��RAME �RA MIS V�LJAS ASUVAD Sortimendi t�hised kolmas rida .
-
-			// System.out.println("rownum " + row.getLastCellNum());
-			for (int a = 4; a < row.getLastCellNum(); a++) {
-				try {
-					// System.out.println(row.getCell((short)a).getStringCellValue());
-					 groups.put(a + "", "KA" +Converter.cleanLitLatEst(row.getCell((short) a)
-							.getStringCellValue()).trim());
-				} catch (Exception e) {
-					// System.out.println(row.getCell((short)a).getNumericCellValue());
-				}
-			}
-
-		//	 System.out.println(groups.toString());
-
-			for (int i = 8; i < sheet.getLastRowNum(); i++) {
-				row = sheet.getRow(i);
-				String prodID = "";
-
-				if (row != null && row.getCell((short) 1) != null) {
-
-					try {
-						prodID =  (row.getCell((short) 1)
-								.getNumericCellValue()) + "";
-						if(prodID.indexOf("E") != -1){
-							prodID = prodID.substring(0,prodID.indexOf("E") );
-   				         int len  = prodID.length();
-   				      prodID = prodID.substring(0,1) + prodID.substring(2,len);
-  				          if(prodID.length() == 12){
-  				        	prodID = prodID+"0";
-  				          }
-   				        }else if(prodID.indexOf(".") != -1) {
-   				        	prodID = prodID.substring(0,prodID.indexOf("."));
-   				        }
-						
-					} catch (Exception e) {
-						prodID = (row.getCell((short) 1).getStringCellValue());
-					}
-					
-				
-					
-					
-                	prodID = (String)eans.get(prodID);
-                	
-				       if(prodID != null && !prodID.equals("0")){
-					// Siin l�heme reasisse rokkima ja vaatama kas se toode
-					// l�heb kaasa
-				    	   
-					for (int a = 4; a < row.getLastCellNum(); a++) {
-
-						String group = (String) groups.get(a + "");
-						if (group != null && group.trim().length() > 0) {
-
-							String custID = " ";
-							String clGroup = " ";
-							String prodGroup = " ";
-
-							String go = null;
-							clGroup = group;
-
-							MatrixLine mline = new MatrixLine();
-							// Vaatame kas selles veerus on sellel tootel pandud
-							// mingi t�his
-							if (row.getCell((short) a) != null) {
-
-								try {
-									go = (int) (row.getCell((short) a)
-											.getNumericCellValue()) + "";
-								} catch (Exception e) {
-									try{
-										go = (row.getCell((short) a)
-												.getStringCellValue());	
-									}catch(Exception n){
-										
-									}
-								
-								}
-
-							}
-
-							if (go != null && (go.equals("1") || go.equals("2"))) {
-								
-										
-						
-
-								if (custID != null
-										&& custID.trim().length() > 0) {
-									mline.setCustID(custID.trim());
-								}
-								if (clGroup != null
-										&& clGroup.trim().length() > 0) {
-									mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
-								}
-
-								if (prodID != null
-										&& prodID.trim().length() > 0 ) {
-									mline.setProdID(prodID.trim());
-									
-									//mline.setLineinfo("CENTRAL");
-									
-									//if(teemantid.contains(prodID.trim())){
-										//mline.setLineinfo("TOP");
-									//}
-								}
-								
-								if (mline.getProdID() == null
-										&& prodGroup != null
-										&& prodGroup.trim().length() > 0) {
-									mline.setProdGroup(prodGroup);
-								}
-								
-								
-									
-								 
-								if(!mline.getCliGroup().equals("KA"))
-								result.add(mline);
-							}
-						}
-					}
-					   
-                       }
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		 getFixedFel(result,null);
-		 System.out.println("fixed Suurus baas " + result.size());
-		
-		return result;
-
-	}
 
 
 	

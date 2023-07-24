@@ -195,6 +195,45 @@ HashMap pants = null;
 
 	  }
   
+ private HashMap<String, String> pnames = null;
+  
+  private String identifyProductName(String id) throws SQLException {
+	  String sql1 = " SELECT N17_KODAS_PS AS toode ,N17_PAV AS nimi " +
+			     " FROM n17_prod a where N17_POZ_DATE !=1  and N17_MEN_PAV !='IG' and len(ltrim(N17_PAV_K1))  >0 "; 
+	  	
+	  	 if(pnames != null) {
+	  		 return pnames.get(id);
+	  	 }
+	  	 
+	    System.out.println(sql1);
+	   
+
+	    Statement st1 = con.createStatement();
+	    ResultSet rs1 = st1.executeQuery(sql1);
+
+	    while (rs1.next()) {
+	    	if(pnames == null) {
+	    		pnames = new HashMap<String, String>();
+	    	}
+	    	
+	      String toode  = rs1.getString("toode").trim();
+
+	      String nimi  = rs1.getString("nimi");
+	      if(nimi != null)
+	      pnames.put(toode, nimi);
+
+	    }
+	    rs1.close();
+	    st1.close();
+
+	    if(pnames != null) {
+	  		 return pnames.get(id);
+	  	 }
+	    
+	    return null;
+
+	  }
+  
   public String identifyCustomerADDR(String id) throws SQLException {
   	 String	sql1 = "SELECT N33_ADRESAS AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
   	 		"  rtrim(rtrim(N08_KODAS_KS))+'-'+ rtrim(ltrim(N33_kodas_ak)) = '" + id +"'"; 
@@ -402,6 +441,11 @@ HashMap pants = null;
 
       
       String agent = order.getAgent();
+      String comm = "";
+      if(order.getInfo() != null && order.getInfo().trim().length() >0){
+		
+	        comm = order.getInfo().replaceAll("\\r\\n|\\r|\\n", " ");
+      }
       
       //sb.append(getLineNr(cou));
       
@@ -418,10 +462,12 @@ HashMap pants = null;
       
       
       String name =  null;
+      String cuname = null;
   	try {
   		
   		
   		name = identifyCustomerName(cust);
+  		cuname = name;
   		if(name == null){
   			name ="nonam";
   		}else{
@@ -637,6 +683,8 @@ if(ladu.trim().length()!=0){
         fos.write(sb.toString().getBytes());
         fos.close();
         
+        sendConfirmEmail(comm,order,cuname);
+        
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
@@ -647,6 +695,103 @@ if(ladu.trim().length()!=0){
   }
   
   
+  private void sendConfirmEmail(String comment, Order ord , String cuname ){
+	   	try{
+	   		
+	   			
+	   			System.out.println(comment);
+	   			Email mail = new Email(null);
+		  		   String sub = "Order by : " + ord.getAgent() + " " + ord.getCompany() + " " + cuname;
+		  	
+		            mail.setSMTP(parent.getProps().getProperty("smtphost"));
+		            mail.setUser(parent.getProps().getProperty("smtpuser"));
+		            mail.setPass(parent.getProps().getProperty("smtppass"));
+		            mail.setPort(parent.getProps().getProperty("smtpport"));
+		  	  		mail.setFilesTo(parent.getProps().getProperty("confemail"));//pasutijumi@fazer.com
+		  	  		mail.setFrom(parent.getProps().getProperty("from"));
+		  	  		mail.setSubjectFilesTo(sub);
+		  	  		mail.setEncoding("utf-8");
+		  	    	mail.setBodyHtml(getOOSEmailText(ord, ord.getAgent() , cuname ));
+		  	  		mail.setSendNotice(false);
+		  	  		mail.send();
+		  	  
+		  	  		System.out.println("Request Sent");
+		  	
+		  	
+		  			}catch(Exception e){
+		  			e.printStackTrace();	
+		  			}
+		  	
+	   }
+  
+
+  
+  private String getOOSEmailText( Order ord, String agent, String custname) throws SQLException {
+		int i = 0;
+		int j = 0;
+		 String text = order.getInfo();
+		  
+		   if(text != null && text.trim().length() > 0){
+			   text = text.trim();
+		   }else{
+			   text = "";	
+			   }
+		
+		StringBuffer sb = new StringBuffer();
+	    sb.append("<br><font face=\"Arial\" size=\"2\" color=\"#000000\"><b>Klientas:</b> " + custname + "</font> ") ;
+	    sb.append("<font face=\"Arial\" size=\"2\" color=\"#000000\">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;" + "" + " </font>") ;
+		sb.append("</font>");
+	    sb.append("<font face=\"Arial\" size=\"2\" color=\"#E42217\"><span style=\"float: right\">  Prist. data "
+				+ Converter.getDDpMMpYYYYpString(ord.getShipCal()) + "</span></font><br> ") ;
+	    	
+	
+		sb.append("<font face=\"Arial\" size=\"2\" color=\"#000000\"><span style=\"float: right\"> <b>" 
+				+ ("Agents ") + ":</b> " +" " +  ord.getAgent()+ "</span></font> <br>") ;
+ 
+		if(text.length() > 0) {
+		sb.append("<font face=\"Arial\" size=\"3\"  color=\"#382D2C\"><b> Komentarą : " + text + " </b>" );
+		}
+		sb.append("<br><br>" );
+														
+		sb.append("	<style type=\"text/css\">");
+		sb.append("table.tb-table {");
+		sb.append("border: 1px inset #98bf21; font-family: Arial, Helvetica, sans-serif");
+		sb.append("font-size: 12px;} ");
+		sb.append(".tb-table td {");
+		sb.append("	padding: 4px;");
+		sb.append("	margin: 3px;");
+		sb.append("		border: 1px inset #FF3399;}");
+		sb.append(".tb-table th {");
+		sb.append("	background-color: #FFF; ");
+		sb.append("color: #00000;");
+		sb.append("		font-weight: bold;}");
+		sb.append("</style><table class=\"tb-table\">" );
+		sb.append("<tr><th>Nr.</th><th>Kodas</th><th>Pavad</th><th>Kiekis</th><th>Nuol.</th><th>Kaina €</th></tr>" );
+
+		
+			for (; i < ord.getOrderLines().size(); i++) {
+				OrderLine line = (OrderLine) ord.getOrderLines().elementAt(i);
+		
+				String priceS = getNF().format(line.getPrice()) ;
+				String discS = "";
+				if(line.getDiscount() > 0) {
+					discS = getNF().format(line.getDiscount()) + "%";
+					
+				}
+				
+					sb.append("<tr><td>" + (i+1) + ".</td><td>" + line.getToode() + 
+							"</td><td><div style=\"min-width: 250px\" >" + identifyProductName(line.getToode()) + "</div></td>"
+									+ "<td><div style=\"min-width: 150px\" >" + line.getKogus() + "</div></td>"
+											+ "<td><div style=\"min-width: 200px\" >" + discS + "</div></td>"
+													+ "<td><div style=\"min-width: 200px\" >" + priceS + "</div></td></tr>" );
+				j++;
+			}
+		return sb.toString();
+	}
+
+
+ 
+
 
 
 

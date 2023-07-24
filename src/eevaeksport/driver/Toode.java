@@ -92,6 +92,10 @@ public void addDonevol(double kogus){
     this.donevol = this.donevol + kogus;
   }
 
+public void addKastis(double kogus){
+    this.kastis = this.kastis + kogus;
+  }
+
 public double getPlancur() {
 	return plancur;
 }
@@ -103,6 +107,15 @@ public void setPlancur(double plancur) {
 public double getDonecur() {
 	return donecur;
 }
+
+public void addPlancur(Double kogus) {
+	 this.plancur = this.plancur + kogus;
+	
+}
+
+public void addPlanvol(Double kogus) {
+	 this.planvol = this.planvol + kogus;	
+   }
 
 public void addDonecur(double kogus){
     this.donecur = this.donecur + kogus;
@@ -167,4 +180,6 @@ public String getGr2() {
 public void setGr2(String gr2) {
 	this.gr2 = gr2;
 }
+
+
 }

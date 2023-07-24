@@ -151,40 +151,27 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		   	    		  System.out.println("Piltide leidmine "  + a);	
 		   	    	}
 		   	     
-		   	    	
-		              
-		                 File f = new File(picts + toode+".jpg");
+		   	    	     File f = new File(picts + toode+".jpg");
 		                 String len = "0";
 		                 if(f.exists()){
 		                       len =	f.length() + "";
 		                     	buf.append(toode+".jpg;"  + len + "\n");
-		                     	if (toode.equals("16831")) {
-		    		   	    		System.out.println("Olemasd 16831 jpg"  );
-		    		   	    	}
+		                  
 			             } else {
 			            	  f = new File(picts + toode+".png");
-			            	 if (toode.equals("16831")) {
-		    		   	    		System.out.println("Olemasd 16831 png"  + f.exists() );
-		    		   	    	}
-		                	
-				                 len = "0";
-				                 System.out.println("buf 0 " + picts + toode+".png "+ f.exists());
+			                     len = "0";
 				                 if(f.exists()){
 				                   len =	f.length() + "";
 				                   buf.append(toode+".png;"  + len + "\n");
 				           	    	
 				                 }  else {
 				                	 f = new File(picts + toode+".PNG");
-				                	 System.out.println("buf 0 " + picts + toode+".png "+ f.exists());
-					                 if(f.exists()){
+				                     if(f.exists()){
 					                   len =	f.length() + "";
 					                   buf.append(toode+".PNG;"  + len + "\n");
 					                 }	
 				                 }
 		                 }
-		                
-		                 
-		               
 		                 
 		                 }
 		   	    rs.close();
@@ -474,7 +461,7 @@ System.out.println(cmd);
 		try {
 			String cmd = "Select * from MobileJavaVIK.vik_litstock";
 
-			Connection con = getNewConnection2();
+			Connection con = getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -491,6 +478,7 @@ System.out.println(cmd);
 			
 
 			rs.close();
+			stmt.close();
 			con.close();
 
 		} catch (Exception e) {

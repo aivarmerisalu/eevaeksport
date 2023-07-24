@@ -509,7 +509,7 @@ private TreeMap customers = null;
             sb.append( getNF().format(line.getKogus())+  ls);
             sb.append(line.getUnit() + ls);
             
-            sb.append( getNF().format(line.getPrice())+  ls);
+            sb.append( getNF().format(line.getPrice()).replace('.', ',')+  ls);
             sb.append(line.getPartii() + ls);
             sb.append(vatt + ls);
 
@@ -555,18 +555,7 @@ private TreeMap customers = null;
             sb.append(" " + ls);
             sb.append(System.getProperty("line.separator"));
               
-                   double ale = line.getDiscount();     
                 counter++;
-                String ean = line.getEAN();
-              
-                	
-              	  double discprice = (100d -line.getDiscount())*line.getPrice()/100d ;
-             
-             
-                
-               
-            
-                
                 
             }
             

@@ -535,14 +535,14 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
             }
             rs1.close();
         	
-            
+            String str = getStr();
 
             String salessql = " SELECT (I06_KODAS_KS)  AS klient,"
             		+ " (case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) as kood,sum(I07_SUMA) AS summa , " + 
 			 " str(datepart(YYYY,I06_DOK_DATA))+' '+str(datepart(mm,I06_DOK_DATA)) as kuu   FROM i07_pard p " +
 				"  INNER JOIN i06_parh ON p.I07_KODAS_PO=I06_KODAS_PO  " +
 				" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-				" WHERE I06_DOK_DATA > getdate()-185 " +
+				" WHERE I06_DOK_DATA > getdate()-185   and I06_KODAS_LS_2 in (" + str + " ) " +
 				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end),str(datepart(YYYY,I06_DOK_DATA))+' '+str(datepart(mm,I06_DOK_DATA)) " +
               " ORDER BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end),str(datepart(YYYY,I06_DOK_DATA))+' '+str(datepart(mm,I06_DOK_DATA)) ";
             
@@ -927,13 +927,13 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
      */
     public Vector getCustomerProductsList(String agentCode) {
         connectionUp(url2);
-        
+        String str = getStr();
         String cmd =" SELECT (I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) as kood," +
         		"I07_KODAS AS toode,I07_KIEKIS AS kogus, " +
 				"I06_DOK_DATA AS kuupaev FROM i07_pard p" +
 				"  INNER JOIN i06_parh ON p.I07_KODAS_PO=I06_KODAS_PO "+
 				" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-				" WHERE I06_DOK_DATA > ? "+
+				" WHERE I06_DOK_DATA > ? and I06_KODAS_LS_2 in (" + str + " )  "+
 				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS";
     
         if (isDebug()) {
@@ -1069,13 +1069,13 @@ Active customer past 7 days  :  20
 	        stmt.close();
 	      System.out.println("aktiivseid " + aktiivsed.size());
 	        //leiame kes on ostnud 30 päeva jooksul 
-	        
+	      String str = getStr();
 	        cmd = "SELECT  N08_ATSTOVAS AS agent ,rtrim(N08_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) AS kood, " +  
 	        	"	(N08_PAV) as nimi  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where N08_ATSTOVAS !='' and " +
 				"	rtrim(N08_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)  in " +
 				"	(SELECT  rtrim(I06_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) as kood	    FROM  i06_parh " +
 				" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-				" WHERE I06_DOK_DATA > getdate()-30 GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
+				" WHERE I06_DOK_DATA > getdate()-30 and I06_KODAS_LS_2 in (" + str + " )  GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
 	        
 	        stmt = con.prepareStatement(cmd);
 	        rs = stmt.executeQuery();
@@ -1105,7 +1105,7 @@ Active customer past 7 days  :  20
 					"	rtrim(N08_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)  in " +
 					"	(SELECT  rtrim(I06_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) as kood	    FROM  i06_parh " +
 					" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-					" WHERE I06_DOK_DATA > getdate()-60 and I06_DOK_DATA < getdate()-30 GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
+					" WHERE I06_DOK_DATA > getdate()-60 and I06_DOK_DATA < getdate()-30 and I06_KODAS_LS_2 in (" + str + " )  GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
 		        
 		        stmt = con.prepareStatement(cmd);
 		        rs = stmt.executeQuery();
@@ -1134,7 +1134,7 @@ Active customer past 7 days  :  20
 						"	rtrim(N08_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)  in " +
 						"	(SELECT  rtrim(I06_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) as kood	    FROM  i06_parh " +
 						" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-						" WHERE MONTH(I06_DOK_DATA) = MONTH(getdate()-30) and I06_DOK_DATA > getdate()-60 GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
+						" WHERE MONTH(I06_DOK_DATA) = MONTH(getdate()-30) and I06_DOK_DATA > getdate()-60 and I06_KODAS_LS_2 in (" + str + " )  GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
 			        
 			        stmt = con.prepareStatement(cmd);
 			        rs = stmt.executeQuery();
@@ -1162,7 +1162,7 @@ Active customer past 7 days  :  20
 							"	rtrim(N08_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)  in " +
 							"	(SELECT  rtrim(I06_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) as kood	    FROM  i06_parh " +
 							" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-							" WHERE MONTH(I06_DOK_DATA) = MONTH(getdate()) and I06_DOK_DATA > getdate()-60 GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
+							" WHERE MONTH(I06_DOK_DATA) = MONTH(getdate()) and I06_DOK_DATA > getdate()-60 and I06_KODAS_LS_2 in (" + str + " )  GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
 				        
 				        stmt = con.prepareStatement(cmd);
 				        rs = stmt.executeQuery();
@@ -1190,7 +1190,7 @@ Active customer past 7 days  :  20
 						"	rtrim(N08_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)  in " +
 						"	(SELECT  rtrim(I06_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) as kood	    FROM  i06_parh " +
 						" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-						" WHERE I06_DOK_DATA > (case when DATENAME(dw,GETDATE()) = 'Monday' then getdate()-4 else getdate()-2 end ) " +
+						" WHERE  I06_KODAS_LS_2 in (" + str + " ) and I06_DOK_DATA > (case when DATENAME(dw,GETDATE()) = 'Monday' then getdate()-4 else getdate()-2 end ) " +
 						 " and day(I06_DOK_DATA) = day(case when DATENAME(dw,GETDATE()) = 'Monday' then getdate()-3 else getdate()-1 end ) " +
 						 " GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV  ";
 			        
@@ -1220,7 +1220,7 @@ Active customer past 7 days  :  20
 							"	rtrim(N08_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)  in " +
 							"	(SELECT  rtrim(I06_KODAS_KS)+'-'+rtrim(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) as kood	    FROM  i06_parh " +
 							" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-							" WHERE I06_DOK_DATA > getdate()-8 GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
+							" WHERE  I06_KODAS_LS_2 in (" + str + " ) and I06_DOK_DATA > getdate()-8 GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end)) order by N08_PAV ";
 				        
 				        stmt = con.prepareStatement(cmd);
 				        rs = stmt.executeQuery();
@@ -1256,6 +1256,29 @@ Active customer past 7 days  :  20
     //  System.out.println("aruandeKleindid " + aruandeAgendid .toString());
   }
 
+  private String getStr() {
+	   
+	     String cmd0 = "SELECT [N23_REIKSME1] as aaa FROM [N23_PRMD] where [N23_KODAS_PR] = 'MERISOFT_03'" ;
+	     String str = "";
+	     try {
+	   
+	     stmt = con.prepareStatement(cmd0);  
+	   
+	     ResultSet	      rs = stmt.executeQuery();
+				while(rs.next()) {
+				String aaa = rs.getString("aaa").trim();
+			
+					 str =  "'" + aaa.replaceAll(",", "','").trim() +"'";
+				
+			}
+			rs.close();
+	     } catch (Exception e) {
+             getParent().showError(e);
+         }
+			
+			return str;
+  }
+  
     public void setBulkSales(Map agents){
     	
     	 connectionUp(url2);
@@ -1310,21 +1333,8 @@ Active customer past 7 days  :  20
      rs.close();
      
      
-     
-     String cmd0 = "SELECT [N23_REIKSME1] as aaa FROM [N23_PRMD] where [N23_KODAS_PR] = 'MERISOFT_03'" ;
-     
-     String str = "";
-     stmt = con.prepareStatement(cmd0);  
-      rs = stmt.executeQuery();
-			while(rs.next()) {
-			String aaa = rs.getString("aaa").trim();
-			if(str.length() < 2) {
-				 str =  "'" + aaa +"'";
-			}else {
-				 str = str + ",'" + aaa +"'";
-			}
-		}
-		rs.close();
+    String str = getStr();
+    System.out.println("getStr " + str);
 	 
      String cmd = "  SELECT  I06_ATSTOVAS AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + " +
                  " SUM(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh  WHERE " +

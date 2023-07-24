@@ -135,6 +135,24 @@ public class VichiLATSQLDBDriver extends AbstractDBDriver implements
          	         		Converter.shrinkAndCopyFile(in,inpda);
          	         	}
  		             	
+ 		             	}else {
+ 		             		File  f = new File(picts + toode+".png");
+ 		  	             
+ 			                 if(f.exists()){
+ 			                	 File inpda = new File ( pictsUnion + toode +".png" );
+ 			                	 if(!inpda.exists()) {
+ 			     	         		Converter.shrinkAndCopyFile(f,inpda);	
+ 			     	         	}
+ 			           	    	
+ 			                 } else {
+ 			                	 f = new File(picts + toode+".PNG");
+ 			                     if(f.exists()){
+ 			                    	 File inpda = new File ( pictsUnion + toode +".PNG" );
+ 				                	 if(!inpda.exists()) {
+ 				     	         		Converter.shrinkAndCopyFile(f,inpda);	
+ 				     	         	}
+ 				                 }	
+ 			                 }
  		             	}
  		             }
 		   	     
@@ -145,8 +163,28 @@ public class VichiLATSQLDBDriver extends AbstractDBDriver implements
 	         	if(!inpda.exists()) {
 	         		Converter.shrinkAndCopyFile(in,inpda);	
 	         	}
-            	
-            	}
+	         	
+            	} else {
+            		File  f = new File(picts2 + toode+".png");
+	             
+		                 if(f.exists()){
+		                	 File inpda = new File ( pictsUnion + toode +".png" );
+		                	 if(!inpda.exists()) {
+		     	         		Converter.shrinkAndCopyFile(f,inpda);	
+		     	         	}
+		           	    	
+		                 } else {
+		                	 f = new File(picts2 + toode+".PNG");
+		                     if(f.exists()){
+		                    	 File inpda = new File ( pictsUnion + toode +".PNG" );
+			                	 if(!inpda.exists()) {
+			     	         		Converter.shrinkAndCopyFile(f,inpda);	
+			     	         	}
+			                 }	
+		                 }
+                     }
+	         	
+	         	
  		        }
  		   	    rs.close();
  		   	    stmt.close();
@@ -202,16 +240,29 @@ public class VichiLATSQLDBDriver extends AbstractDBDriver implements
 		                 File f = new File(pictsUnion + toode+".jpg");
 		                 String len = "0";
 		                 if(f.exists()){
-		                   len = f.length() + "";
-		                 } 
-		                 
-		                 if(len.equals("0")){
-		                 	//System.out.println(toode+".jpg;"  + len);
-		                 	buf0.append(toode+".jpg\n");
-		                 }else{
+		                    len = f.length() + "";
 		                 	buf.append(toode+".jpg;"  + len + "\n");
-		           	    	b++;
+		           	     }  else {
+			            	  f = new File(pictsUnion + toode+".png");
+			                     len = "0";
+				                 if(f.exists()){
+				                   len =	f.length() + "";
+				                   buf.append(toode+".png;"  + len + "\n");
+				           	    	
+				                 }  else {
+				                	 f = new File(pictsUnion + toode+".PNG");
+				                     if(f.exists()){
+					                   len =	f.length() + "";
+					                   buf.append(toode+".PNG;"  + len + "\n");
+					                 }	
+				                 }
 		                 }
+		                 
+		                 
+		                 
+		                 
+		                 
+		                 
 		                 }
 		   	    rs.close();
 		   	    stmt.close();
