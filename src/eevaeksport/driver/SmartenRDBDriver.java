@@ -31,6 +31,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -239,7 +240,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 			HSSFSheet sheet = workbook.getSheetAt(0);
 			HSSFRow row = null;
 			
-			
+			 DataFormatter formatter = new DataFormatter();
 			
 	
 			for (int a = 0; a <= sheet.getLastRowNum(); a++) {
@@ -250,15 +251,24 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 	        	   }
 	        	  String custid = "";
 	        	  try {
-	        		  custid = (row.getCell((short) 0).getStringCellValue()).trim();
+	        		  custid = formatter.formatCellValue(row.getCell((short) 0)).trim();
 	        	  }catch(Exception e) {
 	        		  custid = ((int)(row.getCell((short) 0).getNumericCellValue())+"").trim();
 	        		//  System.out.println("Jama koodiga " + custid + " " + a);
 	        	  }
+	        	 try { 
+	        	  String last = custid.substring(custid.length()-1);
+	        	  if(!Converter.isNumeric(last)) {
+	        		  custid = custid.substring(0,custid.length()-1);
+	        	  }
+	        	 }catch(Exception e) {
+	        		 
+	        	 }
+	        	
 	        	  if(!abicusts.contains(custid))
 	        	  abicusts.add(custid);
 	        	  
-	        	  String agent =  Converter.cleanLitLatEst(row.getCell((short) 13).getStringCellValue());
+	        	  String agent =  Converter.cleanLitLatEst(formatter.formatCellValue(row.getCell((short) 13)));
 		        	StringTokenizer st = new StringTokenizer(agent,";");
 		        	String uu = "";
 		        	while (st.hasMoreTokens()){
@@ -274,10 +284,12 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 		        		asi.put(custid, uu);
 		        		asi.put("0" + custid, uu);
 		        		
+		        		
+		        		
 		        	}
 		        	
 		        	try {
-		        		  String phone =  Converter.cleanLitLatEst(row.getCell((short) 5).getStringCellValue());
+		        		  String phone =  Converter.cleanLitLatEst(formatter.formatCellValue(row.getCell((short) 5)));
 		        		  if(phone != null && phone.length() >0) {
 		        			  asi.put(custid+"phone", phone);
 		        			  asi.put("0"+custid+"phone", phone);
@@ -288,7 +300,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 		        	}
 		        	
 		        	try {
-		        		String email =  Converter.cleanLitLatEst(row.getCell((short) 7).getStringCellValue());
+		        		String email =  Converter.cleanLitLatEst(formatter.formatCellValue(row.getCell((short) 7)));
 		        		  if(email != null && email.length() >0) {
 		        			  asi.put(custid+"mail", email);
 		        			  asi.put("0"+custid+"mail", email);
@@ -943,8 +955,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
    		 
        	String ags = (String)custAgs.get(cust.getID());
        	if(ags != null) {
-      // 	System.out.println("ags" + ags);
-       		if(ags.startsWith(":")) {
+       		
+
+       	if(ags.startsWith(":")) {
        			ags = ags.substring(1);
        		}
        	
@@ -983,9 +996,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
       	  }
         }
         
-        //if(cust.getID().indexOf("7345") != -1) {
-       // 	System.out.println("!!!!! 1187345 " + cust.getID() + " " + goes  + " "+  cust.getAgents().toString());
-        //}
+    //    if(cust.getID().indexOf("1770311") != -1) {
+      //  	System.out.println("!!!!! 1770311 " + cust.getID() + " " + goes  + " "+  cust.getAgents().toString());
+       // }
           
     
                 if(outside == null){
@@ -994,7 +1007,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
                         cust.addAgent(new Agent(getParent().getProps().getProperty("officerep2")));
                     }
                     if(goes) {
-                    customers.put(name, cust);
+                    customers.put(name + cust.getID(), cust);
                     custMap.put(cust.getID(),cust);	
                     }
                 
@@ -1025,7 +1038,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
                       
                  
                       if(goes) {
-                    	  customers.put(name, cust);
+                    	  customers.put(name + cust.getID(), cust);
                           custMap.put(cust.getID(),cust);  
                       }
                 	 

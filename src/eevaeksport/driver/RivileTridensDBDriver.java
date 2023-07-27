@@ -208,9 +208,9 @@ HashSet olemas = new HashSet();
 			st = con.createStatement();
 
 
-			String sql = " SELECT N51_KODAS_KT AS grupp,N52_KODAS AS toode ,N52_KAINA as price " +
-	         " FROM N51_SUTH p INNER JOIN N52_SUTD r ON N51_KODAS_KT=N52_KODAS_KT where N52_POZ_KAINA =1 and N52_KAINA != 0 and N52_KODAS not like 'MED%'" +
-	                  "  and n51_end_date > getdate()+1 and n51_busena!=3  order by N51_KODAS_KT, N52_KODAS";
+			String sql = "  SELECT N51_KODAS_KS AS grupp,N52_KODAS AS toode ,N52_KAINA as price ,N52_NUOLAIDA as disc" + 
+					"	          FROM N51_SUTH p INNER JOIN N52_SUTD r ON N51_KODAS_KT=N52_KODAS_KT where " + 
+					"	                    n52_end_date > getdate()+1 order by N51_KODAS_KS, N52_KODAS";
 
 			ResultSet rs = st.executeQuery(sql);
 
@@ -220,6 +220,7 @@ HashSet olemas = new HashSet();
 				String prodID = rs.getString("toode");
 			
 				double price = rs.getDouble("price");
+				double disc = rs.getDouble("disc");
 				MatrixLine mline = new MatrixLine();
 
 				
@@ -231,12 +232,18 @@ HashSet olemas = new HashSet();
 
 				if (prodID != null && prodID.trim().length() > 0) {
 					mline.setProdID(prodID.trim());
-				}
+				
 			
 				if (price != 0) {
 					mline.setPrice(price);
+				} else if (disc != 0) {
+					mline.setDiscount(disc);
 				}
-				lines.add(mline);
+				
+				if(price != 0 || disc != 0) {
+				   lines.add(mline);
+				}
+				}
 			}
 
 			rs.close();
@@ -921,7 +928,11 @@ HashSet olemas = new HashSet();
     public TreeMap getProducts(Agent agent){
     	
     	this.getSaveStockInfo();
-    	this.getCustomerProductsList2();
+    	try {
+    		this.getCustomerProductsList2();
+    	}catch(Exception e) {
+    		System.exit(0);
+    	}
     	
     	System.out.println("stocks suurus " + stocks.size() );
   

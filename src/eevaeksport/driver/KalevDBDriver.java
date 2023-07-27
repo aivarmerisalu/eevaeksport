@@ -73,7 +73,7 @@ import eevaeksport.report.SalesSetter;
 import eevaeksport.util.Converter;
 
 public class KalevDBDriver extends AbstractDBDriver implements Manager, Promo,
-		BulkUpdater, Discounter,SalesSetter,ClientBlock,PictureMaker , PictureMaker2 ,FixLoader{
+		BulkUpdater, Discounter,SalesSetter,ClientBlock,PictureMaker , PictureMaker2 ,FixLoader,WebReporter{
 
 	public KalevDBDriver(EksportPanel parent) {
 		super(parent); 
@@ -3603,6 +3603,17 @@ try{
 	     
 	  }
 
+	@Override
+	public void WebReporter() {
+		//Pange palun iga öö uuendama ja tarvis oleks siis nii
+		//Answers kui Gallery tabelit csv formaadis. See sobib hästi, et iga päring on uus fail.
+	
+		
+				
+		
+	}
+
+	
 	
 	
 }

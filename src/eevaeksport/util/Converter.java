@@ -5191,10 +5191,11 @@ try{
 		
 	}
 	
-	 public static TreeMap makeWebFilesTree(Date algus, Date lopp ,String company, String user , String pass) {
+	 public static TreeMap makeWebFilesTree(Date algus, Date lopp ,String company, String user , String pass, boolean makedata) {
 			
 		 
 		 TreeMap res = new TreeMap();
+		 if(makedata)
 		   Converter.loadUploadedFiles(algus, null ,company,  user ,  pass);
 		
 		  StringBuffer sb  = new StringBuffer();
@@ -9231,13 +9232,31 @@ client.close();
 			    }
 		}
 	
-	public static void saveFileInANSI(String filename, String sb ){
+	public static void saveFileInANSI2(String filename, String sb ){
 	      try{
 	    	  
 	    	  File f = new File(filename);
 	          if (f.exists())f.delete();
 	      	  Writer out = new BufferedWriter(new OutputStreamWriter(
 	      			    new FileOutputStream(filename), "ISO-8859-2"));
+	      			try {
+	      			    out.write(sb.toString());
+	      			} finally {
+	      			    out.close();
+	      			}
+		            	
+			    }catch(Exception e){
+			    	e.printStackTrace();
+			    }
+		}
+	
+	public static void saveFileInANSI(String filename, String sb ){
+	      try{
+	    	  
+	    	  File f = new File(filename);
+	          if (f.exists())f.delete();
+	      	  Writer out = new BufferedWriter(new OutputStreamWriter(
+	      			    new FileOutputStream(filename), "ISO-8859-1"));
 	      			try {
 	      			    out.write(sb.toString());
 	      			} finally {

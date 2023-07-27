@@ -2475,7 +2475,7 @@ try{
 
 				  	
 				  		
-				  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass);
+				  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass,true);
 				  	//	System.out.println("files " + files.toString());
 				 
 			  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");

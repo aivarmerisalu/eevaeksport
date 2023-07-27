@@ -581,7 +581,7 @@ public class AxaZpienasMilkManaDBDriver extends AbstractDBDriver  implements Man
 	      " cus.vendgroup as grupp,cus.pricegroup as prgrupp " +
 	      " ,  registrationlt_bbs as regnum	, cus.vatnum , state , county, cus.taxgroup,registrationlt_bbs as encode ,economyid_bbs as economyid,agreement_bbs as agreement " +
    " , cus.bankcentralbankpurposetext as volainfo , cus.Enterprisecode as bday " +
- " FROM  vendtable cus  inner join DirPartyTable dp ON cus.partY=dp.REcid  " +
+ " FROM  vendtable cus  inner join DirPartyTable dp ON cus.partY=dp.REcid where stationid_bbs > 0  " +
 " INNER JOIN LOGISTICSPOSTALADDRESS adr ON adr.LOCATION = dp.PRIMARYADDRESSLOCATION and getdate() >=VALIDFROM  and  getdate() <= VALIDTO " +
  "  left  JOIN  paymterm   pay on cus.paymtermid= pay.paymtermid " +
 	" and pay.DATAAREAID = cus.DATAAREAID and  pay.dataareaid='zp'  left  JOIN  custtable  asi  on asi.vendaccount= cus.accountnum  " +
