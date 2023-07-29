@@ -432,7 +432,7 @@ private HashSet getXXX(){
       
 	 System.out.println("Enne suurus splitti" + order.getOrderLines().size());
 	  HashSet xxxprods = getXXX();
-	  HashSet kylmad =  new HashSet(); //getKylmad();
+	  HashSet kylmad =   getKylmad();
 	  Order ord23 = new Order(order.getCompany(),order.getAgentFirstName());
 	  Order ordJ1 = new Order((order.getCompany()),order.getAgentFirstName());
       Order ordOTB = new Order(leiaFelixiKlkood(order.getCompany()),order.getAgentFirstName());

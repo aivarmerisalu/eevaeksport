@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -1565,6 +1566,10 @@ public void PictureMaker() {
 		//Pange palun iga öö uuendama ja tarvis oleks siis nii
 		//Answers kui Gallery tabelit csv formaadis. See sobib hästi, et iga päring on uus fail.
 	
+	 	String pattern = "yyyy-MM-dd HH:mm:ss";
+	    	SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+
+		
 		TreeMap files = null;
 		 ArrayList<String> filenames = new ArrayList<String>();
 			// teeme kataloogi salvestamiseks
@@ -1616,25 +1621,25 @@ public void PictureMaker() {
 				  	
   
       
-      sbYesNo.append("AgentID;AgentName;CustomerID;CustomerName;Date;QuestName;QuestionType;QuestionID;Question;Answer;Comment;FileName;Photolink");
+      sbYesNo.append("AgentID;AgentName;CustomerID;CustomerName;DateTime;QuestName;QuestionType;QuestionID;Question;Answer;Comment;FileName;Photolink");
       sbYesNo.append("\n");
       
-      sbProd.append("AgentID;AgentName;CustomerID;CustomerName;Date;QuestName;QuestionType;ProdID;ProductName;OOSStatus;Comment;FileName;Photolink");
+      sbProd.append("AgentID;AgentName;CustomerID;CustomerName;DateTime;QuestName;QuestionType;ProdID;ProductName;OOSStatus;Comment;FileName;Photolink");
       sbProd.append("\n");
-				  		 files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass, false);
+				  		 files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass, true);
 					  	//	System.out.println("files " + files.toString());
 					 
-				  		//org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, null, null, "test");
+				  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, null, null, "test");
 				  		
 				  		//Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
-				  		 JSONParser parser0 = new JSONParser();
-				  		org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser0.parse(new FileReader( "svdata/currSVjson.json"));
+				  		// JSONParser parser0 = new JSONParser();
+				  		//org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser0.parse(new FileReader( "svdata/currSVjson.json"));
 				  		
 				  		
 				  		boolean savefile = false;
 				  		
-				  		for (int i = 0; i < cc.size(); i++) {
-				  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+				  		for (int i = 0; i < cc.length(); i++) {
+				  			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
 				  		   	String filterOutOfStock = (String)cob.get("resint3").toString();
 				  		 	String filterYesNo = (String)cob.get("resint1").toString();
 				  			String dateAndTime = (String)cob.get("recetime");
@@ -1752,9 +1757,12 @@ public void PictureMaker() {
 				  	    	}
 				  	    	
 				  	    	Date created = new Date(Long.parseLong(((String)cob.get("resstr3"))));
+				  	   
+				  	    	String date = simpleDateFormat.format(created);
+				  	    	System.out.println(date);
 				  	    	
 						if(filterProblem.contains("YESNO"))  	{  
-				  	 	 sbYesNo.append(agid + ";" + agname + ";" + cuid + ";" + custname.trim() + ";" + Converter.getYYYYmMMmDDmString(created)  + ";" + questName + ";" + filterProblem+ ";");
+				  	 	 sbYesNo.append(agid + ";" + agname + ";" + cuid + ";" + custname.trim() + ";" + date  + ";" + questName + ";" + filterProblem+ ";");
 				  	 		String prodname = (String)cob.get("prodname");
 				  	 		String prodid = (String)cob.get("prodid");
 				  	 		String res = "Yes";
@@ -1767,7 +1775,7 @@ public void PictureMaker() {
 						
 						
 						if(filterProblem.contains("PRODUCT"))  	{  
-					  	 	 sbProd.append(agid + ";" + agname + ";" + cuid + ";" + custname.trim() + ";" + Converter.getYYYYmMMmDDmString(created) +";" + questName+  ";" + filterProblem+ ";");
+					  	 	 sbProd.append(agid + ";" + agname + ";" + cuid + ";" + custname.trim() + ";" + date +";" + questName+  ";" + filterProblem+ ";");
 					  	 		String prodname = (String)cob.get("prodname");
 					  	 		String prodid = (String)cob.get("prodid");
 					  	 		
@@ -1841,12 +1849,12 @@ public void PictureMaker() {
 	}
 		
 				  	
-
+Calendar now = Calendar.getInstance();
 					
 					
 					if(sbYesNo.length() > 150) { 
 					 try {
-						Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(lopp) + "_YESNO_csvdata.csv", sbYesNo.toString());
+						Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(now) + "_YESNO_csvdata.csv", sbYesNo.toString());
 					  } catch (Exception e) {
 						e.printStackTrace();
 					  }
@@ -1854,7 +1862,7 @@ public void PictureMaker() {
 					
 					if(sbProd.length() > 200) { 
 						 try {
-							Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(lopp) + "_PRODUCT_csvdata.csv", sbProd.toString());
+							Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(now) + "_PRODUCT_csvdata.csv", sbProd.toString());
 						  } catch (Exception e) {
 							e.printStackTrace();
 						  }
@@ -1863,7 +1871,7 @@ public void PictureMaker() {
 				// siin teeme piltide csv.
 					if(files != null) {
 						StringBuffer fdata = new StringBuffer();
-						fdata.append("CustomerID;ManagerID;Date;Time;PhGroup;PictURL");
+						fdata.append("CustomerID;ManagerID;DateTime;PhGroup;PictURL");
 					Iterator itera =  files.keySet().iterator();
 					while(itera.hasNext()) {
 						String cuid = (String)itera.next();
@@ -1873,7 +1881,7 @@ public void PictureMaker() {
 	  						String signa = t.getLadu();
 	  					  if(done != null && !done.contains(signa)) {
 	  						  done.add(signa);
-	  						  fdata.append(cuid + ";" + t.comment + ";" +t.getGr1() + ";" + t.getGr2() + ";" 
+	  						  fdata.append(cuid + ";" + t.comment + ";" +t.getGr1() +" " + t.getGr2() + ";" 
 	  						  + t.getBrand() +";" + t.getLadu()+ "\n");
 	  					  }
 	  						
@@ -1884,7 +1892,7 @@ public void PictureMaker() {
 					
 					if(fdata.length() > 50) { 
 						 try {
-							Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(lopp) + "_FILES_csvdata.csv", fdata.toString());
+							Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(now) + "_FILES_csvdata.csv", fdata.toString());
 						  } catch (Exception e) {
 							e.printStackTrace();
 						  }
