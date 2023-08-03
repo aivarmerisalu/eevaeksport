@@ -4,6 +4,7 @@ package eevaeksport.driver;
 
 import java.io.BufferedReader;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,10 +14,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -579,11 +583,7 @@ Converter.saveFile(parent.getProps().getProperty("stockrefdir")  + "customerorde
 		st.close();
 		con.close();
 		this.connectionDown();
-		try{
-			getProdGroupsFelix(tm);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		
 	   	
 				return tm;
 	}
@@ -615,25 +615,6 @@ StringBuffer sb = new StringBuffer();
 	    }
 
 
-	 public void getProdGroupsFelix(TreeMap tm) throws SQLException {
-			
-
-			String    sql =
-			    "SELECT liik,artlnimi AS nimetus FROM artliik WHERE grupp='L'";
-			Connection con = this.getNewConEeva();
-			Statement st = con.createStatement();
-			ResultSet rs = st.executeQuery(sql);
-
-			while (rs.next()) {
-			    tm.put("FE" + Converter.enCodeEst(rs.getString("liik").trim()),
-			    		"xFE " + Converter.enCodeEst(rs.getString("nimetus").trim()));
-			}
-			
-			rs.close();
-			st.close();
-		    con.close();
-
-		    }
 
 	
 
@@ -700,12 +681,7 @@ StringBuffer sb = new StringBuffer();
 		    	Converter.sendAgentJson(agents, rcompany, false);
 		    }
 
-		Agent ag1 = new Agent("FELIX");
-		ag1.setName("FELIX");
-		agents1.put("FELIX", ag1);
-		agents.put("FELIX", ag1);
-	
-		//pane tellile 85
+
 
 		return agents;
 	}
@@ -1302,10 +1278,7 @@ SELECT  [MasterProductCode] as klient
 					goes = false;
 				}
 
-				if(cust.getID().equals("M15194") || cust.getID().equals("M15369")){
-					cust.addAgent(new Agent("FELIX"));	
-					goes = true;
-				}
+			
 				
 				if (myyk.get(cust.getID()) != null) {
 					Vector ags = (Vector) myyk.get(cust.getID());
@@ -2081,13 +2054,7 @@ SELECT  [MasterProductCode] as klient
 			
 		
 			
-			
-			try{
-				getProductsEeva(products, levels);
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-			
+		
 			try{
 				 String  sql = "select aaadress, planokaal from [mj_planotabel] ";
 				 connectionUp(url);
@@ -2127,126 +2094,6 @@ SELECT  [MasterProductCode] as klient
 		    }
 		    return sb.toString();
 	}
-	
-	private void getProductsEeva(TreeMap products, TreeMap<String,Integer> levels){
-
-
-		try {
-			
-			
-			
-
-			
-		   String cmd =
-			"SELECT toode,nimetus,asukoht,kastis, myygihind, liik, plaanhind,minkogus,alusel,ribakood,ribakood3, stock1 as laoseis, kood14 as felix FROM toode " +
-	               " WHERE len(trim(toode)) > 2 AND len(trim(liik))>0  AND  myygihind > 0 AND len(trim(nimetus))>0 AND eisaada = .F. ORDER BY toode ";
-
-		    if (isDebug()) {
-			System.out.println(cmd);
-		    }
-
-		    Connection ee = this.getNewConEeva();
-		    Statement st = ee.createStatement();
-		    ResultSet rs = st.executeQuery(cmd);
-
-		    while (rs.next()) {
-				String  kood =  rs.getString("toode").trim();
-                String  nimetus = rs.getString("nimetus").trim();
-				String asukoht = rs.getString("asukoht").trim();
-		    	
-		    	double  tykke = (rs.getDouble("kastis"));
-			String pre = "FE" ;
-			if(kood.startsWith("K0") && nimetus.indexOf("OTB") !=-1){
-				pre = "OTB";
-			}
-             kood = pre + kood;
-			Product prod = new Product(kood);
-			prod.setName("x" + pre + " " + Converter.enCodeEst(nimetus));
-			prod.setPrice(round(rs.getDouble("myygihind"), 2));
-			prod.setInCases(tykke);
-			prod.setType("OTB");
-			
-			
-			prod.setGroup("FE" + rs.getString("liik").trim());
-	                prod.setMeasure(rs.getDouble("plaanhind"));
-	                prod.setMaxDiscount(rs.getDouble("minkogus"));
-	                String ean = rs.getString("ribakood");
-	                prod.setOnPallet(rs.getDouble("alusel"));
-	                if(ean != null && ean.trim().length()>7 ){
-	                prod.setEAN(ean.trim());
-	                eans.put(ean.trim(), prod.getID());
-	                }
-	                String  status = rs.getString("ribakood3");
-
-	                if (status!= null && status.trim().length() > 0){
-	                	 if (status.indexOf("T")!= -1){
-		                       // prod.setStatusTop("1");
-		                      }
-	                      if (status.indexOf("F")!= -1){
-	                        prod.setMustBe("1");
-	                      }
-	                      if (status.indexOf("D")!= -1){
-	                        prod.setStatusDiscount("1");
-	                      }
-	                      if (status.indexOf("N")!= -1){
-	                       prod.setStatusNew("1");
-	                      }
-
-	                      if (status.indexOf("O")!= -1){
-	                        prod.setStatusSellout("1");
-	                       }
-	                }
-
-	                if(levels.get(prod.getID()) != null) {
-	                	prod.points = levels.get(prod.getID());
-	                	prod.setStatusTop("1");
-	                }
-	                
-	    			String puhas = rs.getString("felix");
-	    			String ccc = " select stockcode as toode,  bestbefore as kuup, "
-	    					+ "  stockamount as kogus, discount as maxdisc FROM mj_salesproposal   "
-	    					+ " WHERE  stockcode= '"+ puhas + "'";
-	    //     System.out.println(ccc);
-	    			Statement st2 = con2.createStatement();
-	    			 ResultSet rs2 = st2.executeQuery(ccc);
-
-	    			if (rs2.next()) {
-	    				
-	    				String kuup = rs2.getString("kuup");
-	    				double kog = 0;
-	    				if(kuup != null){
-	    					kog = rs2.getDouble("kogus");
-	    				}
-	    				
-	    				double discount = rs2.getDouble("maxdisc");
-	    				if(discount > 0){
-	    					prod.setMaxDiscount(discount);
-	    				}
-	    				if(kog == 0){
-	    					prod.setStatusDiscount("1");
-	    				}
-	    							
-	    			}
-	    			
-	    			rs2.close();
-	    			st2.close();
-	    			
-	    			
-	                
-	                products.put("x"+asukoht + nimetus, prod);
-
-			// }
-		    }
-	            rs.close();
-                 st.close();
-                 ee.close();
-		} catch (Exception e) {
-		    getParent().showError(e);
-		}
-
-
-	}
-	
 	
 	
 	
@@ -2493,53 +2340,12 @@ SELECT  [MasterProductCode] as klient
 
 		connectionDown();
 		
-		try{
-			getCustomerProductsListFelix(custProds);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+	
 		return custProds;
 	}
 
 	
 	
-    public void getCustomerProductsListFelix(Vector custProds) {
-
-    	String cmd =
-    	    "SELECT k.viitenr as saaja ,rid.toode, kogus, dok.kuupaev AS lastdate FROM dok INNER " +
-    	   " JOIN rid ON dok.dokumnr = rid.dokumnr INNER JOIN toode on rid.toode = toode.toode " +
-            "    INNER JOIN klient k ON dok.saaja=k.kood WHERE " +
-    	    " len(trim(dok.saaja)) > 0 AND len(trim(rid.toode)) > 2   AND dok.kuupaev > date()-180 AND dok.pais2obj != '6' " + 
-            " AND k.objekt2 !='' AND  dok.doktyyp = 'G' and k.viitenr != '' " +
-			"  GROUP BY k.viitenr, rid.toode ORDER BY dok.kuupaev DESC, k.viitenr,toode.asukoht, toode.nimetus";
-
-    	if (isDebug()) {
-    	    System.out.println(cmd);
-    	}
-
-    	try {
-         	Connection con = this.getNewConEeva();
-            PreparedStatement pst = con.prepareStatement(cmd);
-    	    ResultSet	      rs = pst.executeQuery();
-
-    	    while (rs.next()) {
-    		String kliendikood = rs.getString("saaja").trim();
-            String tootekood = "FE" + rs.getString("toode").trim();
-                    double kogus = rs.getDouble("kogus");
-                    String lastDate = rs.getString("lastdate").substring(5,10);
-                    CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,lastDate,0,0,0," ");
-                    custProds.add(cp);
-                    
-    	    }
-                rs.close();
-                pst.close();
-                con.close();
-             
-    	} catch (Exception e) {
-    	    getParent().showError(e);
-    	}
-        }
-
 	
 	public String getPilotDayData(Agent agent) {
 		String sql = "SELECT RTRIM(SL01002) AS nimi,OR01001  AS number,OR01015 AS kuupaev, OR01024 AS summa  FROM  " +
@@ -3194,122 +3000,7 @@ try{
 
 	@Override
 	public void setSales(HashMap custprods) throws SQLException {
-		 System.out.println("TEEME SALESREPORTIT");
-	      Iterator iter = custprods.keySet().iterator();
-	      String dlr = (String)iter.next();
-	      String sqly =" INSERT INTO rid VALUES('T',99999, '', ?, ?, ?,?,'K','',0,'',?,?,'', " +
-	           "?,MONTH(date()-20),YEAR(date()-20),0,0,? ,'','','',0,0,'','','',0,0,.F.,.F.,0,'',0)" ;
-
-	      
-	      String sql = "INSERT INTO  feliximyygid values(" +
-	      		" ? ," + // salesdate datetime ,
-	      		" ? ," + // agentid nvarchar(10) ,
-	      		" ? ," + //agentname nvarchar(100) ,
-	      		" ? ," + //smacustid nvarchar(20) ,
-	      		" ? ," + // felcustid nvarchar(20) ,
-	      		" ? ," + // custname nvarchar(200) ,
-	      		" ? ," + // prodid nvarchar(20) ,
-	      		" ? ," + // prodname nvarchar(200) ,
-	      		" ? ," + //barcode nvarchar(20) ,  
-	      		" ? ," + // smaprodid nvarchar(20) ,
-	      		" ? ," + // felixprodid nvarchar(20) ,
-	      		" ? ," + // qty numeric(18,7) ,
-	      		" ? )" ; //price numeric(18,7) "
-	      
-	       String sql1 = "SELECT kood , viitenr as koodfel,objekt2 as agent, y.nimetus as agentname, nimi as custname FROM KLIENT k left join  " +
-           " yksus y on y.yksus =objekt2 and y.klassif = 2 WHERE kood1 = ? OR smartsaaja= ?";
-	       
-	       
-	       String sql2 = "SELECT toode,nimetus as prodname,ribakood as barcode,kood14 as felprodid FROM toode WHERE kood1 = ?  OR ribakood= ?";
-	   	Connection con = getNewConnection2();
-	       PreparedStatement pst = con.prepareStatement(sql);
-	       iter = custprods.keySet().iterator();
-	       while (iter.hasNext()) {
-	         String dealer = (String) iter.next();
-	         ArrayList al = (ArrayList) custprods.get(dealer);
-
-	         for (int i = 0; i < al.size(); i++) {
-
-	           String owncustid = "MUUKLIENT";
-	           String felcustid = "FELKLIENT";
-	           String ownprodid = "11111111";
-	           String agent = "000";
-	           String agentname = "noname";
-	           String custname = "noname";
-
-	           CustProd p = (CustProd) al.get(i);
-	           String custid = p.getCustID();
-	           String prodid = p.getProdID();
-	           java.sql.Date daatum = new java.sql.Date(Calendar.getInstance().getTimeInMillis());
-	           if(p.getReportmonth() != null){
-	           	daatum = p.getReportmonth();
-	           }
-
-	           Connection cc = getNewConEeva();
-	           PreparedStatement pst1 = cc.prepareStatement(sql1);
-	           pst1.setString(1, custid);
-	           pst1.setString(2, custid);
-	           ResultSet rs = pst1.executeQuery();
-	           while (rs.next()) {
-	             owncustid = rs.getString("kood").trim();
-	             felcustid = rs.getString("koodfel").trim();
-	             agent = rs.getString("agent").trim();
-	             String nn = rs.getString("agentname");
-	             if(nn != null){
-	            	  agentname = nn.trim();
-	             }
-	             nn = rs.getString("custname");
-	             if(nn != null){
-	            	 custname = nn.trim();
-	             }
-	            
-	           }
-	           rs.close();
-	           pst1.close();
-            
-	           String prodname = "noname";
-	        String    barcode = "0000000000000";
-	        String    smaprodid = " ";
-	        String    felprodid = "nocode";
-	           PreparedStatement pst2 = cc.prepareStatement(sql2);
-	           pst2.setString(1, prodid);
-	           pst2.setString(2, prodid);
-	           ResultSet rs2 = pst2.executeQuery();
-	           while (rs2.next()) {
-	             ownprodid = rs2.getString("toode").trim();
-	             prodname = rs2.getString("prodname").trim();
-	             barcode = rs2.getString("barcode").trim();
-	             felprodid = rs2.getString("felprodid").trim();
-          }
-	           rs2.close();
-	           pst2.close();
-	           cc.close();
-	           
-	  
-      		
-	           
-	           pst.setTimestamp(1, new Timestamp(daatum.getTime()));
-	           pst.setString(2, agent);
-	           pst.setString(3, agentname);
-	           pst.setString(4, custid);
-	           pst.setString(5, felcustid);
-	           pst.setString(6, custname);
-	           pst.setString(7, prodid);
-	           pst.setString(8, prodname);
-	           pst.setString(9, barcode);
-	           pst.setString(10, smaprodid);
-	           pst.setString(11, felprodid);
-	           pst.setDouble(12, p.getMovedStockPluss());
-	           pst.setDouble(13, p.getLastPrice());
-	           pst.executeUpdate();
-	           
-	          
-	           
-	         }
-	       }
-
-	       pst.close();
-	       con.close();
+		
 	}
 
 	@Override
@@ -3608,7 +3299,7 @@ try{
 		public void WebReporter() {
 			//Pange palun iga öö uuendama ja tarvis oleks siis nii
 			//Answers kui Gallery tabelit csv formaadis. See sobib hästi, et iga päring on uus fail.
-		
+		//  System.setProperty("file.encoding","UTF-8");
 		 	String pattern = "yyyy-MM-dd HH:mm:ss";
 		    	SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 
@@ -3654,9 +3345,11 @@ try{
 
 					  	algus.add(Calendar.DATE, -1 * days);
 					  	algus.set(Calendar.HOUR, 0);
+					  	
+					  	lopp.setTime(algus.getTime());
 					  	lopp.set(Calendar.HOUR, 23);
 					  	lopp.set(Calendar.MINUTE, 59);
-					  	lopp.add(Calendar.DATE, +2);
+					  	lopp.add(Calendar.DATE, +30);
 						
 					    StringBuffer sbYesNo = new StringBuffer();
 					    StringBuffer sbProd = new StringBuffer();
@@ -3674,17 +3367,18 @@ try{
 						 
 					  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompanyx, user, pass, false, null, null, "test");
 					  		
-					  		//Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
-					  		// JSONParser parser0 = new JSONParser();
-					  		//org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser0.parse(new FileReader( "svdata/currSVjson.json"));
-					  		
+					  		saveFileInENC("svdata/currSVjson.json", cc.toString(),"UTF8");
+					  		//try (FileOutputStream fout=new FileOutputStream("svdata/currSVjson.json")) {
+					  		  //  fout.write(cc.toString().getBytes(Charsets.));
+					  		//} // Closes fout.
 					  		
 					  		boolean savefile = false;
 					  		
 					  		for (int i = 0; i < cc.length(); i++) {
 					  			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
 					  		   	String filterOutOfStock = (String)cob.get("resint3").toString();
-					  		 	String filterYesNo = (String)cob.get("resint1").toString();
+					  		  String filterYesNo = (String)cob.get("resint1").toString();
+					  				  
 					  			String dateAndTime = (String)cob.get("recetime");
 					  			String dateOnly = dateAndTime.split("T")[0];
 					  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
@@ -3798,19 +3492,29 @@ try{
 					  	    		}
 					  	    		comment = " ";
 					  	    	}
+					  	    	Date created = new Date();
 					  	    	
-					  	    	Date created = new Date(Long.parseLong(((String)cob.get("resstr3"))));
+					  	    	try {
+					  	    		created = new Date(Long.parseLong(((String)cob.get("resstr3"))));
+					  	    	}catch(Exception k) {
+					  	    		try {
+					  	    		created = new Date(((Long)cob.get("sentdate")));
+					  	    		}catch(Exception uu) {}
+					  	    		
+					  	    	}
+					  	    	
 					  	   
 					  	    	String date = simpleDateFormat.format(created);
-					  	    	System.out.println(date);
+					  	    	//System.out.println(date);
 					  	    	
 							if(filterProblem.contains("YESNO"))  	{  
 					  	 	 sbYesNo.append(agid + ";" + agname + ";" + cuid + ";" + custname.trim() + ";" + date  + ";" + questName + ";" + filterProblem+ ";");
 					  	 		String prodname = (String)cob.get("prodname");
 					  	 		String prodid = (String)cob.get("prodid");
 					  	 		String res = "Yes";
-					  	 		if(filterYesNo.equals("1")){
+					  	 		if(filterYesNo != null && filterYesNo.trim().equals("1.0")){
 					  	 			res = "No";
+					  	 			System.out.println("NOOO " + prodname);
 					  	 		}
 					  	 		 sbYesNo.append(prodid + ";" + prodname + ";" + res + ";" + comment + ";");
 		
@@ -3827,7 +3531,7 @@ try{
 								}
 							
 							if(cfoto != null) {
-								System.out.println("cfoto " + cfoto);
+							//	System.out.println("cfoto " + cfoto);
 	  							if(filterProblem.contains("YESNO"))  	{  
 	  							 sbYesNo.append(cfoto + ";http://reporting-files.merisoft.eu/gallery/kalevmerc/" + cfoto  );	
 	  							}
@@ -3853,7 +3557,7 @@ try{
 					  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid)
 	                                            &&  t.getGr1().equals(dateOnly) ){
 					  							
-					  							System.out.println("foto " + foto);
+					  							//System.out.println("foto " + foto);
 					  							if(filterProblem.contains("YESNO"))  	{  
 					  							 sbYesNo.append(fname + ";" + foto  );	
 					  							}
@@ -3935,7 +3639,7 @@ try{
 						
 						if(fdata.length() > 50) { 
 							 try {
-								Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(now) + "_FILES_csvdata.csv", fdata.toString());
+								Converter.saveFile("csvout/" + Converter.getYYYY_MM_DDpString(now) + "_FILES_csvdata.csv", fdata.toString());
 							  } catch (Exception e) {
 								e.printStackTrace();
 							  }
@@ -3962,7 +3666,24 @@ try{
 
 	
 	
-	
+	  private void saveFileInENC(String filename, String sb, String enc){
+	      try{
+	    	  
+	    	  File f = new File(filename);
+	          if (f.exists())f.delete();
+	      	  Writer out = new BufferedWriter(new OutputStreamWriter(
+	      			    new FileOutputStream(filename), enc));
+	      			try {
+	      			    out.write(sb.toString());
+	      			} finally {
+	      			    out.close();
+	      			}
+		            	
+			    }catch(Exception e){
+			    	e.printStackTrace();
+			    }
+		}
+	  
 }
 
 /*--- formatting done in "Sun Java Convention" style on 04-26-2002 ---*/

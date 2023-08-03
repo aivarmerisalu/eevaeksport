@@ -1965,7 +1965,7 @@ try {
     		   double psales = tt.getPlancur();
     		   
     			
-         		  double  tehtudsalperc = psales/msales;
+         		  double  tehtudsalperc = msales/psales;
              	  double  plaanitavMyykSal = d2 * msales/dd;
              	  double  prognosalperc = plaanitavMyykSal/psales;
             
@@ -1975,12 +1975,10 @@ try {
               	  asi = asi + Converter.enCodeEst("Pardavimai Zalia: ")+ (int)msales + " €|";  ;
              	
               	  
-              	  if(tehtudsalperc > 3){
+              	  if(tehtudsalperc*100 < 1){
              		tehtudsalperc = 0;
              	  }
-             	if(prognosalperc > 3){
-             		prognosalperc = 0;
-             	  }
+             
              	  
                    asi = asi + "Plano vykdymas: " + getNF().format(tehtudsalperc*100) + "% |"; 
                 agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
@@ -1992,17 +1990,14 @@ try {
      		     psales = tt.getPlanvol();
      		   
      		   if(psales > 0) {
-          		    tehtudsalperc = psales/msales;
+          		    tehtudsalperc = msales/psales ;
               	    plaanitavMyykSal = d2 * msales/dd;
               	    prognosalperc = plaanitavMyykSal/psales;
              
                 asi =  Converter.enCodeEst("||Planas Gaminiai: ") + (int)psales + " €|";    
                	  asi = asi + Converter.enCodeEst("Pardavimai Gaminiai: ") + (int)msales + " €|";
-              	  if(tehtudsalperc > 3){
+              	  if(tehtudsalperc*100 < 1){
               		tehtudsalperc = 0;
-              	  }
-              	if(prognosalperc > 3){
-              		prognosalperc = 0;
               	  }
               	
               	 asi = asi + "Plano vykdymas: " + getNF().format(tehtudsalperc*100) + "% ||";  

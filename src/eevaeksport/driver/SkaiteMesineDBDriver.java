@@ -2034,11 +2034,11 @@ try{
               if(psales > 0) {
               asi = Converter.enCodeEst("Planas Zalia: ") + (int)psales + " €|";    
                	  asi = asi + Converter.enCodeEst("Pardavimai Zalia/Plano vykdymas :");
-              	  if(tehtudsalperc > 3){
+               	if(tehtudsalperc*100 < 1){
               		tehtudsalperc = 0;
               	  }
-              	if(prognosalperc > 3){
-              		prognosalperc = 0;
+               	if(prognosalperc*100 < 1){
+               		prognosalperc = 0;
               	  }
               	  
                     asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %|";  
@@ -2057,13 +2057,13 @@ try{
               
                  asi =  Converter.enCodeEst("||Planas Gaminiai: ") + (int)psales + " €|";    
                 	  asi = asi + Converter.enCodeEst("Pardavimai Gaminiai/Plano vykdymas :");
-               	  if(tehtudsalperc > 3){
-               		tehtudsalperc = 0;
-               	  }
-               	if(prognosalperc > 3){
-               		prognosalperc = 0;
-               	  }
-               	  
+                	  if(tehtudsalperc*100 < 1){
+                    		tehtudsalperc = 0;
+                    	  }
+                		if(prognosalperc*100 < 1){
+                       		prognosalperc = 0;
+                      	  }
+                      	  
                      asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %|";  
                   agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
       		   }

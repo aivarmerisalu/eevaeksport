@@ -1211,10 +1211,14 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
 				         				customer.setSalesBlock(true); 
 				         			 }
 				         		       
-				         //		      goes = false;
+				         	      goes = false;
 				         		    //  System.out.println("Blkoitud " + customer.getName());
 				         		  }
 				         	   }catch(Exception e){}
+			          
+			          if(name.startsWith("ZDEL")) {
+			        	  goes = false;
+			          }
 				         	   
 	         	   if(goes){
 	         		  tm.put(name, customer);

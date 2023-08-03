@@ -451,7 +451,7 @@ public class S1XMLRadexDBDriver extends AbstractDBDriver implements BulkUpdater,
 	 			         				 e.printStackTrace();
 	 			         			 }
 	 			         		} else {
-	 			         			System.out.println("ridu  " + stn);
+	 			         			//System.out.println("ridu  " + stn);
 	 			         			lisa = lisa + stn + " : "+  parent.getNF().format(am) + "|";
 	 			         		}
 	 			         	  }
@@ -518,6 +518,8 @@ TreeMap<String, Double> odue = null;
 		         	  }catch(Exception e){e.printStackTrace();}
 		         	  
 		         	  
+		         	  
+		         	  
 		         	 Node debtsNode = getNode(rida,"Debts");
 		         	for (int j = 0; j < debtsNode.getChildNodes().getLength(); j++){
 		         		
@@ -532,6 +534,8 @@ TreeMap<String, Double> odue = null;
 			         		String debtDocDate   = getNode(debtrida,"DocDate").getFirstChild().getNodeValue();
 			         		String debtPayDate   = getNode(debtrida,"PayDate").getFirstChild().getNodeValue();
 			         		Double debtOpenAmount   = Double.parseDouble(getNode(debtrida,"OpenAmount").getFirstChild().getNodeValue());
+			         		
+			         	
 			         		
 			         		if((getDate(debtPayDate)).before(now)) {
 			         			if(odue.get(custGUID) != null) {
@@ -581,7 +585,7 @@ TreeMap<String, Double> odue = null;
 
 	   
 	   
-
+   System.out.println("GUID " + odue.get("c914f926-3885-11ec-8454-1098369fa172"));
 	      
 	      
 

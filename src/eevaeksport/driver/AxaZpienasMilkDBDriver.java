@@ -116,9 +116,9 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 	  TreeMap saajad = new TreeMap();
 	  try {
 		  
-		  String cmd = "select stationid as klient,'SMS' as type,(select top 1 l.locator  from  LOGISTICSELECTRONICADDRESS l  where  l.privateforparty = s.party) as aadress "
+		  String cmd = "select stationid as klient,'SMS' as type,(select top 1 l.locator  from  LOGISTICSELECTRONICADDRESS l  where  l.privateforparty = s.party) as aadress ,description"
 		  		+ " from bbsstationtable s where dataareaid = 'zp'" + 
-		  		"and (select top 1 l.locator  from  LOGISTICSELECTRONICADDRESS l  where  l.privateforparty = s.party) is not null ";
+		  		"and (select top 1 l.locator  from  LOGISTICSELECTRONICADDRESS l  where  l.privateforparty = s.party) is not null  ";
 	    	Connection con = this.getNewConnection();
 	    	Statement stmt = con.createStatement();
 	        ResultSet rs = stmt.executeQuery(cmd);
@@ -127,7 +127,8 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 		         String klient = rs.getString("klient").trim();
 		         String type = rs.getString("type").trim();
 		         String aadress = rs.getString("aadress").trim();
-			        	
+		         String desc = rs.getString("description").trim();
+			        if(desc.indexOf("K.") != 1)	
 			      saajad.put(klient,type + "|" + aadress);
 	        }
 	        
@@ -274,6 +275,7 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
          String nimi = st.nextToken();
          sisu = st.nextToken();
          String inf =  (String)saajad.get(klient);
+         if(inf != null) {
          System.out.println("inf " + inf);
          String type = inf.substring(0, inf.indexOf("|")); 
          String aadress = inf.substring(inf.indexOf("|")+1 );  
@@ -333,7 +335,7 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 		   ee.printStackTrace();
 	    }
    	}   
-       
+	}
    	return null;
    }
   

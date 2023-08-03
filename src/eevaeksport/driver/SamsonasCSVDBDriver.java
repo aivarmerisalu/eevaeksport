@@ -1561,358 +1561,323 @@ public void PictureMaker() {
 }
 
 
-	@Override
-	public void WebReporter() {
-		//Pange palun iga öö uuendama ja tarvis oleks siis nii
-		//Answers kui Gallery tabelit csv formaadis. See sobib hästi, et iga päring on uus fail.
-	
-	 	String pattern = "yyyy-MM-dd HH:mm:ss";
-	    	SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 
-		
-		TreeMap files = null;
-		 ArrayList<String> filenames = new ArrayList<String>();
-			// teeme kataloogi salvestamiseks
-					File f = new File("svdata");
-					if(!f.exists()) {
-						f.mkdir();
-					}
-					
-					
-				  f = new File("csvout");
-					if(!f.exists()) {
-						f.mkdir();
-					}
-					
-		// loeme signatuurid sisse kui on olemas	
-					HashSet done = null;
-					try {
-						done = (HashSet) Converter.readObject("signadone.obj");
-					}catch(Exception e) {
-						e.printStackTrace();
-					}
-					
-					if(done == null) {
-						 done = new HashSet();
-					}
-					
-					
-		//teeme perioodi valmis
-					Calendar algus = Calendar.getInstance();  
-				  	Calendar lopp = Calendar.getInstance();  	
-				  	Integer days = 20;
-				  if(	parent.getProps().getProperty("webreport.days") != null) {
-					  try {
-						  days = Integer.parseInt(parent.getProps().getProperty("webreport.days"));
-					  }catch(Exception e) {
-						  
-					  }
-				  };
-
-				  	algus.add(Calendar.DATE, -1 * days);
-				  	algus.set(Calendar.HOUR, 0);
-				  	lopp.set(Calendar.HOUR, 23);
-				  	lopp.set(Calendar.MINUTE, 59);
-				  	lopp.add(Calendar.DATE, +2);
-					
-				    StringBuffer sbYesNo = new StringBuffer();
-				    StringBuffer sbProd = new StringBuffer();
-				  	try {
-				  	
-  
-      
-      sbYesNo.append("AgentID;AgentName;CustomerID;CustomerName;DateTime;QuestName;QuestionType;QuestionID;Question;Answer;Comment;FileName;Photolink");
-      sbYesNo.append("\n");
-      
-      sbProd.append("AgentID;AgentName;CustomerID;CustomerName;DateTime;QuestName;QuestionType;ProdID;ProductName;OOSStatus;Comment;FileName;Photolink");
-      sbProd.append("\n");
-				  		 files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass, true);
-					  	//	System.out.println("files " + files.toString());
-					 
-				  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, null, null, "test");
-				  		
-				  		//Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
-				  		// JSONParser parser0 = new JSONParser();
-				  		//org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser0.parse(new FileReader( "svdata/currSVjson.json"));
-				  		
-				  		
-				  		boolean savefile = false;
-				  		
-				  		for (int i = 0; i < cc.length(); i++) {
-				  			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
-				  		   	String filterOutOfStock = (String)cob.get("resint3").toString();
-				  		 	String filterYesNo = (String)cob.get("resint1").toString();
-				  			String dateAndTime = (String)cob.get("recetime");
-				  			String dateOnly = dateAndTime.split("T")[0];
-				  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
-				  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
-				  		    String signa = dateAndTime + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") ;
-				  		    String filterProblem = (String)cob.get("resstr1");
-				  		    String questName =  null;
-				  		  try {  
-				  		  questName = (String)cob.get("extData");
-				  		  } catch (Exception e) {
-				  			  
-				  		  }
-				  		    if(questName == null ) {
-				  		    	questName = " ";
-				  		    }
-				  		  
-				  			if( done != null && !done.contains(signa )){  	
-				  			//	System.out.println("signa " + signa + " " + filterOutOfStock + " " + filterProblem);
-							  	
-				  			
-				  		  savefile = true;
-				  			
-				  	 
-				  			String agid = (String)cob.get("agentid");
-				  			String agname = (String)cob.get("managerName");
-				  			if(agname.contains(agid)) {
-				  				agname = agname.substring(0,agname.indexOf(agid)).trim();
-				  			}
-
-			  				String cuid = (String)cob.get("custid");
-			  				
-				  				
-				  			String custname = "";
-				  			String custchain = "";
-				  			String custaddr = "";
-				  			try {
-				  				custchain = (String)cob.get("custchain");
-				  			} catch(Exception e) {
-				  				
-				  			}
-				  			
-				  			try {
-				  				custname = (String)cob.get("custname");
-				  				if(custname.indexOf(",") != -1) {
-				  					custaddr = custname.substring(custname.indexOf(",")+1);
-				  					custname = custname.substring(0,custname.indexOf(","));
-				  				}
-				  			} catch(Exception e) {
-				  				
-				  			}
-				  			
-				  			if(custname.endsWith(cuid)) {
-				  				custname = custname.substring(0,custname.indexOf(cuid)-1);
-			  				}
-				  			
-				  			
-				  			
-				  		
-				  			Date fromdate = null; //new Date((Long)obj1.get("sDay"));
-				  	    	Date todate = null; //new Date((Long)obj1.get("eDay"));
-				  	  	String comID = "";
-			  	    	String comment = "";
-			  	    	
-				  	    	 JSONParser parser = new JSONParser();
-				  	    	try { 
-				  	    	org.json.simple.JSONObject obj1 = (org.json.simple.JSONObject) parser.parse((cob.get("comment").toString()));
-				  	    
-				  	    
-				  	    	String typeid = (String)obj1.get("disID");
-				  	    	String typename = (String)obj1.get("disNa");
-				  	    	Double typekogus = (Double)obj1.get("disAm");
-				  	    	
-				  	    	String bonusid = (String)obj1.get("bonID");
-				  	    	String bonusname = (String)obj1.get("bonNa");
-				  	    	Double bonuskogus = 0d;
-				  	    	try {
-					  	    	  fromdate = new Date((Long)obj1.get("sDay"));
-					  	    	  todate = new Date((Long)obj1.get("eDay"));
-					  	  	     } catch(Exception k) {
-				  	    		 // k.printStackTrace();
-				  	    	     }
-				  	    		bonuskogus = Double.parseDouble((String)obj1.get("bonAm"));
-				  	    	}catch(Exception e) {
-				  	    	}
-				  	    	
-				  	    	
-				  	    	
-				  	    	
-				  	    	
-				  	    	try {
-				  	    		org.json.simple.JSONObject obj2 = (org.json.simple.JSONObject) parser.parse((cob.get("custcomme").toString()));
-				  	    		comID = ((String)obj2.get("comID"));
-				  	    		comment = ((String)obj2.get("comNa"));
-				  	    	}catch(Exception e) {
-				  	    	}
-				  	    	
-				  	    	try {
-				  	    	 comment = (String)cob.get("comment");
-				  	    	}catch(Exception e) {
-				  	    		
-				  	    	}
-				  	    	if(comment == null  || comment.length() < 1) {
-				  	    		comment = " ";
-				  	    	}
-				  	    	
-				  	    	String cfoto = null;
-				  	    	if(comment.startsWith("Photo :")) {
-				  	    		cfoto = comment.substring(7);
-				  	    		if(cfoto.indexOf("|") != -1) {
-				  	    		cfoto = cfoto.substring(0,cfoto.indexOf("|"));
-				  	    		}
-				  	    		comment = " ";
-				  	    	}
-				  	    	
-				  	    	Date created = new Date(Long.parseLong(((String)cob.get("resstr3"))));
-				  	   
-				  	    	String date = simpleDateFormat.format(created);
-				  	    	System.out.println(date);
-				  	    	
-						if(filterProblem.contains("YESNO"))  	{  
-				  	 	 sbYesNo.append(agid + ";" + agname + ";" + cuid + ";" + custname.trim() + ";" + date  + ";" + questName + ";" + filterProblem+ ";");
-				  	 		String prodname = (String)cob.get("prodname");
-				  	 		String prodid = (String)cob.get("prodid");
-				  	 		String res = "Yes";
-				  	 		if(filterYesNo.equals("1")){
-				  	 			res = "No";
-				  	 		}
-				  	 		 sbYesNo.append(prodid + ";" + prodname + ";" + res + ";" + comment + ";");
-	
-						}
-						
-						
-						if(filterProblem.contains("PRODUCT"))  	{  
-					  	 	 sbProd.append(agid + ";" + agname + ";" + cuid + ";" + custname.trim() + ";" + date +";" + questName+  ";" + filterProblem+ ";");
-					  	 		String prodname = (String)cob.get("prodname");
-					  	 		String prodid = (String)cob.get("prodid");
-					  	 		
-					  	 		 sbProd.append(prodid + ";" + prodname + ";" + filterOutOfStock + ";" + comment + ";" );
-		
-							}
-						
-						if(cfoto != null) {
-							System.out.println("cfoto " + cfoto);
-  							if(filterProblem.contains("YESNO"))  	{  
-  							 sbYesNo.append(cfoto + ";http://reporting-files.merisoft.eu/gallery/kalevmerc/" + cfoto  );	
-  							}
-						}else {
-							try {
-				  				String foto = null;
-				  				org.json.simple.JSONArray phs = (org.json.simple.JSONArray)parser.parse((cob.get("pictureLinks").toString()));
-				  			//	System.out.println("phs " + phs.toString());
-				  				if(files != null && files.get(cuid) != null && phs != null) {
-				  					int a = 0;
-				  				//	if(cuid.equals("747724"))
-				  					
-				  						for(int y = 0; y < phs.size() ; y++) {
-				  							String fname = (String)phs.get(y);
-				  						//	System.out.println("fotoname " + fname);
-				  					
-				  				
-				  					ArrayList arr = (ArrayList)files.get(cuid);
-				  					for(int e = 0; e<arr.size(); e++) {
-				  						Toode t = (Toode)arr.get(e);
-				  						foto = t.getLadu();
-				  					//	System.out.println("foto0 " + foto);
-				  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid)
-                                            &&  t.getGr1().equals(dateOnly) ){
-				  							
-				  							System.out.println("foto " + foto);
-				  							if(filterProblem.contains("YESNO"))  	{  
-				  							 sbYesNo.append(fname + ";" + foto  );	
-				  							}
-				  				  		     a++;
-				  				  				
-				  						}
-				  					}
-				  						}
-				  						
-				  				}
-				  				}catch(Exception e) {
-				  					//e.printStackTrace();
-				  				}
-						}
-				  				
-				  				 //URL Link
-				  				
-				  				
-				  				
-				  		
-				  				done.add(signa );
-				  				if(filterProblem.contains("YESNO"))  	{  
-				  				sbYesNo.append("\n");
-				  				}
-				  				
-				  				if(filterProblem.contains("PRODUCT"))  	{  
-					  				sbProd.append("\n");
-					  				}
-				  			}
-				  		}
-				  	//	System.out.println(sbYesNo.toString());
-	
-				  	
-				  	}catch(Exception r) {
-		r.printStackTrace();
-	}
-		
-				  	
-Calendar now = Calendar.getInstance();
-					
-					
-					if(sbYesNo.length() > 150) { 
-					 try {
-						Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(now) + "_YESNO_csvdata.csv", sbYesNo.toString());
-					  } catch (Exception e) {
-						e.printStackTrace();
-					  }
-					}
-					
-					if(sbProd.length() > 200) { 
-						 try {
-							Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(now) + "_PRODUCT_csvdata.csv", sbProd.toString());
-						  } catch (Exception e) {
-							e.printStackTrace();
-						  }
-						}
+@Override
+public void WebReporter() {
+	  
+	  ArrayList<String> filenames = new ArrayList<String>();
+	// teeme kataloogi salvestamiseks
+			File f = new File("svdata");
+			if(!f.exists()) {
+				f.mkdir();
+			}
+			
+			
+// loeme signatuurid sisse kui on olemas	
+			HashSet done = null;
+			try {
+				done = (HashSet) Converter.readObject("signadone.obj");
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+			if(done == null) {
+				 done = new HashSet();
+			}
+			
+			
+//teeme perioodi valmis
+			Calendar algus = Calendar.getInstance();  
+		  	Calendar lopp = Calendar.getInstance();  	
+		  	Integer days = 20;
+		  if(	parent.getProps().getProperty("webreport.days") != null) {
+			  try {
+				  days = Integer.parseInt(parent.getProps().getProperty("webreport.days"));
+			  }catch(Exception e) {
 				  
-				// siin teeme piltide csv.
-					if(files != null) {
-						StringBuffer fdata = new StringBuffer();
-						fdata.append("CustomerID;ManagerID;DateTime;PhGroup;PictURL");
-					Iterator itera =  files.keySet().iterator();
-					while(itera.hasNext()) {
-						String cuid = (String)itera.next();
-						ArrayList arr = (ArrayList)files.get(cuid);
-	  					for(int e = 0; e<arr.size(); e++) {
-	  						Toode t = (Toode)arr.get(e);
-	  						String signa = t.getLadu();
-	  					  if(done != null && !done.contains(signa)) {
-	  						  done.add(signa);
-	  						  fdata.append(cuid + ";" + t.comment + ";" +t.getGr1() +" " + t.getGr2() + ";" 
-	  						  + t.getBrand() +";" + t.getLadu()+ "\n");
-	  					  }
-	  						
-			          
-			            	
-	  					}
-					}
-					
-					if(fdata.length() > 50) { 
-						 try {
-							Converter.saveFileInANSI("csvout/" + Converter.getYYYY_MM_DDpString(now) + "_FILES_csvdata.csv", fdata.toString());
-						  } catch (Exception e) {
-							e.printStackTrace();
-						  }
-						}
-						
-					
-					}
-					
-					
-					
-					
-					try {
-						//Converter.saveObject(done, "signadone.obj");
-					} catch (Exception e) {
-						
-						e.printStackTrace();
-					}
-					
-					
-				  System.exit(0);
+			  }
+		  };
+
+		  	algus.add(Calendar.DATE, -1 * days);
+		  	algus.set(Calendar.HOUR, 0);
+		  	lopp.set(Calendar.HOUR, 23);
+		  	lopp.set(Calendar.MINUTE, 59);
+		  	lopp.add(Calendar.DATE, +2);
+			
+		  	
+		  	try {
+		  		String fnameBASE = this.getExcelDir() + "reportbase.xlsx";
+		  		FileInputStream excelifailBase = new FileInputStream(fnameBASE);
+		  		XSSFWorkbook  wbBASE = new XSSFWorkbook(excelifailBase);
+				XSSFSheet worksheetBASE = wbBASE.getSheetAt(0);
+				
+				CreationHelper createHelper = wbBASE.getCreationHelper();
+				
+				 XSSFCellStyle hlinkstyle = wbBASE.createCellStyle();
+			      XSSFFont hlinkfont = wbBASE.createFont();
+			      hlinkfont.setUnderline(XSSFFont.U_SINGLE);
+			      hlinkfont.setColor(IndexedColors.BLUE.getIndex());
+			      hlinkstyle.setFont(hlinkfont);
+
+			      System.out.println("files alustan" );
+			  		
+			  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass,false);
+			  		System.out.println("files " + files.toString());
+			 
+			  		 JSONParser parser = new JSONParser();
+			  		org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader( "svdata/currSVjson.json"));
+		  		//org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
+		  	   System.out.println("cc" + cc.toString() );
+		  		//Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
+		   
+		  		int palletrow = 1;
+		  		boolean savefile = false;
+		  		
+		  		for (int i = 0; i < cc.size(); i++) {
+		  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+		  		   	String filterOutOfStock = (String)cob.get("resint3").toString();
+		  			String dateAndTime = (String)cob.get("recetime");
+		  			String dateOnly = dateAndTime.split("T")[0];
+		  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
+		  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
+		  		  String signa = dateAndTime + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") ;
+		  		  
+		  			if(filterOutOfStock != null && filterOutOfStock.startsWith("333") && done != null && !done.contains(signa )){  	
+		  			String filterProblem = (String)cob.get("resstr1");
+		  			
+		  		  savefile = true;
+		  			
+		  	    //	String cagid = (String)cob.get("custagent");
+		  		//	String cagname = (String)cob.get("custagname");
+		  			String agid = (String)cob.get("agentid");
+		  			String agname = (String)cob.get("managerName");
+		  			if(agname.contains(agid)) {
+		  				agname = agname.substring(0,agname.indexOf(agid)).trim();
+		  			}
+		  			String custname = "";
+		  			String custchain = "";
+		  			String custaddr = "";
+		  			try {
+		  				custchain = (String)cob.get("custchain");
+		  			} catch(Exception e) {
+		  				
+		  			}
+		  			
+		  			try {
+		  				custname = (String)cob.get("custname");
+		  				if(custname.indexOf(",") != -1) {
+		  					custaddr = custname.substring(custname.indexOf(",")+1);
+		  					custname = custname.substring(0,custname.indexOf(","));
+		  				}
+		  			} catch(Exception e) {
+		  				
+		  			}
+		  			
+		  		
+		  			if(custname.indexOf("VRV")  != -1) {
+		  			System.out.println("cob " +  cob.toJSONString());
+		  			}
+		  			//System.out.println("signa " + signa + " " + filterOutOfStock + " " + filterProblem);
+		  	    	  parser = new JSONParser();
+		  	    	 
+		  	    	org.json.simple.JSONObject obj1 = (org.json.simple.JSONObject) parser.parse((cob.get("comment").toString()));
+		  	    
+		  	    	String comID = "";
+		  	    	String comment = "";
+		  	    	
+		  	    	try {
+		  	    		org.json.simple.JSONObject obj2 = (org.json.simple.JSONObject) parser.parse((cob.get("custcomme").toString()));
+		  	    		comID = ((String)obj2.get("comID"));
+		  	    		comment = ((String)obj2.get("comNa"));
+		  	    	}catch(Exception e) {
+		  	    	}
+		  	    	String typeid = (String)obj1.get("disID");
+		  	    	String typename = (String)obj1.get("disNa");
+		  	    	Double typekogus = (Double)obj1.get("disAm");
+		  	    	
+		  	    	String bonusid = (String)obj1.get("bonID");
+		  	    	String bonusname = (String)obj1.get("bonNa");
+		  	    	Double bonuskogus = 0d;
+		  	    	try {
+		  	    		bonuskogus = Double.parseDouble((String)obj1.get("bonAm"));
+		  	    	}catch(Exception e) {
+		  	    	}
+		  	    	
+		  	    	Date fromdate = null; //new Date((Long)obj1.get("sDay"));
+		  	    	Date todate = null; //new Date((Long)obj1.get("eDay"));
+		  	    	try {
+		  	    	  fromdate = new Date((Long)obj1.get("sDay"));
+		  	    	  todate = new Date((Long)obj1.get("eDay"));
+		  	  	     } catch(Exception k) {
+	  	    		  k.printStackTrace();
+	  	    	     }
+		  	    	
+		  	    	Date created = new Date(Long.parseLong(((String)cob.get("resstr3"))));
+		  	    	
+		  	  
+		  	    	String cuname = (String)cob.get("custname");
+	  				String cuid = (String)cob.get("custid");
+	  				if(cuname.endsWith(cuid)) {
+	  					cuname = cuname.substring(0,cuname.indexOf(cuid)-1);
+	  				}
+		  				
+		  				
+		  				worksheetBASE.createRow(palletrow);
+		  				
+		  				worksheetBASE.getRow(palletrow).createCell(0).setCellValue(agname);
+		  				
+		  			    worksheetBASE.getRow(palletrow).createCell(1).setCellValue(created);
+		  				XSSFCell celld3 = worksheetBASE.getRow(palletrow).getCell(1);
+		  				XSSFCellStyle cellStyle3 = (XSSFCellStyle)celld3.getCellStyle();
+			  	        cellStyle3.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+			  	       
+		  				worksheetBASE.getRow(palletrow).createCell(2).setCellValue(cuname);
+		  				worksheetBASE.getRow(palletrow).createCell(3).setCellValue(custchain);
+		  				worksheetBASE.getRow(palletrow).createCell(4).setCellValue(custaddr);
+
+		  				
+		  			
+		  				//worksheetBASE.getRow(palletrow).createCell(2).setCellValue(typeid);
+		  				worksheetBASE.getRow(palletrow).createCell(5).setCellValue(typename);
+		  				worksheetBASE.getRow(palletrow).createCell(6).setCellValue(typekogus);
+		  				XSSFCell cellk1 = worksheetBASE.getRow(palletrow).getCell(6);
+		  				XSSFCellStyle pstyle = worksheetBASE.getRow(0).getCell(6).getCellStyle();
+		  				cellk1.setCellStyle(pstyle);
+		  				
+		  				 
+		  				worksheetBASE.getRow(palletrow).createCell(7).setCellValue(fromdate);
+		  				XSSFCell celld1 = worksheetBASE.getRow(palletrow).getCell(7);
+		  				XSSFCellStyle cellStyle = (XSSFCellStyle)celld1.getCellStyle();
+			  	        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+		  				
+		  				worksheetBASE.getRow(palletrow).createCell(8).setCellValue(todate);
+		  				XSSFCell celld2 = worksheetBASE.getRow(palletrow).getCell(8);
+		  				XSSFCellStyle cellStyle2 = (XSSFCellStyle)celld2.getCellStyle();
+			  	        cellStyle2.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+			  	        
+			  	        
+			  	        
+			  	        worksheetBASE.getRow(palletrow).createCell(9).setCellValue((String)cob.get("prodgroupname"));
+			  	      try {
+			  	    	  worksheetBASE.getRow(palletrow).createCell(10).setCellValue((String)cob.get("resstr2"));  
+			  	      }catch(Exception e) {
+			  	    	  
+			  	      }
+			  	      
+			  	        worksheetBASE.getRow(palletrow).createCell(11).setCellValue((String)cob.get("prodname"));
+		  			
+		  				//worksheetBASE.getRow(palletrow).createCell(12).setCellValue(bonusid);
+		  				
+		  				worksheetBASE.getRow(palletrow).createCell(12);
+		  				XSSFCell cellk2 = worksheetBASE.getRow(palletrow).getCell(12);
+		  				XSSFCellStyle pstyle2 = worksheetBASE.getRow(0).getCell(4).getCellStyle();
+		  				cellk2.setCellStyle(pstyle2);
+		  				cellk2.setCellValue(bonuskogus);
+		  		
+		  				// worksheetBASE.getRow(palletrow).createCell(12).setCellValue(comID);
+		  				 worksheetBASE.getRow(palletrow).createCell(13).setCellValue(comment);
+		  				
+		  				
+		  				
+		  				try {
+		  				String foto = null;
+		  				org.json.simple.JSONArray phs = (org.json.simple.JSONArray)parser.parse((cob.get("pictureLinks").toString()));
+		  				
+		  				if(files != null && files.get(cuid) != null && phs != null) {
+		  					int a = 0;
+		  				//	if(cuid.equals("747724"))
+		  						System.out.println("phs " + phs.toString());
+		  						for(int y = 0; y < phs.size() ; y++) {
+		  							String fname = (String)phs.get(y);
+		  						
+		  					
+		  				
+		  					ArrayList arr = (ArrayList)files.get(cuid);
+		  					for(int e = 0; e<arr.size(); e++) {
+		  						Toode t = (Toode)arr.get(e);
+		  						foto = t.getLadu();
+		  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
+		  							
+		  							
+		  							
+		  								
+		  				  		         Cell  cell = worksheetBASE.getRow(palletrow).createCell(14+a);
+		  				  		         cell.setCellValue("Photo Link "+(a+1) );
+		  				  		         XSSFHyperlink link = (XSSFHyperlink)createHelper.createHyperlink(Hyperlink.LINK_URL);
+		  				  		         link.setAddress(URLEncoder.encode(foto, StandardCharsets.UTF_8.toString()));
+		  				  		         cell.setHyperlink((XSSFHyperlink) link);
+		  				  		         cell.setCellStyle(hlinkstyle);
+		  				  		     a++;
+		  				  				
+		  						}
+		  					}
+		  						}
+		  						
+		  				}
+		  				}catch(Exception e) {
+		  					e.printStackTrace();
+		  				}
+		  				 //URL Link
+		  				
+		  				
+		  				
+		  			 
+		  				worksheetBASE.getRow(palletrow).createCell(18).setCellValue((String)cob.get("prodid"));
+		  				worksheetBASE.getRow(palletrow).createCell(19).setCellValue(agid);
+		  				worksheetBASE.getRow(palletrow).createCell(20).setCellValue("LV");
+		  				worksheetBASE.getRow(palletrow).createCell(21).setCellValue((String)cob.get("custid"));
+		  				worksheetBASE.getRow(palletrow).createCell(22).setCellValue(bonusid);
+		  				worksheetBASE.getRow(palletrow).createCell(23).setCellValue(comID);
+		  				//
+		  				
+		  				
+		  				
+		  			/*	for(int x=0; x<11; x++) {
+		  					if(x == 0 || x == 1 || x == 3) {
+		  						worksheetBASE.getRow(outofstocks).getCell(x).setCellStyle(borderCenteredOOS);
+		  					}else {
+		  						worksheetBASE.getRow(outofstocks).getCell(x).setCellStyle(borderOOS);
+		  					}
+		  				}*/
+		  				palletrow++;
+		  				done.add(signa );
+		  			
+		       			
+		       			
+		  			}
+		  		}
+		  		String exceldir = this.getExcelDir() + "reports/";
+		  		File ff = new File( exceldir );
+		  		if(!ff.exists()) {
+		  			ff.mkdir();
+		  		}
+		  		excelifailBase.close();
+		  		
+if(savefile) {
+FileOutputStream output_file_oos =new FileOutputStream(exceldir + "productPallet-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+	//filenames.add(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+	wbBASE.write(output_file_oos); //write changes
+	output_file_oos.close();  //close the stream
+	System.out.println("report saved " + exceldir + "productPallet-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+
+}else {
+System.out.println("no data to save");
+}
+		  	
+		  	}catch(Exception e) {
+				 e.printStackTrace(); 
+			  }
+		  	
+		  	
+			try {
+				Converter.saveObject(done, "signadone.obj");
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+		  
+		  System.exit(0);
+
 				  	
 				  	
 	}

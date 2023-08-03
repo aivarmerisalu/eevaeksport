@@ -5207,7 +5207,6 @@ try{
 				
 				   	
 		            org.json.simple.JSONArray tagList = (org.json.simple.JSONArray) obj;
-		            System.out.println(tagList.toJSONString());
 		            
 		            Iterator<org.json.simple.JSONObject> iterator = ((List) tagList).iterator();
 		            while (iterator.hasNext()) {

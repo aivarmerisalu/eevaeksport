@@ -2473,13 +2473,13 @@ try{
 				      hlinkfont.setColor(IndexedColors.BLUE.getIndex());
 				      hlinkstyle.setFont(hlinkfont);
 
-				  	
+				      System.out.println("files alustan" );
 				  		
 				  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass,true);
-				  	//	System.out.println("files " + files.toString());
+				  		System.out.println("files " + files.toString());
 				 
 			  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
-			  		
+			  	   System.out.println("cc" + cc.toString() );
 			  		Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
 			  		int palletrow = 1;
 			  		boolean savefile = false;
