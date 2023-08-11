@@ -1328,7 +1328,7 @@ System.out.println(cmd);
 				 }
 			
 		    	  
-		    	  System.out.println("Asses size enne  " + asscusts.size());
+		    	//  System.out.println("Asses size enne  " + asscusts.size());
 		    	  Vector vec = new Vector(); 
 		    	  String  cmd3 = "select  * from MobilejavaVIK.v_VIK_FA   ";
 		    	  Connection con4 = getNewConnectionView();
@@ -1431,7 +1431,7 @@ System.out.println(cmd);
 		          
 		    	  
 		                     
-		                     System.out.println("Counter " + counter + " Asses " + asses.size());
+		                    // System.out.println("Counter " + counter + " Asses " + asses.size());
 		                     
 		    	   Converter.sendAssetsJson(vec,this.user,this.pass,this.rcompanyx);     
 		    	   
@@ -1478,7 +1478,7 @@ System.out.println(cmd);
 		                  
 		                  stm.close();
 		                     con4.close();
-		    	   System.out.println("assets cou " +  cou + " "+ coua);
+		    	//   System.out.println("assets cou " +  cou + " "+ coua);
 		                      
 		                      // siis peaks tegema vahele kontrolli et kui on muudatus siis ainult laksad ylesse
 		    	   
@@ -1539,19 +1539,33 @@ System.out.println(cmd);
 			rs.close();
 			con.close();
 
-			String cmd7 = " select sd.[Code] as kood ,[Line Discount %] as disc from [Vičiūnai ir Ko$Sales Line Discount] sd "
-					+ " where getdate() between [Starting Date] and [Ending Date] +1 ";
-
+			String cmd7 = " select sd.[Code] as kood ,[Line Discount %] as disc, 'price' as types from [Vičiūnai ir Ko$Sales Line Discount] sd \r\n" + 
+					"				 where getdate() between [Starting Date] and [Ending Date] +1 \r\n" + 
+					"				 union\r\n" + 
+					"		select [Item No_] as kood, [Discount, Pct] as disc , 'disc' as types from [Vičiūnai ir Ko$Akcijų kainos] where [Discount, Pct] > 0 " + 
+					"		 and [Customer No_] = '' and CAST(GETDATE() As Date) BETWEEN [Starting Date]\r\n" + 
+					"		 AND ISNULL(NULLIF([End Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date)))  \r\n" + 
+					"		 order by 1,3, 2 desc ";
+			
+			cmd7 = " select sd.[Code] as kood ,[Line Discount %] as disc, 'price' as types from [Vičiūnai ir Ko$Sales Line Discount] sd \r\n" + 
+					"				 where getdate() between [Starting Date] and [Ending Date] +1 ";
 			con = getNewConnection2();
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(cmd7);
 			while (rs.next()) {
 				String toode = null;
 				double seis = 0;
-				;
+				
 				toode = rs.getString("kood").trim();
 				seis = rs.getDouble("disc");
+				String type = rs.getString("types");
 				discT.put(toode, seis + "");
+			/*	if(type.equals("disc")) {
+					discT.put(toode, seis + "");
+				}else if (discT.get(toode) == null){
+					discT.put(toode, seis + "");
+				}*/
+				
 
 			}
 
@@ -1616,7 +1630,7 @@ System.out.println(cmd);
 	rs.close();
 	con.close();
 		
-	System.out.println("mintime " + top2 + " "+ mintime.toString() );
+	//System.out.println("mintime " + top2 + " "+ mintime.toString() );
 	
 	
 	
@@ -1997,9 +2011,6 @@ System.out.println(cmd);
 				String cu = custID;
 				if(custAbi != null && custAbi.trim().length() > 0) {
 					
-					if(cu.equals("K9569")) {
-						System.out.println("ppp " + cu + " " + custAbi.trim() + " " + aad.get(cu+"_"+custAbi.trim()));
-					}
 					
 					if(custAbi.equals("1") && aad.get(cu+"_"+custAbi.trim()) == null) {
 						custAbi = custID + "_1";  
@@ -2008,9 +2019,7 @@ System.out.println(cmd);
 					   } else if(aad.get(custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(custAbi.trim());
 					   }
-					if(cu.equals("K9569")) {
-						System.out.println("ccc " + cu + " " + custAbi.trim() );
-					}
+					
 					 
 					cu = custID + "_" + custAbi.trim();
 				}

@@ -25,6 +25,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -361,6 +362,35 @@ HashMap pants = null;
   }
   
   
+  private HashMap over21 () {
+	  HashMap res = new HashMap();
+      String sql =
+              "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
+             " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
+             " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
+             " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_mok <= getdate()+21 group by i44.i44_kodas_ks,i44.i44_dok_nr "+
+               " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_KS order by I44_KODAS_KS ";
+      try {
+      PreparedStatement  stmt = con.prepareStatement(sql);
+           //stmt.setInt(1, Integer.parseInt(agent.getID()));
+           //stmt.setDate(2, getStartingDate());
+      ResultSet  rs1 = stmt.executeQuery();
+
+          while (rs1.next()) {
+            String id = rs1.getString("klient").trim();
+            double debt = Double.parseDouble(rs1.getString("summa").trim());
+            if(debt > 0)
+              res.put(id, debt);
+          }
+          rs1.close();
+          stmt.close();
+      }catch(Exception e ) {
+   	   
+      }
+      
+      return res;
+  }
+  
   public void makeOrder(Order order) throws SQLException{
  
 	  setOrder(order);
@@ -381,15 +411,29 @@ HashMap pants = null;
 
  private void makeOutput(Order order,boolean tag){
  	StringBuffer sb = new StringBuffer();
-   
-	Hashtable pandikas =  new Hashtable();
+    HashMap over21 = over21();
+    System.out.println("Over21 " + over21.size());
+	//Hashtable pandikas =  new Hashtable();
+	boolean overDisc = false;
 	
 	 Vector lines = order.getOrderLines();
+     for (int i = 0; i < lines.size(); i++) {
+    		OrderLine line = (OrderLine)lines.elementAt(i);
+    		
+    		if(line.getPartii() != null && line.getPartii().trim().length() > 1) {
+    			overDisc = true;
+    		}
+    		
+    		System.out.println("partii " + line.getPartii() + " " + overDisc);
+     }
+         
+     
+	/* Vector lines = order.getOrderLines();
      for (int i = 0; i < lines.size(); i++) {
     	    
       	OrderLine line = (OrderLine)lines.elementAt(i);
           String toode = line.getToode();
-          String pant = getPandiPakend(toode);
+        //'  String pant = getPandiPakend(toode);
           if(pant != null ){
         	  double aaa = line.getKogus();
          	  if(pandikas.get(pant) == null){
@@ -398,7 +442,7 @@ HashMap pants = null;
                	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+(aaa))+"");
                }
             }
-         }
+         }*/
   
      
 	
@@ -441,6 +485,11 @@ HashMap pants = null;
 
       
       String agent = order.getAgent();
+      String ov21 = "";
+      if(over21.get(cust.substring(0,cust.lastIndexOf("-")))!= null) {
+    	  ov21 = "OverDue 21+D " + over21.get(cust.substring(0,cust.lastIndexOf("-"))) + "€ ";
+      }
+      
       String comm = "";
       if(order.getInfo() != null && order.getInfo().trim().length() >0){
 		
@@ -528,27 +577,29 @@ HashMap pants = null;
       sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
       cou++;
       
+      String aeg = null;
+      if(order.getShipTime() != null && order.getShipTime().trim().length() > 0) {
+    	
+    	  aeg =   order.getShipTime().trim();
+    	  sb.append("          <I06_ADR3>" + escape(aeg) + "</I06_ADR3>" + ls);
+          cou++;
+      }
+      
       String lisa = null;
       if(order.getInfo() != null && order.getInfo().trim().length() > 0) {
     	  lisa = order.getInfo().trim();
       }
-      if(order.getShipTime() != null && order.getShipTime().trim().length() > 0) {
-    	  if(lisa == null) {
-    		  lisa = "laikas: " +  order.getShipTime().trim();
-    	  }else {
-    		  lisa = "laikas: " + order.getShipTime().trim()+ " " +lisa;
-    	  }
-    	 
-      }
+      
+    
       
       
       if(lisa != null){
     	//  sb.append(getLineNr(cou));
-          sb.append("          <I06_PASTABOS>" + escape(lisa) + "</I06_PASTABOS>" + ls);
+          sb.append("          <I06_PASTABOS>" + escape(ov21 + lisa) + "</I06_PASTABOS>" + ls);
           cou++;  
       }
      
-    lines = order.getOrderLines();
+      lines = order.getOrderLines();
       for (int i = 0; i < lines.size(); i++) {
       //	 sb.append(getLineNr(cou));
          sb.append("          <I07>" + ls);
@@ -557,7 +608,8 @@ HashMap pants = null;
           
       	OrderLine line = (OrderLine)lines.elementAt(i);
           String toode = line.getToode();
-          
+          String partii = line.getPartii();
+          //System.out.println("partii " + partii);
           
           double ale = line.getDiscount();
           if (ale == -1 ){
@@ -627,7 +679,7 @@ if(ladu.trim().length()!=0){
       }
 
       
-      if( pandikas.size()>0){
+    /*  if( pandikas.size()>0){
       	Enumeration enumpant = pandikas.keys();
        while(enumpant.hasMoreElements()){
        	
@@ -666,7 +718,7 @@ if(ladu.trim().length()!=0){
       sb.append("          </I07>" + ls);
       cou++;
    	  }
-      }
+      }*/
       
       //sb.append(getLineNr(cou));
       sb.append("          </I06>" + ls);
@@ -683,7 +735,7 @@ if(ladu.trim().length()!=0){
         fos.write(sb.toString().getBytes());
         fos.close();
         
-        sendConfirmEmail(comm,order,cuname);
+        sendConfirmEmail(comm,order,cuname,addr, ov21, overDisc);
         
 	} catch (Exception e) {
 		e.printStackTrace();
@@ -695,14 +747,21 @@ if(ladu.trim().length()!=0){
   }
   
   
-  private void sendConfirmEmail(String comment, Order ord , String cuname ){
+  private void sendConfirmEmail(String comment, Order ord , String cuname , String delaadr, String ov21, boolean overDisc){
 	   	try{
 	   		
 	   			
 	   			System.out.println(comment);
 	   			Email mail = new Email(null);
-		  		   String sub = "Order by : " + ord.getAgent() + " " + ord.getCompany() + " " + cuname;
+	   			String ll = "";
+	   			if(overDisc) {
+	   				ll = "OVERDISCOUNTED ";
+	   			}
+		  		   String sub = ll + ov21 + "Order by : " + ord.getAgent() + " " + ord.getCompany() + " " + cuname + " " + delaadr;
 		  	
+		  		   if(ov21.length() > 1 || overDisc) {
+		  			   mail.setImportance(Email.IMPORTANCE_HIGH);
+		  		   }
 		            mail.setSMTP(parent.getProps().getProperty("smtphost"));
 		            mail.setUser(parent.getProps().getProperty("smtpuser"));
 		            mail.setPass(parent.getProps().getProperty("smtppass"));
@@ -711,7 +770,7 @@ if(ladu.trim().length()!=0){
 		  	  		mail.setFrom(parent.getProps().getProperty("from"));
 		  	  		mail.setSubjectFilesTo(sub);
 		  	  		mail.setEncoding("utf-8");
-		  	    	mail.setBodyHtml(getOOSEmailText(ord, ord.getAgent() , cuname ));
+		  	    	mail.setBodyHtml(getOOSEmailText(ord, ord.getAgent() , cuname , delaadr , overDisc ,ov21 ));
 		  	  		mail.setSendNotice(false);
 		  	  		mail.send();
 		  	  
@@ -726,7 +785,7 @@ if(ladu.trim().length()!=0){
   
 
   
-  private String getOOSEmailText( Order ord, String agent, String custname) throws SQLException {
+  private String getOOSEmailText( Order ord, String agent, String custname, String addr, boolean overDisc, String ov21) throws SQLException {
 		int i = 0;
 		int j = 0;
 		 String text = order.getInfo();
@@ -738,7 +797,7 @@ if(ladu.trim().length()!=0){
 			   }
 		
 		StringBuffer sb = new StringBuffer();
-	    sb.append("<br><font face=\"Arial\" size=\"2\" color=\"#000000\"><b>Klientas:</b> " + custname + "</font> ") ;
+	    sb.append("<br><font face=\"Arial\" size=\"2\" color=\"#000000\"><b>Klientas:</b> " + custname + " " + addr +  "</font> ") ;
 	    sb.append("<font face=\"Arial\" size=\"2\" color=\"#000000\">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;" + "" + " </font>") ;
 		sb.append("</font>");
 	    sb.append("<font face=\"Arial\" size=\"2\" color=\"#E42217\"><span style=\"float: right\">  Prist. data "
@@ -749,7 +808,7 @@ if(ladu.trim().length()!=0){
 				+ ("Agents ") + ":</b> " +" " +  ord.getAgent()+ "</span></font> <br>") ;
  
 		if(text.length() > 0) {
-		sb.append("<font face=\"Arial\" size=\"3\"  color=\"#382D2C\"><b> Komentarą : " + text + " </b>" );
+		 sb.append("<font face=\"Arial\" size=\"3\"  color=\"#382D2C\"><b> Komentaras : " + text + " " + ov21 + " </b>" );
 		}
 		sb.append("<br><br>" );
 														
@@ -771,27 +830,56 @@ if(ladu.trim().length()!=0){
 		
 			for (; i < ord.getOrderLines().size(); i++) {
 				OrderLine line = (OrderLine) ord.getOrderLines().elementAt(i);
-		
-				String priceS = getNF().format(line.getPrice()) ;
 				String discS = "";
-				if(line.getDiscount() > 0) {
-					discS = getNF().format(line.getDiscount()) + "%";
-					
+				 Double price = line.getPrice();
+				 if(line.getDiscount() > 0 ) {
+					// price = price * (100-line.getDiscount())/100;
+					 discS = getNF().format(line.getDiscount()) + "%";
+				 }
+				
+				 
+				String priceS = getNF().format(price) ;
+				
+				
+				
+				String col = "";
+				String part = "";
+				if(line.getPartii() != null && line.getPartii().trim().length() > 0) {
+					part = "<br>" +line.getPartii().trim();
+					col = "color: red; font-weight: bold;";
 				}
 				
+				
 					sb.append("<tr><td>" + (i+1) + ".</td><td>" + line.getToode() + 
-							"</td><td><div style=\"min-width: 250px\" >" + identifyProductName(line.getToode()) + "</div></td>"
+							"</td><td><div style=\"min-width: 250px\" >" + identifyProductName(line.getToode()) + part + "</div></td>"
 									+ "<td><div style=\"min-width: 150px\" >" + line.getKogus() + "</div></td>"
-											+ "<td><div style=\"min-width: 200px\" >" + discS + "</div></td>"
+											+ "<td><div  style=\"min-width: 200px; "+col+"\" >" + discS + "</div></td>"
 													+ "<td><div style=\"min-width: 200px\" >" + priceS + "</div></td></tr>" );
 				j++;
 			}
+			
+		String ordSum =	getNF().format(getCalcSum(ord.getOrderLines())) + " €";
+		sb.append("</table><br><font face=\"Arial\" size=\"3\" color=\"#000000\"><span style=\"float: right\"> <b>" 
+				+ "Suma  " + ":</b> " +" " +  ordSum+ "</span></font> <br>") ;
+		System.out.println("ordSum " + ordSum);
 		return sb.toString();
 	}
 
 
  
-
+  private double getCalcSum(Vector orderLines){
+	  double res = 0 ;
+	 Enumeration enume =  orderLines.elements();
+	 while(enume.hasMoreElements()){
+		 OrderLine ol  = (OrderLine)enume.nextElement();
+		 Double price = ol.getPrice();
+		 if(ol.getDiscount() > 0 ) {
+			// price = price * (100-ol.getDiscount())/100;
+		 }
+		 res = res + (price * ol.getKogus());
+	 }
+	  return res;
+  }
 
 
 
@@ -910,6 +998,8 @@ if(ladu.trim().length()!=0){
 
   public NumberFormat getNF() {
 		nf.setGroupingUsed(false);
+		nf.setMaximumFractionDigits(2);
+		nf.setMinimumFractionDigits(2);
 		return this.nf;
 	}
   

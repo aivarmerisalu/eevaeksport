@@ -1170,7 +1170,7 @@ private String getERI(String ware) {
 }
 
 
-private Vector splitOrderByAm (Order order, int num){
+private Vector splitOrderByAmNOTINUSE (Order order, int num){
 Vector result = new Vector();
 
 Order ord9 = new Order(order.getCompany(),order.getAgentFirstName());
@@ -1951,15 +1951,9 @@ try{
     					order.setCurrency("NPARK2");
     					
     					 //makeOutput(order,order,hrccustomer);  
-    					 Vector splitted2 =  this.splitOrderByAm(order, 38);
-   			    	  Enumeration en2 = splitted2.elements();
-   			    	  while(en2.hasMoreElements()){
-   			    		  
-   						  Order ord2 = (Order)en2.nextElement();
-   						  
-   						  
-					        makeOutput(ord2,order,hrccustomer);
-   			    	  }
+    				
+					        makeOutput(order,order,hrccustomer);
+   			    	  
     				}else {
     				
     				  
@@ -1970,9 +1964,9 @@ try{
     					  
     					  while(en.hasMoreElements()){
     						  Order ord = (Order)en.nextElement();
-    	    				 // makeOutput(ord,order, hrccustomer);  
+    	    				 makeOutput(ord,order, hrccustomer);  
     	    				  
-    	    				  Vector splitted2 =  this.splitOrderByAm(ord, 38);
+    	    				/*  Vector splitted2 =  this.splitOrderByAm(ord, 38);
         			    	  Enumeration en2 = splitted2.elements();
         			    	  while(en2.hasMoreElements()){
         			    		  
@@ -1980,7 +1974,7 @@ try{
         						  
         						  
     					        makeOutput(ord2,order,hrccustomer);
-        			    	  }
+        			    	  }*/
     	        		  }
     					  
     				  }else{
@@ -1990,9 +1984,9 @@ try{
     			    	  while(en.hasMoreElements()){
     			    		  
     						  Order ord = (Order)en.nextElement();
-    						  //makeOutput(ord,order,hrccustomer);
+    						  makeOutput(ord,order,hrccustomer);
     						  
-    						  Vector splitted2 =  this.splitOrderByAm(ord, 38);
+    						 /* Vector splitted2 =  this.splitOrderByAm(ord, 38);
         			    	  Enumeration en2 = splitted2.elements();
         			    	  while(en2.hasMoreElements()){
         			    		  
@@ -2000,7 +1994,7 @@ try{
         						  
         						  
     					        makeOutput(ord2,order,hrccustomer);
-        			    	  }
+        			    	  }*/
         	        		 
     					  }
     					//  makeOutput(order,order, hrccustomer);   

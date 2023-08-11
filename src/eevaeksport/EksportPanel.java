@@ -3696,6 +3696,7 @@ if(agprods != null && agprods.size() >0){
           name = name.replaceAll("CASINO", "Cas.");
           name = name.replaceAll("casino", "cas.");
           name = name.replaceAll("\"", " ");
+          name = name.replaceAll("  ", " ");
 	      name = name.replace('*', ' ');
 	      name = name.replace('*', ' ');
 	      name = name.replace('*', ' ');
@@ -4166,6 +4167,8 @@ if(agprods != null && agprods.size() >0){
             }else if(driver.getDriverVersion().equals("Miesnieks") || driver.getDriverVersion().equals("RivileKepe")){
             	val = val.substring(3,key.length());	
             }else if(driver.getDriverVersion().equals("SkaiteVigesta")){
+            	val = val.substring(2,key.length());	
+            }else if(driver.getDriverVersion().equals("RivileTridens")){
             	val = val.substring(2,key.length());	
             }
              

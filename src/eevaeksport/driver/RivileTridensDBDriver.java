@@ -241,6 +241,7 @@ HashSet olemas = new HashSet();
 				}
 				
 				if(price != 0 || disc != 0) {
+					mline.setStartDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
 				   lines.add(mline);
 				}
 				}
@@ -490,20 +491,36 @@ HashSet olemas = new HashSet();
 
       TreeMap tm = new TreeMap();
 
-            String cmdold = " select distinct n17_kodas_ls_2 as kood ,n35_pav as nimi from \r\n" + 
            
-            		"                        n17_prod,n35_lgst where n17_kodas_ls_2 = n35_kodas_ls";
-            String cmd = " SELECT  N19_KODAS_GS AS kood ,N19_PAV  AS nimi  FROM  n19_pgr ORDER BY N19_KODAS_GS";
+            String cmd = " SELECT  N19_KODAS_GS AS kood ,N19_PAV  AS nimi , N19_PAV_K1 as sorting FROM  n19_pgr ORDER BY N19_KODAS_GS";
        try {
         stmt = con.prepareStatement(cmd);
         ResultSet rs = stmt.executeQuery();
       // setTreeGroup(true);
         while (rs.next()) {
           String liik = rs.getString("kood").trim();
+          String sort = rs.getString("sorting");
           //String nimetus =  Converter.enCodeEst(rs.getString("nimi").trim());
          
           if (liik != "") {
-            tm.put(liik,liik);
+        	  String nimi = liik;
+        	  if(nimi.equals("BALT_VYNAS")) {
+        		  nimi = "Ba.VYNAS";
+        	  }
+        	  if(nimi.equals("RAUD_VYNAS")) {
+        		  nimi = "Ra.VYNAS";
+        	  }
+        	  if(nimi.equals("ROZ_VYNAS")) {
+        		  nimi = "Ro.VYNAS";
+        	  }
+        	  if(nimi.equals("PUTOJ_VYNAS")) {
+        		  nimi = "Pu.VYNAS";
+        	  }
+        	  
+        	  if(sort == null || sort.trim().length() == 0) {
+        		  sort = "99";
+        	  }
+            tm.put(liik,sort.trim()+nimi);
           }
         }
       }
@@ -682,13 +699,20 @@ HashSet olemas = new HashSet();
     
     public TreeMap getCustomers(Agent agent){
     	
-    	
+     	 TreeMap webmerc1 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"ANDREJ");
+    	 TreeMap webmerc2 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"DANELIUS");
+    	 TreeMap webmerc3 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"LUKAS");
+    	 TreeMap webmerc4 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"MANTAS");
+    	 TreeMap webmerc5 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"PAULIUS");
+    	 TreeMap webmerc6 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"ROBERTAS");
+    	 TreeMap webmerc7 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"SIMAS");
+    	 TreeMap webmerc8 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"TADAS_KLP");
+    	 TreeMap webmerc9 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"URNIEZIUS");
     	 try{
       	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass);
-      	        	
-      }catch(Exception e){
-      	e.printStackTrace();
-      }
+         } catch(Exception e){
+         	e.printStackTrace();
+         }
     	
     	 TreeMap<String, String> logistics = getRoutes(); 
     	 
@@ -887,6 +911,37 @@ HashSet olemas = new HashSet();
                   }
             }
               
+              
+              if(webmerc1.get(cust.getID()) != null) {
+            	  cust.addAgent(new Agent("ANDREJ")); 
+           }
+          if(webmerc2.get(cust.getID()) != null) {
+        	  cust.addAgent(new Agent("DANELIJUS")); 
+           }
+          if(webmerc3.get(cust.getID()) != null) {
+        	  cust.addAgent(new Agent("LUKAS")); 
+           }
+          if(webmerc4.get(cust.getID()) != null) {
+        	  cust.addAgent(new Agent("MANTAS")); 
+           }
+          
+          if(webmerc5.get(cust.getID()) != null) {
+        	  cust.addAgent(new Agent("PAULIUS")); 
+           }
+          
+          if(webmerc6.get(cust.getID()) != null) {
+        	  cust.addAgent(new Agent("ROBERTAS")); 
+           }
+          if(webmerc7.get(cust.getID()) != null) {
+        	  cust.addAgent(new Agent("SIMAS")); 
+           }
+            
+          if(webmerc8.get(cust.getID()) != null) {
+        	  cust.addAgent(new Agent("TADAS_KLP")); 
+           }
+          if(webmerc9.get(cust.getID()) != null) {
+        	  cust.addAgent(new Agent("URNIEZIUS")); 
+           }
              
            //   cust.setMainAgent(ag);
               try{
@@ -940,7 +995,7 @@ HashSet olemas = new HashSet();
    		"   		N37_BAR_KODAS AS ean, \r\n" + 
    		"    0 AS kogus,n17_kodas_gs AS grupp2, N17_KODAS_VS_T AS grupp,  N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status ,  N35_PAV_K3 as maks,\r\n" + 
    		"    case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus , ltrim(N17_KODAS_LS_8) as sellout \r\n" + 
-   		"    FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
+   		"  , N17_KODAS_LS_8 as maxdisc  FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
    		"  LEFT JOIN  n37_pmat g ON n37_kodas_ps=n17_kodas_ps  and N37_KODAS_US = N17_KODAS_US"
    		+ " left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1 and (L02_KODAS_FS is null or L02_KODAS_FS!='NP_O') and N17_MEN_PAV !='IG' and len(ltrim(N17_PAV_K1))  >0\r\n" + 
    		"   ";
@@ -1017,14 +1072,18 @@ HashSet olemas = new HashSet();
               nimetus = nimetus.replaceAll("geografine", "geo.");
               nimetus = nimetus.replaceAll("nuoroda", "nuo.");
               nimetus = nimetus.replaceAll("Putojantis", "Put.");
-              
+             
               nimetus = nimetus.replaceAll("Champagne", "Cham.");
               nimetus = nimetus.replaceAll("Grande", "Gra.");
               nimetus = nimetus.replaceAll("Reserve", "Res.");
               nimetus = nimetus.replaceAll("Aromatizuota", "Arom.");
               nimetus = nimetus.replaceAll("CHARDONNAY", "CHARD.");
+              nimetus = nimetus.replaceAll("ampanas", "amp.");
+              nimetus = nimetus.replaceAll("ORIGINAL", "Orig.");
+              nimetus = nimetus.replaceAll("Original", "Orig.");
+              nimetus = nimetus.replaceAll("Likeris", "Lik.");
               
-               
+              
               nimetus = nimetus.replaceAll("BARREL", "Barr.");
               nimetus = nimetus.replaceAll("FERMENTED", "Ferm.");
               nimetus = nimetus.replaceAll("Cellar", "Cell.");
@@ -1037,7 +1096,7 @@ HashSet olemas = new HashSet();
               nimetus = nimetus.replaceAll("Vienkartinio naudojimo", "Vien.naudo");
               nimetus = nimetus.replaceAll("SAUVIGNON", "SAUV");
               nimetus = nimetus.replaceAll("Kalifornija", "Kalif");
-              
+              nimetus = nimetus.replaceAll("VERMOUTH", "Verm.");
               
               
               
@@ -1067,7 +1126,7 @@ HashSet olemas = new HashSet();
             		  EAN13CheckDigit ee = new EAN13CheckDigit();
             		  String ean2 = ean.trim() + ee.calculate(ean.trim());
                       prod.setEAN(ean2);	
-            		  prod.setName(prod.getName() + " " + ean2.substring(ean2.length()-4));
+            		//  prod.setName(prod.getName() + " " + ean2.substring(ean2.length()-4));
             	  }catch(Exception y){
             		  
             	  }
@@ -1086,10 +1145,13 @@ HashSet olemas = new HashSet();
             String grupp = rs.getString("grupp2");
              if (grupp != null && grupp.trim().length()>0){
                prod.setGroup(grupp.trim());
-               if(nogroups.get(grupp.trim()) != null) {
-            	  // goes = false;
+               if(grupp.contains("VYN")) {
+            		 String grupp2 = rs.getString("grupp");
+                     if (grupp2 != null && grupp2.trim().length()>0){
+                       prod.setGroupSecond(grupp2.trim());
+                     }   
                }
-             //  prod.setDiscgrupp(grupp.trim());
+              
              }
           
         
@@ -1097,26 +1159,8 @@ HashSet olemas = new HashSet();
                      	   prod.setName("x " + prod.getName());
                         }
                     
-                    	 String grupp2 = rs.getString("grupp");
-                          if (grupp2 != null && grupp2.trim().length()>0){
-                            prod.setGroupSecond(grupp2.trim());
-                          }
                        
-                    	
-                    	
-               double max = rs.getDouble("maks");
-               if(max > 0){
-               	if(max < 1){
-               		max = 2;
-               	}
-               	int uus = rs.getInt("uus");
-               	
-               	if(uus > 0){
-               		//prod.setName("t " + nimetus);
-               		//prod.setStatusTop("1");
-               	}
-               	prod.setMaxDiscount(max);
-               }
+            
                
           
            
@@ -1135,7 +1179,19 @@ HashSet olemas = new HashSet();
                if(prod.getStock() < 1 && !usedProds.contains(prod.getID())) {
             	   goes = false;
                }
+            try {
+               Double aMaxDiscount = Double.parseDouble(rs.getString("maxdisc"));
+               if(aMaxDiscount > 0) {
+            	  double minPrice = prod.getPrice();
+            	  minPrice = minPrice * (100-aMaxDiscount)/ 100;
+            	  prod.setMinPrice(minPrice);
+            	 // prod.setMaxDiscount(-1);
+               }
             
+              
+            }catch(Exception e) {
+            	
+            }
                
                prod.setVat("21");
                if(goes) {

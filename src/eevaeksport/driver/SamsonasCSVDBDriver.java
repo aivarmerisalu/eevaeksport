@@ -1676,6 +1676,7 @@ public void WebReporter() {
 		  		
 		  			if(custname.indexOf("VRV")  != -1) {
 		  			System.out.println("cob " +  cob.toJSONString());
+		  		
 		  			}
 		  			//System.out.println("signa " + signa + " " + filterOutOfStock + " " + filterProblem);
 		  	    	  parser = new JSONParser();
@@ -1691,6 +1692,7 @@ public void WebReporter() {
 		  	    		comment = ((String)obj2.get("comNa"));
 		  	    	}catch(Exception e) {
 		  	    	}
+		  	    	
 		  	    	String typeid = (String)obj1.get("disID");
 		  	    	String typename = (String)obj1.get("disNa");
 		  	    	Double typekogus = (Double)obj1.get("disAm");
@@ -1786,7 +1788,7 @@ public void WebReporter() {
 		  				if(files != null && files.get(cuid) != null && phs != null) {
 		  					int a = 0;
 		  				//	if(cuid.equals("747724"))
-		  						System.out.println("phs " + phs.toString());
+		  					//	System.out.println("phs " + phs.toString());
 		  						for(int y = 0; y < phs.size() ; y++) {
 		  							String fname = (String)phs.get(y);
 		  						
@@ -1815,7 +1817,7 @@ public void WebReporter() {
 		  						
 		  				}
 		  				}catch(Exception e) {
-		  					e.printStackTrace();
+		  					//e.printStackTrace();
 		  				}
 		  				 //URL Link
 		  				
