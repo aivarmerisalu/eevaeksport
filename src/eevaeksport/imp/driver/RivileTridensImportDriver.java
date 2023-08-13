@@ -368,8 +368,8 @@ HashMap pants = null;
               "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
              " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
              " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
-             " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_mok <= getdate()+21 group by i44.i44_kodas_ks,i44.i44_dok_nr "+
-               " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_KS order by I44_KODAS_KS ";
+             " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11  group by i44.i44_kodas_ks,i44.i44_dok_nr "+
+               " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) and i44_data_mok <= getdate()-21  group by I44_KODAS_KS order by I44_KODAS_KS ";
       try {
       PreparedStatement  stmt = con.prepareStatement(sql);
            //stmt.setInt(1, Integer.parseInt(agent.getID()));
@@ -487,7 +487,7 @@ HashMap pants = null;
       String agent = order.getAgent();
       String ov21 = "";
       if(over21.get(cust.substring(0,cust.lastIndexOf("-")))!= null) {
-    	  ov21 = "OverDue 21+D " + over21.get(cust.substring(0,cust.lastIndexOf("-"))) + "€ ";
+    	  ov21 = "OverDue +21D " + over21.get(cust.substring(0,cust.lastIndexOf("-"))) + "€ ";
       }
       
       String comm = "";

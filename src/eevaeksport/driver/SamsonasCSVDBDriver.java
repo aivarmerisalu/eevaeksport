@@ -1564,6 +1564,7 @@ public void PictureMaker() {
 
 @Override
 public void WebReporter() {
+	
 	  
 	  ArrayList<String> filenames = new ArrayList<String>();
 	// teeme kataloogi salvestamiseks

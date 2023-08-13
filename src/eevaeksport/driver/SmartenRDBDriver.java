@@ -564,6 +564,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
     	   getOpenOrders();
     		
     	  String  cmd = " SELECT TooteKood,KogusVaba FROM vw_MJ_Laosaldod where Partner='" + partnercode + "'" ;
+    	  if( getParent().getProps().getProperty("stockrefSQL") != null) {
+    		  cmd =  getParent().getProps().getProperty("stockrefSQL");
+    	  }
 
 	       if (isDebug()) System.out.println(cmd);
 	       StringBuffer products = new StringBuffer();

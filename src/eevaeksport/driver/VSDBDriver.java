@@ -2,8 +2,11 @@
 
 package eevaeksport.driver;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -108,6 +111,74 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
     String user =  null;
     String pass = null;
     String rcompanyx = null;
+    
+    
+    private void updateClientStock()
+    	    throws IOException, SQLException {
+  
+
+    	    System.out.println("Laoseis Update");
+
+    	    
+    		    HashMap hm = new HashMap();
+
+    		    //laema faili alla 
+    		    
+    		    File ff = new File("stock");
+    		    
+    		    if(!ff.exists()) {
+    		    	ff.mkdir();
+    		    }
+    		    
+    		   Converter.downloadFile(parent.getProps().getProperty("stockurl"), "stock/stockref.txt");
+    		 
+
+    		    String	   fileName = "stock/stockref.txt";
+
+    		    BufferedReader br =
+    			new BufferedReader(new FileReader(fileName));
+    		    String	   line = null;
+    		    String	   dealerID = null;
+    		    ArrayList      prods = new ArrayList();
+
+    		    while ((line = br.readLine()) != null) {
+    		    	 System.out.println("line " +  line);
+    			StringTokenizer st = new StringTokenizer(line, ";");
+
+    			if (st.hasMoreTokens() && line.trim().length()>0) {
+    			    dealerID = "1";
+
+    			    if (st.hasMoreTokens()) {
+                                  String prodID = st.nextToken();
+                               
+    				Product p = new Product(prodID);
+    				st.nextToken();
+    				
+    				if (st.hasMoreTokens()) {
+    				    p.setStock(Double.parseDouble(st.nextToken()));
+    				}
+
+    				prods.add(p);
+    				 if(dealerID.length() < 3 && dealerID.trim().length() >0 && prods.size()>1) {
+    				       hm.put(dealerID, prods);
+    				    }
+    			    }
+    			   
+    			}
+    		    }
+                        System.out.println("Dealer " + dealerID);
+    		    br.close();
+    		   
+    		    
+    		    System.out.println("hm " + hm.toString());
+    		    
+    		    if (hm.size() > 0) {
+    			  setStocks(hm);
+    		    }
+    		
+        }
+
+
     
     public Vector getFixedAssortmentData() {
 		Vector result = new Vector();
@@ -252,6 +323,11 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
      *
      */
         public String getSaveDebtInfo() {
+        	try {
+				updateClientStock();
+			} catch (IOException | SQLException e) {
+				e.printStackTrace();
+			}
            	return null;
            }
            
@@ -491,6 +567,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
 
     public void setStocks(HashMap products) throws SQLException{
       connectionUp();
+      String startday = getStartingTime();
       Iterator iter = products.keySet().iterator();
       String dlr = (String)iter.next();
       System.out.println("Dealer '" +  dlr + "'");
@@ -513,7 +590,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
         for (int i = 0 ; i < al.size() ; i++){
           Product p = (Product)al.get(i);
           pst.setDouble(1, p.getStock());
-          pst.setString(2, getStartingTime());
+          pst.setString(2, startday);
           pst.setString(3, p.getID());
           pst.executeUpdate();
         }}

@@ -20,10 +20,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -65,7 +67,9 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -73,8 +77,12 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -148,7 +156,48 @@ public class Converter {
 		return false;
 	}
 	
-	   
+	  public static void downloadFile(String url, String filename) {
+		
+		  
+		
+		     String fname = filename;
+		
+			try {
+				URL ur = new URL(url);
+			
+			final HttpParams httpParams = new BasicHttpParams();
+		    HttpConnectionParams.setConnectionTimeout(httpParams, 10000);
+		    HttpConnectionParams.setSoTimeout(httpParams, 10000);
+			HttpClient  httpclient = new DefaultHttpClient(httpParams);
+			HttpGet httpGet= new HttpGet(ur.toString());
+			System.out.println("url " + ur.toString());
+			HttpResponse resp = httpclient.execute(httpGet);
+			InputStream is = resp.getEntity().getContent(); 
+			
+			if(is != null) {
+		    	
+
+			      OutputStream os = new FileOutputStream(fname);
+			      int read = 0;
+			             byte[] bytes = new byte[1024];
+			             int total2 = 0;
+			     		while((read = is.read(bytes))!= -1){
+			     			os.write(bytes, 0, read);
+			     			total2 = total2 + read;
+			     		}
+			   	//	 System.out.println("Faili salvestus " + file.getName() + " " + total2 + " " + total + " " + read);   
+			      	
+			     		
+			      is.close();
+			      os.close();
+			  	
+			    	}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+	  }
+		     
+		     
 	   public static TreeMap loadMore() {
 		   TreeMap res = new TreeMap();
 		   try {
