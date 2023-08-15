@@ -253,7 +253,7 @@ for(int i = 0;dd1.length>i;i++){
       			 StringBuffer sb = new StringBuffer();
       			  sb.append("CUSTCODE,DELIVERYCODE,CUSTNAME,SUMEUR,CHEQUENR,CHEQUEDATE,MANAGER,COMMENT\n");
       			  
-      			    this.getCustomers(null);
+      			
       			    HashSet loetud = new HashSet();
       			    for (int i = 0; i < files.length ; i++){
       			      File file = files[i];
@@ -990,9 +990,7 @@ HashSet olemas = new HashSet();
 
               }
               
-              if(maks.equals("1040")) {
-         		 System.out.println("võlgu2 1040 " + maks + " " + d30.contains(maks) +" " + d30.contains(cust.getID()));
-         	 }
+        
               
               if(d30.contains(cust.getID()) || d30.contains(maks)) {
             	  cust.setSalesBlock(true);

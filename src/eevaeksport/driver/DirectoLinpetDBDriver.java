@@ -97,6 +97,50 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
   String rcompany = null;
   String logurl = null;
   
+  
+  
+  public HashMap getTobisData(){
+		HashMap hash = new HashMap();
+		
+			try {
+
+		final File  v  = new File("stocktobis.txt");
+         Converter.downloadFile("https://www.tobis.lt/MeRiSoFt/stockref.txt", "stocktobis.txt");
+			
+
+				BufferedReader  inse = new BufferedReader(new FileReader(v));
+				String	    line;
+			
+				while ((line = inse.readLine()) != null) {
+					StringTokenizer st = new StringTokenizer(line, ";");
+					
+					String prodID = "";
+					double amount = 0;
+				//	System.out.println("id " + line);
+					if (st.hasMoreTokens()) {
+						prodID = st.nextToken();
+					}
+					st.nextToken();
+				
+					if (st.hasMoreTokens()) {
+						amount = new Double(st.nextToken()).doubleValue();
+					}
+					hash.put(prodID,amount + "" );
+						
+				}
+				inse.close();
+             }catch(Exception e){
+				e.printStackTrace();
+			}
+	
+			System.out.println("Tobis seisud suurus " + hash.size());
+	
+		  return hash;
+	  }
+
+  
+  
+  
   public TreeMap getProductsOther(){
 	    TreeMap tm = new TreeMap();
 	     if(stockConn != null){
@@ -751,7 +795,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 			
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		return result;
@@ -854,6 +898,9 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    		e.printStackTrace();
    	}
       // System.out.println("prodsinuse " +prodsInUse.size() );
+       
+       
+   
        
        return sortLines(lines,prods);
  }
@@ -2799,6 +2846,24 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      } catch (Exception e){
        e.printStackTrace();
      }
+     
+   if("true".equals(getParent().getProps().getProperty("tobisstock"))) {  
+     
+     HashMap tobis =  getTobisData();
+     Iterator itera =   tobis.keySet().iterator();
+     while(itera.hasNext()){
+   	  String key = (String)itera.next();
+   	  double stock = Double.parseDouble((String)tobis.get(key));
+   	  Product prod = (Product)prodHash.get(key);
+         if (prod != null){
+       	  prod.setStock(stock);
+       	//  System.out.println("lisan Laoseisu " + prod.getName() + " " + stock);
+         }
+         
+   	  
+     }
+     
+   }
      
      //teeme puhtaks grupi mapi 
      TreeMap grups  = new TreeMap();

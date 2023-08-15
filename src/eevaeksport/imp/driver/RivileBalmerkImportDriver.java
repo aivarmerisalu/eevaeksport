@@ -30,7 +30,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -61,6 +64,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -224,26 +229,12 @@ HashMap pants = null;
     return acc;
   }
   
-  public String identifyCustomerAGENT(String id) throws SQLException {
- 	 String	sql1 = "SELECT N33_SHIP_VIA AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
- 	 		"  rtrim(rtrim(N08_KODAS_KS))+'-'+ rtrim(ltrim(N33_kodas_ak)) = '" + id +"'"; 
- 	
-   System.out.println(sql1);
-   String acc = null;
-   con = DriverManager.getConnection(url + "rivile","","");
-   Statement st1 = con.createStatement();
-   ResultSet rs1 = st1.executeQuery(sql1);
+  
 
-   while (rs1.next()) {
-     acc = rs1.getString("aadress").trim();
-
-   }
-   rs1.close();
-   st1.close();
-  con.close();
-   return acc;
-
- }
+  
+  
+  
+  
   
   public String getAgentCar(String age) throws SQLException {
 	 	 String	sql1 = "SELECT N72_KODAS_AU AS carplate FROM N72_mas  WHERE N72_KODAS_MS = '" + age +"'"; 
@@ -510,7 +501,7 @@ public Vector getDebt() throws SQLException{
           
             if(d30.contains(cust.getID()) || d30.contains(maks)) {
           	  cust.setSalesBlockT(true);
-          	System.out.println("Blokk peale " + cust.getID());
+          //	System.out.println("Blokk peale " + cust.getID());
             }
          
             
@@ -651,6 +642,133 @@ public Vector getDebt() throws SQLException{
 		  			}
 		  	
 	   }
+  
+  
+
+  private Calendar  getNextShipCal(String cust) throws SQLException{
+	  	Calendar res = null;
+	 		//	Saame kõik 2 nädala päevad kätte 
+	  	
+
+	    String cmd = "SELECT N33_SHIP_FOB  as deld " +
+				"  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where "
+				+ " rtrim(rtrim(N08_KODAS_KS))+'-'+ rtrim(ltrim(N33_kodas_ak)) = '" + cust +"' order by N08_PAV ";
+	   
+    System.out.println(cmd);
+  
+   
+    	          Connection con = DriverManager.getConnection(url + "rivile","","");
+	  		      Statement stmt =con.createStatement();
+	  		      ResultSet rs = stmt.executeQuery(cmd);
+	  		      String days = null;
+	  		      if(rs.next()){
+	  		    	
+		  		        days= rs.getString("deld");
+		  		        if(days != null && days.trim().length() > 0) {
+		  		        	days = days.trim();
+		  		        }else {
+		  		        	days = null;
+		  		        }
+	  		      }
+	  		      rs.close();
+	  		      stmt.close();
+	  		      con.close();
+	  		      
+	  	
+	  		      
+	  		      if(days != null) {
+	  		    	  
+	  		     
+	  	
+				LocalDate now = new LocalDate();
+				LocalDate mon = now.withDayOfWeek(DateTimeConstants.MONDAY);
+			
+				LocalDate tue = mon.plusDays(1);
+				LocalDate wed = mon.plusDays(2);
+				LocalDate thu = mon.plusDays(3);
+				LocalDate fri = mon.plusDays(4);
+				LocalDate sat = mon.plusDays(5);
+				LocalDate sun = mon.plusDays(6);
+				LocalDate mon1 = mon.plusDays(7);
+				LocalDate tue1 = mon.plusDays(8);
+				LocalDate wed1 = mon.plusDays(9);
+				LocalDate thu1 = mon.plusDays(10);
+				LocalDate fri1 = mon.plusDays(11);
+				LocalDate sat1 = mon.plusDays(12);
+				LocalDate sun1 = mon.plusDays(13);
+				
+			LocalDate kaes = new LocalDate();
+			ArrayList <LocalDate> aaa = new ArrayList<LocalDate>();
+				 
+				 StringTokenizer st = new StringTokenizer(days,",");  
+				 while(st.hasMoreTokens()) {
+					 
+					int day = Integer.parseInt(st.nextToken());
+				//   System.out.println(day + " uuu " + paev);
+				   
+				   if(day == 1) {
+					   aaa.add(mon1);
+					   aaa.add(mon);
+					   
+				   }
+				   if(day == 2) {
+					   aaa.add(tue1);
+					   aaa.add(tue);
+				   }
+				   if(day == 3) {
+					   aaa.add(wed1);
+					   aaa.add(wed);
+				   }						
+				   if(day == 4) {
+					   aaa.add(thu1);
+					   aaa.add(thu);
+				   }
+				   if(day == 5) {
+					   aaa.add(fri1);
+					   aaa.add(fri);
+				   }
+				   if(day == 6) {
+					   aaa.add(sat1);
+					   aaa.add(sat);
+				   }
+				   if(day == 7) {
+					   aaa.add(sun1);
+					   aaa.add(sun);
+				   }
+				   
+				 }
+				 
+				 // aaa sees on päevad millal action toimub - nyyd onvaja leida tänasele päevale lähin neist .
+				 Collections.sort(aaa);
+				 Iterator<LocalDate> asd = aaa.iterator();
+				 while (asd.hasNext()) {
+					 LocalDate fff = asd.next();
+					 if(fff.isAfter(now)) {
+						 kaes = fff;
+						 break;
+					 }
+				 }
+				 
+				 
+		System.out.println("kaes sobiv päev " + kaes + " "  );
+		
+				 try {
+					 if(kaes != null) {
+							java.util.Date d = new SimpleDateFormat("yyyy-MM-dd").parse(kaes.toString());
+							res = Calendar.getInstance();
+							res.setTime(d);
+					 }
+			
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				 
+	  		    }
+			
+	  	return res ;
+	  }
+	  
+  
  
 
  private void makeOutput(Order order,boolean tag, boolean volgu , boolean kaup , boolean yle){
@@ -690,7 +808,18 @@ public Vector getDebt() throws SQLException{
      	
      }
 	
- 	
+    Calendar nextDeld =  null;
+    try {
+    	nextDeld = getNextShipCal(order.getCompany());
+	} catch (SQLException e2) {
+		
+		e2.printStackTrace();
+	}
+     
+   
+    
+
+    
  	String ls = System.getProperty("line.separator");
  	try {
  	  int cou = 1;
@@ -754,14 +883,21 @@ public Vector getDebt() throws SQLException{
    //   sb.append("          <I06_DOK_NR>U" +  escape(agent)+ "-" + name + "-"  +  escape(order.getDokNr())  + "</I06_DOK_NR>" + ls);
      // cou++;
       
+  	Calendar gosc = order.getShipCal();
+  	if(!order.isShipDateUsed()) {
+  		gosc = this.getNextShipCal(cust);
+  	}
 
+  	if(gosc == null) {
+  		gosc = order.getShipCal();
+  	}
     //  sb.append(getLineNr(cou));
-      sb.append("          <I06_OP_DATA>" +  getDateString(order.getShipCal()) + "</I06_OP_DATA>" + ls);
+      sb.append("          <I06_OP_DATA>" +  getDateString(gosc) + "</I06_OP_DATA>" + ls);
       cou++;
       
       
   //    sb.append(getLineNr(cou));
-      sb.append("          <I06_DOK_DATA>" +  getDateString(order.getShipCal()) + "</I06_DOK_DATA>" + ls);
+      sb.append("          <I06_DOK_DATA>" +  getDateString(gosc) + "</I06_DOK_DATA>" + ls);
       cou++;
  
 

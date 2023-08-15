@@ -2943,19 +2943,19 @@ try{
 				
 
 						String sq3 = "select * from (\r\n" + 
-								"select case when d.OR20004='+' then d.OR20003 else d.OR20004 end AS klient  ,d.OR20015 AS kuup ,r.OR21005 as toode,sum(r.OR21012) as kogus, max(r.OR21008)  as hind, max(d.OR20024) as summa , max( ST03014) as arvenr from OR210100 r INNER JOIN OR200100 d ON r.OR21001=d.OR20001   \r\n" + 
+								"select case when d.OR20004='+' then d.OR20003 else d.OR20004 end AS klient  ,d.OR20015 AS kuup ,r.OR21005 as toode,sum(r.OR21012) as kogus, max(r.OR21008)  as hind, max(d.OR20024) as summa , ( ST03014) as arvenr from OR210100 r INNER JOIN OR200100 d ON r.OR21001=d.OR20001   \r\n" + 
 								"								  LEFT JOIN ST030100 a on a.ST03009 = d.OR20001	 WHERE   d.OR20024 > 0 AND d.OR20015 >=(select top 1 kuupaev  from ( 	SELECT top 5 jou2.OR20015 as kuupaev \r\n" + 
 								"														FROM  OR200100 jou2  where ltrim(case when jou2.OR20004='+' then jou2.OR20003 else jou2.OR20004 end) = ltrim(case when d.OR20004='+' then d.OR20003 else d.OR20004 end)  \r\n" + 
 								"													 and jou2.OR20015 > getdate()-30   and jou2.OR20024 > 0 group by (case when jou2.OR20004='+' then jou2.OR20003 else jou2.OR20004 end) , jou2.OR20015 order by jou2.OR20015 desc ) \r\n" + 
 								"														  as dd order by kuupaev) and (case when d.OR20004='+' then d.OR20003 else d.OR20004 end) not like 'INTR%'  and r.OR21005 not like 'PP%'\r\n" + 
-								"														 GROUP BY case when d.OR20004='+' then d.OR20003 else d.OR20004 end,d.OR20015 ,r.OR21005 \r\n" + 
+								"														 GROUP BY ST03014, case when d.OR20004='+' then d.OR20003 else d.OR20004 end,d.OR20015 ,r.OR21005 \r\n" + 
 								"						union all\r\n" + 
-								"		select case when d.OR01004='+' then d.OR01003 else d.OR01004 end AS klient  ,d.OR01015 AS kuup ,r.OR03005 as toode,sum(r.OR03011) as kogus, max(r.OR03008)  as hind, max(d.OR01024) as summa , max( OR01001) as arvenr   from OR030100 r INNER JOIN OR010100 d ON r.OR03001=d.OR01001   \r\n" + 
+								"		select case when d.OR01004='+' then d.OR01003 else d.OR01004 end AS klient  ,d.OR01015 AS kuup ,r.OR03005 as toode,sum(r.OR03011) as kogus, max(r.OR03008)  as hind, max(d.OR01024) as summa , ( OR01001) as arvenr   from OR030100 r INNER JOIN OR010100 d ON r.OR03001=d.OR01001   \r\n" + 
 								"									 WHERE   d.OR01024 > 0 AND d.OR01015 >=(select top 1 kuupaev  from ( 	SELECT top 2 jou2.OR01015 as kuupaev \r\n" + 
 								"														FROM  OR010100 jou2  where ltrim(case when jou2.OR01004='+' then jou2.OR01003 else jou2.OR01004 end) = ltrim(case when d.OR01004='+' then d.OR01003 else d.OR01004 end)  \r\n" + 
 								"													 and jou2.OR01015 > getdate()-2   and jou2.OR01024 > 0 group by (case when jou2.OR01004='+' then jou2.OR01003 else jou2.OR01004 end) , jou2.OR01015 order by jou2.OR01015 desc ) \r\n" + 
 								"														  as dd order by kuupaev) and (case when d.OR01004='+' then d.OR01003 else d.OR01004 end) not like 'INTR%' and r.OR03005 not like 'PP%'\r\n" + 
-								"														 GROUP BY case when d.OR01004='+' then d.OR01003 else d.OR01004 end,d.OR01015 ,r.OR03005) as ll \r\n" + 
+								"														 GROUP BY OR01001, case when d.OR01004='+' then d.OR01003 else d.OR01004 end,d.OR01015 ,r.OR03005) as ll \r\n" + 
 								"														  ORDER BY 1,2 desc ,3" ;
 						
 					 
