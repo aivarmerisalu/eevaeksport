@@ -57,7 +57,22 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
 	} catch (Exception e) {
 	    parent.showError(e);
 	}
-    }
+	
+	
+
+    user =  getParent().getProps().getProperty("rest.user");
+    pass = getParent().getProps().getProperty("rest.pass");
+    companyx = getParent().getProps().getProperty("rest.companyx");
+    company = getParent().getProps().getProperty("rest.company");
+      }
+    
+    
+    String user =  null;
+	  String companyx =  null;
+	  String company =  null;
+	
+	  String pass = null;
+    
     public String getSaveDebtInfo() {
        	return null;
        }
@@ -286,9 +301,10 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
 		String kontaktTel = parent.make(rs.getString("ContactPhone"));
 		String email = parent.make(rs.getString("Email"));
 		         
-		String ag = "HUN003";
+		         String ag = "HUN003";
 		         Agent aa = new Agent(ag);
 		         cust.addAgent(aa);
+		         
 		     	 String ag1 = "HUN005";
 		         Agent a1 = new Agent(ag1);
 		         cust.addAgent(a1);
@@ -366,19 +382,22 @@ try{
     Connection  con = DriverManager.getConnection(url);
 PreparedStatement pstm = con.prepareStatement(cmd);
 ResultSet rs6 = pstm.executeQuery();
-
+System.out.println("groups 2 " + groups);
 while(rs6.next()){
+	
 	String kood = rs6.getString("Id").trim();
+	System.out.println("kood 3 " + kood);
 	 Iterator itera =  groups.keySet().iterator();
 	while(itera.hasNext()) {
 		String field = (String)itera.next();
+		System.out.println("kood 3 " + field);
 		try {
 			int gr = rs6.getInt(field);
 			if(gr > 0) {
 				prodsInGroups.put(kood, field);
 			}
 		}catch(Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
    

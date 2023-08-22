@@ -693,6 +693,16 @@ try{
 	              email.setFilesTo(aadr);
 	              email.send();
 	              }
+	            
+	            if(parent.getProps().getProperty("booker.returnemail") != null) {
+	            	  st =  new StringTokenizer(parent.getProps().getProperty("booker.returnemail"),";");
+	 	             aadr = null;
+	 	            while(st.hasMoreTokens()){
+	 	            	 aadr = new InternetAddress(st.nextToken()).toString();
+	 	              email.setFilesTo(aadr);
+	 	              email.send();
+	 	              }
+	            }
 	            String aadress2 =  cust.getCity();
 	           //  aadress2 =  "aivar@mobilejava.ee";
 	            

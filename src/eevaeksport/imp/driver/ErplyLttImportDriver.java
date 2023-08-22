@@ -679,7 +679,10 @@ public class ErplyLttImportDriver extends AbstractImportDriver{
 	 		 	 		// System.exit(0);
 	 		 	 	}
 	 	 	
-	 	 	
+	 		if(inputLineBuf.toString().contains("errorCode>1054")){
+	 		 	  this.trouble.append("Tellimust ei imporditud 1054 viga " + order.getCompName() + " " + order.getDokNr() );
+	 		 	 		// System.exit(0);
+	 		 	 	}
 	 	      setNumAddedLines(counter); 
 	 	      
 	 	    String doknr = order.getDokNr();

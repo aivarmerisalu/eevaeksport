@@ -2014,6 +2014,8 @@ System.out.println(cmd);
 					
 					if(custAbi.equals("1") && aad.get(cu+"_"+custAbi.trim()) == null) {
 						custAbi = custID + "_1";  
+					   } else if(custAbi.equals("2") && aad.get(cu+"_"+custAbi.trim()) == null) {
+						custAbi = custID + "_2";  
 					   } else if(aad.get(cu+"_"+custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(cu+"_"+custAbi.trim());
 					   } else if(aad.get(custAbi.trim()) != null) {
@@ -2070,10 +2072,13 @@ System.out.println(cmd);
 				String cu = klient;
 				if(custAbi != null && custAbi.trim().length() > 0) {
 					
-					
+
+					 
 					if(custAbi.equals("1")  && aad.get(cu+"_"+custAbi.trim()) == null) {
 						custAbi = klient + "_1";  
-					   } else if(aad.get(cu+"_"+custAbi.trim()) != null) {
+					    } else if(custAbi.equals("2") && aad.get(cu+"_"+custAbi.trim()) == null) {
+							custAbi = klient + "_2";  
+					   }else if(aad.get(cu+"_"+custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(cu+"_"+custAbi.trim());
 					   }else if(aad.get(custAbi.trim()) != null) {
 						 custAbi = (String)aad.get(custAbi.trim());

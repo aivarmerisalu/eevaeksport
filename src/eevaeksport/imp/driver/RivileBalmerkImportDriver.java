@@ -678,7 +678,7 @@ public Vector getDebt() throws SQLException{
 	  		      
 	  		      if(days != null) {
 	  		    	  
-	  		     
+	  		     System.out.println("days  " + days);
 	  	
 				LocalDate now = new LocalDate();
 				LocalDate mon = now.withDayOfWeek(DateTimeConstants.MONDAY);
@@ -701,6 +701,12 @@ public Vector getDebt() throws SQLException{
 			ArrayList <LocalDate> aaa = new ArrayList<LocalDate>();
 				 
 				 StringTokenizer st = new StringTokenizer(days,",");  
+				 if(days.contains(";")) {
+					 st = new StringTokenizer(days,";");  
+				 }
+				 if(days.contains(".")) {
+					 st = new StringTokenizer(days,".");  
+				 }
 				 while(st.hasMoreTokens()) {
 					 
 					int day = Integer.parseInt(st.nextToken());
@@ -808,14 +814,7 @@ public Vector getDebt() throws SQLException{
      	
      }
 	
-    Calendar nextDeld =  null;
-    try {
-    	nextDeld = getNextShipCal(order.getCompany());
-	} catch (SQLException e2) {
-		
-		e2.printStackTrace();
-	}
-     
+  
    
     
 
