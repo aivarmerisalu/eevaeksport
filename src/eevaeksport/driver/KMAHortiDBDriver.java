@@ -819,7 +819,8 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 				String ean = rs.getString("ean");
 				String add = "";
 				if (ean != null && ean.trim().length() > 7) {
-					prod.setEAN(ean.trim());
+					
+					prod.setEAN(ean.trim().replace(';', ','));
 					add = ean.substring(ean.length()-4); 
 				}
 

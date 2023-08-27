@@ -4564,7 +4564,7 @@ if(agprods != null && agprods.size() >0){
         buf.append(prod.getMaxDiscount());
 
         buf.append(EksportPanel.separator);
-        buf.append(prod.getEAN().replaceAll("\r", " ").replaceAll("\n", " "));
+        buf.append(prod.getEAN().replaceAll("\r", " ").replaceAll("\n", " ").replace(';', ','));
 
         buf.append(EksportPanel.separator);
         buf.append((int)prod.getOnPallet());

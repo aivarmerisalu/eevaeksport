@@ -936,7 +936,9 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
      eanprods.put(ean.trim(), prod.getID());
      
      int ll  = ean.trim().length();
+     if(ll > 6) {
      add = " @" +  ean.trim().substring(ll-4);
+     }
     }
      
      String optimum = rs.getString("optimum");
