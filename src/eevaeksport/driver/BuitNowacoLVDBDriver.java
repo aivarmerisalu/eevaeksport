@@ -2420,11 +2420,18 @@ System.out.println(cmd);
    public Vector getCustomerProductsList(String agentCode){
      Vector vec = new Vector();
      HashMap kliendid = new HashMap();
+     
+     int days = 60;
+     try {
+    	 days = Integer.parseInt(parent.getProps().getProperty("days"));
+     }catch(Exception e) {
+    	 
+     }
      try {
     String cmd =  " 	SELECT  b.klient_id AS klient,r.preke AS toode,(kiekis) AS kogus, Data AS lastdate, " +
     		" kaina as price FROM apyv_gr r " +
             " INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 180 day) > current_date()  INNER JOIN klientai b ON b.klientas=d.gavejas " + 
-	        " where DATE_ADD(data,interval 180 day) > current_date() order by klient_id ,r.preke ,data desc ";
+	        " where DATE_ADD(data,interval " +   days + " day) > current_date() order by klient_id ,r.preke ,data desc ";
     System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupï¿½ev","viimane kogus"
     Connection con = getNewConnection();

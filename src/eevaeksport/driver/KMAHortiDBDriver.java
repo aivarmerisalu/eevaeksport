@@ -1,8 +1,11 @@
 package eevaeksport.driver;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.Date;
@@ -16,6 +19,7 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -47,7 +51,7 @@ import eevaeksport.util.Converter;
  */
 
 public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo,
-		BulkUpdater, Discounter {
+		BulkUpdater, Discounter, eevaeksport.driver.PictureMaker {
 	public KMAHortiDBDriver(EksportPanel parent) {
 		super(parent);
 		if (parent.getParentFrame().isDaySales()) {
@@ -74,7 +78,102 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 	  String pass = null;
 	  String rcompany = null;
 	
-	
+
+	  @Override
+	  public void PictureMaker() {
+			String pictssou = parent.getProps().getProperty("pict.dir");
+	 	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	 	    
+		  String url = "http://213.219.67.37/ladu20/images/kaubad/tellikma/";
+		  TreeMap prods = this.getProducts(new Agent("pilt"));
+		  Iterator itera = prods.values().iterator();
+		  Vector exists = new Vector();
+		  
+		  File dir = new File(pictssou);
+		  for (String f: dir.list()) {
+			  exists.add(f);
+		  }
+		  
+		  System.out.println("exists " + exists.elementAt(0));
+		  
+	  	 while(itera.hasNext()) {
+	  		 Product prod = (Product) itera.next();
+	  		 if(prod.getPhotoid() != null && prod.getPhotoid().trim().length() > 0) {
+	  			 String ext = prod.getPhotoid().substring(prod.getPhotoid().lastIndexOf(".")+1);
+	  			 System.out.println("ext " +  ext + " " + prod.getPhotoid());
+	  			 if(!exists.contains(prod.getID() + "." + ext)) {
+	  			 Converter.downloadFile(url + prod.getPhotoid() , "picts/"+ prod.getID() + "." + ext);
+	  			 System.out.print(" downloaded  ");
+	  			 }
+	  		 }
+	  	 }
+	  	 
+	   	
+	   
+	 	    TreeMap phsize = new TreeMap();
+	 	    
+	 	    
+	 	 try {
+	    	  File f = new File(pictspda +"list.txt");
+	         if (f.exists())f.delete();
+	         //Kataloogi sisude kustutamine
+	     	  File res2 = new File (pictspda);
+	           
+	 		StringBuffer buf = new StringBuffer();
+	        Iterator enume = prods.keySet().iterator();
+	   
+	        while (enume.hasNext()) {
+	   	    	String asi = (String)enume.next();
+	   	    	Product prod = (Product)prods.get(asi);
+	   	    	String toode = prod.getID();  
+	              if(toode.length() > 0){
+	               	
+	   	   	  res2 = new File (pictssou);
+	   	   String[] ff2 = res2.list();
+	           
+	        	 for(int i = 0;ff2.length>i;i++){
+	            	if( ff2[i].startsWith(toode)){
+	              // System.out.println("pilt olemas " + ff2[i]);
+	           	File in = new File ( pictssou + ff2[i]); 
+	             	if(in.isFile()){
+	             	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+	             	if(!inpda.exists()) {
+	             		Converter.shrinkAndCopyFile(in,inpda,250);
+	             	}
+	                 	
+	                 	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
+	                 	phsize.put(prod.getID(), kkk.length());
+	           	    }
+	                }
+	              }
+	            }
+	   	   }
+	       
+	        
+	       itera =   phsize.keySet().iterator();
+	      while(itera.hasNext()) {
+	   	   String prid = (String)itera.next();
+	   		buf.append(prid +".jpg;"  + phsize.get(prid) + "\n");
+	              
+	      }
+	       
+	        
+	        try {
+	    		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+	    		os.write(buf.toString());
+	    		os.close();
+	    	  }catch (Exception ex) {
+	    		ex.printStackTrace();
+	    	  }
+	 	 
+	 	 } catch (Exception e) {
+	   	    getParent().showError(e);
+	   	}
+		  
+	  	 System.exit(0);
+	  }
+	  
+	  
 	public String getDealerCustomerCSV(String agent) {
 		return null;
 	}
@@ -845,7 +944,7 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 				prod.setName( Converter.enCodeEst(nimetus + " " +  add).trim());
 
 				String weblink = rs.getString("PildiLink");
-				if (weblink != null && weblink.trim().length() > 0) {
+				if (weblink != null && weblink.trim().length() > 0 && agent != null && agent.getID().equals("pilt")) {
 					//http://pda.kma.ee/horticom/images/kaubad/tellikma/
 				//	prod.weblink = (weblink.trim().substring(weblink.trim().lastIndexOf("/")+1));
 					prod.setPhotoid(weblink.trim().substring(weblink.trim().lastIndexOf("/")+1));
