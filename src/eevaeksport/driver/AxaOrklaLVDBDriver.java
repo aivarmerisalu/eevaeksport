@@ -1688,7 +1688,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
     Connection con = getNewConnection();
     TreeMap   tm = new TreeMap();
      grups = new TreeMap ();
-    String    sql = "  SELECT groupid as liik ,sortidx as sorting,name as nimi  FROM bmssa.TraItemSortGroup  where dataareaid ='olv'  ";
+    String    sql = "  SELECT groupid as liik ,sortidx as sorting,name as nimi  FROM bmssa.TraItemSortGroup  where dataareaid ='olv' and formerisoft=1 ";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 
