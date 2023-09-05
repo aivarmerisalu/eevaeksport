@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -576,6 +577,72 @@ return null;
     return prodID;
   }
 
+  
+  
+  private Vector splitOrder (Order order){
+	  Vector result = new Vector();
+      
+	  Order ord = new Order(order.getCompany(),order.getAgentFirstName());
+	  Order ordTag = new Order((order.getCompany()),order.getAgentFirstName());
+	 
+	     
+	  ord.setAgentCode(order.getAgentCode());
+	  ord.setDokNr(order.getDokNr());
+	  ord.setInfo(order.getInfo());
+	  ord.setTeostaja((order.getTeostaja()));
+	  ord.setChanged(order.isChanged());
+	  ord.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord.setStatus(order.getStatus());
+	  ord.setShipTime(order.getShipTime());
+	  ord.setWarehouse("norm");
+	     
+	  
+	  
+	  ordTag.setAgentCode(order.getAgentCode());
+	  ordTag.setDokNr(order.getDokNr()+ "1");
+	  ordTag.setInfo(order.getInfo());
+	  ordTag.setChanged(order.isChanged());
+	  ordTag.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordTag.setStatus(order.getStatus());
+	  ordTag.setShipTime(order.getShipTime());
+	  ordTag.setWarehouse("kink");
+	
+	
+	
+	  Vector lines = order.getOrderLines();
+	  Enumeration enumr = lines.elements();
+	  
+	  while  (enumr.hasMoreElements()){
+		  OrderLine lin = (OrderLine)enumr.nextElement();
+		 // System.out.println("Line disc " + lin.getDiscount());
+		  
+		    if(lin.getDiscount() == -2){  
+		    	 ordTag.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);	 
+		     	 }else{
+		       	 ord.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+				     		    lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+			     }
+
+	  }
+
+
+
+	  if(ord.getOrderLines() != null && ord.getOrderLines().size()>0){
+		  result.add(ord);  
+	  }
+
+	  if(ordTag.getOrderLines() != null && ordTag.getOrderLines().size()>0){
+		  result.add(ordTag);  
+	  }
+	  
+	
+	 
+	 System.out.println("Result =" +order.getDokNr()
+			 + " "+ result.size());
+
+	 return result ;
+  }
 
   
   public void makeOrder(Order order) throws SQLException{
@@ -587,6 +654,8 @@ return null;
 	   trouble = "Imoprdin tellimust " + order.getAgent() + "." + order.getDokNr() + ".txt aga SAP faili ei tekkinud ";
 		
 	 Order ord =  order;	
+	 
+	 
 	 try{
 		  java.util.Collections.sort(ord.getOrderLines(), new java.util.Comparator(){
 				 
@@ -611,14 +680,27 @@ return null;
      				  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
      				    		  
      			  }else{
-     			        ord.setTeostaja(order.getTeostaja());
+     				  
+     				  
+     				  
+     				  
+     			       
+     			      
+     			        
+     			 	  Vector splitted =  splitOrder(ord);
+        			   System.out.println("tellimusi eriStaatusega " + splitted.size());
+        		         Enumeration en = splitted.elements();
+        				  while(en.hasMoreElements()){
+        					  Order orde = (Order)en.nextElement();
+     			        
+     			        
      			        
      			       boolean tagastus = false;
-     				 	 Vector lin = order.getOrderLines();
+     				 	 Vector lin = orde.getOrderLines();
      				 	 int nega = 0;
      				 	 for (int i = 0; i < lin.size(); i++) {
      				 		OrderLine ol = (OrderLine) lin.elementAt(i);
-     				 		if(ol.getKogus() < 0 && (order.getStatus() == 5 || order.getStatus() == 4 || order.getStatus() == 2)){
+     				 		if(ol.getKogus() < 0 && (orde.getStatus() == 5 || orde.getStatus() == 4 || orde.getStatus() == 2)){
      				 			nega++;
      				 		}
      				 	 }  
@@ -629,8 +711,10 @@ return null;
      					    	tagastus = true;
      					    }
      			        
-          			   makeOutput(ord,tagastus);
-          			   addToDB(ord,(String)nimed.get(ord.getCompany()));
+          			   makeOutput(orde,tagastus);
+          			   addToDB(orde,(String)nimed.get(orde.getCompany()));
+        				  }
+     			  
      	    	   signatures.add(ord.getSignature());
      			  }
      	    	 
@@ -784,6 +868,11 @@ if( parent.getProps().getProperty("regnum")!= null){
 	regnum = parent.getProps().getProperty("regnum");//"40003244865";
 }
 
+
+boolean kink = false;
+if(order.getWarehouse() != null && order.getWarehouse().trim().equals("kink")){
+	kink = true;
+}
  	try {
  	  int cou = 0;
 		String ref = order.getReference();
@@ -1073,6 +1162,17 @@ if( parent.getProps().getProperty("regnum")!= null){
                   }
              
                sb.append(" <GROUP_25>" + ls);
+               
+               if(kink){
+            	   sb.append("<FTX>" + ls);
+            	   sb.append("<FTX01-TextSubjectQualifier>ZZZ</FTX01-TextSubjectQualifier>" + ls);
+                   sb.append(" <FTX04-TextLiteral>" + ls);
+            	   sb.append(" <FTX0401-FreeText>S01</FTX0401-FreeText>" + ls);
+            	   sb.append(" </FTX04-TextLiteral>" + ls); 
+                   sb.append("</FTX>" + ls);  
+                    }
+               
+               
                sb.append(" <LIN>" + ls);
                sb.append("   <LIN01-LineItemNumber>"  + (i+1) + "</LIN01-LineItemNumber>" + ls);
                sb.append("  <LIN03-ItemNumberIdentification>" + ls);
@@ -1128,6 +1228,10 @@ if( parent.getProps().getProperty("regnum")!= null){
             	   price = Double.parseDouble((String)hinnad.get(line.getToode()));
                }
               
+               if(kink){
+            	   price = 0;
+               }
+               
                
                sb.append("     <PRI0102-Price>" + nf.format(price) + "</PRI0102-Price>" + ls);
                sb.append("    </PRI01-PriceInformation>" + ls);
@@ -1141,6 +1245,9 @@ if( parent.getProps().getProperty("regnum")!= null){
                if(hinnad.get(line.getToode()) != null){
             	   price = Double.parseDouble((String)hinnad.get(line.getToode()));
             	   price = price * (100-line.getDiscount())/100;
+               }
+               if(kink){
+            	   price = 0;
                }
               
                sb.append("      <PRI0101-PriceQualifier>" + dim + "</PRI0101-PriceQualifier>" + ls); //AAE

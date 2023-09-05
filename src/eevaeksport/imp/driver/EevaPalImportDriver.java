@@ -9,15 +9,19 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.TreeMap;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 
+import eevaeksport.EksportFrame;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
@@ -187,10 +191,17 @@ public class EevaPalImportDriver
   }
 
   
+  Properties konverter = new Properties();
   
   
   
   public String identifyProduct(String ean, String prodID) throws SQLException{
+	  
+	  konverter = EksportFrame.loadProps("");
+	  if(konverter.get(ean) != null) {
+		  ean = (String)konverter.get(ean);
+	  }
+	  
     String sql1 = "SELECT toode FROM toode where left(ribakood,13)='" + ean + "'";
 
 

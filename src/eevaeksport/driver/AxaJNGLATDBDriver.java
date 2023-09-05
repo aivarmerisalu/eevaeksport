@@ -277,6 +277,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                           double perc = rs.getDouble("percent1");
                           double price = rs.getDouble("amount");
                           int relation = rs.getInt("relation");
+                          String camp = rs.getString("description");
                           int paev = rs.getInt("paev");
                           MatrixLine mline = new MatrixLine();
                           
@@ -312,6 +313,11 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                                      }
                                  } 
                           }
+                          
+                          if(camp != null && camp.trim().length() > 0 && camp.trim().startsWith("MAGAZ")) {
+                         	 mline.setLineinfo(camp);
+                          }
+                          
                      
                           if(!hh.contains(check)){
                         	  lines.add(mline);  

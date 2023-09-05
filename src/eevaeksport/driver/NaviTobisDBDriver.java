@@ -248,19 +248,19 @@ public class NaviTobisDBDriver extends AbstractDBDriver implements BulkUpdater,D
                       "  year ([Ending Date]) = 1753) and [Sales Type] = 1 " +   
                           "  union  select [Sales Code] AS custid, '' AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
             "   0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val " +
-                       "  from [2015_Tobis$Sales Line Discount] where [Type] = 1 and [Sales Type] = 0 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or " +
+                       "  from [2015_Tobis$Sales Line Discount] where [Type] = 1 and [Sales Type] = 0 and [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or " +
                       "  year ([Ending Date]) = 1753)  " +     
                    "  union select [Sales Code] AS custid, ''  AS clgroup,[Code] AS prodid,'' AS prodgroup, " +
               " 0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val " +
-                       "  from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 0 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or  " +
+                       "  from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 0 and [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or  " +
                       "   year ([Ending Date]) = 1753) " +
                       " union select '' AS custid, [Sales Code] AS clgroup,'' AS prodid,[Code] AS prodgroup, " +
                      " 0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val " +
-                     "    from [2015_Tobis$Sales Line Discount] where [Type] = 1 and [Sales Type] = 1 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or " +  
+                     "    from [2015_Tobis$Sales Line Discount] where [Type] = 1 and [Sales Type] = 1 and [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or " +  
                      "  year ([Ending Date]) = 1753)       " +
                     " union select '' AS custid, [Sales Code] AS clgroup,[Code] AS prodid,'' AS prodgroup, " +
                    " 0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val " +
-                    "     from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 1 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or " + 
+                    "     from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 1 and [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or " + 
                      "    year ([Ending Date]) = 1753) " ; 
 			
   	 

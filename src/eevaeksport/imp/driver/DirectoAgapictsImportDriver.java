@@ -35,6 +35,7 @@ import org.w3c.dom.Node;
 import ee.mobilejava.earve.GenericDOM;
 import eevaeksport.Agent;
 import eevaeksport.Customer;
+import eevaeksport.EksportFrame;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.driver.Toode;
@@ -66,6 +67,13 @@ public class DirectoAgapictsImportDriver extends AbstractImportDriver{
  //   mlines = new Vector();//getFixedAssortmentData();
     grupid = this.getProdGroups();  
     loadSignatures();
+    try {
+    	  konverter = EksportFrame.loadProps("abifailid/konverter.txt");
+    	 // System.out.println("konverter " + konverter.toString());
+    }catch (Exception e) {
+    	e.printStackTrace();
+    }
+  
   }
 
   
@@ -478,9 +486,15 @@ try{
     return null;
   }
 
-
+  Properties konverter = null;
   
   public String identifyProduct(String ean, String prodID) throws SQLException{ 
+	  
+	
+	  if(konverter != null && konverter.getProperty(ean) != null) {
+		  ean = (String)konverter.getProperty(ean);
+	  }
+	  
 	  
 	  if(eans.get(ean) != null){
 		  return eans.get(ean) + "";

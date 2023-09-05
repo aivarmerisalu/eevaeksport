@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Connection;
@@ -25,11 +26,22 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -41,6 +53,7 @@ import eevaeksport.CustProd;
 import eevaeksport.Customer;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
+import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.imp.Order;
@@ -102,17 +115,27 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 			this.getProducts(null);
 			
 			   TreeMap smas = new TreeMap();
-				 
-				 String sql4 = " select toode , sum(kogus) as kokku  from firma1.seisud " + 
-				 " where  osak='2' group  by toode  " ;
+			   String sql = "set search_path to firma1,public;\r\n" ; 
+	     		  String sql2 ="select  s.toode  , sum(s.kogus) as kogus from (\r\n" + 
+	      		"select * from crlaosei6())as  s where s.objekt = '3' or s.toode like 'FLi%' group by s.toode ";
 
-				try{
-					Connection con = DriverManager.getConnection(url);
-					PreparedStatement pstm = con.prepareStatement(sql4);
-					ResultSet rs6 = pstm.executeQuery();
+					try{
+						Connection con = DriverManager.getConnection(url);
+						
+						PreparedStatement pstm = null ;
+						ResultSet rs6 = null ;
+						try {
+							pstm = con.prepareStatement(sql);
+							 rs6 = pstm.executeQuery();
+						}catch(Exception e) {
+							
+						}
+
+						
+						 pstm = con.prepareStatement(sql2);
 
 					while(rs6.next()){
-					smas.put(rs6.getString("toode").trim(),rs6.getDouble("kokku") );
+					smas.put(rs6.getString("toode").trim(),rs6.getDouble("kogus") );
 					}
 					rs6.close();
 					pstm.close();
@@ -142,15 +165,14 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 				}
 			}
 			
+			if(Calendar.getInstance().get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY || "true".equals(parent.getProps().getProperty("flint"))){
+				sendFlintReports(ppprods,smas);
+			}
 			
-			
-	     
-			
-			sendVeresReports(pprods,smas);
-			
-			
+	     	sendVeresReports(pprods,smas);
 			makePictureCat();
-			 System.exit(0);
+		
+			System.exit(0);
 			
 		}
 	  
@@ -543,6 +565,224 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
     
     
     
+	private void sendFlintReports(TreeMap prods , TreeMap smas){
+		
+		Calendar cals = Calendar.getInstance();
+		if("true".equals(parent.getProps().getProperty("flint"))){
+		cals.add(Calendar.DAY_OF_MONTH, -7);
+		}
+		if(cals.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+				    while (cals.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+				        cals.add(Calendar.DAY_OF_WEEK, -1);
+				    }
+		}
+       
+		
+		Calendar cale = Calendar.getInstance();
+		if("true".equals(parent.getProps().getProperty("flint"))){
+		cale.add(Calendar.DAY_OF_MONTH, -7);
+		}
+		if(cale.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+				    while (cale.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+				        cale.add(Calendar.DAY_OF_WEEK, 1);
+				    }
+		}	    
+				    
+		String period  = Converter.getDDpMMpYYYYpString(cals) + " - " + Converter.getDDpMMpYYYYpString(cale) ;
+	
+		  
+    	String fname = this.getExcelDir() + "flint/flint.xlsx";
+	 
+	    
+	    String    sql = "SELECT rid.toode,sum  (rid.kogus) as kogus,sum(rid.hind*rid.kogus)  as summa " + 
+	    		"	    		FROM firma1.dok INNER JOIN firma1.rid ON dok.dokumnr = rid.dokumnr " + 
+	    		"	    		WHERE length(trim(dok.klient)) > 1 AND rid.toode like 'FLI%' " + 
+	    		"	    		AND dok.kuupaev >= ? and  dok.kuupaev < ? " + 
+	    		"	    		AND (dok.doktyyp = 'G' or dok.doktyyp = 'V') and eimuuda = false " + 
+	    		"				group by 1 ORDER BY rid.toode ";
+	    		
+	    	
+	    		TreeMap vahe = new TreeMap();
+
+	    	          try {
+	    	        	  
+	    	        	  
+	    	        	  
+	    	        	  FileInputStream fIPS= new FileInputStream(fname); //Read the spreadsheet that needs to be updated
+	    	  	        XSSFWorkbook  wb = new XSSFWorkbook(fIPS);
+	    	  	        XSSFSheet worksheet = wb.getSheetAt(0);	
+	    	  	        
+	    	  	      XSSFRow row1 = worksheet.getRow(0);  //0 = row number
+				        Cell c = row1.getCell(1);
+				             c.setCellValue(period);
+				    
+				         
+	    	        	 Connection con = DriverManager.getConnection(url);
+	    	         
+	    	          	PreparedStatement st = con.prepareStatement(sql);
+	    	            st.setTimestamp(1, new Timestamp(cals.getTimeInMillis()));
+	    	            st.setTimestamp(2, new Timestamp(cale.getTimeInMillis()));
+	    	            ResultSet rs = st.executeQuery();
+	    	            
+                            int i = 2;
+                            double sum = 0;
+                            double sumkog = 0;
+                            double sumlad = 0;
+	    	            while (rs.next()) {
+	    	            	
+	    	            	  String toode = rs.getString("toode").trim();
+	    	            	  Double kogus = rs.getDouble("kogus");
+	    	            	  Double hind = rs.getDouble("summa");
+	    	            	  sum = sum + hind;
+	    	            	  sumkog = sumkog + kogus;
+	    	            	  Product prod = (Product)prods.get(toode);
+	    	            	  String ean = prod.getEAN();
+	    	            	  String nimi = prod.getName();
+	    	            	  String unit = prod.getUnit();
+	    	            	  if(unit.trim().length() == 0) {
+	    	            		  unit = "pc.";
+	    	            	  }
+	    	            	  Double laos = (Double)smas.get(toode);
+	    	            	  if(laos == null) {
+	    	            		  laos = 0d;
+	    	            	  }
+	    	            	  
+	    	            	  sumlad= sumlad + laos;
+	    	            	  worksheet.createRow(i);
+	    	            	  row1 = worksheet.getRow(i);  //0 = row number
+	    	            	  
+	    	            	  row1.createCell(0);
+						      c = row1.getCell(0);
+						      c.setCellValue(ean);
+						      
+						      row1.createCell(1);
+						      c = row1.getCell(1);
+						      c.setCellValue(Converter.deCode(nimi));
+						      
+						      row1.createCell(2);
+						      c = row1.getCell(2);
+						      c.setCellValue(unit);
+						      
+						      row1.createCell(3);
+						      c = row1.getCell(3);
+						      c.setCellValue(kogus);
+						      
+						      row1.createCell(4);
+						      c = row1.getCell(4);
+						      c.setCellValue(hind);
+						    
+						      row1.createCell(5);
+						      c = row1.getCell(5);
+						      c.setCellValue(laos);
+	    	            	  
+	    	            	i++;  
+	    	            } 
+
+	    	            
+	    	            CellStyle style = wb.createCellStyle();
+	    	            Font font = wb.createFont();
+	    	            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+	    	            style.setFont(font);
+	    	            
+  	            	   worksheet.createRow(i);
+	    	            row1 = worksheet.getRow(i); 
+	    	            
+	    	          
+	    	            
+	    	              row1.createCell(2);
+	    	              c = row1.getCell(2);
+					      c.setCellValue("Total");
+					      c.setCellStyle(style);
+					      
+					      row1.createCell(3);
+					      c = row1.getCell(3);
+					      c.setCellValue(sumkog);
+					      c.setCellStyle(style);
+					      
+					      row1.createCell(4);
+					      c = row1.getCell(4);
+					      c.setCellValue(sum);
+					      c.setCellStyle(style);
+					      
+					      row1.createCell(5);
+					      c = row1.getCell(5);
+					      c.setCellValue(sumlad);
+					      c.setCellStyle(style);
+					      
+					      
+	    	           // System.out.println(vahe.toString());
+	    	            rs.close();
+	    	            st.close();
+	    	            con.close();
+	    	            
+	    	            
+	    	            
+	    	            
+	   	    	     FileOutputStream output_file =new FileOutputStream(this.getExcelDir() + "flint/Flint_" + period + ".xlsx");
+	   			        wb.write(output_file); //write changes
+	   			        output_file.close();  //close the stream
+	   			        
+	   			        
+	   			        
+	   			     String address = parent.getProps().getProperty("flintemail");
+	   			    		 
+	   			    
+	   			 
+	   		//	  System.out.println("määratud email " + emai + " " + props.toString());
+	   			  if(address != null ){
+	   				  Email email = new Email("Interaltus Salesreport - Flint");
+	   		          email.setFrom(parent.getProps().getProperty("from"));
+	   		          email.setSMTP(parent.getProps().getProperty("smtphost"));
+	   		          email.setUser(parent.getProps().getProperty("smtpuser"));
+	   		          email.setPass(parent.getProps().getProperty("smtppass"));
+	   		          email.setPort(parent.getProps().getProperty("smtpport"));
+	   		          email.setSubjectFilesTo("Interaltus Salesreport - Flint");
+	   		          email.setEncoding("iso-8859-1");
+	   		         
+	   		          try {
+	   		        	  
+	   		        	email.setBodyHtml("Sales report for last week " + period);
+	   	                email.addAttach(this.getExcelDir() +"flint/Flint_" + period + ".xlsx");
+	   		            StringTokenizer st1 =  new StringTokenizer(address,";");
+	   		            String aadr = null;
+	   		            while(st1.hasMoreTokens()){
+	   		            	 aadr = new InternetAddress(st1.nextToken()).toString();
+	   		              email.setFilesTo(aadr);
+	   		              email.send();
+	   		              }
+	   		            
+	   		              
+	   		            
+	   				} catch (AddressException e) {
+	   					// TODO Auto-generated catch block
+	   					e.printStackTrace();
+	   				} catch (UnsupportedEncodingException e) {
+	   					// TODO Auto-generated catch block
+	   					e.printStackTrace();
+	   				} catch (MessagingException e) {
+	   					// TODO Auto-generated catch block
+	   					e.printStackTrace();
+	   				}
+	   				  		  
+	   			  }
+	   			        
+	   			        
+	   			        
+	   			        
+	   			        
+	   			        
+	    	          }catch(Exception e){
+	    	        	 e.printStackTrace(); 
+	    	          }
+	    	        	  
+	    	  
+	    		
+	    	     System.out.println("Prods Size " + prods.size());
+ 	    	     
+	}
+    
+    
+    
     
     
     
@@ -717,7 +957,7 @@ conv2.close();
 
          String sql = "set search_path to firma1,public;\r\n" ; 
         		  String sql2 ="select sum(s.kogus) as kogus, s.toode from (\r\n" + 
-         		"select * from crlaosei6())as  s where s.objekt = '3' group by s.toode ";
+         		"select * from crlaosei6())as  s where s.objekt = '3' or s.toode like 'FLi%' group by s.toode ";
          if (isDebug()) {
              System.out.println(sql);
          }
@@ -871,6 +1111,48 @@ private TreeMap stocks = null;
             getParent().showError(e);
         }
         connectionDown();
+        
+        
+        if("true".equals(parent.getProps().getProperty("flint"))){
+        	this.getProducts(null);
+			
+			   TreeMap smas = new TreeMap();
+				 
+			   String sql = "set search_path to firma1,public;\r\n" ; 
+     		  String sql2 ="select  s.toode  , sum(s.kogus) as kogus from (\r\n" + 
+      		"select * from crlaosei6())as  s where s.objekt = '3' or s.toode like 'FLi%' group by s.toode ";
+
+				try{
+					Connection con = DriverManager.getConnection(url);
+					
+					PreparedStatement pstm = null ;
+					ResultSet rs6 = null ;
+					try {
+						pstm = con.prepareStatement(sql);
+						 rs6 = pstm.executeQuery();
+					}catch(Exception e) {
+						
+					}
+
+					
+					 pstm = con.prepareStatement(sql2);
+					 rs6 = pstm.executeQuery();
+
+					while(rs6.next()){
+					smas.put(rs6.getString("toode").trim(),rs6.getDouble("kogus") );
+					}
+					rs6.close();
+					pstm.close();
+					con.close();
+					//System.out.println("smas " + smas.size());
+					
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			sendFlintReports(ppprods,smas);
+		}
+        
+        
         return agents;
     }
     
@@ -1250,6 +1532,8 @@ Statement stmtw = conw.createStatement();
                         	  products.put(nimetus, prod); 
                          }
                          pprods.put(nimetus + kood,prod);
+                         
+                         ppprods.put( kood,prod);
 
                       }
                       rs.close();
@@ -1270,6 +1554,7 @@ Statement stmtw = conw.createStatement();
 
     
     private TreeMap pprods = new TreeMap();
+    private TreeMap ppprods = new TreeMap();
     
     
     /**
