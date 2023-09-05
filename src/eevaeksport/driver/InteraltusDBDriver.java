@@ -587,8 +587,11 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 				        cale.add(Calendar.DAY_OF_WEEK, 1);
 				    }
 		}	    
-				    
-		String period  = Converter.getDDpMMpYYYYpString(cals) + " - " + Converter.getDDpMMpYYYYpString(cale) ;
+			
+		Calendar cc = Calendar.getInstance();
+		cc.setTimeInMillis(cale.getTimeInMillis());
+		cc.add(Calendar.DAY_OF_MONTH, -1);
+		String period  = Converter.getDDpMMpYYYYpString(cals) + " - " + Converter.getDDpMMpYYYYpString(cc) ;
 	
 		  
     	String fname = this.getExcelDir() + "flint/flint.xlsx";
