@@ -26,8 +26,10 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -54,6 +56,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 
+import eevaeksport.Agent;
+import eevaeksport.Customer;
+import eevaeksport.EksportFrame;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -87,10 +92,47 @@ public class AxaJNGLATImportDriver extends AbstractImportDriver{
     
    
     loadSignatures();
+    instance = parent.getProps().getProperty("company");
+    if(instance == null) {
+  	  instance = "";
+       }
+     
+    }
+  
+  HashMap customers = null;
+  String instance = null;
+  private String url = "jdbc:odbc:axa";
+  
+  private HashMap getCustomers() {
+	  HashMap res = new HashMap();
+	  try {
+	  String cmd = "Select kood, nimi  from getCustomers where nimi != '' ";
+	 	Connection  con = getNewConnection();
+        Statement   stmt = con.createStatement();        
+        ResultSet  rs = stmt.executeQuery(cmd);
+        while (rs.next()) {
+           
+        	String kood = rs.getString("kood").trim();
+          Customer cust = new Customer(kood);
+          String nimi = rs.getString("nimi").trim();
+         cust.setName(nimi);
+
+          if(!nimi.endsWith("#")){
+        	  res.put(kood, cust);
+          }
+          }
+        rs.close();
+        stmt.close();
+        con.close();
+          
+	  }catch (Exception e) {
+		  e.printStackTrace();
+	  }
+          
+        	  
+        	  return res;
   }
   
-
-  private String url = "jdbc:odbc:axa";
   
   private Connection getNewConnection() throws SQLException{
 	    return DriverManager.getConnection(url, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
@@ -238,6 +280,9 @@ try{
    	   signatures = new Vector();
       }
       
+      if( (instance.equals("shell") || order.getAgent().startsWith("SH")) && this.customers == null) {
+    	  customers = this.getCustomers();
+       }
       
       String signature = order.getSignature();
 	  if(signatures.contains(signature)){
@@ -262,7 +307,13 @@ try{
   
  private void makeOutput(Order order){
 	  
-	  
+	 Properties props = new Properties();
+		try {
+			props = EksportFrame.loadProps("emailret.txt");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	    
 	      try {
 	 
@@ -449,10 +500,23 @@ JSONObject ord = new JSONObject();
 			   System.out.println("json " + ord.toString());
 		   }
 	     
-	      
+		   
+		      if(instance.equals("shell") || (order.getAgent().startsWith("SH"))) {// shell
+		    	  Agent ag = new Agent(order.getAgent());
+		    	  ag.setEmail(props.getProperty(order.getAgent()));
+		    	  ag.setName(props.getProperty(order.getAgent()));
+		    	  
+		    	
+		    	  Converter.sendCommentEmail("order " + order.getInfo(), null, order.getAgent() + "-" + order.getDokNr(), order.getCompany(),
+		    			  ((Customer)customers.get(order.getCompany())).getName(), null, false, ag, parent, fileName);
+		    	  System.out.println("Shell email sent");
+		      }
+		      
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	      
+	     
 	 }
 
  

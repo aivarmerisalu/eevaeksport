@@ -184,7 +184,7 @@ try {
                  "INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and summ.dataareaid=dim.dataareaid " +
                  "INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and summ.dataareaid=inv.dataareaid " +
                  "WHERE summ.DATAAREAID='dat'and dim.DATAAREAID='dat' and inv.DATAAREAID='dat' AND CLOSED = 0 AND  moduletype=0 " +
-                 " AND dim.inventlocationid IN ('KM')  GROUP BY summ.itemid  ORDER BY summ.itemid ";
+                 " AND dim.inventlocationid IN ('KM')  and AVAILPHYSICAL > 0 GROUP BY summ.itemid  ORDER BY summ.itemid ";
 
 			if (isDebug())
 				System.out.println(cmd);
@@ -1343,13 +1343,13 @@ String region = rs.getString("region");
     String  cmd2 = "  SELECT summ.itemid AS toode , SUM(AVAILPHYSICAL) AS stock ,  inv.price as oma  FROM INVENTSUM summ " +
              " INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and summ.dataareaid=dim.dataareaid " +
              " INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and summ.dataareaid=inv.dataareaid " +
-			 " AND CLOSED = 0 AND  moduletype=0 WHERE summ.DATAAREAID='dat'   and AVAILPHYSICAL != 0  AND dim.inventlocationid IN ('KM') " +
+			 " AND CLOSED = 0 AND  moduletype=0 WHERE summ.DATAAREAID='dat'   and AVAILPHYSICAL > 0  AND dim.inventlocationid IN ('KM') " +
 			 " GROUP BY summ.itemid,inv.price ORDER BY summ.itemid " ;
              
     String cmd3 = " SELECT summ.itemid AS toode , SUM(AVAILPHYSICAL) AS stock ,avg((case when PHYSICALVALUE > 0 then PHYSICALVALUE else postedvalue end)/AVAILPHYSICAL) as oma  FROM INVENTSUM summ " +
              "INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and summ.dataareaid=dim.dataareaid " +
              "INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and inv.dataareaid=summ.dataareaid " +
-             "WHERE summ.DATAAREAID='dat'and dim.DATAAREAID='dat' and inv.DATAAREAID='dat' AND CLOSED = 0 AND  moduletype=0 and AVAILPHYSICAL != 0 " +
+             "WHERE summ.DATAAREAID='dat'and dim.DATAAREAID='dat' and inv.DATAAREAID='dat' AND CLOSED = 0 AND  moduletype=0 and AVAILPHYSICAL > 0 " +
              " AND dim.inventlocationid IN ('KS') GROUP BY summ.itemid  ORDER BY summ.itemid ";
 
     if (isDebug()) System.out.println(cmd);

@@ -76,6 +76,216 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
   String rcompany = null;
   String instance = null;
   
+  private HashMap getMustSales() {
+	  HashMap res = new HashMap();
+	  
+		try {
+		
+			
+			    TreeMap custTypes =  Converter.getCustDimsLoading("type");
+			    	
+			
+			
+			//1. peame tegema kindlaks, mis grupid on ja mis tooted sinna kuuluvad
+			
+			ArrayList<String> mustGroups = new ArrayList<String>(); 
+			HashMap mustProds = new HashMap();
+			HashMap<String, String> groupTypes = new HashMap<String, String>();
+			
+    		String sq3 = "select * from getproducts where customgroup1 != '' and nimi1 != '' " ;
+					
+					Connection con3 = getNewConnection();
+					Statement st3 = con3.createStatement();
+					ResultSet rs3 = st3.executeQuery(sq3);
+					while (rs3.next()) {
+						String kood = rs3.getString("toode").trim();
+						String nimi = rs3.getString("nimi1").trim();
+						String prGrupp = rs3.getString("grupp");
+						String grupp = rs3.getString("customgroup1").trim();
+						
+						if( !mustGroups.contains(grupp) ) {
+						 mustGroups.add(grupp);
+						 String type = "NONFOOD";
+						 if(prGrupp != null &&
+								 (prGrupp.trim().startsWith("151") ||
+										 prGrupp.trim().startsWith("25") ||
+										 prGrupp.trim().startsWith("31") ||
+										 prGrupp.trim().startsWith("29") ||
+										 prGrupp.trim().startsWith("42") ||
+										 prGrupp.trim().startsWith("22") ||
+										 
+										 
+										 
+										        prGrupp.trim().equals("201") ||
+										        prGrupp.trim().equals("5") ||
+												 prGrupp.trim().equals("16") ||
+												 prGrupp.trim().equals("34") ||
+												 prGrupp.trim().equals("35") ||
+												 prGrupp.trim().equals("51")
+												 
+										 )) {
+							 type = "FOOD";
+						 }
+						 groupTypes.put(grupp, type);
+						 
+						}
+						//Product tt = new Product(kood);
+						//tt.setName(nimi);
+						mustProds.put(kood, grupp);
+						
+					}
+					rs3.close();
+					st3.close();
+					
+					
+					//2.Nüüd võtame müügid klientide lõikes ja paneme kliendi lõiles külge mis müüdi ja mis ei müüdud  
+					
+					 TreeMap custProds = new TreeMap();
+					 
+					    String cmd = "select KLIENT ,TOODE  from getcustomerproductlist where KUUPAEV > getdate()-90 and len(KLIENT) > 0 " + 
+					    		" GROUP BY klient, toode ORDER BY klient,toode" ;
+
+
+
+					    Statement stmt =  con3.createStatement();
+					      ResultSet rs = stmt.executeQuery(cmd);
+					  
+					      while(rs.next()){
+					        String kliendikood = rs.getString("klient").trim();
+					        String tootekood = rs.getString("toode").trim();
+					        
+					        			ArrayList arr = new ArrayList();
+					        			if(custProds.get(kliendikood) != null) {
+					        				arr =  (ArrayList)custProds.get(kliendikood);
+					        			}
+					        			if(!arr.contains(tootekood)) {
+					        				arr.add(tootekood);
+					        				custProds.put(kliendikood, arr);
+					        			}
+					           }
+					      
+					      rs.close();
+					      stmt.close();
+					 
+					    
+					   Iterator itera =    custProds.keySet().iterator();
+					   
+					   
+					   
+					   while(itera.hasNext()) {
+						   
+						   ArrayList<String>  soldGR = new ArrayList<String>();
+						   ArrayList<String>  nonSoldGR = (ArrayList<String>) mustGroups.clone();
+						   String klkood = (String)itera.next();
+						   String klgr = "ALL";
+						   if(custTypes != null && custTypes.get(klkood) != null) {
+							   
+					        	ArrayList type = (ArrayList)custTypes.get(klkood);
+					        	if(type != null) {
+					        	 klgr = (String)type.get(0); 
+					        	
+					        	 if(klgr.equals("Must-A")){
+					        		 klgr = "FOOD";
+					        	 } else {
+					        		 klgr = "NONFOOD";
+					        	 }
+					        	//Must-A on FOOD
+					        	//Must-B on NONFOOD
+					        	
+					        	
+					        	}
+						   
+						   
+						   
+						   ArrayList<String> sold = (ArrayList<String>)custProds.get(klkood);
+						   
+						   for(String toode : sold) {
+							   if(mustProds.get(toode) != null) {
+								   String grsold = (String)mustProds.get(toode);
+								   if(  !soldGR.contains(grsold)) {
+								   soldGR.add(grsold); 
+								   nonSoldGR.removeIf(n -> n.equals(grsold));
+								   }
+							   }
+						   }
+						   ArrayList foodgrs = new ArrayList();
+						   ArrayList nonfoodgrs = new ArrayList();
+							  // siin tuleb müümata gruppe rehitseda vastavalt kliendi tyybile	   
+						   if(klgr.equals("FOOD")) {
+							 Iterator ite =	 groupTypes.keySet().iterator();
+							 while(ite.hasNext()) {
+								 String grr = (String)ite.next();
+								 if(grr.equals("NONFOOD")) {
+									 String typ = (String)groupTypes.get(grr);
+									 nonSoldGR.remove(typ);
+									 soldGR.remove(typ);
+									 
+								 }else {
+									 String typ = (String)groupTypes.get(grr);
+									 foodgrs.add(typ);
+								 }
+							 }
+						   }
+						   
+						   if(klgr.equals("NONFOOD")) {
+							   Iterator ite =	 groupTypes.keySet().iterator();
+								 while(ite.hasNext()) {
+									 String grr = (String)ite.next();
+									 if(grr.equals("FOOD")) {
+										 String typ = (String)groupTypes.get(grr);
+										 nonSoldGR.remove(typ);
+										 soldGR.remove(typ);
+										
+									 }else {
+										 String typ = (String)groupTypes.get(grr);
+										 nonfoodgrs.add(typ);
+									 }
+								 }
+						   }
+						   
+							  double perc = 1;
+							  
+							  if(nonSoldGR.size() > 0) {
+								  
+								  double non = mustGroups.size() * 1.0;
+								  if(klgr.equals("FOOD")) {
+									  non = foodgrs.size();
+								  }
+								  if(klgr.equals("NONFOOD")) {
+									  non = nonfoodgrs.size();
+								  }
+								  
+								  perc = soldGR.size() *1.0 / non;
+							  }
+							  
+							   res.put(klkood , perc);//
+							   res.put(klkood + "sold", soldGR);
+							   res.put(klkood + "nonsold", nonSoldGR);
+							   if(soldGR.size() > 0)
+							   System.out.println("Must% " + klkood + " " + soldGR.size() + " " + nonSoldGR.size() + " " + perc);   
+				  	  }
+						   
+					
+					
+					   }
+					
+					st3.close();
+					con3.close();
+					  res.put("groups", mustGroups);
+					  res.put("prods", mustProds);
+
+			  
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		
+		
+		
+		
+		  return res;
+  }
+  
   public TreeMap getDealers() {
 		return null;
 	}
@@ -727,16 +937,19 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
   
   public TreeMap getCustomers(Agent agent){
 	  
-	  TreeMap custTop = new TreeMap();
+	  HashMap custTop = new HashMap();
+	  
+	
 	  
 	  agentMust = new TreeMap<String,ArrayList<Double>>();
 	  
 	  if(!instance.equals("shell")) {
 		  // teeme Must toodete mapi ja protsendid 
-		  TreeMap mustCon = new TreeMap();
-			Converter.getContractsSuggByCustOrType(mustCon,rcompany,user,pass,true) ;	 
-		    TreeMap custTypes =  Converter.getCustDimsLoading("type");
-		    custTop =   getCustomerTopProds(custTypes , mustCon);
+		  // TreeMap mustCon = new TreeMap();
+		//7	Converter.getContractsSuggByCustOrType(mustCon,rcompany,user,pass,true) ;	 
+		   // TreeMap custTypes =  Converter.getCustDimsLoading("type");
+		  
+		    custTop =  this.getMustSales();
      }
 	  
 	 // System.out.println("custTop " + custTop.size() + " " + custTop.toString());
@@ -892,7 +1105,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                   // cust.setVisit(visit.trim().toUpperCase());
                 }
                 
-                if(minordsum != 0){
+                if(minordsum != 0 &&  !instance.equals("shell") ){
                 	cust.setMinsum(minordsum);
                 }
 
@@ -1151,11 +1364,24 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
             		 if(cust.getCity() != null && cust.getCity().trim().length() > 0){
                 		 cust.setCity( cust.getCity() + "|Must prod Percent - " +  getNF().format(vv*100) + "%"); 	 
                 	 }else{
-                		 cust.setCity("Must prod Percent - " +  getNF().format(vv*100) + "%"); 	 
+                		 cust.setCity("Must prod Percent - " +  getNF().format(vv*100) + "%"); 	
+                		 
                 	 }  
             	 }
             	
              }
+             
+             
+             if(custTop.get(cust.getID()+"nonsold") != null) {
+            	
+            	 ArrayList vv = (ArrayList) custTop.get(cust.getID()+"nonsold");
+            	// System.out.println("oioi " + vv);
+            	 if(vv != null && vv.size() > 0) {
+            		cust.addCity("NonSold Groups: " + vv.toString().replace('[', ' ').replace(']', ' ')); 
+            	 }
+            	
+             }
+             
              }catch(Exception e) {
             	 e.printStackTrace();
              }
@@ -1218,7 +1444,35 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
             getParent().showError(e);
         }
         
+        StringBuffer sb = new StringBuffer();
         
+        if(agentMust != null) {
+        	sb.append("<!DOCTYPE html><html><body>");
+
+        	
+        	Iterator itera =  agentMust.keySet().iterator();
+        	while(itera.hasNext()) {
+        		String ag = (String) itera.next();
+        		  Agent agen = (Agent)agents1.get(ag);
+                  if (agen != null){
+                	  double avg = 0;
+                	  ArrayList<Double> aa = agentMust.get(ag);
+                	  double size = aa.size();
+                	  double sum = 0;
+                	  for(Double x : aa) {
+                		  sum = sum + x;
+                	  }
+                	  
+                	  sb.append("<p><br>");
+                	 sb.append(agen.getName() + " = " + this.getNF().format(sum/size) + "%");
+                	  		 sb.append("</p>");
+
+                  }
+        	}
+        	
+        	sb.append("</body></html>");
+        	Converter.saveFile("mustreport.html", sb.toString());
+         }
         
         System.out.println("kliendid l�petan ");
         return customers;
@@ -1285,8 +1539,23 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 
 
   public TreeMap getProdGroupsSecond() throws SQLException {
-  TreeMap   tm = new TreeMap();
-      return tm;
+	  Connection con = getNewConnection();
+	    TreeMap   tm = new TreeMap();
+	    String    sql = " select customgroup1 from getproducts where customgroup1 != '' group by customgroup1 ";
+	    	
+	    Statement st = con.createStatement();
+	    ResultSet rs = st.executeQuery(sql);
+
+	    while (rs.next()) {
+	      String liik = rs.getString("customgroup1").trim();
+	  	        tm.put(liik, liik );
+	      }
+	    
+	    rs.close();
+	    st.close();
+	    con.close();
+
+	    return tm;
   }
 
   public TreeMap getAgents1() {
@@ -1373,11 +1642,14 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
         	 sort = "0" + sort;
          }
        
-        	 
+         
+         String gr2 = rs.getString("customgroup1");
+         if(gr2 != null && gr2.trim().length()>0){
+             prod.setGroupSecond(gr2.trim());
+           }
         	
-        	 // nimetus = sort + nimetus;
         	 
-        	 sort = prod.getGroup() + " " + sort; 
+        	  sort = prod.getGroup() + " " + sort; 
         	  prod.setNameSorting(sort + nimetus);
          
        

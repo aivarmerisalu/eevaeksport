@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -48,6 +49,7 @@ import eevaeksport.CustProd;
 import eevaeksport.Customer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
+import eevaeksport.EksportFrame;
 import eevaeksport.EksportPanel;
 import eevaeksport.Email;
 import eevaeksport.MatrixLine;
@@ -1114,13 +1116,19 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
        
        private NumberFormat NF = NumberFormat.getInstance();
        
-     	  
+       Properties konverter = null;
+       
        private TreeMap  getOpenOrders(){
     	   
     	    NF.setMaximumFractionDigits(4);
     	    NF.setGroupingUsed(false);
       
-    	    
+    	    try {
+    	    	  konverter = EksportFrame.loadProps("abifailid/konverter.txt");
+    	    	 // System.out.println("konverter " + konverter.toString());
+    	    }catch (Exception e) {
+    	    	e.printStackTrace();
+    	    }
     	    TreeMap cmanas = custManas();
   		    TreeMap<String, ArrayList<Toode>> docs = new TreeMap<String, ArrayList<Toode>>();
   			TreeMap res = new TreeMap();
@@ -1203,6 +1211,10 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	  			    	  if(toode.startsWith("UT") && prods.get(toode) != null) {
 	  			    		  toode = ((Product)prods.get(toode)).getEAN();
 	  			    		 // System.out.println("muutsin koodi " + toode);
+
+	  			    		  if(konverter != null && konverter.getProperty(toode) != null) {
+	  			    			  toode = (String)konverter.getProperty(toode);
+	  			    		  }
 	  			    	  }
 	  			    	  
 	  			    	  

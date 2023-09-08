@@ -103,6 +103,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 
 	
 	 private void makePictureCat(){
+		 
 
 		 String cmd2 = "SELECT t.[No_] AS toode, (t.[Search Description]) AS nimi, sp.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp\r\n" + 
 					"	, t.[Pogrupio kodas] AS grupp2  , [Base Unit of Measure] AS unit\r\n" + 
@@ -119,12 +120,14 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 					"   AND [Starting Date] <= GETDATE() AND [Ending Date] >= GETDATE()   \r\n" + 
 					"WHERE ([Blocked] = 0 AND sp.[Unit Price] > 0 AND LEN([Grupės kodas]) > 0 AND LEN([Search Description]) != 0 AND t2.[Not for Merisoft] <> 1) \r\n" + 
 					"ORDER BY t.[No_] " ;
+		 
+		 cmd2 = " select * from  MobilejavaVIK.v_VIK_GetProducts ";
 		     	String picts = parent.getProps().getProperty("pict.dir");
 
 		     	String pictspda = parent.getProps().getProperty("pictpda.dir");
 
 		   	try {
-		 	   Connection con = getNewConnection2();
+		 	   Connection con = getNewConnectionView();
 			
 		   		Statement stmt = con.createStatement();
 		   	    ResultSet	      rs = stmt.executeQuery(cmd2);
@@ -513,7 +516,7 @@ System.out.println(cmd);
 		setTreeGroup(true);
 		String cmd = " SELECT  [Kodas] AS kood,[Aprašas] AS nimi  FROM [Vičiūnai ir Ko$Prekių grupavimas] order by [Kodas]";
 		try {
-			Connection con = getNewConnection2();
+			Connection con = getNewConnectionView();
 			System.out.println(cmd);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
@@ -731,11 +734,12 @@ System.out.println(cmd);
 		String cmd = "SELECT [Code] AS kood,[Name] AS nimi,[Location Code] AS objekt ,left ([Location Code for MobileJava],3) AS objekt2" +
 				" ,[Item subgroup filter] as grups FROM "
 				+ "[Vičiūnai ir Ko$Salesperson_Purchaser] WHERE len([Location Code])>0";
+		  cmd = "select * from  MobilejavaVIK.v_VIK_GetAgents ";
 		if (isDebug())
 			System.out.println(cmd);
 		TreeMap agents = new TreeMap();
 		try {
-			Connection con = getNewConnection2();
+			Connection con = getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -769,7 +773,10 @@ System.out.println(cmd);
 				 agents1.put(agent.getID(), agent);
 				 agent1.put(agent.getID(), agent);
 			}
-
+             rs.close();
+             stmt.close();
+             con.close();
+             
 			Agent aa = new Agent("HOUSE1");
 			aa.setName("office1");
 			// aa.setObject("KAU");
@@ -788,8 +795,9 @@ System.out.println(cmd);
 
 			cmd = "SELECT k.[No_] AS klient, [Balance total (LCY)]AS summa "
 					+ " FROM [Vičiūnai ir Ko$Customer] k  WHERE k.[Salesperson Code] != '' AND [Balance total (LCY)]<>0 ";
+			cmd ="select * from MobilejavaVIK.v_VIK_GetDebts";
 			System.out.println(cmd);
-			con = getNewConnection2();
+			con = getNewConnectionView();
 			Statement stmt1 = con.createStatement();
 			ResultSet rs1 = stmt1.executeQuery(cmd);
 			while (rs1.next()) {
@@ -802,7 +810,7 @@ System.out.println(cmd);
 			}
 
 			rs1.close();
-			rs.close();
+			stmt1.close();
 			con.close();
 		} catch (Exception e) {
 			getParent().showError(e);
@@ -841,11 +849,10 @@ System.out.println(cmd);
 
 		
 			
-			String ccc =  "select custcode as cust ,Code+ ' ' +name as last from MobilejavaVIK.v_VIK_FA ";
+			
 			 
-			 String qqq = "select Agent as agent , Customer  as klient , [Route Code]as day from " +
-			 		" [Vičiūnai ir Ko$Route sequence]	 ";
-			 
+		
+		/*	 
 			  Connection cone = this.getNewConnection2();
 		    
 		   	Statement stme = cone.createStatement();
@@ -879,9 +886,12 @@ System.out.println(cmd);
 		       rse.close();
 		      stme.close();
 		      cone.close();
-
+*/
 		   //   System.out.println("custAgents " + custAgents);
-		      
+		    
+			
+			
+	String ccc =  "select custcode as cust ,Code+ ' ' +name as last from MobilejavaVIK.v_VIK_FA ";
 		      
   	Connection cn = getNewConnectionView();
  	Statement stcn = cn.createStatement();
@@ -910,13 +920,13 @@ System.out.println(cmd);
 	cn.close();
 	
 	
-	   String cc2 = "select [Code] as klient , [EDI ILN] as iln from  dbo.[Vičiūnai ir Ko$Ship-to Address] where [EDI ILN] != ''";
+	   String cc2 = "select [Code] as klient2 , [EDI ILN] as iln from  dbo.[Vičiūnai ir Ko$Ship-to Address] where [EDI ILN] != ''";
 	   con = getNewConnection2();
 	   
 	   Statement stmt1 = con.createStatement();
 		ResultSet rs1 = stmt1.executeQuery(cc2);
 		while (rs1.next()) {
-			String addID = rs1.getString("klient").trim();
+			String addID = rs1.getString("klient2").trim();
 		String ilnID = rs1.getString("iln").trim();
 		
 			aad.put(addID, ilnID);
@@ -947,10 +957,13 @@ System.out.println(cmd);
 				+	" group by a.[Sell-to Customer No_] , h.[Ship-to Code],a.[Customer No_] ,a.[External Document No_], "
 					+ " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount]) <> 0 ";
 		  	
+		  	
+		  	cmd ="select * from MobilejavaVIK.v_VIK_GetDebtList";
 			System.out.println(cmd);
 			this.debtList = new Vector();
 			
-			 stmt1 = con.createStatement();
+			cn = getNewConnectionView();
+			 stmt1 = cn.createStatement();
 			 rs1 = stmt1.executeQuery(cmd);
 			while (rs1.next()) {
 				Debt debt = new Debt();
@@ -990,7 +1003,7 @@ System.out.println(cmd);
 			}
 
 			rs1.close();
-			con.close();
+			cn.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1003,7 +1016,8 @@ System.out.println(cmd);
 				 " and a.[Posting Date] > getdate()- 1000 group by a.[Customer No_]  having sum(b.[Amount])<> 0 ";
 	
 	try {
-		Connection con3 = getNewConnection2();
+		sql3= "select * from MobilejavaVIK.v_VIK_GetOverdue";
+		Connection con3 = getNewConnectionView();
 		Statement stmt3 = con3.createStatement();
 		ResultSet rs3 = stmt3.executeQuery(sql3);
 		while (rs3.next()) {
@@ -1549,7 +1563,10 @@ System.out.println(cmd);
 			
 			cmd7 = " select sd.[Code] as kood ,[Line Discount %] as disc, 'price' as types from [Vičiūnai ir Ko$Sales Line Discount] sd \r\n" + 
 					"				 where getdate() between [Starting Date] and [Ending Date] +1 ";
-			con = getNewConnection2();
+			
+			
+			cmd7 = "select * from MobilejavaVIK.v_VIK_GetDiscount";
+			con = getNewConnectionView();
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(cmd7);
 			while (rs.next()) {
@@ -1558,15 +1575,8 @@ System.out.println(cmd);
 				
 				toode = rs.getString("kood").trim();
 				seis = rs.getDouble("disc");
-				String type = rs.getString("types");
 				discT.put(toode, seis + "");
-			/*	if(type.equals("disc")) {
-					discT.put(toode, seis + "");
-				}else if (discT.get(toode) == null){
-					discT.put(toode, seis + "");
-				}*/
-				
-
+		
 			}
 
 			rs.close();
@@ -1579,7 +1589,11 @@ System.out.println(cmd);
 					+ // status=1 and
 					"order by r.[No_]";
 
-			con = getNewConnection2();
+			
+			cmd0 = "select * from  MobilejavaVIK.v_VIK_GetAmsOnOrders";
+			
+			//con = getNewConnection2();
+			con = this.getNewConnectionView();
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(cmd0);
 			while (rs.next()) {
@@ -1619,8 +1633,9 @@ System.out.println(cmd);
 		String top2 =" select No_ as itemid , [Min_ Order Time] as asi from [Vičiūnai ir Ko$Item 2] where "
 				+ " DATEPART(HOUR,[Min_ Order Time]) != 0  " ;
 		
-		
-	con = getNewConnection2();
+		top2 = "select * from  MobilejavaVIK.v_VIK_GetMinOrdTimes";
+		//con = this.getNewConnection2();
+	con = this.getNewConnectionView();
 	stmt = con.createStatement();
 	rs = stmt.executeQuery(top2);
 	while (rs.next()) {
@@ -1679,8 +1694,11 @@ System.out.println(cmd);
 					"WHERE ([Blocked] = 0 AND sp.[Unit Price] > 0 AND LEN([Grupės kodas]) > 0 AND LEN([Search Description]) != 0 AND t2.[Not for Merisoft] <> 1) \r\n" + 
 					"ORDER BY t.[No_]" ;
 			
+			cmd = "select * from  MobilejavaVIK.v_VIK_GetProducts ";
+			
 			System.out.println(cmd);
-			Connection con = getNewConnection2();
+			//Connection con = getNewConnection2();
+			Connection con = getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -1989,9 +2007,11 @@ System.out.println(cmd);
 				    "	 r.[Užsakytas kiekis] -r.[Quantity] as saamatta FROM [Vičiūnai ir Ko$Sales Shipment Line] r INNER JOIN [Vičiūnai ir Ko$Sales Shipment Header] d ON r.[Document No_]= d.[No_] " +
 				   
 					"	  WHERE d.[Shipment Date]> GETDATE()-30 ";
+			
+			cmd = " select * from   MobilejavaVIK.v_VIK_GetCustProdList";
 			System.out.println(cmd);
 			// "klient","toode","kogus","viimane kuupļæ½ev","viimane kogus"
-			Connection con = getNewConnection2();
+			Connection con = getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -2059,9 +2079,10 @@ System.out.println(cmd);
 				    "	 FROM [Vičiūnai ir Ko$Sales Shipment Line] r INNER JOIN [Vičiūnai ir Ko$Sales Shipment Header] d ON r.[Document No_]= d.[No_] " +
 				   "	  WHERE d.[Shipment Date]> GETDATE()-30 "
 					+ " Order by 1,3,5 desc ";
+			cmd2 = "select * from   MobilejavaVIK.v_VIK_GetCustProdList";
 			System.out.println(cmd2);
 			// "klient","toode","kogus","viimane kuupļæ½ev","viimane kogus"
-			Connection con2 = getNewConnection2();
+			Connection con2 = getNewConnectionView();
 			Statement stmt2 = con2.createStatement();
 			ResultSet rs2 = stmt2.executeQuery(cmd2);
 

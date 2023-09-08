@@ -4125,6 +4125,9 @@ public class Converter {
 	                
 		  	  		mail.setFilesTo(parent.getProps().getProperty("operatoremail"));
 		  	  		mail.setFrom(parent.getProps().getProperty("from"));
+		  	  		
+		  	  	
+		  	  		
 		  	  		String agent = "";
 		  	  	if(ag != null) {
 		  	  		agent = ag.getName() ;
@@ -4147,6 +4150,12 @@ public class Converter {
 		  	  		}
 		  	  		
 		  	  		mail.send();
+		  	  		
+		  	  	if(ag != null && "true".equals(parent.getProps().getProperty("sendconftoagent"))) {
+	  	  			mail.setFilesTo(ag.getEmail());
+	  	  		    mail.send();
+	  	  		}
+		  	  		
 		  	  		System.out.println("\nOrder Comment " +  doknr + " " + lisa + custid + " "+ nimi + " " + agent + "\n\n" +
 		  	  				  "\n >>>>>" + comment + "<<<<<");
 		  				
