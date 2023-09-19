@@ -133,19 +133,28 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 
 						
 						 pstm = con.prepareStatement(sql2);
+						 rs6 = pstm.executeQuery();
 
-					while(rs6.next()){
-					smas.put(rs6.getString("toode").trim(),rs6.getDouble("kogus") );
+						while(rs6.next()){
+						smas.put(rs6.getString("toode").trim(),rs6.getDouble("kogus") );
+						}
+						rs6.close();
+						pstm.close();
+						con.close();
+						//System.out.println("smas " + smas.size());
+						
+					}catch(Exception e) {
+						e.printStackTrace();
 					}
-					rs6.close();
-					pstm.close();
-					con.close();
-					//System.out.println("smas " + smas.size());
 					
-				}catch(Exception e) {
-					e.printStackTrace();
-				}
+				
 			
+					if(Calendar.getInstance().get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY || "true".equals(parent.getProps().getProperty("flint"))){
+						sendFlintReports(ppprods,smas);
+					}
+					
+					
+					
 			if(Calendar.getInstance().get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY || "true".equals(parent.getProps().getProperty("chumak"))){
 				sendChumakReports(pprods,smas);
 			
@@ -165,9 +174,6 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 				}
 			}
 			
-			if(Calendar.getInstance().get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY || "true".equals(parent.getProps().getProperty("flint"))){
-				sendFlintReports(ppprods,smas);
-			}
 			
 	     	sendVeresReports(pprods,smas);
 			makePictureCat();
@@ -568,19 +574,12 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 	private void sendFlintReports(TreeMap prods , TreeMap smas){
 		
 		Calendar cals = Calendar.getInstance();
-		if("true".equals(parent.getProps().getProperty("flint"))){
-		cals.add(Calendar.DAY_OF_MONTH, -7);
-		}
-		if(cals.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-				    while (cals.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-				        cals.add(Calendar.DAY_OF_WEEK, -1);
-				    }
-		}
-       
+		cals.set(Calendar.DAY_OF_MONTH, 1);
+		
 		
 		Calendar cale = Calendar.getInstance();
 		if("true".equals(parent.getProps().getProperty("flint"))){
-		cale.add(Calendar.DAY_OF_MONTH, -7);
+		   //cale.add(Calendar.DAY_OF_MONTH, -7);
 		}
 		if(cale.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
 				    while (cale.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
@@ -624,7 +623,7 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 	    	         
 	    	          	PreparedStatement st = con.prepareStatement(sql);
 	    	            st.setTimestamp(1, new Timestamp(cals.getTimeInMillis()));
-	    	            st.setTimestamp(2, new Timestamp(cale.getTimeInMillis()));
+	    	            st.setTimestamp(2, new Timestamp(cc.getTimeInMillis()));
 	    	            ResultSet rs = st.executeQuery();
 	    	            
                             int i = 2;

@@ -963,7 +963,8 @@ public Vector getDebt() throws SQLException{
           
           
           double ale = line.getDiscount();
-          if (ale == -1 ){
+          
+          if (ale == -1 || Double.isNaN(ale)){
           ale = 0 ;
               }
           if(ale == -1 ){

@@ -2667,7 +2667,8 @@ SELECT  [MasterProductCode] as klient
 	public Vector getFixedAssortmentData() {
 		Vector result = new Vector();
 		//this.getProducts(null);
-		String sql = "select DeliveryCustomerCode as cuid, ProductCode as toode from AssortmentRegisterNEW where Listing != 0 and Period = 'current' "  ;
+		String sql = "select DeliveryCustomerCode as cuid, ProductCode as toode, EANcode as ean from "
+				+ "AssortmentRegisterNEW where Listing != 0 and Period = 'current' "  ;
 try {
 	
 
@@ -2681,6 +2682,7 @@ try {
 			// mingi t�his
 			 String custID =  rs.getString("cuid").trim();
              String prodID =  rs.getString("toode").trim();
+             String prodEA = rs.getString("ean").trim();
 				if (custID != null
 						&& custID.trim().length() > 0) {
 					//mline.setCustID(custID.trim());
@@ -2688,6 +2690,10 @@ try {
 				}
 			
 
+				if(eans != null && eans.get(prodEA) != null) {
+					prodID = (String)eans.get(prodEA);
+				}
+				
 				if (prodID != null
 						&& prodID.trim().length() > 0 ) {
 					if(prodID.startsWith("F") || prodID.startsWith("E") || prodID.startsWith("H") || prodID.startsWith("B")) {

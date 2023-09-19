@@ -740,7 +740,7 @@ public class Product {
 	}
 
 	public void setPhotoid(String photoid) {
-		this.photoid = photoid;
+		this.photoid = photoid.replaceAll(";", "|");
 	}
 
 	public String getTypeSimi() {

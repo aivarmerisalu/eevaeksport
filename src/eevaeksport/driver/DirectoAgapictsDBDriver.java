@@ -2196,11 +2196,15 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    	  len = line.indexOf(   "data code=\"ART_SELVER__E_POOD\""); 
 	
 	 	 if(len != -1){
+	 		 try {
 	 		pesa =  line.substring(len + 40); 
 	     	pesa = pesa.substring(0,pesa.indexOf("\""));
          if(pesa.contains("Jah")) {
               selverEpoodProds.add(prod.getID());
           }
+	 		 }catch(Exception e) {
+	 			 
+	 		 }
   //   System.out.println("Etooted " + pesa  );
 	 	 }
    	 	
@@ -2519,10 +2523,15 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		     	 	 len = line.indexOf("data code=\"ART_ASUKOHT\""); 
 		     	 	 boolean goes = false;
 		     	 	 if(len != -1){
-		     	 		pesa =  line.substring(len + 33); 
-		     	     	pesa = pesa.substring(0,pesa.indexOf("\""));
-		                //System.out.println("pesa " + pesa );
-		                goes = true;
+		     	 		 try {
+		     	 			pesa =  line.substring(len + 33); 
+			     	     	pesa = pesa.substring(0,pesa.indexOf("\""));
+			                //System.out.println("pesa " + pesa );
+			                goes = true; 
+		     	 		 }catch(Exception e) {
+		     	 			 
+		     	 		 }
+		     	 		
 		          	 }
 		      	     prod.setName( pesa + Converter.deCode(name.substring(0,name.indexOf("\""))) + prod.getID());
 		      	   //  System.out.println(prod.getName());
@@ -2550,6 +2559,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		    	 	 len = line.indexOf("data code=\"ART_EAN_KONVERT\""); 
 		   
 		      	    if(len != -1){
+		      	    	try {
 		      	    	 String ean   = line.substring(len + 37);
 		      	    	 ean = ean.substring(0,ean.indexOf("\""));
 		      	    	ean =  ean.replaceAll(";", ":");
@@ -2562,6 +2572,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		      	    	    if(prod.getID().contains("KO003649"))
 			          	     System.out.println("Konvert kood " + ean + " " + prod.getID());
 			            }
+		      	    	}catch(Exception e) {
+		      	    		
+		      	    	}
 		          	 }
 		      	    
 		      	     tm.put(prod.getID(), prod); 

@@ -995,6 +995,9 @@ if(order.getWarehouse() != null && order.getWarehouse().trim().equals("kink")){
            if(tagastus) {
         	   aa = "22R";
            }
+           if(kink) {
+        	   aa = "228";
+           }
            sb.append("<BGM0101-DocumentMessageNameCoded>" + aa + "</BGM0101-DocumentMessageNameCoded>" + ls);
            sb.append("<BGM0103-CodeListResponsibleAgencyCoded>ZZZ</BGM0103-CodeListResponsibleAgencyCoded>" + ls);
            sb.append("</BGM01-DocumentMessageName>" + ls);
