@@ -264,6 +264,13 @@ public class Product {
           partii = status;
         }
 
+        public void addPartii(String status){
+        	if(partii.trim().length() > 0) {
+        		 partii = partii + "|" + status;
+        	}else {
+        		 partii = status;
+        	}
+          }
 
     public String idabi = null;
     private String sendSeparate = " ";

@@ -1316,6 +1316,7 @@ System.out.println(cmd);
   	              	seis = rs.getDouble("kogus");
   	          	double seis2 = rs.getDouble("PickupQty");
   	              	ladutr.put(toode, seis + "");
+  	              	if(seis2 > 0)
   	          	    ladulah.put(toode, seis2 + "");
   	        }
 
@@ -1380,7 +1381,7 @@ System.out.println(cmd);
 			" ,t.[Base Unit of Measure] AS unit,[No_ 2] AS ean,'' AS status ,0 AS maxdiscount, " +
 			 " '' AS type, [Units per Parcel] AS kastis,[Item Disc_ Group] as alegr ,  '' AS kaal, "
 			 + "[VAT Prod_ Posting Group] AS vat ,[Units per Pallet] as pallet " +
-			 " ,[Unit List Price] as listprice,[New until] as newprod ,[Nelikvidas]  as status2 FROM [2015_Tobis$Item] t  WHERE t.[Blocked]=0    ORDER BY t.[No_] ";
+			 " ,[Unit List Price] as listprice,[New until] as newprod ,[Nelikvidas]  as status2 , [Minimum Unit Price]  as jaeh FROM [2015_Tobis$Item] t  WHERE t.[Blocked]=0    ORDER BY t.[No_] ";
       
     	 System.out.println(cmd);
      	 con = getNewConnection2();
@@ -1479,6 +1480,14 @@ System.out.println(cmd);
                 	   
                    }
                  
+                   try {
+                	   double status = rs.getDouble("jaeh");
+                       if(status > 0) {
+                    	   prod.addPartii("Savikaina: " + getNF().format(status) + "€");
+                       }   
+                   }catch(Exception e) {
+                	   
+                   }
                    
                    
                    if(luba.contains(prod.getID()) && !name.equals("")){
