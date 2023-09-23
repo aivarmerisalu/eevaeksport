@@ -27,6 +27,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
@@ -59,6 +60,7 @@ import org.xml.sax.InputSource;
 import eevaeksport.Agent;
 import eevaeksport.Customer;
 import eevaeksport.EksportFrame;
+import eevaeksport.Product;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -100,6 +102,7 @@ public class AxaJNGLATImportDriver extends AbstractImportDriver{
     }
   
   HashMap customers = null;
+  TreeMap prodNames = null;
   String instance = null;
   private String url = "jdbc:odbc:axa";
   
@@ -282,6 +285,9 @@ try{
       
       if( (instance.equals("shell") || order.getAgent().startsWith("SH")) && this.customers == null) {
     	  customers = this.getCustomers();
+       }
+      if( (instance.equals("shell") || order.getAgent().startsWith("SH")) && this.prodNames == null) {
+    	  prodNames = this.getProducts(null);
        }
       
       String signature = order.getSignature();
@@ -505,10 +511,16 @@ JSONObject ord = new JSONObject();
 		    	  Agent ag = new Agent(order.getAgent());
 		    	  ag.setEmail(props.getProperty(order.getAgent()));
 		    	  ag.setName(props.getProperty(order.getAgent()));
-		    	  
+		    	//  System.out.println(prodNames);
 		    	
-		    	  Converter.sendCommentEmail("order " + order.getInfo(), null, order.getAgent() + "-" + order.getDokNr(), order.getCompany(),
+		    	  String linesTXT = Converter.getOrderText(order, prodNames);
+		    	  String comm = "";
+		    	  if(order.getInfo() != null) {
+		    		  comm = order.getInfo();
+		    	  }
+		    	  Converter.sendCommentEmail("order " + comm + "\n\n" + linesTXT, null, order.getAgent() + "-" + order.getDokNr(), order.getCompany(),
 		    			  ((Customer)customers.get(order.getCompany())).getName(), null, false, ag, parent, fileName);
+		    	 
 		    	  System.out.println("Shell email sent");
 		      }
 		      
@@ -519,6 +531,34 @@ JSONObject ord = new JSONObject();
 	     
 	 }
 
+ 
+ 
+ private TreeMap getProducts(Agent agent){
+
+	    String cmd = " select * from getproducts where nimi1 != ''";
+	    
+	    TreeMap products = new TreeMap();
+	    try {
+   Connection con = this.getNewConnection();
+	    	Statement stmt =  con.createStatement();
+	      ResultSet rs = stmt.executeQuery(cmd);
+	      HashMap prodHash = new HashMap();
+	      while(rs.next()){
+	        String kood = rs.getString("toode").trim();
+	        String nimetus = rs.getString("nimi1").trim() ;
+	         products.put(kood, nimetus);
+	        
+	      }
+	      rs.close();
+	      stmt.close();
+	      con.close();
+	    }catch(Exception e) {
+	    	e.printStackTrace();
+	    }
+	    return products;
+ }
+	        
+	        
  
  private void addToDB(String number,String json) throws SQLException{
 

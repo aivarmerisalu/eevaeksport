@@ -16993,7 +16993,7 @@ shipdate = getCalXML(asi);
       if("true".equals(parent.getProps().getProperty("order.encode.ansi"))){
     	  try{
     		 File encoded = null;
-    	        Charset win = Charset.forName("cp1251");
+    	        Charset win = Charset.forName("cp1251");//	cp1257
     	        Charset utf = Charset.forName("utf-8");
      	       
     	        	InputStream in = new FileInputStream(file);

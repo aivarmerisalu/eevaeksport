@@ -2685,8 +2685,8 @@ try {
              String prodEA = rs.getString("ean").trim();
 				if (custID != null
 						&& custID.trim().length() > 0) {
-					//mline.setCustID(custID.trim());
-					mline.setCliGroup(custID.trim());
+					mline.setCustID(custID.trim());
+				//	mline.setCliGroup(custID.trim());
 				}
 			
 

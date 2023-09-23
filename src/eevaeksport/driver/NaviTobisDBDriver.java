@@ -1483,7 +1483,7 @@ System.out.println(cmd);
                    try {
                 	   double status = rs.getDouble("jaeh");
                        if(status > 0) {
-                    	   prod.addPartii("Savikaina: " + getNF().format(status) + "€");
+                    	   prod.addPartii("|  Savikaina: " + getNF().format(status) + "€");
                        }   
                    }catch(Exception e) {
                 	   

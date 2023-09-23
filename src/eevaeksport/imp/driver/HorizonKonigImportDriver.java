@@ -782,7 +782,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  ord9.setPaymTerm(order.getPaymTerm());
 	  ord9.setShipDateUsed(order.isShipDateUsed());
 	  ord9.setWarehouse(order.getWarehouse());
-	  ord9.setDealer("53271");
+	  ord9.setDealer("85349");
 	  ord9.setCurrency(getType(order.getDealer(),9,order)); // G tähega
 	  
 
@@ -1305,8 +1305,8 @@ private Vector splitOrderHRC (Order order){
     	  ord9.setPaymTerm(order.getPaymTerm());
     	  ord9.setShipDateUsed(order.isShipDateUsed());
     	  ord9.setWarehouse(order.getWarehouse());
-    	  ord9.setDealer("53271");
-    	  ord9.setCurrency("NDM3"); // G tähega
+    	  ord9.setDealer("85349");
+    	  ord9.setCurrency("NDM33"); // G tähega
           
     	  Order ord2 = new Order((order.getCompany() + "_" + cuKont ),order.getAgentFirstName());
     	  ord2.setAgentCode(order.getAgentCode());
@@ -1441,7 +1441,7 @@ private String getType(String ware , int num , Order ord ){
 		}
 		
 		if(num == 9 ){ // G
-			return "NDM3";
+			return "NDM33";
 		}
 	
 		if(num == 12 ){ 
@@ -1636,7 +1636,7 @@ private String getTypeHRC(String ware , int num , Order ord ){
 		}
 		
 		if(num == 9 ){ // G
-			return "NDM3";
+			return "NDM33";
 		}
 	
 		

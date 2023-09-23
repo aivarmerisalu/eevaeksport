@@ -931,10 +931,10 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	        char ch = originalUnprotectedString.charAt(i);
 
 	        boolean controlCharacter = ch < 32;
-	        boolean unicodeButNotAscii = ch > 126;
+	        boolean unicodeButNotAscii = ch > 256;
 	        boolean characterWithSpecialMeaningInXML = ch == '<' || ch == '&' || ch == '>';
 
-	        if (characterWithSpecialMeaningInXML || unicodeButNotAscii || controlCharacter) {
+	        if (characterWithSpecialMeaningInXML  || controlCharacter) { // || unicodeButNotAscii
 	           // stringBuffer.append("&#" + (int) ch + ";");
 	            anyCharactersProtected = true;
 	        } else {

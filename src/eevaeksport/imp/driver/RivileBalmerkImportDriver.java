@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
@@ -528,6 +529,54 @@ public Vector getDebt() throws SQLException{
   }
   
   TreeMap custs = null;
+  HashSet statProds = null;
+  
+  public HashSet getStatProds(){
+	  
+    HashSet products = new HashSet();
+    
+      	try {
+      		
+      	   String cmd = " SELECT N17_KODAS_PS AS toode  FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
+      	   		"   left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1 and "
+      	   		+ "(L02_KODAS_FS is null or L02_KODAS_FS!='NP_O') and N17_MEN_PAV !='IG' and len(ltrim(N17_PAV_K1))  >0 and N17_kodas_gs = 'STAT'";
+      		 con = DriverManager.getConnection(url + "rivile","","");
+             PreparedStatement   stmt = con.prepareStatement(cmd);
+             ResultSet	      rs = stmt.executeQuery();
+
+          
+          while (rs.next()) {
+        	  products.add(rs.getString("toode").trim());
+          }
+         
+          rs.close();
+          stmt.close();
+          con.close();
+          
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+
+      return products;
+  }
+
+  
+  
+  private boolean onlyStat(Order order) {
+	  boolean res = true;
+		
+		 Vector lines = order.getOrderLines();
+	     for (int i = 0; i < lines.size(); i++) {
+	    	    
+	      	OrderLine line = (OrderLine)lines.elementAt(i);
+	          String toode = line.getToode();
+	           if(!statProds.contains(toode)) {
+	        	   res = false;
+	           }
+	         }
+	  
+	  return res;
+  }
   
   public void makeOrder(Order order) throws SQLException{
 	  getNF();
@@ -536,13 +585,13 @@ public Vector getDebt() throws SQLException{
 	  if(custs == null) {
 		custs =   this.getCustomers();
 	  }
-	  
+	
 	  
 	  boolean kaup = false;
-	  
-	 
+	
 	  
 	  boolean tag = false;
+	  
 	  OrderLine ol = (OrderLine)order.getOrderLines().get(0);
 	  if(ol.getKogus() < 0) {
 		  tag = true;
@@ -577,10 +626,18 @@ public Vector getDebt() throws SQLException{
 		  
 		  
 	  }
+	  boolean stat = false;
+	  if(tag) {
+		  if(statProds == null) {
+			  statProds = this.getStatProds();
+		  }
+		  
+	   stat = onlyStat(order);
+	  }
 	  
-	  System.out.println("On Tagastus/Võlgu " + tag + " " + volgu + " " + kaup);
+	  System.out.println("On Tagastus/Võlgu " + tag + " " + volgu + " " + kaup + " statProds " + stat);
 	  
-      makeOutput(order, tag, volgu, kaup, yle);
+      makeOutput(order, tag, volgu, kaup, yle , stat);
     
     
     if(volgu || yle) {
@@ -777,7 +834,7 @@ public Vector getDebt() throws SQLException{
   
  
 
- private void makeOutput(Order order,boolean tag, boolean volgu , boolean kaup , boolean yle){
+ private void makeOutput(Order order,boolean tag, boolean volgu , boolean kaup , boolean yle, boolean stat){
  	StringBuffer sb = new StringBuffer();
    
 	Hashtable pandikas =  new Hashtable();
@@ -948,6 +1005,8 @@ public Vector getDebt() throws SQLException{
     	  }
     	  
           cou++;
+      } else if(tag && !stat) {
+    	  sb.append("          <I06_KODAS_LS_3>BLOCK</I06_KODAS_LS_3>" + ls);  
       }
           
       
