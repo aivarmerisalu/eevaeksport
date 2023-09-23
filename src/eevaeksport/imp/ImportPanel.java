@@ -62,6 +62,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -80,6 +81,7 @@ import eevaeksport.ConvertData;
 import eevaeksport.EksportFrame;
 import eevaeksport.Email;
 import eevaeksport.Product;
+import eevaeksport.driver.Toode;
 import eevaeksport.imp.driver.AbstractImportDriver;
 import eevaeksport.imp.driver.KalevImportDriver;
 import eevaeksport.imp.driver.MovexLatImportDriver;
@@ -313,6 +315,7 @@ public String parseFirstEmail(String emails) {
                 System.out.println(file.getAbsolutePath());
                 // file.delete();
         	}
+        
 
          	if(format.equals("idaxls")){
        		 System.out.println("xls tellimus IdaAri formaat");
@@ -622,6 +625,14 @@ public String parseFirstEmail(String emails) {
                 String format = identifyXLS(file);
                 System.out.println("XLS tellimus formaat "  + format);
                try{
+            		
+               	if(format.equals("konig")){
+              		 System.out.println("xlsx tellimus Konig formaat");
+              		loadXLSKonigOrder(orders, file,troubles);
+                      System.out.println(file.getAbsolutePath());
+                      // file.delete();
+              	}
+            	   
             	   if(format.equals("eiginta")){
                        this.loadXLSEigintaOrder(orders, file,troubles);
                        System.out.println("XLS tellimus eiginta");
@@ -11561,6 +11572,9 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 	  String result = null;
 		int a = 0;
 		FileInputStream ff  = null;
+		if(f.getName().startsWith("konig")) {
+			return "konig";
+		}
 	    try{
 	    	 ff = new FileInputStream(f);
 			HSSFWorkbook workbook = new HSSFWorkbook((ff));
@@ -16272,6 +16286,119 @@ shipdate = getCalXML(asi);
 
 	  }
 
+  private void loadXLSKonigOrder(Orders orders, File f,StringBuffer troubles) throws IOException{
+	    String fileName = f.getName();
+	    
+	    setEmailBody(orders,fileName);
+	
+	    TreeMap<String, ArrayList<Toode>> tellid = new TreeMap<String, ArrayList<Toode> >();
+	    String tellijaKood = null;
+	    String dokNr = null;
+	    firma = "";
+	    int counter = 0;
+	    String shipdate = " ";
+	    String tellijaRegnr = null;
+	    String kood = null;
+	    
+		int a = 0;
+	    try{
+	    	FileInputStream ff = new FileInputStream(f);
+			Workbook workbook = new XSSFWorkbook((ff));
+			Sheet sheet = workbook.getSheet("report");
+			for(int i = 0 ; i < sheet.getLastRowNum();i++){
+				XSSFRow row = (XSSFRow) sheet.getRow(i);
+				if(row == null && a == 0){
+					a = i;
+				}else{
+					a = sheet.getLastRowNum();
+				}
+			}
+			System.out.println("sees " + a);
+			//Teeme kõige pealt  valmis tellimused 
+			 DataFormatter formatter = new DataFormatter();
+			 
+			
+			for(int i = 0 ; i <= a;i++){
+				XSSFRow row = (XSSFRow) sheet.getRow(i);
+				 
+                 String toode = formatter.formatCellValue(row.getCell((short) 18));
+                 String klient = formatter.formatCellValue(row.getCell((short) 21));
+                 try {
+				 Integer kogus = Integer.parseInt(formatter.formatCellValue(row.getCell((short) 12)));
+				 
+					
+					if(kogus > 0) {
+						//System.out.println("sees " + toode + " " + klient + " " + kogus);
+						 
+				 ArrayList<Toode> tooted = tellid.get(klient);
+				 if(tooted == null) {
+					 tooted = new ArrayList<Toode>();
+				 }
+				 Toode tt = new Toode(toode);
+				 tt.setKogus(kogus);
+				 tooted.add(tt);
+				 
+				 tellid.put(klient, tooted);
+
+					}
+                 } catch(Exception e) {
+                	 e.printStackTrace();
+                 }
+			}
+			
+		ff.close();
+		
+		
+     Iterator itera  = tellid.keySet().iterator();
+     int i = 1;
+		while(itera.hasNext()){
+			String custid = (String)itera.next(); 
+		
+			orders = new Orders("aaa", false);
+			firma = custid; // maxima variant
+			
+			System.out.println("Firma " + firma);
+		
+			Calendar cal = Calendar.getInstance();
+			String num = cal.getTimeInMillis() + "";
+			shipdate = cal.getTime().getTime() + "";
+        	dokNr = "BON" + num.substring(6) + "" + i;    
+        //	System.out.println( i + " " + dokNr);
+        	 doknr=dokNr;
+
+        	 ArrayList<Toode> lines = (ArrayList<Toode>)tellid.get(custid);
+
+            for(Toode tt : lines){
+          		double kogus = tt.getKogus();
+			
+					System.out.println(i + "*"+firma+"*"+ tt.getID()  +"*"+kogus+"*"+ dokNr);
+				          
+				          orders.setInfo(dokNr);
+				          orders.add(firma, tt.getID(), "noname" ,kogus, dokNr, null, 0, 0,shipdate,"0",
+				        		  0,0,false,"",77," ",null,"",null,null,true,null,null);
+				  counter++;
+		       	  
+
+            }
+		       				    try{
+		       	                  	importOrder(orders,troubles); 	
+		       				    } catch (Exception eee){
+		       				    	eee.printStackTrace();
+		       				    }
+			 
+		     }
+		
+		
+		
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+	   // System.exit(0);
+	 f.delete();
+
+	  }
+
+  
   
   private void loadXLSMULTISHEETOrder(Orders orders, File f,StringBuffer troubles) throws IOException{
 	    String fileName = f.getName();
