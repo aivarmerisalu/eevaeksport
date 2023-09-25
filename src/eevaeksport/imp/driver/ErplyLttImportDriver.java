@@ -957,7 +957,7 @@ public class ErplyLttImportDriver extends AbstractImportDriver{
 	    	 for (int i = 0; i < ll.length; i++) {
 	    		
 	    		 String name = ll[i];
-	    		 //   System.out.println(name);
+	    		    System.out.println(name);
 	 		  File f = new File (getDir() + name);
 	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	 	     DocumentBuilder db;

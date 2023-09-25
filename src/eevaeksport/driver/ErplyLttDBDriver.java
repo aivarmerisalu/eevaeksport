@@ -3056,6 +3056,146 @@ public static String getDataDirStr(){
              //   System.exit(0);
               }
                 
+              
+
+              
+              System.out.println("Algab toodete moodustamine" );
+            int   tsykkel = 0;
+              
+              inputLineBuf = new StringBuffer();
+              boolean cut = true;
+              if("true".equals(getParent().getProps().getProperty("nocut"))){        	   
+           	   cut = false;
+              }
+              String luba = "";
+              if(getParent().getProps().getProperty("okgrups") != null){
+                   luba =  "&groupIDsWithSubgroups=" + getParent().getProps().getProperty("okgrups") ;  
+              }
+             
+              if(getParent().getProps().getProperty("okstatus") != null){
+                  luba = luba + "&status=" + getParent().getProps().getProperty("okstatus") ;  
+             }
+              
+           	
+          	try {
+       		inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage +
+       				"&getPackageInfo=1&getStockInfo=1&getContainerInfo=1" + luba + userstuff); //&getStockInfo=1
+       		//inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getStockInfo=1&getContainerInfo=1&warehouseID="+ laoID + userstuff); //&getStockInfo=1
+       		
+       	//	System.out.println("joru1 " + inputLineBuf.substring(0,100));
+       		if(cut){
+       				inputLineBuf = removeTags(inputLineBuf.toString(),"manufacturerName");
+       	    		inputLineBuf = removeTags(inputLineBuf.toString(),"brandName");
+       	    		inputLineBuf = removeTags(inputLineBuf.toString(),"packages");
+       	    	
+       	    		  
+       		  }
+       		//System.out.println("joru2 " + inputLineBuf.substring(0,100));
+       		inputLineBuf = removeTags(inputLineBuf.toString(),"description");
+       		inputLineBuf = removeTags(inputLineBuf.toString(),"longdesc");
+       		inputLineBuf = removeTags(inputLineBuf.toString(),"longdescENG");
+          	} catch (Exception e1) {
+       		e1.printStackTrace();
+       	}
+           
+              
+            if(inputLineBuf.indexOf("recordsTotal") != -1 ){
+           	 int lines = inputLineBuf.indexOf("recordsTotal");
+           	 int end = inputLineBuf.indexOf("recordsTotal",lines+12);
+           	
+           	 try{
+           		 tsykkel = Integer.parseInt(inputLineBuf.substring(lines+13,end-2));
+           	
+           		 //kuion olemas siis vanad failid maha.
+           		 if(tsykkel != 0){
+           			 FileListFilter  fil = new FileListFilter("tootederp","xml");
+           		 String[]  ll = new File (getDir()).list(fil);
+            	    	 for (int i = 0; i < ll.length; i++) {
+            	    		 String name = ll[i];
+            		    		// System.out.println(name);
+            		 		  File f = new File (getDir() + name);
+            	           if(f.exists()){
+            	        	   f.delete();
+            	           }
+            	    	 }	 
+           		 }
+           		 
+           	 }catch(Exception e){
+           		 
+           	 }
+            }
+           // System.out.println("Tooted Tsykkel " + tsykkel );
+              if(inputLineBuf.length() > 2){        
+                  try {
+                	  File f = new File (getDir() + "tootederp1.xml");
+                	  if(f.exists())f.delete();
+            		 Converter.saveFileInUTF8(getDir() + "tootederp1.xml", inputLineBuf.toString().replace((char)0x19, ' ')
+    						 .replace((char)0x19, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0x19, ' ')
+    						 .replace((char)0x1c, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
+    						 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ').replaceAll("<>", " ") .replaceAll("</>", " ")
+    						 .replace((char)0x1b, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0x1b, ' '));
+            	  }catch (Exception ex) {
+            		ex.printStackTrace();
+            	  }
+             }
+              
+              if(tsykkel > onpage ){
+           	  int counter = 2;
+           	   for(;tsykkel > onpage;tsykkel = tsykkel-onpage){
+           		   try {
+           	    		inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getContainerInfo=1&getStockInfo=1&pageNo=" + counter + luba + userstuff); //&getStockInfo=1
+           	    		//inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getContainerInfo=1&getStockInfo=1&warehouseID=" + laoID + "&pageNo=" + counter + userstuff); //&getStockInfo=1
+           	    		if(inputLineBuf.toString().indexOf("1054") != -1 && inputLineBuf.toString().indexOf("error") !=-1){
+           	    			 session = getSessionId(passString);
+           	    				System.out.println("uus session " + session);
+           	    			   while(session.indexOf("%") != -1){
+           	    				   session = getSessionId(passString);
+           	    			   }
+           	    			    userstuff = "&clientCode=" + company +"&version=" + apiversion + "&responseType=" + returntype + "&sessionKey=" + session;
+           	    			    inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getContainerInfo=1&getStockInfo=1&pageNo=" + counter  + luba + userstuff); //&getStockInfo=1
+                   	    			    
+           	    		}
+           	    		
+           	    		if(cut){
+           	    				inputLineBuf = removeTags(inputLineBuf.toString(),"manufacturerName");
+                   	    		inputLineBuf = removeTags(inputLineBuf.toString(),"brandName");
+                   	    		inputLineBuf = removeTags(inputLineBuf.toString(),"packages");
+                   	    		
+                   	    	
+           	    		 }
+           	    		inputLineBuf = removeTags(inputLineBuf.toString(),"description");
+           	    		inputLineBuf = removeTags(inputLineBuf.toString(),"longdesc");
+           	    		inputLineBuf = removeTags(inputLineBuf.toString(),"longdescENG");
+           		   } catch (Exception e1) {
+           	    		e1.printStackTrace();
+           	    	}  
+           		   
+           		  
+           		   
+           	    	if(inputLineBuf.length() > 2){        
+           	               try {
+           	             	  File f = new File (getDir() + "tootederp" + counter + ".xml");
+           	             	  if(f.exists())f.delete();
+           	         
+           	       	    	 Converter.saveFileInUTF8(getDir() + "tootederp" + counter + ".xml", inputLineBuf.toString().replace((char)0x19, ' ')
+            						 .replace((char)0x19, ' ').replace((char)0x1f, ' ').replace((char)0x1f, ' ').replace((char)0xe, ' ').replace((char)0xe, ' ').replace((char)0x19, ' ')
+            						 .replace((char)0x1c, ' ').replace((char)0x1c, ' ').replace((char)0x1c, ' ')
+            						 .replace((char)0x1d, ' ').replace((char)0x1d, ' ').replace((char)0x1d, ' ').replaceAll("<>", " ") .replaceAll("</>", " ")
+            						 .replace((char)0x1b, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0xb, ' ').replace((char)0x1b, ' '));
+           	               }catch (Exception ex) {
+           	         		ex.printStackTrace();
+           	         	  }
+           	          }
+
+           	    	counter++;
+           	   }
+           	   
+              }
+            
+              
+              System.out.println("l�petatud toodete moodustamine" );
+              
+              
                 FileListFilter fil = new FileListFilter("prlisterp","xml");
  	    	 String[] ll = new File (getDir()).list(fil);
  	    	 for (int i = 0; i < ll.length; i++) {
@@ -3073,7 +3213,7 @@ public static String getDataDirStr(){
              		e1.printStackTrace();
              	}
                                        
-                    int tsykkel = 0;
+                     tsykkel = 0;
             		if (inputLineBuf.indexOf("recordsTotal") != -1) {
             			int lines = inputLineBuf.indexOf("recordsTotal");
             			int end = inputLineBuf.indexOf("recordsTotal", lines + 12);
@@ -3464,127 +3604,6 @@ public static String getDataDirStr(){
                 
           
      
-           
-           System.out.println("Algab toodete moodustamine" );
-            tsykkel = 0;
-           
-           inputLineBuf = new StringBuffer();
-           boolean cut = true;
-           if("true".equals(getParent().getProps().getProperty("nocut"))){        	   
-        	   cut = false;
-           }
-           String luba = "";
-           if(getParent().getProps().getProperty("okgrups") != null){
-                luba =  "&groupIDsWithSubgroups=" + getParent().getProps().getProperty("okgrups") ;  
-           }
-          
-           if(getParent().getProps().getProperty("okstatus") != null){
-               luba = luba + "&status=" + getParent().getProps().getProperty("okstatus") ;  
-          }
-           
-        	
-       	try {
-    		inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage +
-    				"&getPackageInfo=1&getStockInfo=1&getContainerInfo=1" + luba + userstuff); //&getStockInfo=1
-    		//inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getStockInfo=1&getContainerInfo=1&warehouseID="+ laoID + userstuff); //&getStockInfo=1
-    		
-    	//	System.out.println("joru1 " + inputLineBuf.substring(0,100));
-    		if(cut){
-    				inputLineBuf = removeTags(inputLineBuf.toString(),"manufacturerName");
-    	    		inputLineBuf = removeTags(inputLineBuf.toString(),"brandName");
-    	    		inputLineBuf = removeTags(inputLineBuf.toString(),"packages");
-    	    		inputLineBuf = removeTags(inputLineBuf.toString(),"description");
-    	    		inputLineBuf = removeTags(inputLineBuf.toString(),"longdesc");	  
-    		  }
-    		//System.out.println("joru2 " + inputLineBuf.substring(0,100));
-        	
-       	} catch (Exception e1) {
-    		e1.printStackTrace();
-    	}
-        
-           
-         if(inputLineBuf.indexOf("recordsTotal") != -1 ){
-        	 int lines = inputLineBuf.indexOf("recordsTotal");
-        	 int end = inputLineBuf.indexOf("recordsTotal",lines+12);
-        	
-        	 try{
-        		 tsykkel = Integer.parseInt(inputLineBuf.substring(lines+13,end-2));
-        	
-        		 //kuion olemas siis vanad failid maha.
-        		 if(tsykkel != 0){
-        			 fil = new FileListFilter("tootederp","xml");
-         	    	 ll = new File (getDir()).list(fil);
-         	    	 for (int i = 0; i < ll.length; i++) {
-         	    		 String name = ll[i];
-         		    		// System.out.println(name);
-         		 		  File f = new File (getDir() + name);
-         	           if(f.exists()){
-         	        	   f.delete();
-         	           }
-         	    	 }	 
-        		 }
-        		 
-        	 }catch(Exception e){
-        		 
-        	 }
-         }
-        // System.out.println("Tooted Tsykkel " + tsykkel );
-           if(inputLineBuf.length() > 2){        
-               try {
-             	  File f = new File (getDir() + "tootederp1.xml");
-             	  if(f.exists())f.delete();
-         		 Converter.saveFileInUTF8(getDir() + "tootederp1.xml", inputLineBuf.toString().replace((char)0x1d, ' ').replace((char)0x1d, ' '));
-         	  }catch (Exception ex) {
-         		ex.printStackTrace();
-         	  }
-          }
-           
-           if(tsykkel > onpage ){
-        	  int counter = 2;
-        	   for(;tsykkel > onpage;tsykkel = tsykkel-onpage){
-        		   try {
-        	    		inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getContainerInfo=1&getStockInfo=1&pageNo=" + counter + luba + userstuff); //&getStockInfo=1
-        	    		//inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getContainerInfo=1&getStockInfo=1&warehouseID=" + laoID + "&pageNo=" + counter + userstuff); //&getStockInfo=1
-        	    		if(inputLineBuf.toString().indexOf("1054") != -1 && inputLineBuf.toString().indexOf("error") !=-1){
-        	    			 session = getSessionId(passString);
-        	    				System.out.println("uus session " + session);
-        	    			   while(session.indexOf("%") != -1){
-        	    				   session = getSessionId(passString);
-        	    			   }
-        	    			    userstuff = "&clientCode=" + company +"&version=" + apiversion + "&responseType=" + returntype + "&sessionKey=" + session;
-        	    			    inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getContainerInfo=1&getStockInfo=1&pageNo=" + counter  + luba + userstuff); //&getStockInfo=1
-                	    			    
-        	    		}
-        	    		
-        	    		if(cut){
-        	    				inputLineBuf = removeTags(inputLineBuf.toString(),"manufacturerName");
-                	    		inputLineBuf = removeTags(inputLineBuf.toString(),"brandName");
-                	    		inputLineBuf = removeTags(inputLineBuf.toString(),"packages");
-                	    		inputLineBuf = removeTags(inputLineBuf.toString(),"description");
-                	    		inputLineBuf = removeTags(inputLineBuf.toString(),"longdesc");	 
-        	    		 }
-        	    	
-        		   } catch (Exception e1) {
-        	    		e1.printStackTrace();
-        	    	}  
-        	    	if(inputLineBuf.length() > 2){        
-        	               try {
-        	             	  File f = new File (getDir() + "tootederp" + counter + ".xml");
-        	             	  if(f.exists())f.delete();
-        	         
-        	       	    	 Converter.saveFileInUTF8(getDir() + "tootederp" + counter + ".xml", inputLineBuf.toString());
-        	               }catch (Exception ex) {
-        	         		ex.printStackTrace();
-        	         	  }
-        	          }
-
-        	    	counter++;
-        	   }
-        	   
-           }
-         
-           
-           System.out.println("l�petatud toodete moodustamine" );
            System.out.println("algab klientide moodustamine" ); 
            inputLineBuf = new StringBuffer();
            
