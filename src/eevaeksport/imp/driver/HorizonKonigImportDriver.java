@@ -371,7 +371,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		        		s.printStackTrace();
 		        	}
 
-		    	System.out.println("dfOsak " + defOsak.size());
+		    	//System.out.println("dfOsak " + defOsak.size());
 		    	
 		    	
   }
@@ -402,7 +402,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		        		s.printStackTrace();
 		        	}
 
-		    	System.out.println("hrccustomers " + res.size());
+		    //	System.out.println("hrccustomers " + res.size());
 		   return res ; 	
 		    	
   }
@@ -464,7 +464,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		        		s.printStackTrace();
 		        	}
 
-		    	System.out.println("defDealers " + kontOK.size());
+		   // 	System.out.println("defDealers " + kontOK.size());
 		    	
 		    	
   }
@@ -560,7 +560,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
           }
           
           
-          System.out.println("CuNot " + order.getCompany() + " " + cuNot + " " + cuKont);
+       //   System.out.println("CuNot " + order.getCompany() + " " + cuNot + " " + cuKont);
           
           Order ordc = new Order(order.getCompany()+ "_" + cuNot ,order.getAgentFirstName());
 
@@ -623,7 +623,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  ordcD.setDealer(eridealer);
 	  ordcD.setPaymTerm(order.getPaymTerm());
 	  ordcD.setCurrency(getType(order.getDealer(),20,ordcD)); // p mitte
-	  System.out.println("eridealer00 " + order.getDealer() + " " + eridealer + " " + ordcD.getCurrency());
+	//  System.out.println("eridealer00 " + order.getDealer() + " " + eridealer + " " + ordcD.getCurrency());
 	 
 	  
 	  Order ord1 = new Order(order.getCompany()+ "_" + cuNot ,order.getAgentFirstName());
@@ -920,7 +920,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	  
 	  
 	  
-	  System.out.println("Splitin Warehouse agendidY " + order.getWarehouse());
+	  //System.out.println("Splitin Warehouse agendidY " + order.getWarehouse());
 	  
 	  Vector lines = order.getOrderLines();
 	  Enumeration enums = lines.elements();
@@ -928,7 +928,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		  OrderLine lin = (OrderLine)enums.nextElement();
 		
 		     String itemid = lin.getToode();
-		     System.out.println("ppcheck " + lin.getToode() + " " + lin.getKogus() + " " + order.getPaymTerm());
+		 //    System.out.println("ppcheck " + lin.getToode() + " " + lin.getKogus() + " " + order.getPaymTerm());
          if(order.getPaymTerm() == -1 ){
         	 
         	 if(itemid.startsWith("FP") && propsVEGE.containsKey(order.getCompany()) ){
@@ -1017,7 +1017,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
                      	ord10pp.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
          		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
                    	
-                   	 System.out.println("ord10pp " + lin.getToode() + " " + lin.getKogus());
+                   	// System.out.println("ord10pp " + lin.getToode() + " " + lin.getKogus());
                    }else if(itemid.startsWith("P") || itemid.startsWith("A") ){
             	    	 boolean FF = true;
             	    	 if(defOsak.get(lin.getToode()) != null && defOsak.get(lin.getToode()).equals("NF")){
@@ -1144,8 +1144,6 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		  result.add(ord10r);  
 	  }
 	  
-	 System.out.println("Result =" +order.getDokNr()
-			 + " "+ result.size());
 	 //System.exit(0);
 	  
 	 return result ;
@@ -1206,7 +1204,7 @@ ord2.setCurrency(order.getCurrency()); // M
 	
 
 
-System.out.println("Splitin Warehouse agendid " + order.getWarehouse());
+//System.out.println("Splitin Warehouse agendid " + order.getWarehouse());
 
 Vector lines = order.getOrderLines();
 Enumeration enums = lines.elements();
@@ -1240,11 +1238,6 @@ result.add(ord9);
 
 
 
-
-
-
-System.out.println("Result =" +order.getDokNr()
-		 + " "+ result.size());
 //System.exit(0);
 return result ;
 }
@@ -1264,7 +1257,7 @@ private Vector splitOrderHRC (Order order){
 	  if(kontOK == null){
 		getKont();
 		loadOsak();
-		System.out.println("aadresite suurused " + kontOK.size() + " " + kontNO.size());
+		//System.out.println("aadresite suurused " + kontOK.size() + " " + kontNO.size());
 	  }
 	  
 	
@@ -1287,7 +1280,7 @@ private Vector splitOrderHRC (Order order){
           String cuKont = kontOK.get(order.getCompany())+"";
          
           
-          System.out.println("CuKont " + order.getCompany() + " " + cuKont);
+       //   System.out.println("CuKont " + order.getCompany() + " " + cuKont);
           
           
  
@@ -1339,7 +1332,7 @@ private Vector splitOrderHRC (Order order){
     	  ord92.setDealer("82450");
     	  ord92.setCurrency("NPARMP"); // G tähega
 	  
-	  System.out.println("Splitin Warehouse agendid " + order.getWarehouse());
+	//  System.out.println("Splitin Warehouse agendid " + order.getWarehouse());
 	  
 	  Vector lines = order.getOrderLines();
 	  Enumeration enums = lines.elements();
@@ -1381,9 +1374,7 @@ private Vector splitOrderHRC (Order order){
 	  
 	  
 
-	 System.out.println("Result =" +order.getDokNr()
-			 + " "+ result.size());
-	 //System.exit(0);
+		 //System.exit(0);
 	  
 	 return result ;
   }
@@ -1398,7 +1389,7 @@ private String getType(String ware , int num , Order ord ){
 //		53270	Liepājas noliktava	N03
 //J - всегда склад N05 и тип документа NDM2G - всегда склад N04 и тип документа NDM3
 	
-	System.out.println("type "+ ware + " "+ num + " " );
+//	System.out.println("type "+ ware + " "+ num + " " );
 	
 	
 	
@@ -1921,7 +1912,7 @@ try{
        
      		
      		
-     		System.out.println("Vege Address size " + propsVEGE.size());
+     		//System.out.println("Vege Address size " + propsVEGE.size());
        if (signatures == null){
     	   signatures = new Vector();
        }
@@ -1946,7 +1937,7 @@ try{
     					  nlvKlients = lvNotCustomer();
     				  }
     				  
-    				  System.out.println(order.getCompany() + " " + nlvKlients.contains(order.getCompany()));
+    				//  System.out.println(order.getCompany() + " " + nlvKlients.contains(order.getCompany()));
     				if(nlvKlients.contains(order.getCompany())) {
     					order.setCurrency("NPARK2");
     					
@@ -1959,6 +1950,12 @@ try{
     				  
     				  if(!hrccustomer){
     				//	  System.out.println("OffTrade");
+    					  if(order.getStatus() == 34) {
+    						  order.setCurrency("NPAIK9");
+    						  order.setWarehouse("53268");
+    						  
+    						  makeOutput(order,order, hrccustomer); 
+    					  }else {
     					  Vector splitted =  splitOrder(order);
     			    	  Enumeration en = splitted.elements();
     					  
@@ -1976,33 +1973,28 @@ try{
     					        makeOutput(ord2,order,hrccustomer);
         			    	  }*/
     	        		  }
+    					  }
     					  
     				  }else{
     					 // System.out.println("OffTrade");
+    					  
+    					  if(order.getStatus() == 34) {
+    						  order.setCurrency("NPAIK9");
+    						  order.setWarehouse("53268");
+    						  
+    						  makeOutput(order,order, hrccustomer); 
+    					  }else {
     					  Vector splitted =  splitOrderHRC(order);
     			    	  Enumeration en = splitted.elements();
     			    	  while(en.hasMoreElements()){
     			    		  
     						  Order ord = (Order)en.nextElement();
     						  makeOutput(ord,order,hrccustomer);
-    						  
-    						 /* Vector splitted2 =  this.splitOrderByAm(ord, 38);
-        			    	  Enumeration en2 = splitted2.elements();
-        			    	  while(en2.hasMoreElements()){
-        			    		  
-        						  Order ord2 = (Order)en2.nextElement();
-        						  
-        						  
-    					        makeOutput(ord2,order,hrccustomer);
-        			    	  }*/
-        	        		 
-    					  }
-    					//  makeOutput(order,order, hrccustomer);   
+    						 
+    					  }}
     				  }
-    					
     				}
     					signatures.add(signature);
-        			  
         		  }
     	
        try {
@@ -2141,11 +2133,11 @@ try{
 	 TreeMap pantHinnad = null;
 	
 	 TreeMap	pants = getPandiPakend();
-			System.out.println("pants " + pants.size());
+		//	System.out.println("pants " + pants.size());
 	
 		try {
 			pantHinnad = getPandiPakendHind();
-			System.out.println("panthinnad " + pantHinnad.size());
+			//System.out.println("panthinnad " + pantHinnad.size());
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2197,7 +2189,7 @@ try{
 		 		 }
 		 		
 		 		 
-		 		   System.out.println("shipdate horeca: " + hrccusts.contains(orig.getCompany()) + " " + order.getStatus());
+		 		//   System.out.println("shipdate horeca: " + hrccusts.contains(orig.getCompany()) + " " + order.getStatus());
 					
 		 		 
 		 		  if(shipDate == null) {
@@ -2296,7 +2288,7 @@ try{
 							 order.setDealer("53268");
 							 this.trouble = " Nav noliktava in Horizon OUTPUT";
 					   }
-					  System.out.println("dealer " + defDealers.size() + " " + aaa + " " + defDealers.get(aaa));
+					 // System.out.println("dealer " + defDealers.size() + " " + aaa + " " + defDealers.get(aaa));
 					 // order.setCurrency(getType(order.getDealer(),1,order));
 					 }
 				   
@@ -2372,7 +2364,7 @@ try{
 
 	     	 Vector lines = order.getOrderLines();
 	     	 if(isHoreca) {
-	     		 System.out.println("OLines 1 " + lines.toString());
+	     		// System.out.println("OLines 1 " + lines.toString());
 	        	 java.util.Collections.sort(lines, new java.util.Comparator(){
 				        public boolean equals(Object obj) {
 					       return false;
@@ -2385,7 +2377,7 @@ try{
 					   });
 						        	 
 						        	 
-	        	 System.out.println("OLines 2 " + lines.toString());
+	        	// System.out.println("OLines 2 " + lines.toString());
 	     	 }
 		      for (int i = 0; i < lines.size(); i++) {
 		    	  OrderLine line = (OrderLine) lines.elementAt(i);
@@ -2463,9 +2455,9 @@ try{
 	 		
 	 	try {
 	 		if("true".equals(parent.getProps().getProperty("testing"))){
-		 		System.out.println("Testing ");
+		 	//	System.out.println("Testing ");
 		 	   String fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-" + fn + "-" + order.getCurrency() +  ".json";
-			      System.out.println(fileName);
+			     // System.out.println(fileName);
 			       
 			      Converter.saveFileInUTF8(fileName, resource.toString());
 
@@ -2473,12 +2465,12 @@ try{
 	    	 	
 	 		
 		      String fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-" + fn + "-" + order.getCurrency() +  ".json";
-		      System.out.println(fileName);
+		     // System.out.println(fileName);
 		       
 		      Converter.saveFileInUTF8(fileName, resource.toString());
 
 		      fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-"  + fn  + "-" + order.getCurrency()+  "-response.xml";
-		      System.out.println(fileName + "\n" +  resource.toString());
+		     //System.out.println(fileName + "\n" +  resource.toString());
 		     
 		
 		   //   trouble = "IMPORTED ORDER \n" + order_xml;

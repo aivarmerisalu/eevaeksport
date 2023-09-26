@@ -708,6 +708,7 @@ HashSet olemas = new HashSet();
     	 TreeMap webmerc7 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"SIMAS");
     	 TreeMap webmerc8 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"TADAS_KLP");
     	 TreeMap webmerc9 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"URNIEZIUS");
+    	 TreeMap webmerc10 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"SARUNAS");
     	 try{
       	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass);
          } catch(Exception e){
@@ -941,7 +942,10 @@ HashSet olemas = new HashSet();
            }
           if(webmerc9.get(cust.getID()) != null) {
         	  cust.addAgent(new Agent("URNIEZIUS")); 
-           }
+           } 
+          if(webmerc10.get(cust.getID()) != null) {
+         	  cust.addAgent(new Agent("SARUNAS")); 
+            }
              
            //   cust.setMainAgent(ag);
               try{

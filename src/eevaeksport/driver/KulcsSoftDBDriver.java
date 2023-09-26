@@ -418,7 +418,7 @@ r.printStackTrace();
 }
 
            String cmd = " select p.\"Id\" as toode ,p.\"Code\" as code, p.\"Name\", p.\"Barcode\" as ean,"
-           		+ " p.\"MinimumQuantity\" as minam , p.\"Vat\" , 'db' as unit ,  p.\"StockBalance\" as stock from  \"Product\" p where \"Service\" = 0  and \"OutGoingProduct\" != 1 ";
+           		+ " p.\"MinimumQuantity\" as minam , p.\"Vat\" , \"QuantityUnit\" as unit ,  p.\"StockBalance\" as stock from  \"Product\" p where \"Service\" = 0  and \"OutGoingProduct\" != 1 ";
 //kood AS liik , nimetus AS nimi  FROM artryhm t
 			if (isDebug()) {
 			    System.out.println(cmd);
@@ -474,7 +474,12 @@ r.printStackTrace();
                 String yh = rs.getString("unit");
                 
                 if(yh != null && yh.trim().length()>0){
-                	prod.setUnit(yh.trim());
+                	if(yh.equals("362")) {
+                		prod.setUnit("db");	
+                	}else {
+                		prod.setUnit("kg");	
+                	}
+                	
                 }
                 Double stock = rs.getDouble("stock");
                 if(stock != null && stock > 0) {

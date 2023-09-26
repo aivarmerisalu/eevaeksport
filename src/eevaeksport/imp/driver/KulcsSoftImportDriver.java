@@ -142,7 +142,7 @@ public class KulcsSoftImportDriver
     
 
             String cmd = " select p.\"Id\" as toode ,p.\"Code\" as code, p.\"Name\", p.\"Barcode\" as ean,"
-            		+ " p.\"MinimumQuantity\" as minam, 1 as price , p.\"Vat\" , 'db' as unit ,  p.\"StockBalance\" as stock from  \"Product\" p where \"Service\" = 0 ";
+            		+ " p.\"MinimumQuantity\" as minam, 1 as price , p.\"Vat\" , \"QuantityUnit\" as unit ,  p.\"StockBalance\" as stock from  \"Product\" p where \"Service\" = 0 ";
  //kood AS liik , nimetus AS nimi  FROM artryhm t
  			
  			    System.out.println(cmd);
@@ -193,8 +193,15 @@ public class KulcsSoftImportDriver
                  String yh = rs.getString("unit");
                  
                  if(yh != null && yh.trim().length()>0){
-                 	prod.setUnit(yh.trim());
+                 	if(yh.equals("362")) {
+                 		prod.setUnit("db");	
+                 	}else {
+                 		prod.setUnit("kg");	
+                 	}
+                 	
                  }
+                 
+                 
                  Double stock = rs.getDouble("stock");
                  if(stock != null && stock > 0) {
                  	prod.setStock(stock);

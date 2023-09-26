@@ -16318,17 +16318,18 @@ shipdate = getCalXML(asi);
 			 DataFormatter formatter = new DataFormatter();
 			 
 			
-			for(int i = 0 ; i <= a;i++){
+			for(int i = 1 ; i <= a;i++){
 				XSSFRow row = (XSSFRow) sheet.getRow(i);
 				 
                  String toode = formatter.formatCellValue(row.getCell((short) 18));
+                 String agent = formatter.formatCellValue(row.getCell((short) 19));
                  String klient = formatter.formatCellValue(row.getCell((short) 21));
                  try {
 				 Integer kogus = Integer.parseInt(formatter.formatCellValue(row.getCell((short) 12)));
 				 
 					
 					if(kogus > 0) {
-						//System.out.println("sees " + toode + " " + klient + " " + kogus);
+						System.out.println("sees " + toode + " " + klient + " " + kogus + " " + agent);
 						 
 				 ArrayList<Toode> tooted = tellid.get(klient);
 				 if(tooted == null) {
@@ -16336,7 +16337,9 @@ shipdate = getCalXML(asi);
 				 }
 				 Toode tt = new Toode(toode);
 				 tt.setKogus(kogus);
+				 tt.setBrand(agent);
 				 tooted.add(tt);
+				 
 				 
 				 tellid.put(klient, tooted);
 
@@ -16354,7 +16357,7 @@ shipdate = getCalXML(asi);
 		while(itera.hasNext()){
 			String custid = (String)itera.next(); 
 		
-			orders = new Orders("aaa", false);
+			
 			firma = custid; // maxima variant
 			
 			System.out.println("Firma " + firma);
@@ -16363,25 +16366,28 @@ shipdate = getCalXML(asi);
 			String num = cal.getTimeInMillis() + "";
 			shipdate = cal.getTime().getTime() + "";
         	dokNr = "BON" + num.substring(6) + "" + i;    
-        //	System.out.println( i + " " + dokNr);
+        	
         	 doknr=dokNr;
-
+        	 orders = new Orders("aaa", false);
         	 ArrayList<Toode> lines = (ArrayList<Toode>)tellid.get(custid);
 
+        	 System.out.println( i + " " + dokNr + " " +lines.size());
             for(Toode tt : lines){
           		double kogus = tt.getKogus();
 			
+          		String agent = tt.getBrand();
 					System.out.println(i + "*"+firma+"*"+ tt.getID()  +"*"+kogus+"*"+ dokNr);
-				          
+					      orders.agent = agent;
 				          orders.setInfo(dokNr);
 				          orders.add(firma, tt.getID(), "noname" ,kogus, dokNr, null, 0, 0,shipdate,"0",
-				        		  0,0,false,"",77," ",null,"",null,null,true,null,null);
+				        		  0,0,false,agent,34," ",null,"",null,null,true,null,null);
 				  counter++;
 		       	  
 
             }
 		       				    try{
 		       	                  	importOrder(orders,troubles); 	
+		       	                  	counter = 0;
 		       				    } catch (Exception eee){
 		       				    	eee.printStackTrace();
 		       				    }
