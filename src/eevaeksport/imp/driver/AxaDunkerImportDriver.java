@@ -19,7 +19,9 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.Category;
@@ -51,10 +53,8 @@ public class AxaDunkerImportDriver
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
     try {
       Class.forName(databaseDriverName).newInstance();
-      con = DriverManager.getConnection(url, "mobile","mobile");
-      con2 = DriverManager.getConnection(url, "mobile","mobile");
-      con3 = DriverManager.getConnection(url, "mobile","mobile");
-      con4 = DriverManager.getConnection(url, "mobile","mobile");
+      
+    
    
       calNF.setMaximumFractionDigits(0);
       calNF.setMaximumIntegerDigits(2);
@@ -81,7 +81,7 @@ public class AxaDunkerImportDriver
 	
     System.out.println(sql1);
     String acc = null;
-
+    Connection con = DriverManager.getConnection(url, "mobile","mobile");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -91,6 +91,7 @@ public class AxaDunkerImportDriver
     }
     rs1.close();
     st1.close();
+    con.close();
 
     System.out.println("Klient: " + acc + " " + id);
     return acc;
@@ -104,7 +105,7 @@ public class AxaDunkerImportDriver
  	
    System.out.println(sql1);
    String agent = null;
-
+   Connection con = DriverManager.getConnection(url, "mobile","mobile");
    Statement st1 = con.createStatement();
    ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -114,6 +115,7 @@ public class AxaDunkerImportDriver
    }
    rs1.close();
    st1.close();
+   con.close();
 
    return agent;
 
@@ -126,6 +128,7 @@ public class AxaDunkerImportDriver
  	 
     String sql1 = " select SL22002 as kood from SL220200 where SL22003 =0 and SL22005 =  " + paevad + "";
     String kood = null;
+    Connection con = DriverManager.getConnection(url, "mobile","mobile");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
     while (rs1.next()) {
@@ -134,6 +137,7 @@ public class AxaDunkerImportDriver
        System.out.println(paevad + " mtkood " + kood);
     rs1.close();
     st1.close();
+    con.close();
     return kood;
  }
  
@@ -147,7 +151,7 @@ public class AxaDunkerImportDriver
 
     
     String sql1 ="";
-        
+    Connection con = DriverManager.getConnection(url, "mobile","mobile");
         Statement st1 = con.createStatement();
         ResultSet rs1  = null;
         
@@ -187,6 +191,7 @@ public class AxaDunkerImportDriver
     try{
     	  rs1.close();
     	    st1.close();	
+    	    con.close();
     }catch(Exception rr){
     rr.printStackTrace();	
     }
@@ -202,7 +207,7 @@ public class AxaDunkerImportDriver
 	 	 
 		    String sql2 = "SELECT cus.name as nimi FROM custtable cus " +
 		            " WHERE cus.dataareaid='vir' and cus.accountnum = '" + cuid + "' ";
-				
+		    Connection con = DriverManager.getConnection(url, "mobile","mobile");
 				Statement st1 = con.createStatement();
 				ResultSet rs1 = st1.executeQuery(sql2);
 				
@@ -212,7 +217,7 @@ public class AxaDunkerImportDriver
 				
 		rs1.close();
 		st1.close();
-		
+		con.close();
 	  	
 	  	
 	  	System.out.println("oioi " + eans.size() );
@@ -298,7 +303,7 @@ public class AxaDunkerImportDriver
   	 		  " and (disc.todate>getdate()-1 OR (disc.fromdate<=getdate() AND disc.todate=('1900-01-01 00:00:00.00') ) )  "+
   	 		  " AND moduletype=2 and blocked = 0  and inv.itemgroupid not in ('91','94') "+
   	 		  "  and disc.accountrelation = ''";
-  				
+  	   Connection con = DriverManager.getConnection(url, "mobile","mobile");
   				Statement st1 = con.createStatement();
   				ResultSet rs1 = st1.executeQuery(sql2);
   				
@@ -315,7 +320,7 @@ public class AxaDunkerImportDriver
   				
   		rs1.close();
   		st1.close();
-  		
+  		con.close();
   	  	}
   	  	
   	  	System.out.println("oioi " + eans.size() );
@@ -323,6 +328,8 @@ public class AxaDunkerImportDriver
   	  	return eans ;
   	  }
   
+
+    
   
   private void makeOutputTelema(Order order , boolean tagastus, boolean ymber){	
 	 StringBuffer sb = new StringBuffer();
@@ -469,7 +476,7 @@ public class AxaDunkerImportDriver
 
 
         
-        Vector sortedLines = order.getOrderLines();
+        Vector sortedLines = Converter.joinLines(order.getOrderLines());
         for (int i = 0; i < sortedLines.size(); i++) {
             OrderLine line = (OrderLine)sortedLines.elementAt(i);
             double ale = line.getDiscount();     
@@ -612,8 +619,10 @@ public class AxaDunkerImportDriver
 
 	    String sort = "000";
 
+	 
 	    Statement st1;
 		try {
+			   Connection con = DriverManager.getConnection(url, "mobile","mobile");
 			st1 = con.createStatement();
 		
 	    ResultSet rs1 = st1.executeQuery(sql1);
@@ -628,6 +637,7 @@ public class AxaDunkerImportDriver
 
 	    rs1.close();
 	    st1.close();
+	    con.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -853,7 +863,7 @@ public class AxaDunkerImportDriver
 	       	 sb.append("toote_kood,nimetus,yhik,kogus,km,yhiku_hind,ean_kood,summa" + lineSep); 
 	        
 	         
-	    Vector lines = order.getOrderLines();
+	    Vector lines =  Converter.joinLines(order.getOrderLines());
 	      for (int i = 0; i < lines.size(); i++) {
 	    	  
 	        OrderLine ol = (OrderLine) lines.elementAt(i);
@@ -1046,10 +1056,7 @@ private String escape(String s){
   
   private String url = "jdbc:odbc:AXA";
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
-  private Connection con;
-  private Connection con2;
-  private Connection con4;
-  private Connection con3;
+
   private int counter = 0;
   private ImportPanel parent;
 

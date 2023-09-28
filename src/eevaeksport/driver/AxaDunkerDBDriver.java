@@ -62,8 +62,6 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
      PropertyConfigurator.configure("log4j.properties");
     try {
       Class.forName(databaseDriverName).newInstance();
-      con = getNewConnection();
-      stmt = con.createStatement();
     } catch (Exception e){
        parent.showError(e);
     }
@@ -116,12 +114,17 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
 	    
 	    
 	    try {	
+	    	 Connection con =  getNewConnection();
+	    	 Statement stmt = con.createStatement();
 	    	ResultSet rs = stmt.executeQuery(cmd);
 	        while(rs.next()){
 	        String kood = rs.getString("dunkood").trim();
 	        String rimkood = rs.getString("klientkood").trim();
 	        rimi.put(kood, rimkood);
 	        }
+	        rs.close();
+	        stmt.close();
+	        con.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -413,8 +416,9 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
        if (isDebug()) System.out.println(cmd);
        StringBuffer products = new StringBuffer();
        try {
-
-         Statement st = con.createStatement();
+    	 	 Connection con =  getNewConnection();
+	    	 Statement st = con.createStatement();
+      
          ResultSet rs = st.executeQuery(cmd);
 
          while (rs.next()) {
@@ -429,6 +433,8 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
            }
            }
            rs.close();
+           st.close();
+           con.close();
        } catch (Exception e) {
            getParent().showError(e);
        }
@@ -467,8 +473,8 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
                "  GROUP BY dim.inventlocationid,summ.itemid  ORDER BY dim.inventlocationid,summ.itemid ";
 
            if (isDebug()) System.out.println(sql);
-         
-              Statement stm = con.createStatement();
+       	 Connection con =  getNewConnection();
+    	 Statement stm = con.createStatement();
               ResultSet rst = stm.executeQuery(sql);
 
                 while (rst.next()) {
@@ -479,6 +485,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
               }
               rst.close();
               stm.close();
+              con.close();
 
       } catch (Exception e) {
           getParent().showError(e);
@@ -514,7 +521,8 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	    }catch(Exception e){
 	    	e.printStackTrace();
 	    }
-	
+	 	 Connection con =  getNewConnection();
+    	 Statement stmt = con.createStatement();
     	ResultSet rs = stmt.executeQuery(cmd);
         while(rs.next()){
           Agent agent = new Agent(rs.getString("agent").trim());
@@ -553,6 +561,9 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 		 agents1.put(agent.getID(), agent);
           agents.put(name, agent);
         }
+        rs.close();
+        stmt.close();
+        con.close();
     } catch (Exception e){
         getParent().showError(e);
       }
@@ -1124,6 +1135,8 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	      getParent().showError(e);
 	      if(counter< 4){
 	      	try{
+	      	 	 Connection con =  getNewConnection();
+		    	 Statement stmt = con.createStatement();
 	        	 ResultSet rs = stmt.executeQuery(cmd);
 	             counter++;
 	             while(rs.next()){
@@ -1136,6 +1149,9 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	               cp.setRedline(rs.getString("date"));
 	               custProds.add(cp);
 	             }
+	             rs.close();
+	             stmt.close();
+	             con.close();
 	      	}catch (Exception ee){
 
 	      	}
@@ -1176,7 +1192,8 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 
          if (isDebug()) System.out.println(cmd);
             try {
-                Statement stmt =  this.getNewConnection().createStatement();
+            	 Connection con =  getNewConnection();
+    	    	 Statement stmt = con.createStatement();
                 ResultSet	      rs = stmt.executeQuery(cmd);
                 while(rs.next()) {
                   String agentID = rs.getString("agent").trim();
@@ -1187,6 +1204,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
                   }
                 }
                 rs.close();
+                stmt.close();
                 con.close();
             } catch (Exception e) {
                 getParent().showError(e);
@@ -1242,45 +1260,17 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	    sb.append("\n\n\n Vormistatud tellimused:\n\n");
 
 	      try {
+	    	 Connection con =  getNewConnection();
+	    	 Statement stmt = con.createStatement();
 	                  ResultSet	      rs2 = stmt.executeQuery(sql2);
 	                  while (rs2.next()) {
 	                  sb.append("(" + rs2.getString("arve").trim() + ") [" + rs2.getString("kuupaev").substring(0,10) + "] - " + rs2.getString("klient") + "  Ridu: " + rs2.getDouble("summa") + "\n");
 	                  }
-
-	        //stmt = con.prepareStatement(sql);
-	        //stmt.sets(1, agent.getObject());
-	          //stmt.setString(2, agent.getObject());
-	                  /* 	    String sql =" SELECT  (SELECT SUM(PHYSICALINVENT)FROM INVENTSUM summ INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid WHERE summ.DATAAREAID='bal' and dim.DATAAREAID='bal'" +
-	"AND CLOSED = 0 AND dim.inventlocationid ='" + agent.getObject() + "' " +
-	"AND summ.itemid=inv.itemid GROUP BY summ.itemid) AS ladu,SUM(sal.qty) AS kogus,avg(sal.lineamountmst/sal.qty) AS myygihind, " +
-	"inv.itemname AS nimetus, inv.itemqtyinabox AS tykke " +
-	"FROM custinvoicetrans sal INNER JOIN inventtable inv ON sal.itemid=inv.itemid  WHERE " +
-	"inv.dataareaid='bal' AND sal.dimension='" + agent.getID() + "' AND YEAR(sal.invoicedate) = YEAR(getdate()) AND MONTH(sal.invoicedate) = MONTH(getdate()) AND DAY(sal.invoicedate) = DAY(getdate()) " +
-	"GROUP BY inv.itemname ,inv.itemqtyinabox,inv.itemid ORDER BY inv.itemname ";
-   ResultSet	      rs = stmt.executeQuery(sql);
-	          ResultSetMetaData md = rs.getMetaData();
-	          sb.append("Nimi  \t\tLadu\t\tM��dud\t\tSumma\n");
-	          sb.append("---------------------------------------------------\n");
-
-	          double totalKokku = 0d;
-
-	          while (rs.next()) {
-	            int ladu = rs.getInt("ladu");
-	            int kogus = rs.getInt("kogus");
-	            double hind = round(rs.getDouble("myygihind"), 2);
-	            double kokku = round(kogus*hind, 2);
-	            totalKokku = round(totalKokku + kokku, 2);
-
-	            sb.append(rs.getString("nimetus").trim() + " " + rs.getInt("tykke")+ "\n");
-
-	            sb.append("\t\t\t\t" + ladu + "\t\t" + kogus + "\t\t" +
-	              kokku + "\n\n");
-	           }
-
-	          sb.append("---------------------------------------------------\n");
-	          sb.append("\tP�eva m��k kokku: " + totalKokku + " EUR");
-
-*/
+	                  
+	                  rs2.close();
+	                  stmt.close();
+	                  con.close();
+	                  
 	                  } catch (Exception e) {
 	                      getParent().showError(e);
 	                  }
@@ -1311,9 +1301,9 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
     }
   private String url = "jdbc:odbc:AXA";
   private String url2 = "jdbc:odbc:report";
-  private Connection con;
+
   private   Vector debt = new Vector();
-  private Statement stmt;
+
   private String subjectFilesTo = null;
     private NumberFormat NF = NumberFormat.getInstance();
 

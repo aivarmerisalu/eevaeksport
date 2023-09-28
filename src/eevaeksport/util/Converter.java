@@ -156,6 +156,64 @@ public class Converter {
 		return false;
 	}
 	
+	
+    
+    public static  Vector<OrderLine> joinLines(Vector<OrderLine> lines) {
+    	
+    	Vector<OrderLine> res = (Vector<OrderLine>)lines.clone();
+    	
+    	// vaatame kas on sama toodet 2 korda
+    	HashSet prs = new HashSet();
+    	Vector<String> topelt = new Vector<String>();
+    	TreeMap<String, Double> kogused = new TreeMap<String, Double>();
+    	for(OrderLine ol : lines) {
+    		String olemas = ol.getToode() + ol.getDiscount();
+    		if(prs.contains(olemas)) {
+    			if(!topelt.contains(olemas))
+    		  topelt.add(olemas);
+    		
+    		}
+    		if(kogused.get(olemas) == null) {
+				kogused.put(olemas, ol.getKogus());	
+			} else {
+				Double l = kogused.get(olemas);
+				kogused.put(olemas, l + ol.getKogus());
+			}
+    		prs.add(olemas);
+    	}
+    	//nii nüüd otsime toelt tooted ja setime esimese rea koguse üle nimg kustutame muud ära
+    	
+    	
+    	for(String olemas : topelt) {
+    		boolean done = false;
+    		for(OrderLine ol : res) {
+    			String t = ol.getToode() + ol.getDiscount();
+    			if(olemas.equals(t)) {
+    				if(done) {
+    				   ol.setKogus(kogused.get(t));
+    				} else {
+    					ol.setKogus(0);
+    				}
+    				done = true;
+    			}
+    		}
+    	}
+    	
+    	//nüüd eemaldame nullised read.
+    	
+    	for(int i = res.size() - 1; i >= 0; --i) {
+    		
+    	        if(res.get(i).getKogus() == 0) {
+    	                res.remove(i);
+    	        }
+    	    }
+    	
+    	
+    	System.out.println(res.toString());
+    	return res;
+    }
+	
+	
 	  public static void downloadFile(String url, String filename) {
 		
 		  

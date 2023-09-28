@@ -49,6 +49,10 @@ public class VichiLITSQLUUSImportDriver extends AbstractImportDriver{
     PropertyConfigurator.configure("log4j.properties");
     //String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
+    
+    if(parent.getProps().getProperty("view.url") != null) {
+    	urlV = parent.getProps().getProperty("view.url");
+    }
     try {
       Class.forName(databaseDriverName).newInstance();
       

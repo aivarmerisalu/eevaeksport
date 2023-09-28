@@ -337,7 +337,13 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	}
 	
 	private Connection getNewConnectionView() throws SQLException {
-		return DriverManager.getConnection(urlV, getParent().getProps()
+		String v = "jdbc:odbc:naviltview";
+		if(getParent().getProps()
+				.getProperty("view.url") != null) {
+			v = getParent().getProps()
+					.getProperty("view.url");
+		}
+		return DriverManager.getConnection(v, getParent().getProps()
 				.getProperty("view.user"),
 				getParent().getProps().getProperty("view.pass"));
 	}
@@ -944,6 +950,7 @@ System.out.println(cmd);
 		if(addCode.equals("1")) {
 			aad.put(addID+"_1", ilnID);
 		}
+		aad.put(addID+"_"+addCode, ilnID);
 		}
 		rs1.close();
 		stmt1.close();
@@ -1990,16 +1997,7 @@ System.out.println(cmd);
 		HashMap kliendid = new HashMap();
 		try {
 
-			String cmd = " select  d.[Sell-to Customer No_]  AS klient,  d.[Ship-to Code] as abiklient , r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate ,  " +
-					" r.[Užsakytas kiekis] -r.[Quantity] as saamatta FROM [Vičiūnai ir Ko$Sales Line] r INNER JOIN [Vičiūnai ir Ko$Sales Header] d ON r.[Document No_]= d.[No_] "
-					+"  WHERE d.[Shipment Date]> GETDATE()-30 " +
-					"  UNION ALL " +
-				    "	select  d.[Sell-to Customer No_] AS klient,  d.[Ship-to Code]   as abiklient, r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate , " + 
-				    "	 r.[Užsakytas kiekis] -r.[Quantity] as saamatta FROM [Vičiūnai ir Ko$Sales Shipment Line] r INNER JOIN [Vičiūnai ir Ko$Sales Shipment Header] d ON r.[Document No_]= d.[No_] " +
-				   
-					"	  WHERE d.[Shipment Date]> GETDATE()-30 ";
-			
-			cmd = " select * from   MobilejavaVIK.v_VIK_GetCustProdList";
+			String cmd = " select * from   MobilejavaVIK.v_VIK_GetCustProdList";
 			System.out.println(cmd);
 			// "klient","toode","kogus","viimane kuupļæ½ev","viimane kogus"
 			Connection con = getNewConnectionView();
@@ -2192,7 +2190,6 @@ System.out.println(cmd);
 	private Vector klient = new Vector();
 	private TreeMap agents = new TreeMap();
 	private String url2 = "jdbc:odbc:navi";
-	private String urlV = "jdbc:odbc:naviltview";
 	private Connection con;
 	private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
 	private TreeMap debtDays = new TreeMap();

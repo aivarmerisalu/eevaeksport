@@ -1270,7 +1270,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
          }
      	 // cust.setSupervisorFilled(true); //vaja  nagu oleks k�igi juures tehtud 
 
-         
+         if(!instance.equals("shell")) {
          double minsum = rs.getDouble("minsum");
           if(minsum > 0){
         	  cust.setMinsum(minsum);
@@ -1278,7 +1278,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
           if(minordsum == -1){
         	  cust.setMinsum(-1);
           }
-          
+         }
           String logsol = rs.getString("logsol");
           if(logsol != null){
         	  logMap.put(logsol, cust.getID());
