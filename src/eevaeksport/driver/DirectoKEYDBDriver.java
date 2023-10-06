@@ -209,7 +209,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	              ff2 = res2.list();
 	             
 	         	 for(int i = 0;ff2.length>i;i++){
-	             	if( ff2[i].startsWith(toode)){
+	             	if( ff2[i].startsWith(toode+".")){
 	               // System.out.println("pilt olemas " + ff2[i]);
 	            	File in = new File ( pictssou + ff2[i]); 
 	              	if(in.isFile()){

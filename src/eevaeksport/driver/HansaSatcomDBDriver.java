@@ -67,6 +67,7 @@ import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.htmlgen.HTMLeditor;
 import eevaeksport.util.Converter;
 import eevaeksport.util.FileListFilter;
 
@@ -721,8 +722,10 @@ TreeMap tr = new TreeMap();
 
    public TreeMap getAgents(){
 	   
-	   
-	   
+	
+	   HTMLeditor hm = new HTMLeditor();
+	   hm.genChart();
+	  // System.exit(0);
 	 //  getSaveStockInfo2();
 	   
 	   
@@ -1202,7 +1205,10 @@ TreeMap tr = new TreeMap();
     	   st.nextToken().trim();
          String id = st.nextToken().trim();
          Product prod = new Product(id);
-       //  System.out.println("id " + id );
+         
+         if(id.equals("E1B13")) {
+         System.out.println("id " + line);
+         }
          String name = "";
          if (st.hasMoreTokens()){
         	 name = st.nextToken().trim();
@@ -1212,6 +1218,7 @@ TreeMap tr = new TreeMap();
            	if(unit.length()>0){
            		prod.setUnit(unit);
            	}
+        
           String kastis =  	st.nextToken();
           if(kastis != null && kastis.trim().length()>0){
         	//  prod.setInCases(Double.parseDouble(kastis.replaceAll(" ","").replace(',', '.')));
@@ -1276,7 +1283,9 @@ TreeMap tr = new TreeMap();
            
            	ii = st.nextToken();
              	st.nextToken();
-       
+                if(id.equals("E1B13")) {
+                    System.out.println("ean2 " + ean2);
+                    }
              	
            	if(grupp.trim().length()>0){
            		prod.setGroup(grupp.trim());
@@ -1309,33 +1318,27 @@ TreeMap tr = new TreeMap();
        		
        	}
        	
-           	st.nextToken();
-           	st.nextToken();
-           	st.nextToken();
-           	st.nextToken();
-          	st.nextToken();
-           	st.nextToken();
-           	st.nextToken();
-           	st.nextToken();
-            st.nextToken();
-          	st.nextToken();
-           	st.nextToken();
-           	st.nextToken();
-           	st.nextToken();
-           	st.nextToken();
-           	st.nextToken();
-           	st.nextToken();
           
-             if (st.hasMoreTokens()){
+           
+          int o = 0;
+             while (st.hasMoreTokens()){
              	String ca = st.nextToken().trim().replaceAll(",",".").replaceAll(" ","");
+             	 if(o== 27) {
+             		 try {
+                      	double inCases = Double.parseDouble(ca);
+                          if (inCases > 0){
+                            prod.setInCases(inCases);
+                             System.out.println("Case "+ id + " " + prod.getInCases());
+                           }
+                        }catch(Exception e) {
+                     	   
+                        } 
+             	 }
+             	 o++;
              	if(ca.trim().length()==0){
              		ca = "0";
              	}
-                 double inCases = Double.parseDouble(ca);
-                 if (inCases > 0){
-                   prod.setInCases(inCases);
-               //System.out.println("CAse" + prod.getInCases());
-             }
+              
               }
              
 

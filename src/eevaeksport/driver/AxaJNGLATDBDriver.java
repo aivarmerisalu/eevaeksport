@@ -78,13 +78,12 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
   
   private HashMap getMustSales() {
 	  HashMap res = new HashMap();
-	  
-		try {
+	  StringBuffer sb = new StringBuffer();
 		
-			
+	  try {
 			    TreeMap custTypes =  Converter.getCustDimsLoading("type");
-			    	
-			
+			    String date = Converter.getDDpMMpYYYYpString(Calendar.getInstance());
+			    sb.append(date+"\n");
 			
 			//1. peame tegema kindlaks, mis grupid on ja mis tooted sinna kuuluvad
 			
@@ -261,8 +260,11 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 							   res.put(klkood , perc);//
 							   res.put(klkood + "sold", soldGR);
 							   res.put(klkood + "nonsold", nonSoldGR);
-							   if(soldGR.size() > 0)
-							   System.out.println("Must% " + klkood + " " + soldGR.size() + " " + nonSoldGR.size() + " " + perc);   
+							   if(soldGR.size() > 0) {
+								   System.out.println("Must% " + klkood + " " + soldGR.size() + " " + nonSoldGR.size() + " " + perc); 
+								   sb.append(klkood + "," + (perc*100) + ","+ soldGR.size() + "," + nonSoldGR.size() + "\n");
+							   }
+							    
 				  	  }
 						   
 					
@@ -273,6 +275,8 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 					con3.close();
 					  res.put("groups", mustGroups);
 					  res.put("prods", mustProds);
+					  
+					  Converter.saveFile("reports/mustcustomer.csv", sb.toString());
 
 			  
 		} catch (Exception e) {
@@ -1377,7 +1381,11 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
             	 ArrayList vv = (ArrayList) custTop.get(cust.getID()+"nonsold");
             	// System.out.println("oioi " + vv);
             	 if(vv != null && vv.size() > 0) {
-            		cust.addCity("NonSold Groups: " + vv.toString().replace('[', ' ').replace(']', ' ')); 
+            		 String nn = vv.toString().replace('[', ' ').replace(']', ' ').trim();
+            		 if(nn.length() > 100) {
+            			 nn = nn.substring(0,100);
+            		 }
+            		cust.addCity("NonSold Groups: " + nn); 
             	 }
             	
              }
@@ -1445,11 +1453,19 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
         }
         
         StringBuffer sb = new StringBuffer();
+        StringBuffer sb2 = new StringBuffer();
+	    String date = Converter.getDDpMMpYYYYpString(Calendar.getInstance());
+	   
+	
+	    sb2.append(date+"\n");
         
         if(agentMust != null) {
         	sb.append("<!DOCTYPE html><html><body>");
 
-        	
+        	 sb.append("<p>");
+     	    sb.append("Must products by Agent " + date);
+     	    sb.append("<br></p>");
+     	    
         	Iterator itera =  agentMust.keySet().iterator();
         	while(itera.hasNext()) {
         		String ag = (String) itera.next();
@@ -1462,16 +1478,18 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                 	  for(Double x : aa) {
                 		  sum = sum + x;
                 	  }
-                	  
+                	  sb2.append(ag + "," + agen.getName() + "," + (100* sum/size) + "\n");
                 	  sb.append("<p><br>");
-                	 sb.append(agen.getName() + " = " + this.getNF().format(sum/size) + "%");
+                	 sb.append(agen.getName() + " = " + this.getNF().format(100* sum/size) + "%");
                 	  		 sb.append("</p>");
 
                   }
         	}
         	
         	sb.append("</body></html>");
-        	Converter.saveFile("mustreport.html", sb.toString());
+        	Converter.saveFile("reports/mustreportagent.html", sb.toString());
+        	Converter.saveFile("reports/mustreportagent.csv", sb2.toString());
+        
          }
         
         System.out.println("kliendid l�petan ");

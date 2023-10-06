@@ -148,7 +148,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 	        	}
 	        }
 	        
-	        System.out.println("Piltide leidmine - katalooge sees " + cats.size() + " " + cats.toString());
+	      //  System.out.println("Piltide leidmine - katalooge sees " + cats.size() + " " + cats.toString());
 	   	    while (rs.next()) {
 	   	    	a++;
 	   	    	c++;
@@ -158,7 +158,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 	         toode = toode.replace('/', '_');
 	   	    	if(c == 100){
 	   	    		  c = 0;
-	   	    		  System.out.println("Piltide leidmine "  + a);	
+	   	    		//  System.out.println("Piltide leidmine "  + a);	
 	   	    		  
 	   	    	}
 	   	     
@@ -172,7 +172,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 	                		f = new File(picts + cats.elementAt(w) + "/" + toode+".jpg");
 	                		
 	                		if(f.exists()){
-	                			System.out.println("Kataloogis leitud " + picts + cats.elementAt(w) + "/" + toode+".jpg");	
+	                		//	System.out.println("Kataloogis leitud " + picts + cats.elementAt(w) + "/" + toode+".jpg");	
 	                		     len =	f.length() + "";	
 	                		}                     
 	                	 }
@@ -316,14 +316,14 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 	   }catch(Exception e) {
 		   e.printStackTrace();
 	   }				
-	   System.out.println("hh " + hh.toString());
+	 //  System.out.println("hh " + hh.toString());
 	   return hh;
   }
   
 	   private String toUpper(String asi ){
 		   
 		   asi = asi.substring(0,asi.length()-4).toUpperCase() + asi.substring(asi.lastIndexOf(".")).toLowerCase();
-		   System.out.println(asi);
+		  // System.out.println(asi);
 		   return asi ;
 	   }
 	
@@ -432,7 +432,7 @@ public class BuitNowacoLVDBDriver extends AbstractDBDriver implements BulkUpdate
 	    
 	
 	   
-	   System.out.println("siin");
+	 //  System.out.println("siin");
 	     String header = " Yesterdays sales :\n\n";
 	    
 	     boolean first = true;
@@ -662,8 +662,8 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 					
 		   }else if(mood != null && mood.trim().startsWith("N") ){
 			   
-			   if(cust.getID().equals("5242")) {
-		        	System.out.println("dueint " + cust.getDebt()+" " +blocked6custs.contains("5242") + " " + blockedcusts.contains("5242"));
+			   if(cust.getID().equals("7779")) {
+		        	System.out.println("dueint " + cust.getDebt()+" " +blocked6custs.contains("7779") + " " + blockedcusts.contains("7779"));
 		        }
 				if(blocked6custs.contains(cust.getID())){
 					bl = "2";
@@ -685,7 +685,9 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 				}
 					
 			}
-		
+		 if(cust.getID().equals("7779")) {
+	        	System.out.println("dueint00 " + cust.getDebt()+" " +blocked6custs.contains("7779") + " " + blockedcusts.contains("7779"));
+	        }
 		
 		  if(!cust.getID().equals(""))
 		 products.append(cust.getID() + ";" + getParent().getNF().format(cust.getDebt()) + ";" + bl + "\n");
@@ -1611,8 +1613,8 @@ System.out.println(cmd);
         if(debtDays.get(custID) != null){
          old = Integer.parseInt((String)debtDays.get(custID));
         }
-        if(custID.equals("5242")) {
-        	System.out.println("dueint " + dueint + " " + old + " " +blocked6custs.contains("5242"));
+        if(custID.equals("7779")) {
+        	System.out.println("dueint " + dueint + " " + old + " " +blocked6custs.contains("7779"));
         }
         if(old<dueint){
            debtDays.put(custID,dueint+"") ;
@@ -1812,7 +1814,7 @@ System.out.println(cmd);
              
              //Eraiski lisamine 
              if(name.indexOf("Eraisik") != -1){
-            	 System.out.println("ERAISISK");
+            	// System.out.println("ERAISISK");
             	 Iterator itera = this.getAgents1().keySet().iterator();
             	 while (itera.hasNext()){
             	  	 Agent agg = ((Agent)this.getAgents1().get(itera.next()));
@@ -2033,7 +2035,7 @@ System.out.println(cmd);
        e.printStackTrace();
      }
    
-   System.out.println("Kleindid " + tm.size());
+  // System.out.println("Kleindid " + tm.size());
      return tm;
    }
 
@@ -2191,7 +2193,7 @@ System.out.println(cmd);
 	"		  FROM prekes t inner join grupes g on g.grupe=t.grupe inner join tipai ty on ty.tipas=t.tipas " +
 	"		  where kaina_1 > 0 ";
      	
-      System.out.println(cmd);
+    // System.out.println(cmd);
      	Connection con = getNewConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(cmd);
@@ -2432,7 +2434,7 @@ System.out.println(cmd);
     		" kaina as price FROM apyv_gr r " +
             " INNER JOIN apyvarta d ON r.apyv_id= d.apyv_id and DATE_ADD(data,interval 180 day) > current_date()  INNER JOIN klientai b ON b.klientas=d.gavejas " + 
 	        " where DATE_ADD(data,interval " +   days + " day) > current_date() order by klient_id ,r.preke ,data desc ";
-    System.out.println(cmd);
+  //  System.out.println(cmd);
    //   "klient","toode","kogus","viimane kuupï¿½ev","viimane kogus"
     Connection con = getNewConnection();
     Statement stmt = con.createStatement();
@@ -2467,7 +2469,7 @@ System.out.println(cmd);
          rs.close();
          con.close();
 
-System.out.println("CP suurus " + vec.size());
+//System.out.println("CP suurus " + vec.size());
 
            int counter = 0;
            int cou = 0;
@@ -2478,7 +2480,7 @@ System.out.println("CP suurus " + vec.size());
           String cmd2 =  "SELECT  b.klient_id AS klient,r.preke AS toode,r.kiekis AS kogus, data AS lastdate  FROM  apyv_gr r " +
 		  " INNER JOIN apyvarta d ON r.apyv_id = d.apyv_id INNER JOIN klientai b ON b.klientas=d.gavejas WHERE  DATE_ADD(data,interval 30 day) > current_date() " +
 		  " Order by b.klient_id ,r.preke,d.data desc ";
-          System.out.println(cmd2);
+     //     System.out.println(cmd2);
 		   //   "klient","toode","kogus","viimane kuupï¿½ev","viimane kogus"
 		    Connection con2 = getNewConnection();
 		    Statement stmt2 = con2.createStatement();
@@ -2539,7 +2541,7 @@ System.out.println("CP suurus " + vec.size());
      }
      
 
-System.out.println("CP suurus2 " + vec.size());
+//System.out.println("CP suurus2 " + vec.size());
      
      return vec;
    }

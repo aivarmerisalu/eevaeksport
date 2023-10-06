@@ -876,6 +876,9 @@ private String conv (String ss){
     	       String custID = rs1.getString("klient");
     	        debt.setCustID(conv(custID));
     	        String maksja = rs1.getString("maksja");
+    	        if(maksja.trim().equals("JUTA")) {
+    	        	maksja = "JUTA1";
+	           		}
     	       // debt.set(conv(maksja));
     	       
     	        String doknr = rs1.getString("number");
@@ -1081,6 +1084,10 @@ System.out.println(cmd);
     	           	payer = rs.getString("payer");
     	           	if(payer != null && payer.trim().length()>0){
     	           		payer= conv(payer.trim());
+    	           		
+    	           		if(payer.equals("JUTA")) {
+    	           			payer = "JUTA1";
+    	           		}
     	             customer.setPayer(payer);
     	             
     	            
@@ -1197,6 +1204,8 @@ System.out.println(cmd);
     	           
     	           String alegr = rs.getString("alegr");
     	           if(alegr != null && alegr.trim().length()>0){
+    	        	   
+    	        	
     	        	customer.setGroup(Converter.cleanLitLatEst(alegr.trim()));   
     	           }
     	           

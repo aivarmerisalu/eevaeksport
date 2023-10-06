@@ -574,8 +574,12 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 	private void sendFlintReports(TreeMap prods , TreeMap smas){
 		
 		Calendar cals = Calendar.getInstance();
-		cals.set(Calendar.DAY_OF_MONTH, 1);
-		
+		if(cals.get(Calendar.DAY_OF_MONTH) < 5) {
+			cals.add(Calendar.DAY_OF_MONTH, -6);
+			 cals.set(Calendar.DAY_OF_MONTH, 1);
+		}else {
+		 cals.set(Calendar.DAY_OF_MONTH, 1);
+		}
 		
 		Calendar cale = Calendar.getInstance();
 		if("true".equals(parent.getProps().getProperty("flint"))){

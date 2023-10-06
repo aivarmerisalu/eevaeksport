@@ -905,7 +905,7 @@ try{
      
     String    sql = " SELECT  G.PK_NOMGR AS kood, G.KODS AS abi, G.NOSAUK AS nimi FROM   APV06161.NNOMGR G  " +
 	"  LEFT OUTER JOIN APV06161.NNOMGR VGR ON G.PK_GRUPA=VGR.PK_NOMGR  WHERE G.STATUSS = 0 ORDER BY G.NPK ";
-    sql = " select pk_nomkat as kood , nosauk as nimi  from APV06161.LGNOMKAT  ";
+   // sql = " select pk_nomkat as kood , nosauk as nimi  from APV06161.LGNOMKAT  ";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 
@@ -1103,7 +1103,7 @@ try{
         eans.put(ean.trim(), prod.getID());
         addx = ean.trim().substring(ean.trim().length() -4);
         }
-        String grp = rs.getString("grupp");
+        String grp = rs.getString("grupp2");
         if(grp != null){
         	  prod.setGroup(grp.trim());  
         	  if(!usedGr.contains(grp.trim())){

@@ -73,10 +73,11 @@ public class VichiLITSQLUUSImportDriver extends AbstractImportDriver{
 	 	try{
 	 	    String sql2 = " SELECT [No_] AS toode,([Search Description]) AS nimi  FROM [Vičiūnai ir Ko$Item] LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] " + 
 	 	    		" vat ON (vat.[Item No_]=[No_] and vat.[Code]='DĖŽ.' ) ";
+	 	    
+	 	 sql2 =  " select * from  MobilejavaVIK.v_VIK_GetProducts ";
 	 	    System.out.println(sql2);
 
-	 	   Connection con = DriverManager.getConnection(url + parent.getProps().getProperty("dsn")
-	 	            , parent.getProps().getProperty("dsna.user"), parent.getProps().getProperty("dsna.pass"));
+	 	   Connection con = DriverManager.getConnection(urlV   , parent.getProps().getProperty("view.user"), parent.getProps().getProperty("view.pass"));
 
 	 	    Statement st2 = con.createStatement();
 	 	    ResultSet rs2 = st2.executeQuery(sql2);

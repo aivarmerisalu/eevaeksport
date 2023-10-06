@@ -1324,7 +1324,10 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
       ResultSet rs = stmt.executeQuery(cmd);
         while(rs.next()){
           Agent agent = new Agent(rs.getString("agent").trim());
-          String name = rs.getString("nimetus").trim();
+          String name = rs.getString("nimetus");
+          if(name == null) {
+        	  name = agent.getID();
+          }
           String dubbler = getParent().getProps().getProperty("dubbler." + agent.getID());
          if(dubbler != null && dubbler.trim().length()>1){
           	StringTokenizer st = new StringTokenizer(dubbler,",");

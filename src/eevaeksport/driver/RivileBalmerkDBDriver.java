@@ -813,7 +813,7 @@ HashSet olemas = new HashSet();
     	
         connectionUp(url2);
         String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, " +
-        		" N08_PAV as nimetus, N33_kodas_ak AS nimetus2, N08_CREDIT_LIM as cred, " +
+        		" N08_PAV as nimetus, N33_PAV as nimetus3, N33_kodas_ak AS nimetus2, N08_CREDIT_LIM as cred, " +
 				" N33_ADRESAS AS aadress, ltrim(N08_NUOL_GR)   AS ale , " +
 				" ' ' AS visit ,N08_KODAS_KS AS payer , N08_KODAS_LS_8 as konsig , " +
 				" (CASE WHEN LEN(LTRIM(N33_KODAS_MS))=0 or N33_KODAS_MS  IS NULL THEN  N08_KODAS_MS_P ELSE N33_KODAS_MS  END) AS agent ,  " +
@@ -928,6 +928,11 @@ HashSet olemas = new HashSet();
             	  goes = false;
               }
               String name = rs.getString("nimetus").trim() ;
+              
+              String nim3 = rs.getString("nimetus3");
+              if(nim3 != null) {
+            	  name = name + " " + nim3.trim();
+              }
             		 String nim2 = rs.getString("nimetus2");
               if(nim2 != null) {
             	  name = name + " " + nim2.trim();

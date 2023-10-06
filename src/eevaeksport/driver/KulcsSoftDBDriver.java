@@ -8,6 +8,7 @@ import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
@@ -125,21 +126,6 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
                                                      return null;
                                                      }
 
-    /**
-     *
-     */
-    public void connectionUp(){
-      if (con == null){
-	try {
-           con = DriverManager.getConnection(url);
-           stmt = con.createStatement();
-	} catch (Exception e) {
-	    getParent().showError(e);
-	   // System.exit(0);
-	}
-      }
-    }
-
         public String getDistribution() {
           return null;
         }
@@ -182,18 +168,7 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
             return tm;
         }
 
-    /**
-     *
-     */
-    public void connectionDown(){
-        try {
-           stmt.close();
-           con.close();
-           con = null;
-	} catch (Exception e) {
-	    getParent().showError(e);
-	}
-    }
+  
 
     /**
      * Method declaration
@@ -212,6 +187,9 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
 	Agent aa1 = new Agent("HUN005");
 	aa1.setName("Hungary 005");
 	agents.put(aa1.getName(), aa1);
+	Agent aa12 = new Agent("HU000");
+	aa12.setName("Hungary 000");
+	agents.put(aa12.getName(), aa12);
 /*
 	try {
 		   connectionUp();
@@ -309,6 +287,10 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
 		         Agent a1 = new Agent(ag1);
 		         cust.addAgent(a1);
 		         
+		         String ag12 = "HU000";
+		         Agent a12 = new Agent(ag12);
+		         cust.addAgent(a12);
+		         
 		         if(dues.get(payer) != null) {
 		        	 cust.setUsedCredit(dues.get(payer));
 		         }
@@ -338,7 +320,16 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
     }
     
     
-    
+    private boolean isThere(ResultSet rs, String column){
+        try{
+            rs.findColumn(column);
+            return true;
+        } catch (SQLException sqlex){
+           System.out.println("column doesn't exist {}" + column);
+        }
+
+        return false;
+    }    
     
 
     public TreeMap getProducts(Agent agent) {
@@ -382,27 +373,40 @@ try{
     Connection  con = DriverManager.getConnection(url);
 PreparedStatement pstm = con.prepareStatement(cmd);
 ResultSet rs6 = pstm.executeQuery();
-System.out.println("groups 2 " + groups);
-while(rs6.next()){
-	
+
+ResultSetMetaData rsmd = rs6.getMetaData();
+int columnCount = rsmd.getColumnCount();
+
+HashSet names = new HashSet();
+
+for (int i = 1; i <= columnCount; i++ ) {
+	String nn = rsmd.getColumnName(i);
+	if(groups.keySet().contains(nn)) {
+          names.add(nn);
+	  }
+              }
+System.out.println("groups 2 " + groups + " " + names.toString());
+//selgitame mis väljad on olemas
+
+if(rs6.next()){
 	String kood = rs6.getString("Id").trim();
-	System.out.println("kood 3 " + kood);
-	 Iterator itera =  groups.keySet().iterator();
+	//System.out.println("kood 3 " + kood);
+	 Iterator itera =  names.iterator();
 	while(itera.hasNext()) {
 		String field = (String)itera.next();
 		System.out.println("kood 3 " + field);
 		try {
-			int gr = rs6.getInt(field);
-			if(gr > 0) {
+			
+		
+			String gr = rs6.getString(field);
+			System.out.println("kood 332 " + gr);
+			if(gr != null && !gr.equals("0") ) {
 				prodsInGroups.put(kood, field);
 			}
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
-   
-	
-	
 }
 
 
@@ -411,7 +415,7 @@ pstm.close();
 con.close();
 
 
-System.out.println("prices2 " + prodsInGroups.toString());
+System.out.println("prices2 " + prodsInGroups);
 
 }catch(Exception r){
 r.printStackTrace();
@@ -438,7 +442,7 @@ r.printStackTrace();
 		    name = name.trim();
 		    prod.setEAN(parent.make(rs.getString("ean")));
 			
-		     
+		    System.out.println("name " + name);
     
                  if(prices.get(kood)!= null){
                 	 prod.setPrice(Double.parseDouble((String)prices.get(kood)));
@@ -825,6 +829,16 @@ r.printStackTrace();
 	}
 	public NumberFormat getNF() {
 		return NF;
+	}
+	@Override
+	public void connectionUp() {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void connectionDown() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

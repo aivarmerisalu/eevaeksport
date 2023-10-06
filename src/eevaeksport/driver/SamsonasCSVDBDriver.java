@@ -975,7 +975,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
   
            Customer customer = new Customer(id);
           
-           if(id.equals("27860")) {
+           if(id.equals("29188")) {
         	   System.out.println(name + "'" + crlimit + "'"  +usedcredit + "'"  + block+ "'"+payterm + "'") ;
            }
             
