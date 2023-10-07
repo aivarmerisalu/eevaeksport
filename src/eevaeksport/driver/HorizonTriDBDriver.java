@@ -626,7 +626,7 @@ try{
     			+ "K.REG_NR as payer,K.ADRESE as address ,A.ADRESE as address2 ,k.PIEZIMES as address3, A.PK_REISS as agent , " +
     " K.APMTERM as paym ,K.KREDLIM as credit, K.LIC_NR as licence ,K.LIC_IZDAT as lepalg , " +
     " K.TELEFONS as phone,K.MOBTEL as mphone ,K.EPASTS as email ,k.PK_CENVEID as hinnak  ,gru.nosauk as chain ,kkat.nosauk as kate " +
-    " , K.PK_GRUPA as alegru , K.BRIDIN as infoke FROM   APV06161.DKLIENTS K LEFT OUTER JOIN  APV06161.NADRESES a ON A.PK_KLIENTS=K.PK_KLIENTS  " // and a.LEG_ADR = 2
+    " , K.PK_GRUPA as alegru , K.BRIDIN as infoke , a.PIEZIMES as deldays FROM   APV06161.DKLIENTS K LEFT OUTER JOIN  APV06161.NADRESES a ON A.PK_KLIENTS=K.PK_KLIENTS  " // and a.LEG_ADR = 2
     + " LEFT OUTER JOIN APV06161.DGRUPAS GRU ON K.PK_GRUPA = GRU.PK_GRUPA  " +
     " LEFT OUTER JOIN APV06161.DKLKAT KKAT  ON K.PK_KLKAT = KKAT.PK_KLKAT " +
     " WHERE (K.STATUSS <> 2 AND K.PK_DOKT IS NOT NULL AND ( NOT K.PAMV_ID IN (1810,11970))) AND " +
@@ -830,6 +830,11 @@ try{
         	cust.setInfo(Converter.enCodeEst(infoke.replaceAll("\\r\\n|\\r|\\n", " ").trim()));
         }
         
+        
+        infoke = rs.getString("deldays");
+        if (infoke != null && infoke.trim().length()>0) {
+        	cust.setCity("PiegDiena : " + Converter.enCodeEst(infoke.replaceAll("\\r\\n|\\r|\\n", " ").trim()));
+        }
         boolean laks = true;
                     if((payer == null || payer.trim().length() == 0) && payers.contains(cust.getID())){
                     //	laks = false;
