@@ -938,50 +938,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
   }
 	    
   
-  private TreeMap getLaoSeisud (String ladu) {
-	  TreeMap seis = new TreeMap();
-	  
-	 	try {
-	  		  File f = new File (getDir() + "laoseis.xml");
-	  		  if(f.exists()) {
-	  			
-	  	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	  	     DocumentBuilder db;
-	  		db = dbf.newDocumentBuilder();      	
-	      	FileInputStream in = getCleanInputStream(f);
-	      	String handler = null;
-	          Document doc = db.parse(in,handler);
-	          Node root = getNode(doc, "transport");      
-	       //   System.out.println(root);
-	      	Node read = getNode(root, "stocklevels");
-	      //	System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
-	          for (int i = 0; i < read.getChildNodes().getLength(); i++){
-	          	  Node rida = read.getChildNodes().item(i);
-	          	  try{
-	          		  if(rida.getNodeName().equals("stocklevel")){
-	               		 String prodid  = rida.getAttributes().getNamedItem("code").getNodeValue();
-	               		 double kog = Double.parseDouble(rida.getAttributes().getNamedItem("stock_level").getNodeValue());
-	               		 seis.put(prodid, kog);
-	               		 try{
-	               			 String lkood = rida.getAttributes().getNamedItem("stock_code").getNodeValue();
-	               		 }catch(Exception r){
-	               			 
-	               		 }
-	          		  } 
-	          	  }catch(Exception e){
-	          		 // e.printStackTrace();
-	          	  }
-	          }
-	          
-	  		  }
-	  	}catch(Exception e){
-	  		//e.printStackTrace();
-	  	}
-	    
-		  
-	  
-	  return seis;
-  }
+
   
    public TreeMap getProdGroups2() throws SQLException {
     HashSet names = new HashSet();
@@ -2020,6 +1977,9 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
   
    
    private boolean isDueDate(String mmddyy){
+	   if("true".equals(getParent().getProps().getProperty("debtlist.all"))) {
+		   return true;
+	   }
 	  	
 	  	Calendar cal = Calendar.getInstance();
 	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
@@ -2236,7 +2196,10 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
    
    public TreeMap getProducts(Agent agent){
 	   System.out.println("tooted a");
-	   TreeMap otherStocks = this.getProductsOther();
+	   
+	   if(seisud == null) {
+		    getSaveStockInfo();
+	   }
 	   
 	 
 	   try {
@@ -2791,8 +2754,10 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
                    }catch(Exception e) {
                 	   e.printStackTrace();
       		
-      	}
-     
+      	      }
+     if(seisud != null && seisud.get(prod.getID()) != null) {
+    	 prod.setStock(seisud.get(prod.getID()));
+     }
       	 
       	if(prodCodes != null && !prodCodes.contains(prod.getID())){
       	  goes = false;
@@ -3398,7 +3363,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 public String getSaveStockInfo() {
 
 	   StringBuffer products = new StringBuffer();
-  	 
+	   seisud = new HashMap<String, Double>();
       
  try{
 	 Converter.doTrustToCertificates();
@@ -3503,6 +3468,7 @@ public String getSaveStockInfo() {
 		if(seisx > 0) {
 			products.append(toode +  "; ;");
 			products.append(getParent().getNF().format(seisx) + "; "  +  "\n"); 
+			seisud.put(toode, seisx);
 		}
 
        	  }}
@@ -3516,4 +3482,6 @@ public String getSaveStockInfo() {
  return products.toString();
  
 }
+HashMap<String, Double> seisud = null;
+
 }
