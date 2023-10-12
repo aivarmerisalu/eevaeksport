@@ -792,8 +792,7 @@ try {
     TreeMap   tm = new TreeMap();
   //  String    sql = "   SELECT PRODUCTLINEID as liik,name as nimi FROM  inventproductline  where dataareaid ='kosm'  ";
  
-    String    sql = "select e.recid as liik  , e.name  as nimi from EcoResCategory e inner join inventtable t on t. CATEGORYINVENTGROUP_BBS= e.recid " + 
-			"  where  costgroupid ='Prod' group by e.recid , e.name  ";
+    String    sql = " Select recid as liik , name as nimi from EcoResCategory where CATEGORYHIERARCHY in (5637146826, 5637146827) ";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 
@@ -875,28 +874,27 @@ try {
 
   public TreeMap getProducts(Agent agent){
 	
-	  
-    String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, sui.qty  AS kastis,'' AS alusel, disc.amount AS price " +
-  "     , bar.itembarcode AS ean ,'' AS grupp2, ''  AS grupp , "
-  + " ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 21 as vat , " +
-  "   0  as samm ,sortcode as sorting  ,  0 as nosales  FROM  inventtable inv  " +
-  "       left  JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation  and " +
-  "   disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)  and disc.accountcode='2' and disc.currency = 'EUR' and disc.dataareaid='kosm' " +
-  "      left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  " +
-  "     left join  inventitembarcode bar  ON bar.useforprinting = 1 and bar.itemid=inv.itemid and  " +
-  "     bar.DATAAREAID =inv.DATAAREAID  and bar.inventdimid = 'AllBlank' " +
-"	     left  JOIN  BBSSuiteTable sui ON  inv.mainsuiteitemid_bbs = sui.suiteitemid  and " +
- "     sui.type=0  AND sui.dataareaid='kosm' and   sui.qty > 1 " +
- "  left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension " + 
-		"	 and  dimensionattribute = 5637146830 " +
-  "    WHERE   moduletype=2 and (blocked = 0 or blocked is null) and  inv.dataareaid='kosm'  and ( Assortment_bbs = 1 )  ";
+	  codeEanprods = new TreeMap();
+    String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, 1  AS kastis,'' AS alusel, disc.amount AS price \r\n" + 
+    		"       , bar.itembarcode AS ean ,'' AS grupp2, ''  AS grupp , \r\n" + 
+    		"   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat , \r\n" + 
+    		"     0  as samm ,sortcode as sorting  ,  0 as nosales , inv.* FROM  inventtable inv  \r\n" + 
+    		"         left  JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation  and \r\n" + 
+    		"     disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)   and disc.currency = 'EUR' and disc.dataareaid='kosm' \r\n" + 
+    		"       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  \r\n" + 
+    		"       left join  inventitembarcode bar  ON bar.useforprinting = 1 and bar.itemid=inv.itemid and  \r\n" + 
+    		"       bar.DATAAREAID =inv.DATAAREAID  and bar.inventdimid = 'AllBlank' \r\n" + 
+    		"	\r\n" + 
+    		"   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
+    		"		 and  dimensionattribute = 5637146830 \r\n" + 
+    		"    WHERE   moduletype=2 and (blocked = 0 or blocked is null) and  inv.dataareaid='kosm' and inv.itemid like'15%' ";
     //z p algusega
   
     
-    String sss = "select bb.itemid, itembarcode from inventitembarcode  bb " + 
-    		" left join inventdim dd on bb.inventdimid = dd.inventdimid " + 
-    		" left join inventtable tbl on bb.itemid = tbl.itemid " + 
-    		" where bb.dataareaid = 'kosm' and bb.useforprinting = 1  and tbl.standardconfigid = dd.configid";
+    String sss = "select bb.itemid, itembarcode from inventitembarcode  bb \r\n" + 
+    		"    		 left join inventdim dd on bb.inventdimid = dd.inventdimid and dd.DATAAREAID=bb.DATAAREAID\r\n" + 
+    		"    		 left join inventtable tbl on bb.itemid = tbl.itemid and tbl.DATAAREAID=bb.DATAAREAID\r\n" + 
+    		"    		 where bb.dataareaid = 'kosm' and tbl.standardconfigid = dd.configid and tbl.DATAAREAID='kosm'";
 
  
     
@@ -989,12 +987,13 @@ try {
       stmt.close();
       ccc.close();
     } catch (Exception e){
+    	e.printStackTrace();
       getParent().log(e.toString());
       
     	//System.exit(0);
     }
 
-    
+    System.out.println("PRODUCTS " + products.size());
     return products;
   }
 

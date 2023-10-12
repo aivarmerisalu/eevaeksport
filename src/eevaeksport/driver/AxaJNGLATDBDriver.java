@@ -83,17 +83,19 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	  try {
 			    TreeMap custTypes =  new TreeMap(); // Converter.getCustDimsLoading("type");
 			    
-			    String sq3 = "select * from getcustomers where " ;
+			    String sq3 = "select kood, customgroup2 from getcustomers where customgroup2 != ''" ;
 				
 				Connection con3 = getNewConnection();
 				Statement st3 = con3.createStatement();
 				ResultSet rs3 = st3.executeQuery(sq3);
 				while (rs3.next()) {
-					String kood = rs3.getString("toode").trim();
-					String grupp = rs3.getString("nimi1").trim();
+					String kood = rs3.getString("kood").trim();
+					String grupp = rs3.getString("customgroup2").trim();
 					
+					custTypes.put(kood, grupp);
 				}
-			    
+				rs3.close();
+			    st3.close();
 			    String date = Converter.getDDpMMpYYYYpString(Calendar.getInstance());
 			    sb.append(date+"\n");
 			
@@ -188,22 +190,20 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 						   ArrayList<String>  soldGR = new ArrayList<String>();
 						   ArrayList<String>  nonSoldGR = (ArrayList<String>) mustGroups.clone();
 						   String klkood = (String)itera.next();
-						   String klgr = "ALL";
+						   String klgr = "NONE";
 						   if(custTypes != null && custTypes.get(klkood) != null) {
 							   
 					        	ArrayList type = (ArrayList)custTypes.get(klkood);
 					        	if(type != null) {
 					        	 klgr = (String)type.get(0); 
 					        	
-					        	 if(klgr.equals("Must-A")){
+					        	 if(klgr.equals("A")){
 					        		 klgr = "FOOD";
-					        	 } else {
+					        	 } else if (klgr.equals("B")){
 					        		 klgr = "NONFOOD";
+					        	 }else if (klgr.equals("C")){
+					        		 klgr = "ALL";
 					        	 }
-					        	//Must-A on FOOD
-					        	//Must-B on NONFOOD
-					        	
-					        	
 					        	}
 						   
 						   
@@ -254,6 +254,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 								 }
 						   }
 						   
+						   if(!klgr.equals("NONE")) {
 							  double perc = 1;
 							  
 							  if(nonSoldGR.size() > 0) {
@@ -268,7 +269,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 								  
 								  perc = soldGR.size() *1.0 / non;
 							  }
-							  
+							
 							   res.put(klkood , perc);//
 							   res.put(klkood + "sold", soldGR);
 							   res.put(klkood + "nonsold", nonSoldGR);
@@ -276,6 +277,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 								   System.out.println("Must% " + klkood + " " + soldGR.size() + " " + nonSoldGR.size() + " " + perc); 
 								   sb.append(klkood + "," + (perc*100) + ","+ soldGR.size() + "," + nonSoldGR.size() + "\n");
 							   }
+							  }
 							    
 				  	  }
 						   
