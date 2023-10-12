@@ -81,7 +81,19 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	  StringBuffer sb = new StringBuffer();
 		
 	  try {
-			    TreeMap custTypes =  Converter.getCustDimsLoading("type");
+			    TreeMap custTypes =  new TreeMap(); // Converter.getCustDimsLoading("type");
+			    
+			    String sq3 = "select * from getcustomers where " ;
+				
+				Connection con3 = getNewConnection();
+				Statement st3 = con3.createStatement();
+				ResultSet rs3 = st3.executeQuery(sq3);
+				while (rs3.next()) {
+					String kood = rs3.getString("toode").trim();
+					String grupp = rs3.getString("nimi1").trim();
+					
+				}
+			    
 			    String date = Converter.getDDpMMpYYYYpString(Calendar.getInstance());
 			    sb.append(date+"\n");
 			
@@ -91,11 +103,11 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 			HashMap mustProds = new HashMap();
 			HashMap<String, String> groupTypes = new HashMap<String, String>();
 			
-    		String sq3 = "select * from getproducts where customgroup1 != '' and nimi1 != '' " ;
+    		 sq3 = "select * from getproducts where customgroup1 != '' and nimi1 != '' " ;
 					
-					Connection con3 = getNewConnection();
-					Statement st3 = con3.createStatement();
-					ResultSet rs3 = st3.executeQuery(sq3);
+					
+				 st3 = con3.createStatement();
+				 rs3 = st3.executeQuery(sq3);
 					while (rs3.next()) {
 						String kood = rs3.getString("toode").trim();
 						String nimi = rs3.getString("nimi1").trim();

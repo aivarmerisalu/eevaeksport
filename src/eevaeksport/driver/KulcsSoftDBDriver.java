@@ -287,6 +287,7 @@ public class KulcsSoftDBDriver extends AbstractDBDriver implements BulkUpdater,D
 		         Agent a1 = new Agent(ag1);
 		         cust.addAgent(a1);
 		         
+		         
 		         String ag12 = "HU000";
 		         Agent a12 = new Agent(ag12);
 		         cust.addAgent(a12);

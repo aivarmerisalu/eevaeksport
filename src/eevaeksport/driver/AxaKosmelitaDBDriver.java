@@ -239,9 +239,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
      return this.debt;
    }
   
-  
-  
-  
+ 
 
 
   public String getAssortmentStr(Agent agent){
@@ -279,21 +277,15 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
   
   public TreeMap getAgents(){
 
-    String cmd = " select w.value as kood , w.name as name from  DIMATTRIBUTEHCMWORKER w   inner join HCMWORKER h on h.personnelnumber = w.value " + 
-			" inner join custtable c on c.MAINCONTACTWORKER=h.recid  group by  w.value  , w.name";// +
- // " and title = 'Vadybininkas'";
- //  getFixedAssortmentData();
-  
+    String cmd = " select w.value as kood , w.name as name from  DIMATTRIBUTEHCMWORKER w   inner join HCMWORKER h on h.personnelnumber = w.value \r\n" + 
+    		"			 inner join custtable c on c.MAINCONTACTWORKER=h.recid where w.value like 'G%' group by  w.value  , w.name";// +
     
     Properties propse =  new Properties();
     try{
     	propse =  EksportFrame.loadProps("emails.txt");
-  	  
     }catch(Exception e){
     	e.printStackTrace();
     }
-    
-	
 	
     
     Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
@@ -383,18 +375,7 @@ String email = " ";
 	
 	  System.out.println("Alustan Kliendid");
 	  
- String cmd = "  SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum, \r\n" + 
- 		"                adr.street as tanav,adr.city as linn, adr.county as regioon,adr.zipcode as indeks ,cus.invoiceaccount AS payer, \r\n" + 
- 		"               0 AS debt, cus.linedisc , \r\n" + 
- 		"                  adr.address ,(Select h.personnelnumber from HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) AS agent ,  numofdays AS term, cus.blocked AS block , \r\n" + 
- 		"                               (select max (blocked) from  custtable cc  WITH (NOLOCK) where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = cus.dataareaid ) \r\n" + 
- 		"                         as payerblock ,(select l.locator  from  LOGISTICSELECTRONICADDRESS l WITH (NOLOCK)  where l.recid = dp.primarycontactphone)  \r\n" + 
- 		"						  as info , linedisc as grupp, 0 as minord , \r\n" + 
- 		"                             '' as transa,'' as discount ,'' as samm , '' as tyyp ,'' as tyyp2   \r\n" + 
- 		"             FROM  custtable cus with(nolock) inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join \r\n" + 
- 		"			 LOGISTICSPOSTALADDRESS adr ON adr.LOCATION = dp.PRIMARYADDRESSLOCATION and getdate() >=VALIDFROM  and  getdate() <= VALIDTO left outer JOIN  paymterm \r\n" + 
- 		"                        pay on cus.paymtermid = pay.paymtermid  and pay.DATAAREAID  = cus.DATAAREAID  \r\n" + 
- 		"                             WHERE   (cus.dataareaid='kosm'  and (MAINCONTACTWORKER != 0)) OR cus.accountnum in ('NAUJAS','OFISAS') ";
+
  String ccc = "select invoiceaccount from  custtable where dataareaid='kosm' and invoiceaccount is not null  group by invoiceaccount";
  
            String sql = " SELECT  a.ORDERACCOUNT AS klient,a.invoice AS numbe,co.duedate AS maksepaev,sum(co.amountmst) AS tasumata, " +
@@ -490,6 +471,22 @@ String email = " ";
            
        //    tal_visitationdays ,talspartnercode,
 
+     	 String cmd = "   SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum, \r\n" + 
+     	 		"             adr.street as tanav,adr.city as linn, adr.county as regioon,adr.zipcode as indeks ,cus.invoiceaccount AS payer, \r\n" + 
+     	 		"             0 AS debt, cus.linedisc , \r\n" + 
+     	 		"             adr.address ,(Select h.personnelnumber from HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) AS agent ,  numofdays AS term, cus.blocked AS block , \r\n" + 
+     	 		"               (select max (blocked) from  custtable cc  WITH (NOLOCK) where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = cus.dataareaid ) \r\n" + 
+     	 		"             as payerblock ,(select l.locator  from  LOGISTICSELECTRONICADDRESS l WITH (NOLOCK)  where l.recid = dp.primarycontactphone)  \r\n" + 
+     	 		"			  as info , linedisc as grupp, 0 as minord , \r\n" + 
+     	 		"               '' as transa,'' as discount ,'' as samm , '' as tyyp ,'' as tyyp2   \r\n" + 
+     	 		"             FROM  custtable cus with(nolock) inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join \r\n" + 
+     	 		"	 		 LOGISTICSPOSTALADDRESS adr ON adr.LOCATION = dp.PRIMARYADDRESSLOCATION and getdate() >=VALIDFROM  and  getdate() <= VALIDTO left outer JOIN  paymterm \r\n" + 
+     	 		"            pay on cus.paymtermid = pay.paymtermid  and pay.DATAAREAID  = cus.DATAAREAID  \r\n" + 
+     	 		"           WHERE   (cus.dataareaid='kosm'  and (Select h.personnelnumber from HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) like 'G%') ";
+
+     	  
+     	  
+     	  
   if (isDebug()) System.out.println(cmd);
     TreeMap customers = new TreeMap();
     TreeMap custMap = new TreeMap();
@@ -526,6 +523,7 @@ String email = " ";
     	
 
   	  System.out.println("Alustan Kliendid 3");
+  	  try {
   	   Statement stmu = con.createStatement();
     	
          rs1 = stmu.executeQuery(sss);
@@ -545,7 +543,9 @@ String email = " ";
         }
        rs1.close();
        stmu.close();
-  
+  	  }catch(Exception k) {
+  		  k.printStackTrace();
+  	  }
 
 	//  System.out.println("Alustan Kliendid 4");
     	
@@ -563,7 +563,6 @@ String email = " ";
  	  System.out.println("Alustan Kliendid 5");
     	Statement stmt = con.createStatement();
       ResultSet rs = stmt.executeQuery(cmd);
-      Statement stm = con.createStatement();
       while(rs.next()){
         String name = rs.getString("name").replaceAll("UAB", " ").trim();
         
@@ -643,22 +642,13 @@ String email = " ";
         if (aadr != null) {
           cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ')),"Lithuania").replaceAll("\\r\\n|\\r|\\n", " "));
         }
-        String visit = rs.getString("visit");
-        if (visit != null && visit.trim().length()>0) {
-        	
-          cust.setVisit(Converter.getVisitDayLetter(visit.trim()));
-        }
+     
         String agen = rs.getString("agent");
       
         if (agen != null && agen.trim().length() >0) {
           cust.addAgent(new Agent(agen.trim()));
     
-          cust.addAgent(new Agent("WARE1"));
-          cust.addAgent(new Agent("WARE2"));
-          cust.addAgent(new Agent("WARE3"));
-          cust.addAgent(new Agent("WARE4"));
-          cust.addAgent(new Agent("WARE5"));
-          cust.addAgent(new Agent("WARE6"));
+       
           cust.setMainAgent(agen.trim());
           
           
@@ -671,12 +661,8 @@ String email = " ";
           	}
         }
         
+      
         
-        String agen2 = rs.getString("agent2");
-        
-        if (agen2 != null && agen2.trim().length() >0) {
-        	 cust.addAgent(new Agent(agen2.trim()));
-        }
         
        
         int term = rs.getInt("term");
@@ -738,26 +724,15 @@ String email = " ";
         }
         
       
-     
-        
-        
-    
-        
-    //    cc.addQuestiosToCustomer(cust,kyssad);
-     
-                    boolean laks = true;
-                    if((payer == null || payer.trim().length() == 0) && payers.contains(cust.getID())){
-                    	//laks = false;
-                    }
-                    if(laks){
                         customers.put(name, cust);
                         custMap.put(cust.getID(),cust);	
-                    }
+                    
       }
       rs.close();
 
 	  System.out.println("Alustan Kliendid 6");
-      rs = stmt.executeQuery(sql);
+try {
+	  rs = stmt.executeQuery(sql);
                       while(rs.next()){
                         Debt debt = new Debt();
                         debt.setCustID(rs.getString("klient").trim());
@@ -776,6 +751,9 @@ String email = " ";
                         this.debt.addElement(debt); 	
                       }
                       rs.close();
+}catch(Exception r) {
+	r.printStackTrace();
+}
                       stmt.close();
                       con.close();
 
@@ -789,7 +767,7 @@ String email = " ";
     if(rcompany != null){
     // 	Converter.sendCustomerJson(customers, rcompany,false,user,pass);
      }
-    
+    System.out.println("Kliendid " + customers.size());
     return customers;
   }
 

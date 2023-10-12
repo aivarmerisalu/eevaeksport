@@ -36,6 +36,7 @@ import eevaeksport.Product;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.imp.Orders;
 import eevaeksport.util.Converter;
 
 /**
@@ -67,6 +68,9 @@ public class KulcsSoftImportDriver
       calNF.setMinimumIntegerDigits(2);
       calNF.setGroupingUsed(false);
       fileName = parent.getProps().getProperty("conv.dir") + getYYYYpMMpDDpString(new Date())   +  ".csv";
+      bufferOrders = new TreeMap<String, String>();
+      bufferAmounts = new TreeMap <String, Double> (); 
+      ordNums = new TreeMap<String, String>();
     } catch (Exception e) {
       parent.showError(e);
       log.error(e);
@@ -412,8 +416,9 @@ public class KulcsSoftImportDriver
   }
 
 
-  
-  
+  private TreeMap<String, String> bufferOrders = null; 
+  private TreeMap<String, String> ordNums = null;
+  private TreeMap <String, Double> bufferAmounts = null;
   
   public void makeOrder(Order order) throws SQLException{
 	  if(this.prods == null) {
@@ -452,7 +457,8 @@ private TreeMap customers = null;
   
   
   private void makeOutput(Order order){
-  	StringBuffer sb = new StringBuffer();
+	  
+  	
   	 nf.setGroupingUsed(false);
   	
   	try {
@@ -478,6 +484,27 @@ private TreeMap customers = null;
                   cal = shipDate;
                 }
             
+            
+            String ordnum = order.getDokNr();
+            
+            //Teeme keyd valmis
+            String key = custID;
+           
+            if(parent.getProps().getProperty("consolidate") != null && cust.getPayer().trim().length() > 0 
+            		&& parent.getProps().getProperty("consolidate").contains(cust.getPayer())) {
+            	 key = cust.getPayer();
+            	 if(ordNums.containsKey(key)) {
+            		 ordnum = ordNums.get(key);
+            	 }else {
+            	     ordNums.put(key, ordnum);
+            	 }
+            	//417172 Városház-central
+            	// 246054 Halmschlager
+
+            }
+            
+           System.out.println("Key " + key + " " + cust.getMainAgent() + cust.getPayer());
+            
             Vector sortedLines = order.getOrderLines();
             for (int i = 0; i < sortedLines.size(); i++) {
             	
@@ -493,9 +520,10 @@ private TreeMap customers = null;
             if(prod != null) {
             	prodName = prod.getName();
             }
-           
+            StringBuffer sb = new StringBuffer();
+        
             
-            sb.append((order.getDokNr()).trim() + ls); 
+            sb.append((ordnum).trim() + ls); 
             sb.append("HUF" + ls); 
             sb.append("1" + ls); 
             sb.append( cust.getMainAgent() +  ls); 
@@ -508,12 +536,16 @@ private TreeMap customers = null;
             sb.append(json.get("street")  + ls);
             sb.append(getDateString(Calendar.getInstance())  + ls);
             sb.append(getDateString(cal)  + ls);
-            
+          
+            Double kogus = line.getKogus();
+           if(bufferOrders.get(key+"_"+prod.getAgentGroup()) != null) {
+            	kogus = kogus + bufferAmounts.get(key+"_"+prod.getAgentGroup()); 
+            }
             sb.append( cust.getVatnr() +  ls);
             sb.append( "átutalás" +  ls);
             sb.append( prod.getAgentGroup()+  ls);
             sb.append( prodName +  ls);
-            sb.append( getNF().format(line.getKogus())+  ls);
+            sb.append( getNF().format(kogus)+  ls);
             sb.append(line.getUnit() + ls);
             
             sb.append( getNF().format(line.getPrice()).replace('.', ',')+  ls);
@@ -526,21 +558,6 @@ private TreeMap customers = null;
             sb.append("RE" + ls);
             sb.append("" + ls);
             sb.append("" + ls);
-            
-      /*  	json.put("building", building);
-     		json.put("staircase", staircase);
-     		json.put("floor", floor);
-     		json.put("door", door);
-     		json.put("buildingC", buildingC);
-     		json.put("staircaseC", staircaseC);
-     		json.put("floorC", floorC);
-     		json.put("doorC", doorC);
-     		json.put("numberC", numberC);
-     		json.put("cityC", cityC);
-     		json.put("streetC", streetC);
-     		json.put("zipcodeC", zipcodeC);*/
-           
-        
             sb.append(json.get("countryC") + ls); // Buyer address - Country
             sb.append(json.get("publicDomainC") + ls); //Customer address - Public area
             sb.append(json.get("doorC") + ls); //Customer address - Door
@@ -564,21 +581,31 @@ private TreeMap customers = null;
               
                 counter++;
                 
+                bufferOrders.put(key+"_"+prod.getAgentGroup(), sb.toString()); 
+                bufferAmounts.put(key+"_"+prod.getAgentGroup(), line.getKogus()); 
+                
             }
             
 
             
-           
+         StringBuffer ss = new StringBuffer();
+         for(String line : bufferOrders.values()) {
+        	 ss.append(line);
+         }
 
   
        counter = counter + cou;
     
       
-       System.out.println(fileName);
-      // Converter.saveFileInANSI(fileName, sb.toString());
        
-       FileUtils.writeStringToFile(new File(fileName),sb.toString() , true);
- 	} catch (Exception e) {
+       
+       System.out.println(fileName);
+      // Converter.saveFileInANSI(fileName, ss.toString());
+       
+    //   FileUtils.writeStringToFile(new File(fileName),ss.toString() , true);
+       Converter.saveFileInANSI(fileName, ss.toString());
+       
+  	} catch (Exception e) {
  		e.printStackTrace();
  	}
   }
