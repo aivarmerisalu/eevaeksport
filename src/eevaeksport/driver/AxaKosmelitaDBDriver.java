@@ -792,7 +792,8 @@ try {
     TreeMap   tm = new TreeMap();
   //  String    sql = "   SELECT PRODUCTLINEID as liik,name as nimi FROM  inventproductline  where dataareaid ='kosm'  ";
  
-    String    sql = " Select recid as liik , name as nimi from EcoResCategory where CATEGORYHIERARCHY in (5637146826, 5637146827) ";
+    String    sql = " 	Select e.PARENTCATEGORY as liik ,  (Select name from ECORESCATEGORY a where a.RECID = e.PARENTCATEGORY) as nimi from ECORESPRODUCTCATEGORY g \r\n" + 
+    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827','5637146826') group by e.recid , e.name ,PARENTCATEGORY ";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 
@@ -820,20 +821,20 @@ try {
 
   
   public TreeMap getProdGroupsSecond() throws SQLException {
-	  Connection con = getNewConnection();
-	    TreeMap   tm = new TreeMap();
-	    String    sql = "select e.recid as liik , e.name as nimi from EcoResCategory e inner join inventtable t on t. CATEGORYPRODUCTLINE_BBS= e.recid " +
-			" where  costgroupid ='Prod' group by e.recid , e.name ";
+	  
+	    Connection con = getNewConnection();
+	    TreeMap tm = new TreeMap();
 	    
-	    
-	    sql = "Select ww.displayvalue as liik , ww.displayvalue as nimi from DimensionAttributeValueSetItemView ww where " + 
-		"	dimensionattribute = 5637146830";
+	    String sql = "Select e.recid as liik , e.PARENTCATEGORY as liik2, e.name as nimi from  ECORESPRODUCTCATEGORY g \r\n" + 
+	    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827','5637146826') group by e.recid ,PARENTCATEGORY, e.name";
+	   
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
-	        tm.put(liik,  Converter.enCodeEst(rs.getString("nimi").trim()));
+	      String liik2 =  rs.getString("liik2").trim();
+	        tm.put(liik2+liik,  Converter.enCodeEst(rs.getString("nimi").trim()));
 	    }
 	    rs.close();
 	    st.close();
@@ -842,52 +843,25 @@ try {
 	    return tm;
   }
   
-  public TreeMap getEancodes() throws SQLException {
-	  Connection con = getNewConnection();
-	 
-	    TreeMap   tm = new TreeMap();
-	    String    sql = " SELECT inv.itemid AS kood, bar.itembarcode AS ean  FROM  inventtable inv " +
-	     " inner join  inventitembarcode bar on bar.dataareaid = 'kosm' and bar.useforprinting =" +
-	   " 1 and bar.itemid=inv.itemid  WHERE   inv.dataareaid='kosm'  and  bar.dataareaid='kosm' " ;
-	  //  "  and (inv.itemgroupid like 'Z%' or inv.itemgroupid like 'S%') and inv.Assortment = 1";
-	    Statement st = con.createStatement();
-	    ResultSet rs = st.executeQuery(sql);
 
-	    while (rs.next()) {
-	      String liik = rs.getString("kood").trim();
-	      String maks = rs.getString("ean");
-	      
-	      if(maks != null && maks.trim().length() > 0){
-	    	  tm.put( maks.trim(),liik);
-	      }
-	      
-	    }
-	    rs.close();
-	    st.close();
-	    con.close();
-
-	    return tm;
-  }
-  
   
   
 
   public TreeMap getProducts(Agent agent){
-	
-	  codeEanprods = new TreeMap();
-    String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, 1  AS kastis,'' AS alusel, disc.amount AS price \r\n" + 
-    		"       , bar.itembarcode AS ean ,'' AS grupp2, ''  AS grupp , \r\n" + 
+
+    String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, DISPLAYVALUE  AS kastis,'' AS alusel, disc.amount AS price \r\n" + 
+    		"        ,CATEGORY AS grupp2, PARENTCATEGORY  AS grupp , \r\n" + 
     		"   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat , \r\n" + 
-    		"     0  as samm ,sortcode as sorting  ,  0 as nosales , inv.* FROM  inventtable inv  \r\n" + 
+    		"     0  as samm ,sortcode as sorting  ,  0 as nosales FROM  inventtable inv \r\n" + 
+    		"	 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
+    		"	 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('5637146827','5637146826') \r\n" + 
+    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
     		"         left  JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation  and \r\n" + 
     		"     disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)   and disc.currency = 'EUR' and disc.dataareaid='kosm' \r\n" + 
     		"       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  \r\n" + 
-    		"       left join  inventitembarcode bar  ON bar.useforprinting = 1 and bar.itemid=inv.itemid and  \r\n" + 
-    		"       bar.DATAAREAID =inv.DATAAREAID  and bar.inventdimid = 'AllBlank' \r\n" + 
-    		"	\r\n" + 
     		"   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
-    		"		 and  dimensionattribute = 5637146830 \r\n" + 
-    		"    WHERE   moduletype=2 and (blocked = 0 or blocked is null) and  inv.dataareaid='kosm' and inv.itemid like'15%' ";
+    		"		 and  dimensionattribute = 5637145336 \r\n" + 
+    		"    WHERE   moduletype=2  and  inv.dataareaid = 'kosm' ";
     //z p algusega
   
     
@@ -931,32 +905,27 @@ try {
         	prod.setPrice(1);
         }
        
-        prod.setType("ZP");
-        String ean = rs.getString("ean");
-        if(ean!=null && ean.trim().length()>0){
-          prod.setEAN(ean);
-        } else if(eans.get(kood) != null) {
+       
+         if(eans.get(kood) != null) {
     	  prod.setEAN(eans.get(kood)+"");
+    	 
         }
-        codeEanprods.put(prod.getID(), prod.getEAN());
-        
-    String add = "";
+         String add = "";
+         String gruppc = rs.getString("grupp2");
+      
+         
+   
       String grupp = rs.getString("grupp");
        if(grupp!=null && grupp.trim().length()>0){
         prod.setGroup(grupp.trim());
-       // add = grupp.trim().substring(0,2);
      }
-       String gruppc = rs.getString("grkood");
        if(gruppc!=null && gruppc.trim().length()>0){
-    	   
-        add = gruppc.trim().substring(0,2);
-        gruppc = gruppc.trim();
-        prod.setGroupSecond(gruppc);
-     }
-       
+           gruppc = grupp + gruppc.trim();
+           prod.setGroupSecond(gruppc);
+        }
    
        
-      prod.setName((add +  " " + nimetus.replaceAll("'", " ").replaceAll("\"", " ").trim()).replaceAll("\n", " ").trim());
+      prod.setName((nimetus.replaceAll("'", " ").replaceAll("\"", " ").trim()).replaceAll("\n", " ").trim());
 
       String unit = rs.getString("unit");
       if(unit!=null && unit.trim().length()>0){
@@ -998,11 +967,6 @@ try {
   }
 
 
-
-  private TreeMap codeEanprods = null;
-  
-  
-  
 
   public Vector getCustomerProductsList(String agentCode){
     Vector custProds = new Vector();
