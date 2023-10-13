@@ -7,7 +7,7 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 
 public class Html2 {
-    public static String generateHTML(ArrayList<String> graph2) {
+    public static String generateHTML(ArrayList<String> graph2, String url, String topLabel) {
         StringBuilder html = new StringBuilder();
         html.append("<html>");
         html.append("<head>");
@@ -16,7 +16,7 @@ public class Html2 {
         html.append("  display: grid;");
         html.append("  grid-template-columns: repeat(2, 1fr);"); // Divide into 2 columns
         html.append("  grid-template-rows: 1fr;");    // Single row
-        html.append("  height: 95vh;"); // Set the container to full viewport height
+        html.append("  height: 92vh;"); // Set the container to full viewport height
         html.append("  gap: 5px;");     // Add a small gap between windows
         html.append("}");
 
@@ -35,8 +35,8 @@ public class Html2 {
         html.append("}");
 
         html.append(".logo img {");
-        html.append("  width: 30px;");    // Adjust the width as needed
-        html.append("  height: 30px;");   // Adjust the height as needed
+        html.append("  width: 60px;");    // Adjust the width as needed
+        html.append("  height: 60px;");   // Adjust the height as needed
         html.append("  margin-right: 10px;"); // Add some spacing between the logo and label
         html.append("}");
 
@@ -57,7 +57,7 @@ public class Html2 {
         html.append("<body>");
         html.append("<div class='top-header'>");
         html.append("  <div class='logo'>");
-        html.append("    <img src='pildike.jpg' alt='Logo'>");
+        html.append("    <img src='"+url+"' alt='Logo'>");
         html.append("  </div>");
         // Get the current date and time
         Date currentDate = new Date();
@@ -79,7 +79,7 @@ public class Html2 {
         // Create two windows
         for (String gr:graph2) {
             html.append("<div class='window").append(i).append("'>");
-            html.append("Window " +  i);
+            //html.append("Window " +  i);
             String updatedGraph = gr.replace("ID_PLACEHOLDER", "ID" + i)
                     .replace("HEIGHT_PLACEHOLDER", "800px")
                     .replace("WIDTH_PLACEHOLDER", "800px");
@@ -98,7 +98,7 @@ public class Html2 {
         	}
         	
             FileWriter writer = new FileWriter("dashboard/2Window.html");
-            writer.write(html.toString());
+            writer.write(html.toString().replace("TOPLABEL_PLACEHOLDER", topLabel));
             writer.close();
             System.out.println("HTML file created successfully.");
         } catch (IOException e) {
@@ -108,12 +108,4 @@ public class Html2 {
         return html.toString();
     }
 
-    public static void main(String[] args) {
-        ArrayList<String> graphList = new ArrayList<>();
-        // Add your graph data (HTML content) to the graphList for two windows
-        graphList.add("<div id='ID_PLACEHOLDER'>Your Graph Content for Window 1</div>");
-        graphList.add("<div id='ID_PLACEHOLDER'>Your Graph Content for Window 2</div>");
-
-        generateHTML(graphList);
-    }
 }

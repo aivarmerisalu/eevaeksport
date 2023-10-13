@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load('current', {'packages':['gauge']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable([
+        ['Label', 'Value'],
+        <!-- Start Data Section -->
+        ['Memory', 80],
+        <!-- End Data Section -->
+      ]);
+
+      var options = {
+        width: '70%', // Set width to 100%
+        height: '70%', // Set height to 100%
+        redFrom: 0,
+        redTo: 40,
+        yellowFrom: 40,
+        yellowTo: 70,
+        greenFrom: 70,
+        greenTo: 100,
+        minorTicks: 5,
+      };
+
+      var chart = new google.visualization.Gauge(document.getElementById('ID_PLACEHOLDER'));
+
+      chart.draw(data, options);
+    }
+  </script>
+  <style>
+    html, body {
+      height: 100%; /* Set HTML and body height to 100% */
+      margin: 0;
+      overflow: hidden; /* Hide any overflow to prevent scrollbars */
+    }
+    #ID_PLACEHOLDER {
+      width: 70%;
+      height: 70%;
+	  margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="ID_PLACEHOLDER"></div>
+</body>
+</html>

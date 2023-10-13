@@ -34,6 +34,7 @@ public class HTMLeditor {
     
 	public  void  loadFiles() {
 		InputStream in = HTMLeditor.class.getResourceAsStream( "DiagramChart.html");
+		InputStream in1 = HTMLeditor.class.getResourceAsStream( "DonutChart.html");
 		try {
 			System.out.println(in == null);
 			if(in != null) {
@@ -47,51 +48,88 @@ public class HTMLeditor {
     }
     
 	
-	public void genChart() {
+	public void genChart(String url, ArrayList<Map> data, String topLabel) {
         // Define the paths for the HTML and text files
+		int elemCount = data.size();
+		// Table, Cauge
        
 
        
         
         try {
             // Step 1: Read the values from the text file and store them in a map
-            Map<String, String[]> agentData = new HashMap<>();
-            agentData.put("EEE2", new String[] { "['" + "Erik" + " (" + "EEE2"+ ")'", "350" + "]," });
-            agentData.put("AIV1", new String[] { "['" + "Aivar" + " (" + "AIV1"+ ")'", "500" + "]," });
-            agentData.put("KAT1", new String[] { "['" + "Katrin" + " (" + "KAT1"+ ")'", "430" + "]," });
-
-         
+           
 
 
 
             // Step 2: Read the Diagram file and locate the data section
-            BufferedReader diagramReader = new BufferedReader(new InputStreamReader(HTMLeditor.class.getResourceAsStream( "DiagramChart.html")));
-            BufferedReader donutReader = new BufferedReader(new InputStreamReader(HTMLeditor.class.getResourceAsStream( "DonutChart.html")));
-            StringBuilder updatedDiagram = new StringBuilder();
-            StringBuilder updatedDonut = new StringBuilder();
+            
+            
+            
+            
             boolean inDataSection = false;
             String line = null;
-            // Diagram file
             
-
-            while ((line = diagramReader.readLine()) != null) {
+            // Diagram file
+            ArrayList<String> result = new ArrayList();
+            for (Map<String, String[]> agentData: data) {
+            	BufferedReader reader = null;
+            	StringBuilder updatedData = new StringBuilder();
+            	System.out.println(agentData.toString());
+            	String label = agentData.get("Label")[0];
+            	
+            	String type = agentData.get("Type")[0];
+            	
+            	if (type.equals("Bar")) {
+            		reader = new BufferedReader(new InputStreamReader(HTMLeditor.class.getResourceAsStream( "BarChart.html")));;
+            	}
+            	if (type.equals("Pie")) {
+            		reader = new BufferedReader(new InputStreamReader(HTMLeditor.class.getResourceAsStream( "PieChart.html")));;
+            		
+            	}
+            	if (type.equals("Donut")) {
+            		reader = new BufferedReader(new InputStreamReader(HTMLeditor.class.getResourceAsStream( "DonutChart.html")));;
+            		
+            	}
+            	if (type.equals("Table")) {
+            		reader = new BufferedReader(new InputStreamReader(HTMLeditor.class.getResourceAsStream( "TableChart1.html")));;
+            		
+            	}
+            	if (type.equals("Gauge")) {
+            		reader = new BufferedReader(new InputStreamReader(HTMLeditor.class.getResourceAsStream( "GaugeChart.html")));;
+            		
+            	}
+            while ((line = reader.readLine()) != null) {
                 if (line.contains("<!-- Start Data Section -->")) {
                     inDataSection = true;
-                    updatedDiagram.append(line).append("\n");
+                    updatedData.append(line).append("\n");
                     // Add the new data here with indentation
-                    for (Map.Entry<String, String[]> entry : agentData.entrySet()) {
-                        updatedDiagram.append("        ").append(entry.getValue()[0]).append(", ").append(entry.getValue()[1]).append("\n");
+                    for (String key : agentData.keySet()) {
+                    	if (!key.equals("Label") && !key.equals("Type")) {
+                    		if (type.equals("Table") || type.equals("Gauge")) {
+                    			updatedData.append("        ").append((agentData.get(key))[0]).append(", ");
+                    		} else {
+                    			updatedData.append("        ").append((agentData.get(key))[0]).append(", ").append((agentData.get(key))[1]).append("\n"); 
+                    		}
+                    	}
                     }
                 } else if (line.contains("<!-- End Data Section -->")) {
                     inDataSection = false;
-                    updatedDiagram.append(line).append("\n");
+                    updatedData.append(line).append("\n");
                 } else if (!inDataSection) {
-                    updatedDiagram.append(line).append("\n");
+                    updatedData.append(line).append("\n");
                 }
-            }      
-            diagramReader.close();
+            }  
+            result.add(updatedData.toString().replace("TITLE_PLACEHOLDER", label));
+            reader.close();
+            	
+            }
+            
+            
+            
+            
             // Donut file
-            while ((line = donutReader.readLine()) != null) {
+          /*  while ((line = donutReader.readLine()) != null) {
                 if (line.contains("<!-- Start Data Section -->")) {
                     inDataSection = true;
                     updatedDonut.append(line).append("\n");
@@ -107,29 +145,66 @@ public class HTMLeditor {
                 }
             } 
             donutReader.close();
+            */
 
             
 
 
             //Html2
-            ArrayList graph2 = new ArrayList();
-            graph2.add(updatedDiagram.toString());
-            graph2.add(updatedDonut.toString());
+            if (elemCount == 2){
+		        ArrayList graph2 = new ArrayList();
+		        for(String element:result) {
+		        graph2.add(element);
+		        }
+		        Html2.generateHTML(graph2, url, topLabel);
+		        
+            }
+            
             //Html3
-            ArrayList graph6 = new ArrayList();
-            graph6.add(updatedDiagram.toString());
-            graph6.add(updatedDonut.toString());
-            graph6.add(updatedDiagram.toString());
-            graph6.add(updatedDonut.toString());
-            graph6.add(updatedDiagram.toString());
-            graph6.add(updatedDonut.toString());
+            if (elemCount == 3){
+	            ArrayList graph3 = new ArrayList();
+	            for(String element:result) {
+			        graph3.add(element);
+			        }
+			        Html3.generateHTML(graph3, url, topLabel);
+            }
+           
+            //Html4
+            if (elemCount == 4){
+	            ArrayList graph4 = new ArrayList();
+	            for(String element:result) {
+			        graph4.add(element);
+			        } 
+	            Html4.generateHTML(graph4, url, topLabel);
+            }
+            
+            //Html5
+            if (elemCount == 5){
+            	ArrayList graph5 = new ArrayList();
+            	for(String element:result) {
+    		        graph5.add(element);
+    		        }
+	            Html5.generateHTML(graph5, url, topLabel);
+            }
+            
+            //Html6
+            if (elemCount == 6){
+		        ArrayList graph6 = new ArrayList();
+		        for(String element:result) {
+    		        graph6.add(element);
+    		        }
+		        Html6.generateHTML(graph6, url, topLabel);
+            }
 
 
 
             //
    
-            Html2.generateHTML(graph2);
-            Html6withLabels.generateHTML(graph6);
+            
+            //Html3.generateHTML(graph3, url);
+            //Html4.generateHTML(graph4, url);
+            //Html5.generateHTML(graph5, url);
+            //Html6withLabels.generateHTML(graph6, url);
 
             System.out.println("HTML file has been updated with text file data.");
         } catch (IOException e) {

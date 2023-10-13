@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Bar Chart Example</title>
+
+    <!-- Include Google Charts library -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+    <script type="text/javascript">
+        // Load the Google Charts library
+        google.charts.load('current', {'packages':['corechart']});
+      
+        // Set a callback function to run when the Google Charts library is loaded
+        google.charts.setOnLoadCallback(drawChart);
+      
+        // Callback function to create and draw the bar chart
+        function drawChart() {
+            // Define the data for the bar chart
+            var data = google.visualization.arrayToDataTable([
+                ['Category', 'Sales'],
+                <!-- Start Data Section -->
+                ['Product A', 500],
+                ['Product B', 800],
+                ['Product C', 1200],
+                ['Product D', 600],
+                ['Product E', 900]
+                <!-- End Data Section -->
+            ]);
+
+            // Define chart options
+            var options = {
+                title: 'TITLE_PLACEHOLDER',
+                width: WIDTH_PLACEHOLD3R,
+                height: HEIGHT_PLACEHOLD3R
+            };
+
+            // Create a new instance of the bar chart
+            var chart = new google.visualization.BarChart(document.getElementById('ID_PLACEHOLDER'));
+
+            // Draw the chart with the specified data and options
+            chart.draw(data, options);
+        }
+    </script>
+</head>
+<body>
+    <!-- The chart will be displayed in this div -->
+    <div id="ID_PLACEHOLDER"></div>
+</body>
+</html>

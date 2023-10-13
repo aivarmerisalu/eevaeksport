@@ -1,21 +1,12 @@
 package eevaeksport.htmlgen;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 public class Html4 {
-	public static void main(String[] args) {
-        String htmlContent = generateHTML();
-        try {
-            FileWriter writer = new FileWriter("C:\\HTMLproj2\\4Window.html");
-            writer.write(htmlContent);
-            writer.close();
-            System.out.println("HTML file created successfully.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static String generateHTML() {
+    public static String generateHTML(ArrayList<String> graph4, String url, String topLabel) {
         StringBuilder html = new StringBuilder();
         html.append("<html>");
         html.append("<head>");
@@ -23,12 +14,12 @@ public class Html4 {
         html.append(".container {");
         html.append("  display: grid;");
         html.append("  grid-template-columns: repeat(2, 1fr);"); // Divide into 2 columns
-        html.append("  grid-template-rows: repeat(2, 1fr);");    // Divide into 2 rows
-        html.append("  height: 98vh;"); // Set the container to full viewport height
-        html.append("  gap: 2px;");     // Add a small gap between windows
+        html.append("  grid-template-rows: repeat(2, 1fr);"); // Divide equally into 2 rows
+        html.append("  height: 92vh;"); // Set the container to full viewport height
+        html.append("  gap: 5px;"); // Add a small gap between windows
         html.append("}");
 
-        // Define styles for each window
+        // Define styles for the windows
         for (int i = 1; i <= 4; i++) {
             html.append(".window").append(i).append(" {");
             html.append("  border: 1px solid #000;");
@@ -36,21 +27,87 @@ public class Html4 {
             html.append("}");
         }
 
+        // CSS styles for date and time
+        html.append(".top-header {");
+        html.append("  display: flex;");
+        html.append("  justify-content: space-between;"); // Horizontally space items
+        html.append("  align-items: center;"); // Vertically align items
+        html.append("}");
+
+        html.append(".logo img {");
+        html.append("  width: 60px;"); // Adjust the width as needed
+        html.append("  height: 60px;"); // Adjust the height as needed
+        html.append("  margin-right: 10px;"); // Add some spacing between the logo and label
+        html.append("}");
+
+        html.append(".dateandtime {");
+        html.append("  text-align: right;"); // Align to the right
+        html.append("  font-size: 18px;");
+        html.append("  margin-top: 10px;"); // Add some spacing between the labels
+        html.append("  margin-left: auto;"); // Push to the rightmost side of the top-header
+        html.append("}");
+
+        html.append(".top-label {");
+        html.append("  text-align: left;");
+        html.append("  font-size: 18px;");
+        html.append("  margin-top: 10px;"); // Add some spacing between the labels
+        html.append("}");
+        // End of CSS styles from Html6withLabels
+
         html.append("</style>");
         html.append("</head>");
         html.append("<body>");
-        html.append("<div class='container'>");
+        html.append("<div class='top-header'>");
+        html.append("  <div class='logo'>");
+        html.append("    <img src='"+url+"' alt='Logo'>");
+        html.append("  </div>");
+        // Get the current date and time
+        Date currentDate = new Date();
 
-        // Create four windows
-        for (int i = 1; i <= 4; i++) {
+        // Define the date format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+
+        // Format the current date and time as a string
+        String formattedDate = dateFormat.format(currentDate);
+
+        // Print the formatted date and time
+        System.out.println("Current Date and Time: " + formattedDate);
+
+        // Insert the top-label and dateandtime from the Html6withLabels code
+        html.append("  <div class='top-label'>TOPLABEL_PLACEHOLDER</div>");
+        html.append("  <div class='dateandtime'>" + formattedDate + "</div>");
+
+        html.append("</div>");
+        html.append("<div class='container'>");
+        int i = 1;
+
+
+        // Create all 4 windows
+        for (String gr : graph4) {
             html.append("<div class='window").append(i).append("'>");
-            html.append("Window ").append(i);
+            //html.append("Window " +  i);
+            String updatedGraph = gr.replace("ID_PLACEHOLDER", "ID" + i)
+                    .replace("HEIGHT_PLACEHOLDER", "400px")
+                    .replace("WIDTH_PLACEHOLDER", "600px");
+            
+            html.append(updatedGraph);
             html.append("</div>");
+            i++;
+            
+            
         }
 
         html.append("</div>");
         html.append("</body>");
         html.append("</html>");
+        try {
+            FileWriter writer = new FileWriter("dashboard/4Window.html");
+            writer.write(html.toString().replace("TOPLABEL_PLACEHOLDER", topLabel));
+            writer.close();
+            System.out.println("HTML file created successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return html.toString();
     }

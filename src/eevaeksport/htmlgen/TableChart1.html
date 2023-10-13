@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load('current', {'packages':['table']});
+    google.charts.setOnLoadCallback(drawTable);
+
+    function drawTable() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'Name');
+      data.addColumn('number', 'Salary');
+      data.addColumn('boolean', 'Full Time Employee');
+      data.addRows([
+        <!-- Start Data Section -->
+        ['Mike',  {v:10000}, true],
+        ['Jim',   {v:8000,   f: '$8,000'},  false],
+        ['Alice', {v: 12500, f: '$12,500'}, true],
+        ['Bob',   {v: 7000,  f: '$7,000'},  true]
+        <!-- End Data Section -->
+      ]);
+
+      var table = new google.visualization.Table(document.getElementById('ID_PLACEHOLDER'));
+      var options = {
+        showRowNumber: true,
+        width: '90%',  // Set the width to 80% of the available space
+        height: '90%', // Set the height to 80% of the available space
+        cssClassNames: {
+          headerCell: 'center-text',  // Style for header cells
+          tableCell: 'center-text'    // Style for table cells
+        }
+      };
+
+
+      table.draw(data, options);
+    }
+  </script>
+  <style>
+    html, body {
+      height: 100%; /* Set HTML and body height to 100% */
+      margin: 0;
+      overflow: hidden; /* Hide any overflow to prevent scrollbars */
+    }
+    #ID_PLACEHOLDER {
+      width: 90%;  /* Set the width to 80% */
+      height: 90%; /* Set the height to 80% */
+      margin: auto; /* Center the table chart */
+    }
+    /* Center the text content within the table cells */
+    .center-text {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="ID_PLACEHOLDER"></div>
+</body>
+</html>
