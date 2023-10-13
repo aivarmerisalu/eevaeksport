@@ -20,6 +20,8 @@ public class Html1 {
         html.append("  border: 1px solid #000;");
         html.append("  padding: 10px;"); // Larger padding for the big window
         html.append("}");
+        
+        
 
         html.append("</style>");
         html.append("</head>");
