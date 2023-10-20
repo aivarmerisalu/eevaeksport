@@ -238,6 +238,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 							 }
 						   }
 						   
+						   
 						   if(klgr.equals("NONFOOD")) {
 							   Iterator ite =	 groupTypes.keySet().iterator();
 								 while(ite.hasNext()) {

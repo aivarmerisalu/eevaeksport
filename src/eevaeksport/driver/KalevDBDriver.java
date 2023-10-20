@@ -2666,7 +2666,7 @@ SELECT  [MasterProductCode] as klient
 	
 	public Vector getFixedAssortmentData() {
 		Vector result = new Vector();
-		//this.getProducts(null);
+		this.getProducts(null);
 		String sql = "select DeliveryCustomerCode as cuid, ProductCode as toode, EANcode as ean from "
 				+ "AssortmentRegisterNEW where Listing != 0 and Period = 'current' "  ;
 try {
@@ -2686,7 +2686,7 @@ try {
 				if (custID != null
 						&& custID.trim().length() > 0) {
 					mline.setCustID(custID.trim());
-				//	mline.setCliGroup(custID.trim());
+					mline.setCliGroup(custID.trim());
 				}
 			
 
@@ -3016,7 +3016,7 @@ try{
 
 	@Override
 	public void PictureMaker() {
-		// teeme info toomise tabelisse kampaania hinnad 
+		// teeme info toomise tabelisse aania hinnad 
 	 	Calendar viim5 = Calendar.getInstance();
 	 	viim5.add(Calendar.DAY_OF_YEAR, -5);
 	 	Calendar tana = Calendar.getInstance();

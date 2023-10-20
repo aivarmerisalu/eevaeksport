@@ -957,7 +957,8 @@ public class MovexDBDriver extends AbstractDBDriver implements Manager,Promo,Bul
    		
    	  }
       
-   	String cmd9 = " SELECT drrout as kood ,drtx40 as nimi FROM mvxjdta.droute WHERE drcono=100   ORDER BY drrout ";
+   	  String cmd9 = " SELECT drrout as kood ,drtx40 as nimi FROM mvxjdta.droute WHERE drcono=100"
+   			+ " and length(drrout)=4 and drrout between '2000' AND '2999' ORDER BY drrout ";
 
 rs2 = s2.executeQuery(cmd9); 
 while (rs2.next()){

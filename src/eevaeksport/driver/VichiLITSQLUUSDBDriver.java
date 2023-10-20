@@ -1580,7 +1580,7 @@ System.out.println(cmd);
 			rs.close();
 			con.close();
 
-			String cmd0 = "select sum(Quantity) as kogus ,r.No_ as toode  "
+		/*	String cmd0 = "select sum(Quantity) as kogus ,r.No_ as toode  "
 					+ " FROM [Vičiūnai ir Ko$Sales Line] r "
 					+ "    INNER JOIN [Vičiūnai ir Ko$Sales Header] d ON r.[Document No_]= d.[No_] where "
 					+ "  r.[Location Code] in ('KAU','KAU_CEN','BFE') group by r.[No_] "
@@ -1610,7 +1610,8 @@ System.out.println(cmd);
 			}
 
 			rs.close();
-			con.close();
+			stmt.close();
+			con.close();*/
 
 			
 			String top ="select No_ as itemid , [Top Item] as asi from [Vičiūnai ir Ko$Item 2] where [Top Item] = 1 " ;
@@ -1625,6 +1626,7 @@ System.out.println(cmd);
 					}
 
 		rs.close();
+		stmt.close();
 		con.close();
 			
 
@@ -1641,6 +1643,7 @@ System.out.println(cmd);
 				}
 
 	rs.close();
+	stmt.close();
 	con.close();
 		
 	//System.out.println("mintime " + top2 + " "+ mintime.toString() );
@@ -1944,6 +1947,7 @@ System.out.println(cmd);
 			}
 
 			rs.close();
+			stmt.close();
 			con.close();
 		} catch (Exception e) {
 			e.printStackTrace();

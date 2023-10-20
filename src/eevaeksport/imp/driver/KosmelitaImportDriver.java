@@ -199,9 +199,9 @@ public class KosmelitaImportDriver extends AbstractImportDriver{
          Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
      
      String sql = " INSERT INTO OrderHeaders (  " +
-            " OrderId, OrderAccount, SalesTaker, OrderDate, DeliveryDate, Notes, Reference, Ready ) " +
+            " OrderId, OrderAccount, SalesTaker, OrderDate, DeliveryDate, Notes, Reference, Ready, Activity ) " +
            " VALUES (" + salesid + " ,'" + comp +"','" + agent +"',cast(getdate() as date),cast(? as date),'" + ref + "','"
-            + com.replace('\'', ' ').replace('\"', ' ') + "',0)" ;
+            + com.replace('\'', ' ').replace('\"', ' ') + "',0,'OLD')" ;
           log.info("addInvoiceHeader2: " + sql);
         System.out.println(sql);
         

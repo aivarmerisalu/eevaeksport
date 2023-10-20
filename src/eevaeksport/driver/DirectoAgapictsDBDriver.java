@@ -2188,11 +2188,15 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    	 	 len = line.indexOf("data code=\"ART_ASUKOHT\""); 
    	 	 boolean goes = false;
    	 	 if(len != -1){
+   	 		 try {
    	 		pesa =  line.substring(len + 33); 
    	     	pesa = pesa.substring(0,pesa.indexOf("\""));
               //System.out.println("pesa " + pesa );
               goes = true;
         
+   	 		 }catch (Exception e) {
+   	 			 
+   	 		 }
    	 	 }
    	  len = line.indexOf(   "data code=\"ART_SELVER__E_POOD\""); 
 	

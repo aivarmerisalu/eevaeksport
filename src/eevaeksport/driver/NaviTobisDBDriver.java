@@ -1478,7 +1478,8 @@ System.out.println(cmd);
                    
                    Date newprod = rs.getDate("newprod");
                    if(newprod.after(new Date())){
-                	   prod.setStatusNew("1");
+                	//   prod.setStatusNew("1");
+                	   prod.setMustBe("1");
                    }
                    try {
                 	   int status = rs.getInt("status2");
@@ -1492,7 +1493,7 @@ System.out.println(cmd);
                    try {
                 	   double status = rs.getDouble("jaeh");
                        if(status > 0) {
-                    	   prod.addPartii("|  Savikaina: " + getNF().format(status) + "€");
+                    	   prod.addPartii("|  Min pard. kaina: " + getNF().format(status) + "€");
                        }   
                    }catch(Exception e) {
                 	   

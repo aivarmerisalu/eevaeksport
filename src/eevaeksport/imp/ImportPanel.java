@@ -17387,6 +17387,7 @@ shipdate = getCalXML(asi);
             				  || driver.getDriverVersion().equals("NaviTobisImport") 
             				   || driver.getDriverVersion().equals("NaviTobisKALImport") 
             				   || driver.getDriverVersion().equals("HorizonTriImport") 
+            				   || driver.getDriverVersion().equals("AgnumRinkuImport") 
 
                                || driver.getDriverVersion().equals("ViciCZSQLImport")
                                       || driver.getDriverVersion().equals("AxaZpienasImport")
@@ -17448,6 +17449,7 @@ shipdate = getCalXML(asi);
             				           || driver.getDriverVersion().equals("S1XMLRadexImport")
             				           || driver.getDriverVersion().equals("KMPImport")
             				           || driver.getDriverVersion().equals("KulcsSoftImport")
+            				           || driver.getDriverVersion().equals("Rinku")
             				           
             				           
             						  )){
