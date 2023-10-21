@@ -721,11 +721,83 @@ TreeMap tr = new TreeMap();
    }
 
    public TreeMap getAgents(){
+	   Map<String, String[]> agentData = new HashMap<>();
+       agentData.put("EEE2", new String[] { "['" + "Erik" + " (" + "EEE2"+ ")'", "350" + "]," });
+       agentData.put("AIV1", new String[] { "['" + "Aivar" + " (" + "AIV1"+ ")'", "500" + "]," });
+       agentData.put("KAT1", new String[] { "['" + "Katrin" + " (" + "KAT1"+ ")'", "430" + "]," });
+       agentData.put("Label",new String[] {"Olen graafik nr 1" });
+       agentData.put("Type",new String[] {"Donut" });
+       Map<String, String[]> agentData2 = new HashMap<>();
+       agentData2.put("EEE2", new String[] { "['" + "Erik" + " (" + "EEE2"+ ")'", "950" + "]," });
+       agentData2.put("AIV1", new String[] { "['" + "Aivar" + " (" + "AIV1"+ ")'", "5900" + "]," });
+       agentData2.put("KAT1", new String[] { "['" + "Katrin" + " (" + "KAT1"+ ")'", "4930" + "]," });
+       agentData2.put("Label",new String[] {"Olen graafik nr 2" });
+       agentData2.put("Type",new String[] {"Pie" });
+       Map<String, String[]> agentData3 = new HashMap<>();
+       agentData3.put("EEE2", new String[] { "['" + "Erik" + " (" + "EEE2"+ ")'", "3500" + "]," });
+       agentData3.put("AIV1", new String[] { "['" + "Aivar" + " (" + "AIV1"+ ")'", "100" + "]," });
+       agentData3.put("KAT1", new String[] { "['" + "Katrin" + " (" + "KAT1"+ ")'", "430" + "]," });
+       agentData3.put("Label",new String[] {"Olen graafik nr 3" });
+       agentData3.put("Type",new String[] {"Donut" });
+       Map<String, String[]> agentData4 = new HashMap<>();
+       agentData4.put("EEE2", new String[] { "['" + "Erik" + " (" + "EEE2"+ ")'", "150" + "]," });
+       agentData4.put("AIV1", new String[] { "['" + "Aivar" + " (" + "AIV1"+ ")'", "590" + "]," });
+       agentData4.put("KAT1", new String[] { "['" + "Katrin" + " (" + "KAT1"+ ")'", "4930" + "]," });
+       agentData4.put("Label",new String[] {"Olen graafik nr 4" });
+       agentData4.put("Type",new String[] {"Pie" });
+       Map<String, String[]> agentData5 = new HashMap<>();
+       agentData5.put("Memory", new String[] { "['Memory', 80]" });
+       agentData5.put("CPU", new String[] { "['CPU', 55]" });
+       //agentData5.put("Network", new String[] { "['Network', 68]" });
+       agentData5.put("Label",new String[] {"Olen graafik nr 5" });
+       agentData5.put("Type",new String[] {"Gauge" });
+       
+       
+       /*
+       agentData5.put("EEE2", new String[] { "['" + "Erik" + " (" + "EEE2"+ ")'", "30" + "]," });
+       agentData5.put("AIV1", new String[] { "['" + "Aivar" + " (" + "AIV1"+ ")'", "90" + "]," });
+       agentData5.put("KAT1", new String[] { "['" + "Katrin" + " (" + "KAT1"+ ")'", "15" + "]," });
+       agentData5.put("Label",new String[] {"Olen graafik nr 5" });
+       agentData5.put("Type",new String[] {"Pie" });
+       */
+       Map<String, String[]> agentData6 = new HashMap<>();
+       /*
+       agentData6.put("EEE2", new String[] { "['" + "Erik" + " (" + "EEE2"+ ")'", "30" + "]," });
+       agentData6.put("AIV1", new String[] { "['" + "Aivar" + " (" + "AIV1"+ ")'", "90" + "]," });
+       agentData6.put("KAT1", new String[] { "['" + "Katrin" + " (" + "KAT1"+ ")'", "15" + "]," });
+       agentData6.put("Label",new String[] {"Olen graafik nr 5" });
+       agentData6.put("Type",new String[] {"Pie" });
+       */
+       
+       
+       agentData6.put("MIK", new String[] { "['" + "Mike" + "', {v: 10000}, true]" });
+       agentData6.put("JIM", new String[] { "['Jim', {v: 8000}, false]" });
+       agentData6.put("ALI1", new String[] { "['Alice', {v: 12500}, true]" });
+       agentData6.put("ALI", new String[] { "['Karl', {v: 500}, true]" });
+       agentData6.put("Label",new String[] {"Olen graafik nr 6" });
+       agentData6.put("Type",new String[] {"Table" });
+       
+       //Table text allignment /left/center
+       
+  
+    
+
+ 
+	   ArrayList data = new ArrayList();
 	   
-	
+	   data.add(agentData);
+	   data.add(agentData2);
+	   data.add(agentData3);
+	   data.add(agentData4);
+	   data.add(agentData5);
+	   data.add(agentData6);
 	   HTMLeditor hm = new HTMLeditor();
-	   hm.genChart();
-	  // System.exit(0);
+	   String url = "http://www.merisoft.ee/help/alecoq.jpg";
+	   ArrayList type = new ArrayList();
+	   String topLabel = "Ale coqi müügiandmed";
+	   
+	   hm.genChart(url,data,topLabel);
+	   System.exit(0);
 	 //  getSaveStockInfo2();
 	   
 	   
