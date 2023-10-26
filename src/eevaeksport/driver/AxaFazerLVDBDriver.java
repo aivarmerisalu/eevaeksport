@@ -1463,6 +1463,10 @@ sqlo = "   SELECT  jou.orderaccount as agent,case when itemgroupid = 'SALD' then
         String agen = rs.getString("agent");
         if (agen != null) {
           cust.addAgent(new Agent(agen.trim()));
+          
+          if(agen.trim().equals("12")) {
+        	   cust.addAgent(new Agent("MERC1"));
+          }
     
           Agent aa1 = (Agent)agent1.get(agen.trim());
       	if(aa1 != null) {

@@ -480,11 +480,19 @@ String picts = parent.getProps().getProperty("pict.dir");
    
         while (rs.next()) {
           String liik = rs.getString("kood").trim();
-          String nimetus =  Converter.enCodeEst(rs.getString("nimi").trim());
+          
+          String nimetus =  Converter.enCodeEst(rs.getString("nimi"));
+          
+          if(nimetus == null) {
+        	  nimetus = "aa No Name";
+          }else {
+        	  nimetus = nimetus.trim();
+          }
          
           if (liik != "") {
             tm.put(liik,nimetus);
           }
+         
         }
       }
       catch (Exception e) {

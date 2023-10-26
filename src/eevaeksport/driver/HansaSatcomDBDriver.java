@@ -68,6 +68,7 @@ import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.htmlgen.HTMLeditor;
+import eevaeksport.mailagent.FileSender;
 import eevaeksport.util.Converter;
 import eevaeksport.util.FileListFilter;
 
@@ -792,11 +793,21 @@ TreeMap tr = new TreeMap();
 	   data.add(agentData5);
 	   data.add(agentData6);
 	   HTMLeditor hm = new HTMLeditor();
-	   String url = "http://www.merisoft.ee/help/alecoq.jpg";
+	   String url = "http://www.merisoft.ee/help/jungent.png";
 	   ArrayList type = new ArrayList();
-	   String topLabel = "Ale coqi müügiandmed";
+	   String topLabel = "Jungenti müügiandmed";
 	   
 	   hm.genChart(url,data,topLabel);
+	   
+	  
+	   try {
+		 FileSender fs = new FileSender();
+		fs.uploadDash();
+	   } catch (Exception e1) {
+		e1.printStackTrace();
+	   }
+	   
+	   
 	   System.exit(0);
 	 //  getSaveStockInfo2();
 	   

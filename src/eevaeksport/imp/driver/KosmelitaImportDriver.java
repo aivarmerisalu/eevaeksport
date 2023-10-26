@@ -17,13 +17,16 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 
 import eevaeksport.Agent;
+import eevaeksport.MatrixLine;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -119,6 +122,10 @@ public class KosmelitaImportDriver extends AbstractImportDriver{
 
   private void addInvoiceLines(String salesid) throws SQLException{
 
+	  
+	  if(this.sPrices == null) {
+		  sPrices = this.getPrices();
+	  }
     Enumeration enumr = order.getOrderLines().elements();
     int counter = 0;
     while (enumr.hasMoreElements()){
@@ -135,16 +142,24 @@ public class KosmelitaImportDriver extends AbstractImportDriver{
        System.out.println("Discount "  + discount + " status " + order.getStatus() );
     
        double price =  orderLine.getPrice();
-      
-   
-          
+       double sprice = -1;
+       if (sPrices.get(itemid) != null) {
+    	   sprice = sPrices.get(itemid);
+       }
+       double cprice = getPriceFromMatrix(order.getCompany(),itemid,sprice);
+       double mprice = -1;
+       if(discount > 0) {
+    	   mprice = price;
+       }
     	  //OrderLines  
   		//    OrderId   ItemId   Quantity    UnitId    Price   Discount 
           
 
   		  
-          String sql =" INSERT into  OrderLines (OrderId, ItemID, Quantity, UnitId, Price, Discount )  " +
-             " values("+salesid+","+itemid+","+kogus+",'" + unit + " '," + price + "," + discount+ ")";
+          String sql =" INSERT into  OrderLines (OrderId, ItemID, Quantity, UnitId, Price, Discount"
+          		+ ", StandardPrice, CustomerPrice, ManualPrice)  " +
+             " values("+salesid+","+itemid+","+kogus+",'" + unit + " '," + price + "," + discount+
+             "," + sprice + "," +cprice+ "," + mprice+ ")";
 
               log.info("SALES_LINE_SQL: " + sql);
               System.out.println(sql);
@@ -238,7 +253,102 @@ public class KosmelitaImportDriver extends AbstractImportDriver{
           return isAmount;
   }
 
- 
+  
+  private HashMap<String , Double>  sPrices = null;
+  
+  private HashMap<String , Double> getPrices() {
+	  HashMap<String , Double> res = new HashMap<String , Double>();
+	  String sql = "SELECT inv.itemid,  disc.amount AS price   FROM  inventtable inv inner JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation  and \r\n" + 
+	  		"    		     disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)   and disc.currency = 'EUR' and disc.dataareaid='kosm' \r\n" + 
+	  		"    		       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID   \r\n" + 
+	  		"    		   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
+	  		"    				 and  dimensionattribute = 5637145336   WHERE   moduletype=2  and  inv.dataareaid = 'kosm'";
+	  try {
+
+      Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+     Statement stmt = con.createStatement();
+     ResultSet rs = stmt.executeQuery(sql);
+
+     while (rs.next()) {
+             String itemid = rs.getString("itemid").trim();
+             Double price = rs.getDouble("price");
+             res.put(itemid, price);
+     }
+     
+       rs.close();
+       stmt.close();
+       con.close();
+	  }catch(Exception e) {
+		  e.printStackTrace();
+	  }
+     
+	  return res;
+  }
+
+  private double getPriceFromMatrix(String cust, String prodID , double pri) {
+          double res = -1;
+         String sql = " SELECT (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) as custid, (accountnum) as klient,  '' AS clgroup, " + 
+				 "  (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +  
+				 "  (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,max(percent1) AS discount,max(amount)  " +
+                 "  AS price FROM pricedisctable pd " +
+                 "   left join custtable cus on cus.accountnum = pd.accountrelation  " +
+                 "    and cus.DATAAREAID=pd.DATAAREAID where  " +
+				 "  cus.DATAAREAID = 'kosm'   and pd.DATAAREAID = 'kosm'   " +
+				 "  and  pd.fromdate<getdate() and pd.todate>getdate()" +
+				 "  and  pd.relation in (4,5) and (case when pd.itemcode = 0 then pd.itemrelation else ''end) =' " + prodID + "'" +
+				 " and ((case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) = '" + cust + "'"  +
+				 "  group by (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) " +
+                 "  ,cus.accountnum, pd.itemrelation,pd.itemcode  ";
+
+          try {
+System.out.println(sql);
+                   Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+        	      Statement stmt = con.createStatement();
+                  ResultSet rs = stmt.executeQuery(sql);
+
+                  while (rs.next()) {
+
+                          double price = rs.getDouble("price");
+                          if (price != 0) {
+                                  return(price);
+                          }
+                     }
+                    rs.close();
+                  
+                  
+                  String sql2 = "  select c.accountnum AS clgroup,  " +
+				  " (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +
+				  " (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, " +
+				  "   pd.fromdate as algus , pd.todate as lopp from  " +
+				  "  pricedisctable pd  inner join custtable c on c.linedisc =  pd.accountrelation where  c.accountnum = '"+cust+"'"
+				  		+ "and pd.fromdate<getdate()+3 and pd.todate>=getdate() and pd.accountcode=1 and percent1 > 0 and pd.dataareaid ='kosm' " +
+				  "   order by pd.accountrelation , pd.itemrelation" ;
+                  
+                  rs = stmt.executeQuery(sql2);
+
+                  while (rs.next()) {
+
+                         
+                          double discount = rs.getDouble("discount");
+                         System.out.println("disc " + discount);
+                       if(discount > 0) {
+                    	  // return pri*(100-discount) /100;
+                       }
+                        
+                   
+                  }
+                  
+                  
+                  rs.close();
+                  stmt.close();
+                  con.close();
+
+          } catch (SQLException ex) {
+          ex.printStackTrace();
+          }
+          return res;
+  }
+
 
 
   public NumberFormat getNF() {
@@ -260,6 +370,7 @@ public class KosmelitaImportDriver extends AbstractImportDriver{
   }
 
   private String url = "jdbc:odbc:kosmelita";
+  private String url2 = "jdbc:odbc:kosmelitaaxa";
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
 
 

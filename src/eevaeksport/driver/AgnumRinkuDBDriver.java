@@ -187,7 +187,7 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
         String cmd =
             "SELECT  k.id_kl as klid,s.id_subkl as sid, k.kod as kood , k.pavad as nimi, s.kod as skood , s.adr as subnimi,k.adr AS aadress,' ' AS ale, ' ' AS visit ,s.id_agent   " + 
           "  AS agent,'' as maksja , k.tlf as telefon ,k.term_p as term , k.f1 as grupp   " +
-		  " FROM kl k  left join subkl s on s.id_kl=k.id_kl where   k.deb='Y' and k.color!=255  ORDER BY k.pavad ";
+		  " FROM kl k  left join subkl s on s.id_kl=k.id_kl where   k.deb='Y' and k.color!=255  and s.f2 != '' ORDER BY k.pavad ";
 
         log(cmd);
 

@@ -5,11 +5,14 @@ import java.io.File;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.TreeMap;
 
@@ -18,6 +21,7 @@ import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.HttpMethod;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -25,10 +29,14 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.ListVersionsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.S3VersionSummary;
+import com.amazonaws.services.s3.model.VersionListing;
 
 import eevaeksport.Email;
 import eevaeksport.util.Converter;
@@ -55,11 +63,13 @@ public class FileSender {
 	public boolean getOrders = false;
 	public boolean sendPicts = false;
 	public boolean sendKeygen = false;
+	public boolean sendDash = false;
 	
 	 
 	   boolean getAWS ( Properties mjProps) {
 		 
 		   String bucketName = mjProps.getProperty("aws.bucket");
+		   String bucketNameDash = mjProps.getProperty("aws.bucketdash");
 		  
 		   String catalogue = mjProps.getProperty("aws.getfiles");
 		   String catalogueLOG = mjProps.getProperty("aws.getfilesLOG");
@@ -80,6 +90,9 @@ public class FileSender {
 	  	 
 		   String dirPictLoc = mjProps.getProperty("aws.dirpictloc");
 		  	 String dirPict = mjProps.getProperty("aws.dirpict");
+			 
+			   String dirDashLoc = mjProps.getProperty("aws.dirdashloc");
+			  	 String dirDash = mjProps.getProperty("aws.dirdash");
 		   
 	       String stringObjKeyName =  catalogue ;
 	       String stringObjKeyNameLOG =  catalogueLOG ;
@@ -390,6 +403,62 @@ public class FileSender {
 	    	        }
 	    	     }  
 	        
+	        if(this.sendDash) {
+	        	 System.out.println(time + " Sees Dash " + new File(dirDashLoc).listFiles() + " " + dirDashLoc);
+	        
+	        	 
+	    	        for (File f : new File(dirDashLoc).listFiles())  {
+	    	        	 System.out.println(time + " Sees " + f.getName());
+	    	        	try {
+
+	    	                // Upload a text string as a new object.
+	    	               // s3Client.putObject(bucketName, dirOut, "Uploaded String Object");
+
+	    	                // Upload a file as a new object with ContentType and title specified.
+	    	        		if(f.getName().contains(".htm") ) {
+	    	        			 	  PutObjectRequest request = new PutObjectRequest(bucketNameDash, dirDash + f.getName(), f);
+	  	    	                ObjectMetadata metadata = new ObjectMetadata();
+	  	    	                metadata.setContentType("plain/text");
+	  	    	                metadata.addUserMetadata("title", "someTitle");
+	  	    	                request.setMetadata(metadata);
+	  	    	                s3Client.putObject(request);
+	  	    	                
+	  	    	              Date expiration = new Date();
+	  	    	            long expTimeMillis = expiration.getTime();
+	  	    	            expTimeMillis += 3600 * 1000; // 1 hour in milliseconds
+	  	    	            expiration.setTime(expTimeMillis);
+
+	  	    	            // Generate the pre-signed URL
+	  	    	            GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketNameDash, dirDash + f.getName())
+	  	    	                    
+	  	    	                    .withExpiration(expiration);
+	  	    	            
+	  	    	           URL preSignedUrl = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
+
+	  	    	            System.out.println("Pre-signed URL: " + preSignedUrl.toString());
+
+	  	    	                
+	  	    	                log(time + " Uploaded Dash file to AWS : " + f.getName());
+	  		    	            System.out.println(time + " Uploading " + f.getName());	
+	  		    	            
+	  		    	       
+	  		    	            
+	    	        		}
+	    	              
+		    	           
+	    	            } catch (AmazonServiceException e) {
+	    	                // The call was transmitted successfully, but Amazon S3 couldn't process 
+	    	                // it, so it returned an error response.
+	    	                e.printStackTrace();
+	    	            } catch (SdkClientException e) {
+	    	                // Amazon S3 couldn't be contacted for a response, or the client
+	    	                // couldn't parse the response from Amazon S3.
+	    	                e.printStackTrace();
+	    	            }
+	    	        }
+	    	     }  
+	        
+	        
 	        
 	        if(this.sendPicts) {
 	        	 System.out.println(time + " Sees Picts " + new File(dirPictLoc).listFiles() + " " + dirOutLoc);
@@ -486,6 +555,26 @@ public class FileSender {
 			
 			
 		}
+		
+		public void uploadDash() throws Exception{
+			sendDash = true;
+			
+			Properties props = new Properties();
+			File file = new File("eksport.ini");
+			if (file.exists()) {
+				FileInputStream in = new FileInputStream(file);
+					props = new Properties();
+				props.load(in);
+				in.close();
+			}
+			getAWS(props);
+			
+			
+			
+			//in.close();
+			
+			
+		}
 	   
 	public void start(String[] args) throws Exception{
 		if(args != null) {
@@ -503,6 +592,10 @@ public class FileSender {
 		      if (args[i].trim().equalsIgnoreCase("/picts")){
 			        this.sendPicts = true;
 			      }
+		      
+		      if (args[i].trim().equalsIgnoreCase("/dash")){
+			        this.sendDash = true;
+			      }
 		      }
 		  } 
 		
@@ -516,7 +609,7 @@ public class FileSender {
 			in.close();
 		}
 		
-		if(getOrders || sendMaster || sendStock || sendPicts ) {
+		if(getOrders || sendMaster || sendStock || sendPicts || sendDash ) {
 			getAWS(props);
 	        System.exit(0);
 	    }

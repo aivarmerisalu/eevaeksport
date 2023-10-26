@@ -120,11 +120,12 @@ return obj;
 	  String subid = code.substring(code.indexOf("-")+1);
 	  String sql =
 	            "SELECT  k.id_kl as klid,s.id_subkl as sid, k.kod as kood , k.pavad as nimi, s.kod as skood , s.adr as subnimi,k.adr AS aadress,' ' AS ale, ' ' AS visit ,s.id_agent   " + 
-	          "  AS agent,'' as maksja , k.tlf as telefon ,k.term_p as term , k.f1 as grupp , rkod as regis , k.pozymiai as sms " +
+	          "  AS agent,'' as maksja , k.tlf as telefon ,k.term_p as term , k.f1 as grupp , rkod as regis , k.pozymiai as sms ,k.F3 as cuILN ,s.F2 as adrILN " +
 			  " FROM kl k  left join subkl s on s.id_kl=k.id_kl where   k.deb='Y' and "
 			  + "k.color!=255 and k.id_kl ='" + kliid + "'  and   s.id_subkl ='" + subid + "'";
 	   System.out.println(sql);
 	   try {
+		   
 		
 		    Connection con = getNewConnection();
 	        Statement stmt = con.createStatement();
@@ -137,8 +138,8 @@ return obj;
 	        	res.setPayer(rs.getString("skood").trim());
 	        	res.setRegnr(rs.getString("regis").trim());
 	        	res.setSMS =(rs.getString("sms").trim());
-
-
+	        	res.currency = rs.getString("cuILN").trim();
+	        	res.GLNCode = rs.getString("adrILN").trim();
 			    
 		    }
 	       
@@ -169,7 +170,7 @@ return obj;
 	        ResultSet rs = stmt.executeQuery(cmd);
 	      
           while (rs.next()) {
-           res = rs.getString("yksus");
+           res = rs.getString("yksus").trim();
           }
           rs.close();
 	        stmt.close();
@@ -224,10 +225,10 @@ private Vector signatures = new Vector();
 		    }
 		    String signature = order.getSignature();
 			  if(signatures.contains(signature)){
-				  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
+				  this.trouble = "REPRETATING ORDER agent :" +  getAgetCode(order.getAgent()) + " customer :" + order.getCompany() ;
 			  }else{
 				  
-				  makeOutput(order,tagastus);  
+				  makeOutput(order);  
 				  signatures.add(signature);
 			  }
 			   try {
@@ -278,7 +279,402 @@ private Vector signatures = new Vector();
 		 
 	}
   
- private void makeOutput(Order order , boolean ret ){
+  
+  
+  
+  
+  
+  private void makeOutput(Order order) {
+
+		
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+
+		try {
+
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.newDocument();
+			Element root = doc.createElement("Document-Order");
+			doc.appendChild(root);
+
+			Node docheader = doc.createElement("Document-Header");
+			root.appendChild(docheader);
+
+			Node un2 = doc.createElement("DocumentType");
+			Text unVal2 = doc.createTextNode("ORDER");
+			un2.appendChild(unVal2);
+			docheader.appendChild(un2);
+
+			Node un3 = doc.createElement("DocumentSource");
+			Text unVal3 = doc.createTextNode("E");
+			un3.appendChild(unVal3);
+			docheader.appendChild(un3);
+			try {
+
+				long ll = Long.parseLong(order.getAgentCode());
+				Node un4 = doc.createElement("DateCreated");
+
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new java.util.Date(ll));
+
+				String month = (cal.get(Calendar.MONTH) + 1) + "";
+				if (month.length() == 1)
+					month = "0" + month;
+				String day = cal.get(Calendar.DAY_OF_MONTH) + "";
+				if (day.length() == 1)
+					day = "0" + day;
+
+				String hour = cal.get(Calendar.HOUR_OF_DAY) + "";
+				if (hour.length() == 1)
+					hour = "0" + hour;
+				String minute = cal.get(Calendar.MINUTE) + "";
+				if (minute.length() == 1)
+					minute = "0" + minute;
+
+				String second = cal.get(Calendar.SECOND) + "";
+				if (second.length() == 1)
+					second = "0" + second;
+
+				// [ HH:MM:SS]
+
+				String dateString = cal.get(Calendar.YEAR) + "-" + month + "-" + day + "[" + hour + ":" + minute + ":"
+						+ second + "]";
+
+				Text unVal4 = doc.createTextNode(dateString);
+				un4.appendChild(unVal4);
+				docheader.appendChild(un4);
+
+			} catch (Exception e) {
+
+			}
+
+			String number = order.getDokNr();
+			if (number == null || number.length() == 0) {
+				number = (Calendar.getInstance().getTimeInMillis() + "").substring(5);
+			}
+
+			long uni = Calendar.getInstance().getTimeInMillis();
+			Node header = doc.createElement("Order-Header");
+
+			Node nr = doc.createElement("OrderNumber");
+			Text nrVal = doc.createTextNode("MS-" + number + "");
+			nr.appendChild(nrVal);
+			header.appendChild(nr);
+
+			Node age = doc.createElement("SalesAgent");
+			String agCode = getAgetCode(order.getAgent());
+			Text ageVal = doc.createTextNode(agCode);
+			age.appendChild(ageVal);
+			header.appendChild(age);
+
+			String comm = "";
+			if (order.getInfo() != null && order.getInfo().trim().length() > 0) {
+
+				Node com = doc.createElement("Remarks");
+				Text comVal = doc.createTextNode(order.getInfo());
+				com.appendChild(comVal);
+				header.appendChild(com);
+				comm = order.getInfo();
+
+				Node com2 = doc.createElement("comment");
+				Text comVal2 = doc.createTextNode(order.getInfo());
+				com2.appendChild(comVal2);
+				header.appendChild(com2);
+
+			}
+			System.out.println("Remarks " + comm);
+
+			Node kuupaev = doc.createElement("OrderDate");
+			Calendar cal = Calendar.getInstance();
+
+			String month = (cal.get(Calendar.MONTH) + 1) + "";
+			if (month.length() == 1)
+				month = "0" + month;
+			String day = cal.get(Calendar.DAY_OF_MONTH) + "";
+			if (day.length() == 1)
+				day = "0" + day;
+			String year = cal.get(Calendar.YEAR) + "";
+			if (year.length() == 2) {
+				year = "20" + year;
+			}
+			String dateString = year + "-" + month + "-" + day;
+			Text kuupaevVal = doc.createTextNode(dateString);
+			kuupaev.appendChild(kuupaevVal);
+			header.appendChild(kuupaev);
+
+			Node curr = doc.createElement("OrderCurrency");
+			Text currVal = doc.createTextNode("EUR");
+			curr.appendChild(currVal);
+			header.appendChild(curr);
+
+			Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
+			Calendar delcal = Calendar.getInstance();
+			delcal.setTime(order.getShipCal().getTime());
+
+			month = (delcal.get(Calendar.MONTH) + 1) + "";
+			if (month.length() == 1)
+				month = "0" + month;
+			day = delcal.get(Calendar.DAY_OF_MONTH) + "";
+			if (day.length() == 1)
+				day = "0" + day;
+			year = delcal.get(Calendar.YEAR) + "";
+			if (year.length() == 2) {
+				year = "20" + year;
+			}
+			dateString = year + "-" + month + "-" + day;
+			Text delkuupaevVal = doc.createTextNode(dateString);
+			delkuupaev.appendChild(delkuupaevVal);
+			header.appendChild(delkuupaev);
+
+			Node expectedDeliveryTime = doc.createElement("ExpectedDeliveryTime");
+			Text expectedDeliveryTimeVal = doc.createTextNode("00:00");
+			expectedDeliveryTime.appendChild(expectedDeliveryTimeVal);
+			header.appendChild(expectedDeliveryTime);
+
+			
+			Node un34 = doc.createElement("DocumentFunctionCode");
+			Text unVal34 = doc.createTextNode("O");
+			un34.appendChild(unVal34);
+			header.appendChild(un34);
+			
+			root.appendChild(header);
+			
+			
+			
+
+			 Customer cust = this.getCust(order.getCompany());
+				String cuCode = cust.getID();
+		    	String adrCode = cust.getPayer();
+		    	String cuILN = cust.currency;
+		    	String adrILN = cust.GLNCode;
+
+			Node parties = doc.createElement("Document-Parties");
+			Node seller = doc.createElement("DeliveryPoint");
+
+			
+			Node ise = doc.createElement("CodeBySupplier");
+			Text nimiVal = doc.createTextNode(adrCode);
+			ise.appendChild(nimiVal);
+			Node ise2 = doc.createElement("ILN");
+			Text nimiVal2 = doc.createTextNode(adrILN);
+			ise2.appendChild(nimiVal2);
+
+			seller.appendChild(ise);
+			seller.appendChild(ise2);
+
+			parties.appendChild(seller);
+
+			Node receiver = doc.createElement("Receiver");
+
+			Node iseR = doc.createElement("CodeBySupplier");
+			Text nimiRVal = doc.createTextNode(adrCode);
+			iseR.appendChild(nimiRVal);
+			Node ise2R = doc.createElement("ILN");
+			Text nimiVal2R = doc.createTextNode(adrILN);
+			ise2R.appendChild(nimiVal2R);
+
+			receiver.appendChild(iseR);
+			receiver.appendChild(ise2R);
+
+			parties.appendChild(receiver);
+
+			Node buyer = doc.createElement("Buyer");
+
+			Node iseX2 = doc.createElement("ILN");
+			Text nimiXVal2 = doc.createTextNode(cuILN);
+			iseX2.appendChild(nimiXVal2);
+
+			Node iseX = doc.createElement("CodeByBuyer");
+			Text nimiXVal = doc.createTextNode(cuCode);
+			iseX.appendChild(nimiXVal);
+			buyer.appendChild(iseX2);
+			buyer.appendChild(iseX);
+			parties.appendChild(buyer);
+			root.appendChild(parties);
+
+			
+			
+			Node partiesO = doc.createElement("Order-Parties");
+			Node buyerO = doc.createElement("Buyer");
+
+			Node iseX2O = doc.createElement("ILN");
+			Text nimiXVal2O = doc.createTextNode(cuILN);
+			iseX2O.appendChild(nimiXVal2O);
+
+			Node iseXO = doc.createElement("CodeByBuyer");
+			Text nimiXValO = doc.createTextNode(cuCode);
+			iseXO.appendChild(nimiXValO);
+
+			buyerO.appendChild(iseX2O);
+			buyerO.appendChild(iseXO);
+
+			partiesO.appendChild(buyerO);
+			
+			Node sellerO = doc.createElement("DeliveryPoint");
+
+			
+			Node iseO = doc.createElement("CodeBySupplier");
+			Text nimiValO = doc.createTextNode(adrCode);
+			iseO.appendChild(nimiValO);
+			Node ise2O = doc.createElement("ILN");
+			Text nimiVal2O = doc.createTextNode(adrILN);
+			ise2O.appendChild(nimiVal2O);
+
+			sellerO.appendChild(iseO);
+			sellerO.appendChild(ise2O);
+
+			partiesO.appendChild(sellerO);
+
+			root.appendChild(partiesO);
+
+			// RIDADE LISAMINE
+			Node read = doc.createElement("Order-Lines");
+
+			int coun = 0;
+			Iterator iter = order.getOrderLines().iterator();
+			while (iter.hasNext()) {
+				OrderLine line = (OrderLine) iter.next();
+				String toode = line.getToode();
+				if (toode != null) {
+					toode = toode.trim();
+				} else {
+					toode = "";
+				}
+				if (line.getKogus() != 0 && !toode.equals("")) {
+
+					coun++;
+					addLine(line, read, doc, coun, order);
+				}
+			}
+
+			root.appendChild(read);
+			
+		    Node summary = doc.createElement("Order-Summary");
+	        
+		      
+	        Node TotalLines = doc.createElement("TotalLines");
+	        Text TotalLinesVal = doc.createTextNode(coun + "");
+	        TotalLines.appendChild(TotalLinesVal);
+	        summary.appendChild(TotalLines);
+
+	        Node TotalOrderedAmount = doc.createElement("TotalOrderedAmount");
+	        Text TotalOrderedAmountVal = doc.createTextNode(order.getCalcSum() + "");
+	        TotalOrderedAmount.appendChild(TotalOrderedAmountVal);
+	        summary.appendChild(TotalOrderedAmount);
+	        
+	        Node TotalNetAmount = doc.createElement("TotalNetAmount");
+	        Text TotalNetAmountVal = doc.createTextNode(order.getCalcSum() + "");
+	        TotalNetAmount.appendChild(TotalNetAmountVal);
+	        summary.appendChild(TotalNetAmount);
+	       
+	        root.appendChild(summary);
+
+			String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim()
+					+ ".xml";
+			System.out.println(fileName);
+			OutputFormat of = new OutputFormat();
+			of.setIndenting(true);
+			of.setLineSeparator(System.getProperty("line.separator"));
+			of.setEncoding("ISO-8859-1");
+			XMLSerializer ser = new XMLSerializer(of);
+			FileOutputStream fos = new FileOutputStream(fileName);
+			PrintWriter out = new PrintWriter(fos);
+			ser.setOutputCharStream(out);
+			ser.serialize(doc);
+			out.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void addLine(OrderLine line, Node read, Document doc, int counter, Order order) throws SQLException {
+
+		 if(prods == null) {
+  		   prods = getProducts();
+  	   }
+		
+		Node rida = doc.createElement("Line");
+		read.appendChild(rida);
+
+		Node ridaitem = doc.createElement("Line-Item");
+
+		Node linenum = doc.createElement("LineNumber");
+		Text linnum = doc.createTextNode(counter + "");
+		linenum.appendChild(linnum);
+		ridaitem.appendChild(linenum);
+
+		/*
+		 * Node toote_ean = doc.createElement("EAN"); Text toote_eanVal =
+		 * doc.createTextNode(line.getEAN());
+		 * toote_ean.appendChild(toote_eanVal); ridaitem.appendChild(toote_ean);
+		 */
+
+		String toode = line.getToode();
+
+		Node btoote_kood = doc.createElement("BuyerItemCode");
+		Text btoote_koodVal = doc.createTextNode(toode);
+		btoote_kood.appendChild(btoote_koodVal);
+		ridaitem.appendChild(btoote_kood);
+
+	  	  Product prod = (Product)prods.get(toode);
+		Node toote_kood = doc.createElement("SupplierItemCode");
+		Text toote_koodVal = doc.createTextNode(toode);
+		toote_kood.appendChild(toote_koodVal);
+		ridaitem.appendChild(toote_kood);
+		String ean = prod.getEAN();
+		if(ean != null) {
+			Node ean_kood = doc.createElement("EAN");
+			Text ean_koodVal = doc.createTextNode(ean);
+			ean_kood.appendChild(ean_koodVal);
+			ridaitem.appendChild(ean_kood);		
+		}
+	
+
+		String nimi = prod.getName();
+		if (nimi != null) {
+			Text nimetusVal = doc.createTextNode(nimi.replace('`', ' ').replace('´', ' '));
+			Node nimetus = doc.createElement("ItemDescription");
+			nimetus.appendChild(nimetusVal);
+			ridaitem.appendChild(nimetus);
+		}
+
+		double kogus = line.getKogus();
+		double price = line.getPrice();
+		double disc = line.getDiscount();
+		String unit = line.getUnit();
+
+		Node koGus = doc.createElement("OrderedQuantity");
+
+		Text kogusVal = doc.createTextNode(getNF().format(kogus));
+		koGus.appendChild(kogusVal);
+		ridaitem.appendChild(koGus);
+
+		if (disc > 0) {
+			// price = price * (100-disc)/100;
+			Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
+			Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
+			yhiku_hind.appendChild(yhiku_hindVal);
+			ridaitem.appendChild(yhiku_hind);
+		}
+
+		Node yhiku_va = doc.createElement("TaxRate");
+		Text yhiku_vaVla = doc.createTextNode("21");
+		yhiku_va.appendChild(yhiku_vaVla);
+		ridaitem.appendChild(yhiku_va);
+
+		Node yhik = doc.createElement("UnitOfMeasure");
+		Text yhikVal = doc.createTextNode(unit);
+		yhik.appendChild(yhikVal);
+		ridaitem.appendChild(yhik);
+
+		rida.appendChild(ridaitem);
+		addNumLine();
+	}
+
+	
+
+  
+ private void makeOutputOld(Order order , boolean ret ){
 	        
 	 	  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	   
@@ -311,6 +707,7 @@ private Vector signatures = new Vector();
 	        it1.setAttribute("DEB", "Y");
 	        it1.setAttribute("AKTYVUS", "Y");
 	        it1.setAttribute("POZYMIAI", "Y");
+	        
 		    it1.setAttribute("DEFAULT_CURR", "EUR");
 	        
 	        
@@ -362,10 +759,6 @@ private Vector signatures = new Vector();
 	    	if(order.getInfo() != null && order.getInfo().trim().length() >0){
 				 it3.setAttribute("DOKMEMO", order.getInfo());	
 			 }
-				 	  
-	   
-
-	        //RIDADE LISAMINE
 	   
 	        Iterator iter = order.getOrderLines().iterator();
 	         sum = 0 ;
@@ -389,7 +782,7 @@ private Vector signatures = new Vector();
 	        	  rida.setAttribute("VNT", line.getUnit()+"");
 	        	  
 	        	  if(line.getDiscount() > 0) {
-	        		  rida.setAttribute("NPARK", line.getPrice()+"");
+	        		  rida.setAttribute("PARKN", line.getPrice()+"");
 	        	  }
 	        	  
 	        	  addNumLine(); 
@@ -597,7 +990,7 @@ String gg = "0";
  		   if(comment == null){
 		    	comment = "";
 		    }
- 		  comment = comment + " \n\nManager : "  +order.getAgent() +"\nProduct name : " + nimi + "\nRequested price : " +line.getPrice() 
+ 		  comment = comment + " \n\nManager : "  + getAgetCode(order.getAgent()) +"\nProduct name : " + nimi + "\nRequested price : " +line.getPrice() 
 		    + " EUR\nRequested Discount : " + line.getDiscount() + "%\nOrdered amount : " +
 		    + line.getKogus() + "\nComment : " +  line.getPartii().trim() ;
 		}
@@ -626,13 +1019,10 @@ String gg = "0";
 		try {
 	   
 	                  
-	       String  cmd = "   SELECT t.kod as toode , t.pavad as nimetus , ipak as tykke,KAINA1 as  myygihind, vnt as  yhik,g.id_pgr AS grupp, id_classif AS grupp2 ,bk.bkod   \r\n" + 
-	       		"       		      		AS ean,t.pvm as vat , t.kiekis as laoseis   FROM prk t INNER JOIN pgr g ON g.grupe=t.grupe and gr_type=1\r\n" + 
-	       		"						inner join RR_PRKKN h ON h. ID_PRK = t.ID_PRK and h.ID_KN = 115 and kaina1 != 0\r\n" + 
-	       		"       	INNER JOIN PRK_BY_CLASSIF c on c.id_prk=t.id_prk\r\n" + 
-	       		"									INNER JOIN PRK_CLASSIF cc on cc.id=c.id_classif "
-	       		+ "			left join BK bk on bk.id_prk=t.id_prk \r\n" + 
-	       		"       					where kod like '0000%' and ID_snd = 2948   ORDER BY t.kod "; //and  g.grupe like '%pda%'
+	       String  cmd = "    SELECT t.kod as toode , t.pavad as nimetus , ipak as tykke,KAINA1 as  myygihind, vnt as  yhik,g.id_pgr AS grupp, '' AS grupp2 ,bk.bkod   \r\n" + 
+	       		"	       		    AS ean,t.pvm as vat , t.kiekis as laoseis   FROM prk t INNER JOIN pgr g ON g.grupe=t.grupe and gr_type=1\r\n" + 
+	       		"	       			INNER join RR_PRKKN h ON h. ID_PRK = t.ID_PRK and h.ID_KN = 115 and kaina1 != 0 left join BK bk on bk.id_prk=t.id_prk \r\n" + 
+	       		"	       		       					where kod like '0000%' and  ID_snd = 2948   ORDER BY t.kod "; //and  g.grupe like '%pda%'
 	       
 
 	//color 8388608

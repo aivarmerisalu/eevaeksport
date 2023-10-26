@@ -2049,7 +2049,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
       int top = rs.getInt("topstatus");
       if(top == 1) {
     	  prod.setStatusTop("1");
-    	  prod.setMustBe("1");
+    	 // prod.setMustBe("1");
       }
     
       

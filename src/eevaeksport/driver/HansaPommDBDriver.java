@@ -553,9 +553,8 @@ TreeMap tr = new TreeMap();
 
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-    // getPriceMatrixData();
      try {
-     
+ 	 
        BufferedReader reader = new BufferedReader(
    			   new InputStreamReader(
    	                      new FileInputStream(getDir() + AGENT_FILE), "UTF8"));
@@ -1270,9 +1269,10 @@ TreeMap tr = new TreeMap();
         	    
         	}
         }
-        
+       // System.out.println("Out0 " + ll);
+          
         ll = reader.readLine();
-        if(ll != null && ll.trim().length() > 10){
+        if(ll != null && ll.trim().length() > 20){
         	String aaa = ll.trim();
         	if(prod.getPartii().trim().length() > 0){
         	 	prod.setPartii(prod.getPartii() + " " + aaa.replaceAll(";", ",").trim() + " ");
@@ -1282,7 +1282,38 @@ TreeMap tr = new TreeMap();
         	    
         	}
         }
-         
+       // System.out.println("Out00 " + ll);
+        ll = reader.readLine();
+        if(ll != null && ll.trim().contains("ALUSEL")){
+        	String aaa = ll.trim();
+        	if(prod.getPartii().trim().length() > 0){
+        	 	prod.setPartii(prod.getPartii() + " " + aaa.replaceAll(";", ",").trim() + " ");
+        	        		
+        	}else{
+        		prod.setPartii( aaa.replaceAll(";", ","));
+        	    
+        	}
+        }
+        
+        String part = prod.getPartii();
+        
+           part = part.replaceAll("  ", " ").trim();
+           part = part.replaceAll("\\.\\.", " ").trim();
+        if(part.indexOf("//") != -1) {
+        	part = part.substring(0,part.indexOf("//"));
+        }
+        if(part.startsWith(".")) {
+        	part = part.substring(1);
+        }
+        if(part.indexOf("<CR>") != -1) {
+        	part = part.substring(0,part.indexOf("<CR>")).trim();
+        }
+       
+        if(part.endsWith("/")) {
+        	part = part.substring(0,part.length()-1).trim();
+        }
+       System.out.println("Out1 " + prod.getID() + " " + part);
+        prod.setPartii(part);
          	if( goes && prod.getName()!= null ){
                  tm.put(name, prod);       	
          	}

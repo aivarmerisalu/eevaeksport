@@ -140,13 +140,14 @@ public class ScalaPrikeLitDBDriver extends AbstractDBDriver implements BulkUpdat
       	    	String asi = (String)enume.next();
       	    	Product prod = (Product)prods.get(asi);
       	    	String ean = prod.getEAN();  
+      	    	String kood = prod.getID();
                  if(ean.length() > 0){
                   	
       	   	  File res2 = new File (pictssou);
                String[] ff2 = res2.list();
               
            	 for(int i = 0;ff2.length>i;i++){
-               	if( ff2[i].startsWith(ean)){
+               	if( ff2[i].startsWith(ean) || ff2[i].startsWith(kood)){
                  // System.out.println("pilt olemas " + ff2[i]);
               	File in = new File ( pictssou + ff2[i]); 
                 	if(in.isFile()){
