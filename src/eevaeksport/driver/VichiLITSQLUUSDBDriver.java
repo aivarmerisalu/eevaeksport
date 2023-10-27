@@ -928,29 +928,17 @@ System.out.println(cmd);
 	
 	   String cc2 = "select * from MobileJavaVIK.v_VIK_GetCustIlns";
 	   Connection con  = getNewConnectionView();
-	   
 	   Statement stmt1 = con.createStatement();
 		ResultSet rs1 = stmt1.executeQuery(cc2);
 		while (rs1.next()) {
-			String addID = rs1.getString("klient2").trim();
-		String ilnID = rs1.getString("iln").trim();
-		
-			aad.put(addID, ilnID);
-		}
-		rs1.close();
-		stmt1.close();
-		
-		cc2 = "select * from MobileJavaVIK.v_VIK_GetCustIlns";
-		stmt1 = con.createStatement();
-		 rs1 = stmt1.executeQuery(cc2);
-		while (rs1.next()) {
 			String addID = rs1.getString("klient").trim();
 			String addCode = rs1.getString("klient2").trim();
-		String ilnID = rs1.getString("iln").trim();
-		if(addCode.equals("1")) {
+		    String ilnID = rs1.getString("iln").trim();
+		    aad.put(addCode, ilnID);
+		   if(addCode.equals("1")) {
 			aad.put(addID+"_1", ilnID);
-		}
-		aad.put(addID+"_"+addCode, ilnID);
+		    }
+		   aad.put(addID+"_"+addCode, ilnID);
 		}
 		rs1.close();
 		stmt1.close();

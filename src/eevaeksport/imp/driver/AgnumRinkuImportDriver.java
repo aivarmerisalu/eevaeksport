@@ -644,11 +644,16 @@ private Vector signatures = new Vector();
 		String unit = line.getUnit();
 
 		Node koGus = doc.createElement("OrderedQuantity");
-
-		Text kogusVal = doc.createTextNode(getNF().format(kogus));
+        Text kogusVal = doc.createTextNode(getNF().format(kogus));
 		koGus.appendChild(kogusVal);
 		ridaitem.appendChild(koGus);
 
+		Node koG = doc.createElement("OrderedUnitPacksize");
+		Text kogVal = doc.createTextNode(getNF().format(1));
+		koG.appendChild(kogVal);
+		ridaitem.appendChild(koG);
+		
+		 
 		if (disc > 0) {
 			// price = price * (100-disc)/100;
 			Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");

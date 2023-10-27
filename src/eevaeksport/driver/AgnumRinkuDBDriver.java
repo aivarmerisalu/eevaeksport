@@ -212,10 +212,10 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
             String subadr = rs.getString("subnimi");
             
             if(subkod != null){
-            	nimi = nimi + " " + subkod.trim();
+            	nimi = (nimi + " " + subkod.trim()).trim();
             }
             if(subadr != null){
-            	nimi = nimi + " " + subadr.trim();
+            	nimi = (nimi + " " + subadr.trim()).trim();
             }            
             
             cust.setName(nimi);
@@ -258,7 +258,7 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
             }
             
             String gr = rs.getString("grupp");
-            if(gr != null && gr.trim().length() >0 && gr.trim().equals("11")){//baashinnakirja ei pane
+            if(gr != null && gr.trim().length() >0 && !gr.trim().equals("11")){//baashinnakirja ei pane
             	cust.setGroup(gr.trim());
             }
             
