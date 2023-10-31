@@ -77,59 +77,6 @@ public class AxaFazerLVDBDriver extends AbstractDBDriver  implements Manager,Pro
   }
   
   
-	public Vector getLastThreeDataNew() {
-
-		Vector result = new Vector();
-		try {
-		
-
-	String sq3 = "  SELECT jou.custaccount as klient, jou.deliverydate  as kuup , tra.itemid as toode ,\r\n" + 
-			"						 sum(case when tra.salesqty > 0 then tra.salesqty else 0 end) as kogus,\r\n" + 
-			"				 sum(case when tra.salesqty < 0 then tra.salesqty else 0 end) as kogusmin, max (jou.salesid) as doknr , \r\n" + 
-			"			 case when  jou.deliverydate > CAST(GETDATE() AS DATE)then 1 else 0 end as color FROM salesline  tra INNER JOIN salestable jou ON \r\n" + 
-			"			 tra.salesid=jou.salesid  and  tra.dataareaid= jou.dataareaid  WHERE  jou.deliverydate >=   \r\n" + 
-			"			(select top 1 kuupaev  from ( 	 SELECT top 10 jou2.deliverydate as kuupaev FROM  salestable jou2  where ltrim(jou2.custaccount) = ltrim(jou.custaccount)  and jou2.dataareaid= 'lve'  \r\n" + 
-			"			 and jou2.deliverydate > getdate()-14 and jou2.deliverydate < getdate()+4 group by jou2.custaccount , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)  \r\n" + 
-			"			 AND tra.dataareaid ='lve'\r\n" + 
-			"	 GROUP BY jou.custaccount,jou.deliverydate , tra.itemid ORDER BY jou.custaccount,jou.deliverydate desc, max(jou.salesid) desc, tra.itemid" ;
-					
-					Connection con3 = getNewConnection();
-					Statement st3 = con3.createStatement();
-					ResultSet rs3 = st3.executeQuery(sq3);
-					while (rs3.next()) {
-						MatrixLine ml = new MatrixLine();
-						ml.setCustID(rs3.getString("klient").trim());
-						ml.setStartDate(rs3.getString("kuup").substring(5,10));
-						ml.setProdID(rs3.getString("toode").trim());
-						ml.setPrice(rs3.getDouble("kogus"));
-						double kmin = rs3.getDouble("kogusmin");
-						
-						ml.setMinAm(kmin);
-						ml.setLineinfo(rs3.getString("doknr").trim());
-						
-						int color = rs3.getInt("color");
-						if(color == 1) {
-							ml.setCliGroup("green");
-						}
-                        
-						if(kmin < 0) {
-							ml.setCliGroup("red");
-						}
-					    
-						result.add(ml);
-					}
-					rs3.close();
-					st3.close();
-					con3.close();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return result;
-	}
-
-
 
 	public Vector getLastThreeData() {
 
@@ -140,11 +87,11 @@ public class AxaFazerLVDBDriver extends AbstractDBDriver  implements Manager,Pro
 			
 			
 //			paneme tuleviku siia ette 
-			String  sqlt = "SELECT jou.salesid,jou.custaccount,tra.itemid ,tra.name ,tra.salesqty,jou.deliverydate AS lastdate,(tra.lineamount/case when tra.salesqty != 0 then tra.salesqty else 1 end) as lastprice " +  
-	 			      " FROM salesline  tra INNER JOIN salestable jou ON  " +
-	 			      " tra.salesid=jou.salesid  and  tra.dataareaid= jou.dataareaid  WHERE  jou.deliverydate between getdate()and getdate()+2 " +
-	 				  "	  AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  " +
-	 			      "  ORDER BY jou.custaccount,tra.itemid ,jou.deliverydate ,tra.salesqty";
+			String  sqlt = "SELECT jou.salesid,jou.custaccount,tra.itemid ,tra.name ,tra.salesqty,jou.deliverydate AS lastdate,(tra.lineamount/case when tra.salesqty != 0 then tra.salesqty else 1 end) as lastprice   \r\n" + 
+					"	 			       FROM salesline  tra INNER JOIN salestable jou ON  \r\n" + 
+					"	 			       tra.salesid=jou.salesid  and  tra.dataareaid= jou.dataareaid  WHERE  jou.deliverydate between getdate()and getdate()+2 \r\n" + 
+					"	 				  	  AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  \r\n" + 
+					"	 			        ORDER BY 2,3 ,6 ,5";
 
   
 	        Connection con3 = getNewConnection();
@@ -158,7 +105,6 @@ public class AxaFazerLVDBDriver extends AbstractDBDriver  implements Manager,Pro
 				String dok = rs3.getString("salesid").trim();
 	         	String kl = rs3.getString("custaccount").trim();
 	         	String tootekood = rs3.getString("itemid").trim();
-	         	String tootenimi = rs3.getString("name");
 	         	double kogus = rs3.getDouble("salesqty");
 	         	String delyveryD = rs3.getString("lastdate").substring(0,10);
 	         	
@@ -180,15 +126,27 @@ public class AxaFazerLVDBDriver extends AbstractDBDriver  implements Manager,Pro
 			
 
 					String sq3 = "SELECT jou.orderaccount as klient, jou.invoicedate  as kuup , tra.itemid as toode ,sum(tra.qty) as kogus,max(invoiceamount) as summa, jou.invoiceid \r\n" + 
-							"							as doknr  FROM custinvoicetrans  tra INNER JOIN custinvoicejour jou ON \r\n" + 
-							"							       tra.invoiceid=jou.invoiceid  and  tra.dataareaid= jou.dataareaid \r\n" + 
-							"								  WHERE  jou.invoicedate >=  \r\n" + 
-							"								  (select top 1 kuupaev  from ( 	 \r\n" + 
-							"										 SELECT top " + asi + " jou2.invoicedate as kuupaev\r\n" + 
-							"								       FROM  custinvoicejour jou2  where ltrim(jou2.orderaccount) = ltrim(jou.orderaccount)  and jou2.dataareaid= 'lve' \r\n" + 
-							"									   and jou2.invoicedate > getdate()-60  group by jou2.orderaccount , jou2.invoicedate order by jou2.invoicedate desc) as dd order by kuupaev)\r\n" + 
-							"									    AND tra.dataareaid ='lve'\r\n" + 
-							"							               GROUP BY jou.orderaccount,jou.invoiceid,jou.invoicedate , tra.itemid ORDER BY jou.orderaccount,jou.invoicedate desc ,jou.invoiceid desc, tra.itemid " ;
+							"														as doknr  FROM custinvoicetrans  tra INNER JOIN custinvoicejour jou ON \r\n" + 
+							"														       tra.invoiceid=jou.invoiceid  and  tra.dataareaid= jou.dataareaid \r\n" + 
+							"															  WHERE  jou.invoicedate >=  \r\n" + 
+							"															  (select top 1 kuupaev  from ( 	 \r\n" + 
+							"																	 SELECT top " + asi + " jou2.invoicedate as kuupaev\r\n" + 
+							"															       FROM  custinvoicejour jou2  where ltrim(jou2.orderaccount) = ltrim(jou.orderaccount)  and jou2.dataareaid= 'lve' \r\n" + 
+							"																   and jou2.invoicedate > getdate()-60  group by jou2.orderaccount , jou2.invoicedate order by jou2.invoicedate desc) as dd order by kuupaev) \r\n" + 
+							"															    AND tra.dataareaid ='lve'\r\n" + 
+							"														               GROUP BY jou.orderaccount,jou.invoiceid,jou.invoicedate , tra.itemid\r\n" + 
+							"																	   union\r\n" + 
+							"						SELECT jou.orderaccount as klient, jou.deliverydate  as kuup , tra.itemid as toode ,sum(tra.qty) as kogus,max(0) as summa, jou.PackingSlipId  \r\n" + 
+							"																				as doknr  FROM CustPackingSlipTrans  tra INNER JOIN CustPackingSlipJour jou ON \r\n" + 
+							"																					       tra.PackingSlipId=jou.PackingSlipId  and  tra.dataareaid= jou.dataareaid  \r\n" + 
+							"																						  WHERE  jou.deliverydate >=  \r\n" + 
+							"																						  (select top 1 kuupaev  from ( 	 \r\n" + 
+							"																								 SELECT top 6 jou2.deliverydate as kuupaev\r\n" + 
+							"																						       FROM  CustPackingSlipJour jou2  where ltrim(jou2.orderaccount) = ltrim(jou.orderaccount)  and jou2.dataareaid= 'lve' \r\n" + 
+							"																							   and jou2.deliverydate > getdate()-20  group by jou2.orderaccount , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)  \r\n" + 
+							"																						    AND tra.dataareaid ='lve'\r\n" + 
+							"																					               GROUP BY jou.orderaccount,jou.PackingSlipId,jou.deliverydate , tra.itemid \r\n" + 
+							"																								   ORDER BY 1,2 desc ,6 desc, 3" ;
 					
 				 
 					 st3 = con3.createStatement();
@@ -713,20 +671,35 @@ try {
 	  int counter = 1;
 	  
 	  String cmd2 = "SELECT jou.orderaccount,tra.itemid ,sum (tra.qty) as kog\r\n" + 
-	  		"	       FROM custinvoicetrans  tra INNER JOIN custinvoicejour jou ON \r\n" + 
-	  		"	       tra.invoiceid=jou.invoiceid  and  tra.dataareaid= jou.dataareaid INNER JOIN inventTABLE cus ON cus.itemid=tra.itemid \r\n" + 
-	  		"	         and  tra.dataareaid= cus.dataareaid  WHERE  jou.invoicedate > getdate()- 30\r\n" + 
-	  		"			 AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  AND cus.dataareaid = 'lve' \r\n" + 
-	  		"	       GROUP BY jou.orderaccount,tra.itemid \r\n" + 
-	  		"	       ORDER BY jou.orderaccount,tra.itemid";
+	  		"	  			       FROM custinvoicetrans  tra INNER JOIN custinvoicejour jou ON \r\n" + 
+	  		"	  			       tra.invoiceid=jou.invoiceid  and  tra.dataareaid= jou.dataareaid INNER JOIN inventTABLE cus ON cus.itemid=tra.itemid \r\n" + 
+	  		"	  			         and  tra.dataareaid= cus.dataareaid  WHERE  jou.invoicedate > getdate()- 30 \r\n" + 
+	  		"	  					 AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  AND cus.dataareaid = 'lve' \r\n" + 
+	  		"	  			       GROUP BY jou.orderaccount,tra.itemid \r\n" + 
+	  		"	  			      union\r\n" + 
+	  		"					  SELECT jou.orderaccount,tra.itemid ,sum (tra.qty) as kog\r\n" + 
+	  		"	  			       FROM custinvoicetrans  tra INNER JOIN custinvoicejour jou ON \r\n" + 
+	  		"	  			       tra.invoiceid=jou.invoiceid  and  tra.dataareaid= jou.dataareaid INNER JOIN inventTABLE cus ON cus.itemid=tra.itemid \r\n" + 
+	  		"	  			         and  tra.dataareaid= cus.dataareaid  WHERE  jou.deliverydate > getdate()- 30 \r\n" + 
+	  		"	  					 AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  AND cus.dataareaid = 'lve' \r\n" + 
+	  		"	  			       GROUP BY jou.orderaccount,tra.itemid \r\n" + 
+	  		"					   ORDER BY 1,2";
 	  
 	  
-	   String cmd = "SELECT jou.orderaccount,tra.itemid ,tra.qty,jou.invoicedate AS lastdate,max(tra.lineamount/case when tra.qty != 0 then tra.qty else 1 end) as lastprice " +
-	      " FROM custinvoicetrans  tra INNER JOIN custinvoicejour jou ON " +
-	      " tra.invoiceid=jou.invoiceid  and  tra.dataareaid= jou.dataareaid INNER JOIN inventTABLE cus ON cus.itemid=tra.itemid " +
-	      "   and  tra.dataareaid= cus.dataareaid  WHERE  jou.invoicedate > getdate()- (case when ltrim(itemgroupid) = 'SALD' then 120 else 30 end ) AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  AND cus.dataareaid = 'lve' " +
-	      " GROUP BY jou.orderaccount,tra.itemid ,jou.invoicedate ,tra.qty " +
-	      " ORDER BY jou.orderaccount,tra.itemid ,jou.invoicedate ,tra.qty " ;
+	   String cmd = "SELECT jou.orderaccount,tra.itemid ,tra.qty,jou.invoicedate AS lastdate,max(tra.lineamount/case when tra.qty != 0 then tra.qty else 1 end) as lastprice \r\n" + 
+	   		"	       FROM custinvoicetrans  tra INNER JOIN custinvoicejour jou ON \r\n" + 
+	   		"	       tra.invoiceid=jou.invoiceid  and  tra.dataareaid= jou.dataareaid INNER JOIN inventTABLE cus ON cus.itemid=tra.itemid \r\n" + 
+	   		"	         and  tra.dataareaid= cus.dataareaid  WHERE  jou.invoicedate > getdate()- (case when ltrim(itemgroupid) = 'SALD' then 120 else 30 end ) \r\n" + 
+	   		"			 AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  AND cus.dataareaid = 'lve' \r\n" + 
+	   		"	       GROUP BY jou.orderaccount,tra.itemid ,jou.invoicedate ,tra.qty \r\n" + 
+	   		"	      union\r\n" + 
+	   		"SELECT jou.orderaccount,tra.itemid ,tra.qty,jou.deliverydate AS lastdate,max(tra.lineamount/case when tra.qty != 0 then tra.qty else 1 end) as lastprice \r\n" + 
+	   		"	       FROM CustPackingSlipTrans   tra INNER JOIN CustPackingSlipJour  jou ON \r\n" + 
+	   		"	       tra.PackingSlipId=jou.PackingSlipId  and  tra.dataareaid= jou.dataareaid INNER JOIN inventTABLE cus ON cus.itemid=tra.itemid \r\n" + 
+	   		"	         and  tra.dataareaid= cus.dataareaid  WHERE  jou.deliverydate > getdate()- (case when ltrim(cus.itemgroupid) = 'SALD' then 120 else 30 end ) \r\n" + 
+	   		"			 AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  AND cus.dataareaid = 'lve' \r\n" + 
+	   		"	       GROUP BY jou.orderaccount,tra.itemid ,jou.deliverydate ,tra.qty \r\n" + 
+	   		"	       ORDER BY 1,2,3,5 " ;
 
 
 	    if (isDebug()) System.out.println(cmd);
@@ -986,7 +959,7 @@ try {
          }catch(Exception r) {
 		 r.printStackTrace();  
 	     }			
-			System.out.println("oioi " + res.toString());	
+			//System.out.println("oioi " + res.toString());	
 				return res;
   }
   
@@ -1304,11 +1277,15 @@ sqlo = "   SELECT  jou.orderaccount as agent,case when itemgroupid = 'SALD' then
     	
     	Connection con = this.getNewConnection();
     	  Statement stmr = con.createStatement();
-          ResultSet rs1 = stmr.executeQuery("SELECT jou.salesid,jou.custaccount,tra.itemid ,tra.name ,tra.salesqty,jou.deliverydate AS lastdate,(tra.lineamount/case when tra.salesqty != 0 then tra.salesqty else 1 end) as lastprice " +  
- 			      " FROM salesline  tra INNER JOIN salestable jou ON  " +
- 			      " tra.salesid=jou.salesid  and  tra.dataareaid= jou.dataareaid  WHERE  jou.deliverydate between getdate()and getdate()+2 " +
- 				  "	  AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  " +
- 			      "  ORDER BY jou.custaccount,tra.itemid ,jou.deliverydate ,tra.salesqty");
+          ResultSet rs1 = stmr.executeQuery("SELECT jou.salesid,jou.custaccount,tra.itemid ,tra.name ,tra.salesqty,jou.deliverydate AS lastdate,(tra.lineamount/case when tra.salesqty != 0 then tra.salesqty else 1 end) as lastprice  \r\n" + 
+          		" 			       FROM salesline  tra INNER JOIN salestable jou ON  \r\n" + 
+          		" 			       tra.salesid=jou.salesid  and  tra.dataareaid= jou.dataareaid  WHERE  jou.deliverydate between getdate()-1 and getdate()+2 \r\n" + 
+          		" 				  	  AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'  \r\n" + 
+          		" 			       union\r\n" + 
+          		"					SELECT jou.salesid,jou.orderaccount as custaccount,tra.itemid ,tra.name ,tra.qty as salesqty,jou.deliverydate AS lastdate,(tra.lineamount/case when tra.qty != 0 then tra.qty else 1 end) as lastprice  \r\n" + 
+          		"						 			       FROM CustPackingSlipTrans  tra INNER JOIN CustPackingSlipJour  jou ON  \r\n" + 
+          		"				 			       tra.PackingSlipId = jou.PackingSlipId  and  tra.dataareaid= jou.dataareaid  WHERE  jou.deliverydate between getdate() -1 and getdate()+2  \r\n" + 
+          		"						 				  	  AND tra.dataareaid ='lve'  AND jou.dataareaid = 'lve'    ORDER BY 2,3 ,5 ,4");
          
         
           

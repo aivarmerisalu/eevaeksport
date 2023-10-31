@@ -145,7 +145,8 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
        }else {
     	   sprice = price;
        }
-       double cprice = getPriceFromMatrix(order.getCompany(),itemid,sprice);
+       double cprice = getPriceFromMatrix(order.getCompany(),itemid,sprice, orderLine.getKogus());
+       System.out.println("cprice " + cprice);
        double mprice = -1;
        if(discount > 0) {
     	   mprice = price;
@@ -285,20 +286,14 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
 	  return res;
   }
 
-  private double getPriceFromMatrix(String cust, String prodID , double pri) {
+  private double getPriceFromMatrix(String cust, String prodID , double pri , double amount ) {
           double res = -1;
-         String sql = " SELECT (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) as custid, (accountnum) as klient,  '' AS clgroup, " + 
-				 "  (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +  
-				 "  (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,max(percent1) AS discount,max(amount)  " +
-                 "  AS price FROM pricedisctable pd " +
-                 "   left join custtable cus on cus.accountnum = pd.accountrelation  " +
-                 "    and cus.DATAAREAID=pd.DATAAREAID where  " +
-				 "  cus.DATAAREAID = 'kosm'   and pd.DATAAREAID = 'kosm'   " +
-				 "  and  pd.fromdate<getdate() and pd.todate>getdate()" +
-				 "  and  pd.relation in (4,5) and (case when pd.itemcode = 0 then pd.itemrelation else ''end) ='" + prodID + "'" +
-				 " and (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) = '" + cust + "'"  +
-				 "  group by (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) " +
-                 "  ,cus.accountnum, pd.itemrelation,pd.itemcode  ";
+          
+          
+          
+          //kui on toode ja klient 
+         String sql = "  SELECT percent1 AS discount, (amount) AS price , accountrelation  FROM pricedisctable pd where itemrelation = '" + prodID + "' "
+         		+ "and accountrelation = '" + cust + "' and dataareaid = 'kosm'"; 
 
           try {
 System.out.println(sql);
@@ -307,37 +302,56 @@ System.out.println(sql);
                   ResultSet rs = stmt.executeQuery(sql);
 
                   while (rs.next()) {
-
+                	     double discount = rs.getDouble("discount");
                           double price = rs.getDouble("price");
-                          if (price != 0) {
+                          if (price > 0) {
                                   return(price);
+                          }
+                          if (discount > 0) {
+                              return pri * (100-discount)/100;
                           }
                      }
                     rs.close();
                   
-                  
-                  String sql2 = "  select c.accountnum AS clgroup,  " +
-				  " (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +
-				  " (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, " +
-				  "   pd.fromdate as algus , pd.todate as lopp from  " +
-				  "  pricedisctable pd  inner join custtable c on c.linedisc =  pd.accountrelation inner join inventtable t on t.ItemBuyerGroupId =   (case when pd.itemcode = 1 then pd.itemrelation else ''end) where  c.accountnum = '"+cust+"'"
-				  		+ "and pd.fromdate<getdate()+3 and pd.todate>=getdate() and pd.accountcode=1 and percent1 > 0 and pd.dataareaid ='kosm' " +
-				  "   order by pd.accountrelation , pd.itemrelation" ;
-                  
-                  rs = stmt.executeQuery(sql2);
+                // 2. kui on tootegrupp ja klient    
+                    sql = " SELECT percent1 AS discount, (amount) AS price , accountrelation, itemrelation  FROM pricedisctable pd where accountrelation = '"+cust+"' and itemrelation = \r\n" + 
+                    		"				  (Select linedisc from inventtablemodule mod where mod.moduletype = 2 and mod.itemid = '" + prodID+ "' ) and\r\n" + 
+                    		"				    pd.fromdate<=getdate() and pd.todate>=getdate() and quantityamountfrom <= "+amount+" and dataareaid = 'kosm'"; 
+  
+                    System.out.println(sql);
+                    rs = stmt.executeQuery(sql);
 
-                  while (rs.next()) {
-
-                         
-                          double discount = rs.getDouble("discount");
-                         System.out.println("disc " + discount);
-                       if(discount > 0) {
-                    	  // return pri*(100-discount) /100;
+                    while (rs.next()) {
+                  	     double discount = rs.getDouble("discount");
+                            double price = rs.getDouble("price");
+                            if (price > 0) {
+                                    return(price);
+                            }
+                            if (discount > 0) {
+                                return pri * (100-discount)/100;
+                            }
                        }
-                        
-                   
-                  }
-                  
+                      rs.close();
+                    
+                      // 2. kui on toote ja klientgrupp    
+                      sql = "   SELECT percent1 AS discount, (amount) AS price , accountrelation  FROM pricedisctable pd where accountrelation = \r\n" + 
+                      		"					 (select linedisc from custtable cus where cus.dataareaid = 'kosm' and (cus.accountnum) = '" + cust + "')  and "
+                      				+ " itemrelation = '" + prodID + "' and dataareaid = 'kosm'"; 
+    
+                      System.out.println(sql);
+                      rs = stmt.executeQuery(sql);
+
+                      while (rs.next()) {
+                    	     double discount = rs.getDouble("discount");
+                              double price = rs.getDouble("price");
+                              if (price > 0) {
+                                      return(price);
+                              }
+                              if (discount > 0) {
+                                  return pri * (100-discount)/100;
+                              }
+                         }
+                    
                   
                   rs.close();
                   stmt.close();

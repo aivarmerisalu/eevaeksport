@@ -341,6 +341,10 @@ TreeMap photos = new TreeMap();
                         String nimetus =rs.getString("nimetus");
                           prod.setName(nimetus.trim());
                           prod.setPrice(rs.getDouble("myygihind"));
+                          
+                          String yhik = rs.getString("yhik");
+                          if(yhik != null && yhik.trim().length()>0){
+                          prod.setUnit(yhik.trim());}
                       
                            String grupp = rs.getString("grupp");
                           if(grupp != null && grupp.trim().length()>0){
@@ -369,6 +373,8 @@ TreeMap photos = new TreeMap();
                            double stock = rs.getDouble("laoseis");
                            if(stock>0){
                         	   prod.setStock(stock);
+                           }else {
+                        	   prod.setStock(0);
                            }
                          
                           

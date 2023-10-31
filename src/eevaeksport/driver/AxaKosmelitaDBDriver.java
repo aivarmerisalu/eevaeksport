@@ -168,6 +168,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
                           if (mline.getProdID() == null && prodGroup != null
                                           && prodGroup.trim().length() > 0) {
                                   mline.setProdGroup(prodGroup);
+                                  mline.setDiscGroup(prodGroup);
                           }
                           mline.setDiscount(discount);
 
@@ -629,9 +630,7 @@ String email = " ";
         if(aleke != null && aleke.trim().length()>0){
             aleke = aleke.trim();
             cust.setGroup(aleke);
-        } else {
-        	aleke = "000" ;
-        }
+        } 
         
         if(salesres.get(accountnum) != null){
         	cust.setInfo("CHART Pardavimai :|Menuo ir metai|Pardavimai €|" + salesres.get(accountnum) );
@@ -852,11 +851,11 @@ try {
     String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, DISPLAYVALUE  AS kastis,'' AS alusel, disc.amount AS price \r\n" + 
     		"        ,CATEGORY AS grupp2, PARENTCATEGORY  AS grupp , \r\n" + 
     		"   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat , \r\n" + 
-    		"     0  as samm ,sortcode as sorting  ,  0 as nosales FROM  inventtable inv \r\n" + 
+    		"     0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp FROM  inventtable inv \r\n" + 
     		"	 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
     		"	 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('5637146827','5637146826') \r\n" + 
     		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
-    		"         left  JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation  and \r\n" + 
+    		"         left  JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation and accountcode = 0  and \r\n" + 
     		"     disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)   and disc.currency = 'EUR' and disc.dataareaid='kosm' \r\n" + 
     		"       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  \r\n" + 
     		"   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
@@ -948,6 +947,13 @@ try {
       if(nosales != null && nosales.trim().length()>0 && nosales.trim().equals("1")){
        prod.noOrder = true;
     }
+      
+      
+      
+      String prgrupp = rs.getString("prgrupp");
+      if(prgrupp != null && prgrupp.trim().length()>0 ){
+         prod.setDiscgrupp(prgrupp);
+       }
         products.put(add + nimetus, prod);
         prodHash.put(prod.getID(), prod);
 

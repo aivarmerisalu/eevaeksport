@@ -109,25 +109,6 @@ public class KalevIntrDBDriver extends AbstractDBDriver implements Manager,Promo
      * @see
      */
     
-    public void getProdGroupsFelix(TreeMap tm) throws SQLException {
-		
-
-		String    sql =
-		    "SELECT liik,artlnimi AS nimetus FROM artliik WHERE grupp='L'";
-		Connection con = this.getNewConEeva();
-		Statement st = con.createStatement();
-		ResultSet rs = st.executeQuery(sql);
-
-		while (rs.next()) {
-		    tm.put("FE" + Converter.enCodeEst(rs.getString("liik").trim()),
-		    		"xFE " + Converter.enCodeEst(rs.getString("nimetus").trim()));
-		}
-		
-		rs.close();
-		st.close();
-	    con.close();
-
-	    }
 
 
         public TreeMap getProdGroups() throws SQLException {
@@ -147,11 +128,7 @@ public class KalevIntrDBDriver extends AbstractDBDriver implements Manager,Promo
             con.close();
             this.connectionDown();
             
-            try{
-    			getProdGroupsFelix(tm);
-    		}catch(Exception e){
-    			e.printStackTrace();
-    		}
+        
     	   	
             tm.put("XXX","MUUD TOOTED");
       
@@ -240,7 +217,7 @@ public class KalevIntrDBDriver extends AbstractDBDriver implements Manager,Promo
 
     public TreeMap getCustomers(Agent agent){
     	
-    	HashSet felkoodid = getFelKoodid();
+    
     	
         connectionUp(url);
         connectionUp2(url);
@@ -346,9 +323,6 @@ if(cal.get(Calendar.MONTH) > 7 ) {
                 	cust.setPersonalData(delday.trim().replaceAll(";", ":"));              	
                 }
        
-                if(felkoodid.size() >0 && !felkoodid.contains(cust.getID())){
-					//cust.setInfo(" FELIXI TOOTEID EI SAA M��A - KOOD PUUDUB ");
-				}
                 
         if(!nimi.startsWith("*")){
         	  customers.put(cust.getName(), cust);
@@ -557,92 +531,12 @@ if(cal.get(Calendar.MONTH) > 7 ) {
 	
 	
 	
-	try{
-		getProductsFelix(products);
-	}catch(Exception e){
-		e.printStackTrace();
-	}
+	
 
 	return products;
     }
 
     
-    
-    private void getProductsFelix(TreeMap products){
-
-
-		try {
-
-		   String cmd =
-			"SELECT toode,nimetus,asukoht,kastis, myygihind, liik, plaanhind,minkogus,alusel,ribakood,ribakood3, stock1 as laoseis  FROM toode " +
-	               " WHERE len(trim(toode)) > 2 AND len(trim(liik))>0  AND  myygihind > 0 AND len(trim(nimetus))>0 AND eisaada = .F. ORDER BY toode ";
-
-		    if (isDebug()) {
-			System.out.println(cmd);
-		    }
-
-		    Connection ee = this.getNewConEeva();
-		    Statement st = ee.createStatement();
-		    ResultSet rs = st.executeQuery(cmd);
-
-		    while (rs.next()) {
-			double  tykke = (rs.getDouble("kastis"));
-			String  kood = "FE" + rs.getString("toode").trim();
-
-			String  nimetus = rs.getString("nimetus").trim();
-			String asukoht = rs.getString("asukoht").trim();
-			Product prod = new Product(kood);
-			prod.setName("xFE " + Converter.enCodeEst(nimetus));
-			prod.setPrice(round(rs.getDouble("myygihind"), 2));
-			prod.setInCases(tykke);
-	                prod.setGroup("FE" + rs.getString("liik").trim());
-	                prod.setMeasure(rs.getDouble("plaanhind"));
-	                prod.setMaxDiscount(rs.getDouble("minkogus"));
-	                String ean = rs.getString("ribakood");
-	                prod.setOnPallet(rs.getDouble("alusel"));
-	                if(ean != null && ean.trim().length()>7 ){
-	                prod.setEAN(ean.trim());
-	                }
-	                String  status = rs.getString("ribakood3");
-
-	                String seis = rs.getString("laoseis");
-	                try{
-	                    if(seis!= null && !seis.trim().equals("0")){
-		                	prod.setStock(Double.parseDouble(seis.trim()));
-		                }	
-	                }catch(Exception r){
-	                r.printStackTrace();	
-	                }
-	            
-	                if (status!= null && status.trim().length() > 0){
-	                    if (status.indexOf("F")!= -1){
-	                       prod.setMustBe("1");
-	                    }
-	                      if (status.indexOf("D")!= -1){
-	                        prod.setStatusDiscount("1");
-	                     }
-	                      if (status.indexOf("N")!= -1){
-	                       prod.setStatusNew("1");
-	                      }
-
-	                          if (status.indexOf("O")!= -1){
-	                             prod.setStatusSellout("1");
-	                          }
-	                }
-			products.put("x"+asukoht + nimetus, prod);
-
-			// }
-		    }
-	            rs.close();
-                 st.close();
-                 ee.close();
-		} catch (Exception e) {
-		    getParent().showError(e);
-		}
-
-
-	}
-	
 
     
     
@@ -743,12 +637,7 @@ if(cal.get(Calendar.MONTH) > 7 ) {
             
         
            
-        
-            
-            
-            
-            
-   
+
             
           
             

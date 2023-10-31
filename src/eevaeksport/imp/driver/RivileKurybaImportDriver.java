@@ -6,6 +6,8 @@
 package eevaeksport.imp.driver;
 
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -50,7 +52,7 @@ public class RivileKurybaImportDriver
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
     try {
       Class.forName(databaseDriverName).newInstance();
-      con = DriverManager.getConnection(url + "kuryba","sa","sql");
+     
 
     }
     catch (Exception e) {
@@ -64,7 +66,7 @@ public class RivileKurybaImportDriver
 	  	
 	    System.out.println(sql1);
 	    String acc = null;
-
+       Connection  con = DriverManager.getConnection(url + "kuryba","sa","sql");
 	    Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -74,6 +76,7 @@ public class RivileKurybaImportDriver
 	    }
 	    rs1.close();
 	    st1.close();
+	    con.close();
 
 	    return acc;
 
@@ -95,7 +98,7 @@ public class RivileKurybaImportDriver
 	
     System.out.println(sql1);
     String acc = null;
-
+    Connection  con = DriverManager.getConnection(url + "kuryba","sa","sql");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -105,6 +108,7 @@ public class RivileKurybaImportDriver
     }
     rs1.close();
     st1.close();
+    con.close();
 
    // System.out.println("Klient: " + acc);
     return acc;
@@ -117,7 +121,7 @@ public class RivileKurybaImportDriver
   	
     System.out.println(sql1);
     String acc = null;
-
+    Connection  con = DriverManager.getConnection(url + "kuryba","sa","sql");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -128,6 +132,7 @@ public class RivileKurybaImportDriver
     
     rs1.close();
     st1.close();
+    con.close();
     
     return acc;
 
@@ -142,7 +147,7 @@ public class RivileKurybaImportDriver
 	  	
 	    System.out.println(sql1);
 	    Double acc = 0d;
-
+	    Connection  con = DriverManager.getConnection(url + "kuryba","sa","sql");
 	    Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -157,6 +162,7 @@ public class RivileKurybaImportDriver
 	    
 	    rs1.close();
 	    st1.close();
+	    con.close();
 	    System.out.println("minSum0 " + acc);
 	    return acc;
 
@@ -170,7 +176,7 @@ public class RivileKurybaImportDriver
 		  	
 		    System.out.println(sql1);
 		    TreeMap<String , Double> acc = new TreeMap<String , Double>();
-
+		    Connection  con = DriverManager.getConnection(url + "kuryba","sa","sql");
 		    Statement st1 = con.createStatement();
 		    ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -187,18 +193,18 @@ public class RivileKurybaImportDriver
 		    
 		    rs1.close();
 		    st1.close();
-		    
+		    con.close();
 		    return acc;
 
   }
   
   public String identifyCustomerAGENT(String id) throws SQLException {
- 	 String	sql1 = "SELECT N33_SHIP_VIA AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
+ 	 String	sql1 = "SELECT N08_ATSTOVAS AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
  	 		"  trim(N08_KODAS_KS)||'-'|| N33_kodas_ak = '" + id +"'"; 
  	
    System.out.println(sql1);
    String acc = null;
-
+   Connection  con = DriverManager.getConnection(url + "kuryba","sa","sql");
    Statement st1 = con.createStatement();
    ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -208,7 +214,7 @@ public class RivileKurybaImportDriver
    }
    rs1.close();
    st1.close();
-
+  con.close();
    return acc;
 
  }
@@ -225,7 +231,7 @@ public class RivileKurybaImportDriver
    	"  WHERE  N17_KODAS_PS = '" + prodID.trim() + "'";
 
     String prod = null;
-
+    Connection  con = DriverManager.getConnection(url + "kuryba","sa","sql");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -245,7 +251,8 @@ public class RivileKurybaImportDriver
     System.out.println(prodID + " prod1 " + prod);
     rs1.close();
     st1.close();
-
+    con.close();
+    
     return prod;
   }
 
@@ -278,7 +285,7 @@ public class RivileKurybaImportDriver
  	StringBuffer sb = new StringBuffer();
  	TreeMap<String , Double> trprices = null;
  	boolean less = false;
- 	System.out.println("minsum " + minSum + " " + order.getCalcSum());
+ //	System.out.println("minsum " + minSum + " " + order.getCalcSum());
  	if(order.getCalcSum() *1.21 < minSum ) {
  		less = true;
  		try {
@@ -298,6 +305,13 @@ public class RivileKurybaImportDriver
         	  has001 = true;
           }
     }
+    String cuAG = null;
+   try {
+	 cuAG =  identifyCustomerAGENT(order.getCompany());
+} catch (SQLException e2) {
+	
+	e2.printStackTrace();
+}
  	
  	String ls = System.getProperty("line.separator");
  	try {
@@ -317,6 +331,13 @@ public class RivileKurybaImportDriver
 
       
       String agent = order.getAgent();
+      if(cuAG != null) {
+    	  if(agent.equals("vadyba2") || agent.equals("vadyba3") || agent.equals("vadyba5")) {
+    		
+    	  }else {
+    		agent = cuAG;  
+    	  }
+      }
       
       sb.append(getLineNr(cou));
       sb.append("          <I06_ATSTOVAS>" + escape(agent) + "</I06_ATSTOVAS>" + ls);
@@ -657,7 +678,6 @@ if(ladu.trim().length()!=0){
 
   private String url = "jdbc:odbc:";
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
-  private Connection con;
   private ImportPanel parent;
 
 public String getTrouble() {
