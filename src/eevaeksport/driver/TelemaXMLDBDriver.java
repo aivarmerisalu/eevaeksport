@@ -210,9 +210,7 @@ public class TelemaXMLDBDriver extends AbstractDBDriver implements BulkUpdater,D
 
    
 
-	  private Node getElement(Node rt, String s){
-	    return GenericDOM.getNode(rt, s);
-	  }
+	  
    
 	  private Node getNode(Node rt, String s){
   	    return GenericDOM.getNode(rt, s);
@@ -301,15 +299,7 @@ public class TelemaXMLDBDriver extends AbstractDBDriver implements BulkUpdater,D
        
        
        
-       
-       private Date getDate(String mmddyy){
-    	  	Calendar cal = Calendar.getInstance();
-    	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(6, 10)));
-    	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(3, 5))-1);
-    	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(0, 2)));
-    	    return new Date(cal.getTimeInMillis());
-    	  }
-      
+   
 
        private TreeMap agents1 = new TreeMap();
        public TreeMap getAgents1() {
@@ -450,7 +440,7 @@ public class TelemaXMLDBDriver extends AbstractDBDriver implements BulkUpdater,D
 		         	
 		         			CustLegalAddres = (aad1 +  aad2 +  city  + county  +  aad3).trim();
 		         		}catch(Exception e){e.printStackTrace();}
-		         		System.out.println("Legal " + CustLegalAddres );
+		         		//System.out.println("Legal " + CustLegalAddres );
 		         	
 		         		
 		         		 CustName = Converter.deCode(CustName);
@@ -764,7 +754,7 @@ private HashMap prodsGUID = new HashMap();
 		   				 
 		   			 }
 	   				 
-	   				prod.setVat("21");
+	   				prod.setVat("20");
 
 		    	
 		 			

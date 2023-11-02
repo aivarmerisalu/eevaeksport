@@ -3,7 +3,9 @@ package eevaeksport.driver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.CallableStatement;
@@ -127,7 +129,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
                  "    and cus.DATAAREAID=pd.DATAAREAID where  " +
 				 "  cus.DATAAREAID = 'kosm'   and pd.DATAAREAID = 'kosm'   " +
 				 "  and  pd.fromdate<getdate() and pd.todate>getdate()" +
-				 "  and  pd.relation in (4,5)  " +
+				 "  and  pd.relation in (4,5) and quantityamountfrom = 1 " +
 				 "  group by (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) " +
                  "  ,cus.accountnum, pd.itemrelation,pd.itemcode  order by " +
 				 "  (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end),pd.itemrelation ";
@@ -847,7 +849,9 @@ try {
   
 
   public TreeMap getProducts(Agent agent){
-
+	   HashMap prodHash = new HashMap();
+	   HashMap<String, ArrayList<String>> lineDiscs = new HashMap<String, ArrayList<String>>();
+	   
     String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, DISPLAYVALUE  AS kastis,'' AS alusel, disc.amount AS price \r\n" + 
     		"        ,CATEGORY AS grupp2, PARENTCATEGORY  AS grupp , \r\n" + 
     		"   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat , \r\n" + 
@@ -888,7 +892,7 @@ try {
       rs.close();
       
       rs = stmt.executeQuery(cmd);
-      HashMap prodHash = new HashMap();
+   
       while(rs.next()){
         String kood = rs.getString("itemid").trim();
         Product prod = new Product(kood);
@@ -952,7 +956,13 @@ try {
       
       String prgrupp = rs.getString("prgrupp");
       if(prgrupp != null && prgrupp.trim().length()>0 ){
-         prod.setDiscgrupp(prgrupp);
+         prod.setDiscgrupp(prgrupp.trim());
+         ArrayList<String> arr = lineDiscs.get(prgrupp.trim());
+         if(arr == null) {
+        	 arr = new ArrayList<String>();
+         }
+         arr.add(prod.getID());
+         lineDiscs.put(prgrupp.trim(), arr);
        }
         products.put(add + nimetus, prod);
         prodHash.put(prod.getID(), prod);
@@ -968,6 +978,88 @@ try {
     	//System.exit(0);
     }
 
+    
+    
+	  cmd = " SELECT (case when pd.itemcode = 1 then pd.itemrelation else ''end) as grupp , accountrelation  as klient ,amount AS hind, quantityamountfrom as kogus\r\n" + 
+	  		"				   ,(percent1) AS perc, (case when pd.itemcode = 1 then pd.itemrelation else ''end) as linedisc  FROM pricedisctable pd \r\n" + 
+	  		"                    left join custtable cus on cus.accountnum = pd.accountrelation  \r\n" + 
+	  		"                     and cus.DATAAREAID=pd.DATAAREAID where  \r\n" + 
+	  		"				   cus.DATAAREAID = 'kosm'   and pd.DATAAREAID = 'kosm'   \r\n" + 
+	  		"				   and  pd.fromdate<getdate() and pd.todate>getdate()\r\n" + 
+	  		"				   and  pd.relation in (4,5) and quantityamountfrom > 1  ";
+	 
+		
+	    StringBuffer buf = new StringBuffer();
+		try {
+			
+		Connection	 con = this.getNewConnection();
+		 Statement    stmt =  con.createStatement();
+		  ResultSet    rs = stmt.executeQuery(cmd);
+
+	           while(rs.next()){
+	        	        String  gruppx = rs.getString("grupp").trim();
+	        	        String  klient = rs.getString("klient").trim();
+	        	        if(lineDiscs.get(gruppx) != null) {
+	        	        ArrayList<String> arr = lineDiscs.get(gruppx);	
+	        	     	double  kogus = rs.getDouble("kogus");
+	                  	double  perc  = rs.getDouble("perc");
+	        	        for (String toodex : arr) {
+	                 
+	                  		
+	                  		Product pp = (Product)prodHash.get(toodex);
+	                  		if(pp != null) {
+	                  		
+	                  		double  hind  = pp.getPrice();
+		                 
+		                  	double  lined = 0;
+		                  	
+		                  	if(kogus == 0){
+		                  		kogus = 1;
+		                  	}
+		                  	
+		                  	double hl = (hind -lined) *(100-perc)/100;
+		                  	
+		                  	// siia teha number format 
+		                  	
+		                  	      buf.append(toodex+ "; ; ;" + NF.format(hl).replace(',', '.') + ";" + gruppx + ";" + kogus + ";-1; ;-1;" +klient  );
+		                          buf.append("\n");	
+		                      	
+	                  		}
+	                  		}
+	        	        }
+	                  }	
+	           rs.close();
+	           stmt.close();
+	           con.close();
+		}catch (Exception e ){
+			e.printStackTrace();
+		}
+    
+    if(buf.length() > 2){
+        File f = new File("prodactions.txt");
+        if (f.exists())f.delete();
+          try {
+    		PrintWriter os = new PrintWriter(new FileWriter(
+    				 "prodactions.txt", true));
+    		os.write(Converter.cleanLitLatEst(buf.toString()));
+    		os.close();
+    	  }catch (IOException ex) {
+    		ex.printStackTrace();
+    	  }
+     }else{
+        File f = new File("prodactions.txt");
+        if (f.exists())f.delete();
+          try {
+    		PrintWriter os = new PrintWriter(new FileWriter(
+    				 "prodactions.txt", true));
+    		os.write("");
+    		os.close();
+    	  }catch (IOException ex) {
+    		ex.printStackTrace();
+    	  }
+     }
+    
+    
     System.out.println("PRODUCTS " + products.size());
     return products;
   }
