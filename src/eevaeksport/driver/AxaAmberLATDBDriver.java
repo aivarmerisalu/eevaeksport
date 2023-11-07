@@ -2288,6 +2288,9 @@ stmt.close();
     	//   System.out.println("välja eiladu + ei hind  " + prod.getID());
     	   goes = false;
        }
+       if(prod.getID().startsWith("60") && posmust.contains(prod.getID())){
+		   goes = true;
+	   }
       
        String bre = "";
        //lisa kilo hind 
