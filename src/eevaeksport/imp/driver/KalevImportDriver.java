@@ -2572,7 +2572,7 @@ try{
       
       fn = fn + "-" + ( Calendar.getInstance().getTimeInMillis() + "").substring(9);
       
-   //   System.out.println("On Discountiga tellimus  " + hasdiscount);
+      System.out.println("Ordee Status  " + order.getStatus());
 
 if(xmlcounter >0){
 	if(order.getStatus() < 10 && hasdiscount){
@@ -2596,7 +2596,20 @@ if(xmlcounter >0){
 	
 	
 	}else{
-
+         if(order.getStatus() == 99) {
+        	 try{
+     	    	String fileName3 = escape(parent.getProps().getProperty("conv.dirselver")  + order.getAgent())
+     	    	+ "." + fn   +  ".xml";
+     	  	FileOutputStream fos = new FileOutputStream(fileName3);
+     	        fos.write(sb2.toString().getBytes());
+     	        fos.close();
+     	    	
+     	    }catch(Exception e){
+     	    	e.printStackTrace();
+     	    }
+         } else {
+        	 
+       
 	    try{
 	    	String fileName3 = escape(parent.getProps().getProperty("conv.dir2")  + order.getAgent())
 	    	+ "." + fn   +  ".xml";
@@ -2606,7 +2619,10 @@ if(xmlcounter >0){
 	    	
 	    }catch(Exception e){
 	    	e.printStackTrace();
-	    }	 
+	    }
+         }
+	    
+	    
 	}
 
     try{
