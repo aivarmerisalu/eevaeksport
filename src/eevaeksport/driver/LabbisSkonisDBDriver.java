@@ -1317,7 +1317,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
                    }
                    
                    String christ = rs.getString("sutart");
-               	if(christ != null && christ.startsWith("KALEDOS")){
+               	if(christ != null && christ.contains("VENTINIS")){
                		prod.setStatusTop("5");
                	}
                  	
