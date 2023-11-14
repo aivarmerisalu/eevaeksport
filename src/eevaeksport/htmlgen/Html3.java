@@ -22,7 +22,7 @@ public class Html3 {
         // Define styles for the top 2 windows
         for (int i = 1; i <= 2; i++) {
             html.append(".window").append(i).append(" {");
-            html.append("  border: 1px solid #000;");
+            html.append("  border: 1px solid lightgray;");
             html.append("  padding: 5px;"); // Reduce the padding
             html.append("}");
         }
@@ -82,7 +82,7 @@ public class Html3 {
 
         // Insert the top-label and dateandtime from the Html6withLabels code
         html.append("  <div class='top-label'>TOPLABEL_PLACEHOLDER</div>");
-        html.append("  <div class='dateandtime'>" + formattedDate + "</div>");
+        html.append("  <div class='dateandtime'>" + formattedDate + "&nbsp;&nbsp;&nbsp;</div>");
 
         html.append("</div>");
         html.append("<div class='container'>");
@@ -93,8 +93,8 @@ public class Html3 {
             html.append("<div class='window").append(i).append("'>");
             //html.append("Window " +  i);
             String updatedGraph = gr.replace("ID_PLACEHOLDER", "ID" + i)
-                    .replace("HEIGHT_PLACEHOLDER", "400px")
-                    .replace("WIDTH_PLACEHOLDER", "600px");
+            		.replace("HEIGHT_PLACEHOLDER", "100%")
+                    .replace("WIDTH_PLACEHOLDER", "100%");
             
             html.append(updatedGraph);
             html.append("</div>");   

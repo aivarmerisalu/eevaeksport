@@ -19,6 +19,7 @@
         function drawChart() {
             // Define the data for the bar chart
             var data = google.visualization.arrayToDataTable([
+                // BARLABELS_PLACEHOLDER
                 ['Category', 'Sales'],
                 <!-- Start Data Section -->
                 ['Product A', 500],
@@ -31,9 +32,7 @@
 
             // Define chart options
             var options = {
-                title: 'TITLE_PLACEHOLDER',
-                width: WIDTH_PLACEHOLD3R,
-                height: HEIGHT_PLACEHOLD3R
+                title: 'TITLE_PLACEHOLDER'
             };
 
             // Create a new instance of the bar chart
@@ -46,6 +45,6 @@
 </head>
 <body>
     <!-- The chart will be displayed in this div -->
-    <div id="ID_PLACEHOLDER"></div>
+    <div id="ID_PLACEHOLDER" style="width: 100%; height: 100%;" ></div>
 </body>
 </html>

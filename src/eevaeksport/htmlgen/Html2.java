@@ -23,7 +23,7 @@ public class Html2 {
         // Define styles for each window
         for (int i = 1; i <= 2; i++) {
             html.append(".window").append(i).append(" {");
-            html.append("  border: 1px solid #000;");
+            html.append("  border: 1px solid lightgray;");
             html.append("  padding: 5px;"); // Reduce the padding
             html.append("}");
         }
@@ -71,7 +71,7 @@ public class Html2 {
         // Print the formatted date and time
         System.out.println("Current Date and Time: " + formattedDate);
         html.append("  <div class='top-label'>TOPLABEL_PLACEHOLDER</div>");
-        html.append("  <div class='dateandtime'>" + formattedDate + "</div>");
+        html.append("  <div class='dateandtime'>" + formattedDate + "&nbsp;&nbsp;&nbsp;</div>");
         html.append("</div>");
         html.append("<div class='container'>");
         int i = 1;
@@ -81,8 +81,8 @@ public class Html2 {
             html.append("<div class='window").append(i).append("'>");
             //html.append("Window " +  i);
             String updatedGraph = gr.replace("ID_PLACEHOLDER", "ID" + i)
-                    .replace("HEIGHT_PLACEHOLDER", "800px")
-                    .replace("WIDTH_PLACEHOLDER", "800px");
+            		.replace("HEIGHT_PLACEHOLDER", "100%")
+                    .replace("WIDTH_PLACEHOLDER", "100%");
             html.append(updatedGraph);
             html.append("</div>");
             i++;
