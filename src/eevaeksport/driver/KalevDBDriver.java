@@ -3384,12 +3384,24 @@ try{
 					  			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
 					  		   	String filterOutOfStock = (String)cob.get("resint3").toString();
 					  		  String filterYesNo = (String)cob.get("resint1").toString();
-					  				  
+					  		  
+					  		  
+					  		Date created = new Date();
+				  	    	
+				  	    	try {
+				  	    		created = new Date(Long.parseLong(((String)cob.get("resstr3"))));
+				  	    	}catch(Exception k) {
+				  	    		try {
+				  	    		created = new Date(((Long)cob.get("sentdate")));
+				  	    		}catch(Exception uu) {}
+				  	    		
+				  	    	}
+				  	    	String date = simpleDateFormat.format(created);
 					  			String dateAndTime = (String)cob.get("recetime");
 					  			String dateOnly = dateAndTime.split("T")[0];
 					  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
 					  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
-					  		    String signa = dateAndTime + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") ;
+					  		    String signa = date + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") ;
 					  		    String filterProblem = (String)cob.get("resstr1");
 					  		    String questName =  null;
 					  		  try {  
@@ -3498,19 +3510,10 @@ try{
 					  	    		}
 					  	    		comment = " ";
 					  	    	}
-					  	    	Date created = new Date();
-					  	    	
-					  	    	try {
-					  	    		created = new Date(Long.parseLong(((String)cob.get("resstr3"))));
-					  	    	}catch(Exception k) {
-					  	    		try {
-					  	    		created = new Date(((Long)cob.get("sentdate")));
-					  	    		}catch(Exception uu) {}
-					  	    		
-					  	    	}
+					  	    
 					  	    	
 					  	   
-					  	    	String date = simpleDateFormat.format(created);
+					  	    	
 					  	    	//System.out.println(date);
 					  	    	
 							if(filterProblem.contains("YESNO"))  	{  

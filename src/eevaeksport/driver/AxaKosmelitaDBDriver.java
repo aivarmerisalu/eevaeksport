@@ -321,9 +321,51 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
   	return null;
   }
 
-      public String getSaveStockInfo(){
-      return null;
-      }
+  private Connection getNewConnection2() throws SQLException {
+		return DriverManager.getConnection(url2, getParent().getProps()
+				.getProperty("dsn.user2"),
+				getParent().getProps().getProperty("dsn.pass2"));
+	}
+  
+  private String url2 = "jdbc:odbc:kosmelita";
+  
+  private HashMap<String,Double> stocksOld = null;
+  
+  public String getSaveStockInfo() {
+	    stocksOld = new HashMap<String,Double> ();
+		String cmd = " select * from Products where Blocked != '1'";
+
+		if (isDebug())
+			System.out.println(cmd);
+
+		StringBuffer products = new StringBuffer();
+		try {
+
+			Connection con1 = getNewConnection2();
+			Statement st = con1.createStatement();
+			ResultSet rs = st.executeQuery(cmd);
+
+			while (rs.next()) {
+
+				String kood = rs.getString("UniqueCode").trim();
+				Double kogus = rs.getDouble("Inventory");
+				
+				stocksOld.put(kood, kogus);
+				String dealer = " ";
+
+				products.append(kood + ";");
+				products.append(" ;");
+				products.append(getParent().getNF().format(kogus) + ";"
+						+ dealer + "\n");
+				// products.append(getParent().getNF().format(rs.getDouble("stock"))
+				// + "; ; \n");
+			}
+			rs.close();
+		} catch (Exception e) {
+			getParent().showError(e);
+		}
+		return products.toString();
+	}
 
 
               public String getDealerCustomerCSV(String agent){
@@ -923,6 +965,12 @@ try {
   public TreeMap getProducts(Agent agent){
 	   HashMap prodHash = new HashMap();
 	   HashMap<String, ArrayList<String>> lineDiscs = new HashMap<String, ArrayList<String>>();
+	   if(stocksOld == null) {
+		   this.getSaveStockInfo();
+		   System.out.println(stocksOld.toString());
+	   }
+	   
+	
 	   
     String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, DISPLAYVALUE  AS kastis,'' AS alusel, disc.amount AS price \r\n" + 
     		"        ,CATEGORY AS grupp2, PARENTCATEGORY  AS grupp , \r\n" + 
@@ -1036,6 +1084,12 @@ try {
          arr.add(prod.getID());
          lineDiscs.put(prgrupp.trim(), arr);
        }
+      
+       if(stocksOld != null && stocksOld.get(prod.getID()) != null) {
+    	   prod.setStock(stocksOld.get(prod.getID()));
+       }
+      
+      
         products.put(add + nimetus, prod);
         prodHash.put(prod.getID(), prod);
 

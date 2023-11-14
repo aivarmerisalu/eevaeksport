@@ -824,9 +824,9 @@ public Vector getDebt() throws SQLException{
    	 // auto = "COR 389";
      }
      
-     sb.append(getLineNr(cou));
+   /*  sb.append(getLineNr(cou));
      sb.append("          <I06_KODAS_AU>" +  escape(auto)   + "</I06_KODAS_AU>" + ls);
-     cou++;
+     cou++;*/
      
 
      sb.append(getLineNr(cou));
@@ -874,7 +874,8 @@ public Vector getDebt() throws SQLException{
          Fillial 01   -  agent 007
 Fillial 02   -  agent 020
 Fillial 03    - agent 016*/
-         String ladu = agent;
+         String ladu = "01";
+         
          
 if(ladu.trim().length()!=0){
 	
