@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -64,6 +65,7 @@ import org.w3c.dom.NodeList;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
+import eevaeksport.DashboardData;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
@@ -721,23 +723,22 @@ TreeMap tr = new TreeMap();
       }
       return tm;
    }
-   public Map<String, String[]> getChartData(String label, String type) {
+   
+   
+   public Map<String, String[]> getChartData(String label, String type, TreeMap data ) {
 	   Map<String, String[]> agentData = new HashMap<>();
 	   if (type.equals("Pie") || type.equals("Donut") || type.equals("Bar")) {
-	       agentData.put("EEE2", new String[] { "['" + "Erik" + " (" + "EEE2"+ ")'", "350" + "]," });
-	       agentData.put("AIV1", new String[] { "['" + "Aivar" + " (" + "AIV1"+ ")'", "500" + "]," });
-	       agentData.put("KAT1", new String[] { "['" + "Katrin" + " (" + "KAT1"+ ")'", "430" + "]," });
+		   
+		   
+		   agentData = getPieDonBarMap(data);
+	      
 	   }
 	   if (type.equals("Table")){
-	       agentData.put("MIK", new String[] { "['" + "Mike" + "', {v: 10000}, true]" });
-	       agentData.put("JIM", new String[] { "['Jim', {v: 8000}, false]" });
-	       agentData.put("ALI1", new String[] { "['Alice', {v: 12500}, true]" });
-	       agentData.put("ALI", new String[] { "['Karl', {v: 500}, true]" });
+		   agentData = getTableMap(data);
+	       
 	   }
 	   if (type.equals("Gauge")){
-	       agentData.put("Memory", new String[] { "['Memory', 80]" });
-	       agentData.put("CPU", new String[] { "['CPU', 55]" });
-		   
+		   agentData = getGaugeMap(data);
 	   }
        
        
@@ -747,13 +748,131 @@ TreeMap tr = new TreeMap();
        return agentData;
    }
 
+   public Map<String, String[]> getTableMap(TreeMap data){
+	   Map<String, String[]> agentData = new HashMap<>();
+	 
+	   DashboardData dd0 = (DashboardData) data.get("LABEL");
+	    String label = "";
+	    if(dd0 != null) {
+	   for(DashboardData ddd : dd0.dataArr) {
+		   label = label + "data.addColumn('" + ddd.dataType + "', '" + ddd.dataLabel +"');\n";
+	   }}
+	   
+	   
+	   agentData.put("LABEL", new String[] {label}); 
+	   Iterator itera = data.keySet().iterator();
+	   while (itera.hasNext()) {
+		   String key = (String) itera.next();
+		   if(!key.equals("LABEL")) {
+		   DashboardData dd = (DashboardData) data.get(key);
+		   agentData.put(key, new String[] { "['"+dd.dataLabel+"', {v: "+dd.dataValue+"}, true]" });
+		   }
+		   
+	   }
+   
+	   return agentData;
+   }
+   
+   public Map<String, String[]> getPieDonBarMap(TreeMap data){
+	   Map<String, String[]> agentData = new HashMap<>();
+	 
+	   Iterator itera = data.keySet().iterator();
+	   while (itera.hasNext()) {
+		   String key = (String) itera.next();
+		   DashboardData dd = (DashboardData) data.get(key);
+		   agentData.put(key, new String[] { "['" + dd.dataLabel + " (" + key + ")'", dd.dataValue + "]," });
+		   
+	   }
+   
+	   return agentData;
+   }
+   
+   public Map<String, String[]> getGaugeMap(TreeMap data){
+	   Map<String, String[]> agentData = new HashMap<>();
+	 
+	   Iterator itera = data.keySet().iterator();
+	   while (itera.hasNext()) {
+		   String key = (String) itera.next();
+		   DashboardData dd = (DashboardData) data.get(key);
+		   agentData.put(key, new String[] { "['"+dd.dataLabel+"', "+dd.dataValue+"]" });
+		   
+	   }
+   
+	   return agentData;
+   }
+   
+   
+   
+   
    public TreeMap getAgents(){
-	   Map<String, String[]> agentData = getChartData("Testime", "Donut");
-       Map<String, String[]> agentData2 = getChartData("TestimeGauge", "Gauge");
-       Map<String, String[]> agentData3 = getChartData("TestimeBar", "Bar");
-       Map<String, String[]> agentData4 = getChartData("TestimePie", "Pie");
-       Map<String, String[]> agentData5 = getChartData("TestimeGauge", "Gauge");
-       Map<String, String[]> agentData6 = getChartData("TestimeTable", "Table");   
+	   
+	   TreeMap data1 = new TreeMap();
+	   DashboardData dd1 = new DashboardData("EE2");
+	   dd1.dataLabel = "Erik";
+	   dd1.dataValue = 350.0;
+	   
+	   data1.put("EE2", dd1);
+	   
+	   DashboardData dd2 = new DashboardData("EE3");
+	   dd2.dataLabel = "Aivar";
+	   dd2.dataValue = 390.0;
+	   
+	   data1.put("EE3", dd2);
+	   
+	   DashboardData dd3 = new DashboardData("EE4");
+	   dd3.dataLabel = "Erig";
+	   dd3.dataValue = 310.0;
+	   
+	   data1.put("EE4", dd3);
+	   
+	   
+	   
+	   
+	   TreeMap data1l = new TreeMap();
+	   DashboardData dd1ll = new DashboardData("LABEL");
+	   
+	   DashboardData dd2ll = new DashboardData("l1");
+	   dd2ll.dataLabel = "AgendiKood";
+	   dd2ll.dataType = "string";
+	   dd1ll.addArrElement(dd2ll);
+	   
+	   DashboardData dd3ll = new DashboardData("l2");
+	   dd3ll.dataLabel = "Müük";
+	   dd3ll.dataType = "number";
+	   dd1ll.addArrElement(dd3ll);
+	   
+	   DashboardData dd4ll = new DashboardData("l3");
+	   dd4ll.dataLabel = "Jaemüük";
+	   dd4ll.dataType = "boolean";
+	   dd1ll.addArrElement(dd4ll);
+	  
+	   data1l.put("LABEL", dd1ll);
+	   
+	   DashboardData dd1l = new DashboardData("EE2");
+	   dd1l.dataLabel = "Erik";
+	   dd1l.dataValue = 350.0;
+	   
+	   data1l.put("EE2", dd1l);
+	   
+	   DashboardData dd2l = new DashboardData("EE3");
+	   dd2l.dataLabel = "Aivar";
+	   dd2l.dataValue = 390.0;
+	   
+	   data1l.put("EE3", dd2l);
+	   
+	   DashboardData dd3l = new DashboardData("EE4");
+	   dd3l.dataLabel = "Erig";
+	   dd3l.dataValue = 310.0;
+	   
+	   data1l.put("EE4", dd3l);
+	   
+	   Map<String, String[]> agentData = getChartData("Testime", "Donut", data1);
+       Map<String, String[]> agentData2 = getChartData("TestimeGauge", "Gauge", data1);
+       Map<String, String[]> agentData3 = getChartData("TestimeBar", "Bar", data1);
+      
+       Map<String, String[]> agentData4 = getChartData("TestimePie", "Pie", data1);
+       Map<String, String[]> agentData5 = getChartData("TestimeGauge", "Gauge", data1);
+       Map<String, String[]> agentData6 = getChartData("TestimeTable", "Table", data1l);   
        
 
        
@@ -766,11 +885,11 @@ TreeMap tr = new TreeMap();
 	   ArrayList data = new ArrayList();
 	   
 	   data.add(agentData);
-	   data.add(agentData2);
-	   data.add(agentData3);
-	   data.add(agentData4);
-	   data.add(agentData5);
-	   data.add(agentData6);
+	   //data.add(agentData2);
+	   //data.add(agentData3);
+	   //data.add(agentData4);
+	   //data.add(agentData5);
+	   //data.add(agentData6);
 	   HTMLeditor hm = new HTMLeditor();
 	   String url = "http://www.merisoft.ee/help/jungent.png";
 	   ArrayList type = new ArrayList();

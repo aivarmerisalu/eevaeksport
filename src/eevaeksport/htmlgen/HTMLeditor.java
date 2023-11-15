@@ -105,7 +105,7 @@ public class HTMLeditor {
                     updatedData.append(line).append("\n");
                     // Add the new data here with indentation
                     for (String key : agentData.keySet()) {
-                    	if (!key.equals("Label") && !key.equals("Type")) {
+                    	if (!key.equals("Label") && !key.equals("Type") && !key.equals("LABEL")) {
                     		if (type.equals("Table") || type.equals("Gauge")) {
                     			updatedData.append("        ").append((agentData.get(key))[0]).append(", ");
                     		} else {
@@ -119,8 +119,19 @@ public class HTMLeditor {
                 } else if (!inDataSection) {
                     updatedData.append(line).append("\n");
                 }
+                
+                
             }  
-            result.add(updatedData.toString().replace("TITLE_PLACEHOLDER", label));
+            
+            String fdata = updatedData.toString();
+            if (agentData.get("LABEL") != null) {
+            fdata  = fdata.replace("LABELS_PLACEHOLDER",agentData.get("LABEL")[0] );
+            	
+            }
+            
+            result.add(fdata.replace("TITLE_PLACEHOLDER", label));
+            
+           
             reader.close();
             	
             }
@@ -145,7 +156,21 @@ public class HTMLeditor {
                 }
             } 
             donutReader.close();
+            
+            
             */
+            
+            
+            //Html2
+            if (elemCount == 1){
+		        ArrayList graph1 = new ArrayList();
+		        for(String element:result) {
+		        graph1.add(element);
+		        }
+		        Html1.generateHTML(graph1, url, topLabel);
+            }
+		        
+		        
 
             
 
@@ -197,14 +222,6 @@ public class HTMLeditor {
             }
 
 
-
-            //
-   
-            
-            //Html3.generateHTML(graph3, url);
-            //Html4.generateHTML(graph4, url);
-            //Html5.generateHTML(graph5, url);
-            //Html6withLabels.generateHTML(graph6, url);
 
             System.out.println("HTML file has been updated with text file data.");
         } catch (IOException e) {
