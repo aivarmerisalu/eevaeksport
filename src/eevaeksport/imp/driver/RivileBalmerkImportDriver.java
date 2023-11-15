@@ -112,7 +112,7 @@ public class RivileBalmerkImportDriver
     catch (Exception e) {
       parent.showError(e);
     }
-    
+    loadSignatures();
     logurl = "https://api.manorivile.lt/client/v2";
     if( parent.getProps().getProperty("logurl") != null){
     	  logurl = parent.getProps().getProperty("logurl");
@@ -122,7 +122,27 @@ public class RivileBalmerkImportDriver
     }
    }
   
+  private Vector signatures = new Vector();
   
+	private void loadSignatures(){
+		
+try{		
+		File f = new File("signatures.vec");
+		Calendar ss = Calendar.getInstance();
+		
+		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 3600000) {// kui on yle tunni vana siis maha 
+			f.delete();
+			signatures = new Vector();
+		} else {
+			signatures = (Vector) Converter.readObject("signatures.vec");
+		}
+
+		
+	} catch (Exception e) {
+		signatures = new Vector();
+	}
+
+	}
   private String logurl = null;
   private String APIKEY = null;
   
@@ -636,9 +656,23 @@ public Vector getDebt() throws SQLException{
 	  }
 	  
 	  System.out.println("On Tagastus/Võlgu " + tag + " " + volgu + " " + kaup + " statProds " + stat);
+
+	  if (signatures == null){
+   	   signatures = new Vector();
+      }
 	  
+	  
+	  String signature = order.getSignature();
+	  if(signatures.contains(signature)){
+		  troubles.append("REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() );
+		    		  
+	  }else{
       makeOutput(order, tag, volgu, kaup, yle , stat);
-    
+      try {
+  		Converter.saveObject(signatures, "signatures.vec");
+  	} catch (IOException e) {
+  		e.printStackTrace();
+  	}	
     
     if(volgu || yle) {
     	
@@ -653,9 +687,13 @@ public Vector getDebt() throws SQLException{
 		
     	 sendConfirmEmail( emailto, order.getCompany(), yle); 
     }
- 
+	  }
+       
+
+    
   }
   
+  private StringBuffer troubles= new StringBuffer();
   
   private void sendConfirmEmail(String emailto,String custid, boolean yle){
 	   	try{
