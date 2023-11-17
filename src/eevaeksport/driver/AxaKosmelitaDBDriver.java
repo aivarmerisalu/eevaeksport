@@ -258,9 +258,9 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
                   
                   String sql2 = "  select pd.accountrelation AS clgroup,  " +
 				  " (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +
-				  " (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, " +
+				  " (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, amount as price, " +
 				  "   pd.fromdate as algus , pd.todate as lopp from  " +
-				  "  pricedisctable pd where   pd.fromdate<getdate()+3 and pd.todate>=getdate() and pd.accountcode=1 and percent1 > 0 and pd.dataareaid ='kosm' " +
+				  "  pricedisctable pd where   pd.fromdate<getdate()+3 and pd.todate>=getdate() and pd.accountcode=1 and pd.dataareaid ='kosm' " +
 				  "   order by pd.accountrelation , pd.itemrelation" ;
                   
                   rs = stmt.executeQuery(sql2);
@@ -271,6 +271,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
                           String prodID = rs.getString("prodid");
                           String prodGroup = rs.getString("prodgroup");
                           double discount = rs.getDouble("discount");
+                          double price = rs.getDouble("price");
                           String fromdate = rs.getString("algus");
                           String todate = rs.getString("lopp");
                           MatrixLine mline = new MatrixLine();
@@ -287,7 +288,17 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
                                           && prodGroup.trim().length() > 0) {
                                   mline.setProdGroup(prodGroup);
                           }
-                          mline.setDiscount(discount);
+                          boolean goes = false;
+                          if(discount > 0) {
+                        	  mline.setDiscount(discount);
+                        	  goes = true; 
+                          }
+                          
+                          if(price > 0) {
+                        	  mline.setPrice(price);
+                        	  goes = true; 
+                          }
+                         
                           mline.setStartDate(fromdate.substring(0,10));
                           mline.setEndDate(todate.substring(0,10));
                      
@@ -522,7 +533,7 @@ String email = " ";
            
            
            String cmd2 = " SELECT disc.accountrelation as klient ,disc.percent1 AS discount FROM  pricedisctable disc  WHERE " +
-                 "   disc.dataareaid='kosm' AND  ltrim(disc.itemrelation)='0'  AND fromdate<=getdate() and todate >= getdate() ";
+                 "   disc.dataareaid='kosm' AND  ltrim(disc.itemrelation)=''  AND fromdate<=getdate() and todate >= getdate() ";
           
            TreeMap aled = new TreeMap();
            Connection con = null;
@@ -590,11 +601,11 @@ String email = " ";
 
      	 String cmd = "   SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum, \r\n" + 
      	 		"             adr.street as tanav,adr.city as linn, adr.county as regioon,adr.zipcode as indeks ,cus.invoiceaccount AS payer, \r\n" + 
-     	 		"             0 AS debt, cus.linedisc , \r\n" + 
+     	 		"             0 AS debt, cus.linedisc , pricegroup, \r\n" + 
      	 		"             adr.address ,(Select h.personnelnumber from HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) AS agent ,  numofdays AS term, cus.blocked AS block , \r\n" + 
      	 		"               (select max (blocked) from  custtable cc  WITH (NOLOCK) where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = cus.dataareaid ) \r\n" + 
      	 		"             as payerblock ,(select l.locator  from  LOGISTICSELECTRONICADDRESS l WITH (NOLOCK)  where l.recid = dp.primarycontactphone)  \r\n" + 
-     	 		"			  as info , linedisc as grupp, 0 as minord , \r\n" + 
+     	 		"			  as info , 0 as minord , \r\n" + 
      	 		"               '' as transa,'' as discount ,'' as samm , '' as tyyp ,'' as tyyp2   \r\n" + 
      	 		"             FROM  custtable cus with(nolock) inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join \r\n" + 
      	 		"	 		 LOGISTICSPOSTALADDRESS adr ON adr.LOCATION = dp.PRIMARYADDRESSLOCATION and getdate() >=VALIDFROM  and  getdate() <= VALIDTO left outer JOIN  paymterm \r\n" + 
@@ -746,6 +757,11 @@ String email = " ";
         if(aleke != null && aleke.trim().length()>0){
             aleke = aleke.trim();
             cust.setGroup(aleke);
+        } 
+        String aleke2 = rs.getString("pricegroup");
+        if(aleke2 != null && aleke2.trim().length()>0){
+            aleke2 = aleke2.trim();
+            cust.setGroup(aleke2);
         } 
         
         if(salesres.get(accountnum) != null){

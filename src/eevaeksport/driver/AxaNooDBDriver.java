@@ -809,8 +809,11 @@ Connection con = this.getNewConnection();
     	Statement stmt = con.createStatement();
       ResultSet rs = stmt.executeQuery(cmd);
       while(rs.next()){
-        String name = Converter.enCodeEst(rs.getString("name").trim()).replace('*', ' ').trim();;
-        
+        String name = Converter.enCodeEst(rs.getString("name").trim()).replace('*', ' ').trim();
+        boolean goes = true;
+        if(name.length() < 3) {
+        	goes = false;
+        }
         
         String accountnum = rs.getString("accountnum").trim();
         Customer cust = new Customer(accountnum);
@@ -995,7 +998,7 @@ Connection con = this.getNewConnection();
         if (block == 2 ) {
             cust.setSalesBlockT(true);
           }
-       boolean goes = true;
+     
         
         int payerblock = rs.getInt("payerblock");
         if (payerblock == 1) {

@@ -92,12 +92,12 @@ try{
 				ResultSet rs1 ;
 		    	Statement stmr ;
 				 String sqldea = "	  select t.PK_NOM as abi, t.KODS as  toode" +
-	" from APV06161.NNOM  t LEFT OUTER JOIN APV06161.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
-	" LEFT OUTER JOIN APV06161.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
-	"  LEFT OUTER JOIN APV06161.CHD_MG1 gr ON t.PK_MG1=gr.PK_MG1 " +
-	"  LEFT OUTER JOIN APV06161.NMINMAX aa ON aa.PK_NOM=t.PK_NOM and aa.PK_NOL=22013 " +
-	"   LEFT OUTER JOIN [APV06161].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
-	"   LEFT OUTER JOIN [APV06161].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
+	" from TRIDLV8407.NNOM  t LEFT OUTER JOIN TRIDLV8407.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
+	" LEFT OUTER JOIN TRIDLV8407.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
+	"  LEFT OUTER JOIN TRIDLV8407.CHD_MG1 gr ON t.PK_MG1=gr.PK_MG1 " +
+	"  LEFT OUTER JOIN TRIDLV8407.NMINMAX aa ON aa.PK_NOM=t.PK_NOM and aa.PK_NOL=22013 " +
+	"   LEFT OUTER JOIN [TRIDLV8407].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
+	"   LEFT OUTER JOIN [TRIDLV8407].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
 	"  where t.STATUSS = 0  and PAMVID = 2015  and  gr.kods != 'TM' and t.kods not like 'NIC%'and t.kods not like 'PRV%'   ";
 			    		
 			//	 tubakas mitte jätta .
@@ -135,12 +135,12 @@ try{
 				ResultSet rs1 ;
 		    	Statement stmr ;
 				 String sqldea = "	  select t.PK_NOM as abi, t.KODS as  toode" +
-	" from APV06161.NNOM  t LEFT OUTER JOIN APV06161.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
-	" LEFT OUTER JOIN APV06161.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
-	"  LEFT OUTER JOIN APV06161.CHD_MG1 gr ON t.PK_MG1=gr.PK_MG1 " +
-	"  LEFT OUTER JOIN APV06161.NMINMAX aa ON aa.PK_NOM=t.PK_NOM and aa.PK_NOL=22013 " +
-	"   LEFT OUTER JOIN [APV06161].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
-	"   LEFT OUTER JOIN [APV06161].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
+	" from TRIDLV8407.NNOM  t LEFT OUTER JOIN TRIDLV8407.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
+	" LEFT OUTER JOIN TRIDLV8407.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
+	"  LEFT OUTER JOIN TRIDLV8407.CHD_MG1 gr ON t.PK_MG1=gr.PK_MG1 " +
+	"  LEFT OUTER JOIN TRIDLV8407.NMINMAX aa ON aa.PK_NOM=t.PK_NOM and aa.PK_NOL=22013 " +
+	"   LEFT OUTER JOIN [TRIDLV8407].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
+	"   LEFT OUTER JOIN [TRIDLV8407].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
 	"  where t.STATUSS = 0  and PAMVID = 2015  and (t.kods like 'NIC%' or t.kods "
 	+ " like 'PRV%' or t.kods  like 'MYC%')   ";
 			    		
@@ -356,7 +356,7 @@ try{
 	}
 	
   
-  private String weburl = "http://horizon:7378/rest/TNdmPvzSale/template/5";
+  private String weburl = "https://horizonweb-cloud.visma.lv/REST_H34780003/rest/TNdmPvzSale/template/5";
   
   private String getDateNiceString(Calendar cal){
 	    StringBuffer sb = new StringBuffer();
@@ -402,9 +402,10 @@ try{
 	  try{
 		  System.out.println("weburl " + weburl);
 		  DefaultHttpClient httpClient = new DefaultHttpClient();
-		 // Credentials defaultcreds = new UsernamePasswordCredentials("restmappost", "R");
-		  Credentials defaultcreds = new UsernamePasswordCredentials("rest", "Tribaltic@18");
-		 
+		
+		 // Credentials defaultcreds = new UsernamePasswordCredentials("rest", "Tribaltic@18");
+		  
+		  Credentials defaultcreds = new UsernamePasswordCredentials("TridensLV-read", "Rhjow1PuAQLF2AO3mn@TxrbthmWTCLGT");
 		  httpClient.getCredentialsProvider().setCredentials(
                    AuthScope.ANY, defaultcreds);
 		  HttpPost postRequest = new HttpPost(weburl);
@@ -450,7 +451,7 @@ try{
 	  return false;
  }
  
- private String url = "jdbc:odbc:horizon";
+ private String url = "jdbc:odbc:horinew";
  
  private Connection getNewConnection() throws SQLException{
 	    return DriverManager.getConnection(url, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
@@ -461,7 +462,7 @@ try{
 
 	    Connection con = getNewConnection();
 	  	
-	    String cmd = "SELECT K.NOSAUK AS nimi, K.PK_KLIENTS AS id, K.KODS AS kood FROM   APV06161.DKLIENTS K " +
+	    String cmd = "SELECT K.NOSAUK AS nimi, K.PK_KLIENTS AS id, K.KODS AS kood FROM   TRIDLV8407.DKLIENTS K " +
 	  			" WHERE ltrim(K.KODS) = '" + kood + "'" ;  
 
 	  	Statement st = con.createStatement();
@@ -483,14 +484,14 @@ try{
 	    
 
 		  String cmdo = "select  as  itemid,t.NOSAUK  AS nimetus, t.M_ATT12 AS kastis,1 AS alusel,   bar.BAR_KODS AS ean ,PK_NOMGR AS grupp,yh.kods As unit,1/M_ATT13 as liter " +
-		" from APV06161.NNOM  t LEFT OUTER JOIN APV06161.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
-		" LEFT OUTER JOIN APV06161.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
+		" from TRIDLV8407.NNOM  t LEFT OUTER JOIN TRIDLV8407.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
+		" LEFT OUTER JOIN TRIDLV8407.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
 		"  where (t.PAMVID IN (2015,7713,24522,18205,12200,12201,13204,13205,15139)) AND (( ( (t.STATUSS = 0)) " +
-		"   AND ( ( EXISTS (SELECT 1 FROM APV06161.NNOMSAGR NSG WHERE NSG.PK_NOM=t.PK_NOM AND NSG.PK_NOMPGR =5)))))";
+		"   AND ( ( EXISTS (SELECT 1 FROM TRIDLV8407.NNOMSAGR NSG WHERE NSG.PK_NOM=t.PK_NOM AND NSG.PK_NOMPGR =5)))))";
 	    
 		  
 	  	
-	    String cmd = "SELECT PK_NOM AS id FROM   APV06161.NNOM t " +
+	    String cmd = "SELECT PK_NOM AS id FROM   TRIDLV8407.NNOM t " +
 	  			" WHERE t.KODS = '" +Converter.deCode(kood)+"'" ;  
 
 	  	Statement st = con.createStatement();

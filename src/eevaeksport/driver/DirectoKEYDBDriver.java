@@ -1002,7 +1002,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
           		  } 
                   
           	  }catch(Exception e){
-          		  e.printStackTrace();
+          		 // e.printStackTrace();
           		 // System.exit(0);
           	  }
                
@@ -1843,13 +1843,69 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		         		  }catch(Exception r){
 		         			  
 		         		  }
+		         		  
+		         		  
+		         		 try{
+		         			  
+		         			 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
+		         			  Node nn = rida.getChildNodes().item(r);
+		       	    		 if(nn.getNodeName().equals("contact")){
+		         				 String cname =  nn.getAttributes().getNamedItem("name").getNodeValue();
+		         				String ctel =  nn.getAttributes().getNamedItem("telephone").getNodeValue();
+		         				customer.restPerson = cname;
+		         				customer.restPerPhone = ctel;
+		         				if(customer.getPersonalData().trim().length() < 1){
+		         					customer.setPersonalData((cname + " " + ctel).replaceAll(";", ","));
+			         			}else{
+			         				String lisa = (cname + " " + ctel).replaceAll(";", ",");
+			         				if(customer.getPersonalData().indexOf(ctel) != -1){
+			         					lisa = (cname ).replaceAll(";", ",");
+			         				}
+		         				    customer.setPersonalData(customer.getPersonalData() + "|" + lisa);
+		         				}
+		         				String cemail =  nn.getAttributes().getNamedItem("email").getNodeValue();
+		         				customer.restPerEmail = cemail;
+		         				
+		  	         		
+		  	         		 }}
+		         		  }catch(Exception r){
+		         			  
+		         		  }
+		         		      	boolean fix = false;	  
+		         		 try{
+		         			  
+		         			 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
+		         			  Node nn = rida.getChildNodes().item(r);
+		       	    		 if(nn.getNodeName().equals("datafields")){
+		         				
+		         				 for (int re = 0; re < nn.getChildNodes().getLength(); re++){
+		         					 Node nn2 = nn.getChildNodes().item(re);
+		         					 
+		         					if("data".equals(nn2.getNodeName())) {
+		         						
+		         					//System.out.println("nodes " + nn2.getAttributes().getNamedItem("code").getNodeValue());
+		         					
+		         					if("FIKSUOTAS_ASORTIMENTAS".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+		         						
+										if("TAIP".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
+											fix = true;
+										}
+			         					
+		         					}
+		         				   }
+		         				 }
+		  	         		
+		  	         		 }}
+		         		  }catch(Exception r){
+		         			  r.printStackTrace();
+		         		  }
 		         		      		  
-		         		
+		         		  
 		         		  
 		         		  try{
 		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("priceformula").getNodeValue());         	
 			         		   customer.setGroup(Converter.deCode(price_list));
-			         		  if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
+			         		  if("true".equals(getParent().getProps().getProperty("fixed.frompricelist")) && fix){
 			       			   customer.addFixSortCode(Converter.deCode(price_list)); 
 			       		       }
 		         		  }catch(Exception e){
@@ -1870,7 +1926,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 			         				 customer.setGroup(Converter.deCode(as));
 					         	   }
 					         		
-                                   if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
+                                   if("true".equals(getParent().getProps().getProperty("fixed.frompricelist")) && fix){
 					       			   customer.addFixSortCode(Converter.deCode(as)); 
 					       		   }  
 		         			  }
@@ -1885,7 +1941,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		         			 String closed =  ensureLen(rida.getAttributes().getNamedItem("closed").getNodeValue());         	
 			         		  if(closed.equals("1")) {
 			         			  goes = false;
-			         			  System.out.println("closed " + customer.getName());
+			         			 // System.out.println("closed " + customer.getName());
 			         		  }
 		         		  }catch(Exception e){
 		         		  }
@@ -1924,7 +1980,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	     cc.addAgent(new Agent("LADU"));
 	   tm.put("Ladu tagastus", cc);
 	   
-	   System.out.println("kliendid b " + tm.size());
+	  // System.out.println("kliendid b " + tm.size());
 	   
 	   if(tm.size()< 2) {
 		   System.exit(0);
@@ -2115,7 +2171,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	   Hashtable re = new Hashtable();
 	   try {
 			  File f = new File (getDir() + "hinnakiri.xml");
-			  System.out.println("siin matix");
+			//  System.out.println("siin matix");
 		     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		     DocumentBuilder db;
 			db = dbf.newDocumentBuilder();      	
@@ -2195,7 +2251,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
    }
    
    public TreeMap getProducts(Agent agent){
-	   System.out.println("tooted a");
+	  // System.out.println("tooted a");
 	   
 	   if(seisud == null) {
 		    getSaveStockInfo();
@@ -2236,7 +2292,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
   TreeMap stockAlter = new TreeMap();
      if(getParent().getProps().getProperty("stockdir") != null ){
     	 stockAlter = this.getProducts3();
-    	System.out.println("stockalter " + stockAlter.size());
+    	//System.out.println("stockalter " + stockAlter.size());
      }
 
    
@@ -3118,7 +3174,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		   
 	   }
 	   
-	     System.out.println("debts size" + debts.size());
+	    // System.out.println("debts size" + debts.size());
 	   
 	   //  System.exit(0);
 	   return debts;
@@ -3346,9 +3402,9 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 			                Agent agent = (Agent)agents.get(agentID);
 			                 if (agent != null){
 			                   agent.setMonthSales((int)Double.parseDouble(summa));
-			        	   System.out.println("agsales0 " + agentID +" "+ summa);     	
+			        	 //  System.out.println("agsales0 " + agentID +" "+ summa);     	
 			        	}
-			                 System.out.println("agsales1 " + agentID +" "+ summa);     
+			               //  System.out.println("agsales1 " + agentID +" "+ summa);     
 		        	}
 		        }}  
 	  }catch(Exception e){
@@ -3478,7 +3534,7 @@ public String getSaveStockInfo() {
     		tt.printStackTrace();	 
     	  }
 
- System.out.println("laoseisud " + products.toString());
+ //System.out.println("laoseisud " + products.toString());
  return products.toString();
  
 }
