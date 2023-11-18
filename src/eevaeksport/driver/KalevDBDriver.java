@@ -3512,7 +3512,7 @@ try{
 					  	    	}
 					  	    
 					  	    	
-					  	   
+					  	     comment = comment.replaceAll("\\r\\n|\\r|\\n", " ");
 					  	    	
 					  	    	//System.out.println(date);
 					  	    	
@@ -3535,15 +3535,14 @@ try{
 						  	 		String prodname = (String)cob.get("prodname");
 						  	 		String prodid = (String)cob.get("prodid");
 						  	 		
-						  	 		 sbProd.append(prodid + ";" + prodname + ";" + filterOutOfStock + ";" + comment + ";" );
+						  	 		 sbProd.append(prodid + ";" + prodname + ";" + filterOutOfStock + ";" + comment.replaceAll("\\r\\n|\\r|\\n", " ") + ";" );
 			
 								}
 							
-							if(cfoto != null) {
-							//	System.out.println("cfoto " + cfoto);
-	  							if(filterProblem.contains("YESNO"))  	{  
-	  							 sbYesNo.append(cfoto + ";http://reporting-files.merisoft.eu/gallery/kalevmerc/" + cfoto  );	
-	  							}
+							if(cfoto != null && filterProblem.contains("YESNO")) {
+								
+	  							 sbYesNo.append(cfoto + ";http://reporting-files.merisoft.eu/gallery/kalevmerc/" + cfoto +";" );	
+	  							
 							}else {
 								try {
 					  				String foto = null;
@@ -3557,7 +3556,7 @@ try{
 					  							String fname = (String)phs.get(y);
 					  						//	System.out.println("fotoname " + fname);
 					  					
-					  				
+					  				boolean olem = false;
 					  					ArrayList arr = (ArrayList)files.get(cuid);
 					  					for(int e = 0; e<arr.size(); e++) {
 					  						Toode t = (Toode)arr.get(e);
@@ -3568,12 +3567,19 @@ try{
 					  							
 					  							//System.out.println("foto " + foto);
 					  							if(filterProblem.contains("YESNO"))  	{  
-					  							 sbYesNo.append(fname + ";" + foto  );	
+					  							 sbYesNo.append(fname + ";" + foto  + ";" );	
+					  							 olem = true;
 					  							}
 					  				  		     a++;
 					  				  				
 					  						}
 					  					}
+					  					
+					  					if(!olem) {
+					  						 sbYesNo.append(fname + ";http://reporting-files.merisoft.eu/gallery/kalevmerc/" + fname +";" );
+					  						 olem = true;
+					  					}
+					  					
 					  						}
 					  						
 					  				}
