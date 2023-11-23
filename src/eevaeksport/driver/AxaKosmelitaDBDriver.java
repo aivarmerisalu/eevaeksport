@@ -88,11 +88,13 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
     user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.companyx");
+    instance = getParent().getProps().getProperty("instance");
      }
   
   String user =  null;
   String pass = null;
   String rcompany = null;
+  String instance = null;
   
    
   @Override
@@ -261,7 +263,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 				  " (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, amount as price, " +
 				  "   pd.fromdate as algus , pd.todate as lopp from  " +
 				  "  pricedisctable pd where   pd.fromdate<getdate()+3 and pd.todate>=getdate() and pd.accountcode=1 and pd.dataareaid ='kosm' " +
-				  "   order by pd.accountrelation , pd.itemrelation" ;
+				  " and  pd.accountrelation != '" + instance + "' order by pd.accountrelation , pd.itemrelation" ;
                   
                   rs = stmt.executeQuery(sql2);
 
@@ -756,11 +758,13 @@ String email = " ";
         String aleke = rs.getString("linedisc");
         if(aleke != null && aleke.trim().length()>0){
             aleke = aleke.trim();
+            if(!aleke.equals(instance))
             cust.setGroup(aleke);
         } 
         String aleke2 = rs.getString("pricegroup");
         if(aleke2 != null && aleke2.trim().length()>0){
             aleke2 = aleke2.trim();
+            if(!aleke2.equals(instance))
             cust.setGroup(aleke2);
         } 
         
@@ -974,9 +978,35 @@ try {
 	    return tm;
   }
   
+  private HashMap<String , Double> getPrices() {
+  HashMap<String , Double> res = new HashMap<String , Double>();
+  String sql = "SELECT itemrelation as itemid,  disc.amount AS price   from pricedisctable disc where \r\n" + 
+  		"  		    		     disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)   and disc.currency = 'EUR' and disc.dataareaid='kosm'  \r\n" + 
+  		"  		    		   and accountrelation = '" + instance + "'";
+  try {
 
+  Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+ Statement stmt = con.createStatement();
+ ResultSet rs = stmt.executeQuery(sql);
+
+ while (rs.next()) {
+         String itemid = rs.getString("itemid").trim();
+         Double price = rs.getDouble("price");
+         res.put(itemid, price);
+ }
+ 
+   rs.close();
+   stmt.close();
+   con.close();
+  }catch(Exception e) {
+	  e.printStackTrace();
+  }
+ System.out.println();
+  return res;
+}
   
   
+  private HashMap<String , Double>  sPrices = null;
 
   public TreeMap getProducts(Agent agent){
 	   HashMap prodHash = new HashMap();
@@ -986,21 +1016,21 @@ try {
 		   System.out.println(stocksOld.toString());
 	   }
 	   
-	
+	   if(this.sPrices == null) {
+			  sPrices = this.getPrices();
+		  }
 	   
-    String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, DISPLAYVALUE  AS kastis,'' AS alusel, disc.amount AS price \r\n" + 
-    		"        ,CATEGORY AS grupp2, PARENTCATEGORY  AS grupp , \r\n" + 
-    		"   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat , \r\n" + 
-    		"     0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp FROM  inventtable inv \r\n" + 
-    		"	 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
-    		"	 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('5637146827','5637146826') \r\n" + 
-    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
-    		"         left  JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation and accountcode = 0  and \r\n" + 
-    		"     disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)   and disc.currency = 'EUR' and disc.dataareaid='kosm' \r\n" + 
-    		"       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  \r\n" + 
-    		"   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
-    		"		 and  dimensionattribute = 5637145336 \r\n" + 
-    		"    WHERE   moduletype=2  and  inv.dataareaid = 'kosm' ";
+    String cmd = "  SELECT inv.itemid, inv. namealias AS nimetus, DISPLAYVALUE  AS kastis,'' AS alusel, 0 AS price \r\n" + 
+    		"    		       ,CATEGORY AS grupp2, PARENTCATEGORY  AS grupp , \r\n" + 
+    		"    		   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat ,  \r\n" + 
+    		"    		    0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp FROM  inventtable inv  \r\n" + 
+    		"    			 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
+    		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('5637146827','5637146826')  \r\n" + 
+    		"    			 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
+    		"    		       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  \r\n" + 
+    		"    		   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
+    		"    				 and  dimensionattribute = 5637145336 \r\n" + 
+    		"    		    WHERE   moduletype=2  and  inv.dataareaid = 'kosm'";
     //z p algusega
   
     
@@ -1014,9 +1044,9 @@ try {
     if (isDebug()) System.out.println(cmd);
     TreeMap products = new TreeMap();
     try {
-     Connection ccc = getNewConnection();
+        Connection ccc = getNewConnection();
     	Statement stmt =  ccc.createStatement();
-      ResultSet rs = stmt.executeQuery(sss);
+        ResultSet rs = stmt.executeQuery(sss);
       
       
       HashMap eans = new HashMap();
@@ -1037,9 +1067,11 @@ try {
   
         prod.setInCases(rs.getDouble("kastis"));
        // prod.setOnPallet(rs.getDouble("alusel"));
-        Double price = rs.getDouble("price");
+        Double price = sPrices.get(kood);
+        boolean goes = false;
         if(price != null) {
         	 prod.setPrice(price);
+        	  goes = true;
         }else {
         	prod.setPrice(1);
         }
@@ -1105,10 +1137,11 @@ try {
     	   prod.setStock(stocksOld.get(prod.getID()));
        }
       
-      
+    
+      if(goes) {
         products.put(add + nimetus, prod);
         prodHash.put(prod.getID(), prod);
-
+      }
       }
       rs.close();
       stmt.close();

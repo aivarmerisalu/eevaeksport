@@ -456,6 +456,8 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		Vector result = new Vector();
 		
 		   if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
+			   System.out.println("siin Fixed " + fixedLines.size());
+
 			   return fixedLines ;
 		   }
 			   
@@ -791,7 +793,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
    public Vector getFixedAssortmentData1() {
        Vector lines = new Vector();
        TreeMap prods = this.getProducts2();
-    //  System.out.println("prods " + prods.size());
+      System.out.println("prods " + prods.size() + " " + pricelists.toString());
        
        try {
    		  File f = new File (getDir() + "hinnakiri.xml");
@@ -842,7 +844,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
                          }
                     
                        
-                         if(prodID != null && prods.keySet().contains(prodID) && pricelists.contains(clGroup.trim())){
+                         if(prodID != null && prods.get(prodID) != null && pricelists.contains(clGroup.trim())){
                         	
                         	
                         	 
@@ -1174,14 +1176,21 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	         			//System.out.println("balance " + debt);
 	         		   }
       		      }
-	         			 String price_list = ensureLen(rida.getAttributes().getNamedItem("price_list").getNodeValue());         	
+	         			 Node price_list = rida.getAttributes().getNamedItem("price_list");         	
 		         	
-		         	      if(!parent.getEmail(salesman).equals("") &&  !pricelists.contains(price_list)){
-	 	         		     pricelists.add(price_list.trim()); 
+		         	      if(price_list != null && !parent.getEmail(salesman).equals("") &&  !pricelists.contains(price_list.getNodeValue())){
+	 	         		     pricelists.add(ensureLen(price_list.getNodeValue().trim())); 
 	 	         		   }
-		         	      price_list =  rida.getAttributes().getNamedItem("price_list_special").getNodeValue() ;         	
-				         	
-		         	      StringTokenizer st  = new StringTokenizer(price_list,",");
+		         	      
+		         	     price_list = rida.getAttributes().getNamedItem("priceformula");         	
+		         	    if(price_list != null && !parent.getEmail(salesman).equals("") &&  !pricelists.contains(price_list.getNodeValue())){
+	 	         		     pricelists.add(ensureLen(price_list.getNodeValue().trim())); 
+	 	         		   }
+		         	    
+		         	      
+		         	      price_list =  rida.getAttributes().getNamedItem("price_list_special") ;  
+		         	     if(price_list != null) {
+				          StringTokenizer st  = new StringTokenizer(price_list.getNodeValue(),",");
 		         	      if(st.hasMoreTokens()){
                             String aa = ensureLen(st.nextToken());
                             
@@ -1189,7 +1198,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		 	         		     pricelists.add(aa); 
 		 	         		   }
 			         	      
-		         	      }
+		         	      }}
 	         	  
          	  }catch(Exception e){
          		 // e.printStackTrace();
@@ -1883,12 +1892,16 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 		         					 
 		         					if("data".equals(nn2.getNodeName())) {
 		         						
-		         					//System.out.println("nodes " + nn2.getAttributes().getNamedItem("code").getNodeValue());
+		         					
+		         						
+		         						
+		         						//System.out.println("nodes " + nn2.getAttributes().getNamedItem("code").getNodeValue());
 		         					
 		         					if("FIKSUOTAS_ASORTIMENTAS".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
 		         						
 										if("TAIP".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
 											fix = true;
+										//			System.out.println("On Fix " + customer.getName());
 										}
 			         					
 		         					}
@@ -1907,6 +1920,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 			         		   customer.setGroup(Converter.deCode(price_list));
 			         		  if("true".equals(getParent().getProps().getProperty("fixed.frompricelist")) && fix){
 			       			   customer.addFixSortCode(Converter.deCode(price_list)); 
+			       			System.out.println("On Fix " + customer.getName() + " " +  price_list);
 			       		       }
 		         		  }catch(Exception e){
 		         		  }
@@ -2893,25 +2907,37 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	     
 	     try {
 	 
-	    	   FileReader fr = new FileReader(getDir() + "tooted.xml");
-	           BufferedReader reader = new BufferedReader(fr);
-	         String line = null;
-
-	          while((line = reader.readLine()) != null  ){
-	        	 
+	    	 File f = new File (getDir() + "tooted.xml");
+	         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		     DocumentBuilder db;
+			db = dbf.newDocumentBuilder();      	
+	    	FileInputStream in = getCleanInputStream(f);
+	    	String handler = null;
+	        Document doc = db.parse(in,handler);
+	        Node root = getNode(doc, "transport");      
+	   
+	    	Node read = getNode(root, "items");
+	        for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	        	  Node rida = read.getChildNodes().item(i);
+	        	
+	        		  if(rida.getNodeName().equals("bi_item")){
+	        		
+	       
+	        		String id =  rida.getAttributes().getNamedItem("code").getNodeValue();  
+	        		try {
+	        		  String namec =  rida.getAttributes().getNamedItem("name").getNodeValue(); 
+	        	
+	      	     Product prod = new Product(id);
+	      	     prod.setName(namec);
 		        	
-	        	  if((line.trim().length()) > 50){
-	        		 // System.out.println(line);
-	        		  int len = line.indexOf("code=");
-		        	  String id   = line.substring(len + 6);
-		      	      Product prod = new Product(id.substring(0,id.indexOf("\"")).trim());
-		      	      len = line.indexOf("default_name=");
-		      	     String name   = line.substring(len + 14);
-		      	     prod.setName( prod.getID() + " " + Converter.deCode(name.substring(0,name.indexOf("\""))));
 		      	     tm.put(prod.getID(), prod); 
+	        		}catch(Exception e) {
+	        			
+	        		}
 	        	  }
 	        	
-	          }	    	 
+	          }
+	        in.close();
 	    
 	     } catch (Exception e){
 	       e.printStackTrace();

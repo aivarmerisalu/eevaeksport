@@ -2234,7 +2234,7 @@ SELECT  [MasterProductCode] as klient
 					CustProd cp = new CustProd(kliendikood, tootekood, kogus,
 							pluss, 0, date.toString().substring(5, 10), 0, ei,
 							0, " ");
-					cp.setAbiKood(arvenr);
+					//cp.s(arvenr);
 					 cp.setOpenAmount(ei);
 					custProds.add(cp);
 					Product prod = new Product(tootekood);

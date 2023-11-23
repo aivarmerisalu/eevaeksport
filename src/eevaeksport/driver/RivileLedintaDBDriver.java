@@ -100,10 +100,8 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
         	 Vector lines = new Vector();
 
              try {
-            	  String cmd = " select L01_KODAS_FS as grupp,l02_kodas_fil as toode from L01_FILH h , L02_FILD d ,n17_prod p where " +
-            	  		" h.l01_kodas_fs=d.l02_kodas_fs  and L01_TIPAS = 1 " +
-" and N17_KODAS_PS=l02_kodas_fil and h.l01_kodas_fs in (select n33_ship_via from " +
-" N33_KBAN group by n33_ship_via ) order by L01_KODAS_FS ,N17_PAV ";
+            	  String cmd = " SELECT n32_tipas as clgroup ,n32_kodas_ps as toode FROM dbo.N32_PABC  where n32_g_date < getdate() and n32_tipas!='A'  and (n32_kaina1) != 0  "
+            	  		+ "group by  n32_kodas_ps,n32_tipas,n32_kaina1 order by n32_tipas ,n32_kodas_ps";
             	System.out.println(cmd);
                	 connectionUp();
              	Connection con = DriverManager.getConnection(url,"LEDIN_API","P455W0rd_*1");
@@ -117,7 +115,7 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
                               String prodGroup = " ";
                               MatrixLine mline = new MatrixLine();
                                    
-                              clGroup = rs.getString("grupp");
+                              clGroup = rs.getString("clgroup");
                               prodID = rs.getString("toode");
 
                               if (custID != null && custID.trim().length() > 0) {
@@ -189,9 +187,9 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
 	         }
 			rs.close();
 		
-			String sql2 = "SELECT n32_tipas as clgroup ,max(n32_g_date),n32_kodas_ps as toode ,(n32_kaina1) as price " +
-	  		" FROM dbo.N32_PABC " +
-	  		" where n32_g_date < getdate() and n32_tipas!='A'  group by  n32_kodas_ps,n32_tipas,n32_kaina1 order by n32_tipas ,n32_kodas_ps";
+			String sql2 = " SELECT n32_tipas as clgroup, max(n32_g_date),n32_kodas_ps as toode ,(n32_kaina1) as price \r\n" + 
+					"	  		FROM dbo.N32_PABC  where n32_g_date < getdate() and n32_tipas!='A' and (n32_kaina1) != 0\r\n" + 
+					"			 group by  n32_kodas_ps,n32_tipas,n32_kaina1 order by n32_tipas ,n32_kodas_ps";
 				
 			
 			 rs = st.executeQuery(sql2);
@@ -289,8 +287,8 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
 
         TreeMap tm = new TreeMap();
 
-              String cmd = "  SELECT  N19_KODAS_GS AS kood ,rtrim( N19_KODAS_GS) + ' ' + rTRIM(N19_PAV)   AS nimi " +
-         " FROM  n19_pgr WHERE  N19_LYGIS = 2 ORDER BY N19_KODAS_GS";
+              String cmd = "  SELECT  N19_KODAS_GS AS kood ,rtrim( N19_KODAS_GS) + ' ' + rTRIM(N19_PAV)   AS nimi \r\n" + 
+              		"          FROM  n19_pgr WHERE  N19_LYGIS in( 2,1) ORDER BY N19_KODAS_GS";
          try {
         	 Connection con = DriverManager.getConnection(url,"LEDIN_API","P455W0rd_*1");
              PreparedStatement stmt = con.prepareStatement(cmd);
@@ -501,17 +499,13 @@ String ag = rs.getString("agent").trim();
 	}
               
               cust.addAgent(new Agent(ag));
-              cust.addAgent(new Agent("05"));
-              cust.addAgent(new Agent("08"));
-              cust.addAgent(new Agent("04"));
-              cust.addAgent(new Agent("03"));
-              cust.addAgent(new Agent("07"));
+          //    cust.addAgent(new Agent("05"));
                 
               
               String paym = rs.getString("paymterm");
               if(paym != null && paym.trim().length() > 1){
             	  cust.setPaymTerm(paym.trim().substring(0,paym.trim().length() -1));  
-            	  System.out.println(cust.getID() +  " " + cust.getPaymTerm());
+            	//  System.out.println(cust.getID() +  " " + cust.getPaymTerm());
               }
               
               
@@ -545,9 +539,10 @@ String ag = rs.getString("agent").trim();
               
               String hinnak = rs.getString("hinnad");
               if(hinnak != null && hinnak.trim().length() > 0){
-            	  if(!hinnak.trim().equals("G")){
+            	  if(!hinnak.trim().equals("A")){
             		//cust.setGroup(hinnak.trim());  
-            		cust.setCustType(hinnak.trim());  
+            		cust.setCustType(hinnak.trim()); 
+            		cust.addFixSortCode(hinnak.trim());
             	  }
             	  
               }
@@ -727,11 +722,9 @@ String ag = rs.getString("agent").trim();
         
 
         String cmd = "SELECT N17_KODAS_PS AS toode,(N17_PAV)  AS nimetus,N37_LAIKAS_KROV  AS tykke, 0 AS myygihind,  "+
-   	"	N17_KODAS_PS AS ean, " +
-   " 0 AS kogus,n17_kodas_ks AS grupp, N17_KODAS_GS AS grupp2 , N17_NUOL_GR AS alegrupp  ,N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status , N17_MAX_NUOL as maks, "+
-   " case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus "+
-   " FROM n17_prod a  LEFT JOIN  n37_pmat ON n37_kodas_ps=n17_kodas_ps where  N17_POZ_DATE !=1 " +
-   " order by N17_KODAS_PS ";
+   	"	N17_KODAS_PS AS ean, N17_KODAS_GS AS grupp , N17_NUOL_GR AS alegrupp  ,N17_MEN_PAV AS minkogus ,"
+   	+ "N17_KODAS_LS_4 AS status , N17_MAX_NUOL as maks,  case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus "+
+   " FROM n17_prod a  LEFT JOIN  n37_pmat ON n37_kodas_ps=n17_kodas_ps where  N17_POZ_DATE !=1  order by N17_KODAS_PS ";
 
 
         if (isDebug()) {
@@ -755,13 +748,13 @@ String ag = rs.getString("agent").trim();
                }
            
               
-              /* String kastis = rs.getString("kastis");
+               String kastis = rs.getString("tykke");
               if (kastis != null && kastis.trim().length()>0){
                 prod.setInCases(Double.parseDouble(kastis));
-              }*/
+              }
               
                     
-                    String grupp = rs.getString("grupp2");
+                    String grupp = rs.getString("grupp");
                     if (grupp != null && grupp.trim().length()>0){
                       prod.setGroup(grupp.trim());
                     }

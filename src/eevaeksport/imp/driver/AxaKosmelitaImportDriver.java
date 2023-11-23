@@ -47,7 +47,7 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
     nf.setGroupingUsed(false);
   
-    
+     instance = parent.getProps().getProperty("instance");
     try {
       Class.forName(databaseDriverName).newInstance();
       
@@ -56,7 +56,7 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
        parent.showError(e);
     }
   }
-
+  String instance = null;
 
   public String getImportFile(){
    return parent.getProps().getProperty("imp.read");
@@ -259,11 +259,9 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
   
   private HashMap<String , Double> getPrices() {
 	  HashMap<String , Double> res = new HashMap<String , Double>();
-	  String sql = "SELECT inv.itemid,  disc.amount AS price   FROM  inventtable inv inner JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation  and \r\n" + 
-	  		"    		     disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)   and disc.currency = 'EUR' and disc.dataareaid='kosm' \r\n" + 
-	  		"    		       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID   \r\n" + 
-	  		"    		   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
-	  		"    				 and  dimensionattribute = 5637145336   WHERE   moduletype=2  and  inv.dataareaid = 'kosm'";
+	  String sql = "SELECT itemrelation as itemid,  disc.amount AS price   from pricedisctable disc where \r\n" + 
+		  		"  		    		     disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)   and disc.currency = 'EUR' and disc.dataareaid='kosm'  \r\n" + 
+		  		"  		    		   and accountrelation = '" + instance + "'";
 	  try {
 
       Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
@@ -316,7 +314,7 @@ System.out.println(sql);
                 // 2. kui on tootegrupp ja klient    
                     sql = " SELECT percent1 AS discount, (amount) AS price , accountrelation, itemrelation  FROM pricedisctable pd where accountrelation = '"+cust+"' and itemrelation = \r\n" + 
                     		"				  (Select linedisc from inventtablemodule mod where mod.moduletype = 2 and mod.itemid = '" + prodID+ "' ) and\r\n" + 
-                    		"				    pd.fromdate<=getdate() and pd.todate>=getdate() and quantityamountfrom <= "+amount+" and dataareaid = 'kosm'"; 
+                    		"				    pd.fromdate<=getdate() and pd.todate>=getdate() and quantityamountfrom <= "+amount+" and dataareaid = 'kosm' "; 
   
                     System.out.println(sql);
                     rs = stmt.executeQuery(sql);
@@ -335,8 +333,9 @@ System.out.println(sql);
                     
                       // 2. kui on toote ja klientgrupp    
                       sql = "   SELECT percent1 AS discount, (amount) AS price , accountrelation  FROM pricedisctable pd where accountrelation = \r\n" + 
-                      		"					 (select linedisc from custtable cus where cus.dataareaid = 'kosm' and (cus.accountnum) = '" + cust + "')  and "
-                      				+ " itemrelation = '" + prodID + "' and dataareaid = 'kosm'"; 
+                      		"					 (select  case when linedisc != '' then linedisc else pricegroup end from custtable cus where cus.dataareaid = 'kosm' and (cus.accountnum) = '" + cust + "'"
+                      				+ " and (  case when linedisc != '' then linedisc else pricegroup end) != '" + instance + "' )  and "
+                      				+ " itemrelation = '" + prodID + "' and dataareaid = 'kosm' "; 
     
                       System.out.println(sql);
                       rs = stmt.executeQuery(sql);
@@ -351,8 +350,19 @@ System.out.println(sql);
                                   return pri * (100-discount)/100;
                               }
                          }
+                      
+                      //kui on üldine kliendi ale 
+                      sql = " SELECT  disc.percent1 AS discount  FROM  pricedisctable disc  WHERE  disc.dataareaid='kosm' AND  ltrim(disc.itemrelation)=''  "
+                      		+ "AND fromdate<=getdate() and disc.percent1 > 0 and todate >= getdate() and disc.accountrelation = '" + cust+ "'"; 
+      
+                        System.out.println(sql);
+                        rs = stmt.executeQuery(sql);
+
+                        while (rs.next()) {
+                      	     double discount = rs.getDouble("discount");
+                                    return pri * (100-discount)/100;
+                           }
                     
-                  
                   rs.close();
                   stmt.close();
                   con.close();
