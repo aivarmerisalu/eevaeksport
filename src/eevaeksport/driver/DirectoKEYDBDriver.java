@@ -1,6 +1,7 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -70,6 +71,7 @@ import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.mailagent.FileSender;
 import eevaeksport.htmlgen.HTMLeditor;
 import eevaeksport.util.Converter;
 
@@ -3608,6 +3610,13 @@ public void createDashboard() {
 	   String topLabel = "Jungenti müügiandmed";
 	   
 	   hm.genChart(url,data,topLabel);
+	   
+	   try {
+			 FileSender fs = new FileSender();
+			fs.uploadDash();
+		   } catch (Exception e1) {
+			e1.printStackTrace();
+		   }
 	
 	System.exit(0);
 }
