@@ -57,6 +57,9 @@ static Category log = Category.getRoot();
       if (args[i].trim().equalsIgnoreCase("/auto")){
         this.autoSend = true;
       }
+      if (args[i].trim().equalsIgnoreCase("/dashboard")){
+          this.setDashboardCreator(true);
+        }
 
       if (args[i].trim().equalsIgnoreCase("/fixloader")){
           this.setFixLoader(true);
@@ -564,6 +567,7 @@ static Category log = Category.getRoot();
   public final static boolean USE_SCHEDULE_BUTTON = false;
   private boolean autoSend = false;
   private boolean fixLoader = false;
+  private boolean dashboardCreator = false;
   private boolean fixReporter = false;
   private boolean webReporter = false;
   private boolean saveStock = false;
@@ -752,5 +756,13 @@ public boolean isWebReporter() {
 
 public void setWebReporter(boolean webReporter) {
 	this.webReporter = webReporter;
+}
+
+public boolean isDashboardCreator() {
+	return dashboardCreator;
+}
+
+public void setDashboardCreator(boolean dashboardCreator) {
+	this.dashboardCreator = dashboardCreator;
 }
 }

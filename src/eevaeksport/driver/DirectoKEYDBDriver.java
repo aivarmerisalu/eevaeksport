@@ -1,6 +1,7 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -64,11 +65,14 @@ import ee.mobilejava.earve.GenericDOM;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
+import eevaeksport.DashboardData;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.mailagent.FileSender;
+import eevaeksport.htmlgen.HTMLeditor;
 import eevaeksport.util.Converter;
 
 
@@ -82,7 +86,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker  {
+public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,DashboardCreator  {
 
   public DirectoKEYDBDriver(EksportPanel parent) {
     super(parent);
@@ -3401,21 +3405,42 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 	String agentID = (String) itera.next();
 		
 	  try{
-
-			String httpsURL = logurl  + company + "/xmlcore.asp?what=sale&get=1&code=" + agentID;
-		       // System.out.println("httpsURL " + httpsURL);
-				URL myurl = new URL(httpsURL);
-				Converter.doTrustToCertificates();
-			    HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-		        InputStream ins = con.getInputStream();
-		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-		        BufferedReader in = new BufferedReader(isr);
+		  
+		     String gS = getParent().getProps().getProperty("keySale");
+			    if(gS == null) {
+			    	System.out.println("keyStocks is missing!");
+			    	System.exit(0);
+			    }
+			   
+		     String urlParameters  = "what=sale&get=1&code=" + agentID+"&key="+gS;
+		    String  httpsURL = logurl  + company + "/" + comphelp + "/xmlcore.asp"; //?get=1&what=stocklevel
+		    URL myurl = new URL(httpsURL);
+		     
+		     byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+		     int postDataLength = postData.length;
+		     HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
+		     con.setRequestMethod("POST");
+		     con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+		     con.setRequestProperty("charset", "utf-8");
+		     con.setRequestProperty("Content-Length", Integer.toString(postDataLength ));
+		     con.setUseCaches(false);
+		     con.setDoOutput(true);
+		     try(DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+		        wr.write( postData );
+		     }
+		     
+		    InputStream ins = con.getInputStream();
+		    InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
+		    BufferedReader in = new BufferedReader(isr);
+			
 		        
 		        String inputLine;
 		        StringBuffer inputLineBuf = new StringBuffer();
 		        while ((inputLine = in.readLine()) != null){
+		        
 		        	inputLine =Converter.enCodeEst(inputLine);
 		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ));
+		        	
 		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
 		        	while (st.hasMoreTokens()){
 		        		String line = st.nextToken();
@@ -3428,7 +3453,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
 			                Agent agent = (Agent)agents.get(agentID);
 			                 if (agent != null){
 			                   agent.setMonthSales((int)Double.parseDouble(summa));
-			        	 //  System.out.println("agsales0 " + agentID +" "+ summa);     	
+			        	   	
 			        	}
 			               //  System.out.println("agsales1 " + agentID +" "+ summa);     
 		        	}
@@ -3565,5 +3590,61 @@ public String getSaveStockInfo() {
  
 }
 HashMap<String, Double> seisud = null;
+
+@Override
+public void createDashboard() {
+	System.out.println("Testin");
+
+	setBulkSales(agent1);
+	
+	Map<String, String[]> agentData = null;
+	TreeMap data1 = new TreeMap();
+	
+	Iterator itera = agent1.keySet().iterator();
+	while (itera.hasNext()){
+		
+		String agId = (String) itera.next();
+		Agent ag = (Agent) agent1.get(agId);
+	    String agName = Converter.deCode(ag.getName());
+        int agSales = ag.getMonthSales();
+        if (agSales < 0) {
+        	agSales = 0 ;
+        }
+		System.out.println(agId + " " + agName + " " + agSales);
+		
+	
+		   DashboardData dd1 = new DashboardData(agId);
+		   dd1.dataLabel = agName;
+		   dd1.dataValue = (double) agSales;
+		   data1.put(agId, dd1);
+		  
+	
+	}
+	
+	 agentData = Converter.getChartData("Testime", "Donut", data1);
+	   ArrayList data = new ArrayList();
+	   
+	   data.add(agentData);
+	   data.add(agentData);
+	   //data.add(agentData3);
+	   //data.add(agentData4);
+	   //data.add(agentData5);
+	   //data.add(agentData6);
+	   HTMLeditor hm = new HTMLeditor();
+	   String url = "http://www.merisoft.ee/help/jungent.png";
+	   ArrayList type = new ArrayList();
+	   String topLabel = "Jungenti müügiandmed";
+	   
+	   hm.genChart(url,data,topLabel);
+	   
+	   try {
+			 FileSender fs = new FileSender();
+			fs.uploadDash();
+		   } catch (Exception e1) {
+			e1.printStackTrace();
+		   }
+	
+	System.exit(0);
+}
 
 }
