@@ -109,7 +109,7 @@ import eevaeksport.util.FileListFilter;
  * @version 1.0
  */
 
-public class HansaSatcomDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,WebReporter{
+public class HansaSatcomDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,WebReporter,DashboardCreator{
 
   public HansaSatcomDBDriver(EksportPanel parent) {
     super(parent);
@@ -749,191 +749,13 @@ TreeMap tr = new TreeMap();
    }
    
    
-   public Map<String, String[]> getChartData(String label, String type, TreeMap data ) {
-	   Map<String, String[]> agentData = new HashMap<>();
-	   if (type.equals("Pie") || type.equals("Donut") || type.equals("Bar")) {
-		   
-		   
-		   agentData = getPieDonBarMap(data);
-	      
-	   }
-	   if (type.equals("Table")){
-		   agentData = getTableMap(data);
-	       
-	   }
-	   if (type.equals("Gauge")){
-		   agentData = getGaugeMap(data);
-	   }
-       
-       
-       agentData.put("Label",new String[] {label });
-       agentData.put("Type",new String[] {type });
-       
-       return agentData;
-   }
-
-   public Map<String, String[]> getTableMap(TreeMap data){
-	   Map<String, String[]> agentData = new HashMap<>();
-	 
-	   DashboardData dd0 = (DashboardData) data.get("LABEL");
-	    String label = "";
-	    if(dd0 != null) {
-	   for(DashboardData ddd : dd0.dataArr) {
-		   label = label + "data.addColumn('" + ddd.dataType + "', '" + ddd.dataLabel +"');\n";
-	   }}
-	   
-	   
-	   agentData.put("LABEL", new String[] {label}); 
-	   Iterator itera = data.keySet().iterator();
-	   while (itera.hasNext()) {
-		   String key = (String) itera.next();
-		   if(!key.equals("LABEL")) {
-		   DashboardData dd = (DashboardData) data.get(key);
-		   agentData.put(key, new String[] { "['"+dd.dataLabel+"', {v: "+dd.dataValue+"}, true]" });
-		   }
-		   
-	   }
-   
-	   return agentData;
-   }
-   
-   public Map<String, String[]> getPieDonBarMap(TreeMap data){
-	   Map<String, String[]> agentData = new HashMap<>();
-	 
-	   Iterator itera = data.keySet().iterator();
-	   while (itera.hasNext()) {
-		   String key = (String) itera.next();
-		   DashboardData dd = (DashboardData) data.get(key);
-		   agentData.put(key, new String[] { "['" + dd.dataLabel + " (" + key + ")'", dd.dataValue + "]," });
-		   
-	   }
-   
-	   return agentData;
-   }
-   
-   public Map<String, String[]> getGaugeMap(TreeMap data){
-	   Map<String, String[]> agentData = new HashMap<>();
-	 
-	   Iterator itera = data.keySet().iterator();
-	   while (itera.hasNext()) {
-		   String key = (String) itera.next();
-		   DashboardData dd = (DashboardData) data.get(key);
-		   agentData.put(key, new String[] { "['"+dd.dataLabel+"', "+dd.dataValue+"]" });
-		   
-	   }
-   
-	   return agentData;
-   }
-   
+  
    
    
    
    public TreeMap getAgents(){
 	   
-	   
-	 
-	   TreeMap data1 = new TreeMap();
-	   DashboardData dd1 = new DashboardData("EE2");
-	   dd1.dataLabel = "Erik";
-	   dd1.dataValue = 350.0;
-	   
-	   data1.put("EE2", dd1);
-	   
-	   DashboardData dd2 = new DashboardData("EE3");
-	   dd2.dataLabel = "Aivar";
-	   dd2.dataValue = 390.0;
-	   
-	   data1.put("EE3", dd2);
-	   
-	   DashboardData dd3 = new DashboardData("EE4");
-	   dd3.dataLabel = "Erig";
-	   dd3.dataValue = 310.0;
-	   
-	   data1.put("EE4", dd3);
-	   
-	   
-	   
-	   
-	   TreeMap data1l = new TreeMap();
-	   DashboardData dd1ll = new DashboardData("LABEL");
-	   
-	   DashboardData dd2ll = new DashboardData("l1");
-	   dd2ll.dataLabel = "AgendiKood";
-	   dd2ll.dataType = "string";
-	   dd1ll.addArrElement(dd2ll);
-	   
-	   DashboardData dd3ll = new DashboardData("l2");
-	   dd3ll.dataLabel = "Müük";
-	   dd3ll.dataType = "number";
-	   dd1ll.addArrElement(dd3ll);
-	   
-	   DashboardData dd4ll = new DashboardData("l3");
-	   dd4ll.dataLabel = "Jaemüük";
-	   dd4ll.dataType = "boolean";
-	   dd1ll.addArrElement(dd4ll);
 	  
-	   data1l.put("LABEL", dd1ll);
-	   
-	   DashboardData dd1l = new DashboardData("EE2");
-	   dd1l.dataLabel = "Erik";
-	   dd1l.dataValue = 350.0;
-	   
-	   data1l.put("EE2", dd1l);
-	   
-	   DashboardData dd2l = new DashboardData("EE3");
-	   dd2l.dataLabel = "Aivar";
-	   dd2l.dataValue = 390.0;
-	   
-	   data1l.put("EE3", dd2l);
-	   
-	   DashboardData dd3l = new DashboardData("EE4");
-	   dd3l.dataLabel = "Erig";
-	   dd3l.dataValue = 310.0;
-	   
-	   data1l.put("EE4", dd3l);
-	   
-	   Map<String, String[]> agentData = getChartData("Testime", "Donut", data1);
-       Map<String, String[]> agentData2 = getChartData("TestimeGauge", "Gauge", data1);
-       Map<String, String[]> agentData3 = getChartData("TestimeBar", "Bar", data1);
-      
-       Map<String, String[]> agentData4 = getChartData("TestimePie", "Pie", data1);
-       Map<String, String[]> agentData5 = getChartData("TestimeGauge", "Gauge", data1);
-       Map<String, String[]> agentData6 = getChartData("TestimeTable", "Table", data1l);   
-       
-
-       
-       //Table text allignment /left/center
-       
-  
-    
-
- 
-	   ArrayList data = new ArrayList();
-	   
-	   data.add(agentData);
-	   //data.add(agentData2);
-	   //data.add(agentData3);
-	   //data.add(agentData4);
-	   //data.add(agentData5);
-	   //data.add(agentData6);
-	   HTMLeditor hm = new HTMLeditor();
-	   String url = "http://www.merisoft.ee/help/jungent.png";
-	   ArrayList type = new ArrayList();
-	   String topLabel = "Jungenti müügiandmed";
-	   
-	   hm.genChart(url,data,topLabel);
-	   
-	  /*
-	   try {
-		 FileSender fs = new FileSender();
-		fs.uploadDash();
-	   } catch (Exception e1) {
-		e1.printStackTrace();
-	   }
-	   */
-	   
-	  // System.exit(0);
-	 //  getSaveStockInfo2();
 	   
 	   
      TreeMap tm = new TreeMap();
@@ -2182,6 +2004,118 @@ private org.json.simple.JSONArray getPictData() {
 	System.out.println("res suurus" + res.size());
 // System.exit(0);
 	  return res;
+}
+
+@Override
+public void createDashboard() {
+	// TODO Auto-generated method stub
+	System.out.println("Okei päev");
+	
+	 
+	 
+	   TreeMap data1 = new TreeMap();
+	   DashboardData dd1 = new DashboardData("EE2");
+	   dd1.dataLabel = "Erik";
+	   dd1.dataValue = 350.0;
+	   
+	   data1.put("EE2", dd1);
+	   
+	   DashboardData dd2 = new DashboardData("EE3");
+	   dd2.dataLabel = "Aivar";
+	   dd2.dataValue = 390.0;
+	   
+	   data1.put("EE3", dd2);
+	   
+	   DashboardData dd3 = new DashboardData("EE4");
+	   dd3.dataLabel = "Erig";
+	   dd3.dataValue = 310.0;
+	   
+	   data1.put("EE4", dd3);
+	   
+	   
+	   
+	   
+	   TreeMap data1l = new TreeMap();
+	   DashboardData dd1ll = new DashboardData("LABEL");
+	   
+	   DashboardData dd2ll = new DashboardData("l1");
+	   dd2ll.dataLabel = "AgendiKood";
+	   dd2ll.dataType = "string";
+	   dd1ll.addArrElement(dd2ll);
+	   
+	   DashboardData dd3ll = new DashboardData("l2");
+	   dd3ll.dataLabel = "Müük";
+	   dd3ll.dataType = "number";
+	   dd1ll.addArrElement(dd3ll);
+	   
+	   DashboardData dd4ll = new DashboardData("l3");
+	   dd4ll.dataLabel = "Jaemüük";
+	   dd4ll.dataType = "boolean";
+	   dd1ll.addArrElement(dd4ll);
+	  
+	   data1l.put("LABEL", dd1ll);
+	   
+	   DashboardData dd1l = new DashboardData("EE2");
+	   dd1l.dataLabel = "Erik";
+	   dd1l.dataValue = 350.0;
+	   
+	   data1l.put("EE2", dd1l);
+	   
+	   DashboardData dd2l = new DashboardData("EE3");
+	   dd2l.dataLabel = "Aivar";
+	   dd2l.dataValue = 390.0;
+	   
+	   data1l.put("EE3", dd2l);
+	   
+	   DashboardData dd3l = new DashboardData("EE4");
+	   dd3l.dataLabel = "Erig";
+	   dd3l.dataValue = 310.0;
+	   
+	   data1l.put("EE4", dd3l);
+	   
+	   Map<String, String[]> agentData = Converter.getChartData("Testime", "Donut", data1);
+    Map<String, String[]> agentData2 = Converter.getChartData("TestimeGauge", "Gauge", data1);
+    Map<String, String[]> agentData3 = Converter.getChartData("TestimeBar", "Bar", data1);
+   
+    Map<String, String[]> agentData4 = Converter.getChartData("TestimePie", "Pie", data1);
+    Map<String, String[]> agentData5 = Converter.getChartData("TestimeGauge", "Gauge", data1);
+    Map<String, String[]> agentData6 = Converter.getChartData("TestimeTable", "Table", data1l);   
+    
+
+    
+    //Table text allignment /left/center
+    
+
+ 
+
+
+	   ArrayList data = new ArrayList();
+	   
+	   data.add(agentData);
+	   //data.add(agentData2);
+	   //data.add(agentData3);
+	   //data.add(agentData4);
+	   //data.add(agentData5);
+	   //data.add(agentData6);
+	   HTMLeditor hm = new HTMLeditor();
+	   String url = "http://www.merisoft.ee/help/jungent.png";
+	   ArrayList type = new ArrayList();
+	   String topLabel = "Jungenti müügiandmed";
+	   
+	   hm.genChart(url,data,topLabel);
+	   
+	  /*
+	   try {
+		 FileSender fs = new FileSender();
+		fs.uploadDash();
+	   } catch (Exception e1) {
+		e1.printStackTrace();
+	   }
+	   */
+	   
+	   System.exit(0);
+	 //  getSaveStockInfo2();
+	
 }
 
 	

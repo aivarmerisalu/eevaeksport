@@ -64,6 +64,7 @@ import eevaeksport.driver.Outputter;
 import eevaeksport.driver.PictureMaker;
 import eevaeksport.driver.FixLoader;
 import eevaeksport.driver.FixReporter;
+import eevaeksport.driver.DashboardCreator;
 import eevaeksport.driver.PictureMaker2;
 import eevaeksport.driver.Promo;
 import eevaeksport.driver.RestSalesSender;
@@ -226,6 +227,9 @@ public class EksportPanel extends JPanel implements ActionListener,
         if(parent.isFixLoader()) {
          uploadFixsortiments();	
         }
+        if(parent.isDashboardCreator()) {
+        	createDashboard();	
+           }
         
         if(parent.isFixReporter()) {
             createFixreport();	
@@ -380,6 +384,11 @@ public class EksportPanel extends JPanel implements ActionListener,
     private void createFixreport(){
     	((FixReporter)driver).FixReporter();
     }
+    
+    private void createDashboard(){
+    	((DashboardCreator)driver).createDashboard();
+    }
+    
     private void createWebreport(){
     	((WebReporter)driver).WebReporter();
     }

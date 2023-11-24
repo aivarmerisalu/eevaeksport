@@ -53,6 +53,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -119,6 +120,7 @@ import eevaeksport.Contract;
 import eevaeksport.ContractLine;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
+import eevaeksport.DashboardData;
 import eevaeksport.EksportPanel;
 import eevaeksport.Email;
 import eevaeksport.MatrixLine;
@@ -157,8 +159,83 @@ public class Converter {
 		return false;
 	}
 	
-	
-    
+	  public static Map<String, String[]> getChartData(String label, String type, TreeMap data ) {
+		   Map<String, String[]> agentData = new HashMap<>();
+		   if (type.equals("Pie") || type.equals("Donut") || type.equals("Bar")) {
+			   
+			   
+			   agentData = getPieDonBarMap(data);
+		      
+		   }
+		   if (type.equals("Table")){
+			   agentData = getTableMap(data);
+		       
+		   }
+		   if (type.equals("Gauge")){
+			   agentData = getGaugeMap(data);
+		   }
+	       
+	       
+	       agentData.put("Label",new String[] {label });
+	       agentData.put("Type",new String[] {type });
+	       
+	       return agentData;
+	   }
+
+
+	   public static Map<String, String[]> getTableMap(TreeMap data){
+		   Map<String, String[]> agentData = new HashMap<>();
+		 
+		   DashboardData dd0 = (DashboardData) data.get("LABEL");
+		    String label = "";
+		    if(dd0 != null) {
+		   for(DashboardData ddd : dd0.dataArr) {
+			   label = label + "data.addColumn('" + ddd.dataType + "', '" + ddd.dataLabel +"');\n";
+		   }}
+		   
+		   
+		   agentData.put("LABEL", new String[] {label}); 
+		   Iterator itera = data.keySet().iterator();
+		   while (itera.hasNext()) {
+			   String key = (String) itera.next();
+			   if(!key.equals("LABEL")) {
+			   DashboardData dd = (DashboardData) data.get(key);
+			   agentData.put(key, new String[] { "['"+dd.dataLabel+"', {v: "+dd.dataValue+"}, true]" });
+			   }
+			   
+		   }
+	   
+		   return agentData;
+	   }
+	   
+	   public static Map<String, String[]> getPieDonBarMap(TreeMap data){
+		   Map<String, String[]> agentData = new HashMap<>();
+		 
+		   Iterator itera = data.keySet().iterator();
+		   while (itera.hasNext()) {
+			   String key = (String) itera.next();
+			   DashboardData dd = (DashboardData) data.get(key);
+			   agentData.put(key, new String[] { "['" + dd.dataLabel + " (" + key + ")'", dd.dataValue + "]," });
+			   
+		   }
+	   
+		   return agentData;
+	   }
+	   
+	   public static Map<String, String[]> getGaugeMap(TreeMap data){
+		   Map<String, String[]> agentData = new HashMap<>();
+		 
+		   Iterator itera = data.keySet().iterator();
+		   while (itera.hasNext()) {
+			   String key = (String) itera.next();
+			   DashboardData dd = (DashboardData) data.get(key);
+			   agentData.put(key, new String[] { "['"+dd.dataLabel+"', "+dd.dataValue+"]" });
+			   
+		   }
+	   
+		   return agentData;
+	   }
+	   
     public static  Vector<OrderLine> joinLines(Vector<OrderLine> lines) {
     	
     	Vector<OrderLine> res = (Vector<OrderLine>)lines.clone();

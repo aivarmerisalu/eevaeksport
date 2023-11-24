@@ -161,7 +161,7 @@ public class HTMLeditor {
             */
             
             
-            //Html2
+            //Html1
             if (elemCount == 1){
 		        ArrayList graph1 = new ArrayList();
 		        for(String element:result) {
@@ -170,9 +170,6 @@ public class HTMLeditor {
 		        Html1.generateHTML(graph1, url, topLabel);
             }
 		        
-		        
-
-            
 
 
             //Html2
