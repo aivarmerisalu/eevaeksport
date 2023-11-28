@@ -11598,13 +11598,14 @@ client.close();
 		   LocalDate lastMonday = today.with(TemporalAdjusters.previous( DayOfWeek.MONDAY ));
 		   LocalDate lastSaturday = today.with(TemporalAdjusters.previous( DayOfWeek.SUNDAY ));
 		   Long monTimestamp = lastMonday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000;
-		   Long satTimestamp = lastSaturday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000 + 43200000;
+		   Long satTimestamp = lastSaturday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000 + 86400000;
 		   //System.exit(0);
 
 		   
 		   
 	  try{
 		  JSONArray dayreportarray = getWebDayReport(monTimestamp, satTimestamp, rcompany, user, pass);
+		  saveFileInUTF8(exceldir + "vigestareport" + lastMonday + ".json", dayreportarray.toString());
 		  JSONArray webcustarray = getWebCustomersAll(rcompany, user, pass);
 //System.out.println(dayreportarray.toString());
 		  int lenn = webcustarray.length();
@@ -11660,19 +11661,25 @@ client.close();
 				  starttime = hhmmFormat.format(startdatee);
 			  }catch (Exception e){
 			  }
-
+			  if (agentname.contains("Linas")) {
+		        	 System.out.println(startdates + ";"+key + ";" + agentname );
+		         }
 
 			  String endtime = null;
+			  Integer duration = null;
 			  try {
-				  Integer duration = (Integer)cob.get("duration");
+				  duration = (Integer)cob.get("duration");
+			  }catch (Exception e){
+				 // e.printStackTrace();
+				 
+				  }
+				  if(duration != null) {
 				  long enddate = duration+startdate;
 				//  Date enddatee = new Date(Long.parseLong(duration+""));
 				  Date enddatee = new Date(enddate);
 				  endtime = hhmmFormat.format(enddatee);
-			  }catch (Exception e){
-			  e.printStackTrace();
-			 // System.exit(0);
-			  }
+				  }
+			 
 			  
 			  
 			  
@@ -11718,7 +11725,7 @@ client.close();
 				 ooo = ordercoords.replace(";", ":");
 			  }
 				  sb.append(agentname + "\t" + key + "\t" + custname + "\t" + startdates + "\t" + starttime + "\t" + endtime + "\t" + clientcoords + "\t" + ooo + "\t" + isInRange + "\r\n");
-
+       
 		  }
 
 			saveFileInUTF8(exceldir + "vigestareport" + lastMonday + ".csv",sb);

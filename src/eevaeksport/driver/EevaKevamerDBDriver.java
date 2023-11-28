@@ -1,4 +1,3 @@
-/*--- formatted by Jindent 2.1, (www.c-lab.de/~jindent) ---*/
 
 package eevaeksport.driver;
 
@@ -605,6 +604,8 @@ public class EevaKevamerDBDriver extends AbstractDBDriver implements BulkUpdater
             	cust.addAgent(new Agent("6"));
             	cust.addAgent(new Agent("4"));
             	cust.addAgent(new Agent("3"));
+            	cust.addAgent(new Agent("7"));
+            	cust.addAgent(new Agent("10"));
             }
             
             

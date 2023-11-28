@@ -416,9 +416,10 @@ public class FileSender {
 
 	    	                // Upload a file as a new object with ContentType and title specified.
 	    	        		if(f.getName().contains(".htm") ) {
+	    	        			
 	    	        			 	  PutObjectRequest request = new PutObjectRequest(bucketNameDash, dirDash + f.getName(), f);
 	  	    	                ObjectMetadata metadata = new ObjectMetadata();
-	  	    	                metadata.setContentType("plain/text");
+	  	    	                metadata.setContentType("text/html; charset=utf-8");
 	  	    	                metadata.addUserMetadata("title", "someTitle");
 	  	    	                request.setMetadata(metadata);
 	  	    	                s3Client.putObject(request);

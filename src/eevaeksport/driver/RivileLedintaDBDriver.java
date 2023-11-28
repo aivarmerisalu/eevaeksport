@@ -540,7 +540,7 @@ String ag = rs.getString("agent").trim();
               String hinnak = rs.getString("hinnad");
               if(hinnak != null && hinnak.trim().length() > 0){
             	  if(!hinnak.trim().equals("A")){
-            		//cust.setGroup(hinnak.trim());  
+            		cust.setGroup(hinnak.trim());  
             		cust.setCustType(hinnak.trim()); 
             		cust.addFixSortCode(hinnak.trim());
             	  }

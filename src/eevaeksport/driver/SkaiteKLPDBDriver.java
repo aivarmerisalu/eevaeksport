@@ -1595,8 +1595,8 @@ private Vector baashk = null;
      "                ISNULL(pr.ipokavimomvid, 0) < 2 OR " +
       "               pr.MVId NOT IN (2, 62733) THEN mv.Kodas ELSE ipokmv.Kodas END AS unit , pr.MV_Pastaba  AS kastis,  " +
      " CONVERT(Money, NULL) AS CostPrice, CONVERT(varchar(20), Pr.KAPKodas) AS ean,   " +
-     "                CONVERT(varchar(20),  pr.PrekiuGrupesID) AS grupp, md.SkaitaMedisId AS grupp2, CONVERT(char(1), 'Y') AS Valid	" +
-" FROM         dbo.Prekes AS Pr LEFT OUTER JOIN " +
+     "                CONVERT(varchar(20),  pr.PrekiuGrupesID) AS grupp, md.SkaitaMedisId AS grupp2, CONVERT(char(1), 'Y') AS Valid,	pl.Cert_Seal as lice " +
+" FROM         dbo.Prekes AS Pr INNER JOIN Pl_prekes pl on Pr.PrekesID = Pl.PrekesID   LEFT OUTER JOIN " +
  "                    dbo.MVGSantykiai AS mvs ON Pr.MVId = mvs.MVId1 AND Pr.IpokavimoMVId = mvs.MVId2 AND Pr.MVGId = mvs.MVGId INNER JOIN " +
   "                   dbo.Mokesciai AS mok ON Pr.MokesciaiId = mok.MokesciaiId INNER JOIN " +
    "                  dbo.PrekiuTipai AS pt ON Pr.PrekiuTipaiId = pt.PrekiuTipaiId INNER JOIN " + 
@@ -1696,7 +1696,11 @@ try{
               	 prod.setGroupSecond(grupp2.trim());
                
               }
-
+              
+              String lice = rs.getString("lice");
+              if(lice != null && lice.trim().length()>0){
+              	 prod.licence = lice.trim();
+              }
          
               if(nimetus != null){
                  prod.setName(Converter.enCodeEst(nimetus));

@@ -19,6 +19,10 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -3595,11 +3599,12 @@ HashMap<String, Double> seisud = null;
 public void createDashboard() {
 	System.out.println("Testin");
 
+	
+
 	setBulkSales(agent1);
 	
 	Map<String, String[]> agentData = null;
 	TreeMap data1 = new TreeMap();
-	
 	Iterator itera = agent1.keySet().iterator();
 	while (itera.hasNext()){
 		
@@ -3621,17 +3626,38 @@ public void createDashboard() {
 	
 	}
 	
-	 agentData = Converter.getChartData("Testime", "Donut", data1);
+	 agentData = Converter.getChartData("Testime Bari", "Bar", data1);
 	   ArrayList data = new ArrayList();
 	   
 	   data.add(agentData);
-	   data.add(agentData);
+	   
+	   Map<String, String[]> agentData1 = null;
+	   
+	   TreeMap data2 = new TreeMap();
+		 itera = agent1.keySet().iterator();
+		while (itera.hasNext()){
+			
+			String agId = (String) itera.next();
+			Agent ag = (Agent) agent1.get(agId);
+		    String agName = Converter.deCode(ag.getName());
+	        int agSales = ag.getMonthSales();
+	        if (agSales < 0) {
+	        	agSales = 0 ;
+	        }
+			System.out.println(agId + " " + agName + " " + agSales);
+			   DashboardData dd1 = new DashboardData(agId);
+			   dd1.dataLabel = agName;
+			   dd1.dataValue = (double) agSales;
+			   data2.put(agId, dd1);
+		}
+		 agentData1 = Converter.getChartData("Testime Sõõrikut", "Donut", data2);
+	   data.add(agentData1);
 	   //data.add(agentData3);
 	   //data.add(agentData4);
 	   //data.add(agentData5);
 	   //data.add(agentData6);
 	   HTMLeditor hm = new HTMLeditor();
-	   String url = "http://www.merisoft.ee/help/jungent.png";
+	   String url = "https://mobitrek.eu/reporting/logoproxy/help/jungent.png";
 	   ArrayList type = new ArrayList();
 	   String topLabel = "Jungenti müügiandmed";
 	   
