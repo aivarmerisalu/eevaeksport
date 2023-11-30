@@ -345,7 +345,7 @@ public class PalettiLitDBDriver extends AbstractDBDriver implements  BulkUpdater
     public String getSaveStockInfo(){
         
   	  String  cmd  = "select toode,stock from (select VERTYBESKODAS as toode,sum(kiekis)-isnull((select sum(kiekisapskvnt) from linum where\r\n" + 
-  	  		"                       linum.periodono='XX' and linum.vertybeskodas=likoi.vertybeskodas and linum.objektokodas=likoi.objektokodas ),0)\r\n" + 
+  	  		"                       linum.periodKod6='111111' and linum.vertybeskodas=likoi.vertybeskodas and linum.objektokodas=likoi.objektokodas ),0)\r\n" + 
   	  		"               as stock  from likoi where  objektokodas='0110' and isnull(saugojimovieta,'')<>'' group by VERTYBESKODAS,objektokodas\r\n" + 
   	  		"                       having stock>0 order by VERTYBESKODAS) AA" + 
   	  		" UNION select kodas as toode,999 as stock from usrPrekiuRinkiniai";

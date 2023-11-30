@@ -340,7 +340,8 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 
 		String cmd = " select Siffer as toode, Kogus as stock , Kasutajakood as ladu from AgendiLaoseis " + 
 				"      		union select Siffer as toode , Hetkeseis as stock , 'PEA' as ladu from Kaubad where"
-				+ " Tähtsusgrupp in('Laotoode','Lõpumüük','Eritellimustoode') or Tähtsusgrupp like '%Hooaja%' ";
+				+ " Tähtsusgrupp like '%Laotoode%' or Tähtsusgrupp like '%Lõpumüük%'"  
+			    + " or Tähtsusgrupp like '%Eritellimustoode%' or Tähtsusgrupp like '%Hooaja%' ";
 
 		if (isDebug())
 			System.out.println(cmd);
@@ -849,7 +850,8 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 						 " from HinnakirjaKaubad  r INNER JOIN Hinnakirjad h on h.HK_ID = r.HK_ID " + 
 						 " where Lõpp > getdate() group by Siffer ";
 
-		String cmd = " select * from Kaubad where (Tähtsusgrupp in('Laotoode','Lõpumüük','Eritellimustoode') or Tähtsusgrupp like '%Hooaja%') "
+		String cmd = " select * from Kaubad where ( Tähtsusgrupp like '%Laotoode%' or Tähtsusgrupp like '%Lõpumüük%'"
+				+ " or Tähtsusgrupp like '%Eritellimustoode%' or Tähtsusgrupp like '%Hooaja%') "
 				+ " and Nimetus is not null ";
 		// Siffer   Nimetus Hind Ühik  ÜhikutKastis   EAN   
 		//YlemGrupp AlamGrupp Hetkeseis   MinHind  Kaal  Brutokaal  Pildilink   
@@ -1026,8 +1028,8 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 
 		 int counter = 1;
 		   String cmd = " select klident, gp.Siffer , Kogus , ArveKpv , arvenr from CustomerProducts gp "
-		   		+ "INNER JOIN Kaubad k on k.Siffer = gp.Siffer where Tähtsusgrupp in('Laotoode','Lõpumüük','Eritellimustoode')"
-		   		+ " or Tähtsusgrupp like '%Hooaja%' order by gp.klident ,k.Nimetus " ;
+		   		+ " INNER JOIN Kaubad k on k.Siffer = gp.Siffer where Tähtsusgrupp like '%Laotoode%' or Tähtsusgrupp like '%Lõpumüük%'" 
+		   		+ " or Tähtsusgrupp like '%Eritellimustoode%' or Tähtsusgrupp like '%Hooaja%' order by gp.klident ,k.Nimetus " ;
 
 		//   and blocked = 0 select * from Kaubad where Tähtsusgrupp in('Laotoode','Lõpumüük')
 		    if (isDebug()) System.out.println(cmd);
@@ -1140,7 +1142,8 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 
       String cmd = " select Siffer as toode, Kogus as stock , Kasutajakood as ladu from AgendiLaoseis "
       		+ "union select Siffer as toode , Hetkeseis as stock , 'PEA' as ladu from Kaubad  "
-      		+ "where Tähtsusgrupp in('Laotoode','Lõpumüük','Eritellimustoode') or Tähtsusgrupp like '%Hooaja%'" ;
+      		+ "where Tähtsusgrupp like '%Laotoode%' or Tähtsusgrupp like '%Lõpumüük%'"  
+      		+ " or Tähtsusgrupp like '%Eritellimustoode%' or Tähtsusgrupp like '%Hooaja%'" ;
 	    		     
 
 	           if (isDebug()) System.out.println(cmd);
