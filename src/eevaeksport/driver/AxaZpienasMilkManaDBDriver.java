@@ -1096,6 +1096,8 @@ public class AxaZpienasMilkManaDBDriver extends AbstractDBDriver  implements Man
 	        if (agen != null && agen.trim().length() >0) {
 	          cust.addAgent(new Agent(agen.trim()));
 	          cust.setMainAgent(agen.trim());
+	          
+	          cust.addAgent(new Agent("12887"));
 	        }
 	
 	        int term = rs.getInt("term");

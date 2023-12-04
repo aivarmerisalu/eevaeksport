@@ -758,9 +758,14 @@ public Vector getDebt() throws SQLException{
      sb.append(getLineNr(cou));
      sb.append("       <I06>" + ls);
      cou++;
-
+    // 51-Važtaraštis, 52-Grąžinimas, 53-Užsakymas, 54-Rezervavimas, 55-Pasiūlymas
+     
+     String type = "55";
+     if(parent.getProps().getProperty("doc.type") != null) {
+    	 type = parent.getProps().getProperty("doc.type") ;
+     }
      sb.append(getLineNr(cou));
-     sb.append("          <I06_OP_TIP>55</I06_OP_TIP>" + ls);
+     sb.append("          <I06_OP_TIP>"+ type+ "</I06_OP_TIP>" + ls);
      cou++;
 
      sb.append(getLineNr(cou));

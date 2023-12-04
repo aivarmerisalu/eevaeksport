@@ -205,20 +205,28 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
             		klid = klid + "-" + sid;
             	}
               Customer cust = new Customer(klid);
-            String nimi = rs.getString("nimi").trim();
+            String name = rs.getString("nimi").trim();
+            
+            name = name.replaceAll("\"", " ");
+            name = name.replaceAll("   ", " ");
+            name = name.replaceAll("  ", " ");
+  	      name = name.replace('*', ' ');
+  	      name = name.replace('*', ' ');
+  	      name = name.replace('*', ' ');
+  	      name = name.replaceAll("  ", " ");
         
             cust.setPayer(paym);
             String subkod = rs.getString("skood");
             String subadr = rs.getString("subnimi");
             
             if(subkod != null){
-            	nimi = (nimi + " " + subkod.trim()).trim();
+            	name = (name + " " + subkod.trim()).trim();
             }
             if(subadr != null){
-            	nimi = (nimi + " " + subadr.trim()).trim();
+            	name = (name + " " + subadr.trim()).trim();
             }            
             
-            cust.setName(nimi);
+            cust.setName(name);
             
             String aadress = rs.getString("aadress") ;
             if (aadress != null){
@@ -262,13 +270,13 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
             	cust.setGroup(gr.trim());
             }
             
-                customers.put(nimi, cust);
+                customers.put(name, cust);
                 custMap2.put(klid,cust);
             }
 
             
             String sql = " SELECT id_kl as klient,sum(skola -apmsum) as summa FROM  \r\n" + 
-            		"                    dok WHERE (skola -apmsum > 0.1  or skola -apmsum < -0.1) and snd_kod = 'ps' and doknr like 'RAD%' and ((current_timestamp-data)-term) < 0\r\n" + 
+            		"                    dok WHERE (skola -apmsum > 0.1  or skola -apmsum < -0.1) and snd_kod = 'ps' and doknr like 'RAD%' and ((current_timestamp-data)-term) > 0\r\n" + 
             		"                     group by id_kl ORDER BY id_kl";
             
          ResultSet   rst =  stmt.executeQuery(sql);
@@ -277,18 +285,40 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
             double debt = Double.parseDouble(rst.getString("summa").trim());
      
           Iterator iter = custMap2.values().iterator(); 
-          //System.out.println("Olemas2 "  + " " + id + " " + debt);
+        
           while (iter.hasNext()){
           	Customer cc = (Customer)iter.next();
           	// 
           	if(cc.getPayer().equals(id) || cc.getID().equals(id)){
           		cc.setDebt(debt);       		
-          		//System.out.println("Olemas222 " + cc.getID() + " " + cc.getPayer() + " " + id + " " + debt);
-          	}
+          		
+            }
           }
-          	  
-            
           }
+          
+           sql = " SELECT id_kl as klient,sum(skola -apmsum) as summa FROM  \r\n" + 
+          		"                    dok WHERE (skola -apmsum > 0.1  or skola -apmsum < -0.1) and snd_kod = 'ps' and doknr like 'RAD%' \r\n" + 
+          		"                     group by id_kl ORDER BY id_kl";
+          
+       rst =  stmt.executeQuery(sql);
+        while(rst.next()){
+          String id = rst.getString("klient").trim();
+          double debt = Double.parseDouble(rst.getString("summa").trim());
+   
+        Iterator iter = custMap2.values().iterator(); 
+     
+        while (iter.hasNext()){
+        	Customer cc = (Customer)iter.next();
+        	// 
+        	if(cc.getPayer().equals(id) || cc.getID().equals(id)){
+        		cc.setUsedCredit(debt);       		
+        		
+        	  }
+          }
+        }
+          
+          
+          
           rst.close();
             
             
@@ -346,9 +376,13 @@ TreeMap photos = new TreeMap();
                           if(yhik != null && yhik.trim().length()>0){
                           prod.setUnit(yhik.trim());}
                       
+                          boolean goes = false;
                            String grupp = rs.getString("grupp");
                           if(grupp != null && grupp.trim().length()>0){
-                          prod.setGroup(grupp.trim());}
+                          prod.setGroup(grupp.trim());
+                          goes = true;
+                          }
+                          
                           
                           String grupp2 = rs.getString("grupp2");
                           if(grupp2 != null && grupp2.trim().length()>0){
@@ -378,8 +412,10 @@ TreeMap photos = new TreeMap();
                            }
                          
                           
-                          
-                          products.put(nimetus, prod);
+                          if(goes) {
+                        	  products.put(nimetus, prod);  
+                          }
+                        
 
                       }
       rs.close();                      
@@ -496,15 +532,17 @@ TreeMap photos = new TreeMap();
     public Vector getDebt(String agentCode) throws SQLException{
       Vector list = new Vector();
       
-      String sql = " SELECT id_kl as saaja,doknr AS number,data+ term AS maksepaev,skola -apmsum as tasumata, data as kuupaev ,((current_timestamp-data)-term)\r\n" + 
-      		"      		AS yle, snd_kod FROM  dok WHERE  (skola -apmsum > 0.1  or skola -apmsum < -0.1) and snd_kod = 'ps' and doknr like 'RAD%' and ((current_timestamp-data)-term) < 200 ORDER BY id_kl ";
+      String sql = " SELECT d.id_kl as payer , d.id_subkl as saaja  ,doknr AS number,d.data+ d.term AS maksepaev,d.skola -apmsum as tasumata, d.data as kuupaev ,((current_timestamp-d.data)-d.term)\r\n" + 
+      		"      		      		AS yle, d.snd_kod  FROM  dok d  WHERE  (d.skola -apmsum > 0.1  or d.skola -apmsum < -0.1) and d.snd_kod = 'ps' and \r\n" + 
+      		"						doknr like 'RAD%'  and ((current_timestamp-d.data)-d.term) < 200 ORDER BY d.id_kl ";
 
       connectionUp();
       ResultSet rs = stmt.executeQuery(sql);
       while(rs.next()){
     	  
         Debt debt = new Debt();
-        debt.setCustID(rs.getString("saaja").trim());
+        debt.setPayerID(rs.getString("payer").trim());
+        debt.setCustID(debt.getPayerID() + "-" + rs.getString("saaja").trim());
         debt.setDoknr(rs.getString("number").trim());
         debt.setDuedate(rs.getDate("maksepaev"));
         debt.setSum(rs.getDouble("tasumata"));

@@ -1089,7 +1089,11 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
         	while(st1.hasMoreElements()) {
         		 customer.addFixSortCode(st1.nextToken());
         	}
-        }
+        }else  {
+        	
+            	customer.setGroup(customer.getPayer());
+        		 customer.addFixSortCode(customer.getPayer());
+             }
         
         
         if(block != null && block.trim().equals("B")) {

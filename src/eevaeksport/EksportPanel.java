@@ -3707,10 +3707,12 @@ if(agprods != null && agprods.size() >0){
           name = name.replaceAll("CASINO", "Cas.");
           name = name.replaceAll("casino", "cas.");
           name = name.replaceAll("\"", " ");
+          name = name.replaceAll("   ", " ");
           name = name.replaceAll("  ", " ");
 	      name = name.replace('*', ' ');
 	      name = name.replace('*', ' ');
 	      name = name.replace('*', ' ');
+	      name = name.replaceAll("  ", " ");
           
           if (name.equals("")) name = " ";
           buf.append(name.replace(';', ':'));
