@@ -1064,6 +1064,28 @@ private long getAndUpdateNext() throws SQLException{
 
 	    return result;
 	  }
+
+  
+  private boolean isSelver(String  cust )throws SQLException{
+	    boolean result = false;
+	    String sql = "SELECT SL01056 AS kood FROM SL010100 where SL01001  =  '" + cust + "'  ";
+	    log.info("getAndUpdateRecID(): " + sql);
+	      Statement st = con.createStatement();
+	      ResultSet rs = st.executeQuery(sql);
+	      if(rs.next()){
+	    	  String aa = rs.getString("kood").trim();
+	    	  if(aa.equals("M14042")){
+	    		  result = true; 
+	    	  }
+	        
+	      }
+	      
+	     
+	      rs.close();
+	      st.close();
+
+	    return result;
+	  }
   
   private boolean isPrisma(String  cust )throws SQLException{
 	    boolean result = false;
@@ -2595,8 +2617,9 @@ if(xmlcounter >0){
 	      fos.close();
 	
 	
+	      
 	}else{
-         if(order.getStatus() == 99) {
+         if(order.getStatus() == 60 && isSelver(order.getCompany())) {
         	 try{
      	    	String fileName3 = escape(parent.getProps().getProperty("conv.dirselver")  + order.getAgent())
      	    	+ "." + fn   +  ".xml";

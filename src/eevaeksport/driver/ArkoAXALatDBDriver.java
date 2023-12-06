@@ -36,6 +36,7 @@ import eevaeksport.util.Converter;
  * Company:
  * @author Tarmo Tubro
  * @version 1.0
+ * testime
  */
 
 public class ArkoAXALatDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater,Discounter {
