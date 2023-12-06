@@ -1,6 +1,7 @@
 package eevaeksport;
 
 import java.awt.GridLayout;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileInputStream;
@@ -487,18 +488,18 @@ static Category log = Category.getRoot();
 		try {
 			 Socket sock = new Socket("localhost", 4445);
 			   sock.close();
-			   System.out.println("T��tas paneme kinni");
+			   System.out.println("Tï¿½ï¿½tas paneme kinni");
 			} catch (IOException e){
 				//e.printStackTrace();
 			    ok = true;
-			    System.out.println("Paneme t��le");
+			    System.out.println("Paneme tï¿½ï¿½le");
 			}
 			
 			 if ( ok ) {
 					Runnable run = new SocketServer();
 				   Thread th = new Thread(run);
 					th.start();			    
-				    System.out.println("Panin t��le");
+				    System.out.println("Panin tï¿½ï¿½le");
 			} 
 	    System.out.println("Tagastan " + ok);
 	    
