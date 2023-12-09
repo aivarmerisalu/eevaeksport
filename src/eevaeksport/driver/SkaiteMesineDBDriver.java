@@ -1998,89 +1998,87 @@ try{
       }
 
 
+ 
+ public void setBulkSales(Map agents) {
+    //if (agentCode == null) return 0;
+    connectionUp(url);
+    
 
-    public void setBulkSales(Map agents) {
-        //if (agentCode == null) return 0;
-        connectionUp(url);
-        
-  
-      TreeMap<String, String> agentBonuses =  loadAgentBonuses(agents);
-        
-        
-   	 int yy = Calendar.getInstance().get(Calendar.YEAR);
-      int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-      int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
-        // plaan boonus tabeli tekitamine
-        
-        TreeMap<String, Toode> bp = this.getPB();
-        
-        //Meil on vaja kulme viimase kuu boonuste jagamine koguda 
-        Iterator<String> itera = bp.keySet().iterator();
-        while(itera.hasNext()) {
-     	   String agen = itera.next();
-     	   Agent agent = (Agent)agents.get(agen);
-     	   if(agent != null) {
-     		   Toode tt = bp.get(agen);
-     		   
-     		   double psales = tt.getDonecur();
-     		   double msales = tt.getPlancur();
-     		   
-     			
-          		  double  tehtudsalperc = msales/psales;
-              	  double  plaanitavMyykSal = d2 * msales/dd;
-              	  double  prognosalperc = plaanitavMyykSal/psales;
-             
-              String  asi = "";
-              if(psales > 0) {
-              asi = Converter.enCodeEst("Planas Zalia: ") + (int)psales + " €|";    
-               	  asi = asi + Converter.enCodeEst("Pardavimai Zalia/Plano vykdymas :");
-               	if(tehtudsalperc*100 < 1){
-              		tehtudsalperc = 0;
-              	  }
-               	if(prognosalperc*100 < 1){
-               		prognosalperc = 0;
-              	  }
-              	  
-                    asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %|";  
-                 agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
-              }
-                 
-                 
-                 
-                  psales = tt.getDonevol();
-      		     msales = tt.getPlanvol();
-      		   
-      		   if(psales > 0) {
-           		    tehtudsalperc = msales/psales;
-               	    plaanitavMyykSal = d2 * msales/dd;
-               	    prognosalperc = plaanitavMyykSal/psales;
-              
-                 asi =  Converter.enCodeEst("||Planas Gaminiai: ") + (int)psales + " €|";    
-                	  asi = asi + Converter.enCodeEst("Pardavimai Gaminiai/Plano vykdymas :");
-                	  if(tehtudsalperc*100 < 1){
-                    		tehtudsalperc = 0;
-                    	  }
-                		if(prognosalperc*100 < 1){
-                       		prognosalperc = 0;
-                      	  }
-                      	  
-                     asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %|";  
-                  agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
-      		   }
-                 
-                 if(agentBonuses.get(agen) != null) {
-                 	agent.setStart(agent.getStart() +  Converter.enCodeEst(agentBonuses.get(agen)));	
-                 }
-     	   }
-     	   
-        }
-        
-        
-          
+
+    
+    
+	 int yy = Calendar.getInstance().get(Calendar.YEAR);
+  int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+  int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+    // plaan boonus tabeli tekitamine
+    
+    TreeMap<String, Toode> bp = this.getPB();
+    
+    TreeMap<String, String> agentBonuses =  loadAgentBonuses(agents);
+    
+    //Meil on vaja kulme viimase kuu boonuste jagamine koguda 
+    Iterator<String> itera = bp.keySet().iterator();
+    while(itera.hasNext()) {
+ 	   String agen = itera.next();
+ 	   Agent agent = (Agent)agents.get(agen);
+ 	   if(agent != null) {
+ 		   Toode tt = bp.get(agen);
+ 		   
+ 		   double msales = tt.getDonecur();
+ 		   double psales = tt.getPlancur();
+ 		   
+ 			
+      		  double  tehtudsalperc = msales/psales;
+          	  double  plaanitavMyykSal = d2 * msales/dd;
+          	  double  prognosalperc = plaanitavMyykSal/psales;
          
+          String  asi = "";
+          if(psales > 0) {
+          asi = Converter.enCodeEst("Planas Zalia: ") + (int)psales + " €|";    
+           	  asi = asi + Converter.enCodeEst("Pardavimai Zalia: ")+ (int)msales + " €|";  ;
+          	
+           	  
+           	  if(tehtudsalperc*100 < 1){
+          		tehtudsalperc = 0;
+          	  }
+          
+          	  
+                asi = asi + "Plano vykdymas: " + getNF().format(tehtudsalperc*100) + "% |"; 
+             agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
+          }
+             
+             
+             
+              msales = tt.getDonevol();
+  		     psales = tt.getPlanvol();
+  		   
+  		   if(psales > 0) {
+       		    tehtudsalperc = msales/psales ;
+           	    plaanitavMyykSal = d2 * msales/dd;
+           	    prognosalperc = plaanitavMyykSal/psales;
+          
+             asi =  Converter.enCodeEst("||Planas Gaminiai: ") + (int)psales + " €|";    
+            	  asi = asi + Converter.enCodeEst("Pardavimai Gaminiai: ") + (int)msales + " €|";
+           	  if(tehtudsalperc*100 < 1){
+           		tehtudsalperc = 0;
+           	  }
+           	
+           	 asi = asi + "Plano vykdymas: " + getNF().format(tehtudsalperc*100) + "% ||";  
+              agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
+  		   }
+             
+             if(agentBonuses.get(agen) != null) {
+             	agent.setStart(agent.getStart() +  Converter.enCodeEst(agentBonuses.get(agen)));	
+             }
+ 	   }
+ 	   
+    }
+    
+    
+      
+     
 
-      }
-
+  }
 
 
     public ManagerData getManagerData() throws SQLException{

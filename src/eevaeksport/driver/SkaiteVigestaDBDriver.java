@@ -19,6 +19,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,6 +36,7 @@ import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.manager.ManagerData;
+import eevaeksport.routines.EAN13CheckDigit;
 import eevaeksport.util.Converter;
 
 /**
@@ -44,7 +46,7 @@ import eevaeksport.util.Converter;
  * @author Tarmo Tubro
  * @version 1.0
  */
-public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter,FixReporter{
+public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter,FixReporter,PictureMaker{
 
 
     public SkaiteVigestaDBDriver(EksportPanel parent) {
@@ -133,178 +135,89 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
       connectionUp(this.url);
     }
     public String getSaveDebtInfo() {
-    	 makePictureCat();
-		  System.exit(0);
+    	 
        	return null;
        }
     
-    private void makePictureCat(){
-	     
-       	 
-    String cmd = "SELECT  Pr.PrekesID as tid, Pr.Kodas AS toode " +
-" FROM         dbo.Prekes AS Pr INNER JOIN dbo.PL_Prekes pl on pl.prekesid=pr.prekesID LEFT OUTER JOIN " +
- "                    dbo.MVGSantykiai AS mvs ON Pr.MVId = mvs.MVId1 AND Pr.IpokavimoMVId = mvs.MVId2 AND Pr.MVGId = mvs.MVGId INNER JOIN " +
- "                    dbo.Mokesciai AS mok ON Pr.MokesciaiId = mok.MokesciaiId INNER JOIN " +
- "                    dbo.PrekiuTipai AS pt ON Pr.PrekiuTipaiId = pt.PrekiuTipaiId INNER JOIN " + 
- "                    dbo.MV ON Pr.MVId = dbo.MV.MVid INNER JOIN " +
- "                    dbo.MV AS IpokMV ON Pr.IpokavimoMVId = IpokMV.MVid LEFT OUTER JOIN " +
- "                    dbo.SkaitaMedis_Prekes AS mdp ON Pr.PrekesID = mdp.PrekesID LEFT OUTER JOIN " +
- "                    dbo.SkaitaMedis AS md ON mdp.SkaitaMedisId = md.SkaitaMedisId " +
- "      WHERE     (Pr.PrekesID > 1) AND (pt.ArSandeliuojama = 1) and Pr.Nenaudoti <> ( 1 ) and md.SkaitaMedis_ListId IN (2)" ;
-
-        
-       	
-         	String picts = parent.getProps().getProperty("pict.dir");
-     	    String pictspda = parent.getProps().getProperty("pictpda.dir");
-     	 
-
-       	try {
-// teema kataloogi puhtaks 
-            //Kataloogi sisude kustutamine
-       	 File res2 = new File (pictspda);
-           String[] ff2 = res2.list();
-       	 for(int i = 0;ff2.length>i;i++){
-           //	System.out.println("fff " + ff2[i]);
-           	(new File ( pictspda + ff2[i])).delete(); 
-        
-           }
-//       	 L�ppes kustutamine 
-       	 
-         System.out.println("Piltide kopeerimine ");	
-         //Failide kopeerimine  
-           String[] gg = new File(picts).list();
-        	  //System.out.println("gg " + gg[0] + " " + gg.length);
-           
-            for(int i = 0;gg.length>i;i++){          	
-            	File in = new File ( picts + gg[i]); 
-            	if(in.isFile()){            	
-            	File inpda = new File ( pictspda + toUpper(gg[i])); 
-                  	Converter.shrinkAndCopyFile(in,inpda);
-            	}
-            }
-            
-
-       		// nyyd on �ige nimega pildid olemas ja kontrollima kas ka sobivad 
-       		
-       		
-       		
-       		
-       		
-       		
-       		
-       		
-       		
-       		
-       		Connection con = getNewConnection();
-    	
-       		Statement stmt = con.createStatement();
-       	    ResultSet	      rs = stmt.executeQuery(cmd);
-
-
-            StringBuffer buf = new StringBuffer();
-            StringBuffer buf0 = new StringBuffer();
-            int a = 0;
-            int b = 0;
-            int c = 0;
-            
-            // leiame kataloogid ja peame meeles 
-            File d  = new File(picts);
-            File[] dd = d.listFiles();
-
-           
-            
-            System.out.println("Piltide leidmine - katalooge sees ");
-       	    while (rs.next()) {
-       	    	a++;
-       	    	c++;
-       	    	
-       	     String toode = rs.getString("toode").trim();  
-             toode = toode.replace('/', '_');
-             toode = toode.replace('/', '_');
-       	    	if(c == 10){
-       	    		  c = 0;
-       	    		  System.out.println("Piltide leidmine "  + a);	
-       	    		  
-       	    	}
-       	     
-                  
-                     File f = new File(pictspda + toode+".jpg");
-                     String len = "0";
-                     if(f.exists()){
-                       len =	f.length() + "";
-                     }
-                     
-                     if(len.equals("0")){
-                     	//System.out.println(toode+".jpg;"  + len);
-                     	buf0.append(toode+".jpg\n");
-                     }else{
-                     	buf.append(toode+".jpg;"  + len + "\n");
-               	    	b++;
-                     }
-                     }
-       	    rs.close();
-       	    stmt.close();
-       	    con.close();
-       	
-       	    //oleasoleva kataloogi kustutamine	    
-                   File f = new File("list.txt");
-                   if (f.exists())f.delete();
-                   
-                     try {
-               		PrintWriter os = new PrintWriter(new FileWriter(
-               				  "list.txt", true));
-               		os.write(buf.toString());
-               		os.close();
+    
+    	  private void makePictureCat(){
+  	  	    
+  	    	
+  	    	String pictssou = parent.getProps().getProperty("pict.dir");
+  	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+  	  	    TreeMap phsize = new TreeMap();
+  	  	    
+  	  	    
+  	  	 try {
+           	  File f = new File(pictspda +"list.txt");
+                if (f.exists())f.delete();
+                //Kataloogi sisude kustutamine
+            	  File res2 = new File (pictspda);
+  	             String[] ff2 = res2.list();
+  	         	 for(int i = 0;ff2.length>i;i++){
+  	             //	(new File ( pictspda + ff2[i])).delete(); 
+  	             }
+//  	         	 Lõppes kustutamine 
+  	  		 
+  	  		 TreeMap prods = this.getProducts(null);
+  	         StringBuffer buf = new StringBuffer();
+  	         Iterator enume = prods.keySet().iterator();
+  	    
+  	         while (enume.hasNext()) {
+  	    	    	String asi = (String)enume.next();
+  	    	    	Product prod = (Product)prods.get(asi);
+  	    	    	String toode = prod.getID().trim();  
+  	               if(toode.length() > 0){
+  	                	
+  	    	   	  res2 = new File (pictssou);
+  	              ff2 = res2.list();
+  	            
+  	         	 for(int i = 0;ff2.length>i;i++){
+  	             	if( ff2[i].startsWith(toode +"_")){
+  	               // System.out.println("pilt olemas " + ff2[i]);
+  	            	File in = new File ( pictssou + ff2[i]); 
+  	              	if(in.isFile()){
+  	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+  	              	if(!inpda.exists()) {
+  	              		Converter.shrinkAndCopyFile(in,inpda,400);
+  	              	}
+  	                  	
+  	                  	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
+  	                  	phsize.put(prod.getID(), kkk.length());
+                  	    }
+  	                 }
+  	               }
+  	             }
+  	    	   }
+  	        
+  	         
+  	       Iterator itera =   phsize.keySet().iterator();
+  	       while(itera.hasNext()) {
+  	    	   String prid = (String)itera.next();
+  	    		buf.append(prid +".jpg;"  + phsize.get(prid) + "\n");
+  	               
+  	       }
+  	        
                	
-               	  }catch (Exception ex) {
-               		ex.printStackTrace();
-               	  }
-               	//  System.out.println("buf 0 " + a  + " " +  b + " "+ buf0.toString());
-               	  File f0 = new File("list0.txt");
-               	
-               	  	
-                        if (f0.exists())f0.delete();
-                     
-                       try {
-                 		PrintWriter os1 = new PrintWriter(new FileWriter(
-                 				  "list0.txt", true));
-                 		os1.write(buf0.toString());
-                 		os1.close();
-                 		//System.out.println( buf.toString());
-                 	  }catch (Exception ex) {
-                 		ex.printStackTrace();
-                 	  }
-                 
-                 File fff =  new File (pictspda +  "list.txt");
-           	  copyFile(f,fff);  	
-           	  File fff0 =  new File (pictspda +  "list0.txt");
-           	  copyFile(f0,fff0);  	
-       	} catch (Exception e) {
-       	    getParent().showError(e);
-       	}
-       
-    }
+               
+  	         
+  	         
+  	         try {
+           		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+           		os.write(buf.toString());
+           		os.close();
+           	  }catch (Exception ex) {
+           		ex.printStackTrace();
+           	  }
+  	  	 
+  	  	 } catch (Exception e) {
+  	    	    getParent().showError(e);
+  	    	}
+  	    
+  	  	 
+  	  	 
+  	  }
      
-       private String toUpper(String asi ){
-    	   
-    	   asi = asi.substring(0,asi.indexOf(" ")).toUpperCase() + asi.substring(asi.lastIndexOf(".")).toLowerCase();
-    	//   System.out.println(asi);
-    	   return asi ;
-       }
-       
-     public void copyFile(File in, File out) throws Exception {
-         FileInputStream fis  = new FileInputStream(in);
-         FileOutputStream fos = new FileOutputStream(out);
-         byte[] buf = new byte[1024];
-         int i = 0;
-         while((i=fis.read(buf))!=-1) {
-           fos.write(buf, 0, i);
-           }
-         fis.close();
-         fos.close();
-         }
-
-
 
        
     public String getAssortmentStr(Agent agent){
@@ -2163,7 +2076,16 @@ try {
 		System.exit(0);
 	}
     
+	
 
+
+
+	@Override
+	public void PictureMaker() {
+		 makePictureCat();
+		  System.exit(0);
+		
+	}
 	
 }
 

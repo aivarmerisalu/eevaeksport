@@ -266,7 +266,52 @@ String picts = parent.getProps().getProperty("pict.dir");
 		
 	//	System.out.println("gruppmap " + gruppmap.size());
 		
+         
+   				
+   				 sql = "SELECT n32_tipas as grupp ,max(n32_g_date),n32_kodas_ps as toode ,(n32_kaina1) as price\r\n" + 
+   						"   		FROM [VASCA_EUR].dbo.[N32_PABC] \r\n" + 
+   						"   		 where n32_g_date < getdate() and n32_tipas != 'C' group by  n32_kodas_ps,n32_tipas,n32_kaina1 order by n32_tipas ,n32_kodas_ps";
+   					
 
+   					
+   					stm = con.createStatement();
+   					ResultSet rs = stm.executeQuery(sql);
+
+   					while (rs.next()) {
+
+   						String clGroup = rs.getString("grupp");
+   						String prodID = rs.getString("toode");
+   					
+   						double price = rs.getDouble("price");
+   						MatrixLine mline = new MatrixLine();
+
+   						
+   						if (mline.getCustID() == null && clGroup != null
+   								&& clGroup.trim().length() > 0) {
+   							mline.setCliGroup(clGroup.trim());
+   							mline.setStartDate(Converter.getYYYYpMMpDDpString(new Date()));
+   						}
+
+   						if (prodID != null && prodID.trim().length() > 0) {
+   							mline.setProdID(prodID.trim());
+   						}
+   					
+   						if (price != 0) {
+   							mline.setPrice(price);
+   						}
+   						lines.add(mline);
+   					}
+
+   					rs.close();
+   					stm.close();
+
+   		 
+   		 
+   		 
+   		 
+   		 
+   		 
+         
 		 sql = "  SELECT N51_KODAS_KS AS grupp,N52_KODAS AS toode ,N52_NUOLAIDA as ale , N52_RUSIS as mis" + 
 				"         FROM [VASCA_EUR].dbo.[N51_SUTH] p INNER JOIN [VASCA_EUR].dbo.[N52_SUTD] r ON N51_KODAS_KT=N52_KODAS_KT where  N52_NUOLAIDA != 0 \r\n" + 
 				"                    order by N51_KODAS_KS,N52_KODAS";
@@ -275,7 +320,7 @@ String picts = parent.getProps().getProperty("pict.dir");
 	
 			connectionUp();
 			st = con.createStatement();
-			ResultSet rs = st.executeQuery(sql);
+			 rs = st.executeQuery(sql);
 
 			while (rs.next()) {
 
@@ -329,7 +374,7 @@ String picts = parent.getProps().getProperty("pict.dir");
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}
-	//	System.out.println("Matrix size " + lines.size());
+		System.out.println("Matrix size " + lines.size());
 		return lines;
 	}
 
@@ -383,14 +428,14 @@ String picts = parent.getProps().getProperty("pict.dir");
       connectionUp(this.url);
     }
 
-
+  private HashMap stocksSIN = null;
 
     public String getSaveStockInfo(){
         
     	String  cmd = "  SELECT  I17_KODAS_PS AS toode, I17_KIEKIS-I17_ATIDUOTA AS STOCK , I17_KODAS_IS AS LADU  " + 
-          		" from [VASCA_EUR].dbo.[i17_vpro] where I17_KODAS_IS in ('010000000049','010000000052') and I17_KIEKIS > 0 "
+          		" from [VASCA_EUR].dbo.[i17_vpro] where I17_KODAS_IS in ('CENTRINIS') and I17_KIEKIS > 0 "
           		+ " ORDER BY I17_KODAS_PS" ;
-
+   stocksSIN = new HashMap();
 
          if (isDebug()) System.out.println(cmd);
 
@@ -408,6 +453,7 @@ String picts = parent.getProps().getProperty("pict.dir");
                  products.append(kood +  ";");
                  products.append(" ;");
                  products.append(getParent().getNF().format(seis) + "; "  +  "\n"); 
+                 stocksSIN.put(kood, seis);
                }
              }
              rs.close();
@@ -434,7 +480,7 @@ String picts = parent.getProps().getProperty("pict.dir");
           con.close();
         }
 
-           con = DriverManager.getConnection(url,"sa",  parent.getProps().getProperty("dns.pass"));//8tLtTQXD");
+           con = DriverManager.getConnection(url,"sa",  parent.getProps().getProperty("dsn.pass"));//8tLt);
       } catch (Exception e) {
             getParent().showError(e);
       }
@@ -449,9 +495,7 @@ String picts = parent.getProps().getProperty("pict.dir");
 
       TreeMap tm = new TreeMap();
 
-            String cmd = "   SELECT distinct N17_KODAS_MS AS kood , (select N15_PAV from [VASCA_EUR].dbo.[n15_men] where N15_KODAS_MS =  N17_KODAS_MS) as nimi " + 
-            		"    FROM [VASCA_EUR].dbo.[n17_prod] a  LEFT JOIN  [VASCA_EUR].dbo.[n27_pak] ON n27_kodas_ps=n17_kodas_ps where  N17_POZ_DATE !=1 " + 
-            		"    and N17_PAV_K1 is not null  and len( ltrim(N17_KODAS_MS)) > 0 ";
+            String cmd = "SELECT  N19_KODAS_GS AS kood ,N19_PAV  AS nimi  FROM  [VASCA_EUR].dbo.[n19_pgr]   ORDER BY N19_KODAS_GS ";
        try {
       PreparedStatement  stmt = con.prepareStatement(cmd);
         ResultSet rs = stmt.executeQuery();
@@ -523,7 +567,7 @@ String picts = parent.getProps().getProperty("pict.dir");
     public DealerProduct getDealerProductsList() {
     	stocks = new HashMap<String,Double> ();
     	stocksabi = new HashMap();
-
+/*
         DealerProduct dealerProds = new DealerProduct();
         try {
 
@@ -568,8 +612,8 @@ String picts = parent.getProps().getProperty("pict.dir");
             getParent().showError(e);
         }
 
-         return dealerProds;
-        // return null;
+         return dealerProds;*/
+         return null;
        }
 
 
@@ -585,8 +629,11 @@ String picts = parent.getProps().getProperty("pict.dir");
     	
     //	this.getPriceMatrixData();
         connectionUp(url2);
-        String  cmd = "SELECT N15_KODAS_MS AS kood ,N15_PAV AS nimi,N15_TEVAS AS objekt FROM "
-        		+ " [VASCA_EUR].dbo.[n15_men] where N15_KODAS_MS like '000%' and len(rtrim(N15_KODAS_MS)) = 5 ORDER by N15_PAV";
+        String  cmd = "SELECT   (CASE WHEN len(TRIM(N33_SHIP_VIA))=0 or N33_SHIP_VIA IS NULL THEN  N08_KODAS_MS_P ELSE N33_SHIP_VIA END) AS kood , max(N15_PAV) as nimi   \r\n" + 
+        		"        					FROM [VASCA_EUR].dbo.[n08_klij]  left JOIN [VASCA_EUR].dbo.[N33_KBAN] ON N33_KODAS_KS = N08_KODAS_KS left join [VASCA_EUR].dbo.[n15_men] \r\n" + 
+        		"							on N15_KODAS_MS =(CASE WHEN len(TRIM(N33_SHIP_VIA))=0 or N33_SHIP_VIA IS NULL THEN  N08_KODAS_MS_P ELSE N33_SHIP_VIA END)\r\n" + 
+        		"						 group by (CASE WHEN len(TRIM(N33_SHIP_VIA))=0 or N33_SHIP_VIA IS NULL THEN  N08_KODAS_MS_P ELSE N33_SHIP_VIA END)\r\n" + 
+        		"						order by  max(N15_PAV)";
         TreeMap agents = new TreeMap();
         
         
@@ -597,32 +644,13 @@ String picts = parent.getProps().getProperty("pict.dir");
             ResultSet	      rs = stmt.executeQuery();
 
             while (rs.next()) {
-              Agent agent = new Agent(rs.getString("kood").trim());
+            	String kood = Converter.cleanLitLatEst(rs.getString("kood"));
+            	if(kood != null && kood.trim().length() >0) {
               String name = rs.getString("nimi").trim();
-             String ob = null;
-             
-             
-          //   00025- 1 manager Klaipedos profesionaia, storage number 45 Kristina Ramonaite,
-           //  00027- 1 manager Panevezio profesionalai; storage number 29 Inga Kairiene;
-            // 00024; 00026; 00028 -1 manager (Vilnius, Kaunas, Alytus); storage number 47 
-              	
-          /*   if(agent.getID().trim().equals("00025")){
-              		ob = "010000000045";
-              	}
-              	
-             if(agent.getID().trim().equals("00024")){
-              		ob = "010000000047";
-              	}
-              	
-             if(agent.getID().trim().equals("00027")){
-              		ob = "010000000029";
-              	}
-            */
-           //  if(ob != null) {
-            	// agent.setObject(ob.trim());
-                 agent.setName(name + " " + agent.getID());
+              Agent agent = new Agent(kood.trim());
+              agent.setName(name );
                  agents.put(name, agent);
-             //}
+             }
             	
             }
             rs.close();
@@ -644,7 +672,7 @@ String picts = parent.getProps().getProperty("pict.dir");
         		"			(CASE WHEN len(TRIM(N33_SHIP_VIA))=0 or N33_SHIP_VIA IS NULL THEN  N08_KODAS_MS_P ELSE N33_SHIP_VIA END) AS agent ,  \r\n" + 
         		"			(case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm ,\r\n" + 
         		"			 (case when N33_TEL  !='' then N33_TEL else ((case when N08_TEL  !='' then N08_TEL else (N08_MOB_TEL) end) ) end)  as phone \r\n" + 
-        		"			, N08_E_MAIL as mail FROM [VASCA_EUR].dbo.[n08_klij]  left JOIN [VASCA_EUR].dbo.[N33_KBAN] ON N33_KODAS_KS = N08_KODAS_KS  order by N08_PAV";
+        		"			, N08_E_MAIL as mail, N08_KAINYNAS as hinnak FROM [VASCA_EUR].dbo.[n08_klij]  left JOIN [VASCA_EUR].dbo.[N33_KBAN] ON N33_KODAS_KS = N08_KODAS_KS  order by N08_PAV";
         log(cmd);
         TreeMap customers = new TreeMap();
         HashMap custMap = new HashMap();
@@ -739,17 +767,11 @@ String picts = parent.getProps().getProperty("pict.dir");
              
              cust.setGroup(maks);
 
-             String ag = rs.getString("agent").trim();
+             String ag =  Converter.cleanLitLatEst(rs.getString("agent").trim());
               cust.addAgent(new Agent(ag));
-              if(ag.equals("00026") || ag.equals("00028") ){
-            	  cust.addAgent(new Agent("00024"));  
-              }
              
-             
-             cust.setMainAgent(ag);
               try{
             	  cust.setPaymTerm(rs.getString("paymterm")+"");
-                    
               }catch(Exception e){
             	  
               }
@@ -767,6 +789,10 @@ String picts = parent.getProps().getProperty("pict.dir");
             		  cust.setPersonalData(mail.trim());
             	  }
             	 
+              }
+              String hinnak = rs.getString("hinnak");
+              if(hinnak != null && hinnak.trim().length() > 0 && !hinnak.trim().equals("C")){
+            	  cust.setCustType(hinnak.trim());
               }
               
               customers.put(name, cust);
@@ -788,9 +814,10 @@ String picts = parent.getProps().getProperty("pict.dir");
     TreeMap<String,Double> prices = new TreeMap<String,Double>();
     
     public TreeMap getProducts(Agent agent){
-    	getDealerProductsList();
+    	//getDealerProductsList();
+    	getSaveStockInfo();
     	prices = new TreeMap<String,Double>();
-    	System.out.println("stocks suurus " + stocks.size());
+    	System.out.println("stocks suurus " + stocksSIN.size());
     	
     	String groupsok =  getParent().getProps().getProperty("groups.ok");
     	HashSet<String> okgr = new HashSet<String>();
@@ -804,7 +831,7 @@ String picts = parent.getProps().getProperty("pict.dir");
   
    String cmd = " SELECT N17_KODAS_PS AS toode,trim(N17_PAV)  AS nimetus,N27_KIEKIS_PAK  AS tykke, 0 AS myygihind," +
    		"N17_KODAS_PS AS ean, "+
-   " 0 AS kogus,N17_KODAS_MS AS grupp, N17_KODAS_GS AS grupp2 ,N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status , N17_MAX_NUOL as maks," +
+   " 0 AS kogus,N17_KODAS_GS AS grupp, N17_KODAS_MS AS grupp2 ,N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status , N17_MAX_NUOL as maks," +
    " case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus " +
    " FROM [VASCA_EUR].dbo.[n17_prod] a  LEFT JOIN  [VASCA_EUR].dbo.[n27_pak] ON n27_kodas_ps=n17_kodas_ps where  N17_POZ_DATE !=1" +
    " and N17_PAV is not null " ;
@@ -815,8 +842,10 @@ String picts = parent.getProps().getProperty("pict.dir");
         try {
        
         	
-    String    sql = " select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from [VASCA_EUR].dbo.[I33_PKAI] " + 
-    		"    		 where I33_KODAS_iS = '010000000049'  GROUP BY I33_KODAS_PS having max(I33_KAINA) > 0 " ;
+    String  sql = "SELECT max(n32_g_date),n32_kodas_ps as toode ,(n32_kaina1) as price\r\n" + 
+					"   		FROM [VASCA_EUR].dbo.[N32_PABC] \r\n" + 
+					"   		 where n32_g_date < getdate() and n32_tipas = 'C' group by  n32_kodas_ps,n32_tipas,n32_kaina1 order by n32_tipas ,n32_kodas_ps";
+				
     
             System.out.println("hind");
           if (isDebug()) System.out.println(sql);
@@ -827,7 +856,7 @@ String picts = parent.getProps().getProperty("pict.dir");
 
                while (rst.next()) {
                  String toode = rst.getString("toode").trim();
-                 double hind = rst.getDouble("hind");
+                 double hind = rst.getDouble("price");
                 	 Toode tt = new Toode(toode);                
                      tt.setKastis(hind);
                      tooted.put(toode,tt);	
@@ -840,14 +869,14 @@ String picts = parent.getProps().getProperty("pict.dir");
         	
         	
              connectionUp(url2);
-            stm = con.prepareStatement(cmd);
+            stmt = con.prepareStatement(cmd);
             ResultSet	      rs = stmt.executeQuery();
 
             
             
             while (rs.next()) {
             	
-            	boolean goes = true;
+            	
               String kood = rs.getString("toode").trim();
               Product prod = new Product(kood);
               String nimetus = rs.getString("nimetus").trim();
@@ -855,11 +884,12 @@ String picts = parent.getProps().getProperty("pict.dir");
               try{
               prod.setInCases(rs.getDouble("tykke"));
             } catch (Exception e){}
-            
+            boolean goes = false;
             if(tooted.get(kood) != null){
             	Toode tt = (Toode)tooted.get(kood);
             	  prod.setPrice(tt.getKastis());
                   prices.put(kood, tt.getKastis());
+                  goes = true;
             }
              // String price = rs.getString("iii");
 
@@ -876,8 +906,8 @@ String picts = parent.getProps().getProperty("pict.dir");
             
               }
        
-              if(stocks.get(prod.getID()) != null){
-            	  prod.setStock(stocks.get(prod.getID())); 
+              if(stocksSIN.get(prod.getID()) != null){
+            	  prod.setStock(Double.parseDouble(stocksSIN.get(prod.getID())+"")); 
               }
               
               prod.setUnit("VNT");
@@ -891,7 +921,7 @@ String picts = parent.getProps().getProperty("pict.dir");
              if (grupp != null && grupp.trim().length()>0){
                prod.setGroup(grupp.trim());
                if(!okgr.contains(grupp.trim())) {
-            	   goes = false;
+            	//   goes = false;
                }
              }
              String grupp2 = rs.getString("grupp2");
@@ -922,7 +952,7 @@ String picts = parent.getProps().getProperty("pict.dir");
                if(nimetus.startsWith("X ")) {
             	   prod.setStatusSellout("1");
             	   if(stocksabi.get(prod.getID()) == null && stocks.get(prod.getID()) == null){
-            		   goes = false;
+            		 //  goes = false;
             	   }
                }
               

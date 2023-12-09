@@ -774,7 +774,7 @@ public class EksportPanel extends JPanel implements ActionListener,
       }
 
     Vector res   = sortAgs(agentsq,terr);
-  //  System.out.println("res " + res.toString());
+    System.out.println("res " + res.toString());
       
       if (driver instanceof BulkUpdater){
         generateForBulk(res);
@@ -938,7 +938,7 @@ public class EksportPanel extends JPanel implements ActionListener,
                 e.printStackTrace();
               }
          
-            System.out.println("parent. costructfiles matrix done "  + agentCodes.toString());
+            System.out.println("parent. costructfiles matrix done "  + theAgents.toString());
             
             Enumeration enume = theAgents.elements();
             while (enume.hasMoreElements()){
@@ -1182,6 +1182,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("KulcsSoft")
 					    || driver.getDriverVersion().equals("Rinku")
 					    || driver.getDriverVersion().equals("RivileLedinta")
+					    || driver.getDriverVersion().equals("RivileVasca")
 	                	 )
                   
                   {

@@ -430,6 +430,7 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
 " , N33_TEL as phone ,N08_KAINYNAS as hinnad FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS  order by N08_PAV";
         System.out.println(cmd);
         TreeMap customers = new TreeMap();
+        
         HashMap custMap = new HashMap();
         HashMap volad = new HashMap();
         try {
