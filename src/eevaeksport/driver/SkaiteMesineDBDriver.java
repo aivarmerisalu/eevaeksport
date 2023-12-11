@@ -1861,9 +1861,9 @@ try{
       }
     
     
-    
     public TreeMap<String, String> loadAgentBonuses(Map agents) {
        	
+
         
        	TreeMap<String, String> res = new TreeMap<String, String>();
             
@@ -1882,7 +1882,33 @@ try{
        		}catch(Exception e) {
        			
        		}
-       				
+       		
+       		
+       		Double soldThis = null;
+       		try {
+       			soldThis = Double.parseDouble(tt.json.get("soldThis")+"");
+       		}catch(Exception e) {
+       			
+       		}
+       			
+       		
+       		Double soldLast = null;
+       		
+       		try {
+       			soldLast = Double.parseDouble(tt.json.get("soldLast")+"");
+       		   		}catch(Exception e) {
+       		   			
+       		   		}
+       		
+       		Double soldPreLast = null;
+       		
+       		try {
+       			soldPreLast = Double.parseDouble(tt.json.get("soldPreLast")+"");	
+       		   		}catch(Exception e) {
+       		   			
+       		   		}
+       		
+       		
        		Double compLast = null;
        		
     try {
@@ -1905,20 +1931,37 @@ try{
        				 tt0 = (Toode)agT.get(age) ;
        			} 
        			
-       			if(compThis != null) {
+       			    if(compThis != null) {
     					tt0.addDonecur(compThis);
     				 }
-    				 if(compLast != null) {
-    				tt0.addDonevol(compLast);
-    				 }
+    				 
+       			    if(compLast != null) {
+    				   tt0.addDonevol(compLast);
+    				    }
+       			    
     				 if(compPreLast != null) {
-    				tt0.addKogus(compPreLast);
-    				 }
+    				    tt0.addKogus(compPreLast);
+    				    }
+    				 
+    				 if(soldThis != null) {
+    						tt0.addPlancur(soldThis);
+    					}
+    					 
+    	   			 if(soldLast != null) {
+    					   tt0.addPlanvol(soldLast);
+    					}
+    				 
+    	   			if(soldPreLast != null) {
+    					   tt0.addKastis(soldPreLast);
+    					}
        			
        			agT.put(age, tt0);
        		}
        	}
              
+       	
+       	
+       
       
     	 itera = agT.keySet().iterator();
        	
@@ -1926,14 +1969,20 @@ try{
        		String agID = itera.next();
        		Toode tt = agT.get(agID);
        	    if(agents.get(agID) != null && tt != null) {
-       	    	
+       	     double agentsales = 0;
+       	 	 
+
+    	double percThis = tt.getDonecur()/tt.getPlancur() * 100; 
+    	double percLast = tt.getDonevol()/tt.getPlanvol() * 100; 
+    	double percPreLast = tt.getKogus()/tt.getKastis() * 100; 
+    	
        	    String re = "||Bonuses|";
        	    if((int)tt.getDonecur() > 0) {
-       	     re = "Komp einamasis men: " + (int)tt.getDonecur() + "€|";
+       	     re = "Komp einamasis men: " + (int)tt.getDonecur() + "€/" + getNF().format(percThis) + "%|";
        	    }
        	   
-       	    	re = re + "Praeitas men: " + (int)tt.getDonevol() + "€|";
-       	    	re = re + "Uzpraeitas men: " + (int)tt.getKogus() + "€|";
+       	    	re = re + "Praeitas men: " + (int)tt.getDonevol() + "€/" + getNF().format(percLast) + "%|";
+       	    	re = re + "Uzpraeitas men: " + (int)tt.getKogus() + "€/" + getNF().format(percPreLast) + "%|";
        	    	res.put(agID, re );
        	      }
        	   }
@@ -1946,7 +1995,7 @@ try{
              return res;
 
          }
-    
+       
     
     
  public TreeMap<String, Toode> getPB() {
