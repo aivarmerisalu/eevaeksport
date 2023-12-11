@@ -622,6 +622,7 @@ String picts = parent.getProps().getProperty("pict.dir");
      *
      *
      * @return
+     * 
      *
      * @see
      */
