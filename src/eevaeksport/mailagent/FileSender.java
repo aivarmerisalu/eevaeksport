@@ -64,10 +64,15 @@ public class FileSender {
 	public boolean sendPicts = false;
 	public boolean sendKeygen = false;
 	public boolean sendDash = false;
+	private boolean upload = false;
 	
 	 
 	   boolean getAWS ( Properties mjProps) {
 		 
+		   if("true".equals(mjProps.getProperty("aws.upload.force"))) {
+			   upload = true;
+		   }
+		   
 		   String bucketName = mjProps.getProperty("aws.bucket");
 		   String bucketNameDash = mjProps.getProperty("aws.bucketdash");
 		  
@@ -341,7 +346,7 @@ public class FileSender {
 	  	    	            	 s3Client.putObject(request);
 		  	    	                log(time + " Uploaded ZIP file to AWS : " + f.getName());
 		  		    	            System.out.println(time + " Uploading " + f.getName());	
-	  	    	             } else if(sizes.get( dirOut + f.getName()) != f.length()){
+	  	    	             } else if(sizes.get( dirOut + f.getName()) != f.length() || upload){
 	  	    	            	 s3Client.putObject(request);
 	  	    	            	 System.out.println(time + " Zip on uue suurusega " + f.getName() + " W" + sizes.get( dirPict + f.getName())+ " L" + f.length() );	
 	  	    	             } else {
