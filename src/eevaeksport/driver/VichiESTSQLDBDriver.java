@@ -1871,6 +1871,8 @@ con3.close();
                      	prod.setVat("5");
                      } else if (vat.equals("GRUPE20")){
                       	prod.setVat("20");
+                     } else if (vat.equals("GRUPE22")){
+                       	prod.setVat("22");
                       }
                    }
                    

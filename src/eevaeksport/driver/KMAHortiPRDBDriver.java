@@ -793,7 +793,7 @@ public class KMAHortiPRDBDriver extends AbstractDBDriver implements Manager, Pro
 
 				
 				prod.setInCases((rs.getDouble("ÜhikutKastis")));
-				prod.setVat("20");
+				prod.setVat("22");
 
 				
 				 

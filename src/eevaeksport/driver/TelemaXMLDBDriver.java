@@ -754,7 +754,7 @@ private HashMap prodsGUID = new HashMap();
 		   				 
 		   			 }
 	   				 
-	   				prod.setVat("20");
+	   				prod.setVat("22");
 
 		    	
 		 			

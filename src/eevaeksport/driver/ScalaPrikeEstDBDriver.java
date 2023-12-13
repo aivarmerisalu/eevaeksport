@@ -1876,7 +1876,7 @@ System.out.println("fixed size " + result.size());
                 	 prod.setOldName(props.getProperty(prod.getID()));
                  }
                  prod.setName(add +nimetus );
-              prod.setVat("21"); 
+              prod.setVat("22"); 
               
               String statustop = rs.getString("statustop");
 

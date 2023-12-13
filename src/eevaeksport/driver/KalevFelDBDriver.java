@@ -1477,7 +1477,7 @@ StringBuffer sb = new StringBuffer();
 				}
 				prod.setType("KALEV");
 				
-				prod.setVat("20");
+				prod.setVat("22");
 
 				String sss = "SELECT top 3 SC33001 as toode , SC33015 as bb , sum( SC33005) as kogus    FROM SC330800 where SC33002 = '23'"
 						+ " and SC33005 > 0 and SC33001 = '"

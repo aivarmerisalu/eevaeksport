@@ -948,7 +948,7 @@ private TreeMap groups = new TreeMap();
 			    	    	         prod.setName(aa + " " + name.trim());
 			    	    	         prod.setUnit("tk.");
 			    	    	         prod.setPrice(1);
-			    	    	         prod.setVat("20");
+			    	    	         prod.setVat("22");
 			    	    	         if(type!= null && type.trim().length() > 0){
 			    	    	        	 prod.setType(type.trim());
 			    	    	         }

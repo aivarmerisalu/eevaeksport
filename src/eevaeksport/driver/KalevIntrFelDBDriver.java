@@ -398,7 +398,7 @@ public class KalevIntrFelDBDriver extends AbstractDBDriver implements Manager,Pr
                     prod.setUnit(unit.trim());
                   }
            
-              prod.setVat("20"); 
+              prod.setVat("22"); 
             
   		        products.put(nimetus, prod);  
 

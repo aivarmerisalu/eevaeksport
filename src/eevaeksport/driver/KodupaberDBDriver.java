@@ -479,7 +479,7 @@ public class KodupaberDBDriver extends AbstractDBDriver implements Manager,Promo
 
                     prod.setUnit(unit.trim() );	
                 }
-                prod.setVat("20");
+                prod.setVat("22");
                 prod.setInCases(parseDouble(rs.getString("tykke").trim()));
                 String ean = rs.getString("ean");
                 prod.setGroup(rs.getString("grupp").trim());

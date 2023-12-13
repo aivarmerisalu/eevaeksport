@@ -416,7 +416,7 @@ String cmd = "  SELECT  (date),pr.id,pr.code AS kood,pr.descr AS nimi,(c.value) 
         if (yhik!= null && yhik.trim().length()>0){
           prod.setUnit(yhik.trim());
         }
-        prod.setVat("20");
+        prod.setVat("22");
         String grupp = rs.getString("grupp");
         if (grupp != null && grupp.trim().length() > 0) {
             prod.setGroup(grupp.trim());

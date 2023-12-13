@@ -518,7 +518,7 @@ if(cal.get(Calendar.MONTH) > 7 ) {
                     prod.setUnit(unit.trim());
                   }
            
-              prod.setVat("20"); 
+              prod.setVat("22"); 
             
   		        products.put(nimetus, prod);  
 

@@ -269,18 +269,72 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
 
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
-          String sql = " SELECT PRICEDISCTABLE.ITEMRELATION as prodid , PRICEDISCTABLE.ACCOUNTRELATION as custid, " +
-         " MIN(PRICEDISCTABLE.AMOUNT) AS price   ,min(PRICEDISCTABLE.FROMDATE) as algus , max(PRICEDISCTABLE.TODATE) as lopp ," +
-		" datediff( day,min(PRICEDISCTABLE.FROMDATE) , max(PRICEDISCTABLE.TODATE) )  as paevi " +
-         "  FROM PRICEDISCTABLE WHERE PRICEDISCTABLE.DATAAREAID='VIR' AND PRICEDISCTABLE.RELATION=4 AND PRICEDISCTABLE.ACCOUNTCODE=0 " + 
-         "  AND  (GETDATE()>=PRICEDISCTABLE.FROMDATE " + 
-         " AND (GETDATE()<=PRICEDISCTABLE.TODATE+1 OR PRICEDISCTABLE.TODATE=('1900-01-01 00:00:00.00'))) " + 
-         "  GROUP BY ITEMCODE,ACCOUNTCODE,ITEMRELATION,ACCOUNTRELATION";
+          
+          
 
           try {
 
         	Statement stmt = this.getNewConnection().createStatement();
-                  ResultSet rs = stmt.executeQuery(sql);
+                
+        	  
+            String sql2 = " SELECT PRICEDISCTABLE.ACCOUNTRELATION as clgroup," +
+            " PRICEDISCTABLE.ITEMRELATION as prodid, MIN(PRICEDISCTABLE.AMOUNT) AS price  , min(PRICEDISCTABLE.FROMDATE) as algus , max(PRICEDISCTABLE.TODATE) as lopp" +
+        	  " , datediff( day,min(PRICEDISCTABLE.FROMDATE) , max(PRICEDISCTABLE.TODATE) )  as paevi " +
+            " FROM PRICEDISCTABLE WHERE PRICEDISCTABLE.DATAAREAID='VIR' AND PRICEDISCTABLE.RELATION=4 AND PRICEDISCTABLE.ACCOUNTCODE=1 AND " +
+            " (GETDATE()>=PRICEDISCTABLE.FROMDATE " + 
+            " AND (GETDATE()<=PRICEDISCTABLE.TODATE+1 OR PRICEDISCTABLE.TODATE=('1900-01-01 00:00:00.00'))) " + 
+            " GROUP BY ITEMCODE, ACCOUNTCODE, ITEMRELATION, ACCOUNTRELATION";
+            
+            ResultSet  rs = stmt.executeQuery(sql2);
+
+            while (rs.next()) {
+
+                    String clGroup = rs.getString("clgroup");
+                    String prodID = rs.getString("prodid");
+                    double price = rs.getDouble("price");
+                    String algus = rs.getString("algus");
+                    String lopp = rs.getString("lopp");
+                int paevi = rs.getInt("paevi");
+                    
+                    MatrixLine mline = new MatrixLine();
+                    
+                
+                    if (clGroup != null && clGroup.trim().length() > 0) {
+                            mline.setCliGroup(clGroup.trim());
+                    }
+
+                    if (prodID != null && prodID.trim().length() > 0) {
+                            mline.setProdID(prodID.trim());
+                    }
+                  // if(paevi < 47){
+                  	   if (algus != null && algus.trim().length() > 0) {
+                             mline.setStartDate(algus.trim().substring(0,10));
+                     }
+                         if (lopp != null && lopp.trim().length() > 0) {
+                             mline.setEndDate(lopp.trim().substring(0,10));
+                     } 	 
+                   //}else{
+                 	 // mline.setProdLevel("pr");
+                   //}
+                 
+                    mline.setPrice(price);
+           
+                    lines.add(mline);
+            }
+            
+            rs.close();
+            
+            
+            String sql = " SELECT PRICEDISCTABLE.ITEMRELATION as prodid , PRICEDISCTABLE.ACCOUNTRELATION as custid, " +
+           " MIN(PRICEDISCTABLE.AMOUNT) AS price   ,min(PRICEDISCTABLE.FROMDATE) as algus , max(PRICEDISCTABLE.TODATE) as lopp ," +
+  		" datediff( day,min(PRICEDISCTABLE.FROMDATE) , max(PRICEDISCTABLE.TODATE) )  as paevi " +
+           "  FROM PRICEDISCTABLE WHERE PRICEDISCTABLE.DATAAREAID='VIR' AND PRICEDISCTABLE.RELATION=4 AND PRICEDISCTABLE.ACCOUNTCODE=0 " + 
+           "  AND  (GETDATE()>=PRICEDISCTABLE.FROMDATE " + 
+           " AND (GETDATE()<=PRICEDISCTABLE.TODATE+1 OR PRICEDISCTABLE.TODATE=('1900-01-01 00:00:00.00'))) " + 
+           "  GROUP BY ITEMCODE,ACCOUNTCODE,ITEMRELATION,ACCOUNTRELATION";
+  
+        	
+        	 rs = stmt.executeQuery(sql);
 
                   while (rs.next()) {
                 	  String prodID = rs.getString("prodid");
@@ -316,66 +370,16 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
                           //}else{
                         //	  mline.setProdLevel("pr");
                          // }
-                       
+                         mline.prodLevel = ("999");
                           lines.add(mline);
                   }
                   rs.close();
-                  
-                  
-                  String sql2 = " SELECT PRICEDISCTABLE.ACCOUNTRELATION as clgroup," +
-                  " PRICEDISCTABLE.ITEMRELATION as prodid, MIN(PRICEDISCTABLE.AMOUNT) AS price  , min(PRICEDISCTABLE.FROMDATE) as algus , max(PRICEDISCTABLE.TODATE) as lopp" +
-              	  " , datediff( day,min(PRICEDISCTABLE.FROMDATE) , max(PRICEDISCTABLE.TODATE) )  as paevi " +
-                  " FROM PRICEDISCTABLE WHERE PRICEDISCTABLE.DATAAREAID='VIR' AND PRICEDISCTABLE.RELATION=4 AND PRICEDISCTABLE.ACCOUNTCODE=1 AND " +
-                  " (GETDATE()>=PRICEDISCTABLE.FROMDATE " + 
-                  " AND (GETDATE()<=PRICEDISCTABLE.TODATE+1 OR PRICEDISCTABLE.TODATE=('1900-01-01 00:00:00.00'))) " + 
-                  " GROUP BY ITEMCODE, ACCOUNTCODE, ITEMRELATION, ACCOUNTRELATION";
-                  
-                  rs = stmt.executeQuery(sql2);
-
-                  while (rs.next()) {
-
-                          String clGroup = rs.getString("clgroup");
-                          String prodID = rs.getString("prodid");
-                          double price = rs.getDouble("price");
-                          String algus = rs.getString("algus");
-                          String lopp = rs.getString("lopp");
-                      int paevi = rs.getInt("paevi");
-                          
-                          MatrixLine mline = new MatrixLine();
-                          
-                      
-                          if (clGroup != null && clGroup.trim().length() > 0) {
-                                  mline.setCliGroup(clGroup.trim());
-                          }
-
-                          if (prodID != null && prodID.trim().length() > 0) {
-                                  mline.setProdID(prodID.trim());
-                          }
-                        // if(paevi < 47){
-                        	   if (algus != null && algus.trim().length() > 0) {
-                                   mline.setStartDate(algus.trim().substring(0,10));
-                           }
-                               if (lopp != null && lopp.trim().length() > 0) {
-                                   mline.setEndDate(lopp.trim().substring(0,10));
-                           } 	 
-                         //}else{
-                       	 // mline.setProdLevel("pr");
-                         //}
-                       
-                          mline.setPrice(price);
-                 
-                          lines.add(mline);
-                  }
-                  
-                  rs.close();
-                  
-        
-        
-                  
+                  stmt.close();
+                
                   
 
           } catch (SQLException ex) {
-          ex.printStackTrace();
+            ex.printStackTrace();
           }
           return lines;
   }

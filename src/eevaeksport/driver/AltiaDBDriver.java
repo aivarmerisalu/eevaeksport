@@ -1567,7 +1567,7 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
    	    	 try{ prod.setUnit(getNode(rida, "BaseUnit").getFirstChild().getNodeValue());	 
    	    	 }catch (Exception e){   	 }
     	    	
-   	       	   prod.setVat("20");
+   	       	   prod.setVat("22");
     	      //    prod.setStock(Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
         	 	 if(links.get(prod.getID()) != null){
         	 		 prod.weblink = links.get(prod.getID()) + "";

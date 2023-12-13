@@ -673,7 +673,7 @@ String rcompany = null;
 
     	  	                 	 
     	  	                 	 
-    	  	                 	 prod.setVat("20");
+    	  	                 	 prod.setVat("22");
     	  	                           
 
     	  	                 	     String grd = rs.getString("grd");
