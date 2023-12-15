@@ -1192,8 +1192,14 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
   	  			    	Node read2 = getNode(rida, "lines");
   	  			      for (int u = 0; u < read2.getChildNodes().getLength(); u++){
   	  			      Node rida2 = read2.getChildNodes().item(u);
-  	  			       
-	  			    	  String toode = rida2.getAttributes().getNamedItem("pcode").getNodeValue();
+  	  			      String toode = null;
+  	  			  try {
+	  			    	   toode = rida2.getAttributes().getNamedItem("pcode").getNodeValue();
+  	  			}catch(Exception e) {
+			    		 
+		    	  }
+  	  			  
+  	  			  if(toode != null) {
 	  			    	  Node nnn = rida2.getAttributes().getNamedItem("description");
 	  			    	  
 	  			    	  String nimi = "pole nime";
@@ -1203,10 +1209,10 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	  			    	  double kogus =  0;
 	  			    	  try {
 	  			    		  kogus =  Double.parseDouble(rida2.getAttributes().getNamedItem("quantity").getNodeValue()); 
-	  			    	  }catch(Exception e) {
-	  			    		 
-	  			    	  }
-	  			    	 
+	  			    	  
+	  			    	}catch(Exception e) {
+				    		 
+	  		    	  }
 	  			    	  
 	  			    	  if(toode.startsWith("UT") && prods.get(toode) != null) {
 	  			    		  toode = ((Product)prods.get(toode)).getEAN();
@@ -1244,7 +1250,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	  			    		}	
 		  			    	}
 	  			    	  }
-  	  			        }
+  	  			        }}
   	  				
 	  			        }
   		       

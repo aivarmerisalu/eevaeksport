@@ -278,7 +278,7 @@ con.close();
       ////sb.append(getLineNr(cou));
       sb.append("          <I06_PVM_TIP>0</I06_PVM_TIP>" + ls);
       cou++;
-      String cust = order.getCompany();
+      String cust = Converter.deCode(order.getCompany());
 
       
       String agent1 = order.getAgent();

@@ -881,12 +881,15 @@ String picts = parent.getProps().getProperty("pict.dir");
               String kood = rs.getString("toode").trim();
               Product prod = new Product(kood);
               String nimetus = rs.getString("nimetus").trim();
-              prod.setName(Converter.enCodeEst(nimetus));
+              prod.setName(Converter.enCodeEst(nimetus + " " + kood));
+
               try{
-              prod.setInCases(rs.getDouble("tykke"));
-            } catch (Exception e){}
-            boolean goes = false;
-            if(tooted.get(kood) != null){
+                 prod.setInCases(rs.getDouble("tykke"));
+               } catch (Exception e){}
+            
+              boolean goes = false;
+            
+              if(tooted.get(kood) != null){
             	Toode tt = (Toode)tooted.get(kood);
             	  prod.setPrice(tt.getKastis());
                   prices.put(kood, tt.getKastis());
@@ -900,7 +903,6 @@ String picts = parent.getProps().getProperty("pict.dir");
             		  EAN13CheckDigit ee = new EAN13CheckDigit();
             		  String ean2 = ean.trim() + ee.calculate(ean.trim());
                       prod.setEAN(ean2);	
-            		  prod.setName(prod.getName() + " " + ean2.substring(ean2.length()-4));
             	  }catch(Exception y){
             		  
             	  }

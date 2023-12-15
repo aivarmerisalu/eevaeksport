@@ -1609,9 +1609,9 @@ public void PictureMaker() {
     //Kataloogi sisude kustutamine
 	 	 File res2 = new File (pictspda);
          String[] ff2 = res2.list();
-     	 for(int i = 0;ff2.length>i;i++){
-         	(new File ( pictspda + ff2[i])).delete(); 
-         }
+     	// for(int i = 0;ff2.length>i;i++){
+         	//(new File ( pictspda + ff2[i])).delete(); 
+         //}
 //     	 Lõppes kustutamine 
 		 
 		 TreeMap prods = this.getProducts(null);
@@ -1636,13 +1636,15 @@ public void PictureMaker() {
            // System.out.println("pilt olemas " + ff2[i]);
         	File in = new File ( pictssou + ff2[i]); 
           	if(in.isFile()){
-          	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
+          		String ext = in.getName().substring(in.getName().lastIndexOf("."));
+          	File inpda = new File ( pictspda + prod.getID()+ ext);
           	if(!inpda.exists()){
               	Converter.shrinkAndCopyFile(in,inpda,400);
-      	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-                		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-                	}
+      	  
       	  	   }
+            if(buf.toString().indexOf(prod.getID() + ext + ";"  + inpda.length()) == -1){
+        		buf.append(prod.getID() + ext +";"  + inpda.length() + "\n");
+        	}
              }
            }
          }}
