@@ -4568,6 +4568,28 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
 	//	3. Vastustega
 		
 		  
+		/*		
+		 * 
+		 *      Kui on vaja päeva haaval välja lugeda siis peab seda kasutama.
+		     for(int u = 0 ; u < 50 ;u++) {
+		    	 
+				Calendar start = Calendar.getInstance();
+				start.add(Calendar.DATE, -u);
+ 
+				Calendar end = Calendar.getInstance();
+				end.add(Calendar.DATE, -u+1);
+								 
+					String filenameTask =   Converter.getTaskData(start.getTimeInMillis(), end.getTimeInMillis(), "orklalv", "orkla.lv", "Riga-012","Tasks-"+ Converter.getDDpMMpYYYYpString(start)+"-" );
+				System.out.println("filenameTask "+  filenameTask);
+			  
+		  }
+		  
+	
+		 
+		 
+		 System.exit(0); 
+*/
+		
 		  //System.out.println(input);
 		
 		  

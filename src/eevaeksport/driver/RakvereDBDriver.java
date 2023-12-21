@@ -1086,8 +1086,8 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
 
         public Vector getPriceMatrixData(){
         	 String    sql = "SELECT Kliendikood AS custid,'' AS clgroup,Tootekood AS prodid,'' AS prodgroup, " +
-            " Sooduhind AS price ,[kampaania l�pp] as paev  "+
-            "   FROM soodukampaaniad inner join customers c on c.kood=Kliendikood where getdate() BETWEEN  [kampaania algus]-5 AND [kampaania l�pp]  " +
+            " Sooduhind AS price ,[kampaania lõpp] as paev  "+
+            "   FROM soodukampaaniad inner join customers c on c.kood=Kliendikood where getdate() BETWEEN  [kampaania algus]-5 AND [kampaania lõpp]  " +
             "   and visit !='' order by Kliendikood,Tootekood";
 
              Vector result = new Vector();

@@ -40,6 +40,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.joda.time.DateMidnight;
+import org.joda.time.DateTime;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -702,7 +704,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	  
      
    public TreeMap getAgents(){
-	
+	   
+		  
+
 	   
      TreeMap tm = new TreeMap();
      try{

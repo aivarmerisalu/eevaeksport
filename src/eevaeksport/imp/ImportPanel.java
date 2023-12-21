@@ -14125,7 +14125,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 				   
 				
 				if (i > 7 && i < 600){
-				//	System.out.println("edasi " + i );
+					System.out.println("edasi " + i );
 			        String prod = null;
 			        String ean = "";
 			        try{
@@ -14147,7 +14147,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 				       
 			        }
 			        
-			    //	System.out.println("prod  " + prod);
+			    	System.out.print(" prod  " + prod);
 					
 			        
 			         try{
@@ -14182,7 +14182,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 					}
 					
 					
-			//		 System.out.println("EAN TEST "  + ean + " " + kogus);
+				 System.out.print(" EAN TEST "  + ean + " " + kogus);
 					
 			        	if(ean != null && ean.trim().length() > 13) {
 			        		ean = ean.substring(0,13);

@@ -2592,6 +2592,10 @@ try{
     	  fn =( Calendar.getInstance().getTimeInMillis() + "").substring(3);
       }
       
+      if(ebast) {
+    	  fn = fn + "-e-";
+      }
+      
       fn = fn + "-" + ( Calendar.getInstance().getTimeInMillis() + "").substring(9);
       
       System.out.println("Ordee Status  " + order.getStatus());
