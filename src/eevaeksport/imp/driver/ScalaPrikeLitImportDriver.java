@@ -5,6 +5,8 @@ package eevaeksport.imp.driver;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,6 +16,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -23,8 +26,17 @@ import java.util.Vector;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import eevaeksport.Email;
+import eevaeksport.driver.Toode;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -54,7 +66,7 @@ import eevaeksport.util.Converter;
 	      if(parent.getEksportFrame().getProps().getProperty("db.url") != null) {
 		     	 url = parent.getEksportFrame().getProps().getProperty("db.url");//"jdbc:odbc:scalaDB";	
 		       }
-	    
+	      
 	      
 	     // updateCustcodes();
 	      calNF.setMaximumFractionDigits(0);
@@ -682,13 +694,73 @@ return res;
 	  public String identifyProduct(String ean, String prodID) throws SQLException{
 	    return prodID;
 	  }
-			
+
+	  private String getExcelDir(){
+	      String dir = parent.getEksportFrame().getProps().getProperty("excel.dir");
+	      if(dir == null){
+	    	  return "excel/";
+	      }
+	      if (!(dir.endsWith("/") || (dir.endsWith("\\")))) dir = dir + "/";
+	      return dir;
+	    }
+	  
+	  private HashMap readPosExcel() {
+		  HashMap hh = new HashMap();
+	        	
+	        	
+	        	File f = new File(getExcelDir() + "POS.xlsx");
+	    		try {
+	    			FileInputStream ff = new FileInputStream(f);
+	    			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+	    			XSSFSheet sheet = workbook.getSheetAt(0);
+	    			XSSFRow row = null;
+	    		
+	    			row = sheet.getRow(0);
+
+	    			for (int a = 0; a <  sheet.getLastRowNum(); a++) {
+	    				row = sheet.getRow(a);
+	    				String prodid = null;
+	    				String comment = null;
+
+	    	 			 DataFormatter formatter = new DataFormatter();
+	    	 			try {
+	     					prodid =  formatter.formatCellValue(row.getCell((short) 3)).trim();
+	     				} catch (Exception e) {
+	     					
+	     				}
+	    				
+	    	 			try {
+	     					comment =  formatter.formatCellValue(row.getCell((short) 6)).trim();
+	     				} catch (Exception e) {
+	     					
+	     				}
+	    	 			
+	    	 			if(prodid != null && comment != null) {
+	    	 				hh.put(prodid, comment);
+	    	 			}
+	    				
+	    			}
+	    		}catch (Exception d){
+	    			d.printStackTrace();
+	    		}
+	    		
+          // System.out.println("Comments " + hh.toString());
+		  
+		  return hh;
+	  }
+	  
+	  private HashMap poscomm = null;
 
 	  public void makeOrder(Order order) throws SQLException{
 		
 		  if(zeros == null) {
 			 zeros =  zeroStatus() ;
 		  }
+
+		  if(poscomm == null) {
+			  poscomm =  readPosExcel() ;
+		  }
+		  
 		  setOrder(order);
 		    makeOutput(order);
 	/*	  Vector splitted =  splitOrder(order);
@@ -1279,8 +1351,9 @@ return res;
 			      sb2.append("               <dta:AccDim1>" + agent + "</dta:AccDim1>" + ls);
 			      sb2.append("         </dta:AccStr>" + ls);
 			      sb2.append("         <dta:TextLines>" + ls);
-			      if(zallahtext != null){
-			      sb2.append("               <dta:TextLine>" + zallahtext + "</dta:TextLine>" + ls);
+			      
+			       if(poscomm != null && poscomm.get(toode) != null){
+			        sb2.append("               <dta:TextLine>" + ((String)poscomm.get(toode)).trim()+ "</dta:TextLine>" + ls);
 			        }else{
 			      sb2.append("               <dta:TextLine></dta:TextLine>" + ls);
 			        }
