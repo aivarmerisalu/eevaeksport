@@ -1014,7 +1014,7 @@ System.out.println("tooted " + products.size());
 
 */	    // k�sioleva m��gimehe selle kuu m��gi leidmine
             String sql =
-                "select sum(doksumma)/1.20 as seekuu  from firma34.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) AND pais2obj=?";
+                "select sum(doksumma)/1.22 as seekuu  from firma34.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) AND pais2obj=?";
             if (isDebug()) {
                 System.out.println(sql);
             }
@@ -1033,7 +1033,7 @@ System.out.println("tooted " + products.size());
             rs.close();
             pstmt.close();
             String sql2 =
-                "select sum(doksumma)/1.20 as seekuu  from firma34.dok where (month(kuupaev))=(month(current_date)) and yksus='3' and doktyyp='G'"
+                "select sum(doksumma)/1.22 as seekuu  from firma34.dok where (month(kuupaev))=(month(current_date)) and yksus='3' and doktyyp='G'"
                 + " AND year(current_date)=year(kuupaev) AND pais2obj=?";
             if (isDebug()) {
               System.out.println(sql2);
@@ -1054,7 +1054,7 @@ System.out.println("tooted " + products.size());
             pstmt2.close();
 
             String sql1 =
-                "select sum(doksumma)/1.20 as seekuu  from firma34.dok where (month(kuupaev))=(month(current_date)) and yksus='4' and doktyyp='G' AND year(current_date)=year(kuupaev) AND pais2obj=?";
+                "select sum(doksumma)/1.22 as seekuu  from firma34.dok where (month(kuupaev))=(month(current_date)) and yksus='4' and doktyyp='G' AND year(current_date)=year(kuupaev) AND pais2obj=?";
             if (isDebug()) {
               System.out.println(sql1);
             }
@@ -1218,7 +1218,7 @@ System.out.println("tooted " + products.size());
     
     
 		  connectionUp();
-    		String cmd =  "  select sum(doksumma)/1.20 as sales , dok.pais2obj  AS agent   from firma34.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) " +
+    		String cmd =  "  select sum(doksumma)/1.22 as sales , dok.pais2obj  AS agent   from firma34.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) " +
 			  "  GROUP BY dok.pais2obj" ;
     		
     		String cmd2 =  "  select sum(doksumma) as sales , dok.pais2obj  AS agent   from firma34.dok where "

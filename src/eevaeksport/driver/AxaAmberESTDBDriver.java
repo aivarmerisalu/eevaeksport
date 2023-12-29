@@ -1388,7 +1388,7 @@ private TreeMap groups = null;
   public TreeMap getProducts(Agent agent){
 
     String cmd = "   SELECT inv.itemid, inv.itemname AS nimetus, inv.taxpackagingqty AS kastis,inv.standardpalletquantity AS alusel, disc.amount AS price  " + 
-" , bar.itembarcode AS ean ,inv.ITEMSUBGROUPID AS grupp,inv.SPIBRANDID AS grupp2,mod.unitid As unit, '20' as vat,mod.LineDisc as alegr  " +
+" , bar.itembarcode AS ean ,inv.ITEMSUBGROUPID AS grupp,inv.SPIBRANDID AS grupp2,mod.unitid As unit, '22' as vat,mod.LineDisc as alegr  " +
  " , ITEMGROUPID as type ,lowestqty as mini , multipleqty as opti, NEWITEM as uus ,sellout as out , topitem as tops , giftbox as gift , SPIDONTCONTROLMINAMOUNTMS as nocount FROM inventtable inv  " +
 "  left join InventItemSalesSetup s on s.itemid = inv.itemid and s.dataareaid=inv.dataareaid left join pricedisctable as disc on inv.itemid=disc.itemrelation and disc.dataareaid=inv.dataareaid " +
 "  and disc.module = 1  and disc.relation=4  and disc.itemcode=0 and disc.accountcode=1 and accountrelation = 'Standard' and (disc.todate > getdate() or year( disc.todate ) = 1900) and  (disc.fromdate < getdate()+1 or year( disc.fromdate ) = 1900 )" +

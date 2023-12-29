@@ -499,7 +499,7 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
 	@Override
 	public void setBulkSales(Map agents) {
 		
-  		String cmd =  "  select sum(doksumma)/1.20 as sales , dok.pais2obj  AS agent   from firma1.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) " +
+  		String cmd =  "  select sum(doksumma)/1.22 as sales , dok.pais2obj  AS agent   from firma1.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) " +
 			  "  GROUP BY dok.pais2obj" ;
   	
   		log(cmd);

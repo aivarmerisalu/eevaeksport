@@ -1538,6 +1538,54 @@ return bomKount;
 	   return res ;
    }
    
+   
+   private HashMap readPosExcel() {
+		  HashMap hh = new HashMap();
+	        	
+	        	
+	        	File f = new File(getExcelDir() + "POS.xlsx");
+	    		try {
+	    			FileInputStream ff = new FileInputStream(f);
+	    			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+	    			XSSFSheet sheet = workbook.getSheetAt(0);
+	    			XSSFRow row = null;
+	    		
+	    			row = sheet.getRow(0);
+
+	    			for (int a = 0; a <  sheet.getLastRowNum(); a++) {
+	    				row = sheet.getRow(a);
+	    				String prodid = null;
+	    				String comment = null;
+
+	    	 			 DataFormatter formatter = new DataFormatter();
+	    	 			try {
+	     					prodid =  formatter.formatCellValue(row.getCell((short) 3)).trim();
+	     				} catch (Exception e) {
+	     					
+	     				}
+	    				
+	    	 			try {
+	     					comment =  formatter.formatCellValue(row.getCell((short) 6)).trim();
+	     				} catch (Exception e) {
+	     					
+	     				}
+	    	 			
+	    	 			if(prodid != null && comment != null) {
+	    	 				hh.put(prodid, comment);
+	    	 			}
+	    				
+	    			}
+	    		}catch (Exception d){
+	    			d.printStackTrace();
+	    		}
+	    		
+       // System.out.println("Comments " + hh.toString());
+		  
+		  return hh;
+	  }
+	  
+	  private HashMap poscomm = null;
+
 
     public TreeMap getProducts(Agent agent){
         connectionUp(url);
@@ -1549,6 +1597,10 @@ return bomKount;
         		opts.add(st.nextToken());
         	}
         }
+
+		  if(poscomm == null) {
+			  poscomm =  readPosExcel() ;
+		  }
         
         TreeMap links= getLinks();
         
@@ -1585,6 +1637,10 @@ return bomKount;
 		String kood = rs.getString("toode").trim();
 		String nimetus = rs.getString("nimi").trim();
 	     Product prod = new Product(kood);
+	     
+	     if(poscomm.get(kood) != null) {
+	    	 prod.setOldName("POS Comment: " + poscomm.get(kood)+"");
+	     }
 		String info = "";
 		if(bro.get(kood) != null){
 			String aa = "";

@@ -933,7 +933,7 @@ con.close();
 
 */	    // k�sioleva m��gimehe selle kuu m��gi leidmine
             String sql =
-                "select sum(doksumma)/1.20 as seekuu  from firma1.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) AND pais2obj=?";
+                "select sum(doksumma)/1.22 as seekuu  from firma1.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) AND pais2obj=?";
             if (isDebug()) {
                 System.out.println(sql);
             }
@@ -952,7 +952,7 @@ con.close();
             rs.close();
             pstmt.close();
             String sql2 =
-                "select sum(doksumma)/1.20 as seekuu  from firma1.dok where (month(kuupaev))=(month(current_date)) and yksus='3' and doktyyp='G'"
+                "select sum(doksumma)/1.22 as seekuu  from firma1.dok where (month(kuupaev))=(month(current_date)) and yksus='3' and doktyyp='G'"
                 + " AND year(current_date)=year(kuupaev) AND pais2obj=?";
             if (isDebug()) {
               System.out.println(sql2);
@@ -973,7 +973,7 @@ con.close();
             pstmt2.close();
 
             String sql1 =
-                "select sum(doksumma)/1.20 as seekuu  from firma1.dok where (month(kuupaev))=(month(current_date)) and yksus='4' and doktyyp='G' AND year(current_date)=year(kuupaev) AND pais2obj=?";
+                "select sum(doksumma)/1.22 as seekuu  from firma1.dok where (month(kuupaev))=(month(current_date)) and yksus='4' and doktyyp='G' AND year(current_date)=year(kuupaev) AND pais2obj=?";
             if (isDebug()) {
               System.out.println(sql1);
             }

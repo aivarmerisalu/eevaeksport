@@ -1094,7 +1094,7 @@ private TreeMap groups = null;
  HashSet prs = getProds();
  
     String cmd = "       SELECT inv.itemid, inv.itemname AS nimetus, bar.description as nimetus2, inv.iteitemqtyinbox AS kastis, disc.amount AS price   " + 
-    		"    		 , bar.itembarcode AS ean ,inv.NLTSTATGROUP4ID AS grupp ,mod.unitid As unit, '20' as vat, mod.LineDisc as alegr  " + 
+    		"    		 , bar.itembarcode AS ean ,inv.NLTSTATGROUP4ID AS grupp ,mod.unitid As unit, '22' as vat, mod.LineDisc as alegr  " + 
     		"    		  , '' as type ,0 as mini , 0 as opti, 0 as uus ,0 as out , 0 as tops , 0 as gift , 0 as nocount ,  storageinfo as temp , bestbeforedays as red,  iteitemingredients  as info FROM inventtable inv   " + 
     		"    		   inner join pricedisctable as disc on ltrim(inv.itemid)=ltrim(disc.itemrelation) and disc.dataareaid=inv.dataareaid  " + 
     		"    		  and disc.module = 1  and disc.relation=4  and disc.itemcode=0 and disc.accountcode=1 and accountrelation like 'BAAS2019%' and (disc.todate > getdate() or year( disc.todate ) = 1900) and  (disc.fromdate < getdate()+1 or year( disc.fromdate ) = 1900 ) " + 
