@@ -1870,13 +1870,13 @@ System.out.println("fixed size " + result.size());
                 	 nimetus = nimetus + " *X*";  
                 	// System.out.println("On olemas X  " +  nimetus);
                  }
-                 String add = "      ";
+               
                  if(props.getProperty(prod.getID()) != null  && props.getProperty(prod.getID()).trim().length() > 0){
                 	// add =    "    " + props.getProperty(prod.getID()) + " "; 
                 	 prod.setOldName(props.getProperty(prod.getID()));
                  }
-                 prod.setName(add +nimetus );
-              prod.setVat("22"); 
+                 prod.setName(nimetus );
+                  prod.setVat("22"); 
               
               String statustop = rs.getString("statustop");
 

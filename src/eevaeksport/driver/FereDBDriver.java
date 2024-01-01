@@ -956,7 +956,7 @@ con.close();
                           //   prod.setName(prod.getName() + " " + ean.substring(ean.trim().length()-4) );
                            }          
                            
-                          
+                       prod.setVat("22");   
                            
                 products.put(nimetus, prod);
                 prods.put(prod.getID(), prod);

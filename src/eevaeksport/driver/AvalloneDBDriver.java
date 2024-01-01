@@ -853,7 +853,7 @@ StringBuffer sb = new StringBuffer();
                     		 prod.setStatusNew("1");
                     	 }
                      }
-          				
+          				prod.setVat("22");
           				prod.setName(prod.getName() + add);
           				prod.setPartii(prod.getPartii() + add);
           				nimetus = prod.getName();

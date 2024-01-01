@@ -1380,6 +1380,7 @@ while (rs2.next()){
         
         prod.setInCases( (rs.getDouble("tykke")));
         prod.setPrice( (rs.getDouble("hind")));
+        prod.setVat("22");
       
         prices.put(kood, prod.getPrice() +"");
         

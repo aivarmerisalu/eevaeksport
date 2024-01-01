@@ -1057,7 +1057,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
       
       String vat = rs.getString("vat");
       if(vat!=null && vat.trim().length()>0){
-       prod.setVat("20");
+       prod.setVat("22");
     }
   
       String alegr = rs.getString("alegr");

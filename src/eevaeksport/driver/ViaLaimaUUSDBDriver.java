@@ -2889,6 +2889,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 												   if(goes){
 													 //  System.out.println("Nimi " + prod.getName());
 													   prod.setAgentGroup("all");
+													   prod.setVat("22");
 														tm.put(prod.getName(), prod);
 														koodiga.put(prod.getID(), prod);	   
 												   }
@@ -2903,6 +2904,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 		
 		if(lisatooted != null) {
 			for(Product pr : lisatooted) {
+				pr.setVat("22");
 				tm.put(pr.getName(), pr);
 				koodiga.put(pr.getID(), pr);
 			}

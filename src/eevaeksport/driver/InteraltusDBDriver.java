@@ -1490,6 +1490,7 @@ Statement stmtw = conw.createStatement();
                           Product prod = new Product(kood);
                           prod.setName(Converter.enCodeEst(nimetus));
                           prod.setPrice(rs.getDouble("myygihind"));
+                          prod.setVat("22");
                           prod.setInCases(rs.getDouble("tykke"));
                           prod.setStock(kogus);
                           prod.setGroup(parent.make(rs.getString("hankija")));

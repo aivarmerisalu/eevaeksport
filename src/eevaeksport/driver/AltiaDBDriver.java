@@ -1565,13 +1565,14 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
  	    	 }catch (Exception e){}
  	    
    	    	 try{ prod.setUnit(getNode(rida, "BaseUnit").getFirstChild().getNodeValue());	 
-   	    	 }catch (Exception e){   	 }
+   	    	 }catch (Exception e){}
     	    	
    	       	   prod.setVat("22");
     	      //    prod.setStock(Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
         	 	 if(links.get(prod.getID()) != null){
         	 		 prod.weblink = links.get(prod.getID()) + "";
         	 	 }
+        	 	 
         	    if(goes && prod.getName()!= null){
         	         prodHash.put(prod.getID(), prod);
         	         tm.put(prod.getName(), prod);	
