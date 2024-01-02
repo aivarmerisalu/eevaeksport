@@ -280,6 +280,7 @@ public class EevaArkeDBDriver extends AbstractDBDriver  implements BulkUpdater,D
                          
                           prod.setGroup(parent.make(rs.getString("liik")));
                           prod.setEAN(parent.make(rs.getString("ribakood")));
+                          prod.setVat("22");
                        	
 	                      	if(eanprods == null) {
 	                      		eanprods= new TreeMap();

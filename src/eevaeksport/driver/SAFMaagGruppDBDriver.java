@@ -1865,7 +1865,7 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
        // 	top.append(prod.getID() + ";" + prod.getName() + "\n");  	
         //}
      
-        
+        prod.setVat("22");
         
         products.put(nimetus, prod);
         //}

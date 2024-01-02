@@ -3079,7 +3079,7 @@ public static String getDataDirStr(){
            	
           	try {
        		inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage +
-       				"&getPackageInfo=1&getStockInfo=1&getContainerInfo=1" + luba + userstuff); //&getStockInfo=1
+       				"&getPackageInfo=1&orderBy=productID&getStockInfo=1&getContainerInfo=1" + luba + userstuff); //&getStockInfo=1
        		//inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getStockInfo=1&getContainerInfo=1&warehouseID="+ laoID + userstuff); //&getStockInfo=1
        		
        	//	System.out.println("joru1 " + inputLineBuf.substring(0,100));
@@ -3143,7 +3143,7 @@ public static String getDataDirStr(){
            	  int counter = 2;
            	   for(;tsykkel > onpage;tsykkel = tsykkel-onpage){
            		   try {
-           	    		inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getContainerInfo=1&getStockInfo=1&pageNo=" + counter + luba + userstuff); //&getStockInfo=1
+           	    		inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&orderBy=productID&getContainerInfo=1&getStockInfo=1&pageNo=" + counter + luba + userstuff); //&getStockInfo=1
            	    		//inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getContainerInfo=1&getStockInfo=1&warehouseID=" + laoID + "&pageNo=" + counter + userstuff); //&getStockInfo=1
            	    		if(inputLineBuf.toString().indexOf("1054") != -1 && inputLineBuf.toString().indexOf("error") !=-1){
            	    			 session = getSessionId(passString);
@@ -3152,7 +3152,7 @@ public static String getDataDirStr(){
            	    				   session = getSessionId(passString);
            	    			   }
            	    			    userstuff = "&clientCode=" + company +"&version=" + apiversion + "&responseType=" + returntype + "&sessionKey=" + session;
-           	    			    inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&getContainerInfo=1&getStockInfo=1&pageNo=" + counter  + luba + userstuff); //&getStockInfo=1
+           	    			    inputLineBuf = postData("request=getProducts&recordsOnPage=" + onpage + "&getPackageInfo=1&orderBy=productID&getContainerInfo=1&getStockInfo=1&pageNo=" + counter  + luba + userstuff); //&getStockInfo=1
                    	    			    
            	    		}
            	    		

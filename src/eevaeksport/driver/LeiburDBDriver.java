@@ -898,7 +898,7 @@ TreeMap groups = new TreeMap();
 				if (stocks.get(kood) != null) {
 					prod.setStock(Double.parseDouble((String) stocks.get(kood)));
 				}
-
+  prod.setVat("22");
 				products.put(prod.getName(), prod);
 				// }
 			}

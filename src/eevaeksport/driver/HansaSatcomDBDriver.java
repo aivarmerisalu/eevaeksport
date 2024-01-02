@@ -1394,6 +1394,7 @@ TreeMap tr = new TreeMap();
          }
          
          	if( goes && prod.getName() != null  && prod.getName() .length() > 10 ){
+         		prod.setVat("22");
                  tm.put(prod.getGroup() +" "+  id +" "+ name, prod);   
                  prods.add(prod.getID());
          	}

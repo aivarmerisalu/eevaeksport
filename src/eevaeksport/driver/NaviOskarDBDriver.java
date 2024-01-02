@@ -920,9 +920,11 @@ public class NaviOskarDBDriver extends AbstractDBDriver implements BulkUpdater,D
                             	prod.setVat("21");
                             }else if (vat.equals("GRUPE2")){
                             	prod.setVat("5");
-                            } else if (vat.equals("KM20")){
-                             	prod.setVat("20");
-                             }
+                            } else if (vat.equals("KM22")){
+                              	prod.setVat("22");
+                              }else{
+                            	  prod.setVat("22");
+                              }
                           }
 
          

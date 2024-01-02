@@ -767,7 +767,7 @@ try{
                           	prod.setDiffColor(true);
                             }
                          
-                          
+                          prod.setVat("22");
                           
                          if(partiid.get(kood) != null){
                         	prod.setPartii(partiid.get(kood) + "") ; 

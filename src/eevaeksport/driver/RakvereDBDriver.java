@@ -1530,6 +1530,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
                 //prod.setStock(parseDouble(rs.getString("stock").trim()));
                 String grupp = rs.getString("uusgrupp").trim();
                 prod.setGroup(grupp);
+                prod.setVat("22");
                 grupp = rs.getString("grupp").trim();
                 int xx = rs.getInt("xx");
                 if(xx == 2){

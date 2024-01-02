@@ -1274,6 +1274,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
          prod.setVat("22");
        }
       
+      
       String kogus = rs.getString("kogus");
       if(kogus!=null && kogus.trim().length()>0){
        prod.setStock(new Double(kogus).doubleValue());

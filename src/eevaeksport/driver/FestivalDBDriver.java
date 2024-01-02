@@ -593,6 +593,7 @@ private HashMap abigr = null;
 
          prod.setStock(kogus);
          prod.setInCases(kastis);
+         prod.setVat("22");
          
      if(  groups.get(prod.getGroupSecond()) != null){
          products.put(nimetus, prod); 
