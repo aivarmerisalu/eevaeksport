@@ -1319,7 +1319,7 @@ cn.close();
 
 				String visit = rs.getString("visit");
 				if (visit != null && visit.trim().length() > 0) {
-					customer.setVisit(visit.trim());
+					customer.setVisit(Converter.visitTurn(visit.trim()));
 				}
 				
 				String type = rs.getString("type");

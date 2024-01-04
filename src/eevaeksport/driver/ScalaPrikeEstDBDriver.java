@@ -1345,14 +1345,14 @@ System.out.println("fixed size " + result.size());
                 	}
                 	
                 	if(t.getBrand() != null && t.getBrand().trim().length() > 0){
-                		d.setVisit(t.getBrand());
+                		d.setVisit(Converter.visitTurn(t.getBrand()));
                 	}
                 	
                 	if(cust.getAgents().get(t.getID()) != null){
                 		Agent olemas = (Agent) cust.getAgents().get(t.getID());
                 		
                 		if(t.getBrand() != null && t.getBrand().trim().length() > 0){
-                    		olemas.setVisit(t.getBrand());
+                    		olemas.setVisit(Converter.visitTurn(t.getBrand()));
                     	}
                 		
                 		
@@ -1371,7 +1371,7 @@ System.out.println("fixed size " + result.size());
                     	Toode t = (Toode)tableExtra.get(cust.getID());
                     	Agent d = new Agent(t.getID());
                     	if(t.getBrand()!= null)
-                    	d.setVisit(t.getBrand());
+                    	d.setVisit(Converter.visitTurn(t.getBrand()));
                     	 if(!cust.hasAgent(t.getID()))
                           cust.addAgent(d);
                         
@@ -1383,7 +1383,7 @@ System.out.println("fixed size " + result.size());
                 if(agen != null){
                 	Agent ee = new Agent(agen.trim());
                 	if(vis.trim().length() > 0){
-                		ee.setVisit(vis.trim());
+                		ee.setVisit(Converter.visitTurn(vis.trim()));
                 	}
                       if(!cust.hasAgent(agen.trim())){
                     	  cust.addAgent(ee); 	  

@@ -747,7 +747,7 @@ private  TreeMap<String, Double> getHinnad(){
       	  agent = fixagent;
         }
         
-        sb.append("<UserId>" +  agent + "</UserId>" + ls);
+       // sb.append("<UserId>" +  agent + "</UserId>" + ls);
         sb.append("</DeliveryParty>" + ls);
         
         sb.append("<SellerParty>\r\n" + 
@@ -785,7 +785,7 @@ private  TreeMap<String, Double> getHinnad(){
         sb.append("<PaymentMethod>Pank</PaymentMethod>" + ls );
         sb.append("<PaymentTerm>" + cust.getPaymTerm() + "</PaymentTerm>" + ls );
        
-        
+        sb.append("<CreatedBy>" + escape(agent)+ "</CreatedBy>" + ls); 
         
       	  sb.append("<RefInfo>" + ls);
       	  if(ref != null && ref.trim().length() > 0){
@@ -799,21 +799,30 @@ private  TreeMap<String, Double> getHinnad(){
 
         
     String    sss = (Calendar.getInstance().getTime().getTime()+ "").substring(4) ;
-    
-    if(ref != null && ref.trim().length() > 0){
- 	   sb.append("<DocumentNum>" + escape(ref)+ "</DocumentNum>" + ls); 
-    }else {
- 	   sb.append("<DocumentNum>" + escape(agent + "-" + sss )+ "</DocumentNum>" + ls);   
-    }
-       
-        sb.append("<CreatedBy>" + escape(agent)+ "</CreatedBy>" + ls); 
+  
+     
         
         sb.append("<DateInfo>" + ls);
         sb.append("<InvoiceDate>" +escape(getDateString(Calendar.getInstance())) + "</InvoiceDate>" + ls);
+        Calendar due = Calendar.getInstance();
+        try {
+        	int dd = Integer.parseInt(cust.getPaymTerm());
+            due.add(Calendar.DATE, dd);
+        }catch(Exception e) {
+        	
+        }
+         
+        sb.append("<DueDate>" +escape(getDateString(due)) + "</DueDate>" + ls);
         sb.append("<DeliveryDateActual>" +  escape(getDateString(Calendar.getInstance())) + "</DeliveryDateActual>" + ls); //aeg taha panna  T10:00:00
         sb.append("</DateInfo>" + ls);
         
-        sb.append("<CreatedByContact>" + ls);
+        if(ref != null && ref.trim().length() > 0){
+     	   sb.append("<DocumentNum>" + escape(ref)+ "</DocumentNum>" + ls); 
+        }else {
+     	   sb.append("<DocumentNum>" + escape(doknr)+ "</DocumentNum>" + ls);   
+        }
+           
+      /*  sb.append("<CreatedByContact>" + ls);
        
           if(order.getAgent().equals("M09")) {
 	        sb.append("<ContactFirstName>Eda</ContactFirstName>" + ls);
@@ -827,17 +836,19 @@ private  TreeMap<String, Double> getHinnad(){
         
         sb.append("<MobileNum>+372 5062 350</MobileNum>" + ls);
         sb.append("</CreatedByContact>" + ls);
-        
+        */
         sb.append("</DocumentInfo>" + ls);
        
         
         
         sb.append("<DocumentSumGroup>" + ls );
-        sb.append("<Currency>EUR</Currency>" + ls);
+  
         
         sb.append("<DocumentSum>" + order.getCalcSum()+ "</DocumentSum>" + ls );
-        sb.append("<VAT><SumBeforeVAT>" + order.getCalcSum()+ "</SumBeforeVAT><VATRate>20</VATRate><VATSum>" + Converter.Round((float)(order.getCalcSum() * 0.2), 2) + "</VATSum></VAT>" + ls);
-        sb.append("<TotalSum>" + Converter.Round((float) (order.getCalcSum() * 1.2 ) , 2) + "</TotalSum>" + ls);
+        sb.append("<VAT><SumBeforeVAT>" + order.getCalcSum()+ "</SumBeforeVAT><VATRate>22</VATRate><VATSum>" + Converter.Round((float)(order.getCalcSum() * 0.2), 2) + "</VATSum><Currency>EUR</Currency></VAT>" + ls);
+        sb.append("<TotalVATSum>" + Converter.Round((float) (order.getCalcSum() * 0.22 ) , 2) + "</TotalVATSum>" + ls);
+        sb.append("<TotalSum>" + Converter.Round((float) (order.getCalcSum() * 1.22 ) , 2) + "</TotalSum>><Currency></Currency>" + ls);
+
         sb.append("</DocumentSumGroup>" + ls);  
         
      
@@ -854,7 +865,18 @@ private  TreeMap<String, Double> getHinnad(){
          
             Product prod = (Product) prods.get(line.getToode());
             
-            
+            /*><LineItemNum>1</LineItemNum><SellerItemCode>13908</SellerItemCode>
+             * <GTIN>8590311102965</GTIN><ItemDescription>Chew &amp; Tattoo Pop 8g</ItemDescription>
+             * <ItemUnitRecord><ItemUnit>TK</ItemUnit></ItemUnitRecord>
+             * <BaseUnit>TK</BaseUnit>
+             * <AmountInvoiced>50</AmountInvoiced>
+             * <ItemPrice>0.1</ItemPrice>
+             * <ItemModifiedPrice></ItemModifiedPrice>
+             * <ItemBasePrice>0.1</ItemBasePrice>
+             * <ItemSum>5</ItemSum>
+             * <Addition addCode="DSC"><AddRate>0</AddRate></Addition><VAT vatID="TAX">
+             * <SumBeforeVAT>5</SumBeforeVAT><VATRate>20</VATRate><VATSum>1</VATSum></VAT>
+             * <ItemTotal>6</ItemTotal></ItemEntry><*/
             String yhik = line.getUnit();
             if (ale == -1 ){
                 ale = 0 ;
@@ -876,20 +898,23 @@ private  TreeMap<String, Double> getHinnad(){
            sb.append("         <BaseUnit>" + line.getUnit() + "</BaseUnit>" + ls);
           
            sb.append("         <AmountInvoiced>" + escape(getNF().format(line.getKogus())) + "</AmountInvoiced>" + ls);
-           sb.append("         <ItemPrice>" + escape(getNF().format(line.getPrice())) + "</ItemPrice>" + ls);
+           sb.append("         <ItemPrice>" + escape(getNF().format(line.getPrice())) + "</ItemPrice><ItemModifiedPrice></ItemModifiedPrice>" + ls);
            sb.append("         <ItemBasePrice>" + escape(getNF().format(prod.getPrice())) + "</ItemBasePrice>" + ls);
            sb.append("         <ItemSum>" + getNF().format(line.getPrice() * line.getKogus()) + "</ItemSum>" + ls);
            
                String ccc = "";
-            if(line.getDiscount() > 0){
+          String add ="";
+          if(line.getDiscount() > 0) {
+        	 add = escape(getNF().format(line.getDiscount()));
+          }
           	  double discprice = (100d -line.getDiscount())*line.getPrice()/100d ;
               sb.append("         <Addition addCode=\"DSC\"><AddRate>" +
-          	   escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
-              ccc =  "-" + nf.format(line.getDiscount()) + "% ";
-            }
+          	 add  + "</AddRate></Addition>" + ls); 
+            //  ccc =  "-" + nf.format(line.getDiscount()) + "% ";
+            
            
             sb.append("         <VAT vatID=\"TAX\"><SumBeforeVAT>" + getNF().format(line.getPrice() * line.getKogus()) + "</SumBeforeVAT>" + ls);
-            sb.append("<VATRate>20</VATRate>" + ls);
+            sb.append("<VATRate>22</VATRate>" + ls);
             sb.append("<VATSum>" + getNF().format(line.getPrice() * line.getKogus() * 0.2) + "</VATSum>" + ls);
             sb.append("         </VAT>" + ls);
             
@@ -948,7 +973,7 @@ private  TreeMap<String, Double> getHinnad(){
    Writer out = new BufferedWriter(new OutputStreamWriter(
 			    new FileOutputStream(fileName), "UTF-8"));
 			try {
-			    out.write(sb.toString());
+			    out.write(Converter.deCode(sb.toString()));
 			} finally {
 			    out.close();
 			}
@@ -978,7 +1003,7 @@ private  TreeMap<String, Double> getHinnad(){
 	    sb.append(cal.get(Calendar.YEAR) + "");
 	    String month = String.valueOf(cal.get(Calendar.MONTH) + 1);
 	    if (month.length() == 1){
-	      sb.append("0");
+	     month = "0" + month;
 	    }
 	    sb.append("-" +month + "-");
 

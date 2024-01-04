@@ -763,14 +763,14 @@ try{
 
    String sql =  " SELECT k.[Name]  AS nimi, k.[Name 2] AS nimi2 ,adr.[Name] AS nimi3 ,k.[No_] AS kood,adr.[Code] as kood2 ,k.[Bill-to Customer No_] AS payer,\r\n" + 
    		"   		adr.[Address] + ' ' + adr.[Address 2] + ' ' + adr.[City] AS aadress ,k.[Country Code] as country,adr.[Salesperson Code] AS agent , \r\n" + 
-   		"		k.[Salesperson Code] AS agent2 ,blocked AS blokk, \r\n" + 
+   		"		k.[Salesperson Code] AS agent2 ,k.blocked AS blokk, \r\n" + 
    		"   			 [Payment Terms Code] AS payment,[Line Discount %] AS alekood, 0 AS yle,'' AS visit,'' AS type,   \r\n" + 
    		"   			   [Blocking after overdue days] AS extradays ,'' AS sort, '' AS debt , 0 AS minsum , \r\n" + 
    		"   			  adr.contact +' ' + adr.[Phone no_] + ' ' + adr.[E-Mail] as kontakt ,' 'as kett  , '' as chain , \r\n" + 
    		"   			  [Customer Price Group] as hinnak, k.[Currency Code] as currency ,  k.[Credit Limit (LCY)] as credit \r\n" + 
    		"   			  FROM [VICIUNAI-POL$Customer] k  LEFT JOIN [VICIUNAI-POL$Ship-to Address] adr ON adr.[Customer No_]  = k.[No_]  \r\n" + 
    		"			  LEFT JOIN [VICIUNAI-POL$Sales Line Discount] d ON d.[Sales Code] = k.[Customer Disc_ Group] \r\n" + 
-   		"   			 WHERE (k.[Salesperson Code] != ''  AND blocked != 3) or k.[No_] = '2' " ;
+   		"   			 WHERE (k.[Salesperson Code] != ''  AND k.blocked != 3) or k.[No_] = '2' " ;
    System.out.println(sql);
    try {
         Connection con = getNewConnection2();
