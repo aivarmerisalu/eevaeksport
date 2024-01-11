@@ -65,13 +65,8 @@ public class TelemaXMLImportDriver
     this.parent = parent;
     PropertyConfigurator.configure("log4j.properties");
    
-    String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
     try {
-      Class.forName(databaseDriverName).newInstance();
-      
-    
-   
-      calNF.setMaximumFractionDigits(0);
+       calNF.setMaximumFractionDigits(0);
       calNF.setMaximumIntegerDigits(2);
       calNF.setMinimumIntegerDigits(2);
       calNF.setGroupingUsed(false);
@@ -472,7 +467,6 @@ private  TreeMap<String, Double> getHinnad(){
 	     
 			
 			try {
-				StringBuffer sbEAN = new StringBuffer();
 				 File f = new File (getDir() + "prodat.xml");
 		 	       // System.out.println(getDir() + "Agents.xml");
 		 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -680,7 +674,7 @@ private  TreeMap<String, Double> getHinnad(){
    
         sb.append("<Header>" + ls);
         sb.append("<DateIssued>" + escape(getDateString(Calendar.getInstance())) + "</DateIssued>" + ls);
-        sb.append("<SenderID>-</SenderID>" + ls);
+        sb.append("<SenderID>" + fixagent + "</SenderID>" + ls);
         sb.append("<ReceiverID>-</ReceiverID>" + ls); 
         sb.append("<Charset>UTF-8</Charset>" + ls);
         sb.append("<Channel>MMT</Channel>" + ls);

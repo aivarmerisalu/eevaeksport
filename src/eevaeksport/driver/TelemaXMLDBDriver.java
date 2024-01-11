@@ -150,7 +150,42 @@ public class TelemaXMLDBDriver extends AbstractDBDriver implements BulkUpdater,D
    public Vector getPriceMatrixData(){
 	   
 	   Vector result = new Vector();
-	  
+		try {
+			 File f = new File (getDir() + "pricat.xml");
+		       // System.out.println(getDir() + "Agents.xml");
+		     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		     DocumentBuilder db;
+			 db = dbf.newDocumentBuilder();      	
+	    	 FileInputStream in = getCleanInputStream(f);
+	    	 String handler = null;
+	        Document doc = db.parse(in,handler);
+	        Node root = getNode(doc, "E-Document"); 
+	        Node dokument = getNode(root, "Document"); 
+	        Node dokumentitem = getNode(dokument, "DocumentItem"); 
+	        
+	        for (int i = 0; i < dokumentitem.getChildNodes().getLength(); i++){
+		          Node rida = dokumentitem.getChildNodes().item(i);
+		    	  if(rida.getNodeName().equals("ItemPartyEntry")){
+		    		  MatrixLine ml = new MatrixLine();
+		    	        String ProdCode = null;
+				        String ProdPrice = null;
+					  try{
+						  ProdCode   = getNode(rida,"SellerItemCode").getFirstChild().getNodeValue();
+						  ml.setProdID(ProdCode);
+		    		  }catch(Exception e){e.printStackTrace();}
+					  try{
+						  ProdPrice   = getNode(rida,"ItemPartyPrice").getFirstChild().getNodeValue();
+						  ml.setPrice(Double.parseDouble(ProdPrice));
+		    		  }catch(Exception e){e.printStackTrace();}
+					  
+					  result.add(ml);
+		    	  }
+	        }
+		   in.close();
+		} catch(Exception e) {
+			
+		}
+
 	   
 	   return result;
    }
@@ -461,7 +496,12 @@ public class TelemaXMLDBDriver extends AbstractDBDriver implements BulkUpdater,D
 	      		         
 	      		       if(CustLegalAddres != null){
 	      		        	customer.setJuridics(Converter.enCodeEst(Converter.adressLink(CustLegalAddres,"Eesti")));
+	      		        	
 	      		         }
+	      		       
+	      		       if(CustJurName != null) {
+	      		    	   customer.setCity(Converter.enCodeEst(CustJurName));
+	      		       }
 	      		         
 	      		       
 	      		         if(CustActualAddres != null){

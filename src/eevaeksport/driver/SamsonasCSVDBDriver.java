@@ -888,7 +888,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	        
 		        //	System.out.println(custid  + " " + number + " " + date  + " " + duedate  + " " + volg );	
 		       
-	        
+	        try {
 	        		 double vv = Double.parseDouble(volg);
 	        		 if(vv != 0){
 	        			// if(isDueDate(duedate)){
@@ -933,6 +933,9 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	     				  }
 	        			 
 	        		 }
+	        }catch(Exception e) {
+	        	
+	        }
            	}
      }
      

@@ -879,7 +879,10 @@ public Vector getDebt() throws SQLException{
          Fillial 01   -  agent 007
 Fillial 02   -  agent 020
 Fillial 03    - agent 016*/
-         String ladu = "01";
+         String ladu = "KAUNAS";
+         if(agent.equals("003")) {
+        	 ladu = "KLAIPEDA";
+         }
          
          
 if(ladu.trim().length()!=0){

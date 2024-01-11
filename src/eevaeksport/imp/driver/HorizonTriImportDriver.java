@@ -26,6 +26,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+import org.json.simple.JSONObject;
 
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
@@ -517,11 +518,11 @@ try{
 	 		System.out.println("Testing ");
        	 	}else{
 	 	
-	 		String comm = "";
+	 		String com = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
-	 			comm =  order.getInfo() ;
+	 			com =  order.getInfo() ;
 	 		}
-	 		System.out.println("Comment " + comm);
+	 		System.out.println("Comment " + com);
 			
 	 		String doknr = order.getDokNr();
 	 		 Calendar  shipDate = order.getShipCal();
@@ -556,6 +557,47 @@ try{
 		        	
 			    }
 
+		        
+		        
+
+	            String KT = "";
+				String KOMPL = "";
+				String ARVE = "";
+			    
+
+			
+				
+				if(com.indexOf("KT:")!=-1 && com.indexOf("KM:") != -1){
+				      	KT = com.substring(com.indexOf("KT:"),com.indexOf("KM:"));
+				} else if(com.indexOf("KT:")!=-1 && com.indexOf("AR:") != -1){
+					    KT = com.substring(com.indexOf("KT:"),com.indexOf("AR:"));
+				} else if(com.indexOf("KT:")!=-1){
+					    KT = com.substring(com.indexOf("KT:"),com.length());
+				}
+
+				if(com.indexOf("AR:")!=-1 && com.indexOf("KM:") != -1){  
+					KOMPL = com.substring(com.indexOf("KM:"),com.indexOf("AR:")); 	
+				  }else if(com.indexOf("KM:") != -1){
+				  	KOMPL = com.substring(com.indexOf("KM:"),com.length()); 	
+				  }    
+
+				if(com.indexOf("AR:")!=-1 ){  
+					ARVE = com.substring(com.indexOf("AR:"),com.length());
+				  }
+
+				String a3 = "";
+				
+				if(ARVE.length() > 3){
+					a3 = ARVE;
+				}
+				String a2 = "";
+				if(KT.length() > 3){
+					a2 = KT;
+				}
+				
+				if(KOMPL.length() > 3){
+					
+				}
 		        
 		        String ladu = "33";
 		        if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 0){
@@ -595,14 +637,45 @@ try{
         " <PK_VAL> <href>/rest/TsdmValName/3</href><title>EUR</title></PK_VAL><PAMAT>TextOnAccount</PAMAT><TIPS>1</TIPS>" +
         " <PK_PROJ><href>/rest/TdmProject/1</href><title>V : Visi projekti</title></PK_PROJ>" +
        aadr +   
-        " <PVN_TIPS>0</PVN_TIPS> <PIELIKUMS>" + comm+ "</PIELIKUMS>" +
+        " <PVN_TIPS>0</PVN_TIPS> <PIELIKUMS>" + a3+ "</PIELIKUMS>" +
 		" <PK_NDARAPR><href>/rest/TdmNDarAprBL/1</href></PK_NDARAPR></NdmPvzAddition>" ; 
       
-      
-    /*  " <urn:soPo>" + doknr + "</urn:soPo> " +
-      " <urn:soCurr>EUR</urn:soCurr> " +
-      " <urn:soSlspsn>" + order.getAgent() + "</urn:soSlspsn>" ;
-      */
+      if(a2 != null && a2.trim().length() > 0) {
+    	  order_xml = order_xml + "<dmNdocIpasBL><row>";
+    	  
+    	  order_xml = order_xml + "<PK_NIPAS><href>/rest/TIpasibaBL/8</href></PK_NIPAS>"
+    	  		//+ "<PK_DOK><href rel=\"self\">/rest/TNdmPvzSale/277267</href></PK_DOK>"
+    	  		+ " <VERTTEXT>" + a2 + "</VERTTEXT>" + 
+    	  		"<NI_PAMV_ID>17511</NI_PAMV_ID><VALUE>" + a2 + "</VALUE>";
+    	  
+    	  order_xml = order_xml + " </row></dmNdocIpasBL>";
+    	  
+      }
+		           
+		           /*<dmNdocIpasBL>
+            <row>
+                <PK_NDOKIPAS>2</PK_NDOKIPAS>
+                <PK_NIPAS>
+                    <href>/rest/TIpasibaBL/8</href>
+                </PK_NIPAS>
+                <PK_DOK>
+                    <href rel="self">/rest/TNdmPvzSale/277267</href>
+                </PK_DOK>
+                <NI_KODS>KOMENTARS</NI_KODS>
+                <NI_NOSAUK>Komentārs PLG</NI_NOSAUK>
+                <PK_NIPASR/>
+                <DAUDZ/>
+               
+                <PK_KRASA/>
+                <KR_NOSAUK/>
+                <KR_KRASA/>
+                <KR_KODS/>
+                <APR_NOSAUK/>
+                <VALUE>10-16:00 piegāde</VALUE>
+                <DATUMS/>
+                <HIPERSAITE/>
+            </row>
+        </dmNdocIpasBL>*/
       
       
       order_xml = order_xml + "<tblRindas>";
