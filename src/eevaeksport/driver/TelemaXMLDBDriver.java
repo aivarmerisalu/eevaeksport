@@ -178,7 +178,7 @@ public class TelemaXMLDBDriver extends AbstractDBDriver implements BulkUpdater,D
 						  ml.setPrice(Double.parseDouble(ProdPrice));
 		    		  }catch(Exception e){e.printStackTrace();}
 					  
-					  result.add(ml);
+					//  result.add(ml);
 		    	  }
 	        }
 		   in.close();

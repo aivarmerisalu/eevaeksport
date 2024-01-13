@@ -147,6 +147,8 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
   	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
   	  	    TreeMap phsize = new TreeMap();
   	  	    
+
+ 	  		 TreeMap prods = this.getProducts(null);
   	  	    
   	  	 try {
            	  File f = new File(pictspda +"list.txt");
@@ -158,10 +160,49 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
   	             //	(new File ( pictspda + ff2[i])).delete(); 
   	             }
 //  	         	 Lõppes kustutamine 
-  	  		 
-  	  		 TreeMap prods = this.getProducts(null);
-  	         StringBuffer buf = new StringBuffer();
-  	         Iterator enume = prods.keySet().iterator();
+  	         	 
+  	         	 
+
+
+  	  	         StringBuffer buf = new StringBuffer();
+    	         Iterator enume = piltcodes.keySet().iterator();
+    	    
+    	         while (enume.hasNext()) {
+    	    	    	String asi = (String)enume.next();
+    	    	    	Vector vec = (Vector)piltcodes.get(asi);
+    	    	    	Enumeration itt = vec.elements();
+    	    	    	while(itt.hasMoreElements()) {
+    	    	    		String ass =(String) itt.nextElement();
+    	    	    	
+    	    	    	Product prod = (Product)prods.get(ass);
+    	    	    	String toode = prod.getID().trim();  
+    	               if(toode.length() > 0){
+    	                	
+    	    	   	  res2 = new File (pictssou);
+    	              ff2 = res2.list();
+    	            
+    	         	 for(int i = 0;ff2.length>i;i++){
+    	             	if( ff2[i].startsWith(ass +"_")){
+    	               // System.out.println("pilt olemas " + ff2[i]);
+    	            	File in = new File ( pictssou + ff2[i]); 
+    	              	if(in.isFile()){
+    	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+    	              	if(!inpda.exists()) {
+    	              		Converter.shrinkAndCopyFile(in,inpda,400);
+    	              	}
+    	                  	
+    	                  	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
+    	                  	phsize.put(prod.getID(), kkk.length());
+                    	    }
+    	                 }
+    	               }
+    	             }
+    	    	    	}
+    	    	   }
+    	         
+    	    
+  	  	       
+  	          enume = prods.keySet().iterator();
   	    
   	         while (enume.hasNext()) {
   	    	    	String asi = (String)enume.next();
@@ -189,6 +230,8 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
   	               }
   	             }
   	    	   }
+  	         
+  	         
   	        
   	         
   	       Iterator itera =   phsize.keySet().iterator();
@@ -1323,7 +1366,8 @@ Statement st = null;
 
 	
     
-    
+
+    private TreeMap piltcodes = null;
     
     private TreeMap prcodes = new TreeMap();
     private HashMap prodHash = new HashMap();
@@ -1331,7 +1375,8 @@ Statement st = null;
     public TreeMap getProducts(Agent agent){
     	
 	TreeMap products = new TreeMap();
-	
+	 piltcodes = new TreeMap();
+
 	//getSaveStockInfo();
 	prcodes = new TreeMap();
 	
@@ -1376,7 +1421,7 @@ Statement st = null;
 		 
 	 }
 	 */
-    String cmd = "SELECT  Pr.PrekesID as tid, Pr.Kodas AS kood,pl.MES_MES_PAV_TRUMPINYS as nimi2, Pr.Pavad AS nimetus," +
+    String cmd = "SELECT  Pr.PrekesID as tid,Pr.MES_Pakavimo_ID as pkood, Pr.Kodas AS kood,pl.MES_MES_PAV_TRUMPINYS as nimi2, Pr.Pavad AS nimetus," +
     " CONVERT(Money, tt.PK_PardKaina) AS hind, CASE WHEN pr.mvid = pr.ipokavimomvid OR " +
     " ISNULL(pr.ipokavimomvid, 0) < 2 OR  pr.MVId NOT IN (2, 62733) THEN mv.Kodas ELSE ipokmv.Kodas END AS unit , 0  AS kastis, " +
     "  CONVERT(Money, NULL) AS CostPrice, CONVERT(varchar(20), Pr.KAPKodas) AS ean, CONVERT(varchar(20),  pr.PrekiuGrupesID) AS grupp, '' AS grupp2 ,gr.kodas " +
@@ -1408,11 +1453,26 @@ Statement st = null;
              while (rs.next()) {
         	  boolean goes = true;
         	  String tid = rs.getString("tid");
-              String kood = rs.getString("kood").trim();
-              String nimi2 = rs.getString("nimi2").trim();
+              int pkood = rs.getInt("pkood");
+        	  
+        	  String kood = rs.getString("kood").trim();
+              
+        	  if(pkood > 1) {
+        		  Vector vec = (Vector)piltcodes.get(pkood);
+        		  if(vec  == null) {
+        			  vec =  new Vector();
+        		  }
+        		 
+        		  vec.add(kood);
+        		  
+        		  piltcodes.put(pkood, vec); 
+        	  }
+        	  
+        	  String nimi2 = rs.getString("nimi2").trim();
               String nimetus =  rs.getString("nimetus").replaceAll("\"", " ").trim();
                nimetus = nimi2;
               Product prod = new Product(kood);
+              
                goes = false;
              try{
               double price = rs.getDouble("hind");

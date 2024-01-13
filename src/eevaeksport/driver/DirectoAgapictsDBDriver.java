@@ -362,23 +362,26 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	                    	  try{
 		                             currency =  rida.getAttributes().getNamedItem("currency").getNodeValue();
 		                    	  }catch(Exception aa){ }
-                      String mode = rida.getAttributes().getNamedItem("what").getNodeValue();
                       
                     
                     	  
                       
                       
                       try{
-                     double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
+                     
+                    	  String mode = rida.getAttributes().getNamedItem("what").getNodeValue();
+                          
+                    	  double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
                      if(mode != null && mode.equals("8")){
                     	 mline.setPrice(value);
                      }else{
                          mline.setDiscount(value);
                      }
+                     mline.setProdLevel(mode);
                       }catch(Exception aa){ }
                   
                       
-                      mline.setProdLevel(mode);
+                    
                     
                       
                       if (custID != null && custID.trim().length() > 0) {
@@ -462,7 +465,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		 Vector lines = new Vector();
 	       TreeMap prods = this.getProducts2();
 	       fixEans = new TreeMap();
-	      System.out.println("prods " + eShopPrl.toString() + " " + selverEpoodProds.toString());
+	     // System.out.println("prods " + eShopPrl.toString() + " " + selverEpoodProds.toString());
 	       
 	       try {
 	   		  File f = new File (getDir() + "hinnakiri.xml");
@@ -558,7 +561,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   	}catch(Exception e){
 	   		e.printStackTrace();
 	   	}
-	       System.out.println("fixlines  " + lines.size() + " " + prods.size());
+	     //  System.out.println("fixlines  " + lines.size() + " " + prods.size());
 	       
 	       return sortLines(lines,prods);
 	
@@ -586,7 +589,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	        	sorted.add((MatrixLine)asi.get(key));
 	        }
 	       
-	       System.out.println("sorted Size " + sorted.size() + " "+ asi.size());
+	    //   System.out.println("sorted Size " + sorted.size() + " "+ asi.size());
 	        return sorted;
 	      }
 	
@@ -1129,7 +1132,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
       
     	    try {
     	    	  konverter = EksportFrame.loadProps("abifailid/konverter.txt");
-    	    	  System.out.println("konverter " + konverter.toString());
+    	    	 // System.out.println("konverter " + konverter.toString());
     	    }catch (Exception e) {
     	    	e.printStackTrace();
     	    }
@@ -1220,11 +1223,11 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	  			    	  
 	  			    	  if(toode.startsWith("UT") && prods.get(toode) != null) {
 	  			    		  toode = ((Product)prods.get(toode)).getEAN();
-	  			    		  System.out.println("muutsin koodi 00" + toode);
+	  			    		  //System.out.println("muutsin koodi 00" + toode);
 
 	  			    		  if(konverter != null && konverter.getProperty(toode) != null) {
 	  			    			  toode = (String)konverter.getProperty(toode);
-	  			    			  System.out.println("muutsin koodi 22  " + toode);
+	  			    			//  System.out.println("muutsin koodi 22  " + toode);
 	  			    		  }
 	  			    	  }
 	  			    	  
@@ -1383,7 +1386,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   custPRlists = new TreeMap();
 	   custMap = new TreeMap();
 	   custAgs = new TreeMap();
-	   
+	   if(customerSales == null) {
+		   this.getCustomerProductsList2();
+	   }
 	   if(!"true".equals(getParent().getProps().getProperty("use.olddata"))){
 		   makeData();
 		 }
@@ -1407,7 +1412,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   
 		 this.customers = new ArrayList();
 	     this.debtList = makeDebtlist();
-
+	     
 	     
 	   try {
 	 		  File f = new File (getDir() + "kliendid.xml");
@@ -1539,7 +1544,24 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
                         	 customer.setAddress(""); 
 		         		 }
 
-		         		  
+		         		  if(customerSales.get(customer.getID()) != null) {
+		         			  Toode t = (Toode)customerSales.get(customer.getID())  ;
+		         			  String asi = null;
+	        	              if(t.getDonecur() != 0 ){
+	        	            	  asi = "Jooksev kuu : " + (int)t.getDonecur() + " eur|"; 
+	        	              }
+	        	              
+	        	            	   if(t.getDonevol() != 0 ){
+	              	            	 if(asi == null){
+	              	            	   asi = "Eelmine Aasta sama : " + (int)t.getDonevol() + "eur|"; 
+	              	                 }else{
+	              	            	   asi = asi + "Eelmine Aasta sama : " + (int)t.getDonevol() + "eur|"; 
+	              	                }}
+	        	            	   
+                            if(asi != null) {
+		         			  customer.setInfo(asi);
+                            }
+		         		  }
 		         		  try{
 		         			  
 		         			 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
@@ -1704,7 +1726,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			   Customer ccc = (Customer)custMap.get(id);
 			   String name = Converter.deCode(ccc.getName());
 				if(name.startsWith("Rimi")) {
-					ccc.setInfo("NB! Müümata EAN koode : " + vv.size() + "|Kasuta soovituslikku sortimentti");
+					ccc.setInfo(ccc.getInfo() + "|NB! Müümata EAN koode : " + vv.size() + "|Kasuta soovituslikku sortimentti");
 				}
 			   
 		   }
@@ -1794,7 +1816,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		
 	  }
 
-   private Vector getCP(String custid , String number, String date,HashSet check ){
+   private Vector getCP(String custid , String number, String date, Date ddd,HashSet check ){
 
 	   Vector result = new Vector();
 	   File cpdata = new File("cpdata/" + number+".vec");
@@ -1864,11 +1886,15 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		        	
 		        
 		        	if(!check.contains(custid+""+toode)) {
-		        		  result.add(new CustProd(custid, toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
+		        		CustProd cp = new CustProd(custid, toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," ");
+		        		cp.checkdate = ddd;
+		        		  result.add(cp);
 		        		  check.add(custid+""+toode);
 		        			
 		        	}
-			      
+			       if(prodCodes == null) {
+			    	   prodCodes = new HashSet();
+			       }
 			      
 			        if(!prodCodes.contains(toode)){
 				        prodCodes.add(toode);	
@@ -1895,7 +1921,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   Hashtable re = new Hashtable();
 	   try {
 			  File f = new File (getDir() + "hinnakiri.xml");
-			  System.out.println("siin matix");
+			//  System.out.println("siin matix");
 		     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		     DocumentBuilder db;
 			db = dbf.newDocumentBuilder();      	
@@ -1999,7 +2025,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
      if(getParent().getProps().getProperty("stockdir") != null ){
     	
     	 stockAlter = this.getProducts3();
-    	System.out.println("stockalter " + stockAlter.size());
+    	//System.out.println("stockalter " + stockAlter.size());
      }
 
      
@@ -2708,7 +2734,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	      }
 	   }
 	   
-	   System.out.println("soldEans " + soldEans.size() + " " + prodEans.size());
+	//   System.out.println("soldEans " + soldEans.size() + " " + prodEans.size());
 	   
 	   
 	   // nyyd vaatame kes mida poel ostnud
@@ -2921,10 +2947,12 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   return custProds;
    }
    
+   private HashMap customerSales = null;
+   
    public Vector getCustomerProductsList2(){
 	   //1.teeme klientide arvete nimekirja .
 	    custProds = new Vector();
-	    
+	    customerSales = new HashMap();
 	    
 		   File cpdatadir = new File("cpdata");
 		   if(!cpdatadir.exists()) {
@@ -2962,7 +2990,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		   m = "0" + m;
 	   }
 		   String start =  d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
-		//   System.out.println(start + " uhuu " + end);
+		  // System.out.println(start + " uhuu " + end);
 		   
 		   Enumeration enums = this.custtsUsed.elements();
 	   while(enums.hasMoreElements()){
@@ -2974,7 +3002,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
 				String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice&get=1&orderer=" + cuurl 
 				+ "&invoicedate1=" + start + "&invoicedate2=" + end;
-		  //     System.out.println(httpsURL);
+		     //  System.out.println(httpsURL);
 				URL myurl = new URL(httpsURL);
 		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
 		        InputStream ins = con.getInputStream();
@@ -3025,12 +3053,19 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		        		String vahe = (String) malu.get(key);
 		        		String date = vahe.substring(vahe.indexOf("@")+1);
 		        		String number = vahe.substring(0, vahe.indexOf("@"));
-		        		
+		        	 	Calendar cal2 = Calendar.getInstance();
+		        	    cal2.set(Calendar.YEAR, Integer.parseInt( date.substring(0, 4)));
+		        	    cal2.set(Calendar.MONTH, Integer.parseInt(date.substring(5, 7))-1);
+		        	    cal2.set(Calendar.DAY_OF_MONTH, Integer.parseInt(date.substring(8, 10)));
+		        	  // System.out.println(mmddyy + " " +cal.getTime()); 
+		        	   Date ddd = new Date(0);
+		        	   ddd.setTime(cal2.getTimeInMillis());
+		        	
 		        	
 		        	 if(isOkDate(date)){
-		        			// System.out.println(date + "  222 " + number + " " + custid);	
 				        		
-		     					Vector cps = this.getCP(Converter.deCode(custid),number,date ,check);
+		     					Vector cps = this.getCP(Converter.deCode(custid),number,date , ddd,check);
+
 		     					if(cps != null){
 		     				if(this.isOkDate60(date)) {
 		     					if(last60Sold == null) {
@@ -3050,7 +3085,33 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		     						
 		     						Enumeration eee = cps.elements();
 		     						while( eee.hasMoreElements()){
-		     							custProds.add(eee.nextElement());
+		     							CustProd cp = (CustProd) eee.nextElement();
+		     						//	siin siis vaja koguda kliendi müüki 
+		     							//cp.checkdate
+                                     if(cp.checkdate.getMonth() == 0)
+					        		//	 System.out.println(cp.checkdate.toLocaleString() + " " + (lastYearMonth(cp.checkdate))+ " " + date + "  222 " + number + " " + custid  + " " + cps);			     					
+		 				        		
+		     							if(thisMonth(cp.checkdate)) {
+
+		     								Toode tt = new Toode("tt");
+		     								if(customerSales.get(custid) != null) {
+		     									tt = (Toode)customerSales.get(custid);
+		     								}
+		     								tt.setDonecur(tt.getDonecur() + cp.getLastAmount()*cp.getLastPrice());
+		     								customerSales.put(custid, tt);
+		     							}
+                                        if(lastYearMonth(cp.checkdate)) {
+                                        	Toode tt = new Toode("tt");
+		     								if(customerSales.get(custid) != null) {
+		     									tt = (Toode)customerSales.get(custid);
+		     								}
+		     								tt.setDonevol(tt.getDonevol() + cp.getLastAmount()*cp.getLastPrice());
+		     								customerSales.put(custid, tt);
+
+			     							// System.out.println(cp.checkdate.toLocaleString() + " " + custid);			     								
+		     							}
+		     							
+		     							custProds.add(cp);
 			     					}			     				
 				        		}
 		     				}
@@ -3066,10 +3127,37 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		   } catch (Exception a){
 		   }
 	   }
-	   System.out.println("last60Sold " + last60Sold.size());
+	   System.out.println("customerSales " + customerSales.size());
 	   
 	   return custProds;
    }
+   
+   private boolean thisMonth(Date dd) {
+	   
+	   Calendar cal = Calendar.getInstance();
+	   Calendar gg = Calendar.getInstance();
+	   gg.setTime(dd);
+	   if(cal.get(Calendar.YEAR) == gg.get(Calendar.YEAR) && cal.get(Calendar.MONTH) == gg.get(Calendar.MONTH) ) {
+		   return true;
+	   }
+	   
+	   return false;
+   }
+   
+
+   private boolean lastYearMonth(Date dd) {
+	   
+	   Calendar cal = Calendar.getInstance();
+	   Calendar gg = Calendar.getInstance();
+	   gg.setTime(dd);
+	   cal.add(Calendar.YEAR, -1);
+	   if(cal.get(Calendar.YEAR) == gg.get(Calendar.YEAR) && cal.get(Calendar.MONTH) == gg.get(Calendar.MONTH) ) {
+		   return true;
+	   }
+	   
+	   return false;
+   }
+   
    
    private TreeMap last60Sold = null;
 

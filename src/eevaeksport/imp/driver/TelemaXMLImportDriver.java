@@ -772,11 +772,21 @@ private  TreeMap<String, Double> getHinnad(){
         sb.append("</DocumentParties>" + ls);
         sb.append("<DocumentInfo>" + ls);
         
-       
+        String comm = order.getInfo();
+        if(comm != null && comm.length()>100){
+        	comm = comm.substring(0,100);
+        }
+           
         
         sb.append("<DocumentSubType>DEB</DocumentSubType>" + ls);
         sb.append("<DocumentName>invoice</DocumentName>" + ls );
-        sb.append("<PaymentMethod>Pank</PaymentMethod>" + ls );
+        
+        String way = "Pank";
+        if(comm != null && comm.toLowerCase().contains("sula")) {
+        	way ="SULAS";
+        }
+        
+        sb.append("<PaymentMethod>" + way + "</PaymentMethod>" + ls );
         sb.append("<PaymentTerm>" + cust.getPaymTerm() + "</PaymentTerm>" + ls );
        
         sb.append("<CreatedBy>" + escape(agent)+ "</CreatedBy>" + ls); 
@@ -792,7 +802,7 @@ private  TreeMap<String, Double> getHinnad(){
             sb.append("</RefInfo>" + ls); 
 
         
-    String    sss = (Calendar.getInstance().getTime().getTime()+ "").substring(4) ;
+    String    sss = (Calendar.getInstance().getTime().getTime()+ "").substring(9) ;
   
      
         
@@ -891,25 +901,33 @@ private  TreeMap<String, Double> getHinnad(){
 
            sb.append("         <BaseUnit>" + line.getUnit() + "</BaseUnit>" + ls);
           
+
+           String ccc = "";
+      String add ="";
+      double discprice = line.getPrice();
+      if(line.getDiscount() > 0) {
+    	 add = escape(getNF().format(line.getDiscount()));
+         discprice = (100d -line.getDiscount())*line.getPrice()/100d ;
+      }
+           
            sb.append("         <AmountInvoiced>" + escape(getNF().format(line.getKogus())) + "</AmountInvoiced>" + ls);
-           sb.append("         <ItemPrice>" + escape(getNF().format(line.getPrice())) + "</ItemPrice><ItemModifiedPrice></ItemModifiedPrice>" + ls);
+           sb.append("         <ItemPrice>" + escape(getNF().format(discprice)) + "</ItemPrice><ItemModifiedPrice></ItemModifiedPrice>" + ls);
            sb.append("         <ItemBasePrice>" + escape(getNF().format(prod.getPrice())) + "</ItemBasePrice>" + ls);
-           sb.append("         <ItemSum>" + getNF().format(line.getPrice() * line.getKogus()) + "</ItemSum>" + ls);
-           
-               String ccc = "";
-          String add ="";
-          if(line.getDiscount() > 0) {
-        	 add = escape(getNF().format(line.getDiscount()));
-          }
-          	  double discprice = (100d -line.getDiscount())*line.getPrice()/100d ;
-              sb.append("         <Addition addCode=\"DSC\"><AddRate>" +
-          	 add  + "</AddRate></Addition>" + ls); 
+           sb.append("         <ItemSum>" + getNF().format(discprice * line.getKogus()) + "</ItemSum>" + ls);
+           if(line.getDiscount() > 0) {
+              sb.append("         <Addition addCode=\"DSC\"><AddContent>DISCOUNT</AddContent><AddBase>" + getNF().format(discprice * line.getKogus())
+            		  + "</AddBase><AddRate>" +
+          	 add  + "</AddRate><AddSum>" + getNF().format(((line.getPrice()-discprice) * line.getKogus())) +  "</AddSum></Addition>" + ls); 
             //  ccc =  "-" + nf.format(line.getDiscount()) + "% ";
-            
+           } else {
+        	   sb.append("         <Addition addCode=\"DSC\"><AddRate>" +
+           	 add  + "</AddRate></Addition>" + ls); 
+           }
+             // <Addition addCode="DSC"><AddContent>DISCOUNT</AddContent><AddBase>20.7</AddBase><AddRate>10.14493</AddRate><AddSum>2.1</AddSum></Addition>
            
-            sb.append("         <VAT vatID=\"TAX\"><SumBeforeVAT>" + getNF().format(line.getPrice() * line.getKogus()) + "</SumBeforeVAT>" + ls);
+            sb.append("         <VAT vatID=\"TAX\"><SumBeforeVAT>" + getNF().format(discprice * line.getKogus()) + "</SumBeforeVAT>" + ls);
             sb.append("<VATRate>22</VATRate>" + ls);
-            sb.append("<VATSum>" + getNF().format(line.getPrice() * line.getKogus() * 0.2) + "</VATSum>" + ls);
+            sb.append("<VATSum>" + getNF().format(discprice * line.getKogus() * 0.2) + "</VATSum>" + ls);
             sb.append("         </VAT>" + ls);
             
 
@@ -933,11 +951,7 @@ private  TreeMap<String, Double> getHinnad(){
 
         sb.append("   </DocumentItem>" + ls);
         
-  	    String comm = order.getInfo();
-          if(comm != null && comm.length()>100){
-          	comm = comm.substring(0,100);
-          }
-          
+  	
           if(comm != null && comm.trim().length() > 0 ){
           	  sb.append("   <AdditionalInfo>" +ls);
                 sb.append("       <Extension extensionId=\"remarks\">" + ls);
@@ -962,7 +976,7 @@ private  TreeMap<String, Double> getHinnad(){
    }
    
    
-  String  fileName = escape(parent.getProps().getProperty("conv.dirxml") + "invoice-" + agent) + "-" + counter + "." + sss  +  ".xml";
+  String  fileName = escape(parent.getProps().getProperty("conv.dirxml") + "invoice-" + agent) + "-" + counter + "." + sss  + "-" + doknr +  ".xml";
    System.out.println(fileName);
    Writer out = new BufferedWriter(new OutputStreamWriter(
 			    new FileOutputStream(fileName), "UTF-8"));
@@ -973,7 +987,7 @@ private  TreeMap<String, Double> getHinnad(){
 			}
 			
 			 log.error(" File Saved " + fileName );
-			 fileName = escape(parent.getProps().getProperty("conv.dircxml") + "invoice-" + agent) + "-" + counter + "." + sss  +  ".xml";
+			 fileName = escape(parent.getProps().getProperty("conv.dircxml") + "invoice-" + agent) + "-" + counter + "." + sss  +  "-" + doknr +  ".xml";
 		      System.out.println(fileName);
 		       out = new BufferedWriter(new OutputStreamWriter(
 					    new FileOutputStream(fileName), "UTF-8"));
