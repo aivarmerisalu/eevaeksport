@@ -483,6 +483,10 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 
 			String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim()
 					+ ".xml";
+			if( order.getStatus() == 1){
+				fileName = parent.getProps().getProperty("conv.diroffer") + order.getDokNr().trim() + (uni + "").trim()
+						+ ".xml";
+			}
 			System.out.println(fileName);
 			OutputFormat of = new OutputFormat();
 			of.setIndenting(true);

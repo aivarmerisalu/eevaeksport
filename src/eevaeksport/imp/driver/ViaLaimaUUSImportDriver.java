@@ -92,7 +92,7 @@ try{
 			f.delete();
 			signatures = new Vector();
 		} else {
-			signatures = (Vector) readObject("signatures.vec");
+			signatures = (Vector) Converter.readObject("signatures.vec");
 		}
 
 		
@@ -101,27 +101,6 @@ try{
 	}
 
 	}
-
-	public static void saveObject(Object obj, String file) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
-		oos.writeObject(obj);
-		oos.close();
-	}
-	
-  
-		
-	   public static Object readObject(String s) throws IOException,
-     ClassNotFoundException, IOException {
-   Object obj = null;
-   File f = new File(s);
-   if (f.exists()){
-     ObjectInputStream ois = new ObjectInputStream(new FileInputStream(s));
-     obj = ois.readObject();
-     ois.close();
-   }
-   return obj;
- }
-
 
   
   
@@ -233,7 +212,7 @@ try{
 	  }	    
 	  
 	   try {
-			saveObject(signatures, "signatures.vec");
+			Converter.saveObject(signatures, "signatures.vec");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -252,9 +231,12 @@ try{
 	    	  
 JSONObject ord = new JSONObject();
 	  // ord.put("trackid", "1384c1b6f32e31353630353132393339");
-	   String trackid = "1384c1b6f32e31353630353132393339";
+	   String trackid = null;
 	  if( parent.getProps().getProperty("trackid") != null) {
 		  trackid  = parent.getProps().getProperty("trackid");
+	  }else {
+		  System.out.println("NO TRACK ID");
+		  System.exit(0);
 	  }
 	   ord.put("trackid", trackid);
 		    	  

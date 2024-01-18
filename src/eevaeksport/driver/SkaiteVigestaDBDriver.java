@@ -168,21 +168,26 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
     	         Iterator enume = piltcodes.keySet().iterator();
     	    
     	         while (enume.hasNext()) {
-    	    	    	String asi = (String)enume.next();
+    	    	    	Integer asi = (Integer)enume.next();
     	    	    	Vector vec = (Vector)piltcodes.get(asi);
     	    	    	Enumeration itt = vec.elements();
     	    	    	while(itt.hasMoreElements()) {
     	    	    		String ass =(String) itt.nextElement();
-    	    	    	
+    	    	    	System.out.println("ass " + ass + " " + prods.get(ass));
     	    	    	Product prod = (Product)prods.get(ass);
-    	    	    	String toode = prod.getID().trim();  
-    	               if(toode.length() > 0){
+    	    	    	if(prod != null) {
+    	    	    		
+    	    	    	String toode = prod.getID().trim(); 
+    	    	    	String pkood = prcodes.get(toode)+"";
+    	    	    	
+    	    	    	
+    	               if(toode.length() > 0 && pkood != null && pkood.trim().length() >0){
     	                	
     	    	   	  res2 = new File (pictssou);
     	              ff2 = res2.list();
     	            
     	         	 for(int i = 0;ff2.length>i;i++){
-    	             	if( ff2[i].startsWith(ass +"_")){
+    	             	if( ff2[i].startsWith(pkood +"_")){
     	               // System.out.println("pilt olemas " + ff2[i]);
     	            	File in = new File ( pictssou + ff2[i]); 
     	              	if(in.isFile()){
@@ -197,7 +202,7 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
     	                 }
     	               }
     	             }
-    	    	    	}
+    	    	    	}}
     	    	   }
     	         
     	    
@@ -1421,7 +1426,7 @@ Statement st = null;
 		 
 	 }
 	 */
-    String cmd = "SELECT  Pr.PrekesID as tid,Pr.MES_Pakavimo_ID as pkood, Pr.Kodas AS kood,pl.MES_MES_PAV_TRUMPINYS as nimi2, Pr.Pavad AS nimetus," +
+    String cmd = "SELECT  Pr.PrekesID as tid, MES_Pakavimo_ID as pkood, Pr.Kodas AS kood,pl.MES_MES_PAV_TRUMPINYS as nimi2, Pr.Pavad AS nimetus," +
     " CONVERT(Money, tt.PK_PardKaina) AS hind, CASE WHEN pr.mvid = pr.ipokavimomvid OR " +
     " ISNULL(pr.ipokavimomvid, 0) < 2 OR  pr.MVId NOT IN (2, 62733) THEN mv.Kodas ELSE ipokmv.Kodas END AS unit , 0  AS kastis, " +
     "  CONVERT(Money, NULL) AS CostPrice, CONVERT(varchar(20), Pr.KAPKodas) AS ean, CONVERT(varchar(20),  pr.PrekiuGrupesID) AS grupp, '' AS grupp2 ,gr.kodas " +
@@ -1454,21 +1459,8 @@ Statement st = null;
         	  boolean goes = true;
         	  String tid = rs.getString("tid");
               int pkood = rs.getInt("pkood");
-        	  
         	  String kood = rs.getString("kood").trim();
-              
-        	  if(pkood > 1) {
-        		  Vector vec = (Vector)piltcodes.get(pkood);
-        		  if(vec  == null) {
-        			  vec =  new Vector();
-        		  }
-        		 
-        		  vec.add(kood);
-        		  
-        		  piltcodes.put(pkood, vec); 
-        	  }
-        	  
-        	  String nimi2 = rs.getString("nimi2").trim();
+              String nimi2 = rs.getString("nimi2").trim();
               String nimetus =  rs.getString("nimetus").replaceAll("\"", " ").trim();
                nimetus = nimi2;
               Product prod = new Product(kood);
@@ -1562,9 +1554,21 @@ try{
               	   prod.setMeasure(1);
                  }
               
+
+        	  if(pkood > 1) {
+        		  Vector vec = (Vector)piltcodes.get(pkood);
+        		  if(vec  == null) {
+        			  vec =  new Vector();
+        		  }
+        		 
+        		  vec.add(nimetus);
+        		  prcodes.put(kood, pkood);
+        		  piltcodes.put(pkood, vec); 
+        	  }
               
               if(goes){
             	  prcodes.put(tid, kood);
+            	
          		  products.put(nimetus, prod);
                   prodHash.put(prod.getID(), prod.getPrice());  
               }

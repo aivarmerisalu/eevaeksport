@@ -64,7 +64,7 @@ public class TelemaXMLImportDriver
   public TelemaXMLImportDriver(ImportPanel parent) {
     this.parent = parent;
     PropertyConfigurator.configure("log4j.properties");
-   
+    loadSignatures();
     try {
        calNF.setMaximumFractionDigits(0);
       calNF.setMaximumIntegerDigits(2);
@@ -103,11 +103,53 @@ public class TelemaXMLImportDriver
 		 String name = null;
 	    	return name ;
 	  }
+	private void loadSignatures(){
+		
+try{		
+		File f = new File("signatures.vec");
+		Calendar ss = Calendar.getInstance();
+		
+		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 360000000) {// kui on yle tunni vana siis maha 
+			f.delete();
+			signatures = new Vector();
+		} else {
+			signatures = (Vector) Converter.readObject("signatures.vec");
+		}
 
+		
+	} catch (Exception e) {
+		signatures = new Vector();
+	}
+
+	}
+  
+	private Vector signatures = new Vector();
   
   public void makeOrder(Order order) throws SQLException{
   counter = 0;
-	 		 makeOutputTelema(order);
+  
+  if (signatures == null){
+  	   signatures = new Vector();
+     }
+     
+     
+     String signature = order.getSignature();
+   
+     
+     if(signature != null && signatures.contains(signature)){
+	  }else{
+		  makeOutputTelema(order);
+		  signatures.add(signature);
+		  
+	  }	   
+     
+     
+     try {
+			Converter.saveObject(signatures, "signatures.vec");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	 		
 	  setNumAddedLines(counter);
   }
   
@@ -528,7 +570,7 @@ private  TreeMap<String, Double> getHinnad(){
 			    		  
 			    	
 			    		  try{
-			    			  ProdDesc   = getNode(rida,"ItemDescription").getFirstChild().getNodeValue();
+			    			  ProdDesc   = getNode(rida,"ItemDescription").getFirstChild().getNodeValue().replaceAll("&", "and");
 			    		  }catch(Exception e){e.printStackTrace();}
 			    		  
 			    		  try{
@@ -689,7 +731,7 @@ private  TreeMap<String, Double> getHinnad(){
            sb.append( "<PartyCode>" +  escape((custID)) + "</PartyCode>" + ls); 
            
            if(cust != null) {
-           sb.append( "<Name>" + cust.getName() + "</Name>" + ls);
+           sb.append( "<Name>" + cust.getName().replaceAll("&", "and") + "</Name>" + ls);
            if(cust.getRegnr() != null && cust.getRegnr().trim().length() > 0) {
            sb.append( "<RegNum>" +  cust.getRegnr() + "</RegNum>" + ls); 
            }
@@ -699,7 +741,7 @@ private  TreeMap<String, Double> getHinnad(){
            
            sb.append("<ContactData>" + ls);
            sb.append("<ActualAddress>" + ls);
-           sb.append( "<Address1>" +  cust.restStreet + "</Address1>" + ls); 
+           sb.append( "<Address1>" +  cust.restStreet.replaceAll("&", "and") + "</Address1>" + ls); 
            String city = "";
            if(cust.restCity != null) {
         	   city = cust.restCity;
@@ -720,7 +762,7 @@ private  TreeMap<String, Double> getHinnad(){
            sb.append( "<PartyCode>" +  escape((custID)) + "</PartyCode>" + ls); 
            
            if(cust != null) {
-           sb.append( "<Name>" + cust.getName() + "</Name>" + ls);
+           sb.append( "<Name>" + cust.getName().replaceAll("&", "and") + "</Name>" + ls);
            if(cust.getRegnr() != null && cust.getRegnr().trim().length() > 0) {
            sb.append( "<RegNum>" +  cust.getRegnr() + "</RegNum>" + ls); 
            }
@@ -730,7 +772,7 @@ private  TreeMap<String, Double> getHinnad(){
            
            sb.append("<ContactData>" + ls);
            sb.append("<ActualAddress>" + ls);
-           sb.append( "<Address1>" +  cust.getAddress() + "</Address1>" + ls); 
+           sb.append( "<Address1>" +  cust.getAddress().replaceAll("&", "and") + "</Address1>" + ls); 
       
    
            sb.append("</ActualAddress>" + ls);

@@ -266,6 +266,11 @@ public class AxaZpienasMilkManaDBDriver extends AbstractDBDriver  implements Man
     aa.setName("HOUSE1");
     agents.put("HOUSE1", aa);
     
+
+    Agent aa1 = new Agent ("10000");
+    aa1.setName("10000");
+    agents.put("10000", aa1);
+    
     if(sb2.length() > 2){
     	try{
     		 Converter.saveFileInUTF8( "agent.txt", sb2);
@@ -1098,6 +1103,8 @@ public class AxaZpienasMilkManaDBDriver extends AbstractDBDriver  implements Man
 	          cust.setMainAgent(agen.trim());
 	          
 	          cust.addAgent(new Agent("12887"));
+	          cust.addAgent(new Agent("10000"));
+	          
 	        }
 	
 	        int term = rs.getInt("term");

@@ -526,6 +526,7 @@ TreeMap<String, Double> odue = null;
 		         		Debt debt = new Debt();
 		         		if(custid != null) {
 			         		debt.setCustID(custid);
+			         		debt.setPayerID(custid);
 		         		 }
 		         		
 			         	  Node debtrida = debtsNode.getChildNodes().item(j);
@@ -585,7 +586,7 @@ TreeMap<String, Double> odue = null;
 
 	   
 	   
-   System.out.println("GUID " + odue.get("c914f926-3885-11ec-8454-1098369fa172"));
+  // System.out.println("GUID " + odue.get("c914f926-3885-11ec-8454-1098369fa172"));
 	      
 	      
 

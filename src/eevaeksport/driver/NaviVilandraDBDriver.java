@@ -795,52 +795,6 @@ public class NaviVilandraDBDriver extends AbstractDBDriver implements BulkUpdate
        public String getDistribution() {
          return null;
        }
-  private String getVisitDay(String input){
-	  String res = "";
-	  
-	  for (int i = 0 ; i < input.length(); i++ ){
-		char a = input.charAt(i);
-		if(a == 'A'){
-			res = res + "E";
-		}
-		if(a == 'B'){
-			res = res + "T";
-		}
-		if(a == 'C'){
-			res = res + "K";
-		}
-		if(a == 'D'){
-			res = res + "N";
-		}
-		if(a == 'E'){
-			res = res + "R";
-		}
-		if(a == 'F'){
-			res = res + "L";
-		}
-		if(a == 'G'){
-			res = res + "P";
-		}
-		if(a == '1'){
-			res = res + "2";
-		}if(a == '2'){
-			res = res + "1";
-		}if(a == '3'){
-			res = res + "4";
-		}if(a == '4'){
-			res = res + "8";
-		}if(a == '5'){
-			res = res + "16";
-		}if(a == '6'){
-			res = res + "32";
-		}
-	  }
-	  
-	  if(res.length() == 0){
-		  res = " ";
-	  }
-	  return res ;
-  }
   
   private HashSet sorts = new HashSet();
   
@@ -1111,7 +1065,7 @@ public class NaviVilandraDBDriver extends AbstractDBDriver implements BulkUpdate
     	
     	        	String visit = rs.getString("visit");
    	             if(visit != null && visit.trim().length()>0 && !visit.trim().toLowerCase().equals("x")){
-   	                customer.setVisit(this.getVisitDay(visit.trim()));
+   	            	customer.setVisit(Converter.visitTurn(Converter.getVisitDay(visit.trim())));
    	                customer.setCity("Route : " + visit.trim());   	            
    	                }
 

@@ -1071,13 +1071,13 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 		}
 		
 		
-		if(sb1.length() > 0) {
+	/*	if(sb1.length() > 0) {
 			Converter.saveFile("ilus.txt", sb1.toString());
 		}
 		String kuu = (Calendar.getInstance().get(Calendar.MONTH)+1)+"";
 		if(ss.length() > 0) {
 			Converter.saveFile("ilus2-" + kuu  + ".txt", ss.toString());
-		}
+		}*/
 		
 		cpDone = true;
      	}
@@ -2473,7 +2473,6 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		koodiga = new TreeMap();
 		TreeMap tm = new TreeMap();
 		
-		String[] names = (new File(getDir())).list();
 		String laod = getParent().getProps().getProperty("laoseis.laod");
 		
 		if(laod != null) {
