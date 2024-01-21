@@ -48,6 +48,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -480,10 +481,10 @@ public static String getYYYYpMMpDD(Date dd){
 	    	TreeMap vvv = multJTooted.get(custID);
 	    	Iterator itera = vvv.keySet().iterator();
 	    	while(itera.hasNext()){
-	    		String prodID = itera.next() + "";
+	    		String prodID = (itera.next() + "").trim();
 	    		String lineinfo = "";
 	    		MatrixLine mline = new MatrixLine();
-		        	mline.setCustID(custID.trim());
+		        	mline.setCliGroup(custID.trim());
 		        	mline.setLineinfo("MULTI " + vvv.get(prodID));
 		        	lineinfo = "  .NEW";
 		        	String kood = prodsx.get(prodID.trim()) + "";
@@ -493,8 +494,10 @@ public static String getYYYYpMMpDD(Date dd){
 		    	  	try{
 		    	  	  	name = ((Product)prodHash.get(kood)).getNameSorting().trim();
 			     	}catch(Exception r){
+			     		name = " " + kood;
 		    	  	}
-		    	 pre.put(custID  + lineinfo + name ,mline);
+		    	 pre.put(custID  + lineinfo + name  ,mline);
+		    	// System.out.println("loeme stuffi " +  custID  + " " + prodID + " " + mline.getLineinfo());
 	 		  }			  
 	       }
 	       
@@ -841,7 +844,9 @@ public static String getYYYYpMMpDD(Date dd){
 			    	    	  }catch(Exception e){
 			    	    		  
 			    	    	  }
-			    	    	  
+			    	    	  if(myydud == null) {
+			    	    		  myydud = new HashSet();
+			    	    	  }
 			    	    	  if(!myydud.contains(toode)){
 		                    		myydud.add(toode);
 			                    }
@@ -2515,8 +2520,9 @@ public static String getYYYYpMMpDD(Date dd){
     			  File f = new File (getExcelDir() + "Kampaaniad.xlsx");
     				
     			  FileInputStream	 ff = new FileInputStream(f);
-    			
-    			  
+
+    	 			 DataFormatter formatter = new DataFormatter();
+    					 
     			  //mï¿½ï¿½rame ketid
     			XSSFWorkbook workbook = new XSSFWorkbook((ff));
     			XSSFSheet sheet = workbook.getSheet("Ketid");
@@ -2538,20 +2544,14 @@ public static String getYYYYpMMpDD(Date dd){
       							String kett1 = null;
       							String klient = null;
       							try {
-      								kett1 = (row.getCell((short) 0).getStringCellValue());
+      								kett1 =  formatter.formatCellValue(row.getCell((short) 0));
       	    					} catch (Exception e) {
       	    						
       	    					}
       	    					try {
-      								klient = (row.getCell((short) 1).getStringCellValue());
+      								klient =  formatter.formatCellValue(row.getCell((short) 1));
       	    					} catch (Exception e) {
       	    						//System.out.println("iiii " + i);
-      	    						try{
-      	    							klient = ((int)row.getCell((short) 1).getNumericCellValue()) + "";
-      	    	      	    							
-      	    						}catch(Exception r){
-      	    							r.printStackTrace();
-      	    						}
       	    					}
       	    				
       	    					
@@ -2802,7 +2802,7 @@ public static String getYYYYpMMpDD(Date dd){
 	    	    	if(rida.getNodeName().equals("asum")){
 
 		    	    	String id =  getNode(rida,"asum_kd").getFirstChild().getNodeValue();
-		    	    	String nimi = "";
+		    	    	String nimi = id +  " 90 päeva " + "| |";;
 		    	    	Node vad = getNode(rida, "valjaanded");
 		    	    	for (int e = 0; e < vad.getChildNodes().getLength(); e++){
 		    	    		 Node va = vad.getChildNodes().item(e);
@@ -2815,6 +2815,7 @@ public static String getYYYYpMMpDD(Date dd){
 				         		if(prodsx.get(vaid)!= null && prodHash.get(prodsx.get(vaid)) != null){
 				         		Product prod = (Product)prodHash.get(prodsx.get(vaid));
 				         		if(nimi.equals("")){
+				         			
 				         			nimi =  kogus + " tk. ("+summa+" eur) " + prod.getName() + "|";
 					        	}else{
  				         			nimi = nimi + kogus + " tk. ("+summa+" eur) " + prod.getName() + "|";
@@ -2988,7 +2989,7 @@ public static String getYYYYpMMpDD(Date dd){
 	  
 				}
 			}	 }catch(Exception g){
-		   g.printStackTrace();
+		  // g.printStackTrace();
 	   }
 		   
 			
@@ -3095,7 +3096,11 @@ public static String getYYYYpMMpDD(Date dd){
 	 		   } 	
 	 		   System.out.println("volg seis " + debts.size());
 
-	   
+	 		  if("true".equals((parent.getProps().getProperty("rest.loadvisitlines")))){
+  			    Converter.loadVisitLines("plan", rcompanyx, user, pass);
+  	    	    Converter.loadVisitLines("done", rcompanyx, user, pass);
+  	    	    Converter.loadVisitLines("extra", rcompanyx, user, pass);
+  	 	 }
 	   
 	   
 	     makeInventoryData();
@@ -3113,6 +3118,7 @@ public static String getYYYYpMMpDD(Date dd){
 	     
 	     Converter cc = new Converter();
 	 	//  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+	
 	     TreeMap nonvisited = Converter.getNonVisited();
  		 Converter.saveFileInUTF8( "nonevisited.txt", getTMStr(nonvisited));
 	     budgets = getBudgets(); 
@@ -3123,7 +3129,12 @@ public static String getYYYYpMMpDD(Date dd){
 	     TreeMap top3Asum = getTop3Asum();
 	     
 	     this.customers = new ArrayList();
-	     TreeMap visits = getVisits();
+	     TreeMap visits = null;
+	     try {
+	     // visits = getVisits();
+	     } catch(Exception e) {
+	    	 
+	     }
 	     int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
 	   
 	   try {
@@ -3265,7 +3276,7 @@ public static String getYYYYpMMpDD(Date dd){
 	         		  
 	         		 customer.setAddress(Converter.adressLink(Converter.enCodeEst(aadr), "Estonia"));
 	         		  
-	         		 if(visits.get(customer.getID()) != null){
+	         		 if(visits != null && visits.get(customer.getID()) != null){
 	         			 String visit = "" + visits.get(customer.getID());
 	         			 if(visit.equals("KV1-3")){
 	         				 if(month == 1 || month == 2 || month == 3 ||
@@ -3418,7 +3429,7 @@ public static String getYYYYpMMpDD(Date dd){
 	                     
 
 	                     if(top3Cust.get(customer.getID()) != null && top3Asum.get(askd) != null){
-	                    	 String add = "Kliendi TOP3||" + top3Cust.get(customer.getID()) + "|Asumi TOP3||" + top3Asum.get(askd); 
+	                    	 String add = "Kliendi TOP3||" + top3Cust.get(customer.getID()) + "|Asumi TOP3|" + top3Asum.get(askd); 
 	                    	 if(customer.getInfo() != null && customer.getInfo().length() > 0 ){
 	                    		 customer.setInfo(customer.getInfo() + "|" + add );
 	                    	 }else{
@@ -3444,13 +3455,12 @@ public static String getYYYYpMMpDD(Date dd){
 	                   //  System.out.println("tyyp " + customer.getCustType());
 	                    	 customer.setGroup(((String)excelketid.get(customer.getID())).replaceAll(",", "|").replaceAll(" ", ""));
 	                     }
+	                     customer.addFixSortCode(customer.getID());
 	                     
 	         		 try{  String kett =  getNode(rida,"mp_kett_kd").getFirstChild().getNodeValue();
 	         		      customer.setCity(kt.get(kett) + "");
 	         		      customer.setChain(kt.get(kett) + "");
-	         		      Vector vv = new Vector();
-	         		      vv.add(kett);
-	         		      customer.setFixSortCode(vv);
+	         		      customer.addFixSortCode(kett);
 	         		      customer.setAnkeediTyyp(kett);
 	         		      kettKlient.put(customer.getID(),kett);
 	         		     kett = (String) this.ketidSidus.get(kett);
@@ -5213,7 +5223,9 @@ TreeMap realiseer = new TreeMap();
    	   String ymonth = Converter.getYYYYMMString(-1);
 	   String ymonthl = Converter.getYYYYMMString(-2);
 	   String tag = "";
-   	  while(enumer.hasMoreElements()){
+  
+	   /*
+	   'while(enumer.hasMoreElements()){
    		  String aa = enumer.nextElement() + "";
    		 
    		  
@@ -5224,8 +5236,9 @@ TreeMap realiseer = new TreeMap();
          		  tag = tag + "|     " + aa + " " + hind + "|"; 
  			 }
    		  }
+   	*/
    		
-   	enumer = tagAg.keys();
+  /* 	enumer = tagAg.keys();
    	  
    	while(enumer.hasMoreElements()){
  		  String aa = enumer.nextElement() + "";
@@ -5240,7 +5253,7 @@ TreeMap realiseer = new TreeMap();
  				ag.setStart(ag.getStart() + "   " + per + " " + hind  );
  			}
      	  }
- 		}
+ 		}*/
 	
     enumer = this.agBudgets.keys();
  	  

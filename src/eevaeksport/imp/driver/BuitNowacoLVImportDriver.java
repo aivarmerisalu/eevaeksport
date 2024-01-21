@@ -498,7 +498,7 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 			ser.setOutputCharStream(out);
 			ser.serialize(doc);
 			out.close();
-			if(sendcomm) {
+			if(sendcomm && order.getStatus() != 1) {
 				   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
 				    String name = (String)this.getCustNimi(order.getCompany());
 				    if(order.isShipDateUsed()) {

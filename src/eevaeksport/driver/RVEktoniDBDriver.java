@@ -661,7 +661,7 @@ public class RVEktoniDBDriver extends AbstractDBDriver implements BulkUpdater,Di
               	prod.setGroup(grupp.trim());
               	 prod.setDiscgrupp(grupp.trim());
               }
-              prod.setVat("20");
+              prod.setVat("22");
               String grupp2 = rs.getString("grupp2");
               if(grupp2 != null && grupp2.trim().length() >0){
             	  //prod.setDiscgrupp(grupp2.trim());
