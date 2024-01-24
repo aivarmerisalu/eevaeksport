@@ -2189,7 +2189,7 @@ System.out.println(cmd);
  " kaina_5 as hind5, kaina_6 as hind6, kaina_7 as hind7, kaina_8 as hind8, kaina_9 as hind9, kaina_10 as hind10,grup_id AS grupp ,tip_id AS tupe ,t.tipas  " +
 	"		 , t.mato_vien AS unit, t.bar_kodas AS ean,0 AS status ,t.max_nuol AS maxdiscount,  " +
 	"		  t.tipas AS type, t.orig_pak AS kastis,  t.prek_neto AS kaal,21 AS vat,  pak_kiek as opt ,prek_mode as info ,t.vieta as staatus "
-	+ ",sertifikat as topprod , t.savik_3 as oma  " +
+	+ ",sertifikat as topprod , t.savik_3 as oma , naujiena as newprod " +
 	"		  FROM prekes t inner join grupes g on g.grupe=t.grupe inner join tipai ty on ty.tipas=t.tipas " +
 	"		  where kaina_1 > 0 ";
      	
@@ -2309,7 +2309,7 @@ System.out.println(cmd);
                 	 }
                 	
                  }
-                 String stattus = rs.getString("staatus");
+             /*    String stattus = rs.getString("staatus");
                  if(stattus != null && stattus.trim().length()>0){
                 	 if(stattus.trim().toLowerCase().indexOf("a") != -1){
                 		 prod.setStatusDiscount("1");
@@ -2318,11 +2318,17 @@ System.out.println(cmd);
                 		 prod.setStatusNew("1");
                 	 }
                 	
-                 }
+                 }*/
                  
                  String topprod = rs.getString("topprod");
                  if(topprod != null && topprod.trim().length() > 0) {
+                	 
+                	 if(topprod.trim().toLowerCase().equals("a"))
                 	 prod.setStatusTop("1");
+                	 
+                	 if(topprod.trim().toLowerCase().equals("b"))
+                    	 prod.setStatusSellout("1");
+                    	 
                  }
                  
                  double oma = rs.getDouble("oma");
@@ -2336,6 +2342,12 @@ System.out.println(cmd);
                 	 }
                  }
                  
+                 String newprod = rs.getString("newprod");
+                 if(newprod != null && newprod.trim().equals("1")) {
+                	 
+                	 prod.setStatusNew("1");
+                	 
+                 }
                  
                  if(higherCodes.contains(prod.getID())){
                 	 if(prod.getStatusTop().trim().length() > 0) {

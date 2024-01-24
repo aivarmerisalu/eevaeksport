@@ -654,7 +654,7 @@ private Vector signatures = new Vector();
 		ridaitem.appendChild(koG);
 		
 		 
-		if (disc > 0) {
+		if (disc > 0 || disc < -1) {
 			// price = price * (100-disc)/100;
 			Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
 			Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));

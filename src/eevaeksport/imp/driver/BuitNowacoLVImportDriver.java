@@ -505,9 +505,11 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 				    	 comm = comm + "Piegades datums :" + dateString + "\n";	
 				    }
 				   
-				    
-				Converter.sendCommentEmail(comm, null, "MS-" + number , order.getCompany(),
-						name, null, false, ag, parent, fileName);
+				    if( order.getStatus() != 1) {
+				    	Converter.sendCommentEmail(comm, null, "MS-" + number , order.getCompany(),
+								name, null, false, ag, parent, fileName);	
+				    }
+			
 			}
 			
 		} catch (Exception e) {

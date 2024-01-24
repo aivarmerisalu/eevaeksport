@@ -996,23 +996,19 @@ System.out.println(cmd);
 		// / KLIENDI ANDMETE LEIDMINE
 
 		TreeMap<String,Double> yle = new TreeMap<String,Double>();
-		String   sql3 = "select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle FROM [Vičiūnai ir Ko$Cust_ Ledger Entry] a inner join " + 
-                " [Vičiūnai ir Ko$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_]  " +
-                " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] <getdate() " +
-				 " and a.[Posting Date] > getdate()- 1000 group by a.[Customer No_]  having sum(b.[Amount])<> 0 ";
-	
+		   
 	try {
-		sql3= "select * from MobilejavaVIK.v_VIK_GetOverdue";
+		String sql3= "select * from MobilejavaVIK.v_VIK_GetOverdue";
 		Connection con3 = getNewConnectionView();
 		Statement stmt3 = con3.createStatement();
 		ResultSet rs3 = stmt3.executeQuery(sql3);
 		while (rs3.next()) {
             String cuid = rs3.getString("maksja").trim();
 			double sum = rs3.getDouble("yle");
-			if (sum != 0) {
+		
 				yle.put(cuid, sum);
 				// System.out.println("yle " + id+ " " + sum);
-			}
+		
 
 		}
 
@@ -1231,11 +1227,20 @@ System.out.println(cmd);
 					customer.setMinsum(minsum);
 				}
 
+				
+				
 				if ( !customer.isNodebt()) {
 
 				   if(yle.containsKey(idorig)) {
 					   customer.setDebt(yle.get(idorig));
+				   }else if(yle.containsKey(customer.getPayer())) {
+					   customer.setDebt(yle.get(customer.getPayer()));
 				   }
+				   if(idorig.equals("A1816")) {
+						System.out.println("Võlg olemas " +
+								yle.containsKey(idorig) + " " + yle.containsKey(customer.getPayer())
+					+ " " + customer.getDebt());
+					}   
             	}
 				   String cont = rs.getString("kontakt");
 		           if(cont != null && cont.trim().length()>0){

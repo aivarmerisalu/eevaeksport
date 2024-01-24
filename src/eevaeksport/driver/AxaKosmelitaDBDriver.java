@@ -1068,10 +1068,10 @@ try {
         prod.setInCases(rs.getDouble("kastis"));
        // prod.setOnPallet(rs.getDouble("alusel"));
         Double price = sPrices.get(kood);
-        boolean goes = false;
+        boolean goes = true;
         if(price != null) {
         	 prod.setPrice(price);
-        	  goes = true;
+        	 // goes = true;
         }else {
         	prod.setPrice(1);
         }

@@ -105,8 +105,52 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
   public void connectionUp(){
   }
 	public Vector getLastThreeData() {
-		// TODO Auto-generated method stub
-		return null;
+
+		Vector result = new Vector();
+		try {
+			   
+
+   Connection con3 = this.getNewConnection();
+			
+			
+			
+
+					String sq3 = "SELECT KliendiKood as klient,ArveKuupaev  AS kuup ,TooteKood as toode ,KogusMY as kogus,Hind as hind, NetoSumma as summa , ArveNr as arvenr\r\n" + 
+							"       FROM vw_MJ_kliendi_sortiment  Where Partner ='AFRU' and ArveKuupaev > getdate()-90 order by KliendiKood,ArveKuupaev desc,TooteKood ";
+					
+				 
+					Statement st3 = con3.createStatement();
+					ResultSet rs3 = st3.executeQuery(sq3);
+					while (rs3.next()) {
+						MatrixLine ml = new MatrixLine();
+						ml.setCustID(rs3.getString("klient").trim());
+						String kuup = rs3.getString("kuup");
+						ml.setStartDate(kuup.substring(5,10));
+						String toode = rs3.getString("toode");
+						if(toode != null) {
+							ml.setProdID(toode.trim());
+							ml.setPrice(rs3.getDouble("kogus"));
+							ml.discount = rs3.getDouble("hind");
+							double summa = rs3.getDouble("summa");
+							String doknr = rs3.getString("arvenr");
+							ml.setLineinfo(doknr + " " + kuup.substring(0,10)+ " ("+ (int)summa + "€)" );
+						    
+							result.add(ml);
+						}
+						
+					}
+					rs3.close();
+					st3.close();
+					con3.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+      
+		System.out.println("lastthree läbi" + result.size());
+		
+		return result;
+
 	}
 
   public String getSaveDebtInfo() {
