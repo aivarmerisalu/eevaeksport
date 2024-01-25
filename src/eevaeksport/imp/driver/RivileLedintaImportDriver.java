@@ -956,6 +956,9 @@ if(ladu.trim().length()!=0){
       if(tag) {
     	 cat = parent.getProps().getProperty("conv.dirret");
       }
+      if(order.getDokNr().toLowerCase().startsWith("f")) {
+    	  cat = parent.getProps().getProperty("conv.dir2");
+      }
  	
       String fileName = escape(cat + order.getAgent()) + "-"  + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".EIP";
       System.out.println(fileName);
@@ -963,7 +966,7 @@ if(ladu.trim().length()!=0){
         fos.write(sb.toString().getBytes());
         fos.close();
 
-        
+        if(!order.getDokNr().toLowerCase().startsWith("f")) {
     	try {
         
 
@@ -1000,6 +1003,7 @@ if(ladu.trim().length()!=0){
     		System.exit(0);
     	}
         
+        }
 	} catch (Exception e) {
 		e.printStackTrace();
 		

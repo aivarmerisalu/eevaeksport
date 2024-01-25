@@ -1386,6 +1386,7 @@ HashSet olemas = new HashSet();
              double lastale = 0;
              if( ( kuup.contains("2023") ) && oldPr.get(tootekood) != null) {
             	 lastale = 100 -( lastprice/Double.parseDouble(oldPr.get(tootekood)+"") * 100 ); 
+            	
              } else {
             	 if(tooted.get(tootekood) != null) {
             	  lastale = 100 -( lastprice/Double.parseDouble(tooted.get(tootekood)+"") * 100 ); 
