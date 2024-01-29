@@ -105,7 +105,7 @@ try{
 		   Connection con = getNewConnection();
 		   TreeMap pants = new TreeMap();
 		    String sql1 = " SELECT  nn.[PK_NOM] as toode, nn.[PK_PIESKGR]as grupp ,P.PK_PIESK as kood " + 
-		    		"  FROM [FTGWIN_ALUS_2021].[APV06517].[NNOMPIESK] nn inner join [FTGWIN_ALUS_2021].[APV06517].NPIESK P"
+		    		"  FROM [FTGWIN_ALUS_2021].[VLMALS2638].[NNOMPIESK] nn inner join [FTGWIN_ALUS_2021].[VLMALS2638].NPIESK P"
 		    		+ "  ON P.PK_PIESKGR=NN.PK_PIESKGR";
 		   
 		    Statement st1 = con.createStatement();
@@ -173,7 +173,8 @@ try{
 	}
 	
   
-  private String weburl = "http://mappost:7378/rest/TNdmPvzSale/template/303";
+  private String weburl = "https://horizonweb-cloud.visma.lv/REST_H34780920/rest/TNdmPvzSale/template/303";
+		  //"http://mappost:7378/rest/TNdmPvzSale/template/303";
   
   private String getDateNiceString(Calendar cal){
 	    StringBuffer sb = new StringBuffer();
@@ -219,7 +220,7 @@ try{
 		  System.out.println("weburl " + weburl);
 		  DefaultHttpClient httpClient = new DefaultHttpClient();
 		 // Credentials defaultcreds = new UsernamePasswordCredentials("restmappost", "R");
-		  Credentials defaultcreds = new UsernamePasswordCredentials("merisoftrest", "merirest");
+		  Credentials defaultcreds = new UsernamePasswordCredentials("merisoftrest",  parent.getProps().getProperty("wsdl.pass"));
 		  
 		  httpClient.getCredentialsProvider().setCredentials(
                    AuthScope.ANY, defaultcreds);
@@ -266,7 +267,7 @@ try{
 	  return false;
  }
  
- private String url = "jdbc:odbc:horizon";
+ private String url = "jdbc:odbc:horizoncloud";
  
  private Connection getNewConnection() throws SQLException{
 	    return DriverManager.getConnection(url, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
@@ -277,7 +278,7 @@ try{
 
 	    Connection con = getNewConnection();
 	  	
-	    String cmd = "SELECT K.NOSAUK AS nimi, K.PK_KLIENTS AS id, K.KODS AS kood FROM   APV06517.DKLIENTS K " +
+	    String cmd = "SELECT K.NOSAUK AS nimi, K.PK_KLIENTS AS id, K.KODS AS kood FROM   VLMALS2638.DKLIENTS K " +
 	  			" WHERE K.KODS = '" +kood+"'" ;  
 
 	  	Statement st = con.createStatement();
@@ -298,14 +299,14 @@ try{
 	    
 
 		  String cmdo = "select  as  itemid,t.NOSAUK  AS nimetus, t.M_ATT12 AS kastis,1 AS alusel,   bar.BAR_KODS AS ean ,PK_NOMGR AS grupp,yh.kods As unit,1/M_ATT13 as liter " +
-		" from APV06517.NNOM  t LEFT OUTER JOIN APV06517.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
-		" LEFT OUTER JOIN APV06517.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
+		" from VLMALS2638.NNOM  t LEFT OUTER JOIN VLMALS2638.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
+		" LEFT OUTER JOIN VLMALS2638.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
 		"  where (t.PAMVID IN (2015,7713,24522,18205,12200,12201,13204,13205,15139)) AND (( ( (t.STATUSS = 0)) " +
-		"   AND ( ( EXISTS (SELECT 1 FROM APV06517.NNOMSAGR NSG WHERE NSG.PK_NOM=t.PK_NOM AND NSG.PK_NOMPGR =5)))))";
+		"   AND ( ( EXISTS (SELECT 1 FROM VLMALS2638.NNOMSAGR NSG WHERE NSG.PK_NOM=t.PK_NOM AND NSG.PK_NOMPGR =5)))))";
 	    
 		  
 	  	
-	    String cmd = "SELECT PK_NOM AS id FROM   APV06517.NNOM t " +
+	    String cmd = "SELECT PK_NOM AS id FROM   VLMALS2638.NNOM t " +
 	  			" WHERE t.KODS = '" +Converter.deCode(kood)+"'" ;  
 
 	  	Statement st = con.createStatement();
@@ -396,7 +397,7 @@ try{
         " </PK_DOKT>" +
         " <PAMV_ID>2711</PAMV_ID> "  + 
         " <PK_IESTADE><href>/rest/TdmDIestadeBL/1</href></PK_IESTADE>" +
-        " <PK_PVNK><href>/rest/TdmPvnKat/1</href></PK_PVNK>" +
+       // " <PK_PVNK><href>/rest/TdmPvnKat/1</href></PK_PVNK>" +
         " <PK_R_ES><href>/rest/TDdmSaviRek/7092</href></PK_R_ES> " + 
         " <PK_KLIENTS><href>/rest/TDdmCustomer/" + cuid + "</href></PK_KLIENTS> "+   
         " <DAT_DOK>" + getDateNiceString(cal) + "</DAT_DOK>" + //getDateNiceString(Calendar.getInstance())
