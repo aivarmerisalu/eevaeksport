@@ -4703,6 +4703,12 @@ TreeMap realiseer = new TreeMap();
           		  
           		 String kood = ""; 
           		 
+          		 String nrid = null; 
+          		 try {
+          		 nrid = getNode(rida,"va_nr_id").getFirstChild().getNodeValue();
+         		  // <va_nr_id>588981</va_nr_id>
+           	}catch (Exception e){}
+          		 
           		try{
           			kood = getNode(rida,"kood").getFirstChild().getNodeValue();
           			
@@ -4827,6 +4833,12 @@ TreeMap realiseer = new TreeMap();
 
             	     try{
          	    		 String ean = getNode(rida, "ean").getFirstChild().getNodeValue();
+         	    		 if(nrid != null) {
+         	    			 if(ean.length() > 4)
+         	    		 prod.setPhotoid(ean+ "/id2/" + nrid+ "-ldpi.jpg"); //9772228156036/id2/588981-ldpi.jpg
+         	    		 }else {
+         	    			 prod.setPhotoid(ean+ "/latest-ldpi.jpg"); //977029074726944/latest-ldpi.jpg
+         	    		 }
          	    		 if(ean.startsWith("00")){
          	    			 ean = ean.substring(1);
          	    		 }

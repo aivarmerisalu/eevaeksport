@@ -1260,13 +1260,13 @@ HashSet olemas = new HashSet();
     public Vector getCustomerProductsList(String agentCode) {
         connectionUp(url2);
         
-        String cmd =" SELECT ltrim(I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) as kood," +
+        String cmd =" SELECT ltrim(I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else N33_kodas_ak end) as kood," +
         		"I07_KODAS AS toode,I07_KIEKIS AS kogus, " +
 				"I06_DOK_DATA AS kuupaev  ,max(I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end ) as lastprice FROM i07_pard p" +
 				"  INNER JOIN i06_parh ON p.I07_KODAS_PO=I06_KODAS_PO "+
 				" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-				" WHERE I06_DOK_DATA > getdate()-40 "+ //year(I06_DOK_DATA) = year(getdate()) and  month(I06_DOK_DATA) = month(getdate()) 
-				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS";
+				" WHERE I06_DOK_DATA > getdate()-40 and i06_op_tip = '51'     "+ //year(I06_DOK_DATA) = year(getdate()) and  month(I06_DOK_DATA) = month(getdate()) 
+				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else N33_kodas_ak end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS";
     
         if (isDebug()) {
            System.out.println(cmd);
@@ -1408,7 +1408,7 @@ HashSet olemas = new HashSet();
        String cmd = " SELECT  I06_KODAS_MS AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + " +
                      "SUM(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh  WHERE " +
                      "month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) and I06_PERKELTA='2'" +
-                     " and I06_R_DATE <= getdate() " +
+                     " and I06_R_DATE <= getdate() and i06_op_tip in ('51','52') " +
                      "GROUP BY  I06_KODAS_MS";
 
        log(cmd);
@@ -1439,8 +1439,8 @@ HashSet olemas = new HashSet();
 
        HashMap voladkoik = new HashMap ();
        HashMap voladyle = new HashMap ();
-       stmt = con.prepareStatement(cmd2);  
-     ResultSet	      rs = stmt.executeQuery();
+     //  stmt = con.prepareStatement(cmd2);  
+    /* ResultSet	      rs = stmt.executeQuery();
      while(rs.next()) {
     	 String agent = rs.getString("agent");
     	 if(agent != null && agent.trim().length() > 0){
@@ -1460,10 +1460,10 @@ HashSet olemas = new HashSet();
     		 voladkoik.put(agent.trim(), volg);
     	 }
      }
-     rs.close();
+     rs.close();*/
      
      stmt = con.prepareStatement(cmd); 
-          rs = stmt.executeQuery();
+     ResultSet  rs = stmt.executeQuery();
              while(rs.next()) {
                String agentID = rs.getString("agent").trim();
                Agent agent = (Agent)agents.get(agentID);

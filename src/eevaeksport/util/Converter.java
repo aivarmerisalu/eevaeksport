@@ -1158,7 +1158,7 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("Groups " +  groups.toString());
+						System.out.println("Groups " +  groups.toString());
 					
 						
 						 //siin käime kõik grupid läbi ja otsime tooteid 
@@ -1173,7 +1173,8 @@ public class Converter {
 							 
 							 
 							
-							 //System.out.println("uu " + (1+start));
+							 System.out.println("uu " + (1+start) + " - " + i);
+							 try {
 								String ean = formatter.formatCellValue(row.getCell(1+start));
 								//System.out.println("uu " + ean);
 								 if(ean != "") {
@@ -1210,7 +1211,9 @@ public class Converter {
 							  }
 							  
 							 }
-							
+							 }catch(Exception e) {
+								 e.printStackTrace();
+							 }
 						}
 						}
 					 }

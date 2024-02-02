@@ -371,14 +371,14 @@ rs.close();
 
                                               
                                               if(kuu > 42 ){
-                                             	 mline.setProdLevel("pr");
+                                             //	 mline.setProdLevel("pr");
                                                 }else{
                                                 mline.setStartDate(algus.trim());
                                                 mline.setEndDate(lopp.trim());
                                               }
                                               
 
-                                              mline.setProdLevel(pri); 
+                                            //  mline.setProdLevel(pri); 
                                               mline.setPrice(price);
                                      
                                               lines.add(mline);

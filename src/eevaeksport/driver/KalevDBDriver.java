@@ -1804,7 +1804,24 @@ SELECT  [MasterProductCode] as klient
 		connectionUp(url);
 		eans = new TreeMap();
 		// 'PR' +
-		
+		 String extralist = "";
+		 String asi = getParent().getProps().getProperty("extralist");
+		 if( asi != null) {
+			 StringTokenizer st = new StringTokenizer(asi, ",");
+			 extralist = " or RTRIM(t.SC01001) in (";
+			 boolean f = true;
+			 while(st.hasMoreTokens()) {
+				 if(f) {
+					 extralist = extralist + "'" + st.nextToken() + "'";
+				 }else {
+					 extralist = extralist + ",'" + st.nextToken() + "'";
+				 }
+				 f = false;
+			 }
+			 extralist = extralist + ") " ;
+		 }
+		 
+		 System.out.println("extralist " + extralist);
 		
 		TreeMap<String,Integer> levels = new TreeMap<String,Integer>();
 
@@ -1838,8 +1855,8 @@ SELECT  [MasterProductCode] as klient
 				+ " , case when SC01135 = 0 then  'KG' else 'TK' end as unit  ,  SC01141 as kaal, " +
 						" OptimumKTellimuseKogus as inunit ,SC01107 as type , SC01164 as kate, SC01063 as pallet FROM SC010100 t left outer JOIN SC030100 on SC03001=t.SC01001 and SC03002='SKSM1' AND SC03003!=0 left outer JOIN SC390100 ON t.SC01001 "
 				+ "  = SC39001 and SC39002='00' LEFT OUTER JOIN proov20100 yh ON yh.SC01001= t.SC01001 " +
-						" LEFT OUTER JOIN class ty ON ty.MasterProductCode = t.SC01001 WHERE   (( RTRIM(t.SC01001) like 'X0%' or  RTRIM(t.SC01001) like 'Y0%' or RTRIM(t.SC01001) like 'R0%') and SC01115 = 'K') or SC01115 = 'L' or"
-						+ "  ( LEN(LTRIM(SC01037))>0 and SC39004 > 0 and rtrim(ltrim(SC01016)) != 'S' and SC01014 != '' and SC01014 != 'XXX')  ORDER BY LEFT(RTRIM(SC01037),1),t.SC01001 ";
+						" LEFT OUTER JOIN class ty ON ty.MasterProductCode = t.SC01001 WHERE  ( (( RTRIM(t.SC01001) like 'X0%' or  RTRIM(t.SC01001) like 'Y0%' or RTRIM(t.SC01001) like 'R0%') and SC01115 = 'K') or SC01115 = 'L' or"
+						+ "  ( LEN(LTRIM(SC01037))>0 and SC39004 > 0 and rtrim(ltrim(SC01016)) != 'S' and SC01014 != '' and SC01014 != 'XXX')) " + extralist + "  ORDER BY LEFT(RTRIM(SC01037),1),t.SC01001 ";
 		
 		if (isDebug()) {
 			System.out.println(cmd);

@@ -928,7 +928,7 @@ try {
   //  String    sql = "   SELECT PRODUCTLINEID as liik,name as nimi FROM  inventproductline  where dataareaid ='kosm'  ";
  
     String    sql = " 	Select e.PARENTCATEGORY as liik ,  (Select name from ECORESCATEGORY a where a.RECID = e.PARENTCATEGORY) as nimi from ECORESPRODUCTCATEGORY g \r\n" + 
-    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827','5637146826') group by e.recid , e.name ,PARENTCATEGORY ";
+    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827') group by e.recid , e.name ,PARENTCATEGORY ";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 
@@ -961,7 +961,7 @@ try {
 	    TreeMap tm = new TreeMap();
 	    
 	    String sql = "Select e.recid as liik , e.PARENTCATEGORY as liik2, e.name as nimi from  ECORESPRODUCTCATEGORY g \r\n" + 
-	    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827','5637146826') group by e.recid ,PARENTCATEGORY, e.name";
+	    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827') group by e.recid ,PARENTCATEGORY, e.name";
 	   
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
@@ -1025,7 +1025,7 @@ try {
     		"    		   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat ,  \r\n" + 
     		"    		    0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp FROM  inventtable inv  \r\n" + 
     		"    			 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
-    		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('5637146827','5637146826')  \r\n" + 
+    		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('5637146827')  \r\n" + 
     		"    			 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
     		"    		       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  \r\n" + 
     		"    		   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 

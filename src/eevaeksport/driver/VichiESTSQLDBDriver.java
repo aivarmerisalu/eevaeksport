@@ -1205,7 +1205,7 @@ try{
 	" [Blokuoti SF išrašymą] AS blokk, " +
 	" [Payment Terms Code] AS payment,[Line Discount %] AS alekood, [Balance total (LCY)] AS yle,[RouteCode] AS visit,[Customer type] AS type,  " +
 	"   [Blokavimas po pradelstų dienų] AS extradays ,k.[Asortimento kodas]+k.[Assortment Level] AS sort,PDA_debt AS debt , 0 AS minsum ," +
-	"   contact  as k1 , [Phone no_]  as k2 , k.[Home Page] as k3  , k.[Asortimento kodas] as kett  , k.tinklas as chain , " +
+	"   contact  as k1 , [Phone no_]  as k2 , k.[Home Page] as k3 , k.[E-Mail] as k4 , k.[Asortimento kodas] as kett  , k.tinklas as chain , " +
 	" [Shipping Agent Code] AS rout  ,[Loading Code] as rout2 ,  [Customer Price Group] as hinnak " +
 	"  FROM [Vičiunai Baltic$Customer] k LEFT JOIN [Vičiunai Baltic$Sales Line Discount] d ON d.[Sales Code] = k.[Customer Disc_ Group] " +
 	"  WHERE k.[Salesperson Code] != ''  AND blocked != 3  " ;
@@ -1436,6 +1436,14 @@ con3.close();
             	   kontakt = cont3;
                } else {
             	   kontakt = kontakt + "|" + cont3;  
+               }  
+           }
+           String cont4 = rs.getString("k4");
+           if(cont4 != null && cont4.trim().length()>0){
+        	   if(kontakt == null) {
+            	   kontakt = cont4;
+               } else {
+            	   kontakt = kontakt + "|" + cont4;  
                }  
            }
            

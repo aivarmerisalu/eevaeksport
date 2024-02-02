@@ -210,7 +210,7 @@ HashSet olemas = new HashSet();
 
 			String sql = "  SELECT N51_KODAS_KS AS grupp,N52_KODAS AS toode ,N52_KAINA as price ,N52_NUOLAIDA as disc" + 
 					"	          FROM N51_SUTH p INNER JOIN N52_SUTD r ON N51_KODAS_KT=N52_KODAS_KT where " + 
-					"	                    n52_end_date > getdate()+1 order by N51_KODAS_KS, N52_KODAS";
+					"	                  (( getdate()  between n51_beg_date and n51_end_date) or ( n52_end_date > getdate()+600 ) ) order by N51_KODAS_KS, N52_KODAS";
 
 			ResultSet rs = st.executeQuery(sql);
 
@@ -218,7 +218,6 @@ HashSet olemas = new HashSet();
 
 				String clGroup = rs.getString("grupp");
 				String prodID = rs.getString("toode");
-			
 				double price = rs.getDouble("price");
 				double disc = rs.getDouble("disc");
 				MatrixLine mline = new MatrixLine();
@@ -242,7 +241,11 @@ HashSet olemas = new HashSet();
 				
 				if(price != 0 || disc != 0) {
 					mline.setStartDate(Converter.getDDpMMpYYYYpString(Calendar.getInstance()));
-				   lines.add(mline);
+					 
+                    if(!olemas.contains(clGroup+"-"+prodID)) {
+                   		lines.add(mline);
+                   		olemas.add(clGroup+"-"+prodID);
+                    }
 				}
 				}
 			}

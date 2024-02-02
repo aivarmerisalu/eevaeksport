@@ -464,13 +464,17 @@ public class HorizonMuizDBDriver extends AbstractDBDriver  implements Manager,Pr
 
             	String tnimi = rs1.getString("N_NOSAUK").trim();
             	double kogus = rs1.getDouble("NDOK_DAUDZ");
-            	if(kogus > 0){
+            	if(kogus != 0){
             		
             		String kkood = rs1.getString("G_PK_ADRESE");
             		
             		String akood = rs1.getString("K_KODS").trim();
+            		String add = "";
+            		if(kogus<0) {
+            			add = " !!! ";
+            		}
             		
-            		String rida = "[" + (int)kogus  + "] " + tnimi + "|"; 
+            		String rida = "[" + add + (int)kogus + add + "] " + tnimi + "|"; 
             		
             		if(kkood != null){
             			akood = akood+ "_"+ kkood.trim();

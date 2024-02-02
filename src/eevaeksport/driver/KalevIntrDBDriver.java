@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -460,12 +461,32 @@ if(cal.get(Calendar.MONTH) > 7 ) {
     public TreeMap getProducts(Agent agent){
         connectionUp(url);
 
+        String extralist = "";
+		 String asi = getParent().getProps().getProperty("extralist");
+		 if( asi != null) {
+			 StringTokenizer st = new StringTokenizer(asi, ",");
+			 extralist = " or RTRIM(SC01001) in (";
+			 boolean f = true;
+			 while(st.hasMoreTokens()) {
+				 if(f) {
+					 extralist = extralist + "'" + st.nextToken() + "'";
+				 }else {
+					 extralist = extralist + ",'" + st.nextToken() + "'";
+				 }
+				 f = false;
+			 }
+			 extralist = extralist + ") " ;
+		 }
+		 
+		 System.out.println("extralist " + extralist);
+		
+        
         String cmd ="SELECT  RTRIM(SC01001) AS toode,(RTRIM(SC01002)+'      ' " +
             "    +rtrim(SC01003)) + '     ' +RTRIM(SC01001) AS nimi,SC39004 AS myygihind ,SC01015 AS tykke,SC03003-SC03004 AS stock, " +  
     " SC01115  AS grupp,SC01132 AS ean  , SC01016 as letter ,SC01014 as sorting " +
     " , case when SC01135 = 0 or SC01001 = '08060-6,25' then  'KG' else 'TK' end as unit  FROM SC010100 left outer JOIN SC030100 "
     + " on SC03001=SC01001 and SC03002='SKSM1' AND SC03003!=0 left outer JOIN SC390100 ON SC01001 " +
-    "  = SC39001 and SC39002='00'  WHERE   LEN(LTRIM(SC01037))>0 and SC39004 > 0 and rtrim(ltrim(SC01016)) != 'S' and SC01014 != ''  ORDER BY LEFT(RTRIM(SC01037),1),SC01001 " ;
+    "  = SC39001 and SC39002='00'  WHERE  ( LEN(LTRIM(SC01037))>0 and SC39004 > 0 and rtrim(ltrim(SC01016)) != 'S' and SC01014 != '' )" + extralist + "  ORDER BY LEFT(RTRIM(SC01037),1),SC01001 " ;
 	if (isDebug()) {
 	    System.out.println(cmd);
 	}

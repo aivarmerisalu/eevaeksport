@@ -29,6 +29,7 @@ import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
 import eevaeksport.DealerProduct;
+import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
@@ -221,8 +222,36 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
 	
 
 	   public Vector getDebt(String agentCode) throws SQLException{
-		      Vector list = new Vector();
+		     Vector list = new Vector();
+		     String sql = "SELECT I44_KODAS_KS AS klient,I44_DOK_NR AS number ,max(I44_DATA_MOK) AS maksepaev , " +
+		         " sum(i44_suma_db-i44_suma_cr) AS tasumata ,max(DateDiff(dayofyear,I44_DATA_MOK,getdate())) AS yle FROM i44_skol,n08_klij WHERE " +
+		         " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
+		         " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
+		         " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok <= getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr " +
+		        " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_DOK_NR,I44_KODAS_KS order by I44_KODAS_KS,i44_dok_nr ";
+
+		     Connection con = DriverManager.getConnection(url,"LEDIN_API","P455W0rd_*1");
+		      PreparedStatement st = con.prepareStatement(sql);
+		      //st.setString(1, agentCode);
+		      ResultSet rs = st.executeQuery();
+		      while(rs.next()){
+		        Debt debt = new Debt();
+		        debt.setCustID(rs.getString("klient").trim());
+		        String number = rs.getString("number").trim();
+		        debt.setDoknr(number);
+		        debt.setDuedate(rs.getDate("maksepaev"));
+		        debt.setPayerID(debt.getCustID());
+		        debt.setSum(rs.getDouble("tasumata"));
+		      //  debt.setDate(rs.getDate("kuupaev"));
+		        debt.setDue(rs.getString("yle"));
+		        list.addElement(debt);
+		      }
+		      rs.close();
+		      st.close();
+		      con.close();
+		      
 		      return list;
+
 		    }
 
 
@@ -599,7 +628,7 @@ String ag = rs.getString("agent").trim();
             	  
             	  for (int i = 0;i < custv.size();i++){
             		  Customer cust = (Customer)custv.elementAt(i);
-            		 // cust.setDebt(cust.getDebt() + debt );
+            		  cust.setDebt(cust.getDebt() + debt );
                   }
             	}
             }

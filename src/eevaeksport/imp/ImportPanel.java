@@ -12372,7 +12372,11 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
   
   private String identifyTXT(File f){
 	  String result = "ABC";
-		
+	  
+	 if("ABC".equals( parent.getProps().getProperty("imp.format"))) {
+		 return "ABC";	
+	 }
+	 
 	    try{
 	        BufferedReader in = new BufferedReader(
 	                new FileReader(f));

@@ -284,7 +284,7 @@ private Product getProd(String toode){
 private String getEan(String toode){
 	  
 	  String sql =  " SELECT bar.itembarcode as name FROM inventitembarcode bar  WHERE  bar.itemid = '" + toode + "'"
-	  		+ " and bar.barcodesetupid ='EANBottle'  and useforprinting = 1  and dataareaid = 'spil'";
+	  		+ " and bar.barcodesetupid ='EANBottle'  and useforprinting = 1  and dataareaid = 'ade'";
 	  	   System.out.println(sql);
 	  	   String res = "00000000000";
 	  	   try {
