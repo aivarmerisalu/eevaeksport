@@ -584,6 +584,40 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	      }
     	/// KLIENDI ANDMETE LEIDMINE
 
+
+	 	TreeMap freeze = new TreeMap();
+					    
+						String ccc = "select [Customer No_]  as cust, [No_] + ' ' + [Description]   " +
+						" as last ,  [Last Date Modified] as dd from [" + base + "$Fixed Asset]" ;
+			try {	
+				Connection cn = getNewConnection2();
+				Statement stcn = cn.createStatement();
+				ResultSet rscn = stcn.executeQuery(ccc);
+				System.out.println(ccc);
+				while (rscn.next()) {
+				String cid = rscn.getString("cust").trim();
+				String name = rscn.getString("last");
+				String dd = rscn.getString("dd").substring(0,10);
+				name = name.trim() + " " + dd;
+				if(freeze.get(cid) != null){
+				Vector vv = (Vector)freeze.get(cid);
+				vv.addElement(name);
+				freeze.put(cid, vv);
+				}else{
+				Vector vv = new Vector();
+				vv.addElement(name);
+				freeze.put(cid, vv);
+				}
+				}
+				rscn.close();
+				stcn.close();
+				cn.close();
+				
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+	 //   System.out.println("freeze " + freeze.toString());
+	    
     	     TreeMap tm = new TreeMap();
     	     this.customers = new ArrayList();
 
@@ -628,6 +662,9 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	         	String ag = rs.getString("agent");
     	             customer.addAgent(new Agent(ag));
     	             customer.setMainAgent(ag.trim());
+    	             
+    	             
+    	             
     	             
     	             if (ag != null ){
 	           				Agent agg = ((Agent)this.getAgents1().get(ag));
@@ -784,7 +821,23 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	           if(logist != null && logist.trim().length() > 0){
     	        	   customer.setCity("Pristatymo " + logist.trim());
     	           }
-    	              
+    	             
+
+    	              if(freeze.get(customer.getID()) != null){
+    	            	  Vector vv = (Vector) freeze.get(customer.getID());
+    	            	  Enumeration enume = vv.elements();
+    	            	  while (enume.hasMoreElements()){
+    	            		  customer.addCity(enume.nextElement()+"");
+    	            	  }
+    	              }else  if(freeze.get(customer.getPayer()) != null){
+    	            	  Vector vv = (Vector) freeze.get(customer.getPayer());
+    	            	  Enumeration enume = vv.elements();
+    	            	  while (enume.hasMoreElements()){
+    	            		  customer.addCity("" + enume.nextElement());
+    	            	  }
+    	              }
+    	           
+    	           
     	            tm.put(customer.getName(), customer);
     	            this.customers.add(customer.getID());
     	           

@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -68,6 +69,7 @@ public class KalevImportDriver
    
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
     try {
+    	
       Class.forName(databaseDriverName).newInstance();
       con = DriverManager.getConnection(url, "mobiejava","mobilejava");
    
@@ -77,13 +79,19 @@ public class KalevImportDriver
       calNF.setGroupingUsed(false);
       loadSignatures();
       
-    }
-    catch (Exception e) {
+    }  catch (Exception e) {
       parent.showError(e);
     }
+    try {
+    propsCU = parent.getEksportFrame().loadProps("intr.txt");
+    System.out.println(propsCU.toString());
+    }catch(Exception r) {
+    	
+    }
+    System.out.println();
   }
 
-  
+  Properties propsCU = null;
 	private Vector signatures = new Vector();
 
   private void loadSignatures(){
@@ -556,7 +564,7 @@ private HashSet getXXX(){
   }
 
 
-
+ HashMap outCust = null;
   
 
   public String identifyCustomer(String id,String regnr) throws SQLException {
@@ -570,8 +578,14 @@ private HashSet getXXX(){
   		return "M20240";
   	}
   	
+  	
+  	
   	 System.out.println("Kliendi M��ramine: "  + id + " " + regnr);
   	
+  	if( id != null && propsCU != null && propsCU.get(id) != null){
+  		return propsCU.get(id) + "";
+  	}
+  	 
   	    sql1 = "SELECT SL01001 AS kood FROM SL010100 where SL01125  =  '" + id + "'";	
 	
     System.out.println(sql1);

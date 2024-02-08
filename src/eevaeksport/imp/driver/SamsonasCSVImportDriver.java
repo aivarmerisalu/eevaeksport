@@ -547,25 +547,29 @@ public class SamsonasCSVImportDriver
 			      if(minus){
 			    	//  fileName = escape(parent.getProps().getProperty("conv.dir2")) +  "t-" + order.getAgent() +"."+ order.getCompany()+"." +fn  + ".csv";
 			      }
+			
+			      try {
+			    		String resp = sendOrderAPI(json);
+			    		Converter.saveFile(parent.getProps().getProperty("imp.read")+  respd + "response-"+  fn +"_" + order.getCompany() + "_" + getDateString2(Calendar.getInstance()) + ".json", resp);
+			    		//System.exit(0); 
+			    		if(resp.length() < 40) {
+			    			System.exit(0);
+			    		}
+			    	}catch(Exception e) {
+			    		log.error(e);
+			    		System.exit(0);
+			    	e.printStackTrace();	
+			    	}
+			      
 			      if(sb.toString().length() > 1) {
 			    	  FileOutputStream fos = new FileOutputStream(fileName);
 				        fos.write(sb.toString().getBytes());
 				        fos.close(); 
 			      }else {
-			    	  System.exit(0);;
+			    	  System.exit(0);
 			      }
 			      
-	    	try {
-	    		String resp = sendOrderAPI(json);
-	    		Converter.saveFile(parent.getProps().getProperty("imp.read")+  respd + "response-"+  fn +"_" + order.getCompany() + "_" + getDateString2(Calendar.getInstance()) + ".json", resp);
-	    		//System.exit(0); 
-	    		if(resp.length() < 40) {
-	    			System.exit(0);
-	    		}
-	    	}catch(Exception e) {
-	    		log.error(e);
-	    	e.printStackTrace();	
-	    	}
+	    	
 
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1844,7 +1844,8 @@ SELECT  [MasterProductCode] as klient
 		}
 		
       
-      
+
+	      TreeMap<String,Double>  prices = new TreeMap<String,Double>();
 			
 
 		
@@ -1879,6 +1880,8 @@ SELECT  [MasterProductCode] as klient
 				prod.setEdiname(nimetus);
 				try {
 					prod.setPrice(parseDouble(rs.getString("myygihind").trim()));
+
+            	 	prices.put(prod.getID(), prod.getPrice());	
 				}catch(Exception e){
 					System.out.println("Hind puudu " + prod.getID());
 				}
@@ -2091,6 +2094,92 @@ SELECT  [MasterProductCode] as klient
 				e.printStackTrace();
 			}
 			
+
+	        
+		  	  cmd = "SELECT SL01001 AS custid,SUBSTRING(SC18002,11,35) AS prodid, SC18015 as kogus1, SC18017 AS price1 , SC18018 as kogus2, SC18020 AS price2 ,\r\n" + 
+		  	  		"SC18021 as kogus3, SC18023 AS price3 \r\n" + 
+		  	  		"				   FROM SC180100 INNER JOIN SL010100 ON  left(SC18002,7)= SL01001 LEFT JOIN SY240100 on SC18009=SY24002 and SY24001='BG' WHERE \r\n" + 
+		  	  		"				  SC18001='C' AND CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN  SC18010 AND SC18011   \r\n" + 
+		  	  		"				 and SL01001 not like '%INTR%'\r\n" + 
+		  	  		"				 and SC18015 >0\r\n" + 
+		  	  		"				 order by SL01001,SUBSTRING(SC18002,11,35)";
+		  	 
+		  		
+		  	    StringBuffer buf = new StringBuffer();
+		  
+		  			 connectionUp(url);
+		  		     st =  con.createStatement();
+		  		      rs = st.executeQuery(cmd);
+
+		  	           while(rs.next()){
+		  	        	        String  gruppx = rs.getString("custid").trim();
+		  	                  	String  toodex = rs.getString("prodid").trim();
+		  	                  	try{
+		  	                   	double  kogus = rs.getDouble("kogus1");
+		  	                  	double  hind  = rs.getDouble("price1");
+		  	               //   System.out.println("ooo " + discount + " " + toodex + " " + prices.get(toodex));
+		  	                   	  	    
+		  		                  	if(hind != 0) {
+		  		                      buf.append(toodex+ "; ; ;" + NF.format(hind).replace(',', '.') + "; ;" + (int)kogus + "; ; ; ;" + gruppx );
+				                          buf.append("\n");	
+		  		                  	}
+		  		                  	  
+		  		                      	
+		  		              	  kogus = rs.getDouble("kogus2");
+		  	                  	  hind  = rs.getDouble("price2");
+		  	               //   System.out.println("ooo " + discount + " " + toodex + " " + prices.get(toodex));
+		  	                   	  	    
+		  		                  	if(hind != 0) {
+		  		                      buf.append(toodex+ "; ; ;" + NF.format(hind).replace(',', '.') + "; ;" + (int)kogus + "; ; ; ;" + gruppx );
+				                          buf.append("\n");	
+		  		                  	}
+		  	                  		
+		  		               	
+			  		              	  kogus = rs.getDouble("kogus3");
+			  	                  	  hind  = rs.getDouble("price3");
+			  	               //   System.out.println("ooo " + discount + " " + toodex + " " + prices.get(toodex));
+			  	                   	  	    
+			  		                  	if(hind != 0) {
+			  		                      buf.append(toodex+ "; ; ;" + NF.format(hind).replace(',', '.') + "; ;" + (int)kogus + "; ; ; ;" + gruppx );
+					                          buf.append("\n");	
+			  		                  	}
+		  		                  	
+		  	                  	}catch(Exception e){
+		  	                  	 e.printStackTrace();	
+		  	                  	}
+		  	                  }	
+		  	           rs.close();
+		  	           st.close();
+		  	           con.close();
+		        
+		        
+
+			
+			  if(buf.length() > 2){
+		            File f = new File("prodactions.txt");
+		            if (f.exists())f.delete();
+		              try {
+		        		PrintWriter os = new PrintWriter(new FileWriter(
+		        				 "prodactions.txt", true));
+		        		os.write(Converter.cleanLitLatEst(buf.toString()));
+		        		os.close();
+		        	  }catch (IOException ex) {
+		        		ex.printStackTrace();
+		        	  }
+		         }else{
+		            File f = new File("prodactions.txt");
+		            if (f.exists())f.delete();
+		              try {
+		        		PrintWriter os = new PrintWriter(new FileWriter(
+		        				 "prodactions.txt", true));
+		        		os.write("");
+		        		os.close();
+		        	  }catch (IOException ex) {
+		        		ex.printStackTrace();
+		        	  }
+		         }
+		        
+		      
 			
 			// Converter.sendProductJson(products, company);
 		} catch (Exception e) {
