@@ -142,7 +142,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 		             
 		         	 for(int i = 0;ff2.length>i;i++){
 		             	if( ff2[i].startsWith(toode + ".")){
-		               System.out.println("pilt olemas " + ff2[i]);
+		             //  System.out.println("pilt olemas " + ff2[i]);
 		            	File in = new File ( pictssou + ff2[i]); 
 		              	if(in.isFile()){
 		              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
@@ -557,7 +557,7 @@ String email = " ";
            }
            
 
-     	  System.out.println("Alustan Kliendid 1");
+     	  System.out.println("Alustan Kliendid 1 " + aled.toString());
            try{
                
                String fff = " select custaccount as klient,name as nimi ,  " +
@@ -758,16 +758,30 @@ String email = " ";
         String aleke = rs.getString("linedisc");
         if(aleke != null && aleke.trim().length()>0){
             aleke = aleke.trim();
-            if(!aleke.equals(instance))
-            cust.setGroup(aleke);
+            if(!aleke.equals(instance)) {
+            	if(aled.get(aleke)!= null){
+                	cust.setDiscount(Double.parseDouble((String)aled.get(aleke)));
+             	}else {
+                    cust.setGroup(aleke);
+            	}
+            }
         } 
+        
         String aleke2 = rs.getString("pricegroup");
         if(aleke2 != null && aleke2.trim().length()>0){
             aleke2 = aleke2.trim();
-            if(!aleke2.equals(instance))
-            cust.setGroup(aleke2);
+            if(!aleke2.equals(instance)) {
+            	
+                  if(cust.getGroup().trim().length() == 0  ) {
+            	     cust.setGroup(aleke2);
+                   } else {
+                	   if(!cust.getGroup().contains(aleke2))
+            	    cust.setGroup(cust.getGroup() + "|" + aleke2);
+                   }
+               
+            
         } 
-        
+        }
         if(salesres.get(accountnum) != null){
         	cust.setInfo("CHART Pardavimai :|Menuo ir metai|Pardavimai €|" + salesres.get(accountnum) );
         }
@@ -1013,7 +1027,7 @@ try {
 	   HashMap<String, ArrayList<String>> lineDiscs = new HashMap<String, ArrayList<String>>();
 	   if(stocksOld == null) {
 		   this.getSaveStockInfo();
-		   System.out.println(stocksOld.toString());
+		 //  System.out.println(stocksOld.toString());
 	   }
 	   
 	   if(this.sPrices == null) {
@@ -1062,7 +1076,7 @@ try {
       while(rs.next()){
         String kood = rs.getString("itemid").trim();
         Product prod = new Product(kood);
-        String nimetus = Converter.enCodeEst( rs.getString("nimetus").trim() + " " + kood) ;
+        String nimetus = Converter.enCodeEst( Converter.firstToUpperCase(rs.getString("nimetus").trim()) + " " + kood) ;
    
   
         prod.setInCases(rs.getDouble("kastis"));

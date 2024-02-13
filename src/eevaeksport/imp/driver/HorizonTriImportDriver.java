@@ -734,7 +734,9 @@ try{
 	      
 	      setNumAddedLines(counter); 
 	      
-	       
+	       if(xml.contains("error")) {
+	    	   trouble = "NOT IMPORTED ORDER \n" + xml;
+	       }
 	    
 	 	
 	 	} catch (Exception e) {
