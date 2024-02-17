@@ -3781,7 +3781,7 @@ public static String getYYYYpMMpDD(Date dd){
 			for (Iterator iter = wr.getInfo().getLines().iterator(); iter.hasNext();) {
 				eevaeksport.report.SuperVisorLineWrapperMeri lw = new eevaeksport.report.SuperVisorLineWrapperMeri(iter.next());
 			
-				
+				System.out.println("Sees toimetan");
 				String xml = "";
 				String sb0 = "";
 				String xml2 = "";
