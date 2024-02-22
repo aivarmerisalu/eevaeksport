@@ -261,7 +261,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
                   String sql2 = "  select pd.accountrelation AS clgroup,  " +
 				  " (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +
 				  " (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, amount as price, " +
-				  "   pd.fromdate as algus , pd.todate as lopp from  " +
+				  "   pd.fromdate as algus , pd.todate as lopp , datediff(day,pd.fromdate,pd.todate) as days from  " +
 				  "  pricedisctable pd where   pd.fromdate<getdate()+3 and pd.todate>=getdate() and pd.accountcode=1 and pd.dataareaid ='kosm' " +
 				  " and  pd.accountrelation != '" + instance + "' order by pd.accountrelation , pd.itemrelation" ;
                   
@@ -276,6 +276,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
                           double price = rs.getDouble("price");
                           String fromdate = rs.getString("algus");
                           String todate = rs.getString("lopp");
+                          int days = rs.getInt("days");
                           MatrixLine mline = new MatrixLine();
                           
                       
@@ -300,10 +301,10 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
                         	  mline.setPrice(price);
                         	  goes = true; 
                           }
-                         
+                         if(days < 60) {
                           mline.setStartDate(fromdate.substring(0,10));
                           mline.setEndDate(todate.substring(0,10));
-                     
+                         }
                         
                           lines.add(mline);
                   }
@@ -936,29 +937,31 @@ try {
      
     
   public TreeMap getProdGroups() throws SQLException {
-
+   this.setTreeGroup(true);
     Connection con = getNewConnection();
     TreeMap   tm = new TreeMap();
   //  String    sql = "   SELECT PRODUCTLINEID as liik,name as nimi FROM  inventproductline  where dataareaid ='kosm'  ";
  
-    String    sql = " 	Select e.PARENTCATEGORY as liik ,  (Select name from ECORESCATEGORY a where a.RECID = e.PARENTCATEGORY) as nimi from ECORESPRODUCTCATEGORY g \r\n" + 
-    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827') group by e.recid , e.name ,PARENTCATEGORY ";
+    String    sql = " 	Select e.PARENTCATEGORY as liik , e.code,   (Select name from ECORESCATEGORY a where a.RECID = e.PARENTCATEGORY) as nimi from ECORESPRODUCTCATEGORY g \r\n" + 
+    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827') group by e.recid , e.name, e.code ,PARENTCATEGORY ";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 
     HashSet names = new HashSet();
     while (rs.next()) {
       String liik = rs.getString("liik").trim();
+
+      String code = rs.getString("code").trim();
       String nim = rs.getString("nimi").trim();
-      if(nim.indexOf(" ") != -1){
+   /*   if(nim.indexOf(" ") != -1){
     	  nim = nim.substring(nim.indexOf(" ")).trim();
       }
       if(names.contains(nim)) {
     	  nim = nim + " .";
       }else {
     	  names.add(nim);
-      }
-        tm.put(liik,  Converter.enCodeEst(nim));
+      }*/
+        tm.put(liik,  Converter.enCodeEst(code + " " + nim));
     }
     rs.close();
     st.close();
@@ -974,8 +977,8 @@ try {
 	    Connection con = getNewConnection();
 	    TreeMap tm = new TreeMap();
 	    
-	    String sql = "Select e.recid as liik , e.PARENTCATEGORY as liik2, e.name as nimi from  ECORESPRODUCTCATEGORY g \r\n" + 
-	    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827') group by e.recid ,PARENTCATEGORY, e.name";
+	    String sql = "Select e.recid as liik , e.PARENTCATEGORY as liik2, e.code , e.name as nimi from  ECORESPRODUCTCATEGORY g \r\n" + 
+	    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827') group by e.recid ,PARENTCATEGORY, e.name, e.code";
 	   
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
@@ -983,7 +986,13 @@ try {
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
 	      String liik2 =  rs.getString("liik2").trim();
-	        tm.put(liik2+liik,  Converter.enCodeEst(rs.getString("nimi").trim()));
+	      String code =  rs.getString("code").trim();
+	      String nimi =  rs.getString("nimi").trim();
+	      if(!nimi.startsWith(code + " ")) {
+	    	  nimi = (code+ " " + nimi).trim();
+	      }
+	      
+	        tm.put(liik2+liik,  Converter.enCodeEst( nimi));
 	    }
 	    rs.close();
 	    st.close();

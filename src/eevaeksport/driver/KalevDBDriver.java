@@ -3660,11 +3660,12 @@ try{
 					  					int a = 0;
 					  				//	if(cuid.equals("747724"))
 					  					
-					  						for(int y = 0; y < phs.size() ; y++) {
-					  							String fname = (String)phs.get(y);
-					  						//	System.out.println("fotoname " + fname);
+					  					//kui on mitu siis võtame viimase .
+					  					int u = phs.size()-1;
 					  					
-					  				boolean olem = false;
+					  						for(int y = u; y < phs.size() ; y++) {
+					  							String fname = (String)phs.get(y);
+					  			     	boolean olem = false;
 					  					ArrayList arr = (ArrayList)files.get(cuid);
 					  					for(int e = 0; e<arr.size(); e++) {
 					  						Toode t = (Toode)arr.get(e);

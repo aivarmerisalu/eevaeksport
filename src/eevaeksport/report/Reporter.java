@@ -797,18 +797,6 @@ if (files.size() > 0) {
                 
                   ObjectInputStream ois = null; 
                 
-                  try{
-                	  ois =  new ObjectInputStream(new FileInputStream(f));
-                	  SupervisorInfoWrapper visor = new SupervisorInfoWrapper(ois.readObject());
-                	   ois.close();
-                	   Date dd  = new Date(f.lastModified());
-                       insertSuperVisorSQL(visor,dd);
-                  }catch (Exception e){
-                	  try{
-                		  ois.close();  
-                	  }catch(Exception k){
-                		  
-                	  }
                 	  try{
                 	      ois = new ObjectInputStream(new FileInputStream(f));
                 		  SupervisorInfoWrapperMeri visor = new SupervisorInfoWrapperMeri(ois.readObject());
@@ -819,7 +807,7 @@ if (files.size() > 0) {
                 		ee.printStackTrace();
                 	}
                 	
-                  }
+                  
                  
                
                   File done = new File(props.getProperty("report.dir") + System.getProperty("file.separator") + "done");

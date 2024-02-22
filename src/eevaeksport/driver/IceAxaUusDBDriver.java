@@ -1710,7 +1710,7 @@ return "";//sb.toString();
       " from custinvoicetrans  tra INNER JOIN custinvoicejour jou ON " +
       " tra.invoiceid=jou.invoiceid and tra.dataareaid=jou.dataareaid INNER JOIN inventTABLE cus ON cus.itemid=tra.itemid and cus.dataareaid=tra.dataareaid " + 
       " WHERE  jou.invoicedate > getdate()-90 and tra.dataareaid = 'dat'  and tra.qty != 0 GROUP BY jou.orderaccount,tra.itemid,tra.qty,jou.invoicedate  " +
-      " ORDER BY jou.orderaccount,tra.itemid ,tra.qty,jou.invoicedate  " ;
+      " ORDER BY jou.orderaccount,tra.itemid ,jou.invoicedate ,tra.qty  " ;
 
 
     if (isDebug()) System.out.println(cmd);

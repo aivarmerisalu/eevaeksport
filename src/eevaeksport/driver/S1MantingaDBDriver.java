@@ -574,8 +574,10 @@ public class S1MantingaDBDriver
 								String kylm = row.getCell((short) 8).getStringCellValue().trim();
 								  tt.setGr2(kylm);
 							   }catch(Exception e1) {
+								   try {
 								   String jahe = ((int)row.getCell((short) 8).getNumericCellValue()) + "";
 									  tt.setGr2(jahe);
+								   }catch(Exception e12) {}
 								   
 							   }
 						
