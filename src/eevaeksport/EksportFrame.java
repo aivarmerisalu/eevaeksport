@@ -61,6 +61,10 @@ static Category log = Category.getRoot();
       if (args[i].trim().equalsIgnoreCase("/dashboard")){
           this.setDashboardCreator(true);
         }
+      if (args[i].trim().equalsIgnoreCase("/webshopper")){
+    	  webShopper = true;
+          
+        }
 
       if (args[i].trim().equalsIgnoreCase("/fixloader")){
           this.setFixLoader(true);
@@ -583,8 +587,17 @@ public void setDistRep(boolean distRep) {
 
   private boolean saveDebt = false;
   private boolean autoDebt = false;
+  private boolean webShopper = false;
 
-  private boolean onRequest = false;
+  public boolean isWebShopper() {
+	return webShopper;
+}
+
+public void setWebShopper(boolean webShopper) {
+	this.webShopper = webShopper;
+}
+
+private boolean onRequest = false;
   private boolean sendStock = false;
   private boolean sendRoutecal = false;
   private boolean sendRestAll = false;
