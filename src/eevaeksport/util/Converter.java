@@ -200,7 +200,7 @@ public class Converter {
 			   String key = (String) itera.next();
 			   if(!key.equals("LABEL")) {
 			   DashboardData dd = (DashboardData) data.get(key);
-			   agentData.put(key, new String[] { "['"+dd.dataLabel+"', {v: "+dd.dataValue+"}, true]" });
+			   agentData.put(key, new String[] { "['"+dd.dataLabel+"', {v: "+dd.dataValue+"}]" });
 			   }
 			   
 		   }

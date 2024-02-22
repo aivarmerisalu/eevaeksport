@@ -558,8 +558,8 @@ private HashSet getXXX(){
 	  if(ordOTB.getOrderLines() != null && ordOTB.getOrderLines().size()>0){
 		  result.add(ordOTB);  
 	  }
-//	 System.out.println("Result =" +order.getDokNr()
-	//		 + " "+ result.size());
+ System.out.println("Result =" +order.getDokNr()
+			 + " "+ result.size());
 	 //System.exit(0);
 	  return result ;
   }
@@ -2936,7 +2936,7 @@ private boolean isAllowed(String cust, String toode, int status) throws SQLExcep
 	
 	if(status != 77) {
 		//kontrollime kas on pda tunnus - kui ei siis maha V.A. nende exceli vorm.
-		System.out.println("uuring allow " + pdaProds.size() + " " + toode+ " " + pdaProds.contains(toode));
+		//System.out.println("uuring allow " + pdaProds.size() + " " + toode+ " " + pdaProds.contains(toode));
 		 if(!pdaProds.contains(toode)) {
 			 return false;
 		 }

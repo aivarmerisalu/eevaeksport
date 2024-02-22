@@ -31,11 +31,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
+import eevaeksport.DashboardData;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.htmlgen.HTMLeditor;
+import eevaeksport.mailagent.FileSender;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.util.Converter;
 
@@ -48,7 +51,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Promo, BulkUpdater, Discounter, PictureMaker, FixReporter {
+public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Promo, BulkUpdater, Discounter, PictureMaker, FixReporter ,DashboardCreator{
   public AxaJNGLATDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -193,9 +196,9 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 						   String klgr = "NONE";
 						   if(custTypes != null && custTypes.get(klkood) != null) {
 							   
-					        	ArrayList type = (ArrayList)custTypes.get(klkood);
+					        	String type = (String)custTypes.get(klkood);
 					        	if(type != null) {
-					        	 klgr = (String)type.get(0); 
+					        	 klgr = type; 
 					        	
 					        	 if(klgr.equals("A")){
 					        		 klgr = "FOOD";
@@ -1945,4 +1948,100 @@ HashSet<String> shell = null;
 		     }
 		
 	}
+
+@Override
+public void createDashboard() {
+	System.out.println("Testin");
+ 
+	this.getCustomers(null);
+	Map<String, String[]> agentData = null;
+	TreeMap data1 = new TreeMap();
+	
+   	Iterator itera =  agentMust.keySet().iterator();
+	while(itera.hasNext()) {
+		String ag = (String) itera.next();
+		  Agent agen = (Agent)agents1.get(ag);
+          if (agen != null){
+        	  double avg = 0;
+        	  ArrayList<Double> aa = agentMust.get(ag);
+        	  double size = aa.size();
+        	  double sum = 0;
+        	  for(Double x : aa) {
+        		  sum = sum + x;
+        	  }
+        	  
+        	   DashboardData dd1 = new DashboardData(ag);
+    		   dd1.dataLabel = agen.getName();
+    		   dd1.dataValue = (double) Converter.Round(((float)(100* sum/size)), 2);
+    		   data1.put(ag, dd1);
+        	  
+        	
+
+          }
+	}
+	
+	 DashboardData dd1 = new DashboardData("LABEL");
+	 DashboardData dd01 = new DashboardData("LABEL");
+	 dd01.dataLabel = "Name";
+	 dd01.dataType = "string";
+	 dd1.addArrElement(dd01);
+	 DashboardData dd02 = new DashboardData("LABEL");
+	 dd02.dataLabel = "Percent";
+	 dd02.dataType = "number";
+	 dd02.sorting = "asc";
+	 dd1.addArrElement(dd02);
+	 
+	 
+	   data1.put("LABEL", dd1);
+	
+
+
+	
+	 agentData = Converter.getChartData("AgenMustProducts", "Table", data1);
+	   ArrayList data = new ArrayList();
+	   
+	   data.add(agentData);
+	   
+	/*   Map<String, String[]> agentData1 = null;
+	   
+	   TreeMap data2 = new TreeMap();
+		 itera = agent1.keySet().iterator();
+		while (itera.hasNext()){
+			
+			String agId = (String) itera.next();
+			Agent ag = (Agent) agent1.get(agId);
+		    String agName = Converter.deCode(ag.getName());
+	        int agSales = ag.getMonthSales();
+	        if (agSales < 0) {
+	        	agSales = 0 ;
+	        }
+			System.out.println(agId + " " + agName + " " + agSales);
+			   DashboardData dd1 = new DashboardData(agId);
+			   dd1.dataLabel = agName;
+			   dd1.dataValue = (double) agSales;
+			   data2.put(agId, dd1);
+		}
+		 agentData1 = Converter.getChartData("Testime Sõõrikut", "Donut", data2);
+	   data.add(agentData1);*/
+	   //data.add(agentData3);
+	   //data.add(agentData4);
+	   //data.add(agentData5);
+	   //data.add(agentData6);
+	   HTMLeditor hm = new HTMLeditor();
+	   String url = "https://mobitrek.eu/reporting/logoproxy/help/jungent.png";
+	   ArrayList type = new ArrayList();
+	   String topLabel = "Jungent Latvia data";
+	   
+	   hm.genChart(url,data,topLabel);
+	   
+	   try {
+			 FileSender fs = new FileSender();
+			fs.uploadDash();
+		   } catch (Exception e1) {
+			e1.printStackTrace();
+		   }
+	
+	System.exit(0);
+}
+	
 }

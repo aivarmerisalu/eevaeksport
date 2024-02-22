@@ -7,8 +7,7 @@ public class DashboardData {
 	 public DashboardData(String id) {
 		    this.id = id;
 		  }
-	 
-	 
+  public String sorting = null;
   public String id = null;
   public String dataLabel = null;
   public String dataType = null;
