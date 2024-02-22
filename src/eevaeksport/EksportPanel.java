@@ -53,7 +53,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
+import eevaeksport.driver.WebShopper;
 import eevaeksport.driver.AbstractDBDriver;
 import eevaeksport.driver.BulkUpdater;
 import eevaeksport.driver.Discounter;
@@ -231,6 +231,10 @@ public class EksportPanel extends JPanel implements ActionListener,
         	createDashboard();	
            }
         
+        if(parent.isWebShopper()) {
+        	createWebShopper();
+           }
+        
         if(parent.isFixReporter()) {
             createFixreport();	
            }
@@ -383,6 +387,10 @@ public class EksportPanel extends JPanel implements ActionListener,
     
     private void createFixreport(){
     	((FixReporter)driver).FixReporter();
+    }
+    
+    private void createWebShopper(){
+    	((WebShopper)driver).WebShopper();
     }
     
     private void createDashboard(){

@@ -55,6 +55,7 @@ import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.util.Converter;
+import eevaeksport.util.WebShopPiguLT;
 
 
 
@@ -67,7 +68,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker {
+public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,WebShopper {
 
   public DirectoLinpetDBDriver(EksportPanel parent) {
     super(parent);
@@ -2175,9 +2176,13 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	   return re;
    }
    
+   
+   private HashMap eanProds = null;
+   
    public TreeMap getProducts(Agent agent){
 	   System.out.println("tooted a");
 	   TreeMap otherStocks = this.getProductsOther();
+	   eanProds = new HashMap();
 	   
 	   TreeMap stocksfile = null;
 	   try {
@@ -2409,6 +2414,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       	    	}
       	    	ean =  ean.replaceAll(";", ":");
           	     prod.setEAN(ean);
+          	     eanProds.put(ean, id);
           	     
           	   if("true".equals(getParent().getProps().getProperty("add.ean"))){
           		   try{
@@ -2895,6 +2901,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    
    
    public TreeMap getProducts2(){
+	   eanProds = new HashMap();
 
 	    TreeMap tm = new TreeMap();
 	     
@@ -2912,7 +2919,21 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	        		  int len = line.indexOf("code=");
 		        	  String id   = line.substring(len + 6);
 		      	      Product prod = new Product(id.substring(0,id.indexOf("\"")).trim());
-		      	      len = line.indexOf("default_name=");
+		      	     
+		      	   len = line.indexOf("stripe_code=");
+		      	    if(len != -1){
+		      	    	 String ean   = line.substring(len + 13);
+		      	    	 ean = ean.substring(0,ean.indexOf("\""));
+		      	    	ean =  ean.replaceAll(";", ":");
+		      	    	if(ean.contains("&")) {
+		      	    		ean = ean.substring(0,ean.indexOf("&"));
+		      	    	}
+		      	    	ean =  ean.replaceAll(";", ":");
+		          	     prod.setEAN(ean);
+		          	     eanProds.put(ean, prod);
+		          	     
+		      	    }
+		      	  len = line.indexOf("default_name=");
 		      	     String name   = line.substring(len + 14);
 		      	     prod.setName( prod.getID() + " " + Converter.deCode(name.substring(0,name.indexOf("\""))));
 		      	     tm.put(prod.getID(), prod); 
@@ -3478,5 +3499,19 @@ if(seisx > 0) {
  
  return products.toString();
  
+}
+
+
+
+
+@Override
+public void WebShopper() {
+	getProducts2();
+	
+	WebShopPiguLT vp = new WebShopPiguLT(eanProds);
+	vp.login(parent);
+	vp.getSellerID();
+	vp.getOrderList();
+	System.exit(0);
 }
 }
