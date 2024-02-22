@@ -616,11 +616,13 @@ private Vector signatures = new Vector();
 		btoote_kood.appendChild(btoote_koodVal);
 		ridaitem.appendChild(btoote_kood);
 
-	  	  Product prod = (Product)prods.get(toode);
+	  	
 		Node toote_kood = doc.createElement("SupplierItemCode");
 		Text toote_koodVal = doc.createTextNode(toode);
 		toote_kood.appendChild(toote_koodVal);
 		ridaitem.appendChild(toote_kood);
+		  Product prod = (Product)prods.get(toode);
+		if(prod != null) {
 		String ean = prod.getEAN();
 		if(ean != null) {
 			Node ean_kood = doc.createElement("EAN");
@@ -636,7 +638,7 @@ private Vector signatures = new Vector();
 			Node nimetus = doc.createElement("ItemDescription");
 			nimetus.appendChild(nimetusVal);
 			ridaitem.appendChild(nimetus);
-		}
+		}}
 
 		double kogus = line.getKogus();
 		double price = line.getPrice();

@@ -29,6 +29,8 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 
+import eevaeksport.Agent;
+import eevaeksport.Customer;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -274,18 +276,20 @@ try{
 	  }
 
  
- public String getCustId(String kood) throws SQLException {
+ public Customer getCustId(String kood) throws SQLException {
 
 	    Connection con = getNewConnection();
 	  	
-	    String cmd = "SELECT K.NOSAUK AS nimi, K.PK_KLIENTS AS id, K.KODS AS kood FROM   VLMALS2638.DKLIENTS K " +
+	    String cmd = "SELECT  K.PK_KLIENTS AS id, K.KODS AS kood, K.NOSAUK AS nimi FROM   VLMALS2638.DKLIENTS K " +
 	  			" WHERE K.KODS = '" +kood+"'" ;  
 
 	  	Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(cmd);
-	    String liik = null;
+	    Customer liik = null;
 	    if (rs.next()) {
-	      liik = rs.getString("id").trim();
+	        liik = new Customer(rs.getString("id").trim());
+	        String name = rs.getString("nimi").trim();
+	        liik.setName(name);
 	      }
 	    rs.close();
 	    st.close();
@@ -373,7 +377,7 @@ try{
 		        	cukood = escape(cukood.substring(0,cukood.lastIndexOf("_")));
 			    }
 		           
-		           String cuid = getCustId(cukood);
+		           Customer cuid = getCustId(cukood);
 		
 		           String aadr = "<NdmPvzAddition>";
 		           if(adid != null){
@@ -399,7 +403,7 @@ try{
         " <PK_IESTADE><href>/rest/TdmDIestadeBL/1</href></PK_IESTADE>" +
        // " <PK_PVNK><href>/rest/TdmPvnKat/1</href></PK_PVNK>" +
         " <PK_R_ES><href>/rest/TDdmSaviRek/7092</href></PK_R_ES> " + 
-        " <PK_KLIENTS><href>/rest/TDdmCustomer/" + cuid + "</href></PK_KLIENTS> "+   
+        " <PK_KLIENTS><href>/rest/TDdmCustomer/" + cuid.getID() + "</href></PK_KLIENTS> "+   
         " <DAT_DOK>" + getDateNiceString(cal) + "</DAT_DOK>" + //getDateNiceString(Calendar.getInstance())
         " <DAT_PIEG>" + getDateNiceString(cal) + "</DAT_PIEG>" + 
         " <PK_PARD><href>/rest/TNdmPard/" + agg + "</href></PK_PARD>" + 
@@ -500,6 +504,7 @@ try{
 		
 		   //   trouble = "IMPORTED ORDER \n" + order_xml;
 		      
+		     
 		      if("true".equals(parent.getProps().getProperty("testing"))){
 			 		System.out.println("Testing ");
 		    	  System.exit(0);
@@ -508,11 +513,14 @@ try{
 	 		String xml = getWeb(order_xml , "DokNr:" + order.getDokNr() + " Company:" + cukood);		
 	 	//	System.out.println("Tulemus " + xml);
 		     Converter.saveFileInUTF8(fileName, xml);
-			 	
+		     if(parent.getProps().getProperty("smtphost") != null) {
+		     Agent ag = new Agent(agg);
+		      ag.setName(agg);
+		       Converter.sendCommentEmail("New Order " + comm, null, doknr, cukood, cuid.getName(), null, false, ag, parent, null);
+		     }
 	      
 	      setNumAddedLines(counter); 
 	      
-	       
 	    
 	 	
 	 	} catch (Exception e) {

@@ -1905,6 +1905,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		        }
 		        in.close();
 		        Converter.saveObject(result, "cpdata/" + number + ".vec");
+		     //   Converter.saveFile("cpdata/" + number + ".txt", inputLineBuf.toString());
 		      //  System.out.println("buffer " + result);
 	   }
 	   }catch(Exception e){
@@ -3119,11 +3120,14 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		        	
 		        	
 		        }
-		      //  Converter.saveFile("data/sort"+custid+ ".txt" , inputLineBuf.toString());
+		       
+		        Converter.saveFile("data/sort"+custid+ ".txt" , inputLineBuf.toString());
 		        in.close();
 		        isr.close();
 		        ins.close();
 		        con.disconnect();
+		      
+
 		   } catch (Exception a){
 		   }
 	   }

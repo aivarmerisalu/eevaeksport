@@ -463,7 +463,7 @@ public class S1MantingaDBDriver
 					}
 					
 					if(kood != null && kood.length() > 3 && kood.length() < 13) {
-						 System.out.println(kood);	
+						// System.out.println(kood);	
 						Toode tt = new Toode(kood);
 						
 						  try {
@@ -690,9 +690,7 @@ public class S1MantingaDBDriver
         }
         
         
-        if(kood.equals("51B228")) {
-        	System.out.println("oioi  51B228 " + goes );
-        }
+        
         prod.setStock(kogus);
         prod.setVat("21");
 
@@ -873,7 +871,7 @@ public class S1MantingaDBDriver
         try{
      //   	kogus = Double.parseDouble(abi.substring(9));
         }catch(Exception e){
-        	System.out.println(abi.substring(9));
+        	//System.out.println(abi.substring(9));
         	e.printStackTrace();
         }
         CustProd cp = new CustProd(kliendikood, tootekood, kogus, plusskogus,

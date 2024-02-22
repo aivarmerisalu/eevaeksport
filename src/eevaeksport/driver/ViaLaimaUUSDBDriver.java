@@ -2056,8 +2056,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
         
 
         try{
+        	if(rcompanyx != null) {
      	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
-     		
+        	}
      }catch(Exception e){
      	
      }
@@ -2146,7 +2147,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		    	   
 	    	   }
 		    	   }
-			       
+			       File ft = new File("customerjson" + u + ".txt");
+			       if(ft.exists()) {
 				JSONParser parser = new JSONParser();
 			       Object obj = parser.parse(new FileReader("customerjson" + u + ".txt"));
 		           org.json.simple.JSONObject company = (org.json.simple.JSONObject) obj;
@@ -2414,7 +2416,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
   		           
 		        }
 		     
-			 }
+			 }}
 		       
 		      	   }catch(Exception e){
 					e.printStackTrace();
@@ -2586,7 +2588,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		    	   
 		 		 }
 		 		 }
-		    	   
+		    	   File fe = new File("productjson" + u + ".txt");
+		    	   if(fe.exists()) {
 				JSONParser parser = new JSONParser();
 			       Object obj = parser.parse(new FileReader("productjson" + u + ".txt"));
 		           org.json.simple.JSONObject company = (org.json.simple.JSONObject) obj;
@@ -2896,6 +2899,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 		                                           
 		                                       }
 		                                     }
+			                                }
 			 
 		      	   }catch(Exception e){
 					e.printStackTrace();
