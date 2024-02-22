@@ -3621,12 +3621,44 @@ public void createDashboard() {
 		   DashboardData dd1 = new DashboardData(agId);
 		   dd1.dataLabel = agName;
 		   dd1.dataValue = (double) agSales;
-		   data1.put(agId, dd1);
+		//   data1.put(agId, dd1);
 		  
 	
 	}
 	
-	 agentData = Converter.getChartData("Testime Bari", "Bar", data1);
+	
+	 DashboardData dd3 = new DashboardData("232");
+	   dd3.dataLabel = "Erik";
+	   dd3.dataValue = (double) 2.11;
+	   data1.put("232", dd3);
+	  
+	   
+
+		 DashboardData dd4 = new DashboardData("2322");
+		   dd4.dataLabel = "Erik2";
+		   dd4.dataValue = (double) 3.11;
+		   data1.put("2232", dd4);
+	
+	 DashboardData dd1 = new DashboardData("LABEL");
+	 DashboardData dd01 = new DashboardData("LABEL");
+	 dd01.dataLabel = "Name";
+	 dd01.dataType = "string";
+	 dd1.addArrElement(dd01);
+	 DashboardData dd02 = new DashboardData("LABEL");
+	 dd02.dataLabel = "Percent";
+	 dd02.dataType = "number";
+	 dd02.sorting = "asc";
+	 dd1.addArrElement(dd02);
+	 
+	 
+	   data1.put("LABEL", dd1);
+	
+
+	
+	
+	
+	
+	 agentData = Converter.getChartData("Testime Bari", "Table", data1);
 	   ArrayList data = new ArrayList();
 	   
 	   data.add(agentData);
@@ -3645,10 +3677,10 @@ public void createDashboard() {
 	        	agSales = 0 ;
 	        }
 			System.out.println(agId + " " + agName + " " + agSales);
-			   DashboardData dd1 = new DashboardData(agId);
-			   dd1.dataLabel = agName;
-			   dd1.dataValue = (double) agSales;
-			   data2.put(agId, dd1);
+			   DashboardData dd11 = new DashboardData(agId);
+			   dd11.dataLabel = agName;
+			   dd11.dataValue = (double) agSales;
+			   data2.put(agId, dd11);
 		}
 		 agentData1 = Converter.getChartData("Testime Sõõrikut", "Donut", data2);
 	   data.add(agentData1);

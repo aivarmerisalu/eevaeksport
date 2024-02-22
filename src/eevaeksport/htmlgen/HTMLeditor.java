@@ -105,7 +105,7 @@ public class HTMLeditor {
                     updatedData.append(line).append("\n");
                     // Add the new data here with indentation
                     for (String key : agentData.keySet()) {
-                    	if (!key.equals("Label") && !key.equals("Type") && !key.equals("LABEL")) {
+                    	if (!key.equals("Label") && !key.equals("Type") && !key.equals("LABEL") && !key.equals("SORTING")) {
                     		if (type.equals("Table") || type.equals("Gauge")) {
                     			updatedData.append("        ").append((agentData.get(key))[0]).append(", ");
                     		} else {
@@ -114,6 +114,13 @@ public class HTMLeditor {
                     	}
                     }
                 } else if (line.contains("<!-- End Data Section -->")) {
+                    inDataSection = false;
+                    updatedData.append(line).append("\n");
+                } else if (!inDataSection) {
+                    updatedData.append(line).append("\n");
+                }
+                
+                else if (line.contains("<!-- End Data Section -->")) {
                     inDataSection = false;
                     updatedData.append(line).append("\n");
                 } else if (!inDataSection) {
@@ -130,6 +137,11 @@ public class HTMLeditor {
             }
             
             result.add(fdata.replace("TITLE_PLACEHOLDER", label));
+            String sort = "";
+            if (agentData.get("SORTING") != null) {
+            	sort = agentData.get("SORTING")[0] ;
+            }
+            result.add(fdata.replace("SORT_PLACEHOLDER", sort));
             
            
             reader.close();

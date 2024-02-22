@@ -187,18 +187,38 @@ public class Converter {
 		   Map<String, String[]> agentData = new HashMap<>();
 		 
 		   DashboardData dd0 = (DashboardData) data.get("LABEL");
+		   String sorting = "";
 		    String label = "";
 		    if(dd0 != null) {
+		    	int col = 0;
 		   for(DashboardData ddd : dd0.dataArr) {
 			   label = label + "data.addColumn('" + ddd.dataType + "', '" + ddd.dataLabel +"');\n";
+			   if(ddd.sorting != null) {
+				   String asc = "true";
+				   if (ddd.sorting.equals("desc")) {
+					   asc = "false";
+				   }
+				   
+				   
+				   sorting = "options['sortColumn'] = "+col+";\r\n"
+		            		+ "      options['sortAscending'] = "+asc+";";
+				   
+			   }
+			   col++;
 		   }}
-		   
+		   if (sorting.length() > 0) {
+			   agentData.put("SORTING", new String[] {sorting}); 
+			   
+			   
+			   
+		   }
+		    
 		   
 		   agentData.put("LABEL", new String[] {label}); 
 		   Iterator itera = data.keySet().iterator();
 		   while (itera.hasNext()) {
 			   String key = (String) itera.next();
-			   if(!key.equals("LABEL")) {
+			   if(!key.equals("LABEL") && !key.equals("SORTING")) {
 			   DashboardData dd = (DashboardData) data.get(key);
 			   agentData.put(key, new String[] { "['"+dd.dataLabel+"', {v: "+dd.dataValue+"}]" });
 			   }
