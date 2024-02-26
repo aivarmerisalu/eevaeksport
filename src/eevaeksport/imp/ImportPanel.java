@@ -613,7 +613,8 @@ public String parseFirstEmail(String emails) {
            }
            
           }else if (file.getName().toLowerCase().indexOf("order") != -1 && fileName.toLowerCase().endsWith(".xls") 
-        		  && file.getName().toLowerCase().indexOf("forma") == -1 && file.getName().toLowerCase().indexOf("_order") == -1){
+        		  && file.getName().toLowerCase().indexOf("forma") == -1 && file.getName().toLowerCase().indexOf("_order") == -1
+        		  && file.getName().toLowerCase().indexOf("order_") == -1){
               System.out.println("XLS tellimus Maxima Leedu formaat");
              // System.out.println("asi " + fileName.toLowerCase().indexOf("order") + " " + fileName.toLowerCase());
               convCodes = getConversionCodes();
@@ -624,6 +625,7 @@ public String parseFirstEmail(String emails) {
                 convCodes = getConversionCodes();
                 String format = identifyXLS(file);
                 System.out.println("XLS tellimus formaat "  + format);
+                
                try{
             		
                	if(format.equals("konig")){
@@ -632,7 +634,13 @@ public String parseFirstEmail(String emails) {
                       System.out.println(file.getAbsolutePath());
                       // file.delete();
               	}
-            	   
+            	
+               	if(format.equals("viada")){
+             		 System.out.println("xls tellimus Viada formaat");
+             		loadXLSVIADAOrder(orders, file,troubles);
+                     System.out.println(file.getAbsolutePath());
+                     // file.delete();
+             	}
             	   if(format.equals("eiginta")){
                        this.loadXLSEigintaOrder(orders, file,troubles);
                        System.out.println("XLS tellimus eiginta");
@@ -11620,15 +11628,49 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 				for(int i = 0 ; i < a;i++){
 					HSSFRow row = sheet.getRow(i);				
 					if(i == 0){
+						try {
 						String cell = row.getCell((short)0).getStringCellValue();
 						
 						System.out.println("Firma Maxima LAT " + cell );
 						if(cell.toLowerCase().indexOf("preču pasūtīšana")!= -1  ){
 							return "maximalat";
 						}
+						}catch(Exception e) {
+							
+						}
 					}			
 				}
 			}
+
+			 sheet = workbook.getSheetAt(0);
+				if(sheet != null){
+				for(int i = 0 ; i < sheet.getLastRowNum();i++){
+					HSSFRow row = sheet.getRow(i);
+					//System.out.println(row);
+					if(row == null && a == 0){
+						a = i;
+					}else{
+						a = sheet.getLastRowNum();
+					}
+				}
+				//System.out.println("sees " + a);
+				//Enumeration enum = sheet.getLastRowNum()
+				try{
+					for(int i = 0 ; i < a;i++){
+						HSSFRow row = sheet.getRow(i);				
+						if(i == 5){
+							String cell = row.getCell((short)3).getStringCellValue();
+							firma = cell;
+							System.out.println("Firma VIADA " + firma);
+							if(firma.toLowerCase().indexOf("viada") != -1) return "viada";
+						}			
+				    	}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				
+				}
+
 			
 			 sheet = workbook.getSheetAt(0);
 				if(sheet != null){
@@ -11955,7 +11997,7 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 			}
 			
 	}catch(Exception e) {
-		//.printStackTrace();
+		e.printStackTrace();
 		System.out.println("viga v�i uus excel");
 		try{
 			
@@ -14427,6 +14469,182 @@ private void loadPDFStockmannOrder(Orders orders, File f,StringBuffer troubles )
 
 	  }
 
+
+  
+  
+  private void loadXLSVIADAOrder(Orders orders, File f,StringBuffer troubles) throws IOException{
+	    String fileName = f.getName();
+	    setEmailBody(orders,fileName);
+
+	    String tellijaKood = null;
+	    String dokNr = null;
+	    firma = "";
+	    String shipdate = " ";
+	   
+	    String tellijaRegnr = null;
+	    String kood = null;
+	    int counter = 0;
+		int a = 0;
+	    try{
+	    	FileInputStream ff = new FileInputStream(f);
+			HSSFWorkbook workbook = new HSSFWorkbook((ff));
+			HSSFSheet sheet = workbook.getSheetAt(0);
+			
+			
+			for(int i = 0 ; i < sheet.getLastRowNum();i++){
+				HSSFRow row = sheet.getRow(i);
+				//System.out.println(row);
+				if(row == null && a == 0){
+					a = i;
+				}else{
+					a = sheet.getLastRowNum();
+				}
+			}
+			
+
+			 DataFormatter formatter = new DataFormatter();
+			System.out.println("sees " + a);
+	
+			for(int i = 0 ; i < a+1;i++){
+				HSSFRow row = sheet.getRow(i);		
+			
+				  if(i == 4){
+						String ddd = formatter.formatCellValue(row.getCell((short)3));
+						Date dd = this.getCalHTM2(ddd);
+		        		if(dd == null){
+		        			dd = new Date();
+		        		}
+		        		shipdate = dd.getTime() + "";
+		        	//	System.out.println(dd.toString());   
+		        	
+			        }
+				  if(i == 0){
+						dokNr = formatter.formatCellValue(row.getCell((short)2));  
+						dokNr = dokNr.substring(10,23).trim(); 
+						//System.out.println(dokNr);
+						
+			        }
+		
+				  if(i == 6){
+					String cell = formatter.formatCellValue(row.getCell((short)3));  
+					
+					firma = cell;
+					
+					System.out.println("Firma " + firma);
+					
+					firma = driver.identifyCustomer(firma,null);
+					 if (firma == null || firma.trim().length() == 0){
+					       addLog(parent.getString("nocompid") + " " + tellijaKood + "\n" + fileName + "\n" + parent.getString("fixcompid") +"\n" );
+					       troubles.append("Customer CANNOT BE RESOLVED VIADA XLS format \n" + "Dok Nr: " + doknr + "\n"
+									 + "\t\tRegNr:" + tellijaRegnr + " Code:" + kood + " Number:" + dokNr + "\n\n");
+					       doknr=dokNr;
+					     }
+				}
+				
+	         
+
+				if (i > 11 && i < a){
+					
+			        String prod = null;
+			        String ean = "";
+			         try{
+
+				        ean = row.getCell((short)1).getStringCellValue();	
+				       
+			        }catch (Exception e ){
+
+				        ean = row.getCell((short)1).getNumericCellValue() + "";
+				      
+				        if(ean.indexOf("E") != -1){
+				        	ean = ean.substring(0,ean.indexOf("E") );
+				        }
+				    //   
+				        ean = ean.substring(0,1) + ean.substring(2,ean.length());
+			        }
+			       // System.out.println(ean);
+			    
+			      
+					double kogus = 0;
+					try{
+						kogus = (row.getCell((short)4).getNumericCellValue());
+					}catch (Exception e){
+					//	e.printStackTrace();
+						try{
+							kogus = Double.parseDouble((row.getCell((short)4).getStringCellValue()));
+						}catch (Exception ee){
+							ee.printStackTrace();
+						}
+						
+					}	  
+					
+					double price = 0;
+					try{
+						price = (row.getCell((short)5).getNumericCellValue());
+					}catch (Exception e){
+					//	e.printStackTrace();
+						try{
+							price = Double.parseDouble((row.getCell((short)5).getStringCellValue()));
+						}catch (Exception ee){
+							ee.printStackTrace();
+						}						
+					}	  
+					
+			        	  if(kogus != 0){
+			        		
+			          String eans = ean;
+			          if(eans.indexOf(".") != -1){
+			        	  eans = eans.substring(0,eans.indexOf("."));
+			          }
+			          String name =  formatter.formatCellValue(row.getCell((short)2));
+			      
+			       if(eans.length() == 12){
+			    	   try{
+			              	  EAN13CheckDigit ee = new EAN13CheckDigit();
+			                    eans = eans + ee.calculate(eans);
+			                }catch(Exception e){
+			              	  
+			                }
+			       }
+			         try{
+			           prod = driver.identifyProduct(eans,eans);
+			         } catch (SQLException e) {
+			            e.printStackTrace();	
+			         }
+
+			         
+				
+			       if (prod == null){
+			         addLog(parent.getString("noprodid") + "\n " + ean + "\n" + fileName + "\n" + parent.getString("fixprodid") +"\n\n");
+			         System.out.println(parent.getString("noprodid") + "\n " + ean + "\n" + fileName + "\n" + parent.getString("fixprodid") +"\n\n");
+			         //break;
+			         prod = " ";
+			         if(prod.trim().length() == 0 ){
+			        	 troubles.append("PRODUCT CANNOT BE RESOLVED VIADA XLS : \n" + "Dok Nr: " + doknr + "\n"
+			        			 + "\tLineNum: "  +  (counter+1) + " " + name +" EAN:"  + " Code:" + ean +
+			        			    " amount: " + kogus + " price" + price + "\n\n");
+			     		 doknr=dokNr;
+			        }
+			       }
+			       
+						System.out.println(i + "*"+firma+"*"+ eans +"*"+ name +"*"+kogus+"*"+ dokNr  );
+					      //	System.exit(0);
+					          orders.setInfo(dokNr);
+					          orders.add(firma, prod, name ,kogus, dokNr, null, 0, 0,shipdate,"0",price,0,false,
+					        		  "",55," ",null,"",ean,null,true,null,null);
+					 
+			       	  }
+			    }
+				
+			}
+			
+		ff.close();
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+	//f.delete();
+   // System.exit(0);
+	  }
+	  
 
 
   
@@ -17728,6 +17946,18 @@ shipdate = getCalXML(asi);
 	  	cc.set(Calendar.MONTH,Integer.parseInt(ss.substring(3,5))-1);
 	  	cc.set(Calendar.DATE,Integer.parseInt(ss.substring(0,2)));
 	  	return cc.getTimeInMillis() +"" ;	
+  }
+  
+  private Date getCalHTM2(String ss){
+	  Calendar cc = Calendar.getInstance();
+	 
+	  if(ss.length() == 9){
+		  ss = "0" +  ss;
+	  }
+	  	cc.set(Calendar.YEAR,Integer.parseInt(ss.substring(6,10)));
+	  	cc.set(Calendar.MONTH,Integer.parseInt(ss.substring(3,5))-1);
+	  	cc.set(Calendar.DATE,Integer.parseInt(ss.substring(0,2)));
+	  	return cc.getTime() ;	
   }
   
   private String getCalXML(String ss){

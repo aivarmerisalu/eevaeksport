@@ -1988,7 +1988,7 @@ public void createDashboard() {
 	 DashboardData dd02 = new DashboardData("LABEL");
 	 dd02.dataLabel = "Percent";
 	 dd02.dataType = "number";
-	 dd02.sorting = "asc";
+	 dd02.sorting = "desc";
 	 dd1.addArrElement(dd02);
 	 
 	 

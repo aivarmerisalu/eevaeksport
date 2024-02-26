@@ -1026,10 +1026,8 @@ String gg = "0";
 		try {
 	   
 	                  
-	       String  cmd = "    SELECT t.kod as toode , t.pavad as nimetus , ipak as tykke,KAINA1 as  myygihind, vnt as  yhik,g.id_pgr AS grupp, '' AS grupp2 ,bk.bkod   \r\n" + 
-	       		"	       		    AS ean,t.pvm as vat , t.kiekis as laoseis   FROM prk t INNER JOIN pgr g ON g.grupe=t.grupe and gr_type=1\r\n" + 
-	       		"	       			INNER join RR_PRKKN h ON h. ID_PRK = t.ID_PRK and h.ID_KN = 115 and kaina1 != 0 left join BK bk on bk.id_prk=t.id_prk \r\n" + 
-	       		"	       		       					where kod like '0000%' and  ID_snd = 2948   ORDER BY t.kod "; //and  g.grupe like '%pda%'
+	       String  cmd = "   SELECT t.kod as toode , t.pavad as nimetus ,bk.bkod AS ean   FROM prk t  inner join BK bk on bk.id_prk=t.id_prk  \r\n" + 
+	       		"	       			       		       					where kod like '0000%' and  ID_snd = 2948 and CHAR_LENGTH(bk.bkod) > 8 ORDER BY t.kod"; //and  g.grupe like '%pda%'
 	       
 
 	//color 8388608
@@ -1046,33 +1044,12 @@ String gg = "0";
 	                          
 	                        String nimetus =rs.getString("nimetus");
 	                          prod.setName(nimetus.trim());
-	                          prod.setPrice(rs.getDouble("myygihind"));
 	                      
-	                           String grupp = rs.getString("grupp");
-	                          if(grupp != null && grupp.trim().length()>0){
-	                          prod.setGroup(grupp.trim());}
-	                          
-	                          String grupp2 = rs.getString("grupp2");
-	                          if(grupp2 != null && grupp2.trim().length()>0){
-	                          prod.setGroupSecond(grupp2.trim());}
 
-	                          
-	                          prod.setInCases(rs.getDouble("tykke"));
 	                          String ean = rs.getString("ean");
 	                          if (ean != null && ean.trim().length()>0){
 	                            prod.setEAN(ean.trim());
 	                          }
-
-	                           String vat = rs.getString("vat");
-	                           if (vat != null && vat.trim().length()>0){
-	                        	   prod.setVat(vat);
-	                           }
-	                           
-	                           double stock = rs.getDouble("laoseis");
-	                           if(stock>0){
-	                        	   prod.setStock(stock);
-	                           }
-	                         
 	                          
 	                          
 	                          products.put(prod.getID(), prod);

@@ -136,13 +136,16 @@ public class HTMLeditor {
             	
             }
             
-            result.add(fdata.replace("TITLE_PLACEHOLDER", label));
             String sort = "";
             if (agentData.get("SORTING") != null) {
             	sort = agentData.get("SORTING")[0] ;
             }
-            result.add(fdata.replace("SORT_PLACEHOLDER", sort));
+            fdata = (fdata.replace("SORT_PLACEHOLDER", sort));
             
+            fdata = (fdata.replace("TITLE_PLACEHOLDER", label));
+            
+            result.add(fdata);
+           
            
             reader.close();
             	

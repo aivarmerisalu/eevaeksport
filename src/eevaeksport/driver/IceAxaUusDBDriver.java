@@ -143,10 +143,14 @@ try {
          	if(in.isFile()){
          	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
          	if(!inpda.exists()){
+         		try {
              	Converter.shrinkAndCopyFile(in,inpda,500);
      	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
                		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
                	}
+         		}catch(Exception u) {
+         			
+         		}
      	  	}   }
             }
           }

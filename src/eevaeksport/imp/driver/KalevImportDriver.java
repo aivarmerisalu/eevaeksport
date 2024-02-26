@@ -2326,7 +2326,7 @@ private long getAndUpdateNext() throws SQLException{
             	 // kui on rimi ja mingi kypsis siis koguseid muudame
 
             	 if(line.getToode().equals("135897") || line.getToode().equals("688867") ) {
-                	// kogus = kogus / 5; // Kylli palvel maas 10.2019 ,20.04.2020 tagasi pandud , 06.2020 uuesti maha 
+                	 kogus = kogus / 5; // Kylli palvel maas 10.2019 ,20.04.2020 tagasi pandud , 06.2020 uuesti maha , uuesti peale 26.02.24
                 	 }
             	// 688867 kondents. ja 135897 š
             	 if(line.getToode().equals("05149-1")) {
