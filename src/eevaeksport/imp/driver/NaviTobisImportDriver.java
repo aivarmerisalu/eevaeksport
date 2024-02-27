@@ -288,13 +288,14 @@ Connection ccc = DriverManager.getConnection(url + "saf"
      
          String	sql = "INSERT INTO [2015_Tobis$MOFF Prekiu krepselio eilute] ([Krepselio Nr],[Eilutes Nr], [Prietaiso Nr],[Prekes Nr]," +
          		"    [Kiekis],[Dovana],[Nuolaidos proc_],[Unit Of Measure Code],[Ret_ From ILE No_],[End Customer Discount %],"
-         		+ "[End Customer price],[Uzs_Eil_Nr_],[KS prekes Nr],[Suma],[Suma su PVM],[Aprasas],[Kaina],[Campaign No])" +
+         		+ "[End Customer price],[Uzs_Eil_Nr_],[KS prekes Nr],[Suma],[Suma su PVM],[Aprasas],[Kaina],[Campaign No],"
+         		+ "[Item_code2],[Item_code15],[Item_code5],[Item_code3],[Item_code16],[can_be_equal],[RetFromInvoiceNo],[RetFromInvoiceDate],[Unrecognized])" +
              " VALUES( " +
                salesid + "," +
                counter + ",'MS-" +
                agent + "',?," +
                kogus + "," +
-               alex +"," + ale + ",'',0,0,0,0,'',0,0,'',0,'" + ccc + "')";
+               alex +"," + ale + ",'',0,0,0,0,'',0,0,'',0,'" + ccc + "','','','','','',0,'',getdate(),0)";
 System.out.println(sql);
                log.info("SALES_LINE_SQL: " + sql);
                PreparedStatement st2 = con3.prepareStatement(sql);
@@ -442,11 +443,11 @@ System.out.println(sql);
         		"[Ship-To Address 2],[Ship-To City],[Ship-To Post Code],[Ship-To Country],[Ship-To VAT Reg_ No_],\r\n" + 
         		"[Ship-To Phone],[Ship-To e-mail],[Bill-To Name],[Bill-To Name 2],[Bill-To Address],\r\n" + 
         		"[Bill-To Address 2],[Bill-To City],[Bill-To Post Code],[Bill-To Country],[Bill-To Reg_ No_],\r\n" + 
-        		"[Bill-To VAT Reg_ No_],[Reply-To email],[Ship-To Info Modified],[Payer Info Modified],[StockMgt Order],[DeliveryDate],[Priority],[Customer No_],[Locker Owner], [Locker Code] ) " +
+        		"[Bill-To VAT Reg_ No_],[Reply-To email],[Ship-To Info Modified],[Payer Info Modified],[StockMgt Order],[DeliveryDate],[Priority],[Customer No_],[Locker Owner], [Locker Code], [Prices From File]) " +
                 " VALUES ( " + salesid + ",'MS-" + agent + "','" + custid + "',cast(? as date),1,'"+ tekst.replaceAll("'", " ")+"','" +  
               ref + "','" + ladu  + "'," + status + ",'" + smode + "','" + order.getAgent() + "','MOB',(CAST('1753-01-01 00:00:00.000' AS DateTime)),"
               		+ "(CAST('1753-01-01 00:00:00.000' AS DateTime)),0,0,0,'','',(CAST('1753-01-01 00:00:00.000' AS DateTime)),(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',0,(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',1,'','',0,0,0,"
-              		+ " '','','','','','','','','','','','','','','','','','','','','','',0,0,0,cast(? as date),0,'','','')";
+              		+ " '','','','','','','','','','','','','','','','','','','','','','',0,0,0,cast(? as date),0,'','','',0)";
 
      log.info("addInvoiceHeader2: " + sql);
      System.out.println("addInvoiceHeader2: " + sql);

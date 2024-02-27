@@ -2981,8 +2981,10 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   }
 	   String end = d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
 	   cal.add(Calendar.DATE, - days);
+	   cal.set(Calendar.DAY_OF_MONTH, 1);
 	   
 	    d = cal.get(Calendar.DAY_OF_MONTH)+ "";
+	  
 	   if(d.length() == 1){
 		   d = "0" + d;
 	   }
@@ -3089,7 +3091,6 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		     							CustProd cp = (CustProd) eee.nextElement();
 		     						//	siin siis vaja koguda kliendi müüki 
 		     							//cp.checkdate
-                                     if(cp.checkdate.getMonth() == 0)
 					        		//	 System.out.println(cp.checkdate.toLocaleString() + " " + (lastYearMonth(cp.checkdate))+ " " + date + "  222 " + number + " " + custid  + " " + cps);			     					
 		 				        		
 		     							if(thisMonth(cp.checkdate)) {
@@ -3108,8 +3109,11 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		     								}
 		     								tt.setDonevol(tt.getDonevol() + cp.getLastAmount()*cp.getLastPrice());
 		     								customerSales.put(custid, tt);
-
-			     							// System.out.println(cp.checkdate.toLocaleString() + " " + custid);			     								
+if(custid.equals("10352")) {
+			     							 System.out.println(cp.checkdate.toLocaleString() + " " + custid 
+			     									 + cp.getLastAmount() + " " + cp.getLastPrice()+ " " + tt.getDonevol());	
+			     							System.out.println(httpsURL);
+}
 		     							}
 		     							
 		     							custProds.add(cp);

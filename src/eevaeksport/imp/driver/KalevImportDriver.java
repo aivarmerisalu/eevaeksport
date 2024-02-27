@@ -526,7 +526,8 @@ private HashSet getXXX(){
 				     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
 			          }else{
 			        	  String sorting =  identfySorting(itemid);
-			        	  if((order.getCompany().startsWith("INTR")  || order.getCompany().equals("M12320") || order.getCompany().equals("M19031")) && xxxprods.contains(itemid)) {
+			        	  if(xxxprods.contains(itemid)) {
+			        		 //(order.getCompany().startsWith("INTR")  || order.getCompany().equals("M12320") || order.getCompany().equals("M19031")) && 
 			        		  ordJ1.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 						     			sorting + " " + lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType); 
 			        	  }else {
