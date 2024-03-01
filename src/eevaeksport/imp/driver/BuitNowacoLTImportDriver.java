@@ -681,7 +681,11 @@ if(ag != null){
 
   public String getTrouble() {
   	// TODO Auto-generated method stub
-  	return troubles.toString();
+	  if(troubles != null) {
+		  return troubles.toString();
+	  }
+	  
+  	return "";
   }
   
 }

@@ -1441,6 +1441,16 @@ while (rs2.next()){
         	prod.setStock(Double.parseDouble((String)stocks.get(kood)));
         }
 
+        double TAARA_VAT  = rs.getDouble("TAARA_VAT");
+        double DEPO_WO_VAT = rs.getDouble("DEPO_WO_VAT");
+        if(TAARA_VAT > 0) {
+        prod.TAARA_VAT = TAARA_VAT;
+        }
+        if(DEPO_WO_VAT > 0) {
+            prod.DEPO_WO_VAT = DEPO_WO_VAT;
+            }
+            
+        
         prod.setNameSorting(nimetus);
         prod.setSorting(aaa);
         products.put( nimetus, prod);

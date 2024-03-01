@@ -4781,6 +4781,16 @@ if(agprods != null && agprods.size() >0){
        buf.append(EksportPanel.separator);
        buf.append(prod.getArrivesToStock());
        
+
+       buf.append(EksportPanel.separator);
+       buf.append(prod.TAARA_VAT);
+
+       buf.append(EksportPanel.separator);
+       buf.append(prod.DEPO_WO_VAT);
+
+       buf.append(EksportPanel.separator);
+       buf.append(prod.getArrivesToStock());
+       
        buf.append(lineSeparator);
        
        

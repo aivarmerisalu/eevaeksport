@@ -400,6 +400,8 @@ public class Product {
 	public Integer points = 0;
 	public boolean noOrder = false;
 	public String artikkel = null;
+	public double TAARA_VAT = 0;
+	public double DEPO_WO_VAT = 0;
 	
    
    public double getOptAmountInUnits() {

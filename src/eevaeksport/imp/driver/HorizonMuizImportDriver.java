@@ -504,7 +504,11 @@ try{
 		
 		   //   trouble = "IMPORTED ORDER \n" + order_xml;
 		      
-		     
+		      if(parent.getProps().getProperty("smtphost") != null) {
+				     Agent ag = new Agent(agg);
+				      ag.setName(agg);
+				       Converter.sendCommentEmail("New Order " + comm, null, doknr, cukood, cuid.getName(), null, false, ag, parent, null);
+				     }
 		      if("true".equals(parent.getProps().getProperty("testing"))){
 			 		System.out.println("Testing ");
 		    	  System.exit(0);
@@ -513,11 +517,7 @@ try{
 	 		String xml = getWeb(order_xml , "DokNr:" + order.getDokNr() + " Company:" + cukood);		
 	 	//	System.out.println("Tulemus " + xml);
 		     Converter.saveFileInUTF8(fileName, xml);
-		     if(parent.getProps().getProperty("smtphost") != null) {
-		     Agent ag = new Agent(agg);
-		      ag.setName(agg);
-		       Converter.sendCommentEmail("New Order " + comm, null, doknr, cukood, cuid.getName(), null, false, ag, parent, null);
-		     }
+		     
 	      
 	      setNumAddedLines(counter); 
 	      

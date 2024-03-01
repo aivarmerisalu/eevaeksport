@@ -295,7 +295,7 @@ Connection ccc = DriverManager.getConnection(url + "saf"
                counter + ",'MS-" +
                agent + "',?," +
                kogus + "," +
-               alex +"," + ale + ",'',0,0,0,0,'',0,0,'',0,'" + ccc + "','','','','','',0,'',getdate(),0)";
+               alex +"," + ale + ",'',0,0,0,0,'',0,0,'',0,'" + ccc + "','','','','','',0,'', '1753-01-01 00:00:00',0)";
 System.out.println(sql);
                log.info("SALES_LINE_SQL: " + sql);
                PreparedStatement st2 = con3.prepareStatement(sql);
@@ -446,7 +446,7 @@ System.out.println(sql);
         		"[Bill-To VAT Reg_ No_],[Reply-To email],[Ship-To Info Modified],[Payer Info Modified],[StockMgt Order],[DeliveryDate],[Priority],[Customer No_],[Locker Owner], [Locker Code], [Prices From File]) " +
                 " VALUES ( " + salesid + ",'MS-" + agent + "','" + custid + "',cast(? as date),1,'"+ tekst.replaceAll("'", " ")+"','" +  
               ref + "','" + ladu  + "'," + status + ",'" + smode + "','" + order.getAgent() + "','MOB',(CAST('1753-01-01 00:00:00.000' AS DateTime)),"
-              		+ "(CAST('1753-01-01 00:00:00.000' AS DateTime)),0,0,0,'','',(CAST('1753-01-01 00:00:00.000' AS DateTime)),(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',0,(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',1,'','',0,0,0,"
+              		+ "(CAST('1753-01-01 00:00:00.000' AS DateTime)),0,0,0,'','',(CAST('1753-01-01 00:00:00.000' AS DateTime)),(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',0,(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',0,'','',0,0,0,"
               		+ " '','','','','','','','','','','','','','','','','','','','','','',0,0,0,cast(? as date),0,'','','',0)";
 
      log.info("addInvoiceHeader2: " + sql);

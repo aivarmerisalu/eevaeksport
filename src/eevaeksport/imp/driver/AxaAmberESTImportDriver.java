@@ -481,6 +481,7 @@ private String getEan(String toode){
                }
 	   		
 
+               
 	   			
 		  	  		mail.setSMTP(parent.getProps().getProperty("smtphost"));
 		  	  		mail.setFilesTo(parent.getProps().getProperty("operatoremail2"));

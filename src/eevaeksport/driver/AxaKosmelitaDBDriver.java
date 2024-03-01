@@ -406,8 +406,60 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
   
   TreeMap agnames = null;
   
+  String prodHier = null;
+  String prodHierID = null;
+  String channelID = null;
+  
   public TreeMap getAgents(){
+	  
+	  
+	  String cmk = "select MCRCHANNELCATEGORYHIERARCHY_KOS as hier ,OMOPERATINGUNITID,recid as channelid from dbo.RETAILCHANNELTABLE\r\n" + 
+	  		"where CHANNELTYPE='4' and retailchannelid = '" + getParent().getProps().getProperty("channel") + "'" + 
+	  		"";
 
+	   try {
+		   	 Connection con = getNewConnection();
+		     Statement   stmt = con.createStatement();
+		      ResultSet rs = stmt.executeQuery(cmk);
+		        while(rs.next()){
+		        	prodHier =   rs.getString("hier").trim();
+		        	channelID = rs.getString("channelid").trim();
+
+		        }
+		        rs.close();
+		        stmt.close();
+		        con.close();
+		        
+		    } catch (Exception e){
+		        getParent().showError(e);
+		      }
+	  System.out.println("prodHier " + prodHier);
+	  System.out.println("channelID " + channelID);
+	  
+	 cmk = "select RECID as hier from dbo.ECORESCATEGORYHIERARCHY " + 
+	 		"		  		where name = '" + prodHier + "'" ;
+		  		
+
+		   try {
+			   	 Connection con = getNewConnection();
+			     Statement   stmt = con.createStatement();
+			      ResultSet rs = stmt.executeQuery(cmk);
+			        while(rs.next()){
+			        	prodHierID =   rs.getString("hier").trim();
+
+			        }
+			        rs.close();
+			        stmt.close();
+			        con.close();
+			        
+			    } catch (Exception e){
+			        getParent().showError(e);
+			      }
+	
+		   
+		   System.out.println("prodHierID " + prodHierID);
+			
+		   
     String cmd = " select w.value as kood , w.name as name from  DIMATTRIBUTEHCMWORKER w   inner join HCMWORKER h on h.personnelnumber = w.value \r\n" + 
     		"			 inner join custtable c on c.MAINCONTACTWORKER=h.recid where w.value like 'G%' group by  w.value  , w.name";// +
     
@@ -943,7 +995,7 @@ try {
   //  String    sql = "   SELECT PRODUCTLINEID as liik,name as nimi FROM  inventproductline  where dataareaid ='kosm'  ";
  
     String    sql = " 	Select e.PARENTCATEGORY as liik , e.code,   (Select name from ECORESCATEGORY a where a.RECID = e.PARENTCATEGORY) as nimi from ECORESPRODUCTCATEGORY g \r\n" + 
-    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827') group by e.recid , e.name, e.code ,PARENTCATEGORY ";
+    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('" + prodHierID + "') group by e.recid , e.name, e.code ,PARENTCATEGORY ";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 
@@ -978,7 +1030,7 @@ try {
 	    TreeMap tm = new TreeMap();
 	    
 	    String sql = "Select e.recid as liik , e.PARENTCATEGORY as liik2, e.code , e.name as nimi from  ECORESPRODUCTCATEGORY g \r\n" + 
-	    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('5637146827') group by e.recid ,PARENTCATEGORY, e.name, e.code";
+	    		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('" + prodHierID + "') group by e.recid ,PARENTCATEGORY, e.name, e.code";
 	   
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
@@ -1048,7 +1100,7 @@ try {
     		"    		   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat ,  \r\n" + 
     		"    		    0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp FROM  inventtable inv  \r\n" + 
     		"    			 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
-    		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('5637146827')  \r\n" + 
+    		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('" + prodHierID + "')  \r\n" + 
     		"    			 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
     		"    		       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  \r\n" + 
     		"    		   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
