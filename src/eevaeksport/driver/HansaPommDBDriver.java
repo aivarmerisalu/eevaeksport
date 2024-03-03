@@ -553,8 +553,8 @@ TreeMap tr = new TreeMap();
 
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-     getCustomers(null);
-     System.exit(0);
+    // getCustomers(null);
+     //System.exit(0);
      try {
  	 
        BufferedReader reader = new BufferedReader(
@@ -838,14 +838,14 @@ TreeMap tr = new TreeMap();
       st.nextToken();
       //     st.nextToken();
    //10202	A-Selver AS			P�rnu mnt 238	Tallinn 11624	Kadaka Selver		Kadaka tee 56A	Tallinn 12915		6673400	6673414	SELVE		45	0	0		1			KADSELVER	1			0	GAJAN				1	Kadaka Selver				075		0	09.02.2007					0									0				0	0			0	0	0	19.07.2004	0											0	0	0				0	0																					0	0	1									102068		0	0				0		0			
-      System.out.println(line);
+     // System.out.println(line);
             
            if (st.hasMoreTokens()){
            	String info = st.nextToken().trim();
            	if(info.length()>0 && info.trim().length()>0){
 
                 customer.setPersonalData(Converter.enCodeEst(customer.getPersonalData()) + " " +clear(info));
-                System.out.println(info);
+              //  System.out.println(info);
            	}
             }
            st.nextToken();
