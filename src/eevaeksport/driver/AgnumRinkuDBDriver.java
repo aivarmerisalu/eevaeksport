@@ -489,7 +489,7 @@ TreeMap photos = new TreeMap();
 	 * getStartingTime() + " GROUP BY omrid.klient, rid.toode ORDER BY omrid.klient, rid.nimetus";
 	 */
 	String cmd =	    "select sd.id_kl as saaja,sd.ID_SUBKL as abi,t.kod as toode,max(sd.data) as kuupaev,max(a.kiekis) as kogus , max(doknr) as lastdok , parkn as lastprice from spub2 a INNER JOIN SDOK sd on sd.id_sdok = a.id_sdok inner join prk t on t.id_prk=a.id_prk\r\n" + 
-	    "	       where sd.data>current_timestamp-20  GROUP BY sd.id_kl,sd.ID_SUBKL, t.kod,parkn ORDER BY sd.id_kl,sd.ID_SUBKL , t.kod,parkn desc" ;
+	    "	       where sd.data>current_timestamp-180  GROUP BY sd.id_kl,sd.ID_SUBKL, t.kod,parkn ORDER BY sd.id_kl,sd.ID_SUBKL , t.kod,parkn desc" ;
 	
 	if (isDebug()) {
 	    System.out.println(cmd);

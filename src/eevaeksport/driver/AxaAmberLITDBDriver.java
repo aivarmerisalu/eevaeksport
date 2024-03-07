@@ -463,6 +463,7 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                    //kolm kuud on kampaania hetkel                                
                                  if(nadal > 36 ){
                                 	 mline.setProdLevel("pr");
+                                	  //mline.setStartDate(algus.trim());
                                    }else if (nadal > 0 && nadal < 37){
                                    mline.setStartDate(algus.trim());
                                    mline.setEndDate(lopp.trim());
@@ -545,6 +546,8 @@ BulkUpdater, Discounter,PictureMaker,FixLoader {
                                           
                                           if(kuu > 36 ){
                                          	 mline.setProdLevel("pr");
+                                         	 
+                                         	 //mline.setStartDate(algus.trim());
                                             }else{
                                             mline.setStartDate(algus.trim());
                                             mline.setEndDate(lopp.trim());

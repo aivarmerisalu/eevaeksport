@@ -520,9 +520,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
                   ResultSet rs = stmt.executeQuery(sql);
 
                   while (rs.next()) {
-                          String custID = rs.getString("custid");
+                          String custID = rs.getString("custid").toUpperCase();
                           String klient = rs.getString("klient");
-                          String clGroup = rs.getString("clgroup");
+                          String clGroup = rs.getString("clgroup").toUpperCase();
                           String prodID = rs.getString("prodid");
                           String prodGroup = rs.getString("prodgroup");
                           double discount = rs.getDouble("discount");

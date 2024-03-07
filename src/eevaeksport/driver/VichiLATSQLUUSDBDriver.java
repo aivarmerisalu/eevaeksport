@@ -63,11 +63,14 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		  user =  getParent().getProps().getProperty("rest.user");
 		    pass = getParent().getProps().getProperty("rest.pass");
 		    rcompany = getParent().getProps().getProperty("rest.company");
-		   
+		    if("true".equals(getParent().getProps().getProperty("use.view"))) {
+
+			    view = true;	
+		    }
 	  }
 
 	  
-
+      boolean view = false;
 	  String user =  null;
 	  String pass = null;
 	  String rcompany = null;
@@ -93,14 +96,21 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
      	
    
    	 
-     	
+
+		   	try {
      	String cmd2 = "SELECT t.[No_] AS toode  , (select top 1 ref.[Item No_] from Navision.dbo.[Vičiūnai ir Ko$Item Cross Reference] ref " +   
  	   "    WHERE  ref.[Cross-Reference Type No_] = 'LAT'  and ref.[Cross-Reference No_]  = t.[No_] ) as littoode " +
   "FROM [Vičiūnai-LAT$Item] t WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0) " +
  	"				  or [Pogrupio kodas] like '%2.8.1%' " ;
- 			
- 		   	try {
- 		   	    Connection con = getNewConnection2();
+     	Connection con =  null;
+     	
+     	if(view) {
+     		cmd2 = "select * from MobileJavaLAT.v_LAT_PictureCatalogue";
+     		con = this.getNewConnectionView();
+     	}else {
+     		con =  getNewConnection2();
+     	}
+ 		   	    
  				Statement stmt = con.createStatement();
  		   	    ResultSet	      rs = stmt.executeQuery(cmd2);
  		        TreeMap conver = new TreeMap();
@@ -543,8 +553,13 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		TreeMap tm = new TreeMap();
 		setTreeGroup(true);
 		String cmd = " SELECT  [Kodas] AS kood,[Aprašas] AS nimi  FROM [Vičiūnai-LAT$Prekių grupavimas] order by [Kodas]";
-		try {
-			Connection con = getNewConnection2();
+		try {Connection con = null;
+		if(view) {
+			cmd  = "select * from MobileJavaLAT.v_LAT_GetProdGroups";
+			con = this.getNewConnectionView();
+		} else {
+			con =  getNewConnection2();
+		 }
 			System.out.println(cmd);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
@@ -587,8 +602,13 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		TreeMap tm = new TreeMap();
 		String cmd = "SELECT  [Kodas] AS kood,[Aprašas] AS nimi  FROM [Vičiūnai-LAT$Prekių grupavimas] order by [Kodas]";
 		System.out.println(cmd);
-		try {
-			Connection con = getNewConnection2();
+		try {Connection con = null;
+		if(view) {
+			cmd  = "select * from MobileJavaLAT.v_LAT_GetProdGroups";
+			con = this.getNewConnectionView();
+		} else {
+			con =  getNewConnection2();
+		 }
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -737,17 +757,25 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 
 		String cmd = "SELECT [Code] AS kood,[Name] AS nimi,[Location Code] AS objekt ,left ([Location Code for MobileJava],3) AS objekt2 FROM "
 				+ "[Vičiūnai-LAT$Salesperson_Purchaser] WHERE len([Location Code])>0";
-		if (isDebug())
-			System.out.println(cmd);
+		
+			
+			
 		TreeMap agents = new TreeMap();
 		 agent1 = new TreeMap();
 		   StringBuffer sb2 = new StringBuffer();
 			
 		try {
 
-
+Connection con = null;
+if(view) {
+	cmd  = "select * from MobileJavaLAT.v_LAT_GetAgents";
+	con = this.getNewConnectionView();
+} else {
+	   con =  getNewConnection2();
+ }
 			
-			Connection con = getNewConnection2();
+
+			System.out.println(cmd);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -796,8 +824,15 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 			
 			cmd = "SELECT k.[No_] AS klient, [Balance total (LCY)]AS summa "
 					+ " FROM [Vičiūnai-LAT$Customer] k  WHERE k.[Salesperson Code] != '' AND [Balance total (LCY)]<>0 ";
+			
+		
+			if(view) {
+				cmd  = "select * from MobileJavaLAT.v_LAT_Getdebts";
+				con = this.getNewConnectionView();
+			} else {
+				   con =  getNewConnection2();
+			 }
 			System.out.println(cmd);
-			con = getNewConnection2();
 			Statement stmt1 = con.createStatement();
 			ResultSet rs1 = stmt1.executeQuery(cmd);
 			while (rs1.next()) {
@@ -826,7 +861,9 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 
 	private TreeMap agent1 = new TreeMap();
 	public TreeMap getCustomers(Agent agent) {
-		
+
+		 TreeMap<String , Double> debts = new TreeMap<String, Double>();
+					
 		
 		try{
 			   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
@@ -837,19 +874,21 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 	 	TreeMap freeze = new TreeMap();
 		try {
 
-			String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number, a.[Due Date] AS kuupaev, sum(b.[Amount]) AS summa, "
-					+ " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer  FROM [Vičiūnai-LAT$Cust_ Ledger Entry] a inner join "
-					+ " [Vičiūnai-LAT$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] "
-					+ " where a.[Document type] = 2 AND  a.[Posting Date] > getdate()-200 AND a.[Open]= 1 "
-					+ // a.[Due Date] < GETDATE()+7 AND
-					" group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[External Document No_], "
-					+ " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount])<> 0 ";
 
 			try{
 				String ccc = "select  [Freezer Customer] as cust, No_ + ' ' +Description   " +
 				" as last ,  [Last Date Modified] as dd from [Vičiūnai-LAT$Fixed Asset]" ;
 
-	Connection cn = getNewConnection2();
+	Connection cn = null;
+	
+
+	if(view) {
+		ccc  = "select * from MobileJavaLAT.v_LAT_FA";
+		cn = this.getNewConnectionView();
+	} else {
+		   cn =  getNewConnection2();
+	 }
+	
 Statement stcn = cn.createStatement();
 ResultSet rscn = stcn.executeQuery(ccc);
 while (rscn.next()) {
@@ -875,10 +914,65 @@ cn.close();
 			}catch(Exception r ){
 				
 			}
+			String sql3 = "  SELECT     No_ AS kood, CASE WHEN k.[Bill-to Customer No_] = '' THEN "
+					+ "(SELECT     SUM(de.[Amount (LCY)]) FROM [Vičiūnai-LAT$Cust_ Ledger Entry] c INNER JOIN  "
+					+ " [Vičiūnai-LAT$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] "
+					+ "  WHERE   c.[Customer No_] = k.No_) WHEN k.[Bill-to Customer No_] <> '' THEN (SELECT   SUM(de.[Amount (LCY)]) "
+					+ "  FROM  [Vičiūnai-LAT$Cust_ Ledger Entry] c INNER JOIN "
+					+ "   [Vičiūnai-LAT$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] "
+					+ "  WHERE  c.[Customer No_] = k.[Bill-to Customer No_] AND [OPEN] = 1 AND c.[Sell-to Customer No_] = k.No_ "
+					+ "	 and [Due Date] <getdate()+7    and c.[Posting Date] > getdate()- 100) "
+					+ "	 END AS yle FROM [Vičiūnai-LAT$Customer] k "
+					+ "	WHERE  AND (Blocked <> 3) AND ([Salesperson Code] <> '') ";
 
-			System.out.println(cmd);
+			try {
+
+				Connection con3 = null;
+				if(view) {
+					sql3  = "select * from MobileJavaLAT.v_LAT_GetOverdue";
+					con3 = this.getNewConnectionView();
+				} else {
+					con3 =  getNewConnection2();
+				 }
+				Statement stmt3 = con3.createStatement();
+				ResultSet rs3 = stmt3.executeQuery(sql3);
+				while (rs3.next()) {
+                    String kl = rs3.getString(1);
+					double sum = rs3.getDouble("yle");
+					if (sum != 0) {
+						debts.put(kl, sum);
+						// System.out.println("yle " + id+ " " + sum);
+					}
+
+				}
+
+				rs3.close();
+				stmt3.close();
+				con3.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			
 			this.debtList = new Vector();
-			Connection con = getNewConnection2();
+			Connection con = null;
+			String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number, a.[Due Date] AS kuupaev, sum(b.[Amount]) AS summa, "
+					+ " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer  FROM [Vičiūnai-LAT$Cust_ Ledger Entry] a inner join "
+					+ " [Vičiūnai-LAT$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] "
+					+ " where a.[Document type] = 2 AND  a.[Posting Date] > getdate()-200 AND a.[Open]= 1 "
+					+ // a.[Due Date] < GETDATE()+7 AND
+					" group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[External Document No_], "
+					+ " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount])<> 0 ";
+
+			if(view) {
+				cmd  = "select * from MobileJavaLAT.v_LAT_GetDebtsList";
+				con = this.getNewConnectionView();
+			} else {
+				con =  getNewConnection2();
+			 }
+			
+
+			System.out.println(cmd);			
 			Statement stmt1 = con.createStatement();
 			ResultSet rs1 = stmt1.executeQuery(cmd);
 			while (rs1.next()) {
@@ -923,9 +1017,16 @@ cn.close();
 				+ " ,[Customer Disc_ Group]  as matrix  , k.Tinklas as chain FROM [Vičiūnai-LAT$Customer] k LEFT JOIN [Vičiūnai-LAT$Sales Line Discount] d ON d.[Sales Code] = k.[Customer Disc_ Group]   AND d.[Sales Type]=1 "
 				+ " WHERE k.[Salesperson Code] != ''  AND blocked != 3 and [RouteCode]!= ''  ";
 
-		System.out.println(sql);
 		try {
-			Connection con = getNewConnection2();
+			Connection con = null;
+			if(view) {
+				sql  = "select * from MobileJavaLAT.v_LAT_Customers";
+				con = this.getNewConnectionView();
+			} else {
+     		   con =  getNewConnection2();
+     	    }
+
+			System.out.println(sql);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
@@ -1069,42 +1170,14 @@ cn.close();
 				}
 
 				if (!customer.isNodebt()) {
-
-					String sql3 = "  SELECT     No_ AS kood, CASE WHEN k.[Bill-to Customer No_] = '' THEN "
-							+ "(SELECT     SUM(de.[Amount (LCY)]) FROM [Vičiūnai-LAT$Cust_ Ledger Entry] c INNER JOIN  "
-							+ " [Vičiūnai-LAT$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] "
-							+ "  WHERE   c.[Customer No_] = k.No_) WHEN k.[Bill-to Customer No_] <> '' THEN (SELECT   SUM(de.[Amount (LCY)]) "
-							+ "  FROM  [Vičiūnai-LAT$Cust_ Ledger Entry] c INNER JOIN "
-							+ "   [Vičiūnai-LAT$Detailed Cust_ Ledg_ Entry] de ON de.[Cust_ Ledger Entry No_] = c.[Entry No_] "
-							+ "  WHERE  c.[Customer No_] = k.[Bill-to Customer No_] AND [OPEN] = 1 AND c.[Sell-to Customer No_] = k.No_ "
-							+ "	 and [Due Date] <getdate()+7    and c.[Posting Date] > getdate()- 100) "
-							+ "	 END AS yle FROM [Vičiūnai-LAT$Customer] k "
-							+ "	WHERE  (No_ = '"
-							+ id
-							+ "') AND (Blocked <> 3) AND ([Salesperson Code] <> '') ";
-
-					try {
-						Connection con3 = getNewConnection2();
-						Statement stmt3 = con3.createStatement();
-						ResultSet rs3 = stmt3.executeQuery(sql3);
-						while (rs3.next()) {
-
-							double sum = rs3.getDouble("yle");
-							if (sum != 0) {
-								customer.setDebt(sum);
-								// System.out.println("yle " + id+ " " + sum);
-							}
-
-						}
-
-						rs3.close();
-						stmt3.close();
-						con3.close();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					// customer.setUsedCredit(Double.parseDouble(used.replaceAll(",",".").replaceAll(" ","")));
+                   if(debts.get(customer.getPayer()) != null) {
+				    customer.setDebt(debts.get(customer.getPayer()));
+                   }
+                   if(debts.get(customer.getID()) != null) {
+   				    customer.setDebt(debts.get(customer.getID()));
+                      }
+   				
+                   // customer.setUsedCredit(Double.parseDouble(used.replaceAll(",",".").replaceAll(" ","")));
 				}
 				   String cont = rs.getString("kontakt");
 		           if(cont != null && cont.trim().length()>0){
@@ -1146,8 +1219,15 @@ cn.close();
 			String cmd7 = " select sd.[Code] as kood ,[Line Discount %] as disc from [Vičiūnai-LAT$Sales Line Discount] sd "
 					+ " where getdate() between [Starting Date] and [Ending Date] +1 ";
 
-		Connection	con = getNewConnection2();
-		Statement	stmt = con.createStatement();
+			Connection con = null;
+			if(view) {
+				cmd7  = "select * from MobileJavaLAT.v_LAT_GetDiscount";
+				con = this.getNewConnectionView();
+			} else {
+     		   con =  getNewConnection2();
+     	    }
+			
+			Statement	stmt = con.createStatement();
 		ResultSet	rs = stmt.executeQuery(cmd7);
 			while (rs.next()) {
 				String toode = null;
@@ -1172,7 +1252,15 @@ cn.close();
 	try {
 
 		String cmd7 = " select * from lat_litstock ";
-		Connection	con = getNewConnection2();
+		
+		
+		Connection con = null;
+		if(view) {
+			cmd7  = "select * from MobileJavaLAT.LAT_Litstock";
+			con = this.getNewConnectionView();
+		} else {
+ 		   con =  getNewConnection2();
+ 	    }
 		Statement	stmt = con.createStatement();
 		ResultSet	rs = stmt.executeQuery(cmd7);
 		
@@ -1207,8 +1295,15 @@ cn.close();
 					+ "	  WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0) "
 					+ "	  or [Pogrupio kodas] like '%2.8.1%' ORDER BY [No_] "; //'%2.08.01%'
 			
+			Connection con = null;
+			if(view) {
+				cmd  = "select * from MobileJavaLAT.v_LAT_GetProducts";
+				con = this.getNewConnectionView();
+			} else {
+     		   con =  getNewConnection2();
+     	    }
+
 			System.out.println(cmd);
-			Connection con = getNewConnection2();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -1637,7 +1732,14 @@ cn.close();
 					+ " [Vičiūnai-LAT$Sales Cr_Memo Header] a inner join [Vičiūnai-LAT$Sales CR_Memo Line] b on a.[No_]=b.[Document No_] "
 					+ " where Year(getdate())=Year(a.[Shipment Date]) and Month(getdate())=Month(a.[Shipment Date])) S "
 					+ " group By [Salesperson Code]";
-			Connection con = getNewConnection2();
+			Connection con = null;
+			if(view) {
+				cmd  = "select * from MobileJavaLAT.v_LAT_Turnover";
+				con = this.getNewConnectionView();
+			}else {
+     		con =  getNewConnection2();
+     	}
+			
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
