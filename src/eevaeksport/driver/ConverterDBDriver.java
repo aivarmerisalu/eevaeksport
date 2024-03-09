@@ -555,12 +555,12 @@ public void WebReporter() {
 										
 										invoiceSumma = invoiceSumma + itemSumma;
 										invoiceSummaRound = invoiceSummaRound + Double.parseDouble(formatter.format(itemSumma));
-										invoiceVATSumma = invoiceVATSumma + (itemSumma * 0.2);
-										invoiceVATSummaRound = invoiceVATSummaRound + Double.parseDouble(formatter.format(itemSumma * 0.2));
+										invoiceVATSumma = invoiceVATSumma + (itemSumma * 0.22);
+										invoiceVATSummaRound = invoiceVATSummaRound + Double.parseDouble(formatter.format(itemSumma * 0.22));
 										
-										itemTotalSumma = itemTotalSumma + (itemSumma + (itemSumma * 0.2));
+										itemTotalSumma = itemTotalSumma + (itemSumma + (itemSumma * 0.22));
 										//itemTotalSummaRound = itemTotalSummaRound + Double.parseDouble(formatter.format(itemSumma + (itemSumma * 0.2)));
-										itemTotalSummaRound = itemTotalSummaRound + Double.parseDouble(formatter.format(itemSumma)) + Double.parseDouble(formatter.format(itemSumma*0.2));
+										itemTotalSummaRound = itemTotalSummaRound + Double.parseDouble(formatter.format(itemSumma)) + Double.parseDouble(formatter.format(itemSumma*0.22));
 										//Double.parseDouble(data[3])*0.2 arvutab km-i
 										//formatter.format(itemSumma + Double.parseDouble(data[3]) * 0.2)))
 										
@@ -606,15 +606,15 @@ public void WebReporter() {
 						            itemEntry.appendChild(vat);
 						            // VATRate element
 						            Element vatRate = doc.createElement("VATRate");
-						            vatRate.appendChild(doc.createTextNode("20.00"));
+						            vatRate.appendChild(doc.createTextNode("22.00"));
 						            vat.appendChild(vatRate);
 						            // VATSum element
 						            Element vatSum = doc.createElement("VATSum");	
-						            vatSum.appendChild(doc.createTextNode(formatter.format(itemSumma * 0.2))); //hind*0.2
+						            vatSum.appendChild(doc.createTextNode(formatter.format(itemSumma * 0.22))); //hind*0.2
 						            vat.appendChild(vatSum);
 						            // ItemTotal element
 						            Element itemTotal = doc.createElement("ItemTotal");
-						            itemTotal.appendChild(doc.createTextNode(formatter.format(Double.parseDouble(formatter.format(itemSumma)) + Double.parseDouble(formatter.format(itemSumma*0.2))))); //hind+hind*0.2
+						            itemTotal.appendChild(doc.createTextNode(formatter.format(Double.parseDouble(formatter.format(itemSumma)) + Double.parseDouble(formatter.format(itemSumma*0.22))))); //hind+hind*0.2
 						            itemEntry.appendChild(itemTotal);
 						            
 									} catch (Exception e) {
