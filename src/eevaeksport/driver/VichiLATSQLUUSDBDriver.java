@@ -1514,7 +1514,7 @@ cn.close();
 	public String getAssortmentStr(Agent agent) {
 		StringBuffer sb = new StringBuffer();
 		
-		String cmd = " SELECT * from v_LAT_Asortimentas";
+		String cmd = " SELECT * from MobileJavaLAT.v_LAT_Asortimentas";
 		try {
 			Connection con = getNewConnectionView();
 			System.out.println(cmd);
@@ -1553,9 +1553,17 @@ cn.close();
 				    "	 r.[Užsakytas kiekis] -r.[Quantity] as saamatta ,r.[Unit Price] as lprice  FROM [Vičiūnai-LAT$Sales Shipment Line] r INNER JOIN [Vičiūnai-LAT$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [Vičiūnai-LAT$Item] t ON t.[No_]=r.[No_] " +
 				    "	  WHERE d.[Shipment Date]> GETDATE()-120 " +
 				    " order by 1,2,3,5 "; //d.[Sell-to Customer No_], t.[Search Description],r.[No_],d.[Posting Date]
-			System.out.println(cmd);
+			
 			// "klient","toode","kogus","viimane kuupļæ½ev","viimane kogus"
-			Connection con = getNewConnection2();
+			Connection con = null;
+			if(view) {
+				cmd  = "select * from MobileJavaLAT.v_LAT_GetCustProdList";
+				con = this.getNewConnectionView();
+			}else {
+     		con =  getNewConnection2();
+     	}
+			
+			System.out.println(cmd);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -1600,9 +1608,19 @@ cn.close();
 			String cmd2 = "SELECT  d.[Sell-to Customer No_] AS klient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate FROM [Vičiūnai-LAT$Sales Line] r "
 					+ " INNER JOIN [Vičiūnai-LAT$Sales Header] d ON r.[Document No_]= d.[No_] WHERE d.[Shipment Date]> GETDATE()-60 "
 					+ " Order by d.[Sell-to Customer No_],r.[No_],d.[Shipment Date] desc ";
+			
+			
+			
+			Connection con2 = null;
+			if(view) {
+				cmd2  = "select * from MobileJavaLAT.v_LAT_GetCustProdList where lastdate > getdate()-60 order by klient, toode, lastdate desc";
+				con2 = this.getNewConnectionView();
+			}else {
+     		con2 =  getNewConnection2();
+     	}
+		
+			
 			System.out.println(cmd2);
-			// "klient","toode","kogus","viimane kuupļæ½ev","viimane kogus"
-			Connection con2 = getNewConnection2();
 			Statement stmt2 = con2.createStatement();
 			ResultSet rs2 = stmt2.executeQuery(cmd2);
 

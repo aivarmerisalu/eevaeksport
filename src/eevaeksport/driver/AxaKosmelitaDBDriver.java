@@ -347,17 +347,17 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
   
   public String getSaveStockInfo() {
 	    stocksOld = new HashMap<String,Double> ();
-		String cmd = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) \r\n" + 
-				"	         INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid \r\n" + 
-				"	      WHERE  summ.DATAAREAID='kosm' and CLOSED = 0  and dim.inventlocationid in ('"+ this.prodStockID +"') \r\n" + 
-				"			GROUP BY  summ.itemid  having sum(availphysical) >0 ";
+		String cmd = " select   summ.itemid  AS stock ,SUM(AVAILPHYSICAL) AS summ " + 
+				"	  FROM INVENTSUM summ    INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " + 
+				"	   WHERE  summ.DATAAREAID='kosm' and CLOSED = 0  and dim.inventlocationid in ('" + this.prodStockID + "')" + 
+				"	   GROUP BY  summ.itemid  having sum(availphysical) > 0 ";
+	
 
-		if (isDebug())
-			System.out.println(cmd);
+//		String cmd = " select * from Products where Blocked != '1'";
 
 		StringBuffer products = new StringBuffer();
 		try {
-
+			 //			Connection con1 = getNewConnection2();
 			Connection con1 = getNewConnection();
 			Statement st = con1.createStatement();
 			ResultSet rs = st.executeQuery(cmd);
