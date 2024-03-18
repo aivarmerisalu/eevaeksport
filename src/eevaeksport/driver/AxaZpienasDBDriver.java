@@ -1531,6 +1531,9 @@ try{
              "           pay on cus.paymtermid = pay.paymtermid  and pay.DATAAREAID  = cus.DATAAREAID  " +
               "                WHERE   (cus.dataareaid='zp'  and (SALESMANAGER_BBS != 0 or SALESTAKER_bbs != 0)) OR cus.accountnum in ('NAUJAS','OFISAS') " ; //47406
  
+ String com = "select accountnum as klient , DAYCHOICE_BBS as esma ,DAYCHOICE_BBS2_ as teis, DAYCHOICE_BBS3_ as kolm , DAYCHOICE_BBS4_ as nelj , DAYCHOICE_BBS5_ as reed "
+ 		+ ",  DAYCHOICE_BBS6_ as laup ,  DAYCHOICE_BBS7_ as pyha from  custtable where dataareaid='zp' ";
+ 
  String ccc = "select invoiceaccount from  custtable where dataareaid='zp' and invoiceaccount is not null  group by invoiceaccount";
  
            String sql = " SELECT  a.ORDERACCOUNT AS klient,a.invoice AS numbe,co.duedate AS maksepaev,sum(co.amountmst) AS tasumata, " +
@@ -1578,13 +1581,68 @@ try{
                }
               rs1.close();  
               stm.close();
+              con.close();
             
            }catch (Exception r){
         	   System.out.println(cmd2);
         	   r.printStackTrace();
            }
            
-
+           TreeMap deldays = new TreeMap();
+           
+           try{
+                 con = this.getNewConnection();
+        	   Statement stm = con.createStatement();
+        	  ResultSet rs1 = stm.executeQuery(com);
+               while(rs1.next()){
+            	   String klient = rs1.getString("klient").trim();
+            	   String res = "";
+            	   Integer esma = rs1.getInt("esma");
+            	   if(esma == 1 ) {
+            		   res = res + "1,";
+            	   }
+            	   Integer teis = rs1.getInt("teis");
+            	   if(teis == 1 ) {
+            		   res = res + "2,";
+            	   }
+            	   Integer kolm = rs1.getInt("kolm");
+            	   if(kolm == 1 ) {
+            		   res = res + "3,";
+            	   }
+            	   Integer nelj = rs1.getInt("nelj");
+            	   if(nelj == 1 ) {
+            		   res = res + "4,";
+            	   }
+            	   Integer reed = rs1.getInt("reed");
+            	   if(reed == 1 ) {
+            		   res = res + "5,";
+            	   }
+            	   Integer laup = rs1.getInt("laup");
+            	   if(laup == 1 ) {
+            		   res = res + "6,";
+            	   }
+            	   Integer pyha = rs1.getInt("pyha");
+            	   if(pyha == 1 ) {
+            		   res = res + "7,";
+            	   }
+            	   if(res.length() > 0) {
+            		   res = res.substring(0, res.length()-1);
+            	   }
+            	   
+            	   if( res.length() > 0 ){
+            		   deldays.put(klient, res);
+            	   }
+                
+               }
+              rs1.close();  
+              stm.close();
+            
+           }catch (Exception r){
+        	   System.out.println(cmd2);
+        	   r.printStackTrace();
+           }
+           
+           
      	  System.out.println("Alustan Kliendid 1");
            try{
                
@@ -1894,7 +1952,13 @@ try{
         
         String transa = rs.getString("transa");
         if (transa != null && transa.trim().length()>0) {
-          cust.setCity("Marsruto numeris: " +transa.trim());
+        	String ttt = (String)deldays.get(cust.getID());
+        	if(ttt != null) {
+        		ttt = " (" + ttt + ")" ;
+        	}else {
+        		ttt = "";
+        	}
+          cust.setCity("Marsruto numeris: " +transa.trim() + ttt);
           
         }
         String rounding = rs.getString("samm");

@@ -1400,7 +1400,7 @@ System.out.println(cmd);
             String id = rs.getString("toode").trim();
             String weight ="";
             Product prod = new Product(id);
-         	String name = Converter.enCodeEst(id + " " + rs.getString("nimi").trim());
+         	String name = Converter.enCodeEst(id + " " + rs.getString("nimi").trim()).replaceAll("11153xx", "x2");
          	
              double price = rs.getDouble("myygihind");
                 prod.setPrice(price);
@@ -1425,7 +1425,7 @@ System.out.println(cmd);
         		}
         	
         		
-                prod.setUnit(rs.getString("unit"));
+                prod.setUnit(rs.getString("unit").replaceAll("²", "x2"));
               String ean = (rs.getString("ean"));
                  if (ean != null && ean.trim().length()>0){
                    prod.setEAN(ean);
@@ -1501,7 +1501,7 @@ System.out.println(cmd);
                    
                    
                    if(luba.contains(prod.getID()) && !name.equals("")){
-                	   prod.setName(Converter.enCodeEst(name));
+                	   prod.setName(name);
                        tm.put(name, prod);  
                        String normcode = prod.getID().replace('/', '_');
                        if(!docCodes.contains(normcode)){

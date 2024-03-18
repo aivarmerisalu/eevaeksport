@@ -1050,7 +1050,9 @@ cn.close();
 				}
 				
 				String ag = rs.getString("agent").trim();
-				
+				if(view) {
+					customer.addAgent(new Agent("003"));
+				}
 				customer.addAgent(new Agent(ag));
 	             customer.addAgent(new Agent("HOUSE1"));
 	             customer.setMainAgent(ag);

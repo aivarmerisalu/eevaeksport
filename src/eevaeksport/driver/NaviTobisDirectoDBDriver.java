@@ -1856,7 +1856,7 @@ System.out.println(cmd);
             String id = rs.getString("toode").trim();
             String weight ="";
             Product prod = new Product(id);
-         	String name = Converter.enCodeEst(id + " " + rs.getString("nimi").trim());
+         	String name = Converter.enCodeEst(id + " " + rs.getString("nimi").trim()).replaceAll("11153xx", "x2");
          	
              double price = rs.getDouble("myygihind");
                 prod.setPrice(price);
@@ -1957,7 +1957,7 @@ System.out.println(cmd);
                    
                    
                    if(luba.contains(prod.getID()) && !name.equals("")){
-                	   prod.setName(Converter.enCodeEst(name));
+                	   prod.setName(name);
                        tm.put(name, prod);  
                        String normcode = prod.getID().replace('/', '_');
                        if(!docCodes.contains(normcode)){
@@ -3108,9 +3108,9 @@ private HashSet prodCodes = null;
       		 addid = id;
       	 }
         	  if("true".equals(getParent().getProps().getProperty("name.code.front"))){
-     			 prod.setName( ( id + " " + Converter.enCodeEst(namec) + " " +  add).trim()); 
+     			 prod.setName( ( id + " " + Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " +  add).trim()); 
      		 }else{
-     			 prod.setName(( Converter.enCodeEst(namec) + " " + id + " " + add ).trim()); 
+     			 prod.setName(( Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " + id + " " + add ).trim()); 
      		 }
         	
         	  if(getParent().getProps().getProperty("vat") != null){

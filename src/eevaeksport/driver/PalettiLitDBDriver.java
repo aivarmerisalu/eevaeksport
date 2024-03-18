@@ -349,6 +349,12 @@ public class PalettiLitDBDriver extends AbstractDBDriver implements  BulkUpdater
   	  		"               as stock  from likoi where  objektokodas='0110' and isnull(saugojimovieta,'')<>'' group by VERTYBESKODAS,objektokodas\r\n" + 
   	  		"                       having stock>0 order by VERTYBESKODAS) AA" + 
   	  		" UNION select kodas as toode,999 as stock from usrPrekiuRinkiniai";
+  	  cmd="select toode,stock from (select VERTYBESKODAS as toode,sum(kiekis)-isnull((select sum(kiekisapskvnt) from linum where\r\n" + 
+  	  		"                                                                   linum.periodKod6=@@preparedperiod and linum.vertybeskodas=likoi.vertybeskodas and linum.objektokodas=likoi.objektokodas ),0)\r\n" + 
+  	  		"                                                            as stock  from likoi where  objektokodas='0110' and isnull(saugojimovieta,'')<>'' group by VERTYBESKODAS,objektokodas\r\n" + 
+  	  		"                                                                    having stock>0 order by VERTYBESKODAS)a \r\n" + 
+  	  		"                                              UNION select kodas as toode,999 as stock from usrPrekiuRinkiniai\r\n" + 
+  	  		"";
   	
 
          if (isDebug()) System.out.println(cmd);
