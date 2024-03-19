@@ -1100,6 +1100,7 @@ hind =   Converter.Round((float)hind, 2);
 	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
 	 	    wr.write(data);
 	 	    wr.flush();
+	 	    
 
 	 	    // Get the response
 	 	    BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
