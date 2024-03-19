@@ -561,7 +561,7 @@ static Category log = Category.getRoot();
   }
 
   private EksportPanel eksportPanel = null;
-  private ImportPanel importPanel = null;
+  public ImportPanel importPanel = null;
   private JMenuItem info;
   private JMenuBar menubar = new JMenuBar();
   private Properties props;

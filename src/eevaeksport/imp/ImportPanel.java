@@ -2305,7 +2305,7 @@ public String parseFirstEmail(String emails) {
   }
   
   
-  private void importOrder(Orders orders,StringBuffer troubles) throws SQLException{
+  public void importOrder(Orders orders,StringBuffer troubles) throws SQLException{
 
     Enumeration enume = orders.getOrders().elements();
     int count = 0;
@@ -18057,7 +18057,7 @@ shipdate = getCalXML(asi);
   private String doknr = null;
   private EksportFrame parent;
   public static final char SEPARATOR = ';';
-  private AbstractImportDriver driver;
+  public AbstractImportDriver driver;
   private HashMap tellimustel = new HashMap() ;
   public double getTellimustel(String kood) {
 	  if(tellimustel.get(kood) != null){

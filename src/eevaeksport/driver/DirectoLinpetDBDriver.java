@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.poi.hssf.eventusermodel.dummyrecord.LastCellOfRowDummyRecord;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -54,6 +57,9 @@ import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.imp.ImportPanel;
+import eevaeksport.imp.Order;
+import eevaeksport.imp.driver.AbstractImportDriver;
 import eevaeksport.util.Converter;
 import eevaeksport.util.WebShopPiguLT;
 
@@ -1576,7 +1582,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
           	inputLine = Converter.enCodeEst(inputLine);
            	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ));	
           	
-       //       System.out.println(inputLine);	
+       //3977eraisik, lv3979, 3978leedu       System.out.println(inputLine);	
           }
 
           in.close();
@@ -3501,17 +3507,206 @@ if(seisx > 0) {
  
 }
 
+public ArrayList loadOpenOrders() {
+	  
+	 String httpsURL =  logurl + company + "/xmlcore.asp?get=1&what=order";
+     ArrayList arr = new ArrayList();
+   System.out.println(httpsURL);
+   try {
+   	
+  
+    URL myurl = new URL(httpsURL);
+    URLConnection con = (HttpsURLConnection)myurl.openConnection();
+    InputStream ins = con.getInputStream();
+    InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
+    BufferedReader in = new BufferedReader(isr);
 
+   String inputLine = "";
+   StringBuffer inputLineBuf = new StringBuffer();
+   while ((inputLine = in.readLine()) != null){
+   	inputLine = Converter.enCodeEst(inputLine);
+   	inputLineBuf.append(inputLine.replaceAll("<item","\n<item" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
+   }
+
+   in.close();
+   
+   if(inputLineBuf.length() > 2){
+  
+         try {
+       	  File f = new File (getDir() + "orders.xml");
+       	  if(f.exists())f.delete();
+       	Converter.saveFileInUTF8(getDir() + "orders.xml", inputLineBuf.toString());
+      	
+   	  }catch (Exception ex) {
+   		ex.printStackTrace();
+   	  }
+    }
+   
+   }catch(Exception e) {
+   	e.printStackTrace();
+   } 
+	  
+	System.exit(0);
+   
+	
+		try {
+			 File f = new File (getDir() + "orders.xml");
+	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	     DocumentBuilder db;
+	 		db = dbf.newDocumentBuilder();      	
+	     	FileInputStream in = getCleanInputStream(f);
+	     	String handler = null;
+	         Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "transport");      
+	      //   System.out.println(root);
+	     	Node read = getNode(root, "orders");
+	     //	System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
+	         for (int t = 0; t < read.getChildNodes().getLength(); t++){
+	         	  Node rida = read.getChildNodes().item(t);
+	         	  
+	         	 // System.out.println("node name " + rida.getNodeName());
+	         	 // if(rida.getNodeName().equals("order")){
+	         		
+		         	
+		         	  String id = rida.getAttributes().getNamedItem("ccode").getNodeValue();
+			    	  String arve = rida.getAttributes().getNamedItem("webid").getNodeValue();
+			    	  
+			    	  String number =  " " ;
+			    	  try {
+			    		  number = rida.getAttributes().getNamedItem("cutomer_orderno").getNodeValue();
+			    	  }catch(Exception e) {
+			    		  
+			    	  }
+			    		
+			    	  
+			    	  
+			    	  
+			    	String kuup = null;
+			    String kuup2 = null;
+			    	  try {
+			    	  kuup =  (rida.getAttributes().getNamedItem("webdate").getNodeValue()).substring(0,10);
+			    	  kuup2 =  (rida.getAttributes().getNamedItem("webdate").getNodeValue()).substring(0,10);
+			    	  }catch(Exception e) {
+			    		  
+			    	  }
+			    	boolean goes = false; 
+			    	
+			    	try {
+			    	String status =  (rida.getAttributes().getNamedItem("status").getNodeValue());
+	    			 if(status != null && status.equals("MUUTA") && ( number.startsWith("45") || number.startsWith("46") 
+	    					 || id.equals("10183") )) { // coop
+	    				 goes = true;
+	    			 }
+			    	}catch(Exception e) {
+			    		
+			    	}
+			    	  
+			    
+			    	Node read2 = getNode(rida, "lines");
+			      for (int u = 0; u < read2.getChildNodes().getLength(); u++){
+			      Node rida2 = read2.getChildNodes().item(u);
+			      String toode = null;
+			  try {
+			    	   toode = rida2.getAttributes().getNamedItem("pcode").getNodeValue();
+			}catch(Exception e) {
+	    		 
+   	  }
+			  
+			  if(toode != null) {
+			    	  Node nnn = rida2.getAttributes().getNamedItem("description");
+			    	  
+			    	  String nimi = "pole nime";
+			    	  if(nnn != null) {
+			    		  nimi = nnn.getNodeValue();
+			    	  }
+			    	  double kogus =  0;
+			    	  try {
+			    		  kogus =  Double.parseDouble(rida2.getAttributes().getNamedItem("quantity").getNodeValue()); 
+			    	  
+			    	}catch(Exception e) {
+		    		 
+		    	  }
+			    	  
+			    	 
+			    	  
+			    	  
+			    	  Toode tt = new Toode(toode);
+			    	  tt.setBrand(nimi);
+			    	  tt.setKogus(kogus);
+			    	  tt.setGr1(arve);
+			    	  tt.setGr2(kuup2);
+			    	  
+			    	
+			        }}
+				
+			        }
+	       
+			      
+		  	
+		      
+			 } catch (Exception e) {
+		 		  getParent().showError(e);
+		 	 }
+   
+   
+   
+  	return arr;
+  }
 
 
 @Override
-public void WebShopper() {
+public void WebShopper()  {
+	loadOpenOrders();
+
 	getProducts2();
+	HashSet orderHistory = null;
+	try {
+		orderHistory = (HashSet)Converter.readObject("orderHistory.hash");
+	} catch (ClassNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+	if (orderHistory == null) {
+		orderHistory = new HashSet();
+	}
+	ImportPanel importPanel = null;
+	try {
+		 importPanel = new ImportPanel(parent.getParentFrame());
+	} catch (ClassNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	AbstractImportDriver driver = importPanel.driver;
 	
 	WebShopPiguLT vp = new WebShopPiguLT(eanProds);
 	vp.login(parent);
 	vp.getSellerID();
-	vp.getOrderList();
+	
+	
+	
+	ArrayList orders = vp.getOrderList();
+	System.out.println(orders.toString());
+	for (int i = 0; i < orders.size(); i++) {
+		Order ord = (Order) orders.get(i);
+		if (!orderHistory.contains(ord.getDokNr())) {
+			System.out.println(ord.getDokNr());
+			  try {
+				driver.makeOrder(ord);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		
+			
+			orderHistory.add(ord.getDokNr());
+		}
+	}
+	try {
+		//Converter.saveObject(orderHistory, "orderHistory.hash");
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
 	System.exit(0);
 }
 }

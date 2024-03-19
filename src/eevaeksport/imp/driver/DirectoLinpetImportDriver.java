@@ -962,11 +962,13 @@ hind =   Converter.Round((float)hind, 2);
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 	 			comm = "comment=\""+ order.getInfo()+ "\" " ;
-	 			if(order.getStatus() > 5){
+	 			if(order.getStatus() > 5 && order.getStatus() != 1000){
 		 			comm = "cutomer_orderno=\""+ order.getInfo()+ "\" " ;
 		 		}
 	 		}
-	 		
+	 		if(order.getStatus() == 1000){
+	 			comm = comm+"cutomer_orderno=\""+ order.getDokNr()+ "\" " ;
+	 		}
 	 		 comm = protectSpecialCharacters(comm);
 	 		System.out.println("comm " + comm);
 	 		String gr = "";
@@ -1002,7 +1004,10 @@ hind =   Converter.Round((float)hind, 2);
 	 		 if(order.getWarehouse() != null && order.getWarehouse().trim().length() >0) {
 	 			 ladu =  "stock=\"" + order.getWarehouse() +  "\" "  ; 
 	 		 }
-	 		 
+	 		 String priceList = "<pricelist>" + gr + "</pricelist>";
+	 		 if (order.getStatus() == 1000) {
+	 			 priceList = "";
+	 		 }
 	 	    String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
 	          "<transport>" +
 	          "<order " + 
@@ -1017,7 +1022,8 @@ hind =   Converter.Round((float)hind, 2);
 	         "amount=\"" + order.getSum() + "\" " +
 	         "amount_vat=\"" + order.getSum()* 1.2 + "\" " +
 	         "currency=\"EUR\" language=\"EST\">" +
-	         "<pricelist>" + gr + "</pricelist>" +
+	         priceList+
+	     
 	       
 	         "<send_address>" +
 	         "<street>" + adr + "</street>" +
@@ -1056,9 +1062,16 @@ hind =   Converter.Round((float)hind, 2);
 		    	  
 		    	System.out.println("Hind " + line.getToode() + " " + hind);
 		    	  
-                  if(line.getDiscount() > 0) {
+                  if(line.getDiscount() > 0 || order.getStatus() == 1000) {
                 	  hind = line.getPrice();
-                	  order_xml = order_xml +"discount=\""+ line.getDiscount() +"\" ";
+                	  if (order.getStatus() != 1000) {
+                		  order_xml = order_xml +"discount=\""+ line.getDiscount() +"\" ";
+                	  }else {
+                		  order_xml = order_xml +"discount=\"0\" ";
+                	  }
+                	  
+                	
+                	  
     		      }
 			      order_xml = order_xml +"price=\""+ Converter.Round((float)hind, 2) +"\" ";
 		    	  order_xml = order_xml + "/>";
@@ -1071,7 +1084,7 @@ hind =   Converter.Round((float)hind, 2);
 	 	order_xml = order_xml + "</transport>";
 	    System.out.println("output " +order_xml); 
 	 	
-	 		//System.exit(0);
+	 	
 	 		
 	 	try {
 	 	    // Construct data
@@ -1148,6 +1161,7 @@ hind =   Converter.Round((float)hind, 2);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.exit(0);
 	 }
 	  
 

@@ -10,8 +10,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.Vector;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -24,6 +27,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import eevaeksport.Product;
+import eevaeksport.imp.Order;
+import eevaeksport.imp.OrderLine;
 import eevaeksport.EksportPanel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,6 +43,10 @@ public class WebShopPiguLT {
 	private String token = null;
 	private String sellerID = null;
 	private HashMap eanProds = null;
+	private String kaup24Klient = null;
+	private String piguLTKlient = null;
+	private String lati220Klient = null;
+	
 	
 	public WebShopPiguLT(HashMap eanProds) {
 		this.eanProds = eanProds;
@@ -53,6 +62,9 @@ public class WebShopPiguLT {
 		url = parent.getProps().getProperty("piguURL");
 		password = parent.getProps().getProperty("piguPassword");
 		username = parent.getProps().getProperty("piguUsername");
+		kaup24Klient = parent.getProps().getProperty("kaup24");
+		 piguLTKlient = parent.getProps().getProperty("piguLT");
+		 lati220Klient = parent.getProps().getProperty("220LV");
 		
 		File fileToFind = new File("WebShopper");
 		if (!fileToFind.exists()) {
@@ -173,13 +185,15 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 		return false;
 	}
 	
-	
-	public boolean getOrderList() {
+// <>
+	public ArrayList<Order> getOrderList() {
+		ArrayList<Order> orders = new ArrayList<Order>();
+		
 	
 	        String directoryPath = "WebShopper";
 	        String filePrefix = "piguOrderList";
 	        File directory = new File(directoryPath);
-	        /*
+	        
 	      
 	        
 	        if (directory.exists() && directory.isDirectory()) {
@@ -216,10 +230,11 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
        
         
    		HttpResponse resp = restGetRequest(url + "v3/sellers/" + sellerID + "/orders?" + date_from + offS + status, cli);
+   		//HttpResponse resp = restGetRequest(url + "v3/sellers/" + sellerID + "/orders?" + date_from + offS , cli);
    		String aaa = EntityUtils.toString(resp.getEntity());
            Converter.saveFile(directoryPath+ "/" + filePrefix + co + ".txt", aaa);
-           JSONObject orders = Converter.readJSONFile(directoryPath+ "/" + filePrefix + co + ".txt");
-           JSONArray ordArr = (JSONArray) orders.get("orders");
+           JSONObject ordersJ = Converter.readJSONFile(directoryPath+ "/" + filePrefix + co + ".txt");
+           JSONArray ordArr = (JSONArray) ordersJ.get("orders");
            if (ordArr.size() == 20) {
         	   offset = offset + 20;
            }else {
@@ -231,7 +246,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
        
 		co++;
 	}
-	*/
+	
 	
 
        
@@ -245,8 +260,8 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                            
 	                            
 	                            
-	                    		JSONObject orders = Converter.readJSONFile(directory + "/" + file.getName());
-	                    		JSONArray ordArr = (JSONArray) orders.get("orders");
+	                    		JSONObject ordersJ = Converter.readJSONFile(directory + "/" + file.getName());
+	                    		JSONArray ordArr = (JSONArray) ordersJ.get("orders");
 	                    		System.out.println("Array sisaldab  " + ordArr.size());
 	                    		for (int i = 0; i<ordArr.size(); i++) {
 	                    			JSONObject order = (JSONObject) ordArr.get(i);
@@ -275,8 +290,29 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    			String post_code = (String) shippingAddress.get("post_code");
 	                    			String receiver_first_name = (String) shippingAddress.get("receiver_first_name");
 	                    			String receiver_last_name = (String) shippingAddress.get("receiver_last_name");
-	                    			System.out.println(receiver_first_name + " " + receiver_last_name);
-	                    			
+	                    			System.out.println(receiver_first_name + " " + receiver_last_name+ " " + orderSite);
+	                    			String orderSiteCode = null;
+	                    		
+	                    			if (orderSite.equals("220.lv")) {
+	                    				orderSiteCode = this.lati220Klient;
+	                    				
+	                    			}
+	                    				
+	                    			else if (orderSite.equals("kaup24.ee")) {
+	                    				orderSiteCode = this.kaup24Klient;
+	                    				
+	                    			}
+	                    			else if (orderSite.equals("pigu.lt")){
+	                    				orderSiteCode = this.piguLTKlient;
+	                    				
+	                    			}
+	                    			Order ord = new Order(orderSiteCode, "WebiPood");
+	                    			ord.setDokNr(orderNum);
+	                    			ord.setStatus(1000);
+	                    			ord.setShipCal(ordDate.getTime()+ "");
+	                    			ord.setInfo(receiver_first_name + " " + receiver_last_name +" "+ orderNum);
+	                    			Vector lines = new Vector();
+	                    		
 	                    			
 	                    			
 	                    			JSONArray ordProd = (JSONArray) order.get("products");
@@ -287,16 +323,31 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    				String prodName = (String) modification.get("title");
 	                    				String prodEan = (String) modification.get("ean");
 	                    				
-	                    				Double prodPrice = (Double) productLine.get("price");
+	                    				Double prodPriceVAT = (Double) productLine.get("price");
+	                    				Double prodPrice = Double.parseDouble((String) productLine.get("price_without_vat"));
+	                    				
 	                    				Long prodAmnt = (Long) productLine.get("amount");
 	                    				
-	                    			System.out.println(((Product)eanProds.get(prodEan)).getID()+"  "+ prodEan + "  " + prodPrice + "  " + prodAmnt);
+	                    			System.out.println(orderSiteCode + " " + ((Product)eanProds.get(prodEan)).getID()+"  "+ prodEan + "  " + prodPrice + "  " + prodAmnt);
+	                    			
+	                    				OrderLine ol = new OrderLine();
+	                    				ol.setKogus(prodAmnt);
+	                    				ol.setEAN(prodEan);
+	                    				ol.setTooteNimi(prodName);
+	                    				ol.setPrice(prodPrice);
+	                    				//ol.setDiscount(10);
 	                    				
-	                    				
+	                    				if(eanProds.get(prodEan) != null) {
+	                    					ol.setToode(((Product)eanProds.get(prodEan)).getID() + "");
+	                    				}
+	                    				//System.out.println(((Product)eanProds.get(prodEan)).getID()+"  "+ prodEan + "  " + prodPrice + "  " + prodAmnt);
+	                    			lines.add(ol);
 	                    			
 	                    				
 	                    			}
-
+	                    			ord.setOrderLines(lines);
+	                    			if (ord.getInfo().contains("Ketlin Muttel"))
+	                    			orders.add(ord);
 
 
 	                        
@@ -320,8 +371,9 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 		
 		
 		
-		return false;
+		return orders;
 	}
+	
 		
 
 	
