@@ -553,7 +553,7 @@ TreeMap tr = new TreeMap();
 
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-    // getCustomers(null);
+     //getCustomers(null);
      //System.exit(0);
      try {
  	 
@@ -767,7 +767,8 @@ TreeMap tr = new TreeMap();
   	if(line.length() > 100) {
   	
  	  StringTokenizer st = new StringTokenizer(line, "|");
- 	 //System.out.println(line);
+ 	 
+ 	//  System.out.println(line);
        if (st.hasMoreTokens()){
     	   st.nextToken();
     	   st.nextToken();
@@ -794,26 +795,39 @@ TreeMap tr = new TreeMap();
            }
            if (st.hasMoreTokens()){
             String lisa = st.nextToken().trim();
+
             if( lisa != null){
           
             }
           }
-   //  System.out.println(line);
-
-    //  System.out.println(name);
+   
+         
+           
+           
            name = clear(name);
              customer.setName(Converter.enCodeEst(name));  
 
              
-             clear(st.nextToken().trim());
+         String uustel =     clear(st.nextToken().trim());
              
              if(confirm != null){
                  customer.setConfirmEmail(confirm); 
              }
              
+
+             if( uustel != null && uustel.trim().length() > 0){
+                 
+             customer.setPersonalData(Converter.enCodeEst(customer.getPersonalData()) + " " +clear(uustel).replaceAll(";",":"));
+             }
+             st.nextToken();
+
              
-           st.nextToken();
-          
+             if(line.contains("FERG")) {
+          	 	
+                 System.out.println(line);
+
+           System.out.println(customer.getPersonalData());}
+             
         String  aadress =  st.nextToken().trim();
            if( aadress != null && aadress.trim().length() > 0){
              customer.setInfo(Converter.enCodeEst(aadress));
@@ -844,7 +858,6 @@ TreeMap tr = new TreeMap();
            	String info = st.nextToken().trim();
            	if(info.length()>0 && info.trim().length()>0){
 
-                customer.setPersonalData(Converter.enCodeEst(customer.getPersonalData()) + " " +clear(info));
               //  System.out.println(info);
            	}
             }

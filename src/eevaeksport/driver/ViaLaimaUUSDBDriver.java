@@ -1242,7 +1242,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 			TreeMap res = new TreeMap();
 			StringBuffer oorders = new StringBuffer();
 			oorders.append(Calendar.getInstance().getTimeInMillis() + "\n");
-			
+			if(jsonopen0 != null) {
 			try {
 				
 				String urlStr = null;
@@ -1369,6 +1369,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 				 } catch (Exception e) {
 			 		  getParent().showError(e);
 			 	 }
+			}
 			
 	   if(parent.getProps().getProperty("savefilesdir") != null) {
 		   Converter.saveFile(parent.getProps().getProperty("savefilesdir")  + "customerorders.txt", oorders.toString());   
@@ -1395,6 +1396,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 	
 	public Vector getDebt2(HashMap custMap) {
 	 dlist = new Vector();
+		if(jsondebt0 != null) {
 		
 		try {
 			
@@ -1503,7 +1505,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 		      	   }catch(Exception e){
 					e.printStackTrace();
 				}
-			
+		}
 		return dlist;
 	}
 
@@ -2019,8 +2021,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
    	 now.add(Calendar.DAY_OF_MONTH, -32);
    	 long sta = now.getTimeInMillis();
    	
-  
-    
+  try {
+    if(rcompanyx != null) {
    	 JSONArray dayr =  Converter.getWebDayReport(sta, end, rcompanyx, user, pass);
    	 
    	// System.out.println("dayr " + dayr);
@@ -2046,9 +2048,11 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 			  e.printStackTrace();
 			}
         
-			}
+			}}
   
-			
+        }catch(Exception e){
+         	
+        }
 			System.out.println("contacted "+ contacted.size() ); 
 			 
      }

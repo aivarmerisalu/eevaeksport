@@ -1670,7 +1670,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		NF = aNF;
 	}
 
-	private String url = "jdbc:odbc:AXA";
+	private String url = "jdbc:odbc:edisoft";
 	private String url2 = "jdbc:odbc:report";
     private HashMap ketid = null;
     private HashMap sortimendid = null;

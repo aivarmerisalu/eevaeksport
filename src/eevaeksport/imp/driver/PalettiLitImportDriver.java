@@ -424,7 +424,7 @@ public class PalettiLitImportDriver
 		  }
 		  
 		  
-		  if(laos > am){
+		  if(laos >= am){
 			  linex.add(ol);
 			  //muudame bubbris saadavat kogust ka 
 			  stocks.put(pr, laos - am);

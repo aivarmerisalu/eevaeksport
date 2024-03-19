@@ -506,6 +506,7 @@ try{
 		      
 		      if(parent.getProps().getProperty("smtphost") != null) {
 				     Agent ag = new Agent(agg);
+				     System.setProperty("mail.smtps.ssl.protocols", "TLSv1.2");
 				      ag.setName(agg);
 				       Converter.sendCommentEmail("New Order " + comm, null, doknr, cukood, cuid.getName(), null, false, ag, parent, null);
 				     }

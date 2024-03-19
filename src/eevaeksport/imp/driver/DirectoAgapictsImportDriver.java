@@ -1181,6 +1181,7 @@ try {
 	 	} catch (Exception e) {
 	 		e.printStackTrace();
 	 		log.error(e);
+	 		System.exit(0);
 	 	}
        
 

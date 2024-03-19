@@ -4774,7 +4774,17 @@ TreeMap realiseer = new TreeMap();
        	    		 String km = getNode(rida, "va_km_grupp_kd").getFirstChild().getNodeValue();
        	    		   prod.setVat(kms.get(km) + "");
           	       }catch (Exception e){}
-       	    	 
+
+       	    	
+       	    	try{
+       	    		 String ls = getNode(rida, "va_nr_ladu").getFirstChild().getNodeValue();
+       	    		 Double LS = Double.parseDouble(ls);
+       	    		 if(LS != 0) {
+       	    		   prod.setStock(LS);
+       	    		 }
+          	       }catch (Exception e){}
+
+       	    	
           		 String nimisort = "";
           		 
           		   String nimi = null;   

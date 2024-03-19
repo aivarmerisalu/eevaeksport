@@ -1525,11 +1525,14 @@ try{
 		"				  as info , linedisc as grupp, MINORDERAMOUNT_BBS as minord , " +
          "                    ROUTECODE_TR as transa,'' as discount ,'' as samm , SubGroupCode_BBS as tyyp ,TURNOVERLEVEL_BBS as tyyp2 ," +
 			"				 (Select top 1 DISPLAYVALUE from DIMENSIONATTRIBUTEVALUESETITEM dv WITH (NOLOCK) where dv.DIMENSIONATTRIBUTEVALUESET = cus.DEFAULTDIMENSION    ) as osad, SHELFAREA_BBS as sharea, " +
-            " SHELFSHARE_BBS As shshare ,'' as pictemail ,(select top  1 defaultagreementlineexpirationdate from agreementheader ah WITH (NOLOCK) where ah.custaccount=cus.invoiceaccount order by defaultagreementlineexpirationdate desc)  as contrend  "
+            " SHELFSHARE_BBS As shshare ,'' as pictemail ,(select top  1 defaultagreementlineexpirationdate from agreementheader ah WITH (NOLOCK) where ah.custaccount=cus.invoiceaccount or ah.custaccount=cus.accountnum order by defaultagreementlineexpirationdate desc)  as contrend  "
             + " FROM  custtable cus with(nolock) inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join " +
 			" LOGISTICSPOSTALADDRESS adr ON adr.LOCATION = dp.PRIMARYADDRESSLOCATION and getdate() >=VALIDFROM  and  getdate() <= VALIDTO left outer JOIN  paymterm  " +
              "           pay on cus.paymtermid = pay.paymtermid  and pay.DATAAREAID  = cus.DATAAREAID  " +
               "                WHERE   (cus.dataareaid='zp'  and (SALESMANAGER_BBS != 0 or SALESTAKER_bbs != 0)) OR cus.accountnum in ('NAUJAS','OFISAS') " ; //47406
+ 
+ String com = "select accountnum as klient , DAYCHOICE_BBS as esma ,DAYCHOICE_BBS2_ as teis, DAYCHOICE_BBS3_ as kolm , DAYCHOICE_BBS4_ as nelj , DAYCHOICE_BBS5_ as reed "
+ 		+ ",  DAYCHOICE_BBS6_ as laup ,  DAYCHOICE_BBS7_ as pyha from  custtable where dataareaid='zp' ";
  
  String ccc = "select invoiceaccount from  custtable where dataareaid='zp' and invoiceaccount is not null  group by invoiceaccount";
  
@@ -1578,13 +1581,68 @@ try{
                }
               rs1.close();  
               stm.close();
+              con.close();
             
            }catch (Exception r){
         	   System.out.println(cmd2);
         	   r.printStackTrace();
            }
            
-
+           TreeMap deldays = new TreeMap();
+           
+           try{
+                 con = this.getNewConnection();
+        	   Statement stm = con.createStatement();
+        	  ResultSet rs1 = stm.executeQuery(com);
+               while(rs1.next()){
+            	   String klient = rs1.getString("klient").trim();
+            	   String res = "";
+            	   Integer esma = rs1.getInt("esma");
+            	   if(esma == 1 ) {
+            		   res = res + "1,";
+            	   }
+            	   Integer teis = rs1.getInt("teis");
+            	   if(teis == 1 ) {
+            		   res = res + "2,";
+            	   }
+            	   Integer kolm = rs1.getInt("kolm");
+            	   if(kolm == 1 ) {
+            		   res = res + "3,";
+            	   }
+            	   Integer nelj = rs1.getInt("nelj");
+            	   if(nelj == 1 ) {
+            		   res = res + "4,";
+            	   }
+            	   Integer reed = rs1.getInt("reed");
+            	   if(reed == 1 ) {
+            		   res = res + "5,";
+            	   }
+            	   Integer laup = rs1.getInt("laup");
+            	   if(laup == 1 ) {
+            		   res = res + "6,";
+            	   }
+            	   Integer pyha = rs1.getInt("pyha");
+            	   if(pyha == 1 ) {
+            		   res = res + "7,";
+            	   }
+            	   if(res.length() > 0) {
+            		   res = res.substring(0, res.length()-1);
+            	   }
+            	   
+            	   if( res.length() > 0 ){
+            		   deldays.put(klient, res);
+            	   }
+                
+               }
+              rs1.close();  
+              stm.close();
+            
+           }catch (Exception r){
+        	   System.out.println(cmd2);
+        	   r.printStackTrace();
+           }
+           
+           
      	  System.out.println("Alustan Kliendid 1");
            try{
                
@@ -1894,7 +1952,13 @@ try{
         
         String transa = rs.getString("transa");
         if (transa != null && transa.trim().length()>0) {
-          cust.setCity("Marsruto numeris: " +transa.trim());
+        	String ttt = (String)deldays.get(cust.getID());
+        	if(ttt != null) {
+        		ttt = " (" + ttt + ")" ;
+        	}else {
+        		ttt = "";
+        	}
+          cust.setCity("Marsruto numeris: " +transa.trim() + ttt);
           
         }
         String rounding = rs.getString("samm");

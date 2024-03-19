@@ -53,6 +53,11 @@ public class VichiLATSQLUUSImportDriver extends AbstractImportDriver{
     if(parent.getProps().getProperty("view.url") != null) {
     	urlV = parent.getProps().getProperty("view.url");
     }
+    
+    if("true".equals(parent.getProps().getProperty("use.view"))) {
+
+	    view = true;	
+    }
     try {
       Class.forName(databaseDriverName).newInstance();
       
@@ -61,7 +66,7 @@ public class VichiLATSQLUUSImportDriver extends AbstractImportDriver{
        parent.showError(e);
     }
   }
-
+private boolean view = false;
   
   public String getImportFile(){
 	    return parent.getProps().getProperty("imp.read");
@@ -72,6 +77,9 @@ public class VichiLATSQLUUSImportDriver extends AbstractImportDriver{
 	  
 	 	try{
 	 	    String  sql2 =  " select * from  MobilejavaVIK.v_LAT_GetProducts ";
+	 	    if(view) {
+	 	    	sql2 = "select * from MobileJavaLAT.v_LAT_GetProducts";
+	 	    }
 	 	    System.out.println(sql2);
 
 	 	   Connection con = DriverManager.getConnection(parent.getProps().getProperty("view.url")   , parent.getProps().getProperty("view.user"), parent.getProps().getProperty("view.pass"));
@@ -95,7 +103,7 @@ public class VichiLATSQLUUSImportDriver extends AbstractImportDriver{
 	 	}catch(Exception e) {
 	 		e.printStackTrace();
 	 	}
-		  
+		  System.out.println("nimed " + res.size());
 		  return res;
   }
 
@@ -429,7 +437,7 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	  
 	 	try{
 	 	    String sql2 = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2,k.[Customer ILN] as kood3 "
-	 	    		+ " from  MobileJavaVIK.v_VIK_Customers k where k.[Customer ILN] != '' ";
+	 	    		+ " from  MobileJavaLAT.v_LAT_Customers k where k.[Customer ILN] != '' ";
 	 	    System.out.println(sql2);
 
 	 	   Connection con = DriverManager.getConnection(urlV   , parent.getProps().getProperty("view.user"), parent.getProps().getProperty("view.pass"));
@@ -466,9 +474,10 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	  
 	 	try{
 	 	    String sql2 = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2 "
-	 	    		+ " from  MobileJavaVIK.v_VIK_Customers k where k.[Ship-to Address ILN] != '' ";
+	 	    		+ " from  MobileJavaLAT.v_LAT_Customers k where k.[Ship-to Address ILN] != '' ";
 	 	    System.out.println(sql2);
 
+	 	    
 	 	   Connection con = DriverManager.getConnection(urlV   , parent.getProps().getProperty("view.user"), parent.getProps().getProperty("view.pass"));
 
 	 	    Statement st2 = con.createStatement();

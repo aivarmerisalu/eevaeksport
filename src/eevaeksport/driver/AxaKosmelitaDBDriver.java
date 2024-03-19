@@ -347,22 +347,25 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
   
   public String getSaveStockInfo() {
 	    stocksOld = new HashMap<String,Double> ();
-		String cmd = " select * from Products where Blocked != '1'";
+		String cmd = " select   summ.itemid  AS stock ,SUM(AVAILPHYSICAL) AS summ " + 
+				"	  FROM INVENTSUM summ    INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " + 
+				"	   WHERE  summ.DATAAREAID='kosm' and CLOSED = 0  and dim.inventlocationid in ('" + this.prodStockID + "')" + 
+				"	   GROUP BY  summ.itemid  having sum(availphysical) > 0 ";
+	
 
-		if (isDebug())
-			System.out.println(cmd);
+//		String cmd = " select * from Products where Blocked != '1'";
 
 		StringBuffer products = new StringBuffer();
 		try {
-
-			Connection con1 = getNewConnection2();
+			 //			Connection con1 = getNewConnection2();
+			Connection con1 = getNewConnection();
 			Statement st = con1.createStatement();
 			ResultSet rs = st.executeQuery(cmd);
 
 			while (rs.next()) {
 
-				String kood = rs.getString("UniqueCode").trim();
-				Double kogus = rs.getDouble("Inventory");
+				String kood = rs.getString("stock").trim();
+				Double kogus = rs.getDouble("summ");
 				
 				stocksOld.put(kood, kogus);
 				String dealer = " ";
@@ -409,11 +412,12 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
   String prodHier = null;
   String prodHierID = null;
   String channelID = null;
-  
+  String prodStockID = null;
+   
   public TreeMap getAgents(){
 	  
 	  
-	  String cmk = "select MCRCHANNELCATEGORYHIERARCHY_KOS as hier ,OMOPERATINGUNITID,recid as channelid from dbo.RETAILCHANNELTABLE\r\n" + 
+	  String cmk = "select MCRCHANNELCATEGORYHIERARCHY_KOS as hier ,OMOPERATINGUNITID,recid as channelid ,inventLocation as ladu from dbo.RETAILCHANNELTABLE\r\n" + 
 	  		"where CHANNELTYPE='4' and retailchannelid = '" + getParent().getProps().getProperty("channel") + "'" + 
 	  		"";
 
@@ -424,7 +428,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 		        while(rs.next()){
 		        	prodHier =   rs.getString("hier").trim();
 		        	channelID = rs.getString("channelid").trim();
-
+		        	prodStockID = rs.getString("ladu").trim();
 		        }
 		        rs.close();
 		        stmt.close();
@@ -435,6 +439,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 		      }
 	  System.out.println("prodHier " + prodHier);
 	  System.out.println("channelID " + channelID);
+	  System.out.println("prodStockID " + prodStockID);
 	  
 	 cmk = "select RECID as hier from dbo.ECORESCATEGORYHIERARCHY " + 
 	 		"		  		where name = '" + prodHier + "'" ;
@@ -460,8 +465,8 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 		   System.out.println("prodHierID " + prodHierID);
 			
 		   
-    String cmd = " select w.value as kood , w.name as name from  DIMATTRIBUTEHCMWORKER w   inner join HCMWORKER h on h.personnelnumber = w.value \r\n" + 
-    		"			 inner join custtable c on c.MAINCONTACTWORKER=h.recid where w.value like 'G%' group by  w.value  , w.name";// +
+    String cmd = " select w.value as kood , w.name as name from  DIMATTRIBUTEHCMWORKER w inner join HCMWORKER h on h.personnelnumber = w.value \r\n" + 
+    		"    				 inner join custtable c on c.MAINCONTACTWORKER=h.recid   group by  w.value  , w.name  ";
     
     Properties propse =  new Properties();
     try{

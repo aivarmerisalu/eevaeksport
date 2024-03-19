@@ -648,7 +648,7 @@ TreeMap groups = new TreeMap();
 					prod.setName(itemLevel.trim() + " " +prod.getName());;
 				}
 				
-				String vat  = rs.getString("Vat");
+				String vat  = rs.getString("VatCode");
 				if (vat != null && vat.trim().length() > 1) {
 					prod.setVat(vat.trim());
 				}
