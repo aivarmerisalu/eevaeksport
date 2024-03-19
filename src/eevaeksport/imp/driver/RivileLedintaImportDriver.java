@@ -795,18 +795,30 @@ if(ladu.trim().length()!=0){
          sb.append(getLineNr(cou));
          sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
          cou++;
+         sb.append(getLineNr(cou));
+         sb.append("               <I07_SUMA>" + escape(nf.format((line.getKogus() * line.getPrice())*(100-ale)/100)
+         	)+ "</I07_SUMA>" + ls);
+         cou++;
+       
 
- }   
+ } else {
+	 
+	 sb.append(getLineNr(cou));
+     sb.append("               <I07_SUMA>" + escape(nf.format((line.getKogus() * line.getPrice())))+ "</I07_SUMA>" + ls);
+     cou++;
+     
+     sb.append(getLineNr(cou));
+     sb.append("               <I07_PVM>" + escape(nf.format((line.getKogus() * line.getPrice() * 0.21)))+ "</I07_PVM>" + ls);
+     cou++;
+     
+ }
  
-
-        // sb.append(getLineNr(cou));
-        // sb.append("               <I07_MOKESTIS_P>" + prod.getVat() + "</I07_MOKESTIS_P>" + ls);
-        // cou++;
+ sb.append(getLineNr(cou));
+ sb.append("               <I07_MOKESTIS_P>21</I07_MOKESTIS_P>" + ls);
+ cou++;
+        
          
-        // sb.append(getLineNr(cou));
-        // sb.append("               <I07_SUMA>" + escape(getConc().getNF().format((line.getAmount()* price)*(100-ale)/100)
-         //		)+ "</I07_SUMA>" + ls);
-         //cou++;
+    
          
 
  addNumLine();

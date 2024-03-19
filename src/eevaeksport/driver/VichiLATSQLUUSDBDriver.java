@@ -1020,7 +1020,7 @@ cn.close();
 		try {
 			Connection con = null;
 			if(view) {
-				sql  = "select * from MobileJavaLAT.v_LAT_Customers";
+				sql  = "select [Ship-to-address code] as aad1 , * from MobileJavaLAT.v_LAT_Customers";
 				con = this.getNewConnectionView();
 			} else {
      		   con =  getNewConnection2();
@@ -1030,8 +1030,9 @@ cn.close();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
+				String a1 = rs.getString("aad1").trim();
 				String name = rs.getString("nimi").trim();
-				String id = rs.getString("kood").trim();
+				String id = rs.getString("kood").trim()+"_"+a1;
 				// System.out.println(line);
 				Customer customer = new Customer(id);
 				String payer = null;
