@@ -844,6 +844,10 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 			if (number == null || number.length() == 0) {
 				number = (Calendar.getInstance().getTimeInMillis() + "").substring(5);
 			}
+			
+			if(order.getStatus() == 1) {
+				number = "G" + number;
+			}
 			Node un2 = doc.createElement("Number");
 			Text unVal2 = doc.createTextNode(number);
 			un2.appendChild(unVal2);
@@ -1029,6 +1033,9 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 			
 
 			String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + ".xml";
+			if(order.getStatus() == 1) {
+				fileName = parent.getProps().getProperty("conv.diroffer") + order.getDokNr().trim() + ".xml";
+			}
 			System.out.println(fileName);
 			OutputFormat of = new OutputFormat();
 			of.setIndenting(true);

@@ -1162,7 +1162,7 @@ hind =   Converter.Round((float)hind, 2);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.exit(0);
+		//System.exit(0);
 	 }
 	  
 

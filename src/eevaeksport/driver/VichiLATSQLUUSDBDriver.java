@@ -977,10 +977,18 @@ cn.close();
 			ResultSet rs1 = stmt1.executeQuery(cmd);
 			while (rs1.next()) {
 				Debt debt = new Debt();
-				String custID = rs1.getString("klient");
-				// String custID = rs1.getString("maksja");
+				String custID = rs1.getString("klient").trim();
+
+				 String addr = rs1.getString("kl2");
+				 if(addr != null && addr.trim().length() > 0) {
+					 custID = custID + "-" + addr.trim();
+				 }
 				debt.setCustID(custID);
 
+
+				String maksja = rs1.getString("maksja").trim();
+				debt.setPayerID(maksja);
+				
 				String doknr = rs1.getString("number");
 				if (doknr.trim().length() > 6) {
 					doknr = doknr.substring(6, doknr.length());
@@ -1030,9 +1038,13 @@ cn.close();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				String a1 = rs.getString("aad1").trim();
+				String a1 = "";
+				if(view) {
+				a1 = "_" + rs.getString("aad1").trim();
+				}
 				String name = rs.getString("nimi").trim();
-				String id = rs.getString("kood").trim()+"_"+a1;
+				String kood = rs.getString("kood").trim();
+				String id = kood +  a1;
 				// System.out.println(line);
 				Customer customer = new Customer(id);
 				String payer = null;
@@ -1042,6 +1054,8 @@ cn.close();
 				payer = rs.getString("payer");
 				if (payer != null && payer.trim().length() > 0) {
 					customer.setPayer(payer.trim());
+				}else {
+					customer.setPayer(kood);
 				}
 
 				String aadress = rs.getString("aadress");
@@ -1572,6 +1586,12 @@ cn.close();
 			while (rs.next()) {
 
 				String custID = rs.getString("klient").trim();
+				if(view) {
+					String abi = rs.getString("abiklient");	
+					if(abi != null && abi.trim().length() > 0) {
+						custID = custID + "_" + abi.trim();
+					}
+				}
 
 				String prodID = rs.getString("toode").trim();
 				;
@@ -1629,6 +1649,13 @@ cn.close();
 
 			while (rs2.next()) {
 				String klient = rs2.getString("klient").trim();
+				
+				if(view) {
+					String abi = rs2.getString("abiklient");	
+					if(abi != null && abi.trim().length() > 0) {
+						klient = klient + "_" + abi.trim();
+					}
+				}
 				String toode = rs2.getString("toode").trim();
 				String kogus = "0";
 				String date = " ";

@@ -527,7 +527,7 @@ public class TelemaXMLDBDriver extends AbstractDBDriver implements BulkUpdater,D
 		      		         }
 		      		     
 		      		     if(OverDue != null && !OverDue.equals("0")) {
-		      		    	 customer.setDebt(Double.parseDouble(OverDue));
+		      		    	 //customer.setDebt(Double.parseDouble(OverDue));
 		      		     }
 		      		     
 		      		     if(info != null){
@@ -780,7 +780,12 @@ private HashMap prodsGUID = new HashMap();
 		   			  
 		   		
 		   			 if(ProdDesc.length() > 0) {
-		   				 prod.setName(Converter.enCodeEst(ProdDesc ));
+		   				 if(EANKood.length() > 0) {
+		   					 prod.setName(Converter.enCodeEst(ProdDesc + " " + EANKood )); 
+		   				 }else {
+		   					 prod.setName(Converter.enCodeEst(ProdDesc )); 
+		   				 }
+		   				
 		   				
 		   			 }
 		   			 if(EANKood.length() > 0) {

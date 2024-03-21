@@ -533,6 +533,7 @@ public class DeaNewDBDriver extends AbstractDBDriver implements Manager, ClientB
                 prod.setGroup(rs.getString("liik").trim());
                 prod.setMeasure(rs.getDouble("plaanhind"));
                 prod.setMaxDiscount(rs.getDouble("minkogus"));
+                prod.setVat("22");
                 String ean = rs.getString("ribakood");
                 if(ean != null && ean.trim().length()>7 ){
                 prod.setEAN(ean.trim());

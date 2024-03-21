@@ -1209,11 +1209,84 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
       } catch (Exception e){
         e.printStackTrace();
       }  
-      String inP = parent.getProps().getProperty("doc.origpath");
-      String outP = parent.getProps().getProperty("doc.destination");
-//      Converter.prepareDocCatalogue(inP, outP, docCodes, false);
+     
+     getProdGroupsDirecto(tm);
+     
       return tm;
    }
+
+   public void getProdGroupsDirecto(TreeMap tm) {
+	    HashSet names = new HashSet();
+		   String lang = null;
+		   
+		     if(getParent().getProps().getProperty("productgroup.lang") != null){
+		      	 lang = getParent().getProps().getProperty("productgroup.lang");
+		      }
+		   
+	  	try {
+	  		  File f = new File (getDir() + "tooted.xml");
+	  	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	  	     DocumentBuilder db;
+	  		db = dbf.newDocumentBuilder();      	
+	      	FileInputStream in = getCleanInputStream(f);
+	      	String handler = null;
+	          Document doc = db.parse(in,handler);
+	          Node root = getNode(doc, "transport");      
+	       //   System.out.println(root);
+	      	Node read = getNode(root, "items");
+	      //	System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
+	          for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	          	  Node rida = read.getChildNodes().item(i);
+	          	  try{
+	          		  if(rida.getNodeName().equals("bi_item")){
+	               		 String group  = rida.getAttributes().getNamedItem("class").getNodeValue();
+	               		 try{
+	               			 String name  = rida.getAttributes().getNamedItem("classname").getNodeValue(); 
+	                   		 group = Converter.cleanLitLatEst(group);
+	                   		  name  = "Z" + Converter.enCodeEst(name);
+	                   		  name = name.replaceAll("Turtle Wax", "TW");
+	                   		  
+	                   		  if(lang != null) {
+	                   			  try {
+	                   			  Node lan=	  rida.getChildNodes().item(0);
+	                   		     name = Converter.enCodeEst( lan.getAttributes().getNamedItem("content").getNodeValue());
+	                   		
+	                   			  }catch(Exception e) {
+	                   				  
+	                   			  }
+	                   			
+	                   				
+	                   			
+	                   		  }
+	                   		 if(names.contains(name + " 1")) {
+	                  			  name = name + " 2";
+	                  		  }
+	                   		  
+	                   		  if(names.contains(name)) {
+	                   			  name = name + " 1";
+	                   		  }
+	                   		  tm.put(group, name); 
+	                   		// System.out.println("gr name " + name + " " + group);
+	                   		names.add(name);
+	               		 }catch(Exception r){
+	               			 
+	               		 }
+	               	 
+	          		  } 
+	                  
+	          	  }catch(Exception e){
+	          		 // e.printStackTrace();
+	          		 // System.exit(0);
+	          	  }
+	               
+	          }
+	          
+	  	}catch(Exception e){
+	  		e.printStackTrace();
+	  	}
+	  
+	  
+	   }
 
 
 
@@ -1232,15 +1305,17 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 
 	   return idx;
    }
+   
+   private HashMap dirAgents = null;
 
    public TreeMap getAgents(){
 
 
        String cmd = "  select [2015_Tobis$Salesperson_Purchaser].code as kood , [2015_Tobis$Salesperson_Purchaser].Name as nimi ," +
-       " '' AS objekt FROM [2015_Tobis$Salesperson_Purchaser] " +
+       " '' AS objekt  ,[Code in DIRECTO] as directo FROM [2015_Tobis$Salesperson_Purchaser] " +
        " WHERE [2015_Tobis$Salesperson_Purchaser].Merisoft=1 ";
     
-       
+       dirAgents = new HashMap();
 	    if (isDebug()) System.out.println(cmd);
 	    TreeMap agents = new TreeMap();
 	    try {
@@ -1250,7 +1325,12 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 	        while(rs.next()){
 	          Agent agent = new Agent(rs.getString("kood").trim());
 	          String name = rs.getString("nimi").trim();
-	          agent.setObject(rs.getString("objekt"));
+	          String directo = rs.getString("directo");
+	          
+	          if(directo != null) {
+	        	  dirAgents.put(directo, agent.getID()); 
+	          }
+	          
 	          agent.setName(name);
 
 				String agentAGENTS = getParent().getProps().getProperty("dub." +agent.getID());
@@ -1274,24 +1354,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
             stmt.close();
 	        con.close();
 	        
-	        
-	/*  cmd = "SELECT k.[No_] AS klient, [Balance total (LCY)]AS summa " +
-	  " FROM [Premia Tallinna Külmhoone AS$Customer] k  WHERE k.[Salesperson Code] != '' AND [Balance total (LCY)]<>0 " ;
-	  System.out.println(cmd);
-	         con = getNewConnection2();
-	        Statement stmt1 = con.createStatement();
-	        ResultSet rs1 = stmt1.executeQuery(cmd);
-	        while(rs1.next()){
-
-	          String id = rs1.getString("klient");
-	          Debt debt = new Debt ();
-	         // debt.setDoknr(clear(st2.nextToken()));
-	          debt.setDue(rs1.getString("summa"));
-	          overdebts.put(id,debt);
-	     }
-	     rs1.close();
-*/
-            
+	         
 	       
 	    } catch (Exception e){
 	        getParent().showError(e);
@@ -1308,7 +1371,81 @@ private String conv (String ss){
 	return Converter.enCodeEst(ss);
 }
 
+
+
+private boolean isDueDate(String mmddyy){
+	   if("true".equals(getParent().getProps().getProperty("debtlist.all"))) {
+		   return true;
+	   }
+	  	
+	  	Calendar cal = Calendar.getInstance();
+	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
+	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(5, 7))-1);
+	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(8, 10)));
+		Calendar ca = Calendar.getInstance();
+		ca.add(Calendar.DAY_OF_YEAR, -1);
+		
+		if(cal.before(ca)){
+			return true;
+		}else{
+			return false;
+		}
+	  }
+
+
+
+private Date getDate(String mmddyy){
+	  	long lon = 0;
+	  	Calendar cal = Calendar.getInstance();
+	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
+	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(5, 7))-1);
+	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(8, 10)));
+	  // System.out.println(cal.getTime()); 
+	   Date date = new Date(lon);
+	   date.setTime(cal.getTimeInMillis());
+	    return date;
+		
+	  }
+
+
+ private HashMap dirCustCodes = null ;
+
        public TreeMap getCustomers(Agent agent){
+    	   
+    	   // teeme kindlaks directo koodid mis on Nvisse sisestatud .
+    	   
+    	   try {
+    		  
+ 	    	  String cmd =  " SELECT k.[No_] AS kood, [Code in DIRECTO LT] as directo FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] \r\n" + 
+                            " and a.Code=k.[Ship-to Code]   WHERE k.[Salesperson Code] != ''  AND Blocked != 3 and [Code in DIRECTO LT] != ''";
+ 	       
+ 	    	  dirCustCodes = new HashMap();
+ 	           System.out.println(cmd);
+ 	       
+ 	       con = getNewConnection2();
+ 	       Statement stmt1 = con.createStatement();
+ 	       ResultSet rs1 = stmt1.executeQuery(cmd);
+ 	       
+ 	       while(rs1.next()){
+ 	    	   
+ 	    	   String custID = rs1.getString("kood").trim();
+   	           String dir = rs1.getString("directo").trim();
+   	           dirCustCodes.put(dir, custID); 
+   	           
+ 	       }
+ 	       
+ 	       rs1.close();
+ 	       stmt1.close();
+ 	       con.close();
+    	   
+    	   }catch(Exception e) {
+    		   e.printStackTrace();
+    	   }
+    	   
+    	   
+    	   //Siin peaks directo võla listi ka sisse lugema
+    	   
+    	   
 
     	    try {
 
@@ -1381,6 +1518,156 @@ private String conv (String ss){
     	      } catch (Exception e){
     	        e.printStackTrace();
     	      }
+    	    
+    	    System.out.println("debt size " + debtList.size());
+    	 	   Iterator enums = this.dirCustCodes.keySet().iterator();
+    	 	   String gS = getParent().getProps().getProperty("keyInvoice");
+    	   	    if(gS == null) {
+    	   	    	System.out.println("keyInvoice is missing!");
+    	   	    	System.exit(0);
+    	   	    }
+    	 	   while(enums.hasNext()){
+    	 		String custid = (String)enums.next();
+    	 		
+    	 		   try{
+    	 			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
+    	 			
+    	 			   String httpsURL = logurl  + company + "/" + comphelp + "/xmlcore.asp"; //?get=1&what=stocklevel
+    	 			   Converter.doTrustToCertificates();
+    	 			 	URL myurl = new URL(httpsURL);
+    	 		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
+    	 		        
+    	 		        String urlParameters  = "what=invoice&get=1&orderer=" + cuurl + "&key=" + gS;
+    	 		    	
+    	 		           myurl = new URL(httpsURL);
+    	 		           
+    	 		           byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+    	 		           int postDataLength = postData.length;
+    	 		           con = (HttpsURLConnection)myurl.openConnection();
+    	 		           con.setRequestMethod("POST");
+    	 		           con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+    	 		           con.setRequestProperty("charset", "utf-8");
+    	 		           con.setRequestProperty("Content-Length", Integer.toString(postDataLength ));
+    	 		           con.setUseCaches(false);
+    	 		           con.setDoOutput(true);
+    	 		           try(DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+    	 		              wr.write( postData );
+    	 		           }
+    	 		        
+    	 		        
+    	 		        InputStream ins = con.getInputStream();
+    	 		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
+    	 		        BufferedReader in = new BufferedReader(isr);
+
+    	 		        String inputLine;
+    	 		        StringBuffer inputLineBuf = new StringBuffer();
+    	 		        while ((inputLine = in.readLine()) != null){
+    	 		        	inputLine = Converter.enCodeEst(inputLine);
+    	 		        	//System.out.println(inputLine);
+    	 		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\"l\"","\"L\""));
+    	 		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
+    	 		        	while (st.hasMoreTokens()){
+    	 		        		
+    	 		        		String line = st.nextToken();
+    	 		        		String number = "";
+    	 			        	String date = "";
+    	 			        	String duedate = "";
+    	 			        	String volg = "";
+    	 			        	String payer = "";
+    	 		        		
+    	 			        	int ind =  line.indexOf("invoice number=") ;
+    	 		        		if(ind != -1){
+    	 			        		 number = line.substring(ind + 16);
+    	 			        		 number = number.substring(0,number.indexOf("\""));
+    	 			        	}
+    	 			        	
+    	 			        	ind =  line.indexOf("date=") ;
+    	 				        	if(ind != -1){
+    	 				        		 date = line.substring(ind + 6);
+    	 				        		 date = date.substring(0,date.indexOf("\""));
+    	 				        	}
+    	 				        		
+    	 				        	
+    	 			        	 ind =  line.indexOf("due_date=") ;
+    	 			        	if(ind != -1){
+    	 			        		 duedate = line.substring(ind + 10);
+    	 			        		duedate = duedate.substring(0,duedate.indexOf("\""));
+    	 			        	 }
+    	 			        	
+    	 			        	 ind =  line.indexOf("regno=") ;
+    	 				        	if(ind != -1){
+    	 				        		 payer = line.substring(ind + 7);
+    	 				        		 payer = payer.substring(0,payer.indexOf("\""));
+    	 				        	 }
+    	 				        	
+    	 			        	
+    	 			        	ind =  line.indexOf("balance=") ;
+    	 				        	if(ind != -1){
+    	 				        		 volg = line.substring(ind + 9);
+    	 				        		 volg = volg.substring(0,volg.indexOf("\""));
+    	 				        	 }
+    	 				        //	System.out.println(custid  + " " + number + " " + date  + " " + duedate  + " " + volg );	
+    	 				       
+    	 			        	try{
+    	 			        		 double vv = Double.parseDouble(volg);
+    	 			        		 if(vv != 0){
+    	 			        			 if(isDueDate(duedate)){
+    	 						        		     Debt dd = new Debt();
+    	 						     				  dd.setCustID((String)dirCustCodes.get(custid));
+    	 						     				  
+    	 						     				  dd.setDoknr("GZ-" + number);
+    	 						     				  dd.setDate(getDate(date));
+    	 						     				  dd.setDuedate(getDate(duedate));
+    	 						     				  
+    	 						     				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
+    	 						     				  dd.setDue(ff + "");
+    	 						     				  dd.setSum(vv);
+    	 						     					//System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " +ff);	
+    	 						     				debtList.add(dd);  
+    	 						     			/*	  if(dueSums.get(custid) != null){
+    	 						     					  double ss = Double.parseDouble(dueSums.get(custid) + "")+ vv ;
+    	 						     					 dueSums.put(custid, ss);    
+    	 						     				  }else{
+    	 						     					 dueSums.put(custid, volg); 
+    	 						     				  }
+    	 						     				 debts.add(dd);*/
+
+    	 									        		
+    	 						        	 }
+    	 			        			 
+
+    	 			     				/*  if(usedCredit.get(custid) != null){
+    	 			     					  double ss = Double.parseDouble(usedCredit.get(custid) + "")+ vv ;
+    	 			     					 usedCredit.put(custid, ss);    
+    	 			     				  }else{
+    	 			     					 usedCredit.put(custid, volg); 
+    	 			     				  }*/
+    	 			        			 
+    	 			        		 }
+    	 				        	
+    	 				        	  
+    	 			        	}catch(Exception e){
+    	 			        		//e.printStackTrace();
+    	 			        	}
+    	 				        
+    	 			        	 
+    	 		        	}           	
+    	 		        }
+    	 		      //  System.out.println(inputLineBuf);
+    	 		        in.close();
+    	 		        
+    	 		       
+    	 		   } catch (Exception a){
+    	 			   a.printStackTrace();
+    	 		   }
+    	 		   
+    	 	   }
+    	 	 
+    	    
+
+       	    System.out.println("debt size2 " + debtList.size());
+    	    
+    	    
     	/// KLIENDI ANDMETE LEIDMINE
 
     	      
@@ -1518,7 +1805,7 @@ System.out.println(cmd);
              "    [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,[Route Code] AS visit,'' AS type,  " +
              "  0 AS extradays ,'' AS sort,'' AS debt , 0 AS minsum ,k.Contact + '|' + k.[Phone No_] + '|' + k.[E-Mail] as kontakt  , " +
 			 "  [Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 ,av.AVG_Line_Count as lines,av.AVG_Amount as summa,av.Last_Invoice_Date as lastdeal , [Lojalumo programa] as loyal " +
-             "  	  , k.[Address] as a1,k.[Address 2] as a2,k.[City] as a3, k.[Country Code]as coun , k.[Secondary Salesperson Code] as ag2 FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] " +
+             "  	  , k.[Address] as a1,k.[Address 2] as a2,k.[City] as a3, k.[Country Code]as coun , k.[Secondary Salesperson Code] as ag2 , [Code in DIRECTO LT] as directo FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] " +
               "     and a.Code=k.[Ship-to Code]  " +
 				"   LEFT join [_MERISOFT$Tobis$Customer_Average_Invoice] av on  av.[Customer_No]=k.[No_] " +
 				 "   WHERE k.[Salesperson Code] != ''  AND Blocked != 3" ;
@@ -1580,9 +1867,9 @@ System.out.println(cmd);
     	             customer.addAgent(new Agent(ag));
     	             
     	             if (ag != null && ag.equals("MITU")){
-    	 			          Enumeration enums = getParent().getAgentsHash().elements();
-    	 			          while (enums.hasMoreElements()) {
-    	 			            Agent a = (Agent) enums.nextElement();
+    	 			          Enumeration enums2 = getParent().getAgentsHash().elements();
+    	 			          while (enums2.hasMoreElements()) {
+    	 			            Agent a = (Agent) enums2.nextElement();
     	 			            customer.addAgent(a);
     	 			          }
 
@@ -1723,6 +2010,11 @@ System.out.println(cmd);
     	       	String ag2 = rs.getString("ag2");
     	       	if(ag2 != null && ag2.trim().length() > 0) {
     	       		customer.addAgent(new Agent(ag2));
+    		         	
+    	       	}
+    	    	String dire = rs.getString("directo");
+    	       	if(dire != null && dire.trim().length() > 0) {
+    	       		customer.addCity("Directo Kodas: " + dire);
     		         	
     	       	}
 	             
@@ -2354,6 +2646,13 @@ TreeMap sorting = new TreeMap();
      } catch (Exception e){
        e.printStackTrace();
      }
+     
+     
+     
+     getCustProdsDirecto(sorting);
+     
+     
+     
      Vector vcc = new Vector();
      TreeMap sorting2 = new TreeMap();
      
@@ -2377,6 +2676,146 @@ TreeMap sorting = new TreeMap();
      return vcc;
    }
 
+   public void getCustProdsDirecto(TreeMap sorting){
+	   //1.teeme klientide arvete nimekirja .
+	   
+	   File cpdatadir = new File("cpdata");
+	   if(!cpdatadir.exists()) {
+		   cpdatadir.mkdir();
+	   }
+	
+	
+	   Calendar cal = Calendar.getInstance();
+	   String d = cal.get(Calendar.DAY_OF_MONTH)+ "";
+	   if(d.length() == 1){
+		   d = "0" + d;
+	   }
+	   String m = (cal.get(Calendar.MONTH) +1)+ "";
+	   if(m.length() == 1){
+		   m = "0" + m;
+	   }
+	   
+	   int days = 30 ;
+	   if(getParent().getProps().getProperty("sortdays") != null){
+		   try{
+			   days = Integer.parseInt(getParent().getProps().getProperty("sortdays"));
+		   }catch(Exception e){
+		   }
+	   }
+	   String end = d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
+	   cal.add(Calendar.DATE, - days);
+	   
+	    d = cal.get(Calendar.DAY_OF_MONTH)+ "";
+	   if(d.length() == 1){
+		   d = "0" + d;
+	   }
+	    m = (cal.get(Calendar.MONTH) +1)+ "";
+	   if(m.length() == 1){
+		   m = "0" + m;
+	   }
+		   String start =  d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
+		//   System.out.println(start + " uhuu " + end);
+		
+		   Iterator enums = this.dirCustCodes.keySet().iterator();
+	   while(enums.hasNext()){
+		String custid = (String)enums.next();
+		   try{
+			  // String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
+			   Converter.doTrustToCertificates();
+			   custid = Converter.deCode(custid);
+			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
+				String httpsURL = logurl  + company + "/xmlcore.asp"; 
+		  //     System.out.println(httpsURL);
+				URL myurl = new URL(httpsURL);
+		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
+		        
+		        String gS = getParent().getProps().getProperty("keyInvoice");
+		   	    if(gS == null) {
+		   	    	System.out.println("keyInvoice is missing!");
+		   	    	System.exit(0);
+		   	    }
+		        String urlParameters  = 
+						"what=invoice&get=1&orderer=" + cuurl + "&invoicedate1=" + start + "&invoicedate2=" 
+		            + end + "&key=" + gS;
+		           httpsURL = logurl  + company + "/" + comphelp + "/xmlcore.asp"; //?get=1&what=stocklevel
+		           myurl = new URL(httpsURL);
+		           
+		           byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+		           int postDataLength = postData.length;
+		           con = (HttpsURLConnection)myurl.openConnection();
+		           con.setRequestMethod("POST");
+		           con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+		           con.setRequestProperty("charset", "utf-8");
+		           con.setRequestProperty("Content-Length", Integer.toString(postDataLength ));
+		           con.setUseCaches(false);
+		           con.setDoOutput(true);
+		           try(DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+		              wr.write( postData );
+		           }
+		           
+		        
+		        
+		        
+		        
+		        InputStream ins = con.getInputStream();
+		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
+		        BufferedReader in = new BufferedReader(isr);
+
+		        String inputLine;
+		        StringBuffer inputLineBuf = new StringBuffer();
+		        while ((inputLine = in.readLine()) != null){
+		        	inputLine = Converter.enCodeEst(inputLine);
+		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\"l\"","\"L\""));
+		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
+		        	while (st.hasMoreTokens()){
+		        		
+		        		String line = st.nextToken();
+		        	//	System.out.println(" line " + line);
+		        		int ind =  line.indexOf("invoice number=") ;
+		        		String number = "";
+			        	if(ind != -1){
+			        		 number = line.substring(ind + 16);
+			        		number = number.substring(0,number.indexOf("\""));
+			        		// System.out.println(number);
+			        	}
+			        	 ind =  line.indexOf("date=") ;
+			        	if(ind != -1){
+			        		String date = line.substring(ind + 6);
+			        		date = date.substring(0,date.indexOf("\""));
+			        		// System.out.println(date + " " + number + " " + custid);	
+				        		
+			        		 if(isOkDate(date)){
+			        			// System.out.println(date + "  222 " + number + " " + custid);	
+					        		
+			     					Vector cps = this.getCPCombi(Converter.deCode(custid),number,date);
+			     					if(cps != null){
+			     						Enumeration eee = cps.elements();
+			     						while( eee.hasMoreElements()){
+			     						CustProd cp = (CustProd) eee.nextElement();
+				     						sorting.put(custid +  cp.getProdID()  , cp);
+				     					//	System.out.println(date + " " + number + " " + custid);
+			     						}			     				
+					        			 	
+			     					}
+			     				}
+			        	  }		
+		        	}           	
+		        }
+		      //  System.out.println(inputLineBuf);
+		        in.close();
+		        isr.close();
+		        ins.close();
+		        con.disconnect();
+		        
+		       
+		   } catch (Exception a){
+			  // a.printStackTrace();
+			  
+		   }
+		   
+	   }
+	   System.out.println("cp directo size " + sorting.size());
+  }
 
 
 
@@ -3487,6 +3926,118 @@ private HashSet prodCodes = null;
 	   return result;
   }
 
+
+  private Vector getCPCombi(String custid , String number, String date ){
+
+	   Vector result = new Vector();
+	   try{
+		   File cpdata = new File("cpdata/" + number+".vec");
+		   if(cpdata.exists()) {
+			   Vector vec = (Vector)Converter.readObject("cpdata/" + number+".vec");
+			   for(int i = 0; i < vec.size(); i++) {
+				   CustProd cp = (CustProd)vec.elementAt(i);
+				   if(!prodCodes.contains(cp.getProdID())){
+				        prodCodes.add(cp.getProdID());	
+			        }
+			   }
+			   return vec ;
+		   }else {
+			   
+		 
+			String httpsURL = logurl  + company + "/xmlcore.asp";
+			
+			
+		       // System.out.println("httpsURL " + httpsURL);
+				URL myurl = new URL(httpsURL);
+		        		   String gS = getParent().getProps().getProperty("keyInvRow");
+		  	    if(gS == null) {
+		  	    	System.out.println("keyInvoice is missing!");
+		  	    	System.exit(0);
+		  	    }
+		        String urlParameters  = 
+						"what=invoice_row&get=1&number=" + number + "&key=" + gS;
+		           httpsURL = logurl  + company + "/" + comphelp + "/xmlcore.asp"; //?get=1&what=stocklevel
+		           myurl = new URL(httpsURL);
+		           
+		           byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+		           int postDataLength = postData.length;
+		           HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
+		           con.setRequestMethod("POST");
+		           con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+		           con.setRequestProperty("charset", "utf-8");
+		           con.setRequestProperty("Content-Length", Integer.toString(postDataLength ));
+		           con.setUseCaches(false);
+		           con.setDoOutput(true);
+		           try(DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+		              wr.write( postData );
+		           }
+		        
+		        InputStream ins = con.getInputStream();
+		        
+		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
+		        BufferedReader in = new BufferedReader(isr);
+		        
+		        String inputLine;
+		        StringBuffer inputLineBuf = new StringBuffer();
+		        while ((inputLine = in.readLine()) != null){
+		        	inputLine =Converter.enCodeEst(inputLine);
+		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ));
+		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
+		        	while (st.hasMoreTokens()){
+		        		
+		        		String line = st.nextToken();
+		        		int ind =  line.indexOf("item=") ;
+		        		String toode = "";
+			        	if(ind != -1){
+			        		toode = line.substring(ind + 6);
+			        		toode = toode.substring(0,toode.indexOf("\""));
+			        	
+			        	}
+		        
+			        	
+			        	ind =  line.indexOf("quantity=") ;
+		        		double kogus = 0;
+		        		String kkk = "";
+			        	if(ind != -1){
+			        		kkk = line.substring(ind + 10);
+			        		kkk = kkk.substring(0,kkk.indexOf("\""));
+			        		 kogus = Double.parseDouble(kkk);
+			        	}
+			        	
+			        	ind =  line.indexOf("total=") ;
+			        	double hind = 0;
+		        		 kkk = "";
+			        	if(ind != -1){
+			        		kkk = line.substring(ind + 7);
+			        		kkk = kkk.substring(0,kkk.indexOf("\""));
+			        		
+			        		 hind = Double.parseDouble(kkk)/kogus;
+			        		// System.out.println("toode "  + line + " "+ toode + " " + hind);
+			        	}
+			        	
+		        if(toode != null && toode.trim().length() > 0){
+			        result.add(new CustProd(this.dirCustCodes.get(custid)+"", toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
+			        if(!prodCodes.contains(toode)){
+				        prodCodes.add(toode);	
+			        }
+		        }
+		         }
+		        	
+		        }
+		        in.close();
+		      //  System.out.println("buffer " + result);
+		        Converter.saveObject(result, "cpdata/" + number + ".vec");
+		   }
+		   
+		   
+		   
+		   
+	   }catch(Exception e){
+		   e.printStackTrace();
+		   return null;
+	   }
+	   return result;
+ }
 
   private boolean isOkDate(String mmddyy){
 	  	long lon = 0;
