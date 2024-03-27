@@ -347,7 +347,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                  
 	                    			}
 	                    			ord.setOrderLines(lines);
-	                    			if (ord.getInfo().contains("Ketlin Muttel"))
+	                    			
 	                    			orders.add(ord);
 
 

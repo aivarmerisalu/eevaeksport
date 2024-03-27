@@ -430,14 +430,15 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
     return prod;
   }
 
-
+HashMap paILNs = null;
 
   private HashMap getCustILNs() {
 	  HashMap res = new HashMap();
 	  
+	  paILNs = new HashMap();
 	 	try{
-	 	    String sql2 = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2,k.[Customer ILN] as kood3 "
-	 	    		+ " from  MobileJavaLAT.v_LAT_Customers k where k.[Customer ILN] != '' ";
+	 	    String sql2 = " SELECT k.kood as kood1 ,k. [Ship-to-address code] as kood2, k.[Ship-to Address ILN] as kood3 , k.[Customer ILN] as kood4 " + 
+	 	    		"	 	    		from  MobileJavaLAT.v_LAT_Customers k where k.[Customer ILN] != '' ";
 	 	    System.out.println(sql2);
 
 	 	   Connection con = DriverManager.getConnection(urlV   , parent.getProps().getProperty("view.user"), parent.getProps().getProperty("view.pass"));
@@ -449,11 +450,15 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	 	    	String id = rs2.getString("kood1").trim();
 				String id2 = rs2.getString("kood2");
 				String id3 = rs2.getString("kood3");
+				String id4 = rs2.getString("kood4");
 				if(id2 != null && id2.trim().length() > 0) {
 					id = id + "_" + id2.trim();
 				}
 	 	    	if(id != null && id2 != null && id.trim().length() > 0 && id2.trim().length() > 0) {
 	 	    		  res.put(id, id3);
+	 	    		  if(id4 != null && id4.trim().length() > 0) {
+	 	    		    paILNs.put(id, id4.trim());
+	 	    		  }
 	 	    	}
 	 	    
 
@@ -691,6 +696,11 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 			 if(ILNC == null) {
 				 ILNC = "";
 			 }
+			 String ILNP = (String)paILNs.get(kood);
+			 if(ILNP == null) {
+				 ILNP = "";
+			 }
+			 System.out.println("ilnc " + ILNC);
 			 
 			 if(kood.indexOf("_") != -1) {
 				 kood = cust.substring(0,cust.indexOf("_"));
@@ -709,15 +719,15 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 			Text nimiVal = doc.createTextNode(kood);
 			 ise.appendChild(nimiVal);
 			Node ise2 = doc.createElement("ILN");
-			Text nimiVal2 = doc.createTextNode(lisa);
+			Text nimiVal2 = doc.createTextNode(ILNC);
 			
 			 ise2.appendChild(nimiVal2);
 			Node ise3 = doc.createElement("DeliveryILN");
-			Text nimiVal3 = doc.createTextNode(lisa);
+			Text nimiVal3 = doc.createTextNode(ILNC);
 			
 			Node ise3R = doc.createElement("SenderILN");
-			if(ILNC != null) {
-		    	Text nimiVal3R = doc.createTextNode(ILNC);
+			if(ILNP != null) {
+		    	Text nimiVal3R = doc.createTextNode(ILNP);
 			    ise3R.appendChild(nimiVal3R);
 			}
 			

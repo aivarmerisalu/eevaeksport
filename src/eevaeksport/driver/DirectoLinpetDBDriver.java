@@ -3546,7 +3546,7 @@ public ArrayList loadOpenOrders() {
    	e.printStackTrace();
    } 
 	  
-	System.exit(0);
+	//System.exit(0);
    
 	
 		try {
@@ -3656,7 +3656,7 @@ public ArrayList loadOpenOrders() {
 
 @Override
 public void WebShopper()  {
-	loadOpenOrders();
+	//loadOpenOrders();
 
 	getProducts2();
 	HashSet orderHistory = null;
@@ -3703,7 +3703,7 @@ public void WebShopper()  {
 		}
 	}
 	try {
-		//Converter.saveObject(orderHistory, "orderHistory.hash");
+		Converter.saveObject(orderHistory, "orderHistory.hash");
 	} catch (Exception e) {
 		e.printStackTrace();
 	}

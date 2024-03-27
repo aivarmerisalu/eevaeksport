@@ -1330,15 +1330,21 @@ String region = rs.getString("region");
     		"              NAMEALIAS AS ean ,ItemBuyerGroupId AS grupp, inv.netweight as grr, inv.minprice as minprice, uomcv.factor as kastis ,"
     		+ "case when bomunitid = 'pk' then (Select factor from unitofmeasureconversion  u where  u.FROMUNITOFMEASURE = 5637144580 AND u.TOUNITOFMEASURE = 5637144579 and \r\n" + 
     		"    								  u.product = inv.recid)   when   bomunitid = 'kg' then (Select factor from unitofmeasureconversion  u where  u.FROMUNITOFMEASURE = 5637144580 AND u.TOUNITOFMEASURE = 5637144577 and \r\n" + 
-    		"    								  u.product = inv.recid) else  1 end as kastis2, bomunitid as unit , pal.factor as pallet " + 
+    		"    								  u.product = inv.recid) else  1 end as kastis2, bomunitid as unit , case when bomunitid = 'pk' then (Select factor from unitofmeasureconversion  u where  u.FROMUNITOFMEASURE = 5637144581 AND u.TOUNITOFMEASURE = 5637144580 and  \r\n" + 
+    		"    		  								  u.product = inv.recid)   when   bomunitid = 'kg' then (Select factor from unitofmeasureconversion  u where \r\n" + 
+    		"											   u.FROMUNITOFMEASURE = 5637144581 AND u.TOUNITOFMEASURE = 5637144577 and \r\n" + 
+    		"    		    								  u.product = inv.recid) when\r\n" + 
+    		"												  bomunitid = 'tk' then (Select factor from unitofmeasureconversion  u where \r\n" + 
+    		"											   u.FROMUNITOFMEASURE = 5637144581 AND u.TOUNITOFMEASURE = 5637144578 and \r\n" + 
+    		"    		    								  u.product = inv.recid)\r\n" + 
+    		"												   else  1 end as pallet " + 
     	
     		" FROM inventtable inv  \r\n" + 
     		" INNER JOIN    inventtablemodule mod ON mod.itemid = inv.itemid AND mod.dataareaid=inv.dataareaid\r\n" + 
     		" LEFT JOIN     ecoresproducttranslation erpt ON inv.product = erpt.product \r\n" + 
     		" LEFT JOIN      ecoresproduct es ON es.displayproductnumber = inv.itemid\r\n" + 
     		"    		LEFT JOIN     unitofmeasureconversion uomcv ON uomcv.product = es.recid" + 
-    		"              AND uomcv.FROMUNITOFMEASURE = 5637144580 AND uomcv.TOUNITOFMEASURE = 5637144578 LEFT JOIN     unitofmeasureconversion pal ON pal.product = es.recid\r\n" + 
-    		"    		              AND pal.FROMUNITOFMEASURE = 5637144581 AND pal.TOUNITOFMEASURE = 5637144578 " + 
+    		"              AND uomcv.FROMUNITOFMEASURE = 5637144580 AND uomcv.TOUNITOFMEASURE = 5637144578 " + 
     		"INNER JOIN pricedisctable disc ON inv.itemid=disc.itemrelation AND inv.dataareaid=disc.dataareaid \r\n" + 
     		"AND (getdate()>=disc.fromdate OR disc.fromdate=('1900-01-01 00:00:00.00')) AND (disc.todate>getdate() OR disc.todate=('1900-01-01 00:00:00.00')) \r\n" + 
     	

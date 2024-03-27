@@ -786,9 +786,209 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
         	 e.printStackTrace();
          }
 	
+         getPriceMatrixDataDirecto( result ) ;
+         
     return result;
       }
 
+   private java.util.Date getCalXML(String ss){
+		  Calendar cc = Calendar.getInstance();
+		  	
+		  	cc.set(Calendar.YEAR,Integer.parseInt(ss.substring(0,4)));
+		  	cc.set(Calendar.MONTH,Integer.parseInt(ss.substring(5,7))-1);
+		  	cc.set(Calendar.DATE,Integer.parseInt(ss.substring(8,10)));
+		     
+		  	return cc.getTime() ;
+		  		
+	  }
+	
+	  
+	 private String ensureLen(String in ){
+		 
+		 if(in.length() == 4){
+			 in = "0" + in ;
+		 }
+		 if(in.length() == 3){
+			 in = "00" + in ;
+		 }
+		 if(in.length() == 2){
+			 in = "000" + in ;
+		 }
+
+		 if(in.length() == 1){
+			 in = "0000" + in ;
+		 }
+		 return in;
+	 }
+	  
+	 
+	private  HashMap priceformulas = null;
+   
+	public  void getPriceMatrixDataDirecto( Vector lines ) {
+		   String sdate = Converter.getDDpMMpYYYYpString(Calendar.getInstance());
+		   if(priceformulas == null) {
+			   this.getCustomersDirecto();
+		   }
+		   System.out.println("siin matrix enne " + lines.size());
+		    //siin oleks
+		    try {
+				  File f = new File (getDir() + "hinnakiri.xml");
+				  System.out.println("siin matix");
+			     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			     DocumentBuilder db;
+				db = dbf.newDocumentBuilder();      	
+		    	FileInputStream in = getCleanInputStream(f);
+		    	String handler = null;
+		        Document doc = db.parse(in,handler);
+		        Node root = getNode(doc, "transport");      
+		   
+		    	Node read = getNode(root, "priceformulas");
+		        for (int i = 0; i < read.getChildNodes().getLength(); i++){
+		        	  Node rida = read.getChildNodes().item(i);
+		        	  try{
+		        		  if(rida.getNodeName().equals("priceformula")){
+		        			
+		        			// String custID = " ";
+		                  String clGroup = " ";
+		                  String prodID = " ";
+		                  String prodGroup = " ";
+		                  String start = " ";
+		                  String end = " ";
+		                  String currency = "";
+		                  MatrixLine mline = new MatrixLine();
+		                 try{
+		                 	 try{
+		                 	     clGroup = ensureLen(rida.getAttributes().getNamedItem("code").getNodeValue());
+		                        }catch(Exception aa){}
+		                 	 try{
+			                         prodID =  rida.getAttributes().getNamedItem("item").getNodeValue();  
+		                 	   }catch(Exception aa){ }
+		                 	 try{
+		                          prodGroup =  rida.getAttributes().getNamedItem("class").getNodeValue();
+		                 	  }catch(Exception aa){ }
+		                 	  try{
+			                             start =  rida.getAttributes().getNamedItem("start_date").getNodeValue();
+			                    	  }catch(Exception aa){ }
+			                    	  try{
+				                             end =  rida.getAttributes().getNamedItem("end_date").getNodeValue();
+				                    	  }catch(Exception aa){ }
+			                    	  try{
+				                             currency =  rida.getAttributes().getNamedItem("currency").getNodeValue();
+				                    	  }catch(Exception aa){ }
+			                    	  String mode = null;  
+			                    	  try{  	  
+		                       mode = rida.getAttributes().getNamedItem("what").getNodeValue();
+			                    	  }catch(Exception aa){ }
+			                    	  
+			                   mline.setProdLevel(mode);
+			                    	  
+		                      try{
+		                     double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
+		                     if(mode != null && mode.equals("8")){
+		                    	 mline.setPrice(value);
+		                    	 mline.setProdLevel("pr");
+		                     }else{
+		                         mline.setDiscount(value);
+		                     }
+		                      }catch(Exception aa){ }
+		                  
+		                      
+		                   
+		                    
+		                      
+		                    //  if (custID != null && custID.trim().length() > 0) {
+		                      //  mline.setCustID(custID.trim());
+		                     // }
+		                      if (currency != null && currency.trim().length() > 0) {
+		                          mline.setCurrency(currency.trim());
+		                        }
+		                      
+		                      if (clGroup != null
+		                          && clGroup.trim().length() > 0) {
+		                        mline.setCliGroup(clGroup.trim());
+		                      }
+
+		                      if (prodID != null && prodID.trim().length() > 0) {
+		                        mline.setProdID(prodID.trim());
+		                      }
+		                      
+		                      if (mline.getProdID() == null && prodGroup != null
+		                          && prodGroup.trim().length() > 0) {
+		                        mline.setProdGroup(prodGroup);
+		                      }   
+		                      
+		                      if("true".equals(getParent().getProps().getProperty("add.startdate"))){
+		                    	  if(clGroup != null  && clGroup.trim().length() > 0) {
+		                    		  if (prodID != null && prodID.trim().length() > 0) {
+		                    			  if(mline.getDiscount() > 0) {
+		                    				  mline.setStartDate(sdate);
+		                    			  }
+		                    		  }
+		                    	  }
+		                      }
+		                      
+		                      if(start != " " && end != " "){
+		                     	 mline.setStartDate(start);
+		                     	 mline.setEndDate(end);
+		                          Date alg = getCalXML(start); 
+		                          Date lopp = getCalXML(end); 
+		                          
+		                          long diff = lopp.getTime() - alg.getTime();
+		                          float days = (diff / (1000*60*60*24));
+		                          if(days > 100) {
+		                        	  mline.setStartDate(" ");
+		                        	  mline.setEndDate(" ");
+		                        	  
+		                        	  if("true".equals(getParent().getProps().getProperty("add.startdate"))){
+		                            	  if(clGroup != null  && clGroup.trim().length() > 0) {
+		                            		  if (prodID != null && prodID.trim().length() > 0) {
+		                            			  if(mline.getDiscount() > 0) {
+		                            				  mline.setStartDate(sdate);
+		                            			  }
+		                            		  }
+		                            	  }
+		                              }
+		                          }
+		                          
+		                          if(alg.before(new Date()) && lopp.after(new Date())){
+		                        	  if(mline.discount > 0 || mline.price > 0) {
+		                        		  if(priceformulas.containsKey(clGroup))
+		                         	     lines.add(mline);	
+		                         	     
+		                        	  }
+		                          }
+		                        
+		                          
+		                      } else {
+		                    	  if(mline.discount > 0 || mline.price > 0) {
+		                    		  if(priceformulas.containsKey(clGroup))
+		                     	      lines.add(mline);	
+		                     	      
+		                    	  }
+		  	                 }
+		                 
+		                 }catch(Exception e){
+		                 	e.printStackTrace();
+		                 }
+		                 
+		                }
+		             	
+		        	  }catch(Exception e){
+		        		  e.printStackTrace();
+		        	  }
+		             
+		        }
+		        
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		    
+		 System.out.println("siin matrix peale " + lines.size());
+		 
+
+
+		   }
+   
    private Connection getNewConnection() throws SQLException{
     return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
   }
@@ -1414,6 +1614,10 @@ private Date getDate(String mmddyy){
     	   
     	   // teeme kindlaks directo koodid mis on Nvisse sisestatud .
     	   
+    	   if(!useold) {
+    			  makeData();
+    		  }
+    	   
     	   try {
     		  
  	    	  String cmd =  " SELECT k.[No_] AS kood, [Code in DIRECTO LT] as directo FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] \r\n" + 
@@ -1442,6 +1646,9 @@ private Date getDate(String mmddyy){
     		   e.printStackTrace();
     	   }
     	   
+    	   if(this.priceformulas == null) {
+    		   this.getCustomersDirecto();
+    	   }
     	   
     	   //Siin peaks directo võla listi ka sisse lugema
     	   
@@ -2015,7 +2222,14 @@ System.out.println(cmd);
     	    	String dire = rs.getString("directo");
     	       	if(dire != null && dire.trim().length() > 0) {
     	       		customer.addCity("Directo Kodas: " + dire);
+    		         	if(this.priceformulas.get(dire) != null) {
+    		         		 if(customer.getGroup() != null && customer.getGroup().trim().length() > 0){
+    	    	        		   customer.setGroup(customer.getPersonalData() + "|" + priceformulas.get(dire) );
+    	    	        	   }else{
+    	    	        		   customer.setGroup(priceformulas.get(dire) +""); 
+    	    	        	   }
     		         	
+    		         	}
     	       	}
 	             
     	            tm.put(Converter.cleanLitLatEst(id) + customer.getName(), customer);
@@ -2035,10 +2249,7 @@ System.out.println(cmd);
     	     } catch (Exception e){
     	       e.printStackTrace();
     	     }
-    	     
-    	     String inP = parent.getProps().getProperty("doc.origpath");
-    	      String outP = parent.getProps().getProperty("doc.destination");
-//    	      Converter.prepareDocCatalogue(inP, outP, docCodes, true);
+    
     	     return tm;
     	   }
 
@@ -2046,6 +2257,351 @@ System.out.println(cmd);
 	   
 		return agents1;
 	}
+   
+   
+   
+   public void getCustomersDirecto(){
+	  
+	   priceformulas = new HashMap();;
+	     
+	   try {
+	 		  File f = new File (getDir() + "kliendid.xml");
+	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	     DocumentBuilder db;
+	 		db = dbf.newDocumentBuilder();      	
+	     	FileInputStream in = getCleanInputStream(f);
+	     	String handler = null;
+	         Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "transport");      
+	      //   System.out.println(root);
+	     	Node read = getNode(root, "customers");
+	     	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
+	         for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	         	  Node rida = read.getChildNodes().item(i);
+	         	  
+	         	 // System.out.println("node name " + rida.getNodeName());
+	         	  if(rida.getNodeName().equals("bi_customer")){
+	         		 String name = null;
+	         		boolean addaadr = true;
+		         	  try{
+		         		   name =  rida.getAttributes().getNamedItem("name").getNodeValue();
+		         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
+		         		  Customer customer = new Customer(id);
+		         		  customer.restName = name;
+		         		
+		         		  try{
+		         			  String payer = rida.getAttributes().getNamedItem("payer").getNodeValue();
+			         		  
+			         		  if(payer != null && payer.trim().length() > 0 ){
+			         			  customer.setPayer(payer.trim());
+			         		  }
+	  
+		         		  }catch(Exception e){
+		         			  
+		         		  }
+		         		
+		         	/*	if(this.usedCredit.get(id) != null){
+		         			customer.setUsedCredit(Double.parseDouble(usedCredit.get(id)+ ""));
+		         		}
+		         		
+		         		if(this.dueSums.get(id) != null){
+		         			customer.setDebt(Double.parseDouble(dueSums.get(id)+ ""));
+		         		}
+		         		*/
+		         		 String country = "Lithuania";
+		       		  if(getParent().getProps().getProperty("country") != null){
+		       			  country = getParent().getProps().getProperty("country");
+		       		  }
+		         		
+		         		
+		         		 String sendaadr = ""; 
+		         		try{ 
+		 	         		  sendaadr =  rida.getAttributes().getNamedItem("send_address_street").getNodeValue(); 
+		 	         		  customer.restStreet = sendaadr.replaceAll(";", ",");
+		 	         		  name = name + " " + sendaadr;
+		 	         		addaadr = false;
+		 	         		String maa = "";
+		 	         		try{
+		 	         	  maa =  rida.getAttributes().getNamedItem("send_address_country").getNodeValue().replaceAll(";", ","); 
+		 	         		country = maa;
+		 	         		}catch(Exception eed){
+			         		 }
+		 	         		
+		 	         		customer.setAddress(Converter.adressLink(sendaadr, country));
+		 	         	
+		         		
+		         		}catch(Exception ee){
+		         		 }
+			         	
+		         		
+		         		String asula = "";
+		         		try{ 
+		 	         		  asula =  rida.getAttributes().getNamedItem("send_address_county").getNodeValue().replaceAll(";", ","); 
+		 	         		sendaadr = sendaadr + " " + asula;
+		 	         		customer.restCity = asula; 
+		 	         	
+		 	         		String maa = "";
+		 	         		try{
+		 	         	  maa =  rida.getAttributes().getNamedItem("send_address_country").getNodeValue().replaceAll(";", ","); 
+		 	         		country = maa;
+		 	         		}catch(Exception eed){
+			         		 }
+		 	         		
+		 	         		customer.setAddress(Converter.adressLink(sendaadr, country));
+		 	         	 }catch(Exception ee){
+		         		 }
+		         		
+		         		
+
+		         		String regno = "";
+		         		try{ 
+		         			regno =  rida.getAttributes().getNamedItem("regno").getNodeValue(); 
+		 	         		customer.setRegnr(regno);
+		 	         	 }catch(Exception ee){
+		         		 }
+                         
+		         		
+
+		         		String limit = "";
+		         		try{ 
+		         			limit =  rida.getAttributes().getNamedItem("limit").getNodeValue(); 
+		 	         		customer.setCredit(limit);
+		 	         	 }catch(Exception ee){
+		         		 }
+		         		String paymentterm = "";
+		         		try{ 
+		         			paymentterm =  rida.getAttributes().getNamedItem("paymentterm").getNodeValue(); 
+		 	         		customer.setPaymTerm(paymentterm);
+		 	         	 }catch(Exception ee){
+		         		 }
+		         		
+		         	
+
+		         		try{ 
+		         			double discount  =  Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
+		         			if(discount > 0){
+		         		 		customer.setDiscount(discount);
+		    		 	  }
+		 	         	 }catch(Exception ee){
+		         		 }
+		         		
+		         		
+		         		 String aadr = "";
+		         		 String aadr2 = "";
+		         		 try{ 
+		 	         		  aadr =  rida.getAttributes().getNamedItem("del_address1").getNodeValue(); 
+		 	         		  customer.restStreet = aadr;
+			 	         	  customer.setAddress(Converter.adressLink(aadr, country));
+			 	         	  if("true".equals(getParent().getProps().getProperty("use.county")) && addaadr){
+			 	         			 name = name + " " + aadr;
+			 	         		  }
+			 	         	  
+		 	         		
+		 	         	 } catch (Exception ee){ }
+		         		 
+		         		
+		         		 try{ 
+		 	         		  aadr2 =  rida.getAttributes().getNamedItem("del_address2").getNodeValue(); 
+			 	         	  customer.restCity = aadr2;
+		 	         	 } catch (Exception ee){ }
+		         		 
+		         		 
+		         		  customer.setName(name + " " + customer.getID());
+		         	
+		         		 
+		         		
+		         		 try{ 
+		 	         		 String yldphone =  rida.getAttributes().getNamedItem("phone").getNodeValue();
+		 	         		 if(yldphone.trim().length() > 0){
+		 	            		customer.setPersonalData("Tel: " +(yldphone).replaceAll(";", ","));
+		 	            		customer.restPhone = yldphone;
+		 	  		         }
+		 	     		 }catch(Exception ee){
+                        	
+		         		 }
+
+		         		 
+		         		 try{ 
+		 	         		 String email =  rida.getAttributes().getNamedItem("email").getNodeValue();
+		 	         		 if(email.trim().length() > 0){
+		 	            		customer.adPersonalData("|" + (email).replaceAll(";", ","));
+		 	            		
+		 	  		         }
+		 	     		 }catch(Exception ee){
+                        	
+		         		 }
+		         		  
+		         		  try{
+		         			  
+		         			 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
+		         			  Node nn = rida.getChildNodes().item(r);
+		       	    		 if(nn.getNodeName().equals("contact")){
+		         				 String cname =  nn.getAttributes().getNamedItem("name").getNodeValue();
+		         				String ctel =  nn.getAttributes().getNamedItem("telephone").getNodeValue();
+		         				customer.restPerson = cname;
+		         				customer.restPerPhone = ctel;
+		         				if(customer.getPersonalData().trim().length() < 1){
+		         					customer.setPersonalData((cname + " " + ctel).replaceAll(";", ","));
+			         			}else{
+			         				String lisa = (cname + " " + ctel).replaceAll(";", ",");
+			         				if(customer.getPersonalData().indexOf(ctel) != -1){
+			         					lisa = (cname ).replaceAll(";", ",");
+			         				}
+		         				    customer.setPersonalData(customer.getPersonalData() + "|" + lisa);
+		         				}
+		         				String cemail =  nn.getAttributes().getNamedItem("email").getNodeValue();
+		         				customer.restPerEmail = cemail;
+		         				
+		  	         		
+		  	         		 }}
+		         		  }catch(Exception r){
+		         			  
+		         		  }
+		         		  
+		         		  
+		         		 try{
+		         			  
+		         			 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
+		         			  Node nn = rida.getChildNodes().item(r);
+		       	    		 if(nn.getNodeName().equals("contact")){
+		         				 String cname =  nn.getAttributes().getNamedItem("name").getNodeValue();
+		         				String ctel =  nn.getAttributes().getNamedItem("telephone").getNodeValue();
+		         				customer.restPerson = cname;
+		         				customer.restPerPhone = ctel;
+		         				if(customer.getPersonalData().trim().length() < 1){
+		         					customer.setPersonalData((cname + " " + ctel).replaceAll(";", ","));
+			         			}else{
+			         				String lisa = (cname + " " + ctel).replaceAll(";", ",");
+			         				if(customer.getPersonalData().indexOf(ctel) != -1){
+			         					lisa = (cname ).replaceAll(";", ",");
+			         				}
+		         				    customer.setPersonalData(customer.getPersonalData() + "|" + lisa);
+		         				}
+		         				String cemail =  nn.getAttributes().getNamedItem("email").getNodeValue();
+		         				customer.restPerEmail = cemail;
+		         				
+		  	         		
+		  	         		 }}
+		         		  }catch(Exception r){
+		         			  
+		         		  }
+		         		      	boolean fix = false;	  
+		         		 try{
+		         			  
+		         			 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
+		         			  Node nn = rida.getChildNodes().item(r);
+		       	    		 if(nn.getNodeName().equals("datafields")){
+		         				
+		         				 for (int re = 0; re < nn.getChildNodes().getLength(); re++){
+		         					 Node nn2 = nn.getChildNodes().item(re);
+		         					 
+		         					if("data".equals(nn2.getNodeName())) {
+		         						
+		         					
+		         						
+		         						
+		         						//System.out.println("nodes " + nn2.getAttributes().getNamedItem("code").getNodeValue());
+		         					
+		         					if("FIKSUOTAS_ASORTIMENTAS".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+		         						
+										if("TAIP".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
+											fix = true;
+										//			System.out.println("On Fix " + customer.getName());
+										}
+			         					
+		         					}
+		         				   }
+		         				 }
+		  	         		
+		  	         		 }}
+		         		  }catch(Exception r){
+		         			  r.printStackTrace();
+		         		  }
+		         		      		  
+		         		  
+		         		  
+		         		  try{
+		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("priceformula").getNodeValue());         	
+			         		   customer.setGroup(Converter.deCode(price_list));
+			         		   
+			         		   if(dirCustCodes.get(id) != null) {
+			         			  priceformulas.put(id, price_list);
+			         		   }
+			         			System.out.println("On  " + id + " "+ dirCustCodes.get(id) + " " +customer.getName() + " " +  price_list);
+			         		 
+			         		  if("true".equals(getParent().getProps().getProperty("fixed.frompricelist")) && fix){
+			       			   customer.addFixSortCode(Converter.deCode(price_list)); 
+			       			System.out.println("On Fix " + customer.getName() + " " +  price_list);
+			       		       }
+		         		  }catch(Exception e){
+		         		  }
+		         		  
+		
+		         		  try{
+		         			  String	 price_list =  rida.getAttributes().getNamedItem("price_list_special").getNodeValue() ;
+		         			  
+		         			  StringTokenizer ss = new StringTokenizer(price_list,",");
+		         			  while (ss.hasMoreTokens()){
+		         				  
+                                   String as = ensureLen(ss.nextToken());
+			         			  
+                                  if(customer.getGroup() != null && customer.getGroup().trim().length() > 0){
+			         				 customer.setGroup(customer.getGroup() + "|" + Converter.deCode(as));
+					         	    }else{
+			         				 customer.setGroup(Converter.deCode(as));
+					         	   }
+					         		
+                                   if("true".equals(getParent().getProps().getProperty("fixed.frompricelist")) && fix){
+					       			   customer.addFixSortCode(Converter.deCode(as)); 
+					       		   }  
+		         			  }
+		         			  
+			         		  }catch(Exception e){
+			         		  }
+		         		  
+		         		  
+		         		  boolean goes = true;
+		         		  
+		         		 try{
+		         			 String closed =  ensureLen(rida.getAttributes().getNamedItem("closed").getNodeValue());         	
+			         		  if(closed.equals("1")) {
+			         			  goes = false;
+			         			 // System.out.println("closed " + customer.getName());
+			         		  }
+		         		  }catch(Exception e){
+		         		  }
+		         		  
+		         		  
+     		try {
+	         		 String salesman  = rida.getAttributes().getNamedItem("agent").getNodeValue(); 
+	         		      customer.addAgent(new Agent(Converter.deCode(salesman.toUpperCase())));
+	         		      customer.setMainAgent(Converter.deCode(salesman.toUpperCase()));
+	         		      String sm = parent.getEmail(salesman);
+	         		      
+	         		    
+	                  if(sm != null && sm.length() > 1 && goes){
+	                	//  System.out.println(sm);
+	            	     // tm.put(customer.getName() + " " + customer.getID(), customer);
+	                   //   this.customers.add(customer.getID());
+	                  }
+     		  }catch(Exception t){
+	         	 // t.printStackTrace();
+         	  }
+		         	  }catch(Exception e){
+	         		
+	         		  e.printStackTrace();
+	         	  }
+	              
+	         	  }}
+	 	}catch(Exception e){
+	 		e.printStackTrace();
+	 	}
+	    
+	  // System.out.println("priceformulas " + priceformulas.toString());
+	 
+	 //  System.exit(0);  
+   
+   }
    
    HashSet docCodes = new HashSet();
    private TreeMap agents1 = new TreeMap();
@@ -3928,7 +4484,10 @@ private HashSet prodCodes = null;
 
 
   private Vector getCPCombi(String custid , String number, String date ){
-
+	 if( prodCodes == null ) {
+		 prodCodes = new HashSet();
+	 }
+		 
 	   Vector result = new Vector();
 	   try{
 		   File cpdata = new File("cpdata/" + number+".vec");

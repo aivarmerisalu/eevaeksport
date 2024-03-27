@@ -535,7 +535,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	    TreeMap   tm = new TreeMap();
 	    //  setTreeGroup(true);
 	      try {
-	    	  FileReader fr = new FileReader(getDir() + "GetProdGroups.csv");
+	    	  FileReader fr = new FileReader(getDir() + "GetProductGroups.csv");
 	    	  BufferedReader reader = new BufferedReader(fr);
 	    	  String line = null;
 	  
@@ -548,11 +548,10 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 
 		         if (st.hasMoreTokens()){
 		             String groupcode = st.nextToken().trim();
-		             String parentgroupcode = st.nextToken().trim();
 		             String name = st.nextToken().trim();
 
 		        	 if(name.length()> 2) {
-		        		 tm.put(Converter.cleanLitLatEst(parentgroupcode), Converter.enCodeEst(name));
+		        		 tm.put(groupcode, Converter.enCodeEst(name));
 		 		        
 		        	 }
 		           }
@@ -592,7 +591,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	    }
      agents = new TreeMap();
      try {
-       FileReader fr = new FileReader(getDir() + "GetCustomers.csv");
+       FileReader fr = new FileReader(getDir() + "GetAgentList.csv");
        BufferedReader reader = new BufferedReader(fr);
      String line = null;
      reader.readLine();
@@ -600,26 +599,16 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 
            line = line.replaceAll(","," |");
       	StringTokenizer st = new StringTokenizer(line, "|");
-System.out.println(line);
-        if (st.hasMoreTokens()) {
-        	for (int u = 0 ; u<11; u++) {
-           	 st.nextToken();
-           }
-
-
         	String id = st.nextToken().trim();
         	
-        	System.out.println(id);
             Agent agent = new Agent(id);
-          
-             
-            agent.setName(Converter.enCodeEst(id));
+            agent.setName(Converter.enCodeEst(st.nextToken().trim()));
           
             
                 tm.put(agent.getName(), agent);	
                 agents.put(agent.getID(), agent);
           
-        }
+        
       }
        reader.close();
        fr.close();
@@ -723,7 +712,7 @@ System.out.println(line);
            		String date = st.nextToken().trim();
            		String days = st.nextToken().trim();
            		
-     			String payer = "payer";//st.nextToken().trim();
+     			String payer = st.nextToken().trim();
 	        	
      		
 	        
@@ -1010,24 +999,48 @@ if(stocks == null) {
         reader.readLine();
         while(( line = reader.readLine()) != null ){
         line = line.replaceAll(","," |");
+        
+        line = line.replaceAll("\"\"", "''");
      
        StringTokenizer st = new StringTokenizer(line, "|");
 
        if (st.hasMoreTokens()){
-    	   
+    	   System.out.println(line);
     	 //  itemid,nimetus,kastis,alusel,price,ean,grupp,unit,vat,alegr,tarne_kp
     	   String id = st.nextToken().trim();
     	   String description = st.nextToken().trim();
+           if(description.startsWith("\"") && !description.contains("''") ) {
+        	   description = description + " " + st.nextToken().trim();
+        	   if(!description.endsWith("\"")) {
+        		   description = description + " " + st.nextToken().trim();
+            	}
+        	   
+        	   if(!description.endsWith("\"")) {
+        		   description = description + " " + st.nextToken().trim();
+               }   
+
+        	   if(!description.endsWith("\"")) {
+        		   description = description + " " + st.nextToken().trim();
+               }   
+        	   description = description.replaceAll("\"", " ").trim();
+           }
+    	   //itemid,nimetus,kastis,alusel,price,ean,grupp,unit,vat,alegr,tarne_kp
            String incase = st.nextToken().trim();
            String onPallet = st.nextToken().trim();
+
     	   String unitprice = st.nextToken().trim();
     	   String ean = st.nextToken().trim();
+
     	   String groupcode = st.nextToken().trim();
            String unit = st.nextToken().trim();
     	   String vat = st.nextToken().trim();
     	   String alegr = st.nextToken().trim();
-    	   String tarne_KP = st.nextToken().trim();
+    	   String tarne_KP = null;
 
+    	   if(st.hasMoreTokens()) {
+    		   tarne_KP = st.nextToken().trim();
+    	   }
+    	 
 
     	   Product prod = new Product(id);
     	   if(onPallet.length() > 0) {
@@ -1045,9 +1058,13 @@ if(stocks == null) {
 			 	
             }
 		
-			 
-			 if(Double.parseDouble(incase) > 1) {
-				 prod.setInCases(Double.parseDouble(incase));
+			 try {
+
+				 if(Double.parseDouble(incase) > 1) {
+					 prod.setInCases(Double.parseDouble(incase));
+				 } 
+			 }catch(Exception e) {
+				 
 			 }
 			 
 			 if(unit.length() > 0) {
@@ -1063,9 +1080,14 @@ if(stocks == null) {
 			 if(description.length() > 0) {
 				 prod.setName(description + " "+ id);
 			 
-	
-				 if(Double.parseDouble(unitprice) > 0) {
-					 prod.setPrice(Double.parseDouble(unitprice));
+
+				 try {
+
+					 if(Double.parseDouble(unitprice) > 0) {
+						 prod.setPrice(Double.parseDouble(unitprice));
+					 } 
+				 }catch(Exception e) {
+					 
 				 }
 				 
 				 if(ean.length() > 0) {
@@ -1073,6 +1095,8 @@ if(stocks == null) {
 				 }
 				 
 				 prod.setVat(vat);
+				 System.out.println(description + " " + prod.getEAN() + " " + prod.getGroup());
+
 				 
 				 tm.put(Converter.cleanLitLatEst(description + prod.getUnit() + prod.getID()), prod);
 			 
@@ -1197,111 +1221,7 @@ public void setNF(NumberFormat nf) {
    */
   public void setBulkSales(Map agents) {
 
-	 Hashtable plans =  readPlans();
-	if( agGrSales == null) {
-		readCustSales();
-	}
-	
-	 int d1 = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-     int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
-
-	TreeMap plandone = new TreeMap();
-	
-	Enumeration enume =  agGrSales.keys();
-  	 while(enume.hasMoreElements()) {
-               String agentID = (String)enume.nextElement();
-               TreeMap tree  = (TreeMap)agGrSales.get(agentID);
-               Iterator itera =   tree.keySet().iterator();
-                while(itera.hasNext()) {
-            	  String grid = (String)itera.next();
-                 Toode dd = (Toode)tree.get(grid);
-                 Agent agent = (Agent)agents.get(agentID);
-                 if (agent != null){
-                   agent.setMonthSales((int)(dd.getDonecur()));
-                   agent.setKgSales((int)dd.getDonevol());
-                   
-                   TreeMap hh = new TreeMap();
-                   if(plandone.get(agentID) != null) {
-                	   hh = (TreeMap) plandone.get(agentID);
-                   }
-                   
-                   if(grid.equals("1") || grid.equals("2") || grid.equals("3") || grid.equals("4") || grid.equals("5") 
-                		   || grid.equals("11") || grid.equals("15") ) {
-                	Toode yy = new Toode("Gaminiai");
-                	 if(  hh.get("Gaminiai") != null ) {
-                		 yy = (Toode)hh.get("Gaminiai");
-                	 }
-                	   yy.addDonecur(dd.getDonecur());
-                	   yy.addDonevol(dd.getDonevol());
-                	   hh.put("Gaminiai", yy);
-                   }
-            
-                   
-                   if(grid.equals("29") ) {
-                   	Toode yy = new Toode("Mar. gaminiai");
-                   	 if(  hh.get("Mar. gaminiai") != null ) {
-                   		 yy = (Toode)hh.get("Mar. gaminiai");
-                   	 }
-                   	   yy.addDonecur(dd.getDonecur());
-                   	   yy.addDonevol(dd.getDonevol());
-                   	   hh.put("Mar. gaminiai", yy);
-                      }
-                   
-               
-                   if( grid.equals("27") || grid.equals("24") || grid.equals("25") || grid.equals("14")
-                		   || grid.equals("12") || grid.equals("10") || grid.equals("9") || grid.equals("7") || grid.equals("6")) {
-                      	Toode yy = new Toode("Sv.Mesa");
-                      	 if(  hh.get("Sv.Mesa") != null ) {
-                      		 yy = (Toode)hh.get("Sv.Mesa");
-                      	 }
-                      	   yy.addDonecur(dd.getDonecur());
-                      	   yy.addDonevol(dd.getDonevol());
-                      	   hh.put("Sv.Mesa", yy);
-                         }
-                      
-                   plandone.put(agentID, hh);
-                  }
-               }
-      	    }
-  	 
-  Enumeration enume2 = plans.keys();
-  	 while(enume2.hasMoreElements()) {
-  		 String agid = (String)enume2.nextElement();
-  		  Agent agent = (Agent)agents.get(agid);
-  		  if(agent != null) {
-  			  TreeMap doneall = (TreeMap)plandone.get(agid);
-  			  ArrayList<Toode> pl = (ArrayList<Toode>)plans.get(agid);
-  			  
-  		for(Toode tt : pl) {
-  			
-  		  double kgplan = tt.getPlanvol();
-  		  double eurplan = tt.getPlancur();
-  		  double kgsold = 0;
-  		  double eursold = 0;
-  		  double estkg = 0;
- 		  double esteur = 0;
-  		 
-  		//  System.out.println("rida " + agid + " " + kgplan + " " + eurplan + " " + tt.getGr1()+ "\n " + doneall.keySet().toString());
-  		  
-  		 if(doneall != null && doneall.get(tt.getGr1()) != null) {
-  			 Toode hhh = (Toode) doneall.get(tt.getGr1());
-  			   kgsold = hhh.getDonevol();
-  	   		   eursold = hhh.getDonecur();
-  	   	       double plaanitavMyykKG = d2 * kgsold/d1;
-			   estkg = plaanitavMyykKG/kgplan;
-			   double plaanitavMyykEUR = d2 * eursold/d1;
-			   esteur = plaanitavMyykEUR/eurplan;
-  		 }
-  		
-  		 String asi = tt.getGr1() +  (" Plan/Pard/Est% |") + (int)kgplan + "/" + (int)kgsold + "/"  +(int)(estkg*100) + "% kg|";
-  		  asi = asi + (int)eurplan + "/" + (int)eursold  + "/"  +(int)(esteur*100) + "% €| |";
-  		 agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
-  			
-  		}	
-  		}
-  	 }
-  		
-		        
+			        
   }
 
   

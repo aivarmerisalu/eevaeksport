@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -488,14 +489,16 @@ TreeMap photos = new TreeMap();
 	 * agentCode + "' AND (len(omrid.klient) > 1) AND (len(rid.toode) > 2) AND omrid.tasudtyyp='G' AND omrid.reakuupaev >= " +
 	 * getStartingTime() + " GROUP BY omrid.klient, rid.toode ORDER BY omrid.klient, rid.nimetus";
 	 */
-	String cmd =	    "select sd.id_kl as saaja,sd.ID_SUBKL as abi,t.kod as toode,max(sd.data) as kuupaev,max(a.kiekis) as kogus , max(doknr) as lastdok , parkn as lastprice from spub2 a INNER JOIN SDOK sd on sd.id_sdok = a.id_sdok inner join prk t on t.id_prk=a.id_prk\r\n" + 
-	    "	       where sd.data>current_timestamp-180  GROUP BY sd.id_kl,sd.ID_SUBKL, t.kod,parkn ORDER BY sd.id_kl,sd.ID_SUBKL , t.kod,parkn desc" ;
+	String cmd = " select sd.id_kl as saaja,sd.ID_SUBKL as abi,t.kod as toode,(sd.data) as kuupaev,(a.kiekis) as kogus , (doknr) as lastdok ,\r\n" + 
+			" parkn as lastprice from spub2 a INNER JOIN SDOK sd on sd.id_sdok = a.id_sdok inner join prk t on t.id_prk=a.id_prk \r\n" + 
+			"	           where sd.data>current_timestamp-180   ORDER BY sd.id_kl,sd.ID_SUBKL ,sd.data desc, t.kod" ;
 	
 	if (isDebug()) {
 	    System.out.println(cmd);
 	}
 
 	Vector custProds = new Vector();
+	HashSet done = new HashSet();
 
 	try {
 	    ResultSet	      rs = stmt.executeQuery(cmd);
@@ -510,12 +513,17 @@ TreeMap photos = new TreeMap();
 	     String kuupaev = rs.getString("kuupaev");
         double kogus = Double.parseDouble(rs.getString("kogus").trim());
    
+        String key  =  kliendikood + "--" +tootekood;
+        
         String lb = rs.getString("lastdok");
         double lp = Double.parseDouble(rs.getString("lastprice").trim());
                 if (kliendikood.length() > 1) {
+                	if(!done.contains(key)) {
                   CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,kuupaev.substring(5,10),lp,0,0," ");
                   cp.setAbiKood(lb);
                   custProds.add(cp);
+                  done.add(key);
+                	}
                 }
 	    }
 

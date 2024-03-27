@@ -32,19 +32,6 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.poi.common.usermodel.Hyperlink;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFHyperlink;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.json.JSONException;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -56,7 +43,6 @@ import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.manager.ManagerData;
-import eevaeksport.report.SupervisorInfoWrapperMeri;
 import eevaeksport.util.Converter;
 
 /**
@@ -347,6 +333,7 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
   
   public String getSaveStockInfo() {
 	    stocksOld = new HashMap<String,Double> ();
+	    /*
 		String cmd = " select   summ.itemid  AS stock ,SUM(AVAILPHYSICAL) AS summ " + 
 				"	  FROM INVENTSUM summ    INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " + 
 				"	   WHERE  summ.DATAAREAID='kosm' and CLOSED = 0  and dim.inventlocationid in ('" + this.prodStockID + "')" + 
@@ -378,9 +365,48 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 				// + "; ; \n");
 			}
 			rs.close();
+			
+			rs.close();
+			st.close();
+			con1.close();
 		} catch (Exception e) {
 			getParent().showError(e);
 		}
+		*/
+		
+	    
+		String cmd = " select * from Products where Blocked != '1'";
+
+		StringBuffer products = new StringBuffer();
+		try {
+						Connection con1 = getNewConnection2();
+			Statement st = con1.createStatement();
+			ResultSet rs = st.executeQuery(cmd);
+
+			while (rs.next()) {
+
+
+				String kood = rs.getString("UniqueCode").trim();
+				Double kogus = rs.getDouble("Inventory");
+				
+				stocksOld.put(kood, kogus);
+				String dealer = " ";
+
+				products.append(kood + ";");
+				products.append(" ;");
+				products.append(getParent().getNF().format(kogus) + ";"
+						+ dealer + "\n");
+				// products.append(getParent().getNF().format(rs.getDouble("stock"))
+				// + "; ; \n");
+			}
+			rs.close();
+			st.close();
+			con1.close();
+		} catch (Exception e) {
+			getParent().showError(e);
+		}
+		
+		
 		return products.toString();
 	}
 
@@ -670,7 +696,7 @@ String email = " ";
      	 		"             FROM  custtable cus with(nolock) inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join \r\n" + 
      	 		"	 		 LOGISTICSPOSTALADDRESS adr ON adr.LOCATION = dp.PRIMARYADDRESSLOCATION and getdate() >=VALIDFROM  and  getdate() <= VALIDTO left outer JOIN  paymterm \r\n" + 
      	 		"            pay on cus.paymtermid = pay.paymtermid  and pay.DATAAREAID  = cus.DATAAREAID  \r\n" + 
-     	 		"           WHERE   (cus.dataareaid='kosm'  and (Select h.personnelnumber from HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) like 'G%') ";
+     	 		"           WHERE   cus.dataareaid='kosm'  ";
 
      	  
      	  
@@ -1010,15 +1036,8 @@ try {
 
       String code = rs.getString("code").trim();
       String nim = rs.getString("nimi").trim();
-   /*   if(nim.indexOf(" ") != -1){
-    	  nim = nim.substring(nim.indexOf(" ")).trim();
-      }
-      if(names.contains(nim)) {
-    	  nim = nim + " .";
-      }else {
-    	  names.add(nim);
-      }*/
-        tm.put(liik,  Converter.enCodeEst(code + " " + nim));
+   
+        tm.put(liik,  Converter.enCodeEst( nim ));
     }
     rs.close();
     st.close();
@@ -1046,10 +1065,10 @@ try {
 	      String code =  rs.getString("code").trim();
 	      String nimi =  rs.getString("nimi").trim();
 	      if(!nimi.startsWith(code + " ")) {
-	    	  nimi = (code+ " " + nimi).trim();
+	    	 // nimi = ( nimi + " " + code).trim();
 	      }
 	      
-	        tm.put(liik2+liik,  Converter.enCodeEst( nimi));
+	        tm.put(liik2+liik,  Converter.enCodeEst( code.replace('_', ' ') + " " + nimi));
 	    }
 	    rs.close();
 	    st.close();

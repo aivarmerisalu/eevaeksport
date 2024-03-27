@@ -1028,7 +1028,7 @@ cn.close();
 		try {
 			Connection con = null;
 			if(view) {
-				sql  = "select [Ship-to-address code] as aad1 , * from MobileJavaLAT.v_LAT_Customers";
+				sql  = "select [Ship-to-address code] as aad1 ,[Ship-to address Name] as name2, [Ship-to address Contact] as kont, * from MobileJavaLAT.v_LAT_Customers";
 				con = this.getNewConnectionView();
 			} else {
      		   con =  getNewConnection2();
@@ -1039,10 +1039,25 @@ cn.close();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				String a1 = "";
+				String n1 = "";
+				String kont = "";
+				
 				if(view) {
 				a1 = "_" + rs.getString("aad1").trim();
+				n1 =  rs.getString("name2").trim();
+				kont =  rs.getString("kont").trim();
+				
 				}
+				
+				
 				String name = rs.getString("nimi").trim();
+				
+				if(n1.contains(name)) {
+					name= n1;
+				} else {
+				   name = name + " " + n1;	
+				}
+				
 				String kood = rs.getString("kood").trim();
 				String id = kood +  a1;
 				// System.out.println(line);
@@ -1058,16 +1073,16 @@ cn.close();
 					customer.setPayer(kood);
 				}
 
+				
 				String aadress = rs.getString("aadress");
 				if (aadress != null && aadress.trim().length() > 0) {
 					customer.setAddress(Converter.enCodeEst(Converter.adressLink(aadress,"Latvia")));
-					customer.setName(Converter.enCodeEst(customer.getName() + " " + aadress));
+					if(!view) {
+						customer.setName(Converter.enCodeEst(customer.getName() + " " + aadress));
+					}
 				}
 				
 				String ag = rs.getString("agent").trim();
-				if(view) {
-					customer.addAgent(new Agent("003"));
-				}
 				customer.addAgent(new Agent(ag));
 	             customer.addAgent(new Agent("HOUSE1"));
 	             customer.setMainAgent(ag);
@@ -1196,10 +1211,17 @@ cn.close();
    				
                    // customer.setUsedCredit(Double.parseDouble(used.replaceAll(",",".").replaceAll(" ","")));
 				}
+				
+				 if(kont != null && kont.trim().length() > 0 ){
+					 customer.setPersonalData(Converter.enCodeEst(kont.trim())); 
+				 }else {
 				   String cont = rs.getString("kontakt");
 		           if(cont != null && cont.trim().length()>0){
 		               customer.setPersonalData(Converter.enCodeEst(cont.trim()));   
 		           }
+				 }
+		           
+		           
 		           
 		           String pm = rs.getString("matrix");
 		           if(pm != null && pm.trim().length()>0){
@@ -1212,7 +1234,7 @@ cn.close();
 		           }
 				// customer.setPayer(id);
 			
-					tm.put(customer.getName(), customer);
+					tm.put(customer.getName() + id, customer);
 					this.customers.add(customer.getID());
 			}
 

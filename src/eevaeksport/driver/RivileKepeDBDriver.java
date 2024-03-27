@@ -251,7 +251,6 @@ for(int i = 0;dd1.length>i;i++){
       			 StringBuffer sb = new StringBuffer();
       			  sb.append("CUSTCODE,DELIVERYCODE,CUSTNAME,SUMEUR,CHEQUENR,CHEQUEDATE,MANAGER,COMMENT\n");
       			  
-      			    this.getCustomers(null);
       			    HashSet loetud = new HashSet();
       			    for (int i = 0; i < files.length ; i++){
       			      File file = files[i];
@@ -887,28 +886,7 @@ HashSet olemas = new HashSet();
         	System.out.println("salesres done");
         	
         	
-        	
-            String sql =
-                "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
-               " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
-               " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
-               " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_mok <= getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr "+
-                 " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_KS order by I44_KODAS_KS ";
 
-            stmt = con.prepareStatement(sql);
-             //stmt.setInt(1, Integer.parseInt(agent.getID()));
-             //stmt.setDate(2, getStartingDate());
-               rs1 = stmt.executeQuery();
-
-            while (rs1.next()) {
-              String id = rs1.getString("klient").trim();
-              double debt = Double.parseDouble(rs1.getString("summa").trim());
-                volad.put(id, debt);
-            }
-            rs1.close();
-            stmt.close();
-        	
-            System.out.println("overall done");
 
             String sqlu =
                 "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
@@ -926,6 +904,7 @@ HashSet olemas = new HashSet();
               String id = rs1.getString("klient").trim();
               double debt = Double.parseDouble(rs1.getString("summa").trim());
                 used.put(id, debt);
+                volad.put(id, debt);
             }
             rs1.close();
         	}
