@@ -643,7 +643,7 @@ StringBuffer sb = new StringBuffer();
 				Agent agent = new Agent(rs.getString("yksus").trim());
 				String nimi = rs.getString("nimi").trim();
 				agent.setName(nimi);
-				String agentAGENTS = props.getProperty(agent.getID());
+/*				String agentAGENTS = props.getProperty(agent.getID());
 				if (agentAGENTS != null) {
 					StringTokenizer stag = new StringTokenizer(agentAGENTS, ",");
 					while (stag.hasMoreTokens()) {
@@ -651,7 +651,7 @@ StringBuffer sb = new StringBuffer();
 					//System.out.println("asendajad " + agent + " " + agent.getDubbler());
 					}
 
-				}
+				}*/
 				   agent.setLanguage("EST");
 			          agent.setCountry("ee");
 			          agent.setPassWord("0000");
@@ -678,7 +678,7 @@ StringBuffer sb = new StringBuffer();
 		  // Converter.sendAgentJson(agents, company, false);
 		     
 		 if(rcompany != null){
-		    	Converter.sendAgentJson(agents, rcompany, false);
+		    //	Converter.sendAgentJson(agents, rcompany, false);
 		    }
 
 
@@ -1052,7 +1052,7 @@ StringBuffer sb = new StringBuffer();
 			isChrist = true;
 		}
 		
-	
+	/*
 		String myy = " SELECT  SL01001 AS klient  ,SL01035 as agent "
 				+ "  FROM ST030100 INNER JOIN SL010100 ON ST03001 = SL01001 WHERE ST03015> getdate()-360 and SL01035!= '' "
 				+ " GROUP BY SL01001 ,SL01035 order by SL01001 ,SL01035";
@@ -1067,11 +1067,11 @@ StringBuffer sb = new StringBuffer();
 				Vector vv = new Vector();
 				if (myyk.get(klient) == null) {
 					vv.addElement(ag);
-					myyk.put(klient, vv);
+					//myyk.put(klient, vv);
 				} else {
 					vv = (Vector) myyk.get(klient);
 					vv.addElement(ag);
-					myyk.put(klient, vv);
+					//myyk.put(klient, vv);
 				}
 			}
 			rs.close();
@@ -1079,7 +1079,7 @@ StringBuffer sb = new StringBuffer();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+*/
 	
 
 		String cmd = "SELECT SL01002 AS nimi,SL01001 AS kood,(SL01003 + ' ,' + SL01004 + ',' + SL01005 ) AS aadress , " +
@@ -1280,14 +1280,14 @@ SELECT  [MasterProductCode] as klient
 
 			
 				
-				if (myyk.get(cust.getID()) != null) {
+			/*	if (myyk.get(cust.getID()) != null) {
 					Vector ags = (Vector) myyk.get(cust.getID());
 					for (int i = 0; i < ags.size(); i++) {
 						String aa = (String) ags.elementAt(i);
 						cust.addAgent(new Agent(aa));
 					
 					}
-				}
+				}*/
 
 				String paym = rs.getString("paym");
 				if (paym != null && paym.trim().length() > 0) {

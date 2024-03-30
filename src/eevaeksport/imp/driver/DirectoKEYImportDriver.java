@@ -945,8 +945,10 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	        return originalUnprotectedString;
 	    }
 
-	    return stringBuffer.toString();
+	    return stringBuffer.toString().replaceAll("\"", "'");
 	}
+  
+  
   void saveProps(Properties props, String filename, String header)
 		throws IOException {
 			FileOutputStream fos = new FileOutputStream(filename);
@@ -1004,13 +1006,13 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	        
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
-	 			comm = "comment=\""+ order.getInfo()+ "\" " ;
+	 			comm = "comment=\""+ escape(protectSpecialCharacters(order.getInfo().replaceAll("\"", "'").replace('%', 'p'))) + "\" " ;
 	 			if(order.getStatus() > 5){
-		 			comm = "cutomer_orderno=\""+ order.getInfo()+ "\" " ;
+		 			comm = "cutomer_orderno=\""+ escape(protectSpecialCharacters(order.getInfo().replaceAll("\"", "'").replace('%', 'p'))) + "\" " ;
 		 		}
 	 		}
 	 		
-	 		 comm = protectSpecialCharacters(comm);
+	 		 
 	 		System.out.println("comm " + comm + " ccc " +  ccc.getGroup());
 	 		String gr = "";
 	 		if(ccc != null && ccc.getGroup()!= null){

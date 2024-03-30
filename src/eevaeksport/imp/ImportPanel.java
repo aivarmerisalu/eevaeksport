@@ -17732,6 +17732,7 @@ shipdate = getCalXML(asi);
                   orders.setShipMode(shipmode);             
                 }
               
+              
               if(photoname != null && photoname.trim().length()>0){
                   orders.setPhotoName(photoname);             
                 }
