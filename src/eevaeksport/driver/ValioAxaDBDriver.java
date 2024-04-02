@@ -53,7 +53,7 @@ import eevaeksport.util.Converter;
  */
 
 public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
-		Promo, BulkUpdater, Discounter {
+		Promo, BulkUpdater, Discounter,FixLoader ,PictureMaker{
 	public ValioAxaDBDriver(EksportPanel parent) {
 		super(parent);
 		this.subjectFilesTo = parent.getString("filemsg");
@@ -87,10 +87,35 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		return null;
 	}
 	
+	   private TreeMap eanprods = null;
+	  
+	   @Override
+		public void FixLoader() {
+		   
+		   eanprods =  Converter.loadMore();
+			  
+			  if(eanprods == null) {
+				  eanprods = new TreeMap();
+			  }
+			
+			this.getProducts(null);
+			
+			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+			System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			if(contracts.size() > 0) {
+				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+			}
+			
+			System.exit(0);
+		}
 	
 
+	   private StringBuffer oorders = null;
 	 private TreeMap  getOpenOrders(){
 			TreeMap res = new TreeMap();
+			oorders = new StringBuffer();
+			oorders.append(Calendar.getInstance().getTimeInMillis() + "\n");
+		
 			
 //customerorders tee lisaks 
 			   String sql2 =  "select  sal.salesid AS id, sal.custaccount AS kkood , sal.salesid as number ,sal.createddatetime AS kuup, estimate AS summa " + 
@@ -116,7 +141,8 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 
 			//DPP00488444 (‘Pabeigts’ – 01.06.2018; merisoft).
 		    sb.append(rs.getString("number").trim() + " (");
-			sb.append(rs.getString("kuup").trim().substring(0,10)  + ") ");
+		    String kuup =(rs.getString("kuup").trim().substring(0,10)) ;
+			sb.append(kuup  + ") ");
 			
 
 			double summa = Double.parseDouble(rs.getString("summa").trim());
@@ -126,7 +152,8 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			}else{
 				 sb.append("|" );	
 			}
-			
+
+		  	oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
 		  
 		    String sql3 = "select qtyordered as amount,  salesunit as unit  , name from  " +
 					   " SalesLine rid where rid.dataareaid='liv' and  salesid =  '" + id + "'";
@@ -163,7 +190,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		  getParent().showError(e);
 		}
 
-
+		Converter.saveFile(parent.getProps().getProperty("savefilesdir")  + "customerorders.txt", oorders.toString());
 			
 			return res;
 		}
@@ -713,6 +740,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 
 	public TreeMap getProducts(Agent agent) {
 
+		prodsH = new HashSet();
 		try {
 			getProdGroupsInit();
 		} catch (SQLException e1) {
@@ -755,13 +783,14 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			ResultSet rs2 = stmt.executeQuery(cmdo);
 			while (rs2.next()) {
 				String id = rs2.getString("toode").trim();
-				if(!goes.contains(id))
+				if(!goes.contains(id)) {
 				goes.add(id);
+				prodsH.add(id);
+				}
 			 }
 			rs2.close();
 			stmt.close();
 			con.close();
-			
 			
 			con = this.getNewConnection();
 			stmt = con.createStatement();
@@ -769,6 +798,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			
 			while (rs.next()) {
 				String kood = rs.getString("itemid").trim();
+				
 				Product prod = new Product(kood);
 				String nimetus = rs.getString("nimetus").trim();
 
@@ -778,6 +808,11 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				String ean = rs.getString("ean");
 				if (ean != null && ean.trim().length() > 0) {
 					prod.setEAN(ean);
+					if(eanprods == null) {
+	                   	eanprods =new TreeMap();
+	                   }
+	                   eanprods.put(ean.trim(), prod.getID());
+	                   
 				}
 
 				String grupp = rs.getString("grupp");
@@ -1271,4 +1306,69 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	private Statement stmt;
 	private String subjectFilesTo = null;
 	private NumberFormat NF = NumberFormat.getInstance();
+
+  private HashSet prodsH = null;
+	@Override
+	public void PictureMaker() {
+	//	this.getProducts(null);
+		 
+		   
+		       	
+		       	String picts = parent.getProps().getProperty("pict.dir");
+		        String pictspda = parent.getProps().getProperty("pictpda.dir");
+		     	  
+
+		       	try {
+		     	
+		            StringBuffer buf = new StringBuffer();
+		            
+		            File d  = new File(picts);
+		            for(String fname : d.list() ) {
+		            
+		            	 File in = new File ( picts + fname); 
+		            	 String ean = fname.substring(0,fname.indexOf("."));
+		            	 String ext = fname.substring(fname.indexOf(".") + 1);
+		            	 
+		            		if(in.isFile() ) {//&& prodsH.contains(ean)    
+		                     	 
+		                      	File inpda = new File ( pictspda + ean + "." + ext); 
+		                      	
+		                      		Converter.shrinkAndCopyFile(in,inpda);
+		                     
+		                      	
+		                        String len = "0";
+		                        if(inpda.exists()){
+		                          len =	inpda.length() + "";
+		                          } 
+		                        
+		                          buf.append(ean + "." + ext + ";"  + len + "\n");
+		                        }
+		                 }
+		          	
+		        
+		       	    //oleasoleva kataloogi kustutamine
+		       	    
+		                   File f = new File("list.txt");
+		                   if (f.exists())f.delete();
+		                   
+		                   try {
+		               		PrintWriter os = new PrintWriter(new FileWriter(
+		               				  "list.txt", true));
+		               		os.write(buf.toString());
+		               		os.close();
+		               	   File fff =  new File (pictspda +  "list.txt");
+		         	      Converter.copyFile(f,fff);  
+		               	
+		               	  }catch (Exception ex) {
+		               		ex.printStackTrace();
+		               	  }
+		           	  
+		       	} catch (Exception e) {
+		       	    getParent().showError(e);
+		       	}
+		    
+	    System.exit(0);
+	}
+	
+	
 }

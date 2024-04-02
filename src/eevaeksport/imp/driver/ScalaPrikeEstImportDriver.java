@@ -1175,7 +1175,31 @@ import eevaeksport.util.Converter;
 		    System.out.println(toode + " jagaja " + jagaja);
 		    return jagaja;
 		 }
-		   
+	
+	   
+		  public double getJagajaVUS(String toode) throws SQLException{
+			 	 
+			    String sql1 = " SELECT (case when SC01037 ='VUS' and SC01023 like 'TUB%' then (case when SC01009 > 0  then 10/SC01009 else 1 end)"
+			    		+ " else 1 end) AS jagaja FROM SC010100  WHERE RTRIM(SC01001)=   '" + toode.trim() + "'";
+			    double jagaja = 1;
+			    Statement st1 = con.createStatement();
+			    ResultSet rs1 = st1.executeQuery(sql1);
+			    while (rs1.next()) {
+			    	jagaja = rs1.getDouble("jagaja");
+			    }
+			      
+			    rs1.close();
+			    st1.close();
+			    
+			    if(parent.getProps().getProperty("nomultiply.prods") != null &&
+			    		parent.getProps().getProperty("nomultiply.prods").indexOf(toode) != -1){
+			    	jagaja =  1;
+			    }
+			    System.out.println(toode + " jagajaVUS " + jagaja);
+			    return jagaja;
+			 }
+		  
+	  
 	  public double getJagajaNIV(String toode) throws SQLException{
 		 	 
 		    String sql1 = " SELECT (case when SC01037 ='NIV' and SC01023 like 'TUBAKA%' then (case when SC01009 > 0  then 10/SC01009 else 1 end)"
@@ -2226,9 +2250,15 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		            	 
 		             }
 		             //niv toodete teema maxima + rimi +lidl
+		             
 		             if((order.getILN() != null && order.getILN().equals("4751008570045")) || order.getStatus() == 98
 		            		 || order.getCompany().startsWith("T8587")) { //lidl
 		            	 kogus = (int)(kogus /getJagajaNIV(toode));
+		             }
+		             
+		             
+		             if( order.getCompany().startsWith("T8587")) { //lidl
+		            	 kogus = (int)(kogus /getJagajaVUS(toode));
 		             }
 		             
 		             kogus = (int)(getKogusRounded(toode,kogus,order.getCompany()));

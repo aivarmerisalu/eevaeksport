@@ -929,7 +929,6 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	    StringBuffer stringBuffer = new StringBuffer();
 	    for (int i = 0; i < originalUnprotectedString.length(); i++) {
 	        char ch = originalUnprotectedString.charAt(i);
-
 	        boolean controlCharacter = ch < 32;
 	        boolean unicodeButNotAscii = ch > 256;
 	        boolean characterWithSpecialMeaningInXML = ch == '<' || ch == '&' || ch == '>';
@@ -1006,9 +1005,9 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 	        
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
-	 			comm = "comment=\""+ escape(protectSpecialCharacters(order.getInfo().replaceAll("\"", "'").replace('%', 'p'))) + "\" " ;
+	 			comm = "comment=\""+ escape(protectSpecialCharacters(order.getInfo().replaceAll("\"", "'"))) + "\" " ;
 	 			if(order.getStatus() > 5){
-		 			comm = "cutomer_orderno=\""+ escape(protectSpecialCharacters(order.getInfo().replaceAll("\"", "'").replace('%', 'p'))) + "\" " ;
+		 			comm = "cutomer_orderno=\""+ escape(protectSpecialCharacters(order.getInfo().replaceAll("\"", "'"))) + "\" " ;
 		 		}
 	 		}
 	 		
@@ -1226,6 +1225,10 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
         sb.append("&gt;");
       } else if (c == '\n'){
         sb.append(" ");
+      } else if (c == '"'){
+          sb.append("&quot;");
+      } else if (c == '\''){
+          sb.append("&apos;");
       } else {
         sb.append(c);
       }
@@ -1233,7 +1236,7 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
     return sb.toString();
   }
 
- 
+
   public String getDriverVersion(){
     return "Directo";
   }

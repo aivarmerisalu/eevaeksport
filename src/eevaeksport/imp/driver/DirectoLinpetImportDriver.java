@@ -962,9 +962,9 @@ hind =   Converter.Round((float)hind, 2);
 	 
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
-	 			comm = "comment=\""+ order.getInfo()+ "\" " ;
+	 			comm = "comment=\""+ escape(order.getInfo())+ "\" " ;
 	 			if(order.getStatus() > 5 && order.getStatus() != 1000){
-		 			comm = "cutomer_orderno=\""+ order.getInfo()+ "\" " ;
+		 			comm = "cutomer_orderno=\""+ escape(order.getInfo())+ "\" " ;
 		 		}
 	 		}
 	 		if(order.getStatus() == 1000){
@@ -1074,7 +1074,11 @@ hind =   Converter.Round((float)hind, 2);
                 	
                 	  
     		      }
-			      order_xml = order_xml +"price=\""+ Converter.Round((float)hind, 2) +"\" ";
+                  if (line.getDiscount() > 0 && order.getStatus() == 0) {
+    			      order_xml = order_xml +"price=\""+ Converter.Round((float)hind, 2) +"\" ";  
+                   } else if(order.getStatus() == 1000) {
+    			      order_xml = order_xml +"price=\""+ Converter.Round((float)hind, 2) +"\" ";  
+                  }
 		    	  order_xml = order_xml + "/>";
 			 counter++;
 	      }

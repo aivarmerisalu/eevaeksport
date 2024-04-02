@@ -326,9 +326,9 @@ System.out.println(sql);
 		 		String ordnum = getNum()+ "";
 		 		String comm = "";
 		 		if(ord.getInfo() != null && ord.getInfo().trim().length() >0){
-		 			comm = "comment=\""+ ord.getInfo()+ "\" " ;
+		 			comm = "comment=\""+ escape(ord.getInfo()) + "\" " ;
 		 			if(ord.getStatus() > 5){
-			 			comm = "cutomer_orderno=\""+ ord.getInfo()+ "\" " ;
+			 			comm = "cutomer_orderno=\""+ escape( ord.getInfo()) + "\" " ;
 			 		}
 		 		}
 		 		
@@ -956,27 +956,30 @@ System.out.println(sql);
 	  }
 
    
-private String escape(String s){
- if (s == null) return s;
- StringBuffer sb = new StringBuffer();
- for (int i = 0 ; i < s.length() ; i++){
-   char c = s.charAt(i);
-   if (c == '&'){
-     sb.append("&amp;");
-   } else if (c == '<'){
-     sb.append("&lt;");
-   } else if (c == '>'){
-     sb.append("&gt;");
-   } else if (c == '\n'){
-     sb.append(" ");
-   }else if (c == '"'){
-	     sb.append("'");
-	   } else {
-     sb.append(c);
-   }
- }
- return sb.toString();
-}
+
+	  private String escape(String s){
+	    if (s == null) return s;
+	    StringBuffer sb = new StringBuffer();
+	    for (int i = 0 ; i < s.length() ; i++){
+	      char c = s.charAt(i);
+	      if (c == '&'){
+	        sb.append("&amp;");
+	      } else if (c == '<'){
+	        sb.append("&lt;");
+	      } else if (c == '>'){
+	        sb.append("&gt;");
+	      } else if (c == '\n'){
+	        sb.append(" ");
+	      } else if (c == '"'){
+	          sb.append("&quot;");
+	      } else if (c == '\''){
+	          sb.append("&apos;");
+	      } else {
+	        sb.append(c);
+	      }
+	    }
+	    return sb.toString();
+	  }
 
 private String cleardots(String idx){
    	while(idx.indexOf(".")>0){
