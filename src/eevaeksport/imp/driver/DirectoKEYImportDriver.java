@@ -1107,8 +1107,8 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
                   if(line.getDiscount() > 0) {
                 	  hind = line.getPrice();
                 	  order_xml = order_xml +"discount=\""+ line.getDiscount() +"\" ";
-    		      }
-			      order_xml = order_xml +"price=\""+ Converter.Round((float)hind, 2) +"\"";
+    			      order_xml = order_xml +"price=\""+ Converter.Round((float)hind, 2) +"\"";
+                  }
 		    	  order_xml = order_xml + "/>";
 			 counter++;
 	      }

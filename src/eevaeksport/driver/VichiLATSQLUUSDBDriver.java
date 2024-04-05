@@ -355,13 +355,17 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 				             
 				             MatrixLine mline = new MatrixLine();
 
+				             boolean startG = false;
 				             if (custID != null && custID.length() > 0) {
 				               mline.setCustID(custID.trim());
-				               mline.setProdLevel("pr");
+				               mline.setProdLevel("001");
 				               
 				             }
 				             if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
 				               mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
+				               if(clGroup.trim().equals("HOREKA")) {
+				            	   startG = true;
+				               }
 				             }
 
 				             String ttt = "";
@@ -369,14 +373,24 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 			                	   mline.setLineinfo(type.trim());
 			                	   ttt = type.trim();
 			                   }
-				             if(!ttt.equals("NUOL")) {
-				             if(sdate != null  && !sdate.startsWith("1753")){
-				            	 mline.setStartDate(sdate.substring(0,10));
-				             }
+				             if(ttt.equals("AKC")) {
+				             
 				             if(edate != null && !edate.startsWith("1753")){
 				            	 mline.setEndDate(edate.substring(0,10));
+				            	 //paneme lõpu ainult siis kui algus on olemas
+				            	 if(sdate != null  && !sdate.startsWith("1753")){
+					            	 mline.setStartDate(sdate.substring(0,10));
+					             }
 				             }
 				             }
+				             
+				             if(startG) {
+				            	 if(sdate != null  && !sdate.startsWith("1753")){
+					            	 mline.setStartDate(sdate.substring(0,10));
+					             }
+				            	 mline.setProdLevel("pr");
+				             }
+				             
 				             if (prodID != null && prodID.length() > 0) {
 				               mline.setProdID(prodID);
 				             }
@@ -1113,7 +1127,7 @@ cn.close();
 		try {
 			Connection con = null;
 			if(view) {
-				sql  = "select [Ship-to-address code] as aad1 ,[Ship-to address Name] as name2, [Ship-to address Contact] as kont, * from MobileJavaLAT.v_LAT_Customers";
+				sql  = "select [Ship-to-address code] as aad1 ,[Ship-to address Name] as name2, [Ship-to address Contact] as kont,[Sales Channel New] as channel, * from MobileJavaLAT.v_LAT_Customers";
 				con = this.getNewConnectionView();
 			} else {
      		   con =  getNewConnection2();
@@ -1126,12 +1140,14 @@ cn.close();
 				String a1 = "";
 				String n1 = "";
 				String kont = "";
+				String chan = "";
 				
 				if(view) {
 				a1 = "_" + rs.getString("aad1").trim();
 				n1 =  rs.getString("name2").trim();
 				kont =  rs.getString("kont").trim();
-				
+			 chan = rs.getString("channel");
+		           
 				}
 				
 				
@@ -1312,6 +1328,14 @@ cn.close();
 		           if(pm != null && pm.trim().length()>0){
 		               customer.setGroup(pm.trim());   
 		           }
+		           
+		          /* if(chan.trim().equals("HORECA")) {
+		        	   if(customer.getGroup().length() > 1) {
+			        	   customer.setGroup(customer.getGroup() + "|" + chan.trim());		        		   
+		        	   } else {
+			        	   customer.setGroup(chan.trim());   
+		        	   }
+		           }*/
 		          
 		           String chain = rs.getString("chain");
 		           if(chain != null && chain.trim().length()>0){
@@ -1319,6 +1343,8 @@ cn.close();
 		           }
 				// customer.setPayer(id);
 			
+		          
+		           
 					tm.put(customer.getName() + id, customer);
 					this.customers.add(customer.getID());
 			}

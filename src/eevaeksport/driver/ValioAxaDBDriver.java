@@ -92,12 +92,14 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	   @Override
 		public void FixLoader() {
 		   
+		  boolean hasFile = Converter.hasFixFromExcels("excelsort",parent);
+		   if(hasFile) {
 		   eanprods =  Converter.loadMore();
 			  
 			  if(eanprods == null) {
 				  eanprods = new TreeMap();
 			  }
-			
+			System.out.println("EanProds " + eanprods.toString());
 			this.getProducts(null);
 			
 			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
@@ -106,6 +108,9 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
 			}
 			
+		     } else {
+			   System.out.println("No sortiments to read");
+		   }
 			System.exit(0);
 		}
 	
@@ -316,7 +321,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				"			(case when accountcode = 1 then accountrelation else ''end)  AS clgroup, \r\n" + 
 				"				(case when itemcode = 0 then itemrelation else ''end) AS prodid, \r\n" + 
 				"				(case when itemcode = 1 then itemrelation else ''end) AS prodgroup,percent1 AS discount,amount \r\n" + 
-				"				 AS price ,fromdate , todate FROM pricedisctable where \r\n" + 
+				"				 AS price ,fromdate , todate , champaintype  as type FROM pricedisctable where \r\n" + 
 				"				 fromdate<getdate() and todate>getdate() AND \r\n" + 
 				"				 fromdate!=('1900-01-01 00:00:00.00') and dataareaid = 'liv' order by (case when accountcode = 0 then accountrelation else ''end),fromdate";
 		try {
@@ -334,6 +339,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				double price = rs.getDouble("price");
 				String sdate =  rs.getString("fromdate");
 				String tdate =  rs.getString("todate");
+				String type =   rs.getString("type");
 				MatrixLine mline = new MatrixLine();
 
 				if (custID != null && custID.trim().length() > 0) {
@@ -364,8 +370,12 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				}
 				if(discount > 0) {
 				   mline.setDiscount(discount);
-				}else if (price != 0) {
+				} else if (price != 0) {
 					mline.setPrice(price);
+				}
+				
+				if(type != null && type.trim().length() > 0) {
+					mline.setLineinfo(type);
 				}
 				
 				lines.add(mline);
@@ -521,7 +531,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 								 && !payer.trim().equals("101")
 								 && !payer.trim().equals("109") 
 								){
-							      cust.setDebt(Double.parseDouble(debtStr));
+							    //  cust.setDebt(Double.parseDouble(debtStr));
 							}
 						
 					}
@@ -627,7 +637,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				custMap.put(cust.getID(), cust);
 			}
 
-			rs = stmt.executeQuery(sql);
+			/*rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				Debt debt = new Debt();
 				debt.setPayerID(rs.getString("maksja").trim());
@@ -649,10 +659,10 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 						 && !debt.getPayerID().equals("101")
 						 && !debt.getPayerID().equals("109") 
 						){
-					this.debt.addElement(debt);	
+				//	this.debt.addElement(debt);	
 				}
 			}
-
+*/
 			
 		} catch (Exception e) {
 			getParent().showError(e);
@@ -720,7 +730,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				
 			}
 			pgr1.put(gg2, gr2);
-			pgr2.put(gg2 + liik, nimi);
+			pgr2.put(gg2 + liik, nimi.replaceAll("Atleet", "At. "));
 			g1g2.put(liik, gg2);
 			tm.put(liik, nimi);
             } catch(Exception e) {
@@ -1148,141 +1158,8 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 
 	 
 	 public void insertSuperVisorSQLMeri(SupervisorInfoWrapperMeri wr){
-	     String sql = "  INSERT into dbo.supervisor values ("
-	       + "?, "   //   agent	C(50),
-	       + "?,"   //   agentname	C(200),
-	       + "?,"   //   clientid	C(50),
-	       + "?,"   //   clientname	C(200),
-	       + "?,"   //	prodid	C(50),
-	       + "?,"   //   prodname	C(200),
-	       + "?  ,"   //	sentdate	D,
-	       + " '' ,"   //	receivedTime	D,
-	       + "?,"   //normalpr	N,
-	       + "?,"   // amoun	N,
-	       + "?,"   // grouptotal	N,
-	       + "?,"   // cattotal	N,
-	       + "?,"   // pertotcat	I,
-	       + "?,"   // percolcat	I,
-	       + "?,"   // perpalcat	I,
-	       + "?,"   // pershecat	I,
-	       + "?,"   // perrescat	I,
-	       + "?,"   // isaction	L,
-	       + "?,"   // ispartner	L,
-	       + "?,"   // isbrand	L,
-	       + "?,"   // isgroup	L
-	       + "?,"   // actionaeva	N,
-	       + "?,"   // actionbeva N,
-	       + "?,"   // actiontota	N,
-	       + "?,"   // custeval	N,
-	       + "?,"   // custcomme	C(200),
-	       + "?,"   // comment	C(200),
-	       + "?,"   // custagent	C(200),
-	       + "?,"   // custagentname	C(200),
-	       + "?,"   // mustbe	I,
-	       + "?,"   // ideal	I,
-	       + "?,"   // resstr1	C(200),
-	       + "?,"   // resstr2	C(200),
-	       + "?,"   // resstr3	C(200),
-	       + "?,"   // resint1	I,
-	       + "?,"   // resint2	I,
-		      + "?)" ; //	resint3	L
-
-	       try {
-	       	System.out.println("jam");
-	        Connection con2 = getNewConnectionRep();
-	           PreparedStatement ps = con2.prepareStatement(sql);
-
-	           for (Iterator iter = wr.getInfo().getLines().iterator(); iter.hasNext(); ) {
-	             eevaeksport.report.SuperVisorLineWrapperMeri lw = new eevaeksport.report.SuperVisorLineWrapperMeri(iter.next());
-	             ps.setString(1, wr.getInfo().getAgentID());
-	             ps.setString(2, wr.getInfo().getAgentName());
-	             
-	             ps.setString(3, lw.getLine().getCustID());
-	             ps.setString(4, lw.getLine().getCustName());
-	             ps.setString(5, lw.getLine().getProdID());
-	             ps.setString(6, lw.getLine().getProdName());
-	             long lll = Calendar.getInstance().getTimeInMillis();
-	             try{
-	            	  lll = Long.parseLong((lw.getLine().getResStr3()));
-	             }catch(Exception e){
-	            	 System.out.println("res3" + lw.getLine().getResStr3());
-	            	 e.printStackTrace();
-	             }
-	             ps.setTimestamp(7, new Timestamp(lll));
-	             ps.setDouble(8, lw.getLine().getNormalPrice());
-	             ps.setDouble(9, lw.getLine().getAmount());
-	             ps.setDouble(10, 0);
-	             ps.setDouble(11, 0);
-	             ps.setInt(12, lw.getLine().getPercentageFromTotalCategory());
-	             ps.setInt(13, lw.getLine().getPercentageFromColdCategory());
-	             ps.setInt(14, lw.getLine().getPercentageFromPallCategory());
-	             ps.setInt(15, lw.getLine().getPercentageFromShelfCategory());
-	             ps.setInt(16, lw.getLine().getPercentageFromRestCategory());
-	             ps.setBoolean(17, lw.getLine().isAction());
-	             ps.setBoolean(18, lw.getLine().isPartner());
-	             ps.setBoolean(19, lw.getLine().isBrand());
-	             ps.setBoolean(20, lw.getLine().isGroup());
-	             ps.setDouble(21, lw.getLine().getCategoryTotal());
-	             ps.setDouble(22, lw.getLine().getPercentageFromRestCategory());
-	             ps.setDouble(23, lw.getLine().getActionTotalEval()*100);
-	             ps.setDouble(24, lw.getLine().getCustEval()*100);
-	             String cc = lw.getLine().getCustComment();
-	             if (cc == null){
-	             	cc = " ";
-	             }
-	             ps.setString(25, cc);
-
-	             String cd = lw.getLine().getComment();
-	             if (cd == null){
-	             	cd = " ";
-	             }
-	             ps.setString(26, cd);
-
-	             String ce = lw.getLine().getCustAgentId();
-	             if (ce == null){
-	             	ce = " ";
-	             }
-
-	             ps.setString(27, ce);
-
-	             String cf = lw.getLine().getCustAgentName();
-	             if (cf == null){
-	             	cf = " ";
-	             }
-	             ps.setString(28, cf);
-	             ps.setInt(29, lw.getLine().getDealNr());
-	             ps.setInt(30, lw.getLine().getIdealNr());
-
-	             String cr1 = lw.getLine().getResStr1();
-	             if (cr1 == null){
-	             	cr1 = " ";
-	             }
-	             ps.setString(31, cr1);
-
-
-	             String cr2 = lw.getLine().getResStr2();
-	             if (cr2 == null){
-	             	cr2 = " ";
-	             }
-	             ps.setString(32, cr2);
-
-
-	             String cr3 = lw.getLine().getResStr3();
-	             if (cr3 == null){
-	             	cr3 = " ";
-	             }
-	             ps.setString(33, cr3);
-	             ps.setInt(34, lw.getLine().getResInt1());
-	             ps.setInt(35, lw.getLine().getResInt2());
-	             ps.setInt(36, lw.getLine().getResInt3());
-	             ps.executeUpdate();
-	           }
-
-	           ps.close();
-	           con2.close();
-	       } catch (SQLException e) {
-	           e.printStackTrace();
-	       }
+	   
+	     
 	     }
 
 	/**

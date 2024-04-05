@@ -2692,7 +2692,7 @@ System.out.println(cmd);
     	 String cmd = "  SELECT  t.[No_] AS toode,(t.[Description] + ' ' +   t.[Description 2] ) AS nimi, t.[Unit Price] AS myygihind,"
     	 		+ " '' AS grupp2,t.[Global Dimension 2 Code] AS grupp " +
 			" ,t.[Base Unit of Measure] AS unit,[No_ 2] AS ean,'' AS status ,0 AS maxdiscount, " +
-			 " '' AS type, [Units per Parcel] AS kastis,[Item Disc_ Group] as alegr ,  '' AS kaal, "
+			 " '' AS type, [Units per Parcel] AS kastis, [Sell only in parcels]  as optam ,[Item Disc_ Group] as alegr ,  '' AS kaal, "
 			 + "[VAT Prod_ Posting Group] AS vat ,[Units per Pallet] as pallet " +
 			 " ,[Unit List Price] as listprice,[New until] as newprod ,[Nelikvidas]  as status2 , [Minimum Unit Price]  as jaeh FROM [2015_Tobis$Item] t  WHERE t.[Blocked]=0    ORDER BY t.[No_] ";
       
@@ -2750,7 +2750,11 @@ System.out.println(cmd);
                 	if(cases > 0){
                        prod.setInCases(cases);
                 	}
-                
+
+                    int	opt = rs.getInt("optam");
+                    	if(cases > 0 && opt == 1){
+                           prod.setOptAmountInUnits(cases);
+                    	}                
                 	String alegrupp = rs.getString("alegr");
                 	if(alegrupp != null && alegrupp.trim().length() > 0){
                 		prod.setAlegrupp(Converter.cleanLitLatEst(alegrupp));	

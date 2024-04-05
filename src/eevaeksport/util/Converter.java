@@ -1603,6 +1603,7 @@ public class Converter {
 }
 	 public static TreeMap loadFixPrisma(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			System.out.println("Prisma lugemine 00 " );
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -1618,16 +1619,18 @@ public class Converter {
 						int ea = 0;
 						int ni = 0;
 						int gr = 2;
-					//	System.out.println("Groups " +  groups.toString());
-						
+				
 						 for(int i = 0 ; i < row.getLastCellNum();i++){
-							 if(formatter.formatCellValue(row.getCell(i)).contains("EAN")) {
+							 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("ean")) {
 								 ea = i;
 							 }
-							 if(formatter.formatCellValue(row.getCell(i)).contains("Desc")) {
+							 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("desc")) {
 								 ni = i;
 							 }
-							 if(formatter.formatCellValue(row.getCell(i)).contains("TOODE")) {
+							 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("dec")) {
+								 ni = i;
+							 }
+							 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("toode")) {
 								 ni = i;
 							 }
 							 if(formatter.formatCellValue(row.getCell(i)).contains("Siku")) {
@@ -1638,7 +1641,7 @@ public class Converter {
 						TreeMap groups = new TreeMap();
 						for (int a = gr; a < row.getLastCellNum(); a++) {
 							try {
-								// System.out.println(row.getCell((short)a).getStringCellValue());
+								 System.out.println(row.getCell((short)a).getStringCellValue());
 								String gg = row.getCell((short) a).getStringCellValue().trim().replaceAll("\n", " ");
 							
 								if(gg.length()>1){
@@ -1658,7 +1661,7 @@ public class Converter {
 								String ean = formatter.formatCellValue(row.getCell(ea));
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
-							 
+								System.out.println("Sees " + ean + " " + toode );
 							  if(toode.equals(ean)) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Prisma formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
@@ -1698,7 +1701,7 @@ public class Converter {
 					
 					
 			//	System.out.println("Prisma size " + res.toString() );
-				//	System.exit(0);
+					//System.exit(0);
 						
 					 }catch(Exception e) {
 						 e.printStackTrace();
@@ -3626,6 +3629,26 @@ public class Converter {
  }
 	
 	 
+	 public static boolean hasFixFromExcels(String dirx ,  EksportPanel parent) {
+			boolean res  = false;
+			
+		//	Kammime kataloogi läbi ja määrame mis on mis ja proovime sisse lugeda 
+			String done = "";
+			
+			 File dir = new File(dirx);
+			 File[] files = dir.listFiles();
+			   
+			    
+			    for (int i = 0; i < files.length ; i++){
+			      File file = files[i];
+			     
+			      if (file.isFile() && !file.getName().contains("Thumbs")) {
+			    	  res = true;
+			      }
+			    }
+			    return res;
+			    
+	 }
 	 
 	
 	public static TreeMap loadFixFromExcels(String dirx , TreeMap prods, EksportPanel parent) {
@@ -3648,8 +3671,8 @@ public class Converter {
 		          System.out.println("Format tuvastatud " + format + " " + file.getName());
 		          if(format != null) {
 		        	  
-		       
-		        //System.exit(0);
+		        	  System.out.println("Format tuvastatud '" + format + "' " );
+		      //  System.exit(0);
 		        
 		        if(format.equals("mjsortiment")) {
 		        	loadFixMJ(res, file , prods, parent);
