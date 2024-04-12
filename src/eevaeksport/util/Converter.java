@@ -578,7 +578,7 @@ public class Converter {
 											r=r-1 ; // kui järve on esimesena siis teeme kadaka -1
 										}
 										found = true;
-										addrow = 7;
+										addrow = 9; //laseme +2 rida alla sest sela on seletused mida pole vaja
 										break;
 									}
 								
@@ -618,7 +618,7 @@ public class Converter {
 						
 						for (int a = r; a < row.getLastCellNum(); a++) {
 							try {
-								 System.out.println(row.getCell((short)a).getStringCellValue() + " " + r);
+								// System.out.println(row.getCell((short)a).getStringCellValue() + " " + r);
 								String gg = row.getCell((short) a).getStringCellValue().trim();
 								if(gg.toLowerCase().indexOf("ean") != -1) {
 									ea = a;
@@ -637,7 +637,7 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("r "  + r + " "+ ea + " " + addrow + " " + groups.toString());
+						System.out.println("r "  + r + " "+ ea + " " + addrow );
 						//System.exit(0);
 						
 						  
@@ -660,7 +660,7 @@ public class Converter {
 							 if(!"Nimetus".equals(tnimi)) {
 								 
 							 
-							  if(toode.equals(ean.trim()) ) {
+							  if(toode.equals(ean.trim()) && ean.trim().length() > 3) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Selver formaat\n fail : "
 								  + file.getName() +"\n\nEAN     Nimetus\n";
@@ -3067,7 +3067,43 @@ public class Converter {
 							 if(pais.equals("Seisund")) {
 								 seis = 11;
 							 }
+						 }else {
+							 pais = formatter.formatCellValue(rowu.getCell(2));
+							 if (pais.equals("Kauplus")) {
+								 u = 2;
+								 pais = formatter.formatCellValue(rowu.getCell(5));
+								 if(pais.equals("EAN")) {
+									 eanp = 5;
+								 }
+								 
+								 pais = formatter.formatCellValue(rowu.getCell(8));
+								 if(pais.equals("EAN")) {
+									 eanp = 8;
+								 }
+								 pais = formatter.formatCellValue(rowu.getCell(7));
+								 if(pais.equals("Nimetus")) {
+									 tnim = 7;
+								 }
+
+								 pais = formatter.formatCellValue(rowu.getCell(10));
+								 if(pais.equals("Nimetus")) {
+									 tnim = 10;
+								 }
+								 pais = formatter.formatCellValue(rowu.getCell(13));
+								 if(pais.equals("Seisund")) {
+									 seis = 13;
+								 }
+
+								 pais = formatter.formatCellValue(rowu.getCell(15));
+								 if(pais.equals("Seisund")) {
+									 seis = 15;
+								 }
 						 }
+							 }
+						 
+						 
+						 
+						 
 						 int poo = 0;
 						 pais = formatter.formatCellValue(rowu.getCell(2));
 						 if (pais.equals("Kauplus")) {
@@ -3150,8 +3186,8 @@ public class Converter {
 									seisund = false;
 								}
 								
-					//	System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi 
-						//		+" " + tnimi+ " "+ ean + " " + pood);
+						System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi 
+							+" " + tnimi+ " "+ ean + " " + pood);
 								
 							}
 							

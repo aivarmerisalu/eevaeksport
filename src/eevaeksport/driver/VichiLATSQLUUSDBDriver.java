@@ -363,7 +363,8 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 				             }
 				             if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
 				               mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
-				               if(clGroup.trim().equals("HOREKA")) {
+				               if(clGroup.trim().equals("HOREKA") || clGroup.trim().equals("AIBE") || 
+				            		   clGroup.trim().equals("LATS") || clGroup.trim().equals("BALT")) {
 				            	   startG = true;
 				               }
 				             }
@@ -1127,7 +1128,8 @@ cn.close();
 		try {
 			Connection con = null;
 			if(view) {
-				sql  = "select [Ship-to-address code] as aad1 ,[Ship-to address Name] as name2, [Ship-to address Contact] as kont,[Sales Channel New] as channel, * from MobileJavaLAT.v_LAT_Customers";
+				sql  = "select [Ship-to-address code] as aad1 ,[Ship-to address Name] as name2, [Ship-to address Contact] as kont,[Sales Channel New] as channel, [Customer blocked] as blokk2 , "
+						+ " * from MobileJavaLAT.v_LAT_Customers";
 				con = this.getNewConnectionView();
 			} else {
      		   con =  getNewConnection2();
@@ -1141,13 +1143,20 @@ cn.close();
 				String n1 = "";
 				String kont = "";
 				String chan = "";
+				String blokk2 = "";
+				
+				boolean goes = true;
 				
 				if(view) {
 				a1 = "_" + rs.getString("aad1").trim();
 				n1 =  rs.getString("name2").trim();
 				kont =  rs.getString("kont").trim();
 			 chan = rs.getString("channel");
-		           
+			 blokk2 = rs.getString("blokk2");
+			 if("Invoice".equals(blokk2)) {
+				// goes = false;
+			 }
+			           
 				}
 				
 				
@@ -1178,6 +1187,7 @@ cn.close();
 				String aadress = rs.getString("aadress");
 				if (aadress != null && aadress.trim().length() > 0) {
 					customer.setAddress(Converter.enCodeEst(Converter.adressLink(aadress,"Latvia")));
+					customer.restStreet = aadress;
 					if(!view) {
 						customer.setName(Converter.enCodeEst(customer.getName() + " " + aadress));
 					}
@@ -1185,7 +1195,6 @@ cn.close();
 				
 				String ag = rs.getString("agent").trim();
 				customer.addAgent(new Agent(ag));
-	             customer.addAgent(new Agent("HOUSE1"));
 	             customer.setMainAgent(ag);
 	             if (ag != null ){
 	   				Agent agg = ((Agent)this.getAgents1().get(ag));
@@ -1199,9 +1208,8 @@ cn.close();
 	   				}
 	   			}
 	             
-	           	customer.addAgent(new Agent(ag));
-					customer.addAgent(new Agent("HOUSE1"));
-					
+					 customer.addAgent(new Agent("001"));
+		             customer.addAgent(new Agent("003"));
 					  if (ag != null && agent1.get(ag.trim()) != null){
 							Agent aa = (Agent)agent1.get(ag.trim());
 						
@@ -1343,10 +1351,10 @@ cn.close();
 		           }
 				// customer.setPayer(id);
 			
-		          
-		           
-					tm.put(customer.getName() + id, customer);
+		          if(goes) {
+		            tm.put(customer.getName() + id, customer);
 					this.customers.add(customer.getID());
+		          }
 			}
 
 			rs.close();

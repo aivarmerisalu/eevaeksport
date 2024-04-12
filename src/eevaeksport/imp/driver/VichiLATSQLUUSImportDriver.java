@@ -782,6 +782,9 @@ HashMap paILNs = null;
 
 			String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim()
 					+ ".xml";
+
+			String fileName2 = parent.getProps().getProperty("conv.dir2") + order.getDokNr().trim() + (uni + "").trim()
+					+ ".xml";
 			System.out.println(fileName);
 			OutputFormat of = new OutputFormat();
 			of.setIndenting(true);
@@ -794,8 +797,17 @@ HashMap paILNs = null;
 			ser.serialize(doc);
 			out.close();
 
+			 fos = new FileOutputStream(fileName2);
+			 out = new PrintWriter(fos);
+			ser.setOutputCharStream(out);
+			ser.serialize(doc);
+			out.close();
+
+			
 		} catch (Exception e) {
 			e.printStackTrace();
+			this.log.error(e);
+			System.exit(0);
 		}
 	}
 
@@ -853,11 +865,11 @@ HashMap paILNs = null;
 
 		if (disc > 0) {
 			// price = price * (100-disc)/100;
-		/*	Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
+			Node yhiku_hind = doc.createElement("FinalPrice");
 			Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
 			yhiku_hind.appendChild(yhiku_hindVal);
 			ridaitem.appendChild(yhiku_hind);
-			*/
+			
 			
 			
 			Node yhiku_ale = doc.createElement("LineDiscount");

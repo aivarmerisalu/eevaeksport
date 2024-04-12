@@ -4332,6 +4332,17 @@ private TreeMap afterOrders = null;
 	         		 }catch(Exception ee){
 		         	 
 	         		 }
+	         		 
+	         		  if(getParent().getProps().getProperty("custgroup") != null){
+	         		    try{ 
+		 	         		 String type =   getNode(rida,"groupName").getFirstChild().getNodeValue();
+		 	         		  if(!type.equals(getParent().getProps().getProperty("custgroup"))){
+		 	         			  goes = false;
+		 	         		  }
+		         		 } catch (Exception ee){
+			         	 }
+	         		 }
+	         		 
 	         		  try{
 	         		   String salesman  = deCode( getNode(rida,"customerManagerID").getFirstChild().getNodeValue());
        		            customer.addAgent(new Agent(salesman));
