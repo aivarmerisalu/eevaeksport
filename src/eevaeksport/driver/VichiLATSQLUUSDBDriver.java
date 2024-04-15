@@ -1187,10 +1187,10 @@ cn.close();
 				String aadress = rs.getString("aadress");
 				if (aadress != null && aadress.trim().length() > 0) {
 					customer.setAddress(Converter.enCodeEst(Converter.adressLink(aadress,"Latvia")));
+					name = name + " " + aadress;
+					customer.setName(name);
 					customer.restStreet = aadress;
-					if(!view) {
-						customer.setName(Converter.enCodeEst(customer.getName() + " " + aadress));
-					}
+					
 				}
 				
 				String ag = rs.getString("agent").trim();

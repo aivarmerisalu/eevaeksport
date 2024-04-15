@@ -165,7 +165,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				 sb.append("|" );	
 			}
 
-		  	oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
+		  
 		  
 		    String sql3 = "select qtyordered as amount,  salesunit as unit  , name from  " +
 					   " SalesLine rid where rid.dataareaid='liv' and  salesid =  '" + id + "'";
@@ -173,15 +173,24 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		    PreparedStatement stmt3 = cc.prepareStatement(sql3);
 			 
 		       ResultSet  rs2 = stmt3.executeQuery();
-		   
+		   boolean goes = true;
 			    while(rs2.next()){
-			    	sb.append("[" +nf.format(rs2.getDouble("amount"))+"] " 
-			       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
+			    	double amo = rs2.getDouble("amount");
+			    	if(amo > 0) {
+			    	sb.append("[" +nf.format(amo)+"] " 
+			           + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
+			    	}else {
+			    		goes = false;
+			    	}
 			    }
 		   
 			    rs2.close();
 		       stmt3.close();
 		       cc.close();
+		       // kui on tagastused siis ei pane
+		       if(goes) {
+		       
+		      	oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
 		       if(res.get(nimi) != null){
 		    	   res.put(nimi,res.get(nimi) +" | |" + sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
 		   	       
@@ -189,7 +198,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		    	   res.put(nimi, sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
 		   	    	   
 		       }
-		   	
+		       }
 		}
 		
 		
@@ -336,7 +345,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			
 		     int a = 0;
 		   try {
-				  File f = new File (getExcelDir() + "kampaania.xlsx");
+				  File f = new File (getExcelDir() + "kampaaniad.xlsx");
 					
 				  FileInputStream	 ff = new FileInputStream(f);
 
@@ -417,12 +426,12 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 								
 						 Date dd = new Date();
 								if(alg != null){
-									alg = new Date(alg.getTime()- 604800000);
+									alg = new Date(alg.getTime()- 86400000);
 								}
 								
 							if(alg != null && lop != null && dd.after(alg) && dd.before(lop)){
 
-					    		System.out.println("AAA " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
+					    	//	System.out.println("AAA " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
 								MatrixLine mm = new MatrixLine();
 								mm.setCliGroup(kett);
 								mm.setProdID(prodid);
@@ -882,17 +891,71 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	private HashMap g1g2 = null;
 	
 	public TreeMap getProdGroups() throws SQLException {
-		this.setTreeGroup(true);
+		//this.setTreeGroup(true);
        return pgr1;
 	}
 	
-	public TreeMap getProdGroupsInit() throws SQLException {
+	public HashMap getProdGroupsInit() throws SQLException {
 		
 		pgr1 = new TreeMap();
 		pgr2 = new TreeMap();
 		g1g2 = new HashMap();
+		HashMap tm = new HashMap();
 		
-		Connection con = getNewConnection();
+		   int a = 0;
+		   try {
+				  File f = new File (getExcelDir() + "tooted.xls");
+					
+				  FileInputStream ff = new FileInputStream(f);
+
+		 			 DataFormatter formatter = new DataFormatter();
+						 
+				  //mï¿½ï¿½rame ketid
+				HSSFWorkbook workbook = new HSSFWorkbook((ff));
+				HSSFRow row = null; 
+	 					ff.close();	
+	 					HSSFSheet	 sheet = workbook.getSheetAt(0); 
+						ff.close();	
+						
+						if(sheet != null){
+							for(int i = 0 ; i < sheet.getLastRowNum();i++){
+								 row = sheet.getRow(i);
+								//System.out.println(row);
+								if(row == null && a == 0){
+									a = i;
+								}else{
+									a = sheet.getLastRowNum();
+								}
+							}
+							
+							
+							for(int i = 1 ; i < a+1 ; i++){
+								
+								 row = sheet.getRow(i);
+								String kood = null;
+								String grupp = null;
+								try {
+									kood = formatter.formatCellValue(row.getCell((short) 0));
+									grupp = formatter.formatCellValue(row.getCell((short) 4));
+									grupp = grupp.replaceAll("JOGURT", "JOG");
+									if(pgr1.get(grupp) == null) {
+									 pgr1.put(grupp, grupp);
+									}
+									tm.put(kood, grupp);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								
+							}
+					
+						}
+	            	  }catch (Exception e){
+	                   e.printStackTrace();	
+		         	  }
+
+
+		
+	/*	Connection con = getNewConnection();
 		TreeMap tm = new TreeMap();
 		String sql = " select gr.articleclass as liik ,gr.name AS nimi , articleclassgroupid as gr2 from \r\n" + 
 				"		valarticleclass gr inner join inventtable t on t.articleclasstype=gr.articleclass and t.dataareaid=gr.dataareaid\r\n" + 
@@ -924,20 +987,23 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		}
 		rs.close();
 		st.close();
-		con.close();
+		con.close();*/
 
 		return tm;
 	}
 
 	public TreeMap getProdGroupsSecond() throws SQLException {
-		return pgr2;
+		return null  ;//pgr2;
 	}
+	
 
 	public TreeMap getProducts(Agent agent) {
-
+  
+		
+		HashMap pgroups=null;
 		prodsH = new HashSet();
 		try {
-			getProdGroupsInit();
+			pgroups =	getProdGroupsInit();
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -1010,17 +1076,20 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	                   
 				}
 
-				String grupp = rs.getString("grupp");
+				/*String grupp = rs.getString("grupp");
 				if (grupp != null && grupp.trim().length() > 0) {
 					grupp = grupp.trim();
 					if(g1g2.get(grupp) != null) {
 						prod.setGroup(g1g2.get(grupp)+"");
 						prod.setGroupSecond(g1g2.get(grupp) + grupp );
 					}
+				}*/
+				if(pgroups.get(prod.getID()) != null) {
+					prod.setGroup(pgroups.get(prod.getID())+"");
 				}
 
 				prod.setName(nimetus);
-
+          prod.setVat("22");
 
 				String unit = rs.getString("unit");
 				if (unit != null && unit.trim().length() > 0) {
@@ -1113,7 +1182,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	}
 
 	public void setBulkSales(Map agents) {
-		this.connectionUp();
+	/*	this.connectionUp();
 		String cmd = "  SELECT  cus.salesmanager as agent,round(SUM(lineamount),0) AS summa "
 				+ " FROM custinvoicetrans sal INNER JOIN inventtable inv ON sal.itemid=inv.itemid and sal.dataareaid=inv.dataareaid  " +
 						"INNER JOIN custinvoicejour jou ON "
@@ -1132,7 +1201,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				String agentID = rs.getString("agent").trim();
 				Agent agent = (Agent) agents.get(agentID);
 				if (agent != null) {
-					agent.setMonthSales((int) rs.getDouble("summa"));
+					//agent.setMonthSales((int) rs.getDouble("summa"));
 					// System.out.println(agent.getMonthSales());
 				}
 			}
@@ -1140,7 +1209,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			con.close();
 		} catch (Exception e) {
 			getParent().showError(e);
-		}
+		}*/
 	}
 
 	public double getFoodSales(String agentCode) throws SQLException {
