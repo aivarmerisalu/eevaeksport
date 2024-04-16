@@ -2762,7 +2762,7 @@ public class Converter {
 							if(row != null) {
 								for (int a = 0; a < row.getLastCellNum(); a++) {
 									String ean = formatter.formatCellValue(row.getCell(a));
-									if(ean.contains("Ribakood")) {
+									if(ean.contains("Ribakood") || ean.contains("EAN") ) {
 										rida = i;
 								     }
 								  }	
@@ -2770,7 +2770,7 @@ public class Converter {
 						} 
 						
 						
-						 if( formatter.formatCellValue(sheet.getRow(rida).getCell(2)).contains("Laogrupid")) {
+						 if( formatter.formatCellValue(sheet.getRow(rida).getCell(2)).contains("Laogrupid") ) {
 							 
 
 							 TreeMap sisu = new TreeMap();
@@ -3952,7 +3952,15 @@ public class Converter {
 								
 									
 									 if(row != null) {
-									 cellx = row.getCell((short)0);
+									 
+											cellx = row.getCell((short)3);
+											String a4 = formatter.formatCellValue(cellx);
+											if(a4 != null && a4.equals("Märkused")) {
+												return "lektus";
+											}
+										
+										 cellx = row.getCell((short)0);
+									 
 										if(cellx != null) {
 											try {
 											String a1 = formatter.formatCellValue(cellx);
@@ -3961,12 +3969,13 @@ public class Converter {
 										cellx = row.getCell((short)2);
 										String a3 = formatter.formatCellValue(cellx);
 										
-											
 									
 												if(a1 != null && a1.equals("Ribakood") && a2 != null && a2.equals("Nimetus")
 														&&  a3 != null && (a3.equals("Kaubagrupp") || a3.equals("Laogrupid"))  ) {
 													return "lektus";
 												}
+												
+												
 											}catch(Exception k) {
 												k.printStackTrace();
 											}

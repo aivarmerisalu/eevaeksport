@@ -839,7 +839,7 @@ if(ladu.trim().length()!=0){
       if(tag) {
     	 cat = parent.getProps().getProperty("conv.dirret");
       }
-      if(order.getDokNr().toLowerCase().startsWith("f")) {
+      if(order.getDokNr().toLowerCase().startsWith("f") || order.getDokNr().toLowerCase().startsWith("z")) {
     	  cat = parent.getProps().getProperty("conv.dir2");
       }
  	
@@ -849,7 +849,7 @@ if(ladu.trim().length()!=0){
         fos.write(sb.toString().getBytes());
         fos.close();
 
-        if(!order.getDokNr().toLowerCase().startsWith("f")) {
+        if(!order.getDokNr().toLowerCase().startsWith("f") &&  !order.getDokNr().toLowerCase().startsWith("z")) {
     	try {
         
 
