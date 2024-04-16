@@ -3826,7 +3826,7 @@ public void WebShopper()  {
 			
 			orderHistory.add(ord.getDokNr());
 		}
-	}
+	}  
 	try {
 		Converter.saveObject(orderHistory, "orderHistory.hash");
 	} catch (Exception e) {

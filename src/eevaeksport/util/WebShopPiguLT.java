@@ -441,7 +441,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	}
 	public void confirmLinesGetSlip(ArrayList confOrders) {
 		// TODO Auto-generated method stub
-		
+		 
 		HashSet orderHistory = null;
 		try {
 			orderHistory = (HashSet)Converter.readObject("slipHistory.hash");

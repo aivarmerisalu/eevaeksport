@@ -972,7 +972,7 @@ hind =   Converter.Round((float)hind, 2);
 	 		}
 	 		// comm = protectSpecialCharacters(comm);
 	 		System.out.println("comm " + comm);
-	 
+	   
 	 		String gr = "";
 	 		if(ccc != null && ccc.getGroup()!= null){
 	 			gr = ccc.getGroup();
