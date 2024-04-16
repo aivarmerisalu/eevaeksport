@@ -35,7 +35,7 @@ public class OrderLine implements Serializable {
     private String prodname = " ";
     private String unit = " " ;
 
-	/**
+	/** 
 	*
 	* @return the double value of price.
 	*/

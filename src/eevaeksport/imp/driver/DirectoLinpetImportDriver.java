@@ -980,7 +980,7 @@ hind =   Converter.Round((float)hind, 2);
 	 		String adr = "";
 	 		if(ccc != null && ccc.getAddress()!= null){
 	 			adr = deCode(ccc.getAddress());
-	 		}
+	 		} 
 	 		
 	 		String city = "";
 	 		if(ccc != null && ccc.getCity()!= null){
