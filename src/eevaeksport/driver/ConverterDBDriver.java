@@ -289,11 +289,12 @@ public void WebReporter() {
          
          
          //Arve saaja BuyerParty
-         String buyer =  "Eesti Energia AS";
-         String buyerRegnr =  "10421629";
+         String buyer =  "Enefit AS";
+         String buyerRegnr =  "16130213";
          String buyerVatnr =  "EE100366327";
          //String buyerAddress =  "Lelle tn 22:Tallinn:11318";
          
+         String oldArveNr = "";
 
          
          
@@ -414,7 +415,12 @@ public void WebReporter() {
 				         
 				         
 				         String arvenr = props.getProperty("arvenr" + (a+1));
-				         
+				            if(arvenr == null){
+				            	arvenr = Integer.toString(Integer.parseInt(oldArveNr) + 1);
+				            	oldArveNr = arvenr;
+				            }else{
+				            	oldArveNr = arvenr;
+				            }
 				         
 
 				         
@@ -716,6 +722,7 @@ public void WebReporter() {
 			            footer.appendChild(totalAmount);
 			            //String fileName = "/home/gpc/Desktop/ohakaelekter/valja/" + arvenr + ".xml";
 			            String fileName = currentWorkingDirectory + "/xmlValja/" + arvenr + ".xml";
+
 					      System.out.println(fileName);
 					      OutputFormat of = new OutputFormat();
 					        of.setIndenting(true);

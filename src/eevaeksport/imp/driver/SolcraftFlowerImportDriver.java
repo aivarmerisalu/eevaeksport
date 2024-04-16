@@ -274,44 +274,7 @@ public void sendToPrinter(String fileName, String text) {
     
     
     
-    try {
-        PrinterJob printJob = PrinterJob.getPrinterJob();
-        PageFormat pageFormat = new PageFormat();
-        pageFormat.setOrientation(PageFormat.PORTRAIT);
-        Paper paper = new Paper(); 
-        paper.setSize(595, 842);
-        paper.setImageableArea(0, 0, 595, 842);
-        pageFormat.setPaper(paper);
-        
-
-        AttributeSet aset = new HashAttributeSet();
-        aset.add(new PrinterName(parent.getProps().getProperty("printer.name"), null));
-        PrintService[] pservices = 
-            PrintServiceLookup.lookupPrintServices(null, aset);
-        
-        PDDocument doc = PDDocument.load(new File(fileNameWithPath));
-       PrintService printService = pservices[0];
-        printJob.setPrintService(printService);
-        printJob.setPrintable(new PDPageable(doc), pageFormat);
-
-       // if (printJob.printDialog()) {
-            printJob.print();
-       // }
-        doc.close();
-        
-        File f = new File(fileNameWithPath);
-		  if(f.exists()){
-			  File uus = new File(parent.getProps().getProperty("watcher.rename") + File.separator  + f.getName());
-			  if(uus.exists()){
-				  uus.delete();
-			  }
-			  f.renameTo(uus);
-			  System.out.println("Renamed " + uus.getAbsolutePath());
-		  }
-
-    } catch (Exception x) {
-        x.printStackTrace();
-    }
+  
 
 }
    

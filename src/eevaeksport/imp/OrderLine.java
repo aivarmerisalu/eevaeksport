@@ -1,5 +1,7 @@
 package eevaeksport.imp;
 
+import java.io.Serializable;
+
 /**
  * <p>Title: </p>
  * <p>Description: </p>
@@ -9,7 +11,7 @@ package eevaeksport.imp;
  * @version 1.0
  */
 
-public class OrderLine {
+public class OrderLine implements Serializable {
 
 	  private String toode = null;
 	  private double kogus = -1;

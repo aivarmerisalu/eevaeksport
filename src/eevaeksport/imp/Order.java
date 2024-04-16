@@ -1,9 +1,12 @@
 package eevaeksport.imp;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import org.json.simple.JSONObject;
 
 import eevaeksport.Product;
 
@@ -16,7 +19,7 @@ import eevaeksport.Product;
  * @version 1.0
  */
 
-public class Order {
+public class Order implements Serializable {
 
   public Order(String company, String agentFirstName) {
     this.company = company;
@@ -272,6 +275,7 @@ public class Order {
   public double wplanned = 0;
   public String dend = null;
   public String colorStatus = null;
+  public JSONObject obj = null;
   
   public String filename = null;
   

@@ -1,6 +1,8 @@
 package eevaeksport.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -11,18 +13,25 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -46,11 +55,28 @@ public class WebShopPiguLT {
 	private String kaup24Klient = null;
 	private String piguLTKlient = null;
 	private String lati220Klient = null;
+	private String printingBat = null;
 	
 	
 	public WebShopPiguLT(HashMap eanProds) {
 		this.eanProds = eanProds;
 		// TODO Auto-generated constructor stub
+	}
+	public void saveOrderIDs(Order ord) {
+		File fileToFind = new File("WebShopper/ordIDs");
+		if (!fileToFind.exists()) {
+			fileToFind.mkdir();
+		}
+		try {
+			Converter.saveObject(ord, "WebShopper/ordIDs/"+  ord.getDokNr() + ".order");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//orderLine converter.save
+		
+		
+		
 	}
 
 
@@ -65,6 +91,7 @@ public class WebShopPiguLT {
 		kaup24Klient = parent.getProps().getProperty("kaup24");
 		 piguLTKlient = parent.getProps().getProperty("piguLT");
 		 lati220Klient = parent.getProps().getProperty("220LV");
+		 printingBat = parent.getProps().getProperty("printing.bat");
 		
 		File fileToFind = new File("WebShopper");
 		if (!fileToFind.exists()) {
@@ -107,7 +134,7 @@ public class WebShopPiguLT {
         		+ "}";
         try {
          	HttpClient cli = getClient();
-    		HttpResponse resp = restPostRequest(url+"v3/login", jsonBody, cli);
+    		HttpResponse resp = restPostRequest(url+"v3/login", jsonBody, cli, null);
     		String aaa = EntityUtils.toString(resp.getEntity());
             Converter.saveFile("WebShopper/piguToken.txt", aaa);
             token = (String) Converter.readJSONFile(filePath).get("token");
@@ -131,14 +158,24 @@ public class WebShopPiguLT {
 	
 	
 	
-	private HttpResponse restPostRequest(String uri, String json, HttpClient client) throws Exception {
+	private HttpResponse restPostRequest(String uri, String json, HttpClient client, List<NameValuePair> params ) throws Exception {
 
 		 HttpPost httpPost = new HttpPost(uri);
+		
 		 if(json != null){
+			
 			 httpPost.setEntity(new StringEntity(json,"utf-8"));
-		        httpPost.setHeader("Accept", "application/json");
-		        httpPost.setHeader("Content-type", "application/json;charset=utf-8");
+			
 		 }
+		 httpPost.setHeader("Authorization", "Pigu-mp "+token);
+		 httpPost.setHeader("Accept", "application/json");
+		 httpPost.setHeader("Content-type", "application/json");
+		 if(params != null){
+		 BasicHttpEntity entity = new BasicHttpEntity();
+		 entity.setContent(new ByteArrayInputStream(params.toString().getBytes("UTF-8")));
+	        httpPost.setEntity(entity);
+		 }  
+	        
 	        return client.execute(httpPost);
 	        
 
@@ -148,10 +185,24 @@ public class WebShopPiguLT {
 	private HttpResponse restGetRequest(String uri, HttpClient client) throws Exception {
 		 HttpGet httpPost = new HttpGet(uri);
 		 System.out.println(uri);
-			// httpPost.setEntity(new StringEntity(json,"utf-8"));
+			 //httpPost.setEntity(new StringEntity(json,"utf-8"));
 		       // httpPost.setHeader("Accept", "application/json");
 		        httpPost.setHeader("Authorization", "Pigu-mp "+token);
 	        return client.execute(httpPost);
+
+	}
+	
+	private HttpResponse restPutRequest(String uri, HttpClient client, String json) throws Exception {
+		 HttpPut httpPut = new HttpPut(uri);
+		 System.out.println(uri);
+			// httpPost.setEntity(new StringEntity(json,"utf-8"));
+		       // httpPost.setHeader("Accept", "application/json");
+		        httpPut.setHeader("Authorization", "Pigu-mp "+token);
+		        httpPut.setEntity(new StringEntity(json,"utf-8"));
+		        httpPut.setHeader("Accept", "application/json");
+		        httpPut.setHeader("Content-type", "application/json");
+
+	        return client.execute(httpPut);
 
 	}
 	
@@ -278,9 +329,18 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    		        String orderID = ((Long) order.get("id"))+"";
 	                    		        String orderNum = ((Long) order.get("external_id"))+"";
 	                    		        String orderSite = (String) order.get("app_name");
+	                    		        String userComment = (String) order.get("user_comment");
+	                    		        String weight = (String) order.get("weight");
+	                    		        String paid = (String) order.get("payment_status");
 	                    		        
-	                    		    System.out.println(ordDate+"  "+ orderSite);
+	                    		       
+	                    		      
+	                    		    System.out.println(ordDate+"  "+ orderSite + " " + paid);
 	                    			
+	                    			if (paid.equals("paid")) {
+	                    				
+	                    				
+	                    				
 	                    			
 	                    			
 	                    			JSONObject shippingAddress = (JSONObject)order.get("shipping_address");
@@ -291,6 +351,8 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    			String receiver_first_name = (String) shippingAddress.get("receiver_first_name");
 	                    			String receiver_last_name = (String) shippingAddress.get("receiver_last_name");
 	                    			System.out.println(receiver_first_name + " " + receiver_last_name+ " " + orderSite);
+	                    			shippingAddress.put("weight", weight);
+	                    			shippingAddress.put("user_comment", userComment);
 	                    			String orderSiteCode = null;
 	                    		
 	                    			if (orderSite.equals("220.lv")) {
@@ -307,7 +369,9 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    				
 	                    			}
 	                    			Order ord = new Order(orderSiteCode, "WebiPood");
+	                    			ord.obj = shippingAddress;
 	                    			ord.setDokNr(orderNum);
+	                    			ord.setContactID(orderID);
 	                    			ord.setStatus(1000);
 	                    			ord.setShipCal(ordDate.getTime()+ "");
 	                    			ord.setInfo(receiver_first_name + " " + receiver_last_name +" "+ orderNum);
@@ -319,7 +383,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    			for (int e = 0; e<ordProd.size(); e++) {
 	                    				JSONObject productLine = (JSONObject)  ordProd.get(e);
 	                    				JSONObject modification = (JSONObject)productLine.get("modification");
-	                    				
+	                    				Long orderProdID = (Long) productLine.get("id");
 	                    				String prodName = (String) modification.get("title");
 	                    				String prodEan = (String) modification.get("ean");
 	                    				
@@ -335,6 +399,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    				ol.setEAN(prodEan);
 	                    				ol.setTooteNimi(prodName);
 	                    				ol.setPrice(prodPrice);
+	                    				ol.selActCode = orderProdID+"";
 	                    				//ol.setDiscount(10);
 	                    				
 	                    				if(eanProds.get(prodEan) != null) {
@@ -350,7 +415,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    			
 	                    			orders.add(ord);
 
-
+	                    			}
 	                        
 	                    }
 	                }
@@ -374,9 +439,208 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 		
 		return orders;
 	}
-	
+	public void confirmLinesGetSlip(ArrayList confOrders) {
+		// TODO Auto-generated method stub
 		
+		HashSet orderHistory = null;
+		try {
+			orderHistory = (HashSet)Converter.readObject("slipHistory.hash");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (orderHistory == null) {
+			orderHistory = new HashSet();
+		}
+		
+		
+		for(int e = 0; e <  confOrders.size() ; e++) {
+			Order ord = (Order) confOrders.get(e);
+			
+			if(!orderHistory.contains(ord.getDokNr())) {
+				orderHistory.add(ord.getDokNr());
+			
+			boolean linesOK = true;
+			for(int i = 0; i <  ord.getOrderLines().size() ; i++) {
+				OrderLine line = (OrderLine) ord.getOrderLines().get(i);
+				System.out.println(line.selActCode);
+				
+				try {
+					
+				boolean	lineOK = confirmLine(line);
+				if (!lineOK ) {
+					linesOK = false;
+				}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+			try {
+				if (linesOK) {
+				boolean orderOK =	confirmOrder(ord);	
+				if (orderOK) {
+					postPackingSlip(ord);
+					printPackingSlip();	
+					}
+				}
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			}
+		}
+		try {
+			Converter.saveObject(orderHistory, "slipHistory.hash");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public boolean printPackingSlip() {
+		
+		 try {
+		     System.out.println("printingBat code: " + printingBat);
+	            // Execute the batch file
+	            Process process = Runtime.getRuntime().exec(printingBat);
+	            
+	            // Wait for the process to finish
+	            int exitCode = process.waitFor();
+	            
+	            // Print the exit code (0 indicates success)
+	            System.out.println("Exit code: " + exitCode);
+	        } catch (IOException | InterruptedException e) {
+	            e.printStackTrace();
+	        }
+		
+		
+		
+		
+		
+	   return true;
+	   
+	}
+
+  
+  public boolean postPackingSlip(Order ord) throws Exception {
+	  
+	  boolean res = false;
+	 
+	Order ordOrig = (Order) Converter.readObject("WebShopper/ordIDs/"+  ord.getDokNr() + ".order");
+	  
+	  String url2 = url+ "v3/orders/" + ordOrig.getContactID() + "/deliveries/labels";
+	 // String url2 = url+ "v3/orders/31237691/deliveries/labels";
+	  
+	  
+	  String name = (String) ordOrig.obj.get("receiver_first_name");
+	  String surname = (String) ordOrig.obj.get("receiver_last_name");
+	  String street = (String) ordOrig.obj.get("address");
+	  String city = (String) ordOrig.obj.get("city");
+	  String postcode = (String) ordOrig.obj.get("post_code");
+	  String phone = (String) ordOrig.obj.get("phone");  
+	 
+	
+
+	  
+	  
+        JSONObject obj = new JSONObject();
+		obj.put("label_quantity", 1);
+			JSONObject receiver = new JSONObject();
+			receiver.put("name", name);
+			receiver.put("surname", surname);
+			receiver.put("street", street);
+			receiver.put("city", city);
+			receiver.put("post_code", postcode);
+			receiver.put("phone", phone);
+		obj.put("receiver", receiver);
+		
+		  
+		  String weight =  (String) ordOrig.obj.get("weight");
+		  String comment =  (String) ordOrig.obj.get("user_comment");
+		  
+		
+		 
+			JSONObject shipment = new JSONObject();
+			shipment.put("weight", weight);
+			//shipment.put("volume", volume);
+			shipment.put("comment", comment);
+		obj.put("shipment", shipment);
+		
+	
+		 // 
+		// 31237691
+     
+	  
+		HttpClient cli = getClient();
+		HttpResponse resp = restPostRequest(url2,obj.toJSONString(), cli,null);
+		String aaa = EntityUtils.toString(resp.getEntity());
+		 
+System.out.println( ordOrig.getContactID()+" "  + obj.toJSONString()+" " +aaa);
+			        // Decode the base64 string into a byte array
+			        byte[] decodedPdfBytes = Base64.getDecoder().decode(aaa);
+
+			        // Path where you want to save the PDF file
+			        String filePath = "WebShopper/slips/"+ordOrig.getContactID() + ".pdf";
+
+			        // Write the byte array into a PDF file
+			        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+			            fos.write(decodedPdfBytes);
+			            System.out.println("PDF file saved successfully!");
+			        } catch (Exception e) {
+			            e.printStackTrace();
+			        }
+		
+		System.out.println(aaa + " " + url2);
+		if (aaa.contains("success")) {
+		return true;
+	}
+		
+		return res;
+  }
+  
+  
+  
+  
 
 	
+		private boolean confirmLine(OrderLine line) throws Exception {
+			boolean res = false;
+			
+			JSONObject obj = new JSONObject();
+			obj.put("amount_now",(int) line.getKogus());
+			String url2 = url+ "v3/order-products/" + line.selActCode + "/amounts";
+			HttpClient cli = getClient();
+    		HttpResponse resp = restPutRequest(url2, cli, obj.toJSONString());
+    		String aaa = EntityUtils.toString(resp.getEntity());
+    		System.out.println(aaa);
+    		if (aaa.contains("orderProduct")) {
+    			return true;
+    		}
+        
+			return res;
+			
+		}
+
+	  private boolean confirmOrder(Order ord) throws Exception {
+		  
+		  boolean res = false;
+		  
+		  Order ordOrig = (Order) Converter.readObject("WebShopper/ordIDs/"+  ord.getDokNr() + ".order");
+		
+		  String url2 = url+ "v3/orders/" + ordOrig.getContactID() + "/confirm";
+
+	        JSONObject obj = new JSONObject();
+			obj.put("orderId", ordOrig.getContactID());
+	     
+		  
+			HttpClient cli = getClient();
+  		HttpResponse resp = restPostRequest(url2,obj.toJSONString() , cli,null);
+  		String aaa = EntityUtils.toString(resp.getEntity());
+  		System.out.println(aaa + " " + url2);
+  		if (aaa.contains("success")) {
+			return true;
+		}
+  		return res;
+	  }
 
 }
