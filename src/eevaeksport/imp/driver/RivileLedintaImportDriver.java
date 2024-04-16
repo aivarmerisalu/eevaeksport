@@ -1069,7 +1069,7 @@ if(ladu.trim().length()!=0){
 
   public NumberFormat getNF() {
 		nf.setGroupingUsed(false);
-		
+		nf.setMaximumFractionDigits(2);
 		return this.nf;
 	}
   

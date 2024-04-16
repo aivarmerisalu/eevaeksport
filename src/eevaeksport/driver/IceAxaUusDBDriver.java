@@ -1472,6 +1472,9 @@ String region = rs.getString("region");
         Double pallet = rs.getDouble("pallet");
         if(pallet !=null && pallet > 0) {
         	prod.setOnPallet(pallet);
+        	if(prod.getID().equals("PFS077")) {
+        		prod.setOnPallet(64);
+        	}
         }
         
         if(goes){

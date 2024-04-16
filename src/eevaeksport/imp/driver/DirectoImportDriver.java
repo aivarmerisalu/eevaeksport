@@ -629,7 +629,7 @@ public class DirectoImportDriver extends AbstractImportDriver{
 	 
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
-	 			comm = "comment=\""+ order.getInfo()+ "\" " ;
+	 			comm = "comment=\""+ escape(order.getInfo())+ "\" " ;
 	 		}
 	 		//System.out.println("Comment " + comm);
 			
@@ -847,6 +847,10 @@ public class DirectoImportDriver extends AbstractImportDriver{
         sb.append("&gt;");
       } else if (c == '\n'){
         sb.append(" ");
+      } else if (c == '"'){
+          sb.append("&quot;");
+      } else if (c == '\''){
+          sb.append("&apos;");
       } else {
         sb.append(c);
       }

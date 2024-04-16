@@ -555,6 +555,38 @@ public class Converter {
 							}
 						}
 					
+						if(!found) {
+							 row = sheet.getRow(7);
+							
+							
+							boolean jarve = false;
+							for (int a = 0; a < row.getLastCellNum(); a++) {
+								try {
+								
+									//System.out.println(row.getCell((short)a).getStringCellValue());
+									String gg = row.getCell((short) a).getStringCellValue().trim();
+									if(gg.toLowerCase().indexOf("ean") != -1) {
+										ea = a;
+									}
+									if(gg.toLowerCase().indexOf("järve") != -1) {
+										jarve = true;
+									}
+									if(gg.toLowerCase().indexOf("kadaka") != -1) {
+										
+										r = a;
+										if(jarve) {
+											r=r-1 ; // kui järve on esimesena siis teeme kadaka -1
+										}
+										found = true;
+										addrow = 9; //laseme +2 rida alla sest sela on seletused mida pole vaja
+										break;
+									}
+								
+								} catch (Exception e) {
+									// System.out.println(row.getCell((short)a).getNumericCellValue());
+								}
+							}
+						}
 						
 						if(!found) {
 							 row = sheet.getRow(15);
@@ -586,7 +618,7 @@ public class Converter {
 						
 						for (int a = r; a < row.getLastCellNum(); a++) {
 							try {
-								 System.out.println(row.getCell((short)a).getStringCellValue() + " " + r);
+								// System.out.println(row.getCell((short)a).getStringCellValue() + " " + r);
 								String gg = row.getCell((short) a).getStringCellValue().trim();
 								if(gg.toLowerCase().indexOf("ean") != -1) {
 									ea = a;
@@ -605,7 +637,7 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("r "  + r + " "+ ea + " " + addrow + " " + groups.toString());
+						System.out.println("r "  + r + " "+ ea + " " + addrow );
 						//System.exit(0);
 						
 						  
@@ -628,7 +660,7 @@ public class Converter {
 							 if(!"Nimetus".equals(tnimi)) {
 								 
 							 
-							  if(toode.equals(ean.trim()) ) {
+							  if(toode.equals(ean.trim()) && ean.trim().length() > 3) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Selver formaat\n fail : "
 								  + file.getName() +"\n\nEAN     Nimetus\n";
@@ -1571,6 +1603,7 @@ public class Converter {
 }
 	 public static TreeMap loadFixPrisma(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			System.out.println("Prisma lugemine 00 " );
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -1586,16 +1619,18 @@ public class Converter {
 						int ea = 0;
 						int ni = 0;
 						int gr = 2;
-					//	System.out.println("Groups " +  groups.toString());
-						
+				
 						 for(int i = 0 ; i < row.getLastCellNum();i++){
-							 if(formatter.formatCellValue(row.getCell(i)).contains("EAN")) {
+							 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("ean")) {
 								 ea = i;
 							 }
-							 if(formatter.formatCellValue(row.getCell(i)).contains("Desc")) {
+							 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("desc")) {
 								 ni = i;
 							 }
-							 if(formatter.formatCellValue(row.getCell(i)).contains("TOODE")) {
+							 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("dec")) {
+								 ni = i;
+							 }
+							 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("toode")) {
 								 ni = i;
 							 }
 							 if(formatter.formatCellValue(row.getCell(i)).contains("Siku")) {
@@ -1606,7 +1641,7 @@ public class Converter {
 						TreeMap groups = new TreeMap();
 						for (int a = gr; a < row.getLastCellNum(); a++) {
 							try {
-								// System.out.println(row.getCell((short)a).getStringCellValue());
+								 System.out.println(row.getCell((short)a).getStringCellValue());
 								String gg = row.getCell((short) a).getStringCellValue().trim().replaceAll("\n", " ");
 							
 								if(gg.length()>1){
@@ -1626,7 +1661,7 @@ public class Converter {
 								String ean = formatter.formatCellValue(row.getCell(ea));
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
-							 
+								System.out.println("Sees " + ean + " " + toode );
 							  if(toode.equals(ean)) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Prisma formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
@@ -1666,7 +1701,7 @@ public class Converter {
 					
 					
 			//	System.out.println("Prisma size " + res.toString() );
-				//	System.exit(0);
+					//System.exit(0);
 						
 					 }catch(Exception e) {
 						 e.printStackTrace();
@@ -3032,7 +3067,43 @@ public class Converter {
 							 if(pais.equals("Seisund")) {
 								 seis = 11;
 							 }
+						 }else {
+							 pais = formatter.formatCellValue(rowu.getCell(2));
+							 if (pais.equals("Kauplus")) {
+								 u = 2;
+								 pais = formatter.formatCellValue(rowu.getCell(5));
+								 if(pais.equals("EAN")) {
+									 eanp = 5;
+								 }
+								 
+								 pais = formatter.formatCellValue(rowu.getCell(8));
+								 if(pais.equals("EAN")) {
+									 eanp = 8;
+								 }
+								 pais = formatter.formatCellValue(rowu.getCell(7));
+								 if(pais.equals("Nimetus")) {
+									 tnim = 7;
+								 }
+
+								 pais = formatter.formatCellValue(rowu.getCell(10));
+								 if(pais.equals("Nimetus")) {
+									 tnim = 10;
+								 }
+								 pais = formatter.formatCellValue(rowu.getCell(13));
+								 if(pais.equals("Seisund")) {
+									 seis = 13;
+								 }
+
+								 pais = formatter.formatCellValue(rowu.getCell(15));
+								 if(pais.equals("Seisund")) {
+									 seis = 15;
+								 }
 						 }
+							 }
+						 
+						 
+						 
+						 
 						 int poo = 0;
 						 pais = formatter.formatCellValue(rowu.getCell(2));
 						 if (pais.equals("Kauplus")) {
@@ -3115,8 +3186,8 @@ public class Converter {
 									seisund = false;
 								}
 								
-					//	System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi 
-						//		+" " + tnimi+ " "+ ean + " " + pood);
+						System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi 
+							+" " + tnimi+ " "+ ean + " " + pood);
 								
 							}
 							
@@ -3594,6 +3665,26 @@ public class Converter {
  }
 	
 	 
+	 public static boolean hasFixFromExcels(String dirx ,  EksportPanel parent) {
+			boolean res  = false;
+			
+		//	Kammime kataloogi läbi ja määrame mis on mis ja proovime sisse lugeda 
+			String done = "";
+			
+			 File dir = new File(dirx);
+			 File[] files = dir.listFiles();
+			   
+			    
+			    for (int i = 0; i < files.length ; i++){
+			      File file = files[i];
+			     
+			      if (file.isFile() && !file.getName().contains("Thumbs")) {
+			    	  res = true;
+			      }
+			    }
+			    return res;
+			    
+	 }
 	 
 	
 	public static TreeMap loadFixFromExcels(String dirx , TreeMap prods, EksportPanel parent) {
@@ -3616,8 +3707,8 @@ public class Converter {
 		          System.out.println("Format tuvastatud " + format + " " + file.getName());
 		          if(format != null) {
 		        	  
-		       
-		        //System.exit(0);
+		        	  System.out.println("Format tuvastatud '" + format + "' " );
+		      //  System.exit(0);
 		        
 		        if(format.equals("mjsortiment")) {
 		        	loadFixMJ(res, file , prods, parent);

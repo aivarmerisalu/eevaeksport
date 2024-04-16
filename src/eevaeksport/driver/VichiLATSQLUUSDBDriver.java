@@ -325,9 +325,109 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		   }
 		   
 
+		   
 	
-	
- public Vector getPriceMatrixData(){
+
+			  public Vector getPriceMatrixData(){
+				  
+				  	 String sql =" SELECT  custid, clgroup,prodid, startday, enddate, price ,0 as disc , salespricetype as type  from MobileJavaLAT.v_LAT_AkcijuKainos where " + 
+				  	 		"		  	 	 len(clgroup) >0 or  len(custid) >0 ";
+
+				       Vector result = new Vector();
+				         try {
+				          
+				      	   Connection con = getNewConnectionView();
+				   	        Statement stmt = con.createStatement();
+				   	        ResultSet rs = stmt.executeQuery(sql);
+				           while (rs.next()) {
+
+				             String custID = Converter.enCodeEst(rs.getString("custid"));
+				             String clGroup = rs.getString("clgroup");
+				             String prodID = rs.getString("prodid").trim();
+				             String prodGroup = null;
+				            
+				         
+				             String sdate = rs.getString("startday");
+				             String edate = rs.getString("enddate");
+				             double price = rs.getDouble("price");
+				             double disc = rs.getDouble("disc");
+				             String type = rs.getString("type");
+				             
+				             MatrixLine mline = new MatrixLine();
+
+				             boolean startG = false;
+				             if (custID != null && custID.length() > 0) {
+				               mline.setCustID(custID.trim());
+				               mline.setProdLevel("001");
+				               
+				             }
+				             if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
+				               mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
+				               if(clGroup.trim().equals("HOREKA") || clGroup.trim().equals("AIBE") || 
+				            		   clGroup.trim().equals("LATS") || clGroup.trim().equals("BALT")) {
+				            	   startG = true;
+				               }
+				             }
+
+				             String ttt = "";
+				             if(type != null && type.trim().length() > 0) {
+			                	   mline.setLineinfo(type.trim());
+			                	   ttt = type.trim();
+			                   }
+				             if(ttt.equals("AKC")) {
+				             
+				             if(edate != null && !edate.startsWith("1753")){
+				            	 mline.setEndDate(edate.substring(0,10));
+				            	 //paneme lõpu ainult siis kui algus on olemas
+				            	 if(sdate != null  && !sdate.startsWith("1753")){
+					            	 mline.setStartDate(sdate.substring(0,10));
+					             }
+				             }
+				             }
+				             
+				             if(startG) {
+				            	 if(sdate != null  && !sdate.startsWith("1753")){
+					            	 mline.setStartDate(sdate.substring(0,10));
+					             }
+				            	 mline.setProdLevel("pr");
+				             }
+				             
+				             if (prodID != null && prodID.length() > 0) {
+				               mline.setProdID(prodID);
+				             }
+				             if (mline.getProdID() == null &&  prodGroup != null && prodGroup.trim().length() > 0) {
+				               mline.setDiscGroup(prodGroup.trim());
+				             }
+
+				             if (price > -1) {
+				               mline.setPrice(price);
+
+				             }
+				             if (disc != 0) {
+				                 mline.setDiscount(disc);
+				               }
+				             
+				             if(price == 0 && disc == 0) {
+				            	 mline.setProdLevel("pr");
+				             }
+				             
+		                  
+				          //   if(mline.getPrice() > 0 || mline.getDiscount() > 0){
+				                 result.add(mline);    
+				            // }
+				             
+				           }
+				           rs.close();
+				           stmt.close();
+				           con.close();
+				         }catch(Exception e){
+				        	 e.printStackTrace();
+				         }
+					
+				    return result;
+				      }
+			  
+ public Vector getPriceMatrixDataold(){
 		  
 	
 	  	 String sql ="select * from v_LAT_AkcijuKainos";
@@ -1028,7 +1128,8 @@ cn.close();
 		try {
 			Connection con = null;
 			if(view) {
-				sql  = "select [Ship-to-address code] as aad1 ,[Ship-to address Name] as name2, [Ship-to address Contact] as kont, * from MobileJavaLAT.v_LAT_Customers";
+				sql  = "select [Ship-to-address code] as aad1 ,[Ship-to address Name] as name2, [Ship-to address Contact] as kont,[Sales Channel New] as channel, [Customer blocked] as blokk2 , "
+						+ " * from MobileJavaLAT.v_LAT_Customers";
 				con = this.getNewConnectionView();
 			} else {
      		   con =  getNewConnection2();
@@ -1041,12 +1142,21 @@ cn.close();
 				String a1 = "";
 				String n1 = "";
 				String kont = "";
+				String chan = "";
+				String blokk2 = "";
+				
+				boolean goes = true;
 				
 				if(view) {
 				a1 = "_" + rs.getString("aad1").trim();
 				n1 =  rs.getString("name2").trim();
 				kont =  rs.getString("kont").trim();
-				
+			 chan = rs.getString("channel");
+			 blokk2 = rs.getString("blokk2");
+			 if("Invoice".equals(blokk2)) {
+				// goes = false;
+			 }
+			           
 				}
 				
 				
@@ -1077,14 +1187,14 @@ cn.close();
 				String aadress = rs.getString("aadress");
 				if (aadress != null && aadress.trim().length() > 0) {
 					customer.setAddress(Converter.enCodeEst(Converter.adressLink(aadress,"Latvia")));
-					if(!view) {
-						customer.setName(Converter.enCodeEst(customer.getName() + " " + aadress));
-					}
+					name = name + " " + aadress;
+					customer.setName(name);
+					customer.restStreet = aadress;
+					
 				}
 				
 				String ag = rs.getString("agent").trim();
 				customer.addAgent(new Agent(ag));
-	             customer.addAgent(new Agent("HOUSE1"));
 	             customer.setMainAgent(ag);
 	             if (ag != null ){
 	   				Agent agg = ((Agent)this.getAgents1().get(ag));
@@ -1098,9 +1208,8 @@ cn.close();
 	   				}
 	   			}
 	             
-	           	customer.addAgent(new Agent(ag));
-					customer.addAgent(new Agent("HOUSE1"));
-					
+					 customer.addAgent(new Agent("001"));
+		             customer.addAgent(new Agent("003"));
 					  if (ag != null && agent1.get(ag.trim()) != null){
 							Agent aa = (Agent)agent1.get(ag.trim());
 						
@@ -1227,6 +1336,14 @@ cn.close();
 		           if(pm != null && pm.trim().length()>0){
 		               customer.setGroup(pm.trim());   
 		           }
+		           
+		          /* if(chan.trim().equals("HORECA")) {
+		        	   if(customer.getGroup().length() > 1) {
+			        	   customer.setGroup(customer.getGroup() + "|" + chan.trim());		        		   
+		        	   } else {
+			        	   customer.setGroup(chan.trim());   
+		        	   }
+		           }*/
 		          
 		           String chain = rs.getString("chain");
 		           if(chain != null && chain.trim().length()>0){
@@ -1234,8 +1351,10 @@ cn.close();
 		           }
 				// customer.setPayer(id);
 			
-					tm.put(customer.getName() + id, customer);
+		          if(goes) {
+		            tm.put(customer.getName() + id, customer);
 					this.customers.add(customer.getID());
+		          }
 			}
 
 			rs.close();

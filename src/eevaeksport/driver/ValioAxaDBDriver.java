@@ -30,6 +30,12 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import ee.mobilejava.wrapper.SuperVisorLineWrapper;
 import ee.mobilejava.wrapper.SupervisorInfoWrapper;
@@ -44,6 +50,7 @@ import eevaeksport.Product;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.report.SupervisorInfoWrapperMeri;
 import eevaeksport.util.Converter;
+import eevaeksport.util.ReportingService;
 
 /**
  * Title: Eeva eksport Description: Copyright: Copyright (c) 2002 Company:
@@ -53,7 +60,7 @@ import eevaeksport.util.Converter;
  */
 
 public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
-		Promo, BulkUpdater, Discounter {
+		Promo, BulkUpdater, Discounter,FixLoader ,PictureMaker{
 	public ValioAxaDBDriver(EksportPanel parent) {
 		super(parent);
 		this.subjectFilesTo = parent.getString("filemsg");
@@ -87,10 +94,40 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		return null;
 	}
 	
+	   private TreeMap eanprods = null;
+	  
+	   @Override
+		public void FixLoader() {
+		   
+		  boolean hasFile = Converter.hasFixFromExcels("excelsort",parent);
+		   if(hasFile) {
+		   eanprods =  Converter.loadMore();
+			  
+			  if(eanprods == null) {
+				  eanprods = new TreeMap();
+			  }
+			System.out.println("EanProds " + eanprods.toString());
+			this.getProducts(null);
+			
+			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+			System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			if(contracts.size() > 0) {
+				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+			}
+			
+		     } else {
+			   System.out.println("No sortiments to read");
+		   }
+			System.exit(0);
+		}
 	
 
+	   private StringBuffer oorders = null;
 	 private TreeMap  getOpenOrders(){
 			TreeMap res = new TreeMap();
+			oorders = new StringBuffer();
+			oorders.append(Calendar.getInstance().getTimeInMillis() + "\n");
+		
 			
 //customerorders tee lisaks 
 			   String sql2 =  "select  sal.salesid AS id, sal.custaccount AS kkood , sal.salesid as number ,sal.createddatetime AS kuup, estimate AS summa " + 
@@ -116,7 +153,8 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 
 			//DPP00488444 (‘Pabeigts’ – 01.06.2018; merisoft).
 		    sb.append(rs.getString("number").trim() + " (");
-			sb.append(rs.getString("kuup").trim().substring(0,10)  + ") ");
+		    String kuup =(rs.getString("kuup").trim().substring(0,10)) ;
+			sb.append(kuup  + ") ");
 			
 
 			double summa = Double.parseDouble(rs.getString("summa").trim());
@@ -126,7 +164,8 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			}else{
 				 sb.append("|" );	
 			}
-			
+
+		  
 		  
 		    String sql3 = "select qtyordered as amount,  salesunit as unit  , name from  " +
 					   " SalesLine rid where rid.dataareaid='liv' and  salesid =  '" + id + "'";
@@ -134,15 +173,24 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		    PreparedStatement stmt3 = cc.prepareStatement(sql3);
 			 
 		       ResultSet  rs2 = stmt3.executeQuery();
-		   
+		   boolean goes = true;
 			    while(rs2.next()){
-			    	sb.append("[" +nf.format(rs2.getDouble("amount"))+"] " 
-			       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
+			    	double amo = rs2.getDouble("amount");
+			    	if(amo > 0) {
+			    	sb.append("[" +nf.format(amo)+"] " 
+			           + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
+			    	}else {
+			    		goes = false;
+			    	}
 			    }
 		   
 			    rs2.close();
 		       stmt3.close();
 		       cc.close();
+		       // kui on tagastused siis ei pane
+		       if(goes) {
+		       
+		      	oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
 		       if(res.get(nimi) != null){
 		    	   res.put(nimi,res.get(nimi) +" | |" + sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
 		   	       
@@ -150,7 +198,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		    	   res.put(nimi, sb.toString().replaceAll("\\r\\n|\\r|\\n", " ").trim());
 		   	    	   
 		       }
-		   	
+		       }
 		}
 		
 		
@@ -163,7 +211,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		  getParent().showError(e);
 		}
 
-
+		Converter.saveFile(parent.getProps().getProperty("savefilesdir")  + "customerorders.txt", oorders.toString());
 			
 			return res;
 		}
@@ -281,15 +329,136 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			return result;
 		}
 	
-		 
+
+	
+	
+	
+      
+
+	
 
 	public Vector getPriceMatrixData() {
 		Vector lines = new Vector();
-		String sql = " SELECT (case when accountcode = 0 then accountrelation else ''end) AS custid, \r\n" + 
+		
+		
+		   TreeMap kampid = new TreeMap();// siia tekstid mis klientidele kï¿½lge
+			
+		     int a = 0;
+		   try {
+				  File f = new File (getExcelDir() + "kampaaniad.xlsx");
+					
+				  FileInputStream	 ff = new FileInputStream(f);
+
+		 			 DataFormatter formatter = new DataFormatter();
+						 
+				  //mï¿½ï¿½rame ketid
+				XSSFWorkbook workbook = new XSSFWorkbook((ff));
+				XSSFRow row = null; 
+	 					ff.close();	
+	 					XSSFSheet	 sheet = workbook.getSheetAt(0); 
+						ff.close();	
+						
+						if(sheet != null){
+							for(int i = 0 ; i < sheet.getLastRowNum();i++){
+								 row = sheet.getRow(i);
+								//System.out.println(row);
+								if(row == null && a == 0){
+									a = i;
+								}else{
+									a = sheet.getLastRowNum();
+								}
+							}
+							
+							
+							for(int i = 1 ; i < a+1 ; i++){
+								
+								 row = sheet.getRow(i);
+								String ean = null;
+								try {
+									ean = formatter.formatCellValue(row.getCell((short) 4));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								
+								String prodid = (String) this.eanprods.get(ean);
+								
+								
+								if(prodid != null) {
+								
+								String sisu = null;
+								try {
+									sisu = formatter.formatCellValue(row.getCell((short) 0));
+								} catch (Exception e) {
+									
+								}
+								Date alg = null;
+								String algus = null;
+								try {
+									alg = row.getCell((short) 2).getDateCellValue();
+									algus = getDateDDkMMkYYYYStr(alg);
+								} catch (Exception e) {
+									
+								}
+								Date lop = null ; 
+								String lopp = null;
+								try {
+									lop = row.getCell((short) 3).getDateCellValue();
+									lopp = getDateDDkMMkYYYYStr(lop);
+								} catch (Exception e) {
+									
+								}
+								
+								String kett = null;
+								try {
+									kett = formatter.formatCellValue(row.getCell((short) 1));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								
+								
+								double price = 0;
+								
+								try {
+									price = row.getCell((short) 6).getNumericCellValue();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								
+						 Date dd = new Date();
+								if(alg != null){
+									alg = new Date(alg.getTime()- 86400000);
+								}
+								
+							if(alg != null && lop != null && dd.after(alg) && dd.before(lop)){
+
+					    	//	System.out.println("AAA " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
+								MatrixLine mm = new MatrixLine();
+								mm.setCliGroup(kett);
+								mm.setProdID(prodid);
+								mm.setPrice(price);
+								mm.setEndDate(lopp);
+								mm.setStartDate(algus);
+								mm.setLineinfo(sisu);
+							    lines.add(mm);
+							 }
+							
+								}
+							}
+					
+								}
+		         		
+	            	  }catch (Exception e){
+	                   e.printStackTrace();	
+		         	  }
+
+
+		
+		
+	/*	String sql = " SELECT (case when accountcode = 0 then accountrelation else ''end) AS custid, \r\n" + 
 				"			(case when accountcode = 1 then accountrelation else ''end)  AS clgroup, \r\n" + 
 				"				(case when itemcode = 0 then itemrelation else ''end) AS prodid, \r\n" + 
 				"				(case when itemcode = 1 then itemrelation else ''end) AS prodgroup,percent1 AS discount,amount \r\n" + 
-				"				 AS price ,fromdate , todate FROM pricedisctable where \r\n" + 
+				"				 AS price ,fromdate , todate , champaintype  as type FROM pricedisctable where \r\n" + 
 				"				 fromdate<getdate() and todate>getdate() AND \r\n" + 
 				"				 fromdate!=('1900-01-01 00:00:00.00') and dataareaid = 'liv' order by (case when accountcode = 0 then accountrelation else ''end),fromdate";
 		try {
@@ -307,6 +476,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				double price = rs.getDouble("price");
 				String sdate =  rs.getString("fromdate");
 				String tdate =  rs.getString("todate");
+				String type =   rs.getString("type");
 				MatrixLine mline = new MatrixLine();
 
 				if (custID != null && custID.trim().length() > 0) {
@@ -337,8 +507,12 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				}
 				if(discount > 0) {
 				   mline.setDiscount(discount);
-				}else if (price != 0) {
+				} else if (price != 0) {
 					mline.setPrice(price);
+				}
+				
+				if(type != null && type.trim().length() > 0) {
+					mline.setLineinfo(type);
 				}
 				
 				lines.add(mline);
@@ -346,9 +520,27 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 
 		} catch (SQLException ex) {
 			ex.printStackTrace();
-		}
+		}*/
 		return lines;
 	}
+	
+
+    public  String getDateDDkMMkYYYYStr(Date cc){
+			StringBuffer sb = new StringBuffer();
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(cc.getTime());
+			
+			String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+			if (day.length() == 1) {day = "0" + day;}
+			String month = String.valueOf(cal.get(Calendar.MONTH ) + 1);
+			if (month.length() == 1){month = ("0") + month;}
+			sb.append(day +"-");
+			sb.append(month + "-");		
+			sb.append("" + cal.get(Calendar.YEAR));
+		
+			return sb.toString();
+		}
+    
 
 	public String getProductSortingData() {
 		return null;
@@ -425,6 +617,39 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	public TreeMap getCustomers(Agent agent) {
 		TreeMap degu = getDegu();
 		
+		
+		 TreeMap names = new TreeMap();
+   	 JSONArray cc =  null;
+		
+		  eevaeksport.util.ReportingService serv = new ReportingService();
+		  serv.user =  user;
+			serv.pass = pass;
+			serv.company = rcompany;
+			try {
+			 cc = 	serv.getCustomersAll();
+		      serv.closeClient();
+
+	    		int lenn = cc.length();
+			
+
+	        //    System.out.println("baone algus dd "  + lenn);
+	            
+	    		for (int i = 0; i < lenn; i++) {
+	         
+	            	JSONObject cob = (JSONObject) cc.getJSONObject(i);
+	            	String key = (String)cob.get("code");
+	            	String name = (String)cob.get("name");
+	            	if(name != null && name.trim().length() > 0)
+	            	names.put(key, name);
+	    		}
+	    		
+		} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			//System.out.println("cc " + cc.toString());
+	// System.exit(0);
+		
 		  TreeMap openOrders = this.getOpenOrders();
 		  
 		  try{
@@ -442,7 +667,9 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	    	 TreeMap webmerc5249 =  Converter.getWebMercagents(rcompany, user, pass,false,"5249");
 	    	 TreeMap webmerc0099 =  Converter.getWebMercagents(rcompany, user, pass,false,"0099");
 			 
-		
+	    	
+				
+			
 		String cmd = "SELECT cus.name, cus.accountnum,(case when len(cus.invoiceaccount)=0 then cus.accountnum else cus.invoiceaccount end )AS payer,   "+
 				" (SELECT sum(amountmst) FROM custtransopen co WHERE co.duedate<getdate() " +
 				 "   AND co.accountnum = (case when len(cus.invoiceaccount)=0 then cus.accountnum else cus.invoiceaccount end ) and dataareaid ='liv') AS debt,regnum_w as regnr, cus.linedisc , " +
@@ -471,6 +698,10 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			while (rs.next()) {
 				String name = rs.getString("name").trim();
 				String accountnum = rs.getString("accountnum").trim();
+				if(names.get(accountnum) != null) {
+					name = names.get(accountnum) +"";
+				}
+				
 				Customer cust = new Customer(accountnum);
 				
 				cust.setName(name);
@@ -494,7 +725,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 								 && !payer.trim().equals("101")
 								 && !payer.trim().equals("109") 
 								){
-							      cust.setDebt(Double.parseDouble(debtStr));
+							    //  cust.setDebt(Double.parseDouble(debtStr));
 							}
 						
 					}
@@ -576,7 +807,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				    
 				int block = rs.getInt("block");
 				if (block == 1) {
-					cust.setSalesBlock(true);
+					//cust.setSalesBlock(true);
 				}
 
 				String grupp = rs.getString("grupp");
@@ -600,7 +831,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				custMap.put(cust.getID(), cust);
 			}
 
-			rs = stmt.executeQuery(sql);
+			/*rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				Debt debt = new Debt();
 				debt.setPayerID(rs.getString("maksja").trim());
@@ -622,10 +853,10 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 						 && !debt.getPayerID().equals("101")
 						 && !debt.getPayerID().equals("109") 
 						){
-					this.debt.addElement(debt);	
+				//	this.debt.addElement(debt);	
 				}
 			}
-
+*/
 			
 		} catch (Exception e) {
 			getParent().showError(e);
@@ -660,17 +891,71 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	private HashMap g1g2 = null;
 	
 	public TreeMap getProdGroups() throws SQLException {
-		this.setTreeGroup(true);
+		//this.setTreeGroup(true);
        return pgr1;
 	}
 	
-	public TreeMap getProdGroupsInit() throws SQLException {
+	public HashMap getProdGroupsInit() throws SQLException {
 		
 		pgr1 = new TreeMap();
 		pgr2 = new TreeMap();
 		g1g2 = new HashMap();
+		HashMap tm = new HashMap();
 		
-		Connection con = getNewConnection();
+		   int a = 0;
+		   try {
+				  File f = new File (getExcelDir() + "tooted.xls");
+					
+				  FileInputStream ff = new FileInputStream(f);
+
+		 			 DataFormatter formatter = new DataFormatter();
+						 
+				  //mï¿½ï¿½rame ketid
+				HSSFWorkbook workbook = new HSSFWorkbook((ff));
+				HSSFRow row = null; 
+	 					ff.close();	
+	 					HSSFSheet	 sheet = workbook.getSheetAt(0); 
+						ff.close();	
+						
+						if(sheet != null){
+							for(int i = 0 ; i < sheet.getLastRowNum();i++){
+								 row = sheet.getRow(i);
+								//System.out.println(row);
+								if(row == null && a == 0){
+									a = i;
+								}else{
+									a = sheet.getLastRowNum();
+								}
+							}
+							
+							
+							for(int i = 1 ; i < a+1 ; i++){
+								
+								 row = sheet.getRow(i);
+								String kood = null;
+								String grupp = null;
+								try {
+									kood = formatter.formatCellValue(row.getCell((short) 0));
+									grupp = formatter.formatCellValue(row.getCell((short) 4));
+									grupp = grupp.replaceAll("JOGURT", "JOG");
+									if(pgr1.get(grupp) == null) {
+									 pgr1.put(grupp, grupp);
+									}
+									tm.put(kood, grupp);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								
+							}
+					
+						}
+	            	  }catch (Exception e){
+	                   e.printStackTrace();	
+		         	  }
+
+
+		
+	/*	Connection con = getNewConnection();
 		TreeMap tm = new TreeMap();
 		String sql = " select gr.articleclass as liik ,gr.name AS nimi , articleclassgroupid as gr2 from \r\n" + 
 				"		valarticleclass gr inner join inventtable t on t.articleclasstype=gr.articleclass and t.dataareaid=gr.dataareaid\r\n" + 
@@ -693,7 +978,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				
 			}
 			pgr1.put(gg2, gr2);
-			pgr2.put(gg2 + liik, nimi);
+			pgr2.put(gg2 + liik, nimi.replaceAll("Atleet", "At. "));
 			g1g2.put(liik, gg2);
 			tm.put(liik, nimi);
             } catch(Exception e) {
@@ -702,19 +987,23 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		}
 		rs.close();
 		st.close();
-		con.close();
+		con.close();*/
 
 		return tm;
 	}
 
 	public TreeMap getProdGroupsSecond() throws SQLException {
-		return pgr2;
+		return null  ;//pgr2;
 	}
+	
 
 	public TreeMap getProducts(Agent agent) {
-
+  
+		
+		HashMap pgroups=null;
+		prodsH = new HashSet();
 		try {
-			getProdGroupsInit();
+			pgroups =	getProdGroupsInit();
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -755,13 +1044,14 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			ResultSet rs2 = stmt.executeQuery(cmdo);
 			while (rs2.next()) {
 				String id = rs2.getString("toode").trim();
-				if(!goes.contains(id))
+				if(!goes.contains(id)) {
 				goes.add(id);
+				prodsH.add(id);
+				}
 			 }
 			rs2.close();
 			stmt.close();
 			con.close();
-			
 			
 			con = this.getNewConnection();
 			stmt = con.createStatement();
@@ -769,6 +1059,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			
 			while (rs.next()) {
 				String kood = rs.getString("itemid").trim();
+				
 				Product prod = new Product(kood);
 				String nimetus = rs.getString("nimetus").trim();
 
@@ -778,19 +1069,27 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				String ean = rs.getString("ean");
 				if (ean != null && ean.trim().length() > 0) {
 					prod.setEAN(ean);
+					if(eanprods == null) {
+	                   	eanprods =new TreeMap();
+	                   }
+	                   eanprods.put(ean.trim(), prod.getID());
+	                   
 				}
 
-				String grupp = rs.getString("grupp");
+				/*String grupp = rs.getString("grupp");
 				if (grupp != null && grupp.trim().length() > 0) {
 					grupp = grupp.trim();
 					if(g1g2.get(grupp) != null) {
 						prod.setGroup(g1g2.get(grupp)+"");
 						prod.setGroupSecond(g1g2.get(grupp) + grupp );
 					}
+				}*/
+				if(pgroups.get(prod.getID()) != null) {
+					prod.setGroup(pgroups.get(prod.getID())+"");
 				}
 
 				prod.setName(nimetus);
-
+          prod.setVat("22");
 
 				String unit = rs.getString("unit");
 				if (unit != null && unit.trim().length() > 0) {
@@ -826,6 +1125,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 
 		return products;
 	}
+	
 
 	public Vector getCustomerProductsList(String agentCode) {
 		Vector custProds = new Vector();
@@ -882,7 +1182,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	}
 
 	public void setBulkSales(Map agents) {
-		this.connectionUp();
+	/*	this.connectionUp();
 		String cmd = "  SELECT  cus.salesmanager as agent,round(SUM(lineamount),0) AS summa "
 				+ " FROM custinvoicetrans sal INNER JOIN inventtable inv ON sal.itemid=inv.itemid and sal.dataareaid=inv.dataareaid  " +
 						"INNER JOIN custinvoicejour jou ON "
@@ -901,7 +1201,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				String agentID = rs.getString("agent").trim();
 				Agent agent = (Agent) agents.get(agentID);
 				if (agent != null) {
-					agent.setMonthSales((int) rs.getDouble("summa"));
+					//agent.setMonthSales((int) rs.getDouble("summa"));
 					// System.out.println(agent.getMonthSales());
 				}
 			}
@@ -909,7 +1209,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			con.close();
 		} catch (Exception e) {
 			getParent().showError(e);
-		}
+		}*/
 	}
 
 	public double getFoodSales(String agentCode) throws SQLException {
@@ -1113,141 +1413,8 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 
 	 
 	 public void insertSuperVisorSQLMeri(SupervisorInfoWrapperMeri wr){
-	     String sql = "  INSERT into dbo.supervisor values ("
-	       + "?, "   //   agent	C(50),
-	       + "?,"   //   agentname	C(200),
-	       + "?,"   //   clientid	C(50),
-	       + "?,"   //   clientname	C(200),
-	       + "?,"   //	prodid	C(50),
-	       + "?,"   //   prodname	C(200),
-	       + "?  ,"   //	sentdate	D,
-	       + " '' ,"   //	receivedTime	D,
-	       + "?,"   //normalpr	N,
-	       + "?,"   // amoun	N,
-	       + "?,"   // grouptotal	N,
-	       + "?,"   // cattotal	N,
-	       + "?,"   // pertotcat	I,
-	       + "?,"   // percolcat	I,
-	       + "?,"   // perpalcat	I,
-	       + "?,"   // pershecat	I,
-	       + "?,"   // perrescat	I,
-	       + "?,"   // isaction	L,
-	       + "?,"   // ispartner	L,
-	       + "?,"   // isbrand	L,
-	       + "?,"   // isgroup	L
-	       + "?,"   // actionaeva	N,
-	       + "?,"   // actionbeva N,
-	       + "?,"   // actiontota	N,
-	       + "?,"   // custeval	N,
-	       + "?,"   // custcomme	C(200),
-	       + "?,"   // comment	C(200),
-	       + "?,"   // custagent	C(200),
-	       + "?,"   // custagentname	C(200),
-	       + "?,"   // mustbe	I,
-	       + "?,"   // ideal	I,
-	       + "?,"   // resstr1	C(200),
-	       + "?,"   // resstr2	C(200),
-	       + "?,"   // resstr3	C(200),
-	       + "?,"   // resint1	I,
-	       + "?,"   // resint2	I,
-		      + "?)" ; //	resint3	L
-
-	       try {
-	       	System.out.println("jam");
-	        Connection con2 = getNewConnectionRep();
-	           PreparedStatement ps = con2.prepareStatement(sql);
-
-	           for (Iterator iter = wr.getInfo().getLines().iterator(); iter.hasNext(); ) {
-	             eevaeksport.report.SuperVisorLineWrapperMeri lw = new eevaeksport.report.SuperVisorLineWrapperMeri(iter.next());
-	             ps.setString(1, wr.getInfo().getAgentID());
-	             ps.setString(2, wr.getInfo().getAgentName());
-	             
-	             ps.setString(3, lw.getLine().getCustID());
-	             ps.setString(4, lw.getLine().getCustName());
-	             ps.setString(5, lw.getLine().getProdID());
-	             ps.setString(6, lw.getLine().getProdName());
-	             long lll = Calendar.getInstance().getTimeInMillis();
-	             try{
-	            	  lll = Long.parseLong((lw.getLine().getResStr3()));
-	             }catch(Exception e){
-	            	 System.out.println("res3" + lw.getLine().getResStr3());
-	            	 e.printStackTrace();
-	             }
-	             ps.setTimestamp(7, new Timestamp(lll));
-	             ps.setDouble(8, lw.getLine().getNormalPrice());
-	             ps.setDouble(9, lw.getLine().getAmount());
-	             ps.setDouble(10, 0);
-	             ps.setDouble(11, 0);
-	             ps.setInt(12, lw.getLine().getPercentageFromTotalCategory());
-	             ps.setInt(13, lw.getLine().getPercentageFromColdCategory());
-	             ps.setInt(14, lw.getLine().getPercentageFromPallCategory());
-	             ps.setInt(15, lw.getLine().getPercentageFromShelfCategory());
-	             ps.setInt(16, lw.getLine().getPercentageFromRestCategory());
-	             ps.setBoolean(17, lw.getLine().isAction());
-	             ps.setBoolean(18, lw.getLine().isPartner());
-	             ps.setBoolean(19, lw.getLine().isBrand());
-	             ps.setBoolean(20, lw.getLine().isGroup());
-	             ps.setDouble(21, lw.getLine().getCategoryTotal());
-	             ps.setDouble(22, lw.getLine().getPercentageFromRestCategory());
-	             ps.setDouble(23, lw.getLine().getActionTotalEval()*100);
-	             ps.setDouble(24, lw.getLine().getCustEval()*100);
-	             String cc = lw.getLine().getCustComment();
-	             if (cc == null){
-	             	cc = " ";
-	             }
-	             ps.setString(25, cc);
-
-	             String cd = lw.getLine().getComment();
-	             if (cd == null){
-	             	cd = " ";
-	             }
-	             ps.setString(26, cd);
-
-	             String ce = lw.getLine().getCustAgentId();
-	             if (ce == null){
-	             	ce = " ";
-	             }
-
-	             ps.setString(27, ce);
-
-	             String cf = lw.getLine().getCustAgentName();
-	             if (cf == null){
-	             	cf = " ";
-	             }
-	             ps.setString(28, cf);
-	             ps.setInt(29, lw.getLine().getDealNr());
-	             ps.setInt(30, lw.getLine().getIdealNr());
-
-	             String cr1 = lw.getLine().getResStr1();
-	             if (cr1 == null){
-	             	cr1 = " ";
-	             }
-	             ps.setString(31, cr1);
-
-
-	             String cr2 = lw.getLine().getResStr2();
-	             if (cr2 == null){
-	             	cr2 = " ";
-	             }
-	             ps.setString(32, cr2);
-
-
-	             String cr3 = lw.getLine().getResStr3();
-	             if (cr3 == null){
-	             	cr3 = " ";
-	             }
-	             ps.setString(33, cr3);
-	             ps.setInt(34, lw.getLine().getResInt1());
-	             ps.setInt(35, lw.getLine().getResInt2());
-	             ps.setInt(36, lw.getLine().getResInt3());
-	             ps.executeUpdate();
-	           }
-
-	           ps.close();
-	           con2.close();
-	       } catch (SQLException e) {
-	           e.printStackTrace();
-	       }
+	   
+	     
 	     }
 
 	/**
@@ -1271,4 +1438,69 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	private Statement stmt;
 	private String subjectFilesTo = null;
 	private NumberFormat NF = NumberFormat.getInstance();
+
+  private HashSet prodsH = null;
+	@Override
+	public void PictureMaker() {
+	//	this.getProducts(null);
+		 
+		   
+		       	
+		       	String picts = parent.getProps().getProperty("pict.dir");
+		        String pictspda = parent.getProps().getProperty("pictpda.dir");
+		     	  
+
+		       	try {
+		     	
+		            StringBuffer buf = new StringBuffer();
+		            
+		            File d  = new File(picts);
+		            for(String fname : d.list() ) {
+		            
+		            	 File in = new File ( picts + fname); 
+		            	 String ean = fname.substring(0,fname.indexOf("."));
+		            	 String ext = fname.substring(fname.indexOf(".") + 1);
+		            	 
+		            		if(in.isFile() ) {//&& prodsH.contains(ean)    
+		                     	 
+		                      	File inpda = new File ( pictspda + ean + "." + ext); 
+		                      	
+		                      		Converter.shrinkAndCopyFile(in,inpda);
+		                     
+		                      	
+		                        String len = "0";
+		                        if(inpda.exists()){
+		                          len =	inpda.length() + "";
+		                          } 
+		                        
+		                          buf.append(ean + "." + ext + ";"  + len + "\n");
+		                        }
+		                 }
+		          	
+		        
+		       	    //oleasoleva kataloogi kustutamine
+		       	    
+		                   File f = new File("list.txt");
+		                   if (f.exists())f.delete();
+		                   
+		                   try {
+		               		PrintWriter os = new PrintWriter(new FileWriter(
+		               				  "list.txt", true));
+		               		os.write(buf.toString());
+		               		os.close();
+		               	   File fff =  new File (pictspda +  "list.txt");
+		         	      Converter.copyFile(f,fff);  
+		               	
+		               	  }catch (Exception ex) {
+		               		ex.printStackTrace();
+		               	  }
+		           	  
+		       	} catch (Exception e) {
+		       	    getParent().showError(e);
+		       	}
+		    
+	    System.exit(0);
+	}
+	
+	
 }
