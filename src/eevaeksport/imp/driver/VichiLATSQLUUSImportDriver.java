@@ -665,7 +665,12 @@ HashMap paILNs = null;
 
 			Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
 			Calendar delcal = Calendar.getInstance();
+			
 			delcal.setTime(order.getShipCal().getTime());
+			//siin lisame ühe päeva juurde juhul kui pole käsitsi muudetud.
+			if(!order.isShipDateUsed()) {
+				delcal.add(Calendar.DAY_OF_YEAR, 1);
+			}
 
 			month = (delcal.get(Calendar.MONTH) + 1) + "";
 			if (month.length() == 1)
