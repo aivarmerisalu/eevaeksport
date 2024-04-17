@@ -2769,16 +2769,21 @@ public class Converter {
 							}
 						} 
 						
+						String gr2 = formatter.formatCellValue(sheet.getRow(rida).getCell(2));
+						String gr3 = formatter.formatCellValue(sheet.getRow(rida).getCell(3));
 						
-						 if( formatter.formatCellValue(sheet.getRow(rida).getCell(2)).contains("Laogrupid") ) {
-							 
-
+						 if( gr2.contains("Laogrupid") || gr3.contains("Laogrupid")) {
+						
 							 TreeMap sisu = new TreeMap();
 							 TreeMap nimi = new TreeMap();
 							int  reanr = 3;
 							int sortasuk = 2;
 							 // määrame andmete rea
-							
+						
+	                        if(gr3.contains("Laogrupid")) {
+	                        	sortasuk = 3;
+							 }
+
 							 
 							// System.out.println("reanr " + reanr );
 							//Teeme kõigepealt treemapi valmis kja siis krutime läbi 
