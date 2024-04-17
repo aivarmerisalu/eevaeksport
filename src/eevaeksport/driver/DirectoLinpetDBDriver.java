@@ -87,7 +87,7 @@ import eevaeksport.util.WebShopPiguLT;
  * @version 1.0
  */
 
-public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,WebShopper {
+public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,WebShopper,WebShopper2 {
 
   public DirectoLinpetDBDriver(EksportPanel parent) {
     super(parent);
@@ -3779,7 +3779,7 @@ public void WebShopper()  {
 	
 	vp.login(parent);
 	vp.getSellerID();
-	vp.printPackingSlip();	
+	
 	
 	
 
@@ -3807,8 +3807,6 @@ public void WebShopper()  {
 	
 
 	
-	
-	
 	ArrayList orders = vp.getOrderList();
 	System.out.println(orders.toString());
 	for (int i = 0; i < orders.size(); i++) {
@@ -3832,6 +3830,24 @@ public void WebShopper()  {
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
+	
+	
+	
+	System.exit(0);
+}
+
+
+
+
+@Override
+public void WebShopper2() {
+	
+	getProducts2();
+	WebShopPiguLT vp = new WebShopPiguLT(eanProds);
+	
+	vp.login(parent);
+	vp.getSellerID();
+	
 	
 	ArrayList confOrders = loadOpenOrders();
 	//System.out.println("confOrders " + confOrders.size());

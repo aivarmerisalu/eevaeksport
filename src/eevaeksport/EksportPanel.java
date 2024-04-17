@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 
 
 
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -54,6 +55,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import eevaeksport.driver.WebShopper;
+import eevaeksport.driver.WebShopper2;
 import eevaeksport.driver.AbstractDBDriver;
 import eevaeksport.driver.BulkUpdater;
 import eevaeksport.driver.Discounter;
@@ -234,6 +236,9 @@ public class EksportPanel extends JPanel implements ActionListener,
         if(parent.isWebShopper()) {
         	createWebShopper();
            }
+        if(parent.isWebShopper2()) {
+        	createWebShopper2();
+           }
         
         if(parent.isFixReporter()) {
             createFixreport();	
@@ -392,7 +397,9 @@ public class EksportPanel extends JPanel implements ActionListener,
     private void createWebShopper(){
     	((WebShopper)driver).WebShopper();
     }
-    
+    private void createWebShopper2(){
+    	((WebShopper2)driver).WebShopper2();
+    }
     private void createDashboard(){
     	((DashboardCreator)driver).createDashboard();
     }
