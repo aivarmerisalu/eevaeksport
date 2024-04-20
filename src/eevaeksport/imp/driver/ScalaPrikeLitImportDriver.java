@@ -1352,7 +1352,7 @@ return res;
 			      sb2.append("         </dta:AccStr>" + ls);
 			      sb2.append("         <dta:TextLines>" + ls);
 			      
-			       if(poscomm != null && poscomm.get(toode) != null){
+			       if(false && poscomm != null && poscomm.get(toode) != null){
 			        sb2.append("               <dta:TextLine>" + ((String)poscomm.get(toode)).trim()+ "</dta:TextLine>" + ls);
 			        }else{
 			      sb2.append("               <dta:TextLine></dta:TextLine>" + ls);

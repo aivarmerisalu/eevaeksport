@@ -3080,17 +3080,31 @@ public class EksportPanel extends JPanel implements ActionListener,
     private void PriceMatrixFile(String agentCode, TreeMap customers,Vector pricematrix,HashSet agprods) {
 
         String fileName = "pricematrix.txt";
-
-        //System.out.println("date " + agentCode);
+        String nomx = null;
+      
+        System.out.println("PMFILE date " + agentCode + " " +  getProps().getProperty("no.matrixagent"));
 System.out.println("Matrix Size " + pricematrix.size());
 boolean prods = false;
 if(agprods != null && agprods.size() >0){
 	prods = true;
 	System.out.println("Size agprods " + agprods.size());
 }
+
+if (getProps().getProperty("no.matrixagent") != null) {
+	  nomx = getProps().getProperty("no.matrixagent") ;
+ }
+
+
+  boolean dostuff = true;
+
+  if(agentCode != null && nomx != null && agentCode.equals(nomx)) {
+	  dostuff = false;
+  }
           StringBuffer buf = new StringBuffer();
           int count = 0;
 
+          
+         if(dostuff) { 
           HashSet done = new HashSet();
        
           Iterator codes = customers.values().iterator();
@@ -3228,7 +3242,7 @@ if(agprods != null && agprods.size() >0){
            }
           }
           
-
+           }
           try {
         	  
               zip.addFile(fileName, buf.toString());

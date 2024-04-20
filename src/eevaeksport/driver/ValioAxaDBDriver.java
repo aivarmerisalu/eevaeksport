@@ -64,7 +64,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	public ValioAxaDBDriver(EksportPanel parent) {
 		super(parent);
 		this.subjectFilesTo = parent.getString("filemsg");
-		// String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
+		
 		String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 	    user =  getParent().getProps().getProperty("rest.user");
 	    pass = getParent().getProps().getProperty("rest.pass");
@@ -77,7 +77,6 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			stmt = con.createStatement();
 		} catch (Exception e) {
 			parent.showError(e);
-			
 		}
 	}
 

@@ -244,7 +244,7 @@ import eevaeksport.util.Converter;
 		  Product res = null;
 		 String maksja =  getPayer(kl);
 		 String ean = getEan(line.getToode());
-		System.out.println("maksja on olemas " + maksja + " " + halduskliendid.contains(maksja));
+		System.out.println("maksja on olemas " + maksja + " " + halduskliendid.contains(maksja) + " " + ean);
 		 if(maksja != null && halduskliendid.contains(maksja)){
 	      Vector<Product> vec = (Vector<Product>)haldusklienditooted.get(maksja);
 	     // System.out.println("tooted "+ vec);
@@ -256,9 +256,10 @@ import eevaeksport.util.Converter;
 	    		//  String ean = line.getEAN();
 	    		 
 	    		  if(ean != null && ean.trim().length() > 0 && prod.getID().equals(ean)){
-	    			 // System.out.println("toode "+ line.getKogus()/prod.getStock() + " | " + (int)(line.getKogus()/prod.getStock()));
+	    			  System.out.println("toode "+ line.getKogus()/prod.getStock() + " | " + (int)(line.getKogus()/prod.getStock()));
 		    		  if((kogus/prod.getStock()) == ((int)(kogus/prod.getStock()))){ //kui jagatis on t�isarv
-		    			//  System.out.println("tagastan toote" + prod );
+		    			  System.out.println("tagastan toote" + prod );
+		    			  
 		    			  return prod;
 		    		  }
 		    		  

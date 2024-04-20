@@ -724,10 +724,39 @@ public Vector getDebt() throws SQLException{
        cou++;
      	
    }
-	
-   
-    
+	double addtoVat = 0;
+   //vaatame kas on vaja lisada km-le midagi.
    Vector lines = order.getOrderLines();
+   double sum = 0;
+   double sumVat = 0;
+   for (int i = 0; i < lines.size(); i++) {
+   	   
+   	OrderLine line = (OrderLine)lines.elementAt(i);
+       double ale = line.getDiscount();
+       double linesum = 0;
+       double linevat = 0;
+       if (ale != 0 ){
+    	 	  
+         linesum =   Converter.Round((float) ((line.getKogus() * line.getPrice())*(100-ale)/100),2);
+         linevat =    Converter.Round((float) ((line.getKogus() * line.getPrice() * 0.21)*(100-ale)/100),2); 	
+
+   } else {
+	   linesum =   Converter.Round((float) (line.getKogus() * line.getPrice()),2);
+       linevat =    Converter.Round((float) (line.getKogus() * line.getPrice() * 0.21),2); 
+   }
+       sum = sum + linesum;
+       sumVat = sumVat + linevat;
+   }
+    
+   double baseVat =  Converter.Round((float) (sum * 0.21),2);
+   
+   addtoVat =  sumVat  - baseVat;
+   
+   System.out.println("vats " + addtoVat + " " + baseVat + " " + sumVat);
+   
+
+   
+    lines = order.getOrderLines();
      for (int i = 0; i < lines.size(); i++) {
      	 sb.append(getLineNr(cou));
         sb.append("          <I07>" + ls);
@@ -790,16 +819,25 @@ if(ladu.trim().length()!=0){
         sb.append(getLineNr(cou));
          sb.append("               <I07_KAINA_BE>" + escape(nf.format(line.getPrice())) + "</I07_KAINA_BE>" + ls);         
          cou++;
+         
+         double addv = 0;
+         if(i == 0) {
+        	 addv = addtoVat;
+         }
  if (ale != 0 ){
  	
          sb.append(getLineNr(cou));
          sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
          cou++;
          sb.append(getLineNr(cou));
+         
          sb.append("               <I07_SUMA>" + escape(nf.format((line.getKogus() * line.getPrice())*(100-ale)/100)
          	)+ "</I07_SUMA>" + ls);
          cou++;
-       
+
+         sb.append(getLineNr(cou));
+         sb.append("               <I07_PVM>" + escape(nf.format((line.getKogus() * line.getPrice()*(100-ale)/100 * 0.21)+addv))+ "</I07_PVM>" + ls);
+         cou++;
 
  } else {
 	 
@@ -808,7 +846,7 @@ if(ladu.trim().length()!=0){
      cou++;
      
      sb.append(getLineNr(cou));
-     sb.append("               <I07_PVM>" + escape(nf.format((line.getKogus() * line.getPrice() * 0.21)))+ "</I07_PVM>" + ls);
+     sb.append("               <I07_PVM>" + escape(nf.format((line.getKogus() * line.getPrice() * 0.21)+addv))+ "</I07_PVM>" + ls);
      cou++;
      
  }

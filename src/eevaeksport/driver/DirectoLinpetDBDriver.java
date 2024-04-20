@@ -903,7 +903,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
                     
                        
                     }catch(Exception e){
-                    	e.printStackTrace();
+                    //	e.printStackTrace();
                     }
                     
                    }
@@ -3523,7 +3523,7 @@ if(seisx > 0) {
 public ArrayList loadOpenOrders() {
 	  
 	 String httpsURL =  logurl + company + "/xmlcore.asp?get=1&what=order";
-	 
+	 System.out.println("httpsURL " + httpsURL);
 	 Calendar yesterday = Calendar.getInstance();
 	 // HILJEM ASENDA -2 -1GA
 	 yesterday.add(Calendar.DAY_OF_YEAR, -2);
