@@ -73,6 +73,7 @@ public class Debt {
   private Date date = null;
   private String due = "0";
   private double tara = 0;
+  public String extraInfo  = null;
 
 /**
  * @return Returns the tara.

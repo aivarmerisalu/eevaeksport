@@ -70,7 +70,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager {
+public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,PictureMaker{
 
   public NaviTobisDirectoDBDriver(EksportPanel parent) {
     super(parent);
@@ -341,7 +341,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
            if(getParent().getProps().getProperty("stockcode") != null){
            	httpsURL = httpsURL + "&stock=" +  getParent().getProps().getProperty("stockcode");
  		     }
- 	    System.out.println(httpsURL);
+ 	 //   System.out.println(httpsURL);
            myurl = new URL(httpsURL);
            con = (HttpsURLConnection)myurl.openConnection();
            ins = con.getInputStream();
@@ -378,7 +378,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
           if(getParent().getProps().getProperty("stockcode122") != null){
        	   httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=item&stock=" +  getParent().getProps().getProperty("stockcode1");
        	   
-       	   System.out.println(httpsURL);
+       	 //  System.out.println(httpsURL);
               myurl = new URL(httpsURL);
               con = (HttpsURLConnection)myurl.openConnection();
               ins = con.getInputStream();
@@ -516,7 +516,6 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
      return null;
    }
    public String getSaveDebtInfo() {
-		  makeeCat();
 		  System.exit(0);
    	return null;
    }
@@ -530,145 +529,88 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
    private String company = null;
    private String comphelp = null;
    
-   private void makeeCat(){
-	     
-   	String  cmd2 = " SELECT [No_] as toode from [2015_Tobis$Item] where  [Show in mob_ device] = 1";
-    TreeMap phsize = new TreeMap();
-    TreeMap used = new TreeMap();
-   	
-     	String picts = parent.getProps().getProperty("pict.dir");
- 	    String pictspda = parent.getProps().getProperty("pictpda.dir");
- 	 
 
-   	try {
+   @Override
+	public void PictureMaker() {
+		makePictureCat();
+		 System.exit(0);
+		
+	}
+   
+   
+   private void makePictureCat(){
  	    
-   		Connection con = getNewConnection2();
-		Statement stmt = con.createStatement();
-   	    ResultSet rs = stmt.executeQuery(cmd2);
+   	
+   	String pictssou = parent.getProps().getProperty("pict.dir");
+ 	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+ 	   
+ 	 try {
+	  
+     File f = new File(pictspda +"list.txt");
+     if (f.exists())f.delete();
+     //Kataloogi sisude kustutamine
+ 	 	 File res2 = new File (pictspda);
+            String[] ff2 = res2.list();
+        	 for(int i = 0;ff2.length>i;i++){
+        		 
+            	//(new File ( pictspda + ff2[i])).delete(); 
+            }
+//        	 Lõppes kustutamine 
+        //	custProds.add("suva");
+ 		 TreeMap prods = this.getProducts(null);
 
         StringBuffer buf = new StringBuffer();
-        
-        // leiame kataloogid ja peame meeles 
-        File d  = new File(picts);
-        File[] dd = d.listFiles();
-
-        Vector cats = new Vector();
-        
-        for(int i = 0; i < dd.length ; i++){
-        	File t = dd[i];
-        	if(t.isDirectory()){
-        		cats.add(t.getName());
-        	}
-        }
-        
-        System.out.println("Piltide leidmine - katalooge sees " + cats.size() + " " + cats.toString());
-   	    while (rs.next()) {
+        Iterator enume = prods.keySet().iterator();
+   
+        while (enume.hasNext()) {
+   	    	String asi = (String)enume.next();
+   	    	Product prod = (Product)prods.get(asi);
+   	    	String toode = prod.getID().trim(); 
    	    	
-   	     String toode = rs.getString("toode").trim();  
-         toode = toode.replace('/', '_');
-         toode = toode.replace('/', '_');
-        
-   	             File f = new File(picts + toode+".jpg");
-                 if(f.exists()){
-                	 used.put(toode + ".jpg", toode+ ".jpg");
-                 } else if(cats.size() > 0 ){
-                	 for(int w = 0 ;w < cats.size();w++){
-                		f = new File(picts + cats.elementAt(w) + "/" + toode+".jpg");
-                		if(f.exists()){
-                			System.out.println("Kataloogis leitud " + picts + cats.elementAt(w) + "/" + toode+".jpg");	
-                			 used.put(toode + ".jpg", toode+ ".jpg");
-                		}                     
-                	 }
-                   }
-                 }
-   	    
-   	    rs.close();
-   	    stmt.close();
-   	    con.close();
-   	
-        	 
-          System.out.println("Piltide kopeerimine ");	
-          
-            String[] gg = new File(picts).list();
-         	 for(int i = 0;gg.length>i;i++){          	
-             	File in = new File ( picts + gg[i]); 
+   	    	  toode = toode.replace('/', '_');
+   	          toode = toode.replace('/', '_');
+   	          
+              if(toode.length() > 0){
+               	
+   	   	  res2 = new File (pictssou);
+             ff2 = res2.list();
+            
+        	 for(int i = 0;ff2.length>i;i++){
+            	if( ff2[i].startsWith(toode+".")){
+              // System.out.println("pilt olemas " + ff2[i]);
+           	File in = new File ( pictssou + ff2[i]); 
              	if(in.isFile()){
-             		String fname = toUpper(gg[i]);
-             	File inpda = new File ( pictspda + fname); 
-             	if(!inpda.exists() && used.get(fname) != null) {
-             		
-             		if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
+             	File inpda = new File ( pictspda + toode+ ".jpg");
+             	if(!inpda.exists()){
+                	if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
              			Converter.copyFile(in,inpda);
              		}else {
-             			Converter.shrinkAndCopyFile(in,inpda,300);
+             			Converter.shrinkAndCopyFile(in,inpda,600);
              		}
-             	  
-                 	
-                 	}
-             	phsize.put(fname, inpda.length());	
-             	}
-             }
-             
-             //piltide kopeerimine alam kataloogist ..
-             
-             if(cats.size() >0){
-            	 for(int h = 0;h < cats.size(); h++){
-            	  String[]  ff = new File(picts + cats.elementAt(h)+ "/").list();
-               	   for(int i = 0;i < ff.length  ;i++){          	
-                   	File in = new File ( picts + cats.elementAt(h)+ "/" + ff[i]); 
-                   	if(in.isFile()){   
-                   		String fname = toUpper(ff[i]);
-                   	File inpda = new File ( pictspda + fname); 
-                   	if(inpda.exists() && used.get(fname) != null) {
-                   		if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
-                 			Converter.copyFile(in,inpda);
-                 		}else {
-                 			Converter.shrinkAndCopyFile(in,inpda,300);
-                 		}
-                   	   
-                   	   }
-                	phsize.put(fname, inpda.length());
-                   	 }
-                   }
-                 }
-               }
-             
-          
-             File f = new File(pictspda + "list.txt");
-             if (f.exists())f.delete();
-             
-            
-             Iterator itera =   used.keySet().iterator();
-  	       while(itera.hasNext()) {
-  	    	   String prid = (String)itera.next();
-  	    	   String s = "0";
-  	    	   try {
-  	    		s = phsize.get(prid) + "";
-  	    		if(s == null) {
-  	    			s = "0";
-  	    		}
-  	    	   }catch(Exception e) {
-  	    		   
-  	    	   }
-  	    		buf.append(prid + ";" + s + "\n");
-  	               
-  	       }
-               try {
-         		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
-         		os.write(buf.toString());
-         		os.close();
-         	
-         	  }catch (Exception ex) {
-         		ex.printStackTrace();
-         	  }
-             
-             
-     	
-   	} catch (Exception e) {
+               	   
+       	  	     } 
+               if(buf.toString().indexOf(toode +".jpg;"  + inpda.length()) == -1){
+           		buf.append(toode +".jpg;"  + inpda.length() + "\n");
+           	}
+             	   }
+                }
+              }
+            }
+      }
+     try {
+		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+		os.write(buf.toString());
+		os.close();
+	  }catch (Exception ex) {
+		ex.printStackTrace();
+	  }
+ 	 
+ 	 } catch (Exception e) {
    	    getParent().showError(e);
    	}
-   
-}
+    
+ }
+
  
    private String toUpper(String asi ){
 	   
@@ -803,25 +745,9 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 	  }
 	
 	  
-	 private String ensureLen(String in ){
-		 
-		 if(in.length() == 4){
-			 in = "0" + in ;
-		 }
-		 if(in.length() == 3){
-			 in = "00" + in ;
-		 }
-		 if(in.length() == 2){
-			 in = "000" + in ;
-		 }
-
-		 if(in.length() == 1){
-			 in = "0000" + in ;
-		 }
-		 return in;
-	 }
-	  
+   
 	 
+	private  HashMap fixCustomers = null;
 	private  HashMap priceformulas = null;
    
 	public  void getPriceMatrixDataDirecto( Vector lines ) {
@@ -858,7 +784,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 		                  MatrixLine mline = new MatrixLine();
 		                 try{
 		                 	 try{
-		                 	     clGroup = ensureLen(rida.getAttributes().getNamedItem("code").getNodeValue());
+		                 	     clGroup = (rida.getAttributes().getNamedItem("code").getNodeValue());
 		                        }catch(Exception aa){}
 		                 	 try{
 			                         prodID =  rida.getAttributes().getNamedItem("item").getNodeValue();  
@@ -886,7 +812,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 		                     double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
 		                     if(mode != null && mode.equals("8")){
 		                    	 mline.setPrice(value);
-		                    	 mline.setProdLevel("pr");
+		                    	// mline.setProdLevel("pr");
 		                     }else{
 		                         mline.setDiscount(value);
 		                     }
@@ -894,7 +820,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 		                  
 		                      
 		                   
-		                    
+
 		                      
 		                    //  if (custID != null && custID.trim().length() > 0) {
 		                      //  mline.setCustID(custID.trim());
@@ -952,20 +878,30 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 		                          
 		                          if(alg.before(new Date()) && lopp.after(new Date())){
 		                        	  if(mline.discount > 0 || mline.price > 0) {
-		                        		  if(priceformulas.containsKey(clGroup))
+		                        		//  if(priceformulas.containsKey(clGroup))
 		                         	     lines.add(mline);	
-		                         	     
+
+					                      if(clGroup != null && clGroup.equals("BIKUVA")) {
+					                    	//  System.out.println("Lisan 1"  + mline.getString());
+					                      }
 		                        	  }
 		                          }
 		                        
 		                          
 		                      } else {
 		                    	  if(mline.discount > 0 || mline.price > 0) {
-		                    		  if(priceformulas.containsKey(clGroup))
+		                    		//  if(priceformulas.containsKey(clGroup))
 		                     	      lines.add(mline);	
-		                     	      
+
+				                      if(clGroup != null && clGroup.equals("BIKUVA")) {
+				                    	 // System.out.println("Lisan ="  + mline.getString());
+				                      }
 		                    	  }
 		  	                 }
+		                      
+		                      if(clGroup != null && clGroup.equals("BIKUVA")) {
+		                    	 // System.out.println(mline.getString());
+		                      }
 		                 
 		                 }catch(Exception e){
 		                 	e.printStackTrace();
@@ -1213,53 +1149,15 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 
    
    public Vector getFixedAssortmentData() {
-           Vector lines = new Vector();
-/*
-           try {
-          	  String cmd = " SELECT  [Asortimento kodas] AS grupp,[Prekës Nr_] AS toode  FROM [Premia Tallinna Külmhoone AS$Prekiø asortimentas] r" +
-          	  		" INNER JOIN [Premia Tallinna Külmhoone AS$Item] t ON t.[No_]=r.[Prekës Nr_]  ORDER BY [Search Description]";
-          	System.out.println(cmd);
-             	 Connection con = getNewConnection2();
-         	        Statement stmt = con.createStatement();
-         	        ResultSet rs = stmt.executeQuery(cmd);
-         	        while(rs.next()){
-                            String custID = " ";
-                            String clGroup = " ";
-                            String prodID = " ";
-                            String prodGroup = " ";
-                            MatrixLine mline = new MatrixLine();
+		Vector result = new Vector();
+		
+		   if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
+			   System.out.println("siin Fixed " + fixedLines.size());
+			   return fixedLines ;
+		   }
+		   return result;
 
-                            clGroup = rs.getString("grupp");
-                            prodID = rs.getString("toode");
-
-                            if (custID != null && custID.trim().length() > 0) {
-                              mline.setCustID(custID.trim());
-                            }
-                            if (clGroup != null
-                                && clGroup.trim().length() > 0) {
-                              mline.setCliGroup(clGroup.trim());
-                            }
-
-                            if (prodID != null && prodID.trim().length() > 0) {
-                              mline.setProdID(prodID.trim());
-                            }
-                            if (mline.getProdID() == null && prodGroup != null
-                                && prodGroup.trim().length() > 0) {
-                              mline.setProdGroup(prodGroup);
-                            }
-
-                            lines.add(mline);
-                          }
-
-         	       rs.close();
-         	       con.close();
-                         } catch (Exception e) {
-                             getParent().showError(e);
-                         }
-                         */
-           return lines;
    }
-
 
 
    public DealerProduct DealerProductsList() {
@@ -1330,7 +1228,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 "  FROM [_MERISOFT$Tobis_Stock]";
    
     	  
-    		   	  
+    		   	  HashSet koodid = new HashSet();
 
     		          if (isDebug()) System.out.println(cmd);
     		          StringBuffer products = new StringBuffer();
@@ -1346,6 +1244,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
     		              String kood = rs.getString("kood").trim();
     		              double seis = rs.getDouble("kogus");
     		              if(seis > 0){
+    		            	  koodid.add(kood);
     		                  products.append(kood +  ";");
     		                  products.append(" ;");
     		                  products.append(getParent().getNF().format(seis) + "; "  +  "\n"); // + dealer +  "\n");
@@ -1357,6 +1256,8 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
     		          } catch (Exception e) {
     		              getParent().showError(e);
     		          }
+    		          
+    		    products.append(  this.getSaveStockInfoDirecto(koodid));
     		          
     		          makeDebtFile();
     		          
@@ -1510,6 +1411,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 
    public TreeMap getAgents(){
 
+	  // getPriceMatrixDataDirecto(new Vector());
 
        String cmd = "  select [2015_Tobis$Salesperson_Purchaser].code as kood , [2015_Tobis$Salesperson_Purchaser].Name as nimi ," +
        " '' AS objekt  ,[Code in DIRECTO] as directo FROM [2015_Tobis$Salesperson_Purchaser] " +
@@ -1560,9 +1462,65 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 	        getParent().showError(e);
 	      }
 
+	    
+	    
+		try {
+	 		  File f = new File (getDir() + "kliendid.xml");
+	 	     
+	 	       // System.out.println(f.getAbsolutePath());
+	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	     DocumentBuilder db;
+	 		db = dbf.newDocumentBuilder();      	
+	     	FileInputStream in = getCleanInputStream(f);
+	     	String handler = null;
+	         Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "transport"); 
+	     	Node read = getNode(root, "customers");
+	     	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
+	         for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	         	  Node rida = read.getChildNodes().item(i);
+	         	  try{	
+	         		 
+	                 		 Node price_list = rida.getAttributes().getNamedItem("price_list");         	
+			         	
+			         	      if(price_list != null &&  !pricelists.contains(price_list.getNodeValue())){
+		 	         		     pricelists.add((price_list.getNodeValue().trim())); 
+		 	         		   }
+			         	      
+			         	     price_list = rida.getAttributes().getNamedItem("priceformula");         	
+			         	    if(price_list != null &&  !pricelists.contains(price_list.getNodeValue())){
+		 	         		     pricelists.add((price_list.getNodeValue().trim())); 
+		 	         		   }
+			         	    
+			         	      
+			         	      price_list =  rida.getAttributes().getNamedItem("price_list_special") ;  
+			         	     if(price_list != null) {
+					          StringTokenizer st  = new StringTokenizer(price_list.getNodeValue(),",");
+			         	      if(st.hasMoreTokens()){
+	                            String aa = (st.nextToken());
+	                            
+				         	      if( !pricelists.contains(aa)){
+			 	         		     pricelists.add(aa); 
+			 	         		   }
+				         	      
+			         	      }}
+		         	  
+	         	  }catch(Exception e){
+	         		 // e.printStackTrace();
+	         	  }
+	         }
+	         
+	 	}catch(Exception e){
+	 		e.printStackTrace();
+	 	}
+
+	    
 
      return agents;
    }
+   
+
+   private Vector pricelists = new Vector();
 
        public String getDistribution() {
          return null;
@@ -1635,6 +1593,7 @@ private Date getDate(String mmddyy){
  	    	   String custID = rs1.getString("kood").trim();
    	           String dir = rs1.getString("directo").trim();
    	           dirCustCodes.put(dir, custID); 
+   	           custtsUsed.add(dir);
    	           
  	       }
  	       
@@ -1649,6 +1608,8 @@ private Date getDate(String mmddyy){
     	   if(this.priceformulas == null) {
     		   this.getCustomersDirecto();
     	   }
+    	   
+    	 //  System.out.println("priceformulas " + priceformulas.toString());
     	   
     	   //Siin peaks directo võla listi ka sisse lugema
     	   
@@ -1727,6 +1688,7 @@ private Date getDate(String mmddyy){
     	      }
     	    
     	    System.out.println("debt size " + debtList.size());
+    	    if(!useold) {
     	 	   Iterator enums = this.dirCustCodes.keySet().iterator();
     	 	   String gS = getParent().getProps().getProperty("keyInvoice");
     	   	    if(gS == null) {
@@ -1871,7 +1833,7 @@ private Date getDate(String mmddyy){
     	 	   }
     	 	 
     	    
-
+    	    }
        	    System.out.println("debt size2 " + debtList.size());
     	    
     	    
@@ -2222,14 +2184,23 @@ System.out.println(cmd);
     	    	String dire = rs.getString("directo");
     	       	if(dire != null && dire.trim().length() > 0) {
     	       		customer.addCity("Directo Kodas: " + dire);
-    		         	if(this.priceformulas.get(dire) != null) {
+    	       		//if(dire.equals("9535"))
+    	       		//System.out.println("pr formula " + priceformulas.get(dire) + " " + customer.getID() );
+    		         	if(priceformulas.get(dire) != null) {
     		         		 if(customer.getGroup() != null && customer.getGroup().trim().length() > 0){
-    	    	        		   customer.setGroup(customer.getPersonalData() + "|" + priceformulas.get(dire) );
+    	    	        		   customer.setGroup(customer.getGroup() + "|" + priceformulas.get(dire) );
     	    	        	   }else{
     	    	        		   customer.setGroup(priceformulas.get(dire) +""); 
     	    	        	   }
-    		         	
     		         	}
+    		         	
+    		         	if(this.fixCustomers.get(dire) != null ) {
+			         		  if("true".equals(getParent().getProps().getProperty("fixed.frompricelist")) ){
+			       			   customer.addFixSortCode(fixCustomers.get(dire)+""); 
+			       		//	System.out.println("On Fix " + customer.getName() + " " +  price_list);
+			       		       }
+    		         	}
+    		         	
     	       	}
 	             
     	            tm.put(Converter.cleanLitLatEst(id) + customer.getName(), customer);
@@ -2249,10 +2220,181 @@ System.out.println(cmd);
     	     } catch (Exception e){
     	       e.printStackTrace();
     	     }
+    	   
+    	   
+    	   if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
+    	    	  fixedLines = getFixedAssortmentData1();
+    	    	     }
+    	   
     
     	     return tm;
     	   }
 
+       
+       
+       
+       
+       public TreeMap getProducts2(){
+
+    	    TreeMap tm = new TreeMap();
+    	     
+    	     try {
+    	 
+    	    	 File f = new File (getDir() + "tooted.xml");
+    	         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    		     DocumentBuilder db;
+    			db = dbf.newDocumentBuilder();      	
+    	    	FileInputStream in = getCleanInputStream(f);
+    	    	String handler = null;
+    	        Document doc = db.parse(in,handler);
+    	        Node root = getNode(doc, "transport");      
+    	   
+    	    	Node read = getNode(root, "items");
+    	        for (int i = 0; i < read.getChildNodes().getLength(); i++){
+    	        	  Node rida = read.getChildNodes().item(i);
+    	        	
+    	        		  if(rida.getNodeName().equals("bi_item")){
+    	        		
+    	       
+    	        		String id =  rida.getAttributes().getNamedItem("code").getNodeValue();  
+    	        		try {
+    	        		  String namec =  rida.getAttributes().getNamedItem("name").getNodeValue(); 
+    	        	
+    	      	     Product prod = new Product(id);
+    	      	     prod.setName(namec);
+    		        	
+    		      	     tm.put(prod.getID(), prod); 
+    	        		}catch(Exception e) {
+    	        			
+    	        		}
+    	        	  }
+    	        	
+    	          }
+    	        in.close();
+    	    
+    	     } catch (Exception e){
+    	       e.printStackTrace();
+    	     }
+    	     return tm;
+    	     
+    	   }
+
+
+       public Vector getFixedAssortmentData1() {
+           Vector lines = new Vector();
+           TreeMap prods = this.getProducts2();
+          System.out.println("prods " + prods.size() + " " + pricelists.toString());
+           
+           try {
+       		  File f = new File (getDir() + "hinnakiri.xml");
+       	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+       	     DocumentBuilder db;
+       		db = dbf.newDocumentBuilder();      	
+           	FileInputStream in = getCleanInputStream(f);
+           	String handler = null;
+               Document doc = db.parse(in,handler);
+               Node root = getNode(doc, "transport");      
+          
+           	Node read = getNode(root, "priceformulas");
+               for (int i = 0; i < read.getChildNodes().getLength(); i++){
+               	  Node rida = read.getChildNodes().item(i);
+               	  try{
+               		  if(rida.getNodeName().equals("priceformula")){
+               			 String clGroup = " ";
+                         String prodID = null;
+                         String start = null;
+                         String end = null;
+                         MatrixLine mline = new MatrixLine();
+                        try{
+                        	 clGroup = (rida.getAttributes().getNamedItem("code").getNodeValue()); 
+                        	  try{
+                        		  prodID =  rida.getAttributes().getNamedItem("item").getNodeValue(); 
+                        	  }catch(Exception rr) {
+                        		 // System.out.println("jama " + i + " " + clGroup);
+                        	  }
+                        	  
+                            
+                            try { 
+                             start =  rida.getAttributes().getNamedItem("start_date").getNodeValue();
+                  	           }catch(Exception aa){ }
+                  	        
+                            try{
+                               end =  rida.getAttributes().getNamedItem("end_date").getNodeValue();
+                      	      }catch(Exception aa){ }
+                             
+                        
+                             if (clGroup != null && clGroup.trim().length() > 0) {
+                               mline.setCliGroup(clGroup.trim());
+                             }
+
+                             if (prodID != null && prodID.trim().length() > 0) {
+                               mline.setProdID(prodID.trim());
+                             }
+                        
+                           
+                             if(prodID != null && prods.get(prodID) != null && pricelists.contains(clGroup.trim())){
+                            	
+                            	
+                            	 
+                            	
+                            	
+                            	if(start != null && end != null) {
+                            		 Date alg = getCalXML(start); 
+                                     Date lopp = getCalXML(end); 
+                               	 
+                               	  if(alg.before(new Date()) && lopp.after(new Date())){
+                                      	 lines.add(mline);	
+                                      }	
+                            	}else {
+                            		lines.add(mline);
+                            	}
+                            	 	
+                              }
+                        
+                           
+                        }catch(Exception e){
+                        	e.printStackTrace();
+                        }
+                        
+                       }
+                    	
+               	  }catch(Exception e){
+               		  e.printStackTrace();
+               	  }
+                    
+               }
+               
+       	}catch(Exception e){
+       		e.printStackTrace();
+       	}
+          // System.out.println("prodsinuse " +prodsInUse.size() );
+           
+           return sortLines(lines,prods);
+     }
+
+       private Vector sortLines(Vector inVec,TreeMap products){
+    	   TreeMap asi = new TreeMap();
+    	       // System.out.println("Prod22 " + products.size());
+    	        for (int i = 0 ; i < inVec.size() ; i++){
+    	        	
+    	        	  MatrixLine ol = (MatrixLine)inVec.elementAt(i);
+    	          asi.put(ol.getCliGroup()+ ((Product)products.get(ol.getProdID())).getName() , ol);
+    	        }
+    	        Vector sorted = new Vector ();
+    	        Iterator itera = asi.keySet().iterator();
+    	        while (itera.hasNext()){
+    	        	String key = (String)itera.next();
+    	        	sorted.add((MatrixLine)asi.get(key));
+    	        }
+    	       
+    	     //  System.out.println("sorted Size " + sorted.size());
+    	        return sorted;
+    	      }
+    	
+
+
+       private Vector fixedLines = new Vector();
+       
    public TreeMap getAgents1() {
 	   
 		return agents1;
@@ -2262,7 +2404,8 @@ System.out.println(cmd);
    
    public void getCustomersDirecto(){
 	  
-	   priceformulas = new HashMap();;
+	   priceformulas = new HashMap();
+	   fixCustomers = new HashMap();
 	     
 	   try {
 	 		  File f = new File (getDir() + "kliendid.xml");
@@ -2515,24 +2658,23 @@ System.out.println(cmd);
 		  	         		
 		  	         		 }}
 		         		  }catch(Exception r){
-		         			  r.printStackTrace();
+		         			//  r.printStackTrace();
 		         		  }
 		         		      		  
 		         		  
 		         		  
 		         		  try{
-		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("priceformula").getNodeValue());         	
+		         			 String price_list =  rida.getAttributes().getNamedItem("priceformula").getNodeValue();         	
 			         		   customer.setGroup(Converter.deCode(price_list));
 			         		   
 			         		   if(dirCustCodes.get(id) != null) {
 			         			  priceformulas.put(id, price_list);
+			         			  if(fix) {
+			         			   fixCustomers.put(id,price_list);
+			         			  }
+				         			//System.out.println("On  " + id + " "+ dirCustCodes.get(id) + " " +customer.getName() + " '" +  price_list+"");
 			         		   }
-			         			System.out.println("On  " + id + " "+ dirCustCodes.get(id) + " " +customer.getName() + " " +  price_list);
-			         		 
-			         		  if("true".equals(getParent().getProps().getProperty("fixed.frompricelist")) && fix){
-			       			   customer.addFixSortCode(Converter.deCode(price_list)); 
-			       			System.out.println("On Fix " + customer.getName() + " " +  price_list);
-			       		       }
+			         		
 		         		  }catch(Exception e){
 		         		  }
 		         		  
@@ -2543,7 +2685,7 @@ System.out.println(cmd);
 		         			  StringTokenizer ss = new StringTokenizer(price_list,",");
 		         			  while (ss.hasMoreTokens()){
 		         				  
-                                   String as = ensureLen(ss.nextToken());
+                                   String as = (ss.nextToken());
 			         			  
                                   if(customer.getGroup() != null && customer.getGroup().trim().length() > 0){
 			         				 customer.setGroup(customer.getGroup() + "|" + Converter.deCode(as));
@@ -2563,7 +2705,7 @@ System.out.println(cmd);
 		         		  boolean goes = true;
 		         		  
 		         		 try{
-		         			 String closed =  ensureLen(rida.getAttributes().getNamedItem("closed").getNodeValue());         	
+		         			 String closed =  (rida.getAttributes().getNamedItem("closed").getNodeValue());         	
 			         		  if(closed.equals("1")) {
 			         			  goes = false;
 			         			 // System.out.println("closed " + customer.getName());
@@ -2637,7 +2779,7 @@ System.out.println(cmd);
   	      stmt.close();
   	      con.close();
 
-  	    System.out.println(cmd);
+  	   // System.out.println(cmd);
    } catch (Exception e) {
        e.printStackTrace();
    }
@@ -2661,7 +2803,7 @@ System.out.println(cmd);
         	  String id = rs.getString("toode").trim();
         	  luba.add(id);
          }
-         System.out.println("luba suurus " + luba.size());
+       //  System.out.println("luba suurus " + luba.size());
            rs.close();
            stmt.close();
            con.close();
@@ -2681,7 +2823,7 @@ System.out.println(cmd);
         	  String id = rs.getString("ItemNo").trim();
         	  top.add(id);
          }
-         System.out.println("top suurus " + top.size());
+       //  System.out.println("top suurus " + top.size());
            rs.close();
            stmt.close();
            con.close();
@@ -2704,7 +2846,7 @@ System.out.println(cmd);
             String id = rs.getString("toode").trim();
             String weight ="";
             Product prod = new Product(id);
-         	String name = Converter.enCodeEst(id + " " + rs.getString("nimi").trim()).replaceAll("11153xx", "x2");
+         	String name = Converter.enCodeEst(id + " " + rs.getString("nimi").trim()).replaceAll("11153xx", "x2") + " TOBIS";
          	
              double price = rs.getDouble("myygihind");
                 prod.setPrice(price);
@@ -2784,10 +2926,11 @@ System.out.println(cmd);
                 	   prod.setPriceSecond(Converter.Round((float)(listprice * 1.21), 2));
                    }
                    
+                   
                    Date newprod = rs.getDate("newprod");
                    if(newprod.after(new Date())){
                 	//   prod.setStatusNew("1");
-                	   prod.setMustBe("1");
+                	 //  prod.setMustBe("1");
                    }
                    try {
                 	   int status = rs.getInt("status2");
@@ -2842,7 +2985,7 @@ System.out.println(cmd);
         		"               from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 3 and [Starting Date] < getdate()-5  and ([Ending Date] > getdate()+1 or \r\n" + 
         		"                 year ([Ending Date]) = 1753) ";
       
-    	 System.out.println(cmd);
+    	// System.out.println(cmd);
      	 con = getNewConnection2();
          stmt = con.createStatement();
          rs = stmt.executeQuery(cmd);
@@ -2914,7 +3057,7 @@ System.out.println(cmd);
                  		"                 		                 from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] in (3) and [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or \r\n" + 
                  		"                 		                   year ([Ending Date]) = 1753)";
                
-             	 System.out.println(cmd);
+             //	 System.out.println(cmd);
               	 con = getNewConnection2();
                   stmt = con.createStatement();
                   rs = stmt.executeQuery(cmd);
@@ -3146,7 +3289,7 @@ TreeMap sorting = new TreeMap();
           String cmd2 =  "SELECT  d.[Sell-to Customer No_] AS klient,r.[No_] AS toode,r.[Quantity] AS kogus, d.[Posting Date] AS lastdate FROM [2015_Tobis$Sales Invoice Line] r " +
 		  " INNER JOIN [2015_Tobis$Sales Invoice Header] d ON r.[Document No_]= d.[No_] WHERE d.[Posting Date]> GETDATE()-30 " +
 		  " Order by d.[Sell-to Customer No_],r.[No_],d.[Posting Date] desc ";
-          System.out.println(cmd2);
+       //   System.out.println(cmd2);
 		   //   "klient","toode","kogus","viimane kuupï¿½ev","viimane kogus"
 		    Connection con2 = getNewConnection2();
 		    Statement stmt2 = con2.createStatement();
@@ -3232,7 +3375,7 @@ TreeMap sorting = new TreeMap();
      while (itera.hasNext()){
     	 vcc.add(itera.next());
      }
-     System.out.println("vcc suurus " + vcc.size());
+   //  System.out.println("vcc suurus " + vcc.size());
      return vcc;
    }
 
@@ -3274,7 +3417,7 @@ TreeMap sorting = new TreeMap();
 		   m = "0" + m;
 	   }
 		   String start =  d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
-		//   System.out.println(start + " uhuu " + end);
+		   System.out.println(dirCustCodes.get("9535") + " " + start + " uhuu " + end);
 		
 		   Iterator enums = this.dirCustCodes.keySet().iterator();
 	   while(enums.hasNext()){
@@ -3313,24 +3456,26 @@ TreeMap sorting = new TreeMap();
 		              wr.write( postData );
 		           }
 		           
-		        
-		        
+		     
 		        
 		        
 		        InputStream ins = con.getInputStream();
 		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
 		        BufferedReader in = new BufferedReader(isr);
-
+  
 		        String inputLine;
 		        StringBuffer inputLineBuf = new StringBuffer();
 		        while ((inputLine = in.readLine()) != null){
 		        	inputLine = Converter.enCodeEst(inputLine);
 		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\"l\"","\"L\""));
+		        	   
+				        
 		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
 		        	while (st.hasMoreTokens()){
 		        		
 		        		String line = st.nextToken();
-		        	//	System.out.println(" line " + line);
+		        		
+		        	//	
 		        		int ind =  line.indexOf("invoice number=") ;
 		        		String number = "";
 			        	if(ind != -1){
@@ -3342,17 +3487,18 @@ TreeMap sorting = new TreeMap();
 			        	if(ind != -1){
 			        		String date = line.substring(ind + 6);
 			        		date = date.substring(0,date.indexOf("\""));
-			        		// System.out.println(date + " " + number + " " + custid);	
-				        		
+			        		// 		        		
 			        		 if(isOkDate(date)){
-			        			// System.out.println(date + "  222 " + number + " " + custid);	
-					        		
+			        			
 			     					Vector cps = this.getCPCombi(Converter.deCode(custid),number,date);
 			     					if(cps != null){
 			     						Enumeration eee = cps.elements();
 			     						while( eee.hasMoreElements()){
 			     						CustProd cp = (CustProd) eee.nextElement();
-				     						sorting.put(custid +  cp.getProdID()  , cp);
+			     						if(cp.getCustID().equals(custid) && dirCustCodes.get(custid) != null) {
+			     							cp.custID = dirCustCodes.get(custid)+"";
+			     						}
+			     							sorting.put(custid +  cp.getProdID()  , cp);
 				     					//	System.out.println(date + " " + number + " " + custid);
 			     						}			     				
 					        			 	
@@ -3383,7 +3529,7 @@ TreeMap sorting = new TreeMap();
      return null;
    }
    public String getDriverVersion(){
-     return "NaviTobis";
+     return "NaviTobisDirecto";
    }
    public String getSubjectFilesTo(){
      return this.subjectFilesTo;
@@ -3457,7 +3603,7 @@ public void setNF(NumberFormat nf) {
   
   //directo asjad siin 
   
-  public String getSaveStockInfoDirecto() {
+  public String getSaveStockInfoDirecto(HashSet koodid) {
 
 	   StringBuffer products = new StringBuffer();
 	   seisud = new HashMap<String, Double>();
@@ -3562,7 +3708,13 @@ try {
 		}else{
 			seisx = ( Double.parseDouble(kogus)); 
 		}
-		if(seisx > 0) {
+		
+		boolean kood = true;
+		if(koodid != null && koodid.contains(toode)) {
+			kood = false;
+		}
+		
+		if(seisx > 0 && kood) {
 			products.append(toode +  "; ;");
 			products.append(getParent().getNF().format(seisx) + "; "  +  "\n"); 
 			seisud.put(toode, seisx);
@@ -3853,7 +4005,7 @@ private HashSet prodCodes = null;
 	  // System.out.println("tooted a");
 	   
 	   if(seisud == null) {
-		    getSaveStockInfoDirecto();
+		    getSaveStockInfoDirecto(null);
 	   }
 	   
 	 
@@ -4107,9 +4259,9 @@ private HashSet prodCodes = null;
       		 addid = id;
       	 }
         	  if("true".equals(getParent().getProps().getProperty("name.code.front"))){
-     			 prod.setName( ( id + " " + Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " +  add).trim()); 
+     			 prod.setName( ( id + " " + Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " +  add).trim() + " GETZ" ); 
      		 }else{
-     			 prod.setName(( Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " + id + " " + add ).trim()); 
+     			 prod.setName(( Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " + id + " " + add ).trim() + " GETZ"); 
      		 }
         	
         	  if(getParent().getProps().getProperty("vat") != null){
@@ -4278,7 +4430,9 @@ private HashSet prodCodes = null;
 			   custid = Converter.deCode(custid);
 			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
 				String httpsURL = logurl  + company + "/xmlcore.asp"; 
-		  //     System.out.println(httpsURL);
+				if(custid.equals("9535")) {
+		       System.out.println(httpsURL);
+				}
 				URL myurl = new URL(httpsURL);
 		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
 		        
@@ -4499,7 +4653,7 @@ private HashSet prodCodes = null;
 			   Vector vec = (Vector)Converter.readObject("cpdata/" + number+".vec");
 			   for(int i = 0; i < vec.size(); i++) {
 				   CustProd cp = (CustProd)vec.elementAt(i);
-				   if(!prodCodes.contains(cp.getProdID())){
+				    if(!prodCodes.contains(cp.getProdID())){
 				        prodCodes.add(cp.getProdID());	
 			        }
 			   }
@@ -4580,6 +4734,7 @@ private HashSet prodCodes = null;
 			        	
 		        if(toode != null && toode.trim().length() > 0){
 			        result.add(new CustProd(this.dirCustCodes.get(custid)+"", toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
+
 			        if(!prodCodes.contains(toode)){
 				        prodCodes.add(toode);	
 			        }
@@ -4588,7 +4743,6 @@ private HashSet prodCodes = null;
 		        	
 		        }
 		        in.close();
-		      //  System.out.println("buffer " + result);
 		        Converter.saveObject(result, "cpdata/" + number + ".vec");
 		   }
 		   

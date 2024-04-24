@@ -1381,52 +1381,10 @@ Statement st = null;
     	
 	TreeMap products = new TreeMap();
 	 piltcodes = new TreeMap();
+     prcodes = new TreeMap();
+	
 
-	//getSaveStockInfo();
-	prcodes = new TreeMap();
-	
-	/*
-	String  cmde = "  SELECT    CONVERT(varchar(20), sand.Kodas) AS LADU, pr.kodas AS toode, CONVERT(Int, ps.Likutis_PP) AS UnitsInStock, CONVERT(Int,  " +
-            "  ps.Likutis_PP - ps.KiekisRezervuotas) AS stock " +
-" FROM   dbo.Sandeliai AS sand INNER JOIN " +
-"                    dbo.PrekesSandeliuose AS ps ON sand.SandeliaiId = ps.SandeliaiId INNER JOIN " +
-"                   dbo.Prekes AS pr ON ps.PrekesId = pr.PrekesID " +
-" WHERE     (sand.SandeliaiId > 1) and  (CONVERT(Int, ps.Likutis_PP - ps.KiekisRezervuotas) >0 or "
-+ " CONVERT(Int, ps.Likutis_PP) >0)  and sand.Kodas in ('SGG') " ;
-	
-	  TreeMap seisud = new TreeMap();
-	  TreeMap seisud2 = new TreeMap();
-	   TreeMap aa = new TreeMap();
-	     
-	
-	 try {
-		 Connection con = getNewConnection();
-       Statement st = con.createStatement();
-         ResultSet rs = st.executeQuery(cmde);
-
-         while (rs.next()) {
-        	 String dealer = rs.getString("LADU").trim();
-           String kood = rs.getString("toode").trim();
-           double seis = rs.getDouble("stock");
-          
-           if(seis > 0 ){
-        	   if(seisud.get(kood) != null){
-        		   String aas = seisud.get(kood)+"";
-        		   seisud.put(kood, aas + "" + dealer + "=" +seis + "|");
-        	   }else{
-        		   seisud.put(kood, dealer + "=" +seis + "|");
-        	   }
-        	   seisud2.put(kood, seis);
-             }
-           }
-           rs.close();
-           st.close();
-           
-	 }catch(Exception r){
-		 
-	 }
-	 */
-    String cmd = "SELECT  Pr.PrekesID as tid, MES_Pakavimo_ID as pkood, Pr.Kodas AS kood,pl.MES_MES_PAV_TRUMPINYS as nimi2, Pr.Pavad AS nimetus," +
+    String cmd = "SELECT  Pr.PrekesID as tid, ( select m.Kodas from dbo.Prekes m where m.PrekesID = MES_Pakavimo_ID) as pkood, Pr.Kodas AS kood,pl.MES_MES_PAV_TRUMPINYS as nimi2, Pr.Pavad AS nimetus," +
     " CONVERT(Money, tt.PK_PardKaina) AS hind, CASE WHEN pr.mvid = pr.ipokavimomvid OR " +
     " ISNULL(pr.ipokavimomvid, 0) < 2 OR  pr.MVId NOT IN (2, 62733) THEN mv.Kodas ELSE ipokmv.Kodas END AS unit , 0  AS kastis, " +
     "  CONVERT(Money, NULL) AS CostPrice, CONVERT(varchar(20), Pr.KAPKodas) AS ean, CONVERT(varchar(20),  pr.PrekiuGrupesID) AS grupp, '' AS grupp2 ,gr.kodas " +

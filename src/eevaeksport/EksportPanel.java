@@ -1071,6 +1071,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 						|| driver.getDriverVersion().equals("ScalaPrikeLit")
 						|| driver.getDriverVersion().equals("AxaPere")
 						|| driver.getDriverVersion().equals("NaviTobis")
+						|| driver.getDriverVersion().equals("NaviTobisDirecto")
 						|| driver.getDriverVersion().equals("NaviTobisKAL")					
 						|| driver.getDriverVersion().equals("NaviTobisEST")
 						|| driver.getDriverVersion().equals("NaviTobisBY")
@@ -1200,6 +1201,8 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("Rinku")
 					    || driver.getDriverVersion().equals("RivileLedinta")
 					    || driver.getDriverVersion().equals("RivileVasca")
+
+					    || driver.getDriverVersion().equals("NaviTobisDirecto")
 	                	 )
                   
                   {
@@ -1304,6 +1307,8 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("AxaFazerLV")
 					    || driver.getDriverVersion().equals("SkaiteKM")
 					    || driver.getDriverVersion().equals("SamsonasCSV")
+
+					    || driver.getDriverVersion().equals("NaviTobisDirecto")
 					  ){
                 	 
                 	  System.out.println("Teen Fixi " + jsonDate(Calendar.getInstance().getTime()) );
@@ -4448,7 +4453,11 @@ if (getProps().getProperty("no.matrixagent") != null) {
             buf.append(debt.getDoknr() + separator);
             buf.append(df.format(debt.getDuedate()) + separator);  
             int i = (int)Double.parseDouble(debt.getDue());
-            buf.append(getNF().format(debt.getSum()) + ";" + i + ";"  +getNF().format(debt.getTara()) + ";" + date + ";" + payer +  "\n");
+            String extra = "";
+            if(debt.extraInfo != null) {
+            	extra = debt.extraInfo;
+            }
+            buf.append(getNF().format(debt.getSum()) + ";" + i + ";"  +getNF().format(debt.getTara()) + ";" + date + ";" + payer + ";"  + extra +"\n");
           }
         }
 

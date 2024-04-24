@@ -374,7 +374,7 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 			                	   mline.setLineinfo(type.trim());
 			                	   ttt = type.trim();
 			                   }
-				             if(ttt.equals("AKC")) {
+				             if(ttt.equals("AKC") || ttt.equals("CRD")) {
 				             
 				             if(edate != null && !edate.startsWith("1753")){
 				            	 mline.setEndDate(edate.substring(0,10));
@@ -481,7 +481,7 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 	             
 	             
 	             
-	            if( type.equals("AKC") &&
+	            if( (type.equals("AKC") || type.equals("CRD")) &&
 	            		(sdate != null  && !sdate.startsWith("2030") && !sdate.startsWith("1753") && edate != null &&
 	            		(!edate.startsWith("2030") && !edate.startsWith("1753"))) 
 	            		){
@@ -1056,16 +1056,12 @@ cn.close();
 			
 			this.debtList = new Vector();
 			Connection con = null;
-			String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number, a.[Due Date] AS kuupaev, sum(b.[Amount]) AS summa, "
-					+ " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer  FROM [Vičiūnai-LAT$Cust_ Ledger Entry] a inner join "
-					+ " [Vičiūnai-LAT$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] "
-					+ " where a.[Document type] = 2 AND  a.[Posting Date] > getdate()-200 AND a.[Open]= 1 "
-					+ // a.[Due Date] < GETDATE()+7 AND
-					" group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[External Document No_], "
-					+ " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount])<> 0 ";
+			String cmd = "";
 
 			if(view) {
-				cmd  = "select * from MobileJavaLAT.v_LAT_GetDebtsList";
+				cmd  = "select d.* , c.aadress, c.agent , a.nimi as animi from MobileJavaLAT.v_LAT_GetDebtsList d left join MobileJavaLAT.v_LAT_Customers c "
+						+ "on d.klient = c.kood and d.kl2 = c.[Ship-to-address code] left join \r\n" + 
+						"MobileJavaLAT.v_LAT_GetAgents a on a.kood = c.agent";
 				con = this.getNewConnectionView();
 			} else {
 				con =  getNewConnection2();
@@ -1098,13 +1094,33 @@ cn.close();
 				debt.setSum(rs1.getDouble("summa"));
 				int dueint = rs1.getInt("due");
 				debt.setDue(dueint + "");
+				String text = " ";
+				
+				String aadre = rs1.getString("aadress");
+				if(aadre != null && aadre.trim().length() > 0) {
+					text = aadre.trim();
+				}
+				
+				String ag1 = rs1.getString("agent");
+				if(ag1 != null && ag1.trim().length() > 0) {
+					text = text + "|" + ag1 ;
+				}
+				
+				String ag2 = rs1.getString("animi");
+				if(ag2 != null && ag2.trim().length() > 0) {
+					text = text + " " + ag2 ;
+				}
+				
+				debt.extraInfo = text;
 				int old = 0;
 				if (debtDays.get(custID) != null) {
 					old = Integer.parseInt((String) debtDays.get(custID));
 				}
+				
 				if (old < dueint) {
 					this.debtDays.put(custID, dueint + "");
 				}
+				
 				this.debtList.add(debt);
 			}
 

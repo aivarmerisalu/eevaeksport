@@ -3587,7 +3587,13 @@ public TreeMap getPRLisa()  {
        	    		
        	    	}
        			String agid = (String)cob.get("agentid");
-       			String agname = (String)cob.get("managerName");
+       			
+       			String agname = "NoName Manager" ; 
+       			try {
+       			  agname = (String)cob.get("managerName");
+       			 } catch(Exception r) {
+       				
+       			 }
        			String chain = (String)cob.get("custchain");
        			
        		//	System.out.println(chain + chDaily + " " + chDaily.contains(chain));
@@ -3776,7 +3782,12 @@ public TreeMap getPRLisa()  {
            	    		
            	    	}
      	  			String agid = (String)cob.get("agentid");
-     	  			String agname = (String)cob.get("managerName");
+     	  			String agname = "NoName";
+     	  			try {
+     	  			agname = (String)cob.get("managerName");
+     	  			}catch(Exception e) {
+     	  				
+     	  			}
      	  			String chJ = (String)cob.get("custchain");
      	  			
      	  			String signa = dateOnly + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") ;
@@ -3928,7 +3939,13 @@ public TreeMap getPRLisa()  {
            	    		
            	    	}
      	  			String agid = (String)cob.get("agentid");
-     	  			String agname = (String)cob.get("managerName");
+     	  			
+     	  			String agname = "NoName";
+     	  			try {
+     	  			agname = (String)cob.get("managerName");
+     	  			}catch(Exception e) {
+     	  				
+     	  			}
      	  			String chJ = (String)cob.get("custchain");
      	  			
      	  			String signa = dateOnly + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") ;

@@ -123,20 +123,23 @@ System.out.println(sql);
   }
    
    TreeMap naviCustomers = null;
+   HashSet directoOnly = null;
    
    private TreeMap getDirNaviCustomers() {
 	   TreeMap res = new TreeMap();
 	   try {
 		
 		   String sql =  " SELECT k.[No_] AS kood, [Code in DIRECTO LT] as dire,k.[Name] AS nimi, k.[Address]+' '+k.[Address 2]+' '+k.[City] as addr1, a.[Address]+' '+a.[Address 2]+' '+a.[City] as addr2"
-		   		+ " FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] \r\n" + 
+		   		+ ", [Order only to DIRECTO] as dirord FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] \r\n" + 
                    " and a.Code=k.[Ship-to Code]   WHERE k.[Salesperson Code] != ''  AND Blocked != 3 ";
    
 		   naviCustomers = new TreeMap();
-System.out.println(sql);
+		   directoOnly = new HashSet();
+		   
+   System.out.println(sql);
 
-   Connection con = DriverManager.getConnection(url + "NAV40"
-           , "", "");
+   Connection con = DriverManager.getConnection(url + "NAV40" , "", "");
+   
    Statement stmt = con.createStatement();
    ResultSet rs = stmt.executeQuery(sql);
    while(rs.next()){
@@ -145,6 +148,7 @@ System.out.println(sql);
   		String name = rs.getString("nimi").trim();
   		String aadress1 =  rs.getString("addr1");
   		String aadress2 =  rs.getString("addr2");
+  		Integer dirord = rs.getInt("dirord");
   		String addr = "";
   		if(aadress2 != null) {
   			addr = aadress2.trim();
@@ -156,6 +160,10 @@ System.out.println(sql);
   		naviCustomers.put(kood, escape(name+ " " + addr));
   		if(dire != null) {
   			res.put(kood, dire.trim());
+  			if(dirord == 1) {
+  				System.out.println("directo Only " + kood);
+  			directoOnly.add(kood);
+  			}
   		}
   		
    }
@@ -272,24 +280,7 @@ System.out.println(sql);
 	
 
    }
-   private String ensureLen(String in ){
-		 
-		 if(in.length() == 4){
-			 in = "0" + in ;
-		 }
-		 if(in.length() == 3){
-			 in = "00" + in ;
-		 }
-		 if(in.length() == 2){
-			 in = "000" + in ;
-		 }
 
-		 if(in.length() == 1){
-			 in = "0000" + in ;
-		 }
-		 return in;
-	 }
-   
    
     private TreeMap dirNaviCust = null;
 
@@ -300,21 +291,7 @@ System.out.println(sql);
 	   if(dirNaviCust == null) {
 		   dirNaviCust = getDirNaviCustomers();
 	   }
-	   
-	   if(dirNaviAgs == null) {
-		//   dirNaviAgs = getDirNaviAgents();
-	   }
-	   
-	 /*  ipping cost code to insert into DIRECTO = TRANSP75, 
 
-			   as last row
-
-			   тогда они сами смогут решать - если не нужно - просто удалят эту строчку
-
-			   Поле в Навижине = ShippingCost
-
-			   Цену берем из export.ini параметра
-	   */
 	   if(dirKliendid == null) {
 		getDirCustomers();
 	   }
@@ -332,8 +309,16 @@ System.out.println(sql);
 			 		}
 		 		}
 		 		
+
+		 	   	String custid = (ord.getCompany());
+		 	   	System.out.println("enne " + custid );
+		 	     custid =   (String) this.custcodes.get(custid);
+		 	     if(custid == null) {
+		 	    	 custid = (ord.getCompany());
+		 	     }
 		 		
-		 		String dirCuID = (String)dirNaviCust.get(ord.getCompany());
+		 		
+		 		String dirCuID = (String)dirNaviCust.get(custid);
 		 		if(dirCuID == null) {
 		 			dirCuID = (String)dirNaviCust.get("fake");
 		 		}
@@ -343,12 +328,12 @@ System.out.println(sql);
 		 		if(ccc == null) {
 		 			ccc = new Customer("5556GETZ" );
 		 			ccc.setName("Uzsakymai TOBIS");
-		 			String nameNav = ord.getCompany() + " " + (String)naviCustomers.get(ord.getCompany());
+		 			String nameNav = custid + " " + (String)naviCustomers.get(custid);
 		 			if(ord.getInfo() != null && ord.getInfo().trim().length() >0){
-			 			comm = "comment=\""+ ord.getInfo()+ " " + nameNav + "\" " ;
+			 			comm = "comment=\""+ ord.getAgent() + " " + ord.getInfo()+ " " + nameNav + "\" " ;
 			 			
 			 		}else {
-			 			comm = "comment=\""+  nameNav + "\" " ;
+			 			comm = "comment=\""+ ord.getAgent() + " " + nameNav + "\" " ;
 			 		}
 		 			
 		 			
@@ -438,14 +423,14 @@ System.out.println(sql);
 			    	  double hind = 0;
 			    	  
 			    	  try{
-			    		  hind =  this.getPriceAction(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
+			    		  hind =  this.getPriceAction(line.getToode(),custid,ppp)+ 0.0005 ;
 					  }catch(Exception e){
 			    	  }
 					 // System.out.println("HindAction " + line.getToode() + " " + hind);
 				    	
 					  if(hind < 0.0006){
 	                      try{
-				    		  hind =  getPrice(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
+				    		  hind =  getPrice(line.getToode(),custid,ppp)+ 0.0005 ;
 						  }catch(Exception e){
 				    	  }
 				     }
@@ -1110,6 +1095,11 @@ private HashMap naviProds = null;
 		  
 		  Vector result = new Vector();
 		  
+
+		   if(dirNaviCust == null) {
+			   dirNaviCust = getDirNaviCustomers();
+		   }
+		  
 		  if(naviProds == null) {
 			  naviProds = getNaviProds();
 		  }
@@ -1164,7 +1154,7 @@ private HashMap naviProds = null;
 				  ord.docType = "less";
 			  }
 			    	
-			    	if(naviProds.containsKey(lin.getToode())) {
+			    	if(naviProds.containsKey(lin.getToode()) && !directoOnly.contains(order.getCompany())) {
 			    		ord.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 				     	ord.setDokNr(order.getDokNr());

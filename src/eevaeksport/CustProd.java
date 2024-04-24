@@ -14,7 +14,7 @@ import java.sql.Date;
 
 public class CustProd implements Serializable {
 	 static final long serialVersionUID = 2L; 
-  private String custID = null;
+  public String custID = null;
   private String prodID = null;
   public String soldString = null;
   private String group = null;

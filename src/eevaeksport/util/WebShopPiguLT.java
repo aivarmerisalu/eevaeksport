@@ -332,12 +332,14 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    		        String userComment = (String) order.get("user_comment");
 	                    		        String weight = (String) order.get("weight");
 	                    		        String paid = (String) order.get("payment_status");
+	                    		        Long cod = (Long) order.get("cod_order");
+	                    		        
 	                    		        
 	                    		       
 	                    		      
-	                    		    System.out.println(ordDate+"  "+ orderSite + " " + paid);
+	                    		    System.out.println(ordDate+"  "+ orderSite + " " + paid + " " + cod);
 	                    			
-	                    			if (paid.equals("paid")) {
+	                    			if (paid.equals("paid") || cod == 1) {
 	                    				
 	                    				
 	                    				
