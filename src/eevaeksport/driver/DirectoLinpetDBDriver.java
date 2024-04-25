@@ -3846,6 +3846,7 @@ public void WebShopper2() {
 	WebShopPiguLT vp = new WebShopPiguLT(eanProds);
 	
 	vp.login(parent);
+
 	vp.getSellerID();
 	
 	

@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -36,9 +37,13 @@ import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import eevaeksport.Product;
+import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.Agent;
 import eevaeksport.EksportPanel;
+import eevaeksport.Email;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.io.File;
@@ -80,11 +85,11 @@ public class WebShopPiguLT {
 	}
 
 
-
+	private EksportPanel parentLOC = null;
 
 
 	public boolean login(EksportPanel parent) {
-		
+		parentLOC = parent;
 		url = parent.getProps().getProperty("piguURL");
 		password = parent.getProps().getProperty("piguPassword");
 		username = parent.getProps().getProperty("piguUsername");
@@ -484,7 +489,8 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 				boolean orderOK =	confirmOrder(ord);	
 				if (orderOK) {
 					postPackingSlip(ord);
-					printPackingSlip();	
+					emailPackingSlip(ord);
+					//printPackingSlip();	
 					}
 				}
 			} catch (Exception e1) {
@@ -497,6 +503,98 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public boolean emailPackingSlip(Order ord) {
+		
+		Order ordOrig = null;
+
+		try {
+			ordOrig = (Order) Converter.readObject("WebShopper/ordIDs/"+  ord.getDokNr() + ".order");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		}
+		System.out.println("\nOrder Comment " + ordOrig.getDokNr() );
+		  
+	if(ordOrig != null) {
+	
+	
+		   	try{
+		   		
+		   	
+		   		System.out.println("\nOrder Comment111 "  ); 			
+		   			//System.out.println(comment);
+		   			Email mail = new Email(null);
+			  		   
+		   			
+		                mail.setSMTP(parentLOC.getProps().getProperty("smtphost"));
+		                if(parentLOC.getProps().getProperty("smtpuser") != null)
+		                mail.setUser(parentLOC.getProps().getProperty("smtpuser"));
+		                
+		                if(parentLOC.getProps().getProperty("smtppass") != null)
+		                mail.setPass(parentLOC.getProps().getProperty("smtppass"));
+		                
+		                if(parentLOC.getProps().getProperty("smtpport") != null)
+		                mail.setPort(parentLOC.getProps().getProperty("smtpport"));
+		                
+			  	  		
+			  	  		mail.setFrom(parentLOC.getProps().getProperty("from"));
+			  	  		
+			  	  	String doknr = ordOrig.getDokNr();
+			  	  		
+			  
+			  	  		mail.setSubjectFilesTo("Pigu slip order : " + doknr);
+			  	  	
+			  	  		
+			  	  	String cc = "";
+		  	  		if(doknr != null && doknr.trim().length() > 0) {
+		  	  		    cc = "<br>Order : " +  doknr ;
+		  	  		}
+			  	  		mail.setEncoding("utf-8");
+			  	  		mail.setBodyHtml(cc );
+			  	  		//mail.setBody("\nOrder :" +  doknr + " \nCustomer code :" + custid +  "\nCustomer Name :" + nimi + "\n" +
+			  	  			//    "Manager :" + agent + "\n" +  "\n" + lisa + comment + "\n\n.");
+			  	  		
+			  	      String filePath = "WebShopper/slips/"+doknr + ".pdf";
+			  	   // filePath = "WebShopper/slips/printed/"+doknr + ".pdf";
+			  	  		mail.setSendNotice(false);
+			  	  		if(filePath != null) {
+			  	  		 mail.addAttach(filePath);
+			  	  		}
+			  	  	System.out.println("\nOrder Comment55 "  );
+			  	  		String to = parentLOC.getProps().getProperty("slipemail");
+			  	  		StringTokenizer st = new StringTokenizer(to,",");
+			  	  		while(st.hasMoreElements()) {
+			  	  		mail.setFilesTo(st.nextToken());
+			  	  		mail.send();
+			  	  		}
+			  	  
+			  	   	System.out.println("\nOrder Comment66 "  );
+			  	  
+			  	  		
+			  	  	
+			  				
+		   		       File f = new File(filePath);
+		   		   String  filePath2 = "WebShopper/slips/printed/"+ordOrig.getDokNr() + ".pdf";
+		   		       File dest = new File(filePath2);
+		   		    boolean rm =   f.renameTo(dest);
+		   		       
+		   			System.out.println("\nOrder Comment " +  doknr +  "<<<<<" + rm  );
+			  	
+			  			}catch(Exception e){
+			  			e.printStackTrace();	
+			  			}
+			  	
+		   }
+		
+	
+	
+		 
+		
+		
+	   return true;
+	   
 	}
 
 	public boolean printPackingSlip() {
@@ -582,7 +680,7 @@ System.out.println( ordOrig.getContactID()+" "  + obj.toJSONString()+" " +aaa);
 			        byte[] decodedPdfBytes = Base64.getDecoder().decode(aaa);
 
 			        // Path where you want to save the PDF file
-			        String filePath = "WebShopper/slips/"+ordOrig.getContactID() + ".pdf";
+			        String filePath = "WebShopper/slips/"+ordOrig.getDokNr() + ".pdf";
 
 			        // Write the byte array into a PDF file
 			        try (FileOutputStream fos = new FileOutputStream(filePath)) {

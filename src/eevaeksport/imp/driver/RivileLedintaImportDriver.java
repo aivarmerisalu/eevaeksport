@@ -737,22 +737,23 @@ public Vector getDebt() throws SQLException{
        double linevat = 0;
        if (ale != 0 ){
     	 	  
-         linesum =   Converter.Round((float) ((line.getKogus() * line.getPrice())*(100-ale)/100),2);
-         linevat =    Converter.Round((float) ((line.getKogus() * line.getPrice() * 0.21)*(100-ale)/100),2); 	
+         linesum =   Double.parseDouble(nf.format ((line.getKogus() * line.getPrice())*(100-ale)/100));
+         linevat =   Double.parseDouble(nf.format((line.getKogus() * line.getPrice() * 0.21)*(100-ale)/100)); 	
 
    } else {
-	   linesum =   Converter.Round((float) (line.getKogus() * line.getPrice()),2);
-       linevat =    Converter.Round((float) (line.getKogus() * line.getPrice() * 0.21),2); 
+	   linesum =   Double.parseDouble(nf.format((line.getKogus() * line.getPrice() ))); 
+       linevat = Double.parseDouble(nf.format((line.getKogus() * line.getPrice() * 0.21)));  
+    		   //Converter.Round((float) (line.getKogus() * line.getPrice() * 0.21),2); 
    }
        sum = sum + linesum;
        sumVat = sumVat + linevat;
    }
     
-   double baseVat =  Converter.Round((float) (sum * 0.21),2);
+   double baseVat =  Double.parseDouble(nf.format( Double.parseDouble(nf.format((sum))) * 0.21));
    
-   addtoVat =  sumVat  - baseVat;
+   addtoVat = baseVat - sumVat ;
    
-   System.out.println("vats " + addtoVat + " " + baseVat + " " + sumVat);
+   System.out.println("vats " + addtoVat + " " + baseVat + " " + sumVat + " " + sum);
    
 
    

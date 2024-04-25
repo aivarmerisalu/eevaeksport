@@ -1224,20 +1224,26 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 
        public String getSaveStockInfo(){
     			  
-    	   String cmd = " SELECT [Item No_] as kood       ,[Quantity] as kogus  ,[Location code] " +
+    	   String cmd = " SELECT [Item No_] as kood ,[Quantity] as kogus  ,[Location code] " +
 "  FROM [_MERISOFT$Tobis_Stock]";
    
+ 		  
+    	   String cmd2 = "  SELECT [No_] as toode from [2015_Tobis$Item] where  [Show in mob_ device] = 1 ";
     	  
     		   	  HashSet koodid = new HashSet();
 
     		          if (isDebug()) System.out.println(cmd);
     		          StringBuffer products = new StringBuffer();
     		          try {
+    		        		 Connection con = getNewConnection2();
+ 		        	        Statement stmt = con.createStatement();
+ 		        	        ResultSet rs = stmt.executeQuery(cmd2);
 
+ 		            while (rs.next()) {
+ 		             	  koodid.add(rs.getString("toode").trim());
+ 		              }
 
-    		            	 Connection con = getNewConnection2();
-    		        	        Statement stmt = con.createStatement();
-    		        	        ResultSet rs = stmt.executeQuery(cmd);
+    		         rs = stmt.executeQuery(cmd);
 
     		            while (rs.next()) {
 
@@ -1286,8 +1292,9 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 
    public TreeMap getProdGroups() throws SQLException {
      TreeMap   tm = new TreeMap();
-    // setTreeGroup(true);
-     String cmd = "select dv.Code  as kood, dv.Name  as nimi from [2015_Tobis$Dimension Value] dv where dv.[Dimension Code]='PROJEKTAS'";
+     setTreeGroup(true);
+     String cmd = "SELECT [code]a as kood , [name] as nimi,[Group 2 Code] as vanem" + 
+     		"  FROM [NAV40].[dbo].[2015_Tobis$Dimension Value] where [Dimension Code]='projektas'";
      System.out.println("Asike 1 " +cmd);
      try {
      	 Connection con = getNewConnection2();
@@ -1299,9 +1306,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
  	          String name = rs.getString("nimi") ;
  	               
  	                   tm.put(Converter.cleanLitLatEst(cleardots(groupID)),Converter.enCodeEst(groupID + " " +name));
- 	                  if(!docCodes.contains(Converter.cleanLitLatEst(cleardots(groupID)))){
- 	               	     docCodes.add(Converter.cleanLitLatEst(cleardots(groupID)));
- 	                  }
+ 	                  
  	        }
  	       // System.out.println("Teine" + tm.toString());
  	        rs.close();
@@ -2283,7 +2288,7 @@ System.out.println(cmd);
        public Vector getFixedAssortmentData1() {
            Vector lines = new Vector();
            TreeMap prods = this.getProducts2();
-          System.out.println("prods " + prods.size() + " " + pricelists.toString());
+        //  System.out.println("prods " + prods.size() + " " + pricelists.toString());
            
            try {
        		  File f = new File (getDir() + "hinnakiri.xml");
@@ -2747,12 +2752,13 @@ System.out.println(cmd);
    
    HashSet docCodes = new HashSet();
    private TreeMap agents1 = new TreeMap();
+  private  HashSet prodsUsed = null;
    
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
 
      docCodes = new HashSet();
-     HashSet prodsUsed = new HashSet();
+     prodsUsed = new HashSet();
 
      
      TreeMap  ladutr = new TreeMap();
@@ -3491,6 +3497,7 @@ TreeMap sorting = new TreeMap();
 			        		 if(isOkDate(date)){
 			        			
 			     					Vector cps = this.getCPCombi(Converter.deCode(custid),number,date);
+			     					
 			     					if(cps != null){
 			     						Enumeration eee = cps.elements();
 			     						while( eee.hasMoreElements()){
@@ -3498,15 +3505,15 @@ TreeMap sorting = new TreeMap();
 			     						if(cp.getCustID().equals(custid) && dirCustCodes.get(custid) != null) {
 			     							cp.custID = dirCustCodes.get(custid)+"";
 			     						}
+			     						 if(sorting.get(custid +  cp.getProdID()) == null) {
 			     							sorting.put(custid +  cp.getProdID()  , cp);
-				     					//	System.out.println(date + " " + number + " " + custid);
-			     						}			     				
-					        			 	
+			     						 }
+				     				   }	
 			     					}
-			     				}
-			        	  }		
-		        	}           	
-		        }
+			     				 }
+			        	      }		
+		        	      }           	
+		              }
 		      //  System.out.println(inputLineBuf);
 		        in.close();
 		        isr.close();
@@ -3523,6 +3530,15 @@ TreeMap sorting = new TreeMap();
 	   System.out.println("cp directo size " + sorting.size());
   }
 
+   public static Vector upside(Vector inVecu){
+	   Vector inVec = (Vector)inVecu.clone();
+        Vector sorted = new Vector(inVec.size());
+        while(inVec.size() > 0){
+        	sorted.addElement(inVec.elementAt(inVec.size()-1));
+        	inVec.removeElementAt(inVec.size()-1);
+        }
+        return sorted;
+      }
 
 
    public String getStartingTime(){
@@ -4181,6 +4197,10 @@ private HashSet prodCodes = null;
       	     Product prod = new Product(id);
       	   
       		boolean goes = true;
+      		
+      		
+      		Node dd = rida.getChildNodes().item(0);
+      		
       	    
       	    if(proddatafile) {
       	    	try {
@@ -4304,7 +4324,33 @@ private HashSet prodCodes = null;
       	 		prod.setStock(stoo);
       	 		
       	 	 }
-      		 }}
+      		 }
+       		
+    			
+  	    		 if(rid.getNodeName().equals("datafields")){
+    				
+    				 for (int re = 0; re < rid.getChildNodes().getLength(); re++){
+    					 Node nn2 = rid.getChildNodes().item(re);
+    					 
+    					if("data".equals(nn2.getNodeName())) {
+    						
+    						//System.out.println("nodes " + nn2.getAttributes().getNamedItem("code").getNodeValue());
+    					
+    					if("WEB_ART".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+    						
+							if(!"Rodyti B2B".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
+								goes = false;
+							//			System.out.println("On Fix " + customer.getName());
+							}
+        					
+    					}
+    				   }
+    				 }
+	         		
+	         		 }
+      		 
+      		 
+      		 }
      	         // prod.setStock((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
                    }catch(Exception e) {
                 	   e.printStackTrace();
@@ -4320,6 +4366,10 @@ private HashSet prodCodes = null;
       		  goes = true;
       	  }
       	}
+      	
+      	
+    	  	
+      	
       	try {
       	 String stop =  rida.getAttributes().getNamedItem("ART_STOPPED").getNodeValue();
       	if(stop.equals("Yes")){

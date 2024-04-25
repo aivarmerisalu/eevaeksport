@@ -161,7 +161,7 @@ System.out.println(sql);
   		if(dire != null) {
   			res.put(kood, dire.trim());
   			if(dirord == 1) {
-  				System.out.println("directo Only " + kood);
+  			//	System.out.println("directo Only " + kood);
   			directoOnly.add(kood);
   			}
   		}
@@ -1117,6 +1117,7 @@ private HashMap naviProds = null;
 		  ord.setAgentCode(order.getAgentCode());
 		  ord.setDokNr(order.getDokNr());
 		  ord.setCompName(order.getShipMode());
+		  ord.setShipMode(order.getShipMode());
 		  ord.setShipCal(order.getShipCal().getTimeInMillis() +"");
 		  ord.setStatus(order.getStatus()); 
 		  ord.setInfo(order.getInfo());
@@ -1131,6 +1132,7 @@ private HashMap naviProds = null;
 		  orddirecto.setAgentCode(order.getAgentCode());
 		  orddirecto.setDokNr(order.getDokNr()+"B");
 		  orddirecto.setCompName(order.getShipMode());
+		  orddirecto.setShipMode(order.getShipMode());
 		  orddirecto.setShipCal(order.getShipCal().getTimeInMillis() +"");
 		  orddirecto.setStatus(order.getStatus()); 
 		  orddirecto.setInfo(order.getInfo());
@@ -1141,8 +1143,19 @@ private HashMap naviProds = null;
           
 		  orddirecto.setCurrency("directo");
 
+		  boolean dironly = false;
+			String custid = ord.getCompany();
 		  
-	
+		     custid =   (String) this.custcodes.get(custid);
+		     if(custid == null) {
+		    	 custid = (ord.getCompany());
+		     }
+		     
+		     if(directoOnly.contains(custid) || directoOnly.contains(ord.getCompany())) {
+		    	 dironly = true;
+		     }
+		     
+	     System.out.println("dironly " + dironly);
 		  
 		  Vector lines = order.getOrderLines();
 		  
@@ -1154,7 +1167,7 @@ private HashMap naviProds = null;
 				  ord.docType = "less";
 			  }
 			    	
-			    	if(naviProds.containsKey(lin.getToode()) && !directoOnly.contains(order.getCompany())) {
+			    	if(naviProds.containsKey(lin.getToode()) && !dironly) {
 			    		ord.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 				     	ord.setDokNr(order.getDokNr());
