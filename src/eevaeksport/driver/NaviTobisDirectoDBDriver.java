@@ -1289,11 +1289,49 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
            public String  getCustProdDiscounts(Agent agent){
             return null;
             }
+           
+           
+      	 private String ensureLen(String in ){
 
+    		 if(in.length() == 7){
+    			 in = "0" + in ;
+    		 }
+    		 if(in.length() == 6){
+    			 in = "00" + in ;
+    		 }
+    		 if(in.length() == 5){
+    			 in = "000" + in ;
+    		 }
+    		 if(in.length() == 4){
+    			 in = "0000" + in ;
+    		 }
+    		 if(in.length() == 3){
+    			 in = "00000" + in ;
+    		 }
+    		 if(in.length() == 2){
+    			 in = "000000" + in ;
+    		 }
+
+    		 if(in.length() == 1){
+    			 in = "0000000" + in ;
+    		 }
+    		 return in;
+    	 }
+           private TreeMap<String, String> cateFullGroup = null;
+           TreeMap   group2List = new TreeMap();
+           
+           
+           
    public TreeMap getProdGroups() throws SQLException {
      TreeMap   tm = new TreeMap();
+     
      setTreeGroup(true);
-     String cmd = "SELECT [code]a as kood , [name] as nimi,[Group 2 Code] as vanem" + 
+     
+     cateFullGroup = new TreeMap<String, String>();
+     
+     TreeMap secname = new TreeMap();
+     
+     String cmd = "SELECT [code] as kood , [name] as nimi,[Group 2 Code] as vanem" + 
      		"  FROM [NAV40].[dbo].[2015_Tobis$Dimension Value] where [Dimension Code]='projektas'";
      System.out.println("Asike 1 " +cmd);
      try {
@@ -1302,10 +1340,24 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
  	        Statement stmt = con.createStatement();
  	        ResultSet rs = stmt.executeQuery(cmd);
  	        while(rs.next()){
- 	            String groupID = rs.getString("kood");
- 	          String name = rs.getString("nimi") ;
+ 	        	
+ 	          String groupID = rs.getString("kood").trim();
+ 	          String name = rs.getString("nimi").trim() ;
+ 	          String vanem = rs.getString("vanem");
+ 	          
+ 	          if(groupID.startsWith("/")) {
+                   tm.put(Converter.cleanLitLatEst(cleardots(ensureLen(groupID.substring(1)))), name);
+                   secname.put(Converter.cleanLitLatEst(cleardots(ensureLen(groupID.substring(1)))), name);
+ 	          }
+ 	          
+ 	          if (vanem != null && vanem.trim().length() > 0 ) {
+ 	        	  String g = Converter.cleanLitLatEst(cleardots(ensureLen(vanem.substring(1))));
+ 	        	 cateFullGroup.put(groupID,g);
+ 	        	group2List.put(g + groupID, name);
+ 	          }
+ 	          
+ 	       
  	               
- 	                   tm.put(Converter.cleanLitLatEst(cleardots(groupID)),Converter.enCodeEst(groupID + " " +name));
  	                  
  	        }
  	       // System.out.println("Teine" + tm.toString());
@@ -1316,8 +1368,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
         e.printStackTrace();
       }  
      
-     getProdGroupsDirecto(tm);
-     
+     tm.put("fake", "FAKE");
       return tm;
    }
 
@@ -1397,10 +1448,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 
 
    public TreeMap getProdGroupsSecond() throws SQLException {
-    TreeMap   tm = new TreeMap();
-
-  
-        return tm;
+        return group2List;
   }
 
 
@@ -2757,6 +2805,13 @@ System.out.println(cmd);
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
 
+     try {
+		this.getProdGroups();
+	} catch (SQLException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+     
      docCodes = new HashSet();
      prodsUsed = new HashSet();
 
@@ -2873,7 +2928,13 @@ System.out.println(cmd);
               
               String grupp = cleardots(rs.getString("grupp"));
         		if(grupp != null && grupp.trim().length() >0){
-        			prod.setGroup(Converter.cleanLitLatEst(grupp.trim()));	
+        			grupp = grupp.trim();
+        			 if(this.cateFullGroup.get(grupp) != null) {
+                  	   String g1 = cateFullGroup.get(grupp);
+                  	   prod.setGroup(g1);
+                  	   prod.setGroupSecond(g1+grupp);
+                     }
+        			//prod.setGroup(Converter.cleanLitLatEst(grupp.trim()));	
         		}
         	prod.setType("TOBIS");
         		
@@ -2969,13 +3030,7 @@ System.out.println(cmd);
           
         }
         
-  	  String inP = parent.getProps().getProperty("doc.origpath");
-      String outP = parent.getProps().getProperty("doc.destination");
-//      Converter.prepareDocCatalogue(inP, outP, docCodes, false);
-      
-      
-   
-      
+  	     
       
         rs.close();
         stmt.close();
@@ -3009,30 +3064,10 @@ System.out.println(cmd);
                 if(end.after(new Date())) {
                	 ttt = end.getTime();
                 }
-               	if(kogus == 0){
-               		//kogus = 1;
-               	}
                	
                
-               	
-               	// siia teha number format 
-               	
                	      buf.append(toodex+ ";" + gruppx + ";" + gruppx + ";" + NF.format(hind).replace(',', '.') + "; ;" + kogus + "; ;" + ttt + ";" + disc );
                        buf.append("\n");	
-                       
-                       
-                /*   	id = st.nextToken();
-                	 	actcode = st.nextToken();
-                   	 	actname = st.nextToken();        	 
-                       	String hind  = st.nextToken();
-                       		actgrupp = st.nextToken();
-                       		actamount = Double.valueOf(st.nextToken()).doubleValue();
-                       			bonamount = Double.valueOf(st.nextToken()).doubleValue();
-                       		end = Long.parseLong(st.nextToken());
-                    	  disc = Double.valueOf(st.nextToken()).doubleValue();
-                    	  cust = 
-                   	*/
-                       
                        
            		
            	}catch(Exception e){
@@ -3090,29 +3125,11 @@ System.out.println(cmd);
                         		kogus = 1;
                         	}
                         	
-                        
-                        	
-                        	// siia teha number format 
-                        	
                         	      buf.append(toodex+ ";" + aa + ";" + " " + ";" + NF.format(hind).replace(',', '.') + ";" 
                         	      + " " + ";" + (int)(kogus+0.001) + "; ;" + ttt + ";" + disc + ";" + gruppx);
                                 buf.append("\n");	
                                 
-                                
-                         /*   	id = st.nextToken();
-                         	 	actcode = st.nextToken();
-                            	 	actname = st.nextToken();        	 
-                                	String hind  = st.nextToken();
-                                		actgrupp = st.nextToken();
-                                		actamount = Double.valueOf(st.nextToken()).doubleValue();
-                                			bonamount = Double.valueOf(st.nextToken()).doubleValue();
-                                		end = Long.parseLong(st.nextToken());
-                             	  disc = Double.valueOf(st.nextToken()).doubleValue();
-                             	  custid
-                            	*/
-                                
-                                
-                    		
+                        	
                     	}catch(Exception e){
                     		
                     	}
@@ -4087,16 +4104,6 @@ private HashSet prodCodes = null;
       	}
       }
      
-     if(getParent().getProps().getProperty("usedataforgroups") != null){
-         groupIndent = getParent().getProps().getProperty("usedataforgroups");
-      	prGroups = new TreeMap();
-      	try {
-			this.getProdGroups2();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-      }
      
      String fixedurl = null;
      
@@ -4196,7 +4203,7 @@ private HashSet prodCodes = null;
         	
       	     Product prod = new Product(id);
       	   
-      		boolean goes = true;
+      		boolean goes = false;
       		
       		
       		Node dd = rida.getChildNodes().item(0);
@@ -4241,8 +4248,9 @@ private HashSet prodCodes = null;
       	 try { 
         	    String gr =  rida.getAttributes().getNamedItem("class").getNodeValue(); 
         	    String grn =  rida.getAttributes().getNamedItem("classname").getNodeValue(); 
-        	 	prod.setGroup(gr);
-        	 	prGroups.put(gr, grn);
+        	    prod.setDiscgrupp(gr);
+        	 	prod.setGroup("fake");
+        	 	
               }catch(Exception e) {}
       	  
            	
@@ -4338,13 +4346,24 @@ private HashSet prodCodes = null;
     					
     					if("WEB_ART".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
     						
-							if(!"Rodyti B2B".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
-								goes = false;
+							if("Rodyti B2B".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
+								goes = true;
 							//			System.out.println("On Fix " + customer.getName());
 							}
         					
     					}
     				   }
+    					
+    					
+if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+    						String grupp3 = nn2.getAttributes().getNamedItem("content").getNodeValue();
+                           if(this.cateFullGroup.get(grupp3) != null) {
+                        	   String g1 = cateFullGroup.get(grupp3);
+                        	   
+                        	   prod.setGroup(g1);
+                        	   prod.setGroupSecond(g1+grupp3);
+                           }
+    					}
     				 }
 	         		
 	         		 }
@@ -4408,16 +4427,7 @@ private HashSet prodCodes = null;
    
  
      //teeme puhtaks grupi mapi 
-     TreeMap grups  = new TreeMap();
-    Iterator itera =  prGroups.keySet().iterator();
-    while (itera.hasNext()){
-    	String key = itera.next()+"";
-    	if(usedGroups.contains(key)){
-    		grups.put(key,prGroups.get(key) );
-    	}
-    }
     
-    prGroups = grups;
     
     
        if(sb.length() > 0) {

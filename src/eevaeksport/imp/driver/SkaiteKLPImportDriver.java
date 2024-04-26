@@ -297,6 +297,10 @@ import eevaeksport.util.Converter;
 	   nf3.setGroupingUsed(false);
 	   nf3.setMaximumFractionDigits(3);
 	   nf3.setMinimumFractionDigits(0);
+
+	   nf4.setGroupingUsed(false);
+	   nf4.setMaximumFractionDigits(4);
+	   nf4.setMinimumFractionDigits(0);
 	   
      setOrder(order);
    //  String aiai = parent.getProps().getProperty("testing");
@@ -414,10 +418,12 @@ import eevaeksport.util.Converter;
 	          sum = sum + (line.getPrice() * line.getKogus());
 
 	          double price2 = Converter.Round((float) (line.getPrice()*((100-ale)/100)), 2);
-	          double price = Converter.Round((float) (line.getPrice()*((100-ale)/100) + 0.0000001), 2);
+	          double price = Converter.Round((float) (line.getPrice()*((100-ale)/100) + 0.0000001), 4); // SIIN  MUUTSIN 4 PEALE OLI 2 
 		         
 	          System.out.println("Hind " + price + " " + price2 );
 	          double reasum = price * line.getKogus();
+	          
+	          
 	          if(line.getDiscount() == -2){
 	        
 	        	
@@ -438,7 +444,7 @@ import eevaeksport.util.Converter;
 	        		 sb2.append("<Item Nr=\"" + (i+1) + "\" ID=\"" + toode + "\" Amount=\"" +  
 	        	   			 escape(amm.format(line.getKogus()).replace('.', ','))+ "\"  Price=\"" 
 	        		 		+ escape(nf.format(line.getPrice()).replace('.', ',')) + 
-	        		 		"\" Discount=\"" + escape(nf.format(ale).replace('.', ','))+"\" Price2=\"" + escape(nf.format(price).replace('.', ',')) +
+	        		 		"\" Discount=\"" + escape(nf.format(ale).replace('.', ','))+"\" Price2=\"" + escape(nf4.format(price).replace('.', ',')) +
 	        		 		"\" Summ=\"" + escape(nf.format(reasum).replace('.', ',')) + "\" Notes=\"\" /> " + ls);
 	        	            	  
 	          }
@@ -749,26 +755,11 @@ System.out.println(res);
 	}
 	
    
-   private boolean repricemode = false;
    
 
    public String getDriverVersion(){
      return "SkaiteKLP";
    }
-
-   private String getDate(Calendar cal){
-   String yy = cal.get(Calendar.YEAR)+"";
-   String mm = (cal.get(Calendar.MONTH)+1)+"";
-   if(mm.length()==1){
-   	mm = "0"+ mm ;
-   }
-   String dd = (cal.get(Calendar.DAY_OF_MONTH)) +"";
-   if(dd.length()==0){
-   	dd = "0" + dd;
-   }
-   return yy+"-"+mm+"-"+dd;
-   }
-   
    
    private void setOrder(Order order){
      this.order = order;
@@ -794,6 +785,7 @@ System.out.println(res);
 
    private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
    private NumberFormat nf3 = NumberFormat.getInstance(Locale.ENGLISH);
+   private NumberFormat nf4 = NumberFormat.getInstance(Locale.ENGLISH);
    private ImportPanel parent;
    private Order order = null;
    private boolean isAmount = false;

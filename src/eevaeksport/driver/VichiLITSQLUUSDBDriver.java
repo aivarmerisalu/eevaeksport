@@ -417,9 +417,12 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 
 		try {
 
-			String cmd = " SELECT grupp ,toode from MobileJavaVIK.v_VIK_Asortimentas where len(grupp) > 1 and grupp != 'MINASORT'";
-System.out.println(cmd);
-			 Connection con = this.getNewConnectionView();
+			String cmd = " SELECT a.grupp ,a.toode  from MobileJavaVIK.v_VIK_Asortimentas a inner join MobilejavaVIK.v_VIK_GetProducts"
+					+ " p ON p.toode=a.toode where len(a.grupp) > 1 and a.grupp != 'MINASORT'\r\n" + 
+					" order by a.grupp,p.kaal,a.toode";
+            System.out.println(cmd);
+            
+			Connection con = this.getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
@@ -1544,19 +1547,7 @@ System.out.println(cmd);
 			rs.close();
 			con.close();
 
-			String cmd7 = " select sd.[Code] as kood ,[Line Discount %] as disc, 'price' as types from [Vičiūnai ir Ko$Sales Line Discount] sd \r\n" + 
-					"				 where getdate() between [Starting Date] and [Ending Date] +1 \r\n" + 
-					"				 union\r\n" + 
-					"		select [Item No_] as kood, [Discount, Pct] as disc , 'disc' as types from [Vičiūnai ir Ko$Akcijų kainos] where [Discount, Pct] > 0 " + 
-					"		 and [Customer No_] = '' and CAST(GETDATE() As Date) BETWEEN [Starting Date]\r\n" + 
-					"		 AND ISNULL(NULLIF([End Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date)))  \r\n" + 
-					"		 order by 1,3, 2 desc ";
-			
-			cmd7 = " select sd.[Code] as kood ,[Line Discount %] as disc, 'price' as types from [Vičiūnai ir Ko$Sales Line Discount] sd \r\n" + 
-					"				 where getdate() between [Starting Date] and [Ending Date] +1 ";
-			
-			
-			cmd7 = "select * from MobilejavaVIK.v_VIK_GetDiscount";
+			String cmd7 = "select * from MobilejavaVIK.v_VIK_GetDiscount";
 			con = getNewConnectionView();
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(cmd7);
@@ -1672,23 +1663,7 @@ System.out.println(cmd);
 		
 
 		try {
-			String 	cmd = "SELECT t.[No_] AS toode, (t.[Search Description]) AS nimi, sp.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp\r\n" + 
-					"	, t.[Pogrupio kodas] AS grupp2  , [Base Unit of Measure] AS unit\r\n" + 
-					"	, [Brūkšninis kodas] AS ean, [Product Status] AS [status], [Line Discount %] AS maxdiscount, t.[Type] AS [type]\r\n" + 
-					"	, [Qty_ per Unit of Measure] AS kastis, [Net Weight] AS kaal\r\n" + 
-					"	, [VAT Prod_ Posting Group] AS vat, [Description] AS vatdesc , '' AS [type]\r\n" + 
-					"    , [Order Multiple] AS optimum, [Minimum Order Quantity] AS minimum , [Country of Origin Code] as origi \r\n" + 
-					"FROM [Vičiūnai ir Ko$Item] t INNER JOIN [Vičiūnai ir Ko$Item 2] t2 ON t.[No_] = t2.[No_]\r\n" + 
-					"	INNER JOIN (SELECT [Item No_], [Unit Price], [Unit of Measure Code], ROW_NUMBER() OVER (PARTITION BY [Item No_] ORDER BY [Starting Date] DESC) AS [Priority]\r\n" + 
-					"	FROM [Vičiūnai ir Ko$Sales Price] WHERE [Sales Type] = 2 AND CAST(GETDATE() As Date) BETWEEN [Starting Date] AND ISNULL(NULLIF([Ending Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date))) ) AS sp \r\n" + 
-					"	ON t.No_ = sp.[Item No_] AND t.[Base Unit of Measure] = sp.[Unit of Measure Code] AND sp.[Priority] = 1\r\n" + 
-					"    LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] AS vat ON vat.[Item No_] = t.[No_] AND vat.[Code] = 'DĖŽ.'\r\n" + 
-					"    LEFT JOIN [Vičiūnai ir Ko$Sales Line Discount] AS sd ON sd.[Code] = t.[No_] AND [Sales Type] = 1 AND [Sales Code] = 'AGENT' \r\n" + 
-					"   AND [Starting Date] <= GETDATE() AND [Ending Date] >= GETDATE()   \r\n" + 
-					"WHERE ([Blocked] = 0 AND sp.[Unit Price] > 0 AND LEN([Grupės kodas]) > 0 AND LEN([Search Description]) != 0 AND t2.[Not for Merisoft] <> 1) \r\n" + 
-					"ORDER BY t.[No_]" ;
-			
-			cmd = "select * from  MobilejavaVIK.v_VIK_GetProducts ";
+			String 	cmd = "select * from  MobilejavaVIK.v_VIK_GetProducts ";
 			
 			System.out.println(cmd);
 			//Connection con = getNewConnection2();
@@ -1750,63 +1725,7 @@ System.out.println(cmd);
 				
   
 				String gr2 = rs.getString("grupp2");
-   
-				/*
-				if (cleardots(gr2).equals("1101")) {
-					gr2 = "1.a.1.";
-				}
-				if (cleardots(gr2).equals("1102")) {
-					gr2 = "1.a.2.";
-				}
-				if (cleardots(gr2).equals("1103")) {
-					gr2 = "1.a.3.";
-				}
-				
-				
-				if (cleardots(gr2).equals("1111")) {
-					gr2 = "1.b.1.";
-				}
-				if (cleardots(gr2).equals("1112")) {
-					gr2 = "1.b.2.";
-				}
-				if (cleardots(gr2).equals("1113")) {
-					gr2 = "1.b.3.";
-				}
-				
-				
-				
-				if (cleardots(gr2).equals("1121")) {
-					gr2 = "1.c.1.";
-				}
-				if (cleardots(gr2).equals("1122")) {
-					gr2 = "1.c.2.";
-				}
-				if (cleardots(gr2).equals("1123")) {
-					gr2 = "1.c.3.";
-				}
-				
-				if (cleardots(gr2).equals("1124")) {
-					gr2 = "1.c.4.";
-				}
-				if (cleardots(gr2).equals("1125")) {
-					gr2 = "1.c.5.";
-				}
-				if (cleardots(gr2).equals("1126")) {
-					gr2 = "1.c.6.";
-				}
-				if (cleardots(gr2).equals("1127")) {
-					gr2 = "1.c.7.";
-				}
-				if (cleardots(gr2).equals("1128")) {
-					gr2 = "1.c.8.";
-				}
-				if (cleardots(gr2).equals("1129")) {
-					gr2 = "1.c.9.";
-				}
-				*/
-				
-				
-				
+   			
 				String grupp2 = cleardots(gr2);
 			
 				
