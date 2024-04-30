@@ -1329,14 +1329,13 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
      
      cateFullGroup = new TreeMap<String, String>();
      
-     TreeMap secname = new TreeMap();
      
-     String cmd = "SELECT [code] as kood , [name] as nimi,[Group 2 Code] as vanem" + 
+     String cmd = "SELECT [code] as kood , [Short Name ] as nimi,[Group 2 Code] as vanem" + 
      		"  FROM [NAV40].[dbo].[2015_Tobis$Dimension Value] where [Dimension Code]='projektas'";
      System.out.println("Asike 1 " +cmd);
      try {
      	 Connection con = getNewConnection2();
-     	 docCodes = new HashSet();
+     	    docCodes = new HashSet();
  	        Statement stmt = con.createStatement();
  	        ResultSet rs = stmt.executeQuery(cmd);
  	        while(rs.next()){
@@ -1347,7 +1346,6 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
  	          
  	          if(groupID.startsWith("/")) {
                    tm.put(Converter.cleanLitLatEst(cleardots(ensureLen(groupID.substring(1)))), name);
-                   secname.put(Converter.cleanLitLatEst(cleardots(ensureLen(groupID.substring(1)))), name);
  	          }
  	          
  	          if (vanem != null && vanem.trim().length() > 0 ) {
@@ -1355,12 +1353,8 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
  	        	 cateFullGroup.put(groupID,g);
  	        	group2List.put(g + groupID, name);
  	          }
- 	          
- 	       
- 	               
- 	                  
  	        }
- 	       // System.out.println("Teine" + tm.toString());
+ 	  
  	        rs.close();
  	        stmt.close();
  	        con.close();
@@ -1645,6 +1639,7 @@ private Date getDate(String mmddyy){
  	    	   
  	    	   String custID = rs1.getString("kood").trim();
    	           String dir = rs1.getString("directo").trim();
+   	        		   
    	           dirCustCodes.put(dir, custID); 
    	           custtsUsed.add(dir);
    	           
@@ -1835,7 +1830,7 @@ private Date getDate(String mmddyy){
     	 			        		 if(vv != 0){
     	 			        			 if(isDueDate(duedate)){
     	 						        		     Debt dd = new Debt();
-    	 						     				  dd.setCustID((String)dirCustCodes.get(custid));
+    	 						     				  dd.setCustID(Converter.enCodeEst((String)dirCustCodes.get(custid)));
     	 						     				  
     	 						     				  dd.setDoknr("GZ-" + number);
     	 						     				  dd.setDate(getDate(date));
@@ -3520,7 +3515,7 @@ TreeMap sorting = new TreeMap();
 			     						while( eee.hasMoreElements()){
 			     						CustProd cp = (CustProd) eee.nextElement();
 			     						if(cp.getCustID().equals(custid) && dirCustCodes.get(custid) != null) {
-			     							cp.custID = dirCustCodes.get(custid)+"";
+			     							cp.custID = Converter.enCodeEst(dirCustCodes.get(custid)+"");
 			     						}
 			     						 if(sorting.get(custid +  cp.getProdID()) == null) {
 			     							sorting.put(custid +  cp.getProdID()  , cp);
@@ -4793,7 +4788,7 @@ if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
 			        	}
 			        	
 		        if(toode != null && toode.trim().length() > 0){
-			        result.add(new CustProd(this.dirCustCodes.get(custid)+"", toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
+			        result.add(new CustProd(Converter.enCodeEst(dirCustCodes.get(custid)+""), toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
 
 			        if(!prodCodes.contains(toode)){
 				        prodCodes.add(toode);	
