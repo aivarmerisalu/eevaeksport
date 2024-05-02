@@ -123,9 +123,11 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		HashMap hash = new HashMap();
 		
 			try {
+				
+				String tobisstock = parent.getProps().getProperty("tobisstockpath");
 
-		final File  v  = new File("stocktobis.txt");
-         Converter.downloadFile("https://www.tobis.lt/MeRiSoFt/stockref.txt", "stocktobis.txt");
+		final File  v  = new File(tobisstock);
+        // Converter.downloadFile("https://www.tobis.lt/MeRiSoFt/stockref.txt", "stocktobis.txt");
 			
 
 				BufferedReader  inse = new BufferedReader(new FileReader(v));

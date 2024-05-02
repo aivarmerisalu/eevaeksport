@@ -549,13 +549,15 @@ String ag = rs.getString("agent").trim();
               
               cust.addAgent(new Agent(ag));
           //    cust.addAgent(new Agent("05"));
-                
+              cust.setPaymTerm("21");
               
               String paym = rs.getString("paymterm");
               if(paym != null && paym.trim().length() > 1){
+            	  
             	  cust.setPaymTerm(paym.trim().substring(0,paym.trim().length() -1));  
             	//  System.out.println(cust.getID() +  " " + cust.getPaymTerm());
               }
+              
               
               
              

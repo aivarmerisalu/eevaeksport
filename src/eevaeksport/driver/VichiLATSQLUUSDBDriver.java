@@ -383,9 +383,7 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 					            	 mline.setStartDate(sdate.substring(0,10));
 					             }
 				             }
-				             }
-				             
-				             if(startG) {
+				             }else   if(startG) {
 				            	 if(sdate != null  && !sdate.startsWith("1753")){
 					            	 mline.setStartDate(sdate.substring(0,10));
 					             }
