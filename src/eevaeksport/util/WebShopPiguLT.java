@@ -468,7 +468,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 			
 			if(!orderHistory.contains(ord.getDokNr())) {
 				orderHistory.add(ord.getDokNr());
-			
+			System.out.println("Tellimusel ridu " + ord.getDokNr() + " " + ord.getOrderLines().size());
 			boolean linesOK = true;
 			for(int i = 0; i <  ord.getOrderLines().size() ; i++) {
 				OrderLine line = (OrderLine) ord.getOrderLines().get(i);
@@ -675,7 +675,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 		HttpResponse resp = restPostRequest(url2,obj.toJSONString(), cli,null);
 		String aaa = EntityUtils.toString(resp.getEntity());
 		 
-System.out.println( ordOrig.getContactID()+" "  + obj.toJSONString()+" " +aaa);
+//System.out.println( ordOrig.getContactID()+" "  + obj.toJSONString()+" " +aaa);
 			        // Decode the base64 string into a byte array
 			        byte[] decodedPdfBytes = Base64.getDecoder().decode(aaa);
 
@@ -690,7 +690,7 @@ System.out.println( ordOrig.getContactID()+" "  + obj.toJSONString()+" " +aaa);
 			            e.printStackTrace();
 			        }
 		
-		System.out.println(aaa + " " + url2);
+		//System.out.println(aaa + " " + url2);
 		if (aaa.contains("success")) {
 		return true;
 	}

@@ -527,10 +527,13 @@ import eevaeksport.util.Converter;
    
    private void sendEmail(String body,String subjekt,String to ){
  		Email mail = new Email(null);
- 		mail.setSMTP(parent.getProps().getProperty("smtphost"));
- 		mail.setFrom(parent.getProps().getProperty("from"));
- 		mail.setSubjectFilesTo(subjekt);
- 		mail.setEncoding("UTF-8");
+ 		  mail.setFrom(parent.getProps().getProperty("from"));
+ 		  mail.setSMTP(parent.getProps().getProperty("smtphost"));
+          mail.setUser(parent.getProps().getProperty("smtpuser"));
+          mail.setPass(parent.getProps().getProperty("smtppass"));
+          mail.setPort(parent.getProps().getProperty("smtpport"));
+ 		  mail.setSubjectFilesTo(subjekt);
+ 	 	mail.setEncoding("UTF-8");
  		//mail.addAttach(f.getAbsolutePath());
  		mail.setSendNotice(false);
  		try {

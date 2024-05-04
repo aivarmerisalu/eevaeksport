@@ -124,7 +124,8 @@ System.out.println(sql);
    
    TreeMap naviCustomers = null;
    HashSet directoOnly = null;
-   
+   HashSet naviOnly = null;
+    
    private TreeMap getDirNaviCustomers() {
 	   TreeMap res = new TreeMap();
 	   try {
@@ -135,6 +136,7 @@ System.out.println(sql);
    
 		   naviCustomers = new TreeMap();
 		   directoOnly = new HashSet();
+		   naviOnly = new HashSet();
 		   
    System.out.println(sql);
 
@@ -164,6 +166,10 @@ System.out.println(sql);
   			//	System.out.println("directo Only " + kood);
   			directoOnly.add(kood);
   			}
+  			if(dirord == 2) {
+  	  			//	System.out.println("directo Only " + kood);
+  	  			naviOnly.add(kood);
+  	  			}
   		}
   		
    }
@@ -1144,7 +1150,8 @@ private HashMap naviProds = null;
 		  orddirecto.setCurrency("directo");
 
 		  boolean dironly = false;
-			String custid = ord.getCompany();
+		  boolean navonly = false;
+		  String custid = ord.getCompany();
 		  
 		     custid =   (String) this.custcodes.get(custid);
 		     if(custid == null) {
@@ -1154,8 +1161,14 @@ private HashMap naviProds = null;
 		     if(directoOnly.contains(custid) || directoOnly.contains(ord.getCompany())) {
 		    	 dironly = true;
 		     }
+		    
+
+		     if(naviOnly.contains(custid) || naviOnly.contains(ord.getCompany())) {
+		    	 navonly = true;
+		     }
+		    
 		     
-	     System.out.println("dironly " + dironly);
+	     System.out.println("dironly " + dironly + " " + navonly);
 		  
 		  Vector lines = order.getOrderLines();
 		  
@@ -1167,7 +1180,7 @@ private HashMap naviProds = null;
 				  ord.docType = "less";
 			  }
 			    	
-			    	if(naviProds.containsKey(lin.getToode()) && !dironly) {
+			    	if((naviProds.containsKey(lin.getToode()) && !dironly) || navonly) {
 			    		ord.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 				     	ord.setDokNr(order.getDokNr());
@@ -1494,9 +1507,7 @@ try{
 	   
 	   String signature = order.getSignature();
 	   
-	   
-	   //NB SIINN SIGNATUUR LÜLITA SISSE
-		  if(signatures.contains(signature) && false){ // !!!!!
+	     if(signatures.contains(signature) ){ 
 			  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
 			    		  
 		  }else{
