@@ -421,7 +421,7 @@ rs.close();
 	  
    String cmd = "select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
 	     "    INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " + 
-	     " WHERE  summ.DATAAREAID='ade' and CLOSED = 0  and dim.inventlocationid in ('VIA3L-OP') " +
+	     " WHERE  summ.DATAAREAID='ade' and CLOSED = 0  and dim.inventlocationid in ('VIA3L-OP','VIA3L-EXC','VIA3L-EXC') " +
 		"	GROUP BY  summ.itemid  having sum(availphysical) >0 ";
 
 
@@ -1410,12 +1410,12 @@ private TreeMap groups = null;
 String sql = "select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  " +
         "  INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid  " +
         "  INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and inv.dataareaid=dim.dataareaid        " +
-     " WHERE  inv.DATAAREAID='ade' and CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('VIA3L-OP') " +
+     " WHERE  inv.DATAAREAID='ade' and CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('VIA3L-OP','VIA3L-EXC','VIA-EXC') " +
 	"	GROUP BY  summ.itemid  having sum(availphysical) >0 ";
    
 sql = "select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
 	     "    INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " + 
-	     " WHERE  summ.DATAAREAID='ade' and CLOSED = 0  and dim.inventlocationid in ('VIA3L-OP') " +
+	     " WHERE  summ.DATAAREAID='ade' and CLOSED = 0  and dim.inventlocationid in ('VIA3L-OP','VIA3L-EXC','VIA-EXC') " +
 		"	GROUP BY  summ.itemid  having sum(availphysical) >0 ";
 Connection con = this.getNewConnection();
 Statement st = con.createStatement();

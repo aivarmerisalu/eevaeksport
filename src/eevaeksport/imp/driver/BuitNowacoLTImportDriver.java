@@ -254,7 +254,13 @@ try{
   public void makeOrder(Order order) throws SQLException{
 	  File ff = new File("blocked.txt");
 	  if(ff.exists()) {
-		  System.exit(0);
+		  Calendar cal = Calendar.getInstance();
+		  cal.add(Calendar.MINUTE, 15);
+		  if(ff.lastModified() > cal.getTimeInMillis()) {
+			  
+		  }else {
+			  System.exit(0);  
+		  }
 	  }
 		
 		  

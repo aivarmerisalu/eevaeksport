@@ -2597,7 +2597,7 @@ System.out.println(cmd);
 		 	         	 } catch (Exception ee){ }
 		         		 
 		         		 
-		         		  customer.setName(name + " " + customer.getID());
+		         		  customer.setName(customer.getID() + " " + name);
 		         	
 		         		 
 		         		

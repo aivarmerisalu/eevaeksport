@@ -131,7 +131,7 @@ System.out.println(sql);
 	   try {
 		
 		   String sql =  " SELECT k.[No_] AS kood, [Code in DIRECTO LT] as dire,k.[Name] AS nimi, k.[Address]+' '+k.[Address 2]+' '+k.[City] as addr1, a.[Address]+' '+a.[Address 2]+' '+a.[City] as addr2"
-		   		+ ", [Order only to DIRECTO] as dirord FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] \r\n" + 
+		   		+ ", [Order splitting] as dirord FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] \r\n" + 
                    " and a.Code=k.[Ship-to Code]   WHERE k.[Salesperson Code] != ''  AND Blocked != 3 ";
    
 		   naviCustomers = new TreeMap();
@@ -1168,7 +1168,6 @@ private HashMap naviProds = null;
 		     }
 		    
 		     
-	     System.out.println("dironly " + dironly + " " + navonly);
 		  
 		  Vector lines = order.getOrderLines();
 		  
@@ -1179,13 +1178,15 @@ private HashMap naviProds = null;
 			  if(lin.docType.equals("less")) {
 				  ord.docType = "less";
 			  }
-			    	
+
+			     System.out.println("dironly " + dironly + " " + navonly + " " + (naviProds.containsKey(lin.getToode()) && !dironly) );   	
 			    	if((naviProds.containsKey(lin.getToode()) && !dironly) || navonly) {
 			    		ord.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 				     	ord.setDokNr(order.getDokNr());
 				     	ord.setReference(order.getReference());
-			    		
+
+					     System.out.println("going navi " + navonly);
 			    	} else {
 
 			    		orddirecto.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),

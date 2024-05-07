@@ -14,12 +14,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.http.HttpResponse;
@@ -108,6 +108,13 @@ public class WebShopPiguLT {
         String filePath = "WebShopper/piguToken.txt";
         // Create a Path object for the specified file
         Path path = Paths.get(filePath);
+        File ff = new File(filePath);
+        Calendar cc = Calendar.getInstance();
+        cc.add(Calendar.DATE, +1);
+        if(ff.exists() && ff.lastModified() > cc.getTimeInMillis()) {
+        	ff.delete();
+        }
+        	
         // Check if the file exists
         if (Files.exists(path)) {
             try {
