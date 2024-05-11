@@ -556,9 +556,7 @@ con3.close();
 	      }
 	    String  sqlb =  "  select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle , k.[Overdue Amount Incl_ Tolerance] as buff FROM [ŽŪB Nematekas$Cust_ Ledger Entry] a inner join " +
                   " [ŽŪB Nematekas$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] inner join [ŽŪB Nematekas$Customer] k on k.[No_] = a.[Customer No_]  " +
-                  " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] < getdate() - "
-                  + "(case when (select p.DateForMerisoft from  [ŽŪB Nematekas$Payment terms] p where k.[Payment Terms Code]= p.[Code]) >0 "
-                  + "then (select p.DateForMerisoft from  [ŽŪB Nematekas$Payment terms] p where k.[Payment Terms Code]= p.[Code]) else 0 end) "
+                  " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] < getdate() - k.[Overdue Days Tolerance] "
                   + " and a.[Posting Date] > getdate()- 1000 " +
                   "  group by a.[Customer No_] ,k.[Overdue Amount Incl_ Tolerance] having sum(b.[Amount]) -  k.[Overdue Amount Incl_ Tolerance]  > 0" ;
 
