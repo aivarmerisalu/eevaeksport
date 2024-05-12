@@ -62,7 +62,7 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 		String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 		try {
 			Class.forName(databaseDriverName).newInstance();
-			con = DriverManager.getConnection(url, "merisoft", "Aivar_Horticom297Q5");
+			con = DriverManager.getConnection(url, "merisoft", "Kaer_11Teivas");
 			stmt = con.createStatement();
 		} catch (Exception e) {
 			parent.showError(e);
@@ -402,7 +402,7 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 		try {
 
 			
-			Connection con = DriverManager.getConnection(url, "merisoft", "Aivar_Horticom297Q5");
+			Connection con = DriverManager.getConnection(url, "merisoft", "Kaer_11Teivas");
 		Statement	stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(" select kasutajakood , nimi from Agendid");
 			while (rs.next()) {
@@ -801,7 +801,7 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 	}
 
 	private Connection getNewConnection() throws SQLException {
-		return DriverManager.getConnection(url, "merisoft", "Aivar_Horticom297Q5");
+		return DriverManager.getConnection(url, "merisoft", "Kaer_11Teivas");
 	}
 
 	public TreeMap getProdGroups() throws SQLException {
