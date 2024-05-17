@@ -557,15 +557,16 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
             }
 //        	 Lõppes kustutamine 
         //	custProds.add("suva");
- 		 TreeMap prods = this.getProducts(null);
+ 		  this.getProducts(null);
+ 		 System.out.println("olemas " + prodHash.get("ALC-300630"));
 
         StringBuffer buf = new StringBuffer();
-        Iterator enume = prods.keySet().iterator();
+        Iterator enume = prodHash.keySet().iterator();
    
         while (enume.hasNext()) {
    	    	String asi = (String)enume.next();
-   	    	Product prod = (Product)prods.get(asi);
-   	    	String toode = prod.getID().trim(); 
+   	    	
+   	    	String toode = asi; 
    	    	
    	    	  toode = toode.replace('/', '_');
    	          toode = toode.replace('/', '_');
@@ -587,11 +588,11 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
              		}else {
              			Converter.shrinkAndCopyFile(in,inpda,600);
              		}
-               	   
-       	  	     } 
-               if(buf.toString().indexOf(toode +".jpg;"  + inpda.length()) == -1){
+               	 }
+             	
+             	
            		buf.append(toode +".jpg;"  + inpda.length() + "\n");
-           	}
+           	
              	   }
                 }
               }
@@ -2039,7 +2040,6 @@ System.out.println(cmd);
     	           Customer customer = new Customer(conv(id));
     	            String payer = null;
     	           if (name.equals("")) name = "<" + id + ">";
-    	           customer.setName(Converter.enCodeEst(id + " " + name));
     	           	payer = rs.getString("payer");
     	           	if(payer != null && payer.trim().length()>0){
     	           		payer= conv(payer.trim());
@@ -2227,8 +2227,11 @@ System.out.println(cmd);
     	       	String ag2 = rs.getString("ag2");
     	       	if(ag2 != null && ag2.trim().length() > 0) {
     	       		customer.addAgent(new Agent(ag2));
-    		         	
-    	       	}
+    		    }
+    	       	
+
+  	           customer.setName(Converter.enCodeEst(id + " " + name));
+    	       	
     	    	String dire = rs.getString("directo");
     	       	if(dire != null && dire.trim().length() > 0) {
     	       		customer.addCity("Directo Kodas: " + dire);
@@ -2248,8 +2251,11 @@ System.out.println(cmd);
 			       		//	System.out.println("On Fix " + customer.getName() + " " +  price_list);
 			       		       }
     		         	}
-    		         	
+
+    	    	           customer.setName(Converter.enCodeEst(id + " "  + dire + " " + name));	
     	       	}
+    	       	
+
 	             
     	            tm.put(Converter.cleanLitLatEst(id) + customer.getName(), customer);
     	            this.customers.add(customer.getID());
@@ -2937,6 +2943,7 @@ System.out.println(cmd);
               String ean = (rs.getString("ean"));
                  if (ean != null && ean.trim().length()>0){
                    prod.setEAN(ean);
+                   name = name + " " +ean ;
                  }
                     
                     if(top.contains(prod.getID())){
@@ -3016,6 +3023,8 @@ System.out.println(cmd);
                    if(luba.contains(prod.getID()) && !name.equals("")){
                 	   prod.setName(name);
                        tm.put(name, prod);  
+
+           	    	prodHash.put(prod.getID(), prod);
                        String normcode = prod.getID().replace('/', '_');
                        if(!docCodes.contains(normcode)){
                     	     docCodes.add(normcode);
@@ -4028,6 +4037,7 @@ private TreeMap prTypes = null;
 private HashSet prodCodes = null;
 
 
+HashMap prodHash = new HashMap();
   
   public void getProductsDirecto(TreeMap prods, HashSet olemasNavis ){
 	  // System.out.println("tooted a");
@@ -4051,7 +4061,6 @@ private HashSet prodCodes = null;
 		  e1.printStackTrace();
 	     }
 	   
-     HashMap prodHash = new HashMap();
      HashSet usedGroups = new HashSet();
      
      TreeMap stockLisa = new TreeMap();
@@ -4262,7 +4271,7 @@ private HashSet prodCodes = null;
           	     
           	   if("true".equals(getParent().getProps().getProperty("add.ean"))){
           		   try{
-          				add = ean.substring(ean.length()-4); 
+          				add = ean ;//ean.substring(ean.length()-4); 
           	       }catch(Exception e ){
           			   
           		   }
@@ -4282,9 +4291,9 @@ private HashSet prodCodes = null;
       		 addid = id;
       	 }
         	  if("true".equals(getParent().getProps().getProperty("name.code.front"))){
-     			 prod.setName( ( id + " " + Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " +  add).trim() + " GETZ" ); 
+     			 prod.setName( ( id + " " + Converter.enCodeEst(namec.replaceAll("²", "x2"))).trim() + " GETZ " + add ); 
      		 }else{
-     			 prod.setName(( Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " + id + " " + add ).trim() + " GETZ"); 
+     			 prod.setName(( Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " + id ).trim() + " GETZ " + add ); 
      		 }
         	
         	  if(getParent().getProps().getProperty("vat") != null){
@@ -4400,7 +4409,8 @@ if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
       	if(olemasNavis.contains(prod.getID())) {
       		goes = false; 
       	}
-     
+
+	    	prodHash.put(prod.getID(), prod);
       	    if(goes ){
       	    	prod.setType("GETZ");
       	    	if(!usedGroups.contains(prod.getGroup())){
@@ -4411,7 +4421,6 @@ if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
       	    		usedGroups.add(prod.getGroupSecond());
       	    	}
       	    	
-      	    	prodHash.put(prod.getID(), prod);
       	         prods.put(prod.getName(), prod);	
       	        }
       	      }

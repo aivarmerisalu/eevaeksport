@@ -637,16 +637,20 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	         
 	            	JSONObject cob = (JSONObject) cc.getJSONObject(i);
 	            	String key = (String)cob.get("code");
+	            	try {
 	            	String name = (String)cob.get("name");
 	            	if(name != null && name.trim().length() > 0)
 	            	names.put(key, name);
+	    		}catch (Exception e) {
+	    			e.printStackTrace();
+	    		}
 	    		}
 	    		
 		} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
-			//System.out.println("cc " + cc.toString());
+			System.out.println("names  " + names.size());
 	// System.exit(0);
 		
 		  TreeMap openOrders = this.getOpenOrders();
@@ -817,7 +821,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 
 				String kontakt = rs.getString("kontakt");
 				if (kontakt != null && kontakt.trim().length() != 0) {
-					cust.setPersonalData(kontakt.replaceAll(";", ",").replaceAll("  ", " "));
+					//cust.setPersonalData(kontakt.replaceAll(";", ",").replaceAll("  ", " "));
 				}
 
 				
@@ -1088,7 +1092,9 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				}
 
 				prod.setName(nimetus);
-          prod.setVat("22");
+				prod.setNameSorting(prod.getGroup() + nimetus);
+				
+                prod.setVat("22");
 
 				String unit = rs.getString("unit");
 				if (unit != null && unit.trim().length() > 0) {

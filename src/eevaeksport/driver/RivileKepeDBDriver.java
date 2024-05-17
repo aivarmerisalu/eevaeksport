@@ -659,6 +659,7 @@ HashSet olemas = new HashSet();
            con = DriverManager.getConnection(url,"dba","sql");
       } catch (Exception e) {
             getParent().showError(e);
+            System.exit(0);
       }
 
     }
@@ -726,6 +727,7 @@ HashSet olemas = new HashSet();
         
       }catch (Exception e) {
         getParent().showError(e);
+        System.exit(0);
       }
       connectionDown();
       System.out.println("tm " + tm.toString());
@@ -1221,6 +1223,7 @@ HashSet olemas = new HashSet();
             con.close();
         } catch (Exception e) {
             getParent().showError(e);
+            System.exit(0);
         }
 
         return products;

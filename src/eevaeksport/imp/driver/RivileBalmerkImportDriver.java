@@ -1128,7 +1128,7 @@ if(ladu.trim().length()!=0){
       }
 
       
-      if( pandikas.size()>0){
+      if( pandikas.size()>0 && false){
       	Enumeration enumpant = pandikas.keys();
        while(enumpant.hasMoreElements()){
        	

@@ -134,6 +134,8 @@ import imageUtil.ImageLoader;
 
 public class Converter {
 
+
+	
 	/**
 	 * @param args
 	 * @throws CharacterCodingException 
@@ -645,7 +647,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(ea)).trim();
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(ea)).trim());
 								String tnimi = formatter.formatCellValue(row.getCell(ea+2));
 								
 								if(ean.length() > 13) {
@@ -798,7 +800,7 @@ public class Converter {
 								 
 							
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(ea));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(ea)));
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
 							 
@@ -939,7 +941,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(ea));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(ea)));
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
 							 
@@ -1113,7 +1115,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(0));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(0)));
 								String tnimi = formatter.formatCellValue(row.getCell(1));
 								String toode = getToode(prods,ean);
 							 
@@ -1227,7 +1229,7 @@ public class Converter {
 							
 							 System.out.println("uu " + (1+start) + " - " + i);
 							 try {
-								String ean = formatter.formatCellValue(row.getCell(1+start));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(1+start)));
 								//System.out.println("uu " + ean);
 								 if(ean != "") {
 										
@@ -1420,7 +1422,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							
-								String ean = formatter.formatCellValue(row.getCell(y));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(y)));
 								String tnimi = formatter.formatCellValue(row.getCell(z));
 								String toode = getToode(prods,ean);
 							 
@@ -1538,7 +1540,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							
-								String ean = formatter.formatCellValue(row.getCell(ea));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(ea)));
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String groupt  = formatter.formatCellValue(row.getCell(ni+1)).trim(); 
 								String toode = getToode(prods,ean);
@@ -1658,7 +1660,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							
-								String ean = formatter.formatCellValue(row.getCell(ea));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(ea)));
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
 								System.out.println("Sees " + ean + " " + toode );
@@ -1795,7 +1797,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
-								String ean = formatter.formatCellValue(row.getCell(ea)).trim();
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(ea)).trim());
 								if(ean.length() > 13) {
 									ean = ean.substring(1);
 								}
@@ -2485,7 +2487,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 						
 							
-								String ean = formatter.formatCellValue(row.getCell(0));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(0)));
 								String tnimi = formatter.formatCellValue(row.getCell(2));
 								String toode = getToode(prods,ean);
 							 if(ean != null && ean.trim().length()> 0 ) {
@@ -2646,7 +2648,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 						
 							
-								String ean = formatter.formatCellValue(row.getCell(0));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(0)));
 								String tnimi = formatter.formatCellValue(row.getCell(1));
 								String toode = getToode(prods,ean);
 							 if(ean != null && ean.trim().length()> 0 ) {
@@ -2805,7 +2807,7 @@ public class Converter {
 								Iterator itera  =  sisu.keySet().iterator();
 								while(itera.hasNext()) {
 								
-								String ean = (String)itera.next();
+								String ean = getNumeric((String)itera.next());
 							    String toode = getToode(prods,ean);
 							    if(toode.equals(ean)) {
 									  if(errors == null) {
@@ -2889,7 +2891,7 @@ public class Converter {
 							 row = sheet.getRow(i);
 						
 							
-								String ean = formatter.formatCellValue(row.getCell(0));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(0)));
 								String tnimi = formatter.formatCellValue(row.getCell(1));
 								String toode = getToode(prods,ean);
 							 if(ean != null && ean.trim().length()> 0 ) {
@@ -3182,7 +3184,7 @@ public class Converter {
 							if(nnn != null) {
 						
                             String pood = "COOP-" +nnn.getStringCellValue().trim();
-							String ean = formatter.formatCellValue(row.getCell(eanp));
+							String ean = getNumeric(formatter.formatCellValue(row.getCell(eanp)));
 							String tnimi = formatter.formatCellValue(row.getCell(tnim));
 							Boolean seisund = true;
 							if(seis != 0 ) {
@@ -3452,7 +3454,7 @@ public class Converter {
 							if(nnn != null) {
 						
                             String pood = "COOP-" +nnn.getStringCellValue().trim();
-							String ean = formatter.formatCellValue(row.getCell(eanp));
+							String ean = getNumeric(formatter.formatCellValue(row.getCell(eanp)));
 							String tnimi = formatter.formatCellValue(row.getCell(tnim));
 							Boolean seisund = true;
 							if(seis != 0 ) {
@@ -3575,7 +3577,7 @@ public class Converter {
 						//Teeme kõigepealt treemapi valmis kja siis krutime läbi 
 							for(int i = reanr ; i < sheet.getLastRowNum()+1;i++){
 							Row row = sheet.getRow(i);
-								String ean = formatter.formatCellValue(row.getCell(0));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(0)));
 								String code = formatter.formatCellValue(row.getCell(sortasuk));
 								String nimis = formatter.formatCellValue(row.getCell(sortasuk-1));
 								if(ean != null && ean.trim().length() > 0) {
@@ -3591,7 +3593,7 @@ public class Converter {
 						 
 						Iterator itera  =  sisu.keySet().iterator();
 						while (itera.hasNext()) {
-							String ean = (String)itera.next();
+							String ean =getNumeric( (String)itera.next());
 						    String toode = getToode(prods,ean);
 						    if(toode.equals(ean)) {
 								  if(errors == null) {
@@ -4505,7 +4507,7 @@ public class Converter {
 							DataFormatter formatter = new DataFormatter();
  
 							String pood = row.getCell(0).getStringCellValue();
-							String ean = formatter.formatCellValue(row.getCell(2));
+							String ean = getNumeric(formatter.formatCellValue(row.getCell(2)));
 							String nimi = formatter.formatCellValue(row.getCell(4));
 							
 							ArrayList arr = new ArrayList();
@@ -6755,6 +6757,15 @@ try{
 	      return true;
 	    }
 
+   public static String getNumeric(String s){
+	   String res = "";
+	      for (int i = 0 ; i < s.length(); i++){
+	        if (isNumeric(s.charAt(i))){
+	          res =res + s.charAt(i);
+	        }
+	      }
+	      return res;
+	    }
 
    
    public static boolean isNumeric(char ch)

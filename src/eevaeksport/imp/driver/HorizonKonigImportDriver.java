@@ -519,21 +519,13 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 	
 
 	 
-	 
-	  
-		/*  <add key ="import.sellInvoiceGroup.1" value ="P,X,H,RM,N"/>  n
-	    <add key ="import.sellInvoiceGroup.2" value ="F,I"/>  f
-	    <add key ="import.sellInvoiceGroup.3" value ="A"/>  
-	    <add key ="import.sellInvoiceGroup.4" value ="B"/>   c
-	    <add key ="import.sellInvoiceGroup.5" value ="M"/>   v
-	    <add key ="import.sellInvoiceGroup.6" value ="J"/>   o
-	  */
 	  
 	  
 		  if(order.getDealer() == null || order.getDealer().trim().length() == 0){
 			  order.setDealer("53268");
 		  }
 		  
+		  System.out.println("defDealers " + defDealers.get(order.getCompany()));
 		  
 		  if(order.getStatus() > 6 && defDealers != null && defDealers.get(order.getCompany()) != null){
 			  order.setWarehouse(""+defDealers.get(order.getCompany()));
@@ -1266,7 +1258,7 @@ private Vector splitOrderHRC (Order order){
 		  if(order.getDealer() == null || order.getDealer().trim().length() == 0){
 			  order.setDealer("53268");
 		  }
-		  
+		System.out.println("ladu " + defDealers.get(order.getCompany()) + " " + order.getCompany() );
 		  
 		  if(order.getStatus() > 6 && defDealers != null && defDealers.get(order.getCompany()) != null){
 			  order.setWarehouse(""+defDealers.get(order.getCompany()));
@@ -1280,7 +1272,7 @@ private Vector splitOrderHRC (Order order){
           String cuKont = kontOK.get(order.getCompany())+"";
          
           
-       //   System.out.println("CuKont " + order.getCompany() + " " + cuKont);
+         System.out.println("CuKont " + order.getWarehouse());
           
           
  
@@ -1937,7 +1929,7 @@ try{
     					  nlvKlients = lvNotCustomer();
     				  }
     				  
-    				//  System.out.println(order.getCompany() + " " + nlvKlients.contains(order.getCompany()));
+    				  System.out.println(order.getCompany() + " " + nlvKlients.contains(order.getCompany()));
     				if(nlvKlients.contains(order.getCompany())) {
     					order.setCurrency("NPARK2");
     					
@@ -1949,7 +1941,7 @@ try{
     				
     				  
     				  if(!hrccustomer){
-    				//	  System.out.println("OffTrade");
+    					  System.out.println("OffTrade" + order.getStatus());
     					  if(order.getStatus() == 34) {
     						  order.setCurrency("NPAIK9");
     						  order.setWarehouse("53268");
@@ -1976,7 +1968,7 @@ try{
     					  }
     					  
     				  }else{
-    					 // System.out.println("OffTrade");
+    					  System.out.println("OnTrade" + order.getStatus());
     					  
     					  if(order.getStatus() == 34) {
     						  order.setCurrency("NPAIK9");
@@ -2157,7 +2149,7 @@ try{
 		           
 		        String cukood =  Converter.deCode(order.getCompany());
 		        String adid = null;
-		       // System.out.println("Comment " + comm + " " + cukood);
+		        System.out.println("Comment " + comm + " " + cukood);
 				
 		        if(cukood.indexOf("_")!= -1){
 		        	adid =  escape(cukood.substring(cukood.indexOf("_")+1));
@@ -2268,21 +2260,20 @@ try{
 					  }
 					 
 					 
+					 
 					  if(order.getDealer() == null || order.getDealer().trim().length() == 0){
 						  order.setDealer("53268");
 					  }
 					  
 
 
-					  String aaa = order.getCompany();
-					  if(aaa.indexOf("_") != -1) {
-						  aaa = aaa.substring(aaa.indexOf("_")+1);
-					  }
+					 
+
+						 System.out.println("dealer1 " + order.getDealer() + " " + defDealers.get(cukood) + " " + cukood);
 					  
-					  
-					  if(order.getStatus() > 6 && defDealers != null && defDealers.get(aaa) != null){
-						  order.setWarehouse(""+defDealers.get(aaa));
-						  order.setDealer(""+defDealers.get(aaa)+"");
+					  if(order.getStatus() > 6 && defDealers != null && defDealers.get(cukood) != null){
+						  order.setWarehouse(""+defDealers.get(cukood));
+						  order.setDealer(""+defDealers.get(cukood)+"");
 					   }else if(order.getStatus() > 6){
 						   order.setWarehouse("53268");
 							 order.setDealer("53268");
@@ -2292,7 +2283,8 @@ try{
 					 // order.setCurrency(getType(order.getDealer(),1,order));
 					 }
 				   
-					
+					 System.out.println("dealer2 " + order.getDealer());
+					 
 					 
 					 String ladu = "53268";
 				   
@@ -2301,6 +2293,8 @@ try{
 					   ladu = dealer.trim();
 					  
 				   }
+				   System.out.println("dealer2 " + ladu);
+					 
 		           
 		           JSONObject resource  = new JSONObject();
 		           JSONObject sisu  = new JSONObject();

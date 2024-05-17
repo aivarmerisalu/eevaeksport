@@ -556,11 +556,13 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 				custs.put(maks.trim(),custw);
 			}
 		}
+		Customer custww = null;
+		
 		if(kood != null){
-			 custw = new Customer (kood.trim());
-			custw.setDebt(volg);
+			 custww = new Customer (kood.trim());
+			custww.setDebt(volg);
 			if(volg>0){
-				custs.put(kood.trim(),custw);
+				custs.put(kood.trim(),custww);
 			}
 		}
 	

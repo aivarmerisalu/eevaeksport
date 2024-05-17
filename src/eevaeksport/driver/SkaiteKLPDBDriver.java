@@ -53,7 +53,7 @@ import eevaeksport.util.Converter;
  * @author Tarmo Tubro
  * @version 1.0
  */
-public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter{
+public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter, PictureMaker{
 
 
     public SkaiteKLPDBDriver(EksportPanel parent) {
@@ -1621,7 +1621,7 @@ private Vector baashk = null;
       try {
         Connection con = getNewConnection();
         Statement st = con.createStatement();
-          HashMap prodHash = new HashMap();
+       
           
           ResultSet	      rs = st.executeQuery(cmd2);
           
@@ -2166,6 +2166,83 @@ try{
     private String	       subjectFilesTo = null;
     private NumberFormat NF = NumberFormat.getInstance(); 
     private TreeMap  dealers = new TreeMap();
+
+	@Override
+	public void PictureMaker() {
+		makePictureCat();
+		 System.exit(0);
+		
+	}
+  private HashMap prodHash = new HashMap();
+  
+  private void makePictureCat(){
+	    
+  	
+  	String pictssou = parent.getProps().getProperty("pict.dir");
+	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	   
+	 try {
+	  
+    File f = new File(pictspda +"list.txt");
+    if (f.exists())f.delete();
+    //Kataloogi sisude kustutamine
+	 	 File res2 = new File (pictspda);
+           String[] ff2 = res2.list();
+       	 for(int i = 0;ff2.length>i;i++){
+       		 
+           	//(new File ( pictspda + ff2[i])).delete(); 
+           }
+//       	 Lõppes kustutamine 
+       //	custProds.add("suva");
+		  this.getProducts(null);
+
+       StringBuffer buf = new StringBuffer();
+       Iterator enume = prodHash.keySet().iterator();
+  
+       while (enume.hasNext()) {
+  	    	String asi = (String)enume.next();
+  	    	
+  	    	String toode = asi; 
+  	    	
+  	    	  toode = toode.replace('/', '_');
+  	          toode = toode.replace('/', '_');
+  	          
+             if(toode.length() > 0){
+              	
+  	   	  res2 = new File (pictssou);
+            ff2 = res2.list();
+           
+       	 for(int i = 0;ff2.length>i;i++){
+           	if( ff2[i].startsWith(toode+".")){
+             // System.out.println("pilt olemas " + ff2[i]);
+          	File in = new File ( pictssou + ff2[i]); 
+            	if(in.isFile()){
+            	File inpda = new File ( pictspda + toode+ ".jpg");
+            	if(!inpda.exists()){
+               			Converter.shrinkAndCopyFile(in,inpda,600);
+            	 }
+            	
+          		   buf.append(toode +".jpg;"  + inpda.length() + "\n");
+          	
+            	   }
+               }
+             }
+           }
+     }
+    try {
+		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+		os.write(buf.toString());
+		os.close();
+	  }catch (Exception ex) {
+		ex.printStackTrace();
+	  }
+	 
+	 } catch (Exception e) {
+  	    getParent().showError(e);
+  	}
+   
+}
+
     
 
 	
