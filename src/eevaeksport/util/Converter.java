@@ -3555,12 +3555,12 @@ public class Converter {
 						 // määrame andmete rea
 						 for(int i = 0 ; i < 10;i++){
 							
-						 Row row = sheet.getRow(1);
+						 Row row = sheet.getRow(i);
 						 for(int y = 2 ; y < 15 ;y++) {
 								Cell cellx = row.getCell((short)y);
 								if(cellx != null) {
 									try {
-								//	System.out.println("Elektra " + cellx.getStringCellValue());
+									System.out.println("Elektra " + cellx.getStringCellValue());
 									if(formatter.formatCellValue(cellx).indexOf("A+") != -1  && reanr == 4) {
 										reanr = i;
 										sortasuk = y;
@@ -3573,23 +3573,24 @@ public class Converter {
 						 
 						 }
 						 
-						// System.out.println("reanr " + reanr );
+						 
 						//Teeme kõigepealt treemapi valmis kja siis krutime läbi 
 							for(int i = reanr ; i < sheet.getLastRowNum()+1;i++){
 							Row row = sheet.getRow(i);
 								String ean = getNumeric(formatter.formatCellValue(row.getCell(0)));
 								String code = formatter.formatCellValue(row.getCell(sortasuk));
 								String nimis = formatter.formatCellValue(row.getCell(sortasuk-1));
+								
+							
 								if(ean != null && ean.trim().length() > 0) {
-									sisu.put(ean.trim(), code);
-									nimi.put(ean.trim(), nimis);
+									sisu.put(ean.trim(), code.trim());
+									nimi.put(ean.trim(), nimis.trim());
 								
 								} 
 								
 							}
 						 
-						 
-						
+							System.out.println(sisu);
 						 
 						Iterator itera  =  sisu.keySet().iterator();
 						while (itera.hasNext()) {
@@ -3614,20 +3615,17 @@ public class Converter {
 						    
 						    if(sort.indexOf("A") != -1) {
 						    	sorts.add("A");
-						      sort = sort.substring(sort.indexOf("A")+1);
 						    }
 						    
 						    if(sort.indexOf("B") != -1) {
 						    	sorts.add("B");
-						      sort = sort.substring(sort.indexOf("B")+1);
 						    }
 						    
 						    if(sort.indexOf("C") != -1) {
 						    	sorts.add("C");
-						      sort = sort.substring(sort.indexOf("C")+1);
 						    }
 						    
-						  //  System.out.println(sorts.toString());
+						   System.out.println(sorts.toString());
 						    for(String so : sorts) {
 						    	
 		                         String pood = "OG-" +so;
@@ -3656,8 +3654,6 @@ public class Converter {
 					 }
 					
 					
-					//System.out.println("sorts size " + res.toString() + " " + sheet.getLastRowNum());
-				//	System.exit(0);
 						
 					 }catch(Exception e) {
 						 e.printStackTrace();

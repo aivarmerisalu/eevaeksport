@@ -145,7 +145,7 @@ public class HansaSatcomDBDriver extends AbstractDBDriver implements BulkUpdater
 	}
 
 	private String getBasicAuthenticationEncoding() {
-        String userPassword = "API:API432";
+        String userPassword = "API:SCapi852";
         return new String(Base64.encodeBase64(userPassword.getBytes()));
     }
 	

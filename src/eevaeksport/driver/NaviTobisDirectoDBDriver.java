@@ -102,9 +102,6 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
   }
 
   private void makeData(){
-	   
-	  
-		 
 
 	     
       try{
@@ -2943,7 +2940,8 @@ System.out.println(cmd);
               String ean = (rs.getString("ean"));
                  if (ean != null && ean.trim().length()>0){
                    prod.setEAN(ean);
-                   name = name + " " +ean ;
+                   if(ean.trim().length() > 4)
+                   name = name + " " +ean.trim().substring(ean.trim().length()-4) ;
                  }
                     
                     if(top.contains(prod.getID())){

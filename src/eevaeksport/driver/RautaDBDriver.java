@@ -3111,8 +3111,6 @@ public static String getYYYYpMMpDD(Date dd){
 	     System.out.println("Kliendid alustan");
 	     TreeMap kampaaniad =  getKampaaniad();
 	     
-	     String inP = parent.getProps().getProperty("doc.origpath");
-	      String outP = parent.getProps().getProperty("doc.destination");
 	      HashSet codes = new HashSet();
 	     
 	     
@@ -3649,16 +3647,9 @@ public static String getYYYYpMMpDD(Date dd){
 			 	  
 			 	  tm.put(" aaa MUUGA tegelemine", ccdss);
 				    tmid.put(ccdss.getID(), ccds);
-	 	 try{
-	 	    Converter.prepareDocCatalogue(inP,outP,codes,true);
-	 	 }catch(Exception e){
-	 		 
-	 	 }
-	 
+	 	
 
-	 	if(rcompany != null){
-	    	Converter.sendCustomerJson(tm, rcompany,false,user,pass,true);
-	    }
+	 	
 	 	 
 	    System.out.println("Kliendid tehtud");
 	 return tm;
