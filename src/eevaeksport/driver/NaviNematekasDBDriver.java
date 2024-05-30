@@ -552,11 +552,12 @@ con3.close();
 	         if(sum !=0){
 	        	 debts.put(maksja, sum);
 	         }
-	         
 	      }
+	      
+	      
 	    String  sqlb =  "  select  a.[Customer No_] AS maksja, sum(b.[Amount]) AS yle , k.[Overdue Amount Incl_ Tolerance] as buff FROM [ŽŪB Nematekas$Cust_ Ledger Entry] a inner join " +
                   " [ŽŪB Nematekas$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] inner join [ŽŪB Nematekas$Customer] k on k.[No_] = a.[Customer No_]  " +
-                  " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] < getdate() - k.[Overdue Days Tolerance] "
+                  " where  (a.[Document Type] = 2 or a.[Document Type]= 3 or a.[Document Type]= 0) and a.[Due Date] < getdate() -  case when k.[Overdue Days Tolerance] > 300 then  300 else k.[Overdue Days Tolerance]  end "
                   + " and a.[Posting Date] > getdate()- 1000 " +
                   "  group by a.[Customer No_] ,k.[Overdue Amount Incl_ Tolerance] having sum(b.[Amount]) -  k.[Overdue Amount Incl_ Tolerance]  > 0" ;
 
@@ -565,12 +566,12 @@ con3.close();
 	      while(rs3.next()){
 	         String maksja  = rs3.getString("maksja").trim();
 	         double sum = rs3.getDouble("yle");
-	         if(sum !=0){
+	         if( sum > 0 ){
 	        	 blokk.put(maksja, sum);
 	         }
 	         
 	      }
-
+ System.out.println("R7011 " + blokk.get("R7011"));
 	      
 rs3.close();
 stmt3.close();
@@ -691,6 +692,10 @@ con3.close();
     	        	if(blokk.get(customer.getID()) != null && blokk.get(customer.getID()) > 0){
     	           		customer.setSalesBlockT(true);
     	           	}
+    	        	
+    	        	if(customer.getID().equals("R7011")) {
+    	        		System.out.println("R7011 " + customer.isSalesBlockT() + " " +  blokk.get(customer.getID()) + " " +   blokk.get(customer.getPayer()));
+    	        	}
     	           	
     	             String aadress = rs.getString("aadress");
     	             if( aadress != null && aadress.trim().length()>0){
@@ -1093,7 +1098,7 @@ con3.close();
                 	 }
                 	 
                 java.sql.Time  time =  rs.getTime("mintime");
-                System.out.println("time " + time);
+             //   System.out.println("time " + time);
                 if (time != null &&  time.getTime() > 100){
                 	prod.setTimeToSell(time.getTime());
                 }

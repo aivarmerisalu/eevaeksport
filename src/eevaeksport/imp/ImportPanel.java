@@ -344,7 +344,8 @@ public String parseFirstEmail(String emails) {
         	if(format.equals("xml")){
           		 System.out.println("xml vana arve tagasilugemine formaat");
           		loadXMLArve(orders, file,troubles);
-                  System.out.println(file.getAbsolutePath());
+                
+          		System.out.println(file.getAbsolutePath());
                   // file.delete();
           	    }
            	
@@ -508,7 +509,7 @@ public String parseFirstEmail(String emails) {
         		  (file.getName().startsWith("Z") && !file.getName().startsWith("ZEM") && !file.getName().startsWith("ZI") && !file.getName().startsWith("Z-2") &&  !file.getName().startsWith("ZO."))
           		|| ((file.getName().indexOf("L00")>-1 || file.getName().indexOf("L01")>-1 ) && file.getName().indexOf("VIL0") == -1
           				&& file.getName().indexOf("KL0") == -1 && file.getName().indexOf("TEL00") == -1) || file.getName().indexOf("PO_4")>-1) ||
-        		  file.getName().startsWith("IP") ){
+        		  (file.getName().startsWith("IP") && !file.getName().startsWith("IPGR")) ){
                 System.out.println("txt tellimus SAPOUTPUT formaat");
                 convCodes = getConversionCodes();
                 

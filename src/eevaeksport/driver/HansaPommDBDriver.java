@@ -553,7 +553,7 @@ TreeMap tr = new TreeMap();
 
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
-     //getCustomers(null);
+    // getCustomers(null);
      //System.exit(0);
      try {
  	 
@@ -768,7 +768,7 @@ TreeMap tr = new TreeMap();
   	
  	  StringTokenizer st = new StringTokenizer(line, "|");
  	 
- 	//  System.out.println(line);
+ 	 //System.out.println(line);
        if (st.hasMoreTokens()){
     	   st.nextToken();
     	   st.nextToken();
@@ -781,64 +781,74 @@ TreeMap tr = new TreeMap();
            String name = st.nextToken().trim();
            if (name.equals("")) name = "<" + id + ">";      
             name = name + " " + id;
-          String cinfo =  st.nextToken();
-          if(cinfo.trim().length()>0){
-        	  customer.setPersonalData(this.clear(cinfo));
-          }
-           st.nextToken();
-           if (st.hasMoreTokens()){
-             String aadress = st.nextToken().trim();
-               if( aadress != null){
-             	 aadress = clear(aadress);            
-               customer.setAddress(Converter.adressLink(aadress, "Estonia"));
-             }
-           }
-           if (st.hasMoreTokens()){
+            name = clear(name);
+            customer.setName(Converter.enCodeEst(name));  
+
+         
+            String cinfo =  st.nextToken();
+            String tokk3 =  st.nextToken();
+            String aadress = st.nextToken().trim();
             String lisa = st.nextToken().trim();
+            String uustel =     clear(st.nextToken().trim());
+            String tokk4 =             st.nextToken();
+            String aadress2 =  st.nextToken().trim();
+            if(line.contains("2883"))
+                System.out.println("2883 " + name + " >" + aadress + " >" + lisa + " >" + aadress2 + " >" + lisa + " >" + tokk3 + " >" + tokk4 + " >" + cinfo + " >" + uustel);
+          //2883 J11115xxRVA T11118xx. Koeru Konsum 2883 >JÄRVA TARBIJATE ÜHISTU >Koeru Konsum >MEIE KOOD: 12431 / KOMMIKORV VIDAL STEND >Koeru Konsum >  >  > Agne Pohlak 35 082 120 >P11111xxrna pst 2. Koeru. 73001 J11111xxrvamaa
+
 
             if( lisa != null){
           
             }
-          }
    
-         
+            //  System.out.println();
+            
+            if(cinfo.trim().length()>0){
+          	  customer.setPersonalData(this.clear(aadress));
+            }
+
+            if( lisa != null && lisa.trim().length() > 0){
+                
+            customer.setPersonalData(Converter.enCodeEst(customer.getPersonalData()) + " " +clear(lisa).replaceAll(";",":"));
+            
+            }
+
+                        
+            
+            if( uustel != null){
+            	uustel = clear(uustel);            
+                customer.setAddress(Converter.adressLink(uustel, "Estonia"));
+              }
+            
            
+            
+          /*  if( aadress != null){
+              	 aadress = clear(aadress);            
+                customer.setAddress(Converter.adressLink(aadress, "Estonia"));
+              }
+            */
            
-           name = clear(name);
-             customer.setName(Converter.enCodeEst(name));  
 
              
-         String uustel =     clear(st.nextToken().trim());
              
              if(confirm != null){
                  customer.setConfirmEmail(confirm); 
              }
              
 
-             if( uustel != null && uustel.trim().length() > 0){
-                 
-             customer.setPersonalData(Converter.enCodeEst(customer.getPersonalData()) + " " +clear(uustel).replaceAll(";",":"));
-             }
-             st.nextToken();
 
              
-             if(line.contains("FERG")) {
-          	 	
-                 System.out.println(line);
-
-           System.out.println(customer.getPersonalData());}
-             
-        String  aadress =  st.nextToken().trim();
-           if( aadress != null && aadress.trim().length() > 0){
-             customer.setInfo(Converter.enCodeEst(aadress));
+           if( aadress2 != null && aadress2.trim().length() > 0){
+             customer.setInfo(Converter.enCodeEst(aadress2));
            }
       
-      if (st.hasMoreTokens()){
-       String lisa = st.nextToken().trim();
-       if( lisa != null){
+       String lisa2 = st.nextToken().trim();
+       if( lisa2 != null){
         }
      
-     }
+       
+     
+       
            if(avegs.get(customer.getID())!= null){
         	   double sss =  Double.parseDouble((String) avegs.get(customer.getID()));       	   
         	   customer.setAverage((int)sss/3); 
@@ -849,7 +859,9 @@ TreeMap tr = new TreeMap();
         	   customer.setSold((int)sss); 
            }
            
-      st.nextToken();
+    String tokk =   st.nextToken();
+     
+    
       //     st.nextToken();
    //10202	A-Selver AS			P�rnu mnt 238	Tallinn 11624	Kadaka Selver		Kadaka tee 56A	Tallinn 12915		6673400	6673414	SELVE		45	0	0		1			KADSELVER	1			0	GAJAN				1	Kadaka Selver				075		0	09.02.2007					0									0				0	0			0	0	0	19.07.2004	0											0	0	0				0	0																					0	0	1									102068		0	0				0		0			
      // System.out.println(line);
@@ -978,11 +990,13 @@ TreeMap tr = new TreeMap();
            String pricelist2 = "";
            String delivery = "";
 
+           String phon = "";
+           String phon2 = "";
+
            String visit = "";
-           for(int i = 0 ;i<86;i++){
+           for(int i = 0 ;i<120;i++){
            String	toke = st.nextToken();
-           //if(customer.getID().startsWith("1181"))//nexilis
-            //   System.out.println(customer.getName() + " " + i + " " + toke);
+           
            	if(i==9){
            tok = toke.trim();	
            	}
@@ -1003,13 +1017,39 @@ TreeMap tr = new TreeMap();
                 visit = toke.trim();	
                 	}
         	
-           }
-           if(customer.getID().startsWith("161"))//nexilis
-         System.out.println(customer.getName() + " | blokk"  + pricelist2 + " " + delivery + " vis:"+ visit);
+        	if(i==113){
+                phon = toke.trim();	
+                	}
+        	
 
-           if(delivery.trim().length()>0){
-        	   customer.setAddress(delivery.trim());
+        	if(i==37){
+                phon2 = toke.trim();	
+                	}
+        	//if(line.contains("2883|")) {
+        	//	System.out.println("tok : " + i + " " + toke);
+        	//}
            }
+        
+           if(phon2.trim().length()>0){
+               customer.setPersonalData(Converter.enCodeEst(customer.getPersonalData()) + " " +clear(phon2).replaceAll(";",":"));
+           }
+           
+
+           if(phon.trim().length()>0){
+               customer.setPersonalData(Converter.enCodeEst(customer.getPersonalData()) + " " +clear(phon).replaceAll(";",":"));
+           }
+
+           
+           if(line.contains("2883|")) {
+         	 	
+               System.out.println(line);
+
+         System.out.println(customer.getPersonalData());}
+           
+        //   if(delivery.trim().length()>0){
+        	//   customer.setAddress(delivery.trim());
+           //}
+           
            if(visit.trim().length()>0){
         	   customer.setVisit(Converter.getVisitDay(visit.trim()));
            }

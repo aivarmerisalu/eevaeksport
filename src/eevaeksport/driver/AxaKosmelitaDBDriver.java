@@ -467,6 +467,12 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 	  System.out.println("channelID " + channelID);
 	  System.out.println("prodStockID " + prodStockID);
 	  
+	 if("MON".equals( getParent().getProps().getProperty("channel"))) {
+		 prodHier = "MonroBrand";
+	 }else  if("DP".equals( getParent().getProps().getProperty("channel"))) {
+		 prodHier = "Didmenos medis";
+	 }
+	  
 	 cmk = "select RECID as hier from dbo.ECORESCATEGORYHIERARCHY " + 
 	 		"		  		where name = '" + prodHier + "'" ;
 		  		

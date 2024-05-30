@@ -555,7 +555,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 //        	 Lõppes kustutamine 
         //	custProds.add("suva");
  		  this.getProducts(null);
- 		 System.out.println("olemas " + prodHash.get("ALC-300630"));
+ 		// System.out.println("olemas " + prodHash.get("ALC-300630"));
 
         StringBuffer buf = new StringBuffer();
         Iterator enume = prodHash.keySet().iterator();
@@ -4267,13 +4267,12 @@ HashMap prodHash = new HashMap();
       	    	ean =  ean.replaceAll(";", ":");
           	     prod.setEAN(ean);
           	     
-          	   if("true".equals(getParent().getProps().getProperty("add.ean"))){
           		   try{
-          				add = ean ;//ean.substring(ean.length()-4); 
+          				add = ean.substring(ean.length()-4); 
           	       }catch(Exception e ){
           			   
           		   }
-          		 }
+          		 
       	 } catch (Exception e) {
       		 
       	 }

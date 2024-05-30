@@ -130,7 +130,7 @@ try{
 		File f = new File("signatures.vec");
 		Calendar ss = Calendar.getInstance();
 		
-		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 3600000) {// kui on yle tunni vana siis maha 
+		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 7600000) {// kui on yle tunni vana siis maha 
 			f.delete();
 			signatures = new Vector();
 		} else {
