@@ -2101,7 +2101,6 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
     try { 
 
     	
-    	 if (isDebug()) System.out.println(cmdx);
 	      
   	   Connection con = this.getNewConnection();
        Statement st = con.createStatement();
@@ -2117,9 +2116,59 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
     	st.close();
 
 
+    	HashMap<String, Integer> sorting = new HashMap<String, Integer>();
+    	
+   	 String cmdy = "select itemid as toode , linenum as sorting from eSalesOrderItemSeq where linenum > 0 and eOrderFormatId = 7 and  dataareaid = 'spil' ";
+	
+   
+ st = con.createStatement();
+ rs = st.executeQuery(cmdy);
+
+ while (rs.next()) {
+    String kood = rs.getString("toode").trim();
+    Integer kleeps = rs.getInt("sorting");    
+      sorting.put(kood, kleeps);
+    
+ }
+
+	rs.close();
+	st.close();
+
+HashMap<String,String> retpr = new HashMap<String,String>();
+	
+
+
+	  cmdy = "select itemid as toode , salesprice as retprice ,promosalesprice as actprice from CustItemRecommSalesPrice where dataareaid = 'spil' and AccountRelation = 'Standarts' \r\n" + 
+	 		"and (ToDate > getdate() or year (todate)= 1900)";
+
+
+st = con.createStatement();
+rs = st.executeQuery(cmdy);
+
+while (rs.next()) {
+String kood = rs.getString("toode").trim();
+Double rpe  = rs.getDouble("retprice");    
+Double ape  = rs.getDouble("actprice");   
+String go = "";
+if(rpe != null  && rpe > 0) {
+	go = "|| RSP: " + nf.format(rpe) + "€";
+}
+if(ape != null  && ape > 0) {
+	go = go + "| RPP: " + nf.format(ape) + "€|";
+}
+if(go.trim().length() > 1) {
+ retpr.put(kood, go);
+}
+
+}
+
+rs.close();
+st.close();
+
+	
     	 TreeMap aktsiis = new TreeMap();
     	    
-    	    	 String cmdy = " select  summ.itemid  AS toode ,dim.configId as kleeps, SUM( AVAILPHYSICAL ) AS stock " +
+    	    	  cmdy = " select  summ.itemid  AS toode ,dim.configId as kleeps, SUM( AVAILPHYSICAL ) AS stock " +
     	    				" FROM INVENTSUM summ with (nolock) " +
     	    				" INNER JOIN INVENTDIM dim with (nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +
     	    				" WHERE  summ.DATAAREAID='spil' and CLOSED = 0 AND dim.inventlocationid in ('GPP-AK-LB ') " +
@@ -2127,7 +2176,6 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
     	    	
     	    	 if (isDebug()) System.out.println(cmdx);
     		      
-    	  	    con = this.getNewConnection();
     	        st = con.createStatement();
     	        rs = st.executeQuery(cmdy);
     	   
@@ -2307,12 +2355,21 @@ stmt.close();
      	 prod.setPartii(i + "AKC: "  + aktsiis.get(prod.getID()));
        }
       
+      if(retpr.get(prod.getID()) != null) {
+    	  prod.addPartii(retpr.get(prod.getID()));
+      }
       
       
        
       prod.setName(Converter.enCodeEst(ette + nimetus + add + bre));
-
+      String sorti = "10000";
+      if(sorting.get(prod.getID()) != null) {
+    	  sorti = (sorting.get(prod.getID()) + 10000 )+ "";
+      }
       
+    	  prod.setNameSorting(sorti + prod.getName());
+    	  
+    	  
       String unit = rs.getString("unit");
       if(unit!=null && unit.trim().length()>0){
        prod.setUnit(unit);

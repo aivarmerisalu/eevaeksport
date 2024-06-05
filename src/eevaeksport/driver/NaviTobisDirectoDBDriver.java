@@ -2814,6 +2814,41 @@ System.out.println(cmd);
      prodsUsed = new HashSet();
 
      
+     HashMap<String, Double> maxdisc = new HashMap<String, Double>();
+     
+     try {
+   	  String cmd = "select [Group Code] as kood, [Group 2 Code] as kood2 , code ,  [Max Discount]  as mdisc from [NAV40].[dbo].[2015_Tobis$Dimension Value] where  [Max Discount]  > 0 " ;
+   	  
+      	 Connection con = getNewConnection2();
+  	        Statement stmt = con.createStatement();
+  	        ResultSet rs = stmt.executeQuery(cmd);
+  	        while(rs.next()){
+  	              	String toode =rs.getString("kood");
+  	              	String toode2 =rs.getString("kood2");
+  	              	String toode3 =rs.getString("code");
+  	              	
+  	                Double seis = rs.getDouble("mdisc");
+  	              
+  	              if(toode != null && toode.trim().length() > 0)
+  	              maxdisc.put(toode, seis );
+
+  	              if(toode2 != null && toode2.trim().length() > 0)
+  	              maxdisc.put(toode2, seis );
+
+  	              if(toode3 != null && toode3.trim().length() > 0)
+  	              maxdisc.put(toode3, seis );
+  	              	
+  	        }
+
+  	      rs.close();
+  	      stmt.close();
+  	      con.close();
+
+  	   // System.out.println(cmd);
+   } catch (Exception e) {
+       e.printStackTrace();
+   }
+     
      TreeMap  ladutr = new TreeMap();
       TreeMap  ladulah = new TreeMap();
      
@@ -2927,8 +2962,17 @@ System.out.println(cmd);
               String grupp = cleardots(rs.getString("grupp"));
         		if(grupp != null && grupp.trim().length() >0){
         			grupp = grupp.trim();
+
+                 	if(maxdisc != null && maxdisc.get(grupp) != null){
+                    prod.setMaxDiscount(maxdisc.get(grupp));
+                    }
         			 if(this.cateFullGroup.get(grupp) != null) {
                   	   String g1 = cateFullGroup.get(grupp);
+                  	 
+
+                    	if(maxdisc != null && maxdisc.get(g1) != null){
+                       prod.setMaxDiscount(maxdisc.get(g1));
+                       }
                   	   prod.setGroup(g1);
                   	   prod.setGroupSecond(g1+grupp);
                      }
@@ -2950,10 +2994,6 @@ System.out.println(cmd);
   
               
 
-             	String discou = rs.getString("maxdiscount");
-             	if(discou != null && discou.trim().length()>0){
-                prod.setMaxDiscount(Double.parseDouble(discou));
-                }
 
                 double	cases = rs.getDouble("kastis");
                 	if(cases > 0){
@@ -3226,7 +3266,7 @@ System.out.println(cmd);
        e.printStackTrace();
      }
      
-     getProductsDirecto(tm,prodsUsed);
+     getProductsDirecto(tm,prodsUsed, maxdisc);
      
      return tm;
    }
@@ -4037,7 +4077,7 @@ private HashSet prodCodes = null;
 
 HashMap prodHash = new HashMap();
   
-  public void getProductsDirecto(TreeMap prods, HashSet olemasNavis ){
+  public void getProductsDirecto(TreeMap prods, HashSet olemasNavis , HashMap<String, Double> maxdisc){
 	  // System.out.println("tooted a");
 	   
 	   if(seisud == null) {
@@ -4361,6 +4401,13 @@ if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
                            if(this.cateFullGroup.get(grupp3) != null) {
                         	   String g1 = cateFullGroup.get(grupp3);
                         	   
+                           	if(maxdisc != null && maxdisc.get(g1) != null){
+                              prod.setMaxDiscount(maxdisc.get(g1));
+                              }
+
+                           	if(maxdisc != null && maxdisc.get(grupp3) != null){
+                              prod.setMaxDiscount(maxdisc.get(grupp3));
+                              }
                         	   prod.setGroup(g1);
                         	   prod.setGroupSecond(g1+grupp3);
                            }

@@ -831,7 +831,8 @@ con3.close();
 
      
      try {
-     	String cmd = " SELECT [Code] AS toode,ltrim(ItemCategoryCode) + ' ' +  ltrim(ProductGroupCode) + ' ' +  ltrim(PrintoutType) + ' '  + ltrim(PrintoutOption)  as nimi" +
+     	String cmd = " SELECT [Code] AS toode,ltrim(Description)   as nimi,"
+     			+ "ltrim(ItemCategoryCode) + ' ' +  ltrim(ProductGroupCode) + ' ' +  ltrim(PrintoutType) + ' '  + ltrim(PrintoutOption)  as nimi2" +
        "  , SalesUnitVolume , lower(ltrim( SalesVolumeUnitMeasure)) as nimi3 " +
        " , UnitPrice AS myygihind, ItemCategoryCode AS grupp," +
        "  case when ItemCategoryCode= 'MUU' then 'MUU' else ProductGroupCode end AS grupp2" +  

@@ -2109,6 +2109,8 @@ System.out.println(cmd);
      getPartiid();
      
      HashMap<String,Double>  grpMax = new HashMap<String,Double>();
+
+     HashMap<String,String>  milla = new HashMap<String,String>();
      
       prodHash = new HashMap();
      try {
@@ -2156,7 +2158,28 @@ System.out.println(cmd);
 	      stmt.close();
 	      con.close();
 
-         
+
+	      
+	          cmdh =  "   select preke , gam_art as tekst from prekes where gam_art != ''\r\n" + 
+	          		"  ";
+	 		 
+	     	 
+	     	 
+	      	  con = getNewConnection();
+	   	       stmt = con.createStatement();
+	   	       rs = stmt.executeQuery(cmdh);
+	   	        while(rs.next()){
+	   	             String toode = rs.getString("preke");
+	   	             String  text = rs.getString("tekst");
+	   	              	
+	   	              	milla.put(toode,text);
+	   	        }
+
+	   	      rs.close();
+	   	      stmt.close();
+	   	      con.close();
+
+	            
 	      
 	         String cmdg =  "   SELECT preke as grp , savikaina as disc   FROM likuciai where kiekis >0 and sandelis='ADZ-H' order by preke,data   ";
 	 		 
@@ -2223,6 +2246,9 @@ System.out.println(cmd);
             	}
             	goes = true;
             }
+            
+            
+            
          	String name = rs.getString("nimi").trim() + " " + id;
          	String lisa = rs.getString("lisa");
              if(lisa != null && lisa.trim().length() > 0) {
@@ -2236,10 +2262,7 @@ System.out.println(cmd);
              double price1 = rs.getDouble("hind1");
             	 prod.setPrice(price1); 
              
-                 if(hinnad.get(prod.getID()) != null){
-                	// prod.setMargin(nf.format(hinnad.get(prod.getID())/prod.getPrice()));
-                	// prod.setMinPrice(hinnad.get(prod.getID())*1.15);
-                 }
+                 
               
              if(ladutr.contains(prod.getID())){
             	 goes = true;
@@ -2311,16 +2334,8 @@ System.out.println(cmd);
                 	 }
                 	
                  }
-             /*    String stattus = rs.getString("staatus");
-                 if(stattus != null && stattus.trim().length()>0){
-                	 if(stattus.trim().toLowerCase().indexOf("a") != -1){
-                		 prod.setStatusDiscount("1");
-                	 }
-                	 if(stattus.trim().toLowerCase().indexOf("n") != -1){
-                		 prod.setStatusNew("1");
-                	 }
-                	
-                 }*/
+                 
+                 
                  
                  String topprod = rs.getString("topprod");
                  if(topprod != null && topprod.trim().length() > 0) {
@@ -2360,7 +2375,9 @@ System.out.println(cmd);
                     
                     }
                  
-               
+                 if(prod.getStock() < 1 && milla.get(id) != null) {
+                  	prod.addPartii("||" + milla.get(id) + "|");
+                  }
                    if(goes ){
                 	   prod.setName(Converter.enCodeEst(name));
                 	   prod.setNameSorting(Converter.cleanLitLatEst(name));

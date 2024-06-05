@@ -1128,7 +1128,7 @@ hind =   Converter.Round((float)hind, 2);
 		      System.out.println(fileName);
 		       
 		      Converter.saveFileInUTF8(fileName, asi);
-		      if(asi.contains("error code")){
+		      if(asi.contains("error code") || asi.contains("credential is expired")){
 		    	  trouble = "ORDER Was not Imported :" + asi;
 		      }else{
 		    	  trouble = null;
