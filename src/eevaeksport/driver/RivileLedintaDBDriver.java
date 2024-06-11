@@ -382,6 +382,9 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
                      if(ladu.equals("000000000006")) {
                          ladu = "UTENA";
                          }
+                     if(ladu.equals("000000000007")) {
+                         ladu = "PALANGA";
+                         }
                     String real  =  rst.getString("real");
                     if(real != null){
                     	real =  real.trim().replaceAll(";", ",");
@@ -437,6 +440,11 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
               
               if(agent.getID().equals("004")) {
             	  agent.setObject("UTENA");
+              }
+              
+
+              if(agent.getID().equals("007")) {
+            	  agent.setObject("PALANGA");
               }
               agents.put(name, agent);
               agent1.put(agent.getID(), agent);
@@ -666,7 +674,7 @@ String ag = rs.getString("agent").trim();
         	String as = "select I12_KODAS_PS as toode ,I12_KIEKIS as seis, I12_KODAS_IN as ladu from i12_ind";
            	
      	   String  sql = "  SELECT  I17_KODAS_PS AS toode, sum(I17_KIEKIS) AS STOCK ,  I17_KODAS_IS AS LADU "  +
-              "  from i17_vpro where I17_KODAS_IS in ('KAUNAS','KLAIPEDA','UTENA') GROUP BY I17_KODAS_IS ,I17_KODAS_PS HAVING " +
+              "  from i17_vpro where I17_KODAS_IS in ('KAUNAS','KLAIPEDA','UTENA','PALANGA') GROUP BY I17_KODAS_IS ,I17_KODAS_PS HAVING " +
               "  sum(I17_KIEKIS) != 0 ORDER BY I17_KODAS_PS " ;
 			
     	
@@ -694,6 +702,10 @@ String ag = rs.getString("agent").trim();
                    }
                if(ladu.equals("000000000006")) {
                    ladu = "UTENA";
+                   }
+               
+               if(ladu.equals("000000000007")) {
+                   ladu = "PALANGA";
                    }
                algsa.put(toode+ladu, seis);
               }

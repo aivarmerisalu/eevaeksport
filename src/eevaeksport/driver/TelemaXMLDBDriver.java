@@ -745,6 +745,7 @@ private HashMap prodsGUID = new HashMap();
 		    		    
 		    		  
 		    		  try{
+		    			  if(getNode(rida,"GTIN").getFirstChild() != null)
 		    			  EANKood   = getNode(rida,"GTIN").getFirstChild().getNodeValue();
 		    		  }catch(Exception e){e.printStackTrace();}
 		    		      
@@ -780,7 +781,7 @@ private HashMap prodsGUID = new HashMap();
 		   			  
 		   		
 		   			 if(ProdDesc.length() > 0) {
-		   				 if(EANKood.length() > 0) {
+		   				 if(EANKood != null && EANKood.length() > 0) {
 		   					 prod.setName(Converter.enCodeEst(ProdDesc + " " + EANKood )); 
 		   				 }else {
 		   					 prod.setName(Converter.enCodeEst(ProdDesc )); 
@@ -788,7 +789,7 @@ private HashMap prodsGUID = new HashMap();
 		   				
 		   				
 		   			 }
-		   			 if(EANKood.length() > 0) {
+		   			 if(EANKood != null && EANKood.length() > 0) {
 		   			 prod.setEAN(EANKood);
 		   			 }
 		   			 try {

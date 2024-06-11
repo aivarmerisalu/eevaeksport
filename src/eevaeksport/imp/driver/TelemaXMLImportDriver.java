@@ -623,7 +623,8 @@ private  TreeMap<String, Double> getHinnad(){
 			   				 prod.setName(Converter.enCodeEst(ProdDesc ));
 			   				
 			   			 }
-			   			 if(EANKood.length() > 0) {
+			   			 if(EANKood != null &&  EANKood.length() > 0) {
+			   				 
 			   			 prod.setEAN(EANKood);
 			   			 }
 			   			 try {
@@ -634,7 +635,7 @@ private  TreeMap<String, Double> getHinnad(){
 			   				 
 			   			 }
 		   				 
-		   				prod.setVat("20");
+		   				prod.setVat("22");
 
 			    	
 			 			

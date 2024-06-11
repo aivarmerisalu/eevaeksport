@@ -339,6 +339,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	public Vector getPriceMatrixData() {
 		Vector lines = new Vector();
 		
+		   StringBuffer sb = new StringBuffer();
 		
 		   TreeMap kampid = new TreeMap();// siia tekstid mis klientidele kï¿½lge
 			
@@ -423,12 +424,19 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 									e.printStackTrace();
 								}
 								
-						 Date dd = new Date();
-								if(alg != null){
-									alg = new Date(alg.getTime()- 86400000);
-								}
 								
-							if(alg != null && lop != null && dd.after(alg) && dd.before(lop)){
+								
+								 Date dd = new Date();
+										if(alg != null){
+											alg = new Date(alg.getTime()- 86400000);
+										}
+										
+								if(sisu != null && sisu.equals("UUS") && lop != null &&  dd.before(lop)){
+									sb.append(kett+";"+prodid + ";"+ lop.getTime()+ "\n");
+								}
+						
+								
+							if(alg != null && lop != null && dd.after(alg) && dd.before(lop) && !sisu.equals("UUS")){
 
 					    	//	System.out.println("AAA " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
 								MatrixLine mm = new MatrixLine();
@@ -449,77 +457,11 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	            	  }catch (Exception e){
 	                   e.printStackTrace();	
 		         	  }
+    if(sb.toString().length() > 2) {
+    	Converter.saveFile("fixsortnew.txt", sb.toString());
+    }
 
-
-		
-		
-	/*	String sql = " SELECT (case when accountcode = 0 then accountrelation else ''end) AS custid, \r\n" + 
-				"			(case when accountcode = 1 then accountrelation else ''end)  AS clgroup, \r\n" + 
-				"				(case when itemcode = 0 then itemrelation else ''end) AS prodid, \r\n" + 
-				"				(case when itemcode = 1 then itemrelation else ''end) AS prodgroup,percent1 AS discount,amount \r\n" + 
-				"				 AS price ,fromdate , todate , champaintype  as type FROM pricedisctable where \r\n" + 
-				"				 fromdate<getdate() and todate>getdate() AND \r\n" + 
-				"				 fromdate!=('1900-01-01 00:00:00.00') and dataareaid = 'liv' order by (case when accountcode = 0 then accountrelation else ''end),fromdate";
-		try {
-
-			Statement stmt = this.getNewConnection().createStatement();
-			ResultSet rs = stmt.executeQuery(sql);
-
-			while (rs.next()) {
-
-				String custID = rs.getString("custid");
-				String clGroup = rs.getString("clgroup");
-				String prodID = rs.getString("prodid");
-				String prodGroup = rs.getString("prodgroup");
-				double discount = rs.getDouble("discount");
-				double price = rs.getDouble("price");
-				String sdate =  rs.getString("fromdate");
-				String tdate =  rs.getString("todate");
-				String type =   rs.getString("type");
-				MatrixLine mline = new MatrixLine();
-
-				if (custID != null && custID.trim().length() > 0) {
-					mline.setCliGroup(custID.trim());
-				}
-				
-				if (tdate != null) {
-					mline.setEndDate(tdate.substring(0, 10));
-				}
-				
-				if (sdate != null) {
-					mline.setStartDate(sdate.substring(0, 10));
-				}
-				
-				if (mline.getCustID() == null && clGroup != null
-						&& clGroup.trim().length() > 0) {
-					mline.setCliGroup(clGroup.trim());
-				}
-				if (prodID != null && prodID.trim().length() > 0) {
-					mline.setProdID(prodID.trim());
-				}
-				if (prodGroup != null && prodGroup.trim().length() > 0) {
-					mline.setProdGroup(prodGroup.trim());
-				}
-				if (mline.getProdID() == null && prodGroup != null
-						&& prodGroup.trim().length() > 0) {
-					mline.setProdGroup(prodGroup);
-				}
-				if(discount > 0) {
-				   mline.setDiscount(discount);
-				} else if (price != 0) {
-					mline.setPrice(price);
-				}
-				
-				if(type != null && type.trim().length() > 0) {
-					mline.setLineinfo(type);
-				}
-				
-				lines.add(mline);
-			}
-
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-		}*/
+	
 		return lines;
 	}
 	
@@ -648,6 +590,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	    		
 		} catch (Exception e) {
 				e.printStackTrace();
+				System.exit(0);
 			}
 			
 			System.out.println("names  " + names.size());
@@ -660,6 +603,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	       		
 	       }catch(Exception e){
 	       	e.printStackTrace();
+	       	System.exit(0);
 	       }
 
 	    	 TreeMap webmerc4856 =  Converter.getWebMercagents(rcompany, user, pass,false,"4856");
@@ -863,6 +807,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			
 		} catch (Exception e) {
 			getParent().showError(e);
+			System.exit(0);
 		}
 		
 		return customers;
@@ -1017,7 +962,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		
 		
 		String cmd = "SELECT inv.itemid,(inv.itemname) AS nimetus, taxpackagingqty AS kastis,    price "
-				+ ", itembarcode AS ean,articleclasstype AS grupp ,unitid AS unit, 0 AS yhikukogus FROM inventtable inv "
+				+ ", itembarcode AS ean,articleclasstype AS grupp ,unitid AS unit, 0 AS yhikukogus ,itemmaxvalidity as day1,shelflifebycontract as day2  FROM inventtable inv "
 				+ "  INNER JOIN inventtablemodule mod ON mod.itemid = inv.itemid and mod.dataareaid=inv.dataareaid  "
 				+ "  LEFT JOIN inventitembarcode bc on bc.itemid=inv.itemid and bc.dataareaid=inv.dataareaid "
 				+ "  WHERE   inv.dataareaid='liv' AND mod.dataareaid='liv' AND moduletype=2 "
@@ -1100,6 +1045,15 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				if (unit != null && unit.trim().length() > 0) {
 					prod.setUnit(unit);
 				}
+				
+				String day1 = rs.getString("day1");
+				if (day1 != null && day1.trim().length() > 0) {
+					prod.setPartii("Max.Päevi: " + day1.trim());
+				}
+				String day2 = rs.getString("day2");
+				if (day2 != null && day2.trim().length() > 0) {
+					//prod.setPartii("Max.Päevi: " + day2.trim());
+				}
 
 				// prod.setInUnit(rs.getDouble("yhikukogus"));
             if(goes.contains(prod.getID())) {
@@ -1130,6 +1084,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 
 		return products;
 	}
+	
 	
 
 	public Vector getCustomerProductsList(String agentCode) {

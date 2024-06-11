@@ -413,7 +413,24 @@ public class DirectoLinpetImportDriver extends AbstractImportDriver{
 		         			}
 		         		  }
 	         		
-	         		  
+	         		 try{
+	         			 String country =  rida.getAttributes().getNamedItem("country_id").getNodeValue() ;         	
+		         		 if(country.equals("1")) { 
+	         			     customer.setVAT(0);
+		         		  } else {
+		         			 customer.setVAT(1); 
+		         		  }
+	         			  
+	         		  }catch(Exception e){
+	         			 try{
+		         			 String city =  rida.getAttributes().getNamedItem("address_county").getNodeValue() ;         	
+			         		  customer.setCity(city);
+	         			}catch(Exception es){
+
+		         			  customer.setCity("");	
+	         			}
+	         		  }
+         		
 	         		  
 	         		  try{
 	         			 String price_list =  rida.getAttributes().getNamedItem("price_list").getNodeValue() ;         	
@@ -995,6 +1012,15 @@ hind =   Converter.Round((float)hind, 2);
 	 		if(ccc != null && ccc.getPersonalData()!= null){
 	 			pers = deCode(ccc.getPersonalData());
 	 		}
+	 		double vat = 1;
+	 		if(ccc != null && ccc.getVAT() == 0){
+	 			vat = 0;
+	 		}
+	 		
+	 		String coun = "0";
+	 		if(vat == 0 ) {
+	 			coun = "1";
+	 		}
 	 		System.out.println("Comment " + comm);
 	 		order.setSum(0);
 	 		
@@ -1022,7 +1048,7 @@ hind =   Converter.Round((float)hind, 2);
              comm + 
               ladu +
 	         "amount=\"" + order.getSum() + "\" " +
-	         "amount_vat=\"" + order.getSum()* 1.2 + "\" " +
+	         "amount_vat=\"" + order.getSum() + order.getSum() * (0.22 * vat) + "\" " +
 	         "currency=\"EUR\" language=\"EST\">" +
 	         priceList+
 	     
@@ -1030,7 +1056,7 @@ hind =   Converter.Round((float)hind, 2);
 	         "<send_address>" +
 	         "<street>" + adr + "</street>" +
 	         "<county>" + city + "</county>" +
-	         "<country>0</country>" +
+	         "<country>" + coun + "</country>" +
 	         "</send_address>" +
 	         "<contact>" +
 	         "<name>" + nam + "</name>\r\n" +

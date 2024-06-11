@@ -784,7 +784,10 @@ Fillial 03    - agent 016*/
          if(agent.equals("004")) {
         	 ladu = "UTENA";
          }
-         
+         if(agent.equals("007")) {
+        	 ladu = "PALANGA";
+         }
+          
          
 if(ladu.trim().length()!=0){
 	

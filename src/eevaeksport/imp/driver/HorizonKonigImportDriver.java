@@ -920,7 +920,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		  OrderLine lin = (OrderLine)enums.nextElement();
 		
 		     String itemid = lin.getToode();
-		 //    System.out.println("ppcheck " + lin.getToode() + " " + lin.getKogus() + " " + order.getPaymTerm());
+		    System.out.println("ppcheck " + lin.getToode() + " " + lin.getKogus() + " " + order.getPaymTerm());
          if(order.getPaymTerm() == -1 ){
         	 
         	 if(itemid.startsWith("FP") && propsVEGE.containsKey(order.getCompany()) ){
