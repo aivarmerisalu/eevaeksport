@@ -1293,6 +1293,10 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 	  if(name.contains("alusel")) {
 		  prod.setDiffColor(true);
 	  }
+	  if(prod.getID().equals("RU1939")) {
+		  prod.setDiffColor(true);
+		  
+	  }
 
       String grupp = rs.getString("grupp");
        if(grupp!=null && grupp.trim().length()>0){

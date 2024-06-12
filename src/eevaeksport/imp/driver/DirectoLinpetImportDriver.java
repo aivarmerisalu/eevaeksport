@@ -1048,7 +1048,7 @@ hind =   Converter.Round((float)hind, 2);
              comm + 
               ladu +
 	         "amount=\"" + order.getSum() + "\" " +
-	         "amount_vat=\"" + order.getSum() + order.getSum() * (0.22 * vat) + "\" " +
+	         "amount_vat=\"" + (order.getSum() + order.getSum() * (0.22 * vat)) + "\" " +
 	         "currency=\"EUR\" language=\"EST\">" +
 	         priceList+
 	     
