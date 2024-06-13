@@ -351,7 +351,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    		      
 	                    		    System.out.println(ordDate+"  "+ orderSite + " " + paid + " " + cod);
 	                    			
-	                    			if (paid.equals("paid") || cod == 1) {
+	                    			if (paid.equals("paid") || paid.equals("waiting") || cod == 1) {
 	                    				
 	                    				
 	                    				

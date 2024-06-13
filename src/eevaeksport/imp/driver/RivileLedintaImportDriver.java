@@ -672,8 +672,6 @@ public Vector getDebt() throws SQLException{
  	
      
      String agent = order.getAgent();
-     String ag2 = agent;
-    
     
      
 	   String doknr = order.getDokNr();
@@ -785,6 +783,9 @@ Fillial 03    - agent 016*/
         	 ladu = "UTENA";
          }
          if(agent.equals("007")) {
+        	// ladu = "PALANGA";
+         }
+         if(doknr.startsWith("LED7")) {
         	 ladu = "PALANGA";
          }
           

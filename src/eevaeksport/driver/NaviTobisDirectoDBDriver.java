@@ -547,8 +547,8 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
      if (f.exists())f.delete();
      //Kataloogi sisude kustutamine
  	 	 File res2 = new File (pictspda);
-            String[] ff2 = res2.list();
-        	 for(int i = 0;ff2.length>i;i++){
+            String[] ff3 = res2.list();
+        	 for(int i = 0;ff3.length>i;i++){
         		 
             	//(new File ( pictspda + ff2[i])).delete(); 
             }
@@ -571,7 +571,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
               if(toode.length() > 0){
                	
    	   	  res2 = new File (pictssou);
-             ff2 = res2.list();
+   	   String[]  ff2 = res2.list();
             
         	 for(int i = 0;ff2.length>i;i++){
             	if( ff2[i].startsWith(toode+".")){
@@ -579,7 +579,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
            	File in = new File ( pictssou + ff2[i]); 
              	if(in.isFile()){
              	File inpda = new File ( pictspda + toode+ ".jpg");
-             	if(!inpda.exists()){
+             	if(!inpda.exists() || (inpda.exists() && inpda.lastModified() < in.lastModified())){ // kui on 72h ja uuem
                 	if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
              			Converter.copyFile(in,inpda);
              		}else {

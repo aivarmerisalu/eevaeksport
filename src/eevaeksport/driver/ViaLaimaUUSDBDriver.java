@@ -65,7 +65,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter {
+public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter,PictureMaker {
 
 	
 	
@@ -3088,4 +3088,70 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 	private String subjectFilesTo = null;
     private String url2 = "jdbc:odbc:report";
 	private ArrayList customers = null;
+
+	@Override
+	public void PictureMaker() {
+		 
+		   this.getProducts(null);
+       	
+       	String picts = parent.getProps().getProperty("pict.dir");
+        String pictspda = parent.getProps().getProperty("pictpda.dir");
+     	  
+
+       	try {
+     	
+            StringBuffer buf = new StringBuffer();
+            
+            File d  = new File(picts);
+            for(String fname : d.list() ) {
+            
+            	 File in = new File ( picts + fname); 
+            	 String ean = fname.substring(0,fname.indexOf("."));
+            	 String ext = fname.substring(fname.indexOf(".") + 1);
+            	 
+            		if(in.isFile() ) {//&& prodsH.contains(ean)    
+            			
+            			if(koodiga.get(ean) != null) {
+                     	 
+                      	File inpda = new File ( pictspda + ean + "." + ext); 
+                      	
+                      		Converter.shrinkAndCopyFile(in,inpda);
+                     
+                      	
+                        String len = "0";
+                        if(inpda.exists()){
+                          len =	inpda.length() + "";
+                          } 
+                        
+                          buf.append(ean + "." + ext + ";"  + len + "\n");
+                        }
+            		}
+                 }
+          	
+        
+       	    //oleasoleva kataloogi kustutamine
+       	    
+                   File f = new File("list.txt");
+                   if (f.exists())f.delete();
+                   
+                   try {
+               		PrintWriter os = new PrintWriter(new FileWriter(
+               				  "list.txt", true));
+               		os.write(buf.toString());
+               		os.close();
+               	   File fff =  new File (pictspda +  "list.txt");
+         	      Converter.copyFile(f,fff);  
+               	
+               	  }catch (Exception ex) {
+               		ex.printStackTrace();
+               	  }
+           	  
+       	} catch (Exception e) {
+       	    getParent().showError(e);
+       	}
+    
+System.exit(0);
+
+		
+	}
 }

@@ -443,7 +443,7 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
               }
               
 
-              if(agent.getID().equals("007")) {
+              if(agent.getID().equals("006")) {
             	  agent.setObject("PALANGA");
               }
               agents.put(name, agent);

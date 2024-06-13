@@ -962,7 +962,7 @@ System.out.println(sql);
 	      } else if (c == '\n'){
 	        sb.append(" ");
 	      } else if (c == '"'){
-	          sb.append("&quot;");
+	          sb.append("'");
 	      } else if (c == '\''){
 	          sb.append("&apos;");
 	      } else {

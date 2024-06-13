@@ -96,7 +96,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
     user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.company");
-    logurl = "https://directo.gate.ee/xmlcore/";
+    logurl = "https://login.directo.ee/xmlcore/";
     if( parent.getProps().getProperty("logurl") != null){
     	  logurl = parent.getProps().getProperty("logurl");
     }
@@ -3256,7 +3256,6 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	   while(enums.hasMoreElements()){
 		String custid = (String)enums.nextElement();
 		   try{
-			  // String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
 			   Converter.doTrustToCertificates();
 			   custid = Converter.deCode(custid);
 			   String cuurl =  URLEncoder.encode(custid, "UTF-8");

@@ -524,7 +524,7 @@ try{
 		    }
  		 
  		  signatures.add(signature);
- 		  this.troubles = null;
+ 		  this.troubles = new StringBuffer();
  	  }	  
 		
  	 try {
