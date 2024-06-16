@@ -91,6 +91,7 @@ public class LabbisSkonisImportDriver
 	  l0BF001.setAgentCode(order.getAgentCode());
 	  l0BF001.setDokNr("1" + order.getDokNr());
 	  l0BF001.setInfo(order.getInfo());
+	  l0BF001.setStatus(order.getStatus());
 	  l0BF001.setTeostaja((order.getTeostaja()));
 	  l0BF001.setChanged(order.isChanged());
 	  l0BF001.setShipCal(order.getShipCal().getTimeInMillis() +"");
@@ -104,6 +105,7 @@ public class LabbisSkonisImportDriver
 	  Order l0AS101 = new Order((order.getCompany()),order.getAgentFirstName());
 	  l0AS101.setAgentCode(order.getAgentCode());
 	  l0AS101.setDokNr("2" + order.getDokNr());
+	  l0AS101.setStatus(order.getStatus());
 	  l0AS101.setInfo(order.getInfo());
 	  l0AS101.setChanged(order.isChanged());
 	  l0AS101.setShipCal(order.getShipCal().getTimeInMillis() +"");
@@ -469,7 +471,7 @@ public class LabbisSkonisImportDriver
 	  if(l3TS400.getOrderLines() != null && l3TS400.getOrderLines().size()>0){
 		  result.add(l3TS400);  
 	  }
-	  
+      
 	 System.out.println("Result =" +order.getDokNr()
 			 + " "+ result.size());
 
@@ -867,28 +869,24 @@ counter++;
 	    
 	          
 	      sb.append("</tem:ss_Pardavimas></soapenv:Body></soapenv:Envelope>");
-	      if (testing){
+	      
+	      if (testing || order.getStatus() == 1){
 	    	  System.out.println(sb.toString());
-	    	 String fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-" + fn  +  "-response.xml";
+	    	 String fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-" + fn  +  "offer.xml";
 		      System.out.println(fileName);
 		      Converter.saveFileInUTF8(fileName, sb.toString());
 		 	
-	      }else{
+	      } else {
 	    	  System.out.println( "sees:" + sees + " " + sb.toString());
 	   if(sees > 0 ){
 		
-	   
-	   
 	 	try {
-	 		
-	 		  
-		      
+	 	      
 		      String fileName = (parent.getProps().getProperty("conv.dir")) +  "t-" + fn  +  ".xml";
 		      System.out.println(fileName);
 		       
 		      Converter.saveFileInUTF8(escape(fileName), sb.toString());
-		      
-	 	
+		
 	 		String xml = getWeb(sb.toString());		
 	 		System.out.println("Tulemus " + xml);
 	 		
