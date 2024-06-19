@@ -1745,25 +1745,36 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		       			  country = getParent().getProps().getProperty("country");
 		       		  }
 		         		
-		         		String kname = name;
+		         		 String kname = name;
 		         		 String sendaadr = ""; 
-		         		try{ 
-		 	         		  sendaadr =  rida.getAttributes().getNamedItem("send_address_street").getNodeValue(); 
+		         		 
+		         		try { 
+		 	         		  sendaadr =  rida.getAttributes().getNamedItem("send_address_street").getNodeValue();
+		 	         		  String linn = "";
+		 	         		try {
+				 	         	    linn =  rida.getAttributes().getNamedItem("send_address_county").getNodeValue().replaceAll(";", ","); 
+				 	         	    sendaadr = sendaadr + " " + linn;
+				 	         		customer.restCity = linn;
+				 	         		}catch(Exception eed){
+					         		 }
 		 	         		  customer.restStreet = sendaadr.replaceAll(";", ",");
 		 	         		  name = name + " " + sendaadr;
 		 	         		addaadr = false;
+		 	         		
 		 	         		String maa = "";
 		 	         		try{
-		 	         	  maa =  rida.getAttributes().getNamedItem("send_address_country").getNodeValue().replaceAll(";", ","); 
-		 	         		country = maa;
-		 	         		}catch(Exception eed){
-			         		 }
+		 	         	      maa =  rida.getAttributes().getNamedItem("send_address_country").getNodeValue().replaceAll(";", ","); 
+		 	         		  country = maa;
+		 	         		} catch(Exception eed){
+			         		 
+		 	         		}
 		 	         		
 		 	         		customer.setAddress(Converter.adressLink(sendaadr, country));
 		 	         	
 		         		
-		         		}catch(Exception ee){
-		         		 }
+		         		} catch (Exception ee){
+		         		 
+		         		}
 			         	
 		         		
 		         		String asula = "";

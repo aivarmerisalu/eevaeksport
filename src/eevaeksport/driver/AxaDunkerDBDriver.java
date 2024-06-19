@@ -415,7 +415,24 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 "itt.itemgroupid < 93 GROUP BY summ.itemid having sum(availphysical) >0 order by summ.itemid ";
 
 
-	  
+	  cmd = "SELECT summ.itemid AS toode , ' ' as ladu ,SUM(AVAILPHYSICAL) -\r\n" + 
+	  		"ISNULL((SELECT SUM (CASE WHEN ISNULL(CAST(RP.INVENTQTY AS int), 0)-ISNULL(-CAST(TRANS.KOGUS AS int), 0) > 0\r\n" + 
+	  		"THEN ISNULL(CAST(RP.INVENTQTY AS int), 0)-ISNULL(-CAST(TRANS.KOGUS AS int), 0) ELSE 0 END) AS KliendilSaada\r\n" + 
+	  		"FROM ssWMSrezervationPeriod RP LEFT JOIN ssWMSRezervationItemRelation RI ON RI.DATAAREAID='VIN' AND RP.REFRECID=RI.RECID AND RI.ITEMIDRELATION=summ.itemid\r\n" + 
+	  		"LEFT JOIN ssWMSRezervationCustRelation RC ON RC.DATAAREAID='VIN' AND RI.REFRECID=RC.RECID\r\n" + 
+	  		"RIGHT JOIN INVENTTABLE IT ON IT.DATAAREAID='VIR' AND IT.ITEMID=RI.ITEMIDRELATION AND IT.SSORDERERACCOUNT = 'DUNKER' OUTER APPLY(SELECT INVENTTRANS.ITEMID AS KAUP,\r\n" + 
+	  		"SUM(INVENTTRANS.QTY) AS KOGUS FROM INVENTTRANS LEFT JOIN SalesTable ON SalesTable.DATAAREAID='VIN' AND SalesTable.SALESID=INVENTTRANS.TRANSREFID RIGHT JOIN InventDim ON\r\n" + 
+	  		"InventDim.DATAAREAID='VIN' AND InventDim.INVENTDIMID=InventTrans.INVENTDIMID AND InventDim.INVENTLOCATIONID=RI.INVENTLOCATIONID\r\n" + 
+	  		"WHERE INVENTTRANS.DATAAREAID = 'vin' AND INVENTTRANS.TRANSTYPE=0 AND INVENTTRANS.SALESCREATEDDATE >= RP.FROMDATE AND INVENTTRANS.SALESCREATEDDATE <= RP.TODATE\r\n" + 
+	  		" AND INVENTTRANS.ITEMID = RI.ITEMIDRELATION AND INVENTTRANS.STATUSISSUE <> 6 AND ((SALESTABLE.CUSTACCOUNT = RC.ACCOUNTRELATION AND RC.RELATION=0)\r\n" + 
+	  		" OR (SALESTABLE.INVOICEACCOUNT = RC.ACCOUNTRELATION AND RC.RELATION=1) ) GROUP BY INVENTTRANS.ITEMID) TRANS WHERE RP.DATAAREAID='VIN'\r\n" + 
+	  		" AND DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE()))<=RP.TODATE GROUP BY RI.ITEMIDRELATION ),0) AS Stock FROM INVENTSUM summ INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid\r\n" + 
+	  		" INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid  and inv.dataareaid='vir'\r\n" + 
+	  		" INNER JOIN INVENTTABLE itt ON itt.itemid=summ.itemid and itt.dataareaid='vir'	and itt.ssordereraccount='DUNKER'\r\n" + 
+	  		" INNER JOIN WMSPALLET pal ON dim.wmspalletid = pal.wmspalletid and pal.dataareaid=dim.dataareaid and pal.sssticker=1\r\n" + 
+	  		" WHERE summ.DATAAREAID='vin' and dim.DATAAREAID='vin' and\r\n" + 
+	  		" inv.DATAAREAID='vir' AND CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('LK_AKTSIIS','LK_TAVA','ITELLA') and\r\n" + 
+	  		" itt.itemgroupid < 80 GROUP BY summ.itemid having sum(availphysical) >0  order by summ.itemid";
 
        if (isDebug()) System.out.println(cmd);
        StringBuffer products = new StringBuffer();
@@ -442,10 +459,72 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
        } catch (Exception e) {
            getParent().showError(e);
        }
+
+		getStockBronnData();
        return products.toString();
    }
 
 
+ public void getStockBronnData(){
+
+	    
+	  
+     
+     String sql =  " SELECT RI.ITEMIDRELATION AS toode, Maksja=CASE RC.RELATION WHEN 0 THEN \r\n" + 
+     		"	(SELECT Maksja=CASE INVOICEACCOUNT WHEN '' THEN ACCOUNTNUM ELSE INVOICEACCOUNT END FROM CUSTTABLE\r\n" + 
+     		" WHERE CUSTTABLE.DATAAREAID='vir' AND CUSTTABLE.ACCOUNTNUM=RC.ACCOUNTRELATION) WHEN 1 THEN RC.ACCOUNTRELATION ELSE 'Puudub' END,\r\n" + 
+     		" CASE WHEN ISNULL(CAST(RP.INVENTQTY AS int), 0)-ISNULL(-CAST(TRANS.KOGUS AS int), 0) > 0\r\n" + 
+     		" THEN ISNULL(CAST(RP.INVENTQTY AS int), 0)-ISNULL(-CAST(TRANS.KOGUS AS int), 0) ELSE 0 END AS KliendilSaada\r\n" + 
+     		" FROM ssWMSrezervationPeriod RP LEFT JOIN ssWMSRezervationItemRelation RI ON\r\n" + 
+     		" RI.DATAAREAID='VIN' AND RP.REFRECID=RI.RECID LEFT JOIN ssWMSRezervationCustRelation RC ON RC.DATAAREAID='VIN' AND\r\n" + 
+     		" RI.REFRECID=RC.RECID RIGHT JOIN INVENTTABLE IT ON IT.DATAAREAID='VIR' AND IT.ITEMID=RI.ITEMIDRELATION AND IT.SSORDERERACCOUNT = 'DUNKER'\r\n" + 
+     		" OUTER APPLY ( SELECT INVENTTRANS.ITEMID AS KAUP, SUM(INVENTTRANS.QTY) AS KOGUS\r\n" + 
+     		" FROM INVENTTRANS LEFT JOIN SalesTable ON SalesTable.DATAAREAID='VIN' AND SalesTable.SALESID=INVENTTRANS.TRANSREFID\r\n" + 
+     		" RIGHT JOIN InventDim ON	InventDim.DATAAREAID='VIN' AND InventDim.INVENTDIMID=InventTrans.INVENTDIMID AND InventDim.INVENTLOCATIONID=RI.INVENTLOCATIONID\r\n" + 
+     		" WHERE INVENTTRANS.DATAAREAID = 'vin' AND INVENTTRANS.TRANSTYPE=0 AND INVENTTRANS.SALESCREATEDDATE >= RP.FROMDATE\r\n" + 
+     		" AND INVENTTRANS.SALESCREATEDDATE <= RP.TODATE AND INVENTTRANS.ITEMID = RI.ITEMIDRELATION\r\n" + 
+     		" AND INVENTTRANS.STATUSISSUE <> 6 AND ((SALESTABLE.CUSTACCOUNT = RC.ACCOUNTRELATION AND RC.RELATION=0)\r\n" + 
+     		" OR	(SALESTABLE.INVOICEACCOUNT = RC.ACCOUNTRELATION AND RC.RELATION=1) ) GROUP BY INVENTTRANS.ITEMID) TRANS\r\n" + 
+     		" WHERE RP.DATAAREAID='VIN' AND DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE()))<=RP.TODATE GROUP BY RP.INVENTQTY, RI.ITEMIDRELATION , \r\n" + 
+     		" RC.ACCOUNTRELATION,RC.RELATION,TRANS.KOGUS ORDER BY RI.ITEMIDRELATION " ;
+  			     
+      
+StringBuffer sb = new StringBuffer();
+
+try {
+
+  Connection con = this.getNewConnection();
+  PreparedStatement stmt2 = con.prepareStatement(sql);
+  ResultSet  rs = stmt2.executeQuery();
+
+while(rs.next()){
+	 String  toode = rs.getString("toode").trim();
+
+	 String kuhu = rs.getString("Maksja").trim();
+	 Double seis = rs.getDouble("KliendilSaada");
+	 if(seis > 0) {
+       sb.append(kuhu + ";" + toode + ";" + seis + "\n" );
+	 }
+}
+
+rs.close();
+stmt2.close();
+con.close(); 	 
+
+} catch (Exception e) {
+ getParent().showError(e);
+}
+
+
+
+Converter.saveFile(parent.getProps().getProperty("stockrefdir") + "stockbronn.txt", sb.toString());
+System.out.println(sb.toString());
+			  
+
+  }
+
+
+ 
 
               public String getDealerCustomerCSV(String agent){
                return null;

@@ -188,7 +188,7 @@ try {
                  "INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and summ.dataareaid=dim.dataareaid " +
                  "INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and summ.dataareaid=inv.dataareaid " +
                  "WHERE summ.DATAAREAID='dat'and dim.DATAAREAID='dat' and inv.DATAAREAID='dat' AND CLOSED = 0 AND  moduletype=0 " +
-                 " AND dim.inventlocationid IN ('KM')  and AVAILPHYSICAL > 0 GROUP BY summ.itemid  ORDER BY summ.itemid ";
+                 " AND dim.inventlocationid IN ('KM')   and  summ.inventstatusid  in ( 'MÜÜK') and AVAILPHYSICAL > 0 GROUP BY summ.itemid  ORDER BY summ.itemid ";
 
 			if (isDebug())
 				System.out.println(cmd);
@@ -214,7 +214,8 @@ try {
 			} catch (Exception e) {
 				getParent().showError(e);
 			}
-			
+
+			getStockBronnData();
 			getPilotDayData2();
 			return products.toString();
 		}
@@ -1354,7 +1355,7 @@ String region = rs.getString("region");
     String  cmd2 = "  SELECT summ.itemid AS toode , SUM(AVAILPHYSICAL) AS stock ,  inv.price as oma  FROM INVENTSUM summ " +
              " INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and summ.dataareaid=dim.dataareaid " +
              " INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and summ.dataareaid=inv.dataareaid " +
-			 " AND CLOSED = 0 AND  moduletype=0 WHERE summ.DATAAREAID='dat'   and AVAILPHYSICAL > 0  AND dim.inventlocationid IN ('KM') " +
+			 " AND CLOSED = 0 AND  moduletype=0 WHERE summ.DATAAREAID='dat'   and AVAILPHYSICAL > 0 and  summ.inventstatusid in ( 'MÜÜK' ) AND dim.inventlocationid IN ('KM') " +
 			 " GROUP BY summ.itemid,inv.price ORDER BY summ.itemid " ;
              
     String cmd3 = " SELECT summ.itemid AS toode , SUM(AVAILPHYSICAL) AS stock ,avg((case when PHYSICALVALUE > 0 then PHYSICALVALUE else postedvalue end)/AVAILPHYSICAL) as oma  FROM INVENTSUM summ " +
@@ -1587,7 +1588,58 @@ System.out.println(agent.getID() +" " + sb.toString());
 		return  parent.getEmailProps().containsKey(agent);
 	  }
 	  
+  public void getStockBronnData(){
 
+	    
+	  
+       
+       String sql =  "  SELECT summ.itemid AS toode , sum(AVAILPHYSICAL) AS stock, summ.inventstatusid as kuhu FROM INVENTSUM summ \r\n" + 
+       		"                 INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and summ.dataareaid=dim.dataareaid \r\n" + 
+       		"                 INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and summ.dataareaid=inv.dataareaid \r\n" + 
+       		"                 WHERE summ.DATAAREAID='dat'and dim.DATAAREAID='dat' and inv.DATAAREAID='dat' AND CLOSED = 0 AND  moduletype=0 \r\n" + 
+       		"                 and AVAILPHYSICAL > 0 and dim.inventlocationid IN ('KM') and summ.inventstatusid != '' and  summ.inventstatusid not in ( 'MÜÜK' , 'HANGUB' )\r\n" + 
+       		"				  GROUP BY summ.inventstatusid, summ.itemid  ORDER BY summ.itemid";
+    			     
+        
+StringBuffer sb = new StringBuffer();
+  this.connectionUp();
+try {
+	
+   
+	Connection con = this.getNewConnection();
+    PreparedStatement stmt2 = con.prepareStatement(sql);
+    ResultSet  rs = stmt2.executeQuery();
+ 
+ while(rs.next()){
+	 String  toode = rs.getString("toode").trim();
+	 Double seis = rs.getDouble("stock");
+	 String kuhu = rs.getString("kuhu").trim();
+     
+	 sb.append(kuhu + ";" + toode + ";" + seis + "\n" );
+	 
+ }
+ rs.close();
+ stmt2.close();
+con.close(); 	 
+
+} catch (Exception e) {
+ getParent().showError(e);
+}
+
+	  
+
+connectionDown();
+
+
+
+Converter.saveFile(parent.getProps().getProperty("stockrefdir") + "stockbronn.txt", sb.toString());
+System.out.println(sb.toString());
+			  
+
+    }
+  
+  
+  
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
   
   public String getPilotDayData2(){
