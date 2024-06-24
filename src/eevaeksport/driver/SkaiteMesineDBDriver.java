@@ -44,7 +44,7 @@ import eevaeksport.util.Converter;
  * @author Tarmo Tubro
  * @version 1.0
  */
-public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter{
+public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter,PictureMaker{
 
 
     public SkaiteMesineDBDriver(EksportPanel parent) {
@@ -76,7 +76,141 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
        	return null;
        }
 	
+    @Override
+	public void PictureMaker() {
+		 makePictureCat();
+		  System.exit(0);
+		
+	}
     
+    private void makePictureCat(){
+	  	    
+	    	
+	    	String pictssou = parent.getProps().getProperty("pict.dir");
+	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	  	    TreeMap phsize = new TreeMap();
+	  	    
+
+	  		 TreeMap prods = this.getProducts(null);
+	  	    
+	  	 try {
+       	  File f = new File(pictspda +"list.txt");
+            if (f.exists())f.delete();
+            //Kataloogi sisude kustutamine
+        	  File res2 = new File (pictspda);
+	             String[] ff2 = res2.list();
+	         	 for(int i = 0;ff2.length>i;i++){
+	             //	(new File ( pictspda + ff2[i])).delete(); 
+	             }
+//	         	 Lõppes kustutamine 
+	         	 
+	         	 
+
+
+	  	         StringBuffer buf = new StringBuffer();
+	         Iterator enume = piltcodes.keySet().iterator();
+	    
+	         while (enume.hasNext()) {
+	    	    	Integer asi = (Integer)enume.next();
+	    	    	Vector vec = (Vector)piltcodes.get(asi);
+	    	    	Enumeration itt = vec.elements();
+	    	    	while(itt.hasMoreElements()) {
+	    	    		String ass =(String) itt.nextElement();
+	    	    	System.out.println("ass " + ass + " " + prods.get(ass));
+	    	    	Product prod = (Product)prods.get(ass);
+	    	    	if(prod != null) {
+	    	    		
+	    	    	String toode = prod.getID().trim(); 
+	    	    	String pkood = prcodes.get(toode)+"";
+	    	    	
+	    	    	
+	               if(toode.length() > 0 && pkood != null && pkood.trim().length() >0){
+	                	
+	    	   	  res2 = new File (pictssou);
+	              ff2 = res2.list();
+	            
+	         	 for(int i = 0;ff2.length>i;i++){
+	             	if( ff2[i].startsWith(pkood +"_")){
+	               // System.out.println("pilt olemas " + ff2[i]);
+	            	File in = new File ( pictssou + ff2[i]); 
+	              	if(in.isFile()){
+	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+	              	if(!inpda.exists()) {
+	              		Converter.shrinkAndCopyFile(in,inpda,400);
+	              	}
+	                  	
+	                  	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
+	                  	phsize.put(prod.getID(), kkk.length());
+                	    }
+	                 }
+	               }
+	             }
+	    	    	}}
+	    	   }
+	         
+	    
+	  	       
+	          enume = prods.keySet().iterator();
+	    
+	         while (enume.hasNext()) {
+	    	    	String asi = (String)enume.next();
+	    	    	Product prod = (Product)prods.get(asi);
+	    	    	String toode = prod.getID().trim();  
+	               if(toode.length() > 0){
+	                	
+	    	   	  res2 = new File (pictssou);
+	              ff2 = res2.list();
+	            
+	         	 for(int i = 0;ff2.length>i;i++){
+	             	if( ff2[i].startsWith(toode +"_")){
+	               // System.out.println("pilt olemas " + ff2[i]);
+	            	File in = new File ( pictssou + ff2[i]); 
+	              	if(in.isFile()){
+	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+	              	if(!inpda.exists()) {
+	              		Converter.shrinkAndCopyFile(in,inpda,400);
+	              	}
+	                  	
+	                  	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
+	                  	phsize.put(prod.getID(), kkk.length());
+              	    }
+	                 }
+	               }
+	             }
+	    	   }
+	         
+	         
+	        
+	         
+	       Iterator itera =   phsize.keySet().iterator();
+	       while(itera.hasNext()) {
+	    	   String prid = (String)itera.next();
+	    		buf.append(prid +".jpg;"  + phsize.get(prid) + "\n");
+	               
+	       }
+	        
+           	
+           
+	         
+	         
+	         try {
+       		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+       		os.write(buf.toString());
+       		os.close();
+       	  }catch (Exception ex) {
+       		ex.printStackTrace();
+       	  }
+	  	 
+	  	 } catch (Exception e) {
+	    	    getParent().showError(e);
+	    	}
+	    
+	  	 
+	  	 
+	  }
+ 
+
+
     
 	private Connection getNewConnection() throws SQLException {
 		return DriverManager.getConnection(url, getParent().getProps()
@@ -133,12 +267,12 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
       connectionUp(this.url);
     }
     public String getSaveDebtInfo() {
-    	 makePictureCat();
+    	 makePictureCatO();
 		  System.exit(0);
        	return null;
        }
     
-    private void makePictureCat(){
+    private void makePictureCatO(){
 	     
        	 
     String cmd = "SELECT  Pr.PrekesID as tid, Pr.Kodas AS toode " +
@@ -970,7 +1104,7 @@ Statement st = null;
                       "            WHERE     (pot.PartOperacijosTipas IN (1, 3, 12)) AND (opp.spec = 0) and op.Data+CONVERT(SmallInt, msal.Terminas) < getdate() AND (opp.PartneriaiId = part.PartneriaiId) AND " + 
    				"		 	  (op.Suma > op.ApmoketaSuma)), 0)) as debt  ,masm.kodas as agent	,  " +
    				"			  (select  rtrim(uu.Adresas)  + case when uu.Indeksas IS NULL then '' else ' ' + rtrim(uu.Indeksas)end + ' ' + rtrim(uu.Miestas) from Adresai uu " +
-   				"INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as jurid  , apr.Pavad  as aletext , sut.NuolaiduAprasymaiId  as hinnak , kain.NuolaiduKainininkaiId  as hinnak2 " +
+   				"INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as jurid  , apr.Pavad  as aletext , sut.NuolaiduAprasymaiId  as hinnak , kain.NuolaiduKainininkaiId  as hinnak2 , pl.MES_PARD_GR_KODAS as gr1 " +
                " FROM         dbo.Partneriai AS part INNER JOIN  " +
                "             dbo.PartneriaiPa AS partpa ON part.PartneriaiId = partpa.PartneriaiId INNER JOIN  " +
                 "          dbo.MokejimoSalygos AS msal ON partpa.MokejimoSalygosID = msal.MokejimoSalygosID INNER JOIN " +  
@@ -1135,7 +1269,6 @@ Statement st = null;
 			  }
 		   
 		   String nim = rs.getString("nimi2").replaceAll("\""," ").trim();
-		   String nims = rs.getString("nimi").replaceAll("\""," ").trim();
 		   
 		 String nimi = Converter.enCodeEst(nim);
 		 String payer = rs.getString("payer");
@@ -1333,6 +1466,11 @@ Statement st = null;
                  	cust.addCity("Log : " + locistics.get(cust.getID()) );
                  }
                  
+                 String gr = rs.getString("gr1");
+                 if(gr != null && gr.trim().length()>0){
+                  	  cust.addCity("Pard.gr.Kodas: " + gr.trim());
+                  	} 
+                 
                 if(goes){
                 	 customers.put(Converter.cleanLitLatEst(nim+addr), cust);
                      custMap.put(cust.getID(), cust);	
@@ -1517,7 +1655,7 @@ Statement st = null;
 	
     
     
-    
+    private TreeMap piltcodes = null; 
     private TreeMap prcodes = new TreeMap();
     private HashMap prodHash = new HashMap();
     
@@ -1526,8 +1664,9 @@ Statement st = null;
 	TreeMap products = new TreeMap();
 	
 	   prcodes = new TreeMap();
+	   piltcodes = new TreeMap();
 
-    String cmd = "SELECT  Pr.PrekesID as tid, Pr.Kodas AS kood,pl.MES_MES_PAV_TRUMPINYS as nimi2, Pr.Pavad AS nimetus," +
+    String cmd = "SELECT  Pr.PrekesID as tid, ( select m.Kodas from dbo.Prekes m where m.PrekesID = MES_Pakavimo_ID) as pkood, Pr.Kodas AS kood,pl.MES_MES_PAV_TRUMPINYS as nimi2, Pr.Pavad AS nimetus," +
     " CONVERT(Money, tt.PK_PardKaina) AS hind, CASE WHEN pr.mvid = pr.ipokavimomvid OR " +
     " ISNULL(pr.ipokavimomvid, 0) < 2 OR  pr.MVId NOT IN (2, 62733) THEN mv.Kodas ELSE ipokmv.Kodas END AS unit , 0  AS kastis, " +
     "  CONVERT(Money, NULL) AS CostPrice, CONVERT(varchar(20), Pr.KAPKodas) AS ean, CONVERT(varchar(20),  pr.PrekiuGrupesID) AS grupp, '' AS grupp2 ,gr.kodas " +
@@ -1554,6 +1693,7 @@ Statement st = null;
              while (rs.next()) {
         	  boolean goes = true;
         	  String tid = rs.getString("tid");
+              String pkood = rs.getString("pkood");
               String kood = rs.getString("kood").trim();
               String nimi2 = rs.getString("nimi2").trim();
               String nimetus =  rs.getString("nimetus").replaceAll("\"", " ").trim();
@@ -1651,7 +1791,17 @@ try{
                  }
               
               
-              
+
+        	  if(pkood.trim().length() > 0) {
+        		  Vector vec = (Vector)piltcodes.get(pkood);
+        		  if(vec  == null) {
+        			  vec =  new Vector();
+        		  }
+        		 
+        		  vec.add(nimetus);
+        		  prcodes.put(kood, pkood);
+        		  piltcodes.put(pkood, vec); 
+        	  }
               
               
               if(goes){

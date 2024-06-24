@@ -923,7 +923,7 @@ Statement st = null;
                    "            WHERE     (pot.PartOperacijosTipas IN (1, 3, 12)) AND (opp.spec = 0) and op.Data+CONVERT(SmallInt, msal.Terminas) < getdate() AND (opp.PartneriaiId = part.PartneriaiId) AND " + 
 				"		 	  (op.Suma > op.ApmoketaSuma)), 0)) as debt  ,masm.kodas as agent	,  " +
 				"			  (select  rtrim(uu.Adresas)  + case when uu.Indeksas IS NULL then '' else ' ' + rtrim(uu.Indeksas)end + ' ' + rtrim(uu.Miestas) from Adresai uu " +
-				"INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as jurid  , apr.Pavad  as aletext , sut.NuolaiduAprasymaiId  as hinnak , kain.NuolaiduKainininkaiId  as hinnak2 " +
+				"INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as jurid  , apr.Pavad  as aletext , sut.NuolaiduAprasymaiId  as hinnak , kain.NuolaiduKainininkaiId  as hinnak2 , pl.MES_PARD_GR_KODAS as gr1 " +
             " FROM         dbo.Partneriai AS part INNER JOIN  " +
             "             dbo.PartneriaiPa AS partpa ON part.PartneriaiId = partpa.PartneriaiId INNER JOIN  " +
              "          dbo.MokejimoSalygos AS msal ON partpa.MokejimoSalygosID = msal.MokejimoSalygosID INNER JOIN " +  
@@ -1188,7 +1188,11 @@ Statement st = null;
                 if(locistics.get(cust.getID()) != null) {
                 	cust.addCity("Log : " + locistics.get(cust.getID()) );
                 }
-               
+                String gr = rs.getString("gr1");
+                if(gr != null && gr.trim().length()>0){
+                 	  cust.addCity("Pard.gr.Kodas: " + gr.trim());
+                 	} 
+                
                 
                 	 customers.put(Converter.cleanLitLatEst(nim+addr), cust);
                      custMap.put(cust.getID(), cust);	
@@ -2091,10 +2095,8 @@ try {
 
 	@Override
 	public void FixReporter() {
-		String fileName = Converter.saveDayReportReport(this.getExcelDir(), rcompany, user, pass);
-		if(fileName != null) {
-			Converter.sendReportEmail("Dayreport weekly report", fileName, parent);
-		}
+		String fileName = Converter.saveDayReportReport(this.getExcelDir(), rcompany, user, pass, parent);
+		
 		System.exit(0);
 	}
     

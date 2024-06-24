@@ -11724,23 +11724,27 @@ client.close();
 	   
 	    
 	   
-	   public static String saveDayReportReport(String exceldir, String rcompany, String user, String pass) {
+	   public static String saveDayReportReport(String exceldir, String rcompany, String user, String pass , EksportPanel parent ) {
 		   LocalDate today = LocalDate.now(ZoneId.of("Europe/Tallinn"));
 		   //today = today.minusDays(3);
 		   while(today.getDayOfWeek().getValue() != 1) { //kui ei ole esmasp siis teeskleme et on
 			   today = today.minusDays(today.getDayOfWeek().getValue()-1);
 		   }
-		   LocalDate lastMonday = today.with(TemporalAdjusters.previous( DayOfWeek.MONDAY ));
-		   LocalDate lastSaturday = today.with(TemporalAdjusters.previous( DayOfWeek.SUNDAY ));
-		   Long monTimestamp = lastMonday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000;
-		   Long satTimestamp = lastSaturday.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000 + 86400000;
 		   //System.exit(0);
 
 		   
+		   // siia siis nädala tsykkel teha 
+		   
+		   for (int o = 0 ; o < 7 ; o++) {
+
+			   LocalDate stDay = today.plusDays(o);
+			 //  LocalDate lastSaturday = today.with(TemporalAdjusters.previous( DayOfWeek.SUNDAY ));
+			   Long monTimestamp = stDay.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000;
+			   Long satTimestamp = stDay.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000 + 86400000;
 		   
 	  try{
 		  JSONArray dayreportarray = getWebDayReport(monTimestamp, satTimestamp, rcompany, user, pass);
-		  saveFileInUTF8(exceldir + "vigestareport" + lastMonday + ".json", dayreportarray.toString());
+		  saveFileInUTF8(exceldir + "vigestareport" + stDay + ".json", dayreportarray.toString());
 		  JSONArray webcustarray = getWebCustomersAll(rcompany, user, pass);
 //System.out.println(dayreportarray.toString());
 		  int lenn = webcustarray.length();
@@ -11863,13 +11867,15 @@ client.close();
        
 		  }
 
-			saveFileInUTF8(exceldir + "vigestareport" + lastMonday + ".csv",sb);
+			saveFileInUTF8(exceldir + "vigestareport" + stDay + ".csv",sb);
+			Converter.sendReportEmail("Dayreport weekly report", exceldir + "vigestareport" + stDay + ".csv", parent);
 			
-return exceldir + "vigestareport" + lastMonday + ".csv";
 		  
-	  }catch (Exception e){
+	     } catch (Exception e){
 			e.printStackTrace();
-		}
+		 }
+		   }
+		   
 	  return null;    
 	 }
 	

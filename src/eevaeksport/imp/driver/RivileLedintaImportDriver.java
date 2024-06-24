@@ -751,7 +751,7 @@ public Vector getDebt() throws SQLException{
    
    addtoVat = baseVat - sumVat ;
    
-   System.out.println("vats " + addtoVat + " " + baseVat + " " + sumVat + " " + sum);
+ //  System.out.println("vats " + addtoVat + " " + baseVat + " " + sumVat + " " + sum);
    
 
    
@@ -915,11 +915,12 @@ if(ladu.trim().length()!=0){
          fos.write(sbb.toString().getBytes());
          fos.close();
          if(sbb.contains("<h1>Error: Server Error") || sbb.contains("Connection refused") ||  sbb.contains("connect timed out") ||  sbb.contains("errorMessage")) {
+        	 order.setDokNr(order.getDokNr()+"r");
+        	 this.makeOrder(order);
+        	 coun++;
+        	 if(coun > 2)
             System.exit(0);	
          }
-         if(sbb.contains("<errorMessage></errorMessage>") ) {
-             System.exit(0);	
-          }
        
          
     	} catch (Exception o) {
@@ -935,6 +936,8 @@ if(ladu.trim().length()!=0){
 		
 	}
  }
+ 
+ private int coun = 0;
   
   public String getDriverVersion(){
     return "RivileLedinta";

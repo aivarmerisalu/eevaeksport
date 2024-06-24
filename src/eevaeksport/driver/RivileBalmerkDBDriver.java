@@ -146,16 +146,13 @@ for(int i = 0;dd1.length>i;i++){
 
 
 	        StringBuffer buf = new StringBuffer();
-	        StringBuffer buf0 = new StringBuffer();
-	        int a = 0;
-	       
+	        
 	        int c = 0;
 	        
 	        // leiame kataloogid ja peame meeles 
 	        File d  = new File(picts);
 	        
 	        while (rs.next()) {
-	   	    	a++;
 	   	    	c++;
 	   	     String toode = rs.getString("toode").trim();  
 	         toode = toode.replace('/', '_');
