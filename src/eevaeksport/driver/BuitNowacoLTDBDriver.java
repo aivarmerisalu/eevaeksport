@@ -2284,7 +2284,7 @@ try{
 	   
 	   try {
 			  
-	    	 String cmd =  "  select preke as toode , kiekis  as kogus , sandelis as ladu ,artikulas as bb from likuciai"
+	    	 String cmd =  "  select preke as toode , kiekis  as kogus , sandelis as ladu ,artikulas as bb , savikaina as cost from likuciai"
 	    	 		+ " where  sandelis in ('S6','S4','B1' ,'S4(b)')  and kiekis  > 0";
 	    	//	  System.out.println(cmd);
 	    	 
@@ -2299,6 +2299,7 @@ try{
               double kogus = rs.getDouble("kogus");
               String ladu = rs.getString("ladu");
               String partii = rs.getString("bb");
+              Double hind = rs.getDouble("cost");
             
               if(partii != null){
             	if(stocksdet.get(id)!= null){
@@ -2307,6 +2308,9 @@ try{
 	  	  				tt.setKogus(kogus);
 	  	  				tt.setLadu(ladu);
 	  	  				tt.setBrand(partii.trim());
+	  	  				if(hind > 0) {
+	  	  				tt.setKastis(hind);
+	  	  				}
 	  	  				vv.add(tt);
 	  	  				stocksdet.put(id, vv);
 	  	  			}else{
@@ -2314,6 +2318,9 @@ try{
 	  	  				Toode tt = new Toode(id);
 	  	  				tt.setKogus(kogus);
 	  	  				tt.setLadu(ladu);
+	  	  			if(hind > 0) {
+	  	  			    tt.setKastis(hind);
+	  	  			}
 	  	  				tt.setBrand(partii.trim());
 	  	  				vv.add(tt);
 	  	  				stocksdet.put(id, vv);
@@ -2611,15 +2618,21 @@ try{
             	Vector<Toode> vv = stocksdet.get(id);
             	for(int i = 0; i < vv.size();i++){
             	 Toode tt = vv.elementAt(i)	;
+            	 
+            	 String hh = "";
+            	 if(tt.getKastis() > 0) {
+            	   hh = " Co:" + nf.format(tt.getKastis())+ "€";
+            	 }
+            	 
             	 if(prod.getPartii() != null && prod.getPartii().trim().length() > 0){
-            		 prod.setPartii(prod.getPartii() + tt.getLadu() + ":" + tt.getKogus() + " BB:" + tt.getBrand() + "|");	
-            	 }else{
-            		 prod.setPartii("|" + tt.getLadu() + ":" + tt.getKogus() + " BB: " + tt.getBrand() + "|");	 
+            		 prod.setPartii(prod.getPartii() + tt.getLadu() + ":" + tt.getKogus() + " BB:" + tt.getBrand() + hh + "|");	
+            	   }else{
+            		 prod.setPartii("|" + tt.getLadu() + ":" + tt.getKogus() + " BB: " + tt.getBrand() + hh + "|");	 
             	 }
             	
             	}
-            	
             }
+            
          	String name = rs.getString("nimi").trim() + " " + id;
          	name = name.substring(0,1) + (name.substring(1,name.length())).toLowerCase();
              double price = rs.getDouble("myygihind");

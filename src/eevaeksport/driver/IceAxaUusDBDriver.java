@@ -1602,34 +1602,98 @@ System.out.println(agent.getID() +" " + sb.toString());
     			     
         
 StringBuffer sb = new StringBuffer();
-  this.connectionUp();
+ 
 try {
-	
    
 	Connection con = this.getNewConnection();
     PreparedStatement stmt2 = con.prepareStatement(sql);
     ResultSet  rs = stmt2.executeQuery();
  
- while(rs.next()){
+    HashMap res = new HashMap();
+    
+   while(rs.next()){
 	 String  toode = rs.getString("toode").trim();
 	 Double seis = rs.getDouble("stock");
 	 String kuhu = rs.getString("kuhu").trim();
-     
-	 sb.append(kuhu + ";" + toode + ";" + seis + "\n" );
-	 
- }
+	 HashMap sees = (HashMap)res.get(kuhu);
+      if(sees == null) {
+    	 sees = new HashMap();
+      }
+	 sees.put(toode, seis);
+	 res.put(kuhu, sees);
+  }
+ 
  rs.close();
  stmt2.close();
-con.close(); 	 
+ 
+ 
+ sql =  " select itemid as toode , accountrelation as klient,inventstatusid as kuhu from\r\n" + 
+ 		" BALCUSTINVENTSTATUSSETUP where dataareaid = 'dat' and getdate() between fromdate and todate and accountcode = 0 " ; 
+  
+ stmt2 = con.prepareStatement(sql);
+ rs = stmt2.executeQuery();
 
-} catch (Exception e) {
- getParent().showError(e);
+while(rs.next()){
+
+	 String toode = rs.getString("toode").trim();
+	 String klient = rs.getString("klient");
+	 String kuhu = rs.getString("kuhu").trim();
+	 
+	 HashMap sees = (HashMap)res.get(kuhu);
+  
+     if(sees != null && sees.get(toode) != null) {
+	   sb.append(klient + ";" + toode + ";" + sees.get(toode) + "\n" );
+     }
+	 
 }
 
+
+rs.close();
+stmt2.close();
+
+sql =  " select itemid as toode , accountrelation as klient,inventstatusid as kuhu from\r\n" + 
+ 		" BALCUSTINVENTSTATUSSETUP where dataareaid = 'dat' and getdate() between fromdate and todate and accountcode = 1 " ; 
+  
+ stmt2 = con.prepareStatement(sql);
+ rs = stmt2.executeQuery();
+
+while(rs.next()){
+
+	 String toode = rs.getString("toode").trim();
+	 String grupp = rs.getString("klient").trim();
+	 String kuhu = rs.getString("kuhu").trim();
+	 
+	 HashMap sees = (HashMap)res.get(kuhu);
+  
+     if(sees != null && sees.get(toode) != null) {
+    	 
+    	String  sql2 =  " select accountnum as klient from custtable where custgroup = '" + grupp + "' and dataareaid = 'dat' " ; 
+    	
+    	Connection con2 = this.getNewConnection();
+    	PreparedStatement stmt3 = con2.prepareStatement(sql2);
+    	ResultSet rs3 = stmt3.executeQuery();
+    	
+    	while(rs3.next()){
+          String klient = rs3.getString("klient").trim();
+	      sb.append(klient + ";" + toode + ";" + sees.get(toode) + "\n" );
+    	}
+    	
+    	rs3.close();
+    	stmt3.close();
+    	con2.close();
+    	
+     }	 
+  }
+
+  rs.close();
+  stmt2.close();
+  con.close(); 	 
+
+ } catch (Exception e) {
+    getParent().showError(e);
+ }
+
 	  
-
-connectionDown();
-
 
 
 Converter.saveFile(parent.getProps().getProperty("stockrefdir") + "stockbronn.txt", sb.toString());
@@ -1762,7 +1826,7 @@ connectionDown();
 
 
 Converter.saveFile(parent.getProps().getProperty("stockrefdir") + "st"+ agent + "report.txt", sb.toString());
-System.out.println(sb.toString());
+//System.out.println(sb.toString());
 			  }}
 return "";//sb.toString();
 

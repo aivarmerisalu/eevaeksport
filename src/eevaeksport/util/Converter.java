@@ -11737,7 +11737,7 @@ client.close();
 		   
 		   for (int o = 0 ; o < 7 ; o++) {
 
-			   LocalDate stDay = today.plusDays(o);
+			   LocalDate stDay = today.minusDays(o);
 			 //  LocalDate lastSaturday = today.with(TemporalAdjusters.previous( DayOfWeek.SUNDAY ));
 			   Long monTimestamp = stDay.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000;
 			   Long satTimestamp = stDay.atStartOfDay(ZoneId.of("Europe/Tallinn")).toEpochSecond()*1000 + 86400000;
@@ -11746,7 +11746,9 @@ client.close();
 		  JSONArray dayreportarray = getWebDayReport(monTimestamp, satTimestamp, rcompany, user, pass);
 		  saveFileInUTF8(exceldir + "vigestareport" + stDay + ".json", dayreportarray.toString());
 		  JSONArray webcustarray = getWebCustomersAll(rcompany, user, pass);
-//System.out.println(dayreportarray.toString());
+         
+		  System.out.println(dayreportarray.toString());
+		  
 		  int lenn = webcustarray.length();
 		  TreeMap custsloc = new TreeMap();
 		  for (int i = 0; i < lenn; i++) {
