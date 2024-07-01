@@ -266,6 +266,94 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
     
       }
       
+  	public void makeFixSortNewProds() {
+		Vector lines = new Vector();
+		
+		   StringBuffer sb = new StringBuffer();
+		
+		   TreeMap kampid = new TreeMap();// siia tekstid mis klientidele kï¿½lge
+			
+		     int a = 0;
+		   try {
+				  File f = new File (getExcelDir() + "fixnewprods.xlsx");
+					
+				  FileInputStream	 ff = new FileInputStream(f);
+
+		 			 DataFormatter formatter = new DataFormatter();
+						 
+				  //mï¿½ï¿½rame ketid
+				XSSFWorkbook workbook = new XSSFWorkbook((ff));
+				XSSFRow row = null; 
+	 					ff.close();	
+	 					XSSFSheet	 sheet = workbook.getSheetAt(0); 
+						ff.close();	
+						
+						if(sheet != null){
+							for(int i = 0 ; i < sheet.getLastRowNum();i++){
+								 row = sheet.getRow(i);
+								//System.out.println(row);
+								if(row == null && a == 0){
+									a = i;
+								}else{
+									a = sheet.getLastRowNum();
+								}
+							}
+							
+							
+							for(int i = 1 ; i < a+1 ; i++){
+								
+								 row = sheet.getRow(i);
+								
+						 String kett = null;
+									try {
+										kett = formatter.formatCellValue(row.getCell((short) 0));
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+									
+						String prodid = null;
+								try {
+									prodid = formatter.formatCellValue(row.getCell((short) 2));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								
+								
+								if(prodid != null) {
+								
+								
+								java.util.Date lop = null ; 
+								try {
+									lop = row.getCell((short) 1).getDateCellValue();
+								
+								} catch (Exception e) {
+									
+								}
+								
+								
+								
+								 java.util.Date dd = new java.util.Date();
+										
+										
+								if(lop != null &&  dd.before(lop)){
+									sb.append(kett+";"+prodid + ";"+ lop.getTime()+ "\n");
+								}
+								    }
+							      }
+								}
+		         		
+	            	  }catch (Exception e){
+	                   e.printStackTrace();	
+		         	  }
+    if(sb.toString().length() > 2) {
+    	Converter.saveFile("fixsortnew.txt", sb.toString());
+    }
+
+	
+	}
+	
+
+      
       private ArrayList<Product> lisatooted = null;
       private ArrayList<String> lisagrupid = null;
       private TreeMap<String,ArrayList<String>> lisaagendigrupid = null;
@@ -2473,8 +2561,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 	private TreeMap koodiga = null;
 
 	public TreeMap getProducts(Agent agent) {
-		
-		
+		makeFixSortNewProds();
 		loadCamp();
 		koodiga = new TreeMap();
 		TreeMap tm = new TreeMap();

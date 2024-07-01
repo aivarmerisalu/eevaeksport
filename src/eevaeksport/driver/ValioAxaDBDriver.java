@@ -341,7 +341,6 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		
 		   StringBuffer sb = new StringBuffer();
 		
-		   TreeMap kampid = new TreeMap();// siia tekstid mis klientidele kï¿½lge
 			
 		     int a = 0;
 		   try {

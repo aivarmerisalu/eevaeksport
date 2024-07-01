@@ -111,12 +111,12 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
 	         Iterator enume = piltcodes.keySet().iterator();
 	    
 	         while (enume.hasNext()) {
-	    	    	Integer asi = (Integer)enume.next();
+	    	    	String asi = (String)enume.next();
 	    	    	Vector vec = (Vector)piltcodes.get(asi);
 	    	    	Enumeration itt = vec.elements();
 	    	    	while(itt.hasMoreElements()) {
 	    	    		String ass =(String) itt.nextElement();
-	    	    	System.out.println("ass " + ass + " " + prods.get(ass));
+	    	    //	System.out.println("ass " + ass + " " + prods.get(ass));
 	    	    	Product prod = (Product)prods.get(ass);
 	    	    	if(prod != null) {
 	    	    		
@@ -147,6 +147,7 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
 	             }
 	    	    	}}
 	    	   }
+	         
 	         
 	    
 	  	       

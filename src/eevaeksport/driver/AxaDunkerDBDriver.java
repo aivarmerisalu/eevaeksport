@@ -327,7 +327,7 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
             
             String sql = " SELECT PRICEDISCTABLE.ITEMRELATION as prodid , PRICEDISCTABLE.ACCOUNTRELATION as custid, " +
            " MIN(PRICEDISCTABLE.AMOUNT) AS price   ,min(PRICEDISCTABLE.FROMDATE) as algus , max(PRICEDISCTABLE.TODATE) as lopp ," +
-  		" datediff( day,min(PRICEDISCTABLE.FROMDATE) , max(PRICEDISCTABLE.TODATE) )  as paevi " +
+  	       " datediff( day,min(PRICEDISCTABLE.FROMDATE) , max(PRICEDISCTABLE.TODATE) )  as paevi " +
            "  FROM PRICEDISCTABLE WHERE PRICEDISCTABLE.DATAAREAID='VIR' AND PRICEDISCTABLE.RELATION=4 AND PRICEDISCTABLE.ACCOUNTCODE=0 " + 
            "  AND  (GETDATE()>=PRICEDISCTABLE.FROMDATE " + 
            " AND (GETDATE()<=PRICEDISCTABLE.TODATE+1 OR PRICEDISCTABLE.TODATE=('1900-01-01 00:00:00.00'))) " + 
@@ -431,8 +431,8 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
 	  		" INNER JOIN INVENTTABLE itt ON itt.itemid=summ.itemid and itt.dataareaid='vir'	and itt.ssordereraccount='DUNKER'\r\n" + 
 	  		" INNER JOIN WMSPALLET pal ON dim.wmspalletid = pal.wmspalletid and pal.dataareaid=dim.dataareaid and pal.sssticker=1\r\n" + 
 	  		" WHERE summ.DATAAREAID='vin' and dim.DATAAREAID='vin' and\r\n" + 
-	  		" inv.DATAAREAID='vir' AND CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('LK_AKTSIIS','LK_TAVA','ITELLA') and\r\n" + 
-	  		" itt.itemgroupid < 80 GROUP BY summ.itemid having sum(availphysical) >0  order by summ.itemid";
+	  		" inv.DATAAREAID='vir' AND CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('LK_AKTSIIS','LK_TAVA','ITELLA') \r\n" + 
+	  		" GROUP BY summ.itemid having sum(availphysical) >0  order by summ.itemid";
 
        if (isDebug()) System.out.println(cmd);
        StringBuffer products = new StringBuffer();

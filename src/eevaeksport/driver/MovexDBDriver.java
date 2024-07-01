@@ -1184,6 +1184,11 @@ while (rs2.next()){
             }
             cust.setCountry("Eesti");
             
+            String tarne = rs.getString("TARNE_INFO");
+            if (tarne != null && tarne.trim().length()>0){
+            	cust.addCity("Tarne ring: " + tarne.trim());
+            }
+            
   // cust.setDebt(rs.getDouble("debt"));
           customers.put(name, cust);
           custMap.put(cust.getID(), cust);

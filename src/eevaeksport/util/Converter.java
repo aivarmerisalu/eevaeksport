@@ -11735,7 +11735,7 @@ client.close();
 		   
 		   // siia siis nädala tsykkel teha 
 		   
-		   for (int o = 0 ; o < 7 ; o++) {
+		   for (int o = 1 ; o < 8 ; o++) {
 
 			   LocalDate stDay = today.minusDays(o);
 			 //  LocalDate lastSaturday = today.with(TemporalAdjusters.previous( DayOfWeek.SUNDAY ));

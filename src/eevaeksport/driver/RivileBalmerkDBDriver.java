@@ -598,7 +598,7 @@ HashSet olemas = new HashSet();
   	  String  cmd = "  SELECT  I17_KODAS_PS AS toode, sum(I17_kiekis - I17_atiduota) AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS " +
 " where I17_KODAS_IS in ('SAND1') AND ((I17_kiekis - I17_atiduota) >0 OR (I17_P_PAR_K)>0) and n17_kodas_ls_1<>''  and  N17_POZ_DATE =0 " +
 	 "   GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_atiduota ) >0   ORDER BY I17_KODAS_PS" ;
-//,'SAND6','CER3','CER4'
+//,'SAND11','CER3','CER4'
 
          if (isDebug()) System.out.println(cmd);
 
@@ -625,9 +625,9 @@ HashSet olemas = new HashSet();
              
              
              cmd = "  SELECT  I17_KODAS_PS AS toode, sum(I17_kiekis - I17_atiduota) AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS " +
-            		 " where I17_KODAS_IS in ('SAND6') AND ((I17_kiekis - I17_atiduota) >0 OR (I17_P_PAR_K)>0) and n17_kodas_ls_1<>''  and  N17_POZ_DATE =0 " +
+            		 " where I17_KODAS_IS in ('SAND11') AND ((I17_kiekis - I17_atiduota) >0 OR (I17_P_PAR_K)>0) and n17_kodas_ls_1<>''  and  N17_POZ_DATE =0 " +
             		 	 "   GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_atiduota ) >0   ORDER BY I17_KODAS_PS" ;
-            		 //,'SAND6','CER3','CER4'
+            		 //,'SAND11','CER3','CER4'
              
              rs = st.executeQuery(cmd);
 
@@ -1068,8 +1068,80 @@ HashSet olemas = new HashSet();
 
     private HashMap custNAMES = new HashMap();
     
+    HashMap pants = null;
+
+    public void getPandiPakend() {
+  	
+  	  
+  	  if(pants == null) {
+  		  pants = new HashMap();
+  		    String sql1 = " SELECT N26_KODAS_PS as toode , RTRIM(N26_KODAS_PS_K) AS pant FROM N26_KOMP  where N26_KODAS_PS_K not like 'MI%' ";
+  	/*	MED_CHEPRAUD	2.8000000000000000000000
+  		MED_DEP_VM  	.1000000000000000000000
+  		MED_DEP_VP  	.1000000000000000000000
+  		MED_DEP_VS  	.1000000000000000000000
+  		MED_EPAL    	8.0000000000000000000000
+  		MED_PALCHEP 	.0000000000000000000000
+  		MED_PALEUR  	8.0000000000000000000000
+  		  	5.0000000000000000000000
+  		  	2.8000000000000000000000
+  			20.0000000000000000000000
+  		MED_PALPLAST	20.0000000000000000000000
+  			30.0000000000000000000000
+  		MED_STATI20L	20.0000000000000000000000
+  		MED_STATL20L	.0000000000000000000000 */
+
+  		    try {
+  		      connectionUp(url2);
+  		    	
+  		    	 Statement st1 = con.createStatement();
+  		   	     ResultSet rs1 = st1.executeQuery(sql1);
+  		   	    
+  		   	     while (rs1.next()) {
+  		   	    	
+  		   	     String tood  = rs1.getString("toode").trim();
+  		   	     String pant  = rs1.getString("pant").trim();
+  		   	     Double price = 0.0;
+  		   	     if(pant.equals("MED_CHEPRAUD")) {
+  		   	    	 price = 2.8;
+  		   	     } else  if(pant.startsWith("MED_DEP")) {
+  		   	    	 price = 0.1;
+  		   	     } else  if(pant.equals("MED_EPAL")) {
+  		   	    	 price = 8.0;
+  		   	     } else  if(pant.equals("MED_PALEUR")) {
+  		   	    	 price = 8.0;
+  		   	     } else  if(pant.equals("MED_PALEUV")) {
+  		   	    	 price = 5.0;
+  		   	     } else  if(pant.equals("MED_PALIND")) {
+  		   	    	 price = 2.8;
+  		   	     } else  if(pant.equals("MED_PALPLA20")) {
+  		   	    	 price = 20.0;
+  		   	     }else  if(pant.equals("MED_PALPLAST")) {
+  		   	    	 price = 20.0;
+  		   	     }else  if(pant.equals("MED_STATE30L")) {
+  		   	    	 price = 30.0;
+  		   	     }else  if(pant.equals("MED_STATI20L")) {
+  		   	    	 price = 20.0;
+  		   	     }
+  		   	     
+  		   	     
+  		   	         pants.put(tood, price);
+  		   	  
+  		   	    }
+  		   	       
+  		   	      rs1.close();
+  		   	      st1.close();	
+                  con.close();
+  		    }catch(Exception e) {
+  		    	e.printStackTrace();
+  		    } 
+  	     }
+  	 }
+    
+    
     public TreeMap getProducts(Agent agent){
     	this.getSaveStockInfo();
+    	this.getPandiPakend();
     //	System.out.println("stocks suurus " + stocks.size() + " " + stocks6.size());
   
    String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus,dbo.papn(L11_LAUKAS , 8, 'c')  AS tykke,dbo.papn(L11_LAUKAS , 9, 'c')  AS alusel, 0 AS myygihind,\r\n" + 
@@ -1207,8 +1279,8 @@ HashSet olemas = new HashSet();
             }
              // String price = rs.getString("iii");
             if(stocks6.get(prod.getID()) != null){
-          	  prod.setPartii("Sandelis 6: " + (String)stocks6.get(prod.getID())); 
-          	prod.setName(prod.getName() + "S6@" +((int)Double.parseDouble((String)stocks6.get(prod.getID()))) );
+          	  prod.setPartii("Sandelis 11: " + (String)stocks6.get(prod.getID())); 
+          	  prod.setName(prod.getName() + "S11@" +((int)Double.parseDouble((String)stocks6.get(prod.getID()))) );
             }
               String ean = rs.getString("ean");
               if(ean != null && ean.trim().length()>0){
@@ -1288,7 +1360,6 @@ HashSet olemas = new HashSet();
                }
             
                if (gruppabi != null && gruppabi.trim().length()>0){
-               	System.out.println("gruppabi 2 " +  gruppabi + " " + prod.getID());
                	if(gruppabi.trim().equals("MS")) {
                 	   goes = true;
                       prod.setName("x " + prod.getName());
@@ -1297,6 +1368,13 @@ HashSet olemas = new HashSet();
                
                if(prod.getID().contains("MED")) {
             	   goes = true;
+               }
+               
+               if(pants.get(prod.getID()) != null ) {
+               Double pant = (Double)pants.get(prod.getID()) ;
+               if(pant != null && pant > 0){
+             	 prod.DEPO_WO_VAT = pant;
+               }
                }
                
                prod.setVat("21");
