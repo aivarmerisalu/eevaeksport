@@ -668,6 +668,7 @@ public Vector getDebt() throws SQLException{
 		    		  
 	  }else{
       makeOutput(order, tag, volgu, kaup, yle , stat);
+      signatures.add(signature);
       try {
   		Converter.saveObject(signatures, "signatures.vec");
   	} catch (IOException e) {
