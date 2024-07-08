@@ -1310,7 +1310,7 @@ con3.close();
          	
              double price = rs.getDouble("myygihind");
              if(price == 0){
-            	 price = 1;
+            //	 price = 1;
              }
                 prod.setPrice(price);
                 

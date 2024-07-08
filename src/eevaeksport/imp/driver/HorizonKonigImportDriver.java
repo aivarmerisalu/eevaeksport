@@ -376,7 +376,69 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		    	
   }
 
+  private HashSet<String> makeBLK(){
+	  
+	  HashSet<String> res =  new HashSet<String>();
+	  
+	  try{
+		
+			ResultSet rs1 ;
+	    	Statement stmr ;
+			 String sqldea = " 	  select  s.PK_KLIENTS as klient from APV04761.DKLSAGR s  where PK_KLGR = 'BLK' " ; 
+		    	
+		        	Connection con = this.getNewConnection(); 
+		        		 stmr = con.createStatement();
+		                 rs1 = stmr.executeQuery(sqldea);
+		                 
+		                 while(rs1.next()){
+		                    res.add(rs1.getString("klient").trim());
+		                   }
+		                
+		               rs1.close();
+		               stmr.close();
+		               con.close();
+		        	}catch(Exception s){
+		        		s.printStackTrace();
+		        	}
 
+		    //	System.out.println("hrccustomers " + res.size());
+		   return res ; 	
+		    	
+  }
+
+
+  private HashSet<String> make261(){
+	  
+	  HashSet<String> res =  new HashSet<String>();
+	  
+	  try{
+		
+			ResultSet rs1 ;
+	    	Statement stmr ;
+			 String sqldea = " 	  select  s.PK_KLIENTS as klient from APV04761.DKLSAGR s  where PK_KLGR = '261' " ; 
+		    	
+		        	Connection con = this.getNewConnection(); 
+		        		 stmr = con.createStatement();
+		                 rs1 = stmr.executeQuery(sqldea);
+		                 
+		                 while(rs1.next()){
+		                    res.add(rs1.getString("klient").trim());
+		                   }
+		                
+		               rs1.close();
+		               stmr.close();
+		               con.close();
+		        	}catch(Exception s){
+		        		s.printStackTrace();
+		        	}
+
+		    //	System.out.println("hrccustomers " + res.size());
+		   return res ; 	
+		    	
+  }
+
+    
+  
   private ArrayList<String> makeHRC(){
 	  
 	  ArrayList<String> res =  new ArrayList<String>();
@@ -1884,6 +1946,9 @@ try{
 
 	
   private ArrayList<String> hrccusts = null; 
+  private HashSet<String> h261custs = null;
+  private HashSet<String> blkcusts = null; 
+  
 	private TreeMap delDays = null;	 
 	
 	private HashSet nlvKlients = null;
@@ -1916,7 +1981,19 @@ try{
     				  this.trouble = null;
     				  
     				  if( hrccusts == null){
-    					  hrccusts =  makeHRC(); ;
+    					  hrccusts =  makeHRC(); 
+    				  }
+    	
+    				  if( blkcusts == null){
+    					  blkcusts =  makeBLK(); 
+    					  
+    				  }
+
+    				  if(blkcusts.contains(order.getCompany())) {
+    					  order.setDokNr("BLK" + order.getDokNr());
+    				  }
+    				  if( h261custs == null){
+    					  h261custs =  make261(); 
     				  }
     				  
     				  boolean hrccustomer = false;
@@ -2134,7 +2211,10 @@ try{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	 
+	 boolean tsekikas = false;
+	 if(this.h261custs != null && this.h261custs.contains(order.getCompany()) ) {
+		 tsekikas = true;
+	 }
 	 
 	 	try {
 	 		

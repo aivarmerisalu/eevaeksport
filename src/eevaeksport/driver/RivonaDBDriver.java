@@ -83,15 +83,19 @@ public class RivonaDBDriver extends AbstractDBDriver implements  BulkUpdater ,Di
         pass = getParent().getProps().getProperty("rest.pass");
         rcompanyx = getParent().getProps().getProperty("rest.companyx");
         rcompany = getParent().getProps().getProperty("rest.company");
+
+        duser = getParent().getProps().getProperty("dsn.user");
+        dpass = getParent().getProps().getProperty("dsn.pass");
          }
       
       String user =  null;
       String pass = null;
       String rcompany = null;
       String rcompanyx = null;
+      String duser = null;
+      String dpass = null;
       
 
- 
 
     private void makeNormpict(String pictspda,String pictssou ){
   	  File res2 = new File (pictspda);
@@ -595,7 +599,7 @@ public class RivonaDBDriver extends AbstractDBDriver implements  BulkUpdater ,Di
         if (con != null){
           con.close();
         }
-           con = DriverManager.getConnection(url,"merisoft","KwQe5K9NtT48G35");
+           con = DriverManager.getConnection(url);
       } catch (Exception e) {
             getParent().showError(e);
       }

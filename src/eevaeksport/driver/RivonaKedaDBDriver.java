@@ -499,7 +499,7 @@ public class RivonaKedaDBDriver extends AbstractDBDriver implements  BulkUpdater
         if (con != null){
           con.close();
         }
-           con = DriverManager.getConnection(url,"merisoft","KwQe5K9NtT48G35");
+           con = DriverManager.getConnection(url);
       } catch (Exception e) {
             getParent().showError(e);
       }
