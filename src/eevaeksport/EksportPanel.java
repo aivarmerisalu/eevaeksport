@@ -973,7 +973,7 @@ public class EksportPanel extends JPanel implements ActionListener,
               Agent agent = (Agent)getAgentsHash().get(agentCode);
               email = new Email(getString("datasent"));
               email.setEncoding("UTF-8");
-              email.setNoticeTo(parseSecondEmail(getEmail(agentCode)));
+            //  email.setNoticeTo(parseSecondEmail(getEmail(agentCode)));
               email.setFrom(getProps().getProperty("from"));
               email.setSMTP(getProps().getProperty("smtphost"));
               email.setUser(getProps().getProperty("smtpuser"));
@@ -2210,6 +2210,9 @@ public class EksportPanel extends JPanel implements ActionListener,
                      email.addAttach(filename);
                      email.setBody(asi);
                      String addr = parseFirstEmail(getEmail(agentCode));
+                     if(addr.equals("aa")){
+                    	 addr = parseSecondEmail(getEmail(agentCode));
+                     }
                      StringTokenizer st = new StringTokenizer(addr,",");
                    
                      while(st.hasMoreTokens()){
@@ -2335,7 +2338,7 @@ public class EksportPanel extends JPanel implements ActionListener,
                 email = new Email(getString("datasent"));
                 email.setEncoding("UTF-8");
                 email.setFilesTo(parseFirstEmail(getEmail(agentCode)));
-                email.setNoticeTo(parseSecondEmail(getEmail(agentCode)));
+                //email.setNoticeTo(parseSecondEmail(getEmail(agentCode)));
                 email.setFrom(getProps().getProperty("from"));
                 email.setSMTP(getProps().getProperty("smtphost"));
 

@@ -2846,7 +2846,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 						 if (inCases != null && inCases > 0) {
 							prod.setInCases(inCases);	
 				  		 }
-									
+								String compname = 	prod.getName();
 								
 										if (ean.length() > 0) {
 											prod.setEAN(ean);
@@ -2966,7 +2966,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 												   }
 												   
 												   if(namepartend != null) {
-													   if(prod.getName().contains(namepartend)) {
+													   if(compname.endsWith(namepartend)) {
 														   goes = false;
 													   }
 												   }

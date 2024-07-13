@@ -384,7 +384,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		
 			ResultSet rs1 ;
 	    	Statement stmr ;
-			 String sqldea = " 	  select  s.PK_KLIENTS as klient from APV04761.DKLSAGR s  where PK_KLGR = 'BLK' " ; 
+			 String sqldea = " 	 select PK_KLIENTS as klient, bridin  from APV04761.DKLIENTS s where bridin like '%BLK%' " ; 
 		    	
 		        	Connection con = this.getNewConnection(); 
 		        		 stmr = con.createStatement();
@@ -415,7 +415,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		
 			ResultSet rs1 ;
 	    	Statement stmr ;
-			 String sqldea = " 	  select  s.PK_KLIENTS as klient from APV04761.DKLSAGR s  where PK_KLGR = '261' " ; 
+			 String sqldea = " 	 select PK_KLIENTS as klient, bridin  from APV04761.DKLIENTS s where bridin like '%BLK%' " ; 
 		    	
 		        	Connection con = this.getNewConnection(); 
 		        		 stmr = con.createStatement();
@@ -1453,7 +1453,10 @@ private String getType(String ware , int num , Order ord ){
 	Daugavpils NDMD2
 */
 	
-	if(ord.getPaymTerm() == -1) {
+	
+	
+	
+	if(ord.getPaymTerm() == -1 || (this.h261custs != null && this.h261custs.contains(ord.getCompany()))) {
 		
 		//CASHi juhtumid
 		
@@ -1990,10 +1993,10 @@ try{
     				  }
 
     				  if(blkcusts.contains(order.getCompany())) {
-    					  order.setDokNr("BLK" + order.getDokNr());
+    					  order.setDokNr("BLK-" + order.getDokNr());
     				  }
     				  if( h261custs == null){
-    					  h261custs =  make261(); 
+    					 // h261custs =  make261(); 
     				  }
     				  
     				  boolean hrccustomer = false;

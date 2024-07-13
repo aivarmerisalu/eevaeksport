@@ -115,8 +115,8 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 			
 			
 
-					String sq3 = "SELECT KliendiKood as klient,ArveKuupaev  AS kuup ,TooteKood as toode ,KogusMY as kogus,Hind as hind, NetoSumma as summa , ArveNr as arvenr\r\n" + 
-							"       FROM vw_MJ_kliendi_sortiment  Where Partner ='AFRU' and ArveKuupaev > getdate()-90 order by KliendiKood,ArveKuupaev desc,TooteKood ";
+					String sq3 = "SELECT KliendiKood as klient,ArveKuupaev  AS kuup ,Maksetahtaeg  AS kuup2 ,TooteKood as toode ,KogusMY as kogus,Hind as hind, NetoSumma as summa , ArveNr as arvenr\r\n" + 
+							"       FROM vw_MJ_kliendi_sortiment  Where Partner ='" + this.partnercode + "' and ArveKuupaev > getdate()-90 order by KliendiKood,ArveKuupaev desc,TooteKood ";
 					
 				 
 					Statement st3 = con3.createStatement();
@@ -125,6 +125,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 						MatrixLine ml = new MatrixLine();
 						ml.setCustID(rs3.getString("klient").trim());
 						String kuup = rs3.getString("kuup");
+						String kuup2 = rs3.getString("kuup2");
 						ml.setStartDate(kuup.substring(5,10));
 						String toode = rs3.getString("toode");
 						if(toode != null) {
@@ -133,8 +134,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 							ml.discount = rs3.getDouble("hind");
 							double summa = rs3.getDouble("summa");
 							String doknr = rs3.getString("arvenr");
-							ml.setLineinfo(doknr + " " + kuup.substring(0,10)+ " ("+ (int)summa + "€)" );
-						    
+					
+							ml.setLineinfo(doknr + " " + kuup.substring(0,10) + " MT:["+ kuup2.substring(0,10)+  "] ("+ (int)summa + "€)" );
+							if(ml.discount != 0.1)	    // pant välja
 							result.add(ml);
 						}
 						
@@ -147,7 +149,6 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 			e.printStackTrace();
 		}
       
-		System.out.println("lastthree läbi" + result.size());
 		
 		return result;
 
@@ -161,8 +162,8 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
  private StringBuffer oorders = null;
  private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
  
-  private TreeMap  getOpenOrders(){
-		TreeMap res = new TreeMap();
+  private HashMap  getOpenOrders(){
+		HashMap res = new HashMap();
 		oorders = new StringBuffer();
 		oorders.append(Calendar.getInstance().getTimeInMillis() + "\n");
 		
@@ -202,7 +203,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
   	 
   	oorders.append(nimi + ";" + summa + ";" + kuup + "\n" );
 	    String sql3 = "  select KogusMY as amount,  YhikMY as unit  , TooteNimetus as name from vw_MJ_AvatudMyygid " + 
-	    		" where tarnekuupaev > getdate()-1 and partner ='AFRU' and OrigTellNr = '" + id + "'";
+	    		" where tarnekuupaev > getdate()-1 and partner ='" + this.partnercode + "' and OrigTellNr = '" + id + "'";
 	 //   System.out.println("sql 3 " + sql3 );
 	    Connection cc = this.getNewConnection();
 	    PreparedStatement stmt3 = cc.prepareStatement(sql3);
@@ -823,6 +824,35 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
   
   HashMap custAgendid = null;
   
+  private HashMap getPaymTerms() {
+	  HashMap res = new HashMap();
+	  String cmdo = "select Maksjakood as klient , max(datediff(day,tarnekuupaev,maksetahtaeg)) as paevi"
+	  		+ " from vw_MJ_Kliendi_sortiment where  partner = '" + partnercode + "' group by Maksjakood" ;
+
+	   try {
+           Connection con = this.getNewConnection();
+	       Statement stmt = con.createStatement();
+	       ResultSet rs = stmt.executeQuery(cmdo);
+	  
+	      while(rs.next()){
+	    	  String k = rs.getString("klient");
+	    	  String p = rs.getString("paevi");
+	    	  if(k != null && k.trim().length() > 0) {
+	    	    res.put(k, p);
+	    	  }
+	          
+	      }
+	      rs.close();
+	      stmt.close();
+	      con.close();
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }	  
+	  
+	  
+	  return res;
+  }
+  
   public TreeMap getCustomers(Agent agent){
 	  
 	  try{
@@ -831,7 +861,10 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
         } catch(Exception e){
         }
   	
-	  TreeMap openOrders = this.getOpenOrders();
+	  HashMap paymTerms = this.getPaymTerms();
+	  
+	  
+	  HashMap openOrders = this.getOpenOrders();
 	  
 	  String cmdo = "Select MaksjaKood AS payer ,  k.Staatus as blokk , cast(s.Saldo as int ) as credit FROM vw_MJ_kliendid k " +
               " LEFT JOIN vw_MJ_KliendiSaldo s on s.Kliendikood= k.Kliendikood or s.Kliendikood = MaksjaKood " ;
@@ -904,6 +937,10 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
         	cust.setPayer(payer.trim());
         }
         cust.setPayer(payer);
+        
+        if(paymTerms.get(payer) != null) {
+        	cust.setPaymTerm((String)paymTerms.get(payer));
+        }
         
        
 
@@ -1593,7 +1630,94 @@ System.out.println("Siin sees ");
   }
 
   public String getPilotDayData(Agent agent){
-     return null ;
+		
+		
+	TreeMap custAgs =   getCustAgsExcel();
+	  
+		   String 	sql2 = "select OrigTellNr AS id, '' as tyyp, m.KliendiKood AS kkood ,  OrigTellNr as number ,kuupaev AS kuup , 0 as summa ,k.nimi from vw_MJ_AvatudMyygid m inner join vw_MJ_Kliendid k on k.KliendiKood =  m.KliendiKood\r\n" + 
+				"		   		 where kuupaev > getdate()-1 and Origtellnr !='' and partner = '"  + this.partnercode + "' group by OrigTellNr , m.KliendiKood, k.nimi , kuupaev";
+		   
+		   StringBuffer sb = new StringBuffer();
+			
+			
+	
+	 this.connectionUp();
+	try {
+		
+	   nf.setMinimumFractionDigits(2);
+	   Connection con = this.getNewConnection();
+	   PreparedStatement stmt2 = con.prepareStatement(sql2);
+	   ResultSet  rs = stmt2.executeQuery();
+		
+boolean first = true;
+	while(rs.next()){
+		
+		String id = rs.getString("id");
+		String klient = rs.getString("kkood");
+		
+		if (klient == null){
+			klient = " ";
+	    } else {klient = klient.trim();}
+
+
+		//System.out.println("auu00 '" + custAgs.get(klient) + "' " + agent.getID());	
+		
+		if(custAgs != null && custAgs.get(klient) != null  ) {
+
+			String agg = ((String)custAgs.get(klient)).trim();
+			if(agg.startsWith(":")) {
+				agg = agg.substring(1);
+			}
+			if(agg.equals(agent.getID())) {
+			   
+              if(first) {
+			      sb.append("\n " + getParent().getString("todaysbills") + "\n\n");
+			      first = false;
+                }
+              
+	    sb.append(rs.getString("number").trim() + "  ");
+	    
+	    String kuup =  (rs.getString("kuup").trim().substring(0,10)) ;
+
+	    String nimi =  rs.getString("nimi").trim() ;
+	    sb.append(nimi + " " + kuup );
+   	    sb.append("\n\n" );	
+	
+	    String sql3 = "  select KogusMY as amount,  YhikMY as unit  , TooteNimetus as name from vw_MJ_AvatudMyygid " + 
+	    		" where kuupaev > getdate()-2 and partner ='" + this.partnercode + "' "
+	    				+ "and OrigTellNr = '" + id + "' and TooteKood not like 'RU050%' ";
+
+	    Connection cc = this.getNewConnection();
+	    PreparedStatement stmt3 = cc.prepareStatement(sql3);
+	    ResultSet  rs2 = stmt3.executeQuery();
+	   
+		    while(rs2.next()){
+		    	sb.append("[" +nf.format(rs2.getDouble("amount"))+"] " 
+		       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").toLowerCase().replaceAll("\\r\\n|\\r|\\n", " ").trim() + "\n");
+		    }
+		    sb.append("\n\n" );	
+		    rs2.close();
+	        stmt3.close();
+	        cc.close();
+	        
+			}
+		} 
+	}
+	
+	
+	rs.close();
+	stmt2.close();
+	con.close(); 	 
+	
+	} catch (Exception e) {
+	  getParent().showError(e);
+	}
+
+	connectionDown();
+  
+	//System.out.println(agent.getID() + " " + sb.toString());
+	
+	return sb.toString();
   }
 
 
