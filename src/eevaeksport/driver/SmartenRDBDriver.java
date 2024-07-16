@@ -1205,11 +1205,16 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
   }
 
   public TreeMap getProducts(Agent agent){
+	  
+	  
+	  
 	  StringBuffer buf = new StringBuffer();
     String cmd = "SELECT t.TooteKood as itemid, Nimetus, Kastis, Alusel, Hind AS price   " +
     "  , EAN ,Artikliklass AS grupp, Peaprojekt as grupp1 , YhikMyyk As unit, KM as vat ,MinKogusMyyk  as minimum , KordneKogusMyyk as optimum, " +
-    "	KogusVaba as kogus FROM  vw_MJ_tooted t Left join  vw_MJ_Laosaldod s on s. Tootekood= t.TooteKood and t.Partner=s.Partner "+
+    "	KogusVaba as kogus ,Lisakaubagruppmyyk as grp FROM  vw_MJ_tooted t Left join  vw_MJ_Laosaldod s on s. Tootekood= t.TooteKood and t.Partner=s.Partner "+
     " where t.Partner = '" + partnercode + "'";
+    
+    
     
     
     String partiid = "select TooteKood as item,KogusVaba as amount ,Partii as lot from vw_MJ_laosaldodetail where partii != '' and partner ='" + partnercode + "'";
@@ -1221,6 +1226,8 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
     TreeMap products = new TreeMap();
     try {
 
+    	
+    	
 
     	Statement stmt =  this.getNewConnection().createStatement();
       ResultSet rs = stmt.executeQuery(partiid);
@@ -1239,6 +1246,39 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
     	  }
       }
     	
+      HashMap phinnad = new HashMap();
+      String pahi = "select tootekood, hind from vw_MJ_tooted where partner = '" + partnercode + "'";
+    	
+       rs = stmt.executeQuery(pahi);
+      while(rs.next()){
+    	  String item = rs.getString("tootekood").trim();
+    	  Double kogus = rs.getDouble("hind");
+    		  phinnad.put(item, kogus);
+      }
+    	
+    
+      
+      
+      
+      HashMap pantHash = new HashMap();
+      String pandid = "Select tootekood as toode , Lisakaubagrupp as grupp  from  dbo.vw_MJ_LisakaubaGrupid_Myyk where yhik = 'tk'";
+  	   
+      rs = stmt.executeQuery(pandid);
+      while(rs.next()){
+    	  String item = rs.getString("toode").trim();
+    	  String grupp = rs.getString("grupp").trim();
+    	
+    	  if(pantHash.get(grupp)!= null){
+    		  String olemas = (String) pantHash.get(grupp);
+    		  pantHash.put(grupp, olemas + "," + item);
+    	  }else{
+    		  pantHash.put(grupp, item);
+    	  }
+    	  
+      }
+      
+      
+      
     	 stmt =  this.getNewConnection().createStatement();
           rs = stmt.executeQuery(cmd);
       HashMap prodHash = new HashMap();
@@ -1366,6 +1406,25 @@ name = name.replaceAll("apelsinimahlaga ", " ");
         }else{
     	  prod.setStock(0);
         }
+      String grp = rs.getString("grp");
+      if(grp != null && pantHash.get(grp.trim()) != null) {
+    	  String pan = (String)pantHash.get(grp.trim());
+    	  StringTokenizer st = new StringTokenizer(pan,",");
+    	  while(st.hasMoreTokens()) {
+    		  String pkood = st.nextToken();
+    		  if(pkood.startsWith("RU05")) {
+    			  prod.DEPO_WO_VAT = 0.1;
+    		  } else {
+    			  if(phinnad.get(pkood) != null) {
+    				  Double ff = Double.parseDouble(phinnad.get(pkood)+"");
+    				  prod.TAARA_VAT = ff / prod.getInCases();
+    			  }
+    		  }
+    	  }
+      }
+       
+      
+      
         products.put(name, prod);
         prodHash.put(prod.getID(), prod);
         

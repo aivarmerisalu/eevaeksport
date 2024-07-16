@@ -711,12 +711,22 @@ TreeMap<String, Double> odue = null;
 	         }
 	         	 }
 	         
+	         
+	         
+	         
 	 	}catch(Exception e){
 	 		e.printStackTrace();
 	 	}
-	     //this.getCustomers(null);
-	     //this.getProducts(null);
-	 	//this.getPriceMatrixData();
+	 	
+	 	 Agent sm = new Agent ("18");
+	 	 sm.setName("18");
+	 	   tm.put(sm.getID(), sm);
+           agents1.put(sm.getID(), sm);
+           agentGUID.put("18", "18");
+	 	
+	     this.getCustomers(null);
+	    // this.getProducts(null);
+	 //	this.getPriceMatrixData();
 	     return tm;
 	   }
 
@@ -802,6 +812,7 @@ TreeMap<String, Double> odue = null;
 		         		 
 		         		try{
 		         			CustAgentGUID = getNode(rida,"MainAgentGUID").getFirstChild().getNodeValue();
+		         			//System.out.println(CustAgentGUID + " " + getNode(rida,"MainAgentName").getFirstChild().getNodeValue());
 		         		}catch(Exception e){}
 		         		
 		         		try{	
@@ -1018,7 +1029,7 @@ TreeMap<String, Double> odue = null;
 			}
     	 
     	 
-    	 //System.out.println(tm.toString());
+    	 System.out.println("kliendid " + tm.size());
     	 
     	 //System.exit(0);
           
@@ -1120,8 +1131,7 @@ private HashMap prodsGUID = new HashMap();
 		    
 		    for (int i = 0; i < root.getChildNodes().getLength(); i++){
 		        String ProdGUID = null;
-			   	 String ProdCode = null;   
-			   	 String ProdArticle = null;   
+			   	 String ProdCode = null;    
 			   	 String ProdDesc = null;   
 			   	 String ProdUnit = null;  
 			   	 String GroupGUID = null;
@@ -1133,25 +1143,29 @@ private HashMap prodsGUID = new HashMap();
 		    	  
 		    	  //System.out.println(rida.getNodeName() + " " );
 		    	  if(rida.getNodeName().equals("Product")){
+		    		 
+
 		    		  try{
-		        		  ProdGUID   = getNode(rida,"GUID").getFirstChild().getNodeValue();
+		    			  Node nn =  getNode(rida,"Code");
+		    			  if(nn != null && nn.getFirstChild() != null)
+		    			  ProdCode   = nn.getFirstChild().getNodeValue();
 		    		  }catch(Exception e){e.printStackTrace();}
+
 		    		  
-		    		  try{
-		    			  ProdCode   = getNode(rida,"Code").getFirstChild().getNodeValue();
-		    		  }catch(Exception e){e.printStackTrace();}
+		    		  if(ProdCode != null) {
 		    		  
-		    		  try{
-		    			  ProdArticle   = getNode(rida,"Article").getFirstChild().getNodeValue();
-		    		  }catch(Exception e){e.printStackTrace();}
-		    		  
-		    		  try{
-		    			  ProdDesc   = getNode(rida,"Description").getFirstChild().getNodeValue();
-		    		  }catch(Exception e){e.printStackTrace();}
-		    		  
+		    			  try{
+			        		  ProdGUID   = getNode(rida,"GUID").getFirstChild().getNodeValue();
+			    		  }catch(Exception e){e.printStackTrace();}
+			    		  
+
+			    		  try{
+			    			  ProdDesc   = getNode(rida,"Description").getFirstChild().getNodeValue();
+			    		  }catch(Exception e){e.printStackTrace();}
+			    		  
 		    		  try{
 		    			  ProdUnit   = getNode(rida,"Unit").getFirstChild().getNodeValue();
-		    		  }catch(Exception e){e.printStackTrace();}
+		    		  }catch(Exception e){}
 		    		  
 		    		  try{
 		    			  UnitPrice   = getNode(rida,"UnitPrice").getFirstChild().getNodeValue();
@@ -1167,7 +1181,7 @@ private HashMap prodsGUID = new HashMap();
 		    		  
 		    		  try{
 		    			  GroupGUID   = getNode(rida,"GroupGUID").getFirstChild().getNodeValue();
-		    		  }catch(Exception e){e.printStackTrace();}
+		    		  }catch(Exception e){}
 		    		    
 		        		
 		        		  
@@ -1197,7 +1211,7 @@ private HashMap prodsGUID = new HashMap();
 		   				 //prod.setInCases(Double.parseDouble(incase));
 		   			 //}
 		   			 
-		   			 if(ProdUnit.length() > 0) {   
+		   			 if(ProdUnit != null && ProdUnit.length() > 0) {   
 		   				 prod.setUnit(ProdUnit);
 		   			 }
 		   			 if(GroupGUID != null) {   
@@ -1206,8 +1220,8 @@ private HashMap prodsGUID = new HashMap();
 		   			  
 		   		
 		   			 if(ProdDesc.length() > 0) {
-		   				 prod.setName(Converter.enCodeEst(ProdDesc + " "+ ProdArticle));
-		   				 prod.artikkel = ProdArticle;
+		   				 prod.setName(Converter.enCodeEst(ProdDesc ));
+		   				
 		   			 }
 		   			 
 	   				 if(Double.parseDouble(UnitPrice) > 0) {
@@ -1240,7 +1254,7 @@ private HashMap prodsGUID = new HashMap();
 		 				tm.put(Converter.cleanLitLatEst(ProdDesc + prod.getUnit() + prod.getID()), prod);
 		 			}
 					 
-
+		    		  }
 			       }
 		   			if(sbEAN.length() > 0) {
 			     		 Converter.saveFileInUTF8("prodanalogs.txt", sbEAN.toString());
@@ -1251,6 +1265,8 @@ private HashMap prodsGUID = new HashMap();
 		}catch(Exception k ){
 				k.printStackTrace();
 			}
+		
+		System.out.println("products " + tm.size());
 		return tm;
 
    }

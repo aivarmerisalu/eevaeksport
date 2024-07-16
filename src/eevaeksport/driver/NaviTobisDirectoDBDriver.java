@@ -1839,6 +1839,16 @@ private Date getDate(String mmddyy){
     	 						     				  dd.setSum(vv);
     	 						     					//System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " +ff);	
     	 						     				debtList.add(dd);  
+    	 						     				 if(ff >= 0){
+    	 						     					 String maksja = dd.getCustID();
+    	 						         	    	   if( overdebts.get(maksja) == null){
+    	 						           	        	 overdebts.put(maksja,dd.getSum() + "");
+    	 						           	        }else{
+    	 						           	        	double ss = Double.parseDouble((String)overdebts.get(maksja));
+    	 						           	        	  ss= ss+ dd.getSum();
+    	 						           	        	 overdebts.put(maksja,ss + "");
+    	 						           	        }
+    	 						     				 }
     	 						     			/*	  if(dueSums.get(custid) != null){
     	 						     					  double ss = Double.parseDouble(dueSums.get(custid) + "")+ vv ;
     	 						     					 dueSums.put(custid, ss);    

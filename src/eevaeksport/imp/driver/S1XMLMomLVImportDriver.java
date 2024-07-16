@@ -771,14 +771,18 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 		    	  //System.out.println(rida.getNodeName() + " " );
 		    	  if(rida.getNodeName().equals("Product")){
 		    		  try{
-		        		  ProdGUID   = getNode(rida,"GUID").getFirstChild().getNodeValue();
+		    			  
+if(getNode(rida,"Code") != null && getNode(rida,"Code").getFirstChild() != null) {
 		        		  ProdCode   = getNode(rida,"Code").getFirstChild().getNodeValue();
-		        	  }catch(Exception e){
+		        		  ProdGUID   = getNode(rida,"GUID").getFirstChild().getNodeValue();
+						prodtm.put(ProdCode, ProdGUID);
+}
+
+		    		  }catch(Exception e){
 		        		  e.printStackTrace();
 		        	  }
 		    		
 
-					 prodtm.put(ProdCode, ProdGUID);
 
 			       }
 		    	}

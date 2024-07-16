@@ -1171,6 +1171,8 @@ private HashMap naviProds = null;
 		  
 		  Vector lines = order.getOrderLines();
 		  
+		  boolean navo = false;
+		  boolean diro = false;
 		  
 		  Enumeration enumr = lines.elements();
 		  while  (enumr.hasMoreElements()){
@@ -1185,7 +1187,7 @@ private HashMap naviProds = null;
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 				     	ord.setDokNr(order.getDokNr());
 				     	ord.setReference(order.getReference());
-
+                       navo = true;
 					     System.out.println("going navi " + navonly);
 			    	} else {
 
@@ -1193,11 +1195,25 @@ private HashMap naviProds = null;
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 			    		orddirecto.setDokNr(order.getDokNr());
 			    		orddirecto.setReference(order.getReference());
-				     		
+				     		diro = true;
 			    	}
 			  
 		  }
 		  boolean hasNavi = false;
+		  if(navo && diro) {
+			  String c1 = ord.getInfo();
+			  if(c1 == null) {
+				  c1 = "";
+			  }
+			  ord.setInfo("PADALINTAS: " + c1 );
+			  
+			  String c2 = ord.getInfo();
+			  if(c2 == null) {
+				  c2 = "";
+			  }
+			  orddirecto.setInfo("PADALINTAS: " + c2 );
+		  }
+		  
 		  if(ord.getOrderLines() != null && ord.getOrderLines().size()>0){
 			  result.add(ord);  
 			  hasNavi = true;
