@@ -1208,14 +1208,19 @@ if(ladu.trim().length()!=0){
          fos.write(sbb.toString().getBytes());
          fos.close();
          if(sbb.contains("<h1>Error: Server Error") || sbb.contains("Connection refused") ||  sbb.contains("connect timed out") ||  sbb.contains("errorMessage")) {
-            System.exit(0);	
+            
+        	   this.sendOrderEmail(order, tag, sbb);
+        	      
+        	 System.exit(0);	
          }
          if(sbb.contains("<errorMessage></errorMessage>") ) {
+
+      	   this.sendOrderEmail(order, tag, sbb);
              System.exit(0);	
           }
         } else {
         	
-        	//   this.sendOrderEmail(order, tag, pandikas);
+      //  	   this.sendOrderEmail(order, tag, pandikas);
         }
          
     	} catch (Exception o) {
@@ -1362,86 +1367,40 @@ if(ladu.trim().length()!=0){
 
   
 
-  private void sendOrderEmail(Order ord , boolean ret , Hashtable pandikas){
+  private void sendOrderEmail(Order ord , boolean ret , String error){
 	  
 			          
 			        try {
 	    	 
-	  String address = parent.getProps().getProperty("logistmail");//aivar@mobilejava.ee" ;//"mediato.clients@edi.sis.lt" ;//agent.getEmail();
-	//  address =(props.get(ord.getAgent())+"");"
-//	  System.out.println("määratud email " + emai + " " + props.toString());
+	  String address = parent.getProps().getProperty("errormail");
+	  
 	  String cusname = this.identifyCustomerName(ord.getCompany());
 	  
 	  if(address != null ){
-		  Email email = new Email("Order from Balmerk: " + order.getCompany() + " " + cusname);
+		  Email email = new Email("Order Import error Balmerk: " + order.getCompany() + " " + cusname);
           email.setFrom(parent.getProps().getProperty("from"));
           email.setSMTP(parent.getProps().getProperty("smtphost"));
           email.setUser(parent.getProps().getProperty("smtpuser"));
           email.setPass(parent.getProps().getProperty("smtppass"));
           email.setPort(parent.getProps().getProperty("smtpport"));
-          email.setSubjectFilesTo("Order info : " + cusname);
+          email.setSubjectFilesTo("Order Import error : " + cusname);
           
           email.setEncoding("iso-8859-1");
           try {
         	  
-        	email.setBodyHtml("Order from Balmerk");
-        	String fname = createXMLFile(ord,ret, pandikas);
-            email.addAttach(parent.getProps().getProperty("exceldir") + fname);
+        	email.setBody("Order Import error Balmerk \n " + error );
             StringTokenizer st =  new StringTokenizer(address,";");
             String aadr = null;
             while(st.hasMoreTokens()){
             	 aadr = new InternetAddress(st.nextToken()).toString();
               email.setFilesTo(aadr);
-          //    email.send();
+              email.send();
               }
             System.out.println("mail saatmisel " );
-            
-            if(ret) {
-            	
           
-            	 email = new Email("RETURN from Balmerk: " + order.getCompany() + " " + cusname);
-                 email.setFrom(parent.getProps().getProperty("from"));
-                 email.setSMTP(parent.getProps().getProperty("smtphost"));
-                 email.setUser(parent.getProps().getProperty("smtpuser"));
-                 email.setPass(parent.getProps().getProperty("smtppass"));
-                 email.setPort(parent.getProps().getProperty("smtpport"));
-                 email.setSubjectFilesTo("Order info : " + cusname);
-                 email.setEncoding("iso-8859-1");
-                 
-                 
-                 String text = "\nReturn :" +  ord.getDokNr() + " \nCustomer code :" + ord.getCompany() 
-                     +  "\nCustomer Name :" + this.identifyCustomerName(ord.getCompany()) + "\n\n" ;
-                 
-                Vector lines = ord.getOrderLines();
-                for(int i = 0;i <lines.size();i++) {
-                	OrderLine line = (OrderLine)lines.elementAt(0);
-                	 Product prod = this.getProduct(line.getToode());
-                  String lin = "[" + line.getKogus() + "] " +  prod.getID() + " " + prod.getName() + " " + prod.getEAN() + "\n";	
-                  text = text + lin;
-                }
-                 
-                 
-                email.setBody(text);
-		  	  	email.setSendNotice(false);
-                aadr = new InternetAddress("uzsakymai@balmerk.lt").toString();
-                email.setFilesTo(aadr);
-                email.send();
-            
-            
-            
-            }
-            
-            
-            
-            
 		} catch (AddressException e) {
-		log.error(e);
+		    log.error(e);
 			e.printStackTrace();
-			System.exit(0);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			log.error(e);
 			System.exit(0);
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block

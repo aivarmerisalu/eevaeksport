@@ -531,28 +531,42 @@ TreeMap<String, Double> odue = null;
 		         		
 			         	  Node debtrida = debtsNode.getChildNodes().item(j);
 			         	  if(debtrida.getNodeName().equals("Debt")){
-			         		String debtDocNr   = getNode(debtrida,"DocumentNo").getFirstChild().getNodeValue();
+			         		String debtDocNr   = null;
+			         		if(getNode(debtrida,"DocumentNo") != null && getNode(debtrida,"DocumentNo").getFirstChild() != null) {
+			         			debtDocNr =  getNode(debtrida,"DocumentNo").getFirstChild().getNodeValue();
+			         		}
+				         		
+			         		if(debtDocNr != null) {
 			         		String debtDocDate   = getNode(debtrida,"DocDate").getFirstChild().getNodeValue();
-			         		String debtPayDate   = getNode(debtrida,"PayDate").getFirstChild().getNodeValue();
+			         		String debtPayDate   = null ;
+			         		
+			         		if(getNode(debtrida,"PayDate") != null && getNode(debtrida,"PayDate").getFirstChild() != null) {
+			         		   debtPayDate = getNode(debtrida,"PayDate").getFirstChild().getNodeValue();
+			         		} else {
+
+			         			  debt.setDuedate(new Date(Calendar.getInstance().getTimeInMillis()));
+			         		}
+			         		
 			         		Double debtOpenAmount   = Double.parseDouble(getNode(debtrida,"OpenAmount").getFirstChild().getNodeValue());
 			         		
 			         	
 			         		
-			         		if((getDate(debtPayDate)).before(now)) {
+			         		if(debtPayDate != null && (getDate(debtPayDate)).before(now)) {
 			         			if(odue.get(custGUID) != null) {
 			         				Double ol = odue.get(custGUID);
 			         				odue.put(custGUID, ol+debtOpenAmount);
 			         			}else {
 			         				odue.put(custGUID, debtOpenAmount);
 			         			}
-			         			
+			         		
+			         			  debt.setDuedate(getDate(debtPayDate));
+					      	      debt.setDue(getDue(getDate(debtPayDate).getTime()) + "");
+					      	        
 			         		}
 			         			
 			      	        debt.setDoknr(debtDocNr);
-			      	        debt.setDuedate(getDate(debtPayDate));
 			      	        debt.setSum(debtOpenAmount);
 			      	        debt.setDate(getDate(debtDocDate));
-			      	        debt.setDue(getDue(getDate(debtPayDate).getTime()) + "");
 			      	        
 			      	        
 			         		String debtAddressGUID = null;
@@ -568,11 +582,12 @@ TreeMap<String, Double> odue = null;
 		         					debt.setPayerID(custid);
 		         				}
 		         			 }
-		         			list.addElement(debt);
+		         			
+		         			 
+		         			 list.addElement(debt);
+		         			 
 			         		
-			         		
-			         	  
-			         		//System.out.println(debtDocNr + " - " + debtDocDate + " - " + debtPayDate);
+			         		}
 			         		
 			         	  }
 		         	}
@@ -682,7 +697,7 @@ TreeMap<String, Double> odue = null;
 	         	  //System.out.println(rida.getNodeName() + " " );
 	         	 if(rida.getNodeName().equals("Agent")){
 	         	  try{
-	         		 String salesman   = getNode(rida,"GUID").getFirstChild().getNodeValue().substring(0, 8);
+	         		 String salesman   = getNode(rida,"GUID").getFirstChild().getNodeValue();
 	         		 String salesmanN   = getNode(rida,"Name").getFirstChild().getNodeValue();
 	         		 salesman = Converter.deCode(salesman);
 	         		 Agent sm = new Agent (salesman);
@@ -718,15 +733,10 @@ TreeMap<String, Double> odue = null;
 	 		e.printStackTrace();
 	 	}
 	 	
-	 	 Agent sm = new Agent ("18");
-	 	 sm.setName("18");
-	 	   tm.put(sm.getID(), sm);
-           agents1.put(sm.getID(), sm);
-           agentGUID.put("18", "18");
 	 	
-	     this.getCustomers(null);
+	    // this.getCustomers(null);
 	    // this.getProducts(null);
-	 //	this.getPriceMatrixData();
+	    // this.getPriceMatrixData();
 	     return tm;
 	   }
 
@@ -1487,7 +1497,8 @@ public void setNF(NumberFormat nf) {
 	         	  
 	         	 if(rida.getNodeName().equals("Sale")){
 		         	  try{
-		         		 String agentSaleGUID   = getNode(rida,"AgentGUID").getFirstChild().getNodeValue().substring(0, 8);
+		         		  if(getNode(rida,"AgentGUID").getFirstChild() != null) {
+		         		 String agentSaleGUID   = getNode(rida,"AgentGUID").getFirstChild().getNodeValue();
 		         		 
 		         		 
 		         		Double agentSaleSum  = Double.parseDouble(getNode(rida,"Sum").getFirstChild().getNodeValue()) ;
@@ -1495,7 +1506,7 @@ public void setNF(NumberFormat nf) {
 		         		Agent agent = (Agent)agents.get(agentSaleGUID);
 		                agent.setMonthSales(agentSaleSum.intValue());
 		                //System.out.println(agentSaleGUID + " " +agentSaleSum);
-		         		
+		         		  }
 		         	  }catch(Exception e){
 		         		  e.printStackTrace();
 		         	  }

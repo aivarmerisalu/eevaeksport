@@ -415,7 +415,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		
 			ResultSet rs1 ;
 	    	Statement stmr ;
-			 String sqldea = " 	 select PK_KLIENTS as klient, bridin  from APV04761.DKLIENTS s where bridin like '%BLK%' " ; 
+			 String sqldea = " 	select PK_KLIENTS as klient from APV04761.DKLIENTS s where PK_APMV = 1 " ; 
 		    	
 		        	Connection con = this.getNewConnection(); 
 		        		 stmr = con.createStatement();
@@ -432,7 +432,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		        		s.printStackTrace();
 		        	}
 
-		    //	System.out.println("hrccustomers " + res.size());
+		    	System.out.println("261customers " + res.size());
 		   return res ; 	
 		    	
   }
@@ -1996,7 +1996,7 @@ try{
     					  order.setDokNr("BLK-" + order.getDokNr());
     				  }
     				  if( h261custs == null){
-    					 // h261custs =  make261(); 
+    					  h261custs =  make261(); 
     				  }
     				  
     				  boolean hrccustomer = false;
@@ -2214,11 +2214,13 @@ try{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	 boolean tsekikas = false;
-	 if(this.h261custs != null && this.h261custs.contains(order.getCompany()) ) {
-		 tsekikas = true;
-	 }
-	 
+		
+		
+
+		  if( h261custs == null){
+			  h261custs =  make261(); 
+		  }
+	
 	 	try {
 	 		
 	 	
@@ -2243,7 +2245,11 @@ try{
 		        	adid =  escape(adid.substring(0,adid.indexOf("_")));
 			    }
 		         
-
+		        boolean tsekikas = false;
+		   	 if(this.h261custs != null && this.h261custs.contains(cukood) ) {
+		   		 tsekikas = true;
+		   	 }
+		   	 
 		 		 Calendar  shipDate = order.getShipCal();
 		 		 if(order.getStatus() < 5) {
 		 			 
@@ -2394,8 +2400,17 @@ try{
 		           JSONObject href2  = new JSONObject();
 		           href2.put("href", "/rest/TDdmCustomer/" + cukood);
 		           entity.put("PK_KLIENTS", href2);
-		          
-		         
+		           
+		           
+if(tsekikas) {
+	System.out.println("Tsekikas JAH");
+		           JSONObject href3  = new JSONObject();
+		           href3.put("href", "/rest/TNdmApmveids/1");
+		           entity.put("PK_APMV", href3);
+		           
+}else {
+	System.out.println("Tsekikas EIII");
+}
 		           
 		           entity.put("DAT_DOK",getDateNiceString(shipDate)); // Calendar.getInstance()
 		           entity.put("DOK_NR" , doknr );
