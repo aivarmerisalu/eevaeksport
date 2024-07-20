@@ -542,8 +542,14 @@ TreeMap<String, Double> odue = null;
 			         		
 			         		if(getNode(debtrida,"PayDate") != null && getNode(debtrida,"PayDate").getFirstChild() != null) {
 			         		   debtPayDate = getNode(debtrida,"PayDate").getFirstChild().getNodeValue();
+
+			         			  debt.setDuedate(getDate(debtPayDate));
+					      	      debt.setDue(getDue(getDate(debtPayDate).getTime()) + "");
 			         		} else {
 
+
+					      	      debt.setDue(getDue(Calendar.getInstance().getTimeInMillis()) + "");
+					      	        
 			         			  debt.setDuedate(new Date(Calendar.getInstance().getTimeInMillis()));
 			         		}
 			         		
@@ -559,9 +565,6 @@ TreeMap<String, Double> odue = null;
 			         				odue.put(custGUID, debtOpenAmount);
 			         			}
 			         		
-			         			  debt.setDuedate(getDate(debtPayDate));
-					      	      debt.setDue(getDue(getDate(debtPayDate).getTime()) + "");
-					      	        
 			         		}
 			         			
 			      	        debt.setDoknr(debtDocNr);
