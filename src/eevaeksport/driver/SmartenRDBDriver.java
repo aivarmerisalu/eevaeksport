@@ -1261,12 +1261,14 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
       
       
       HashMap pantHash = new HashMap();
-      String pandid = "Select tootekood as toode , Lisakaubagrupp as grupp  from  dbo.vw_MJ_LisakaubaGrupid_Myyk where yhik = 'tk'";
+      String pandid = "Select tootekood as toode , Lisakaubagrupp as grupp , KordneKogus as kord from  dbo.vw_MJ_LisakaubaGrupid_Myyk where yhik = 'tk'";
   	   
       rs = stmt.executeQuery(pandid);
       while(rs.next()){
     	  String item = rs.getString("toode").trim();
     	  String grupp = rs.getString("grupp").trim();
+    	  int kord = rs.getInt("kord");
+    	  item = item + "|" + kord;
     	
     	  if(pantHash.get(grupp)!= null){
     		  String olemas = (String) pantHash.get(grupp);
@@ -1412,12 +1414,18 @@ name = name.replaceAll("apelsinimahlaga ", " ");
     	  StringTokenizer st = new StringTokenizer(pan,",");
     	  while(st.hasMoreTokens()) {
     		  String pkood = st.nextToken();
+    		  Double kord = 1.0;
+    		  if(pkood.contains("|")) {
+    			  kord = Double.parseDouble(pkood.substring(pkood.indexOf("|")+1));
+    			  pkood = pkood.substring(0,pkood.indexOf("|"));
+    		  }
+    		  
     		  if(pkood.startsWith("RU05")) {
     			  prod.DEPO_WO_VAT = 0.1;
     		  } else {
     			  if(phinnad.get(pkood) != null) {
     				  Double ff = Double.parseDouble(phinnad.get(pkood)+"");
-    				  prod.TAARA_VAT = ff / prod.getInCases();
+    				  prod.TAARA_VAT = ff / kord;
     			  }
     		  }
     	  }

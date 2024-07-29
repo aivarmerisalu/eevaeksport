@@ -97,9 +97,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.company");
     logurl = "https://login.directo.ee/xmlcore/";
-    if( parent.getProps().getProperty("logurl") != null){
-    	  logurl = parent.getProps().getProperty("logurl");
-    }
+    
   
     if( parent.getProps().getProperty("stock.dir") != null){
     	stockConn = parent.getProps().getProperty("stock.dir");

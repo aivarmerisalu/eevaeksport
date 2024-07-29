@@ -199,21 +199,22 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
  "FROM [Vičiūnai-LAT$Item] t WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0) " +
 	"				  or [Pogrupio kodas] like '%2.8.1%' " ;
 			
+			
+			cmd2 = "select * from MobileJavaLAT.v_LAT_GetProducts";
+			
 			makeConvertedCat();
 		     	String pictsUnion = parent.getProps().getProperty("pict.dir3");
             	String pictspda = parent.getProps().getProperty("pictpda.dir");
 
 		   	try {
-		 	   Connection con = getNewConnection2();
+		 	   Connection con = getNewConnectionView();
 			
 		   		Statement stmt = con.createStatement();
 		   	    ResultSet	      rs = stmt.executeQuery(cmd2);
 
 
 		        StringBuffer buf = new StringBuffer();
-		        StringBuffer buf0 = new StringBuffer();
 		        int a = 0;
-		        int b = 0;
 		        int c = 0;
 		        
 		        
@@ -230,33 +231,39 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		   	    		  System.out.println("Piltide leidmine "  + a);	
 		   	    		  
 		   	    	}
-		   	     
+		   	     if(toode.contains("16929")) {
+		   	    	 System.out.println("16929 " + toode );
+		   	     }
 		              
 		                 File f = new File(pictsUnion + toode+".jpg");
 		                 String len = "0";
 		                 if(f.exists()){
 		                    len = f.length() + "";
 		                 	buf.append(toode+".jpg;"  + len + "\n");
-		           	     }  else {
+		                 	if(toode.contains("16929")) {
+		   		   	    	 System.out.println("16929B1 " + toode  + " " + f.getName());
+		   		   	     }
+		   		        
+		                 }  else {
 			            	  f = new File(pictsUnion + toode+".png");
 			                     len = "0";
 				                 if(f.exists()){
 				                   len =	f.length() + "";
 				                   buf.append(toode+".png;"  + len + "\n");
-				           	    	
+				                   if(toode.contains("16929")) {
+					   		   	    	 System.out.println("16929B2 " + toode + " " + f.getName() );
+					   		   	     }    	
 				                 }  else {
 				                	 f = new File(pictsUnion + toode+".PNG");
 				                     if(f.exists()){
 					                   len =	f.length() + "";
 					                   buf.append(toode+".PNG;"  + len + "\n");
+					                   if(toode.contains("16929")) {
+						   		   	    	 System.out.println("16929B3 " + toode  + " " + f.getName() );
+						   		   	     }
 					                 }	
 				                 }
 		                 }
-		                 
-		                 
-		                 
-		                 
-		                 
 		                 
 		                 }
 		   	    rs.close();
@@ -275,16 +282,7 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		           	  }catch (Exception ex) {
 		           		ex.printStackTrace();
 		           	  }
-		           	  File f0 = new File("list0.txt");
-		           	   if (f0.exists())f0.delete();
-		                   try {
-		             		PrintWriter os1 = new PrintWriter(new FileWriter(
-		             				  "list0.txt", true));
-		             		os1.write(buf0.toString());
-		             		os1.close();
-		             	  }catch (Exception ex) {
-		             		ex.printStackTrace();
-		             	  }
+		                   
 
 		   //Kataloogi sisude kustutamine
 		   
@@ -299,10 +297,26 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		            String[] gg = new File(pictsUnion).list();
 		         	  //System.out.println("gg " + gg[0] + " " + gg.length);
 		            
+		            
+		            
 		             for(int i = 0;gg.length>i;i++){          	
-		             	File in = new File ( pictsUnion + gg[i]); 
-		             	if(in.isFile()){            	
-		             	File inpda = new File ( pictspda + toUpper(gg[i])); 
+		            	 String name = gg[i];
+		             	File in = new File ( pictsUnion + name); 
+		             	if(in.isFile()){         
+		             		 name = toUpper(gg[i]);
+		             		 
+		             		  if(name.contains("16929")) {
+				   		   	    	 System.out.println("16929B4 " + in.getName() );
+				   		   	     }
+			                  		
+		             	if(name.startsWith("1")) {
+		             		File inpda = new File ( pictspda + "C"+ name); 
+			             	Converter.shrinkAndCopyFile(in,inpda);
+			             	inpda = new File ( pictspda + "S"+ name); 
+			             	Converter.shrinkAndCopyFile(in,inpda);
+			             		
+		             	}
+		             	File inpda = new File ( pictspda + name); 
 		             	Converter.shrinkAndCopyFile(in,inpda);
 		             	}
 		             }
@@ -312,8 +326,6 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		             
 		             File fff =  new File (pictspda +  "list.txt");
 		       	  Converter.copyFile(f,fff);  	
-		       	  File fff0 =  new File (pictspda +  "list0.txt");
-		       	Converter.copyFile(f0,fff0);  	
 		   	} catch (Exception e) {
 		   	    getParent().showError(e);
 		   	}
@@ -1729,12 +1741,12 @@ cn.close();
 			// "klient","toode","kogus","viimane kuupļæ½ev","viimane kogus"
 			Connection con = null;
 			if(view) {
-				cmd  = "select * from MobileJavaLAT.v_LAT_GetCustProdList";
+				cmd  = "select * from MobileJavaLAT.v_LAT_GetCustProdList order by klient, abiklient, toode, lastdate desc";
 				con = this.getNewConnectionView();
 			}else {
      		con =  getNewConnection2();
      	}
-			
+			HashSet ok = new HashSet();
 			System.out.println(cmd);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
@@ -1749,12 +1761,15 @@ cn.close();
 				}
 
 				String prodID = rs.getString("toode").trim();
-				;
+				
+				String idd = custID + "-" + prodID;
 
 				double amount = 0;
 				String lastdate = " ";
 				amount = rs.getDouble("kogus");
 				lastdate = rs.getString("lastdate").trim().substring(5, 10);
+				
+				if(!ok.contains(idd)) {
 				Customer cust = (Customer) kliendid.get(custID);
 				if (cust == null) {
 					cust = new Customer(custID);
@@ -1772,7 +1787,8 @@ cn.close();
 				cust.addProduct(prod, cp,false);
 				kliendid.put(custID, cust);
 				vec.addElement(cp);
-
+				ok.add(idd);
+				}
 			}
 			rs.close();
 			con.close();
