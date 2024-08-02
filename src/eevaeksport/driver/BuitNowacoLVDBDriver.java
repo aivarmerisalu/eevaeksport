@@ -656,23 +656,31 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 				if(blocked30custs.contains(cust.getID())){
 					bl = "2";
 				}
+				if(cust.getPayer().length() > 2 && blocked30custs.contains(cust.getPayer())){
+					bl = "2";
+				}
 				
 	       }else if(mood != null && mood.trim().startsWith("A") ){  
 					if(blocked11custs.contains(cust.getID())){
 						bl = "2";
 					}
-					
+					if(cust.getPayer().length() > 2 && blocked11custs.contains(cust.getPayer())){
+						bl = "2";
+					}	
 		   }else if(mood != null && mood.trim().startsWith("N") ){
 			   
-			   if(cust.getID().equals("7779")) {
-		        	System.out.println("dueint " + cust.getDebt()+" " +blocked6custs.contains("7779") + " " + blockedcusts.contains("7779"));
-		        }
 				if(blocked6custs.contains(cust.getID())){
 					bl = "2";
 				}
 				
+				if(cust.getPayer().length() > 2 && blocked6custs.contains(cust.getPayer())){
+					bl = "2";
+				}
 	       }else if(mood != null && mood.trim().startsWith("P") ){  
 				if(blocked1custs.contains(cust.getID())){
+					bl = "2";
+				}
+				if(cust.getPayer().length() > 2 && blocked1custs.contains(cust.getPayer())){
 					bl = "2";
 				}
 				
@@ -680,9 +688,15 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 				if(blockedBBcusts.contains(cust.getID())){
 					bl = "2";
 				}
+				if(cust.getPayer().length() > 2 && blockedBBcusts.contains(cust.getPayer())){
+					bl = "2";
+				}
 				
 	       }else {
 				if(blockedcusts.contains(cust.getID())){
+					bl = "2";
+				}
+				if(cust.getPayer().length() > 2 && blockedcusts.contains(cust.getPayer())){
 					bl = "2";
 				}
 					
@@ -1598,7 +1612,12 @@ System.out.println(cmd);
        String custID = rs1.getString("klient").trim();
         debt.setCustID(custID.trim());
         
+
+        String payer = rs1.getString("maksja");
         
+        if(payer != null) {
+        	payer = payer.trim();
+        }
     try{
 	   String doknr = rs1.getString("number").trim();    
         debt.setDoknr(doknr);
@@ -1624,32 +1643,55 @@ System.out.println(cmd);
         	   if(!blockedcusts.contains(custID)){
         			 this.blockedcusts.add(custID);  
         	   }
+        	  
+        	   if(payer != null && !payer.equals("ND") && !blockedcusts.contains(payer)){
+      			 this.blockedcusts.add(payer);  
+      	       }
+      	   
+        	   
              }
            if(dueint >= 6){
         	   if(!blocked6custs.contains(custID)){
         		   this.blocked6custs.add(custID); 
         	   }
+        	   if(payer != null && !payer.equals("ND") && !blocked6custs.contains(payer)){
+        			 this.blocked6custs.add(payer);  
+        	       }
              }
            
            if(dueint > 1){
         	   if(!blocked1custs.contains(custID)){
         		   this.blocked1custs.add(custID); 
         	   }
+        	   if(payer != null && !payer.equals("ND") && !blocked1custs.contains(payer)){
+        			 this.blocked1custs.add(payer);  
+        	       }
              }
            if(dueint >= 26){
         	   if(!blocked11custs.contains(custID)){
         		   this.blocked11custs.add(custID); 
         	   }
+        	   if(payer != null && !payer.equals("ND") && !blocked11custs.contains(payer)){
+        			 this.blocked11custs.add(payer);  
+        	       }
              }
            if(dueint >= 26){
         	   if(!blocked30custs.contains(custID)){
         		   this.blocked30custs.add(custID); 
         	   }
+
+        	   if(payer != null && !payer.equals("ND") && !blocked30custs.contains(payer)){
+        			 this.blocked30custs.add(payer);  
+        	       }
              }
            if(dueint >= 11){
         	   if(!blockedBBcusts.contains(custID)){
         		   this.blockedBBcusts.add(custID); 
         	   }
+
+        	   if(payer != null && !payer.equals("ND") && !blockedBBcusts.contains(payer)){
+        			 this.blockedBBcusts.add(payer);  
+        	       }
              }
            }
        // System.out.println("get debt" + debt.getCustID());

@@ -10210,8 +10210,10 @@ client.close();
 				if(smas.get(prod.getID()) != null) {
 					sto = sto + Double.parseDouble(smas.get(prod.getID())+"");
 				}
+				if(sto > 0) {
 				sb2.append(ourid + ";" + dateString + 
 						";" + prod.getID() + ";" + (int)sto + "\r\n");
+				}
 			 }
 		}
 		 
@@ -11732,6 +11734,10 @@ client.close();
 		   }
 		   //System.exit(0);
 
+		 	NumberFormat nf2 = NumberFormat.getInstance(Locale.ENGLISH);
+		 	nf2.setMaximumFractionDigits(4);
+			nf2.setMinimumFractionDigits(2);
+			nf2.setGroupingUsed(false);
 		   
 		   // siia siis nädala tsykkel teha 
 		   
@@ -11765,7 +11771,7 @@ client.close();
 		  }
 		  
 		  StringBuffer sb = new StringBuffer(); 
-		  sb.append("Agento Kodas\tKliento kodas\tKliento Pavadinimas\tData\tPradzios laikas\tPabaigos laikas\tKliento kordinates\tKordinates\tSutampa ar ne su Faktiniu adresu \r\n");
+		  sb.append("Agento Kodas\tKliento kodas\tKliento Pavadinimas\tData\tPradzios laikas\tPabaigos laikas\tKliento kordinates\tKordinates\tSutampa ar ne su Faktiniu adresu\tUžsakymo suma \r\n");
 		//  sb.append("Код клиента,Название клиента,Дата заказа,Время (начала заказа),Время (Конец заказа),Координаты клиента,Координаты заказа,Совпадает или нет с фактическим адресом клиента\r\n");
 			
 		  lenn = dayreportarray.length();
@@ -11791,7 +11797,7 @@ client.close();
 			  }catch (Exception e){
 			  }
 			  
-			  SimpleDateFormat hhmmFormat = new SimpleDateFormat("HH:mm");
+			  SimpleDateFormat hhmmFormat = new SimpleDateFormat("HH:mm:ss");
 			  String startdates = null;
 			  String starttime = null;
 			  Long startdate = null;
@@ -11865,7 +11871,15 @@ client.close();
 			 if( ordercoords != null) {
 				 ooo = ordercoords.replace(";", ":");
 			  }
-				  sb.append(agentname + "\t" + key + "\t" + custname + "\t" + startdates + "\t" + starttime + "\t" + endtime + "\t" + clientcoords + "\t" + ooo + "\t" + isInRange + "\r\n");
+			 
+			 Double salesSum = (Double)cob.get("docsum");
+			 
+			 String sum = "0";
+			 if(salesSum != null && salesSum > 0) {
+				 sum = nf2.format(salesSum);
+			 }
+			 
+				  sb.append(agentname + "\t" + key + "\t" + custname + "\t" + startdates + "\t" + starttime + "\t" + endtime + "\t" + clientcoords + "\t" + ooo + "\t" + isInRange + "\t" + sum +"\r\n");
        
 		  }
 
