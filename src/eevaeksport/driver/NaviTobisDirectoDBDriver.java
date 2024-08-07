@@ -4401,7 +4401,9 @@ HashMap prodHash = new HashMap();
         					
     					}
     				   }
-    					
+    					/*if(prod.getID().equals("MOT090513OD")) {
+    			      		System.out.println("MOT090513OD 0000" + goes );
+    			      	}*/	
     					
 if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
     						String grupp3 = nn2.getAttributes().getNamedItem("content").getNodeValue();
@@ -4434,15 +4436,20 @@ if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
     	 prod.setStock(seisud.get(prod.getID()));
      }
       	 
+ /*    if(prod.getID().equals("MOT090513OD")) {
+   		System.out.println("MOT090513OD 000" + goes );
+   	}*/
       	if(prodCodes != null && !prodCodes.contains(prod.getID())){
       	  goes = false;
-      	  if(prod.getStock() > 0){
+      	  if(prod.getStock() > 0 || prod.getStock() < -1){
       		  goes = true;
       	  }
       	}
       	
       	
-    	  	
+      	/*if(prod.getID().equals("MOT090513OD")) {
+      		System.out.println("MOT090513OD 00" + goes );
+      	}*/
       	
       	try {
       	 String stop =  rida.getAttributes().getNamedItem("ART_STOPPED").getNodeValue();
@@ -4456,11 +4463,19 @@ if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
       	}catch(Exception e) {
       		
       	}
+      	/*
+      	if(prod.getID().equals("MOT090513OD")) {
+      		System.out.println("MOT090513OD 0" + goes );
+      	}*/
       	
       	if(olemasNavis.contains(prod.getID())) {
       		goes = false; 
       	}
 
+      	
+      	/*if(prod.getID().equals("MOT090513OD")) {
+      		System.out.println("MOT090513OD " + goes );
+      	}*/
 	    	prodHash.put(prod.getID(), prod);
       	    if(goes ){
       	    	prod.setType("GETZ");

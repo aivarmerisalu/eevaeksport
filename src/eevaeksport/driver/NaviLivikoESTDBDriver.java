@@ -194,6 +194,8 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
              Date date = rs.getDate("endday");
              Date sdate = rs.getDate("startday");
              int type = rs.getInt("salestype");
+
+             String lineinfo = Converter.cleanLitLatEst(rs.getString("notes"));
           boolean goes = true;
            //  int paevi = rs.getInt("paevi");
              
@@ -231,7 +233,6 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
                      }	 
             	 }else {
             		// mline.setProdLevel("pr");
-            		 
             	 }
                  
                  
@@ -246,7 +247,14 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
                 	// mline.setProdLevel("pr");
                  }
              }
-             
+              if(lineinfo != null && lineinfo.trim().length() > 0) {
+            	  String ex = mline.getLineinfo();
+            	  if(ex == null) {
+            		  mline.setLineinfo(lineinfo.trim());
+            	     } else {
+            		  mline.setLineinfo(ex + "|" + lineinfo);  
+            	  }
+              }
             
              //pika hinna määramine
              
@@ -260,28 +268,26 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
 
              if (price != 0) {
                mline.setPrice(price);
-
              }
+
              if (disc != 0) {
                  mline.setDiscount(disc);
-
                }
+
              if(mline.getPrice() > 0 || mline.getDiscount() > 0){
-            	 
-            	 
             	if(goes) {
             		  result.add(mline);    
             	   }
-            	
+            	}
              }
-             
-           }
+           
            rs.close();
            stmt.close();
            con.close();
          }catch(Exception e){
         	 e.printStackTrace();
          } 
+         
 	System.out.println("matrix result " + result.size());
     return result;
       }
@@ -754,6 +760,39 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
   Vector nodebt = new Vector();
   
        public TreeMap getCustomers(Agent agent){
+    	   
+    	   
+    	   try {
+    		   
+        	   
+        	   
+    		   Connection conv = getNewConnection2();
+     	       Statement stmt1 = conv.createStatement();
+     	     
+    	 	StringBuffer sb = new StringBuffer();
+    	   ResultSet  rs1 = stmt1.executeQuery("select Code as id, description as nimi from ReturnReason");
+    	    while(rs1.next()){
+    	    	String id = rs1.getString("id");
+    	    	String name = rs1.getString("nimi");
+    	    	if(name != null && name.trim().length() > 0){
+    	    	      sb.append( id+ ";" +Converter.enCodeEst(name.trim()) + "\n");	
+    	    	}
+    	    }
+    	   rs1.close();
+    	   stmt1.close();
+    	   conv.close();
+    	  // System.out.println("REASON " + sb.toString());
+    	   if(sb.length() > 0){
+    		   Converter.saveFile("returnreason.txt", sb.toString());
+    	   }
+    	       
+    	   
+           }catch(Exception r) {
+    		  r.printStackTrace(); 
+    	   }
+    	   
+
+    	   
     	   
     	 TreeMap webmerc1 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC1");
     	 TreeMap webmerc2 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC2");
@@ -1495,10 +1534,18 @@ tm.put("X-TEGEVUSED Kontor", c1);
                     	 prod.setStatusTop("2");
                 	   
                    }
+
+    int alusel = rs.getInt("alusel");
+    if(alusel > 0 ) {
+    	prod.setOnPallet(alusel);
+    }
+
                    
-                 
-                   
-                   
+
+    String link  = rs.getString("weblink");
+     if(link != null && link.trim().length() > 4 ) {
+         prod.weblink = link;
+      }
                    
                    boolean goes = true;
                   

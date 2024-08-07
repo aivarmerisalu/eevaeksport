@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -1259,6 +1260,16 @@ private Vector baashk = null;
                 		 cust.setGroup("" +baasMap.get(id)); 
                 	 }
                  }
+                 
+                 
+                 if(cust.getID().equals("NEWCUSTOMER") ){
+              	   Enumeration enume = getParent().getAgentsHash().elements();
+                     while (enume.hasMoreElements()) {
+                       Agent a = (Agent) enume.nextElement();
+                         cust.addAgent(a);
+                     }
+              }
+                 
                 
                 if(goes){
                 	 customers.put(Converter.cleanLitLatEst(nim+addr), cust);
@@ -1280,6 +1291,16 @@ private Vector baashk = null;
            customers.put("x Pakrovos užsakymas sandėliui", cc);
             
 
+           Customer cn = new Customer("NAUJAS");
+           cn.setName("Būsimų klientų paieška");
+            itera = agents.values().iterator();
+           while(itera.hasNext()) {
+        	   cn.addAgent((Agent) itera.next());
+           }
+           custMap.put(cn.getID(), cn);
+           customers.put("Būsimų klientų paieška", cn);
+            
+           
 
 		      String sql3 = "SELECT op.Doknr,  part.Kodas as klient ,  OrderAsID = CONVERT(varchar(20), op.OperacijosId),   ProductAsId = CONVERT(Int, pr.PrekesId), prodid = CONVERT(varchar(35),   \r\n" + 
 		      		"       pr.Kodas), Price = CONVERT(Money, pk.ppKainaBePVM / pk.Kiekis, 4), amount = CONVERT(Int, pk.Kiekis),     op.Data as kuupaev   \r\n" + 

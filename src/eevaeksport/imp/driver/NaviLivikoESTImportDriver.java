@@ -24,6 +24,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.Category;
@@ -73,6 +74,32 @@ public class NaviLivikoESTImportDriver
     
   }
 
+
+  private TreeMap getReturnReasons(){
+	  TreeMap res = new TreeMap();
+	   try {
+		   
+	   Statement stmt1 = con.createStatement();
+ 	   ResultSet  rs1 = stmt1.executeQuery("select Code as id, description as nimi from ReturnReason");
+	    while(rs1.next()){
+	    	String id = rs1.getString("id");
+	    	String name = rs1.getString("nimi");
+	    	if(name != null && name.trim().length() > 0){
+	    		res.put(id.trim(), name.trim());
+	    	}
+	    }
+	
+	    rs1.close();
+	    stmt1.close();
+	   
+       } catch(Exception r) {
+		  r.printStackTrace(); 
+	   }
+	 //  System.out.println("res  " + res.toString());
+	   return res;
+  }
+  
+  
   private Vector signatures = new Vector();
 
 	private void loadSignatures(){
@@ -122,6 +149,7 @@ try{
   }
 
 
+  TreeMap reasons = null;
   
   public void makeOrder(Order order) throws SQLException{
 
@@ -131,7 +159,9 @@ try{
 	  
 	   String signature = order.getSignature();
 	   
-	   
+
+	   if(reasons == null)
+	   reasons = getReturnReasons();
 	   
 		  if(signatures.contains(signature)){
 			  this.trouble = "REPRETEATING ORDER agent :" + order.getAgent() + " customer :" 
@@ -310,7 +340,28 @@ private HashMap prodnames = null;
      
          String custID = order.getCompany();
          String ladu = null;
-             Calendar  shipDate = order.getShipCal();
+       
+         String inff = order.getTeostaja();
+         String reason = null;
+     
+         if (inff != null && inff.trim().length()>0 && inff.indexOf("|") !=-1){
+         	reason = " " + inff.substring(inff.indexOf("|")+1, inff.indexOf("]"));
+		    reason = reason.replace('|', ' ');
+		    String code2 = reason.substring(reason.indexOf("[")+1).trim();
+		    System.out.println("ret code " + code2);
+		    String rname = (String)reasons.get(code2) ; 
+		    if(rname == null) {
+		    	rname ="";
+		    }
+		    reason = (reason.replace('[', ' ') + " " + rname).trim();
+		   }
+         String reasonCode = null;
+         if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+      	   reasonCode =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
+ 		   }
+         
+         
+         Calendar  shipDate = order.getShipCal();
              
              String code = order.getWarehouse();        
              if (code != null){
@@ -321,7 +372,10 @@ private HashMap prodnames = null;
              ladu = "";
            }
   
-      
+       
+           
+           System.out.println("reason " + reason);
+           
        
            Calendar cal = Calendar.getInstance();
           
@@ -378,7 +432,58 @@ private HashMap prodnames = null;
            sb.append("<DocumentSubType>MERISOFT</DocumentSubType>" + ls);
            sb.append("<DocumentName>MERISOFT-ORDER</DocumentName>" + ls );
                   
-         	  sb.append("<RefInfo>" + ls);
+           
+           String asi = "order";
+     		 if(order.getStatus() == 7) {
+     			asi = "delivery_note";
+           }
+        	  System.out.println("Tagastus " + tagastus + " " + ref);
+              	  sb.append("<RefInfo>" + ls);
+              	  if(ref != null && ref.trim().length() > 0){
+              		String ref2 = ref.trim();
+            		  
+              		  if(tagastus) {
+              			 if( ref.trim().indexOf("|") != -1) {
+           				      ref = ref.substring(0,ref.indexOf("|"));
+           			     } else if(ref.trim().indexOf(" ") != -1) {
+             				  ref = ref.substring(0,ref.indexOf(" "));
+             			  }
+             			
+              			if(ref.trim().indexOf("[") != -1) {
+           				  ref = ref.substring(0,ref.indexOf("["));
+           			    }
+              			if(ref.trim().indexOf("[") == 0) {
+             				  ref = ref.substring(0,ref.indexOf("["));
+             			    }
+              			
+              			
+                		
+              		  }
+              		  
+
+              		  
+              		if(ref2.indexOf("=") != -1) {
+          				ref2 = ref2.substring(ref2.indexOf("=")+1);
+
+                  		if(ref2.indexOf("=") != -1) {
+              				ref2 = ref2.substring(0,ref2.indexOf("="));
+              				}
+          				}
+          			
+              		  
+              		  System.out.println("Tagastus0 " + tagastus + " " + ref2);
+                    sb.append("<SourceDocument type=\"" + asi+ "\">" + ls);
+                    sb.append("    <SourceDocumentNum>" + escape(ref2) + "</SourceDocumentNum>" + ls );
+                    sb.append("</SourceDocument>" + ls);
+              	  }else if(order.getStatus() == 7) {
+              		 sb.append("<SourceDocument type=\"" + asi+ "\">" + ls);
+              	    sb.append("</SourceDocument>" + ls);
+              	  }
+                    sb.append("</RefInfo>" + ls); 
+              	
+           
+           
+         	/*  sb.append("<RefInfo>" + ls);
          	  if(ref != null && ref.trim().length() > 0){
          		  if(tagastus) {
          			  if(ref.trim().indexOf(" ") != -1) {
@@ -391,7 +496,7 @@ private HashMap prodnames = null;
                sb.append("</SourceDocument>" + ls);
          	  }
                sb.append("</RefInfo>" + ls); 
-         	
+         	*/
 
         /* if(smarten){
         	   sb.append(" <CreatedBy>" + agent + "</CreatedBy>" + ls ) ;	
@@ -509,16 +614,33 @@ private HashMap prodnames = null;
              	comm = comm.substring(0,100);
              }
              
-             if(comm != null && comm.trim().length() > 0 ){
-             	  sb.append("   <AdditionalInfo>" +ls);
-                   sb.append("       <Extension extensionId=\"remarks\">" + ls);
-                   sb.append("       <InfoName>Notes</InfoName>");
-                   sb.append("            <InfoContent>" + escape(comm) + "</InfoContent>" + ls );
-                   sb.append("       </Extension>");
-                     //-<Extension extensionId="externalremarks"><InfoContent>K�esoleva arve aluseks olev n�ue on loovutatud AS-ile SEB Liising ja k�ik arvel toodud summad tuleb maksta AS-i SEB Liising arvelduskontole 10052045861006 SEB Pangas (kood 401). Kogu k�esoleva arvega seotud info tuleb teatavaks teha AS-ile SEB Liisingule.</InfoContent></Extension>
-                   sb.append("   </AdditionalInfo>" + ls);	
-             }
-           
+             
+             if (reason != null) {
+            	 if(comm == null) {
+            		 comm = reason.trim();
+            	 }else {
+            		 comm = (comm + reason).trim();
+            	 }
+             	 
+                }
+             
+             if((comm != null && comm.trim().length() > 0)  || reasonCode != null){
+            	  sb.append("   <AdditionalInfo>" +ls);
+                  sb.append("       <Extension extensionId=\"remarks\">" + ls);
+                  sb.append("       <InfoName>Notes</InfoName>");
+                  if(comm == null) {
+               	   comm = "Na.";
+                  }
+                  sb.append("            <InfoContent>" + escape(comm) + "</InfoContent>" + ls );
+                  if(reasonCode != null) {
+               	   sb.append("            <CustomContent>" + ref + " " +  Converter.escapeXML(reasonCode) + "</CustomContent>" + ls );
+                  }
+                  
+                  sb.append("       </Extension>");
+                    //-<Extension extensionId="externalremarks"><InfoContent>K�esoleva arve aluseks olev n�ue on loovutatud AS-ile SEB Liising ja k�ik arvel toodud summad tuleb maksta AS-i SEB Liising arvelduskontole 10052045861006 SEB Pangas (kood 401). Kogu k�esoleva arvega seotud info tuleb teatavaks teha AS-ile SEB Liisingule.</InfoContent></Extension>
+                  sb.append("   </AdditionalInfo>" + ls);	
+            }
+          
              
            sb.append("</Document>" + ls);
            sb.append("</E-Document>" + ls);
