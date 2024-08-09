@@ -47,7 +47,7 @@ import eevaeksport.manager.ManagerData;
 import eevaeksport.util.Converter;
 
 /**
- * 
+ * get
  * Title:        Eeva eksport
  * Description:
  * Copyright:    Copyright (c) 2002
@@ -2206,7 +2206,8 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
 	  int counter = 1;
 	TreeMap res = new TreeMap();
 	if(custplans == null) {
-		 custplans = this.makePlansByCustomers();	
+		// custplans = this.makePlansByCustomers();	
+		custplans = new TreeMap();
 	}
      
 
@@ -2413,6 +2414,10 @@ String cmd ="  SELECT  jou.orderaccount as agent,round(SUM(lineamount),0) AS sum
 
 
   
+  private TreeMap brandplans = null; 
+  private TreeMap subplans = null; 
+  private TreeMap chainplans = null; 
+  private TreeMap regionplans = null; 
 
 
 
@@ -2421,186 +2426,203 @@ String cmd ="  SELECT  jou.orderaccount as agent,round(SUM(lineamount),0) AS sum
       return 0;
     }
 
-
-    public void setBulkSales(Map agents){
-  this.connectionUp();
-    
-  
- // brandplans = this.makePlansCAT();
- // subplans = this.makePlansSUB();
+  public void setBulkSales(Map agents){
+ this.connectionUp();
+   
  
- //System.out.println(brandplans.toString());
-  
+ brandplans = this.makePlansCAT();
+// subplans = this.makePlansSUB();
+
+//System.out.println(brandplans.toString());
+ 
 String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(SUM(lineamount),0) AS summa \r\n" + 
 		"   FROM bmssa.custinvoicetrans sal  with (nolock) INNER JOIN bmssa.inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid INNER JOIN bmssa.custinvoicejour jou with (nolock) ON \r\n" + 
 		"   sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid INNER JOIN bmssa.custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid\r\n" + 
 		"   LEFT JOIN bmssa.INVENTITEMGROUP gr ON inv.ITEMGROUPID = gr.ITEMGROUPID AND  Inv.DATAAREAID = gr.DATAAREAID   WHERE \r\n" + 
-		"   inv.dataareaid='ost'  AND YEAR(sal.invoicedate) = YEAR(getdate())  \r\n" + 
+		"   inv.dataareaid= 'ost'  AND YEAR(sal.invoicedate) = YEAR(getdate())  \r\n" + 
 		"    AND MONTH(sal.invoicedate) = MONTH(getdate()) and traagentsid != '' and inventovergroupid != '' GROUP BY traagentsid,inventovergroupid";
-  
-  
-  String cmd ="  SELECT  traagentsid as agent,round(SUM(lineamount),0) AS summa " +
-  " FROM bmssa.custinvoicetrans sal  with (nolock) INNER JOIN bmssa.inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid  INNER JOIN bmssa.custinvoicejour jou with (nolock) ON  " + 
-  " sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid INNER JOIN bmssa.custtable cus with (nolock) ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid WHERE " + 
-  " inv.dataareaid='ost'    AND YEAR(sal.invoicedate) = YEAR(getdate())  " +
-  "  AND MONTH(sal.invoicedate) = MONTH(getdate()) GROUP BY traagentsid";
+ 
+ 
+ String cmd ="  SELECT  traagentsid as agent,round(SUM(lineamount),0) AS summa " +
+ " FROM bmssa.custinvoicetrans sal  with (nolock) INNER JOIN bmssa.inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid  INNER JOIN bmssa.custinvoicejour jou with (nolock) ON  " + 
+ " sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid INNER JOIN bmssa.custtable cus with (nolock) ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid WHERE " + 
+ " inv.dataareaid='ost'    AND YEAR(sal.invoicedate) = YEAR(getdate())  " +
+ "  AND MONTH(sal.invoicedate) = MONTH(getdate()) GROUP BY traagentsid";
 
 
-      //   if (isDebug()) System.out.println(cmd);
-            try {
-            	
-            	
-            	
-            	Connection con = this.getNewConnection();
-                Statement stmt =  con.createStatement();
-                ResultSet	      rs = stmt.executeQuery(sqlo);
+     //   if (isDebug()) System.out.println(cmd);
+           try {
+           	
+           	
+           	Connection con = this.getNewConnection();
+               Statement stmt =  con.createStatement();
+               ResultSet	      rs = stmt.executeQuery(sqlo);
+
+        	   groupsCat.put("Cakes", "Cakes");
+               while(rs.next()) {
+                 String agentID = rs.getString("agent").trim();
+                 String grupp = rs.getString("grupp").trim();
+                 int sum = (int)rs.getDouble("summa");
+                 
+                 
+                 
+                 if ( brandplans.get(agentID) != null ){
+                   TreeMap tr = (TreeMap) brandplans.get(agentID);
+                   System.out.println("myygi uurimine " +  tr.toString());
+                   
+                   try {
+                   	
+                	   Toode tt = (Toode)tr.get(this.groupsCat.get(grupp));
+                        System.out.println("myygi uurimine " + grupp + " " +  this.groupsCat.get(grupp) + " " + tt + " " + sum  + " " + groupsCat.toString()) ;
+                        
+                         if(tt != null) {
+                       	  tt.setDonecur(tt.getDonecur() + sum);  
+                         }
+                          
+                         
+                   }catch(Exception o ) {
+                   	//System.out.println("vvvv " + grupp + " " + groupsCat.get(grupp) );
+                   }
+                 }    
+               }
+               rs.close();
+               stmt.close();
+               con.close();
+               
+               
+               
+           	int count = 1;
+               try {
+              	 con = this.getNewConnection();
+                stmt =  con.createStatement();
+          	      rs = stmt.executeQuery(cmd);
                 while(rs.next()) {
                   String agentID = rs.getString("agent").trim();
-                  String grupp = rs.getString("grupp").trim();
-                  int sum = (int)rs.getDouble("summa");
-                  
-                //  System.out.println("myygi uurimine " + grupp + " " +  ((TreeMap) brandplans.get(agentID)).size() + " "+ this.groupsCat.get(grupp));
-                  
-                    
+                  Agent agent = (Agent)agents.get(agentID);
+                  if (agent != null){
+                    agent.buffer2 = ((int)rs.getDouble("summa"));
+                   // System.out.println(agent.getMonthSales());
+                  }
                 }
                 rs.close();
                 stmt.close();
                 con.close();
-                
-                
-                
-            	int count = 1;
-                try {
-               	 con = this.getNewConnection();
-                 stmt =  con.createStatement();
-           	      rs = stmt.executeQuery(cmd);
-                 while(rs.next()) {
-                   String agentID = rs.getString("agent").trim();
-                   Agent agent = (Agent)agents.get(agentID);
-                   if (agent != null){
-                     agent.buffer2 = ((int)rs.getDouble("summa"));
-                    // System.out.println(agent.getMonthSales());
-                   }
-                 }
-                 rs.close();
-                 stmt.close();
-                 con.close();
-                }catch(Exception e) {
-                	if(count < 3) {
-                		count++;
-                		con = this.getNewConnection();
-                        stmt =  con.createStatement();
-                  	      rs = stmt.executeQuery(cmd);
-                        while(rs.next()) {
-                          String agentID = rs.getString("agent").trim();
-                          Agent agent = (Agent)agents.get(agentID);
-                          if (agent != null){
-                            agent.buffer2 = ((int)rs.getDouble("summa"));
-                           // System.out.println(agent.getMonthSales());
-                          }
-                        }
-                        rs.close();
-                        stmt.close();
-                        con.close();
-                	}
-                }
-            	
-            
-                
-                
-                
-                              
-                            
-                              int yy = Calendar.getInstance().get(Calendar.YEAR);
-                              int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-                              int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
-                              double planprec = dd/d2;
-                        	  
-                        	 // Iterreerime Plaani mappi ja sealme asjad paika 
-                        	  
-                        	Iterator itera =   agents.keySet().iterator();
-                        	while(itera.hasNext()){
-                        		String agentID = itera.next() + "";
-                        		Agent aa = (Agent)agents.get(agentID);
-                        		  double msales = aa.buffer2 + aa.buffer;
-                        		  double psales = 0;
-                        		try{
-                        		//  psales = Double.parseDouble(((TreeMap)brandplans.get(agentID)).get("all")+"");
-                        	  }catch(Exception e){
-                        //		  e.printStackTrace();
-                        	  }
-                        	  double  tehtudsalperc = msales/psales;
-                        	  double plaanitavMyykSal = d2 * msales/dd;
-                        	  double  prognosalperc = plaanitavMyykSal/psales;
-                        	  if(tehtudsalperc > 10){
-                        		  tehtudsalperc = 0;  
-                        	  }
-                        	  if(prognosalperc > 10){
-                        		  prognosalperc = 0;  
-                        	  }
-                        	  
-                          String asi = "Sales: " + (int)msales + " €||";
-                          if(dd > 6){
-                        	  asi = asi + "Plan done/estimate :";
-                              asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
-                          }
-                           asi = asi + "Sales plan: " + (int)psales + " €||";    
+               }catch(Exception e) {
+               	if(count < 3) {
+               		count++;
+               		con = this.getNewConnection();
+                       stmt =  con.createStatement();
+                 	      rs = stmt.executeQuery(cmd);
+                       while(rs.next()) {
+                         String agentID = rs.getString("agent").trim();
+                         Agent agent = (Agent)agents.get(agentID);
+                         if (agent != null){
+                           agent.buffer2 = ((int)rs.getDouble("summa"));
+                          // System.out.println(agent.getMonthSales());
+                         }
+                       }
+                       rs.close();
+                       stmt.close();
+                       con.close();
+               	}
+               }
+           	
+           
+               
+               
+               
+                             
+                           
+                             int yy = Calendar.getInstance().get(Calendar.YEAR);
+                             int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+                             int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+                             double planprec = dd/d2;
+                       	  
+                       	 // Iterreerime Plaani mappi ja sealme asjad paika 
+                       	  
+                       	Iterator itera =   agents.keySet().iterator();
+                       	while(itera.hasNext()){
+                       		String agentID = itera.next() + "";
+                       		Agent aa = (Agent)agents.get(agentID);
+                       		  double msales = aa.buffer2 + aa.buffer;
+                       		  double psales = 0;
+                       		try{
+                       		  psales = Double.parseDouble(((TreeMap)brandplans.get(agentID)).get("all")+"");
+                       	  }catch(Exception e){
+                       //		  e.printStackTrace();
+                       	  }
+                       	  double  tehtudsalperc = msales/psales;
+                       	  double plaanitavMyykSal = d2 * msales/dd;
+                       	  double  prognosalperc = plaanitavMyykSal/psales;
+                       	  if(tehtudsalperc > 10){
+                       		  tehtudsalperc = 0;  
+                       	  }
+                       	  if(prognosalperc > 10){
+                       		  prognosalperc = 0;  
+                       	  }
+                       	  
+                         String asi = "Sales: " + (int)msales + " €||";
+                         if(dd > 6){
+                       	  asi = asi + "Plan done/estimate :";
+                             asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
+                         }
+                          asi = asi + "Sales plan: " + (int)psales + " €||";    
+                         
+                          String asi2 = "";
                           
-                           String asi2 = "";
-                           
-                      /*     if(brandplans.get(aa.getID()) != null){
-       	                	TreeMap vv =   (TreeMap)brandplans.get(aa.getID());
-       	                	 Iterator enume = vv.keySet().iterator();
-       	                	 while(enume.hasNext()){
-       	                		 String brand = enume.next()+"";
-       	                		 if(!brand.equals("all")){
-       	                			Toode tt = (Toode)vv.get(brand);
-       	                			int teh = (int)tt.getDonecur();
-       	                			
-          	                		asi2 = asi2 + ("Group " + tt.getBrand() + "    " +
-       	                					((int)(teh/tt.getPlancur()*100))
-       	                					+ "% Plan.: " +(int) tt.getPlancur() + " €  Sales.: " + teh + " €||");
-       	                		   }
-       	                		 }
-       	                	    }*/
-       	                   
-                           aa.setStart( Converter.enCodeEst(asi ) + "|" + asi2 );
-                         //  System.out.println(Converter.enCodeEst(asi ) + "|" + asi2 );
-                           
-                        	}
-            } catch (Exception e) {
-                getParent().showError(e);
-             }
-          }
+                          if(brandplans.get(aa.getID()) != null){
+      	                	TreeMap vv =   (TreeMap)brandplans.get(aa.getID());
+      	                	 Iterator enume = vv.keySet().iterator();
+      	                	 while(enume.hasNext()){
+      	                		 String brand = enume.next()+"";
+      	                		 if(!brand.equals("all")){
+      	                			Toode tt = (Toode)vv.get(brand);
+      	                			int teh = (int)tt.getDonecur();
+      	                			
+         	                		asi2 = asi2 + ("Group " + tt.getBrand() + "    " +
+      	                					((int)(teh/tt.getPlancur()*100))
+      	                					+ "% Plan.: " +(int) tt.getPlancur() + " €  Sales.: " + teh + " €||");
+      	                		   }
+      	                		 }
+      	                	    }
+      	                   
+                          aa.setStart( Converter.enCodeEst(asi ) + "|" + asi2 );
+                        //  System.out.println(Converter.enCodeEst(asi ) + "|" + asi2 );
+                          
+                       	}
+           } catch (Exception e) {
+               getParent().showError(e);
+            }
+         }
 
 
-    double totalPlanSum = 0;
-    
-    
-    private TreeMap makePlansCAT(){
- 	   TreeMap res = new TreeMap();
- 	      totalPlanSum = 0;
- 	     groupsCat = new TreeMap();
- 	   try{
- 		
- 	   Calendar cal = Calendar.getInstance();
- 	   String month = (cal.get(Calendar.MONTH)+1)+ "";
- 	   if (month.length() == 1){
- 		   month = "0" + month;
- 	   }
- 	   String jooksev = cal.get(Calendar.YEAR) + "" + month; 
- 	   int a = 0;
- 	   File f = new File (getExcelDir() + "TP_Budget.xlsx");
- 		  FileInputStream	 ff = new FileInputStream(f);
- 	
- 		  
- 		
- 		XSSFWorkbook workbook = new XSSFWorkbook((ff));
- 		
- 		XSSFSheet sheet = workbook.getSheet("GROUPS");
-  		XSSFRow row = null; 
-  		// täidame groupsSub ära
-  		for(int i = 0 ; i < sheet.getLastRowNum();i++){
+   double totalPlanSum = 0;
+   
+   
+   private TreeMap makePlansCAT(){
+	   TreeMap res = new TreeMap();
+	      totalPlanSum = 0;
+	     groupsCat = new TreeMap();
+	   try{
+		
+	   Calendar cal = Calendar.getInstance();
+	   String month = (cal.get(Calendar.MONTH)+1)+ "";
+	   if (month.length() == 1){
+		   month = "0" + month;
+	   }
+	   String jooksev = cal.get(Calendar.YEAR) + "" + month; 
+	   int a = 0;
+	   File f = new File (getExcelDir() + "TP_Budget.xlsx");
+		  FileInputStream	 ff = new FileInputStream(f);
+	
+		  
+		
+		XSSFWorkbook workbook = new XSSFWorkbook((ff));
+		
+		XSSFSheet sheet = workbook.getSheet("GROUPS");
+ 		XSSFRow row = null; 
+ 		// täidame groupsSub ära
+ 		for(int i = 0 ; i < sheet.getLastRowNum();i++){
 				 row = sheet.getRow(i);
 				if(row == null && a == 0){
 					a = i;
@@ -2608,134 +2630,138 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
 					a = sheet.getLastRowNum();
 				}
 			}
-  		
-  		
+ 		
+ 		
 		for(int i = 1 ; i < a + 1;i++){
 			 row = sheet.getRow(i);
+			 try {
 			String gr = (row.getCell((short) 1).getStringCellValue());
 			String sub = (row.getCell((short) 2).getStringCellValue());
 			if(gr != null && gr.trim().length() > 0)
 			groupsCat.put(gr.trim(), sub.trim());
+			 }catch (Exception e) {
+				 
+			 }
 		  		
 		} 
-		
+		System.out.println("groupsCat " + groupsCat.toString());
 		sheet = workbook.getSheet(jooksev);
- 				ff.close();	
- 				if(sheet != null){
- 				
- 					
- 					for(int i = 0 ; i < sheet.getLastRowNum();i++){
- 						 row = sheet.getRow(i);
- 						if(row == null && a == 0){
- 							a = i;
- 						}else{
- 							a = sheet.getLastRowNum();
- 						}
- 					}
- 					String gr1 = null;
- 					String gr2 = null;
- 					String gr3 = null;
- 					String gr4 = null;
+				ff.close();	
+				if(sheet != null){
+				
+					
+					for(int i = 0 ; i < sheet.getLastRowNum();i++){
+						 row = sheet.getRow(i);
+						if(row == null && a == 0){
+							a = i;
+						}else{
+							a = sheet.getLastRowNum();
+						}
+					}
+					String gr1 = null;
+					String gr2 = null;
+					String gr3 = null;
+					String gr4 = null;
 
- 					String gr1n = null;
- 					String gr2n = null;
- 					String gr3n = null;
- 					String gr4n = null;
- 					
- 					for(int i = 0 ; i < a + 1;i++){
- 						 row = sheet.getRow(i);
- 						String agent = null;
- 						double g1 = 0;
- 						double g2 = 0;
- 						double g3 = 0;
- 						double g4 = 0;
- 						double gt = 0;
- 						
- 					if(i == 0){
- 						//loemepäised sisse
- 						
- 						gr1 = (row.getCell((short) 1).getStringCellValue()).trim();
- 						gr2 = (row.getCell((short) 2).getStringCellValue()).trim();
- 						gr3 = (row.getCell((short) 3).getStringCellValue()).trim();
- 						gr4 = (row.getCell((short) 4).getStringCellValue()).trim();
- 						
- 						gr1n = (row.getCell((short) 1).getStringCellValue().trim());
- 						gr2n = (row.getCell((short) 2).getStringCellValue().trim());
- 						gr3n = (row.getCell((short) 3).getStringCellValue().trim());
- 						gr4n = (row.getCell((short) 4).getStringCellValue().trim());
- 						
- 						
- 					}else{
- 						
- 						try {
- 							agent = (row.getCell((short) 0).getStringCellValue());
-    					      } catch (Exception e) {
-    						 //  e.printStackTrace();
-    					      }
- 		//				System.out.println(agent);
- 						try {
- 						g1 = Double.parseDouble(row.getCell((short) 1).getNumericCellValue()+ "");
- 						g2 = Double.parseDouble(row.getCell((short) 2).getNumericCellValue()+ "");
- 						g3 = Double.parseDouble(row.getCell((short) 3).getNumericCellValue()+ "");
- 						g4 = Double.parseDouble(row.getCell((short) 4).getNumericCellValue()+ "");
- 						} catch (Exception e) {
- 	   					 e.printStackTrace();	
-  					      }
- 						
- 						
- 						
- 						TreeMap asi= new TreeMap();
- 						       Toode t1 = new Toode(gr1);
- 						       t1.setBrand(gr1n);
- 						       t1.setPlancur(g1);
- 						       Toode t2 = new Toode(gr2);
+					String gr1n = null;
+					String gr2n = null;
+					String gr3n = null;
+					String gr4n = null;
+					
+					for(int i = 0 ; i < a + 1;i++){
+						 row = sheet.getRow(i);
+						String agent = null;
+						double g1 = 0;
+						double g2 = 0;
+						double g3 = 0;
+						double g4 = 0;
+						double gt = 0;
+						
+					if(i == 0){
+						//loemepäised sisse
+						
+						gr1 = (row.getCell((short) 1).getStringCellValue()).trim();
+						//gr2 = (row.getCell((short) 2).getStringCellValue()).trim();
+						//gr3 = (row.getCell((short) 3).getStringCellValue()).trim();
+						//gr4 = (row.getCell((short) 4).getStringCellValue()).trim();
+						
+						gr1n = (row.getCell((short) 1).getStringCellValue().trim());
+						//gr2n = (row.getCell((short) 2).getStringCellValue().trim());
+						//gr3n = (row.getCell((short) 3).getStringCellValue().trim());
+						//gr4n = (row.getCell((short) 4).getStringCellValue().trim());
+						
+						
+					}else{
+						
+						try {
+							agent = (row.getCell((short) 0).getStringCellValue());
+   					      } catch (Exception e) {
+   						 //  e.printStackTrace();
+   					      }
+		//				System.out.println(agent);
+						try {
+						g1 = Double.parseDouble(row.getCell((short) 1).getNumericCellValue()+ "");
+						//g2 = Double.parseDouble(row.getCell((short) 2).getNumericCellValue()+ "");
+						//g3 = Double.parseDouble(row.getCell((short) 3).getNumericCellValue()+ "");
+						//g4 = Double.parseDouble(row.getCell((short) 4).getNumericCellValue()+ "");
+						} catch (Exception e) {
+	   					 e.printStackTrace();	
+ 					      }
+						
+						
+						
+						TreeMap asi= new TreeMap();
+						       Toode t1 = new Toode(gr1);
+						       t1.setBrand(gr1n);
+						       t1.setPlancur(g1);
+						/*       Toode t2 = new Toode(gr2);
 						       t2.setPlancur(g2);
 						       t2.setBrand(gr2n);
 						       Toode t3 = new Toode(gr3);
- 						       t3.setPlancur(g3);
- 						       t3.setBrand(gr3n);
- 						       Toode t4 = new Toode(gr4);
- 						       t4.setBrand(gr4n);
- 						       t4.setPlancur(g4);
- 						
- 						       
- 				          asi.put(gr1, t1);
- 				          asi.put(gr2, t2);
- 				          asi.put(gr3, t3);
- 				          asi.put(gr4, t4);
- 				          asi.put("all", g1+g2+g3+g4);
- 				         
- 						
- 						if(agent != null && !agent.equals("Total")){
- 							
- 						    res.put(agent,asi );
- 						 //  totalPlanSum = totalPlanSum + (int)(g1+g2+g3+g4); 
- 						    
- 						}
- 						
- 						if(agent != null && agent.equals("Total")){
- 							res.put("totals", asi);
- 						//	System.out.println("totals olemas " + asi.toString() + " " + asi.get("all"));
- 						}
-    					
-    					
- 						
- 					}
- 						
- 					}
- 				
- 				}
-         		   
- 	   }catch (Exception e){
- 		   e.printStackTrace();
- 	   }
- 	
- 	 // System.out.println("groupsCat  "+ groupsCat.toString() );
- 	   return res;
-    }
+						       t3.setPlancur(g3);
+						       t3.setBrand(gr3n);
+						       Toode t4 = new Toode(gr4);
+						       t4.setBrand(gr4n);
+						       t4.setPlancur(g4);
+						*/
+						       
+				          asi.put(gr1, t1);
+				          //asi.put(gr2, t2);
+				          //asi.put(gr3, t3);
+				          //asi.put(gr4, t4);
+				          asi.put("all", g1+g2+g3+g4);
+				         
+						
+						if(agent != null && !agent.equals("Total")){
+							
+						    res.put(agent,asi );
+						 //  totalPlanSum = totalPlanSum + (int)(g1+g2+g3+g4); 
+						    
+						}
+						
+						if(agent != null && agent.equals("Total")){
+							res.put("totals", asi);
+						//	System.out.println("totals olemas " + asi.toString() + " " + asi.get("all"));
+						}
+   					
+   					
+						
+					}
+						
+					}
+				
+				}
+        		   
+	   }catch (Exception e){
+		   e.printStackTrace();
+	   }
+	
+	 // System.out.println("groupsCat  "+ groupsCat.toString() );
+	   return res;
+   }
 
-    private TreeMap groupsSub = null;
-    private TreeMap groupsCat = null;
+   private TreeMap groupsSub = null;
+   private TreeMap groupsCat = null;
     
     private TreeMap makePlansSUB(){
   	   TreeMap res = new TreeMap();
@@ -2768,12 +2794,15 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
   		
   		
 		for(int i = 1 ; i < a + 1;i++){
+			try {
 			 row = sheet.getRow(i);
 			String gr = (row.getCell((short) 0).getStringCellValue());
 			String sub = (row.getCell((short) 1).getStringCellValue());
 			if(gr != null && gr.trim().length() > 0)
 			groupsSub.put(sub.trim(), sub.trim());
-		  		
+			}catch(Exception e) {
+				
+			}
 		}
 			
   		
@@ -2798,29 +2827,12 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
   					String gr3 = null;
   					String gr4 = null;
   					String gr5 = null;
-  					String gr6 = null;
-  					String gr7 = null;
-  					String gr8 = null;
-  					String gr9 = null;
-  					String gr10 = null;
-  					String gr11 = null;
-  					String gr12 = null;
-  					String gr13 = null;
-
+  					
   					String gr1n = null;
   					String gr2n = null;
   					String gr3n = null;
   					String gr4n = null;
   					String gr5n = null;
-  					String gr6n = null;
-  					String gr7n = null;
-  					String gr8n = null;
-  					String gr9n = null;
-  					String gr10n = null;
-  					String gr11n = null;
-  					String gr12n = null;
-  					String gr13n = null;
-  					
   					
   					for(int i = 0 ; i < a + 1;i++){
   						 row = sheet.getRow(i);
@@ -2830,14 +2842,6 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
   						double g3 = 0;
   						double g4 = 0;
   						double g5 = 0;
-  						double g6 = 0;
-  						double g7 = 0;
-  						double g8 = 0;
-  						double g9 = 0;
-  						double g10 = 0;
-  						double g11 = 0;
-  						double g12 = 0;
-  						double g13 = 0;
   						double gt = 0;
   						
   					if(i == 0){
@@ -2848,28 +2852,12 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
   						gr3 = "3";//(row.getCell((short) 3).getStringCellValue());
   						gr4 = "4";//(row.getCell((short) 4).getStringCellValue());
   						gr5 = "5";//(row.getCell((short) 4).getStringCellValue());
-  						gr6 = "6";//(row.getCell((short) 4).getStringCellValue());
-  						gr7 = "7";//(row.getCell((short) 4).getStringCellValue());
-  						gr8 = "8";//(row.getCell((short) 4).getStringCellValue());
-  						gr9 = "9";//(row.getCell((short) 4).getStringCellValue());
-  						gr10 = "10";//(row.getCell((short) 4).getStringCellValue());
-  						gr11 = "11";//(row.getCell((short) 4).getStringCellValue());
-  						gr12 = "12";//(row.getCell((short) 4).getStringCellValue());
-  						gr13 = "13";//(row.getCell((short) 4).getStringCellValue());
   						
   						gr1 = (row.getCell(5).getStringCellValue());
   						gr2 = (row.getCell((short) 6).getStringCellValue());
   						gr3 = (row.getCell((short) 7).getStringCellValue());
   						gr4 = (row.getCell((short) 8).getStringCellValue());
   						gr5 = (row.getCell((short) 9).getStringCellValue());
-  						gr6 = (row.getCell((short) 10).getStringCellValue());
-  						gr7 = (row.getCell((short) 11).getStringCellValue());
-  						gr8 = (row.getCell((short) 12).getStringCellValue());
-  						gr9 = (row.getCell((short) 13).getStringCellValue());
-  						gr10 = (row.getCell((short) 14).getStringCellValue());
-  						gr11 = (row.getCell((short) 15).getStringCellValue());
-  						gr12 = (row.getCell((short) 16).getStringCellValue());
-  						gr13 = (row.getCell((short) 17).getStringCellValue());
   						
   						
   						gr1n = (row.getCell((short) 5).getStringCellValue());
@@ -2877,15 +2865,6 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
   						gr3n = (row.getCell((short) 7).getStringCellValue());
   						gr4n = (row.getCell((short) 8).getStringCellValue());
   						gr5n = (row.getCell((short) 9).getStringCellValue());
-  						gr6n = (row.getCell((short) 10).getStringCellValue());
-  						gr7n = (row.getCell((short) 11).getStringCellValue());
-  						gr8n = (row.getCell((short) 12).getStringCellValue());
-  						gr9n = (row.getCell((short) 13).getStringCellValue());
-  						gr10n = (row.getCell((short) 14).getStringCellValue());
-  						gr11n = (row.getCell((short) 15).getStringCellValue());
-  						gr12n = (row.getCell((short) 16).getStringCellValue());
-  						gr13n = (row.getCell((short) 17).getStringCellValue());
-  						
   						
   						
   					}else{
@@ -2902,14 +2881,6 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
   						g3 = Double.parseDouble(row.getCell((short) 7).getNumericCellValue()+ "");
   						g4 = Double.parseDouble(row.getCell((short) 8).getNumericCellValue()+ "");
   						g5 = Double.parseDouble(row.getCell((short) 9).getNumericCellValue()+ "");
-  						g6 = Double.parseDouble(row.getCell((short) 10).getNumericCellValue()+ "");
-  						g7 = Double.parseDouble(row.getCell((short) 11).getNumericCellValue()+ "");
-  						g8 = Double.parseDouble(row.getCell((short) 12).getNumericCellValue()+ "");
-  						g9 = Double.parseDouble(row.getCell((short) 13).getNumericCellValue()+ "");
-  						g10 = Double.parseDouble(row.getCell((short) 14).getNumericCellValue()+ "");
-  						g11 = Double.parseDouble(row.getCell((short) 15).getNumericCellValue()+ "");
-  						g12 = Double.parseDouble(row.getCell((short) 16).getNumericCellValue()+ "");
-  						g13 = Double.parseDouble(row.getCell((short) 17).getNumericCellValue()+ "");
   						
   						} catch (Exception e) {
   	   					 e.printStackTrace();	
@@ -2935,51 +2906,12 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
 						       t5.setBrand(gr5n);
 						       t5.setPlancur(g5);
 						       
-						       Toode t6 = new Toode(gr6);
-  						       t6.setBrand(gr6n);
-  						       t6.setPlancur(g6);
-  						       
-  						     Toode t7 = new Toode(gr7);
-						       t7.setBrand(gr7n);
-						       t7.setPlancur(g7);
-						       
-						       Toode t8 = new Toode(gr8);
-  						       t8.setBrand(gr8n);
-  						       t8.setPlancur(g8);
-  						     Toode t9 = new Toode(gr9);
-						       t9.setBrand(gr9n);
-						       t9.setPlancur(g9);
-						       
-						       Toode t10 = new Toode(gr10);
-  						       t10.setBrand(gr10n);
-  						       t10.setPlancur(g10);
-  						       
-  						     Toode t11 = new Toode(gr11);
-						       t11.setBrand(gr11n);
-						       t11.setPlancur(g11);
-						       
-						       Toode t12 = new Toode(gr12);
-						       t12.setBrand(gr12n);
-						       t12.setPlancur(g12); 
-						       
-						       Toode t13 = new Toode(gr13);
-						       t13.setBrand(gr13n);
-						       t13.setPlancur(g13);
-  						       
   				          asi.put(gr1, t1);
   				          asi.put(gr2, t2);
   				          asi.put(gr3, t3);
   				          asi.put(gr4, t4);
   				          asi.put(gr5, t5);
-  				          asi.put(gr6, t6);
-  				          asi.put(gr7, t7);
-  				          asi.put(gr8, t8);
-  				          asi.put(gr9, t9);
-  				          asi.put(gr10, t10);
-  				          asi.put(gr11, t11);
-  				          asi.put(gr12, t12);
-  				          asi.put(gr13, t13);
-  				          asi.put("all", g1+g2+g3+g4+g5+g6+g7+g8+g9+g10+g11+g12+g13);
+  				          asi.put("all", g1+g2+g3+g4+g5);
   				         
   						
   						if(agent != null && !agent.equals("Total")){

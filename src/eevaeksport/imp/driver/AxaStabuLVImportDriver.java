@@ -749,7 +749,7 @@ try{
 						}
 						
 						StringBuffer sb = new StringBuffer();
-						String subtext =  "SIA 'Orkla Confectionery & Snacks Latvija' \n &emsp;&emsp;&emsp;&emsp; Miera iela 22, Rīga, LV-1001, Latvija\n";
+						String subtext =  "SIA Staburadze \n &emsp;&emsp;&emsp;&emsp; Miera iela 22, Rīga, LV-1001, Latvija\n";
 						String regno = ("&emsp;&emsp;&emsp;&emsp; Reģ.nr. 40103217882");
 						if (regno != null) {
 							subtext = subtext + " " + regno;

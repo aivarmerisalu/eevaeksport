@@ -3549,7 +3549,6 @@ public TreeMap getPRLisa()  {
      		for (int i = 0; i < cc.length(); i++) {
        			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
        			
-       			String filterProblem = (String)cob.get("resstr1");
        			String filterOutOfStock = (String)cob.get("resint3").toString();
        			String dateAndTime = (String)cob.get("recetime");
        		
@@ -3744,7 +3743,7 @@ public TreeMap getPRLisa()  {
      			for (int i = 0; i < cc.length(); i++) {
      	  			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
      	  			
-     	  			String filterProblem = (String)cob.get("resstr1");
+     	  			//String filterProblem = (String)cob.get("resstr1");
      	  			String filterOutOfStock = (String)cob.get("resint3").toString();
      	  			String dateAndTime = (String)cob.get("recetime");
      	  			 cal = Calendar.getInstance();
