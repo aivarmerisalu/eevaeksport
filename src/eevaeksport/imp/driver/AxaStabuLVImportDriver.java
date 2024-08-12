@@ -886,7 +886,7 @@ try{
 		  nf2.setMaximumFractionDigits(4);
 			nf2.setMinimumFractionDigits(2);
 			nf2.setGroupingUsed(false);
-				    	String ss = "olv";
+				    	String ss = "sta";
 				    	
 				    	String fname = (parent.getProps().getProperty("savefilesdir")) + ss + ".xls";
 				    	
@@ -1105,10 +1105,8 @@ try{
 				    
 	private Product getProduct(String prodid, boolean orkla){
 		Product prod = null;
-		String ork = "olv";
-		if(!orkla){
-			ork = "k12";
-		}
+		String ork = "ost";
+		
 		  
 	    String cmd = "  SELECT disc.todate, disc.fromdate,inv.itemid,inv.itemname  AS nimetus, stbqtyinbox AS kastis,stbqtyinpallet AS alusel, disc.amount AS price " +  
 		"  , bar.itembarcode AS ean ,inv.itemgroupid AS grupp,mod.unitid As unit, taxitemgroupid as vat,mod.LineDisc as alegr " +

@@ -2075,7 +2075,7 @@ TreeMap   tm = new TreeMap();
     String cmd = "   SELECT inv.itemid, inv.itemname AS nimetus, inv.taxpackagingqty AS kastis,inv.standardpalletquantity AS alusel, disc.amount AS price  " + 
 " , bar.itembarcode AS ean ,inv.ITEMSUBGROUPID AS grupp,inv.SPIBRANDID AS grupp2,mod.unitid As unit, '21' as vat,mod.LineDisc as alegr  " +
  " , ITEMGROUPID as type ,lowestqty as mini , multipleqty as opti ,NEWITEM as uus ,sellout as out , topitem as tops , topoffitem as tops2, giftbox as gift "
- + ",  itemfreetextannotation  as annot , SPIDONTCONTROLMINAMOUNTMS as nocount , unitvolume as small, MarkupGroupId as pant  FROM inventtable inv  " +
+ + " , SPIDONTCONTROLMINAMOUNTMS as nocount , unitvolume as small, MarkupGroupId as pant  FROM inventtable inv  " +
 "  left join InventItemSalesSetup s on s.itemid = inv.itemid and s.dataareaid=inv.dataareaid left join pricedisctable as disc on inv.itemid=disc.itemrelation and disc.dataareaid=inv.dataareaid " +
 "  and disc.module in ( 0 , 1 )  and disc.relation=4  and disc.itemcode=0 and disc.accountcode=1 and accountrelation = 'Standarts' "
 + "and (disc.todate > getdate() or year( disc.todate ) = 1900) and   (disc.fromdate < getdate()+1 or year( disc.fromdate ) = 1900 )" +
@@ -2429,11 +2429,6 @@ stmt.close();
       }
 
       
-      String annot = rs.getString("annot");
-      if(annot != null && annot.trim().length() > 0){
-    	 
-      }
-      
       int  nocount = rs.getInt("nocount");
       if(nocount == 1){
     	 prod.sumNoCount = true;
@@ -2544,10 +2539,12 @@ stmt.close();
     	  }
      }
     
-
+try {
       
     makeTexts(tx);
-      
+}catch(Exception e) {
+	e.printStackTrace();
+}
       
     } catch (Exception e){
       getParent().showError(e);

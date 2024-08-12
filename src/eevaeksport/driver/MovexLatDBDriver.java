@@ -156,10 +156,74 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
           
   public void connectionUp(){
   }
-  public String getSaveDebtInfo() {
-   	return null;
-   }
 
+  public String getSaveDebtInfo() {
+
+	  String  cmd = " select  PAYER from cesu.mjcustomerdata where BLOK2 > 0 group  by payer ";
+	String cmd3  = " select PAYER as klient, summa as debt from cesu.mjpayerdebtdue ";
+		
+
+		if (isDebug()) System.out.println(cmd);
+		TreeMap custs = new TreeMap();
+
+
+
+
+		StringBuffer products = new StringBuffer();
+		try {
+
+		Connection con1 = getNewConnection();
+		Statement st = con1.createStatement();
+		ResultSet rs = st.executeQuery(cmd3);
+
+		while (rs.next()) {
+
+		String kood = rs.getString("klient").trim();
+		double volg = rs.getDouble("debt");
+		Customer custw = new Customer (kood);
+		custw.setDebt(volg);
+		if(volg>0){
+			custs.put(kood,custw);
+		}
+		}
+
+		//siin pannakse peale PLOKKID
+
+		rs = st.executeQuery(cmd);
+		while (rs.next()) {
+			String kood = rs.getString("payer").trim();
+		    Customer cus =  (Customer)custs.get(kood);
+		    if(cus != null){
+		    	cus.setSalesBlock(true);
+		    }else{
+		    	Customer cusnew = new Customer(kood);
+		    	cusnew.setSalesBlock(true);
+		    	custs.put(kood,cusnew);
+		    }
+		 }
+
+		rs.close();
+		} catch (Exception e) {
+		getParent().showError(e);
+		}
+		Iterator     codes = custs.values().iterator();
+		while (codes.hasNext()){
+		Customer cust = (Customer)codes.next();
+		String bl = "0";
+		if(cust.isSalesBlock()){
+			bl = "1";
+			}
+		if(cust.getDebt() != -1 && cust.getDebt() != -2){
+			if(cust.getDebt() != -3 && cust.getID().length() > 3) {
+				 products.append(cust.getID() + ";" + getParent().getNF().format(cust.getDebt()) + ";" + bl + "\n");
+			}
+			
+		  }
+		}
+
+		return products.toString();
+
+   }
  
   public String getAssortmentStr(Agent agent){
 		StringBuffer sb = new StringBuffer();
@@ -185,7 +249,8 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
 				String sort3 = rs.getString("VOL");
 		
 				
-
+	  
+  
 			String line = " ;" + type + "; ;" + id + ";" + stat
 			+ "\n";
 		   
@@ -220,9 +285,9 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
    }
 			
 			tree.put(type+sort+stat+"-"+sort3+sort2+id, line);
+  }
 			
 			
-			}
 			int c = 0;
 			Iterator itera = tree.keySet().iterator();
 			while (itera.hasNext()){
@@ -697,7 +762,7 @@ String ex = parent.getProps().getProperty("products");
         }
         
         
-       
+
      
    String cmd = "SELECT * FROM CESU.MJDAILYITEMS";
 
@@ -770,7 +835,11 @@ String ex = parent.getProps().getProperty("products");
             } else if (id.trim().equals("90")) {
               prod.setSentExtra("TA");
             }
-        prod.setPalSpace(rs.getDouble("palletspace"));
+            Double pall = rs.getDouble("palletspace");
+            if(pall != null && pall > 0) {
+            	  	prod.setPalSpace(1/pall);
+                    prod.setOnPallet(pall);
+            }
         
         if(rs.getString("prakis").equals("1")){
             prod.setDefectiveList("1");
@@ -799,6 +868,11 @@ String ex = parent.getProps().getProperty("products");
         
         prod.setAllowGift(false);        
         prod.setPrice( (rs.getDouble("price")));
+        Integer newP = rs.getInt("statusnew");
+        if(newP != null && newP == 1) {
+        	prod.setStatusNew("1");
+        }
+        
         prodHash.put(prod.getID(), prod);
         products.put(nimetus, prod);
         
@@ -848,6 +922,29 @@ String ex = parent.getProps().getProperty("products");
      con.close();
       
 
+     String cmdk = "SELECT * FROM CESU.mjkegoverdue ";
+     con = getNewConnection();
+     st = con.createStatement();
+      rs1 = st.executeQuery(cmdk);
+      StringBuffer sb = new StringBuffer();
+                       while(rs1.next()){
+                         String id = rs1.getString("kood").trim();
+                         String name = rs1.getString("name").trim();
+                         Double saldo = rs1.getDouble("saldo");
+                         Double to = rs1.getDouble("turnover");
+                         Double oc = rs1.getDouble("overc");
+                         String col = rs1.getString("colour").trim();
+                         sb.append(id+";"+name+";"+saldo+";"+to+";"+oc+";"+col + "\n");
+                         
+                       }
+
+    rs1.close();
+    st.close();
+    con.close();
+    if(sb.toString().length() > 0) {
+    	Converter.saveFile("kegoverdue.txt", sb.toString());
+    }
+    
      try{
    	  FileReader fr = new FileReader("markedproducts.txt");
          BufferedReader reader = new BufferedReader(fr);
@@ -882,8 +979,8 @@ String ex = parent.getProps().getProperty("products");
            }
        }
    }catch(Exception e ){
-   	e.printStackTrace();
-   	log(e.toString());
+   	//e.printStackTrace();
+   	//log(e.toString());
    }
      
     } catch (Exception e){
@@ -1029,28 +1126,25 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 
       public Vector getDebt(String agentCode) throws SQLException{
        Vector list = new Vector();
-       String sql = " select  maksja, arve, kuupaev, SUMMA, paevi, tahtaeg from cesu.MJINVOICEDEBT  " ;
+       String sql = " select  maksja,klient, arve, kuupaev, SUMMA, paevi, tahtaeg from cesu.MJINVOICEDEBT  " ;
 
      if (isDebug()) System.out.println(sql);
        Connection con = getNewConnection();
        stmt = con.createStatement();
        ResultSet rs = stmt.executeQuery(sql);
-       Calendar cal = Calendar.getInstance();
-       Date now = new Date(cal.getTimeInMillis());
 
        while(rs.next()){
          Debt debt = new Debt();
-         debt.setCustID(rs.getString("maksja").trim());
+         debt.setPayerID(rs.getString("maksja").trim());
+         debt.setCustID(rs.getString("klient").trim());
          debt.setDoknr(rs.getString("arve").trim());
-         Date duedate = getDate(rs.getString("kuupaev").trim());
-         debt.setDuedate(duedate);
-
+         Date dat = getDate(rs.getString("kuupaev").trim());
+         debt.setDate(dat);
          debt.setSum(rs.getDouble("summa"));
          debt.setDue(rs.getString("paevi"));
-         if(duedate.getTime()<now.getTime()){
-           list.addElement(debt); // pane juhul kui  maksep�ev +1 on k�es kasuta tahtaeg
-           // siis tuleb kokku liita YMT summad ja addida nee vastavale CUSTOMERI.Payerile
-         }
+         debt.setDuedate(getDate(rs.getString("tahtaeg").trim()));
+           list.addElement(debt); 
+          
        }
        rs.close();
        stmt.close();

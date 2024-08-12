@@ -1802,9 +1802,11 @@ Connection con = this.getNewConnection();
     		ex.printStackTrace();
     	  }
      }
-    
+    try {
     makeTexts(tx);
-      
+    }catch(Exception e) {
+    	e.printStackTrace();
+    }
       
       
       
