@@ -886,12 +886,9 @@ try{
 		  nf2.setMaximumFractionDigits(4);
 			nf2.setMinimumFractionDigits(2);
 			nf2.setGroupingUsed(false);
-				    	String ss = "sta";
-				    	
+				    	String ss = "ork";
 				    	String fname = (parent.getProps().getProperty("savefilesdir")) + ss + ".xls";
 				    	
-				    	
-
 						Calendar shdate = ord.getShipCal();
 						Calendar cal = Calendar.getInstance();
 						if (shdate != null) {
@@ -1088,6 +1085,7 @@ try{
 									c.setCellValue(nf.format(total*1.21));
 				
 								    fIPS.close(); //Close the InputStream
+								    
 					        FileOutputStream output_file =new FileOutputStream(ss+ "-" +agent.getID() + ".xls");
 					        wb.write(output_file); //write changes
 					        output_file.close();  //close the stream

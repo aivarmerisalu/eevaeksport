@@ -489,8 +489,9 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
-         String sql = " select  * , datediff(day,fromdate,todate) as paev from getprices where (getdate() between fromdate-2 and todate) " + 
-         		" or ( getdate() > fromdate-2 ) order by accountrelation,relation desc,itemrelation ";
+         String sql = " select  * , datediff(day,fromdate,todate) as paev ,datediff(day, todate, getdate()) as tillend , "
+         		+ " datediff(day, getdate(), fromdate) as fromst from getprices where (getdate() between fromdate-5 and todate) " + 
+         		" or ( getdate() > fromdate-5 ) order by accountrelation,relation desc,itemrelation ";
         HashSet hh = new HashSet();
           try {
 
@@ -511,6 +512,8 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                           int relation = rs.getInt("relation");
                           String camp = rs.getString("description");
                           int paev = rs.getInt("paev");
+                          int tillend = rs.getInt("tillend");
+                          int fromst =  rs.getInt("fromst");
                           MatrixLine mline = new MatrixLine();
                           
                           String check = "";
@@ -548,8 +551,20 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                           
                           if(camp != null && camp.trim().length() > 0 && camp.trim().startsWith("MAGAZ")) {
                          	 mline.setLineinfo(camp);
+                         	if(tillend < 6) {
+                         		 mline.setLineinfo(camp+"|"+tillend + "end");
+                            }
+                         	if(fromst > 0) {
+                        		 mline.setLineinfo(camp+"|"+fromst + "start");
+                           }
+                          } else {
+                              if(tillend < 6) {
+                            	  mline.setLineinfo(tillend + "end");  
+                              }
+                              if(fromst > 0) {
+                            	  mline.setLineinfo(fromst + "start");  
+                              }  
                           }
-                          
                      
                           if(!hh.contains(check)){
                         	  lines.add(mline);  

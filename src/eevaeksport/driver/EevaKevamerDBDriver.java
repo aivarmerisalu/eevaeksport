@@ -885,7 +885,7 @@ System.out.println("tooted " + products.size());
             if (kliendikood.length() > 0 && kogus != 0) {
                   CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,kuupaev.substring(5,10),hind,0,0," ");
                 if(dok != null)
-                  cp.setAbiKood(dok);
+                  cp.setAbiKood(dok.trim());
                   custProds.add(cp);
                 }
 	    }

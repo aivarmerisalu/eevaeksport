@@ -84,7 +84,7 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 			String pictssou = parent.getProps().getProperty("pict.dir");
 	 	    String pictspda = parent.getProps().getProperty("pictpda.dir");
 	 	    
-		  String url = "http://213.219.67.37/ladu20/images/kaubad/tellikma/";
+		  String url = "http://194.204.17.213:8080/ladu20/images/kaubad/";
 		  TreeMap prods = this.getProducts(new Agent("pilt"));
 		  Iterator itera = prods.values().iterator();
 		  Vector exists = new Vector();
