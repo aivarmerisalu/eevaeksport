@@ -1077,7 +1077,7 @@ con3.close();
       prodHash = new HashMap();
      try {
    	  String cmd = "SELECT l.[Item No_] AS kood, sum(l.[Quantity]) AS kogus, l.[Location Code] AS ladu FROM [Viciunai CZ$Item Ledger Entry] l " +
-         " INNER JOIN [Viciunai CZ$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('HOPI MR') " +
+         " INNER JOIN [Viciunai CZ$Item] t ON [No_]=l.[Item No_] WHERE  l.[Location Code] in ('DASICE') " +
          " AND t.[Blocked]=0  AND len(t.[Product Group Code])>0 " +
          " GROUP BY l.[Location Code],l.[Item No_] HAVING sum(l.[Quantity]) > 0 ORDER BY l.[Item No_] ";
 

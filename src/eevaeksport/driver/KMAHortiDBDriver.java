@@ -94,7 +94,7 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 			  exists.add(f);
 		  }
 		  
-		  System.out.println("exists " + exists.elementAt(0));
+		//  System.out.println("exists " + exists.elementAt(0));
 		  
 	  	 while(itera.hasNext()) {
 	  		 Product prod = (Product) itera.next();

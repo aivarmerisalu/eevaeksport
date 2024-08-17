@@ -387,7 +387,11 @@ st1.close();
 	sb.append(getLineNr(cou));
       sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
       cou++;
-      
+     
+
+  	sb.append(getLineNr(cou));
+        sb.append("          <I06_KODAS_AK>" + escape(cust.substring(cust.lastIndexOf("-")+1)) + "</I06_KODAS_AK>" + ls);
+        cou++;
      
     Vector lines = order.getOrderLines();
       for (int i = 0; i < lines.size(); i++) {

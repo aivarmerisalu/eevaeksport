@@ -4167,6 +4167,13 @@ if (getProps().getProperty("no.matrixagent") != null) {
         	   bbb = cust.criticalDebt + "";
            }
            buf.append(bbb); 
+           buf.append(EksportPanel.separator);
+           String bb = "1";
+           if(!cust.topstatus){
+        	   bb =  "0";
+           }
+           buf.append(bb); 
+           
            
            buf.append(lineSeparator);
       }

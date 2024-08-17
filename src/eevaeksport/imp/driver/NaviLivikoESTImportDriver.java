@@ -629,11 +629,11 @@ private HashMap prodnames = null;
                   sb.append("       <Extension extensionId=\"remarks\">" + ls);
                   sb.append("       <InfoName>Notes</InfoName>");
                   if(comm == null) {
-               	   comm = "Na.";
+               	   comm = " ";
                   }
                   sb.append("            <InfoContent>" + escape(comm) + "</InfoContent>" + ls );
                   if(reasonCode != null) {
-               	   sb.append("            <CustomContent>" + ref + " " +  Converter.escapeXML(reasonCode) + "</CustomContent>" + ls );
+               	   sb.append("            <CustomContent>" + (ref + " " +  Converter.escapeXML(reasonCode)).trim() + "</CustomContent>" + ls );
                   }
                   
                   sb.append("       </Extension>");

@@ -489,8 +489,8 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
-         String sql = " select  * , datediff(day,fromdate,todate) as paev ,datediff(day, todate, getdate()) as tillend , "
-         		+ " datediff(day, getdate(), fromdate) as fromst from getprices where (getdate() between fromdate-5 and todate) " + 
+         String sql = " select  * , datediff(day,fromdate,todate) as paev ,datediff(day, getdate() ,todate ) as tillend , " + 
+         		"   datediff(day, fromdate,  getdate()) as fromst from getprices where (getdate() between fromdate-5 and todate) " + 
          		" or ( getdate() > fromdate-5 ) order by accountrelation,relation desc,itemrelation ";
         HashSet hh = new HashSet();
           try {
@@ -551,17 +551,17 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                           
                           if(camp != null && camp.trim().length() > 0 && camp.trim().startsWith("MAGAZ")) {
                          	 mline.setLineinfo(camp);
-                         	if(tillend < 6) {
+                         	  if(tillend < 6) {
                          		 mline.setLineinfo(camp+"|"+tillend + "end");
-                            }
-                         	if(fromst > 0) {
-                        		 mline.setLineinfo(camp+"|"+fromst + "start");
-                           }
+                              }
+                         	  if(fromst < 0) {
+                        	 	 mline.setLineinfo(camp+"|"+fromst + "start");
+                              }
                           } else {
                               if(tillend < 6) {
                             	  mline.setLineinfo(tillend + "end");  
                               }
-                              if(fromst > 0) {
+                              if(fromst < 0) {
                             	  mline.setLineinfo(fromst + "start");  
                               }  
                           }
@@ -1230,11 +1230,10 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                 				 vv1.add(vv);
                 				 this.agentMust.put(ag, vv1 );	 
                 			 }
-                			
                 		}
                 	  
-                		//System.out.println("Lisan Agenti " + ag +" " + cust.getID());
-                		 if(ag.trim().indexOf("SH") == -1 && !cust.hasAgent("HOUSE1")){
+                		
+                		if(ag.trim().indexOf("SH") == -1 && !cust.hasAgent("HOUSE1")){
                              cust.addAgent(new Agent("HOUSE1")); 
                          } 
                 	}
@@ -1432,6 +1431,11 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                	cust.setInfo(Converter.enCodeEst("CHART sales Eur. :|Month & year|Sales |" )+ salesres.get(cust.getID()) );
                }
 
+             cust.topstatus = false;
+             String customgroup2 = rs.getString("customgroup2");
+             if(customgroup2 != null && customgroup2.trim().equals("MustStock")){
+            	 cust.topstatus = true;
+             }
              
           
           if(cust.getID().toLowerCase().indexOf("pr")==-1 && agentc != null && agentc.toLowerCase().indexOf("pr")==-1){
@@ -1695,8 +1699,10 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
        
          
          String gr2 = rs.getString("customgroup1");
-         if(gr2 != null && gr2.trim().length()>0){
-             prod.setGroupSecond(gr2.trim());
+         if(gr2 != null && gr2.trim().equals("MustStock")){
+           //  prod.setGroupSecond(gr2.trim());
+             prod.setStatusTop("1");
+            // System.out.println("Must toode " + prod.getID());
            }
         	
         	 
