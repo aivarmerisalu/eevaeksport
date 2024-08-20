@@ -305,7 +305,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
     
         public String getSaveStockInfo(){
         	this.getProducts(null);
-        	Converter.convertCoopSortimenttoMobitrekFormat(eans);
+        //	Converter.convertCoopSortimenttoMobitrekFormat(eans);
         return null;
         }
         public Vector getPriceMatrixData() {
@@ -695,9 +695,9 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
        	
        }
 	connectionUp();
-	 Converter cc = new Converter();
-     HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-     TreeMap groups = this.getGrupid();
+	// Converter cc = new Converter();
+    // HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+    // TreeMap groups = this.getGrupid();
      
 	String cmd =
 	    "SELECT k.kood, k.nimi, 0 AS tasumata,visit,dealer, trim(tanav)+ ' ' +trim(riik)+ ' ' +trim(piirkond) AS Address, trim(telefon) as kontakt ,liik,info , " +
@@ -747,7 +747,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
                 }
 
                 
-                String grp = (String)groups.get(cust.getID());
+             /*   String grp = (String)groups.get(cust.getID());
                 if(grp != null){
                 	Vector vv = new Vector();
                 	StringTokenizer ste = new StringTokenizer(grp,"|");
@@ -758,7 +758,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
                 	cust.setFixSortCode(vv);
                	System.out.println(cust.getName() + " " + vv.toString());
                 //	cust.setGroup(grp);
-                }
+                }*/
 
                 String block = " ";
                 String block1 = rs.getString("blokk1");
@@ -837,7 +837,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
             System.out.println("Distributsiooni" + cust.getName());
             }
             
-            cc.addQuestiosToCustomer(cust,kyssad);
+         //   cc.addQuestiosToCustomer(cust,kyssad);
             
             String ag = rs.getString("ag");
             if(ag != null &&ag.trim().length() > 0){

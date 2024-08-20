@@ -6364,7 +6364,7 @@ try{
 	
 	
 	if(false){
-		//sellega saab managerid maha võtta 
+		//true sellega saab managerid maha võtta 
 		JSONArray arrayx = new JSONArray();
 		 value.put("managers", arrayx);
 	}else{

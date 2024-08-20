@@ -268,7 +268,7 @@ private ImportPanel parent = null;
   private void addInvoiceHeader(int invID) throws SQLException{
 	  Calendar cc = Calendar.getInstance();
 	  
-  	String hrs = (cc.get(Calendar.HOUR_OF_DAY)+2)+ "";
+  	String hrs = (cc.get(Calendar.HOUR_OF_DAY))+ "";
   	if(hrs.length()==1)hrs = "0" + hrs;
   	String min = cc.get(Calendar.MINUTE) + "";
 	if(min.length()==1)min = "0" + min;

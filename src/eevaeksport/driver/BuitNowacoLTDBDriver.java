@@ -2589,7 +2589,7 @@ try{
 	"		 , t.mato_vien AS unit, t.bar_kodas AS ean,0 AS status ,t.max_nuol AS maxdiscount,  " +
 	"		  t.tipas AS type, t.orig_pak AS kastis,t.pak_kiek as kastis2 ,  t.prek_neto AS kaal,21 AS vat,  pak_kiek as opt ,prek_mode as info ,t.vieta as staatus  " +
 	 "    , orig_pak as origpak, kilm_salis as klimes , laik_salyg as laiksal ,"
-	 + " pak.pakuote as primpak ,t.savik_3 as oma , t.didm_antk as greend, pavad_3 as brandpers, t.aprasymas as otsing " +	
+	 + " pak.pakuote as primpak ,t.savik_3 as oma , t.didm_antk as greend, pavad_3 as brandpers, t.aprasymas as otsing , t.mazm_antk as lilla " +	
 	"		  FROM prekes t inner join grupes g on g.grupe=t.grupe inner join tipai ty on ty.tipas=t.tipas " +
 	"     left join pr_pak pak on pak.preke = t.preke and pak.pirmine = 1   " +
 	"		  where CH_meris  = '1' and (pard_kaina != 0 or kaina_1 < 321.77 or kaina_2 < 321.77 or kaina_3 < 321.77 or kaina_4 < 321.77 or kaina_5 < 321.77 or \r\n" + 
@@ -2797,6 +2797,8 @@ try{
                 	 }
                   }
                  
+                 
+                 
                  if(higherCodes.contains(prod.getID())){
                           prod.setStatusTop("3");
                          }
@@ -2892,8 +2894,15 @@ try{
               
                 		 
                  }
-                	 
+                	
                  
+                 double lilla = rs.getDouble("lilla"); 
+                  if( lilla < 0 ) {
+                	  prod.setStatusTop("2");
+                	  System.out.println("lilla " + lilla + " " + prod.getID());
+                  }
+                	
+                	
                    if(goes ){
                 	   prod.setName(Converter.enCodeEst(name));
                 	   prod.setNameSorting(Converter.cleanLitLatEst(name));
