@@ -378,10 +378,10 @@ boolean send2 = false;
    
 
    private void sendShipmentEmail(String comment,String doknr,String custid, String nimi,String tarne, String mmm){
-	   	try{
-	   		
-	   	
-	   			Email mail = new Email(null);
+	  
+	   if(mmm != null) {
+	   try{
+	   				Email mail = new Email(null);
 		  		   
 		  	  		mail.setSMTP(parent.getProps().getProperty("smtphost"));
 		  	  		
@@ -402,7 +402,7 @@ boolean send2 = false;
 		  			}catch(Exception e){
 		  			e.printStackTrace();	
 		  			}
-		  	
+	   	}
 	   }
 	  
    private void sendCommentEmail(String comment,String doknr,String custid, String nimi,String tarne){

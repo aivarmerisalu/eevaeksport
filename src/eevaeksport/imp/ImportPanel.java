@@ -519,7 +519,7 @@ public String parseFirstEmail(String emails) {
                System.out.println("RTF tellimus DEPO formaat");
               
                this.loadRTFOrder(orders, file,troubles);
-       }else if (file.getName().toLowerCase().endsWith(".WEB") || (file.getName().startsWith("IN.") && file.getName().endsWith(".TXT"))){
+       }else if (file.getName().toLowerCase().endsWith(".WEB") || (file.getName().startsWith("IN.") && file.getName().toLowerCase().endsWith(".TXT"))){
                     System.out.println("TXT tellimus WEB formaat");
                     loadWEBOrder(orders, file,troubles);
             } else if (fileName.toLowerCase().endsWith(".txt") || fileName.toLowerCase().endsWith(".zip")

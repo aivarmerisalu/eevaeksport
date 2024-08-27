@@ -308,10 +308,10 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
                     }
                   // if(paevi < 47){
                   	   if (algus != null && algus.trim().length() > 0) {
-                             mline.setStartDate(algus.trim().substring(0,10));
+                             mline.setStartDate(Converter.turn(algus.trim().substring(0,10)));
                      }
                          if (lopp != null && lopp.trim().length() > 0) {
-                             mline.setEndDate(lopp.trim().substring(0,10));
+                             mline.setEndDate(Converter.turn(lopp.trim().substring(0,10)));
                      } 	 
                    //}else{
                  	 // mline.setProdLevel("pr");
@@ -362,10 +362,10 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
                           
                           // if(paevi < 47){
                         	   if (algus != null && algus.trim().length() > 0) {
-                                   mline.setStartDate(algus.trim().substring(0,10));
+                                   mline.setStartDate(Converter.turn(algus.trim().substring(0,10)));
                            }
                                if (lopp != null && lopp.trim().length() > 0) {
-                                   mline.setEndDate(lopp.trim().substring(0,10));
+                                   mline.setEndDate(Converter.turn(lopp.trim().substring(0,10)));
                            }  	  
                           //}else{
                         //	  mline.setProdLevel("pr");
@@ -1204,8 +1204,8 @@ System.out.println(sb.toString());
 	        String tootekood = rs.getString("itemid").trim();
 	        double kogus = rs.getDouble("qty");
 	  
-	        String lastdate = rs.getString("lastdate").substring(0,10);
-	                 lastdate = lastdate.substring(5,10);
+	        String lastdate = Converter.turn(rs.getString("lastdate").substring(0,10));
+	                 lastdate = lastdate.substring(0,5);
 	                 double hind = rs.getDouble("hind");
 	     	        String bill = rs.getString("dok");          
 	        CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,lastdate,hind,0,0," ");
