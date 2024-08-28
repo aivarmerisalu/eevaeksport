@@ -490,8 +490,8 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
          String sql = " select  * , datediff(day,fromdate,todate) as paev ,datediff(day, getdate() ,todate ) as tillend , " + 
-         		"   datediff(day, fromdate,  getdate()) as fromst from getprices where (getdate() between fromdate-5 and todate) " + 
-         		" or ( getdate() > fromdate-5 ) order by accountrelation,relation desc,itemrelation ";
+         		"   datediff(day, fromdate,  getdate()) as fromst from getprices where (getdate() between fromdate-6 and todate) " + 
+         		" or ( getdate() > fromdate-6 ) order by accountrelation,relation desc,itemrelation ";
         HashSet hh = new HashSet();
           try {
 

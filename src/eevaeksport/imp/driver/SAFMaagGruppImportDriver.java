@@ -408,19 +408,18 @@ boolean send2 = false;
    private void sendCommentEmail(String comment,String doknr,String custid, String nimi,String tarne){
    	try{
    		
-   	
+   	if(parent.getProps().getProperty("operatoremail") != null) {
    			Email mail = new Email(null);
 	  		   
 	  	  		mail.setSMTP(parent.getProps().getProperty("smtphost"));
 	  	  		mail.setFilesTo(parent.getProps().getProperty("operatoremail"));
 	  	  		mail.setFrom(parent.getProps().getProperty("from"));
 	  	  		mail.setSubjectFilesTo("Saabus tellimus MJ-" + doknr + " kliendilt: " + custid);
-	  	  		
-	  	  		mail.setBody("\nSaabus tellimus MJ-" +  doknr + " kliendilt " + custid + " Tarnekuup�evaga: " + tarne 
+	  	  		mail.setBody("\nSaabus tellimus MJ-" +  doknr + " kliendilt " + custid + " Tarnekuupäevaga: " + tarne 
 	  	  				);
 	  	  		mail.setSendNotice(false);
 	  	  		mail.send();
-	  	  
+   	}
 	  			}catch(Exception e){
 	  			e.printStackTrace();	
 	  			}

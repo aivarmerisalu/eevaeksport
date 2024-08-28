@@ -311,6 +311,7 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
                              mline.setStartDate(Converter.turn(algus.trim().substring(0,10)));
                      }
                          if (lopp != null && lopp.trim().length() > 0) {
+                        	 if(!lopp.contains("1900"))
                              mline.setEndDate(Converter.turn(lopp.trim().substring(0,10)));
                      } 	 
                    //}else{
@@ -365,6 +366,7 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
                                    mline.setStartDate(Converter.turn(algus.trim().substring(0,10)));
                            }
                                if (lopp != null && lopp.trim().length() > 0) {
+                            	   if(!lopp.contains("1900"))
                                    mline.setEndDate(Converter.turn(lopp.trim().substring(0,10)));
                            }  	  
                           //}else{

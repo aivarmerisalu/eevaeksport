@@ -244,7 +244,7 @@ import eevaeksport.util.Converter;
 		  Product res = null;
 		 String maksja =  getPayer(kl);
 		 String ean = getEan(line.getToode());
-		System.out.println("maksja on olemas " + maksja + " " + halduskliendid.contains(maksja) + " " + ean);
+		 //System.out.println("maksja on olemas " + maksja + " " + halduskliendid.contains(maksja) + " " + ean);
 		 if(maksja != null && halduskliendid.contains(maksja)){
 	      Vector<Product> vec = (Vector<Product>)haldusklienditooted.get(maksja);
 	     // System.out.println("tooted "+ vec);
@@ -256,9 +256,9 @@ import eevaeksport.util.Converter;
 	    		//  String ean = line.getEAN();
 	    		 
 	    		  if(ean != null && ean.trim().length() > 0 && prod.getID().equals(ean)){
-	    			  System.out.println("toode "+ line.getKogus()/prod.getStock() + " | " + (int)(line.getKogus()/prod.getStock()));
+	    			  //	  System.out.println("toode "+ line.getKogus()/prod.getStock() + " | " + (int)(line.getKogus()/prod.getStock()));
 		    		  if((kogus/prod.getStock()) == ((int)(kogus/prod.getStock()))){ //kui jagatis on t�isarv
-		    			  System.out.println("tagastan toote" + prod );
+		    			  //  System.out.println("tagastan toote" + prod );
 		    			  
 		    			  return prod;
 		    		  }
@@ -757,7 +757,7 @@ import eevaeksport.util.Converter;
 		
 	  	    String  sql2 = " SELECT SL01001 AS kood FROM SL010100 where   SL01001='" + id + "'";
 	  	    
-	    System.out.println(sql1);
+	  	  //  System.out.println(sql1);
 	    String acc = null;
 
 	    Statement st1 = con.createStatement();
@@ -791,13 +791,13 @@ import eevaeksport.util.Converter;
 	" left outer JOIN SC390100 ON SC01001 = SC39001 and SC39002='00'  WHERE  " +
 	" LEN(LTRIM(SC01128))>0 and SC39004 > 0 and SC01001 = '" + id + "' ";
     
-           System.out.println(sql1);
+    //   System.out.println(sql1);
 		    double acc = 0;
 		    Connection cccd = DriverManager.getConnection(url,"iscalaerp","Search2016" );
 		    Statement st1 = cccd.createStatement();
 		    ResultSet rs1 = st1.executeQuery(sql1);
 		  	    
-			    System.out.println(sql1);
+		    //  System.out.println(sql1);
 
 			    if (rs1.next()) {
 			      acc = rs1.getDouble("price") ;
@@ -809,7 +809,7 @@ import eevaeksport.util.Converter;
 		    st1.close();
 		    cccd.close();
 
-		    System.out.println("Hind: " + acc + " " + id);
+		    //  System.out.println("Hind: " + acc + " " + id);
 		    return acc;
 
 		  }
@@ -824,7 +824,7 @@ import eevaeksport.util.Converter;
 						" and SL01001 = '" + klient + "' and SCP6002='" + id + "' ";
 		    
 		    
-		           System.out.println(sql1);
+		    //    System.out.println(sql1);
 				    double acc = 0;
 				    Statement st1 = con.createStatement();
 				    ResultSet rs1 = st1.executeQuery(sql1);
@@ -833,7 +833,7 @@ import eevaeksport.util.Converter;
 			    while (rs1.next()) {
 			    	double dd = rs1.getDouble("disc");
 				      acc = rs1.getDouble("price") *((100-dd)*0.01);
-				      System.out.println("hind ja ale " + acc + " " + dd );
+				      //      System.out.println("hind ja ale " + acc + " " + dd );
 				    }	
 			    
 			    String sql0 = " SELECT SL01002 AS nimi,SL01001 AS kood, case when  SC45005 >0 then SC45005 else 0 end AS ale" +
@@ -864,7 +864,7 @@ import eevaeksport.util.Converter;
 		    
 		    
 		    sql1 = "  SELECT  SC39004 AS price  FROM SC390100  WHERE  SC39002='" + hinnakiri+ "' and  SC39001 = '" + id + "'"; 	    
-		    System.out.println("Teine kontroll " + sql1);
+		    //  System.out.println("Teine kontroll " + sql1);
 		 
 		     st1 = con.createStatement();
 		     rs1 = st1.executeQuery(sql1);
@@ -878,7 +878,7 @@ import eevaeksport.util.Converter;
 		    
 		    
 		    
-				    System.out.println("Klient: " + acc + " " + id);
+		//   System.out.println("Klient: " + acc + " " + id);
 				  if(acc == 0){
 					  sql1 = "  SELECT  SC39004 AS price  FROM SC390100  WHERE  SC39002='00' and  SC39001 = '" + id + "'";
 				  	    
@@ -898,7 +898,7 @@ import eevaeksport.util.Converter;
 				  	   		    rs1.close();
 				    st1.close();
 
-				    System.out.println("Klient: " + acc + " " + id);
+				    //    System.out.println("Klient: " + acc + " " + id);
 				    return acc;
 
 				  }
@@ -908,7 +908,7 @@ import eevaeksport.util.Converter;
 	 	 String	sql1 = "SELECT SL01035 as agent FROM SL010100 left JOIN SY240100  ON SL01036=SY24002 " +
 	 	 		"and SY24001 ='BG' WHERE SL01001='" + id +"'"; 
 	 	
-	   System.out.println(sql1);
+	 	//  System.out.println(sql1);
 	   String agent = null;
 
 	   Statement st1 = con.createStatement();
@@ -933,7 +933,7 @@ import eevaeksport.util.Converter;
 		 	 
 		     String sql1 = "SELECT SC45005 AS ale FROM SL010100 kl inner JOIN SC450100 ON SL01036=SC45003  " +
 		       "   WHERE  SL01001='" + id +"'"; 
-		   System.out.println(sql1);
+		     //   System.out.println(sql1);
 		   double res = 0;
 
 		   Statement st1 = con.createStatement();
@@ -953,7 +953,7 @@ import eevaeksport.util.Converter;
 	  public String getNimi(String id) throws SQLException {
 	 	 String	sql1 = "SELECT SL01002 as agent FROM SL010100  WHERE SL01001='" + id +"'"; 
 	 	
-	   System.out.println(sql1);
+	 	//   System.out.println(sql1);
 	   String agent = null;
 
 	   Statement st1 = con.createStatement();
@@ -975,7 +975,7 @@ import eevaeksport.util.Converter;
 	  public String getPhone(String id) throws SQLException {
 	 	 String	sql1 = "SELECT SL01011 as agent FROM SL010100  WHERE SL01001='" + id +"'"; 
 	 	
-	   System.out.println(sql1);
+	 	//   System.out.println(sql1);
 	   String agent = null;
 
 	   Statement st1 = con.createStatement();
@@ -995,7 +995,7 @@ import eevaeksport.util.Converter;
 	  public String getAddress(String id) throws SQLException {
 	 	 String	sql1 = "SELECT (SL01003 + ' (' + SL01004 + ')')  as agent FROM SL010100  WHERE SL01001='" + id +"'"; 
 	 	
-	   System.out.println(sql1);
+	 	//  System.out.println(sql1);
 	   String agent = null;
 
 	   Statement st1 = con.createStatement();
@@ -1024,7 +1024,7 @@ import eevaeksport.util.Converter;
 		    if (rs1.next()) {
 		    	ladu = rs1.getString("ladu").trim();
 		    }
-		       System.out.println(toode + " ladu1 " + ladu);
+		    //    System.out.println(toode + " ladu1 " + ladu);
 		    rs1.close();
 		    st1.close();
 		    return ladu;
@@ -1056,7 +1056,7 @@ import eevaeksport.util.Converter;
 				e.printStackTrace();
 			}
 	  
-			System.out.println("tagseis suurus " + tagseis.size());
+			//System.out.println("tagseis suurus " + tagseis.size());
 	  }
 	
 	  private void hardEAN(){
@@ -1093,7 +1093,7 @@ import eevaeksport.util.Converter;
 		    	
 		     }
 		     
-		    System.out.println( "hard toode " + hardtoode.toString() );   
+		     //   System.out.println( "hard toode " + hardtoode.toString() );   
 	  }
 	  
 	  
@@ -1126,7 +1126,7 @@ import eevaeksport.util.Converter;
 	    while (rs1.next()) {
 	      prod = rs1.getString("pant").trim();
 	    }
-	       System.out.println(toode + " prod1 " + prod);
+	    //   System.out.println(toode + " prod1 " + prod);
 	    rs1.close();
 	    st1.close();
 	    return prod;
@@ -1149,7 +1149,7 @@ import eevaeksport.util.Converter;
 		    	}
 		     
 		    }
-		       System.out.println(toode + " prod1 " + prod);
+		    //System.out.println(toode + " prod1 " + prod);
 		    rs1.close();
 		    st1.close();
 		    return prod;
@@ -1196,7 +1196,7 @@ import eevaeksport.util.Converter;
 			    		parent.getProps().getProperty("nomultiply.prods").indexOf(toode) != -1){
 			    	jagaja =  1;
 			    }
-			    System.out.println(toode + " jagajaVUS " + jagaja);
+			    // System.out.println(toode + " jagajaVUS " + jagaja);
 			    return jagaja;
 			 }
 		  
@@ -1219,7 +1219,7 @@ import eevaeksport.util.Converter;
 		    		parent.getProps().getProperty("nomultiply.prods").indexOf(toode) != -1){
 		    	jagaja =  1;
 		    }
-		    System.out.println(toode + " jagajaNIV " + jagaja);
+		    //  System.out.println(toode + " jagajaNIV " + jagaja);
 		    return jagaja;
 		 }
 	  
@@ -1233,7 +1233,7 @@ import eevaeksport.util.Converter;
 		  }
 		 	 
 		    String sql1 = " SELECT QtyInBox AS jagaja FROM QtyMultipliers0100  WHERE ProductCode =   '" + toode.trim() + "' and ClientCode = '"+ klient + "'";
-		   // System.out.println(sql1);
+		    System.out.println(sql1);
 		    double jagaja = kogus;
 		    double kastis = 1;
 		    Statement st1 = con.createStatement();
@@ -1257,7 +1257,7 @@ import eevaeksport.util.Converter;
 		    }
 		    
 		   
-		   // System.out.println(toode + " " +  kastis +  " getKogusRounded " + kogus );
+		   System.out.println(toode + " " +  kastis +  " getKogusRounded " + kogus );
 		     if(kastis > 1) {
 		    	 if(kogus < kastis) {
 		    		 return kastis;
@@ -2057,7 +2057,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		          	
 		            String comment = order.getInfo();
 		            
-		            System.out.println("Kommentaari saatmine " + order.getStatus() + " " + comment);
+		            //  System.out.println("Kommentaari saatmine " + order.getStatus() + " " + comment);
 		            if(order.getStatus() < 10 && !tagastus){
 		            	try{
 		                	sendCommentEmail(comment, doknr, order.getCompany(),getNimi(order.getCompany()));
@@ -2068,7 +2068,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		           }
 		            
 		            
-			          System.out.println("Payment " + order.getPaymTerm());
+		            //  System.out.println("Payment " + order.getPaymTerm());
 			          if(order.getPaymTerm() == -2){
 			        	  comment = "Real";
 			        	//  doknr = getDoknr("OR09");
@@ -2238,6 +2238,9 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		            	// rimi = true;
 		             }
 		             
+
+		             System.out.println("kogus0 " + kogus);
+		             
 		             if(order.getStatus() == 98 || order.getCompany().equals("T01044") 
 		            		 || order.getCompany().equals("T1072-20") || order.getCompany().equals("T24161")
 		            		 || order.getCompany().startsWith("T6248") 
@@ -2250,6 +2253,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		            	 kogus = (int)(kogus /getJagaja(toode));
 		            	 
 		             }
+		             System.out.println("kogus1 " + kogus);
 		             //niv toodete teema maxima + rimi +lidl
 		             
 		             if((order.getILN() != null && order.getILN().equals("4751008570045")) || order.getStatus() == 98
@@ -2257,13 +2261,17 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		            	 kogus = (int)(kogus /getJagajaNIV(toode));
 		             }
 		             
-		             
+		             System.out.println("kogusn " + kogus);
+			            
 		             if( order.getCompany().startsWith("T8587")) { //lidl
 		            	 kogus = (int)(kogus /getJagajaVUS(toode));
 		             }
-		             
+		             System.out.println("kogusv " + kogus);
+			             
 		             kogus = (int)(getKogusRounded(toode,kogus,order.getCompany()));
 		             
+
+		             System.out.println("kogus2 " + kogus);
 		             //viimane loogika siis selle kaudu.
 		           
 		             
@@ -2526,7 +2534,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 					
 			       rs1.close();
 			       st1.close();	
-			       System.out.println("ale tagasi " + res );
+			    //   System.out.println("ale tagasi " + res );
 				}catch(Exception r){
 					r.printStackTrace();
 				}
@@ -2614,7 +2622,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 	    	  }
 	    	  
 		  result = yy.substring(2,4) + mm + dd;
-		  System.out.println("P�EV " + result + " " + dat.getTime().toString());
+		//  System.out.println("P�EV " + result + " " + dat.getTime().toString());
 	    }
 	    return result;
 	  }
@@ -2643,7 +2651,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		
 		  String sql1 = " Select ( RTRIM(SC01002) +rtrim(SC01003))  AS nimi FROM SC010100 pr  where pr.SC01001='" + id + "'";
 		 	
-		   System.out.println(sql1);
+		 //  System.out.println(sql1);
 		   String agent = null;
 
 		   Statement st1 = con.createStatement();
@@ -2664,7 +2672,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 			
 		  String sql1 = " Select ( RTRIM(SC01002) +rtrim(SC01003))  AS nimi FROM SC010100 pr  where pr.SC01001='" + id + "'";
 		 	
-		   System.out.println(sql1);
+		  //   System.out.println(sql1);
 		   String agent = null;
 
 		   Statement st1 = con.createStatement();
@@ -2686,7 +2694,7 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		
 		  String sql1 = " Select ( RTRIM(SC01002) +rtrim(SC01003))  AS nimi FROM SC010100 pr  where pr.SC01001='" + id + "'";
 		 	
-		   System.out.println(sql1);
+		  // System.out.println(sql1);
 		   String agent = null;
 
 		   Statement st1 = con.createStatement();
