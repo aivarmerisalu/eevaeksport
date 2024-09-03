@@ -68,11 +68,6 @@ public class DirectoImportDriver extends AbstractImportDriver{
     	  logurl = parent.getProps().getProperty("logurl");
     }
 
-    try {
-      Class.forName(databaseDriverName).newInstance();
-    } catch (Exception e){
-       parent.showError(e);
-    }
   }
   String logurl = null;
   
@@ -246,13 +241,13 @@ public class DirectoImportDriver extends AbstractImportDriver{
 	                           lines.add(mline);	
 	                    
 	                    }catch(Exception e){
-	                    	e.printStackTrace();
+	                    //	e.printStackTrace();
 	                    }
 	                    
 	                   }
 	                	
 	           	  }catch(Exception e){
-	           		  e.printStackTrace();
+	           		 // e.printStackTrace();
 	           	  }
 	                
 	           }

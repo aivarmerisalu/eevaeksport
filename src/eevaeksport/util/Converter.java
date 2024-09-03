@@ -12040,8 +12040,31 @@ client.close();
 
 		return (org.json.simple.JSONObject) obj;
 	}
-		 
-		 
+
+	
+	public static org.json.simple.JSONArray readJSONArrFile(String filename){
+		Object obj = null;
+		try {
+			JSONParser parser = new JSONParser();
+	        obj = parser.parse(new FileReader(filename));
+	    } catch(Exception tt) {
+			tt.printStackTrace();
+		}
+
+		return (org.json.simple.JSONArray) obj;
+	}
+	
+	public static JSONObject readJSONORDFile(String filename){
+		Object obj = null;
+		try {
+			JSONParser parser = new JSONParser();
+	        obj = parser.parse(new FileReader(filename));
+	    } catch(Exception tt) {
+			tt.printStackTrace();
+		}
+
+		return (JSONObject) obj;
+	}		 
 
 
 

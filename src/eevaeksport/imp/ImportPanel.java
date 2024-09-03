@@ -4992,6 +4992,16 @@ System.out.println("token" + token);
 	              	name = toode;
 	          	}catch(Exception e ){
 	          	}
+	          	
+
+                if("true".equals(parent.getProps().getProperty("telema.buyercode.pinus")) && glnkood.equals("9961001770501")){ // Balbiino soovil pinusele tehtud
+		          	try{
+		              	toode = getNode(rida, "BuyerItemCode").getFirstChild().getNodeValue();	 
+		              	name = toode;
+		          	}catch(Exception e ){
+		          	}
+	             }
+	          	
 	        String linenum = null;  
 	        try{
               	linenum = Integer.parseInt(getNode(rida, "LineItemNum").getFirstChild().getNodeValue())+"";	          		

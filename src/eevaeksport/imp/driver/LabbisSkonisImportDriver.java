@@ -531,6 +531,11 @@ public class LabbisSkonisImportDriver
 		  grupp = grupp.substring(0,1); 
 	  }
 	  
+	  /*•	We had 3AS403 and 3TS400 warehouses in Panevėžys
+•	We have 3 managers 3DBV009, 3DBV010 and 3DBV013 in Panevėžys.
+•	We want to make changes in Merisoft – all orders from 3DBV009, 3DBV010 and 3DBV013 managers must go to 1AS203 and 1TS200 (Kaunas city) warehouses.
+*/
+	  
 	 // LTSPAMAL004
        if(grupp.equals("T")){// toode on tubakas
     	   if(agent.substring(0,1).equals("0")){ //vilniuse agent
@@ -543,7 +548,7 @@ public class LabbisSkonisImportDriver
     		   ladu =    "2TS300";
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
-    		   ladu =    "3TS400";
+    		   ladu =    "1TS200";
     	   }
     	   
        }
@@ -561,7 +566,7 @@ public class LabbisSkonisImportDriver
     		   ladu =    "2AS303";
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
-    		   ladu =    "3AS403";
+    		   ladu =    "1AS203";
     	   }	   
        }
        
@@ -578,7 +583,7 @@ public class LabbisSkonisImportDriver
     		   ladu =    "2PS308";
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
-    		   ladu =    "3PS404";
+    		   ladu =    "1PS210";
     	   }	   
        }
        
@@ -595,7 +600,7 @@ public class LabbisSkonisImportDriver
     		   ladu =    "2AS303";
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
-    		   ladu =    "3AS403";
+    		   ladu =    "1AS203";
     	   }	   
        }
        

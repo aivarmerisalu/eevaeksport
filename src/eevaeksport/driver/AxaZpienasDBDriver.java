@@ -42,7 +42,9 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.simple.parser.JSONParser;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -3448,10 +3450,290 @@ public TreeMap getPRLisa()  {
     return tm;
 }
 
+
+private void makeNewCustExcel() {
+
+
+	  ArrayList<String> filenames = new ArrayList<String>();
+	     // teeme kataloogi salvestamiseks
+	     		File f = new File("svdata");
+	     		if(!f.exists()) {
+	     			f.mkdir();
+	     		}
+	     		
+	     		Calendar cal = Calendar.getInstance();
+	     		String hh = cal.getTime().getHours()+"";
+	     		if(hh.length() == 1) {
+	     			hh = "0" + hh;
+	     		}
+	     		String mm = cal.getTime().getMinutes()+"";
+	     		if(mm.length() == 1) {
+	     			mm = "0" + mm;
+	     		}
+	     		String time2 = "_" + hh +"-" +mm;
+	     	// loeme signatuurid sisse kui on olemas	
+	     		HashSet done = null;
+	     		try {
+	     			done = (HashSet) Converter.readObject("signadone.obj");
+	     		}catch(Exception e) {
+	     			e.printStackTrace();
+	     		}
+	     		
+	     		if(done == null) {
+	     			 done = new HashSet();
+	     		}
+	     	
+	
+	     		
+	         	
+	     		Calendar algus = Calendar.getInstance();  
+	     	  	Calendar lopp = Calendar.getInstance();  	
+	     	  	Integer days = 8;
+	     	  if(	parent.getProps().getProperty("webreport.days") != null) {
+	     		  try {
+	     			  days = Integer.parseInt(parent.getProps().getProperty("webreport.days"));
+	     		  }catch(Exception e) {
+	     			  
+	     		  }
+	     	
+	     	  };
+
+	     	  	algus.add(Calendar.DATE, -1 * days);
+	     	  	algus.set(Calendar.HOUR, 0);
+	     	  	lopp.set(Calendar.HOUR, 23);
+	     	  	lopp.set(Calendar.MINUTE, 59);
+	     	  	lopp.add(Calendar.DATE, +2);
+	     		
+
+    			String exceldir = this.getExcelDir() + "reports/";
+           		File ff = new File( exceldir );
+           		if(!ff.exists()) {
+           			ff.mkdir();
+           		}
+	     		
+           		
+
+      		  JSONArray dayreportarray = Converter.getWebDayReport(algus.getTimeInMillis(), lopp.getTimeInMillis(), rcompany, user, pass);
+      		Converter.saveFileInUTF8(f.getPath() + "/currDRjson.json", dayreportarray.toString());
+      		
+      		
+
+            String url = "http://reporting-files.merisoft.eu/gallery/droid@zpienas.lt/";
+      		
+      		TreeMap newCusts = new TreeMap();
+      		
+      		org.json.simple.JSONArray cc = 	Converter.readJSONArrFile(f.getPath() + "/currDRjson.json");
+      		
+      		
+  		  int lenn = cc.size();
+  		try {
+  		  for (int i = 0; i < lenn; i++) {
+  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+            	String key = (String)cob.get("custid");
+            	if(key.equals("NAUJAS")) {
+            	try {
+            	String comm = (String)cob.get("comment");
+            	if(comm.contains("\"custname\"")) {
+            		comm = comm.substring(comm.indexOf("{"));
+            		comm = comm.substring(0,comm.lastIndexOf("}") + 1);
+            		comm = comm.replaceAll("\"\"", "\"");
+
+              		//System.out.println("comm " + comm);
+            		newCusts.put(i , comm);
+            	}
+            	
+            	}catch(Exception e){
+            	}
+
+            	}
+  		  }
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  		}
+  		
+  	//	System.out.println("newCusts " + newCusts.toString());
+  		
+  		
+  		
+  		
+           		
+	  try {
+    	   // Siin siis uue kliendi info kogumine
+    	  	String fnameNewCust = this.getExcelDir() + "ReportNewCustomer.xlsx";
+    		FileInputStream excelifailNew = new FileInputStream(fnameNewCust);
+    		XSSFWorkbook  wbNEW = new XSSFWorkbook(excelifailNew);
+    		XSSFSheet worksheetNEW = wbNEW.getSheetAt(0);
+    	     
+    	  	CreationHelper createHelper2 = wbNEW.getCreationHelper();
+    		
+    		 XSSFCellStyle hlinkstyle2 = wbNEW.createCellStyle();
+    	      XSSFFont hlinkfont2 = wbNEW.createFont();
+    	      hlinkfont2.setUnderline(XSSFFont.U_SINGLE);
+    	      hlinkfont2.setColor(IndexedColors.BLUE.getIndex());
+    	      hlinkstyle2.setFont(hlinkfont2);
+    		
+    	      
+    	      Iterator itera  = newCusts.values().iterator();
+    	      int i = 1;
+    	      while(itera.hasNext()) {
+    	      String com = (String)itera.next();
+    	      JSONParser p = new org.json.simple.parser.JSONParser();
+    	      org.json.simple.JSONObject ob = (org.json.simple.JSONObject) p.parse(com);
+    	      
+    	    	String name = (String)ob.get("custname") ;
+    	    	String contactemail = (String)ob.get("contactemail") ;
+    	    	String contactename = (String)ob.get("contactname") ;
+    	    	String agentid = (String)ob.get("agentid") ;
+    	    	String street = (String)ob.get("street") ;
+    	    	String contactphone = (String)ob.get("contactphone") ;
+    	    	String location = (String)ob.get("location") ;
+    	    	String city = (String)ob.get("city") ;
+    	    	String zipcode = (String)ob.get("zipcode") ;
+    	    	String regnum = (String)ob.get("regnum") ;
+    	    	Long timestamp = (Long)ob.get("timestamp") ;
+    	    	String agentname = (String)ob.get("agentname") ;
+
+    	    	String pictures = (String)ob.get("pictures") ;
+    	    	
+    	    	
+    	    	String foto1 = null;
+    	    	String foto2 = null;
+    	    	String foto3 = null;
+    	    	
+    	    	if(pictures != null) {
+    	    		StringTokenizer st = new StringTokenizer(pictures,",");
+    	    		foto1 = st.nextToken();
+    	    		if(st.hasMoreTokens()) {
+    	    			foto2 = st.nextToken();
+    	    		}
+    	    		if(st.hasMoreTokens()) {
+    	    			foto3 = st.nextToken();
+    	    		}
+    	    	}
+    	    	
+    	    	String contact = "";
+    	    	if(contactename != null) {
+    	    		contact = contactename;
+    	    	}
+    	    	if(contactphone != null) {
+    	    		contact = contact + "," + contactphone ;
+    	    	}
+    	    	if(contactemail != null) {
+    	    		contact = contact + "," + contactemail ;
+    	    	}
+    	    	
+    	    	
+    	    	String aadress = "";
+    	    	if(street != null) {
+    	    		aadress = street;
+    	    	}
+    	    	if(city != null) {
+    	    		aadress = aadress + "," + city ;
+    	    	}
+    	    	if(zipcode != null) {
+    	    		aadress = aadress + "," + zipcode ;
+    	    	}
+    	    	
+    	    	System.out.println(name + " " + contactemail + " " + contactename + " " + contactphone+ " " + street
+    	    			+ " " + location +" " + zipcode + " " + regnum + " " +timestamp+ " " + agentname + "\n"
+    	    			+ URLEncoder.encode("https://maps.google.com/maps?q=" + location, StandardCharsets.UTF_8.toString()));
+    	    	
+    	    	Calendar cal1 = Calendar.getInstance();
+  	  			
+  	  			try {
+  	  				cal1.setTimeInMillis(timestamp);
+  	  			}catch(Exception e) {
+  	  			}
+  	  			
+  	  			String dateOnly = Converter.getYYYYmMMmDDmString(cal1.getTime());
+  	  			
+
+ 	  			String signa = dateOnly + "" + name + "" + agentid ;
+    	    	
+ 	  			if(!done.contains(signa)) {
+ 	  				worksheetNEW.createRow(i);
+ 	  				worksheetNEW.getRow(i).createCell(0).setCellValue(dateOnly);
+    	    	worksheetNEW.getRow(i).createCell(1).setCellValue(name);
+    	    	worksheetNEW.getRow(i).createCell(2).setCellValue(aadress);
+    	    	worksheetNEW.getRow(i).createCell(3).setCellValue(regnum);
+    	    	worksheetNEW.getRow(i).createCell(4).setCellValue(contact);
+
+    	    	worksheetNEW.getRow(i).createCell(5).setCellValue(location);
+    	    	if(location != null) {
+	  		         Cell  cell = worksheetNEW.getRow(i).createCell(6);
+	  		         cell.setCellValue("Maps link");
+	  		         XSSFHyperlink link = (XSSFHyperlink)createHelper2.createHyperlink(Hyperlink.LINK_URL);
+	  		         link.setAddress(URLEncoder.encode("https://maps.google.com/maps?q=" + location, StandardCharsets.UTF_8.toString()));
+	  		         cell.setHyperlink((XSSFHyperlink) link);
+	  		         cell.setCellStyle(hlinkstyle2);
+	  				}
+   	    	
+    	    	
+    	    	worksheetNEW.getRow(i).createCell(7).setCellValue(agentid);
+    	    	
+    	    	if(foto1 != null) {
+	  		         Cell  cell = worksheetNEW.getRow(i).createCell(8);
+	  		         cell.setCellValue("Photo Link 1");
+	  		         XSSFHyperlink link = (XSSFHyperlink)createHelper2.createHyperlink(Hyperlink.LINK_URL);
+	  		         link.setAddress(URLEncoder.encode(url + foto1, StandardCharsets.UTF_8.toString()));
+	  		         cell.setHyperlink((XSSFHyperlink) link);
+	  		         cell.setCellStyle(hlinkstyle2);
+	  				}
+    	    	
+
+    	    	if(foto2 != null) {
+	  		         Cell  cell = worksheetNEW.getRow(i).createCell(9);
+	  		         cell.setCellValue("Photo Link 2");
+	  		         XSSFHyperlink link = (XSSFHyperlink)createHelper2.createHyperlink(Hyperlink.LINK_URL);
+	  		         link.setAddress(URLEncoder.encode(url + foto2, StandardCharsets.UTF_8.toString()));
+	  		         cell.setHyperlink((XSSFHyperlink) link);
+	  		         cell.setCellStyle(hlinkstyle2);
+	  				}
+
+    	    	if(foto3 != null) {
+	  		         Cell  cell = worksheetNEW.getRow(i).createCell(10);
+	  		         cell.setCellValue("Photo Link 3");
+	  		         XSSFHyperlink link = (XSSFHyperlink)createHelper2.createHyperlink(Hyperlink.LINK_URL);
+	  		         link.setAddress(URLEncoder.encode(url + foto3, StandardCharsets.UTF_8.toString()));
+	  		         cell.setHyperlink((XSSFHyperlink) link);
+	  		         cell.setCellStyle(hlinkstyle2);
+	  				}
+    	    	
+ 	  			 done.add(signa);
+ 	  			}
+    	    	i++;
+    	      }
+    	     
+    	      
+      if(i > 1) {
+         		FileOutputStream output_file_oos =new FileOutputStream(exceldir +
+         				"newCustomer-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
+         		filenames.add(exceldir + "newCustomer-" + Converter.getYYYY_MM_DD_String(new java.util.Date())+ time2 + ".xlsx");
+         		wbNEW.write(output_file_oos); 
+         		output_file_oos.close();  
+    	      
+         		
+         		try {
+         			Converter.saveObject(done, "signadone.obj");
+         		} catch (IOException e) {
+         			e.printStackTrace();
+         		}
+           }     		
+    	 } catch (Exception e) {
+ 			e.printStackTrace();
+ 		 }
+	  
+	 // System.exit(0);
+	
+}
+
+
        @Override
        public void WebReporter() {
+    	   
+    	   makeNewCustExcel();
      	  
-     	  ArrayList<String> filenames = new ArrayList<String>();
+    	   ArrayList<String> filenames = new ArrayList<String>();
      // teeme kataloogi salvestamiseks
      		File f = new File("svdata");
      		if(!f.exists()) {
@@ -4047,7 +4329,8 @@ public TreeMap getPRLisa()  {
      		  Converter.sendReportEmail(tekst, fname, parent);
      	  }
      	  
-     	  
+     	
+     	   
      	  
      		try {
      			Converter.saveObject(done, "signadone.obj");

@@ -3012,6 +3012,8 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
 		        BufferedReader in = new BufferedReader(isr);
 
+		        HashSet tehtud = new HashSet();
+		        
 		        TreeMap malu = new TreeMap();
 		        
 		        String inputLine;
@@ -3050,6 +3052,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		        	Vector aa = upsideVector(arr);
 		      
 		        	//System.out.println( "  333 " + aa.toString() );	
+		        	//muutsin siin järjekorda aa ei kasuta hetkel
 		        	
 		        	for(int u = 0 ; aa.size() > u ;u++) {
 		        		String key = (String)aa.get(u);
@@ -3115,8 +3118,10 @@ if(custid.equals("10352")) {
 			     							System.out.println(httpsURL);
 }
 		     							}
-		     							
-		     							custProds.add(cp);
+		     							if(!tehtud.contains(cp.custID+ cp.getProdID())) {
+		     							   custProds.add(cp);
+		     							}
+		     							tehtud.add(cp.custID+ cp.getProdID());
 			     					}			     				
 				        		}
 		     				}

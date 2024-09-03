@@ -1211,9 +1211,12 @@ try{
             if(kordaja != null && kordaja > 0) {
         	  //  price = price * kordaja;
             }
+            if(kordaja < 1 ) {
+            	kordaja = 1.0;
+            }
             if(ladutr.get(id) != null ){
             	Double kogus = ladutr.get(id); 
-            	if(kordaja != null && kordaja > 0) {
+            	if(kordaja != null && kordaja > 1) {
             		kogus = kogus / kordaja;
             	}
           	  prod.setStock(kogus);
