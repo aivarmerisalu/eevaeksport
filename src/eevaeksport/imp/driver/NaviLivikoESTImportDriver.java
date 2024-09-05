@@ -631,9 +631,11 @@ private HashMap prodnames = null;
                   if(comm == null) {
                	   comm = " ";
                   }
-                  sb.append("            <InfoContent>" + escape(comm) + "</InfoContent>" + ls );
+                 
                   if(reasonCode != null) {
-               	   sb.append("            <CustomContent>" + (ref + " " +  Converter.escapeXML(reasonCode)).trim() + "</CustomContent>" + ls );
+               	      sb.append("            <InfoContent>" + (ref + " " +  Converter.escapeXML(reasonCode) + " " +escape(comm)).trim() + "</InfoContent>" + ls );
+                  }else {
+                	  sb.append("            <InfoContent>" + escape(comm) + "</InfoContent>" + ls );
                   }
                   
                   sb.append("       </Extension>");

@@ -3155,7 +3155,10 @@ public class Converter {
 						 }
 							
 						 
-						 
+
+							System.out.println("Sees " + seis  
+									+" " + tnim+ " "+ eanp + " " + poo);
+										
 						 
 						 
 				
@@ -3193,9 +3196,6 @@ public class Converter {
 									seisund = false;
 								}
 								
-						System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + snimi 
-							+" " + tnimi+ " "+ ean + " " + pood);
-								
 							}
 							
 							if(seisund) {
@@ -3212,11 +3212,13 @@ public class Converter {
 								  if(!errors.contains(ean)) {
 									  errors = errors + ean + "   " + tnimi + "\n";
 								  }
+								  System.out.println("Sees " + i +" "+ ean + " " + tnimi );
 							  }else {
 								
 							  
 							if(res.get(pood) != null){
                            	  con = (Contract)res.get(pood);
+                           	  System.out.println("Sees www " + i + " " + pood );
                            	 } 
 							  ContractLine ll = new ContractLine(toode);
                            	  if(con.lines == null){
@@ -3239,7 +3241,7 @@ public class Converter {
 						 e.printStackTrace();
 					 }	 
 		 
-		//System.exit(0);
+	//	System.exit(0);
 		 
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "coop", true);
@@ -3898,10 +3900,14 @@ public class Converter {
 								Cell cellx = row.getCell((short)0);
 								try {
 									if(cellx != null) {
-									//	System.out.println("xx " +formatter.formatCellValue(cellx));
+										System.out.println("xx " +formatter.formatCellValue(cellx));
 										if(formatter.formatCellValue(cellx).indexOf("Maksimarket") != -1 ) {
 											return "coop";
 										}
+										if(formatter.formatCellValue(cellx).indexOf("Tartu Tarbijate Kooperatiiv") != -1 ) {
+											return "coop";
+										}
+										
 										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 ) {
 											return "maxima";
 										}	
@@ -3917,6 +3923,9 @@ public class Converter {
 										if(formatter.formatCellValue(cellx).indexOf("Maksimarket") != -1 ) {
 											return "coop";
 										}	
+										if(formatter.formatCellValue(cellx).indexOf("Tartu Tarbijate Kooperatiiv") != -1 ) {
+											return "coop";
+										}
 									}
 								}catch(Exception k) {
 									k.printStackTrace();

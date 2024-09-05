@@ -79,13 +79,15 @@ public class LabbisSkonisImportDriver
   
   private Vector splitOrder (Order order){
 	  Vector result = new Vector();
-	  
-      if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 1 && order.getAgent().startsWith("0")) {
+	  System.out.println("order.getWarehouse() " + order.getWarehouse());
+      if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 1 && (order.getAgent().startsWith("0") || order.getAgent().startsWith("3"))) {
     	  orderware = order.getWarehouse();
       } else {
     	  orderware = null;
       }
 	  
+      
+      
 	  Order l0BF001 = new Order(order.getCompany(),order.getAgentFirstName());
 
 	  l0BF001.setAgentCode(order.getAgentCode());
@@ -323,18 +325,20 @@ public class LabbisSkonisImportDriver
 		
 		    String ware = "";
 			try {
-				ware = identifyWarehouse(lin.getToode(),order.getAgentCode());
+				ware = identifyWarehouse(lin.getToode(),order.getAgentCode(),orderware);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			if(orderware != null) {
+			if(orderware != null && orderware.length() > 4) { //on reaalladu valitud
 				ware = orderware;
 			}
 			if(ware == null){
 				ware = "";
 			}
+			
+			System.out.println("split orderware " + orderware + " " + ware);
 			 if(ware.equals("4XX002")){  
 		    	 l4XX002.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);	 
@@ -510,10 +514,10 @@ public class LabbisSkonisImportDriver
 
   
 
-  public String identifyWarehouse(String prod,String agent) throws SQLException {
+  public String identifyWarehouse(String prod,String agent, String orderware) throws SQLException {
 	  	String sql1 = null;
 	  	
-	  	 System.out.println("Lao M��ramine: " );
+	  	 System.out.println("Lao määramine: " );
 	  	 
 	  	//toote grupi m��ramine
 	  	    sql1 = "SELECT left(t.GRP_KOD,2) AS grupp  FROM dba.[son] t WHERE  t.KOD = '" + prod + "'";	
@@ -550,6 +554,14 @@ public class LabbisSkonisImportDriver
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1TS200";
     	   }
+    	   if(orderware != null) {
+    		   if(orderware.equals("0AS")) {
+    			   ladu =  "0TS100";
+    		   }
+    		   if(orderware.equals("1AS")) {
+    			   ladu =  "1TS200";
+    		   }
+    	   }
     	   
        }
 	    
@@ -567,7 +579,15 @@ public class LabbisSkonisImportDriver
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1AS203";
-    	   }	   
+    	   }
+    	   if(orderware != null) {
+    		   if(orderware.equals("0AS")) {
+    			   ladu =  "0AS101";
+    		   }
+    		   if(orderware.equals("1AS")) {
+    			   ladu =  "1AS203";
+    		   }
+    	   }
        }
        
        
@@ -584,7 +604,15 @@ public class LabbisSkonisImportDriver
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1PS210";
-    	   }	   
+    	   }
+    	   if(orderware != null) {
+    		   if(orderware.equals("0AS")) {
+    			   ladu =  "0PS119";
+    		   }
+    		   if(orderware.equals("1AS")) {
+    			   ladu =  "1PS210";
+    		   }
+    	   }
        }
        
        
@@ -601,7 +629,16 @@ public class LabbisSkonisImportDriver
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1AS203";
-    	   }	   
+    	   }
+    	   if(orderware != null) {
+    		   if(orderware.equals("0AS")) {
+    			   ladu =  "4XX002";
+    		   }
+    		   if(orderware.equals("1AS")) {
+    			   ladu =  "1AS203";
+    		   }
+    	   }
+       
        }
        
 	    rs1.close();
@@ -609,7 +646,8 @@ public class LabbisSkonisImportDriver
 
 	    //kui on vilniuse agent ja jõulu toode siis saadame jõulu lattu. 
 	    
-	    if(agent.substring(0,1).equals("0")){ //vilniuse agent
+	    
+	    if(agent.substring(0,1).equals("0") ){ //vilniuse agent
 	    	  sql1 = "SELECT left(t.GRP_KOD,2) AS grupp  FROM dba.[son] t WHERE  t.KOD = '" + prod + "' and sutart = 'KALEDOS'";	
 	  		
 	  	    System.out.println(sql1);
@@ -618,6 +656,7 @@ public class LabbisSkonisImportDriver
 	  	     rs1 = st1.executeQuery(sql1);
 	         
 	  	    if (rs1.next()) {
+	  	    	
 	  	      ladu = "0AS132";
 	  	    System.out.println("Opaa Leitud ladu: " + ladu + " "  + prod + " " + agent);
 	  	    }
@@ -857,11 +896,13 @@ public class LabbisSkonisImportDriver
 		    	   sb.append("</lab:Preke>");
 		 	    	  
 		    	   
-		       ladu = identifyWarehouse(ol.getToode(),agent);
+		       ladu = identifyWarehouse(ol.getToode(),agent, orderware);
 		       if(ladu == null){
 		    	   ladu = "";
 		       }
-		       if(orderware != null) {
+		       System.out.println( "Sees 0 + l " + orderware + " " +ladu );
+		       
+		       if(orderware != null && orderware.length() > 4) {
 					ladu = orderware;
 				}
 counter++;
