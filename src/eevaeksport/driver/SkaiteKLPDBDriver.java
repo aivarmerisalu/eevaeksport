@@ -2390,7 +2390,14 @@ try{
              		
   	  try {
       	   // Siin siis uue kliendi info kogumine
-      	  	String fnameNewCust = this.getExcelDir() + "ReportNewCustomer.xlsx";
+  		  
+  		 
+      	  	String fnameNewCust = exceldir + "NewCustomerKLP.xlsx";
+      	  		File gg = new File(fnameNewCust);
+      	  		if(!gg.exists()) {
+      	  		fnameNewCust = 	this.getExcelDir() + "ReportNewCustomer.xlsx";
+      	  		}
+      	  	
       		FileInputStream excelifailNew = new FileInputStream(fnameNewCust);
       		XSSFWorkbook  wbNEW = new XSSFWorkbook(excelifailNew);
       		XSSFSheet worksheetNEW = wbNEW.getSheetAt(0);
@@ -2405,7 +2412,7 @@ try{
       		
       	      
       	      Iterator itera  = newCusts.values().iterator();
-      	      int i = 1;
+      	      int i = worksheetNEW.getLastRowNum()+1;
       	      while(itera.hasNext()) {
       	      String com = (String)itera.next();
       	      JSONParser p = new org.json.simple.parser.JSONParser();
@@ -2531,15 +2538,19 @@ try{
   	  				}
       	    	
    	  			 done.add(signa);
+
+       	    	i++;
    	  			}
-      	    	i++;
       	      }
       	     
       	      
         if(i > 1) {
-           		FileOutputStream output_file_oos =new FileOutputStream(exceldir +
-           				"newCustomer-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
-           		filenames.add(exceldir + "newCustomer-" + Converter.getYYYY_MM_DD_String(new java.util.Date())+ time2 + ".xlsx");
+        	
+        	String fname = exceldir + "newCustomer-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx";
+        	
+        	fname = exceldir + "NewCustomerKLP.xlsx";
+           		FileOutputStream output_file_oos =new FileOutputStream(fname);
+           		filenames.add(fname);
            		wbNEW.write(output_file_oos); 
            		output_file_oos.close();  
       	      

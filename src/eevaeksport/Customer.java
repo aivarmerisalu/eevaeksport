@@ -40,6 +40,7 @@ public class Customer {
   public String restdirect = null;
   public JSONObject json = null;
   public boolean topstatus = true;
+  public boolean investstatus = true;
   public String level = null;
   public Vector<MatrixLine> fixedLines = null;
 

@@ -1644,7 +1644,13 @@ while(rs.next()){
      if(sees != null && sees.get(toode) != null) {
 	   sb.append(klient + ";" + toode + ";" + sees.get(toode) + "\n" );
      }
-	 
+	
+     sees = (HashMap)res.get(kuhu.toLowerCase());
+     
+     if(sees != null && sees.get(toode) != null) {
+	   sb.append(klient + ";" + toode + ";" + sees.get(toode) + "\n" );
+     }
+	
 }
 
 

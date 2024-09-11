@@ -1307,7 +1307,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("AxaFazerLV")
 					    || driver.getDriverVersion().equals("SkaiteKM")
 					    || driver.getDriverVersion().equals("SamsonasCSV")
-
+					    || driver.getDriverVersion().equals("MovexLAT")
 					    || driver.getDriverVersion().equals("NaviTobisDirecto")
 					  ){
                 	 
@@ -1731,6 +1731,12 @@ public class EksportPanel extends JPanel implements ActionListener,
                     zip.addFile("prodsort.txt");
                 	
                 }
+                File wh5 = new File("salescontracts.txt");
+                if(wh5.exists()){
+                    zip.addFile("salescontracts.txt");
+                }
+                
+               
                 File wh = new File("warehouse.txt");
                 if(wh.exists()){
                     zip.addFile("warehouse.txt");
@@ -4179,6 +4185,12 @@ if (getProps().getProperty("no.matrixagent") != null) {
            }
            buf.append(bb); 
            
+           buf.append(EksportPanel.separator);
+           bb = "0";
+           if(cust.investstatus){
+        	   bb =  "1";
+           }
+           buf.append(bb); 
            
            buf.append(lineSeparator);
       }

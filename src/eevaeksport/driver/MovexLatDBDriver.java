@@ -429,6 +429,8 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
     TreeMap customers = new TreeMap();
     makeTaskFile(null);
 
+    String horecaGrs = getParent().getProps().getProperty("horeca.sortiment.groups");
+    
     try {
       Connection con = getNewConnection();
        
@@ -438,12 +440,48 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
        Hashtable kama = new Hashtable();
        Hashtable delextra = new Hashtable();
        
+       Hashtable invest = new Hashtable();
+       
+
+       String cmdk = "SELECT PYNO as kood,agrnr as agrno,fvdt as startD,lvdt as endD,current_fulfill as sold,agr_end_fullfill as estimate " + 
+       		", current_fulfill_coll as coloursold, agr_end_fullfill_coll as coloursesti FROM cesu.mjhorecainvest ";
+       
+       Statement    st = con.createStatement();
+     ResultSet   rs1 = st.executeQuery(cmdk);
+        StringBuffer sbinvest = new StringBuffer();
+                         while(rs1.next()){
+                        	 // CustomerCode: startdate; endddate;fulfilment; estimation; color (G or R)
+
+                           String id = rs1.getString("kood");
+                 if(id != null) {
+                           String agrno = rs1.getString("agrno");
+                           String startD = rs1.getString("startD");
+                           String endD = rs1.getString("endD");
+                           Double done = rs1.getDouble("sold");
+                           Double estimate = rs1.getDouble("estimate");
+                           if(estimate == null) {
+                        	   estimate = 0.0;
+                           }
+                           String colsold = rs1.getString("coloursold").trim();
+
+                           String colesti = rs1.getString("coloursesti").trim();
+                            if(done != null) {
+                            	sbinvest.append(id.trim()+";" + agrno +";"+startD+";"+endD+";"+done+";"+estimate+";"+colsold+ ";"+colesti + "\n");
+                            	invest.put(id, agrno +";"+startD+";"+endD+";"+done+";"+estimate+";"+colsold+ ";"+colesti + "\n");
+                            }
+                         }
+                    }
+      rs1.close();
+      st.close();
+     // con.close();
+      
+       
        
        // tarne p�evade lisamine 
        String cmd31 = "SELECT ddsmcd, ddcuno as saaja , dddays as days FROM cesu.MJDELDAY ";
        Statement st1 = con.createStatement();
     if (isDebug()) System.out.println(cmd31);
-       ResultSet rs1 = st1.executeQuery(cmd31);
+        rs1 = st1.executeQuery(cmd31);
         while (rs1.next()) {
        	 String cus = rs1.getString("saaja");
           int days = Integer.parseInt(rs1.getString("days").trim());          
@@ -518,7 +556,7 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
 	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
 
       if (isDebug()) System.out.println(cmd2);
-      Statement st = con.createStatement();
+       st = con.createStatement();
       ResultSet rs = st.executeQuery(cmd2);
       HashMap custMap = new HashMap();
 
@@ -593,6 +631,16 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
 
 
           cust.setPayer(rs.getString("payer").trim());
+          
+          if(invest.get(cust.getPayer()) != null) {
+        	  sbinvest.append(cust.getID()+ ";" + invest.get(cust.getPayer()));
+        	  cust.investstatus = true;
+          }
+           if(invest.get(cust.getID()) != null) {
+        	  cust.investstatus = true;
+          }
+        
+          
           String taraDeal = rs.getString("EILADU").trim();
           if(taraDeal != null && taraDeal.trim().length() > 0){
               cust.taraDeal = taraDeal;
@@ -680,6 +728,11 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
                }
             }
                   
+            
+          if(  horecaGrs != null && (horecaGrs.contains("," + klgrupp) || horecaGrs.contains(klgrupp + ","))) {
+        	  cust.addFixSortCode("HORECAFIX");
+          }
+            
           customers.put(cust.getName(), cust);
           custMap.put(cust.getID(), cust);
     }
@@ -688,7 +741,14 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
          st.close();
          con.close();
 
-
+         if(sbinvest.toString().length() > 0) {
+           	Converter.saveFile("salescontracts.txt", sbinvest.toString());
+           }else {
+           	Converter.saveFile("salescontracts.txt", "");
+           }
+           
+         
+         
     } catch (SQLException e){
       getParent().showError(e);
     }
@@ -943,6 +1003,8 @@ String ex = parent.getProps().getProperty("products");
     con.close();
     if(sb.toString().length() > 0) {
     	Converter.saveFile("kegoverdue.txt", sb.toString());
+    }else {
+    	Converter.saveFile("kegoverdue.txt", "");
     }
     
      try{
@@ -2436,8 +2498,48 @@ return result;
 
 @Override
 public Vector getFixedAssortmentData() {
-	// TODO Auto-generated method stub
-	return null;
+	
+	 Vector lines = new Vector();
+
+    try {
+   	  String cmd = " SELECT * FROM cesu.mjhorecasortment";
+
+   	
+   	System.out.println(cmd);
+   	 Connection cc = getNewConnection();
+  	        Statement stmt = cc.createStatement();
+  	        ResultSet rs = stmt.executeQuery(cmd);
+  	        while(rs.next()){
+                     String custID = " ";
+                     String clGroup = " ";
+                     String prodID = " ";
+                     String prodGroup = " ";
+                     MatrixLine mline = new MatrixLine();
+
+                     clGroup = "HORECAFIX";
+                     prodID = rs.getString("ITEM");
+
+                     if (clGroup != null
+                         && clGroup.trim().length() > 0) {
+                       mline.setCliGroup(clGroup.trim());
+                      
+                     }
+
+                     if (prodID != null && prodID.trim().length() > 0) {
+                       mline.setProdID(prodID.trim());
+                     }
+                                        
+                     lines.add(mline);
+                   }
+
+  	       rs.close();
+  	       con.close();
+  	       cc.close();
+                  } catch (Exception e) {
+                      getParent().showError(e);
+                  }
+               
+    return lines;
 }
 
 @Override
