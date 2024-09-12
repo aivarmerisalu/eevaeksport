@@ -1730,7 +1730,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 
       Calendar cal = Calendar.getInstance();
       int YEAR = Integer.parseInt(kuup.substring(0, 4));
-      int MONTH = Integer.parseInt(kuup.substring(4, 6));
+      int MONTH = Integer.parseInt(kuup.substring(4, 6)) - 1;
       int DAY = Integer.parseInt(kuup.substring(6, 8));
       cal.set(YEAR, MONTH, DAY, 1, 2, 3);
       Date now = new Date(cal.getTimeInMillis());

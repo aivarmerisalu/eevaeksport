@@ -3505,7 +3505,7 @@ private void makeNewCustExcel() {
 	  	     	  	lopp.add(Calendar.DATE, +2);
 	  	     		
 
-	      			String exceldir = this.getExcelDir() + "reports/";
+	      			String exceldir = parent.getProps().getProperty("webreport.outdir") + "reports/";
 	             		File ff = new File( exceldir );
 	             		if(!ff.exists()) {
 	             			ff.mkdir();
@@ -3561,7 +3561,7 @@ private void makeNewCustExcel() {
 	      	   // Siin siis uue kliendi info kogumine
 	  		  
 	  		 
-	      	  	String fnameNewCust = exceldir + "NewCustomerZP.xlsx";
+	      	  	String fnameNewCust = exceldir + "NewCustomerKLP.xlsx";
 	      	  		File gg = new File(fnameNewCust);
 	      	  		if(!gg.exists()) {
 	      	  		fnameNewCust = 	this.getExcelDir() + "ReportNewCustomer.xlsx";
@@ -3715,9 +3715,7 @@ private void makeNewCustExcel() {
 	      	      
 	        if(i > 1) {
 	        	
-	        	String fname = exceldir + "newCustomer-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx";
-	        	
-	        	fname = exceldir + "NewCustomerZP.xlsx";
+	        	String fname = exceldir + "NewCustomerKLP.xlsx";
 	           		FileOutputStream output_file_oos =new FileOutputStream(fname);
 	           		filenames.add(fname);
 	           		wbNEW.write(output_file_oos); 
