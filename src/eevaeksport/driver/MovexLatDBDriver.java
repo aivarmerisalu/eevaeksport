@@ -463,7 +463,6 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                         	   estimate = 0.0;
                            }
                            String colsold = rs1.getString("coloursold").trim();
-
                            String colesti = rs1.getString("coloursesti").trim();
                             if(done != null) {
                             	sbinvest.append(id.trim()+";" + agrno +";"+startD+";"+endD+";"+done+";"+estimate+";"+colsold+ ";"+colesti + "\n");
@@ -635,10 +634,13 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
           if(invest.get(cust.getPayer()) != null) {
         	  sbinvest.append(cust.getID()+ ";" + invest.get(cust.getPayer()));
         	  cust.investstatus = true;
+        	  System.out.println("Payer " + cust.getPayer() + invest.get(cust.getPayer())  );
           }
-           if(invest.get(cust.getID()) != null) {
+         
+          if(invest.get(cust.getID()) != null) {
         	  cust.investstatus = true;
-          }
+        	  System.out.println("Cust ID " + cust.getID() + invest.get(cust.getID()) );
+           }
         
           
           String taraDeal = rs.getString("EILADU").trim();
