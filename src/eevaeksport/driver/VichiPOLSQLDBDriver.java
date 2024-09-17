@@ -1187,7 +1187,7 @@ try{
      try {
      	String cmd = " SELECT [No_] AS toode,(t.[Description]) AS nimi, var.[Qty_ per Unit of Measure] as kordaja , pr.[Unit Price] AS myygihind, [Product Group Code] AS grupp,[Subgroup Code] AS grupp2 \r\n" + 
      			"     			     					,[Sales Unit of Measure] AS unit,  ref.[Cross-Reference No_] AS ean,'' AS status ,'' AS maxdiscount,\r\n" + 
-     			"     			     						   vat.[Qty_ per Unit of Measure] AS kastis,  vau.[Qty_ per Unit of Measure] AS layer ,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc  \r\n" + 
+     			"     			     						   vat.[Qty_ per Unit of Measure] / var.[Qty_ per Unit of Measure] AS kastis,  vau.[Qty_ per Unit of Measure] AS layer ,  t.[Net Weight] AS kaal, [VAT Prod_ Posting Group] AS vat, t.[Description] AS vatdesc  \r\n" + 
      			"     			     						  , [Description 2] as info ,t.[Item Disc_ Group] as prgroup  ,t. [Class Code] AS type FROM [VICIUNAI-POL$Item] t \r\n" + 
      			"     										  left join [VICIUNAI-POL$Sales Price] pr ON pr.[Item No_] = [No_] and pr.[Sales Code] = ''\r\n" + 
      			"LEFT JOIN [VICIUNAI-POL$Item Unit of Measure] vau ON (vau.[Item No_]=[No_] and vau.[Code]='WARSTWA' ) " + 

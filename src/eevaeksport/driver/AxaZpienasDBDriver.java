@@ -3474,7 +3474,7 @@ private void makeNewCustExcel() {
 	  	     	// loeme signatuurid sisse kui on olemas	
 	  	     		HashSet done = null;
 	  	     		try {
-	  	     			done = (HashSet) Converter.readObject("signadone.obj");
+	  	     			done = (HashSet) Converter.readObject("signadoneN.obj");
 	  	     		}catch(Exception e) {
 	  	     			e.printStackTrace();
 	  	     		}
@@ -3723,7 +3723,7 @@ private void makeNewCustExcel() {
 	      	      
 	           		
 	           		try {
-	           			Converter.saveObject(done, "signadone.obj");
+	           			Converter.saveObject(done, "signadoneN.obj");
 	           		} catch (IOException e) {
 	           			e.printStackTrace();
 	           		}

@@ -438,6 +438,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
         Hashtable debts = new Hashtable();
         Hashtable sales = new Hashtable();
        Hashtable kama = new Hashtable();
+       Hashtable kama1 = new Hashtable();
        Hashtable delextra = new Hashtable();
        
        Hashtable invest = new Hashtable();
@@ -532,7 +533,40 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
              rs5.close();
              st5.close();
          
-         
+        
+             String sql91 = "SELECT * FROM cesu.mjhorecaequipment ";
+             
+             HashSet kk = new HashSet();
+             Statement st51 = con.createStatement();
+             if (isDebug()) System.out.println(sql91);
+                ResultSet rs51 = st51.executeQuery(sql91);
+                 while (rs51.next()) {
+                	 try{
+                	 	 String cus =  rs51.getString("kood").trim();
+                         String luu = rs51.getString("equipname").trim();
+                         String add =  "\t";
+                         if (luu.length() > 23){
+                        	 luu = luu.substring(0,23);
+                        	 add = "\t";
+                         }
+                         String  asi = rs51.getString("saldo").trim();
+                         if(kama1.get(cus) != null){
+                        	 String as = (String) kama1.get(cus);
+                        	 kama1.put(cus, as + "|" + luu + add + asi );
+                         }else{
+                        	  kama1.put(cus, "||Equipname\tSaldo|" + luu + add + asi );	
+                         }
+                	 }catch (Exception e){
+                		e.printStackTrace(); 
+                	 }
+               
+                 }
+                 rs51.close();
+                 st51.close();
+            
+             
+             
+             
          
          String sql7 = "select PAYER as klient, balance from cesu.mjpayerdebt";
          Statement st2 = con.createStatement();
@@ -603,13 +637,26 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
             }
             cust.setName(aaa + " " + name + " " + accountnum + " " + addr);
           }
+          
+          String k0 = (String) kama.get(cust.getID());
+           
           if(kama.get(cust.getID()) != null){
         	  if(cust.getInfo() != null && cust.getInfo().trim().length() == 0){
-        		 cust.setInfo("Name  \t\tKLI\tMAKS|" + (String) kama.get(cust.getID()) );       		 
+        		 cust.setInfo("Name  \t\tKLI\tMAKS|" + k0);       		 
         	  }else{
-        		 cust.setInfo(cust.getInfo() + "|" + (String) kama.get(cust.getID()) );
+        		 cust.setInfo(cust.getInfo() + "|" + k0 );
         	  }
           }
+          
+           String k1 = (String) kama1.get(cust.getID());
+          if(kama1.get(cust.getID()) != null){
+        	 if(cust.getInfo() != null && cust.getInfo().trim().length() == 0){
+        		 cust.setInfo( k1 );       		 
+        	    } else {
+        		 cust.setInfo(cust.getInfo() + "|" + k1 );
+        	  }
+           }
+          
           
           if(delextra.get(cust.getID()) != null){
         		 cust.setDelExtraDays(Integer.parseInt(delextra.get(cust.getID())+ ""));      	  

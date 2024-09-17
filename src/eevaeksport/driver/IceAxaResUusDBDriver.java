@@ -1616,6 +1616,36 @@ System.out.println(agent.getID() +" " + sb.toString());
        		"       		LEFT OUTER JOIN DEFAULTDIMENSIONVIEW dim ON cus.PARTITION = dim.PARTITION AND cus.DEFAULTDIMENSION = dim.DEFAULTDIMENSION AND dim.NAME = N'Agent'\r\n" + 
        		"			 WHERE cus.dataareaid='dat'  AND   cus.deliverydate >= cast(getdate() as datetime) and dim.DISPLAYVALUE = ? \r\n" + 
        		"       		     ORDER BY cus.createddatetime";
+       sql = "SELECT \r\n" + 
+       		"    cus.salesid AS arve, \r\n" + 
+       		"    cus.salesname AS nimi, \r\n" + 
+       		"    cus.custaccount AS klient, \r\n" + 
+       		"    cus.deliverydate AS kuup, \r\n" + 
+       		"    cus.POSTINGPROFILE AS asi,\r\n" + 
+       		"    SUM(s.lineamount) AS summa\r\n" + 
+       		"FROM \r\n" + 
+       		"    SALESTABLE cus\r\n" + 
+       		"INNER JOIN \r\n" + 
+       		"    custtable cu \r\n" + 
+       		"    ON cu.accountnum = cus.custaccount \r\n" + 
+       		"    AND cus.dataareaid = cu.dataareaid\r\n" + 
+       		"LEFT JOIN \r\n" + 
+       		"    DEFAULTDIMENSIONVIEW dim \r\n" + 
+       		"    ON cus.PARTITION = dim.PARTITION \r\n" + 
+       		"    AND cus.DEFAULTDIMENSION = dim.DEFAULTDIMENSION \r\n" + 
+       		"    AND dim.NAME = N'Agent'\r\n" + 
+       		"LEFT JOIN \r\n" + 
+       		"    salesline s \r\n" + 
+       		"    ON s.salesid = cus.salesid \r\n" + 
+       		"    AND s.dataareaid = 'dat'\r\n" + 
+       		"WHERE \r\n" + 
+       		"    cus.dataareaid = 'dat' \r\n" + 
+       		"    AND cus.deliverydate >= GETDATE()\r\n" + 
+       		"    AND dim.DISPLAYVALUE = ? " + 
+       		"GROUP BY \r\n" + 
+       		"    cus.salesid, cus.salesname, cus.custaccount, cus.deliverydate, cus.POSTINGPROFILE\r\n" + 
+       		"ORDER BY \r\n" + 
+       		"    cus.createddatetime " ;
     			     
         
 StringBuffer sb = new StringBuffer();
