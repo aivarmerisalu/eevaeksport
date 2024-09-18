@@ -544,9 +544,9 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                 	 try{
                 	 	 String cus =  rs51.getString("kood").trim();
                          String luu = rs51.getString("equipname").trim();
-                         String add =  "\t";
-                         if (luu.length() > 23){
-                        	 luu = luu.substring(0,23);
+                         String add =  "\t\t";
+                         if (luu.length() > 20){
+                        	 luu = luu.substring(0,20);
                         	 add = "\t";
                          }
                          String  asi = rs51.getString("saldo").trim();
@@ -554,7 +554,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                         	 String as = (String) kama1.get(cus);
                         	 kama1.put(cus, as + "|" + luu + add + asi );
                          }else{
-                        	  kama1.put(cus, "||Equipname\tSaldo|" + luu + add + asi );	
+                        	  kama1.put(cus, "||Nosaukums   \t\t\tAtlikums|" + luu + add + asi );	
                          }
                 	 }catch (Exception e){
                 		e.printStackTrace(); 
@@ -642,7 +642,7 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
            
           if(kama.get(cust.getID()) != null){
         	  if(cust.getInfo() != null && cust.getInfo().trim().length() == 0){
-        		 cust.setInfo("Name  \t\tKLI\tMAKS|" + k0);       		 
+        		 cust.setInfo("Nosaukums    \t\tKLI\tMAKS|" + k0);       		 
         	  }else{
         		 cust.setInfo(cust.getInfo() + "|" + k0 );
         	  }
