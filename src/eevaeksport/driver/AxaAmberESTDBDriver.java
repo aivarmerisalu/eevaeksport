@@ -1477,10 +1477,13 @@ st.close();
         String ean = rs.getString("ean");
         String add = "";
         if(ean != null && ean.trim().length()>0){
+        	if(ean.startsWith("0")) {
+        		ean = ean.substring(1);
+        	}
         prod.setEAN(ean.trim());
         
         if(eanprods == null) {
-    		eanprods= new TreeMap();
+    		eanprods = new TreeMap();
     	}
   
     eanprods.put(prod.getEAN(), prod.getID());

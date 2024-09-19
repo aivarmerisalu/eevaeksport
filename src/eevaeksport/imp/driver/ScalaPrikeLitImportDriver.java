@@ -922,6 +922,27 @@ return res;
     }
     
 
+    private Vector consolidate(Vector in ) {
+    	Vector vec = new Vector();
+    	HashMap lines = new HashMap();
+    	
+	    for (int i = 0; i < in.size(); i++) {
+	      	OrderLine line = (OrderLine)in.elementAt(i);
+	      if(lines.get(line.getToode()) != null) {
+	    	  OrderLine ll = (OrderLine) lines.get(line.getToode());
+	    	   ll.setKogus(ll.getKogus() + line.getKogus());
+	    	   System.out.println("Kogus lisatud " + ll.getToode() + " " + ll.getKogus() + " " + line.getKogus());
+	      }else {
+	    	  lines.put(line.getToode(), line);
+	      }
+	    }
+	      	
+	    vec.addAll(lines.values());
+    	System.out.println("Vec suurus " + vec.size() + " " + in.size());
+    	return vec;
+    }
+    
+    
  
 	  private void makeOutput(Order order){
 		  
@@ -933,6 +954,7 @@ return res;
 	        	asendused = getAsendused();
 	        }
 		   
+		    
 		 	   
 		 	try {
 		 	  int cou = 0;
@@ -1023,22 +1045,26 @@ return res;
 	         
 		         
 		    Vector lines = order.getOrderLines();
-		    boolean hasZallah = false;
-		  	
-		    for (int i = 0; i < lines.size(); i++) {
-		     	OrderLine line = (OrderLine)lines.elementAt(i);
-		     //	System.out.println("Line PL " +  line.getPl());
-		     	if((line.getDiscount() > 0 && line.getPl() == 99) ){
-		         // hasZallah = true; 		
-		     	}
-		    }
-		    if(order.getStatus() == 60){
-		    	 hasZallah = false;
-		    }
+		    
+		    
 		    int i = 0;
 		    boolean tagastus = false;
 		    
 		   // boolean otsikoodi = otsiKoodi(order.getCompany());
+		    for (i = 0; i < lines.size(); i++) {
+		      	OrderLine line = (OrderLine)lines.elementAt(i);
+		      	if(line.getKogus() < 0) {
+		      		tagastus = true;
+		      		type = "1";
+	              	status = "0";
+	           	    doknr = getDoknr("OR22");
+		      	}
+		    }
+		    
+		    if (tagastus) {
+		    	lines = consolidate(lines);
+		    }
+		    
 		    
 		    for (i = 0; i < lines.size(); i++) {
 		      	OrderLine line = (OrderLine)lines.elementAt(i);
@@ -1047,10 +1073,7 @@ return res;
 		          	  toode = (String)asendused.get(toode);
 		            }
 		          
-		          // otsime ean uuesti ja sama piires vaatan laosaldosid - ja valin vanima tootekoodi veini ja kanget eraldi ei k�sitleta
-		          // SC01116 tooteloomise kuup�ev ja 
 		        
-		          
 		          if (i == 0 ){
 		        		try{  
 		        			String abitoode = toode;
@@ -1063,15 +1086,7 @@ return res;
                        }catch(Exception e){
 		            	e.printStackTrace();	
 		            	}
-		          	if( line.getKogus() < 0){
-		     //     		System.out.println("kogus " + line.getKogus());
-		              	type = "1";
-		              	status = "0";
-		              	tagastus = true;
-		           	    doknr = getDoknr("OR22");
-		           	    
-				    
-		          	}
+		          	
 		          	
 		          	
 		            String comment = order.getInfo();
@@ -1175,7 +1190,7 @@ return res;
 			    	    		
 			    	    	}
 			    	  sb2.append("      <dta:OrdNum>" +  Converter.escapeXML(doknr) + "</dta:OrdNum>" + ls);
-						System.out.println("datestuff " + order.isShipDateUsed() + " " + (order.getShipCal() != null));
+					//	System.out.println("datestuff " + order.isShipDateUsed() + " " + (order.getShipCal() != null));
 
 			    	  
 			    	 /* if(!isSameDay(cal,Calendar.getInstance())){
@@ -1199,9 +1214,7 @@ return res;
 					    	  sb2.append("      <dta:ShipMark>" + time.trim() + "</dta:ShipMark>" + ls);	
 					      }
 
-					     if(hasZallah){
-				    	 // sb2.append("      <dta:OrdDisc>" + nf.format(custDisc) + "</dta:OrdDisc>" + ls);	
-						}
+					     
 				    
 				      sb2.append("      <dta:AccStr>" + ls);
 				      sb2.append("          <dta:AccDim1>" + agent + "</dta:AccDim1>" + ls);
@@ -1218,12 +1231,11 @@ return res;
 				      
 				      if(ware!= null && ware.trim().length() >0){
 				    	  ref2 = escape(getDateString(cal)) + "T"+ ware;
-						   
-				      }
-				    	     if(ref1.length() > 35){
+					  }
+				    
+				      if(ref1.length() > 35){
 				    	  ref2 = ref1.substring(35);
 				    	  ref1 = ref1.substring(0,35);
-				    	 
 				      }
 				      
 		              sb2.append("      <dta:Remark1>" +  Converter.escapeXML(ref1) + "</dta:Remark1>" + ls);
@@ -1276,50 +1288,18 @@ return res;
 		      	
 		        String zallahtext = null;
 		        double hind = 0;
-		        double hindstd = 0;
-		    	hindstd = getStdPrice(toode);
-		        double hindArvu = 0;
-		        double hindAle = 0;
+		        double hindstd = getStdPrice(toode);
 		        
-		        if(disc >0){
-		        	//if((line.getDiscount() > 0 && line.getDiscount() < 3) || (line.getDiscount() > 0 && line.getPl() == 99)){
-		        	if(false){	
-		        	int ddd = (int)(line.getDiscount()*10);       	
-		       			disc = ddd / (line.getKogus()) * 100;
-		       		
-		       		    hind = getPrice(toode,hinnakiri,null,-1);
-		       		    hindAle = getPrice(toode,hinnakiri,cust,hind);
-		       		    if(hindAle != 0 ){
-		       		     hindArvu = hindAle * (100-disc)/100;
-		       		    }else{
-		       		     hindArvu = hind * (100-disc)/100;
-		       		    }
-		       		   
-		       		 //   hindArvu = hindArvu *(100 - custDisc)/100; // kommentisin v�lja kuna pole vaja 
-		       		    disc = (1- hindArvu/hind)* 100;
-		        		zallahtext = "Product been sold " + (int)(line.getKogus()-ddd) + "+" + ddd + " discount";
-		        		System.out.println("Zallah Disc " + (disc) + " kogus" + kogus + 
-		        				" " + zallahtext + " hind arvu " + hindArvu
-		        				 );
-		        		// siia uus arvutus teha zallahi alusel 
-		        		//sb.append(addSpaces(nf.format(disc), 6));
-		        		disc = disc-jae;
-		        		sb.append(addSpaces((disc)+ "", 6)); // discount	
-		        		 addToDB(agent,cust,toode,kogus,disc,"LIT",kogus,true);
-		        	}else{
+		        if(disc > 0){
 		        		disc = disc-jae;
 			           	sb.append(addSpaces(nf.format(disc), 6)); // discount	
-		        	}
-		        }else{
+		          } else{
 		           	sb.append(addSpaces("", 6)); // discount
 		        }
 		    
-		        
-		       
 		       
 		        if(disc > 2){
-		        addToDB(agent,cust,toode,kogus,disc,"LIT",0,false);
-		        }else{
+		          addToDB(agent,cust,toode,kogus,disc,"LIT",0,false);
 		        }
 		        
 		        ccc++;
@@ -1353,10 +1333,11 @@ return res;
 			      sb2.append("         <dta:TextLines>" + ls);
 			      
 			       if(false && poscomm != null && poscomm.get(toode) != null){
-			        sb2.append("               <dta:TextLine>" + ((String)poscomm.get(toode)).trim()+ "</dta:TextLine>" + ls);
-			        }else{
-			      sb2.append("               <dta:TextLine></dta:TextLine>" + ls);
+			         sb2.append("               <dta:TextLine>" + ((String)poscomm.get(toode)).trim()+ "</dta:TextLine>" + ls);
+			        } else {
+			         sb2.append("               <dta:TextLine></dta:TextLine>" + ls);
 			        }
+			       
 			      sb2.append("         </dta:TextLines>" + ls);
 			      
                   sb2.append("      </dta:OrderLine>" + ls);
