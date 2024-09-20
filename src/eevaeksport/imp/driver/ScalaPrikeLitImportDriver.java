@@ -1020,7 +1020,6 @@ return res;
 		        if(zeros.contains(payer)) {
 		        	status = "0";
 		        }
-		        System.out.println("payer " + payer + " " + status);
 		         
 		         
 		         sb2.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" + ls);
@@ -1045,7 +1044,7 @@ return res;
 	         
 		         
 		    Vector lines = order.getOrderLines();
-		    
+		    int counLines = lines.size();
 		    
 		    int i = 0;
 		    boolean tagastus = false;
@@ -1359,6 +1358,9 @@ return res;
 		       cou++;
 		      }
 		 	}
+		    if(tagastus) {
+		    	cou = counLines;
+		    }
               nf.setMaximumFractionDigits(3);
               nf.setGroupingUsed(false);
               
@@ -1376,20 +1378,6 @@ return res;
 		          	double pand = new Double((String)pandikas.get(kood)).doubleValue();
 		          	  
 
-				      	sb.append(addSpaces(doknr, 10));
-				      	sb.append(type);//11
-				        sb.append(addSpaces(cust, 10));//22
-				        sb.append(getToday());//46 siia pane dokkuup
-				        sb.append(getTarne(order));//46
-				        sb.append(addSpaces(agent, 3));//49	      
-				        sb.append(addSpaces(kood, 20));//113
-				        sb.append(addSpaces(nf.format(pand).replace(',','.').replaceAll(" ",""), 8));//129
-				        sb.append(addSpaces(" ",70));//181
-				        sb.append("01");// Laokood 
-				        sb.append(addSpaces("",200));//181
-				           
-		                 sb.append(System.getProperty("line.separator"));
-		              
 		                 
 				          sb2.append("      <dta:OrderLine>" + ls);
 				          sb2.append("         <dta:LineNum>" + getLineNr(i+1) + "</dta:LineNum>" + ls);

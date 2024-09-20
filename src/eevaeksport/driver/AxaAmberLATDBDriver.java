@@ -2541,7 +2541,7 @@ stmt.close();
     
 try {
       
-    makeTexts(tx);
+  //  makeTexts(tx);
 }catch(Exception e) {
 	e.printStackTrace();
 }
@@ -2796,6 +2796,7 @@ try {
          		  double psales = 0;
          		try{
          		//	System.out.println("Sees " + agent.getID() + " " + plans.get(agent.getID()));
+         			if(plans.get(agent.getID()) != null) {
          		  psales = Double.parseDouble(plans.get(agent.getID())+"");
          		  double  tehtudsalperc = msales/psales;
              	  double plaanitavMyykSal = d2 * msales/dd;
@@ -2815,7 +2816,7 @@ try {
                   asi = asi + Converter.enCodeEst("Pārdošanas plāns: ") + (int)psales + " €|";    
                 agent.setStart(agent.getStart() +  Converter.enCodeEst(asi ));
              //   System.out.println(Converter.enCodeEst(agentID + "' " +asi  + " "  + plans.get(agent.getID())) );
-                 
+         			}
          		}catch(Exception e){
          		  e.printStackTrace();
          	  }
