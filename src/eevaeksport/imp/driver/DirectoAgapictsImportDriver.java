@@ -1060,6 +1060,16 @@ try{
 	 			ordnum = ordnum.replace('|', ' ').replace('|', ' ').trim();
 	 		}
 	 	    
+	 		String hooaeg = "";
+	 		try{
+	        	if(order.getShipMode() != null  && order.getShipMode().equals("-3")){
+	        		hooaeg = "datafield3=\"Hooajaline\" " ;
+	 	        }	
+	        }catch(Exception e){
+	        	
+	        }
+	       
+	 		
 	 		String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
 	          "<transport>" +
 	          "<order " + 
@@ -1069,7 +1079,7 @@ try{
 	         "send_mode=\"POST\" " + 
 	         "send_type=\"ALL\" " +
 	         "object=\"4\" " +
-             comm + teo + shdate +
+             comm + teo + shdate + hooaeg + 
 	         "amount=\"" + order.getSum() + "\" " +
 	         "amount_vat=\"" + order.getSum()* 1.2 + "\" " +
 	         "currency=\"EUR\" status=\"KOMPLEKTEERI\" language=\"EST\">" +

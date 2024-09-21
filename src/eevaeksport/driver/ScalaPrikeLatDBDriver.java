@@ -965,7 +965,7 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
 
     public Vector getDebt(String agentCode) throws SQLException{
         Vector list = new Vector();
-        String sql = "SELECT SL01001 AS payer, SL03087 as custid ,  SL03002 AS number,SL03006 AS kuupaev,SL03013-SL03053 AS summa , -datediff(day ,getdate(),SL03006) as yle " +
+        String sql = "SELECT SL01001 AS payer, SL03087 as custid ,  SL03002 AS number,SL03004 as arvekuup,SL03006 AS kuupaev,SL03013-SL03053 AS summa , -datediff(day ,getdate(),SL03006) as yle " +
         		"FROM SL030400 INNER JOIN SL010400 ON SL03001 = SL01001  WHERE NOT(SL03013=SL03053) AND " +
                      "LEN(LTRIM(SL03013))>0  ORDER BY SL01001";
 
@@ -985,7 +985,7 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
           }
           
           debt.setDoknr(rs.getString("number").trim());
-
+          debt.setDate(rs.getDate("arvekuup"));
           debt.setDuedate(rs.getDate("kuupaev"));
 
           debt.setSum(Double.parseDouble(rs.getString("summa").trim()));

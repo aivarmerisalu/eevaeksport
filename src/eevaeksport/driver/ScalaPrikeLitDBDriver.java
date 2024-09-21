@@ -1122,10 +1122,9 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
 
     public Vector getDebt(String agentCode) throws SQLException{
       Vector list = new Vector();
-      String sql = "SELECT SL01001 AS klient, SL03002 AS number,SL03006 AS kuupaev,SL03013-SL03053 AS summa , -datediff(day ,getdate(),SL03006) as yle " +
+      String sql = "SELECT SL01001 AS klient, SL03002 AS number,SL03004 as arvekuup, SL03006 AS kuupaev,SL03013-SL03053 AS summa , -datediff(day ,getdate(),SL03006) as yle " +
       		"FROM SL030500 INNER JOIN SL010500 ON SL03001 = SL01001  WHERE NOT(SL03013=SL03053) AND " +
-                   "LEN(LTRIM(SL03013))>0 "; // AND SL03006<GETDATE()+5 
-      sql += " ORDER BY SL01001 , SL03002";
+                   "LEN(LTRIM(SL03013))>0  ORDER BY SL01001 , SL03002";
 
       connectionUp(url);
       stmt = con.prepareStatement(sql);
@@ -1138,7 +1137,7 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
         debt.setCustID(rs.getString("klient").trim());
         debt.setPayerID(debt.getCustID());
         debt.setDoknr(rs.getString("number").trim());
-
+        debt.setDate(rs.getDate("arvekuup"));
         debt.setDuedate(rs.getDate("kuupaev"));
 
         debt.setSum(Double.parseDouble(rs.getString("summa").trim()));
