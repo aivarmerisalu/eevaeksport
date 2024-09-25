@@ -4380,7 +4380,7 @@ public class Converter {
 	   		
 	   		if(comment != null && comment.trim().length() >0){
 	   			
-	   			//System.out.println(comment);
+	   			System.out.println("saadame " + comment);
 	   			Email mail = new Email(null);
 		  		   
 	   			

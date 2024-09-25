@@ -4853,8 +4853,6 @@ if (getProps().getProperty("no.matrixagent") != null) {
        buf.append(EksportPanel.separator);
        buf.append(prod.DEPO_WO_VAT);
 
-       buf.append(EksportPanel.separator);
-       buf.append(prod.getArrivesToStock());
        
        buf.append(lineSeparator);
        
@@ -5938,6 +5936,7 @@ while (itra.hasNext()){
         // writeToFile(fileName, buf.toString());
         try {
             //email.addAttach(fileName, buf.toString());
+        	if(buf.length() > 10)
             zip.addFile(fileName, buf.toString());
         } catch (Exception e) {
             EksportFrame.showError(e);

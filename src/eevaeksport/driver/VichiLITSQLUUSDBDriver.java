@@ -105,23 +105,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	 private void makePictureCat(){
 		 
 
-		 String cmd2 = "SELECT t.[No_] AS toode, (t.[Search Description]) AS nimi, sp.[Unit Price] AS myygihind, t.[Grupės kodas] AS grupp\r\n" + 
-					"	, t.[Pogrupio kodas] AS grupp2  , [Base Unit of Measure] AS unit\r\n" + 
-					"	, [Brūkšninis kodas] AS ean, [Product Status] AS [status], [Line Discount %] AS maxdiscount, t.[Type] AS [type]\r\n" + 
-					"	, [Qty_ per Unit of Measure] AS kastis, [Net Weight] AS kaal\r\n" + 
-					"	, [VAT Prod_ Posting Group] AS vat, [Description] AS vatdesc , '' AS [type]\r\n" + 
-					"    , [Order Multiple] AS optimum, [Minimum Order Quantity] AS minimum , [Country of Origin Code] as origi \r\n" + 
-					"FROM [Vičiūnai ir Ko$Item] t INNER JOIN [Vičiūnai ir Ko$Item 2] t2 ON t.[No_] = t2.[No_]\r\n" + 
-					"	INNER JOIN (SELECT [Item No_], [Unit Price], [Unit of Measure Code], ROW_NUMBER() OVER (PARTITION BY [Item No_] ORDER BY [Starting Date] DESC) AS [Priority]\r\n" + 
-					"	FROM Navision.dbo.[Vičiūnai ir Ko$Sales Price] WHERE [Sales Type] = 2 AND CAST(GETDATE() As Date) BETWEEN [Starting Date] AND ISNULL(NULLIF([Ending Date],'1753-01-01'),DATEADD(DAY,1,CAST(GETDATE() As Date))) ) AS sp \r\n" + 
-					"	ON t.No_ = sp.[Item No_] AND t.[Base Unit of Measure] = sp.[Unit of Measure Code] AND sp.[Priority] = 1\r\n" + 
-					"    LEFT JOIN [Vičiūnai ir Ko$Item Unit of Measure] AS vat ON vat.[Item No_] = t.[No_] AND vat.[Code] = 'DĖŽ.'\r\n" + 
-					"    LEFT JOIN [Vičiūnai ir Ko$Sales Line Discount] AS sd ON sd.[Code] = t.[No_] AND [Sales Type] = 1 AND [Sales Code] = 'AGENT' \r\n" + 
-					"   AND [Starting Date] <= GETDATE() AND [Ending Date] >= GETDATE()   \r\n" + 
-					"WHERE ([Blocked] = 0 AND sp.[Unit Price] > 0 AND LEN([Grupės kodas]) > 0 AND LEN([Search Description]) != 0 AND t2.[Not for Merisoft] <> 1) \r\n" + 
-					"ORDER BY t.[No_] " ;
-		 
-		 cmd2 = " select * from  MobilejavaVIK.v_VIK_GetProducts ";
+		 String 		 cmd2 = " select * from  MobilejavaVIK.v_VIK_GetProducts ";
 		     	String picts = parent.getProps().getProperty("pict.dir");
 
 		     	String pictspda = parent.getProps().getProperty("pictpda.dir");
@@ -1526,11 +1510,11 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		Vector topstuff = new Vector();
 		TreeMap discT = new TreeMap();
 		TreeMap mintime = new TreeMap();
+		HashMap nullseis = new HashMap();
 
 		try {
 			
 			String cmd = "Select * from MobilejavaVIK.vik_litstock";
-
 			Connection con = getNewConnectionView();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
@@ -1563,44 +1547,8 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 
 			rs.close();
 			con.close();
-
-		/*	String cmd0 = "select sum(Quantity) as kogus ,r.No_ as toode  "
-					+ " FROM [Vičiūnai ir Ko$Sales Line] r "
-					+ "    INNER JOIN [Vičiūnai ir Ko$Sales Header] d ON r.[Document No_]= d.[No_] where "
-					+ "  r.[Location Code] in ('KAU','KAU_CEN','BFE') group by r.[No_] "
-					+ // status=1 and
-					"order by r.[No_]";
-
-			
-			cmd0 = "select * from  MobilejavaVIK.v_VIK_GetAmsOnOrders";
-			
-			//con = getNewConnection2();
-			con = this.getNewConnectionView();
-			stmt = con.createStatement();
-			rs = stmt.executeQuery(cmd0);
-			while (rs.next()) {
-				String toode = null;
-				double seis = 0;
-				seis = rs.getDouble("kogus");
-				toode = rs.getString("toode").trim();
-				if (KAU.containsKey(toode)) {
-					double seiss = Double.parseDouble((String) KAU.get(toode))
-							- seis;
-					if (seiss > 0) {
-						KAU.put(toode, seiss + "");
-					}
-				}
-
-			}
-
-			rs.close();
-			stmt.close();
-			con.close();*/
-
 			
 			String top ="select No_ as itemid , [Top Item] as asi from [Vičiūnai ir Ko$Item 2] where [Top Item] = 1 " ;
-			
-			
 
 		con = getNewConnection2();
 		stmt = con.createStatement();
@@ -1614,43 +1562,22 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		con.close();
 			
 
-		String top2 =" select No_ as itemid , [Min_ Order Time] as asi from [Vičiūnai ir Ko$Item 2] where "
-				+ " DATEPART(HOUR,[Min_ Order Time]) != 0  " ;
-		
-		top2 = "select * from  MobilejavaVIK.v_VIK_GetMinOrdTimes";
-		//con = this.getNewConnection2();
+		String top2 = "select * from  MobilejavaVIK.v_VIK_GetMinOrdTimes";
+	
 	con = this.getNewConnectionView();
 	stmt = con.createStatement();
 	rs = stmt.executeQuery(top2);
 	while (rs.next()) {
-		mintime.put( rs.getString("itemid").trim(),rs.getTime("asi").getTime());
+		String pro = rs.getString("itemid").trim();
+		mintime.put( pro,rs.getTime("asi").getTime());
+		nullseis.put(pro, pro);
 				}
 
 	rs.close();
 	stmt.close();
 	con.close();
 		
-	//System.out.println("mintime " + top2 + " "+ mintime.toString() );
-	
-	
-	
-/*
-		String allowed ="select No_ as itemid , [Top Item] as time from [Vičiūnai ir Ko$Item 2] where  " ;
-		
-		
-
-	con = getNewConnection2();
-	stmt = con.createStatement();
-	rs = stmt.executeQuery(allowed);
-	while (rs.next()) {
-		allowedstuff.put( rs.getString("itemid").trim(), rs.getTimestamp("time"));
-				}
-
-	rs.close();
-	con.close();*/
 			
-			
-		//	System.out.println("Kau" + KAU.size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1690,19 +1617,6 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				}
 				
 				String gr1 = rs.getString("grupp");
-				/*
-				if (gr1.equals("1.10.")) {
-					gr1 = "1.a.";//5.01.
-				}
-				if (gr1.equals("1.11.")) {
-					gr1 = "1.b.";//5.01.
-				}
-				if (gr1.equals("1.12.")) {
-					gr1 = "1.c.";//5.01.
-				}
-				if (gr1.equals("1.13.")) {
-					gr1 = "1.d.";//5.01.
-				}*/
 			
 				String grupp = cleardots(gr1);
 				if (grupp.equals("208")) {
@@ -1714,14 +1628,6 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 					prod.setTimeToSell(Long.parseLong(""+allowedstuff.get(prod.getID())));
 				}
 				
-				String split = prod.getGroup().substring(0, 1);
-				if(splitB){
-					if (split.equals("1")) {
-					//	prod.setSendSeparate("1");
-					} else {
-				//		prod.setSendSeparate("2");
-					}	
-				}
 				
   
 				String gr2 = rs.getString("grupp2");
@@ -1824,6 +1730,10 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 					prod.setPartii("Kau+KauCe"
 							+ aaa.substring(0, aaa.indexOf(".")));
 					prod.setStock(Double.parseDouble(aaa));
+				}
+				
+				if(nullseis.get(prod.getID()) != null) {
+					prod.setStock(-1);;
 				}
 
 				if (discT.containsKey(id)) {

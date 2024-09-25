@@ -2331,6 +2331,9 @@ System.out.println(cmd);
                 String unit = (rs.getString("unit"));
                 if (unit != null && unit.trim().length()>0){
                   prod.setUnit(unit.trim());
+                  if(!unit.trim().equals("kg") ) {
+                	  prod.setNoCommas(true);
+                  }
                 }
                 
               String ean = (rs.getString("ean"));
