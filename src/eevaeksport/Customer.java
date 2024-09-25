@@ -41,6 +41,7 @@ public class Customer {
   public JSONObject json = null;
   public boolean topstatus = true;
   public boolean investstatus = false;
+  public int salescompa = 0;
   public String level = null;
   public Vector<MatrixLine> fixedLines = null;
 

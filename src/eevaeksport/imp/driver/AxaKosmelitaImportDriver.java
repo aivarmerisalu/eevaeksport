@@ -55,6 +55,12 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
     } catch (Exception e){
        parent.showError(e);
     }
+    
+    
+    if("true".equals(parent.getProps().getProperty("testdb"))) {
+
+	    url2 = "jdbc:odbc:kosmelitaaxatest"; 
+ }
   }
   String instance = null;
 

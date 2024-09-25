@@ -3195,6 +3195,10 @@ name = name.replaceAll("apelsinimahlaga ", " ");
             	 File in = new File ( picts + fname); 
             	 String ean = fname.substring(0,fname.indexOf("."));
             	 String ext = fname.substring(fname.indexOf(".") + 1);
+            	 String code = ean;
+            	 if(fname.contains(" ")) {
+            		 code = fname.substring(0,fname.indexOf(" "));
+            	 }
             	 
             		if(in.isFile() ) {//&& prodsH.contains(ean)    
             			
@@ -3212,6 +3216,18 @@ name = name.replaceAll("apelsinimahlaga ", " ");
                         
                           buf.append(ean + "." + ext + ";"  + len + "\n");
                         }
+            			if(!code.equals(ean) && koodiga.get(code) != null) {
+                        	 
+                          	File inpda = new File ( pictspda + code + "." + ext); 
+                          	
+                          		Converter.shrinkAndCopyFile(in,inpda);
+                            String len = "0";
+                            if(inpda.exists()){
+                              len =	inpda.length() + "";
+                              } 
+                            
+                              buf.append(code + "." + ext + ";"  + len + "\n");
+                            }
             		}
                  }
           	

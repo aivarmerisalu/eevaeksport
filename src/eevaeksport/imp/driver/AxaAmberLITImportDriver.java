@@ -293,7 +293,7 @@ private Vector signatures = new Vector();
      	 	 boolean repr = false;
      	 	 for (int i = 0; i < lin.size(); i++) {
      	 		OrderLine ol = (OrderLine) lin.elementAt(i);
-     	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0.1 && (order.getStatus() == 5 || order.getStatus() == 4)){
+     	 		if(ol.getKogus() < 0 && (ol.getDiscount() > 0.05 || (ol.getDiscount() < -0.05 && ol.getDiscount() != -1) ) && (order.getStatus() == 5 || order.getStatus() == 4)){
      	 			repr = true;
      	 			tagastus = false;
      	 		}

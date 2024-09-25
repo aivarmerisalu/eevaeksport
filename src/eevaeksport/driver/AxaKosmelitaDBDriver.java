@@ -75,7 +75,11 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.companyx");
     instance = getParent().getProps().getProperty("instance");
+     if("true".equals(getParent().getProps().getProperty("testdb"))) {
+
+    	    url = "jdbc:odbc:kosmelitaaxatest"; 
      }
+  }
   
   String user =  null;
   String pass = null;
@@ -461,20 +465,27 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 		        con.close();
 		        
 		    } catch (Exception e){
-		        getParent().showError(e);
+		       // getParent().showError(e);
 		      }
 	  System.out.println("prodHier " + prodHier);
 	  System.out.println("channelID " + channelID);
 	  System.out.println("prodStockID " + prodStockID);
 	  
 	 if("MON".equals( getParent().getProps().getProperty("channel"))) {
-		 prodHier = "MonroBrand";
+		 if("true".equals(getParent().getProps().getProperty("testdb"))) {
+
+			 prodHier = "MonroBrand" ;//"Monro Pro";			 
+		 }else {
+
+			 prodHier = "Monro Pro";
+		 }
+
 	 }else  if("DP".equals( getParent().getProps().getProperty("channel"))) {
 		 prodHier = "Didmenos medis";
 	 }
 	  
 	 cmk = "select RECID as hier from dbo.ECORESCATEGORYHIERARCHY " + 
-	 		"		  		where name = '" + prodHier + "'" ;
+	 		"		  		where name like '" + prodHier + "%'" ;
 		  		
 
 		   try {

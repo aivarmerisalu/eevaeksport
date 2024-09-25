@@ -1735,6 +1735,10 @@ public class EksportPanel extends JPanel implements ActionListener,
                 if(wh5.exists()){
                     zip.addFile("salescontracts.txt");
                 }
+                File wh53 = new File("salescompa.txt");
+                if(wh53.exists()){
+                    zip.addFile("salescompa.txt");
+                }
                 
                
                 File wh = new File("warehouse.txt");
@@ -4191,6 +4195,12 @@ if (getProps().getProperty("no.matrixagent") != null) {
         	   bb =  "1";
            }
            buf.append(bb); 
+           
+           
+           buf.append(EksportPanel.separator);
+           buf.append(cust.salescompa); 
+           
+           
            
            buf.append(lineSeparator);
       }

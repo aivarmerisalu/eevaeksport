@@ -437,11 +437,13 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
         
         Hashtable debts = new Hashtable();
         Hashtable sales = new Hashtable();
+        Hashtable blockComments = new Hashtable();
        Hashtable kama = new Hashtable();
        Hashtable kama1 = new Hashtable();
        Hashtable delextra = new Hashtable();
        
        Hashtable invest = new Hashtable();
+       Hashtable compa = new Hashtable();
        
 
        String cmdk = "SELECT PYNO as kood,agrnr as agrno,fvdt as startD,lvdt as endD,current_fulfill as sold,agr_end_fullfill as estimate " + 
@@ -473,9 +475,48 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                     }
       rs1.close();
       st.close();
-     // con.close();
+     
+// kuidas müügis ka lähevad 
+
+       cmdk = "SELECT * FROM cesu.mjcustomervol  ";
       
-       
+          st = con.createStatement();
+       rs1 = st.executeQuery(cmdk);
+       StringBuffer sbcompa = new StringBuffer();
+                        while(rs1.next()){
+                       	 // CustomerCode: startdate; endddate;fulfilment; estimation; color (G or R)
+
+                          String id = rs1.getString("uccuno");
+                if(id != null) {
+                        
+                          Double ty = rs1.getDouble("ty_month_vol");
+                          Double ly = rs1.getDouble("ly_month_vol");
+                          Double es = rs1.getDouble("rr_vol");
+                          if(ty == null) {
+                          	   ty = 0.0;
+                             }
+                          if(ly == null) {
+                         	   ly = 0.0;
+                            }
+                          if(es == null) {
+                       	      es = 0.0;
+                          }
+                          String col = rs1.getString("color").trim();
+                           if(ty != null && ty > 0) {
+                           	sbcompa.append(id.trim()+";" + ty +";"+ly+";"+es+";"+col+"\n");
+                           	compa.put(id, col);
+                           }
+                        }
+                   }
+     rs1.close();
+     st.close();
+    
+      
+      
+      
+      
+      
+      
        
        // tarne p�evade lisamine 
        String cmd31 = "SELECT ddsmcd, ddcuno as saaja , dddays as days FROM cesu.MJDELDAY ";
@@ -575,7 +616,10 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
              while (rs2.next()) {
             	 String cus = rs2.getString("klient");
                double myyk = rs2.getDouble("balance");
+               String comm = rs2.getString("prev_com");
                sales.put(cus, myyk+"");
+               if(comm != null && comm.trim().length() > 0)
+               blockComments.put(cus, comm.trim());
              }
              rs2.close();
              st2.close();
@@ -638,6 +682,12 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
             cust.setName(aaa + " " + name + " " + accountnum + " " + addr);
           }
           
+          if(blockComments.get(cust.getPayer()) != null) {
+          	cust.setInfo(blockComments.get(cust.getPayer()) + "|");
+            }
+            
+          
+          
           String k0 = (String) kama.get(cust.getID());
            
           if(kama.get(cust.getID()) != null){
@@ -681,12 +731,13 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
           if(invest.get(cust.getPayer()) != null) {
         	  sbinvest.append(cust.getID()+ ";" + invest.get(cust.getPayer()));
         	  cust.investstatus = true;
-        	  System.out.println("Payer " + cust.getPayer() + invest.get(cust.getPayer())  );
+        	//  System.out.println("Payer " + cust.getPayer() + invest.get(cust.getPayer())  );
           }
-         
+          
+    
           if(invest.get(cust.getID()) != null) {
         	  cust.investstatus = true;
-        	  System.out.println("Cust ID " + cust.getID() + invest.get(cust.getID()) );
+        	 // System.out.println("Cust ID " + cust.getID() + invest.get(cust.getID()) );
            }
         
           
@@ -781,7 +832,15 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
           if(  horecaGrs != null && (horecaGrs.contains("," + klgrupp) || horecaGrs.contains(klgrupp + ","))) {
         	  cust.addFixSortCode("HORECAFIX");
           }
-            
+         String col = (String)compa.get(cust.getID());
+            if(col != null && col.trim().length() > 0) {
+            	if(col.trim().equals("G")) {
+            		cust.salescompa = 1;
+            	}
+            	if(col.trim().equals("R")) {
+            		cust.salescompa = 2;
+            	}
+            }
           customers.put(cust.getName(), cust);
           custMap.put(cust.getID(), cust);
     }
@@ -796,7 +855,11 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
            	Converter.saveFile("salescontracts.txt", "");
            }
            
-         
+         if(sbcompa.toString().length() > 0) {
+            	Converter.saveFile("salescompa.txt", sbcompa.toString());
+            }else {
+            	Converter.saveFile("salescompa.txt", "");
+            }
          
     } catch (SQLException e){
       getParent().showError(e);
