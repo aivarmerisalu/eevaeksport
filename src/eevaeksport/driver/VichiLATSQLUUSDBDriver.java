@@ -98,25 +98,18 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
    	 
 
 		   	try {
-     	String cmd2 = "SELECT t.[No_] AS toode  , (select top 1 ref.[Item No_] from Navision.dbo.[Vičiūnai ir Ko$Item Cross Reference] ref " +   
- 	   "    WHERE  ref.[Cross-Reference Type No_] = 'LAT'  and ref.[Cross-Reference No_]  = t.[No_] ) as littoode " +
-  "FROM [Vičiūnai-LAT$Item] t WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0) " +
- 	"				  or [Pogrupio kodas] like '%2.8.1%' " ;
-     	Connection con =  null;
      	
-     	if(view) {
-     		cmd2 = "select * from MobileJavaLAT.v_LAT_PictureCatalogue";
-     		con = this.getNewConnectionView();
-     	}else {
-     		con =  getNewConnection2();
-     	}
+     	String	cmd2 = "select * from MobileJavaLAT.v_LAT_PictureCatalogue";
+     	Connection	con = this.getNewConnectionView();
+     	
  		   	    
  				Statement stmt = con.createStatement();
  		   	    ResultSet	      rs = stmt.executeQuery(cmd2);
- 		        TreeMap conver = new TreeMap();
+ 		       
  		        while (rs.next()) {
  		   	      String toode = rs.getString("toode").trim();  
  		          String littoode = rs.getString("littoode");
+ 		          System.out.println("lit " + toode + " " + littoode);
  		             toode = toode.replace('/', '_');
 		             toode = toode.replace('/', '_');
 		   	     if(littoode != null && littoode.trim().length()>0){
@@ -182,6 +175,62 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 	         	
  		        }
  		   	    rs.close();
+ 		   	    
+
+ 				 cmd2 = "select * from MobileJavaLAT.v_LAT_GetProducts";
+ 	     	   	    
+ 	 				 stmt = con.createStatement();
+ 	 		   	     rs = stmt.executeQuery(cmd2);
+ 	 		        
+ 	 		        while (rs.next()) {
+ 	 		   	      String toode = rs.getString("toode").trim();  
+ 	 		   	      if(toode.startsWith("S")) {
+ 	 		   	    	  //kui on s algusega toode siis vaatame kas on olemas
+ 	 		   	    	  String seal = toode.substring(1);
+ 	 		   	     File in = new File ( picts + seal+ ".jpg"); 
+ 	 		   	     System.out.println("seal " + seal + " " + in.exists() + " " + in.getName());
+ 		         	if(in.exists()){
+ 		         	File inpda = new File ( pictsUnion + toode +".jpg" );
+ 		         	if(!inpda.exists()) {
+ 		         		Converter.shrinkAndCopyFile(in,inpda);	
+ 		            }
+ 		         	
+ 		       	} else {
+		         		
+	         		 in = new File ( picts + seal+ ".JPG"); 
+ 		         	if(in.exists()){
+ 		         		File	 inpda = new File ( pictsUnion + toode +".JPG" );
+ 		         	if(!inpda.exists()) {
+ 		         		Converter.shrinkAndCopyFile(in,inpda);	
+ 		         	}
+	         	} else {
+	         		
+         		 in = new File ( picts + seal+ ".png"); 
+		         	if(in.exists()){
+		         		File	 inpda = new File ( pictsUnion + toode +".png" );
+		         	if(!inpda.exists()) {
+		         		Converter.shrinkAndCopyFile(in,inpda);	
+		         	}
+         	}else {
+         		
+     		 in = new File ( picts + seal+ ".PNG"); 
+	         	if(in.exists()){
+	         		File	 inpda = new File ( pictsUnion + toode +".PNG" );
+	         	if(!inpda.exists()) {
+	         		Converter.shrinkAndCopyFile(in,inpda);	
+	         	}
+     	}
+	         	}    	
+	         	}
+	         	
+	              }
+ 		         	
+ 	 		        }
+ 	 		        }
+ 		   	    
+ 		   	    
+ 		   	    
+ 		   	    
  		   	    stmt.close();
  		   	    con.close();
           	}catch(Exception r){
@@ -194,13 +243,8 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 	
 	 private void makePictureCat(){
 
-			String cmd2 = "SELECT t.[No_] AS toode  , (select top 1 ref.[Item No_] from Navision.dbo.[Vičiūnai ir Ko$Item Cross Reference] ref " +   
-	   "    WHERE  ref.[Cross-Reference Type No_] = 'LAT'  and ref.[Item No_] = t.[No_] ) as littoode " +
- "FROM [Vičiūnai-LAT$Item] t WHERE ([Blocked]=0 AND [Unit Price]>0 AND len([Grupės kodas])>0 and  len([Search Description]) != 0) " +
-	"				  or [Pogrupio kodas] like '%2.8.1%' " ;
+			String cmd2 = "select * from MobileJavaLAT.v_LAT_GetProducts";
 			
-			
-			cmd2 = "select * from MobileJavaLAT.v_LAT_GetProducts";
 			
 			makeConvertedCat();
 		     	String pictsUnion = parent.getProps().getProperty("pict.dir3");

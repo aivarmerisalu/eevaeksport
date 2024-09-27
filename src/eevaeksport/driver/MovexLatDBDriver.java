@@ -609,14 +609,14 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
              
              
          
-         String sql7 = "select PAYER as klient, balance from cesu.mjpayerdebt";
+         String sql7 = "select * from cesu.mjpayerdebt";
          Statement st2 = con.createStatement();
          if (isDebug()) System.out.println(sql7);
             ResultSet rs2 = st2.executeQuery(sql7);
              while (rs2.next()) {
-            	 String cus = rs2.getString("klient");
+            	 String cus = rs2.getString("PAYER");
                double myyk = rs2.getDouble("balance");
-               String comm = rs2.getString("prev_com");
+               String comm = null; //rs2.getString("prev_com");
                sales.put(cus, myyk+"");
                if(comm != null && comm.trim().length() > 0)
                blockComments.put(cus, comm.trim());
@@ -629,6 +629,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
 String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISIT, LIMIIT, AGENT, PAYER, EILADU, "
 		+ "DEBT, BLOK2, ROUTE_NR, ROUTE_NAME, SQ_INROUTE, GRUPA, LATITUDE, LONGTITUDE, TELENR, GNAME from cesu.mjcustomerdata  ";
 
+Calendar cal = Calendar.getInstance();
 	  Converter cc = new Converter();
 	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
 
@@ -832,6 +833,8 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
           if(  horecaGrs != null && (horecaGrs.contains("," + klgrupp) || horecaGrs.contains(klgrupp + ","))) {
         	  cust.addFixSortCode("HORECAFIX");
           }
+          
+          if(cal.get(Calendar.DAY_OF_WEEK) > 5) {
          String col = (String)compa.get(cust.getID());
             if(col != null && col.trim().length() > 0) {
             	if(col.trim().equals("G")) {
@@ -840,7 +843,8 @@ String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISI
             	if(col.trim().equals("R")) {
             		cust.salescompa = 2;
             	}
-            }
+            }}
+          
           customers.put(cust.getName(), cust);
           custMap.put(cust.getID(), cust);
     }
