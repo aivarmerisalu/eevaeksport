@@ -504,8 +504,8 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                           String col = rs1.getString("color").trim();
                            if(ty != null && ty > 0) {
                            	sbcompa.append(id.trim()+";" + ty +";"+ly+";"+es+";"+col+"\n");
-                           	compa.put(id, col);
                            }
+                           compa.put(id, col);
                         }
                    }
      rs1.close();
@@ -614,17 +614,33 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
          if (isDebug()) System.out.println(sql7);
             ResultSet rs2 = st2.executeQuery(sql7);
              while (rs2.next()) {
-            	 String cus = rs2.getString("PAYER");
+            	 String cus = rs2.getString("PAYER").trim();
                double myyk = rs2.getDouble("balance");
-               String comm = null; //rs2.getString("prev_com");
+               String commcu =  rs2.getString("current_comm");
+               String commpr =  rs2.getString("prev_com");
                sales.put(cus, myyk+"");
-               if(comm != null && comm.trim().length() > 0)
-               blockComments.put(cus, comm.trim());
+               String comm = null;
+               if(commcu != null && commcu.trim().length() > 0) {
+            	   comm = commcu.trim();
+               }
+               
+               if(commpr != null && commpr.trim().length() > 0) {
+            	   if(comm == null) {
+                	   comm = commpr.trim();
+            	   } else {
+                	   comm = comm + "|" + commpr.trim();   
+            	   }
+               }
+               
+               if(comm != null && comm.trim().length() > 0) {
+            	   blockComments.put(cus, comm.trim()); 
+               }
+            
              }
              rs2.close();
              st2.close();
     	
-
+System.out.println("blockComments " + blockComments.toString());
 
 String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISIT, LIMIIT, AGENT, PAYER, EILADU, "
 		+ "DEBT, BLOK2, ROUTE_NR, ROUTE_NAME, SQ_INROUTE, GRUPA, LATITUDE, LONGTITUDE, TELENR, GNAME from cesu.mjcustomerdata  ";
@@ -683,10 +699,6 @@ Calendar cal = Calendar.getInstance();
             cust.setName(aaa + " " + name + " " + accountnum + " " + addr);
           }
           
-          if(blockComments.get(cust.getPayer()) != null) {
-          	cust.setInfo(blockComments.get(cust.getPayer()) + "|");
-            }
-            
           
           
           String k0 = (String) kama.get(cust.getID());
@@ -828,13 +840,43 @@ Calendar cal = Calendar.getInstance();
             		cust.setCity(">< �" +lat + "," +lll + "�");
                }
             }
+          
+            String blcomm = null;
+            
+            if(blockComments.get(cust.getPayer()) != null) {
+             	    blcomm = (String) blockComments.get(cust.getPayer()) ;
+                }
+            
+            if(blockComments.get(cust.getID()) != null) {
+              	blcomm = (String) blockComments.get(cust.getID()) ;
+                }  
+            
+            if(blcomm != null) {
+            	blcomm = Converter.enCodeEst(blcomm);
+            	 if(cust.getInfo() != null && cust.getInfo().trim().length() == 0){
+            		  cust.setInfo("|" + blcomm);     		 
+            	    } else {
+            		 cust.setInfo("|" + cust.getInfo() + "|" + blcomm);
+            	  }
+              
+            }
+            
+            
+            
+            if(blcomm != null) {
+             	if(cust.getCity().trim().length() > 0){
+            		cust.setCity(cust.getCity() + "|" + blcomm.replace('.', '-').replace('.', '-'));
+                 } else{
+            		cust.setCity(blcomm.replace('.', '-').replace('.', '-'));
+                 }
+            }
                   
             
           if(  horecaGrs != null && (horecaGrs.contains("," + klgrupp) || horecaGrs.contains(klgrupp + ","))) {
         	  cust.addFixSortCode("HORECAFIX");
           }
           
-          if(cal.get(Calendar.DAY_OF_WEEK) > 5) {
+        //  if(cal.get(Calendar.DAY_OF_MONTH) > 5) {
          String col = (String)compa.get(cust.getID());
             if(col != null && col.trim().length() > 0) {
             	if(col.trim().equals("G")) {
@@ -843,7 +885,8 @@ Calendar cal = Calendar.getInstance();
             	if(col.trim().equals("R")) {
             		cust.salescompa = 2;
             	}
-            }}
+            }
+            //}
           
           customers.put(cust.getName(), cust);
           custMap.put(cust.getID(), cust);

@@ -3043,7 +3043,8 @@ public class Converter {
 								 seis = 20;
 							 }
 						 }
-						 
+						
+						 try {
 						 rowu = sheet.getRow(3);
 						  pais = formatter.formatCellValue(rowu.getCell(0));
 						 if (pais.equals("Kauplus")) {
@@ -3108,10 +3109,14 @@ public class Converter {
 						 }
 							 }
 						 
+						 }catch(Exception e) {
+							 e.printStackTrace();
+						 }
 						 
-						 
-						 
+
 						 int poo = 0;
+						 
+						try { 
 						 pais = formatter.formatCellValue(rowu.getCell(2));
 						 if (pais.equals("Kauplus")) {
 							 poo = 2;
@@ -3153,11 +3158,52 @@ public class Converter {
 								 tnim = 7;
 							 }
 						 }
-							
+						 }catch(Exception e) {
+							 e.printStackTrace();
+						 }
+						 
+						 
+						 rowu = sheet.getRow(6);
+						 pais = formatter.formatCellValue(rowu.getCell(4));
+						 if (pais.equals("Kauplus")) {
+							 poo = 4;
+							 u = 7;
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(0));
+							 if(pais.equals("EAN")) {
+								 eanp = 0;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(15));
+							 if(pais.equals("Seisund")) {
+								 seis = 15;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(13));
+							 if(pais.equals("Seisund")) {
+								 seis = 13;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(12));
+							 if(pais.equals("Seisund")) {
+								 seis = 12;
+							 }
+							 
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(2));
+							 if(pais.equals("Toote nimetus")) {
+								 tnim = 2;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(8));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 8;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(7));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 7;
+							 }
+						 }
 						 
 
 							System.out.println("Sees " + seis  
-									+" " + tnim+ " "+ eanp + " " + poo);
+									+" tnimi:" + tnim+ " ean:"+ eanp + " " + poo);
 										
 						 
 						 
@@ -3204,7 +3250,7 @@ public class Converter {
 							Contract con = new Contract(pood);
 							String toode = getToode(prods,ean);
 							// if(ean.equals("4744136010477"))
-					//	System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
+						System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
 							  if(toode.equals(ean) && !toode.equals("EAN")) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Coop formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
@@ -3212,13 +3258,13 @@ public class Converter {
 								  if(!errors.contains(ean)) {
 									  errors = errors + ean + "   " + tnimi + "\n";
 								  }
-								  System.out.println("Sees " + i +" "+ ean + " " + tnimi );
+								//  System.out.println("Sees " + i +" "+ ean + " " + tnimi );
 							  }else {
 								
 							  
 							if(res.get(pood) != null){
                            	  con = (Contract)res.get(pood);
-                           	  System.out.println("Sees www " + i + " " + pood );
+                           	 // System.out.println("Sees www " + i + " " + pood );
                            	 } 
 							  ContractLine ll = new ContractLine(toode);
                            	  if(con.lines == null){
@@ -3227,7 +3273,7 @@ public class Converter {
                            	  con.lines.add(ll);
                            	  res.put(pood, con);
 						   }
-							 // System.exit(0);
+							  //System.exit(0);
 							}
 							}
 						}
@@ -3900,7 +3946,7 @@ public class Converter {
 								Cell cellx = row.getCell((short)0);
 								try {
 									if(cellx != null) {
-										System.out.println("xx " +formatter.formatCellValue(cellx));
+									//	System.out.println("xx " +formatter.formatCellValue(cellx));
 										if(formatter.formatCellValue(cellx).indexOf("Maksimarket") != -1 ) {
 											return "coop";
 										}
@@ -3953,7 +3999,7 @@ public class Converter {
 										
 										try {
 											if(formatter.formatCellValue(cellx).indexOf("Abja") != -1 ) {
-												return "cooprist";
+												return "coop";//cooprist
 											}
 										}catch(Exception k) {
 											k.printStackTrace();

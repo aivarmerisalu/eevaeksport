@@ -550,6 +550,8 @@ try{
 		        String cukood =  Converter.deCode(order.getCompany());
 		        String adid = null;
 		        String ccc = cukood;
+		        System.out.println("ccc " + ccc);
+			     
 		        if(cukood.indexOf("_")!= -1){
 		        	adid =  escape(cukood.substring(cukood.lastIndexOf("_")+1));
 		        	ccc = cukood.substring(0,cukood.lastIndexOf("_"));
@@ -557,7 +559,7 @@ try{
 		        	
 			    }
 
-		        
+		        System.out.println("ccc0 " + ccc);
 		        
 
 	            String KT = "";
@@ -605,6 +607,9 @@ try{
 		        }
 		        
 		           String cuid = getCustId(ccc);
+		           if( Converter.deCode(order.getCompany()).contains("_4356")) {
+		        	   cuid = "TÂLS_deb";
+		           }
 		           if(cuid == null){
 		        	   System.exit(0);
 		           }
