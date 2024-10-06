@@ -1583,6 +1583,9 @@ System.out.println("fixed size " + result.size());
    if(cust.getDebt()<0.02 && cust.getDebt() > 0 ){
    	   cust.setDebt(0);
      }           
+   if(cust.getDebt() == -2  ){
+   	   cust.setDebt(-1.95);
+     }  
                 cust.setCountry("Eesti");
                 customers.put(cust.getName() + cust.getID(), cust);
                 custMap.put(cust.getID(), cust);

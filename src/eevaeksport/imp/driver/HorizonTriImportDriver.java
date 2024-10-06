@@ -608,7 +608,7 @@ try{
 		        
 		           String cuid = getCustId(ccc);
 		           if( Converter.deCode(order.getCompany()).contains("_4356")) {
-		        	   cuid = "TÂLS_deb";
+		        	   cuid = "1699";
 		           }
 		           if(cuid == null){
 		        	   System.exit(0);
