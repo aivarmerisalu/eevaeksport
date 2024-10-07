@@ -3999,7 +3999,7 @@ public class Converter {
 										
 										try {
 											if(formatter.formatCellValue(cellx).indexOf("Abja") != -1 ) {
-												return "coop";//cooprist
+												return "cooprist";//cooprist
 											}
 										}catch(Exception k) {
 											k.printStackTrace();
