@@ -1233,7 +1233,7 @@ private void  insertSortLine(MatrixLine mline){
 
     public Vector getDebt(String agentCode) throws SQLException{
       Vector list = new Vector();
-      String sql = "SELECT payer,number,kuupaev,summa,yle FROM [customer debt] where yle >-6";
+      String sql = "SELECT payer,number,kuupaev,summa,yle FROM [customer debt] ";
 
       Connection con = getNewCon();
       Statement stmt = con.createStatement();

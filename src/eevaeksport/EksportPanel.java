@@ -4200,7 +4200,12 @@ if (getProps().getProperty("no.matrixagent") != null) {
            buf.append(EksportPanel.separator);
            buf.append(cust.salescompa); 
            
-           
+           buf.append(EksportPanel.separator);
+           bb = "0";
+           if(cust.statusHoreca){
+        	   bb =  "1";
+           }
+           buf.append(bb); 
            
            buf.append(lineSeparator);
       }

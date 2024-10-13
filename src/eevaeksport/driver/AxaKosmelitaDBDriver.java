@@ -619,7 +619,7 @@ String email = " ";
            String salessql = "    SELECT  jou.orderaccount as klient,round(SUM(lineamount),0) AS summa,MONTH(sal.invoicedate) as kuu " +  
         " FROM  custinvoicetrans sal  with(nolock) INNER JOIN  custinvoicejour jou ON  sal.invoiceid  =jou.invoiceid   and " + 
        "  jou.DATAAREAID =sal.DATAAREAID  WHERE " + 
-	   " sal.dataareaid='kosm' AND sal.invoicedate > getdate() -390  GROUP BY jou.orderaccount,MONTH(sal.invoicedate) " +
+	   " sal.dataareaid='kosm' AND sal.invoicedate > getdate() -190  GROUP BY jou.orderaccount,MONTH(sal.invoicedate) " +
 	   " ORDER BY jou.orderaccount,MONTH(sal.invoicedate)" ;
                
            
@@ -1053,7 +1053,13 @@ try {
 
       String code = rs.getString("code").trim();
       String nim = rs.getString("nimi").trim();
+      if(nim.startsWith("Plauk")) {
+    	  nim = "Pla " + nim.substring(7).trim();
+      }
    
+      if(nim.startsWith("Priemon")) {
+    	  nim = "Pri " + nim.substring(10).trim();
+      }
         tm.put(liik,  Converter.enCodeEst( nim ));
     }
     rs.close();
@@ -1192,10 +1198,12 @@ try {
         	prod.setPrice(1);
         }
        
+        String ean = (String)eans.get(kood);
        
-         if(eans.get(kood) != null) {
-    	  prod.setEAN(eans.get(kood)+"");
-    	 
+         if(ean != null && ean.trim().length() > 6) {
+        	 ean = ean.trim();
+    	  prod.setEAN(ean);
+    	 nimetus = nimetus + " " + ean.substring(ean.length()-5);
         }
          String add = "";
          String gruppc = rs.getString("grupp2");
@@ -1364,11 +1372,13 @@ try {
     
 System.out.println("CustProdlisti tegemine ");
  int counter = 1;
-   String cmdu = " SELECT /*+ leading(tra,jou) use_hash(tra,jou) */orderaccount as customer,tra.itemid ,tra.qty,jou.invoicedate AS lastdate " +
+   String cmdu = " SELECT /*+ leading(tra,jou) use_hash(tra,jou) */orderaccount as customer,tra.itemid ,tra.qty,jou.invoicedate AS lastdate,"
+   		+ "tra.lineamount/case when tra.qty = 0 then 1 else tra.qty end as hind , tra.salesprice as oprice ,max(jou.salesid) as dok " +
      "  FROM  custinvoicetrans  tra INNER JOIN  custinvoicejour jou ON " +
      "  tra.invoiceid =  jou.invoiceid  and  tra.DATAAREAID = jou.DATAAREAID  " +
-     " and tra.SALESID  = jou.SALESID   WHERE  jou.invoicedate > getdate()-180 AND tra.DATAAREAID  = ('kosm')  AND jou.DATAAREAID   = ('kosm')  " +
-     "  GROUP BY orderaccount,tra.itemid,tra.name ,jou.invoicedate ,tra.qty  Order by orderaccount,tra.name,jou.invoicedate desc " ;
+     " and tra.SALESID  = jou.SALESID   WHERE  jou.invoicedate > getdate()-360 AND tra.DATAAREAID  = ('kosm')  AND jou.DATAAREAID   = ('kosm')  " +
+     "  GROUP BY orderaccount,tra.itemid,tra.name ,jou.invoicedate ,tra.qty ,(tra.lineamount/case when tra.qty = 0 then 1 else tra.qty end),tra.salesprice "
+     + " Order by orderaccount,tra.name,jou.invoicedate desc " ;
   
 
    if (isDebug()) System.out.println(cmdu);
@@ -1385,9 +1395,20 @@ System.out.println("CustProdlisti tegemine ");
         String tootekood = rs.getString("itemid").trim();
         if(!custs.keySet().contains(kliendikood+ tootekood)){
 		        double kogus = rs.getDouble("qty");
-		        String lastdate = rs.getString("lastdate").substring(4);
+		        String lastdate = rs.getString("lastdate").substring(5,10);
+		        Double hind = rs.getDouble("hind");
+		        Double oprice = rs.getDouble("oprice");
+		        Double ldisc = 0.0;
+		        if(hind != 0 && oprice != null) {
+		        	ldisc = (double) Converter.Round((float)((1 - (hind/oprice)) * 100),2) ;
+		        }
+		        String dok = rs.getString("dok");
 		        custs.put(kliendikood + tootekood,lastdate); 
-		        CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,lastdate,0,0,0," ");
+		        CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,lastdate,hind,0,0," ");
+		        if(ldisc > 0) {
+		          cp.ale = ldisc;
+		        }
+		        cp.setAbiKood(dok);
 		        custProds.add(cp);
         }
         

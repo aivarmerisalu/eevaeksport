@@ -13,10 +13,14 @@ import java.util.Vector;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
+import eevaeksport.Email;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
@@ -33,7 +37,7 @@ public class AvalloneImportDriver
   static Category log = Category.getInstance(IceImportDriver.class.getName());
 
   public AvalloneImportDriver(ImportPanel parent) {
-  
+	  this.parent = parent;
     PropertyConfigurator.configure("log4j.properties");
     //String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
@@ -45,7 +49,26 @@ public class AvalloneImportDriver
       parent.showError(e);
     }
   }
+  public String identifyCustomerName(String id) throws SQLException {
+	    String sql1 = "SELECT nimi FROM klient where  (kood)= '" + id + "' ";
+	    System.out.println(sql1);
+	    String acc = null;
 
+	    Statement st1 = con.createStatement();
+	    ResultSet rs1 = st1.executeQuery(sql1);
+
+	    while (rs1.next()) {
+	      acc = rs1.getString("nimi").trim();
+
+	    }
+	    rs1.close();
+	    st1.close();
+
+	    
+	    return acc;
+
+	  }
+  
   public String identifyCustomer(String id,String regnr) throws SQLException {
     String sql1 = "SELECT kood FROM klient where  (regnr)= '" + id + "' OR fil= '" + id + "'";
     System.out.println(sql1);
@@ -328,7 +351,7 @@ public class AvalloneImportDriver
 	  if(ordernumber == null){
 		  ordernumber = order.getInfo();
 	  }
-	  System.out.println("oo "+order.getInfo() + " " + order.getReference());
+	  
 	  
 	  if(ordernumber == null || ordernumber.length() < 5){
 		  ordernumber = getNextNum() + "";
@@ -337,12 +360,6 @@ public class AvalloneImportDriver
 	  if(order.getShipCal() != null){
 		  dd = new Date(order.getShipCal().getTimeInMillis());
 	  }
-	  
-	  
-    String sqlold = "INSERT INTO dok VALUES ('T',?, date(), 'LT1',?,1, 'EUR','" + ordernumber + "','', date(),'"+ ladu +"', '1', ?,?,0, .F., 'ADMIN','ADMIN', " +
-         "'23 59', '', '1', 1,date(), 0,'Mobiilne Tellimus','', .F., '','', '', '', '', '','','','epoc','','', 0, .F.,0,0,0, '', '', .F., " +
-        "date(),?,.T., 0, '2000000000',0, '','" + ordernumber + "','','','','','',0)  ";
-
 
     String sql = "INSERT INTO dok VALUES ('T',?, date(), 'LT1',?,1, 'EUR','" + ordernumber + "','', date(),'"+ ladu +"', '1', ?,?,0, .F., 'ADMIN','ADMIN', " +
          "'23 59', '', '1', 1,date(), 'Mobiilne Tellimus','', .F., '','', '', '', '', '','','','epoc','','', 0, .F.,0,0,0, '', '', .F., " +
@@ -365,8 +382,53 @@ public class AvalloneImportDriver
     stmt = con.prepareStatement(sql2);
     stmt.executeUpdate();
     stmt.close();
+    
+
+	String comm = null;
+System.out.println("info " + order.getInfo());
+System.out.println("teostaja " + order.getTeostaja());
+	if(order.getInfo() != null && order.getInfo().trim().length() >0){
+			
+        comm = order.getInfo();
+        
+		}
+    
+
+    if(comm != null){
+	    sendCommentEmail( comm,order.getDokNr(),order.getCompany(),  " " + identifyCustomerName(order.getCompany()),order.getAgent() );
+     }
   }
 
+
+  private ImportPanel parent;
+  
+  private void sendCommentEmail(String comment,String doknr,String custid, String nimi, String agent ){
+	   	try{
+	   		
+	   		if(comment != null && comment.trim().length() >0){
+	   			Email mail = new Email(null);
+		  		   
+		  	  		mail.setSMTP(parent.getProps().getProperty("smtphost"));
+		  	  		mail.setFilesTo(parent.getProps().getProperty("operatoremail"));
+		  	  		mail.setFrom(parent.getProps().getProperty("from"));
+		  	  		mail.setSubjectFilesTo("Tellimusel kommentaar, agent: " + agent + " klient: " + custid);
+		  	  		mail.setEncoding("utf-8");
+		  	  		mail.setBody("\nTellimus :" +  doknr + " \nKliendi kood :" + custid +  "\nKliendi nimi :" + nimi + "\n" +
+		  	  			    "\n" + comment);
+		  	  		mail.setSendNotice(false);
+		  	  		mail.send();
+		  	  		System.out.println("\nOrder Comment " +  doknr + " " + custid + "\n\n" +
+		  	  				  "\n >>>>>" + comment + "<<<<<");
+		  				
+	   		}
+		  	
+		  			}catch(Exception e){
+		  			e.printStackTrace();	
+		  			}
+		  	
+	   }
+
+  
   public String getDriverVersion(){
     return "Avallone";
   }

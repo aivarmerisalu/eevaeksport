@@ -242,6 +242,9 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
 				String type = rs.getString("CFC6").trim();
+				
+				String horecaGrs = getParent().getProps().getProperty("horeca.sortiment.groups");
+				
 				String id = rs.getString("MMITNO").trim();	
 				String stat = rs.getString("STAT").trim().substring(2);	
 				String sort = rs.getString("grupp");
@@ -283,9 +286,10 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
 		   sort3 = sort3 + "0";
 	   }
    }
-			
-			tree.put(type+sort+stat+"-"+sort3+sort2+id, line);
-  }
+			if(!horecaGrs.contains(type)) {
+				tree.put(type+sort+stat+"-"+sort3+sort2+id, line);
+			}
+   }
 			
 			
 			int c = 0;
@@ -492,6 +496,9 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                           Double ty = rs1.getDouble("ty_month_vol");
                           Double ly = rs1.getDouble("ly_month_vol");
                           Double es = rs1.getDouble("rr_vol");
+                          String col = rs1.getString("color").trim();
+                          Double perc = rs1.getDouble("rr_percent");
+                         
                           if(ty == null) {
                           	   ty = 0.0;
                              }
@@ -501,9 +508,15 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                           if(es == null) {
                        	      es = 0.0;
                           }
-                          String col = rs1.getString("color").trim();
+                          if(perc == null) {
+                        	  perc = 0.0;
+                          }
+                          
+                          
+                          String perstr = "RR " +this.getNF().format(perc) + "% "  ;
+                          
                            if(ty != null && ty > 0) {
-                           	sbcompa.append(id.trim()+";" + ty +";"+ly+";"+es+";"+col+"\n");
+                           	sbcompa.append(id.trim()+";" + ty +";"+ly+";"+es+";"+perstr+";"+col+"\n");
                            }
                            compa.put(id, col);
                         }
@@ -512,7 +525,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
      st.close();
     
       
-      
+      System.out.println("salescompa " + compa.size());
       
       
       
@@ -795,7 +808,7 @@ Calendar cal = Calendar.getInstance();
             }
             if(klgrupp.trim().length() > 1 ){
                 	 cust.setGroup(klgrupp.trim());
-                	 cust.setCity(klgrupp.trim());
+                	 cust.addCity(klgrupp.trim());
                  }
             String route = rs.getString("ROUTE_NR");
             String routename = rs.getString("ROUTE_NAME");
@@ -826,19 +839,15 @@ Calendar cal = Calendar.getInstance();
             }
             
             if(route != null && route.trim().length() > 0){
-            	if(cust.getCity().trim().length() > 0){
-                	cust.setCity(cust.getCity() + "| <<" + route + " " + routename + " " + routeseq);
-                }else{
-                	cust.setCity("<< " + route + " " + routename + " " + routeseq);
-                }
+            	
+                	cust.addCity("<< " + route + " " + routename + " " + routeseq);
+                
             }  
             
             if(lat != null && lat.trim().length() > 0){
-            	if(cust.getCity().trim().length() > 0){
-            		cust.setCity(cust.getCity() + "|>< �" +lat + "," +lll + "�");
-               }else{
-            		cust.setCity(">< �" +lat + "," +lll + "�");
-               }
+            
+            		cust.addCity(">< �" +lat + "," +lll + "�");
+               
             }
           
             String blcomm = null;
@@ -853,6 +862,7 @@ Calendar cal = Calendar.getInstance();
             
             if(blcomm != null) {
             	blcomm = Converter.enCodeEst(blcomm);
+            	
             	 if(cust.getInfo() != null && cust.getInfo().trim().length() == 0){
             		  cust.setInfo("|" + blcomm);     		 
             	    } else {
@@ -864,16 +874,13 @@ Calendar cal = Calendar.getInstance();
             
             
             if(blcomm != null) {
-             	if(cust.getCity().trim().length() > 0){
-            		cust.setCity(cust.getCity() + "|" + blcomm.replace('.', '-').replace('.', '-'));
-                 } else{
-            		cust.setCity(blcomm.replace('.', '-').replace('.', '-'));
-                 }
+            		cust.addCity( blcomm.replace('.', '-').replace('.', '-'));
             }
                   
             
           if(  horecaGrs != null && (horecaGrs.contains("," + klgrupp) || horecaGrs.contains(klgrupp + ","))) {
-        	  cust.addFixSortCode("HORECAFIX");
+        	 // cust.addFixSortCode("HORECAFIX");
+        	  cust.statusHoreca = true;
           }
           
         //  if(cal.get(Calendar.DAY_OF_MONTH) > 5) {
@@ -979,9 +986,7 @@ String ex = parent.getProps().getProperty("products");
         if (deflist == null){
         	deflist  = "";
         }
-        
-        
-
+        HashSet hrcprods = getHrcProds();
      
    String cmd = "SELECT * FROM CESU.MJDAILYITEMS";
 
@@ -1001,6 +1006,9 @@ String ex = parent.getProps().getProperty("products");
         // if ( kood.length() > 2 ){
         String kood = rs.getString("kood").trim();
         Product prod = new Product(kood);
+        if(hrcprods.contains(kood)) {
+        	prod.statusSmallPack = "1";
+        }
         String abi = rs.getString("abi").trim();
         String nimetus = abi + " " + rs.getString("nimetus").trim();
         prod.setName(Converter.enCodeEst(nimetus));
@@ -2654,6 +2662,32 @@ return result;
  }
 
 
+private HashSet getHrcProds() {
+	HashSet res = new HashSet();
+	
+	 try {
+	   	  String cmd = " SELECT * FROM cesu.mjhorecasortment";
+	   	
+	   	 System.out.println(cmd);
+	   	   Connection cc = getNewConnection();
+	  	        Statement stmt = cc.createStatement();
+	  	        ResultSet rs = stmt.executeQuery(cmd);
+	  	   
+	  	        while(rs.next()){
+	               String prodID = rs.getString("ITEM").trim();
+                        res.add(prodID);
+	                   }
+
+	  	       rs.close();
+	  	       con.close();
+	  	       cc.close();
+	               
+	                 } catch (Exception e) {
+	                      getParent().showError(e);
+	                 }
+	
+	return res;
+}
 
 @Override
 public Vector getFixedAssortmentData() {
