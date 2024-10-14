@@ -164,13 +164,20 @@ public class AvalloneImportDriver
 	  ordNorm.setAgentCode(order.getAgentCode());
 	  ordNorm.setDokNr(order.getDokNr());
 	  ordNorm.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  
+	  ordNorm.setInfo(order.getInfo());
+	  ordNorm.setReference(order.getReference());
+	  ordNorm.setStatus(order.getStatus());
+ 	  ordNorm.setTeostaja(order.getTeostaja());
 	  
 
 	  ordRR.setAgentCode(order.getAgentCode());
 	  ordRR.setDokNr(order.getDokNr());
 	  ordRR.setShipCal(order.getShipCal().getTimeInMillis() +"");
-
+	  ordRR.setInfo(order.getInfo());
+	  ordRR.setReference(order.getReference());
+	  ordRR.setStatus(order.getStatus());
+ 	  ordRR.setTeostaja(order.getTeostaja());
+	  
 
 	  Vector lines = order.getOrderLines();
 	  Enumeration enumr = lines.elements();
@@ -394,6 +401,7 @@ System.out.println("teostaja " + order.getTeostaja());
 		}
     
 
+System.out.println("teostaja " + comm);
     if(comm != null){
 	    sendCommentEmail( comm,order.getDokNr(),order.getCompany(),  " " + identifyCustomerName(order.getCompany()),order.getAgent() );
      }
@@ -409,6 +417,10 @@ System.out.println("teostaja " + order.getTeostaja());
 	   			Email mail = new Email(null);
 		  		   
 		  	  		mail.setSMTP(parent.getProps().getProperty("smtphost"));
+		  	  		mail.setPass(parent.getProps().getProperty("smtppass"));
+		  	  		mail.setUser(parent.getProps().getProperty("smtpuser"));
+		  	  		mail.setPort(parent.getProps().getProperty("smtpport"));
+
 		  	  		mail.setFilesTo(parent.getProps().getProperty("operatoremail"));
 		  	  		mail.setFrom(parent.getProps().getProperty("from"));
 		  	  		mail.setSubjectFilesTo("Tellimusel kommentaar, agent: " + agent + " klient: " + custid);
