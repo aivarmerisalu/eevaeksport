@@ -402,7 +402,7 @@ System.out.println("teostaja " + order.getTeostaja());
     
 
 System.out.println("teostaja " + comm);
-    if(comm != null){
+    if(comm != null && order.getStatus() < 3){
 	    sendCommentEmail( comm,order.getDokNr(),order.getCompany(),  " " + identifyCustomerName(order.getCompany()),order.getAgent() );
      }
   }

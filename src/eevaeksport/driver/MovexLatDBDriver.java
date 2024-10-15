@@ -881,6 +881,7 @@ Calendar cal = Calendar.getInstance();
           if(  horecaGrs != null && (horecaGrs.contains("," + klgrupp) || horecaGrs.contains(klgrupp + ","))) {
         	 // cust.addFixSortCode("HORECAFIX");
         	  cust.statusHoreca = true;
+        	  cust.setShowfullpricelist(true);
           }
           
         //  if(cal.get(Calendar.DAY_OF_MONTH) > 5) {
