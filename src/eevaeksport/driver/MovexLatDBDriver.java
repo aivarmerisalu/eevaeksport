@@ -456,7 +456,8 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
        Statement    st = con.createStatement();
      ResultSet   rs1 = st.executeQuery(cmdk);
         StringBuffer sbinvest = new StringBuffer();
-                         while(rs1.next()){
+        try {    
+        while(rs1.next()){
                         	 // CustomerCode: startdate; endddate;fulfilment; estimation; color (G or R)
 
                            String id = rs1.getString("kood");
@@ -479,14 +480,17 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                     }
       rs1.close();
       st.close();
-     
+        }catch(Exception e) {
+      	  e.printStackTrace();
+        }
+      
 // kuidas müügis ka lähevad 
 
+        StringBuffer sbcompa = new StringBuffer();
        cmdk = "SELECT * FROM cesu.mjcustomervol  ";
-      
+      try {
           st = con.createStatement();
        rs1 = st.executeQuery(cmdk);
-       StringBuffer sbcompa = new StringBuffer();
                         while(rs1.next()){
                        	 // CustomerCode: startdate; endddate;fulfilment; estimation; color (G or R)
 
@@ -497,6 +501,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                           Double ly = rs1.getDouble("ly_month_vol");
                           Double es = rs1.getDouble("rr_vol");
                           String col = rs1.getString("color").trim();
+                          
                           Double perc = rs1.getDouble("rr_percent");
                          
                           if(ty == null) {
@@ -523,7 +528,9 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                    }
      rs1.close();
      st.close();
-    
+      }catch(Exception e) {
+    	  e.printStackTrace();
+      }
       
       System.out.println("salescompa " + compa.size());
       
