@@ -538,6 +538,7 @@ public class LabbisSkonisImportDriver
 	  /*•	We had 3AS403 and 3TS400 warehouses in Panevėžys
 •	We have 3 managers 3DBV009, 3DBV010 and 3DBV013 in Panevėžys.
 •	We want to make changes in Merisoft – all orders from 3DBV009, 3DBV010 and 3DBV013 managers must go to 1AS203 and 1TS200 (Kaunas city) warehouses.
+change 3DBV009 manager order warehouse – we want this manager to make orders only to 0AS101 and 0TS100 (now it is warehouses 1AS203 and 1TS200).
 */
 	  
 	 // LTSPAMAL004
@@ -554,6 +555,10 @@ public class LabbisSkonisImportDriver
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1TS200";
     	   }
+    	   if(agent.equals("3DBV009")){ //erijuhtum
+    		   ladu =    "0TS100";
+    	   }
+    	   
     	   if(orderware != null) {
     		   if(orderware.equals("0AS")) {
     			   ladu =  "0TS100";
@@ -580,6 +585,9 @@ public class LabbisSkonisImportDriver
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1AS203";
     	   }
+    	   if(agent.equals("3DBV009")){ //erijuhtum
+    		   ladu =    "0AS101";
+    	   }
     	   if(orderware != null) {
     		   if(orderware.equals("0AS")) {
     			   ladu =  "0AS101";
@@ -605,6 +613,9 @@ public class LabbisSkonisImportDriver
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1PS210";
     	   }
+    	   if(agent.equals("3DBV009")){ //erijuhtum
+    		   ladu =    "0PS119";
+    	   }
     	   if(orderware != null) {
     		   if(orderware.equals("0AS")) {
     			   ladu =  "0PS119";
@@ -629,6 +640,9 @@ public class LabbisSkonisImportDriver
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1AS203";
+    	   }
+    	   if(agent.equals("3DBV009")){ 
+    		   ladu =    "4XX002";
     	   }
     	   if(orderware != null) {
     		   if(orderware.equals("0AS")) {
