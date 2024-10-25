@@ -3993,10 +3993,10 @@ if (getProps().getProperty("no.matrixagent") != null) {
            buf.append(EksportPanel.separator);
            
            
-           buf.append(cust.getRegnr());
+           buf.append(cust.getRegnr().replaceAll("\\r\\n|\\r|\\n", " "));
            buf.append(EksportPanel.separator);
 
-           buf.append(cust.getVatnr());
+           buf.append(cust.getVatnr().replaceAll("\\r\\n|\\r|\\n", " "));
            buf.append(EksportPanel.separator);
            
 
