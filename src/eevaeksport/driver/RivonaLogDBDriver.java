@@ -82,11 +82,7 @@ public class RivonaLogDBDriver extends AbstractDBDriver  {
 	 	 }
 	  TreeMap custs = this.getCustomers(null);
 	  
-	  try{
- 		  Converter.sendPodJson(custs,user,pass, company);
- 	 }catch(Exception e){
- 		 e.printStackTrace();
- 	 }
+	 
  	sendShipitDocs(custs);
 	  System.exit(0);
    	return null;

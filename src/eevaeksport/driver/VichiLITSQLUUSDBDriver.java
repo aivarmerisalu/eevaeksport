@@ -824,7 +824,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		
 		try{
 			if(rcompanyx != null)
-			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
 				
 		}catch(Exception e){
 			

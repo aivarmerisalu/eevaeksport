@@ -419,9 +419,7 @@ public class HorizonMuizDBDriver extends AbstractDBDriver  implements Manager,Pr
     agents.put("HOUSE1", aa);
     */
     
-    if(rcompany != null){
-    	Converter.sendAgentJson(agents, rcompany, false);
-    }
+   
 
   //  this.setBulkSales(agents1);
     return agents;

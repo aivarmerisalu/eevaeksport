@@ -165,7 +165,7 @@ public class S1MantingaDBDriver
 	  
 	  
 	  try{
-		   Converter.getManagersReplacements(agents1, rcompany, user, pass); 
+		   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
 	}catch(Exception e){
 
 	}

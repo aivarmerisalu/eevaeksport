@@ -1110,7 +1110,7 @@ System.out.println(cmd);
 		TreeMap<String,Double> odebts = new TreeMap<String, Double>();
 		
 		try{
-			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
 				
 		}catch(Exception e){
 			

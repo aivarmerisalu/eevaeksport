@@ -865,7 +865,7 @@ String email = " ";
         System.out.println("Agents size " + agents1.size() );
         
         try{
-      	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass);
+      	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass, false);
       	        	System.out.println("Agents " + agents1 );
       }catch(Exception e){
       	e.printStackTrace();
@@ -886,7 +886,7 @@ String email = " ";
         
         
         try{
-     	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass);
+     	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass, false);
      	        	
      }catch(Exception e){
      	e.printStackTrace();

@@ -742,10 +742,7 @@ String email = " ";
 	} catch (Exception e) {
 	    getParent().showError(e);
 	}
-        
-        if(rcompany != null){
-	    	Converter.sendAgentJson(agents, rcompany, false);
-	    }
+
         
 	return agents;
     }

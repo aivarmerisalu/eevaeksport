@@ -418,7 +418,7 @@ public class LeiburLATDBDriver extends AbstractDBDriver implements Manager, Prom
 		
 		
 		try{
-			   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+			   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
 				
 		}catch(Exception e){
 			

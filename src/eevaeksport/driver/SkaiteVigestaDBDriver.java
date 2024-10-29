@@ -902,7 +902,7 @@ Statement st = null;
     	  
     	  custBonuses = loadCustBonuses();
     	  try{
-    		   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+    		   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
     	   }catch(Exception e){
     		
     	   }

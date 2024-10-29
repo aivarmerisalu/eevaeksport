@@ -289,10 +289,7 @@ String asi = rs.getString("asi").trim();
         aa.setName("HOUSE");
         agents.put("HOUSE", aa);
 
-        
-        if(rcompany != null){
-	    	Converter.sendAgentJson(agents, rcompany, false);
-	    }
+     
 	return agents;
     }
 

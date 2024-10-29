@@ -952,7 +952,8 @@ public class DaividaDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
     		  e.printStackTrace();
     	  }
      System.out.println("Agendilist tehtud" );
-     Converter.sendAgentJson(tm, country, false);
+
+
      
      Agent sm = new Agent ("HOUSE");
 		       		

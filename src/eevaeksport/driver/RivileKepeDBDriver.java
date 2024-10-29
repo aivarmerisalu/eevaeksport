@@ -826,7 +826,7 @@ HashSet olemas = new HashSet();
     	
     	
     	 try{
-      	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass);
+      	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass, false);
       	        	
       }catch(Exception e){
       	e.printStackTrace();

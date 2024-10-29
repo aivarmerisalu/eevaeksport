@@ -626,7 +626,7 @@ String  cmd = " SELECT \"ItemCode\" as toode ,  \"AvailToOrderQty\" s stock FROM
     TreeMap<String,Double> overDue = new TreeMap<String,Double>();
     try {
     	
-    	 Converter.getManagersReplacements(agent1, rcompany, user , pass);
+    	 Converter.getManagersReplacements(agent1, rcompany, user , pass, false);
     	Connection cc = this.getNewConnection();
     	Statement stmt = cc.createStatement();
       ResultSet rs = stmt.executeQuery(sql);

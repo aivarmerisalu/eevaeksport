@@ -910,7 +910,7 @@ return result;
 	    	  HashMap prgroups = getPrGroups();
 	    	  
 	    	  try{
-	    		   Converter.getManagersReplacements(agents1, rcompany, user, pass); 
+	    		   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
 	    			
 	    	}catch(Exception e){
 	    		e.printStackTrace();

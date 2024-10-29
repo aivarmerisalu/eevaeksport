@@ -5245,7 +5245,7 @@ try{
 	Converter.saveObject(aa, "webagents.trm");
 	//System.exit(0);
 
-	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
 
 
 

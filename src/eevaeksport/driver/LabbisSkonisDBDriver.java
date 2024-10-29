@@ -711,7 +711,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
   
        public TreeMap getCustomers(Agent agent){
 
-    	   Converter.getManagersReplacements(this.getAgents1(), rcompanyx, user , pass);
+    	   Converter.getManagersReplacements(this.getAgents1(), rcompanyx, user , pass, false);
 
     	   ArrayList tech = new ArrayList();
     	   try {

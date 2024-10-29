@@ -741,7 +741,7 @@ TreeMap tr = new TreeMap();
 	        e.printStackTrace();
 	      }
 	 if(rcompany != null){   
-				Converter.getManagersReplacements(agent1, rcompany, user , pass);   
+				Converter.getManagersReplacements(agent1, rcompany, user , pass, false);   
 			 }   
 
      TreeMap tm = new TreeMap();

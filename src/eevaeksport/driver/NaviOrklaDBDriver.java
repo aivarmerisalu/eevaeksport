@@ -612,9 +612,7 @@ if(vv.size() > 2){
 	    	}
 	      }
 
-	    if(rcompany != null){
-	    	Converter.sendAgentJson(agents, rcompany, false);
-	    }
+	   
 	  // this.setBulkSales(agents);
      return agents;
    }
@@ -1068,9 +1066,8 @@ con3.close();
     	     }
     	   
     	   
-    	   if(rcompany != null){
-  			 Converter.sendCustomerJson(tm, rcompany, false,user,pass,true);
-  		    }
+
+
   		
     	   
     	     return tm;
@@ -1269,10 +1266,8 @@ con3.close();
        e.printStackTrace();
      }
      
-     
-     if(rcompany != null){
-     	Converter.sendProductJson(tm, rcompany);
-     }
+
+
      
      return tm;
    }

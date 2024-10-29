@@ -93,7 +93,7 @@ public class RautaLogDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	 	 }
 	  
 	  try{
- 		  Converter.sendPodJson(custs,user,pass, company);
+ 		  Converter.sendPodJson(custs,user,pass, company,false);
  	 }catch(Exception e){
  		 e.printStackTrace();
  	 }
@@ -1398,7 +1398,7 @@ public static String getYYYYpMMpDD(Date dd){
 		 sm.setName("aiku");
 		 tm.put("aiku", sm);
  	
- 	Converter.getManagersReplacements(tm,rcompany,user,pass);
+ 	Converter.getManagersReplacements(tm,rcompany,user,pass, false);
     
  	//System.out.println("Agendilist tehtud " + tm.toString() ); 
     

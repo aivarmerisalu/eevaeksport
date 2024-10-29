@@ -1334,7 +1334,7 @@ System.out.println("Assets serveris " + assets.length());
   
   public TreeMap getCustomers(Agent agent){
 try{
-	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+	   Converter.getManagersReplacements(agent1, rcompany, user, pass, true); 
 }catch(Exception e){
 
 }

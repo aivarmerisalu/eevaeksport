@@ -695,7 +695,7 @@ Statement st = null;
     	   StringBuffer buf = new StringBuffer();
     	  
     	  try{
-    		   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+    		   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
     			
     	}catch(Exception e){
     		

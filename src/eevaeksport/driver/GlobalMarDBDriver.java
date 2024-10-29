@@ -282,9 +282,7 @@ public class GlobalMarDBDriver  extends AbstractDBDriver implements BulkUpdater,
     }catch(Exception e){
     	e.printStackTrace();
     }
-    if(rcompany != null){
-    	Converter.sendAgentJson(agents, rcompany, false);
-    }
+  
     
    return agents;
   }

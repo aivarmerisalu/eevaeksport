@@ -2200,9 +2200,7 @@ while (rs.next()) {
 	    getParent().showError(e);
 	}
 
-	 if(rcompany != null){
-		 Converter.sendProductJson(products, rcompany);
-	    }
+	
 	
 	
 	return products;

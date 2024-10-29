@@ -1078,7 +1078,7 @@ private TreeMap agent1 = new TreeMap();
  try {
 
 try{
-			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
 				
 		}catch(Exception e){
 			

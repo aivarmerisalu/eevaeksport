@@ -489,9 +489,7 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
         }
         connectionDown();
         
-        if(rcompany != null){
-	    	Converter.sendAgentJson(agents, rcompany, false);
-	    }
+       
         return agents;
     }
 

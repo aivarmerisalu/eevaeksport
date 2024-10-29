@@ -703,7 +703,7 @@ TreeMap res = new TreeMap();
     	
     	TreeMap deldays = this.getDeliveryDays();
     	HashMap payments = makePaymentsFile();
-    	  Converter.getManagersReplacements(getAgents1(), rcompany, user , pass);
+    	  Converter.getManagersReplacements(getAgents1(), rcompany, user , pass, false);
         connectionUp(url);
         connectionUp2(url);
        // System.out.println("sort kodes " + this.sortCodes.size());

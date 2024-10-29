@@ -536,9 +536,7 @@ String email = " ";
 	    getParent().showError(e);
 	}
         connectionDown();
-        if(rcompany != null){
-	    	Converter.sendAgentJson(agents, rcompany, false);
-	    }
+     
         
         return agents;
     }

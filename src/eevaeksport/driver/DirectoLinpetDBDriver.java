@@ -2914,10 +2914,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
     prGroups = grups;
     
     
-     if(rcompany != null){
-    	  Converter.sendProductJson(tm, rcompany);
-	    }
-     
+
+
     
        if(sb.length() > 0) {
     	   Converter.saveFileInUTF8("texts.txt", sb);

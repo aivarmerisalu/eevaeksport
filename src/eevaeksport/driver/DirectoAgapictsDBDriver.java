@@ -1395,7 +1395,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	 
 	   
 	   try{
-    	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+    	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
     		
     }catch(Exception e){
     	e.printStackTrace();

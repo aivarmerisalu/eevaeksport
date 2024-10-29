@@ -1109,10 +1109,6 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
 	    getParent().showError(e);
 	}
 	
-	 if(rcompany != null){
-	    	 Converter.sendProductJson(products, rcompany);
-	    	//Converter.sendCustomerJson(customers, rcompany,false,null,null);
-	    }
 	   
 	makeTextFile();
     

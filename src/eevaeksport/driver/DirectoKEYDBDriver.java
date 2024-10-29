@@ -2884,10 +2884,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
     
     prGroups = grups;
     
-    
-     if(rcompany != null){
-    	  Converter.sendProductJson(tm, rcompany);
-	    }
+  
      
     
        if(sb.length() > 0) {

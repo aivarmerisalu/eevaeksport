@@ -5013,7 +5013,7 @@ try{
 	
 	 
 	 
-	public static void sendProductJson(TreeMap tm , String company){
+	public static void sendProductJson(TreeMap tm , String company, boolean https){
 		Vector<MyJSON> json = new Vector<MyJSON> ();
 		
 	  if(company == null){
@@ -5022,6 +5022,10 @@ try{
 	  }
 		MyJSON myson = new MyJSON();
 		myson.setUrl("http://merisoft.ee:8080/rest/product/list/");
+		if(https) {
+
+			myson.setUrl("https://api.mobitrek.eu/rest/product/list/");
+		}
 	  JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		int cou = 0;
@@ -5159,7 +5163,7 @@ try{
 		System.out.println("MYJSON Product 200 " );
 		
 		if(json.size() > 0){
-			setSendRestMsg(json);
+			setSendRestMsg(json,https);
 		}
 		json = new Vector<MyJSON> ();
 		array = new JSONArray();
@@ -5177,7 +5181,7 @@ try{
 		System.out.println("MYJSON PRODUCT " );
 		
 		if(json.size() > 0){
-			setSendRestMsg(json);
+			setSendRestMsg(json,https);
 		}
 		
 	}
@@ -5214,16 +5218,16 @@ try{
 	  return result;
   }
 	
-	
-  public static void getManagersReplacements(TreeMap tm , String company, String user , String pass){
+  public static void getManagersReplacements(TreeMap tm , String company, String user , String pass,boolean https){
 	  eevaeksport.util.ReportingService serv = new ReportingService();
+	  serv.https = https;
 	  serv.user =  user;
 		serv.pass = pass;
 		serv.company = company;
 		
 		try {
 			org.json.JSONArray array = serv.getManagerList();
-		//	System.out.println("oioi "+ array.toString());
+			System.out.println("oioi "+ array.toString());
 		//	throw new Exception("demo"); 
 			try {
 				if(array.toString().contains("replaceManagers")) {
@@ -5739,7 +5743,7 @@ try{
 	
 	
 	
-public static void loadVisitLines(String status,String company, String user , String pass){
+public static void loadVisitLines(String status,String company, String user , String pass, boolean https){
 		
 		try {
 			
@@ -5747,6 +5751,7 @@ public static void loadVisitLines(String status,String company, String user , St
 			  serv.user =  user;
 				serv.pass = pass;
 				serv.company = company;
+				serv.https = https;
 	
 				JSONArray array = serv.getVisitedList(status);
 				Converter.saveFile(  "visitlines" + status + ".json" , array.toString());
@@ -6257,14 +6262,14 @@ public static void loadVisitLines(String status,String company, String user , St
   }
 	
 	
-	public static void sendCustomerJson(TreeMap tm , String company,boolean addRoutes, String user , String pass, boolean sendpartner){
-		sendCustomerJson( tm ,company,addRoutes, user ,  pass, false,sendpartner); 
+	public static void sendCustomerJson(TreeMap tm , String company,boolean addRoutes, String user , String pass, boolean sendpartner,boolean https){
+		sendCustomerJson( tm ,company,addRoutes, user ,  pass, false,sendpartner,https); 
 	}
 		
 	
 	
 	
-	public static void sendCustomerJson(TreeMap tm , String company,boolean addRoutes, String user , String pass, boolean duplicates , boolean sendpartner){
+	public static void sendCustomerJson(TreeMap tm , String company,boolean addRoutes, String user , String pass, boolean duplicates , boolean sendpartner, boolean https){
 		Vector<MyJSON> json = new Vector<MyJSON> ();
 		
 	  if(company == null){
@@ -6282,6 +6287,7 @@ public static void loadVisitLines(String status,String company, String user , St
 			serv.user =  user;
 			serv.pass = pass;
 			serv.company = company;
+			serv.https = https;
 			try {
 				Vector arra = serv.getCustomersCodes();
 		  		for (int i = 0; i < arra.size(); i++) {
@@ -6300,6 +6306,9 @@ public static void loadVisitLines(String status,String company, String user , St
 		
 		MyJSON myson = new MyJSON();
 		myson.setUrl("http://merisoft.eu:8080/rest/customer/list/");
+		if(https) {
+			myson.setUrl("httpa://api.mobitrek.eu/rest/customer/list/");
+		}
 	  JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		
@@ -6633,6 +6642,7 @@ try{
 			serv.user =  user;
 			serv.pass = pass;
 			serv.company = company;
+			serv.https = https;
 		    serv.postJson(deCode(array.toString()), myson.getUrl());
 			serv.closeClient();
 			
@@ -6867,7 +6877,7 @@ try{
 	}
 
 	
-	public static void sendPodJson(TreeMap tm ,String user,String pass, String company){
+	public static void sendPodJson(TreeMap tm ,String user,String pass, String company, boolean https){
 	
 		
 		
@@ -6878,6 +6888,7 @@ try{
 			serv.user =  user;
 			serv.pass = pass;
 			serv.company = company;
+			serv.https = https;
 			try {
 				Vector arra = serv.getPodsCodes();
 		  		for (int i = 0; i < arra.size(); i++) {
@@ -6898,6 +6909,9 @@ try{
 		  return;
 	  }
 		String url = "http://merisoft.eu:8080/rest/pod/list/";
+		if(https) {
+			url = "https://api.mobitrek.eu/rest/pod/list/";
+		}
 	    JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		
@@ -7854,7 +7868,7 @@ try{
 	 
 	
 	
-	public static void sendAgentJson(TreeMap tm , String company, boolean merc){
+	public static void sendAgentJson(TreeMap tm , String company, boolean merc, boolean https){
 		Vector<MyJSON> json = new Vector<MyJSON> ();
 		
 	  if(company == null){
@@ -7863,6 +7877,10 @@ try{
 	  }
 		MyJSON myson = new MyJSON();
 		myson.setUrl("http://merisoft.ee:8080/rest/managers/");
+		if(https) {
+			myson.setUrl("https://api.mobitrek.eu/rest/managers/");
+			
+		}
 	  JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		while (itera.hasNext()){
@@ -7924,18 +7942,19 @@ try{
 //		System.out.println("MYJSON " + array.toString());
 		
 		if(json.size() > 0){
-			setSendRestMsg(json);
+			setSendRestMsg(json,https);
 		}
 		
 	}
 	
 
-	public static void sendSalesJson(ArrayList vec, String company, String user , String pass){
+	public static void sendSalesJson(ArrayList vec, String company, String user , String pass,boolean https){
 		eevaeksport.util.ReportingService serv = new ReportingService();
 		   
 		serv.user =  user;
 		serv.pass = pass;
 		serv.company = company;
+		serv.https = https;
 		
 	  if(company == null){
 		  System.out.println("Add companycode to export.ini for Resting");
@@ -7943,7 +7962,9 @@ try{
 	  }
 		
 	String url = "http://merisoft.eu:8080/rest/dashboard/salesData";
-	
+	if(https) {
+		url = "https://api.mobitrek.eu/rest/dashboard/salesData";	
+	}
 
 	JSONArray array = new JSONArray();
 		Iterator itera = vec.iterator();
@@ -8228,9 +8249,17 @@ try{
 	  
 	
 	
-	public static void setSendRestMsg(Vector<MyJSON> json ){
+	public static void setSendRestMsg(Vector<MyJSON> json, boolean https ){
 		
 		CloseableHttpClient  client = HttpClients.createDefault();
+		if(https) {
+			try {
+				client = TrustAllCertsApache.createHttpClient_AcceptsUntrustedCerts();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 		
 		RequestConfig defaultRequestConfig = RequestConfig.custom()
@@ -8363,6 +8392,25 @@ client.close();
 	} catch (Exception e) {
 	}
 		
+	
+	/*TrustManager[] trustAllCerts = new TrustManager[] {
+new X509TrustManager() {
+public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+return null;
+}
+public void checkClientTrusted(
+java.security.cert.X509Certificate[] certs, String authType) {
+}
+public void checkServerTrusted(
+java.security.cert.X509Certificate[] certs, String authType) {
+}
+}
+};
+
+SSLContext sc = SSLContext.getInstance("SSL");
+sc.init(null, trustAllCerts, new java.security.SecureRandom());
+HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+*/
 	}
 
 	

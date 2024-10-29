@@ -1249,7 +1249,7 @@ sqlo = "   SELECT  jou.orderaccount as agent,case when itemgroupid = 'SALD' then
 	//  System.out.println("budgets " + budgets.toString());
 	  TreeMap displ = getDisplayInfo();
 	  try{
-    	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+    	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
     		
     }catch(Exception e){
     	e.printStackTrace();

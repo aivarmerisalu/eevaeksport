@@ -485,7 +485,7 @@ public class NaviOskarDBDriver extends AbstractDBDriver implements BulkUpdater,D
 	    	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
 	    	
 	    	  try{
-	    		   Converter.getManagersReplacements(agents1, rcompany, user, pass); 
+	    		   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
 	    	}catch(Exception e){
 
 	    	}

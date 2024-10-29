@@ -349,10 +349,7 @@ public class KosmelitaDBDriver extends AbstractDBDriver implements Manager, Prom
 			getParent().showError(e);
 		}
 		
-		System.out.println("p�mmutan " + rcompany);
-		 if(rcompany != null){
-		    	Converter.sendAgentJson(agents, rcompany, false);
-		    }
+	
 		 
 		return agents;
 	}
@@ -368,7 +365,7 @@ public class KosmelitaDBDriver extends AbstractDBDriver implements Manager, Prom
 		TreeMap customers = new TreeMap();
 		try{
 			if(rcompanyx != null)
-			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
 				
 		}catch(Exception e){
 			
@@ -507,9 +504,7 @@ TreeMap groups = new TreeMap();
 			getParent().showError(e);
 		}
 		
-		 if(rcompany != null){
-		    	Converter.sendCustomerJson(customers, rcompany,false,user,pass,true);
-		    }
+	
 		return customers;
 	}
 

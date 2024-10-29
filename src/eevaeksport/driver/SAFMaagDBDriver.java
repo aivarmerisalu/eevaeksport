@@ -1337,7 +1337,7 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
     TreeMap customers = new TreeMap();
     
 	 if(rcompany != null){
-		Converter.getManagersReplacements(aHash, rcompany, user , pass);
+		Converter.getManagersReplacements(aHash, rcompany, user , pass, false);
 	 }
   
     try {

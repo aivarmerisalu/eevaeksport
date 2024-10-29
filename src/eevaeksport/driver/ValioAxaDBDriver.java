@@ -598,7 +598,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		  TreeMap openOrders = this.getOpenOrders();
 		  
 		  try{
-	       	   Converter.getManagersReplacements(agents1, rcompany, user, pass); 
+	       	   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
 	       		
 	       }catch(Exception e){
 	       	e.printStackTrace();

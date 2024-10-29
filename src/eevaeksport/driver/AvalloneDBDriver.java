@@ -526,7 +526,7 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
     	
         custCodes = new Hashtable();
         try{
-     	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+     	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
      		
      }catch(Exception e){
      	e.printStackTrace();

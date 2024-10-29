@@ -499,9 +499,7 @@ StringBuffer sb = new StringBuffer();
 		}
 		  // Converter.sendAgentJson(agents, company, false);
 		     
-		 if(rcompany != null){
-		    	Converter.sendAgentJson(agents, rcompany, false);
-		    }
+	
 
 		Agent ag1 = new Agent("FELIX");
 		ag1.setName("FELIX");

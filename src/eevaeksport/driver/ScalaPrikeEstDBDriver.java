@@ -1100,7 +1100,7 @@ System.out.println("fixed size " + result.size());
         connectionUp(url);
         connectionUp2(url);
         
-        Converter.getManagersReplacements(getAgents1(), rcompany, user , pass);
+        Converter.getManagersReplacements(getAgents1(), rcompany, user , pass, false);
         
         TreeMap sort = getSort();
         System.out.println("sort " + sort.size());

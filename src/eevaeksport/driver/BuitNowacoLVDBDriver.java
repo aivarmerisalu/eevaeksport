@@ -1516,7 +1516,7 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
 	     
  try {
 
-	 Converter.getManagersReplacements(agent1, rcompany, user , pass);
+	 Converter.getManagersReplacements(agent1, rcompany, user , pass, false);
 	 
 	 
 	 System.out.println(agent1.toString());

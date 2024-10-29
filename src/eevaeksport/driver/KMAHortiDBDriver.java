@@ -509,7 +509,7 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 	public TreeMap getCustomers(Agent agent) {
 		
 		
-		 Converter.getManagersReplacements(agents1, rcompany, user , pass);
+		 Converter.getManagersReplacements(agents1, rcompany, user , pass, false);
 			     
 	    	// System.out.println("groups to string " + groups.toString());
 		 TreeMap deldays =  makeCustomerDeliveryFile();

@@ -905,7 +905,7 @@ rs.close();
         + " order by   jou.orderaccount ,YEAR(sal.invoicedate), month(sal.invoicedate) ";
 
            try{
-        	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+        	   Converter.getManagersReplacements(agent1, rcompany, user, pass,true); 
         		
         }catch(Exception e){
         	

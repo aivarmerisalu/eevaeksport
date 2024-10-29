@@ -279,10 +279,7 @@ public class AxaZpienasMilkManaDBDriver extends AbstractDBDriver  implements Man
      }
     
 
-    if(rcompan != null){
-    	Converter.sendAgentJson(agents, rcompan, false);
-    }
-  
+   
     return agents;
   }
  

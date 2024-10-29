@@ -2523,7 +2523,7 @@ private boolean useOldData = false;
  try {
 	      if(this.rcompany != null){
 	    	  
-	    	  Converter.sendCustomerJson(tm, rcompany, false,user,pass,false);
+	    	  Converter.sendCustomerJson(tm, rcompany, false,user,pass,false,false);
 	    	
 	    	  
 	    	     //T�mbame alla k�ikmis meil olemas

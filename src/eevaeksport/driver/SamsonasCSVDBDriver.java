@@ -849,7 +849,7 @@ public class SamsonasCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    
 
     try{
- 	   Converter.getManagersReplacements(agents, rcompany, user, pass); 
+ 	   Converter.getManagersReplacements(agents, rcompany, user, pass, false); 
  		
  }catch(Exception e){
  	

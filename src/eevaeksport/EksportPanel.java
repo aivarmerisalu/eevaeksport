@@ -4960,6 +4960,11 @@ if (getProps().getProperty("no.matrixagent") != null) {
     	 String user =  getProps().getProperty("rest.user");
     	 String   pass = getProps().getProperty("rest.pass");
     	 String   rcompany = getProps().getProperty("rest.companyx");
+    	 String resthttps = getProps().getProperty("rest.https");
+    	 boolean https = false;
+    	 if("true".equals(resthttps)) {
+    		 https = true;
+    	 }
     	 boolean duplicates = true;
     	 boolean sendpartner = false;
     	 try{
@@ -4971,9 +4976,9 @@ if (getProps().getProperty("no.matrixagent") != null) {
     	 }
     	 try{
     		 if("true".equals((getProps().getProperty("rest.loadvisitlines")))){
-    			    Converter.loadVisitLines("plan", rcompany, user, pass);
-    	    	    Converter.loadVisitLines("done", rcompany, user, pass);
-    	    	    Converter.loadVisitLines("extra", rcompany, user, pass);
+    			    Converter.loadVisitLines("plan", rcompany, user, pass,https);
+    	    	    Converter.loadVisitLines("done", rcompany, user, pass,https);
+    	    	    Converter.loadVisitLines("extra", rcompany, user, pass,https);
     	 	 }
     	 }catch(Exception e){
     		 e.printStackTrace();
@@ -4991,20 +4996,20 @@ if (getProps().getProperty("no.matrixagent") != null) {
     	 System.out.println("restalla duplicates " + duplicates);
     	 if(rcompany != null){
     		if(what == null){
-    			 Converter.sendAgentJson(driver.getAgents(), rcompany, false);
-        		 Converter.sendProductJson(driver.getProducts(null), rcompany);
-        		 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, false,user,pass,duplicates,sendpartner );
+    			 Converter.sendAgentJson(driver.getAgents(), rcompany, false, https);
+        		 Converter.sendProductJson(driver.getProducts(null), rcompany , https);
+        		 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, false,user,pass,duplicates,sendpartner , https);
         			
     		}else{
     			if(what.equals("prod")){
-    				 Converter.sendProductJson(driver.getProducts(null), rcompany);
+    				 Converter.sendProductJson(driver.getProducts(null), rcompany , https);
     		    }
     			if(what.equals("cust")){
-    				 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, false,user,pass,duplicates,sendpartner);
+    				 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, false,user,pass,duplicates,sendpartner, https);
     	        			
     			}
     			if(what.equals("custroute")){
-   				 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, true,user,pass,duplicates,sendpartner);
+   				 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, true,user,pass,duplicates,sendpartner, https);
    	        			
    			}
         			
@@ -5018,6 +5023,12 @@ if (getProps().getProperty("no.matrixagent") != null) {
    	 String user =  getProps().getProperty("rest.user");
    	 String   pass = getProps().getProperty("rest.pass");
    	 String   rcompany = getProps().getProperty("rest.companyx");
+
+   	 String   shttps = getProps().getProperty("rest.https");
+   	 boolean https = false;
+   	 if("true".equals(shttps)) {
+   		 https = true;
+   	 }
    	 boolean duplicates = true;
    	 try{
    		 if("false".equals((getProps().getProperty("rest.duplicates")))){
@@ -5030,7 +5041,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
    	 
    	 if(rcompany != null){
    		if (driver instanceof RestSalesSender){
-   		 Converter.sendSalesJson(((RestSalesSender) driver).getSalesData(),rcompany, user, pass);
+   		 Converter.sendSalesJson(((RestSalesSender) driver).getSalesData(),rcompany, user, pass, https);
   	     }
    		}
    	

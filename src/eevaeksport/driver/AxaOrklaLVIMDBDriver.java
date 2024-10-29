@@ -1079,9 +1079,7 @@ String  cmd = " SELECT summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS 
     agents.put("HOUSE1", aa);
     */
     
-    if(rcompany != null){
-    	Converter.sendAgentJson(agents, rcompany, false);
-    }
+   
     return agents;
   }
 

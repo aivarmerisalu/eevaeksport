@@ -3959,7 +3959,7 @@ private TreeMap afterOrders = null;
 		 }
 		 
 		 if(rcompany != null){
-			Converter.getManagersReplacements(agent1, rcompany, user , pass);
+			Converter.getManagersReplacements(agent1, rcompany, user , pass, false);
 		 }
 		 
 	     if(makedata){

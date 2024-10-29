@@ -1114,12 +1114,7 @@ String email = " ";
     		
     	}
       }
-    
 
-    if(rcompany != null){
-    	Converter.sendAgentJson(agents, rcompany, false);
-    }
-  
    // setBulkSales(agents);
     
     return agents;

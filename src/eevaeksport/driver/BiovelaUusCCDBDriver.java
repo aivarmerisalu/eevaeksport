@@ -1608,7 +1608,7 @@ public class BiovelaUusCCDBDriver extends AbstractDBDriver implements BulkUpdate
     		  e.printStackTrace();
     	  }
      System.out.println("Agendilist tehtud" );
-     Converter.sendAgentJson(tm, country, false);
+   
      
      Agent sm = new Agent ("HOUSE");
 		       		

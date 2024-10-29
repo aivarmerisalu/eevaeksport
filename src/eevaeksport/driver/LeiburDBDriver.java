@@ -449,12 +449,7 @@ public class LeiburDBDriver extends AbstractDBDriver implements Manager, Promo,
 		} catch (Exception e) {
 			getParent().showError(e);
 		}
-		
-		System.out.println("p�mmutan " + rcompany);
-		 if(rcompany != null){
-		    	Converter.sendAgentJson(agents, rcompany, false);
-		    }
-		 
+	
 		return agents;
 	}
 
@@ -465,7 +460,7 @@ public class LeiburDBDriver extends AbstractDBDriver implements Manager, Promo,
 	public TreeMap getCustomers(Agent agent) {
 		TreeMap customers = new TreeMap();
 		try{
-			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
 				
 		}catch(Exception e){
 			
@@ -756,9 +751,7 @@ TreeMap groups = new TreeMap();
 			getParent().showError(e);
 		}
 		
-		 if(rcompany != null){
-		    	Converter.sendCustomerJson(customers, rcompany,false,user,pass,true);
-		    }
+		
 		return customers;
 	}
 

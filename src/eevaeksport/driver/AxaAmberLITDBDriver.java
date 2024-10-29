@@ -1015,7 +1015,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
   
   public TreeMap getCustomers(Agent agent){
 try{
-	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+	   Converter.getManagersReplacements(agent1, rcompany, user, pass, true); 
 		
 }catch(Exception e){
 	e.printStackTrace();

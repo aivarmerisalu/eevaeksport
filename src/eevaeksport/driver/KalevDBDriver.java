@@ -810,7 +810,7 @@ StringBuffer sb = new StringBuffer();
 	
 	public TreeMap getCustomers(Agent agent) {
 		if(rcompanyx != null){
-			Converter.getManagersReplacements(getAgents1(), rcompanyx, user , pass);
+			Converter.getManagersReplacements(getAgents1(), rcompanyx, user , pass, false);
 		}
 		
 		  TreeMap openOrders = this.getOpenOrders();

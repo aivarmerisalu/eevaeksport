@@ -933,7 +933,7 @@ public class VichiLITMercDBDriver extends AbstractDBDriver implements
 	public TreeMap getCustomers(Agent agent) {
 		
 		try{
-			   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+			   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
 				
 		}catch(Exception e){
 			

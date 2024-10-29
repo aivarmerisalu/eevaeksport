@@ -2149,7 +2149,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 
         try{
         	if(rcompanyx != null) {
-     	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+     	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
         	}
      }catch(Exception e){
      	

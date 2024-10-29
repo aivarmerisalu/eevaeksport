@@ -1413,7 +1413,7 @@ rs.close();
 
 	     TreeMap discs = new TreeMap(); 
  try {
-	 Converter.getManagersReplacements(agents1, rcompany, user , pass);
+	 Converter.getManagersReplacements(agents1, rcompany, user , pass, false);
 	 String cmd = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS summa FROM apyvarta a INNER JOIN klientai b ON b.klientas=a.gavejas " +
       " where a.terminas < CURRENT_DATE()  group by b.kodas having sum(skola_w) != 0 " ;
 System.out.println(cmd);

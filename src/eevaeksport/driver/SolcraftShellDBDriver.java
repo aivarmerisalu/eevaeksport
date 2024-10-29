@@ -1015,10 +1015,6 @@ public class SolcraftShellDBDriver extends AbstractDBDriver implements Discounte
             getParent().showError(e);
         }
         
-        if(rcompany != null){
-         	Converter.sendCustomerJson(customers, rcompany,true,user,pass,true);
-         }
-        
         
         System.out.println("kliendid l�petan ");
         return customers;

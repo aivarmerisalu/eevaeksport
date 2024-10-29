@@ -642,7 +642,7 @@ private HashMap phones = new HashMap();
 	//	getDegu();
 		
 		try{
-			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
 				
 		}catch(Exception e){
 			

@@ -1151,7 +1151,7 @@ if(grupp.equals("leib") ){
 	   HashSet diff = getTopVisit();
 	  TreeMap displ = getDisplayInfo();
 	  try{
-    	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+    	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
     		
     }catch(Exception e){
     	e.printStackTrace();

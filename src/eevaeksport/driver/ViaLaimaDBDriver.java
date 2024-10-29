@@ -775,9 +775,7 @@ try{
 			e.printStackTrace();
 		}
 		
-		if(rcompany != null){
-	    	Converter.sendAgentJson(tm, rcompany, false);
-	    }
+	
 		return tm;
 	}
 

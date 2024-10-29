@@ -689,7 +689,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
     	
     	
     	 try{
-       	   Converter.getManagersReplacements(getAgents1(), rcompanyx, user, pass); 
+       	   Converter.getManagersReplacements(getAgents1(), rcompanyx, user, pass, false); 
        		
        }catch(Exception e){
        	

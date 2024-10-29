@@ -227,7 +227,6 @@ public class KalevMercDBDriver extends AbstractDBDriver implements Manager, Prom
 			stmt.close();
 			con.close();
 
-			Converter.sendAgentJson(agents, company, true);
 		} catch (Exception e) {
 			getParent().showError(e);
 		}
@@ -298,7 +297,7 @@ public class KalevMercDBDriver extends AbstractDBDriver implements Manager, Prom
 		
 		HashMap saamata = new HashMap();
 		if(rcompanyx != null){
-			Converter.getManagersReplacements(getAgents1(), rcompanyx, user , pass);
+			Converter.getManagersReplacements(getAgents1(), rcompanyx, user , pass, false);
 		}
 		
 

@@ -1589,10 +1589,7 @@ public static String getYYYYpMMpDD(Date dd){
 	} catch (IOException e) {
 		e.printStackTrace();
 	}
-	
-     if(rcompany != null){
-	    	Converter.sendAgentJson(tm, rcompany, false);
-	    }
+
     
      return tm;
    }
@@ -2923,7 +2920,7 @@ public static String getYYYYpMMpDD(Date dd){
    public TreeMap getCustomers(Agent agent){
 	   
 	   readOBJ();
-	   Converter.getManagersReplacements(agents2, rcompanyx, user , pass);
+	   Converter.getManagersReplacements(agents2, rcompanyx, user , pass, false);
 
 	   
 	   debts = new Vector();
@@ -3097,9 +3094,9 @@ public static String getYYYYpMMpDD(Date dd){
 	 		   System.out.println("volg seis " + debts.size());
 
 	 		  if("true".equals((parent.getProps().getProperty("rest.loadvisitlines")))){
-  			    Converter.loadVisitLines("plan", rcompanyx, user, pass);
-  	    	    Converter.loadVisitLines("done", rcompanyx, user, pass);
-  	    	    Converter.loadVisitLines("extra", rcompanyx, user, pass);
+  			    Converter.loadVisitLines("plan", rcompanyx, user, pass,false);
+  	    	    Converter.loadVisitLines("done", rcompanyx, user, pass,false);
+  	    	    Converter.loadVisitLines("extra", rcompanyx, user, pass,false);
   	 	 }
 	   
 	   

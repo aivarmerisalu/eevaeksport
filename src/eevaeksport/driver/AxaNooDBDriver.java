@@ -682,7 +682,7 @@ Connection con = this.getNewConnection();
         + " order by   jou.orderaccount ,YEAR(sal.invoicedate), month(sal.invoicedate) ";
 
            try{
-        	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+        	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
         		
         }catch(Exception e){
         	e.printStackTrace();

@@ -385,9 +385,7 @@ Vector olemas = new Vector();
     Agent aa = new Agent ("HOUSE1");
     aa.setName("HOUSE1");
     agents.put("HOUSE1", aa);
-    if(rcompany != null){
-    	Converter.sendAgentJson(agents, rcompany, false);
-    }
+  
     return agents;
   }
 
@@ -395,7 +393,7 @@ Vector olemas = new Vector();
   
   public TreeMap getCustomers(Agent agent){
 
-	  Converter.getManagersReplacements(agent1, rcompanyx, user , pass);
+	  Converter.getManagersReplacements(agent1, rcompanyx, user , pass, false);
 	  
  String cmd = " select kl.kli_kod as kood , adr.adr_kod as akood, kl.kli_pav as name ,adr.adr_pav1 as aadress, " +
 " adr_poz5 as adragent, kli_poz1 as agent, kli_tel as info, ats_ko1 as term,kli_sko as debt ,KLI_KRE as credit ,kl.klr_kod as hinnak " + 
@@ -1021,9 +1019,7 @@ Vector olemas = new Vector();
     }
     
     
-    if(rcompany != null){
-    	Converter.sendProductJson(products, rcompany);
-    }
+    
 
     return products;
   }

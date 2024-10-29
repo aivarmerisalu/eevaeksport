@@ -913,11 +913,7 @@ String email = " ";
         agents.put("HOUSE", aa);
         
 
-		// Converter.sendProductJson(products, company);
-        if(rcompany != null){
-	    	Converter.sendAgentJson(agents, rcompany, false);
-	    }
-        
+	
         return agents;
     }
 
@@ -930,7 +926,7 @@ String email = " ";
         connectionUp(url2);
         System.out.println("Kliendid");
         try{
-        	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass);
+        	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass, false);
         	        	
         }catch(Exception e){
         	e.printStackTrace();

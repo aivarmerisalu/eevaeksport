@@ -1056,7 +1056,7 @@ if(grupp.equals("leib") ){
 	  TreeMap budgets = getCustPlans();
 	  TreeMap openOrders = new TreeMap();
 	  try{
-    	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+    	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
     		
     }catch(Exception e){
     	e.printStackTrace();

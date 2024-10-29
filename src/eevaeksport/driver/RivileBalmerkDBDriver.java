@@ -57,6 +57,7 @@ public class RivileBalmerkDBDriver extends AbstractDBDriver implements  BulkUpda
      * @param parent
      *
      * @see
+     * 
      */
     public RivileBalmerkDBDriver(EksportPanel parent) {
         super(parent);
@@ -802,7 +803,7 @@ HashSet olemas = new HashSet();
     	
     	
     	 try{
-      	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass);
+      	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass, false);
       	        	
       }catch(Exception e){
       	e.printStackTrace();

@@ -623,9 +623,7 @@ private Hashtable custCodes = null;
             getParent().showError(e);
         }
 
-        if(rcompany != null){
-         	Converter.sendCustomerJson(customers, rcompany,true,user,pass,true);
-         }
+    
         
         
         return customers;

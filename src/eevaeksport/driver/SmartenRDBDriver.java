@@ -857,7 +857,7 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 	  
 	  try{
 		  if(rcompanyx != null)
-    	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass); 
+    	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
         } catch(Exception e){
         }
   	

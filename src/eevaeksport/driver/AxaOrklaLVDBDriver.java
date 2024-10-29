@@ -968,7 +968,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
   public TreeMap getCustomers(Agent agent){
 	  
 	  try{
-   	   Converter.getManagersReplacements(agents1, rcompanyx, user, pass); 
+   	   Converter.getManagersReplacements(agents1, rcompanyx, user, pass, false); 
    		
    }catch(Exception e){
    	e.printStackTrace();

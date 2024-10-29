@@ -833,7 +833,7 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
 			}
     System.out.println("contacted "+ contacted.size()); 
       try{
-       	   Converter.getManagersReplacements(agents1, rcompany, user, pass); 
+       	   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
        		
        }catch(Exception e){
        	e.printStackTrace();

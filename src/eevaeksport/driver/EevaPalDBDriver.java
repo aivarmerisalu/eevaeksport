@@ -421,7 +421,7 @@ String email = " ";
         agent1 = new TreeMap();
         
         try{
-      	   Converter.getManagersReplacements(agent1, rcompany, user, pass); 
+      	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
       		
       }catch(Exception e){
       	e.printStackTrace();
