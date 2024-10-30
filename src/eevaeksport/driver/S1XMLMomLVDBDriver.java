@@ -439,9 +439,10 @@ public class S1XMLMomLVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	 		         	  for (int j = 0; j < debtsNode.getChildNodes().getLength(); j++){
 	 		         		  Node strida = debtsNode.getChildNodes().item(j);
 	 			         	  if(strida.getNodeName().equals("Stock")){
+	 			         		  try {
 	 			         		String stn  = getNode(strida,"StockName").getFirstChild().getNodeValue();
 	 			         		Double am   = Double.parseDouble(getNode(strida,"Inventory").getFirstChild().getNodeValue());
-	 			         		if(stn.equals("Pamata noliktava")) {
+	 			         		if(stn.indexOf("u nol. ''VIA 3L Latvia''") != -1) {
 	 			         			try {
 	 			         			  tt.setKogus(am);
 	 			         			 products.append(prodid +  ";");
@@ -454,6 +455,9 @@ public class S1XMLMomLVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	 			         			//System.out.println("ridu  " + stn);
 	 			         			lisa = lisa + stn + " : "+  parent.getNF().format(am) + "|";
 	 			         		}
+	 			         		  }catch(Exception e) {
+	 			         			  
+	 			         		  }
 	 			         	  }
 	 			          	}
 	 		         	
