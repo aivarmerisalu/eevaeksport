@@ -2070,6 +2070,77 @@ con.close();
                for (Iterator iter = wr.getInfo().getLines().iterator(); iter.hasNext(); ) {
             	
             	   eevaeksport.report.SuperVisorLineWrapperMeri lw = new eevaeksport.report.SuperVisorLineWrapperMeri(iter.next());
+            	   
+            	   
+            	   
+            	   
+            	   boolean inventuur = false;
+            	   
+            	   String res = lw.getLine().getResStr1();
+            	              	   
+            	              	   if(res!= null  && res.startsWith("INVSCAN")){
+            	                 	     inventuur = true;
+            	                      }
+            	              	   //kui on inventuur siis see 
+            	              	   if(inventuur) {
+
+            	   					Calendar cal = Calendar.getInstance();
+            	   					try {
+            	   						cal.setTimeInMillis(Long.parseLong(lw.getLine().getResStr3()));
+            	   					} catch (Exception e) {
+            	   					
+            	   					}
+
+            	              		   String cuid = lw.getLine().getCustID();
+            	              		   String agid = wr.getInfo().getAgentID();
+            	              		   String invent = lw.getLine().getAction1Eval() +""; 
+            	              		   String tehas = lw.getLine().getResStr1();
+            	              		   String comm = lw.getLine().getComment();
+            	   					String cc = lw.getLine().getCustComment();
+            						if (cc == null) {
+            							cc = " ";
+            						}
+            						
+            						String cd = lw.getLine().getComment();
+            						if (cd == null) {
+            							cd = " ";
+            						}
+            	              		   double amount = 1;
+            	              			String sb =  wr.getInfo().getAgentID() + ";;"
+            	           					 + lw.getLine().getCustID()+  ";"  +
+            	           					   ";"  ;	
+            	           				     sb = sb + (cal.getTime().toGMTString()) + ";" + lw.getLine().getResStr2() + ";" +  Converter.deCode(cc) + ";" +  Converter.deCode(cd); 
+            	           				     sb = sb + ";" + lw.getLine().getAction1Eval() + ";" + lw.getLine().getAction2Eval();//long,latt
+            	           				
+            	                      		   System.out.println("inventuur olemas " + sb);
+            	                      		 String sql = "INSERT into alc.MJ_INVENTUUR values ("
+            	                                     + "?, "   //   datetime
+            	                                     + "?, "   //   agentid	C(50),
+            	                                     + "?,"   //   clientid	C(50),
+            	                                     + "?,"   //   itno	C(200),
+            	                                     + "?,"   //   serial	C(200),
+            	                                     + "?,"   //   PVnum	C(200),
+            	                                     + "?,"   //   qty	C(200),
+            	                                     + "?)";   //   comm	C(200),
+            	                      		PreparedStatement ps = c.prepareStatement(sql);
+            	                            Connection c2 =  getNewConnection();
+            	                            ps.setTimestamp(1, new java.sql.Timestamp(cal.getTimeInMillis()));
+            	                            ps.setString(2, agid);
+            	                            ps.setString(3, cuid);
+            	                            ps.setString(4,  lw.getLine().getResStr2());
+            	                            ps.setString(5,  lw.getLine().getResStr2());
+            	                            ps.setString(6, cc);
+            	                            ps.setInt(7, 1);
+            	                            ps.setString(8, comm); 
+            	                            ps.executeUpdate();	 
+            	                   
+            	                    ps.close();
+            	                    c2.close();
+            	              	   } else {
+            	   
+            	   
+            	   
+            	   
             		kuhu = "supervisorsh";
                 	 fixing = false;
                      pv = false;
@@ -2236,6 +2307,7 @@ con.close();
                }
                
                c.close();
+               }
            } catch (SQLException e) {
                e.printStackTrace();
            }

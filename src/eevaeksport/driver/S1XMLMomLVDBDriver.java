@@ -1267,7 +1267,7 @@ private HashMap prodsGUID = new HashMap();
 		 				}
 		 				
 		 			  }
-		 			if("false".equals(ProdBlocked)) {
+		 			if("false".equals(ProdBlocked) && !prod.getID().startsWith("080")) {
 		 				tm.put(Converter.cleanLitLatEst(ProdDesc + prod.getUnit() + prod.getID()), prod);
 		 			}
 					 
@@ -1361,7 +1361,7 @@ private HashMap prodsGUID = new HashMap();
 		         			         		 //System.out.println(prodGUID + " " + prodLastDate);
 		         			         		 String prodid = (String) prodsGUID.get(prodGUID);
 		         			         		 
-		         			         		 if(prodid != null && prodid.length() > 0){
+		         			         		 if(prodid != null && prodid.length() > 0 && !prodid.startsWith("080")){
 		         			         			CustProd cp = new CustProd(custid, prodid, prodQty ,0 ,0,prodLastDate,prodLastPrice,0,0," ");
 		         			         			 cp.setAbiKood(prodInvNo);
 			         			         			custProds.add(cp);

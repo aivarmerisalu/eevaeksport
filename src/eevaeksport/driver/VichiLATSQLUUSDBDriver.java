@@ -657,7 +657,7 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 				
 				
 				
-				String  cmd = " Select kood , sum(kogus) as kogus from lat_litstock  group by kood ";
+				String  cmd = " Select kood , sum(kogus) as kogus from MobileJavaLAT.LAT_Litstock  group by kood ";
 				Connection con = getNewConnectionView();
 				Statement stmt = con.createStatement();
 				ResultSet rs = stmt.executeQuery(cmd);
@@ -665,12 +665,15 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 					String toode = null;
 					double seis = 0;
 					
-					toode = rs.getString("kood").trim();
+					toode = rs.getString("kood");
+							if(toode != null) {
+						toode = 	toode.trim();
 					seis = rs.getDouble("kogus");
 					products.append(toode + "; ;");
 					products.append((seis + "").substring(0, (seis + "").indexOf("."))
 							+ "; ; ; \n");
 					prods.put(toode, seis);
+							}
 				}
 
 				rs.close();
@@ -1444,17 +1447,9 @@ cn.close();
 		try {
 		
 
-			String cmd7 = " select sd.[Code] as kood ,[Line Discount %] as disc from [Vičiūnai-LAT$Sales Line Discount] sd "
-					+ " where getdate() between [Starting Date] and [Ending Date] +1 ";
-
-			Connection con = null;
-			if(view) {
-				cmd7  = "select * from MobileJavaLAT.v_LAT_GetDiscount";
-				con = this.getNewConnectionView();
-			} else {
-     		   con =  getNewConnection2();
-     	    }
-			
+				String cmd7  = "select * from MobileJavaLAT.v_LAT_GetDiscount";
+				Connection	con = this.getNewConnectionView();
+						
 			Statement	stmt = con.createStatement();
 		ResultSet	rs = stmt.executeQuery(cmd7);
 			while (rs.next()) {
@@ -1479,21 +1474,17 @@ cn.close();
 		
 	try {
 
-		String cmd7 = " select * from lat_litstock ";
 		
+		String	cmd7  = "select * from MobileJavaLAT.LAT_Litstock";
+			Connection con = this.getNewConnectionView();
 		
-		Connection con = null;
-		if(view) {
-			cmd7  = "select * from MobileJavaLAT.LAT_Litstock";
-			con = this.getNewConnectionView();
-		} else {
- 		   con =  getNewConnection2();
- 	    }
 		Statement	stmt = con.createStatement();
 		ResultSet	rs = stmt.executeQuery(cmd7);
 		
 			while (rs.next()) {
-				String toode = rs.getString("kood").trim();
+				String toode = rs.getString("kood");
+				if(toode != null) {
+					toode = toode.trim();
 				double seis = rs.getDouble("kogus");
 				String part = rs.getString("bestbefore").trim();
 				if(partiid.get(toode) == null) {
@@ -1501,7 +1492,7 @@ cn.close();
 				}else {
 					partiid.put(toode, partiid.get(toode) + "[" +seis + "] " + part + "|");
 				}
-				
+				}
 			}
 
 			rs.close();

@@ -1838,6 +1838,33 @@ con.close();
                for (Iterator iter = wr.getInfo().getLines().iterator(); iter.hasNext(); ) {
             	
             	   eevaeksport.report.SuperVisorLineWrapperMeri lw = new eevaeksport.report.SuperVisorLineWrapperMeri(iter.next());
+            	   
+            	   boolean inventuur = false;
+            	   
+ String res = lw.getLine().getResStr1();
+            	   
+            	   if(res!= null  && res.startsWith("INVSCAN")){
+               	     inventuur = true;
+                    }
+            	   //kui on inventuur siis see 
+            	   if(inventuur) {
+            		   String cuid = lw.getLine().getCustID();
+            		   String agid = lw.getLine().getCustAgentId();
+            		   String invent = lw.getLine().getAction1Eval() +""; 
+            		   String tehas = lw.getLine().getResStr1();
+            		   String comm = lw.getLine().getComment();
+            		   double amount = 1;
+            		   
+            		   
+                    		   System.out.println("inventuur olemas " + cuid + ";" + agid + ";" + invent + ";" + tehas +";"+ comm + ";" +
+                    				   lw.getLine().getAction1Eval() + ";" + lw.getLine().getAction2Eval());
+            		  System.exit(0); 
+            	   }else {
+            		   
+            	   
+            	   
+            	   
+            	   
             		kuhu = "supervisorsh";
                 	 fixing = false;
                      pv = false;
@@ -2004,9 +2031,13 @@ con.close();
                }
                
                c.close();
+               }
+               
+               
            } catch (SQLException e) {
                e.printStackTrace();
            }
+           
          }
 
 

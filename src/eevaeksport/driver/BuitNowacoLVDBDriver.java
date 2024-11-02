@@ -1833,7 +1833,8 @@ System.out.println(cmd);
                    customer.addAgent(new Agent("176"));
                    customer.addAgent(new Agent("318"));	 
                    customer.addAgent(new Agent("227"));	 
-                   customer.addAgent(new Agent("228"));	 
+                   customer.addAgent(new Agent("228"));	
+                   customer.addAgent(new Agent("356"));	
              }
             	 
           
