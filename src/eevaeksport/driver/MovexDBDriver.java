@@ -1320,6 +1320,33 @@ while (rs2.next()){
          getParent().showError(e);
      }
 
+	 try {
+  StringBuffer pvcodes = new StringBuffer();
+
+	        String  sql = " SELECT MLBANO FROM alc.mj_EQUIPMENT GROUP BY MLBANO  " ;
+
+	          if (isDebug()) System.out.println(sql);
+	          
+	             Connection con1 = getNewConnection();
+	             Statement stm = con1.createStatement();
+	             ResultSet rst = stm.executeQuery(sql);
+
+	               while (rst.next()) {
+	                 String toode = rst.getString("MLBANO").trim();
+	                 pvcodes.append(toode+"\n");
+	               }
+	               
+	             rst.close();
+	             stm.close();
+	             con1.close();
+
+	             Converter.saveFile("pvcodes.txt", pvcodes.toString());
+	             
+	     } catch (Exception e) {
+	         getParent().showError(e);
+	     }
+
+  	 
     // Leiame soodused 
      
      Vector abikad = new Vector();
@@ -2096,9 +2123,19 @@ con.close();
             	              		   String invent = lw.getLine().getAction1Eval() +""; 
             	              		   String tehas = lw.getLine().getResStr1();
             	              		   String comm = lw.getLine().getComment();
+            	              		   String itemno = lw.getLine().getResStr2();
+            	              		  String serial = lw.getLine().getResStr2();
+            	              		  
+            	              		  
+            	              		  
             	   					String cc = lw.getLine().getCustComment();
             						if (cc == null) {
             							cc = " ";
+            						}
+            						
+            						if(cc.indexOf("||") != -1) {
+            							itemno = cc.substring(0,cc.indexOf("||"));
+            							cc = cc.substring(cc.indexOf("||")+2);
             						}
             						
             						String cd = lw.getLine().getComment();
@@ -2127,8 +2164,8 @@ con.close();
             	                            ps.setTimestamp(1, new java.sql.Timestamp(cal.getTimeInMillis()));
             	                            ps.setString(2, agid);
             	                            ps.setString(3, cuid);
-            	                            ps.setString(4,  lw.getLine().getResStr2());
-            	                            ps.setString(5,  lw.getLine().getResStr2());
+            	                            ps.setString(4,  itemno);
+            	                            ps.setString(5, serial );
             	                            ps.setString(6, cc);
             	                            ps.setInt(7, 1);
             	                            ps.setString(8, comm); 

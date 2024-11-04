@@ -1203,6 +1203,33 @@ while (rs2.next()){
           getParent().showError(e);
       }
 
+	 try {
+  StringBuffer pvcodes = new StringBuffer();
+
+  String  sql = " SELECT MLBANO FROM alc.mj_EQUIPMENT GROUP BY MLBANO  " ;
+
+  
+	          if (isDebug()) System.out.println(sql);
+	          
+	             Connection con1 = getNewConnection();
+	             Statement stm = con1.createStatement();
+	             ResultSet rst = stm.executeQuery(sql);
+
+	               while (rst.next()) {
+	                 String toode = rst.getString("MLBANO").trim();
+	                 pvcodes.append(toode+"\n");
+	               }
+	               
+	             rst.close();
+	             stm.close();
+	             con1.close();
+
+	             Converter.saveFile("pvcodes.txt", pvcodes.toString());
+	             
+	     } catch (Exception e) {
+	         getParent().showError(e);
+	     }
+     
     // (case when substr(t.MMITNO,1,1)='1' then substr(t.MMITNO,2,6) else t.MMITNO end)
     String cmd = "SELECT t.MMITNO AS kood,t.MMITNO AS ABI, " +
 " t.MMITDS AS nimetus,(CASE WHEN mucofa IS NULL then t.MMCFI2 ELSE mucofa end ) AS tykke , '' AS maxale , " +
