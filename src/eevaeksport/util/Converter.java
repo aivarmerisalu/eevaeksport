@@ -3605,17 +3605,18 @@ public class Converter {
 							
 						 Row row = sheet.getRow(i);
 						 for(int y = 2 ; y < 15 ;y++) {
-								Cell cellx = row.getCell((short)y);
+							 try {
+							 Cell cellx = row.getCell((short)y);
 								if(cellx != null) {
-									try {
+									
 									System.out.println("Elektra " + cellx.getStringCellValue());
 									if(formatter.formatCellValue(cellx).indexOf("A+") != -1  && reanr == 4) {
 										reanr = i;
 										sortasuk = y;
 									}
+								}
                            }catch(Exception e) {
 									//e.printStackTrace();
-								}
 								}	
 							}
 						 
