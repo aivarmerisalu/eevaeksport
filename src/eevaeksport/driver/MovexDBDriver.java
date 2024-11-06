@@ -2125,9 +2125,25 @@ con.close();
             	              		   String comm = lw.getLine().getComment();
             	              		   String itemno = lw.getLine().getResStr2();
             	              		  String serial = lw.getLine().getResStr2();
+            	              		  String foundCode = lw.getLine().getProdName();
             	              		  
+            	              		  int uuspv = 1;
+            	              		  if(lw.getLine().isAction()) {
+            	              			  uuspv = 0;
+            	              		  }
+            	              		if (foundCode.indexOf("Inventory") != -1) {
+            	              			foundCode = serial;
+            	              		}
             	              		  
-            	              		  
+            	              		String sb =  wr.getInfo().getAgentID() + ";" + serial + " ;"
+           	           					 + lw.getLine().getCustID()+  ";uuspv "  + uuspv + " brand"+ lw.getLine().isBrand()
+           	           					 + " group"+ lw.getLine().isGroup()
+           	           					 + " action"+ lw.getLine().isAction()
+           	           					+ " part"+ lw.getLine().isPartner();//long,latt
+            	              		
+            	              	  if(!lw.getLine().isPartner()) {
+        	              			  serial = "";
+        	              		  }
             	   					String cc = lw.getLine().getCustComment();
             						if (cc == null) {
             							cc = " ";
@@ -2143,11 +2159,7 @@ con.close();
             							cd = " ";
             						}
             	              		   double amount = 1;
-            	              			String sb =  wr.getInfo().getAgentID() + ";;"
-            	           					 + lw.getLine().getCustID()+  ";"  +
-            	           					   ";"  ;	
-            	           				     sb = sb + (cal.getTime().toGMTString()) + ";" + lw.getLine().getResStr2() + ";" +  Converter.deCode(cc) + ";" +  Converter.deCode(cd); 
-            	           				     sb = sb + ";" + lw.getLine().getAction1Eval() + ";" + lw.getLine().getAction2Eval();//long,latt
+            	              		
             	           				
             	                      		   System.out.println("inventuur olemas " + sb);
             	                      		 String sql = "INSERT into alc.MJ_INVENTUUR values ("
@@ -2158,17 +2170,21 @@ con.close();
             	                                     + "?,"   //   serial	C(200),
             	                                     + "?,"   //   PVnum	C(200),
             	                                     + "?,"   //   qty	C(200),
-            	                                     + "?)";   //   comm	C(200),
+            	                                      + "?,"   //   comm	C(200),
+            	                                       + "?,"   //   uuspv	C(200),
+            	                                     + "?)";   //   skannitud
             	                      		PreparedStatement ps = c.prepareStatement(sql);
             	                            Connection c2 =  getNewConnection();
             	                            ps.setTimestamp(1, new java.sql.Timestamp(cal.getTimeInMillis()));
             	                            ps.setString(2, agid);
             	                            ps.setString(3, cuid);
             	                            ps.setString(4,  itemno);
-            	                            ps.setString(5, serial );
+            	                            ps.setString(5, foundCode );
             	                            ps.setString(6, cc);
             	                            ps.setInt(7, 1);
             	                            ps.setString(8, comm); 
+            	                            ps.setInt(9, uuspv);
+            	                            ps.setString(10, serial);
             	                            ps.executeUpdate();	 
             	                   
             	                    ps.close();

@@ -1161,7 +1161,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
   		         	 // System.out.println("node name " + rida.getNodeName());
   		         	 // if(rida.getNodeName().equals("order")){
   		         		
-  			         	
+  			         try {	
   			         	  String id = rida.getAttributes().getNamedItem("ccode").getNodeValue();
   	  			    	  String arve = rida.getAttributes().getNamedItem("webid").getNodeValue();
   	  			    	  
@@ -1258,7 +1258,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		  			    	}
 	  			    	  }
   	  			        }}
-  	  				
+  			          }catch(Exception rr) {
+ 			    		  rr.printStackTrace();
+ 			    	  }
 	  			        }
   		       
   	  			      
