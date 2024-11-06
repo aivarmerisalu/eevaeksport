@@ -552,7 +552,7 @@ public class SamsonasCSVImportDriver
 			    		String resp = sendOrderAPI(json);
 			    		Converter.saveFile(parent.getProps().getProperty("imp.read")+  respd + "response-"+  fn +"_" + order.getCompany() + "_" + getDateString2(Calendar.getInstance()) + ".json", resp);
 			    		//System.exit(0); 
-			    		if(resp.length() < 40) {
+			    		if(resp.length() < 40 && !resp.contains("\"Result\":\"ok\"")) {
 			    			System.exit(0);
 			    		}
 			    	}catch(Exception e) {

@@ -1198,54 +1198,10 @@ String picts = parent.getProps().getProperty("pict.dir");
          try {
         	 
         	 
-    
 
-           String cmd2 =
-               "SELECT I44_KODAS_MS AS agent, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
-              " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
-              " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
-              " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_mok<=getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr "+
-                " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_MS order by I44_KODAS_MS ";
-
-        	 
-           String cmd3 =
-               "SELECT I44_KODAS_MS AS agent, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
-              " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
-              " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
-              " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok<=getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr "+
-                " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_MS order by I44_KODAS_MS ";
-
-        	 
-
-      
-
-       HashMap voladkoik = new HashMap ();
-       HashMap voladyle = new HashMap ();
-       stmt = con.prepareStatement(cmd2);  
-     ResultSet	      rs = stmt.executeQuery();
-     while(rs.next()) {
-    	 String agent = rs.getString("agent");
-    	 if(agent != null && agent.trim().length() > 0){
-    		 int volg = rs.getInt("summa");
-    		 voladyle.put(agent.trim(), volg);
-    	 }
-     }
-     rs.close();
-           
-          
-     stmt = con.prepareStatement(cmd3);  
-     	      rs = stmt.executeQuery();
-     while(rs.next()) {
-    	 String agent = rs.getString("agent");
-    	 if(agent != null && agent.trim().length() > 0){
-    		 int volg = rs.getInt("summa");
-    		 voladkoik.put(agent.trim(), volg);
-    	 }
-     }
-     rs.close();
      
      stmt = con.prepareStatement(cmd); 
-          rs = stmt.executeQuery();
+     ResultSet    rs = stmt.executeQuery();
              while(rs.next()) {
             	 
                String agentID = rs.getString("agent").trim();
@@ -1256,26 +1212,6 @@ String picts = parent.getProps().getProperty("pict.dir");
                Agent agent = (Agent)agents.get(agentID);
                if (agent != null){
                  agent.setMonthSales((int)rs.getDouble("pluss"));
-                 
-                 int yldvolg = 0;
-                 int overvolg = 0;
-                 if(voladyle.get(agentID)!= null){
-                	 overvolg = Integer.parseInt(""+voladyle.get(agentID));
-                 }
-                 
-                 if(voladkoik.get(agentID)!= null){
-                	 yldvolg = Integer.parseInt(""+voladkoik.get(agentID));
-                 }
-                 
-                 if(overvolg != 0){
-                	// agent.setStart("Pradelstos skolos : " +overvolg + " eur|" ); 
-                  }          
-
-                 if(yldvolg != 0){
-                	 //agent.setStart(agent.getStart() + "Visa skola : " +yldvolg + " eur.|" );
-                  }
-                 
-                 
                }
              }
              rs.close();
