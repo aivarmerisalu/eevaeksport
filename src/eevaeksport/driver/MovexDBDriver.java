@@ -2092,7 +2092,6 @@ con.close();
            try {	
           	
          
-          	 Connection c =  getNewConnection();
           
                for (Iterator iter = wr.getInfo().getLines().iterator(); iter.hasNext(); ) {
             	
@@ -2173,8 +2172,11 @@ con.close();
             	                                      + "?,"   //   comm	C(200),
             	                                       + "?,"   //   uuspv	C(200),
             	                                     + "?)";   //   skannitud
+            	                      		 
+
+            	                          	 Connection c =  getNewConnection();
             	                      		PreparedStatement ps = c.prepareStatement(sql);
-            	                            Connection c2 =  getNewConnection();
+            	                            
             	                            ps.setTimestamp(1, new java.sql.Timestamp(cal.getTimeInMillis()));
             	                            ps.setString(2, agid);
             	                            ps.setString(3, cuid);
@@ -2188,11 +2190,13 @@ con.close();
             	                            ps.executeUpdate();	 
             	                   
             	                    ps.close();
-            	                    c2.close();
-            	              	   } else {
+            	                    c.close();
+            
+            	     } else {
             	   
             	   
-            	   
+
+                      	 Connection c =  getNewConnection();
             	   
             		kuhu = "supervisorsh";
                 	 fixing = false;
@@ -2357,9 +2361,10 @@ con.close();
                   ps2.close();
                   ps.close();
                   c2.close();
-               }
+
+                  c.close();
+            	     }
                
-               c.close();
                }
            } catch (SQLException e) {
                e.printStackTrace();

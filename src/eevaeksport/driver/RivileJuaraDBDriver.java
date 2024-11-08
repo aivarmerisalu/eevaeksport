@@ -1190,7 +1190,7 @@ String picts = parent.getProps().getProperty("pict.dir");
        String cmd = " SELECT  I06_KODAS_MS AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + " +
                      "SUM(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh  WHERE " +
                      "month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) and I06_PERKELTA='2'" +
-                     " and I06_R_DATE <= getdate() " +
+                     " and I06_R_DATE <= getdate() and I06_OP_TIP != '55' " +
                      "GROUP BY  I06_KODAS_MS";
 
        log(cmd);

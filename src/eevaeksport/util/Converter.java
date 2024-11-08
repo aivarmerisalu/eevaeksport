@@ -3,11 +3,10 @@ package eevaeksport.util;
 import java.awt.Color;
 
 import java.awt.Graphics2D;
-
-
-
-
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
+import java.awt.image.ColorModel;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -1756,7 +1755,10 @@ public class Converter {
 										break;
 									}
 									if(gg.toLowerCase().indexOf("ean") != -1) {
-										ea = a;
+										if(ea == 0) {
+										  ea = a;
+										//System.out.println(gg +  " " + a);
+										}
 									}
 									if(gg.toLowerCase().indexOf("i kirjeldus") != -1) {
 										ni = a;
@@ -1790,7 +1792,7 @@ public class Converter {
 							}
 						}
 						
-						//System.out.println("Groups " +  groups.size());
+						System.out.println("Groups ea " +  ea);
 						
 						
 						for(int i = pais+1 ; i < sheet.getLastRowNum()+1;i++){
@@ -1801,7 +1803,7 @@ public class Converter {
 								if(ean.length() > 13) {
 									ean = ean.substring(1);
 								}
-								 System.out.println("Sees  '" + ean + "'" + ean.trim());
+								 System.out.println("Sees  '" + ean + "'" + formatter.formatCellValue(row.getCell(ea)).trim());
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
 							 
@@ -1825,8 +1827,7 @@ public class Converter {
                              
                               
                               if(value.trim().length() > 0 && (value.toLowerCase().trim().equals("x") || value.trim().equals("1")  || value.trim().equals("Yes"))) {
-                              	 System.out.println("Sees " +a + " " + value + " '" + ean + "' " + pood + " " + tnimi);
-                              
+                              	
 							if(res.get(pood) != null){
                   	  con = (Contract)res.get(pood);
                   	 } 
@@ -8673,14 +8674,28 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		   }
 	   }
 		
-       	 
         
        	if(inb != null){
 
-           	BufferedImage newImage = new BufferedImage(inb.getWidth(), inb.getHeight(), BufferedImage.TYPE_INT_RGB);
-           	Graphics2D g = newImage.createGraphics();
-           	g.drawImage(inb, 0, 0, null);
-           	g.dispose();
+       		BufferedImage newImage ;
+       		ColorModel colorModel = inb.getColorModel();
+       		ColorSpace colorSpace = colorModel.getColorSpace();
+
+       	  System.out.println("Color Space: " + colorSpace + " Type: " + colorSpace.getType());
+
+            if (colorSpace.getType() == ColorSpace.TYPE_CMYK) {
+                System.out.println("CMYK Detected: Converting to RGB");
+                ColorConvertOp op = new ColorConvertOp(colorSpace, ColorSpace.getInstance(ColorSpace.CS_sRGB), null);
+                newImage = new BufferedImage(inb.getWidth(), inb.getHeight(), BufferedImage.TYPE_INT_RGB);
+                op.filter(inb, newImage);
+            } else {
+                // No conversion needed, just create RGB BufferedImage
+                newImage = new BufferedImage(inb.getWidth(), inb.getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics2D g = newImage.createGraphics();
+                g.drawImage(inb, 0, 0, null);
+                g.dispose();
+            }
+       		
            	inb.flush();
            	 File outputfile = new File(out);
            	 ImageIO.setUseCache(false);
@@ -8702,7 +8717,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
          		System.out.println("Muudan suurust " + bb.getWidth() + " " + in);
          		try{
          			
-         		    bb.getResizedToWidth(size).writeToJPG(new File(out), 0.8f);//.soften(0.95f)
+         		   bb.getResizedToWidth(size).writeToJPG(new File(out), 0.8f);//.soften(0.95f)
                    			
          		} catch (Exception ioe) {
          		    ioe.printStackTrace();
