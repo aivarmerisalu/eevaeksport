@@ -116,7 +116,7 @@ System.out.println(sql);
   //   mlines = new Vector();//getFixedAssortmentData();
     // grupid = this.pggroups; 
      
-     logurl = "https://directo.gate.ee/xmlcore/";
+     logurl = "https://login.directo.ee/xmlcore/";
      if( parent.getProps().getProperty("logurl") != null){
      	  logurl = parent.getProps().getProperty("logurl");
      }

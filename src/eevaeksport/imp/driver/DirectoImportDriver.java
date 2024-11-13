@@ -63,7 +63,7 @@ public class DirectoImportDriver extends AbstractImportDriver{
     mlines = getFixedAssortmentData();
     grupid = this.getProdGroups();
    
-    logurl = "https://directo.gate.ee/xmlcore/";
+    logurl = "https://login.directo.ee/xmlcore/";
     if( parent.getProps().getProperty("logurl") != null){
     	  logurl = parent.getProps().getProperty("logurl");
     }

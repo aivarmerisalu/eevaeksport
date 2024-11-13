@@ -888,7 +888,7 @@ try{
 	 	    data += "&" + URLEncoder.encode("xmldata", "UTF-8") + "=" + URLEncoder.encode(order_xml, "UTF-8");
 	 	    // Send data
 	 	   Converter.doTrustToCertificates();
-	 	    URL url = new URL("https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp");
+	 	    URL url = new URL("https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp");
 	 	    URLConnection conn = url.openConnection();
 	 	    conn.setDoOutput(true);
 	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());

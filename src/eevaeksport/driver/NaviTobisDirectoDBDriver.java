@@ -3495,7 +3495,6 @@ TreeMap sorting = new TreeMap();
 	   while(enums.hasNext()){
 		String custid = (String)enums.next();
 		   try{
-			  // String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
 			   Converter.doTrustToCertificates();
 			   custid = Converter.deCode(custid);
 			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
@@ -4555,7 +4554,6 @@ if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
 	   while(enums.hasMoreElements()){
 		String custid = (String)enums.nextElement();
 		   try{
-			  // String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
 			   Converter.doTrustToCertificates();
 			   custid = Converter.deCode(custid);
 			   String cuurl =  URLEncoder.encode(custid, "UTF-8");

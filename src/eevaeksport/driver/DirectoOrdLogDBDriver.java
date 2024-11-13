@@ -878,7 +878,7 @@ public class DirectoOrdLogDBDriver extends AbstractDBDriver implements BulkUpdat
 
 	     
        try{
-       	String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
+       	String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
        	
        	Converter.doTrustToCertificates();
            URL myurl = new URL(httpsURL);
@@ -914,7 +914,7 @@ public class DirectoOrdLogDBDriver extends AbstractDBDriver implements BulkUpdat
            System.out.println("Tootegrupid tehtud" );
            //algab Hinnakirja faili moodustamine
            
-           httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=priceformula";
+           httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=priceformula";
            myurl = new URL(httpsURL);
            con = (HttpsURLConnection)myurl.openConnection();
            ins = con.getInputStream();
@@ -952,7 +952,7 @@ public class DirectoOrdLogDBDriver extends AbstractDBDriver implements BulkUpdat
            
            //algab tootede faili moodustamine
            
-            httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=item";
+            httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=item";
             myurl = new URL(httpsURL);
             con = (HttpsURLConnection)myurl.openConnection();
             ins = con.getInputStream();
@@ -986,7 +986,7 @@ public class DirectoOrdLogDBDriver extends AbstractDBDriver implements BulkUpdat
            System.out.println("Tooted tehtud" );
            //algab kliendi faili moodustamine
            
-           httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=customer";
+           httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=customer";
            myurl = new URL(httpsURL);
            con = (HttpsURLConnection)myurl.openConnection();
            ins = con.getInputStream();
@@ -1320,7 +1320,7 @@ public class DirectoOrdLogDBDriver extends AbstractDBDriver implements BulkUpdat
 
 	   Vector result = new Vector();
 	   try{
-			String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice_row&get=1&number=" + number;
+			String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice_row&get=1&number=" + number;
 		       // System.out.println("httpsURL " + httpsURL);
 				URL myurl = new URL(httpsURL);
 		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
@@ -1768,7 +1768,7 @@ public class DirectoOrdLogDBDriver extends AbstractDBDriver implements BulkUpdat
 		String custid = (String)enums.nextElement();
 		
 		   try{
-			 	String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice&get=1&customer=" + custid;
+			 	String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice&get=1&customer=" + custid;
 		      // System.out.println(httpsURL);
 			 	Converter.doTrustToCertificates();
 			 	URL myurl = new URL(httpsURL);
@@ -1894,9 +1894,9 @@ public class DirectoOrdLogDBDriver extends AbstractDBDriver implements BulkUpdat
 	   while(enums.hasMoreElements()){
 		String custid = (String)enums.nextElement();
 		   try{
-			  // String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
+			  // String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
 			   Converter.doTrustToCertificates();
-				String httpsURL = "https://directo.gate.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice&get=1&customer=" + custid;
+				String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice&get=1&customer=" + custid;
 		     //  System.out.println(httpsURL);
 				URL myurl = new URL(httpsURL);
 		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
