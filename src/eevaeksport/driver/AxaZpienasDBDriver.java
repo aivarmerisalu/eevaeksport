@@ -1046,7 +1046,7 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
               StringTokenizer stag = new StringTokenizer(agentAGENTS, ",");
    	    while(stag.hasMoreTokens()){  	
    	    	agent.addDubbler(stag.nextToken());
-            System.out.println("Lisan Duubleid " + agent.getID() + " " + agent.getDubbler().toString());
+          //  System.out.println("Lisan Duubleid " + agent.getID() + " " + agent.getDubbler().toString());
    	       }
             }
 
@@ -1817,7 +1817,7 @@ try{
 
 
         
-        
+      //  cust.setMakeAmountRounding(false);
         
         
         Vector grupp = (Vector)fixGroups.get( accountnum);
@@ -1960,7 +1960,7 @@ try{
         }
         String rounding = rs.getString("samm");
         if (rounding != null && rounding.trim().equals("2")) {
-          cust.setMakeAmountRounding(true);        
+         // cust.setMakeAmountRounding(true);        
         }
         
         if(aled.get(cust.getID())!= null){
@@ -1974,7 +1974,7 @@ try{
         	}else{
         		cust.setCity(cust.getCity() + "| Tipas :" + tyyp.trim());
         	}
-          cust.setMakeAmountRounding(true);        
+         // cust.setMakeAmountRounding(true);        
         }
         
         String tyyp2 = rs.getString("tyyp2");
@@ -2420,7 +2420,7 @@ try{
     String cmd = " SELECT inv.itemid, inv. namealias AS nimetus, sui.qty  AS kastis,'' AS alusel, disc.amount AS price " +
   "     , bar.itembarcode AS ean ,inv.CATEGORYPRODUCTLINE_BBS AS grupp2, inv.CATEGORYINVENTGROUP_BBS   AS grupp , "
   + " ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 21 as vat , " +
-  "   0  as samm ,sortcode as sorting  ,  0 as nosales  FROM  inventtable inv  " +
+  "   multipleqty  as samm ,sortcode as sorting  ,  0 as nosales FROM  inventtable inv  " +
   "       left  JOIN  pricedisctable disc ON inv.itemid = disc.itemrelation  and " +
   "   disc.amount != 0  and (disc.todate>getdate()  or   YEAR(disc.todate) =1900)  and disc.accountcode='2' and disc.currency = 'EUR' and disc.dataareaid='zp' " +
   "      left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  " +
@@ -2430,7 +2430,7 @@ try{
  "     sui.type=0  AND sui.dataareaid='zp' and   sui.qty > 1 " +
 "   left join EcoResCategory e on  inv. CATEGORYINVENTGROUP_BBS= e.recid " +
  "  left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension " + 
-		"	 and  dimensionattribute = 5637146830 " +
+		"	 and  dimensionattribute = 5637146830 left join InventItemSalesSetup ss on  inv.itemid= ss.itemid  " +
   "    WHERE   moduletype=2 and (blocked = 0 or blocked is null) and  inv.dataareaid='zp'  and ( Assortment_bbs = 1 " + addsql + " )  ";
     //z p algusega
   
@@ -2512,7 +2512,10 @@ try{
        prod.setVat("21");
     }
 
-     
+      Double samm = rs.getDouble("samm");
+      if(samm > 1) {
+    	  prod.setOptAmountInUnits(samm);
+      }
       
       String top = rs.getString("sorting");
       if(top != null && top.trim().length()>0 && top.trim().equals("TOP")){
