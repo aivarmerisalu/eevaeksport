@@ -1202,7 +1202,7 @@ cn.close();
 			Connection con = null;
 			if(view) {
 				sql  = "select [Ship-to-address code] as aad1 ,[Ship-to address Name] as name2, [Ship-to address Contact] as kont,[Sales Channel New] as channel, [Customer blocked] as blokk2 , "
-						+ " * from MobileJavaLAT.v_LAT_Customers";
+						+ " [Delivery time till] as timex , * from MobileJavaLAT.v_LAT_Customers";
 				con = this.getNewConnectionView();
 			} else {
      		   con =  getNewConnection2();
@@ -1217,6 +1217,7 @@ cn.close();
 				String kont = "";
 				String chan = "";
 				String blokk2 = "";
+				String timex = "";
 				
 				boolean goes = true;
 				
@@ -1229,7 +1230,10 @@ cn.close();
 			 if("Invoice".equals(blokk2)) {
 				// goes = false;
 			 }
-			           
+			 
+			 timex = rs.getString("timex");
+			     
+			 
 				}
 				
 				
@@ -1422,7 +1426,10 @@ cn.close();
 		           if(chain != null && chain.trim().length()>0){
 		               customer.setChain(Converter.enCodeEst(chain.trim()));   
 		           }
-				// customer.setPayer(id);
+			
+		           if (timex != null && timex.trim().length() > 0) {
+						customer.setCity(timex);
+					}
 			
 		          if(goes) {
 		            tm.put(customer.getName() + id, customer);

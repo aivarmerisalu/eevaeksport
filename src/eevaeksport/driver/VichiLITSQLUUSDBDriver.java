@@ -1016,7 +1016,8 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		TreeMap tm = new TreeMap();
 		this.customers = new ArrayList();
 
-		String sql = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2,k.[Ship-to-address code] as kood3 , k.nimi as nimi2, k.[Ship-to address name]  as nimi3, k.aadress as aadress12 ,k.kood as payer2 , k.agent as agent2 , k.* from" + 
+		String sql = "SELECT k.kood as kood1 ,k.[Ship-to Address ILN] as kood2,k.[Ship-to-address code] as kood3 , k.nimi as nimi2, k.[Ship-to address name]  as nimi3, k.aadress as aadress12 ,k.kood as payer2 ,"
+				+ " k.agent as agent2 , [Delivery time till] as timex  , k.* from" + 
 				"				 MobilejavaVIK.v_VIK_Customers k	" ;
 
 		System.out.println(sql);
@@ -1125,6 +1126,13 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 			        }
 				
 
+				   String timex = rs.getString("timex");
+
+					if (timex != null && timex.trim().length() > 0) {
+						customer.addCity(timex);
+					}
+
+				   
 				if (rs.getString("blokk").equals("1")) {
 					customer.setSalesBlock(true);
 				}
