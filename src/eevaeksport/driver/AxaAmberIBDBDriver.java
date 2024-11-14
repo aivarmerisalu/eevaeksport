@@ -1613,6 +1613,7 @@ int i = 0;
 
   stm.close();
     } catch (Exception e){
+    	System.exit(0);
       getParent().showError(e);
     }
     

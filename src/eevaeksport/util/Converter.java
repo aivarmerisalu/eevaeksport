@@ -6309,7 +6309,7 @@ public static void loadVisitLines(String status,String company, String user , St
 		MyJSON myson = new MyJSON();
 		myson.setUrl("http://merisoft.eu:8080/rest/customer/list/");
 		if(https) {
-			myson.setUrl("httpa://api.mobitrek.eu/rest/customer/list/");
+			myson.setUrl("https://api.mobitrek.eu/rest/customer/list/");
 		}
 	  JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
@@ -6404,7 +6404,7 @@ try{
 		}
 	
 	if(ccc.getChain()!= null && ccc.getChain().trim().length() > 0 ){
-		System.out.println(ccc.getChain());
+		//System.out.println(ccc.getChain());
 		JSONArray arrayx = new JSONArray();
 		JSONObject valuex = new JSONObject();
 		valuex.put("code", ccc.getChain());
@@ -6602,11 +6602,13 @@ try{
 					serv.user =  user;
 					serv.pass = pass;
 					serv.company = company;
+					serv.https = https;
 				    serv.postJson(deCode(array.toString()), myson.getUrl());
 					serv.closeClient();
 					
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+
+					System.out.println(deCode(array.toString()));
 					e.printStackTrace();
 				}
 		}
@@ -6650,7 +6652,7 @@ try{
 			
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println(deCode(array.toString()));
 			e.printStackTrace();
 		}
        //  setSendRestMsg(json);
