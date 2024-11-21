@@ -1211,7 +1211,7 @@ try{
             if(kordaja != null && kordaja > 0) {
         	  //  price = price * kordaja;
             }
-            if(kordaja < 1 ) {
+            if(kordaja < 0 ) {
             	kordaja = 1.0;
             }
             if(ladutr.get(id) != null ){
@@ -1252,15 +1252,19 @@ try{
              	if(discou != null && discou.trim().length()>0){
                 prod.setMaxDiscount(Double.parseDouble(discou));
                 }
+             	double alla = kordaja;
+             	if(kordaja < 1) {
+             		alla = 1;
+             	}
 
                 double	cases = rs.getDouble("kastis");
                 	if(cases>0){
-                      prod.setInCases(cases/kordaja);
+                      prod.setInCases(cases/alla);
                 	}
                
                 double	kihis = rs.getDouble("layer");
                  	if(kihis>0){
-                       prod.layer = (kihis/kordaja);
+                       prod.layer = (kihis/alla);
                  	}
 
                 	
