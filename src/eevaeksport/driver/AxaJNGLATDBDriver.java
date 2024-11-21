@@ -489,10 +489,104 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
+          HashSet hh = new HashSet();
+               
+          // leiame need mis on kahekordsed ja siis välistame teised läbi HH et ei tule topelt ridu kui overlapib
+            try {
+            	 String sql1 = " select  itemrelation , accountrelation , min(fromdate) as fdate, max(todate) as tdate , max(percent1) as perc,max(amount) as amount," + 
+            	 		" max(relation) as relation,max(description) as descr, datediff(day,min(fromdate),max(todate)) as paev ,datediff(day, getdate() ,max(todate) ) as tillend , \r\n" + 
+            	 		"                    		   datediff(day, min(fromdate),  getdate()) as fromst\r\n" + 
+            	 	
+            	 		" from getprices where ((getdate() between fromdate-6 and todate) \r\n" + 
+            	 		"                    		 or ( getdate() > fromdate-6 ) )and todate > '1900-01-01 00:00:00.000' group by accountrelation ,itemrelation\r\n" + 
+            	 		"							  having count (itemrelation) > 1  order by accountrelation,itemrelation";
+                  
+          	   Connection con = getNewConnection();
+              	Statement stmt = con.createStatement();
+                    ResultSet rs = stmt.executeQuery(sql1);
+
+                    while (rs.next()) {
+                  	        String prodID = rs.getString("itemrelation");
+                  	        String custGR = rs.getString("accountrelation");
+                            String algus = rs.getString("fdate");
+                            String lopp = rs.getString("tdate");
+                            double perc = rs.getDouble("perc");
+                            double price = rs.getDouble("amount");
+                        
+                            int relation = rs.getInt("relation");
+                            String camp = rs.getString("descr");
+                            int paev = rs.getInt("paev");
+                            int tillend = rs.getInt("tillend");
+                            int fromst =  rs.getInt("fromst");
+                            MatrixLine mline = new MatrixLine();
+                            
+                            String check = "";
+                            
+                            
+                            if (custGR != null && custGR.trim().length() > 1) {
+                                    mline.setCliGroup(custGR.trim());
+                                    check = check + custGR.trim();
+                            }
+                         
+                            if (prodID != null && prodID.trim().length() > 1) {
+                                    mline.setProdID(prodID.trim());
+                                    check = check + prodID.trim();
+                            }
+                            if (perc != 0) {
+                                mline.setDiscount(perc);
+                            }
+
+                            if (price != 0) {
+                                    mline.setPrice(price);
+                            }
+                            if((paev > 1 && paev < 90) || relation == 8) {
+                          	    
+                                   if (lopp != null && lopp.trim().length() > 0  && !lopp.trim().contains("1900")) {
+                                       mline.setEndDate(lopp.trim().substring(0,10));
+                                       // panin sisse et poleks algust kui pole lõppu .
+                                       if (algus != null && algus.trim().length() > 0 && !algus.trim().contains("1900")) {
+                                           mline.setStartDate(algus.trim().substring(0,10));
+                                       }
+                                   } 
+                            }
+                            
+                            if(camp != null && camp.trim().length() > 0 && camp.trim().startsWith("MAGAZ")) {
+                           	 mline.setLineinfo(camp);
+                           	  if(tillend < 6) {
+                           		 mline.setLineinfo(camp+"|"+tillend + "end");
+                                }
+                           	  if(fromst < 0) {
+                          	 	 mline.setLineinfo(camp+"|"+fromst + "start");
+                                }
+                            } else {
+                                if(tillend < 6) {
+                              	  mline.setLineinfo(tillend + "end");  
+                                }
+                                if(fromst < 0) {
+                              	  mline.setLineinfo(fromst + "start");  
+                                }  
+                            }
+                       
+                            if(!hh.contains(check)){
+                          	  lines.add(mline);  
+                            }
+                          
+                            hh.add(check);
+                    }
+                    rs.close();
+                    stmt.close();
+                    con.close();
+            } catch (SQLException ex) {
+            ex.printStackTrace();
+            }          
+          
+          
+          
+          
+          // siin leiame kõik mis ei ole topelt 
          String sql = " select  * , datediff(day,fromdate,todate) as paev ,datediff(day, getdate() ,todate ) as tillend , " + 
          		"   datediff(day, fromdate,  getdate()) as fromst from getprices where (getdate() between fromdate-6 and todate) " + 
          		" or ( getdate() > fromdate-6 ) order by accountrelation,relation desc,itemrelation ";
-        HashSet hh = new HashSet();
           try {
 
         	   Connection con = getNewConnection();
