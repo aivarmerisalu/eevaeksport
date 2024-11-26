@@ -581,7 +581,7 @@ BulkUpdater, Discounter,PictureMaker,RestSalesSender,FixLoader {
 	"   or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
 	"   or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) "+
 	"   or( GETDATE()<=PRI.TODATE+1) )  and pri.AMOUNT > 0.01 and PRI.ACCOUNTRELATION   like '%Stan%' " +
-	"    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation";
+	"    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation, pri.AMOUNT desc";
                   
             
                   

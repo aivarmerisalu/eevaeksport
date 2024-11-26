@@ -3,7 +3,9 @@ package eevaeksport.driver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.CallableStatement;
@@ -68,7 +70,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter, FixReporter ,WebReporter {
+public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater, Discounter, FixReporter ,WebReporter ,PictureMaker{
   public AxaZpienasDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -103,6 +105,112 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
   /**
    *
    */
+  
+	@Override
+	public void PictureMaker() {
+		makePictureCat();
+		 System.exit(0);
+		
+	}
+	  private void copyPictures() {
+		  String pictsorig = parent.getProps().getProperty("pict.dirorig");
+		  String pictssou = parent.getProps().getProperty("pict.dir");
+		  
+		  
+		  File res2 = new File (pictsorig);
+          String[] ff2 = res2.list();
+          
+          for(int i = 0; ff2.length>i; i++){
+        	
+        	  String toode =  ff2[i];
+        	  File f = new File(pictsorig + toode);
+        	
+        	  if(f.isDirectory()) {
+        		  File ori = new File(pictsorig + toode + "\\262.png");
+        		  File out = new File(pictssou + toode + ".png");
+        		  
+        		  System.out.println("catalogue file " + ff2[i] + ori.exists() + " 1" + pictsorig + toode + "\\262.png");
+        		  if(ori.exists()) {
+        			  try {
+						Converter.copyFile(ori, out);
+						  System.out.println("catalogue copy " + ff2[i]);
+					} catch (Exception e) {
+					
+						e.printStackTrace();
+					}
+        		  }
+        		 
+        		  
+        	  }
+        
+           }
+       
+	  }
+	
+	  private void makePictureCat(){
+		  
+		 // copyPictures();
+	  	    
+	    	
+	    	String pictssou = parent.getProps().getProperty("pict.dir");
+	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	       
+	  	 try {
+     	  
+          File f = new File(pictspda +"list.txt");
+          if (f.exists())f.delete();
+          //Kataloogi sisude kustutamine
+      	 	 File res2 = new File (pictspda);
+	             String[] ff2 = res2.list();
+	         	 for(int i = 0;ff2.length>i;i++){
+	             	(new File ( pictspda + ff2[i])).delete(); 
+	             }
+//	         	 Lõppes kustutamine 
+	  		 
+	  		 TreeMap prods = this.getProducts(null);
+
+	         StringBuffer buf = new StringBuffer();
+	         Iterator enume = prods.keySet().iterator();
+	    
+	         while (enume.hasNext()) {
+	    	    	String asi = (String)enume.next();
+	    	    	Product prod = (Product)prods.get(asi);
+	    	    	String toode = prod.getID().trim();  
+	    	    
+	               if(toode.length() > 0){
+	                	
+	    	   	  res2 = new File (pictssou);
+	              ff2 = res2.list();
+	             
+	         	 for(int i = 0;ff2.length>i;i++){
+	             	if( ff2[i].startsWith(toode )){
+	               // System.out.println("pilt olemas " + ff2[i]);
+	            	File in = new File ( pictssou + ff2[i]); 
+	              	if(in.isFile()){
+	              	File inpda = new File ( pictspda + prod.getID()+ ".png");
+	              	if(!inpda.exists()){
+	                  	Converter.shrinkAndCopyFile(in,inpda,400);
+            	    if(buf.toString().indexOf(prod.getID()+".png;"  + inpda.length()) == -1){
+	                    		buf.append(prod.getID()+".png;"  + inpda.length() + "\n");
+	                    	}
+            	  	}   }
+	                 }
+	               }
+	             }
+	       }
+	         try {
+     		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+     		os.write(buf.toString());
+     		os.close();
+     	  }catch (Exception ex) {
+     		ex.printStackTrace();
+     	  }
+	  	 
+	  	 } catch (Exception e) {
+	    	    getParent().showError(e);
+	    	}
+	     
+	  }
   
   
   private void saveAssetFile() {

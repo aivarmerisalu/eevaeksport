@@ -575,6 +575,19 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
               // System.out.println("pilt olemas " + ff2[i]);
            	File in = new File ( pictssou + ff2[i]); 
              	if(in.isFile()){
+             		if(in.getName().toLowerCase().endsWith("png")) {
+             		 	File inpda = new File ( pictspda + toode+ ".png");
+                     	if(!inpda.exists() || (inpda.exists() && inpda.lastModified() < in.lastModified())){ // kui on 72h ja uuem
+                        	if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
+                     			Converter.copyFile(in,inpda);
+                     		}else {
+                     			Converter.shrinkAndCopyFile(in,inpda,600);
+                     		}
+                       	 }
+                     	buf.append(toode +".png;"  + inpda.length() + "\n");
+                   	
+                     	 			
+             		}else {
              	File inpda = new File ( pictspda + toode+ ".jpg");
              	if(!inpda.exists() || (inpda.exists() && inpda.lastModified() < in.lastModified())){ // kui on 72h ja uuem
                 	if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
@@ -583,11 +596,11 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
              			Converter.shrinkAndCopyFile(in,inpda,600);
              		}
                	 }
-             	
-             	
-           		buf.append(toode +".jpg;"  + inpda.length() + "\n");
+             	buf.append(toode +".jpg;"  + inpda.length() + "\n");
            	
+             	
              	   }
+             	}
                 }
               }
             }
