@@ -959,7 +959,7 @@ private String getEan(String toode){
 		      OutputFormat of = new OutputFormat();
 		        of.setIndenting(true);
 		        of.setLineSeparator(System.getProperty("line.separator"));
-		        of.setEncoding("ISO-8859-1");
+		        of.setEncoding("Windows-1257");// ///ISO-8859-1
 		        XMLSerializer ser = new XMLSerializer(of);
 		        FileOutputStream fos = new FileOutputStream(fileName);
 		        PrintWriter out = new PrintWriter(fos);
