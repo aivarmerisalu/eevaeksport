@@ -1144,7 +1144,7 @@ try {
     String cmd = "  SELECT inv.itemid, inv. namealias AS nimetus, DISPLAYVALUE  AS kastis,'' AS alusel, 0 AS price \r\n" + 
     		"    		       ,CATEGORY AS grupp2, PARENTCATEGORY  AS grupp , \r\n" + 
     		"    		   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat ,  \r\n" + 
-    		"    		    0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp FROM  inventtable inv  \r\n" + 
+    		"    		    0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp , '' as tester FROM  inventtable inv  \r\n" + 
     		"    			 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
     		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('" + prodHierID + "')  \r\n" + 
     		"    			 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
@@ -1255,6 +1255,12 @@ try {
          arr.add(prod.getID());
          lineDiscs.put(prgrupp.trim(), arr);
        }
+      
+      String tester = rs.getString("tester");
+      if(tester != null && tester.trim().length()>0 ){
+    	  prod.setDiffColor(true);
+    	  //tester.button
+      }
       
        if(stocksOld != null && stocksOld.get(prod.getID()) != null) {
     	   prod.setStock(stocksOld.get(prod.getID()));

@@ -102,6 +102,10 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
 		  //OrderHeaders
 		//  OrderId     OrderAccount                                       SalesTaker                                         OrderDate               DeliveryDate            Notes                                                                                                Reference                                          Ready 
 		   
+		  
+		 if( tEsters == null) {
+			 tEsters = this.getTesters();
+		 }
            salesid = order.getDokNr() + (Calendar.getInstance().getTimeInMillis()+"").substring(11);
 		    addInvoiceHeader(salesid);
 		    System.out.println("salesid " + salesid);
@@ -262,6 +266,8 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
 
   
   private HashMap<String , Double>  sPrices = null;
+
+  private HashMap<String , String>  tEsters = null;
   
   private HashMap<String , Double> getPrices() {
 	  HashMap<String , Double> res = new HashMap<String , Double>();
@@ -289,6 +295,109 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
      
 	  return res;
   }
+ private HashMap<String, String> getTesters(){
+	 
+	 
+	 
+	String	prodHier =  null;
+    String	channelID = null;
+    String	prodStockID = null;
+	  
+	  String cmk = "select MCRCHANNELCATEGORYHIERARCHY_KOS as hier ,OMOPERATINGUNITID,recid as channelid ,inventLocation as ladu from dbo.RETAILCHANNELTABLE\r\n" + 
+	  		"where CHANNELTYPE='4' and retailchannelid = '" + parent.getProps().getProperty("channel") + "'" + 
+	  		"";
+
+	   try {
+		   	 Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+		     Statement   stmt = con.createStatement();
+		      ResultSet rs = stmt.executeQuery(cmk);
+		        while(rs.next()){
+		        	prodHier =   rs.getString("hier").trim();
+		        	channelID = rs.getString("channelid").trim();
+		        	prodStockID = rs.getString("ladu").trim();
+		        }
+		        rs.close();
+		        stmt.close();
+		        con.close();
+		        
+		    } catch (Exception e){
+		       // getParent().showError(e);
+		      }
+	  System.out.println("prodHier " + prodHier);
+	  System.out.println("channelID " + channelID);
+	  System.out.println("prodStockID " + prodStockID);
+	  
+	 if("MON".equals( parent.getProps().getProperty("channel"))) {
+		 if("true".equals(parent.getProps().getProperty("testdb"))) {
+
+			 prodHier = "MonroBrand" ;//"Monro Pro";			 
+		 }else {
+
+			 prodHier = "Monro Pro";
+		 }
+
+	 }else  if("DP".equals( parent.getProps().getProperty("channel"))) {
+		 prodHier = "Didmenos medis";
+	 }
+	  
+	 cmk = "select RECID as hier from dbo.ECORESCATEGORYHIERARCHY " + 
+	 		"		  		where name like '" + prodHier + "%'" ;
+		  		String prodHierID = null;
+
+		   try {
+			   	 Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+				   
+			     Statement   stmt = con.createStatement();
+			      ResultSet rs = stmt.executeQuery(cmk);
+			        while(rs.next()){
+			        	prodHierID =   rs.getString("hier").trim();
+
+			        }
+			        rs.close();
+			        stmt.close();
+			        con.close();
+			        
+			    } catch (Exception e){
+			        parent.showError(e);
+			    }
+	
+		   
+		   System.out.println("prodHierID " + prodHierID);
+	
+	 
+	 
+	 
+	 HashMap<String , String> res = new HashMap<String , String>();
+	 
+	 String cmd = "  SELECT inv.itemid, inv. namealias AS nimetus,  TESTERITEMID_KOS as tester FROM  inventtable inv  \r\n" + 
+		  		"    			 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
+		  		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('" + prodHierID + "')  \r\n" + 
+		  		"    			 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
+		  		"    		       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  \r\n" + 
+		  		"    		   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
+		  		"    				 and  dimensionattribute = 5637145336 \r\n" + 
+		  		"    		    WHERE   moduletype=2  and  inv.dataareaid = 'kosm' and TESTERITEMID_KOS != ''  ";
+	  try {
+
+     Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+    Statement stmt = con.createStatement();
+    ResultSet rs = stmt.executeQuery(cmd);
+
+    while (rs.next()) {
+            String itemid = rs.getString("itemid").trim();
+            String tester = rs.getString("tester").trim();
+            res.put(itemid, tester);
+    }
+    
+      rs.close();
+      stmt.close();
+      con.close();
+	  }catch(Exception e) {
+		  e.printStackTrace();
+	  }
+    
+	  return res;
+ }
 
   private double getPriceFromMatrix(String cust, String prodID , double pri , double amount ) {
           double res = -1;
