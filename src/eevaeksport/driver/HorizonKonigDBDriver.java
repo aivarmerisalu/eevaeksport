@@ -121,7 +121,7 @@ public class HorizonKonigDBDriver extends AbstractDBDriver  implements Manager,P
   		row = sheet.getRow(0);
   	    // teeme valmis gruppide Treemapi key grupp ja Vectoris koodid
   		
-  		System.out.println("rownum " + row.getLastCellNum());
+  	//	System.out.println("rownum " + row.getLastCellNum());
   		
   		
   		for(int a = 1 ; a < sheet.getLastRowNum()+1;a++){
@@ -537,7 +537,7 @@ public class HorizonKonigDBDriver extends AbstractDBDriver  implements Manager,P
       }
       catch (SQLException ex) {
       }
-  System.out.println("Pmatrix "+ lines.size());	
+//  System.out.println("Pmatrix "+ lines.size());	
 	
 	  return lines ;
 
@@ -610,7 +610,7 @@ try{
           ex.printStackTrace();
           }
 	  
-	  System.out.println("PriceLines " + lines.size());
+	//  System.out.println("PriceLines " + lines.size());
           return lines;
   }
 
@@ -687,7 +687,7 @@ try{
 	   		"" ;
 		  
 
-	       if (isDebug()) System.out.println(cmd); 
+	     //  if (isDebug()) System.out.println(cmd); 
 	       StringBuffer products = new StringBuffer();
 	       try {
              
@@ -744,7 +744,7 @@ try{
 
     	  String cmd = "select pk_klients as ladu  , nosauk as name from APV04761.DKLIENTS where kods in ('N01','N02','N03','N05','N04')";
 
-           if (isDebug()) System.out.println(cmd);
+        //   if (isDebug()) System.out.println(cmd);
            Connection con = getNewConnection();
               Statement stm = con.createStatement();
               ResultSet rst = stm.executeQuery(cmd);
@@ -827,7 +827,7 @@ try{
 		  if(usedProds == null){
 			  this.getProducts(null);
 		  }
-       if (isDebug()) System.out.println(cmd);
+   //    if (isDebug()) System.out.println(cmd);
        Connection con = getNewConnection();
           Statement stm = con.createStatement();
           ResultSet rst = stm.executeQuery(cmd);
@@ -1159,17 +1159,18 @@ try{
     	
     	
 	
-    	
+    	HashSet custBL = new HashSet();
     	try{
     		
-    		String custAgs = " SELECT K.PK_KLIENTS AS klient , A.PK_PARD as agent " + 
- "  FROM   APV04761.DKLIENTS K LEFT OUTER JOIN  APV04761.NADRESES a ON A.PK_KLIENTS=K.PK_KLIENTS and a.LEG_ADR = 2 " +
- "	 LEFT OUTER JOIN APV04761.DGRUPAS GRU ON K.PK_GRUPA = GRU.PK_GRUPA  " +
- "    WHERE (K.STATUSS <> 2 AND K.PK_DOKT IS NOT NULL AND ( NOT K.PAMV_ID IN (1810,11970))) AND " +
- "   (( ( (K.TIPS = 3)  OR  (K.TIPS = 4)  OR  (K.TIPS = 6)  OR  (K.TIPS = 8) ) AND ( (K.STATUSS = 0)  OR " +
- "   (K.STATUSS = 1) ) AND ( (K.STATUSS = 0) ) AND ( (K.TIPS <> 8) ) AND ( (K.DBKRPAZ = 1) ) ))  and K.KODS is not null  " +
- "	  and A.PK_PARD is not null " +
- "    ORDER BY   K.NOSAUK ASC ";
+    		String custAgs = 
+    				"	  SELECT K.PK_KLIENTS AS klient , A.PK_PARD as agent ,  K.PK_PARD as agent2  \r\n" + 
+    				"   FROM   APV04761.DKLIENTS K LEFT OUTER JOIN  APV04761.NADRESES a ON A.PK_KLIENTS=K.PK_KLIENTS and a.LEG_ADR = 2 \r\n" + 
+    				" 	 LEFT OUTER JOIN APV04761.DGRUPAS GRU ON K.PK_GRUPA = GRU.PK_GRUPA  \r\n" + 
+    				"     WHERE (K.STATUSS <> 2 AND K.PK_DOKT IS NOT NULL AND ( NOT K.PAMV_ID IN (1810,11970))) AND \r\n" + 
+    				"    (( ( (K.TIPS = 3)  OR  (K.TIPS = 4)  OR  (K.TIPS = 6)  OR  (K.TIPS = 8) ) AND ( (K.STATUSS = 0)  OR \r\n" + 
+    				"    (K.STATUSS = 1) ) AND ( (K.STATUSS = 0) ) AND ( (K.TIPS <> 8) ) AND ( (K.DBKRPAZ = 1) ) ))  and K.KODS is not null  \r\n" + 
+    				" 	  and A.PK_PARD is not null \r\n" + 
+    				"     ORDER BY   K.NOSAUK ASC ";
     		
         	Connection con = this.getNewConnection(); 
         		 stmr = con.createStatement();
@@ -1179,6 +1180,14 @@ try{
                  while(rs1.next()){
                 	String custID = rs1.getString("klient").trim();
                 	String  group  = rs1.getString("agent");
+                	
+                	String  group2  = rs1.getString("agent2");
+                	if(group2 != null && group2.trim().equals("146")) {
+                		custBL.add(custID);
+                		//System.out.println("Lisan " + group2.trim());
+                	}
+                	
+                	
                 	Vector ags = new Vector();
 						if(custAgents.get(custID) != null){
 							ags = (Vector)custAgents.get(custID);
@@ -1678,6 +1687,11 @@ try{
                     //	laks = false;
                     }
                     
+                    if(custBL.contains(aab) || custBL.contains(payer) || custBL.contains(cust.getID())) {
+                    	laks = false;
+                   // 	System.out.println("CustID " + cust.getID());
+                    }
+                    
                     if(laks){
                         customers.put(name+abi, cust);
                         custMap.put(cust.getID(),cust);	
@@ -1918,7 +1932,7 @@ try{
 	  
     getSaveStockInfo();
     
-    if (isDebug()) System.out.println(cmd);
+ //   if (isDebug()) System.out.println(cmd);
     TreeMap products = new TreeMap();
    
     try {
@@ -2158,7 +2172,7 @@ try{
 	 "  ORDER BY K.PK_KLIENTS,N.NOSAUK,N.KODS  ,D.DAT_DOK ,r.DAUDZ " ;
 
 
-	    if (isDebug()) System.out.println(cmd);
+	  //  if (isDebug()) System.out.println(cmd);
 
 	    try {
         Connection con = this.getNewConnection();
@@ -2486,10 +2500,10 @@ try{
 				      hlinkfont.setColor(IndexedColors.BLUE.getIndex());
 				      hlinkstyle.setFont(hlinkfont);
 
-				      System.out.println("files alustan" );
+				  //    System.out.println("files alustan" );
 				  		
 				  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass,true);
-				  		System.out.println("files " + files.toString());
+				  	//	System.out.println("files " + files.toString());
 				 
 			  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
 			  	  // System.out.println("cc" + cc.toString() );
@@ -2679,7 +2693,7 @@ try{
 			  				if(files != null && files.get(cuid) != null && phs != null) {
 			  					int a = 0;
 			  					if(cuid.equals("79128"))
-			  						System.out.println("phs " + phs.toString());
+			  			//			System.out.println("phs " + phs.toString());
 			  					
 			  						for(int y = 0; y < phs.size() ; y++) {
 			  							String fname = (String)phs.get(y);
@@ -2753,7 +2767,7 @@ if(savefile) {
 		//filenames.add(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
 		wbBASE.write(output_file_oos); //write changes
 		output_file_oos.close();  //close the stream
-		System.out.println("report saved " + exceldir + "productPallet-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+	//	System.out.println("report saved " + exceldir + "productPallet-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
     
 }else {
 	System.out.println("no data to save");
@@ -2792,7 +2806,7 @@ if(savefile) {
 				row = sheet.getRow(0);
 			    // teeme valmis gruppide Treemapi key grupp ja Vectoris koodid
 				
-				System.out.println("rownum " + row.getLastCellNum());
+			//	System.out.println("rownum " + row.getLastCellNum());
 				
 				
 				/*
@@ -2913,7 +2927,7 @@ if(savefile) {
 				   	    		
 			    			   }catch(Exception e) {
 			    				   e.printStackTrace();
-			    				   System.out.println(comm + "\n" +cob3.toJSONString());
+			    				 //  System.out.println(comm + "\n" +cob3.toJSONString());
 			    			   }
 			    			 
 			    			   //ehitame commentaari valmis
@@ -2936,7 +2950,7 @@ if(savefile) {
 				e.printStackTrace();
 			}
 			
-			System.out.println("res suurus" + res.size());
+		//	System.out.println("res suurus" + res.size());
 		// System.exit(0);
 			  return res;
 		}
