@@ -12,6 +12,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import com.twelvemonkeys.imageio.plugins.jpeg.JPEGImageReaderSpi;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -130,6 +131,9 @@ import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
 import imageUtil.Image;
 import imageUtil.ImageLoader;
+import marvin.image.MarvinImage;
+import marvin.io.MarvinImageIO;
+import static marvin.MarvinPluginCollection.*;
 
 public class Converter {
 
@@ -8657,88 +8661,105 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		  }
 			  
 		  
-	  public static void shrinkAndCopyFile (String in, String out , int size ) throws Exception {
+	  public static void shrinkAndCopyFileNEW (String in, String out , int size ) throws Exception {
    if(in != null && in.toLowerCase().indexOf("thrumbs") == -1){
 	   if(size == 0){
 		   size = 301;
-	   }   try {
-		   
-	   BufferedImage inb = null;
-	   try {
-		  inb =  ImageIO.read(new File(in));
-	   }catch (Exception e){
-		   InputStream ins = new FileInputStream(in);
-		   try{
-			     inb =  JPEGCodec.createJPEGDecoder(ins).decodeAsBufferedImage(); 
-				   	   
-		   }catch(Exception r){
-			   System.out.println("error " + in);
+	   }   
+	   
+
+		  MarvinImage image = MarvinImageIO.loadImage(in);
+		 //   thresholding(image, 85);
+	        scale(image.clone(), image, size);
+	        MarvinImageIO.saveImage(image, out);
+	             }
+	  }
+
+	  
+	  public static void shrinkAndCopyFile (String in, String out , int size ) throws Exception {
+		   if(in != null && in.toLowerCase().indexOf("thrumbs") == -1){
+			   if(size == 0){
+				   size = 301;
+			   }   try {
+				   
+			   BufferedImage inb = null;
+			   try {
+				   ImageIO.scanForPlugins();
+				  inb =  ImageIO.read(new File(in));
+			   }catch (Exception e){
+				   InputStream ins = new FileInputStream(in);
+				   try{
+					     inb =  JPEGCodec.createJPEGDecoder(ins).decodeAsBufferedImage(); 
+						   	   
+				   }catch(Exception r){
+					   System.out.println("error " + in);
+				   }
+			   }
+				
+		        
+		       	if(inb != null){
+
+		       		BufferedImage newImage ;
+		       		ColorModel colorModel = inb.getColorModel();
+		       		ColorSpace colorSpace = colorModel.getColorSpace();
+
+		       	  System.out.println("Color Space: " + colorSpace + " Type: " + colorSpace.getType());
+
+		            if (colorSpace.getType() == ColorSpace.TYPE_CMYK) {
+		                System.out.println("CMYK Detected: Converting to RGB");
+		                ColorConvertOp op = new ColorConvertOp(colorSpace, ColorSpace.getInstance(ColorSpace.CS_sRGB), null);
+		                newImage = new BufferedImage(inb.getWidth(), inb.getHeight(), BufferedImage.TYPE_INT_RGB);
+		                op.filter(inb, newImage);
+		            } else {
+		                // No conversion needed, just create RGB BufferedImage
+		                newImage = new BufferedImage(inb.getWidth(), inb.getHeight(), BufferedImage.TYPE_INT_RGB);
+		                Graphics2D g = newImage.createGraphics();
+		                g.drawImage(inb, 0, 0, null);
+		                g.dispose();
+		            }
+		       		
+		           	inb.flush();
+		           	 File outputfile = new File(out);
+		           	 ImageIO.setUseCache(false);
+		           	 ImageIO.write(newImage, "jpg", outputfile);
+		           	 
+		           	 
+		           	 Image bb =  ImageLoader.fromFile(out);
+		           	 
+		           	 boolean portrait  = false ;
+		           	 if(bb.getWidth() < bb.getHeight()) {
+		           		 portrait = true ;
+		           		 double ss = (size /3 *2);
+		           		 size = (int)ss;
+		           	 }
+		           	 
+		           	
+		           	 
+		           	if(bb.getWidth() > size){
+		         		System.out.println("Muudan suurust " + bb.getWidth() + " " + in);
+		         		try{
+		         			
+		         		   bb.getResizedToWidth(size).writeToJPG(new File(out), 0.8f);//.soften(0.95f)
+		                   			
+		         		} catch (Exception ioe) {
+		         		    ioe.printStackTrace();
+		              			
+		         		}
+		         	 
+		           	}
+		            bb.dispose();
+		              }	else{
+		            		copyFile( new File(in), new File(out)); 
+		              }
+		       	  
+		       	} catch (Exception ioe) {
+		        ioe.printStackTrace();
+		       	copyFile( new File(in), new File(out));
+		       }
 		   }
-	   }
-		
-        
-       	if(inb != null){
+		            }
 
-       		BufferedImage newImage ;
-       		ColorModel colorModel = inb.getColorModel();
-       		ColorSpace colorSpace = colorModel.getColorSpace();
-
-       	  System.out.println("Color Space: " + colorSpace + " Type: " + colorSpace.getType());
-
-            if (colorSpace.getType() == ColorSpace.TYPE_CMYK) {
-                System.out.println("CMYK Detected: Converting to RGB");
-                ColorConvertOp op = new ColorConvertOp(colorSpace, ColorSpace.getInstance(ColorSpace.CS_sRGB), null);
-                newImage = new BufferedImage(inb.getWidth(), inb.getHeight(), BufferedImage.TYPE_INT_RGB);
-                op.filter(inb, newImage);
-            } else {
-                // No conversion needed, just create RGB BufferedImage
-                newImage = new BufferedImage(inb.getWidth(), inb.getHeight(), BufferedImage.TYPE_INT_RGB);
-                Graphics2D g = newImage.createGraphics();
-                g.drawImage(inb, 0, 0, null);
-                g.dispose();
-            }
-       		
-           	inb.flush();
-           	 File outputfile = new File(out);
-           	 ImageIO.setUseCache(false);
-           	 ImageIO.write(newImage, "jpg", outputfile);
-           	 
-           	 
-           	 Image bb =  ImageLoader.fromFile(out);
-           	 
-           	 boolean portrait  = false ;
-           	 if(bb.getWidth() < bb.getHeight()) {
-           		 portrait = true ;
-           		 double ss = (size /3 *2);
-           		 size = (int)ss;
-           	 }
-           	 
-           	
-           	 
-           	if(bb.getWidth() > size){
-         		System.out.println("Muudan suurust " + bb.getWidth() + " " + in);
-         		try{
-         			
-         		   bb.getResizedToWidth(size).writeToJPG(new File(out), 0.8f);//.soften(0.95f)
-                   			
-         		} catch (Exception ioe) {
-         		    ioe.printStackTrace();
-              			
-         		}
-         	 
-           	}
-            bb.dispose();
-              }	else{
-            		copyFile( new File(in), new File(out)); 
-              }
-       	  
-       	} catch (Exception ioe) {
-        ioe.printStackTrace();
-       	copyFile( new File(in), new File(out));
-       }
-   }
-            }
-	
+	  
 	  public static void copyFile(File in, File out) throws Exception {
 	      FileInputStream fis  = new FileInputStream(in);
 	      FileOutputStream fos = new FileOutputStream(out);

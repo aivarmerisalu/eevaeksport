@@ -3056,7 +3056,7 @@ System.out.println(cmd);
                    
                    Date newprod = rs.getDate("newprod");
                    if(newprod.after(new Date())){
-                	//   prod.setStatusNew("1");
+                	  prod.setStatusNew("1");
                 	 //  prod.setMustBe("1");
                    }
                    try {
