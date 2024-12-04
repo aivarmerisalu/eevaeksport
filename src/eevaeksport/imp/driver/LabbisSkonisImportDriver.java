@@ -555,10 +555,11 @@ change 3DBV009 manager order warehouse – we want this manager to make orders o
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1TS200";
     	   }
-    	   if(agent.equals("3DBV009")){ //erijuhtum
-    		   ladu =    "0TS100";
+    	   if(agent.equals("3DBV009") || agent.equals("3DBV010")){ //erijuhtum paneme vilniusesse 
+    		   ladu = "0TS100";
     	   }
-    	   
+    	    
+    	   //kui on käsitsi määratud siis tuleb see mis käsitsi pandud
     	   if(orderware != null) {
     		   if(orderware.equals("0AS")) {
     			   ladu =  "0TS100";
