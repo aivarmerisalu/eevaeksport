@@ -22,6 +22,7 @@ package eevaeksport.util;
 		 .build();
 
 		 // Create an SSL socket factory with our SSL context
+		 
 		 SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
 
 		 // Create an HttpClient with the SSL socket factory
