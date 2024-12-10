@@ -18,6 +18,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 
 import org.apache.log4j.Category;
@@ -74,6 +75,40 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
   }
 
   
+  private HashMap<String , String> getTestersInfo() {
+	    testersSet = new HashSet<String> ();
+HashMap<String , String> res = new HashMap<String , String>();
+String sql = " select mainitemcard as itemid ,testeritemid as tester ,istester , MandatoryTester from InventTableAdditionalInfo_KOS \r\n" + 
+		"where testeritemid != ''";
+try {
+
+Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+Statement stmt = con.createStatement();
+ResultSet rs = stmt.executeQuery(sql);
+
+while (rs.next()) {
+       String itemid = rs.getString("itemid").trim();
+       String tester = rs.getString("tester").trim();
+       
+       if(!testersSet.contains(tester)) {
+      	 testersSet.add(tester);
+       }
+       res.put(itemid, tester);
+}
+
+ rs.close();
+ stmt.close();
+ con.close();
+}catch(Exception e) {
+	  e.printStackTrace();
+}
+System.out.println();
+return res;
+}
+
+private HashSet<String >  testersSet = null;
+
+  
 
   public String identifyProduct(String ean, String prodID) throws SQLException{
    return prodID;
@@ -104,7 +139,7 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
 		   
 		  
 		 if( tEsters == null) {
-			 tEsters = this.getTesters();
+			 tEsters = this.getTestersInfo();
 		 }
            salesid = order.getDokNr() + (Calendar.getInstance().getTimeInMillis()+"").substring(11);
 		    addInvoiceHeader(salesid);
@@ -161,6 +196,12 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
        if(discount > 0) {
     	   mprice = price;
     	   sprice = price / (100-discount) * 100;
+       }
+       if(discount == -2 ) {
+    	   // vahetame toote testeri vastu 
+    	   if(this.tEsters.get(itemid) != null) {
+    		   itemid = this.tEsters.get(itemid);
+    	   }
        }
     	  //OrderLines  
   		//    OrderId   ItemId   Quantity    UnitId    Price   Discount 
@@ -295,109 +336,7 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
      
 	  return res;
   }
- private HashMap<String, String> getTesters(){
-	 
-	 
-	 
-	String	prodHier =  null;
-    String	channelID = null;
-    String	prodStockID = null;
-	  
-	  String cmk = "select MCRCHANNELCATEGORYHIERARCHY_KOS as hier ,OMOPERATINGUNITID,recid as channelid ,inventLocation as ladu from dbo.RETAILCHANNELTABLE\r\n" + 
-	  		"where CHANNELTYPE='4' and retailchannelid = '" + parent.getProps().getProperty("channel") + "'" + 
-	  		"";
 
-	   try {
-		   	 Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
-		     Statement   stmt = con.createStatement();
-		      ResultSet rs = stmt.executeQuery(cmk);
-		        while(rs.next()){
-		        	prodHier =   rs.getString("hier").trim();
-		        	channelID = rs.getString("channelid").trim();
-		        	prodStockID = rs.getString("ladu").trim();
-		        }
-		        rs.close();
-		        stmt.close();
-		        con.close();
-		        
-		    } catch (Exception e){
-		       // getParent().showError(e);
-		      }
-	  System.out.println("prodHier " + prodHier);
-	  System.out.println("channelID " + channelID);
-	  System.out.println("prodStockID " + prodStockID);
-	  
-	 if("MON".equals( parent.getProps().getProperty("channel"))) {
-		 if("true".equals(parent.getProps().getProperty("testdb"))) {
-
-			 prodHier = "MonroBrand" ;//"Monro Pro";			 
-		 }else {
-
-			 prodHier = "Monro Pro";
-		 }
-
-	 }else  if("DP".equals( parent.getProps().getProperty("channel"))) {
-		 prodHier = "Didmenos medis";
-	 }
-	  
-	 cmk = "select RECID as hier from dbo.ECORESCATEGORYHIERARCHY " + 
-	 		"		  		where name like '" + prodHier + "%'" ;
-		  		String prodHierID = null;
-
-		   try {
-			   	 Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
-				   
-			     Statement   stmt = con.createStatement();
-			      ResultSet rs = stmt.executeQuery(cmk);
-			        while(rs.next()){
-			        	prodHierID =   rs.getString("hier").trim();
-
-			        }
-			        rs.close();
-			        stmt.close();
-			        con.close();
-			        
-			    } catch (Exception e){
-			        parent.showError(e);
-			    }
-	
-		   
-		   System.out.println("prodHierID " + prodHierID);
-	
-	 
-	 
-	 
-	 HashMap<String , String> res = new HashMap<String , String>();
-	 
-	 String cmd = "  SELECT inv.itemid, inv. namealias AS nimetus,  TESTERITEMID_KOS as tester FROM  inventtable inv  \r\n" + 
-		  		"    			 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
-		  		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('" + prodHierID + "')  \r\n" + 
-		  		"    			 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
-		  		"    		       left JOIN  inventtablemodule mod ON mod.itemid = inv.itemid and inv.DATAAREAID =mod.DATAAREAID  \r\n" + 
-		  		"    		   left join DimensionAttributeValueSetItemView ww on ww.DimensionAttributeValueSet = inv.defaultdimension  \r\n" + 
-		  		"    				 and  dimensionattribute = 5637145336 \r\n" + 
-		  		"    		    WHERE   moduletype=2  and  inv.dataareaid = 'kosm' and TESTERITEMID_KOS != ''  ";
-	  try {
-
-     Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
-    Statement stmt = con.createStatement();
-    ResultSet rs = stmt.executeQuery(cmd);
-
-    while (rs.next()) {
-            String itemid = rs.getString("itemid").trim();
-            String tester = rs.getString("tester").trim();
-            res.put(itemid, tester);
-    }
-    
-      rs.close();
-      stmt.close();
-      con.close();
-	  }catch(Exception e) {
-		  e.printStackTrace();
-	  }
-    
-	  return res;
- }
 
   private double getPriceFromMatrix(String cust, String prodID , double pri , double amount ) {
           double res = -1;

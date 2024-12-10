@@ -1129,6 +1129,41 @@ try {
   
   private HashMap<String , Double>  sPrices = null;
 
+  private HashMap<String , String> getTestersInfo() {
+	    testersSet = new HashSet<String> ();
+  HashMap<String , String> res = new HashMap<String , String>();
+  String sql = " select mainitemcard as itemid ,testeritemid as tester ,istester , MandatoryTester from InventTableAdditionalInfo_KOS \r\n" + 
+  		"where testeritemid != ''";
+  try {
+
+  Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+ Statement stmt = con.createStatement();
+ ResultSet rs = stmt.executeQuery(sql);
+
+ while (rs.next()) {
+         String itemid = rs.getString("itemid").trim();
+         String tester = rs.getString("tester").trim();
+         
+         if(!testersSet.contains(tester)) {
+        	 testersSet.add(tester);
+         }
+         res.put(itemid, tester);
+ }
+ 
+   rs.close();
+   stmt.close();
+   con.close();
+  }catch(Exception e) {
+	  e.printStackTrace();
+  }
+ System.out.println();
+  return res;
+}
+  
+  private HashSet<String >  testersSet = null;
+  private HashMap<String , String>  testerProdsMap = null;
+
+  
   public TreeMap getProducts(Agent agent){
 	   HashMap prodHash = new HashMap();
 	   HashMap<String, ArrayList<String>> lineDiscs = new HashMap<String, ArrayList<String>>();
@@ -1140,11 +1175,16 @@ try {
 	   if(this.sPrices == null) {
 			  sPrices = this.getPrices();
 		  }
+	   if(testerProdsMap == null) {
+		   testerProdsMap = getTestersInfo();
+	   }
+	   
+	   
 	   
     String cmd = "  SELECT inv.itemid, inv. namealias AS nimetus, DISPLAYVALUE  AS kastis,'' AS alusel, 0 AS price \r\n" + 
     		"    		       ,CATEGORY AS grupp2, PARENTCATEGORY  AS grupp , \r\n" + 
     		"    		   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat ,  \r\n" + 
-    		"    		    0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp , '' as tester FROM  inventtable inv  \r\n" + 
+    		"    		    0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp  FROM  inventtable inv  \r\n" + 
     		"    			 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
     		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('" + prodHierID + "')  \r\n" + 
     		"    			 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY\r\n" + 
@@ -1256,8 +1296,8 @@ try {
          lineDiscs.put(prgrupp.trim(), arr);
        }
       
-      String tester = rs.getString("tester");
-      if(tester != null && tester.trim().length()>0 ){
+     
+      if(this.testerProdsMap.get(prod.getID()) != null){
     	  prod.setDiffColor(true);
     	  //tester.button
       }
@@ -1265,7 +1305,9 @@ try {
        if(stocksOld != null && stocksOld.get(prod.getID()) != null) {
     	   prod.setStock(stocksOld.get(prod.getID()));
        }
-      
+       if(this.testersSet.contains(prod.getID())) {
+    	   goes = false;
+       }
     
       if(goes) {
         products.put(add + nimetus, prod);

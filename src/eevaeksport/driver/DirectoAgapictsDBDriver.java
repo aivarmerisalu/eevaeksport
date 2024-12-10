@@ -138,7 +138,6 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	     
 	     return tm;
 	     
-	     
 	   }
   
 
@@ -2279,7 +2278,10 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
           	 if(len != -1){
           	   String incase   =  line.substring(len + 10); 
           	   try{
-          		   prod.setInCases(Double.parseDouble(incase.substring(0,incase.indexOf("\""))));
+          		   double uh = Double.parseDouble(incase.substring(0,incase.indexOf("\"")));
+          		   prod.setInCases(uh);
+          		   prod.setOptAmountInUnits(uh);
+          		   
           	   }catch(Exception e){
          		   e.printStackTrace();
           	   }
