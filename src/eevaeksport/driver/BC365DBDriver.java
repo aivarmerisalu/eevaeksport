@@ -1,6 +1,7 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,14 +36,18 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.util.EntityUtils;
 import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -100,6 +105,8 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
       rcompany = getParent().getProps().getProperty("rest.companyx");
       token = getMSToken();
       System.out.println("Token " + token);
+      testConn();
+    
       System.exit(0);
      }
   
@@ -113,6 +120,54 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 	  String token =  null;
   
  
+	  private void testConn() {
+		  String url = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/environments";
+
+		  url = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/v2.0/"
+		  		+ "companies(3b92aaf0-963a-ef11-8409-000d3ab2813a)/items";
+		  
+		  try (CloseableHttpClient client = HttpClients.createDefault()) {
+			  HttpGet request = new HttpGet(url);
+			  request.setHeader("Authorization", "Bearer " + token);
+
+			  HttpResponse response = client.execute(request);
+			  HttpEntity entity = response.getEntity();
+			  if (entity != null) {
+			  String result = EntityUtils.toString(entity);
+			  Converter.saveFile("test.json", result);
+			 // System.out.println("Query result " + result);
+			  
+			  /* {
+      "@odata.etag": "W/\"JzIwOzEwNDU0MjEwNDEyNDg0NjMxODY3MTswMDsn\"",
+      "id": "e81e48a3-ae33-ef11-8409-0022489f6722",
+      "number": "47SISI000603",
+      "displayName": "SISI Relax 40 den nero M SP",
+      "displayName2": "SUKKP\u00dcKSID Relax",
+      "type": "Inventory",
+      "itemCategoryId": "040414c1-b354-ef11-bfe2-000d3adbde7b",
+      "itemCategoryCode": "SUKKPX SISI",
+      "blocked": false,
+      "gtin": "",
+      "inventory": 0,
+      "unitPrice": 0,
+      "priceIncludesTax": false,
+      "unitCost": 0,
+      "taxGroupId": "00000000-0000-0000-0000-000000000000",
+      "taxGroupCode": "",
+      "baseUnitOfMeasureId": "e087a81b-7829-ef11-9f88-000d3ab16a11",
+      "baseUnitOfMeasureCode": "TK",
+      "generalProductPostingGroupId": "dd6282ee-041c-ef11-9f88-000d3a69189e",
+      "generalProductPostingGroupCode": "KAUP",
+      "inventoryPostingGroupId": "08dea46d-751e-ef11-9f88-000d3a69189e",
+      "inventoryPostingGroupCode": "KAUBAD",
+      "lastModifiedDateTime": "2024-09-17T15:49:54.307Z"
+    }*/
+			  }
+			  } catch (IOException e) {
+			  e.printStackTrace();
+			  }
+	  }
+	  
   private String  getMSToken() {
 		 String res = null;
 		 

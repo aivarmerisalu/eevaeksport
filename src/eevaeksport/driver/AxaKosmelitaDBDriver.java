@@ -1135,7 +1135,7 @@ try {
   String sql = " select mainitemcard as itemid ,testeritemid as tester ,istester , MandatoryTester from InventTableAdditionalInfo_KOS \r\n" + 
   		"where testeritemid != ''";
   try {
-
+ //String url = "jdbc:odbc:kosmelitaaxatest";
   Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
  Statement stmt = con.createStatement();
  ResultSet rs = stmt.executeQuery(sql);
