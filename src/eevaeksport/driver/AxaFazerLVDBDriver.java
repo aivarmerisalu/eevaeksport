@@ -2390,10 +2390,16 @@ String asi3 = "";
 				JSONParser parser = new JSONParser();
 				JSONObject obj = (JSONObject) parser.parse(res2);
 			    String segment = (String)obj.get("segment");
+			    String brand = (String)obj.get("brand");
 			    String type = (String)obj.get("type");
 			    Long start = (Long)obj.get("start");
 			    String startT = (String)obj.get("startT");
-
+			    Double  wei =  0d;
+			    try {
+			       wei = Double.parseDouble(obj.get("weight")+"");
+			     } catch(Exception e) {
+			    	
+			     }
 			    Long end = (Long)obj.get("end");
 			    String endT = (String)obj.get("endT");
 
@@ -2401,14 +2407,14 @@ String asi3 = "";
 				
 				String pricet = "1";
 				String perct = "0";
-				Boolean isPerc = (Boolean)cob.get("isbrand");
+				Boolean isPerc = (Boolean)cob.get("isgroup");
 				if(isPerc) {
 					pricet = "0";
 					perct  = "1";
 				}
 				
 
-	   			String signa = dateOnly + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") + segment ;
+	   			String signa = dateOnly + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") + brand ;
    		
    			
    			if( done != null && !done.contains(signa)){
@@ -2418,7 +2424,7 @@ String asi3 = "";
    				
    				try {
    				  addi = Double.parseDouble(cob.get("grouptotal")+"");
-   				}catch(Exception e) {}
+   				 } catch(Exception e) {}
    				
    				worksheetBASE.createRow(outofstocks);
    				worksheetBASE.getRow(outofstocks).createCell(0).setCellValue(agid);
@@ -2433,7 +2439,7 @@ String asi3 = "";
    				worksheetBASE.getRow(outofstocks).createCell(2).setCellValue(cuid);
 				String prodid = (String)cob.get("prodid");
    				//worksheetBASE.getRow(outofstocks).createCell(4).setCellValue(prodid);
-   				worksheetBASE.getRow(outofstocks).createCell(4).setCellValue((String)cob.get("prodname"));
+   				worksheetBASE.getRow(outofstocks).createCell(4).setCellValue(brand);
    				
    				
    				worksheetBASE.getRow(outofstocks).createCell(5).setCellValue(startT);
@@ -2441,43 +2447,50 @@ String asi3 = "";
    				
 
    				worksheetBASE.getRow(outofstocks).createCell(7).setCellValue(pricet);
-
    				worksheetBASE.getRow(outofstocks).createCell(8).setCellValue(perct);
-try {
-    Double price = Double.parseDouble(cob.getString("normalpr"));
-     if(price > 0) {
-   				worksheetBASE.getRow(outofstocks).createCell(9).setCellValue(price);
-     }
-}catch(Exception e) {}
-try {
-     Double priceA = Double.parseDouble(cob.getString("amoun"));
-     if(priceA > 0) {
-   				worksheetBASE.getRow(outofstocks).createCell(10).setCellValue(priceA);
-     }
-   			}catch(Exception e) {}   
+			   				
+			try {
+			    Double price = Double.parseDouble(cob.get("normalpr")+"");
+			     if(price > 0) {
+			   				worksheetBASE.getRow(outofstocks).createCell(9).setCellValue(price);
+			     }
+			     }catch(Exception e) {}
+			
+			try {
+			     Double priceA = Double.parseDouble(cob.get("amoun")+"");
+			     if(priceA > 0) {
+			   				worksheetBASE.getRow(outofstocks).createCell(10).setCellValue(priceA);
+			     }
+			     }catch(Exception e) {}   
+			
+			try {          
+			       if(wei > 0) {
+					  worksheetBASE.getRow(outofstocks).createCell(11).setCellValue(wei);
+					}
+			    } catch (Exception e) {}
+			
 
+   				if(segment != null) {
+   				  worksheetBASE.getRow(outofstocks).createCell(12).setCellValue(segment);
+   				}
 
    				if(type != null) {
-   				  worksheetBASE.getRow(outofstocks).createCell(12).setCellValue(type);
+   				  worksheetBASE.getRow(outofstocks).createCell(13).setCellValue(type);
    				}
-   				
-   				if(segment != null) {
-   				  worksheetBASE.getRow(outofstocks).createCell(11).setCellValue(segment);
-   				}
-   				
+   				   				
 
    				if(addi > 0) {
-   				  worksheetBASE.getRow(outofstocks).createCell(13).setCellValue(addi);
+   				  worksheetBASE.getRow(outofstocks).createCell(14).setCellValue(addi);
    				}
    				
 
    				try {
-   	  				worksheetBASE.getRow(outofstocks).createCell(14).setCellValue((String)cob.get("comment"));
+   	  				worksheetBASE.getRow(outofstocks).createCell(15).setCellValue((String)cob.get("comment"));
    	  				}catch(Exception e) {
    	  					
    	  				}
-   				worksheetBASE.getRow(outofstocks).createCell(16).setCellValue(dateOnly);
-   				worksheetBASE.getRow(outofstocks).createCell(17).setCellValue(timeOnly);
+   				worksheetBASE.getRow(outofstocks).createCell(17).setCellValue(dateOnly);
+   				worksheetBASE.getRow(outofstocks).createCell(18).setCellValue(timeOnly);
    
    				
    				String foto = null;
@@ -2487,15 +2500,15 @@ try {
   						Toode t = (Toode)arr.get(e);
   						if(!t.getID().equals("prodid")) {
   						//System.out.println(t.getID()+ " " +  (String)cob.get("prodid") +" " + agid+ " " + t.comment +" " + t.getGr1() + " "  + dateOnly );
-  						if(t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
+  						  if(t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
   							foto = t.getLadu();
-  						}
+  						   }
   					}}
   				}
    				
    				 //URL Link
    				if(foto != null) {
-   		         Cell  cell = worksheetBASE.getRow(outofstocks).createCell(15);
+   		         Cell  cell = worksheetBASE.getRow(outofstocks).createCell(16);
    		         cell.setCellValue("Photo Link");
    		         XSSFHyperlink link = (XSSFHyperlink)createHelper.createHyperlink(Hyperlink.LINK_URL);
    		         link.setAddress(URLEncoder.encode(foto, StandardCharsets.UTF_8.toString()));
