@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
+
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
@@ -35,14 +36,18 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.util.EntityUtils;
 import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -95,23 +100,40 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
       secret = parent.getProps().getProperty("365.secret"); //"I~c8Q~fgLOHhFnFcIe2RHUSX6HWlPHXN8fon9b4Q"; 
 	  tenantID = parent.getProps().getProperty("365.tenantID"); //"bcf61030-52c2-4048-9e18-042d8a0c856f";
 	  clientID =  parent.getProps().getProperty("365.clientID"); //"075984fb-65fc-45e1-9a26-168935061542";
-      user =  getParent().getProps().getProperty("rest.user");
+	  companyID =  parent.getProps().getProperty("365.companyID");
+	  user =  getParent().getProps().getProperty("rest.user");
       pass = getParent().getProps().getProperty("rest.pass");
       rcompany = getParent().getProps().getProperty("rest.companyx");
-      token = getMSToken();
+     
+      
+      
+     
+    
+  
+    //  token = getMSToken();
+    
       System.out.println("Token " + token);
-      System.exit(0);
+      
+    this.downloadData(null);
+    // this.getDebt(null);
+    // this.getCustomerProductsList(null);
+     //this.setBulkSales(null);
+   
      }
   
 	  String user =  null;
 	  String pass = null;
 	  String rcompany = null;
-  
 	  String secret = null;
       String tenantID = null;
+      String companyID = null;
 	  String clientID =  null;
 	  String token =  null;
   
+		 
+		 
+		 
+		 
  
   private String  getMSToken() {
 		 String res = null;
@@ -168,81 +190,7 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
    public Vector getPriceMatrixData() {
 
    	Vector lines = new Vector();
-   	/*
-   	try {
-    FileReader fr = new FileReader(getDir() + DATA_FILE);
-    BufferedReader reader = new BufferedReader(fr);
-  String line = null;
-
-  while(!(line = reader.readLine()).equals("\"[Get DiscountMatrix]\"")){
-  }
-  line = reader.readLine();
-    System.out.println("line" +line);
-  while(((line = reader.readLine()).trim().length()) > 3 ){
-  	
-    line = line.replaceAll("\",\"", "|");
-    line = line.replaceAll("\",", "|");
-    line = line.replaceAll("\""," ");
- 
-    StringTokenizer st = new StringTokenizer(line, SEPARATOR);
-    double price = 0;
-	String custID = null;
-	String clGroup = null;
-	String prodID = null;
-	String discGroup = null;
-	double discount = 0;
-		if(st.hasMoreTokens()){
-			custID = cleardots(st.nextToken());
-			
-		}
-				if(st.hasMoreTokens()){
-		 clGroup = cleardots(st.nextToken());	
-			}
-			if(st.hasMoreTokens()){
-				 prodID = cleardots(st.nextToken());	
-			}
-			if(st.hasMoreTokens()){
-				discGroup = cleardots(st.nextToken());	
-			}
-			
-			if(st.hasMoreTokens()){
-				 discount = Double.parseDouble(cleardots(st.nextToken()).replaceAll(",","."));	
-			}
-			
-		//	System.out.println("'" + custID + "'" + clGroup + "'" + prodID + "'" + discGroup + "'" + discount) ;
-			if(st.hasMoreTokens()){
-				price = Double.parseDouble(cleardots(st.nextToken()));	
-			}
-			MatrixLine mline = new MatrixLine();
-
-			if (custID != null && custID.trim().length() > 0) {
-				mline.setCustID(custID.trim());
-			}
-			if (mline.getCustID() == null && clGroup != null
-					&& clGroup.trim().length() > 0) {
-				mline.setCliGroup(clGroup.trim());
-			}
-
-			if (prodID != null && prodID.trim().length() > 0) {
-				mline.setProdID(prodID.trim());
-			}
-			if (mline.getProdID() == null && discGroup != null
-					&& discGroup.trim().length() > 0) {
-				mline.setDiscGroup(discGroup);
-			}
-			mline.setDiscount(discount);
-
-			if (price != 0) {
-				mline.setPrice(price);
-			}
-			lines.add(mline);
-		}
-
-	  
-
-	} catch (Exception ex) {
-		ex.printStackTrace();
-	}*/
+  
 	return lines;
 
    }
@@ -254,454 +202,15 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
    
    
    public Vector getFixedAssortmentData() {
-		Vector result = new Vector();
-		this.s(null);
-		File f = new File(this.getExcelDir() + "/sortiments.xls");
-				
-		try {
-			
-			
-			/*  String sql = "SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE())) from mj_assortment where res3 = 'EE' and DATEADD(dd, 0, DATEDIFF(dd, 0, sortdate)) = DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE())) ";
-       	  boolean insertassort = true;
-        	
-       	   Connection con = getNewConnection(url);
- 	           Statement stmt = con.createStatement();
- 	        
- 	        ResultSet rs = stmt.executeQuery(sql);
- 	        if(rs.next()){
- 	        	insertassort = false;
- 	        	//kontrollime kas on vaja insertida 
- 	        }
- 	        rs.close();
- 	        stmt.close();
- 	        con.close();
- 	        
- 	        System.out.println("Sisestame sortimenti " + insertassort );
-			*/
-			
-			FileInputStream ff = new FileInputStream(f);
-			HSSFWorkbook workbook = new HSSFWorkbook((ff));
-			HSSFSheet sheet = workbook.getSheet("Assortment");
-			HSSFRow row = null;
-			
-			HSSFSheet sheetKood = workbook.getSheet("Code");
-			
-			HSSFSheet sheetKoodSort = workbook.getSheet("CodeSorts");
-			
-			TreeMap omakoodid = new TreeMap();
-
-			TreeMap omagroups = new TreeMap();
-			
-			TreeMap omaTootegroups = new TreeMap();
-			
-			row = sheetKood.getRow(0);
-			// MÄÄRAME ÄRA MIS VÄLJAS ASUVAD TOOTEKOODIDE Sortimendi tähised.
-
-			// System.out.println("rownum " + row.getLastCellNum());
-			for (int a = 1; a < row.getLastCellNum(); a++) {
-				try {
-					// System.out.println(row.getCell((short)a).getStringCellValue());
-					omagroups.put(a + "", row.getCell((short) a)
-							.getStringCellValue());
-				} catch (Exception e) {
-					// System.out.println(row.getCell((short)a).getNumericCellValue());
-				}
-			}
-
-		//	 System.out.println("omagroups " + omagroups.toString());
-
-			
-			//mis kood on sortimedi koodid ja tootekoodide sortimendi tähised kokku 
-			for (int i = 0; i < sheetKoodSort.getLastRowNum(); i++) {
-				row = sheetKoodSort.getRow(i);
-				String sortkood = "";
-				if (row.getCell((short) 0) != null) {
-                  try {
-						sortkood = (int) (row.getCell((short) 0)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						sortkood = (row.getCell((short) 0).getStringCellValue());
-					}
-			}
-				String omakood = "";
-
-				if (row.getCell((short) 1) != null) {
-
-					try {
-						omakood = (int) (row.getCell((short) 1)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						omakood = (row.getCell((short) 1).getStringCellValue());
-					}
-				//	System.out.println("omakood" + omakood);
-
-			}
-				
-				if(!omakood.equals("") && !sortkood.equals("")){
-					
-						omaTootegroups.put(sortkood, omakood);
-					//	omaTootegroups.put(sortkood, i+"");
-				}
-			}
-				
-			// System.out.println("omaTootegroups " + omaTootegroups.toString());
-			
-			TreeMap tulemusKood = new TreeMap();
-
-			for (int i = 1; i < sheetKood.getLastRowNum(); i++) {
-				row = sheetKood.getRow(i);
-				
-				String prodID = "";
-               if (row.getCell((short) 0) != null) {
-                 try {
-						prodID = (int) (row.getCell((short) 0)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID = (row.getCell((short) 0).getStringCellValue());
-					}
-								}
-				
-
-				String prodID1 = "";
-               if (row.getCell((short) 1) != null) {
-                	try {
-						prodID1 = (int) (row.getCell((short) 1)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID1 = (row.getCell((short) 1).getStringCellValue());
-					}
-			     }
-
-               if(prodID.trim().length() > 0 && prodID1.trim().length() > 0){
-            	  
-            	   String key = omagroups.get("1") + "";
-            	   if(tulemusKood.get(key) != null){
-            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
-            		   t1.put(prodID, prodID1);
-            		   tulemusKood.put(key, t1);
-            	   }else{
-            		   TreeMap t1 = new TreeMap();
-            		   t1.put(prodID, prodID1);
-            		   tulemusKood.put(key, t1);
-            	    }
-                          
-               }
-				
-               
-				String prodID2 = "";
-               if (row.getCell((short) 2) != null) {
-                 try {
-						prodID2 = (int) (row.getCell((short) 2)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID2 = (row.getCell((short) 2).getStringCellValue());
-					}
-			       }
-				
-
-               if(prodID.trim().length() > 0 && prodID2.trim().length() > 0){
-             	  
-            	   String key = omagroups.get("2") + "";
-            	   if(tulemusKood.get(key) != null){
-            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
-            		   t1.put(prodID, prodID1);
-            		   tulemusKood.put(key, t1);
-            	   }else{
-            		   TreeMap t1 = new TreeMap();
-            		   t1.put(prodID, prodID1);
-            		   tulemusKood.put(key, t1);
-            	    }
-               }
-               
-               
-				String prodID3 = "";
-               if (row.getCell((short) 3) != null) {
-              	try {
-						prodID3 = (int) (row.getCell((short) 3)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID3 = (row.getCell((short) 3).getStringCellValue());
-					}
-			    }
-				
-
-               if(prodID.trim().length() > 0 && prodID3.trim().length() > 0){
-             	  
-            	   String key = omagroups.get("3") + "";
-            	   if(tulemusKood.get(key) != null){
-            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
-            		   t1.put(prodID, prodID1);
-            		   tulemusKood.put(key, t1);
-            	   }else{
-            		   TreeMap t1 = new TreeMap();
-            		   t1.put(prodID, prodID1);
-            		   tulemusKood.put(key, t1);
-            	    }
-               }
-               
-				String prodID4 = "";
-               if (row.getCell((short) 4) != null) {
-             	try {
-						prodID4 = (int) (row.getCell((short) 4)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID4 = (row.getCell((short) 4).getStringCellValue());
-					}
-			    }
-               
-
-
-               if(prodID.trim().length() > 0 && prodID4.trim().length() > 0){
-             	  
-            	   String key = omagroups.get("4") + "";
-            	   if(tulemusKood.get(key) != null){
-            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
-            		   t1.put(prodID, prodID1);
-            		   tulemusKood.put(key, t1);
-            	   }else{
-            		   TreeMap t1 = new TreeMap();
-            		   t1.put(prodID, prodID1);
-            		   tulemusKood.put(key, t1);
-            	    }
-               }
-			}
-			
-		//	System.out.println("TulemusKood " + tulemusKood.toString());
-			
-			
-			
-			TreeMap groups = new TreeMap();
-			row = sheet.getRow(2);
-			// MÄÄRAME ÄRA MIS VÄLJAS ASUVAD Sortimendi tähised.
-             
-			for (int a = 2; a < row.getLastCellNum(); a++) {
-				try {
-					groups.put(a + "", row.getCell((short) a)
-							.getStringCellValue());
-				} catch (Exception e) {
-				}
-			}
-
-			// System.out.println("groups" + groups.toString());
-
-			for (int d = 6; d < sheet.getLastRowNum(); d++) {
-				row = sheet.getRow(d);
-				String prodIDe = "";
-
-				if (row.getCell((short) 0) != null) {
-
-					try {
-						prodIDe = (int) (row.getCell((short) 0)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodIDe = (row.getCell((short) 0).getStringCellValue());
-					}
-					
-                      if(!prodIDe.equals("0")){
-                   	
-					// Siin läheme reasisse rokkima ja vaatama kas se toode
-					// läheb kaasa
-					for (int a = 2; a < row.getLastCellNum(); a++) {
-
-						String group = (String) groups.get(a + "");
-						if (group != null && group.trim().length() > 0) {
-
-							String custID = " ";
-							String clGroup = " ";
-							String prodGroup = " ";
-							
-
-							String go = null;
-							clGroup = group;
-
-							MatrixLine mline = new MatrixLine();
-							// Vaatame kas selles veerus on sellel tootel pandud
-							// mingi tähis
-							if (row.getCell((short) a) != null) {
-
-								try {
-									go = (int) (row.getCell((short) a)
-											.getNumericCellValue()) + "";
-								} catch (Exception e) {
-									go = (row.getCell((short) a)
-											.getStringCellValue());
-								}
-
-							}
-
-							if (go != null && go.equals("1")) {
-
-						//	 System.out.println( a + " " + prodID + " " +
-							//	 clGroup + " " + go);
-
-								if (custID != null
-										&& custID.trim().length() > 0) {
-									mline.setCustID(custID.trim());
-								}
-								if (clGroup != null
-										&& clGroup.trim().length() > 0) {
-									mline.setCliGroup(clGroup.trim());
-									
-								}
-
-								if (prodIDe != null	&& prodIDe.trim().length() > 0 ) {
-										mline.setProdID(prodIDe.trim());	
-									}
-								
-								}
-								if (mline.getProdID() == null
-										&& prodGroup != null
-										&& prodGroup.trim().length() > 0) {
-									mline.setProdGroup(prodGroup);
-								}
-								
-
-								if (clGroup != null && prodIDe != null
-									&& clGroup.trim().length() > 0 && prodIDe.trim().length() > 0 ) {
-                                   if(omaTootegroups.get(clGroup.trim()) != null){
-                                	   String ass = (String)(omaTootegroups.get(clGroup.trim()));
-                                	   if(tulemusKood.get(ass) != null){
-                                		  
-                                		     TreeMap tr = (TreeMap)tulemusKood.get(ass);
-                                		     if(tr.get(prodIDe) != null){
-                                		    	 mline.setLineinfo("" +tr.get(prodIDe));
-                                		 //   	 System.out.println(clGroup.trim() + " " + omaTootegroups.get(clGroup.trim())
-                                		   // 			 + " " + tr.get(prodIDe) + " " + prodIDe);
-                                           	  
-                                		     }
-                                			
-                                	   }
-                                   }
-									//tulemusKood.get()
-								}
-											
-								// if(insertassort){
-										//  insertSortLine(mline);  
-									// }
-								
-								//System.out.println("Milne " + mline.toString());
-								result.add(mline);
-							}
-						}
-					}
-					   
-                      }
-				}
-			
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return result;
-
+	return null;
 	}
 
    
    
    
-   public Vector getFixedAssortmentData1() {
-       Vector lines = new Vector();
-       TreeMap prods = this.s2();
-       System.out.println("prods " + prods.size());
-       
-       try {
-   		  File f = new File (getDir() + "hinnakiri.xml");
-   	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-   	     DocumentBuilder db;
-   		db = dbf.newDocumentBuilder();      	
-       	FileInputStream in = getCleanInputStream(f);
-       	String handler = null;
-           Document doc = db.parse(in,handler);
-           Node root = getNode(doc, "transport");      
-      
-       	Node read = getNode(root, "priceformulas");
-           for (int i = 0; i < read.getChildNodes().getLength(); i++){
-           	  Node rida = read.getChildNodes().item(i);
-           	  try{
-           		  if(rida.getNodeName().equals("priceformula")){
-           			 String custID = " ";
-                     String clGroup = " ";
-                     String prodID = " ";
-                     String prodGroup = " ";
-                     MatrixLine mline = new MatrixLine();
-                    try{
-                    	 clGroup = rida.getAttributes().getNamedItem("code").getNodeValue(); 
-                         prodID =  rida.getAttributes().getNamedItem("item").getNodeValue(); 
-                         if (custID != null && custID.trim().length() > 0) {
-                           mline.setCustID(custID.trim());
-                         }
-                         if (clGroup != null && clGroup.trim().length() > 0) {
-                           mline.setCliGroup(clGroup.trim());
-                         }
-
-                         if (prodID != null && prodID.trim().length() > 0) {
-                           mline.setProdID(prodID.trim());
-                         }
-                         
-                         if (mline.getProdID() == null && prodGroup != null
-                             && prodGroup.trim().length() > 0) {
-                           mline.setProdGroup(prodGroup);
-                         }
-
-                        
-                         if(prods.keySet().contains(prodID) && pricelists.contains(clGroup.trim())){
-                        	
-                        	 
-                        	if(!prodsInUse.contains(prodID.trim())){
-                           	  this.prodsInUse.add(prodID.trim());	
-                        	}
-                        	 
-                            lines.add(mline);	
-                          }
-                    
-                       
-                    }catch(Exception e){
-                    }
-                    
-                   }
-                	
-           	  }catch(Exception e){
-           		  e.printStackTrace();
-           	  }
-                
-           }
-           
-   	}catch(Exception e){
-   		e.printStackTrace();
-   	}
-     //  System.out.println(prodsInUse.size() );
-       
-       return sortLines(lines,prods);
- }
+  
    
-   private Vector sortLines(Vector inVec,TreeMap products){
-	        Vector vec = new Vector();
-	       // System.out.println("Prod22 " + products.size());
-	        for (int i = 0 ; i < inVec.size() ; i++){
-	          vec.addElement(inVec.elementAt(i));
-	        }
-	        Vector sorted = new Vector(vec.size());
-	        while(vec.size() > 0){
-	          MatrixLine smallest = null;
-	          Product smProd = null;
-	          for (Enumeration enumr = vec.elements(); enumr.hasMoreElements() ; ){
-	        	  MatrixLine ol = (MatrixLine)enumr.nextElement();
-	            Product prod = (Product)products.get(ol.getProdID());
-           //   System.out.println("Prod " + prod + "  " + ol.getProdID());
-	            if ( (smallest == null && smProd == null )
-	            		|| ( prod.getName().compareTo(smProd.getName()) < 0 )) {
-	              smallest = ol;
-	              smProd = (Product)products.get(smallest.getProdID());
-	            }
-	          }
-	          vec.removeElement(smallest);
-	          sorted.addElement(smallest);
-	        }
-	        return sorted;
-	      }
-	
-
+ 
 
    public String SortingData(){
    	return null;
@@ -714,8 +223,51 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
  
 
    public Vector getDebt(String agentCode){
-        return this.debtList;
-  }
+			  Vector tm = new Vector();
+				org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
+		  	
+				org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+				
+				  int lenn = values.size();
+				try {
+				  for (int i = 0; i < lenn; i++) {
+						org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+		        		String number = (String) cob.get("number");
+			        	String date =(String) cob.get("invoiceDate");
+			        	String duedate = (String) cob.get("dueDate");
+			        	Double volg = Double.parseDouble(cob.get("remainingAmount") + "");
+			        	String payer = (String) cob.get("billToCustomerNumber");
+			        	String custid = (String) cob.get("customerNumber");
+					  
+
+
+       		     Debt dd = new Debt();
+				  dd.setCustID(custid);
+				  dd.setPayerID(payer);
+				  dd.setDoknr(number);
+				  dd.setDate(getDate(date));
+				  dd.setDuedate(getDate(duedate));
+				  
+				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
+				  dd.setDue(ff + "");
+				  dd.setSum(volg);
+				//	System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " +ff);	
+
+				 tm.add(dd);
+
+		        		
+		          	}
+				  
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+		System.out.println("Debtsize " + tm.size());
+
+		  
+
+	     return tm;
+	   }
 
    public void connectionDown(){
    }
@@ -731,49 +283,59 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
             }
   private TreeMap   prGroups= new TreeMap();
   
+ 
+  
+  
+  
+  
+  
+  
+  
    public TreeMap getProdGroups() throws SQLException {
-    
-     
-  	try {
-  		  File f = new File (getDir() + "tootegrupid.xml");
-  	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-  	     DocumentBuilder db;
-  		db = dbf.newDocumentBuilder();      	
-      	FileInputStream in = getCleanInputStream(f);
-      	String handler = null;
-          Document doc = db.parse(in,handler);
-          Node root = getNode(doc, "transport");      
-       //   System.out.println(root);
-      	Node read = getNode(root, "itemclasses");
-      //	System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
-          for (int i = 0; i < read.getChildNodes().getLength(); i++){
-          	  Node rida = read.getChildNodes().item(i);
-          	  try{
-          		  if(rida.getNodeName().equals("itemclass")){
-               		 String group  = rida.getAttributes().getNamedItem("code").getNodeValue();
-               		 try{
-               			 String name  = rida.getAttributes().getNamedItem("default_name").getNodeValue(); 
-                   		 group = deCode(group);
-                   		  name  =  deCode(name);
-                   		  prGroups.put(group, name);  
-               		 }catch(Exception r){
-               			 
-               		 }
-               	 
-          		  } 
-                  
-          	  }catch(Exception e){
-          		  e.printStackTrace();
-          		 // System.exit(0);
-          	  }
-               
-          }
-          
-  	}catch(Exception e){
-  		e.printStackTrace();
-  	}
-         return prGroups;
-   }
+	   TreeMap tm = new TreeMap();
+	   
+	   
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//itemCategories.json");
+	  	
+		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+		
+		  int lenn = values.size();
+		try {
+		  for (int i = 0; i < lenn; i++) {
+			  
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+           String id = (String)cob.get("id");
+           String code = (String)cob.get("code");
+           String name = (String)cob.get("displayName");
+       
+           if (name != null && name.trim().length() > 0) {
+        	   tm.put(code,name);
+           }
+         	}
+		  
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+System.out.println("ProdGroup size :  " + tm.size());
+	  
+	return tm;
+   
+
+}
+	   
+	   
+	   
+	   /*   {
+      "@odata.etag": "W/\"JzIwOzE0NTcxMzI1NDExNjY1NDUyMDYwMTswMDsn\"",
+      "id": "2a7525a9-b354-ef11-bfe2-000d3adbde7b",
+      "code": "AINEDISP",
+      "displayName": "puhastusaine dispenser",
+      "lastModifiedDateTime": "2024-08-07T11:53:31.527Z"
+    },
+    */
+	   
+   
 
    public TreeMap getProdGroupsSecond() throws SQLException {
       return null;
@@ -794,234 +356,41 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
    
    
    public TreeMap getAgents(){
-     TreeMap tm = new TreeMap();
-     //getFixedAssortmentData();
-  //  makeData();
-     
-     // loene võimalikud agendid sisse 
-   
- 	try {
- 		  File f = new File (getDir() + "kliendid.xml");
- 	     
- 	      //  System.out.println(f.getAbsolutePath());
- 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
- 	     DocumentBuilder db;
- 		db = dbf.newDocumentBuilder();      	
-     	FileInputStream in = getCleanInputStream(f);
-     	String handler = null;
-         Document doc = db.parse(in,handler);
-         Node root = getNode(doc, "transport"); 
-     	Node read = getNode(root, "customers");
-     	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
-         for (int i = 0; i < read.getChildNodes().getLength(); i++){
-         	  Node rida = read.getChildNodes().item(i);
-         	  try{
-         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
-         		 salesman = deCode(salesman);
-         		 Agent sm = new Agent (salesman);
-         		 sm.setName(salesman);
-                  tm.put(salesman, sm); 
-                  
-                  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
-                  if(!parent.getEmail(salesman).equals("") &&  !custtsUsed.contains(id)){     		   
-	         		   custtsUsed.add(id);
-      		      }
-	         			 String price_list =  rida.getAttributes().getNamedItem("price_list").getNodeValue() ;         	
-		         	
-		         	      if(!parent.getEmail(salesman).equals("") &&  !pricelists.contains(price_list)){
-	 	         		     pricelists.add(price_list.trim()); 
-	 	         		   }
-	         	  
-         	  }catch(Exception e){
-         		 // e.printStackTrace();
-         	  }
-         }
-         
- 	}catch(Exception e){
- 		//e.printStackTrace();
- 	}
-     
-     System.out.println("Agendilist tehtud" );
-     System.out.println("Hinnakirju kasutusel "  + pricelists.size() +  " " + pricelists.toString() );
-     System.out.println("Aktiivseid kliente kasutusel "  + custtsUsed.size());
-     fixedLines = getFixedAssortmentData1();
+		  TreeMap tm = new TreeMap();
+			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//customers.json");
+	  	
+			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+			
+			  int lenn = values.size();
+			try {
+			  for (int i = 0; i < lenn; i++) {
+				  
+				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+
+	            String salesCode = (String)cob.get("salespersonCode");
+	            if (salesCode != null && salesCode.trim().length() > 0) {
+	            	Agent agent = new Agent(salesCode);
+	            	agent.setName(salesCode);
+	            	  tm.put(agent.getName(), agent);
+	            }
+
+	        
+	          	}
+			  
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+	System.out.println("Managersize " + tm.size());
+
+	  
+
      return tm;
    }
 
    
    
-   private void makeData(){
-	   
-
-	     
-       try{
-       	String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
-       	
-       	Converter.doTrustToCertificates();
-           URL myurl = new URL(httpsURL);
-           HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-           InputStream ins = con.getInputStream();
-           InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-           BufferedReader in = new BufferedReader(isr);
-
-           String inputLine;
-           StringBuffer inputLineBuf = new StringBuffer();
-           while ((inputLine = in.readLine()) != null){
-           	inputLine = this.enCode(inputLine);
-           	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\"l\"","\"L\""));
-          }
-
-           in.close();
-           
-           if(inputLineBuf.length() > 2){
-             
-                 try {
-               	  File f = new File (getDir() + "tootegrupid.xml");
-               	  if(f.exists())f.delete();
-               	  
-               	  
-             	 Converter.saveFileInUTF8(getDir() + "tootegrupid.xml", inputLineBuf.toString());
-           	
-           	  }catch (Exception ex) {
-           		ex.printStackTrace();
-           	  }
-            }
-           
-           //lõpeb tootegruppidega tegelemine 
-           System.out.println("Tootegrupid tehtud" );
-           //algab Hinnakirja faili moodustamine
-           
-           httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=priceformula";
-           myurl = new URL(httpsURL);
-           con = (HttpsURLConnection)myurl.openConnection();
-           ins = con.getInputStream();
-           isr = new InputStreamReader(ins,"UTF-8");
-           in = new BufferedReader(isr);
-
-           inputLine = "";
-          inputLineBuf = new StringBuffer();
-          while ((inputLine = in.readLine()) != null){
-          	inputLine = this.enCode(inputLine);
-          	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
-          }
-
-          in.close();
-          
-          if(inputLineBuf.length() > 2){
-         
-                try {
-              	  File f = new File (getDir() + "hinnakiri.xml");
-              	  if(f.exists())f.delete();
-              	 Converter.saveFileInUTF8(getDir() + "hinnakiri.xml", inputLineBuf.toString());
-          	
-          	  }catch (Exception ex) {
-          		ex.printStackTrace();
-          	  }
-           }
-          
-
-          //lõpeb toodetega tegelemine 
-
-          System.out.println("Hinnakirjad tehtud" );
-           
-           
-           
-           
-           //algab tootede faili moodustamine
-           
-            httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=item";
-            myurl = new URL(httpsURL);
-            con = (HttpsURLConnection)myurl.openConnection();
-            ins = con.getInputStream();
-            isr = new InputStreamReader(ins,"UTF-8");
-            in = new BufferedReader(isr);
-
-            inputLine = "";
-           inputLineBuf = new StringBuffer();
-           while ((inputLine = in.readLine()) != null){
-           	inputLine = this.enCode(inputLine);
-           	inputLineBuf.append(inputLine.replaceAll("<item","\n<item" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
-           }
-
-           in.close();
-           
-           if(inputLineBuf.length() > 2){
-          
-                 try {
-               	  File f = new File (getDir() + "tooted.xml");
-               	  if(f.exists())f.delete();
-               	Converter.saveFileInUTF8(getDir() + "tooted.xml", inputLineBuf.toString());
-              	
-           	  }catch (Exception ex) {
-           		ex.printStackTrace();
-           	  }
-            }
-           
-
-           //lõpeb toodetega tegelemine 
-
-           System.out.println("Tooted tehtud" );
-           //algab kliendi faili moodustamine
-           
-           httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=customer";
-           myurl = new URL(httpsURL);
-           con = (HttpsURLConnection)myurl.openConnection();
-           ins = con.getInputStream();
-           isr = new InputStreamReader(ins,"UTF-8");
-           in = new BufferedReader(isr);
-
-           inputLine = "";
-          inputLineBuf = new StringBuffer();
-          while ((inputLine = in.readLine()) != null){
-          	inputLine = this.enCode(inputLine);
-           	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ));	
-          	
-       //       System.out.println(inputLine);	
-          }
-
-          in.close();
-          
-          if(inputLineBuf.length() > 2){
-             
-                 try {
-                    String res = "";
-               	  StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
-               	  while(st.hasMoreTokens()){
-               		String line = st.nextToken();
-               		//if(line.indexOf("\"10173\"") == -1 && line.indexOf("\"13543\"") == -1 && line.indexOf("<contact code=\"2575\"") == -1 ){
-               			res = res + line + "\n";
-               		//}
-               	  }
-               	  File f = new File (getDir() + "kliendid.xml");
-               	  if(f.exists())f.delete();
-               	Converter.saveFileInUTF8(getDir() + "kliendid.xml", inputLineBuf.toString());
-              	
-           	  }catch (Exception ex) {
-           		ex.printStackTrace();
-           	  }
-            }
-          
-       }catch(Exception e){
-       	e.printStackTrace();
-       }
-       
-       
-
-   	
-
-       System.out.println("kliendid tehtud" );
-       
-       
-       
-	   
-	   
-   }
-
-        	  private Node getNode(Node rt, String s){
-        	    return GenericDOM.getNode(rt, s);
-        	  }
-        	  
-
+  
         	  private FileInputStream getCleanInputStream(File xmlFile)throws FileNotFoundException, IOException {
         		FileInputStream in = new FileInputStream(xmlFile);
         		int bomKount = getBOMCount(xmlFile);
@@ -1051,181 +420,352 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
        public String getDistribution() {
          return null;
        }
+private void saveFile (String dataType) {
+	  String folderPath = "Data"; // Update this path as needed
 
+      // Create a File object
+      File folder = new File(folderPath);
 
-   public TreeMap getCustomers(Agent agent){
-	     TreeMap tm = new TreeMap();
-	     makeData();
+      // Check if the folder already exists
+      if (!folder.exists()) {
+          // Try to create the folder
+          if (folder.mkdirs()) {
+              System.out.println("Folder created successfully at: " + folderPath);
+          } else {
+              System.out.println("Failed to create the folder at: " + folderPath);
+          }
+      } 
+      String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/itera/kp/v2.0/"
+	          + "companies(" + companyID + ")/";
+      //https://api.businesscentral.dynamics.com/v2.0/{{kodupaber}}/DEV/api/itera/kp/v2.0/companies({{IT-TEST}})/endpointinimi
+      
 
-		  String country = "Estonia";
-		  if(getParent().getProps().getProperty("country") != null){
-			  country = getParent().getProps().getProperty("country");
-		  }
-	     this.customers = new ArrayList();
-	   
+	      String url = urlBase + dataType;
+	      
+	      try (CloseableHttpClient client = HttpClients.createDefault()) {
+	        HttpGet request = new HttpGet(url);
+	        request.setHeader("Authorization", "Bearer " + token);
+
+	        HttpResponse response = (HttpResponse) client.execute(request);
+	        HttpEntity entity = ((org.apache.http.HttpResponse) response).getEntity();
+	        if (entity != null) {
+	        String result = EntityUtils.toString(entity);
+	        Converter.saveFile("data//" + dataType + ".json", result);
+	        System.out.println(dataType + " tehtud");
+	        }} catch (IOException e) {
+	            e.printStackTrace();
+	            }
+	       // System.out.println("Query result " + result);
+
+      
+      
+}
+
+  private void downloadData(String dataType) {
+	  if (token == null) {
+		  token = getMSToken();
+	  }
+
+	  //Folderi olemasolu kontroll-loomine
+	   // Specify the path where you want to create the folder
+      String folderPath = "Data"; // Update this path as needed
+
+      // Create a File object
+      File folder = new File(folderPath);
+
+      // Check if the folder already exists
+      if (!folder.exists()) {
+          // Try to create the folder
+          if (folder.mkdirs()) {
+              System.out.println("Folder created successfully at: " + folderPath);
+          } else {
+              System.out.println("Failed to create the folder at: " + folderPath);
+          }
+      } 
+      String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/itera/kp/v2.0/"
+	          + "companies(" + companyID + ")/";
+      
+      //https://{businesscentralPrefix}/api/v2.0/companies({id})/salesInvoices({id})/salesInvoiceLines({salesInvoiceLineId})
+      
+      if (dataType == null || dataType.equals("salesPrices")) {
+    	  this.saveFile("salesPrices");
+
+}
+      
+
+      
+      
+      
+      if (dataType == null || dataType.equals("salesInvoices")) {
+    	  this.saveFile("salesInvoices");
+  		
+
+  		  File dir = new File("Data//lines");
+  		  if (!dir.exists()) {
+  			  dir.mkdir();
+  			  }
+
+			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
+		  	
+			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+			
+			  int lenn = values.size();
+			try {
+			  for (int i = 0; i < lenn; i++) {
+					org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+	        		String number = (String) cob.get("number");
+		        	String id = (String) cob.get("id");
+		        	
+		        	
+		        	File f = new File("data//lines//"+number+".json");
+		        	if (!f.exists()) {
+		        		
+		        	
+		        	
+
+  		  
+  		  
+  		  
+	     String url = urlBase + "salesInvoices("+ id +")/salesInvoiceLines";
+	      
+	      
+	      try (CloseableHttpClient client = HttpClients.createDefault()) {
+	        HttpGet request = new HttpGet(url);
+	        request.setHeader("Authorization", "Bearer " + token);
+
+	        HttpResponse response = (HttpResponse) client.execute(request);
+	        HttpEntity entity = ((org.apache.http.HttpResponse) response).getEntity();
+	        if (entity != null) {
+	        String result = EntityUtils.toString(entity);
+	        Converter.saveFile("data//lines//"+number+".json", result);
+	        System.out.println("salesInvoiceLines tehtud");
+	        }} catch (IOException e) {
+	            e.printStackTrace();
+	            }
+		        	}
+	       // System.out.println("Query result " + result);
+}
+			} catch (Exception e) {
+	            e.printStackTrace();
+	            }
+      }
+      
+	  ///agedAccountsReceivables
+	  //toodete json
 	     
-	     this.debtList = makeDebtlist();
-	     
-	     
-	     
-	   try {
-	 		  File f = new File (getDir() + "kliendid.xml");
-	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	 	     DocumentBuilder db;
-	 		db = dbf.newDocumentBuilder();      	
-	     	FileInputStream in = getCleanInputStream(f);
-	     	String handler = null;
-	         Document doc = db.parse(in,handler);
-	         Node root = getNode(doc, "transport");      
-	      //   System.out.println(root);
-	     	Node read = getNode(root, "customers");
-	     	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
-	         for (int i = 0; i < read.getChildNodes().getLength(); i++){
-	         	  Node rida = read.getChildNodes().item(i);
-	         	  
-	         	 // System.out.println("node name " + rida.getNodeName());
-	         	  if(rida.getNodeName().equals("customer")){
-	         		 String name = null;
-		         	  try{
-		         		   name =  rida.getAttributes().getNamedItem("name").getNodeValue();
-		         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
-		         		  Customer customer = new Customer(id);
-		         		  String kkood = id;
-		         		  try{
-		         			  String payer = rida.getAttributes().getNamedItem("regno").getNodeValue();
-			         		  
-			         		  if(payer != null && payer.trim().length() > 0 ){
-			         			  customer.setPayer(payer.trim());
-			         		  }
+      
+if (dataType == null || dataType.equals("agedAcc")) {
+	  this.saveFile("agedAccountsReceivables");
+}
+      
+      
+if (dataType == null || dataType.equals("items")) {
+	 this.saveFile("items");
+}
 	  
-		         		  }catch(Exception e){
-		         			  
-		         		  }
-		         		
-		         		if(this.usedCredit.get(id) != null){
-		         			customer.setUsedCredit(Double.parseDouble(usedCredit.get(id)+ ""));
-		         		}
-		         		
-		         		if(this.dueSums.get(id) != null){
-		         			customer.setDebt(Double.parseDouble(dueSums.get(id)+ ""));
-		         		}
-		         		
-		         		String kname = name;
-		         		 String sendaadr = ""; 
-		         		try{ 
-		 	         		  sendaadr =  rida.getAttributes().getNamedItem("send_address_street").getNodeValue(); 
-		 	         		  name = name + " " + sendaadr;
-		         		 }catch(Exception ee){
+if (dataType == null || dataType.equals("customers")) {
+	this.saveFile("customers");
+}
 
-			         	
-		         		 }
-			         	
-		         		String asula = "";
-		         		try{ 
-		 	         		  asula =  rida.getAttributes().getNamedItem("send_address_country").getNodeValue(); 
-		 	         		sendaadr = sendaadr + " " + asula;
-		 	         		 customer.setAddress(Converter.adressLink(sendaadr, country));
-		 	         	 }catch(Exception ee){
-		         		 }
-		 	         	
-                         
-		         		
-		         		  customer.setName(name);
-		         		 String aadr = "";
-		         		 String aadr2 = "";
-		         		 try{ 
-		 	         		  aadr =  rida.getAttributes().getNamedItem("address_street").getNodeValue(); 
-		 	         		  aadr2 =  rida.getAttributes().getNamedItem("address_country").getNodeValue(); 
-			 	         		
-		 	         		  customer.setAddress(Converter.adressLink(aadr, country));
-		         		 }catch(Exception ee){
+if (dataType == null || dataType.equals("itemCategories")) {
+	this.saveFile("itemCategories");
+}
 
-			 		         		 }
-		         		 String aadress = aadr + " " + aadr2;
 
-		         		 try{ 
-		 	         		 String yldphone =  rida.getAttributes().getNamedItem("telephone").getNodeValue();
-		 	         		 if(yldphone.trim().length() > 0){
-		 	            		customer.setPersonalData((yldphone).replaceAll(";", ","));
-		 	  		         }
-		 	     		 }catch(Exception ee){
-                        	 customer.setAddress(""); 
-		         		 }
 
-		         		  
-		         		  try{
-		         			  
-		         			 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
-		         			  Node nn = rida.getChildNodes().item(r);
-		       	    		 if(nn.getNodeName().equals("contact")){
-		         				 String cname =  nn.getAttributes().getNamedItem("name").getNodeValue();
-		         				String ctel =  nn.getAttributes().getNamedItem("telephone").getNodeValue();
-		         				if(customer.getPersonalData().trim().length() > 1){
-		         					customer.setPersonalData((cname + " " + ctel).replaceAll(";", ","));
-			         			}else{
-		         				   customer.setPersonalData(customer.getPersonalData() + "|" +(cname + " " + ctel).replaceAll(";", ","));
-		         				}
-		  	         		
-		  	         		 }}
-		         		  }catch(Exception r){
-		         			  
-		         		  }
-		         		 
-		         		  	        		  
-		         		  try{
-			         			 String city =  rida.getAttributes().getNamedItem("send_address_county").getNodeValue() ;         	
-				         		  customer.setCity(city);
-			         		  }catch(Exception e){
-			         			 try{
-				         			 String city =  rida.getAttributes().getNamedItem("address_county").getNodeValue() ;         	
-					         		  customer.setCity(city);
-			         			}catch(Exception es){
 
-				         			  customer.setCity(" ");	
-			         			}
-			         		  }
-		         		 
-		         		  
-		         		  try{
-		         			 String price_list =  rida.getAttributes().getNamedItem("price_list").getNodeValue() ;         	
-			         		  customer.setGroup(deCode(price_list));
-		         	  
-		         		  }catch(Exception e){
-		         			  
-		         		  }
-		         		  
-		         		  try{
-			         			 String price_list_special =  rida.getAttributes().getNamedItem("price_list_special").getNodeValue() ;   
 
-			         			 if(customer.getGroup() != null && customer.getGroup().trim().length() > 0) {
-			         				customer.setGroup(customer.getGroup() + "|" + deCode(price_list_special.replaceAll(",", "|"))); 
-			         			 }else {
-			         				customer.setGroup( deCode(price_list_special.replaceAll(",", "|"))); 
-			         			 }
-				         		  
-			         	  
-			         		  }catch(Exception e){
-			         			  
-			         		  }
-     		
-	         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
-	         		      customer.addAgent(new Agent(deCode(salesman.toUpperCase())));
-	         		      customer.setMainAgent(deCode(salesman.toUpperCase()));
+
+
+	  
+  }
+       
+       
+       
+       
+       
+   public TreeMap getCustomers(Agent agent){
+	   
+	   TreeMap<String, Double>volad = new TreeMap<String, Double>();
+		org.json.simple.JSONObject cc1 = 	Converter.readJSONFile("data//agedAccountsReceivables.json");
+ 	
+		org.json.simple.JSONArray values1 = (org.json.simple.JSONArray) cc1.get("value");
+		
+		  int lenn1 = values1.size();
+		try {
+		  for (int i = 0; i < lenn1; i++) {
+			  
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values1.get(i);
+
+         	String number = (String)cob.get("customerNumber");
+         	Double balDue = Double.parseDouble( cob.get("balanceDue")+"");
+         	if (balDue != 0 && number != null && number.trim().length() > 0) {
+             	volad.put(number, balDue+0.0);
+         	}
+
+          
+		  }
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Võlad"+ volad.toString());
+	   
+	   
+	   
+	   
+	   
+		  TreeMap tm = new TreeMap();
+			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//customers.json");
+	  	
+			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+			
+			  int lenn = values.size();
+			  
+			try {
+			  for (int i = 0; i < lenn; i++) {
+				  
+				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+
+	          	String number = (String)cob.get("number");
+	            Customer cust = new Customer(number);
+	            
+	       
+	            
+	            
+	            
+	            String displayName = (String)cob.get("displayName");
+	            cust.setName(displayName);
+	            
+	            String billToCustomerNo = (String)cob.get("billToCustomerNo");
+	            cust.setPayer(billToCustomerNo);
+	            
+	            String address1 = (String)cob.get("addressLine1");
+	            String address2 = (String)cob.get("addressLine2");
+	            if (address2 != null && address2.trim().length() > 1) {
+	            	address2 = ", " + address2.trim();
+	            
+	            }else {
+	            	address2 = "";
+	            }
+	            if(address2.contains(address1)) {
+	            	address2 = "";
+	            }
+	            
+	            String city = (String)cob.get("city");
+	            if (city != null && city.trim().length() > 1) {
+	            	city = ", " + city.trim();
+	            
+	            }else {
+	            	city = "";
+	            }
+	            String state = (String)cob.get("state");
+	            if (state != null && state.trim().length() > 1) {
+	            	state = ", " + state.trim();
+	            
+	            }else {
+	            	state = "";
+	            }
+	            String country = (String)cob.get("country");
+	            if (country != null && country.trim().length() > 1) {
+	            	country = ", " + country.trim();
+	            
+	            }else {
+	            	country = "";
+	            }
+	            String postalCode = (String)cob.get("postalCode");
+	            if (postalCode != null && postalCode.trim().length() > 1) {
+	            	postalCode = ", " + postalCode.trim();
+	            
+	            }else {
+	            	postalCode = "";
+	            }
+	            if (city.contains(state)) {
+	            	state = "";
+	            }
+	        //    System.out.println("klinfo " + address1 + "'" +address2 + "'" + city  + "'" + state+ "'" + country+ "'" + postalCode);
+	            cust.setAddress((address1 +  address2 + city  + state + country + postalCode).trim());
+	            
+	            
+	            String phone = (String)cob.get("phoneNumber");
+	            cust.setPersonalData("Tel:" + phone);
+	            
+	            
+	            
+	            String email = (String)cob.get("email");
+	            cust.setInfoEmail(email);
+	            
+	            
+	            String salesCode = (String)cob.get("salespersonCode");
+	            cust.addAgent(new Agent (salesCode));
+	           
+	            
+	            
+	            
+	            String balanceDue = cob.get("balanceDue")+ "";
+	            
+	            
+	            
+	            
+	            String creditLimit = cob.get("creditLimit")+"";
+	            cust.setCredit(creditLimit);
+	            
+	            
+	            if (volad.get(cust.getID() ) != null) {
+	            	cust.setDebt(volad.get(cust.getID()));
+	            }
+	            if (volad.get(cust.getPayer() ) != null) {
+	            	cust.setDebt(volad.get(cust.getPayer()));
+	            }
+	            
+	            
+	            //String blocked = (String)cob.get("blocked");
+	            
+	          	
+	          tm.put(cust.getName(), cust);
+	          	}
+			  
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+	System.out.println("Custsize " + tm.size());
+		  
+		return tm;
 	    
-	         		      tm.put(customer.getName(), customer);
-	                      this.customers.add(customer.getID());
-	                    
-	         	  }catch(Exception e){
-	         		
-	         		  e.printStackTrace();
-	         	  }
-	              
-	         	  }}
-	 	}catch(Exception e){
-	 		e.printStackTrace();
-	 	}
-	    
-     return tm;
+		 /*
+		  * {
+	      "@odata.etag": "W/\"JzE5OzE5NTUyMzgxOTY2ODM5NTk2NzExOzAwOyc=\"",
+	      "id": "a2ea5579-8933-ef11-8409-0022489f6722",
+	      "number": "10001",
+	    1  "displayName": "Selver Anne",
+	      "type": "Company",
+	    1  "addressLine1": "Kalda tee 43",
+	     1 "addressLine2": "",
+	     1 "city": "Tartu, Tartu",
+	     1 "state": "",
+	    1  "country": "EE",
+	     1 "postalCode": "50707",
+	    1  "phoneNumber": "7461604",
+	    1  "email": "selver.kaubakategooriajuhtanne@selver.ee",
+	      "website": "",
+	    1  "salespersonCode": "IRMAL",
+	    1  "balanceDue": 0,
+	    1  "creditLimit": 1,
+	      "taxLiable": false,
+	      "taxAreaId": "cdafba67-db1c-ef11-9f88-000d3a69189e",
+	      "taxAreaDisplayName": "Kodumaised kliendid ja hankijad",
+	      "taxRegistrationNumber": "",
+	      "currencyId": "00000000-0000-0000-0000-000000000000",
+	      "currencyCode": "EUR",
+	      "paymentTermsId": "597a462b-5d1e-ef11-9f88-000d3a69189e",
+	      "shipmentMethodId": "a834a542-b82f-ef11-8409-000d3a6922b3",
+	      "paymentMethodId": "cf59ca74-6729-ef11-9f88-000d3ab16a11",
+	   1   "blocked": "_x0020_",
+	      "lastModifiedDateTime": "2024-11-05T11:39:49.14Z"
+	    },
+		  */
+
+     
    }
    
    
@@ -1830,70 +1370,79 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 
    
    public Vector getCustomerProductsList(String agentCode){
-	   //1.teeme klientide arvete nimekirja .
 	   Vector custProds = new Vector();
-	   Enumeration enums = this.custtsUsed.elements();
-	   while(enums.hasMoreElements()){
-		String custid = (String)enums.nextElement();
-		   try{
-			  // String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?get=1&what=itemclass";
-			   Converter.doTrustToCertificates();
-				String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice&get=1&customer=" + custid;
-		     //  System.out.println(httpsURL);
-				URL myurl = new URL(httpsURL);
-		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-		        InputStream ins = con.getInputStream();
-		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-		        BufferedReader in = new BufferedReader(isr);
+	   
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
+	  	
+		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+		
+		  int lenn = values.size();
+		try {
+		  for (int i = 0; i < lenn; i++) {
+				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+       		String number = (String) cob.get("number");
+	        	
+	        	String customerNumber = (String) cob.get("customerNumber");
+	        	
+	        	
+	        	
+	        	File f = new File("data//lines//"+number+".json");
+	        	if (f.exists()) {
+	        		org.json.simple.JSONObject ccL = 	Converter.readJSONFile("data//lines//"+number+".json");
+	        	  	
+	        		org.json.simple.JSONArray valuesL = (org.json.simple.JSONArray) ccL.get("value");
+	        		
+	      		  int lennL = valuesL.size();
+	      		  
+	    		  for (int ii = 0; ii < lennL; ii++) {
+	  				org.json.simple.JSONObject line = (org.json.simple.JSONObject) valuesL.get(ii);
+	         		String prodId = (String) line.get("lineObjectNumber");
+	         		String shipDate = (String) line.get("shipmentDate");
+	         		shipDate = shipDate.substring(5);
+	         		Double netAmnt = 0d;
+	         		try {
+	         			netAmnt = Double.parseDouble(line.get("netAmount")+"");
+	         			
+	         		}catch(Exception E) {
+	         			
+	         		}
+	         		
+	         		Double qty = 0d;
+	         		
+	         		try {
+	         			qty = Double.parseDouble(line.get("quantity")+"");;
+	         			
+	         		}catch(Exception E) {
+	         			
+	         		}
+	         		
+	         				
+	         		Double price = 0d;
+	         		
+	         		try {
+	         			price = netAmnt / qty;;;
+	         			
+	         		}catch(Exception E) {
+	         			
+	         		}
+	         		  
+	         		  CustProd cp = new CustProd(customerNumber, prodId, qty ,0 ,0 ,shipDate,price,0,0," ");
+	         		  cp.setAbiKood(number);
+	         		  custProds.add(cp);
+	         		
+	    		  }
 
-		        String inputLine;
-		        StringBuffer inputLineBuf = new StringBuffer();
-		        while ((inputLine = in.readLine()) != null){
-		        	inputLine = this.enCode(inputLine);
-		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\"l\"","\"L\""));
-		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
-		        	while (st.hasMoreTokens()){
-		        		
-		        		String line = st.nextToken();
-		        		int ind =  line.indexOf("invoice number=") ;
-		        		String number = "";
-			        	if(ind != -1){
-			        		 number = line.substring(ind + 16);
-			        		number = number.substring(0,number.indexOf("\""));
-			        		// System.out.println(number);
-			        	}
-			        	 ind =  line.indexOf("date=") ;
-			        	if(ind != -1){
-			        		String date = line.substring(ind + 6);
-			        		date = date.substring(0,date.indexOf("\""));
-			        		
-			        		 if(isOkDate(date)){
-			        			// System.out.println(date + " " + number + " " + custid);	
-			        		
-			     					Vector cps = this.getCP(deCode(custid),number,date);
-			     					if(cps != null){
-			     						Enumeration eee = cps.elements();
-			     						while( eee.hasMoreElements()){
-				     						custProds.add(eee.nextElement());
-				     					//	System.out.println(date + " " + number + " " + custid);
-			     						}			     				
-					        			 	
-			     					}
-			     				}
-			        	  }		
-		        	}           	
-		        }
-		      //  System.out.println(inputLineBuf);
-		        in.close();
-		        
-		       
-		   } catch (Exception a){
-			   a.printStackTrace();
-		   }
-		   
-	   }
+	        	}
+       
+}
+		} catch (Exception e) {
+           e.printStackTrace();
+           }
+		System.out.println("Query result " + custProds.toString());
+ 
 	   return custProds;
    }
+
 
    public String getStartingTime(){
      return null;
@@ -1935,34 +1484,61 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
    * @param agents Map
    */
   public void setBulkSales(Map agents) {
-/*
-  	 try {
-        FileReader fr = new FileReader(getDir() + DATA_FILE);
-      BufferedReader reader = new BufferedReader(fr);
-    String line = null;
+	   TreeMap<String, Double> ags = new TreeMap<String, Double>();
+	   
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
+	  	
+		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+		
+		  int lenn = values.size();
+		try {
+		  for (int i = 0; i < lenn; i++) {
+			  
+				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+      		String dateInv = (String) cob.get("invoiceDate");
+      		String salespers = (String) cob.get("salesperson");
+      		Double amnt = Double.parseDouble(cob.get("totalAmountExcludingTax")+"");
+      		
+      		
+      		Date dateSInv = this.getDate(dateInv);
+      		Calendar cal = Calendar.getInstance();
+      		cal.set(Calendar.DAY_OF_MONTH, 1);
+      		cal.set(Calendar.HOUR_OF_DAY, 0);
+      		java.util.Date d = cal.getTime();
+      		
+      		//if (d.before(dateSInv)) {
+      			Double sum = ags.get(salespers);
+      			if (sum == null) {
+      				ags.put(salespers, amnt);
+      			}
+      			else {
+      				ags.put(salespers, sum+amnt);
+      			}
+      			
+      			
+     // 		}
+		  }
+		}catch(Exception E){
+	    	
+	    }
+	        	
+	  System.out.println(ags.toString());
+	  
+	  Iterator itera = ags.keySet().iterator();
+	  while (itera.hasNext()) {
+		  String agentID = (String) itera.next();
+		  Agent agent = (Agent)agents.get(agentID);
+	      if (agent != null){
 
-    //   "klient","toode","kogus","viimane kuup„ev","viimane kogus"
+	        agent.setMonthSales(ags.get(agentID).intValue());
+	             		
+		     }
+		  
+	  }
 
-    while(!(line = reader.readLine()).equals("[Get Salary]")){
-    }
-    line=reader.readLine();
-    while((line = reader.readLine())!= null &&  line.trim().length() > 0 ){
-       line = line.replaceAll("\",\"","|");
-       StringTokenizer st = new StringTokenizer(line, SEPARATOR);
-        if (st.hasMoreTokens()){
-          double sales = Double.parseDouble(clear(st.nextToken()));
-                if (st.hasMoreTokens()){
-                 String agentID = clear(st.nextToken());
-                 Agent agent = (Agent)agents.get(agentID);
-                 if (agent != null){
-                   agent.setMonthSales((int)(sales));
-            }
-          }
-        }
-    }
-      } catch (IOException e){
-        e.printStackTrace();
-      }*/
+	  
+	  
+	  
   }
 
 @Override
@@ -1980,8 +1556,74 @@ public String getProductSortingData() {
 
 @Override
 public TreeMap getProducts(Agent agent) {
-	// TODO Auto-generated method stub
-	return null;
+	  TreeMap tm = new TreeMap();
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
+  	
+		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+		
+		  int lenn = values.size();
+		try {
+		  for (int i = 0; i < lenn; i++) {
+			  
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+
+          	String number = (String)cob.get("number");
+			Product prod = new Product(number);
+		
+
+          	String itemCatCode = (String)cob.get("itemCategoryCode");
+        	if (itemCatCode != null && itemCatCode.length() > 0) {
+        		prod.setGroup(itemCatCode);
+        	}
+        	
+          	Boolean blocked = (Boolean) cob.get("blocked");
+          	
+          	
+          	String gtin = (String)cob.get("gtin");
+          	if (gtin != null && gtin.length() > 5) {
+             	prod.setEAN(gtin);
+          	}
+          	
+          	String name = (String)cob.get("displayName");
+          	String name2 = (String)cob.get("displayName2");
+          	prod.setName((name + " " + name2).trim());
+          	
+        
+        	String unit = (String)cob.get("baseUnitOfMeasureCode");
+        	if (unit != null) {
+        		prod.setUnit(unit);
+        	}
+        	
+          	String price = cob.get("unitPrice")+ "";
+          	if (price != null) {
+          		prod.setPrice(Double.parseDouble(price));
+          	}
+          	
+          	Long inventory = (Long)cob.get("inventory");
+          	if (inventory != null) {
+          		prod.setStock(inventory);
+          	}
+          	  	
+            
+           
+            
+            
+            
+            if(!blocked) {
+            	  tm.put(prod.getName(), prod);	
+            }
+
+          	
+          
+          	}
+		  
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+System.out.println("Prodsize " + tm.size());
+	  
+	return tm;
 }
 
 @Override
