@@ -615,6 +615,11 @@ HashSet olemas = new HashSet();
             	  name = name.trim();
               }
               agent.setName(name);
+              
+              if("true".equals(  getParent().getProps().getProperty("usewebpass"))) {
+                	agent.needsZipPass = true;
+                }
+              
               agents.put(name, agent);
               agents1.put(agent.getID(), agent);
           		}

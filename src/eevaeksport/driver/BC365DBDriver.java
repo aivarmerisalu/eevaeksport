@@ -1,6 +1,7 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -113,12 +114,14 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
     //  token = getMSToken();
     
       System.out.println("Token " + token);
+
       
     this.downloadData(null);
     // this.getDebt(null);
     // this.getCustomerProductsList(null);
      //this.setBulkSales(null);
    
+
      }
   
 	  String user =  null;
@@ -135,6 +138,54 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 		 
 		 
  
+	  private void testConn() {
+		  String url = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/environments";
+
+		  url = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/v2.0/"
+		  		+ "companies(3b92aaf0-963a-ef11-8409-000d3ab2813a)/items";
+		  
+		  try (CloseableHttpClient client = HttpClients.createDefault()) {
+			  HttpGet request = new HttpGet(url);
+			  request.setHeader("Authorization", "Bearer " + token);
+
+			  HttpResponse response = client.execute(request);
+			  HttpEntity entity = response.getEntity();
+			  if (entity != null) {
+			  String result = EntityUtils.toString(entity);
+			  Converter.saveFile("test.json", result);
+			 // System.out.println("Query result " + result);
+			  
+			  /* {
+      "@odata.etag": "W/\"JzIwOzEwNDU0MjEwNDEyNDg0NjMxODY3MTswMDsn\"",
+      "id": "e81e48a3-ae33-ef11-8409-0022489f6722",
+      "number": "47SISI000603",
+      "displayName": "SISI Relax 40 den nero M SP",
+      "displayName2": "SUKKP\u00dcKSID Relax",
+      "type": "Inventory",
+      "itemCategoryId": "040414c1-b354-ef11-bfe2-000d3adbde7b",
+      "itemCategoryCode": "SUKKPX SISI",
+      "blocked": false,
+      "gtin": "",
+      "inventory": 0,
+      "unitPrice": 0,
+      "priceIncludesTax": false,
+      "unitCost": 0,
+      "taxGroupId": "00000000-0000-0000-0000-000000000000",
+      "taxGroupCode": "",
+      "baseUnitOfMeasureId": "e087a81b-7829-ef11-9f88-000d3ab16a11",
+      "baseUnitOfMeasureCode": "TK",
+      "generalProductPostingGroupId": "dd6282ee-041c-ef11-9f88-000d3a69189e",
+      "generalProductPostingGroupCode": "KAUP",
+      "inventoryPostingGroupId": "08dea46d-751e-ef11-9f88-000d3a69189e",
+      "inventoryPostingGroupCode": "KAUBAD",
+      "lastModifiedDateTime": "2024-09-17T15:49:54.307Z"
+    }*/
+			  }
+			  } catch (IOException e) {
+			  e.printStackTrace();
+			  }
+	  }
+	  
   private String  getMSToken() {
 		 String res = null;
 		 

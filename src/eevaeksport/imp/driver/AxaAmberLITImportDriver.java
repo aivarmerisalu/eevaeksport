@@ -298,6 +298,14 @@ private Vector signatures = new Vector();
      	 			tagastus = false;
      	 		}
      	 	 }  
+     	 	String inff = order.getTeostaja();
+     	 	if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+     	 		String reason = inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
+     	 		if(reason.equals("105") && (tagastus || repr)) {
+     	 			repr = true;
+     	 			tagastus = false;
+     	 		}
+     	 	}
 		    
 		    
 		    

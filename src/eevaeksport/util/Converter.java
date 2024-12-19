@@ -1052,15 +1052,15 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("R " + r );
 						
 						
 						
 						if(!found) {
 							 row = sheet.getRow(1);
 							
-							 for (int a = 0; a < row.getLastCellNum(); a++) {
 								try {
+
+									 for (int a = 0; a < row.getLastCellNum(); a++) {
 									String gg = row.getCell((short) a).getStringCellValue().trim();
 									if(gg.toLowerCase().indexOf("abja") != -1) {
 										r = a;
@@ -1068,11 +1068,11 @@ public class Converter {
 										addrow = 1;
 										break;
 									}
-								
+									 }	
 								} catch (Exception e) {
 									// System.out.println(row.getCell((short)a).getNumericCellValue());
 								}
-							}
+							
 						}
 						
 						if(!found) {
@@ -1097,6 +1097,8 @@ public class Converter {
 							}
 						}
 						
+
+						System.out.println("R " + r + " " + addrow);
 						
 						
 						for (int a = r; a < row.getLastCellNum(); a++) {
@@ -1111,9 +1113,8 @@ public class Converter {
 							}
 						}
 						
-						//System.out.println("Groups " +  groups.toString());
-						//System.exit(0);
-						
+						System.out.println("Groups " +  groups.toString());
+					
 						for(int i = 1+addrow ; i < sheet.getLastRowNum()+1;i++){
 							 row = sheet.getRow(i);
 							 
@@ -1144,7 +1145,7 @@ public class Converter {
                                 
                                  
                                  if(value.trim().length() > 0 && !value.trim().equals("-")) {
-                                 	// System.out.println("Sees " +a + " " + pood + " " + value + " " + ean + " " + tnimi);
+                                 // System.out.println("Sees " +a + " " + pood + " " + value + " " + ean + " " + tnimi);
                                  
 							if(res.get(pood) != null){
                      	  con = (Contract)res.get(pood);
@@ -5254,7 +5255,7 @@ try{
 			}
 			
 			
-		//	System.out.println("Pass " + agent + " " + passx);
+			System.out.println("Pass " + agent + " " + passx);
 			
 			Iterator itera =  tm.values().iterator();
 		       while (itera.hasNext()){
