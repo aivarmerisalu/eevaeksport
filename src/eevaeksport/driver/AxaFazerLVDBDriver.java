@@ -2386,7 +2386,7 @@ String asi3 = "";
 				}catch(Exception e) {
 					
 				}
-			
+				try {
 				JSONParser parser = new JSONParser();
 				JSONObject obj = (JSONObject) parser.parse(res2);
 			    String segment = (String)obj.get("segment");
@@ -2521,6 +2521,9 @@ String asi3 = "";
    				outofstocks++;
    				done.add(signa);
    			}
+              }catch(Exception e) {
+            	  
+              }
    			
    	   			}
  		

@@ -139,7 +139,7 @@ public class SkaiteRomoDBDriver extends AbstractDBDriver implements BulkUpdater,
 	     
        	 
     String cmd = "SELECT  Pr.PrekesID as tid, Pr.Kodas AS toode " +
-" FROM         dbo.Prekes AS Pr INNER JOIN dbo.PL_Prekes pl on pl.prekesid=pr.prekesID LEFT OUTER JOIN " +
+ " FROM         dbo.Prekes AS Pr INNER JOIN dbo.PL_Prekes pl on pl.prekesid=pr.prekesID LEFT OUTER JOIN " +
  "                    dbo.MVGSantykiai AS mvs ON Pr.MVId = mvs.MVId1 AND Pr.IpokavimoMVId = mvs.MVId2 AND Pr.MVGId = mvs.MVGId INNER JOIN " +
  "                    dbo.Mokesciai AS mok ON Pr.MokesciaiId = mok.MokesciaiId INNER JOIN " +
  "                    dbo.PrekiuTipai AS pt ON Pr.PrekiuTipaiId = pt.PrekiuTipaiId INNER JOIN " + 
