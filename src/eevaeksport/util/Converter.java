@@ -7634,6 +7634,14 @@ String ees = "";
 		return   format.format(dd) ;	
 	}
 
+	public static String jsonDateOnly(Date dd){
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		format.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return   format.format(dd) ;	
+	}
+
+	
+	
 	public static void sendAssetsJson(Vector vec , String user , String pass, String company){
 		eevaeksport.util.ReportingService serv = new ReportingService();
 		   
