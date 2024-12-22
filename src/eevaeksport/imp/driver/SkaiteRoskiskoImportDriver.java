@@ -187,12 +187,12 @@ try{
 	  }else{
 		
 	  
-	  Vector splitted =  splitOrder(order);
- 	  Enumeration en = splitted.elements();
- 	  while(en.hasMoreElements()){
- 		  Order ord = (Order)en.nextElement();
- 			  makeOutput(ord);  
-	}
+	//  Vector splitted =  splitOrder(order);
+ 	  //Enumeration en = splitted.elements();
+ 	  //while(en.hasMoreElements()){
+ 		//  Order ord = (Order)en.nextElement();
+ 			  makeOutput(order);  
+	//}
  	 signatures.add(signature);
 	  }
  	    
@@ -657,7 +657,7 @@ if(line.getPartii() != null && line.getPartii().length() > 0 ){
 
  
   public String getDriverVersion(){
-    return "SkaiteMesineImport";
+    return "SkaiteRoskiskoImport";
   }
  
  

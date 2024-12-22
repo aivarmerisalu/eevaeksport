@@ -1201,8 +1201,8 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("Rinku")
 					    || driver.getDriverVersion().equals("RivileLedinta")
 					    || driver.getDriverVersion().equals("RivileVasca")
-
 					    || driver.getDriverVersion().equals("NaviTobisDirecto")
+					    || driver.getDriverVersion().equals("SkaiteRoskisko")
 	                	 )
                   
                   {
@@ -1309,6 +1309,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("SamsonasCSV")
 					    || driver.getDriverVersion().equals("MovexLAT")
 					    || driver.getDriverVersion().equals("NaviTobisDirecto")
+					    || driver.getDriverVersion().equals("SkaiteRoskisko")
 					  ){
                 	 
                 	  System.out.println("Teen Fixi " + jsonDate(Calendar.getInstance().getTime()) );
@@ -3138,7 +3139,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
           StringBuffer buf = new StringBuffer();
           int count = 0;
 
-          
+          System.out.println("PMFILE date " + dostuff);    
          if(dostuff) { 
           HashSet done = new HashSet();
        

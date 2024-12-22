@@ -455,68 +455,9 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 
 
         public String getSaveStockInfo(){
-        	  connectionUp(url);
-        	
-
-        	  String cmVILN = "SELECT   'VILN' AS LADU,   pr.kodas AS toode, sum (CONVERT(Int, ps.Likutis_PP - ps.KiekisRezervuotas)) AS stock " +
- "FROM   dbo.Sandeliai AS sand INNER JOIN " +
-  "                    dbo.PrekesSandeliuose AS ps ON sand.SandeliaiId = ps.SandeliaiId INNER JOIN " +
-  "                    dbo.Prekes AS pr ON ps.PrekesId = pr.PrekesID " +
- " WHERE     (sand.SandeliaiId > 1) and  (CONVERT(Int, ps.Likutis_PP - ps.KiekisRezervuotas) >0 or " +
- " CONVERT(Int, ps.Likutis_PP) >0)  and sand.Kodas in ('S','GA','GS')  " +
- " group by  pr.kodas ";
-        	  
-		       if (isDebug()) System.out.println(cmVILN);
-		       StringBuffer products = new StringBuffer();
-		       try {
-
-		         Statement st = con.createStatement();
-		         ResultSet rs = st.executeQuery(cmVILN);
-
-		         while (rs.next()) {
-		        	 String dealer = rs.getString("LADU").trim();
-		           String kood = rs.getString("toode").trim();
-		           double seis = rs.getDouble("stock");
-		          
-		           if(seis > 0 ){
-		        	   
-		               products.append(kood +  ";");
-		               products.append( dealer +";");
-		               products.append(getParent().getNF().format(seis) + "; "  +  "\n"); // + dealer +  "\n");
-		             }
-		           }
-		           rs.close();
-		           
-
-		        	  String cmMUU = "SELECT   'MUU' AS LADU,   pr.kodas AS toode, sum (CONVERT(Int, ps.Likutis_PP - ps.KiekisRezervuotas)) AS stock " +
-		 "FROM   dbo.Sandeliai AS sand INNER JOIN " +
-		  "                    dbo.PrekesSandeliuose AS ps ON sand.SandeliaiId = ps.SandeliaiId INNER JOIN " +
-		  "                    dbo.Prekes AS pr ON ps.PrekesId = pr.PrekesID " +
-		 " WHERE     (sand.SandeliaiId > 1) and  (CONVERT(Int, ps.Likutis_PP - ps.KiekisRezervuotas) >0 or " +
-		 " CONVERT(Int, ps.Likutis_PP) >0)  and sand.Kodas in ('GA','GS')  " +
-		 " group by  pr.kodas ";
-		           
-		        	  rs = st.executeQuery(cmMUU);
-
-				         while (rs.next()) {
-				        	 String dealer = rs.getString("LADU").trim();
-				           String kood = rs.getString("toode").trim();
-				           double seis = rs.getDouble("stock");
-				          
-				           if(seis > 0 ){
-				        	  
-				               products.append(kood +  ";");
-				               products.append( dealer +";");
-				               products.append(getParent().getNF().format(seis) + "; "  +  "\n"); // + dealer +  "\n");
-				             }
-				           }
-				           rs.close();
-		           
-		           con.close();
-		       } catch (Exception e) {
-		           getParent().showError(e);
-		       }
-		       return products.toString();
+       
+      
+		       return null;
 		   }
         
                                            public String getCustProdDiscounts(Agent agent){
@@ -622,7 +563,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 
      String sql = " SELECT  CONVERT(varchar(20), md.PrekiuGrupesId) AS kood, CONVERT(varchar(50), md.Pavad) AS nimetus " +
 	        " FROM  dbo.PrekiuGrupes AS md where md.Pavad <> ( '' ) and  " +
-			"  CASE WHEN ISNUMERIC(Kodas) = 1 THEN CAST(Kodas AS INT) ELSE 0 END between 1100 and 1350" ;
+			"  CASE WHEN ISNUMERIC(Kodas) = 1 THEN CAST(Kodas AS INT) ELSE 0 END between 100 and 1200" ;
 
     	    Statement st = con.createStatement();
     	    ResultSet rs = st.executeQuery(sql);
@@ -631,7 +572,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     	    	
     	    	String kood = rs.getString("kood");
     	  	    String nimetus2 =  rs.getString("nimetus");
-    	  	    nimetus2 = nimetus2.substring(nimetus2.length()-2)+ " " + nimetus2.substring(0,nimetus2.length()-2) ;
+    	  	  //  nimetus2 = nimetus2.substring(nimetus2.length()-2)+ " " + nimetus2.substring(0,nimetus2.length()-2) ;
     	  	    
     	  		    gr.put( kood, Converter.enCodeEst(nimetus2.trim()));	
     	  	    
@@ -700,11 +641,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 	    getParent().showError(e);
 	}
         connectionDown();
-        Agent agent = new Agent("HOUSE");
-        String nimi = agent.getID() ;
-        agent.setName(nimi);
-        agent.setIsPilot(true);
-        agents.put(nimi, agent);
+       
         
 	return agents;
     }
@@ -717,368 +654,18 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     
     public Vector getPriceMatrixData()  {
         Vector lines = new Vector();
-       this.getProducts(null);
-    
-     
-     String sqlp = "select  hh.DataNuo_Int as start from  " +
-	   " NuolaiduAprasymai apr INNER JOIN dbo.NuolaiduKainininkuSudetis hh on  " +
-	    " apr.NuolaiduKainininkaiId= hh.NuolaiduKainininkaiId  " +
-	 	"right join dbo.NuolaiduInfoPrekiuGrupes r  on r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId  " +
-		" INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId  " +
-	 	" where  " +
-	 	" (CONVERT (date, GETDATE()) between   cast(hh.DataNuo_Int as datetime) and  cast(hh.DataIki_Int as datetime) or (hh.DataNuo_Int = 0 and hh.DataIki_Int = 999999)) " +
-	" group by hh.DataNuo_Int " +
-    	" union  select r.DataNuo_Int  as start from   dbo.NuolaiduInfoPrekes r   " +
-     	"   INNER JOIN  dbo.NuolaiduAprasymai  AS apr ON r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId  " + 
-    	"  INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId and  (r.NuolaiduSutartysId = sut.NuolaiduSutartysId or  r.NuolaiduSutartysId = 1 )  " +  
-    "	  and (CONVERT (date, GETDATE()) between   cast(r.DataNuo_Int as datetime) and  cast(r.DataIki_Int as datetime) or (r.DataNuo_Int = 0 and r.DataIki_Int = 999999)) group by r.DataNuo_Int " +
-     "   union select  sud.DataNuo_Int as start " +
-	" from KainosPrekiuKategorijoms as t INNER JOIN PrekiuKainuKategorijos as abi on t.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId " +
-	"	 INNER JOIN NuolaiduKainininkuSudetis sud on sud.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId  where kaina > 0 and " +
-	"	 (CONVERT (date, GETDATE()) between   cast(sud.DataNuo_Int as datetime) and  cast(sud.DataIki_Int as datetime) or (sud.DataNuo_Int = 0 and sud.DataIki_Int = 99999)) " +
-  " group by sud.DataNuo_Int order by 1";
-     
-     
-     
-String    sql = " select  '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clgroup ,'' AS prodid,r.PrekiuGrupesId AS prodgroup,NuolaidosProc AS discount,0 AS price ,  " +
-	  "  cast(hh.DataNuo_Int as datetime) as start  , cast(hh.DataIki_Int as datetime) as endday ,  hh.DataNuo_Int as  prior  from  " +
-	   " NuolaiduAprasymai apr INNER JOIN dbo.NuolaiduKainininkuSudetis hh on  " +
-	   "  apr.NuolaiduKainininkaiId= hh.NuolaiduKainininkaiId  " +
-	 "	right join dbo.NuolaiduInfoPrekiuGrupes r  on r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId  " +
-	"	 INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId  " +
-	 "	 where  " +
-	 "	 (CONVERT (date, GETDATE()) between   cast(hh.DataNuo_Int as datetime) and  cast(hh.DataIki_Int as datetime) or (hh.DataNuo_Int = 0 and hh.DataIki_Int = 999999)) " +
-	 
-    "	union  " +
-     "	   select '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clgroup ,r.prekesID AS prodid,'' AS prodgroup,NuolaidosProc AS discount,KainaBePVM AS price ,cast(r.DataNuo_Int as datetime) as start " +   
-     "	   , cast(r.DataIki_Int as datetime) as endday ,   sut.DataNuo_Int as prior  from   dbo.NuolaiduInfoPrekes r   " +
-     "	   INNER JOIN  dbo.NuolaiduAprasymai  AS apr ON r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId   " +
-    "	  INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId and  (r.NuolaiduSutartysId = sut.NuolaiduSutartysId or  r.NuolaiduSutartysId = 1 )    " +
-    "	  and (CONVERT (date, GETDATE()) between   cast(r.DataNuo_Int as datetime) and  cast(r.DataIki_Int as datetime) or (r.DataNuo_Int = 0 and r.DataIki_Int = 999999)) " +
-     "   union " +
-	" select  '' AS custid,'K'+ ltrim(str(sud.NuolaiduKainininkaiId)) AS clgroup ,t.prekesID AS prodid,'' AS prodgroup,0 AS discount,t.Kaina AS price ,cast(sud.DataNuo_Int as datetime) as start " +
-	" , cast(sud.DataIki_Int as datetime) as endday ,   sud.DataNuo_Int as prior" +
-	" from KainosPrekiuKategorijoms as t INNER JOIN PrekiuKainuKategorijos as abi on t.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId " +
-	"	 INNER JOIN NuolaiduKainininkuSudetis sud on sud.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId " +
-	"	 where kaina > 0 and " +
-	"	 (CONVERT (date, GETDATE()) between   cast(sud.DataNuo_Int as datetime) and  cast(sud.DataIki_Int as datetime) or (sud.DataNuo_Int = 0 and sud.DataIki_Int = 99999)) " +
-	"  order by 8,2,3,7 " ;
-
-
-Statement st = null;
-           try {
-             TreeMap prior = new TreeMap(); 
-        	   
-             Connection con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
-                     getParent().getProps().getProperty("dsn.pass"));
-             st = con.createStatement();
-             ResultSet rs = st.executeQuery(sqlp);
-             
-           int i = 1;
-             while (rs.next()) {
-            	 
-                 String prr = rs.getString("start").trim();
-                 String aa = i +"";
-                 if(aa.length() == 1){
-                	 aa = "00" + aa;
-                 }
-                 if(aa.length() == 2){
-                	 aa = "0" + aa;
-                 }
-                 prior.put(prr, aa);
-                  
-              i++;    
-             }
-             
-             rs.close();
-             
-             
-             //Baas hinnad
-             
-             
-             
-             rs = st.executeQuery(sql);
-
-             while (rs.next()) {
-
-               String clGroup = rs.getString("clgroup");
-               String prodID = rs.getString("prodid").trim();
-               String idd = prodID;
-               
-               if(prcodes.get(prodID) != null){
-            	   prodID = prcodes.get(prodID) + "";
-               }
-               String prodGroup = rs.getString("prodgroup");
-               
-               String discount = rs.getString("discount");
-               
-               double price = rs.getDouble("price");
-               String prt = rs.getString("prior");
-               MatrixLine mline = new MatrixLine();
-
-               mline.setCliGroup(clGroup.trim());
-               mline.setProdLevel(prt);
-               if (prodID != null && prodID.trim().length() > 1) {
-                 mline.setProdID(prodID.trim());
-               }
-               if (mline.getProdID() == null &&  prodGroup != null && prodGroup.trim().length() > 0) {
-                 mline.setProdGroup(prodGroup.trim());
-                // System.out.println("asi " + prodGroup.trim());
-               }
-               if(discount.trim().length()==0){
-               	discount = "0";
-               }
-                 mline.setDiscount(Double.parseDouble(discount));
-
-               if (Double.parseDouble(discount) == 0 && price != 0) {
-                 mline.setPrice(price);
-
-               }
-               boolean goes = true ;
-               if(clGroup != null && clGroup.trim().startsWith("K")){
-            	   if(this.prodHash.get(idd) != null ){
-            		   if(Double.parseDouble(this.prodHash.get(idd)+"") == price){
-            			  goes = false; 
-            		   }
-            	   }
-               }
-               
-               if(goes){
-                   lines.add(mline);   
-               }
-               
-             }
-
-             rs.close();
-             st.close();
-             con.close();
-     
-             
-             if(baashk != null && baashk.size() > 0){
-            	
-             for(int r = 0; r<baashk.size();r++){
-            	 
-         String asi = (baashk.elementAt(r) + "");
-       		con = this.getNewConnection();
-       		  CallableStatement  msProcedure = con.prepareCall( "uspv_Kainininkas '" + 
-       				  asi.substring(1) + "', 'eur' ,0" );
-       		    ResultSet rs3 = msProcedure.executeQuery();
-       	      while(rs3.next()){
-       	    	  String toode = rs3.getString("prekesid");
-       	    	  String hind = rs3.getString("kaina");
-       	    //  	System.out.println( "Toode " +  toode + " hind " + hind);
-       	      	MatrixLine mm = new MatrixLine();
-       	      	mm.setProdID(toode);
-       	      	mm.setCliGroup(asi);
-       	      	if(hind != null){
-       	     	mm.setPrice(Double.parseDouble(hind));
-         	    }
-       	      	mm.setProdLevel("0");
-       	      }
-       	       rs3.close();
-       	       msProcedure.close();
-       	       con.close();
-       	  
-             }
-            	 
-               	 
-              
-             }
-            	   
-           }
-           catch (SQLException ex) {
-             ex.printStackTrace();
-           }
-           System.out.println("Maatrix suurus " + lines.size());
-         return lines;
+           return this.matrixLines;
     	
        }
 
+    
+    
+    
+    
+    
   
-    
-    public Vector getPriceMatrixDataOld()  {
-        Vector lines = new Vector();
-       this.getProducts(null);
-    
-     
-     String sqlp = "select  hh.DataNuo_Int as start from  " +
-	   " NuolaiduAprasymai apr INNER JOIN dbo.NuolaiduKainininkuSudetis hh on  " +
-	    " apr.NuolaiduKainininkaiId= hh.NuolaiduKainininkaiId  " +
-	 	"right join dbo.NuolaiduInfoPrekiuGrupes r  on r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId  " +
-		" INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId  " +
-	 	" where  " +
-	 	" (CONVERT (date, GETDATE()) between   cast(hh.DataNuo_Int as datetime) and  cast(hh.DataIki_Int as datetime) or (hh.DataNuo_Int = 0 and hh.DataIki_Int = 999999)) " +
-	" group by hh.DataNuo_Int " +
-    	" union  select r.DataNuo_Int  as start from   dbo.NuolaiduInfoPrekes r   " +
-     	"   INNER JOIN  dbo.NuolaiduAprasymai  AS apr ON r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId  " + 
-    	"  INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId and  (r.NuolaiduSutartysId = sut.NuolaiduSutartysId or  r.NuolaiduSutartysId = 1 )  " +  
-    "	  and (CONVERT (date, GETDATE()) between   cast(r.DataNuo_Int as datetime) and  cast(r.DataIki_Int as datetime) or (r.DataNuo_Int = 0 and r.DataIki_Int = 999999)) group by r.DataNuo_Int " +
-     "   union select  sud.DataNuo_Int as start " +
-	" from KainosPrekiuKategorijoms as t INNER JOIN PrekiuKainuKategorijos as abi on t.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId " +
-	"	 INNER JOIN NuolaiduKainininkuSudetis sud on sud.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId  where kaina > 0 and " +
-	"	 (CONVERT (date, GETDATE()) between   cast(sud.DataNuo_Int as datetime) and  cast(sud.DataIki_Int as datetime) or (sud.DataNuo_Int = 0 and sud.DataIki_Int = 99999)) " +
-  " group by sud.DataNuo_Int order by 1";
-     
-     
-     
-String    sql = " select  '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clgroup ,'' AS prodid,r.PrekiuGrupesId AS prodgroup,NuolaidosProc AS discount,0 AS price ,  " +
-	  "  cast(hh.DataNuo_Int as datetime) as start  , cast(hh.DataIki_Int as datetime) as endday ,  hh.DataNuo_Int as  prior  from  " +
-	   " NuolaiduAprasymai apr INNER JOIN dbo.NuolaiduKainininkuSudetis hh on  " +
-	   "  apr.NuolaiduKainininkaiId= hh.NuolaiduKainininkaiId  " +
-	 "	right join dbo.NuolaiduInfoPrekiuGrupes r  on r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId  " +
-	"	 INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId  " +
-	 "	 where  " +
-	 "	 (CONVERT (date, GETDATE()) between   cast(hh.DataNuo_Int as datetime) and  cast(hh.DataIki_Int as datetime) or (hh.DataNuo_Int = 0 and hh.DataIki_Int = 999999)) " +
-	 
-    "	union  " +
-     "	   select '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clgroup ,r.prekesID AS prodid,'' AS prodgroup,NuolaidosProc AS discount,KainaBePVM AS price ,cast(r.DataNuo_Int as datetime) as start " +   
-     "	   , cast(r.DataIki_Int as datetime) as endday ,   sut.DataNuo_Int as prior  from   dbo.NuolaiduInfoPrekes r   " +
-     "	   INNER JOIN  dbo.NuolaiduAprasymai  AS apr ON r.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId   " +
-    "	  INNER JOIN  dbo.NuolaiduSutartys  AS sut ON r.NuolaiduAprasymaiId = sut.NuolaiduAprasymaiId and  (r.NuolaiduSutartysId = sut.NuolaiduSutartysId or  r.NuolaiduSutartysId = 1 )    " +
-    "	  and (CONVERT (date, GETDATE()) between   cast(r.DataNuo_Int as datetime) and  cast(r.DataIki_Int as datetime) or (r.DataNuo_Int = 0 and r.DataIki_Int = 999999)) " +
-     "   union " +
-	" select  '' AS custid,'K'+ ltrim(str(sud.NuolaiduKainininkaiId)) AS clgroup ,t.prekesID AS prodid,'' AS prodgroup,0 AS discount,t.Kaina AS price ,cast(sud.DataNuo_Int as datetime) as start " +
-	" , cast(sud.DataIki_Int as datetime) as endday ,   sud.DataNuo_Int as prior" +
-	" from KainosPrekiuKategorijoms as t INNER JOIN PrekiuKainuKategorijos as abi on t.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId " +
-	"	 INNER JOIN NuolaiduKainininkuSudetis sud on sud.PrekiuKainuKategorijosId= abi.PrekiuKainuKategorijosId " +
-	"	 where kaina > 0 and " +
-	"	 (CONVERT (date, GETDATE()) between   cast(sud.DataNuo_Int as datetime) and  cast(sud.DataIki_Int as datetime) or (sud.DataNuo_Int = 0 and sud.DataIki_Int = 99999)) " +
-	"  order by 8,2,3,7 " ;
-
-
-Statement st = null;
-           try {
-             TreeMap prior = new TreeMap(); 
-        	   
-             Connection con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
-                     getParent().getProps().getProperty("dsn.pass"));
-             st = con.createStatement();
-             ResultSet rs = st.executeQuery(sqlp);
-             
-           int i = 1;
-             while (rs.next()) {
-            	 
-                 String prr = rs.getString("start").trim();
-                 String aa = i +"";
-                 if(aa.length() == 1){
-                	 aa = "00" + aa;
-                 }
-                 if(aa.length() == 2){
-                	 aa = "0" + aa;
-                 }
-                 prior.put(prr, aa);
-                  
-              i++;    
-             }
-             
-             rs.close();
-             
-             
-             //Baas hinnad
-             
-             
-             
-             rs = st.executeQuery(sql);
-
-             while (rs.next()) {
-
-               String clGroup = rs.getString("clgroup");
-               String prodID = rs.getString("prodid").trim();
-               String idd = prodID;
-               
-               if(prcodes.get(prodID) != null){
-            	   prodID = prcodes.get(prodID) + "";
-               }
-               String prodGroup = rs.getString("prodgroup");
-               
-               String discount = rs.getString("discount");
-               
-               double price = rs.getDouble("price");
-               String prt = rs.getString("prior");
-               MatrixLine mline = new MatrixLine();
-
-               mline.setCliGroup(clGroup.trim());
-               mline.setProdLevel(prt);
-               if (prodID != null && prodID.trim().length() > 1) {
-                 mline.setProdID(prodID.trim());
-               }
-               if (mline.getProdID() == null &&  prodGroup != null && prodGroup.trim().length() > 0) {
-                 mline.setProdGroup(prodGroup.trim());
-                // System.out.println("asi " + prodGroup.trim());
-               }
-               if(discount.trim().length()==0){
-               	discount = "0";
-               }
-                 mline.setDiscount(Double.parseDouble(discount));
-
-               if (Double.parseDouble(discount) == 0 && price != 0) {
-                 mline.setPrice(price);
-
-               }
-               boolean goes = true ;
-               if(clGroup != null && clGroup.trim().startsWith("K")){
-            	   if(this.prodHash.get(idd) != null ){
-            		   if(Double.parseDouble(this.prodHash.get(idd)+"") == price){
-            			  goes = false; 
-            		   }
-            	   }
-               }
-               
-               if(goes){
-                   lines.add(mline);   
-               }
-               
-             }
-
-             rs.close();
-             st.close();
-             con.close();
-     
-             
-             if(baashk != null && baashk.size() > 0){
-            	
-             for(int r = 0; r<baashk.size();r++){
-            	 
-         String asi = (baashk.elementAt(r) + "");
-       		con = this.getNewConnection();
-       		  CallableStatement  msProcedure = con.prepareCall( "uspv_Kainininkas '" + 
-       				  asi.substring(1) + "', 'eur' ,0" );
-       		    ResultSet rs3 = msProcedure.executeQuery();
-       	      while(rs3.next()){
-       	    	  String toode = rs3.getString("prekesid");
-       	    	  String hind = rs3.getString("kaina");
-       	    //  	System.out.println( "Toode " +  toode + " hind " + hind);
-       	      	MatrixLine mm = new MatrixLine();
-       	      	mm.setProdID(toode);
-       	      	mm.setCliGroup(asi);
-       	      	if(hind != null){
-       	     	mm.setPrice(Double.parseDouble(hind));
-         	    }
-       	      	mm.setProdLevel("0");
-       	      }
-       	       rs3.close();
-       	       msProcedure.close();
-       	       con.close();
-       	  
-             }
-            	 
-               	 
-              
-             }
-            	   
-           }
-           catch (SQLException ex) {
-             ex.printStackTrace();
-           }
-           System.out.println("Maatrix suurus " + lines.size());
-         return lines;
-    	
-       }
     public void makePaymentsFile()  {
-
-    	 
-        
-        
+     
     	   String    sql = "select * from vwMES_Merisoft_Pinigai order by PartneriaiId, data desc " ; 
     			 HashMap hh = new HashMap();
 
@@ -1302,72 +889,8 @@ Statement st = null;
 		}catch(Exception e) {
 			
 		}
-		 String degu = " SELECT  part.Kodas as klient , pr.Kodas as toode , pk.kiekis*pr.PK_PardKaina as summa,pr.PK_PardKaina as hind " +
- " FROM  PardavimuKunai AS pk WITH(NOLOCK) INNER JOIN Operacijos AS op   ON pk.OperacijosId = op.OperacijosId  INNER JOIN Pard_BendraInf AS pbi WITH(NOLOCK) ON op.OperacijosId = pbi.OperacijosId  " +
- " INNER JOIN  Partneriai AS part WITH(NOLOCK) ON pbi.PartneriaiId = part.PartneriaiId INNER JOIN xPrekes AS pr  WITH(NOLOCK) ON pk.PrekesId = pr.PrekesId  "+
- " WHERE     op.OperacijosTipoId = (2000018) and year(op.Data) = year(getdate()) and month(op.Data) = month(getdate()) "+
- " order by 1,2";
-		 
-	          stmt = con2.prepareStatement(degu);
-	        	      rs = stmt.executeQuery();
 
-		   while (rs.next()) {
-			 String klient = (rs.getString("klient").trim());
-			 String toode = (rs.getString("toode").trim());
-			 double kogus = rs.getDouble("summa");
-			 if(deguSumm.get(klient) != null){
-				 double asi = Double.parseDouble(deguSumm.get(klient)+"");
-				 deguSumm.put(klient,asi + (kogus )); 
-				    		 
-			 }else{
-				 deguSumm.put(klient,kogus ); 
-				    	 
-			 }
-		     }
-			 rs.close();
-			 stmt.close();
-			
-			 
-		System.out.println("Degusum " + deguSumm.toString());	 
 
-	//	  TreeMap fourThousand= get4Thousand();
-		 //this.makePaymentsFile();
-		 
-		 
-		 String sqlb = "SELECT Partneriai.PartneriaiId as klient,(SELECT  Nuolaidukainininkusudetis.PrekiuKainuKategorijosId AS hk FROM " +
-   "{oj{oj{oj  dbo.NuolaiduKainininkuSudetis Nuolaidukainininkusudetis    LEFT OUTER JOIN dbo.NuolaiduKainininkai Nuolaidukainininkai " +
-   "  ON  Nuolaidukainininkusudetis.NuolaiduKainininkaiId = Nuolaidukainininkai.NuolaiduKainininkaiId} " +
-   " LEFT OUTER JOIN dbo.PrekiuKainuKategorijos Prekiukainukategorijos  " +
-   "ON  Nuolaidukainininkusudetis.PrekiuKainuKategorijosId = Prekiukainukategorijos.PrekiuKainuKategorijosId}  " +
-   " LEFT OUTER JOIN dbo.PartneriuKategorijos Partneriukategorijos " +
-   "ON  Nuolaidukainininkusudetis.NuolaiduKainininkaiId = Partneriukategorijos.NuolaiduKainininkaiId} " +
-" WHERE  Prekiukainukategorijos.Neaktyvi <> ( 1 ) " +
- "  AND  Nuolaidukainininkusudetis.DataIki_Int = ( 999999 ) and Nuolaidukainininkusudetis.PrekiuKainuKategorijosId  != 93776 and Partneriukategorijos.PartneriuKategorijosId = Pa.PartneriuKategorijosId )" +
- " AS hk FROM   {oj{oj  dbo.Partneriai Partneriai    LEFT OUTER JOIN dbo.PartneriaiPa Pa " +
- "    ON  Partneriai.PartneriaiId = pa.PartneriaiId} " +
- "   LEFT OUTER JOIN dbo.PL_PARTNERIAI Pl_partneriai " +
- "  ON  Partneriai.PartneriaiId = Pl_partneriai.PARTNERIAIID} " +
-" WHERE   Pa.PartneriuKategorijosId !=1 order by Partneriai.PartneriaiId";
-	
-		 //baas hinnakirjade leidmine
-		
-		 
-		 
-		 stmt = con2.prepareStatement(sqlb);
-	             rs = stmt.executeQuery();
-
-		   while (rs.next()) {
-			 String klient = (rs.getString("klient").trim()); 
-			 String hk = rs.getString("hk");
-			 if(hk != null && hk.trim().length() > 0){
-				 baasMap.put(klient, "B" + hk.trim()); 
-				 if(baashk!= null && !baashk.contains("B" + hk.trim())){
-					 baashk.add("B" + hk.trim());
-				 } 
-			 }
-				}
-			 rs.close();
-			 stmt.close();
 			
 		 
 		 
@@ -1473,7 +996,7 @@ Statement st = null;
                 boolean goes = true;
 
                 
-                cust.addAgent(new Agent("HOUSE"));
+              
                /* String group = rs.getString("grupp");
                 if(group != null){
                   cust.setGroup(group.trim());
@@ -1518,9 +1041,7 @@ Statement st = null;
                 	 }
                  }*/
                  
-                 if(deguSumm.get(cust.getID()) != null){
-                	cust.setCity("DeguSuma : " + ((int)Double.parseDouble(deguSumm.get(cust.getID())+"")) + " eur");
-                 }
+               
                  
                  /*if(fourThousand.get(payer) != null) {
                      cust.noCashSales = true;
@@ -1542,13 +1063,8 @@ Statement st = null;
                          cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" +payid) +""))+"€");
                        }*/
                  
-                 if(baasMap.get(id) != null){
-                	 if(cust.getGroup().trim().length() > 0 ){
-                		 cust.setGroup(cust.getGroup() + "|" +baasMap.get(id));
-                	 }else{
-                		 cust.setGroup("" +baasMap.get(id)); 
-                	 }
-                 }
+
+                 cust.setGroup(cust.getID());
                 
                  if(locistics.get(cust.getID()) != null) {
                  	cust.addCity("Log : " + locistics.get(cust.getID()) );
@@ -1738,7 +1254,149 @@ Statement st = null;
     
     
     
-    
+    private void makePricelists() {
+    	matrixLines = new Vector();
+         basePrices = new HashMap();
+         
+         
+         String    sql = "SELECT\r\n" + 
+         		"	NuolaiduSutartys.Kodas AS ns_pavadinimas,\r\n" + 
+         		"	PartneriuKategorijos.Kodas AS kl_kodas,\r\n" + 
+         		"	CONVERT ( datetime, NuolaiduSutartys.DataNuo_Int ) AS ns_start,\r\n" + 
+         		"	CONVERT ( datetime, NuolaiduSutartys.DataIki_Int ) AS ns_end,\r\n" + 
+         		"	NuolaiduInfoPrekes.KainaBePVM,\r\n" + 
+         		"	Prekes.Kodas AS pr_kodas,\r\n" + 
+         		"CASE\r\n" + 
+         		"		\r\n" + 
+         		"		WHEN ( NuolaiduSutartys.ArAsortimentas = 0 AND NuolaiduSutartys.PartneriaiId = 1 ) THEN\r\n" + 
+         		"		'Akcija' \r\n" + 
+         		"		WHEN ( NuolaiduSutartys.ArAsortimentas <= 0 AND NuolaiduSutartys.PartneriaiId <> 1 ) THEN\r\n" + 
+         		"		'Nuolaidų sutartis' ELSE 'Bazinė nuolaidų sutartis' \r\n" + 
+         		"	END AS ns_tipas,\r\n" + 
+         		"CASE\r\n" + 
+         		"		\r\n" + 
+         		"		WHEN ( NuolaiduSutartys.ArAsortimentas = 0 AND NuolaiduSutartys.PartneriaiId = 1 ) THEN\r\n" + 
+         		"		'1' \r\n" + 
+         		"		WHEN ( NuolaiduSutartys.ArAsortimentas <= 0 AND NuolaiduSutartys.PartneriaiId <> 1 ) THEN\r\n" + 
+         		"		'2' ELSE '3' \r\n" + 
+         		"	END AS ns_tipas_id \r\n" + 
+         		"FROM\r\n" + 
+         		"	dbo.NuolaiduSutartys\r\n" + 
+         		"	INNER JOIN dbo.NuolaiduInfoPrekes ON NuolaiduSutartys.NuolaiduAprasymaiId = NuolaiduInfoPrekes.NuolaiduAprasymaiId\r\n" + 
+         		"	INNER JOIN dbo.Prekes ON NuolaiduInfoPrekes.PrekesID = Prekes.PrekesID\r\n" + 
+         		"	INNER JOIN dbo.NuolaiduSutarciuDalyviai ON NuolaiduSutartys.NuolaiduSutartysId = NuolaiduSutarciuDalyviai.NuolaiduSutartysId \r\n" + 
+         		"	AND NuolaiduSutarciuDalyviai.DefId = 221\r\n" + 
+         		"	INNER JOIN dbo.PartneriuKategorijos ON NuolaiduSutarciuDalyviai.RefId = PartneriuKategorijos.PartneriuKategorijosID \r\n" + 
+         		"WHERE\r\n" + 
+         		"	NuolaiduSutartys.DataIki_Int >= GETDATE( ) \r\n" + 
+         		"	AND NuolaiduInfoPrekes.DataIki_Int >= GETDATE( ) \r\n" + 
+         		"	AND NuolaiduSutartys.ArAsortimentas <> 200001 \r\n" + 
+         		"	AND NuolaiduInfoPrekes.KainaBePVM IS NOT NULL \r\n" + 
+         		"	AND Prekes.Nenaudoti = '0' UNION\r\n" + 
+         		"SELECT\r\n" + 
+         		"	NuolaiduSutartys.Kodas AS ns_pavadinimas,\r\n" + 
+         		"	Partneriai.Kodas AS kl_kodas,\r\n" + 
+         		"	CONVERT ( datetime, NuolaiduSutartys.DataNuo_Int ) AS ns_start,\r\n" + 
+         		"	CONVERT ( datetime, NuolaiduSutartys.DataIki_Int ) AS ns_end,\r\n" + 
+         		"	NuolaiduInfoPrekes.KainaBePVM,\r\n" + 
+         		"	Prekes.Kodas AS pr_kodas,\r\n" + 
+         		"CASE\r\n" + 
+         		"		\r\n" + 
+         		"		WHEN ( NuolaiduSutartys.ArAsortimentas = 0 AND NuolaiduSutartys.PartneriaiId = 1 ) THEN\r\n" + 
+         		"		'Akcija' \r\n" + 
+         		"		WHEN ( NuolaiduSutartys.ArAsortimentas <= 0 AND NuolaiduSutartys.PartneriaiId <> 1 ) THEN\r\n" + 
+         		"		'Nuolaidų sutartis' ELSE 'Bazinė nuolaidų sutartis' \r\n" + 
+         		"	END AS ns_tipas,\r\n" + 
+         		"CASE\r\n" + 
+         		"		\r\n" + 
+         		"		WHEN ( NuolaiduSutartys.ArAsortimentas = 0 AND NuolaiduSutartys.PartneriaiId = 1 ) THEN\r\n" + 
+         		"		'1' \r\n" + 
+         		"		WHEN ( NuolaiduSutartys.ArAsortimentas <= 0 AND NuolaiduSutartys.PartneriaiId <> 1 ) THEN\r\n" + 
+         		"		'2' ELSE '3' \r\n" + 
+         		"	END AS ns_tipas_id \r\n" + 
+         		"FROM\r\n" + 
+         		"	dbo.NuolaiduSutartys\r\n" + 
+         		"	INNER JOIN dbo.NuolaiduInfoPrekes ON NuolaiduSutartys.NuolaiduAprasymaiId = NuolaiduInfoPrekes.NuolaiduAprasymaiId\r\n" + 
+         		"	INNER JOIN dbo.Prekes ON NuolaiduInfoPrekes.PrekesID = Prekes.PrekesID\r\n" + 
+         		"	INNER JOIN dbo.NuolaiduSutarciuPartneriai ON NuolaiduSutartys.NuolaiduSutartysId = NuolaiduSutarciuPartneriai.NuolaiduSutartysId\r\n" + 
+         		"	INNER JOIN dbo.Partneriai ON NuolaiduSutarciuPartneriai.PartneriaiId = Partneriai.PartneriaiId \r\n" + 
+         		"WHERE\r\n" + 
+         		"	NuolaiduSutartys.DataIki_Int >= GETDATE( ) \r\n" + 
+         		"	AND NuolaiduInfoPrekes.DataIki_Int >= GETDATE( ) \r\n" + 
+         		"	AND NuolaiduSutartys.ArAsortimentas <> 200001 \r\n" + 
+         		"	AND NuolaiduInfoPrekes.KainaBePVM IS NOT NULL \r\n" + 
+         		"	AND Prekes.Nenaudoti = '0'" ;
+
+
+         Statement st = null;
+                    try {
+                      TreeMap prior = new TreeMap(); 
+                 	   
+                      Connection con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
+                              getParent().getProps().getProperty("dsn.pass"));
+                      st = con.createStatement();
+                     
+                      
+                      //Baas hinnad
+                      
+                      
+                      
+                     ResultSet rs = st.executeQuery(sql);
+
+                      while (rs.next()) {
+
+                     	 /*
+                     	  * 	"	NuolaiduSutartys.Kodas AS ns_pavadinimas,\r\n" + 
+         		"	PartneriuKategorijos.Kodas AS kl_kodas,\r\n" + 
+         		"	CONVERT ( datetime, NuolaiduSutartys.DataNuo_Int ) AS ns_start,\r\n" + 
+         		"	CONVERT ( datetime, NuolaiduSutartys.DataIki_Int ) AS ns_end,\r\n" + 
+         		"	NuolaiduInfoPrekes.KainaBePVM,\r\n" + 
+         		"	Prekes.Kodas AS pr_kodas,\r\n" + */
+                     	 
+                        String clKodas = rs.getString("kl_kodas");
+                        java.sql.Date startD = rs.getDate("ns_start");
+                        java.sql.Date endD = rs.getDate("ns_end");
+                       double price = rs.getDouble("KainaBePVM");
+                       
+                        String prodID = rs.getString("pr_kodas").trim();
+                        int prt = rs.getInt("ns_tipas_id");
+                        
+                        MatrixLine mline = new MatrixLine();
+
+                        mline.setCustID(clKodas.trim());
+                      
+                        if (prodID != null && prodID.trim().length() > 1) {
+                          mline.setProdID(prodID.trim());
+                        }
+                       
+                         mline.setPrice(price);
+
+                      if(prt == 1) {
+                     	 mline.setStartDate(Converter.getDDsMMMsYYYYString(startD));
+                     	 mline.setEndDate(Converter.getDDsMMMsYYYYString(endD));
+                      }
+                      
+                        
+                       if(prt != 3) {
+                    	   matrixLines.add(mline);
+                       }
+                       if(prt == 3) {
+                    	   basePrices.put(prodID, price);
+                       }
+                        
+                      }
+
+                      rs.close();
+                      st.close();
+                      con.close();
+                
+                     	   
+                    }
+                    catch (SQLException ex) {
+                      ex.printStackTrace();
+                    }
+                    System.out.println("Maatrix suurus " + matrixLines.size());
+    }
 
 	
     
@@ -1746,8 +1404,14 @@ Statement st = null;
     private TreeMap piltcodes = null; 
     private TreeMap prcodes = new TreeMap();
     private HashMap prodHash = new HashMap();
+    private Vector matrixLines = null;
+    private HashMap basePrices = null;
     
     public TreeMap getProducts(Agent agent){
+    	
+    	if(basePrices == null || matrixLines == null) {
+    		makePricelists();
+    	}
     	
 	TreeMap products = new TreeMap();
 	
@@ -1764,7 +1428,7 @@ Statement st = null;
     		"       dbo.Mokesciai AS mok ON Pr.MokesciaiId = mok.MokesciaiId INNER JOIN dbo.PrekiuTipai AS pt ON Pr.PrekiuTipaiId = pt.PrekiuTipaiId INNER JOIN \r\n" + 
     		"       dbo.MV ON Pr.MVId = dbo.MV.MVid INNER JOIN  dbo.MV AS IpokMV ON Pr.IpokavimoMVId = IpokMV.MVid  \r\n" + 
     		"      WHERE     (Pr.PrekesID > 1) AND (pt.ArSandeliuojama = 1) and Pr.Nenaudoti <> ( 1 ) and \r\n" + 
-    		"      CASE WHEN ISNUMERIC(gr.Kodas) = 1 THEN CAST(gr.Kodas AS INT) ELSE 0 END between 1100 and 1350   "; 
+    		"      CASE WHEN ISNUMERIC(gr.Kodas) = 1 THEN CAST(gr.Kodas AS INT) ELSE 0 END between 100 and 1350   "; 
     
       if (isDebug()) {
           System.out.println(cmd);
@@ -1779,7 +1443,7 @@ Statement st = null;
           	      rs = st.executeQuery(cmd);
              
              while (rs.next()) {
-        	  boolean goes = true;
+        	  boolean goes = false;
         	  String tid = rs.getString("tid");
               String pkood = rs.getString("pkood");
               String kood = rs.getString("kood").trim();
@@ -1801,13 +1465,13 @@ Statement st = null;
              if(nimetus == null){
            	  // goes = false;
              }else{
-           	   nimetus = nimetus.trim().replaceAll("\n", " ") ;
+           	   nimetus = nimetus.trim().replaceAll("\n", " ") + " " + kood;
              }
            	 
          
               String unit = rs.getString("unit");
               if(unit != null && unit.trim().length()>0){
-              	prod.setUnit(unit.trim());
+              	  prod.setUnit(unit.trim());
                 }
 try{
 	 prod.setInCases(rs.getInt("kastis"));
@@ -1817,40 +1481,22 @@ try{
 
               String ean = rs.getString("ean");
               if(ean != null && ean.trim().length()>0){
-              	prod.setEAN(ean.trim());
+            	  ean = ean.trim();
+              	prod.setEAN(ean);
+              	if(ean.length() >8) {
+              		nimetus = nimetus + " " + ean.substring(ean.length()-4);
+              	}
               }
        
               String grupp = rs.getString("grupp");
               if(grupp != null && grupp.trim().length()>0){
               	 prod.setGroup(grupp.trim());
               }
-              
-             /* String grupp2 = rs.getString("grupp2");
-              if(grupp2 != null && grupp2.trim().length()>0){
             
-              }*/
-
-         
-             
                  prod.setName(Converter.enCodeEst(nimetus));
                  
               
-             /* if(seisud.get(prod.getID()) != null){
-            	  prod.setPartii(seisud.get(prod.getID()) +"");
-            	 prod.setStock(Double.parseDouble(seisud2.get(prod.getID()) +""));  
-              }*/
-                 
-                 
-                  String grnimi = rs.getString("grnimi");
-                 if(grnimi != null && grnimi.trim().length()>0){
-                	grnimi =  grnimi.substring(grnimi.length()-2) + grnimi.substring(0,grnimi.length()-2) ;
-                	prod.setNameSorting(grnimi + Converter.cleanLitLatEst(nimetus));
-                 }else{
-                	 	prod.setNameSorting("xx" + Converter.cleanLitLatEst(nimetus));
-                         	 
-                 }
-                 
-                 //vaata tootel 7636 ja 7637
+             
                  
                  String topstatus = rs.getString("topstatus");
                  if(topstatus != null && topstatus.trim().equals("1")){
@@ -1861,12 +1507,6 @@ try{
               prod.setStock(-1); 
               prod.setVat("21");
           
-
-              String aggroup = rs.getString("aggroup");
-              if(aggroup != null && aggroup.trim().length() > 0){
-              	prod.setAgentGroup(aggroup.trim());
-               }
-              
               
               Double kaal = rs.getDouble("kaal");
               
@@ -1879,18 +1519,11 @@ try{
                  }
               
               
-
-        	  if(pkood.trim().length() > 0) {
-        		  Vector vec = (Vector)piltcodes.get(pkood);
-        		  if(vec  == null) {
-        			  vec =  new Vector();
-        		  }
-        		 
-        		  vec.add(nimetus);
-        		  prcodes.put(kood, pkood);
-        		  piltcodes.put(pkood, vec); 
-        	  }
-              
+  if(basePrices.get(prod.getID()) != null) {
+	  prod.setPrice((Double)basePrices.get(prod.getID()));
+	  goes = true;
+  }
+        	 
               
               if(goes){
             	  prcodes.put(tid, kood);
