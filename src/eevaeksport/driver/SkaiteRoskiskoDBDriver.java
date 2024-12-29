@@ -801,7 +801,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     	  
     	   String cmd = " SELECT CONVERT(Int, part.PartneriaiId) AS CustomerASId, part.regnr as regno , (select  oo.Kodas from Adresai uu  \r\n" + 
     	   		"   				INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as pay, CONVERT(varchar(20), part.Kodas) AS kood,'' as nimi2, CONVERT(varchar(40), part.Pavad) AS nimi,   \r\n" + 
-    	   		"                        SumokaPartneriaiID AS payer ,  rtrim(adr.Adresas)  + case when adr.Indeksas IS NULL then '' else ' ' + rtrim(adr.Indeksas)end + ' ' + \r\n" + 
+    	   		"                        SumokaPartneriaiID AS payer ,  rtrim(adr.Adresas)  + ' ' + \r\n" + 
     	   		"                      case when adr.Miestas IS NULL then '' else ' ' + rtrim(adr.Miestas)end AS Address,part.pvmnr as vatno, \r\n" + 
     	   		"                         CONVERT(char(1), 'N') AS Blocked, CONVERT(char(1), 'Y') AS Valid, CONVERT(Int, ROUND(part.Kreditas, 0)) AS CreditLimit, CONVERT(SmallInt, msal.Terminas)  \r\n" + 
     	   		"                         AS paym,  CONVERT(nvarchar(30),  \r\n" + 
@@ -869,7 +869,18 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 		 stmt.close();
 		try {
 		 
-		 String logi = "Select Partnerio_Kodas as klient ,Marsruto_Pavad as ring , SavaitesDienos as paev from MES_PartneriuMarsrutai ";
+		 String logi = "SELECT Partneriai.Kodas AS klient," + 
+		 		"    CASE  WHEN PL_PARTNERIAI.MES_ISORINIS_VEZID = '1' THEN 'RM' ELSE Vez.Pavad  END AS ring," + 
+		 		"    LTRIM(  CASE WHEN PL_PARTNERIAI.MES_PIRM_MARSRID <> 1 THEN 'Pir, ' ELSE '' END +" + 
+		 		"        CASE WHEN PL_PARTNERIAI.MES_ANTR_MARSRID <> 1 THEN 'Ant, ' ELSE '' END +" + 
+		 		"        CASE WHEN PL_PARTNERIAI.MES_TREC_MARSRID <> 1 THEN 'Tre, ' ELSE '' END +" + 
+		 		"        CASE WHEN PL_PARTNERIAI.MES_KETV_MARSRID <> 1 THEN 'Ket, ' ELSE '' END +" + 
+		 		"        CASE WHEN PL_PARTNERIAI.MES_PENKT_MARSRID <> 1 THEN 'Pen, ' ELSE '' END +" + 
+		 		"        CASE WHEN PL_PARTNERIAI.MES_SEST_MARSRID <> 1 THEN 'Šeš, ' ELSE '' END +" + 
+		 		"        CASE WHEN PL_PARTNERIAI.MES_SEKM_MARSRID <> 1 THEN 'Sek ' ELSE '’ END " + 
+		 		"    ) AS paev FROM dbo.Partneriai  INNER JOIN dbo.PL_PARTNERIAI ON Partneriai.PartneriaiId = PL_PARTNERIAI.PARTNERIAIID " + 
+		 		"    LEFT JOIN dbo.Partneriai AS Vez ON PL_PARTNERIAI.MES_ISORINIS_VEZID = Vez.PartneriaiId   ORDER BY Partneriai.Kodas ASC ";
+		 		
 		 Connection con = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
                  getParent().getProps().getProperty("dsn.pass"));
 		 stmt = con.prepareStatement(logi);
@@ -879,7 +890,10 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 			 String klient = (rs.getString("klient").trim());
 			 String ring = (rs.getString("ring").trim());
 			 String paev = rs.getString("paev");
-			   locistics.put(klient,ring + " " + paev  ); 
+			 if(paev.endsWith(",")) {
+				 paev = paev.substring(0, paev.length()-1);
+			 }
+			   locistics.put(klient,"Vežėjas "+ ring + "|" + paev ); 
 		     }
 
 		   rs.close();
@@ -1067,7 +1081,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                  cust.setGroup(cust.getID());
                 
                  if(locistics.get(cust.getID()) != null) {
-                 	cust.addCity("Log : " + locistics.get(cust.getID()) );
+                 	cust.addCity("" + locistics.get(cust.getID()) );
                  }
                  
                  String gr = rs.getString("gr1");
