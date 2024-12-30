@@ -877,31 +877,32 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 		 		"        CASE WHEN PL_PARTNERIAI.MES_KETV_MARSRID <> 1 THEN 'Ket, ' ELSE '' END +" + 
 		 		"        CASE WHEN PL_PARTNERIAI.MES_PENKT_MARSRID <> 1 THEN 'Pen, ' ELSE '' END +" + 
 		 		"        CASE WHEN PL_PARTNERIAI.MES_SEST_MARSRID <> 1 THEN 'Šeš, ' ELSE '' END +" + 
-		 		"        CASE WHEN PL_PARTNERIAI.MES_SEKM_MARSRID <> 1 THEN 'Sek ' ELSE '’ END " + 
+		 		"        CASE WHEN PL_PARTNERIAI.MES_SEKM_MARSRID <> 1 THEN 'Sek ' ELSE '' END " + 
 		 		"    ) AS paev FROM dbo.Partneriai  INNER JOIN dbo.PL_PARTNERIAI ON Partneriai.PartneriaiId = PL_PARTNERIAI.PARTNERIAIID " + 
 		 		"    LEFT JOIN dbo.Partneriai AS Vez ON PL_PARTNERIAI.MES_ISORINIS_VEZID = Vez.PartneriaiId   ORDER BY Partneriai.Kodas ASC ";
 		 		
-		 Connection con = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
-                 getParent().getProps().getProperty("dsn.pass"));
-		 stmt = con.prepareStatement(logi);
+		 stmt = con2.prepareStatement(logi);
 	       rs = stmt.executeQuery();
 
 		   while (rs.next()) {
 			 String klient = (rs.getString("klient").trim());
 			 String ring = (rs.getString("ring").trim());
 			 String paev = rs.getString("paev");
-			 if(paev.endsWith(",")) {
-				 paev = paev.substring(0, paev.length()-1);
+			 if(paev.endsWith(", ")) {
+				 paev = paev.substring(0, paev.length()-2);
 			 }
-			   locistics.put(klient,"Vežėjas "+ ring + "|" + paev ); 
+			 if(paev.trim().length() > 0) {
+				 paev = "|" +paev ;
+			 }
+			   locistics.put(klient,"Vežėjas "+ ring +  paev ); 
 		     }
 
 		   rs.close();
 		   stmt.close();
-		   con.close();
+		  
  
 		}catch(Exception e) {
-			
+			e.printStackTrace();
 		}
 
 

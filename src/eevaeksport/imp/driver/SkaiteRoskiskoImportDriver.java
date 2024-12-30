@@ -325,14 +325,9 @@ try{
 
 	        Node docheader = doc.createElement("Document-Header");
 	        root.appendChild(docheader);
-	        
-	     /*   Node un2 = doc.createElement("OriginalFileName");
-	        Text unVal2 = doc.createTextNode(order.getShipTime());
-	        un2.appendChild(unVal2);
-	        docheader.appendChild(un2);
 	       
 	        
-	        */
+	        
 	        try{
 
 		        Node un4 = doc.createElement("DateCreated");
@@ -362,8 +357,7 @@ try{
 	        }catch(Exception e){
 	        	
 	        }
-	        
-		
+	       
 	        String add = (Calendar.getInstance().getTimeInMillis()+"").substring(11);
 	        String number = order.getDokNr() + add;
 	        if(number == null || number.length() == 0){
@@ -372,6 +366,19 @@ try{
 	        
 	        
      long uni = Calendar.getInstance().getTimeInMillis();
+	        
+	        
+	        Node un2 = doc.createElement("DocumentID");
+	        Text unVal2 = doc.createTextNode(number);
+	        un2.appendChild(unVal2);
+	        docheader.appendChild(un2);
+
+	        Node un21 = doc.createElement("DocumentType");
+	        Text unVal21 = doc.createTextNode("ORDER");
+	        un21.appendChild(unVal21);
+	        docheader.appendChild(un21);
+		
+	        
      Node header = doc.createElement("Order-Header");
 	        
 	        
@@ -389,7 +396,7 @@ try{
 	        Node age = doc.createElement("SalesAgent");
 	        Text ageVal = doc.createTextNode(order.getAgent());
 	        age.appendChild(ageVal);
-	        header.appendChild(age);
+	      //  header.appendChild(age);
 	 
 	        String type = "order";
 	        // kuidas edastada kingitus 
@@ -403,7 +410,7 @@ try{
 		     Node yhiku_hind = doc.createElement("DocType");
 		     Text yhiku_hindVal = doc.createTextNode(type);
 		     yhiku_hind.appendChild(yhiku_hindVal);
-		     header.appendChild(yhiku_hind);
+		   //  header.appendChild(yhiku_hind);
 	        
 	        
 	        
@@ -413,7 +420,7 @@ try{
 	 			Node com = doc.createElement("comment");
 		        Text comVal = doc.createTextNode(order.getInfo());
 		        com.appendChild(comVal);
-		        header.appendChild(com);
+		      //  header.appendChild(com);
 		        comm = order.getInfo();
 	 		}
 	 		System.out.println("Comment " + comm);
@@ -421,7 +428,7 @@ try{
 	 		Node war = doc.createElement("Warehouse");
 	        Text warVal = doc.createTextNode(order.getWarehouse());
 	        war.appendChild(warVal);
-	        header.appendChild(war);
+	      //  header.appendChild(war);
 	      
 
 	        Node kuupaev = doc.createElement("OrderDate");
@@ -477,7 +484,14 @@ try{
 	         dateString = year +"-"+ month +"-"+ day;
 	        Text delkuupaevVal = doc.createTextNode(dateString);
 	        delkuupaev.appendChild(delkuupaevVal);
-	        header.appendChild(delkuupaev);		        
+	        header.appendChild(delkuupaev);		
+	        
+	        
+	        
+	        Node yhiku_hind2 = doc.createElement("DocumentFunctionCode");
+		     Text yhiku_hindVal2 = doc.createTextNode("O");
+		     yhiku_hind2.appendChild(yhiku_hindVal2);
+		    header.appendChild(yhiku_hind2);
 
 	        root.appendChild(header);
 
@@ -485,7 +499,7 @@ try{
 	        Node parties = doc.createElement("Order-Parties");
 	        Node seller = doc.createElement("DeliveryPoint");
 
-	        Node ise = doc.createElement("CodeByBuyer");
+	        Node ise = doc.createElement("CodeBySupplier");
 	        Text nimiVal = doc.createTextNode(order.getCompany());
 	        ise.appendChild(nimiVal);
 	        Node ise2 = doc.createElement("ILN");
@@ -597,7 +611,7 @@ if(line.getPartii() != null && line.getPartii().length() > 0 ){
 	
 }
 	     
-	     Node toote_kood2 = doc.createElement("BuyerItemCode");
+	     Node toote_kood2 = doc.createElement("SupplierItemCode");
 	     Text toote_koodVal2 = doc.createTextNode(toode);
 	     toote_kood2.appendChild(toote_koodVal2);
 	     ridaitem.appendChild(toote_kood2);
