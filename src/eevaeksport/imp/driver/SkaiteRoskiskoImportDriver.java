@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -300,13 +301,38 @@ try{
   
   
   
+  HashSet twoDays = null;
   
+
+  private HashSet getTwodays(){
+	   HashSet res = new HashSet();
+	  String sql =  " SELECT   part.kodas as kood FROM dbo.Partneriai AS part INNER JOIN dbo.PL_PARTNERIAI AS pl ON part.PartneriaiId = pl.PARTNERIAIID "
+	  		+ "where MES_ISORINIS_VEZID  > 1 " ;
+	  	   System.out.println(sql);
+	  	   try {
+	  		   Connection con = getNewConnection();
+	  	        Statement stmt = con.createStatement();
+	  	        ResultSet rs = stmt.executeQuery(sql);
+	  	        
+	  	        while(rs.next()){
+	  	        	res.add(rs.getString("kood").trim());
+	  	        }
+	  	        
+	  	        rs.close();
+	  	        stmt.close();
+	  	        con.close();
+	  	        
+	  	   }catch(Exception e){
+	  		 e.printStackTrace();  
+	  	   }
+     return res;
+  }
    
   
   private void makeOutput(Order order){
 	  
-	  if(names == null){
-		 // names = this.custNames();
+	  if(twoDays == null){
+		  twoDays = this.getTwodays();
 	  }
 	  
 	 	  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -457,13 +483,12 @@ try{
 	        
 	        //kui on täna reede ja on pandud esmaspäevaks siis paneme homseks
 	        Calendar cal2 = Calendar.getInstance();
-	        cal2.add(Calendar.DAY_OF_MONTH, 1);
-	       /*   if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY  && 
-	        		  delcal.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY  ) {
-	          
-	            delcal.setTimeInMillis(cal2.getTimeInMillis());
-	          }*/
-	        
+	        if(twoDays.contains(order.getCompany())) {
+	        	 cal2.add(Calendar.DAY_OF_MONTH, 2);
+	         } else {
+	        	 cal2.add(Calendar.DAY_OF_MONTH, 1);
+	        }
+	       
 	          
 	          if(isToday(delcal.getTimeInMillis())){
 		        	delcal.setTimeInMillis(cal2.getTimeInMillis());
