@@ -243,9 +243,9 @@ public class BC365ImportDriver extends AbstractImportDriver{
 		  token = this.getMSToken();
 	  }
 	  String res = null;
-	  String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/v2.0/"
+	  String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/itera/kp/v2.0/"
 	          + "companies(" + companyID + ")/";
-		
+		// https://api.businesscentral.dynamics.com/v2.0/%7B%7Bkodupaber%7D%7D/DEV/api/itera/kp/v2.0/companies(%7B%7BIT-TEST%7D%7D)/salesPersons
 
 	    String url = urlBase + type;
 	    
@@ -275,12 +275,19 @@ public class BC365ImportDriver extends AbstractImportDriver{
   
   private void makeOutput(Order order){
 	  String paymTerm = (String)paymTerms.get(order.getCompany());
-	  
+	  String comm = null;
+		if(order.getInfo() != null && order.getInfo().trim().length() >0){
+			comm = order.getInfo();
+		}
 	  JSONObject ord = new JSONObject();
 	  ord.put("salesperson", order.getAgent());
-	  ord.put("orderDate", Converter.jsonDateOnly(new Date()));
+	  ord.put("orderingDate", Converter.jsonDateOnly(new Date()));
 	  ord.put("customerNumber", order.getCompany());
 	  ord.put("currencyCode", "EUR");
+	  if (comm != null) {
+		  ord.put("comment", comm);
+	  }
+	  
 	  if (paymTerm != null) {
 		  ord.put("paymentTermsId", paymTerm);  
 	  }
@@ -348,7 +355,7 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	    
 	    Double disc = line.getDiscount();
 	    if (disc > 0) {
-	    	lin.put("discountPercent", disc);
+	    	lin.put("specialDiscount", disc);
 	    }
 	    
 	    lin.put("lineObjectNumber", toode);
@@ -371,163 +378,10 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	  
 	  
 	System.exit(0); 
-	 	try {
-	 	
-	 		
-	 		
-	 		
-	 		
-	 		
-	 		
-	 		
-	 		
-	 		
-	 		Customer ccc = (Customer)kliendid.get(order.getCompany());
-	 
-	 		String comm = "";
-	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
-	 			comm = "comment=\""+ (order.getInfo())+ "\" " ;
-	 		}
-	 		//System.out.println("Comment " + comm);
-			
-	 	    String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
-	          "<transport>" +
-	          "<order " + 
-	         "webid=\"" + "1" + "\" " + //order.getDokNr()+
-	         "webdate=\"" + (Calendar.getInstance())+ "\" " +
-	         "ccode=\"" +deCode( order.getCompany()) + "\" " +
-	       //  "send_mode=\"POST\" " + 
-	         "send_type=\"ALL\" " +
-	         "object=\"4\" " +
-             comm + 
-	         "amount=\"" + order.getSum() + "\" " +
-	         "amount_vat=\"" + order.getSum()* 1.2 + "\" " +
-	         "currency=\"EUR\" language=\"EST\">" +
-	         "<pricelist>" + ccc.getGroup() + "</pricelist>" +
-	         "<send_address>" +
-	         "<street>" + deCode(ccc.getAddress()) + "</street>" +
-	         "<county>" + deCode(ccc.getCity()) + "</county>" +
-	         "<country>0</country>" +
-	         "</send_address>" +
-	         "<contact>" +
-	         "<name>" + deCode(ccc.getInfo()) + "</name>\r\n" +
-	         "<phone>" + ccc.getPersonalData() +"</phone>" +
-	         "</contact>" +
-	         "<lines>" ;
-	       
-	     	 Vector lines = order.getOrderLines();
-		      for (int i = 0; i < lines.size(); i++) {
-		    	  OrderLine line = (OrderLine) lines.elementAt(i);
-		    	  Product ppp = (Product)tooted.get(line.getToode());
-		    	  
-		    	  order_xml = order_xml + "<line ";
-		    	  order_xml = order_xml + "quantity=\"" + line.getKogus() + "\" ";
-			      order_xml = order_xml +"pcode=\""+ line.getToode() + "\" ";
-		    	 // order_xml = order_xml + "description=\"" + ppp.getName() + "\" " ;
-		    	  double hind = 0;
-		    	  try{
-		    		  hind = ppp.getPrice() ;//getPrice(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
-				    	 	  
-		    	  }catch(Exception e){
-		    		  
-		    	  }
-		    	  
-                  if(line.getDiscount() > 0) {
-                	  //hind = line.getPrice();
-                	  order_xml = order_xml +"discount=\""+ line.getDiscount() +"\" ";
-    		    	  
-                  }
-                  
-			      order_xml = order_xml +"price=\""+ hind +"\" ";
-		    	  order_xml = order_xml + "/>";
-			 counter++;
-	      }
-	 
-		  
-		      
-	 	
-	 	
-	 	
-	 	order_xml = order_xml + "</lines>";
-	 	order_xml = order_xml + "</order>";
-	 	order_xml = order_xml + "</transport>";
-	    System.out.println("output " +order_xml); 
-	 	
-	 		//System.exit(0);
-	 		
-	 	try {
-	 	    // Construct data
-	 	    String data = URLEncoder.encode("put", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8");
-	 	    data += "&" + URLEncoder.encode("what", "UTF-8") + "=" + URLEncoder.encode("order", "UTF-8");
-	 	    data += "&" + URLEncoder.encode("xmldata", "UTF-8") + "=" + URLEncoder.encode(order_xml, "UTF-8");
-	 	    // Send data
-	 	   Converter.doTrustToCertificates();
-	 	    URL url = new URL( logurl + company + "/xmlcore.asp");
-	 	    URLConnection conn = url.openConnection();
-	 	    conn.setDoOutput(true);
-	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-	 	    wr.write(data);
-	 	    wr.flush();
 
-	 	    // Get the response
-	 	    BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-	 	    String line;
-	 	    String asi = "";
-	 	    while ((line = rd.readLine()) != null) {
-	 	        System.out.println(line);
-	 	        asi = asi + "\n" + line ;
-	 	    }
-	 	    wr.close();
-	 	    rd.close();
-	 	    
-	 	   String doknr = order.getDokNr();
-		      String fn = doknr;
-		      if(doknr.trim().length()== 0){
-		    	  fn =( Calendar.getInstance().getTimeInMillis() + "").substring(3);
-		      }
-	 	   String fileName = parent.getProps().getProperty("conv.dir") +  "t-" + fn  +  ".txt";
-		      System.out.println(fileName);
-		       
-		      Converter.saveFileInUTF8(fileName, asi);
-		      if(asi.contains("error code")){
-		    	  trouble = "ORDER Was not Imported :" + asi;
-		      }else{
-		    	  trouble = null;
-		      }
-	 	    
-	 	} catch (Exception e) {
-	 		e.printStackTrace();
-	 	}
-       
 
 	      
-	      setNumAddedLines(counter); 
-	      
-	    String doknr = order.getDokNr();
-	      String fn = doknr;
-	      if(doknr.trim().length()== 0){
-	    	  fn =( Calendar.getInstance().getTimeInMillis() + "").substring(3);
-	      }
-	    
-	      
-	      String fileName = parent.getProps().getProperty("conv.dir") +  "t-" + fn  +  ".xml";
-	      System.out.println(fileName);
-	       
-	      Converter.saveFileInUTF8(fileName, order_xml);
-	    
-	      
-	      if(order.getStatus() < 5  ) {
-	    	
-	    	  
-	    		   Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent());
-	    		 
-	    	 //  sendCommentEmail( comm ,null,doknr,order.getCompany(),  " " + ccc.getName() , " ",false,ag,parent);
-	    	 
-	    }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	 }
  
   public TreeMap getProducts(Agent agent) {

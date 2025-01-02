@@ -115,8 +115,8 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
     
       System.out.println("Token " + token);
 
-      
-    this.downloadData(null);
+      this.downloadData("salesPrices");
+    //this.downloadData(null);
     // this.getDebt(null);
     // this.getCustomerProductsList(null);
      //this.setBulkSales(null);
@@ -408,7 +408,7 @@ System.out.println("ProdGroup size :  " + tm.size());
    
    public TreeMap getAgents(){
 		  TreeMap tm = new TreeMap();
-			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//customers.json");
+			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPersons.json");
 	  	
 			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 			
@@ -418,10 +418,11 @@ System.out.println("ProdGroup size :  " + tm.size());
 				  
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
 
-	            String salesCode = (String)cob.get("salespersonCode");
+	            String salesCode = (String)cob.get("code");
+	            String salesName = (String)cob.get("name");
 	            if (salesCode != null && salesCode.trim().length() > 0) {
 	            	Agent agent = new Agent(salesCode);
-	            	agent.setName(salesCode);
+	            	agent.setName(salesName);
 	            	  tm.put(agent.getName(), agent);
 	            }
 
@@ -622,7 +623,9 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	this.saveFile("itemCategories");
 }
 
-
+if (dataType == null || dataType.equals("salesPersons")) {
+	  this.saveFile("salesPersons");
+}
 
 
 
