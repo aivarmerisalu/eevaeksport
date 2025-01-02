@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -187,12 +188,12 @@ try{
 	  }else{
 		
 	  
-	  Vector splitted =  splitOrder(order);
- 	  Enumeration en = splitted.elements();
- 	  while(en.hasMoreElements()){
- 		  Order ord = (Order)en.nextElement();
- 			  makeOutput(ord);  
-	}
+	//  Vector splitted =  splitOrder(order);
+ 	  //Enumeration en = splitted.elements();
+ 	  //while(en.hasMoreElements()){
+ 		//  Order ord = (Order)en.nextElement();
+ 			  makeOutput(order);  
+	//}
  	 signatures.add(signature);
 	  }
  	    
@@ -300,13 +301,38 @@ try{
   
   
   
+  HashSet twoDays = null;
   
+
+  private HashSet getTwodays(){
+	   HashSet res = new HashSet();
+	  String sql =  " SELECT   part.kodas as kood FROM dbo.Partneriai AS part INNER JOIN dbo.PL_PARTNERIAI AS pl ON part.PartneriaiId = pl.PARTNERIAIID "
+	  		+ "where MES_ISORINIS_VEZID  > 1 " ;
+	  	   System.out.println(sql);
+	  	   try {
+	  		   Connection con = getNewConnection();
+	  	        Statement stmt = con.createStatement();
+	  	        ResultSet rs = stmt.executeQuery(sql);
+	  	        
+	  	        while(rs.next()){
+	  	        	res.add(rs.getString("kood").trim());
+	  	        }
+	  	        
+	  	        rs.close();
+	  	        stmt.close();
+	  	        con.close();
+	  	        
+	  	   }catch(Exception e){
+	  		 e.printStackTrace();  
+	  	   }
+     return res;
+  }
    
   
   private void makeOutput(Order order){
 	  
-	  if(names == null){
-		 // names = this.custNames();
+	  if(twoDays == null){
+		  twoDays = this.getTwodays();
 	  }
 	  
 	 	  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -325,14 +351,9 @@ try{
 
 	        Node docheader = doc.createElement("Document-Header");
 	        root.appendChild(docheader);
-	        
-	     /*   Node un2 = doc.createElement("OriginalFileName");
-	        Text unVal2 = doc.createTextNode(order.getShipTime());
-	        un2.appendChild(unVal2);
-	        docheader.appendChild(un2);
 	       
 	        
-	        */
+	        
 	        try{
 
 		        Node un4 = doc.createElement("DateCreated");
@@ -362,8 +383,7 @@ try{
 	        }catch(Exception e){
 	        	
 	        }
-	        
-		
+	       
 	        String add = (Calendar.getInstance().getTimeInMillis()+"").substring(11);
 	        String number = order.getDokNr() + add;
 	        if(number == null || number.length() == 0){
@@ -372,6 +392,19 @@ try{
 	        
 	        
      long uni = Calendar.getInstance().getTimeInMillis();
+	        
+	        
+	        Node un2 = doc.createElement("DocumentID");
+	        Text unVal2 = doc.createTextNode(number);
+	        un2.appendChild(unVal2);
+	        docheader.appendChild(un2);
+
+	        Node un21 = doc.createElement("DocumentType");
+	        Text unVal21 = doc.createTextNode("ORDER");
+	        un21.appendChild(unVal21);
+	        docheader.appendChild(un21);
+		
+	        
      Node header = doc.createElement("Order-Header");
 	        
 	        
@@ -389,7 +422,7 @@ try{
 	        Node age = doc.createElement("SalesAgent");
 	        Text ageVal = doc.createTextNode(order.getAgent());
 	        age.appendChild(ageVal);
-	        header.appendChild(age);
+	      //  header.appendChild(age);
 	 
 	        String type = "order";
 	        // kuidas edastada kingitus 
@@ -403,7 +436,7 @@ try{
 		     Node yhiku_hind = doc.createElement("DocType");
 		     Text yhiku_hindVal = doc.createTextNode(type);
 		     yhiku_hind.appendChild(yhiku_hindVal);
-		     header.appendChild(yhiku_hind);
+		   //  header.appendChild(yhiku_hind);
 	        
 	        
 	        
@@ -413,7 +446,7 @@ try{
 	 			Node com = doc.createElement("comment");
 		        Text comVal = doc.createTextNode(order.getInfo());
 		        com.appendChild(comVal);
-		        header.appendChild(com);
+		      //  header.appendChild(com);
 		        comm = order.getInfo();
 	 		}
 	 		System.out.println("Comment " + comm);
@@ -421,7 +454,7 @@ try{
 	 		Node war = doc.createElement("Warehouse");
 	        Text warVal = doc.createTextNode(order.getWarehouse());
 	        war.appendChild(warVal);
-	        header.appendChild(war);
+	      //  header.appendChild(war);
 	      
 
 	        Node kuupaev = doc.createElement("OrderDate");
@@ -450,13 +483,12 @@ try{
 	        
 	        //kui on täna reede ja on pandud esmaspäevaks siis paneme homseks
 	        Calendar cal2 = Calendar.getInstance();
-	        cal2.add(Calendar.DAY_OF_MONTH, 1);
-	       /*   if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY  && 
-	        		  delcal.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY  ) {
-	          
-	            delcal.setTimeInMillis(cal2.getTimeInMillis());
-	          }*/
-	        
+	        if(twoDays.contains(order.getCompany())) {
+	        	 cal2.add(Calendar.DAY_OF_MONTH, 2);
+	         } else {
+	        	 cal2.add(Calendar.DAY_OF_MONTH, 1);
+	        }
+	       
 	          
 	          if(isToday(delcal.getTimeInMillis())){
 		        	delcal.setTimeInMillis(cal2.getTimeInMillis());
@@ -477,7 +509,14 @@ try{
 	         dateString = year +"-"+ month +"-"+ day;
 	        Text delkuupaevVal = doc.createTextNode(dateString);
 	        delkuupaev.appendChild(delkuupaevVal);
-	        header.appendChild(delkuupaev);		        
+	        header.appendChild(delkuupaev);		
+	        
+	        
+	        
+	        Node yhiku_hind2 = doc.createElement("DocumentFunctionCode");
+		     Text yhiku_hindVal2 = doc.createTextNode("O");
+		     yhiku_hind2.appendChild(yhiku_hindVal2);
+		    header.appendChild(yhiku_hind2);
 
 	        root.appendChild(header);
 
@@ -485,7 +524,7 @@ try{
 	        Node parties = doc.createElement("Order-Parties");
 	        Node seller = doc.createElement("DeliveryPoint");
 
-	        Node ise = doc.createElement("CodeByBuyer");
+	        Node ise = doc.createElement("CodeBySupplier");
 	        Text nimiVal = doc.createTextNode(order.getCompany());
 	        ise.appendChild(nimiVal);
 	        Node ise2 = doc.createElement("ILN");
@@ -597,7 +636,7 @@ if(line.getPartii() != null && line.getPartii().length() > 0 ){
 	
 }
 	     
-	     Node toote_kood2 = doc.createElement("BuyerItemCode");
+	     Node toote_kood2 = doc.createElement("SupplierItemCode");
 	     Text toote_koodVal2 = doc.createTextNode(toode);
 	     toote_kood2.appendChild(toote_koodVal2);
 	     ridaitem.appendChild(toote_kood2);
@@ -657,7 +696,7 @@ if(line.getPartii() != null && line.getPartii().length() > 0 ){
 
  
   public String getDriverVersion(){
-    return "SkaiteMesineImport";
+    return "SkaiteRoskiskoImport";
   }
  
  

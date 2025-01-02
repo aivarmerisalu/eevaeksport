@@ -1621,9 +1621,171 @@ private Date getDate(String mmddyy){
 	  }
 
 
+
+private HashSet getSales5M() throws SQLException {
+	HashSet res = new HashSet();
+
+	 String cmd =  "SELECT  d.[Sell-to Customer No_] AS klient,d.[Posting Date] AS lastdate " +	
+"  from [2015_Tobis$Sales Shipment Header] d  WHERE   d.[Posting Date]> GETDATE()-150 " ;
+	   
+      con = getNewConnection2();
+      Statement stmt1 = con.createStatement();
+      ResultSet rs1 = stmt1.executeQuery(cmd);
+      
+      while(rs1.next()){
+   	   
+   	   String custID = rs1.getString("klient").trim();
+	           res.add(custID);
+	           
+      }
+      
+      rs1.close();
+      stmt1.close();
+	
+       
+   	   File cpdatadir = new File("cpdata");
+   	   if(!cpdatadir.exists()) {
+   		   cpdatadir.mkdir();
+   	   }
+   	
+   	
+   	   Calendar cal = Calendar.getInstance();
+   	   String d = cal.get(Calendar.DAY_OF_MONTH)+ "";
+   	   if(d.length() == 1){
+   		   d = "0" + d;
+   	   }
+   	   String m = (cal.get(Calendar.MONTH) +1)+ "";
+   	   if(m.length() == 1){
+   		   m = "0" + m;
+   	   }
+   	   
+   	   int days = 150 ;
+   	   
+   	   String end = d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
+   	   cal.add(Calendar.DATE, - days);
+   	   
+   	    d = cal.get(Calendar.DAY_OF_MONTH)+ "";
+   	   if(d.length() == 1){
+   		   d = "0" + d;
+   	   }
+   	    m = (cal.get(Calendar.MONTH) +1)+ "";
+   	   if(m.length() == 1){
+   		   m = "0" + m;
+   	   }
+   		   String start =  d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
+   		 //  System.out.println(dirCustCodes.get("9535") + " " + start + " uhuu " + end);
+   		
+   		   Iterator enums = this.dirCustCodes.keySet().iterator();
+   	   while(enums.hasNext()){
+   		String custid = (String)enums.next();
+   		   try{
+   			   Converter.doTrustToCertificates();
+   			   custid = Converter.deCode(custid);
+   			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
+   				String httpsURL = logurl  + company + "/xmlcore.asp"; 
+   		  //     System.out.println(httpsURL);
+   				URL myurl = new URL(httpsURL);
+   		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
+   		        
+   		        String gS = getParent().getProps().getProperty("keyInvoice");
+   		   	    if(gS == null) {
+   		   	    	System.out.println("keyInvoice is missing!");
+   		   	    	System.exit(0);
+   		   	    }
+   		        String urlParameters  = 
+   						"what=invoice&get=1&orderer=" + cuurl + "&invoicedate1=" + start + "&invoicedate2=" 
+   		            + end + "&key=" + gS;
+   		           httpsURL = logurl  + company + "/" + comphelp + "/xmlcore.asp"; //?get=1&what=stocklevel
+   		           myurl = new URL(httpsURL);
+   		           
+   		           byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+   		           int postDataLength = postData.length;
+   		           con = (HttpsURLConnection)myurl.openConnection();
+   		           con.setRequestMethod("POST");
+   		           con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+   		           con.setRequestProperty("charset", "utf-8");
+   		           con.setRequestProperty("Content-Length", Integer.toString(postDataLength ));
+   		           con.setUseCaches(false);
+   		           con.setDoOutput(true);
+   		           try(DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+   		              wr.write( postData );
+   		           }
+   		           
+   		     
+   		        
+   		        
+   		        InputStream ins = con.getInputStream();
+   		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
+   		        BufferedReader in = new BufferedReader(isr);
+     
+   		        String inputLine;
+   		        StringBuffer inputLineBuf = new StringBuffer();
+   		        while ((inputLine = in.readLine()) != null){
+   		        	inputLine = Converter.enCodeEst(inputLine);
+   		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\"l\"","\"L\""));
+   		        	   
+   				        
+   		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
+   		        	while (st.hasMoreTokens()){
+   		        		
+   		        		String line = st.nextToken();
+   		        		
+   		        	//	
+   		        		int ind =  line.indexOf("invoice number=") ;
+   		        		String number = "";
+   			        	if(ind != -1){
+   			        		 number = line.substring(ind + 16);
+   			        		number = number.substring(0,number.indexOf("\""));
+   			        		// System.out.println(number);
+   			        	}
+   			        	 ind =  line.indexOf("date=") ;
+   			        	if(ind != -1){
+   			        		String date = line.substring(ind + 6);
+   			        		date = date.substring(0,date.indexOf("\""));
+   			        		// 		        		
+   			        		 if(isOkDate(date)){
+   			        			
+   			     					Vector cps = this.getCPCombi(Converter.deCode(custid),number,date);
+   			     					
+   			     					if(cps != null){
+   			     						Enumeration eee = cps.elements();
+   			     						while( eee.hasMoreElements()){
+   			     						CustProd cp = (CustProd) eee.nextElement();
+   			     						if(cp.getCustID().equals(custid) && dirCustCodes.get(custid) != null) {
+   			     							String cuid = Converter.enCodeEst(dirCustCodes.get(custid)+"");
+   			     							if(!res.contains(cuid)) {
+   			     							   res.add(cuid);
+   			     							 }
+   			     						  }
+   				     				   }	
+   			     					}
+   			     				 }
+   			        	      }		
+   		        	       }           	
+   		                }
+   		      //  System.out.println(inputLineBuf);
+   		        in.close();
+   		        isr.close();
+   		        ins.close();
+   		        con.disconnect();
+   		        
+   		       
+   		   } catch (Exception a){
+   			  
+   		   }
+   	   }
+
+
+      System.out.println("sales Size " + res.size());
+	
+	return res;
+}
+
  private HashMap dirCustCodes = null ;
 
        public TreeMap getCustomers(Agent agent){
+    	   
+    	   //teeme hash seti kõigist klientidest kes pole ostnud rohkem
     	   
     	   // teeme kindlaks directo koodid mis on Nvisse sisestatud .
     	   
@@ -1632,7 +1794,8 @@ private Date getDate(String mmddyy){
     		  }
     	   
     	   try {
-    		  
+    		   
+        	     
  	    	  String cmd =  " SELECT k.[No_] AS kood, [Code in DIRECTO LT] as directo FROM [2015_Tobis$Customer] k LEFT join [2015_Tobis$Ship-to Address] a on  a.[Customer No_]=k.[No_] \r\n" + 
                             " and a.Code=k.[Ship-to Code]   WHERE k.[Salesperson Code] != ''  AND Blocked != 3 and [Code in DIRECTO LT] != ''";
  	       
@@ -2047,6 +2210,8 @@ System.out.println(cmd);
 
     	   System.out.println(sql);
     	   try {
+    		   
+    		   HashSet sales5m = getSales5M();
     	        Connection con = getNewConnection2();
     	        Statement stmt = con.createStatement();
     	        ResultSet rs = stmt.executeQuery(sql);
@@ -2195,15 +2360,36 @@ System.out.println(cmd);
     	        	}
     	           }
     	          
+    	           boolean lastDealNo = false;
     	           String lines  = rs.getString("lines");
     	           if(lines != null && lines.trim().length()>0){
     	        	   double summa   = rs.getDouble("summa");
     	        	   String ldate  = rs.getString("lastdeal");
-    	        	    	        	   
-    	        	   
+    	        	   Calendar cc = Calendar.getInstance();
+    	        	   int y = Integer.parseInt(ldate.substring(0,4));
+    	        	   int m = Integer.parseInt(ldate.substring(6,7));
+    	        	  int d =  Integer.parseInt(ldate.substring(9,10));
+    	        	  cc.set(Calendar.YEAR, y);
+    	        	  cc.set(Calendar.MONTH, m);
+    	        	  cc.set(Calendar.DAY_OF_MONTH, d);
+    	        	  cc.add(Calendar.MONTH, 5);
+    	        	  
+    	        	  if(cc.getTime().before(new Date())) {
+    	        		  lastDealNo = true;
+    	        	  }
+    	        	  
     	        	   customer.setInfo(Converter.enCodeEst("Paskutinė SF data: " + ldate.substring(0,10) + "|Vidutinė SF (iš 4 paskutinių):|" 
                    +  "*  Eilučių sk.:" + lines +"|  " +
     	        	   		"   Suma: " + (int)summa + " €." ));
+    	           }
+    	           
+    	           if(sales5m.contains(customer.getID()) || lastDealNo) {
+    	        	   if(customer.getInfo().trim().length() > 10) {
+      	        	     customer.setInfo(customer.getInfo() + "|Pirko seniau nei prieš 5 mėn. – Reikia atlikti rizikos vertinimą.Kreiptis į skolų valdymo specialistę");
+    	        	   } else {
+    	        	     customer.setInfo("Pirko seniau nei prieš 5 mėn. – Reikia atlikti rizikos vertinimą.Kreiptis į skolų valdymo specialistę");
+    	        	   }
+    	        	   
     	           }
     	          
     	           String loyal  = rs.getString("loyal");
@@ -3502,7 +3688,7 @@ TreeMap sorting = new TreeMap();
 		   m = "0" + m;
 	   }
 		   String start =  d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
-		   System.out.println(dirCustCodes.get("9535") + " " + start + " uhuu " + end);
+		 //  System.out.println(dirCustCodes.get("9535") + " " + start + " uhuu " + end);
 		
 		   Iterator enums = this.dirCustCodes.keySet().iterator();
 	   while(enums.hasNext()){

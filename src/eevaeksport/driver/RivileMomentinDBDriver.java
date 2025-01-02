@@ -1025,7 +1025,7 @@ HashSet olemas = new HashSet();
     	try {
     		
     	
-    	 File f = new File ( "excel/pricelist2023.xlsx");
+    	 File f = new File ( "excel/pricelist2024.xlsx");
   	   FileInputStream	 ff = new FileInputStream(f);
   	 int a = 0;
   		XSSFWorkbook workbook = new XSSFWorkbook((ff));
@@ -1076,10 +1076,6 @@ HashSet olemas = new HashSet();
  						
   					}
 					
-					
-  					
-  					
-  					
   				}
   				
   					
@@ -1384,7 +1380,7 @@ HashSet olemas = new HashSet();
              double lastprice = rs.getDouble("lastprice");
              
              double lastale = 0;
-             if( ( kuup.contains("2023") ) && oldPr.get(tootekood) != null) {
+             if( ( kuup.contains("2024") ) && oldPr.get(tootekood) != null) {
             	 lastale = 100 -( lastprice/Double.parseDouble(oldPr.get(tootekood)+"") * 100 ); 
             	
              } else {

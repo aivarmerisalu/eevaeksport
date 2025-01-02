@@ -2171,7 +2171,7 @@ con.close();
             	                                     + "?,"   //   qty	C(200),
             	                                      + "?,"   //   comm	C(200),
             	                                       + "?,"   //   uuspv	C(200),
-            	                                     + "?)";   //   skannitud
+            	                                     + "?,?)";   //   skannitud
             	                      		 
 
             	                          	 Connection c =  getNewConnection();
@@ -2187,6 +2187,7 @@ con.close();
             	                            ps.setString(8, comm); 
             	                            ps.setInt(9, uuspv);
             	                            ps.setString(10, serial);
+            	                            ps.setString(11, "");
             	                            ps.executeUpdate();	 
             	                   
             	                    ps.close();
