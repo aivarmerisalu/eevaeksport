@@ -325,6 +325,7 @@ try{
 	  	   }catch(Exception e){
 	  		 e.printStackTrace();  
 	  	   }
+	  	   System.out.println("Twodays len " + res.size());
      return res;
   }
    
@@ -490,13 +491,14 @@ try{
 	        }
 	       
 	          
-	          if(isToday(delcal.getTimeInMillis())){
-		        	delcal.setTimeInMillis(cal2.getTimeInMillis());
-		        }
 	          
-	        if(order.getShipCal().getTimeInMillis() > delcal.getTimeInMillis() ){
+	        if(order.isShipDateUsed()){
 	        	delcal.setTimeInMillis(order.getShipCal().getTimeInMillis());
+	        }else {
+	        	delcal.setTimeInMillis(cal2.getTimeInMillis());
 	        }
+	        
+	        System.out.println("DelDay " + order.isShipDateUsed());
 
 	         month = (delcal.get(Calendar.MONTH) + 1) + "";
 	        if (month.length() == 1) month = "0" + month;
