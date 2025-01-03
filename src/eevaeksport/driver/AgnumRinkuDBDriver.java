@@ -350,7 +350,7 @@ TreeMap photos = new TreeMap();
        		"       		      		       		      		AS ean, path as pilt ,t.pvm as vat , t.kiekis as laoseis,t.pogrupis, t.kateg, t.grupe   FROM prk t\r\n" + 
        		"       											 LEFT JOIN pgr g ON g.grupe=t.pogrupis and g.gr_type=2\r\n" + 
        		"       											 LEFT JOIN pgr g2 ON g2.grupe=t.posakis and g2.gr_type=3\r\n" + 
-       		"       		       								inner join RR_PRKKN h ON h. ID_PRK = t.ID_PRK and h.ID_KN = 134 and kaina1 != 0\r\n" + 
+       		"       		       								inner join RR_PRKKN h ON h. ID_PRK = t.ID_PRK and h.ID_KN = 151 and kaina1 != 0\r\n" +  // siin saab hinnakirja koodi muuta
        		"												LEFT JOIN prk_images i on i.id_prk=t.id_prk\r\n" + 
        		"       		       		                        left join BK bk on bk.id_prk=t.id_prk\r\n" + 
        		"       		       		       					where kod like '0000%' and ID_snd = 2948  and aktyvi ='Y' "; //and  g.grupe like '%pda%'

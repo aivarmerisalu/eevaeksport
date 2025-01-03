@@ -1149,7 +1149,6 @@ import eevaeksport.util.Converter;
 		    	}
 		     
 		    }
-		    //System.out.println(toode + " prod1 " + prod);
 		    rs1.close();
 		    st1.close();
 		    return prod;
@@ -2250,23 +2249,25 @@ Tegin CUSTOMERDATA0100 tabelisse lisav�lja � MJkoodivalik, v�ljat��bik
 		            		 || (order.getILN() != null && prisma)
 		            		 ){//prismad 
 		            	 
-		            	 kogus = (int)(kogus /getJagaja(toode));
+		            //	 kogus = (int)(kogus /getJagaja(toode));
 		            	 
 		             }
-		             System.out.println("kogus1 " + kogus);
+		           
+		             //  System.out.println("kogus1 " + kogus);
 		             //niv toodete teema maxima + rimi +lidl
+		             
 		             
 		             if((order.getILN() != null && order.getILN().equals("4751008570045")) || order.getStatus() == 98
 		            		 || order.getCompany().startsWith("T8587")) { //lidl
-		            	 kogus = (int)(kogus /getJagajaNIV(toode));
+		            	// kogus = (int)(kogus /getJagajaNIV(toode));
 		             }
 		             
-		             System.out.println("kogusn " + kogus);
+		          //   System.out.println("kogusn " + kogus);
 			            
 		             if( order.getCompany().startsWith("T8587")) { //lidl
-		            	 kogus = (int)(kogus /getJagajaVUS(toode));
+		            	 //kogus = (int)(kogus /getJagajaVUS(toode));
 		             }
-		             System.out.println("kogusv " + kogus);
+		          //   System.out.println("kogusv " + kogus);
 			             
 		             kogus = (int)(getKogusRounded(toode,kogus,order.getCompany()));
 		             
