@@ -281,7 +281,12 @@ public class BC365ImportDriver extends AbstractImportDriver{
 		}
 	  JSONObject ord = new JSONObject();
 	  ord.put("salesperson", order.getAgent());
-	  ord.put("orderingDate", Converter.jsonDateOnly(new Date()));
+	  
+	  Calendar cal =  Calendar.getInstance();;
+	 	if(order.isShipDateUsed()) {
+	 		cal = order.getShipCal();
+	 	}
+	  ord.put("orderingDate", Converter.jsonDateOnly(cal.getTime()));
 	  ord.put("customerNumber", order.getCompany());
 	  ord.put("currencyCode", "EUR");
 	  if (comm != null) {
@@ -336,8 +341,6 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	 	  if (unitMeasureId != null) {
 	 	  lin.put("unitOfMeasureId", unitMeasureId );
 	   }
-	 	Calendar cal = order.getShipCal();
-	 	lin.put("shipmentDate", Converter.jsonDateOnly(cal.getTime()));
 	 	
 	 	
 	 	lin.put("quantity", line.getKogus());
