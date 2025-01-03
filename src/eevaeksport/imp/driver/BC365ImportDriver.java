@@ -294,6 +294,7 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	  }
 	  
 	  if (paymTerm != null) {
+		  
 		  ord.put("paymentTermsId", paymTerm);  
 	  }
 	  
