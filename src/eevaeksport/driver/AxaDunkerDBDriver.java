@@ -1270,7 +1270,7 @@ System.out.println(sb.toString());
   		"      and inv.ssordereraccount='DUNKER' and inv.itemid not like '9%' " + 
   		" INNER JOIN custinvoicejour jou ON sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid " + 
   		" INNER JOIN custtable cus ON cus.accountnum = jou.orderaccount  WHERE  inv.dataareaid='vir' AND sal.dataareaid='du2' " + 
-  		" AND sal.DIMENSION in ('SALE','DUN','DEK','MED') " + 
+  		" AND sal.DIMENSION in ('SALE','DUN','DEK','MED','MARKETING') " + 
   		" AND left(sal.INVOICEID,3) not in ('VSA','DSA') AND cus.dataareaid='vir' AND jou.dataareaid='du2' " + 
   		" AND YEAR(sal.invoicedate) = YEAR(getdate()) AND MONTH(sal.invoicedate) = MONTH(getdate()) GROUP BY cus.agent" ;
   		

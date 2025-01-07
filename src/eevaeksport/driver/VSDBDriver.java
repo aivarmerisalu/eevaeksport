@@ -720,8 +720,11 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
 
 		cust.setName(Converter.enCodeEst(nimi));
 		cust.setDebt(rs.getDouble("tasumata"));
-		cust.setVisit(rs.getString("visit").trim());
-                String aadr = rs.getString("address");
+	//	cust.setVisit(rs.getString("visit").trim());
+		cust.setVisit(Converter.visitTurn(rs.getString("visit").trim()));
+        
+		
+		String aadr = rs.getString("address");
                 if(aadr != null){
 		       cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim()),"Estonia"));
                 }

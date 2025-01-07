@@ -586,7 +586,7 @@ change 3DBV009 manager order warehouse – we want this manager to make orders o
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1AS203";
     	   }
-    	   if(agent.equals("3DBV009")){ //erijuhtum
+    	   if(agent.equals("3DBV009") || agent.equals("3DBV010")){ //erijuhtum
     		   ladu =    "0AS101";
     	   }
     	   if(orderware != null) {
@@ -614,7 +614,7 @@ change 3DBV009 manager order warehouse – we want this manager to make orders o
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1PS210";
     	   }
-    	   if(agent.equals("3DBV009")){ //erijuhtum
+    	   if(agent.equals("3DBV009") || agent.equals("3DBV010")){ //erijuhtum
     		   ladu =    "0PS119";
     	   }
     	   if(orderware != null) {
@@ -642,7 +642,7 @@ change 3DBV009 manager order warehouse – we want this manager to make orders o
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1AS203";
     	   }
-    	   if(agent.equals("3DBV009")){ 
+    	   if(agent.equals("3DBV009")|| agent.equals("3DBV010")){ 
     		   ladu =    "4XX002";
     	   }
     	   if(orderware != null) {

@@ -597,7 +597,7 @@ HashSet olemas = new HashSet();
     	stocks = new HashMap();
     	stocks6 = new HashMap();
   	  String  cmd = "  SELECT  I17_KODAS_PS AS toode, sum(I17_kiekis - I17_atiduota) AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS " +
-" where I17_KODAS_IS in ('SAND1') AND ((I17_kiekis - I17_atiduota) >0 OR (I17_P_PAR_K)>0) and n17_kodas_ls_1<>''  and  N17_POZ_DATE =0 " +
+" where I17_KODAS_IS in ('SAND1') AND ((I17_kiekis - I17_atiduota) >0 OR (I17_P_PAR_K)>0)   and  N17_POZ_DATE =0 " + //and n17_kodas_ls_1<>''
 	 "   GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_atiduota ) >0   ORDER BY I17_KODAS_PS" ;
 //,'SAND11','CER3','CER4'
 
@@ -626,7 +626,7 @@ HashSet olemas = new HashSet();
              
              
              cmd = "  SELECT  I17_KODAS_PS AS toode, sum(I17_kiekis - I17_atiduota) AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS " +
-            		 " where I17_KODAS_IS in ('SAND11') AND ((I17_kiekis - I17_atiduota) >0 OR (I17_P_PAR_K)>0) and n17_kodas_ls_1<>''  and  N17_POZ_DATE =0 " +
+            		 " where I17_KODAS_IS in ('SAND11') AND ((I17_kiekis - I17_atiduota) >0 OR (I17_P_PAR_K)>0)   and  N17_POZ_DATE =0 " +
             		 	 "   GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_atiduota ) >0   ORDER BY I17_KODAS_PS" ;
             		 //,'SAND11','CER3','CER4'
              
