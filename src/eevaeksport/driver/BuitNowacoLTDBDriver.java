@@ -1898,7 +1898,7 @@ try{
         
         if(old<dueint){
            debtDays.put(custID,dueint+"") ;
-           if(dueint > 27){
+           if(dueint > 24){
         	  	 
         	   if(debt.getPayerID() != null && debt.getPayerID().equals("150040692")) {
         		    System.out.println("siit 2 tuleb block" + custID + " " + debt.getDoknr());

@@ -1422,6 +1422,35 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     private Vector matrixLines = null;
     private HashMap basePrices = null;
     
+    
+    private HashMap getLVNames() {
+    HashMap res = new HashMap();
+  	  String cmVILN = " select prekesID as kood , Pavad as nimi from dbo.PrekiuKalbos where KalbosId = '14786' ";
+  	  
+	       if (isDebug()) System.out.println(cmVILN);
+	       try {
+
+	           Connection con = getNewConnection();
+	         Statement st = con.createStatement();
+	         ResultSet rs = st.executeQuery(cmVILN);
+
+	         while (rs.next()) {
+	           String kood = rs.getString("kood").trim();
+	           String nimi = rs.getString("nimi").trim();
+	            res.put(kood, nimi);
+	           }
+	           rs.close();
+	           st.close();
+	           con.close();
+	       }catch(Exception e) {
+	    	   e.printStackTrace();
+	       }
+	       
+	       return res   ;
+
+    }
+    
+    
     public TreeMap getProducts(Agent agent){
     	
     	if(basePrices == null || matrixLines == null) {
@@ -1432,6 +1461,13 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 	
 	   prcodes = new TreeMap();
 	   piltcodes = new TreeMap();
+	   HashMap lvNames = null;
+	   boolean lvE = false;
+	   if("true".equals(getParent().getProps().getProperty("lang.latvia"))) {
+		   lvNames = getLVNames();
+		   lvE = true;
+	   }
+	   
 
     String cmd = " SELECT  Pr.PrekesID as tid, '' as pkood, Pr.Kodas AS kood,'' as nimi2, Pr.Pavad AS nimetus,\r\n" + 
     		"     CONVERT(Money, tt.PK_PardKaina) AS hind, CASE WHEN pr.mvid = pr.ipokavimomvid OR \r\n" + 
@@ -1459,11 +1495,16 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
              
              while (rs.next()) {
         	  boolean goes = false;
+        	  boolean lv = false;
         	  String tid = rs.getString("tid");
               String pkood = rs.getString("pkood");
               String kood = rs.getString("kood").trim();
         
               String nimetus =  rs.getString("nimetus").replaceAll("\"", " ").trim();
+              if(lvNames != null && lvNames.get(tid) != null) {
+            	  nimetus = (String) lvNames.get(tid) ;
+            	  lv = true;
+              }
               
               Product prod = new Product(kood);
             //   goes = false;
@@ -1520,7 +1561,11 @@ try{
                  
                  
               prod.setStock(-1); 
-              prod.setVat("21");
+              if(lvE) {
+                  prod.setVat("21");            	  
+              } else {
+                  prod.setVat("21");  
+              }
           
               
               Double kaal = rs.getDouble("kaal");
@@ -1538,9 +1583,11 @@ try{
 	  prod.setPrice((Double)basePrices.get(prod.getID()));
 	  goes = true;
   }
-        	 
+        	if(lvE) {
+        		goes = false;
+        	}
               
-              if(goes){
+              if(goes || lv){
             	  prcodes.put(tid, kood);
          		  products.put(nimetus, prod);
                   prodHash.put(prod.getID(), prod.getPrice());  
