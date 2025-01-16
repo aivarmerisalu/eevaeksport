@@ -966,6 +966,8 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
   
   
   public TreeMap getCustomers(Agent agent){
+	  TreeMap custAGS = this.getCustMercs();
+	  System.out.println("custAGS " + custAGS.size());
 	  
 	  try{
    	   Converter.getManagersReplacements(agents1, rcompanyx, user, pass, false); 
@@ -1417,6 +1419,11 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
         cust.setName(name);
         
       
+           if(custAGS.get(cust.getID()) != null){
+        		cust.addAgent(new Agent(custAGS.get(cust.getID())+""));
+           }
+        	
+        	
         
         if(mercs.get(cust.getID()) != null){
         	
@@ -3093,31 +3100,156 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
 
     
 
-  
-    
     private TreeMap makePlansByChains(){
+   	   TreeMap res = new TreeMap();
+   	      totalPlanSum = 0;
+   	   try{
+   		
+   	   Calendar cal = Calendar.getInstance();
+   	   String month = (cal.get(Calendar.MONTH)+1)+ "";
+   	   if (month.length() == 1){
+   		   month = "0" + month;
+   	   }
+   	   String jooksev = cal.get(Calendar.YEAR) + "" + month; 
+   	   int a = 0;
+   	   File f = new File (getExcelDir() + "CustChains_Budget.xlsx");
+   		  FileInputStream	 ff = new FileInputStream(f);
+   	
+   		XSSFWorkbook workbook = new XSSFWorkbook((ff));
+   		XSSFSheet sheet = workbook.getSheet(jooksev);
+   	//	System.out.println("jooksev " + jooksev + " " + sheet);
+   		XSSFRow row = null; 
+   				ff.close();	
+   				if(sheet != null){
+   				
+   					
+   					for(int i = 0 ; i < sheet.getLastRowNum();i++){
+   						 row = sheet.getRow(i);
+   						if(row == null && a == 0){
+   							a = i;
+   						}else{
+   							a = sheet.getLastRowNum();
+   						}
+   					}
+   					String gr1 = null;
+   					String gr2 = null;
+   					String gr3 = null;
+   					String gr4 = null;
+
+   					String gr1n = null;
+   					String gr2n = null;
+   					String gr3n = null;
+   					String gr4n = null;
+   					
+   					for(int i = 0 ; i < a + 1;i++){
+   						 row = sheet.getRow(i);
+   						String agent = null;
+   						double g1 = 0;
+   						double g2 = 0;
+   						double g3 = 0;
+   						double g4 = 0;
+   						double gt = 0;
+   						
+   					if(i == 0){
+   						//loemepäised sisse
+   						
+   						gr1 = "1";//(row.getCell((short) 1).getStringCellValue());
+   						gr2 = "2";//(row.getCell((short) 2).getStringCellValue());
+   						gr3 = "3";//(row.getCell((short) 3).getStringCellValue());
+   						gr4 = "4";//(row.getCell((short) 4).getStringCellValue());
+   						
+   						gr1n = (row.getCell((short) 1).getStringCellValue());
+   						gr2n = (row.getCell((short) 2).getStringCellValue());
+   						gr3n = (row.getCell((short) 3).getStringCellValue());
+   						gr4n = (row.getCell((short) 4).getStringCellValue());
+   						
+   						
+   					}else{
+   						
+   						try {
+   							agent = (row.getCell((short) 0).getStringCellValue());
+      					      } catch (Exception e) {
+      						   e.printStackTrace();
+      					      }
+   		//				System.out.println(agent);
+   						try {
+   						g1 = Double.parseDouble(row.getCell((short) 1).getNumericCellValue()+ "");
+   						g2 = Double.parseDouble(row.getCell((short) 2).getNumericCellValue()+ "");
+   						g3 = Double.parseDouble(row.getCell((short) 3).getNumericCellValue()+ "");
+   						g4 = Double.parseDouble(row.getCell((short) 4).getNumericCellValue()+ "");
+   						} catch (Exception e) {
+   	   					 e.printStackTrace();	
+    					      }
+   						
+   						
+   						
+   						TreeMap asi= new TreeMap();
+   						       Toode t1 = new Toode(gr1);
+   						       t1.setBrand(gr1n);
+   						       t1.setPlancur(g1);
+   						       Toode t2 = new Toode(gr2);
+  						       t2.setPlancur(g2);
+  						       t2.setBrand(gr2n);
+  						       Toode t3 = new Toode(gr3);
+   						       t3.setPlancur(g3);
+   						       t3.setBrand(gr3n);
+   						       Toode t4 = new Toode(gr4);
+   						       t4.setBrand(gr4n);
+   						       t4.setPlancur(g4);
+   						
+   						       
+   				          asi.put(gr1, t1);
+   				          asi.put(gr2, t2);
+   				          asi.put(gr3, t3);
+   				          asi.put(gr4, t4);
+   				          asi.put("all", g1+g2+g3+g4);
+   				         
+   						
+   						if(agent != null && !agent.equals("Total")){
+   							
+   						    res.put(agent,asi );
+   						   totalPlanSum = totalPlanSum + (g1+g2+g3+g4); 
+   						    
+   						}
+   						
+   						if(agent != null && agent.equals("Total")){
+   							res.put("totals", asi);
+   						//	System.out.println("totals olemas " + asi.toString() + " " + asi.get("all"));
+   						}
+      					
+      					
+   						
+   					}
+   						
+   					}
+   				
+   				}
+           		   
+   	   }catch (Exception e){
+   		   e.printStackTrace();
+   	   }
+   	   
+   	  // System.out.println("totalPlanSum "+ totalPlanSum );
+   	   return res;
+      }
+      
+
+    
+    
+    private TreeMap getCustMercs(){
   	   TreeMap res = new TreeMap();
-  	      totalPlanSum = 0;
+  	      
   	   try{
   		
-  	   Calendar cal = Calendar.getInstance();
-  	   String month = (cal.get(Calendar.MONTH)+1)+ "";
-  	   if (month.length() == 1){
-  		   month = "0" + month;
-  	   }
-  	   String jooksev = cal.get(Calendar.YEAR) + "" + month; 
   	   int a = 0;
-  	   File f = new File (getExcelDir() + "CustChains_Budget.xlsx");
+  	   File f = new File (getExcelDir() + "CustAgents.xlsx");
   		  FileInputStream	 ff = new FileInputStream(f);
   	
   		XSSFWorkbook workbook = new XSSFWorkbook((ff));
-  		XSSFSheet sheet = workbook.getSheet(jooksev);
-  	//	System.out.println("jooksev " + jooksev + " " + sheet);
+  		XSSFSheet sheet = workbook.getSheetAt(0);
   		XSSFRow row = null; 
   				ff.close();	
   				if(sheet != null){
-  				
-  					
   					for(int i = 0 ; i < sheet.getLastRowNum();i++){
   						 row = sheet.getRow(i);
   						if(row == null && a == 0){
@@ -3126,105 +3258,22 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
   							a = sheet.getLastRowNum();
   						}
   					}
-  					String gr1 = null;
-  					String gr2 = null;
-  					String gr3 = null;
-  					String gr4 = null;
-
-  					String gr1n = null;
-  					String gr2n = null;
-  					String gr3n = null;
-  					String gr4n = null;
   					
   					for(int i = 0 ; i < a + 1;i++){
   						 row = sheet.getRow(i);
-  						String agent = null;
-  						double g1 = 0;
-  						double g2 = 0;
-  						double g3 = 0;
-  						double g4 = 0;
-  						double gt = 0;
+  						String code = (row.getCell((short) 0).getStringCellValue());
+  						String agent = (row.getCell((short) 2).getStringCellValue());
+  						res.put(code, agent);
   						
-  					if(i == 0){
-  						//loemepäised sisse
-  						
-  						gr1 = "1";//(row.getCell((short) 1).getStringCellValue());
-  						gr2 = "2";//(row.getCell((short) 2).getStringCellValue());
-  						gr3 = "3";//(row.getCell((short) 3).getStringCellValue());
-  						gr4 = "4";//(row.getCell((short) 4).getStringCellValue());
-  						
-  						gr1n = (row.getCell((short) 1).getStringCellValue());
-  						gr2n = (row.getCell((short) 2).getStringCellValue());
-  						gr3n = (row.getCell((short) 3).getStringCellValue());
-  						gr4n = (row.getCell((short) 4).getStringCellValue());
-  						
-  						
-  					}else{
-  						
-  						try {
-  							agent = (row.getCell((short) 0).getStringCellValue());
-     					      } catch (Exception e) {
-     						   e.printStackTrace();
-     					      }
-  		//				System.out.println(agent);
-  						try {
-  						g1 = Double.parseDouble(row.getCell((short) 1).getNumericCellValue()+ "");
-  						g2 = Double.parseDouble(row.getCell((short) 2).getNumericCellValue()+ "");
-  						g3 = Double.parseDouble(row.getCell((short) 3).getNumericCellValue()+ "");
-  						g4 = Double.parseDouble(row.getCell((short) 4).getNumericCellValue()+ "");
-  						} catch (Exception e) {
-  	   					 e.printStackTrace();	
-   					      }
-  						
-  						
-  						
-  						TreeMap asi= new TreeMap();
-  						       Toode t1 = new Toode(gr1);
-  						       t1.setBrand(gr1n);
-  						       t1.setPlancur(g1);
-  						       Toode t2 = new Toode(gr2);
- 						       t2.setPlancur(g2);
- 						       t2.setBrand(gr2n);
- 						       Toode t3 = new Toode(gr3);
-  						       t3.setPlancur(g3);
-  						       t3.setBrand(gr3n);
-  						       Toode t4 = new Toode(gr4);
-  						       t4.setBrand(gr4n);
-  						       t4.setPlancur(g4);
-  						
-  						       
-  				          asi.put(gr1, t1);
-  				          asi.put(gr2, t2);
-  				          asi.put(gr3, t3);
-  				          asi.put(gr4, t4);
-  				          asi.put("all", g1+g2+g3+g4);
-  				         
-  						
-  						if(agent != null && !agent.equals("Total")){
-  							
-  						    res.put(agent,asi );
-  						   totalPlanSum = totalPlanSum + (g1+g2+g3+g4); 
-  						    
-  						}
-  						
-  						if(agent != null && agent.equals("Total")){
-  							res.put("totals", asi);
-  						//	System.out.println("totals olemas " + asi.toString() + " " + asi.get("all"));
-  						}
-     					
-     					
-  						
-  					}
-  						
+  					}				
   					}
   				
-  				}
           		   
   	   }catch (Exception e){
   		   e.printStackTrace();
   	   }
   	   
-  	  // System.out.println("totalPlanSum "+ totalPlanSum );
+  	   System.out.println("custAgents "+ res.size() );
   	   return res;
      }
      
@@ -4603,8 +4652,6 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
 				  final DateTime endOfLastWeek2 =  new DateTime(input.minusHours(u*12));
 				
 			  
-				System.out.println("algus " +startOfLastWeek2.toString());
-				System.out.println("lopp " +endOfLastWeek2.toString());
 			  String filenameSV =   Converter.getSVData(startOfLastWeek2.getMillis(), endOfLastWeek2.getMillis(),
 					  rcompanyx, user, pass,false,"SELYNLIST",null,"answers"+ u+ "-");
 				 System.out.println("filenameSV "+  filenameSV);
@@ -4612,21 +4659,13 @@ String sqlo = " SELECT  traagentsid as agent,inventovergroupid as grupp ,round(S
 		  
 		  final DateMidnight startOfLastWeek = 
 		             new DateMidnight(input.minusDays(14));
-		  
 		
-		  //System.out.println(startOfLastWeek);
 		  final DateMidnight endOfLastWeek =  new DateMidnight(input.plusDays(1));
-		
 		 
 			String filenameTask =   Converter.getTaskData(startOfLastWeek.getMillis(), endOfLastWeek.getMillis(), rcompanyx, user, pass,"Tasks");
-			// System.out.println("filenameTask "+  filenameTask);
-		 
-		 
+		  
 		 System.exit(0);
 	}
 	    
-
-	
-	
 	
 }

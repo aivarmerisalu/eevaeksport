@@ -838,7 +838,8 @@ HashSet olemas = new HashSet();
 				" N33_ADRESAS AS aadress, ltrim(N08_NUOL_GR)   AS ale , " +
 				" ' ' AS visit ,N08_KODAS_KS AS payer ,  " +
 				"  (CASE WHEN LENGTH(LTRIM(N33_KODAS_MS))=0 or N33_KODAS_MS IS NULL THEN  N08_KODAS_MS_P ELSE N33_KODAS_MS END) AS agent ,  " +
-				" (case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm , N33_TEL as phone , N33_SHIP_FOB  as deld ,n08_poz_date  as block " +
+				" (case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm , N33_TEL as phone"
+				+ " , N33_SHIP_FOB  as deld ,n08_poz_date  as block , n33_past_kodas as past " +
 				"  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where N08_PAV is not null  and  (N33_ADRESAS != 'NENAUDOTI' or N33_PAV != 'NENAUDOTI') order by N08_PAV ";
         log(cmd);
         TreeMap customers = new TreeMap();
@@ -1034,6 +1035,14 @@ HashSet olemas = new HashSet();
               int bl = rs.getInt("block");
               if(bl == 1){
             	  cust.setSalesBlock(true);;
+              }
+              
+
+              String past = rs.getString("past");
+              if(past != null & past.trim().equals("ELM")){
+            	  // teeme midagi
+            	  cust.addCity("SKU nesiskaičiuoja pas šį klientą");
+            	  cust.setInfo("SKU nesiskaičiuoja pas šį klientą");
               }
               
               if(goes) {

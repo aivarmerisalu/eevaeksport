@@ -927,7 +927,6 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 		   }
 		   if(payid != null){
 				  cust.setPayer(payid);
-				  cust.setGroup(payid);
 			  }
 		   
 		   String nim = rs.getString("nimi").replaceAll("\""," ").trim();
@@ -936,7 +935,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 		 String payer = rs.getString("payer");
 		 
 		 if(payer != null){
-			 payer = Converter.enCodeEst(payer.replaceAll("\""," ").trim());
+			 cust.setGroup(payer.trim());
 		 }
 		 String addr =  Converter.enCodeEst(rs.getString("Address").replaceAll("\""," ").trim());
 		 String vatno = rs.getString("vatno");
@@ -1010,21 +1009,6 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                 }
                 boolean goes = true;
 
-                
-              
-               /* String group = rs.getString("grupp");
-                if(group != null){
-                  cust.setGroup(group.trim());
-                }
-                String tyyp = rs.getString("tyyp");
-                int aktive = rs.getInt("aktiivne");
-               
-                if(tyyp != null && tyyp.trim().length() >0 && tyyp.trim().equals("NENAUDOJAMAS")){
-                   goes = false;
-                }
-                if(aktive == 1){
-                	goes = false;
-                }*/
                 String aadrjur = rs.getString("jurid");
                 if(aadrjur != null && aadrjur.trim().length()>0){
                   cust.setJuridics(Converter.enCodeEst(aadrjur.trim()));
@@ -1034,52 +1018,9 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                 if(aletext != null && aletext.trim().length()>0){
                   cust.setZipcode(Converter.enCodeEst(aletext.trim()));
                 }
-                /*String hinnak = rs.getString("hinnak");
-                if(hinnak != null && hinnak.trim().length()>0){
-                  cust.setGroup(hinnak.trim());
-                }
-                
-                String hinnak2 = rs.getString("hinnak2");
-                if(hinnak2 != null && !hinnak2.trim().equals("1")){
-                	if(cust.getGroup().trim().length() > 0 ){
-                		 cust.setGroup(cust.getGroup() + "|K" + hinnak2.trim());
-                	}else{
-                		 cust.setGroup("K" + hinnak2.trim());
-                	}
-                 
-                }
-                 if(lepMap.get(payid) != null){
-                	 if(cust.getGroup().trim().length() > 0 ){
-                		 cust.setGroup(cust.getGroup() + "|" +lepMap.get(payid));
-                	 }else{
-                		 cust.setGroup("" +lepMap.get(payid)); 
-                	 }
-                 }*/
-                 
                
-                 
-                 /*if(fourThousand.get(payer) != null) {
-                     cust.noCashSales = true;
-                     cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(payer) +""))+"€");
-                     } else if(fourThousand.get("P" + payer) != null) {
-                       cust.noCashSales = true;
-                       cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" + payer) +""))+"€");
-                     } else if(fourThousand.get(cust.getID()) != null) {
-                       cust.noCashSales = true;
-                       cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(cust.getID()) +""))+"€");
-                     } else if(fourThousand.get(payid) != null) {
-                       cust.noCashSales = true;
-                       cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(payid) +""))+"€");
-                     } else if(fourThousand.get("P" + cust.getID()) != null) {
-                         cust.noCashSales = true;
-                         cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" + cust.getID()) +""))+"€");
-                       } else if(fourThousand.get("P" +payid) != null) {
-                         cust.noCashSales = true;
-                         cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" +payid) +""))+"€");
-                       }*/
-                 
 
-                 cust.setGroup(cust.getID());
+                // cust.setGroup(cust.getID());
                 
                  if(locistics.get(cust.getID()) != null) {
                  	cust.addCity("" + locistics.get(cust.getID()) );
@@ -1280,7 +1221,8 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
          		"	CONVERT ( datetime, NuolaiduSutartys.DataNuo_Int ) AS ns_start,\r\n" + 
          		"	CONVERT ( datetime, NuolaiduSutartys.DataIki_Int ) AS ns_end,\r\n" + 
          		"	NuolaiduInfoPrekes.KainaBePVM,\r\n" + 
-         		"	Prekes.Kodas AS pr_kodas,\r\n" + 
+         		"	Prekes.Kodas AS pr_kodas,Partneriai.PartneriaiId as klid,\r\n" + 
+         		"    PartneriaiPa.SumokaPartneriaiId as pyid,\r\n" + 
          		"CASE\r\n" + 
          		"		\r\n" + 
          		"		WHEN ( NuolaiduSutartys.ArAsortimentas = 0 AND NuolaiduSutartys.PartneriaiId = 1 ) THEN\r\n" + 
@@ -1301,7 +1243,9 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
          		"	INNER JOIN dbo.Prekes ON NuolaiduInfoPrekes.PrekesID = Prekes.PrekesID\r\n" + 
          		"	INNER JOIN dbo.NuolaiduSutarciuDalyviai ON NuolaiduSutartys.NuolaiduSutartysId = NuolaiduSutarciuDalyviai.NuolaiduSutartysId \r\n" + 
          		"	AND NuolaiduSutarciuDalyviai.DefId = 221\r\n" + 
-         		"	INNER JOIN dbo.PartneriuKategorijos ON NuolaiduSutarciuDalyviai.RefId = PartneriuKategorijos.PartneriuKategorijosID \r\n" + 
+         		"	INNER JOIN dbo.PartneriuKategorijos ON NuolaiduSutarciuDalyviai.RefId = PartneriuKategorijos.PartneriuKategorijosID "
+         		+ " INNER JOIN dbo.Partneriai ON NuolaiduSutartys.PartneriaiId = Partneriai.PartneriaiId\r\n" + 
+         		"    INNER JOIN dbo.PartneriaiPa ON Partneriai.PartneriaiId = PartneriaiPa.PartneriaiId \r\n" + 
          		"WHERE\r\n" + 
          		"	NuolaiduSutartys.DataIki_Int >= GETDATE( ) \r\n" + 
          		"	AND NuolaiduInfoPrekes.DataIki_Int >= GETDATE( ) \r\n" + 
@@ -1314,7 +1258,8 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
          		"	CONVERT ( datetime, NuolaiduSutartys.DataNuo_Int ) AS ns_start,\r\n" + 
          		"	CONVERT ( datetime, NuolaiduSutartys.DataIki_Int ) AS ns_end,\r\n" + 
          		"	NuolaiduInfoPrekes.KainaBePVM,\r\n" + 
-         		"	Prekes.Kodas AS pr_kodas,\r\n" + 
+         		"	Prekes.Kodas AS pr_kodas,Partneriai.PartneriaiId as klid,\r\n" + 
+         		"    PartneriaiPa.SumokaPartneriaiId as pyid,\r\n" + 
          		"CASE\r\n" + 
          		"		\r\n" + 
          		"		WHEN ( NuolaiduSutartys.ArAsortimentas = 0 AND NuolaiduSutartys.PartneriaiId = 1 ) THEN\r\n" + 
@@ -1334,7 +1279,8 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
          		"	INNER JOIN dbo.NuolaiduInfoPrekes ON NuolaiduSutartys.NuolaiduAprasymaiId = NuolaiduInfoPrekes.NuolaiduAprasymaiId\r\n" + 
          		"	INNER JOIN dbo.Prekes ON NuolaiduInfoPrekes.PrekesID = Prekes.PrekesID\r\n" + 
          		"	INNER JOIN dbo.NuolaiduSutarciuPartneriai ON NuolaiduSutartys.NuolaiduSutartysId = NuolaiduSutarciuPartneriai.NuolaiduSutartysId\r\n" + 
-         		"	INNER JOIN dbo.Partneriai ON NuolaiduSutarciuPartneriai.PartneriaiId = Partneriai.PartneriaiId \r\n" + 
+         		"	INNER JOIN dbo.Partneriai ON NuolaiduSutarciuPartneriai.PartneriaiId = Partneriai.PartneriaiId "
+         		+ "INNER JOIN dbo.PartneriaiPa ON Partneriai.PartneriaiId = PartneriaiPa.PartneriaiId \r\n" + 
          		"WHERE\r\n" + 
          		"	NuolaiduSutartys.DataIki_Int >= GETDATE( ) \r\n" + 
          		"	AND NuolaiduInfoPrekes.DataIki_Int >= GETDATE( ) \r\n" + 
@@ -1374,11 +1320,19 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                        double price = rs.getDouble("KainaBePVM");
                        
                         String prodID = rs.getString("pr_kodas").trim();
+                        String klid = rs.getString("klid").trim();
+                        String pyid = rs.getString("pyid").trim(); 
                         int prt = rs.getInt("ns_tipas_id");
                         
                         MatrixLine mline = new MatrixLine();
 
-                        mline.setCustID(clKodas.trim());
+                        if(klid.equals(pyid)) {
+                        	//System.out.println("on maksja");
+                        	  mline.setCliGroup(pyid);
+                              	
+                        }else {
+                        	  mline.setCustID(clKodas.trim());
+                        }
                       
                         if (prodID != null && prodID.trim().length() > 1) {
                           mline.setProdID(prodID.trim());

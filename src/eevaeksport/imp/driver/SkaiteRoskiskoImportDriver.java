@@ -184,7 +184,7 @@ try{
 	  System.out.println("signature" + signatures.contains(signature) + "  "+ signature );
 		
 	  if(signatures.contains(signature)){
-		  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
+		  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + Converter.deCode(order.getCompany()) ;
 	  }else{
 		
 	  
@@ -204,102 +204,7 @@ try{
 	}
   }
   
-  
-  
-  private Vector splitOrder (Order order){
-	  
-	  Vector result = new Vector();
-
-	  if (order.getDokNr() == null || order.getDokNr().trim().length() == 0){
-		  order.setDokNr((Calendar.getInstance().getTimeInMillis() + "").substring(3));
-	  }
-	//  System.out.println("Infokene " + order.getInfo() + " " + order.getDokNr());
-
-	  Order ordS = new Order(order.getCompany(),order.getAgentFirstName());
-	  Order ordS0 = new Order(order.getCompany(),order.getAgentFirstName());
-	  Order ordSG = new Order(order.getCompany(),order.getAgentFirstName());
-	  
-	  ordS.setAgentCode(order.getAgentCode());
-	  ordS.setDokNr(order.getDokNr());
-	  ordS.setCompName(order.getShipMode());
-	  ordS.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ordS.setStatus(order.getStatus()); 
-	  ordS.setInfo(order.getInfo());
-	  ordS.setDealer("order");
-
-	  ordS0.setAgentCode(order.getAgentCode());
-	  ordS0.setDokNr(order.getDokNr());
-	  ordS0.setCompName(order.getShipMode());
-	  ordS0.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ordS0.setStatus(order.getStatus());
-	  ordS0.setInfo(order.getInfo());
-	  ordS0.setDealer("100");
-
-	  
-	  ordSG.setAgentCode(order.getAgentCode());
-	  ordSG.setDokNr(order.getDokNr());
-	  ordSG.setCompName(order.getShipMode());
-	  ordSG.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ordSG.setStatus(order.getStatus());
-	  ordSG.setInfo(order.getInfo());
-	  ordSG.setDealer("gift");
-
-
-	  
-	  Vector lines = order.getOrderLines();
-	  Enumeration enumr = lines.elements();
-	  while  (enumr.hasMoreElements()){
-		  OrderLine lin = (OrderLine)enumr.nextElement();
-		  
-		  
-
-		    if(lin.getDiscount() == -2){
-		     	ordSG.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-		    	ordSG.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "G");
-			    ordSG.setReference(order.getReference());
-		     }
-		
-		    if(lin.getDiscount() == 0){
-		    	   ordS.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-			     	ordS.setDokNr(order.getDokNr());
-			     	ordS.setReference(order.getReference()); 
-			 }
-		    
-
-		    if(lin.getDiscount() > 0){
-		    	   ordS0.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-			     	ordS0.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "N");
-			     	ordS0.setReference(order.getReference()); 
-			 }
-		  
-	  }
-	  
-	  if(ordS.getOrderLines() != null && ordS.getOrderLines().size()>0){
-		  result.add(ordS);  
-	  }
-
-	  if(ordS0.getOrderLines() != null && ordS0.getOrderLines().size()>0){
-		  result.add(ordS0);  
-	  }
-
-	  if(ordSG.getOrderLines() != null && ordSG.getOrderLines().size()>0){
-		  result.add(ordSG);  
-	  }
-	  
-	  
-	 System.out.println("Result =" +order.getDokNr()
-			 + " "+ result.size());
-	 //System.exit(0);
-	  return result ;
-  }
-
-
-
-  
-  
+    
   
   HashSet twoDays = null;
   
@@ -325,7 +230,7 @@ try{
 	  	   }catch(Exception e){
 	  		 e.printStackTrace();  
 	  	   }
-	  	   System.out.println("Twodays len " + res.size());
+	  	//   System.out.println("Twodays len " + res.size());
      return res;
   }
    
@@ -484,7 +389,7 @@ try{
 	        
 	        //kui on täna reede ja on pandud esmaspäevaks siis paneme homseks
 	        Calendar cal2 = Calendar.getInstance();
-	        if(twoDays.contains(order.getCompany())) {
+	        if(twoDays.contains(Converter.deCode(order.getCompany()))) {
 	        	 cal2.add(Calendar.DAY_OF_MONTH, 2);
 	         } else {
 	        	 cal2.add(Calendar.DAY_OF_MONTH, 1);
@@ -527,10 +432,10 @@ try{
 	        Node seller = doc.createElement("DeliveryPoint");
 
 	        Node ise = doc.createElement("CodeBySupplier");
-	        Text nimiVal = doc.createTextNode(order.getCompany());
+	        Text nimiVal = doc.createTextNode(Converter.deCode(order.getCompany()));
 	        ise.appendChild(nimiVal);
 	        Node ise2 = doc.createElement("ILN");
-	        Text nimiVal2 = doc.createTextNode(order.getCompany());
+	        Text nimiVal2 = doc.createTextNode(Converter.deCode(order.getCompany()));
 	        ise2.appendChild(nimiVal2);
 	        
 	        seller.appendChild(ise);

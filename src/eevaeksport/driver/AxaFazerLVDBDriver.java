@@ -2256,6 +2256,8 @@ String asi3 = "";
   			f.mkdir();
   		}
   		
+  		
+  		
   		Calendar cal = Calendar.getInstance();
   		String hh = cal.getTime().getHours()+"";
   		if(hh.length() == 1) {
@@ -2291,8 +2293,9 @@ String asi3 = "";
   			  
   		  }
   	
-  	  };
+  	  }
 
+  	  System.out.println("days " + days);
   	  	algus.add(Calendar.DATE, -1 * days);
   	  	algus.set(Calendar.HOUR, 0);
   	  	lopp.set(Calendar.HOUR, 23);
@@ -2322,9 +2325,9 @@ String asi3 = "";
   	  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass, true);
   	  	//	System.out.println("files " + files.toString());
 		
-   		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, null, null, "test");
+   		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
    		
-   		Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
+   		Converter.saveFile(f.getPath() + "/currSVjson.json", cc.toString());
    		int outofstocks = 1;
  		for (int i = 0; i < cc.length(); i++) {
    			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
@@ -2414,7 +2417,7 @@ String asi3 = "";
 				}
 				
 
-	   			String signa = dateOnly + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") + brand ;
+	   			String signa = dateAndTime + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") + brand ;
    		
    			
    			if( done != null && !done.contains(signa)){
@@ -2428,6 +2431,20 @@ String asi3 = "";
    				
    				worksheetBASE.createRow(outofstocks);
    				worksheetBASE.getRow(outofstocks).createCell(0).setCellValue(agid);
+   				// agname = new String(agname.getBytes(), "UTF-8");
+   				
+   				if(agid.equals("9")) {
+   					agname = "Anastasija Afončenkova";
+   				}
+   				
+   				if(agid.equals("3")) {
+   					agname = "Guntars Silinš";
+   				}
+   				
+   				if(agid.equals("10")) {
+   					agname = "Sintija Krūmiņa";
+   				}
+   				
    				worksheetBASE.getRow(outofstocks).createCell(1).setCellValue(agname);
    				String cuname = (String)cob.get("custname");
    				String cuid = (String)cob.get("custid");
@@ -2439,6 +2456,47 @@ String asi3 = "";
    				worksheetBASE.getRow(outofstocks).createCell(2).setCellValue(cuid);
 				String prodid = (String)cob.get("prodid");
    				//worksheetBASE.getRow(outofstocks).createCell(4).setCellValue(prodid);
+				//brand = new String(brand.getBytes(), "UTF-8");
+		   			
+			/*	actionbrand;Istenā
+				actionbrand;Maiziņš
+				actionbrand;Kurši
+				actionbrand;Tostē
+				actionbrand;Rīta
+				actionbrand;Spēkatota
+				actionbrand;Gardā
+				actionbrand;Mākoņmaize
+				actionbrand;Dzīvā
+				*/
+				if(brand.startsWith("R") && brand.endsWith("ta")) {
+					brand = "Rīta";
+				}
+				if(brand.startsWith("Sp") && brand.endsWith("katota")) {
+					brand = "Spēkatota";
+				}
+				if(brand.startsWith("Gard")) {
+					brand = "Gardā";
+				}
+				if(brand.startsWith("M") && brand.endsWith("aize")) {
+					brand = "Mākoņmaize";
+				}
+				if(brand.startsWith("Tost") && !brand.contains("maiz") ) {
+					brand = "Tostē";
+				}
+				if(brand.startsWith("Kur")) {
+					brand = "Kurši";
+				}
+				if(brand.startsWith("Maizi")) {
+					brand = "Maiziņš";
+				}
+				
+				if(brand.startsWith("Dz")) {
+					brand = "Dzīvā";
+				}
+				
+				if(brand.startsWith("Isten")) {
+					brand = "Istenā";
+				}
    				worksheetBASE.getRow(outofstocks).createCell(4).setCellValue(brand);
    				
    				

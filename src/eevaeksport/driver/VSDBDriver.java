@@ -682,7 +682,54 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
 	  	 
 	  }
 
-
+    public static String visitTurn4(String input) {
+      	 String res = input;
+      	 
+      	 if(input.equals("T1N2")) {
+      		 res = "T2N1";
+      	 }else   if(input.equals("K1R2")) {
+      		 res = "K2R1";
+      	 }else   if(input.equals("K1N2")) {
+      		 res = "K2N1";
+      	 }
+      	 
+      	 return res ;
+      }
+    
+    public static String visitTurn3(String input) {
+   	 String res = input;
+   	 
+   	 if(input.startsWith("E1") && (input.contains("T") || input.contains("K") || input.contains("N") || input.contains("R"))) {
+   		 res= "E2" + input.substring(2);
+   	 }
+   	 if(input.startsWith("T1") && (input.contains("E") || input.contains("K") || input.contains("N") || input.contains("R"))) {
+   		 res= "T2"  + input.substring(2);
+   	 }if(input.startsWith("K1") && (input.contains("T") || input.contains("E") || input.contains("N") || input.contains("R"))) {
+   		 res= "K2" +  input.substring(2);
+   	 }if(input.startsWith("N1") && (input.contains("T") || input.contains("K") || input.contains("E") || input.contains("R"))) {
+   		 res= "N2"  + input.substring(2);
+   	 }if(input.startsWith("R1") && (input.contains("T") || input.contains("K") || input.contains("N") || input.contains("E"))) {
+   		 res= "R2" + input.substring(2);
+   	 }
+   		 
+   		 if(input.startsWith("E2") && (input.contains("T") || input.contains("K") || input.contains("N") || input.contains("R"))) {
+       		 res= "E1"+ input.substring(2);
+       	 }
+       	 if(input.startsWith("T2") && (input.contains("E") || input.contains("K") || input.contains("N") || input.contains("R"))) {
+       		 res= "T1"+ input.substring(2);
+       	 }if(input.startsWith("K2") && (input.contains("T") || input.contains("E") || input.contains("N") || input.contains("R"))) {
+       		 res= "K1"+ input.substring(2);
+       	 }if(input.startsWith("N2") && (input.contains("T") || input.contains("K") || input.contains("E") || input.contains("R"))) {
+       		 res= "N1"+ input.substring(2);
+       	 }if(input.startsWith("R2") && (input.contains("T") || input.contains("K") || input.contains("N") || input.contains("E"))) {
+       		 res= "R1"+ input.substring(2);
+       	 }
+   	 if(!input.equals(res)) {
+   		 System.out.println("muutsin Visit " + res);
+   	 }
+   	 
+   	 return res ;
+   }
     
     
     public TreeMap getCustomers(Agent agent) {
@@ -721,7 +768,10 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
 		cust.setName(Converter.enCodeEst(nimi));
 		cust.setDebt(rs.getDouble("tasumata"));
 	//	cust.setVisit(rs.getString("visit").trim());
-		cust.setVisit(Converter.visitTurn(rs.getString("visit").trim()));
+		String visit = rs.getString("visit").trim();
+		visit = visitTurn4(visit);
+		visit = visitTurn3(visit);
+		cust.setVisit(Converter.visitTurn(visit));
         
 		
 		String aadr = rs.getString("address");
