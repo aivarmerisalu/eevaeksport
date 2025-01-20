@@ -69,7 +69,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
         String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
         try {
             Class.forName(databaseDriverName).newInstance();
-         ccc = DriverManager.getConnection("jdbc:odbc:scalaDB", "mobilejava", "mobilejava");
+         ccc = DriverManager.getConnection("jdbc:odbc:scalaDB", "mobileJava", "javajava");
         } catch (Exception e) {
             parent.showError(e);
         }
@@ -1152,7 +1152,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     }
 
     private Connection getNewCon() throws SQLException{
-      return DriverManager.getConnection(url, "mobilejava", "mobilejava");
+      return DriverManager.getConnection(url, "mobilejava", "javajava");
     }
 
     /**
@@ -1925,7 +1925,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
 
 	         try {
 	         	System.out.println("jam");
-	         	Connection  ccc = DriverManager.getConnection("jdbc:odbc:scalaDB", "mobilejava", "mobilejava");
+	         	Connection  ccc = DriverManager.getConnection("jdbc:odbc:scalaDB", "mobilejava", "javajava");
 	             PreparedStatement ps = ccc.prepareStatement(sql);
 
 	             for (Iterator iter = wr.getInfo().getLines().iterator(); iter.hasNext(); ) {

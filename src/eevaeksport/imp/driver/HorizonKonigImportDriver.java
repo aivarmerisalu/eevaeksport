@@ -1905,6 +1905,43 @@ try{
 
 	  }
 
+  private String getNONLVCustWare(String id) {
+	  String res = null;
+	  
+  String sql2 = "	  select  s.PK_KLIENTS as klient ,"
+	 		+ " PK_KLGR as dealer from APV04761.DKLSAGR s  where PK_KLGR in ('267','268','269') and PK_KLIENTS = '" + id + "'";;
+   try {
+	   
+  Connection con =  getNewConnection();
+  Statement st1 = con.createStatement();
+  ResultSet rs1 = st1.executeQuery(sql2);
+
+  while (rs1.next()) {
+    
+	res = rs1.getString("dealer").trim();
+	if(res.equals("267")){
+		res = "53269";
+	}
+	if(res.equals("268")){
+		res = "53270";
+	}
+	if(res.equals("269")){
+		res = "53268";
+	}
+	
+  }
+ 
+  
+  rs1.close();
+  st1.close();
+  con.close();
+  
+   }catch(Exception e) {
+	   e.printStackTrace();
+   }
+
+	  return res;
+  }
   
   public String identifyProduct(String ean, String prodID) throws SQLException{
 	  	
@@ -2013,8 +2050,11 @@ try{
     				if(nlvKlients.contains(order.getCompany())) {
     					order.setCurrency("NPARK2");
     					
-    					 //makeOutput(order,order,hrccustomer);  
-    				
+    					String ware =   getNONLVCustWare(order.getCompany());
+    					if(ware != null) {
+    						order.setDealer(ware);
+    					}
+    					
 					        makeOutput(order,order,hrccustomer);
    			    	  
     				}else {
@@ -2027,24 +2067,14 @@ try{
     						  order.setWarehouse("53268");
     						  
     						  makeOutput(order,order, hrccustomer); 
-    					  }else {
+    					  } else {
     					  Vector splitted =  splitOrder(order);
     			    	  Enumeration en = splitted.elements();
     					  
     					  while(en.hasMoreElements()){
     						  Order ord = (Order)en.nextElement();
     	    				 makeOutput(ord,order, hrccustomer);  
-    	    				  
-    	    				/*  Vector splitted2 =  this.splitOrderByAm(ord, 38);
-        			    	  Enumeration en2 = splitted2.elements();
-        			    	  while(en2.hasMoreElements()){
-        			    		  
-        						  Order ord2 = (Order)en2.nextElement();
-        						  
-        						  
-    					        makeOutput(ord2,order,hrccustomer);
-        			    	  }*/
-    	        		  }
+    	    			   }
     					  }
     					  
     				  }else{

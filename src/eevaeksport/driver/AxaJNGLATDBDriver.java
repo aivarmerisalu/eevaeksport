@@ -506,6 +506,8 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                     ResultSet rs = stmt.executeQuery(sql1);
 
                     while (rs.next()) {
+                    	
+                    	boolean goes = false;
                   	        String prodID = rs.getString("itemrelation");
                   	        String custGR = rs.getString("accountrelation");
                             String algus = rs.getString("fdate");
@@ -532,17 +534,22 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                                     mline.setProdID(prodID.trim());
                                     check = check + prodID.trim();
                             }
-                            if (perc != 0) {
+                            if (perc > 0 ) {
                                 mline.setDiscount(perc);
+                                goes = true;
                             }
 
-                            if (price != 0) {
+                            if (price  > 0) {
                                     mline.setPrice(price);
+                                    goes = true;
                             }
+                            
+                            boolean uu = false;
                             if((paev > 1 && paev < 90) || relation == 8) {
                           	    
                                    if (lopp != null && lopp.trim().length() > 0  && !lopp.trim().contains("1900")) {
                                        mline.setEndDate(lopp.trim().substring(0,10));
+                                       uu = true;
                                        // panin sisse et poleks algust kui pole lõppu .
                                        if (algus != null && algus.trim().length() > 0 && !algus.trim().contains("1900")) {
                                            mline.setStartDate(algus.trim().substring(0,10));
@@ -552,22 +559,26 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                             
                             if(camp != null && camp.trim().length() > 0 && camp.trim().startsWith("MAGAZ")) {
                            	 mline.setLineinfo(camp);
-                           	  if(tillend < 6) {
+                           	 if(uu) {
+                           	  if(tillend < 6 && tillend > -100) {
                            		 mline.setLineinfo(camp+"|"+tillend + "end");
                                 }
                            	  if(fromst < 0) {
                           	 	 mline.setLineinfo(camp+"|"+fromst + "start");
                                 }
+                           	 }
                             } else {
-                                if(tillend < 6) {
+                            	if(uu) {
+                                if(tillend < 6 && tillend > -100) {
                               	  mline.setLineinfo(tillend + "end");  
                                 }
                                 if(fromst < 0) {
                               	  mline.setLineinfo(fromst + "start");  
-                                }  
+                                } 
+                            	}
                             }
                        
-                            if(!hh.contains(check)){
+                            if(!hh.contains(check) && goes){
                           	  lines.add(mline);  
                             }
                           
@@ -645,14 +656,14 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                           
                           if(camp != null && camp.trim().length() > 0 && camp.trim().startsWith("MAGAZ")) {
                          	 mline.setLineinfo(camp);
-                         	  if(tillend < 6) {
+                         	  if(tillend < 6 && tillend > -100) {
                          		 mline.setLineinfo(camp+"|"+tillend + "end");
                               }
                          	  if(fromst < 0) {
                         	 	 mline.setLineinfo(camp+"|"+fromst + "start");
                               }
                           } else {
-                              if(tillend < 6) {
+                              if(tillend < 6  && tillend > -100) {
                             	  mline.setLineinfo(tillend + "end");  
                               }
                               if(fromst < 0) {

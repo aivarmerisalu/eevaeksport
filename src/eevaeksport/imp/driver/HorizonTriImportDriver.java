@@ -739,8 +739,10 @@ try{
 	      
 	      setNumAddedLines(counter); 
 	      
-	       if(xml.contains("error")) {
+	      
+	       if(xml.contains("error") || xml.toLowerCase().contains("kont")) {
 	    	   trouble = "NOT IMPORTED ORDER \n" + xml;
+	    	   System.exit(0);
 	       }
 	    
 	 	
