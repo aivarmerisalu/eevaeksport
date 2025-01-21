@@ -630,7 +630,7 @@ try{
         " <PAMV_ID>2711</PAMV_ID> "  + 
         " <PK_IESTADE><href>/rest/TdmDIestadeBL/1</href></PK_IESTADE>" +
         " <PK_PVNK><href>/rest/TdmPvnKat/1</href></PK_PVNK>" +
-        " <PK_R_ES><href>/rest/TDdmSaviRek/1123</href></PK_R_ES> " + 
+    //    " <PK_R_ES><href>/rest/TDdmSaviRek/1123</href></PK_R_ES> " + 
         " <PK_ESPATS><href>/rest/TNdmNol/" + ladu + "</href></PK_ESPATS> " + 
         
 

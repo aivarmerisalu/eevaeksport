@@ -1936,6 +1936,13 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
      		
 	         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
 	         		      customer.addAgent(new Agent(Converter.deCode(salesman)));
+	         		      if(salesman.equals("KATRIN.S")) {
+	         		    	   customer.addAgent(new Agent(Converter.deCode("KATRIN")));
+	         		      }
+	         		      
+	         		      if(salesman.equals("ANNELI.S")) {
+	         		    	   customer.addAgent(new Agent(Converter.deCode("ANNELI_L")));
+	         		      }
 	         		      customer.setMainAgent(Converter.deCode(salesman));
 	         		      String sm = parent.getEmail(salesman);
 	         		      

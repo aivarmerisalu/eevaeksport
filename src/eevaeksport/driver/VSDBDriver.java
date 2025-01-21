@@ -696,9 +696,9 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
       	 return res ;
       }
     
-    public static String visitTurn3(String input) {
+    public static String visitTurn3(String input , boolean go ) {
    	 String res = input;
-   	 
+   	 if(go) {
    	 if(input.startsWith("E1") && (input.contains("T") || input.contains("K") || input.contains("N") || input.contains("R"))) {
    		 res= "E2" + input.substring(2);
    	 }
@@ -727,7 +727,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
    	 if(!input.equals(res)) {
    		 System.out.println("muutsin Visit " + res);
    	 }
-   	 
+   	 }
    	 return res ;
    }
     
@@ -769,8 +769,11 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
 		cust.setDebt(rs.getDouble("tasumata"));
 	//	cust.setVisit(rs.getString("visit").trim());
 		String visit = rs.getString("visit").trim();
+		String vis = visit;
 		visit = visitTurn4(visit);
-		visit = visitTurn3(visit);
+		if(visit.equals(vis)) {
+		 visit = visitTurn3(visit , true);
+		}
 		cust.setVisit(Converter.visitTurn(visit));
         
 		

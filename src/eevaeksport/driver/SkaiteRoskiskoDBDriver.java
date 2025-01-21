@@ -19,6 +19,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -992,6 +993,8 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                 String agen = rs.getString("agent");
                 if(agen != null){
                   cust.addAgent(new Agent(agen.trim()));
+
+                  cust.addAgent(new Agent("PRD18"));
                   cust.setMainAgent(agen.trim());
                   custAgents.put(cust.getID(), agen.trim());
                   if (agen != null && agent1.get(agen.trim()) != null){
@@ -1313,7 +1316,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
          		"	CONVERT ( datetime, NuolaiduSutartys.DataIki_Int ) AS ns_end,\r\n" + 
          		"	NuolaiduInfoPrekes.KainaBePVM,\r\n" + 
          		"	Prekes.Kodas AS pr_kodas,\r\n" + */
-                     	 
+                    	  String ns_pavadinimas = rs.getString("ns_pavadinimas");
                         String clKodas = rs.getString("kl_kodas");
                         java.sql.Date startD = rs.getDate("ns_start");
                         java.sql.Date endD = rs.getDate("ns_end");
@@ -1346,10 +1349,10 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                       }
                       
                         
-                       if(prt != 3) {
+                       if(prt != 3  && !ns_pavadinimas.equals("DPC")) {
                     	   matrixLines.add(mline);
                        }
-                       if(prt == 3) {
+                       if( ns_pavadinimas.equals("DPC")) {
                     	   basePrices.put(prodID, price);
                        }
                         
@@ -1405,12 +1408,50 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     }
     
     
+    private HashMap getActiveProducts() {
+    	HashMap ss = new HashMap();
+    	  try {
+
+	           Connection con = getNewConnection();
+	         Statement st = con.createStatement();
+	         ResultSet rs = st.executeQuery("SELECT\r\n" + 
+	        	    	"    Prekes.Kodas AS kood \r\n" + 
+	        	    	"    , max( NuolaiduInfoPrekes.KainaBePVM) as hind " + 
+	        	    	"FROM\r\n" + 
+	        	    	"    dbo.NuolaiduSutartys\r\n" + 
+	        	    	"    INNER JOIN dbo.NuolaiduInfoPrekes ON NuolaiduSutartys.NuolaiduAprasymaiId = NuolaiduInfoPrekes.NuolaiduAprasymaiId\r\n" + 
+	        	    	"    INNER JOIN dbo.Prekes ON NuolaiduInfoPrekes.PrekesID = Prekes.PrekesID\r\n" + 
+	        	    	"   WHERE\r\n" + 
+	        	    	"    NuolaiduSutartys.DataIki_Int >= GETDATE()\r\n" + 
+	        	    	"    AND NuolaiduInfoPrekes.DataIki_Int >= GETDATE()\r\n" + 
+	        	    	"    AND NuolaiduSutartys.ArAsortimentas <> 200001\r\n" + 
+	        	    	"    AND NuolaiduInfoPrekes.KainaBePVM IS NOT NULL\r\n" + 
+	        	    	"    AND Prekes.Nenaudoti = '0'\r\n" + 
+	        	    	"	group by Prekes.Kodas");
+
+	         while (rs.next()) {
+	           String kood = rs.getString("kood").trim();
+	           Double hind = rs.getDouble("hind");
+	            ss.put(kood, hind);
+	           }
+	           rs.close();
+	           st.close();
+	           con.close();
+	       }catch(Exception e) {
+	    	   e.printStackTrace();
+	       }
+	      System.out.println("Aktiivsed suururs" + ss.size() ); 
+    	  
+    	return ss;
+    }
+    
     public TreeMap getProducts(Agent agent){
     	
     	if(basePrices == null || matrixLines == null) {
     		makePricelists();
     	}
     	
+    	HashMap used = getActiveProducts();
 	TreeMap products = new TreeMap();
 	
 	   prcodes = new TreeMap();
@@ -1540,8 +1581,13 @@ try{
         	if(lvE) {
         		goes = false;
         	}
-              
-              if(goes || lv){
+        	
+        	
+        	if(prod.getPrice() == 0 && used.get(prod.getID()) != null) {
+        		prod.setPrice(Double.parseDouble("" + used.get(prod.getID())));
+        	}
+        	
+              if(goes || lv || used.get(prod.getID()) != null){
             	  prcodes.put(tid, kood);
          		  products.put(nimetus, prod);
                   prodHash.put(prod.getID(), prod.getPrice());  
