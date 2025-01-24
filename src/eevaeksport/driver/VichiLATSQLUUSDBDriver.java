@@ -1723,7 +1723,7 @@ cn.close();
 				}
 				
 				prod.setName(Converter.enCodeEst( name ));
-				prod.setNameSorting(Converter.cleanLitLatEst(name));
+				prod.setNameSorting(Converter.cleanLitLatEst(grupp + name));
 				tm.put(Converter.cleanLitLatEst(name) , prod);
 				
 				}

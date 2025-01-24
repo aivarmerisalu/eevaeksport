@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -32,6 +33,7 @@ import eevaeksport.CustProd;
 import eevaeksport.Customer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
+import eevaeksport.EksportFrame;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
@@ -610,7 +612,13 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     public TreeMap getAgents() {
     
     	
-    	
+    	Properties propse =  new Properties();
+	    try{
+	    	propse =  EksportFrame.loadProps("emails.txt");
+	  	  
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    }
            	TreeMap agents = new TreeMap();
         try {  
     			 connectionUp(url);
@@ -618,7 +626,6 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 				 " FROM dbo.MusuAsmenys AS masm " +
 				 " INNER JOIN pl_musuasmenys abi ON masm.MusuAsmenysId =abi.MusuAsmenysId where Pareigos like  '%adyb%' " ;
 				
-
 
             stmt = con.prepareStatement(cmd);
 	    ResultSet	      rs = stmt.executeQuery();
@@ -630,8 +637,11 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
               agent.setLanguage("LIT");
               agent.setCountry("lt");
               agent.setPassWord("0000");
+
+              if(propse.get(agent.getID()) != null){
               agents.put(nimi, agent);
               agent1.put(agent.getID(), agent);
+              }
         }
 	    rs.close();
 	    stmt.close();
@@ -834,7 +844,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     	   		"   				      dbo.NuolaiduAprasymai AS apr ON sut.NuolaiduAprasymaiId = apr.NuolaiduAprasymaiId LEFT OUTER JOIN  \r\n" + 
     	   		"                         dbo.PL_MUSUASMENYS AS plmasm2 ON part.MusuAsmenysId2 = plmasm2.MUSUASMENYSID CROSS JOIN  \r\n" + 
     	   		"                         dbo.FirmosAtributai AS fa  \r\n" + 
-    	   		"        WHERE      masm.kodas is not null  ";
+    	   		"        WHERE      masm.kodas is not null and part.Nenaudoti = 0 ";
 
         log(cmd);
 
@@ -991,10 +1001,15 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                // cust.setPersonalData(enCode(parent.make(info)));
                 
                 String agen = rs.getString("agent");
-                if(agen != null){
+                if(agen != null && agent1.get(agen.trim()) != null){
                   cust.addAgent(new Agent(agen.trim()));
 
                   cust.addAgent(new Agent("PRD18"));
+                  cust.addAgent(new Agent("PRD20"));
+                  cust.addAgent(new Agent("PRD08"));
+                  cust.addAgent(new Agent("PRD38"));
+                  cust.addAgent(new Agent("REA01"));
+                 
                   cust.setMainAgent(agen.trim());
                   custAgents.put(cust.getID(), agen.trim());
                   if (agen != null && agent1.get(agen.trim()) != null){
@@ -1585,9 +1600,10 @@ try{
         	
         	if(prod.getPrice() == 0 && used.get(prod.getID()) != null) {
         		prod.setPrice(Double.parseDouble("" + used.get(prod.getID())));
+        		
         	}
         	
-              if(goes || lv || used.get(prod.getID()) != null){
+              if(goes || lv || prod.getGroup().equals("261412") || used.containsKey(prod.getID())){
             	  prcodes.put(tid, kood);
          		  products.put(nimetus, prod);
                   prodHash.put(prod.getID(), prod.getPrice());  

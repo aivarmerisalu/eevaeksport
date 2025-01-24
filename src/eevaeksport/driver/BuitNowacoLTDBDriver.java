@@ -244,10 +244,6 @@ public class BuitNowacoLTDBDriver extends AbstractDBDriver implements BulkUpdate
    public String getSaveDebtInfo() {
 	   
 	   makeAction();
-	   String cmd =  "   SELECT k.klient_id AS kood,k.kodas AS payer  FROM klientai k  INNER JOIN " +
-		"  (select klientas, tab_nr from (select * from manager order by klientas,data desc)as man  group by klientas order by klientas,data ) " +
-		"   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where  filialas =1 " ;
-
 	   //kellel on blokid 
 
 String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS debt FROM apyvarta a INNER JOIN klientai b ON b.klientas=a.gavejas " +
@@ -256,11 +252,7 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
       + " current_date() and operacija like 'Pardav%' and b.kodas !='ND' and b.kodas !=' '  group by b.kodas having sum(skola_w) != 0 " ;
 		
 
-
-		if (isDebug()) System.out.println(cmd);
 		TreeMap custs = new TreeMap();
-
-
 
 
 		StringBuffer products = new StringBuffer();
@@ -294,6 +286,9 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 		}
 
 		//siin pannakse peale PLOKKID
+		   String cmd =  "   SELECT k.klient_id AS kood,k.kodas AS payer  FROM klientai k  INNER JOIN " +
+					"  (select klientas, tab_nr from (select * from manager order by klientas,data desc)as man  group by klientas order by klientas,data ) " +
+					"   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where  filialas =1 " ;
 
 		rs = st.executeQuery(cmd);
 		while (rs.next()) {
@@ -498,7 +493,7 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 						if (login.indexOf("Already logged in") != -1) {
 							//saveFile("login-" + uniq + ".txt"  ,login);
 							   String process = port.process("PostNuolaid", xml.toString());
-								System.out.println("process=" + process);
+							//	System.out.println("process=" + process);
 								res = process; 
 								//login=<Error><Message>Already logged in</Message></Error>
 								//process=OK
@@ -533,7 +528,7 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 						if(dest.exists()){
 							dest.delete();
 						}
-						System.out.println("renamed " + file.renameTo(dest));
+					//	System.out.println("renamed " + file.renameTo(dest));
 			    	  }catch(Exception e){
 			    		  e.printStackTrace();
 			    	  }
@@ -1102,7 +1097,6 @@ rs.close();
         " FROM  " + tableName +
         " WHERE sentdate>(GETDATE()-30) ORDER BY clid ";
 
-   if (isDebug()) System.out.println(sql);
    this.con = getNewConnection();
    Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
@@ -1278,7 +1272,6 @@ rs.close();
    	      rs.close();
    	      con.close();
 
-   	    System.out.println(cmd);
     } catch (Exception e) {
         e.printStackTrace();
     }
@@ -1299,7 +1292,7 @@ rs.close();
 		os.write(content);
 		os.close(); 
 
-       System.out.println("Faili salvestus " + fileName); 
+     //  System.out.println("Faili salvestus " + fileName); 
  }catch(Exception r){
 	  r.printStackTrace();
  }
@@ -1357,7 +1350,7 @@ rs.close();
 	        	}
 	        }
 	        
-	        System.out.println("Piltide leidmine - katalooge sees " + cats.size() + " " + cats.toString());
+	       // System.out.println("Piltide leidmine - katalooge sees " + cats.size() + " " + cats.toString());
 	   	    while (rs.next()) {
 	   	    	a++;
 	   	    	c++;
@@ -1367,7 +1360,7 @@ rs.close();
 	         toode = toode.replace('/', '_');
 	   	    	if(c == 100){
 	   	    		  c = 0;
-	   	    		  System.out.println("Piltide leidmine "  + a);	
+	   	    		//  System.out.println("Piltide leidmine "  + a);	
 	   	    		  
 	   	    	}
 	   	     
@@ -1489,7 +1482,7 @@ rs.close();
 	   private String toUpper(String asi ){
 		   
 		   asi = asi.substring(0,asi.length()-4).toUpperCase() + asi.substring(asi.lastIndexOf("."));
-		   System.out.println(asi);
+		 //  System.out.println(asi);
 		   return asi ;
 	   }
 	   
@@ -1737,6 +1730,7 @@ rs.close();
        
        
    public TreeMap getCustomers(Agent agent){
+	    HashSet blocks = new HashSet();
 
 	     TreeMap discs = new TreeMap(); 
  try {
@@ -1798,7 +1792,6 @@ System.out.println(cmd2);
     		"      where dok_serija is not null and (kitas_dok) > 0 and DATE_ADD(a.data,interval 500 day) > current_date() and dok_serija not in"
     		+ " ( 'KRV5', 'LKS' ,'KRV7', 'LKP1','LDS','URM') and operacija like 'Pardav%' \r\n" + 
     		"	   group by b.klient_id having sum(skola_w) != 0 " ;
-    	System.out.println(cmd2);
     	 
     	   rs12 = stmt12.executeQuery(cmd2);
     	    while(rs12.next()){
@@ -1820,7 +1813,28 @@ System.out.println(cmd2);
     stmt12.close();
     cons2.close();
      
-     
+	    cmd =  "   SELECT k.klient_id AS kood,k.kodas AS payer  FROM klientai k  INNER JOIN " +
+				"  (select klientas, tab_nr from (select * from manager order by klientas,data desc)as man  group by klientas order by klientas,data ) " +
+				"   a ON a.klientas = k.klientas and a.tab_nr >0 LEFT join marsrut ma on ma.kodas = k.marsrutas where  filialas =1 " ;
+
+	     cons = this.getNewConnection();
+	   Statement  st = cons.createStatement();
+ResultSet	rs = st.executeQuery(cmd);
+	while (rs.next()) {
+		String kood = rs.getString("kood").trim();
+		String payer = rs.getString("payer");
+		blocks.add(kood);
+	    
+	    if(payer != null && !payer.trim().equals("ND") && payer.indexOf("123715317") == -1){
+			blocks.add(payer.trim());
+	    }
+	 }
+
+	rs.close();
+	st.close();
+	cons.close(); 
+    
+    
      cmd = " select klient_id AS custid, procentas as disc " +
     " from  nuolaid ale inner join klientai k  ON ale.klientas=k.klientas left join  grupes g on g.grupe=ale.grupe " +		
 	"	where   data_iki is null  and (procentas != 0 ) and (preke is null and grup_id is null) group by klient_id" ;
@@ -2042,11 +2056,15 @@ try{
                customer.setSalesBlockT(true);
                blockedcusts.add(customer.getID());
                if(customer.getPayer().equals("150040692")) {
-       		    System.out.println("siit 2 tuleb block" + customer.getID());
+       		    //System.out.println("siit 2 tuleb block" + customer.getID());
        	       }
                
              }
-
+       
+             
+             if(blocks.contains(customer.getID()) || blocks.contains(customer.getPayer()) ) {
+            	 customer.setSalesBlockT(true);
+             }
          
 
         /*   	String num = rs.getString("alekood");
@@ -2121,9 +2139,9 @@ try{
             	blockedcusts.add(customer.getPayer());
             	if(customer.getPayer().equals("150040692")) {
         		
-               	   System.out.println("siin222" + customer.getID() +
-               			   "  " + customer.getPayer() + " " + totaldebts.get(customer.getPayer()) 
-               			   + " " + credit + " ? " );
+               	//   System.out.println("siin222" + customer.getID() +
+               		//	   "  " + customer.getPayer() + " " + totaldebts.get(customer.getPayer()) 
+               			//   + " " + credit + " ? " );
                   }
             	
             }
@@ -2136,7 +2154,7 @@ try{
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
             	if(customer.getPayer().equals("150040692")) {
-            			   System.out.println("siin3333" + customer.getID() + "  " + customer.getPayer());
+            			  // System.out.println("siin3333" + customer.getID() + "  " + customer.getPayer());
                     }
             }
            }
