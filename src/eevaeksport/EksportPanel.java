@@ -5628,9 +5628,9 @@ while (itra.hasNext()){
       String       fileName2 = "prodanalogs.txt";
       Agent agent = (Agent)getAgentsHash().get(agentCode);
  //     System.out.println("agendi grupid 26 " + agent.getProdGroupList().toString());
-  	if(agent.getID().equals("KURZEME1")){
-		System.out.println("agendi grupid 2 " + agent.getProdGroupList().toString());
-	}
+  	//if(agent.getID().equals("KURZEME1")){
+	//	System.out.println("agendi grupid 2 " + agent.getProdGroupList().toString());
+	//}
       
       ArrayList agProds = new ArrayList();
       TreeMap vahe = null;
@@ -5771,7 +5771,7 @@ while (itra.hasNext()){
           }
         }
  // vaat siin on agProds mis on vaja sorterida prod.getname j?rgi
-        System.out.println(" agProds hashxx " + result.size());
+    //    System.out.println(" agProds hashxx " + result.size());
         if(!"true".equals(getProps().getProperty("use.prodsorting"))) {
         
            java.util.Collections.sort(agProds, new java.util.Comparator(){
@@ -5807,7 +5807,7 @@ while (itra.hasNext()){
 
       }
      
-      System.out.println("toodete tegemine l�ppes");
+      System.out.println("toodete tegemine loppes");
       return result;
     }
 

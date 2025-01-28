@@ -3999,7 +3999,7 @@ public class Converter {
 									
 								}
 								
-								for(int y = 4 ; y < 10 ;y++) {
+								for(int y = 4 ; y < 12 ;y++) {
 									
 									cellx = row.getCell((short)y);
 									if(cellx != null) {

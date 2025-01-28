@@ -266,6 +266,59 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
     
       }
       
+      
+      private HashSet loadAllowedProds() {
+    	  
+    	  HashSet res = new HashSet();
+    	  
+    	    NF.setMaximumFractionDigits(4);
+    	    NF.setGroupingUsed(false);
+    	  
+    	  File ffa = new File(this.getExcelDir() + "products.xlsx");
+    		
+    		try {
+    			
+    	 if(ffa.exists()){
+    		   
+    			FileInputStream ff = new FileInputStream(ffa);
+    			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+    			XSSFRow row = null;
+    			XSSFSheet sheetc = workbook.getSheetAt(0);
+    		
+    			
+    			for (int a = 0; a < sheetc.getLastRowNum(); a++) {
+    		               row = sheetc.getRow(a);
+    				try {
+    			String prodid = null;
+    			try {
+    				prodid = row.getCell((short) 0).getStringCellValue();
+    			}catch(Exception r) {
+    				try {
+    					prodid = (int)row.getCell((short) 0).getNumericCellValue() + "";
+    				}catch(Exception rr) {
+    					
+    				}
+    				
+    			}
+    			if(prodid != null) {
+    				
+    	        	res.add(prodid); 
+    			}
+    		
+	        	 
+	      }catch(Exception h) {
+    			h.printStackTrace();
+    		}
+    			}}
+    				 
+    		  }catch(Exception h) {
+      			h.printStackTrace();
+      		}	
+    		System.out.println("allowed prods " + res.size());	   	    
+      return res;    		
+    
+      }
+      
   	public void makeFixSortNewProds() {
 		Vector lines = new Vector();
 		
@@ -2536,8 +2589,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		if (st.hasMoreTokens()) {
      		String visit = st.nextToken();
      		if (visit != null && visit.trim().length()>0){
-     			abi.setVisit(Converter.visitTurn(visit));	// see oli 2023 aastal
-     			//abi.setVisit((visit));	
+     			
+     			//abi.setVisit(Converter.visitTurn(visit));	// see oli 2023 aastal
+     			abi.setVisit((visit));	
      		}
 		   }
 		  }
@@ -2563,6 +2617,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 	public TreeMap getProducts(Agent agent) {
 		makeFixSortNewProds();
 		loadCamp();
+		HashSet allowedProds = this.loadAllowedProds();
 		koodiga = new TreeMap();
 		TreeMap tm = new TreeMap();
 		
@@ -2978,7 +3033,14 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 													   }
 												   }
 												   
-												   
+												   if(allowedProds.size() > 0) {
+													       goes = false;
+													   if(allowedProds.contains(prod.getID())) {
+
+															  System.out.println("Nimi allowed " + prod.getName());
+														   goes = true;
+													   }
+												   }
 												   
 												   if(goes){
 													 //  System.out.println("Nimi " + prod.getName());

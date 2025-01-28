@@ -624,7 +624,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     			 connectionUp(url);
         String  cmd = "select  masm.MusuAsmenysId  AS EmployeeAsId, masm.Kodas AS yksus, LTRIM(masm.Vardas + ' ' + masm.Pavarde) AS nimi " +
 				 " FROM dbo.MusuAsmenys AS masm " +
-				 " INNER JOIN pl_musuasmenys abi ON masm.MusuAsmenysId =abi.MusuAsmenysId where Pareigos like  '%adyb%' " ;
+				 " INNER JOIN pl_musuasmenys abi ON masm.MusuAsmenysId =abi.MusuAsmenysId where Titulas = 'merisoft'" ;
 				
 
             stmt = con.prepareStatement(cmd);
@@ -962,7 +962,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                 if(nimi.startsWith("UAB ")){
                 	nimi = (nimi.substring(4,nimi.length()) + " UAB").trim();
                 }
-                cust.setName(nimi);
+                cust.setName(nimi + " " + cust.getID());
                 try{
                 	String aadr = Converter.enCodeEst(addr.trim());
                 	
@@ -1050,7 +1050,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                   	} 
                  
                 if(goes){
-                	 customers.put(Converter.cleanLitLatEst(nim+addr), cust);
+                	 customers.put(Converter.cleanLitLatEst(nim+addr+cust.getID()), cust);
                      custMap.put(cust.getID(), cust);	
                 }
                
@@ -1429,20 +1429,25 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 
 	           Connection con = getNewConnection();
 	         Statement st = con.createStatement();
-	         ResultSet rs = st.executeQuery("SELECT\r\n" + 
-	        	    	"    Prekes.Kodas AS kood \r\n" + 
-	        	    	"    , max( NuolaiduInfoPrekes.KainaBePVM) as hind " + 
-	        	    	"FROM\r\n" + 
-	        	    	"    dbo.NuolaiduSutartys\r\n" + 
-	        	    	"    INNER JOIN dbo.NuolaiduInfoPrekes ON NuolaiduSutartys.NuolaiduAprasymaiId = NuolaiduInfoPrekes.NuolaiduAprasymaiId\r\n" + 
-	        	    	"    INNER JOIN dbo.Prekes ON NuolaiduInfoPrekes.PrekesID = Prekes.PrekesID\r\n" + 
-	        	    	"   WHERE\r\n" + 
-	        	    	"    NuolaiduSutartys.DataIki_Int >= GETDATE()\r\n" + 
-	        	    	"    AND NuolaiduInfoPrekes.DataIki_Int >= GETDATE()\r\n" + 
-	        	    	"    AND NuolaiduSutartys.ArAsortimentas <> 200001\r\n" + 
-	        	    	"    AND NuolaiduInfoPrekes.KainaBePVM IS NOT NULL\r\n" + 
-	        	    	"    AND Prekes.Nenaudoti = '0'\r\n" + 
-	        	    	"	group by Prekes.Kodas");
+	         ResultSet rs = st.executeQuery(
+	         		"SELECT   Prekes.Kodas AS kood , max( NuolaiduInfoPrekes.KainaBePVM) as hind  \r\n" + 
+	         		"	        	    	FROM\r\n" + 
+	         		"	        	    	    dbo.NuolaiduSutartys\r\n" + 
+	         		"	        	    	    INNER JOIN dbo.NuolaiduInfoPrekes ON NuolaiduSutartys.NuolaiduAprasymaiId = \r\n" + 
+	         		"							NuolaiduInfoPrekes.NuolaiduAprasymaiId\r\n" + 
+	         		"	        	    	    INNER JOIN dbo.Prekes  ON NuolaiduInfoPrekes.PrekesID = Prekes.PrekesID\r\n" + 
+	         		"	        	    	    INNER JOIN  dbo.PrekesSandeliuose AS ps ON ps.PrekesId = Prekes.PrekesID \r\n" + 
+	         		"	        	    	    INNER JOIN  dbo.Sandeliai AS sand  ON sand.SandeliaiId = ps.SandeliaiId\r\n" + 
+	         		"	        	    	   WHERE\r\n" + 
+	         		"	        	    	    NuolaiduSutartys.DataIki_Int >= GETDATE() \r\n" + 
+	         		"	        	    	    AND NuolaiduInfoPrekes.DataIki_Int >= GETDATE()\r\n" + 
+	         		"	        	    	    AND NuolaiduSutartys.ArAsortimentas <> 200001\r\n" + 
+	         		"	        	    	    AND NuolaiduInfoPrekes.KainaBePVM IS NOT NULL \r\n" + 
+	         		"	        	    	    AND Prekes.Nenaudoti = '0' AND RIGHT(Prekes.Kodas, 1) <> '0' \r\n" + 
+	         		"	        	    	    AND Prekes.MV_Pastaba IS NOT NULL\r\n" + 
+	         		"	        	    	   AND Prekes.Galioja > '0'\r\n" + 
+	         		"	        	    	    AND Prekes.Mase > '0' and sand.Kodas IN ( '00001', '00005', '00012', '00015' ) \r\n" + 
+	         		"	        	    		group by Prekes.Kodas");
 
 	         while (rs.next()) {
 	           String kood = rs.getString("kood").trim();
@@ -1489,7 +1494,9 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     		"       dbo.Mokesciai AS mok ON Pr.MokesciaiId = mok.MokesciaiId INNER JOIN dbo.PrekiuTipai AS pt ON Pr.PrekiuTipaiId = pt.PrekiuTipaiId INNER JOIN \r\n" + 
     		"       dbo.MV ON Pr.MVId = dbo.MV.MVid INNER JOIN  dbo.MV AS IpokMV ON Pr.IpokavimoMVId = IpokMV.MVid  \r\n" + 
     		"      WHERE     (Pr.PrekesID > 1) AND (pt.ArSandeliuojama = 1) and Pr.Nenaudoti <> ( 1 ) and \r\n" + 
-    		"      CASE WHEN ISNUMERIC(gr.Kodas) = 1 THEN CAST(gr.Kodas AS INT) ELSE 0 END between 100 and 1350   "; 
+    		"      CASE WHEN ISNUMERIC(gr.Kodas) = 1 THEN CAST(gr.Kodas AS INT) ELSE 0 END between 100 and 1350  " ; 
+   
+
     
       if (isDebug()) {
           System.out.println(cmd);

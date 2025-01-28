@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -64,7 +65,7 @@ public class DirectoAgapictsImportDriver extends AbstractImportDriver{
     company = parent.getProps().getProperty("company");
     kliendid = getCustomers(null);
     tooted = this.getProducts();
- //   mlines = new Vector();//getFixedAssortmentData();
+    mlines = getFixedAssortmentData();
     grupid = this.getProdGroups();  
     loadSignatures();
     try {
@@ -205,11 +206,12 @@ try{
 	  return bomKount;
 	  } 
 	  
+	  private HashMap custFixedProds = null;
 	  
   
 	  public Vector getFixedAssortmentData() {
 	       Vector lines = new Vector();
-	       
+	       custFixedProds = new HashMap();
 	       try {
 	   		  File f = new File (getDir() + "hinnakiri.xml");
 	   		  System.out.println("siin matix");
@@ -239,7 +241,7 @@ try{
 	                    	     clGroup = rida.getAttributes().getNamedItem("code").getNodeValue();
 	                           }catch(Exception aa){}
 	                    	 try{
-		                         prodID =  rida.getAttributes().getNamedItem("item").getNodeValue();  
+		                         prodID =  rida.getAttributes().getNamedItem("datafieldvalue").getNodeValue();  
 	                    	   }catch(Exception aa){ }
 	                    	 try{
 	                             prodGroup =  rida.getAttributes().getNamedItem("class").getNodeValue();
@@ -270,6 +272,7 @@ try{
 
 	                         if (prodID != null && prodID.trim().length() > 0) {
 	                           mline.setProdID(prodID.trim());
+	                          
 	                         }
 	                         
 	                         if (mline.getProdID() == null && prodGroup != null
@@ -286,10 +289,23 @@ try{
 	                             if(alg.before(new Date()) && lopp.after(new Date())){
 	                            	
 	                            	 lines.add(mline);	
+	                            	 
+	                            	 HashSet hash = (HashSet)custFixedProds.get(clGroup);
+	  	                           if(hash != null) {
+	  	                        	   hash = new HashSet();
+	  	                           }
+	  	                           hash.add(prodID.trim());
+	  	                           custFixedProds.put(clGroup, hash);
 	                             }
 	                           
 	                         }else{
-	                        	 lines.add(mline);	
+	                        	 lines.add(mline);
+	                        	 HashSet hash = (HashSet)custFixedProds.get(clGroup);
+		                           if(hash != null) {
+		                        	   hash = new HashSet();
+		                           }
+		                           hash.add(prodID.trim());
+		                           custFixedProds.put(clGroup, hash);
 	     	                 }
 	                    
 	                    }catch(Exception e){
@@ -515,6 +531,9 @@ try{
  	 if(signatures.contains(signature)){
  		  this.troubles.append( "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany()) ;
  	   } else {
+ 		   
+ 		   
+ 		   
  		   
  		  Vector splitted =  splitOrder(order);
 	 	  Enumeration en = splitted.elements();
@@ -1001,6 +1020,7 @@ try{
 		 		}
 	 		}
 	 		
+	 		
 	 		 comm = protectSpecialCharacters(comm);
 	 	
 	 		System.out.println("comm " + comm);
@@ -1068,7 +1088,25 @@ try{
 	        }catch(Exception e){
 	        	
 	        }
-	       
+	 		
+	 		boolean sortOK = true;
+	 		HashSet hh = null;
+	 		Customer cust = (Customer) kliendid.get(order.getCompany());
+	 		if(cust != null && cust.getGroup().trim().length() > 1) {
+		 	 hh = (HashSet)	custFixedProds.get(cust.getGroup());
+		 	  lines = order.getOrderLines();
+		      for (int i = 0; i < lines.size(); i++) {
+		    	  OrderLine line = (OrderLine) lines.elementAt(i);
+		    	  Product ppp = (Product)tooted.get(line.getToode());
+		    	  if(!hh.contains(ppp.getEAN())) {
+		    		  sortOK = false;  
+		    	  }
+		      }
+	 		}
+	 		String sort = "";
+	 		if(!sortOK) {
+	 			sort = "EkstraToodeTellil";
+	 		}
 	 		
 	 		String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
 	          "<transport>" +
@@ -1079,7 +1117,7 @@ try{
 	         "send_mode=\"POST\" " + 
 	         "send_type=\"ALL\" " +
 	         "object=\"4\" " +
-             comm + teo + shdate + hooaeg + 
+             comm + teo + shdate + hooaeg + sort + 
 	         "amount=\"" + order.getSum() + "\" " +
 	         "amount_vat=\"" + order.getSum()* 1.2 + "\" " +
 	         "currency=\"EUR\" status=\"KOMPLEKTEERI\" language=\"EST\">" +

@@ -1723,8 +1723,12 @@ cn.close();
 				}
 				
 				prod.setName(Converter.enCodeEst( name ));
-				prod.setNameSorting(Converter.cleanLitLatEst(grupp + name));
-				tm.put(Converter.cleanLitLatEst(name) , prod);
+				String gr22 = grupp2;
+				while(gr22.length() < 5) {
+					gr22= gr22 + "0";
+				}
+				prod.setNameSorting(Converter.cleanLitLatEst(gr22 + name));
+				tm.put( Converter.cleanLitLatEst(name) , prod);
 				
 				}
 				}
@@ -1770,12 +1774,12 @@ cn.close();
 
 			
 			
-			String cmd = " select  d.[Sell-to Customer No_] AS klient,t.[Search Description],r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate ,  " +
+			String cmd = " select  d.[Sell-to Customer No_] AS klient,t.[Pogrupio kodas] +'' +t.[Search Description],r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate ,  " +
 					" r.[Užsakytas kiekis] -r.[Quantity] as saamatta , case when r.[Quantity]> 0 then r.[amount]/r.[Quantity] else 0 end  as lprice "
 					+ "  FROM [Vičiūnai-LAT$Sales Line] r INNER JOIN [Vičiūnai-LAT$Sales Header] d ON r.[Document No_]= d.[No_]  INNER JOIN [Vičiūnai-LAT$Item] t ON t.[No_]=r.[No_]" +
 					"  WHERE d.[Shipment Date]> GETDATE()-120  " +
 					"  UNION ALL " +
-				    "	select  d.[Sell-to Customer No_] AS klient,t.[Search Description],r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate , " + 
+				    "	select  d.[Sell-to Customer No_] AS klient,t.[Pogrupio kodas]+''+t.[Search Description],r.[No_] AS toode,r.[Quantity] AS kogus, d.[Shipment Date] AS lastdate , " + 
 				    "	 r.[Užsakytas kiekis] -r.[Quantity] as saamatta ,r.[Unit Price] as lprice  FROM [Vičiūnai-LAT$Sales Shipment Line] r INNER JOIN [Vičiūnai-LAT$Sales Shipment Header] d ON r.[Document No_]= d.[No_] INNER JOIN [Vičiūnai-LAT$Item] t ON t.[No_]=r.[No_] " +
 				    "	  WHERE d.[Shipment Date]> GETDATE()-120 " +
 				    " order by 1,2,3,5 "; //d.[Sell-to Customer No_], t.[Search Description],r.[No_],d.[Posting Date]

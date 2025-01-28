@@ -2224,7 +2224,8 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
        	//<data code="ART_ASUKOHT" content="92.01.07"/>
    	 	 String pesa = "";
    	 	 len = line.indexOf("data code=\"ART_ASUKOHT\""); 
-   	 	 boolean goes = false;
+   	 	 boolean goes = true;
+   	 	 //siin oli false
    	 	 if(len != -1){
    	 		 try {
    	 		pesa =  line.substring(len + 33); 
@@ -2256,8 +2257,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    	 		 goes = true;
    	 	 }
       	  
-      	  	 prod.setName((shelf + " " + pesa + " " +Converter.enCodeEst(namec + " " + nameb) + " " + id + " " + add ).trim()); 
-     		
+      	  //	 prod.setName((shelf + " " + pesa + " " +Converter.enCodeEst(namec + " " + nameb) + " " + id + " " + add ).trim()); 
+      	   prod.setName((Converter.enCodeEst(namec + " " + nameb) + " " + id + " " + add ).trim()); 
+    		
         	  if(getParent().getProps().getProperty("vat") != null){
         		  prod.setVat(getParent().getProps().getProperty("vat"));
         	  }
@@ -2500,6 +2502,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
       	    	}
       	    	
       	    	prodHash.put(prod.getID(), prod);
+      	    	prod.setNameSorting(prod.getEAN() + prod.getStock() + prod.getName());
       	         tm.put(prod.getName(), prod);	
       	        }
       	      }
@@ -2579,7 +2582,8 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		     	 		 }
 		     	 		
 		          	 }
-		      	     prod.setName( pesa + Converter.deCode(name.substring(0,name.indexOf("\""))) + prod.getID());
+		      	     prod.setName(Converter.deCode(name.substring(0,name.indexOf("\""))) + prod.getID());
+		      	     //prod.setName( pesa + Converter.deCode(name.substring(0,name.indexOf("\""))) + prod.getID());
 		      	   //  System.out.println(prod.getName());
 		      	     
 		      	   len = line.indexOf("stripe_code=");
@@ -3360,15 +3364,19 @@ if( getParent().getProps().getProperty("stockcode") != null){
 				 }
 	 }
      }
-}else{
+} else {
 	len = line.indexOf("stock_level_total=");
 	 if(len != -1){
 	     String stock   = line.substring(len + 19);  
       seisx = ((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
 	 }
 }
-products.append(id +  "; ;");
-products.append(getParent().getNF().format(seisx) + "; "  +  "\n"); 
+
+if(seisx > 0) {
+ products.append(id +  "; ;");
+ products.append(getParent().getNF().format(seisx) + "; "  +  "\n");
+}
+
        	  }}
       reader.close();
     	  }catch(Exception tt){

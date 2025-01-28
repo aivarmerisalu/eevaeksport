@@ -744,7 +744,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
         public Vector getFixedAssortmentData() {
     		Vector result = new Vector();
     		this.getProducts(null);
-    		File f = new File(this.getExcelDir() + "/sortiments.xls");
+    		File f = new File(this.getExcelDir() + "sortiments.xls");
     				
     		try {
     			
@@ -1236,7 +1236,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     	ketid = new HashMap();
     	
     	 TreeMap visits = getVisits();
-        File fff = new File(this.getDir() + "/xls/sortiments.xls" );
+        File fff = new File(this.getExcelDir() + "sortiments.xls" );
         TreeMap groups = new TreeMap(); 
     	try{
             FileInputStream ff = new FileInputStream(fff);
