@@ -301,7 +301,9 @@ public class S1XMLMomLVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	         			ml.setCliGroup(priceTypeCode);
 	         			ml.setProdID(prodCode);
 	         			ml.setPrice(price);
-	         			result.add(ml);
+	         			if(!priceTypeCode.equals("2")) {
+	         			 result.add(ml);
+	         			}
 	         		}
 	         	}
 	         	  
@@ -349,13 +351,13 @@ public class S1XMLMomLVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	         		if(pricetypeNode.getNodeName().equals("Product")) {
 	         			String prodGUID   = getNode(pricetypeNode,"ProductGUID").getFirstChild().getNodeValue();
 	         			String prodCode = (String)prodsGUID.get(prodGUID);
-	         			Double discount   = Double.parseDouble(getNode(pricetypeNode,"ProductDiscount").getFirstChild().getNodeValue());
+	         			Double price   = Double.parseDouble(getNode(pricetypeNode,"ProductSpecPrice").getFirstChild().getNodeValue());
 	         		//	System.out.println(prodCode + " - " + custCode +  " - " + discount);
 	         		if(prodCode != null && custCode != null) {
 	         			MatrixLine ml = new MatrixLine();
 	         			ml.setCustID(custCode);
 	         			ml.setProdID(prodCode);
-	         			ml.setDiscount(discount);
+	         			ml.setPrice(price);
 	         			//ml.setProdLevel("pr");
 	         			result.add(ml);
 	         		}
@@ -465,7 +467,7 @@ public class S1XMLMomLVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	 		         		  lisa = lisa.substring(0,lisa.length()-1);
 	 		         	  }
 	 		         	  
-	 		         	  tt.comment = lisa;
+	 		         	  tt.comment = Converter.cleanLitLatEst(lisa);
 	 		         	  stocks.put(prodid, tt);
 	 		         	
 	 		         	 }
@@ -906,7 +908,7 @@ TreeMap<String, Double> odue = null;
 	      		         
 	      		       if(CustPriceTypeGUID != null){
 	      		    	   String type = (String) prg.get(CustPriceTypeGUID);
-	      		    	   if(type != null) {
+	      		    	   if(type != null && !type.equals("2")) {
 	      		    		 customer.setGroup(type);
 	      		    	   }
 	      		        	
@@ -1066,13 +1068,64 @@ TreeMap<String, Double> odue = null;
        
    
    
+private HashMap<String,Double> getBasePrices() {
+	HashMap<String,Double> res = new HashMap<String,Double>();
+	 File f = new File (getDir() + "Prices.xml");
+try {	     
+      // System.out.println(getDir() + "Agents.xml");
+    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    DocumentBuilder db;
+	db = dbf.newDocumentBuilder();      	
+	FileInputStream in = getCleanInputStream(f);
+	String handler = null;
+   Document doc = db.parse(in,handler);
+   Node root = getNode(doc, "PricesList"); 
+	
+	//System.out.println("ridu  " + root.getChildNodes().getLength() + root.toString());
+	
+   for (int i = 0; i < root.getChildNodes().getLength(); i++){
+   	  Node rida = root.getChildNodes().item(i);
+   	 if(rida.getNodeName().equals("Product")){
+   		 
+   		String prodCode = null;
+   	  try{
+   		 prodCode = getNode(rida,"ProductCode").getFirstChild().getNodeValue();
+   	  }catch(Exception e){
+   		  e.printStackTrace();
+   	  }
+   	  
+   	Node pricesNode = getNode(rida, "Prices"); 
+   	for (int j = 0; j < pricesNode.getChildNodes().getLength(); j++){
+   		Node pricetypeNode = pricesNode.getChildNodes().item(j);
+   		if(pricetypeNode.getNodeName().equals("PriceType")) {
+   			String priceTypeCode   = getNode(pricetypeNode,"PriceTypeCode").getFirstChild().getNodeValue();
+   			Double price   = Double.parseDouble(getNode(pricetypeNode,"Price").getFirstChild().getNodeValue());
+   			//System.out.println(prodCode + " - " + priceTypeGUID + " - " + priceTypeCode + " - " + price);
+   			MatrixLine ml = new MatrixLine();
+   			ml.setCliGroup(priceTypeCode);
+   			if(priceTypeCode.equals("2")) {
+   				res.put(prodCode, price);
+   			}
+   			
+   		}
+   	}
+   	 }} 
+   
+}catch(Exception e){
+	e.printStackTrace();
+}
 
+	
+	
+	return res;
+}
+       
 private Hashtable prodNames = null;
 private HashMap prodsGUID = new HashMap();
 
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
-     
+     HashMap<String,Double> prices = getBasePrices();
 
       this.getSaveStockInfo();
      //Productgroups.xml
@@ -1243,6 +1296,10 @@ private HashMap prodsGUID = new HashMap();
 		   			 
 	   				 if(Double.parseDouble(UnitPrice) > 0) {
 	   					 prod.setPrice(Double.parseDouble(UnitPrice));
+	   				 }
+	   				 
+	   				 if(prices.get(ProdCode) != null) {
+	   					 prod.setPrice(prices.get(ProdCode));
 	   				 }
 	   				 
 	   				prod.setVat("21");
