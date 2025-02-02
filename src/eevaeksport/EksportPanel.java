@@ -4212,6 +4212,9 @@ if (getProps().getProperty("no.matrixagent") != null) {
            }
            buf.append(bb); 
            
+           buf.append(EksportPanel.separator);
+           buf.append(cust.debtnotara); 
+           
            buf.append(lineSeparator);
       }
 

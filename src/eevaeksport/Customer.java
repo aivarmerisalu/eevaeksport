@@ -283,9 +283,7 @@ public class Customer {
   	if (agents != null && agentCode != null ){
   		return agents.keySet().contains(agentCode); 		  		
   	}
-  	if(agentCode == null){
-  		
-  	}
+  	
     return false;
   }
 
@@ -524,6 +522,7 @@ public void setShowfullpricelist(boolean showfullpricelist) {
 	public String setSMS = null;
 	public double bonusAvailable = 0;
 	public boolean needsToBeVisited = false;
+	public Double debtnotara = 0.0;
 	    public boolean isMakeAmountRounding() {
 			return makeAmountRounding;
 		}

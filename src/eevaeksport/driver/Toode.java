@@ -1,5 +1,6 @@
 package eevaeksport.driver;
 
+import java.io.Serializable;
 import java.sql.Date;
 
 import org.json.simple.JSONObject;
@@ -13,14 +14,14 @@ import org.json.simple.JSONObject;
  * @version 1.0
  */
 
-public class Toode {
-
+public class Toode    {
+	
   public Toode(String ID) {
     this.ID = ID;
   }
 
-  public void setAlguspaev(Date alguspaev){
-    this.alguspaev = alguspaev;
+  public void setAlguspaev(java.sql.Date date){
+    this.alguspaev = date;
   }
 
   public void setKogus(double kogus){
@@ -73,6 +74,7 @@ public class Toode {
   private String brand = null;
   public String comment = null;
   public JSONObject json = null;
+  public Long timestamp = 0l;
 public double getPlanvol() {
 	return planvol;
 }

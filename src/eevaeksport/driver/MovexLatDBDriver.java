@@ -440,6 +440,8 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
        
         
         Hashtable debts = new Hashtable();
+
+        Hashtable debtsnotara = new Hashtable();
         Hashtable sales = new Hashtable();
         Hashtable blockComments = new Hashtable();
        Hashtable kama = new Hashtable();
@@ -553,14 +555,18 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
       
        
        
-        String cmd3 = "select PAYER as saaja, summa from cesu.mjpayerdebtdue ";
+        String cmd3 = "select PAYER as saaja, summa , summa_no_keg from cesu.mjpayerdebtdue ";
          st1 = con.createStatement();
      if (isDebug()) System.out.println(cmd3);
          rs1 = st1.executeQuery(cmd3);
          while (rs1.next()) {
         	 String cus = rs1.getString("saaja");
-           double debt = Double.parseDouble(rs1.getString("SUMMA").trim());          
-           debts.put(cus, debt + "");     
+           double debt = Double.parseDouble(rs1.getString("SUMMA").trim());     
+           debts.put(cus, debt + ""); 
+           Double debtnotara = rs1.getDouble("summa_no_keg");   
+           if(debtnotara != null) {
+             debtsnotara.put(cus, debtnotara + "");    
+           }
          } 
          rs1.close();
          st1.close();
@@ -797,6 +803,9 @@ Calendar cal = Calendar.getInstance();
             
             if(debts.get(cust.getPayer()) != null){
             	cust.setDebt(Double.parseDouble((String)debts.get(cust.getPayer())));
+            }
+            if(debtsnotara.get(cust.getPayer()) != null) {
+              cust.debtnotara = Double.parseDouble(debtsnotara.get(cust.getPayer()) + "");
             }
             
             if(sales.get(cust.getPayer()) != null){

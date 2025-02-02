@@ -56,6 +56,7 @@ import eevaeksport.EksportPanel;
 import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.imp.Order;
 import eevaeksport.util.Converter;
 
 
@@ -85,12 +86,22 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
     if( parent.getProps().getProperty("stock.dir") != null){
     	stockConn = parent.getProps().getProperty("stock.dir");
     }
-   
- 
-    
      }
   
 
+  private HashMap readfromMemory() {
+		HashMap mem = null;  
+	try {
+		File f = new File("ordermemory.vec");
+		if(f.exists()) {
+		    mem =  (HashMap) Converter.readObject("ordermemory.vec");
+		}
+	} catch (ClassNotFoundException | IOException e) {
+		e.printStackTrace();
+	}
+	System.out.println("loading mem "  + mem );
+	return mem;
+  }
   
   private String stockConn = null;
   String user =  null;
@@ -460,7 +471,6 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		if(this.eShopPrl == null) {
 			this.getCustomers(null);
 		}
-	   
 		 Vector lines = new Vector();
 	       TreeMap prods = this.getProducts2();
 	       fixEans = new TreeMap();
@@ -1387,6 +1397,8 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	   custPRlists = new TreeMap();
 	   custMap = new TreeMap();
 	   custAgs = new TreeMap();
+
+	   HashMap mem = readfromMemory();
 	   if(customerSales == null) {
 		   this.getCustomerProductsList2();
 	   }
@@ -1688,6 +1700,15 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	         	  		}
 	         	      }
 	         		      
+	         	      	if(mem != null && mem.get(customer.getID()) != null) {
+	         	      		String mm = (String) mem.get(customer.getID());
+	         	      		System.out.println("mem " +  customer.getID() + " " + mem);
+	         	      		if(!mm.startsWith(salesman)) {
+	         	      			customer.diffBack2 = true;
+	         	      			customer.setInfo("Viimase telli tegi : " + mm.substring(0,mm.indexOf("|")) + " " +
+	         	      			Converter.getDDsMMMsYYYYString(new Date(Long.parseLong(mm.substring(mm.indexOf("|")+1)))));
+	         	      		}
+	         	      	}
 	         		      
 	         		    
 	                  if(sm != null && sm.length() > 1){
@@ -2619,9 +2640,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		      	    	ean =  ean.replaceAll(";", ":");
 		      	    	if(!ean.contains("=")) {
 		      	    	    prod.setEAN(ean);
-		      	    	    if(prod.getID().contains("KO003649"))
-			          	     System.out.println("Konvert kood " + ean + " " + prod.getID());
-			            }
+		      	    	       }
 		      	    	}catch(Exception e) {
 		      	    		
 		      	    	}
@@ -3120,11 +3139,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		     								}
 		     								tt.setDonevol(tt.getDonevol() + cp.getLastAmount()*cp.getLastPrice());
 		     								customerSales.put(custid, tt);
-if(custid.equals("10352")) {
-			     							 System.out.println(cp.checkdate.toLocaleString() + " " + custid 
-			     									 + cp.getLastAmount() + " " + cp.getLastPrice()+ " " + tt.getDonevol());	
-			     							System.out.println(httpsURL);
-}
+
 		     							}
 		     							if(!tehtud.contains(cp.custID+ cp.getProdID())) {
 		     							   custProds.add(cp);
@@ -3148,7 +3163,7 @@ if(custid.equals("10352")) {
 		   } catch (Exception a){
 		   }
 	   }
-	   System.out.println("customerSales " + customerSales.size());
+	  // System.out.println("customerSales " + customerSales.size());
 	   
 	   return custProds;
    }
@@ -3266,9 +3281,9 @@ if(custid.equals("10352")) {
 			                Agent agent = (Agent)agents.get(agentID);
 			                 if (agent != null){
 			                   agent.setMonthSales((int)Double.parseDouble(summa));
-			        	   System.out.println("agsales0 " + agentID +" "+ summa);     	
+			        	  // System.out.println("agsales0 " + agentID +" "+ summa);     	
 			        	}
-			                 System.out.println("agsales1 " + agentID +" "+ summa);     
+			                // System.out.println("agsales1 " + agentID +" "+ summa);     
 		        	}
 		        }}  
 	  }catch(Exception e){
@@ -3373,6 +3388,7 @@ if( getParent().getProps().getProperty("stockcode") != null){
 }
 
 if(seisx > 0) {
+//	System.out.println("Seisx "+ id +" " + seisx);
  products.append(id +  "; ;");
  products.append(getParent().getNF().format(seisx) + "; "  +  "\n");
 }
@@ -3427,7 +3443,7 @@ public void WebReporter() {
 		}
 	}
 	
-	System.out.println(sb.toString());
+	//System.out.println(sb.toString());
 	try {
 		
 	

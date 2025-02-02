@@ -74,10 +74,13 @@ public class DirectoAgapictsImportDriver extends AbstractImportDriver{
     }catch (Exception e) {
     	e.printStackTrace();
     }
+    if("true".equals( parent.getProps().getProperty("testing"))){
+    	testing = true;
+    }
   
   }
 
-  
+    boolean testing = false;
 	private Vector signatures = new Vector();
 
 	private void loadSignatures(){
@@ -291,21 +294,26 @@ try{
 	                            	 lines.add(mline);	
 	                            	 
 	                            	 HashSet hash = (HashSet)custFixedProds.get(clGroup);
-	  	                           if(hash != null) {
+	  	                           if(hash == null) {
 	  	                        	   hash = new HashSet();
 	  	                           }
+
+		                           if(prodID != null) {
 	  	                           hash.add(prodID.trim());
 	  	                           custFixedProds.put(clGroup, hash);
+		                           }
 	                             }
 	                           
 	                         }else{
 	                        	 lines.add(mline);
 	                        	 HashSet hash = (HashSet)custFixedProds.get(clGroup);
-		                           if(hash != null) {
+		                           if(hash == null) {
 		                        	   hash = new HashSet();
 		                           }
+		                           if(prodID != null) {
 		                           hash.add(prodID.trim());
 		                           custFixedProds.put(clGroup, hash);
+		                           }
 	     	                 }
 	                    
 	                    }catch(Exception e){
@@ -324,7 +332,7 @@ try{
 	   		e.printStackTrace();
 	   	}
 	       
-	    System.out.println("siin matix" + lines.size());
+	    System.out.println("siin custFixedProds" + custFixedProds.size());
 	       return lines;
 	 }
 	  
@@ -533,7 +541,7 @@ try{
  	   } else {
  		   
  		   
- 		   
+ 		   addToMemory(order);
  		   
  		  Vector splitted =  splitOrder(order);
 	 	  Enumeration en = splitted.elements();
@@ -551,6 +559,24 @@ try{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+  }
+  
+  private void addToMemory(Order order) {
+		HashMap mem = null;  
+	try {
+		File f = new File("ordermemory.vec");
+		if(f.exists()) {
+		    mem =  (HashMap) Converter.readObject("ordermemory.vec");
+		}else {
+			mem = new HashMap();
+		}
+		mem.put(order.getCompany(), order.getAgent()+ "|"+ Calendar.getInstance().getTimeInMillis() );
+	
+		Converter.saveObject(mem, "ordermemory.vec");
+		
+	} catch (ClassNotFoundException | IOException e) {
+		e.printStackTrace();
+	}
   }
   
   private String getDateNiceString(Calendar cal){
@@ -1007,6 +1033,21 @@ try{
 	 	 
 	 		Customer ccc = (Customer)kliendid.get(order.getCompany());
 	 
+	 		boolean sortOK = true;
+	 		HashSet hh = null;
+	 		Customer cust = (Customer) kliendid.get(order.getCompany());
+	 		if(cust != null && cust.getGroup().trim().length() > 1) {
+		 	 hh = (HashSet)	custFixedProds.get(cust.getGroup());
+		 	  Vector lines = order.getOrderLines();
+		      for (int i = 0; i < lines.size(); i++) {
+		    	  OrderLine line = (OrderLine) lines.elementAt(i);
+		    	  Product ppp = (Product)tooted.get(line.getToode());
+		    	  if(!hh.contains(ppp.getEAN())) {
+		    		  sortOK = false;  
+		    	  }
+		      }
+	 		}
+	 		
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 	 			comm =  order.getInfo();
@@ -1015,10 +1056,21 @@ try{
 		 		 comm = comm.replace('"', ' ');
 	 			
 	 			comm = "comment=\""+comm+ "\" " ;
+	 			
+	 			String sort = "";
+		 		if(!sortOK) {
+		 			sort = " EkstraToodeTellil";
+		 		}
+		 		comm = "comment=\""+comm + sort +"\" "  ;
 	 			if(order.getStatus() > 5){
 		 			comm = "cutomer_orderno=\""+ order.getInfo()+ "\" " ;
 		 		}
-	 		}
+	 		}else {
+	 			
+		 		if(!sortOK) {
+		 			comm = "comment=\"EkstraToodeTellil\" "  ;
+		 		}
+		 	}
 	 		
 	 		
 	 		 comm = protectSpecialCharacters(comm);
@@ -1089,24 +1141,8 @@ try{
 	        	
 	        }
 	 		
-	 		boolean sortOK = true;
-	 		HashSet hh = null;
-	 		Customer cust = (Customer) kliendid.get(order.getCompany());
-	 		if(cust != null && cust.getGroup().trim().length() > 1) {
-		 	 hh = (HashSet)	custFixedProds.get(cust.getGroup());
-		 	  lines = order.getOrderLines();
-		      for (int i = 0; i < lines.size(); i++) {
-		    	  OrderLine line = (OrderLine) lines.elementAt(i);
-		    	  Product ppp = (Product)tooted.get(line.getToode());
-		    	  if(!hh.contains(ppp.getEAN())) {
-		    		  sortOK = false;  
-		    	  }
-		      }
-	 		}
-	 		String sort = "";
-	 		if(!sortOK) {
-	 			sort = "EkstraToodeTellil";
-	 		}
+	 		
+	 		
 	 		
 	 		String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
 	          "<transport>" +
@@ -1117,7 +1153,7 @@ try{
 	         "send_mode=\"POST\" " + 
 	         "send_type=\"ALL\" " +
 	         "object=\"4\" " +
-             comm + teo + shdate + hooaeg + sort + 
+             comm + teo + shdate + hooaeg + 
 	         "amount=\"" + order.getSum() + "\" " +
 	         "amount_vat=\"" + order.getSum()* 1.2 + "\" " +
 	         "currency=\"EUR\" status=\"KOMPLEKTEERI\" language=\"EST\">" +
@@ -1178,6 +1214,7 @@ try{
 	    System.out.println("output " +order_xml); 
 	 	
 	 		//System.exit(0);
+	    if(!testing) {
 	    String asi = "";
 	 	try {
 	 	    // Construct data
@@ -1232,7 +1269,7 @@ try {
 	 		System.exit(0);
 	 	}
        
-
+	    }
 	      
 	 	
 	      setNumAddedLines(counter); 

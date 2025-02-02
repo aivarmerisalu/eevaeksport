@@ -2590,9 +2590,12 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
      		String visit = st.nextToken();
      		if (visit != null && visit.trim().length()>0){
      			
-     			abi.setVisit(Converter.visitTurn(visit));	// see oli 2023 aastal
-     			//abi.setVisit((visit));	
-     		}
+     			if(abi.hasAgent("TAL51")) {
+         			abi.setVisit((visit));		
+     			}else {
+     				abi.setVisit(Converter.visitTurn(visit));	// see oli 2023 aastal
+     			}
+     		 }
 		   }
 		  }
          }
