@@ -962,8 +962,8 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 		
 		String cmd = "SELECT inv.itemid,(inv.itemname) AS nimetus, taxpackagingqty AS kastis,    price "
 				+ ", itembarcode AS ean,articleclasstype AS grupp ,unitid AS unit, 0 AS yhikukogus ,itemmaxvalidity as day1,shelflifebycontract as day2  FROM inventtable inv "
-				+ "  INNER JOIN inventtablemodule mod ON mod.itemid = inv.itemid and mod.dataareaid=inv.dataareaid  "
-				+ "  LEFT JOIN inventitembarcode bc on bc.itemid=inv.itemid and bc.dataareaid=inv.dataareaid "
+				+ "  INNER JOIN inventtablemodule mod ON mod.itemid = inv.itemid and mod.dataareaid=inv.dataareaid   "
+				+ "  LEFT JOIN inventitembarcode bc on bc.itemid=inv.itemid and bc.dataareaid=inv.dataareaid  and barcodesetupid = '1' "
 				+ "  WHERE   inv.dataareaid='liv' AND mod.dataareaid='liv' AND moduletype=2 "
 				+ "  AND len(inv.itemname)>0   and price !=0 ";
 

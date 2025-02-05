@@ -107,18 +107,12 @@ public class KMAHortiImportDriver
     return id;
  }
 
- 
- 
+  
   public String identifyProduct(String ean, String prodID) throws SQLException{
   	return prodID;
   }
 
-
-  
-  
-  
-  
-  
+ 
   
   private Vector splitOrder (Order order){
 	  
@@ -244,7 +238,8 @@ public class KMAHortiImportDriver
  			  makeOutput(ord);  
 	}*/
  	  makeOutput(order);  
- 	 signatures.add(signature);
+ 	  signatures.add(signature);
+ 	  
 	  }
  	    
       try {
@@ -314,7 +309,7 @@ public class KMAHortiImportDriver
  		
  				
  		String ware = order.getWarehouse();
- 		System.out.println("ladu tellimusel " + ware);
+ 	//	System.out.println("ladu tellimusel " + ware);
  	
  		 String doknr = order.getDokNr();
     

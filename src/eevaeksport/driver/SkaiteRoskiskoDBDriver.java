@@ -962,7 +962,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                 if(nimi.startsWith("UAB ")){
                 	nimi = (nimi.substring(4,nimi.length()) + " UAB").trim();
                 }
-                cust.setName(nimi + " " + cust.getID());
+                cust.setName(cust.getID() + " " + nimi);
                 try{
                 	String aadr = Converter.enCodeEst(addr.trim());
                 	
@@ -1538,7 +1538,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
              if(nimetus == null){
            	  // goes = false;
              }else{
-           	   nimetus = nimetus.trim().replaceAll("\n", " ") + " " + kood;
+           	   nimetus =  kood + " " + nimetus.trim().replaceAll("\n", " ") ;
              }
            	 
          
