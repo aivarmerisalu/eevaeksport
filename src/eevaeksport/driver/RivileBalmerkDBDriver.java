@@ -920,7 +920,7 @@ HashSet olemas = new HashSet();
               String maks = accountnum;
               String acc = rs.getString("kood");
               boolean goes = true;
-              if (acc != null && acc.trim().length()>0){
+              if (acc != null && acc.trim().length()>0 && !acc.trim().equals("1")){
               	accountnum = accountnum + "-" + acc.trim();
               }else {
             	  goes = false;
