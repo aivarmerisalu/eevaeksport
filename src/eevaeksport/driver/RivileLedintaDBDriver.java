@@ -370,6 +370,9 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
           		"					union \r\n" + 
           		"					select I12_KODAS_PS as toode ,I12_KIEKIS as stock, I12_KODAS_IN as ladu , '' as real from i12_ind\r\n" + 
           		"					 ORDER BY 1" ;
+          sql =  "SELECT  I17_KODAS_PS AS toode, sum(I17_KIEKIS) AS STOCK ,  I17_KODAS_IS AS LADU "  +
+                  "  from i17_vpro where I17_KODAS_IS in ('KAUNAS','KLAIPEDA','UTENA','PALANGA') GROUP BY I17_KODAS_IS ,I17_KODAS_PS HAVING " +
+                  "  sum(I17_KIEKIS) != 0 ORDER BY I17_KODAS_PS " ;
 
              if (isDebug()) System.out.println(sql);
              Connection con = DriverManager.getConnection(url,"LEDIN_API","P455W0rd_*1");
@@ -392,14 +395,15 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
                      if(ladu.equals("000000000007")) {
                          ladu = "PALANGA";
                          }
-                    String real  =  rst.getString("real");
+                  /*  String real  =  rst.getString("real");
                     if(real != null){
                     	real =  real.trim().replaceAll(";", ",");
                     }else{
                     	real = " ";
                     }
                    
-                    dealerProds.add(ladu, toode,seis+"",real," " );
+                    dealerProds.add(ladu, toode,seis+"",real," " );*/
+                     dealerProds.add(ladu, toode,seis+""," "," " );
                 }
                 rst.close();
                 stm.close();
@@ -678,8 +682,7 @@ String ag = rs.getString("agent").trim();
         TreeMap products = new TreeMap();
         try {
         	
-        	String as = "select I12_KODAS_PS as toode ,I12_KIEKIS as seis, I12_KODAS_IN as ladu from i12_ind";
-           	
+        	 	
      	   String  sql = "  SELECT  I17_KODAS_PS AS toode, sum(I17_KIEKIS) AS STOCK ,  I17_KODAS_IS AS LADU "  +
               "  from i17_vpro where I17_KODAS_IS in ('KAUNAS','KLAIPEDA','UTENA','PALANGA') GROUP BY I17_KODAS_IS ,I17_KODAS_PS HAVING " +
               "  sum(I17_KIEKIS) != 0 ORDER BY I17_KODAS_PS " ;
@@ -691,36 +694,7 @@ String ag = rs.getString("agent").trim();
          TreeMap tootedladu = new TreeMap();
          Connection con = DriverManager.getConnection(url,"LEDIN_API","P455W0rd_*1");
          Statement   stm = con.createStatement();
-          ResultSet  rst = stm.executeQuery(as);
-
-          
-         TreeMap<String,Double> algsa = new TreeMap<String,Double>();
-
-              while (rst.next()) {
-                String toode = rst.getString("toode").trim();
-                double seis = rst.getDouble("seis");
-                String ladu = rst.getString("ladu").trim();
-               if(ladu.equals("000000000004")) {
-                  ladu = "KAUNAS";
-                  algsa.put(toode, seis);
-                  }
-               if(ladu.equals("000000000005")) {
-                   ladu = "KLAIPEDA";
-                   }
-               if(ladu.equals("000000000006")) {
-                   ladu = "UTENA";
-                   }
-               
-               if(ladu.equals("000000000007")) {
-                   ladu = "PALANGA";
-                   }
-               algsa.put(toode+ladu, seis);
-              }
-               
-
-            rst.close();
-          
-            rst = stm.executeQuery(sql);
+          ResultSet   rst = stm.executeQuery(sql);
               while (rst.next()) {
                 String toode = rst.getString("toode").trim();
                 int seis = (int)Double.parseDouble(rst.getString("stock").replace(',','.'));
@@ -838,9 +812,6 @@ String ag = rs.getString("agent").trim();
                    prod.setOldName((String)tootedladu.get(prod.getID()));
                }
              
-              if(algsa.get(prod.getID()) != null) {
-            	 // prod.setStock(algsa.get(prod.getID()));
-              }
               
                String kastis = rs.getString("tykke");
               if (kastis != null && kastis.trim().length()>0){

@@ -1055,8 +1055,6 @@ try{
 		 		 comm = comm.replace('"', ' ');
 		 		 comm = comm.replace('"', ' ');
 	 			
-	 			comm = "comment=\""+comm+ "\" " ;
-	 			
 	 			String sort = "";
 		 		if(!sortOK) {
 		 			sort = " EkstraToodeTellil";

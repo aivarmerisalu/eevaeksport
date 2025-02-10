@@ -15,6 +15,8 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +35,7 @@ import com.opencsv.exceptions.CsvException;
 import ee.mobilejava.wrapper.DefectiveLineWrapper;
 import ee.mobilejava.wrapper.DefectiveWrapper;
 import eevaeksport.Agent;
+import eevaeksport.CustProd;
 import eevaeksport.Customer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
@@ -70,142 +73,66 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
    
    public Vector getPriceMatrixData(){
 	  	
-
+   HashSet check = new HashSet();
 	       Vector result = new Vector();
-	         try {
-	          
-	        	 FileReader fr = new FileReader(getDir() + "Discount.csv");
-	             BufferedReader reader = new BufferedReader(fr);
-	           String line = null;
-	           reader.readLine();
-	            while((line = reader.readLine()) != null ){
+	       
+	       for (String[] row : readCSVData("priceslists.csv")) {
+  	       	 int cou = 0;
+  	         String klient = null; 
+  	      	 String toode = null;
+  	       	 double hind = 0 ;
+  	       	 String hh = null;
+  	       
+  	       	   for (String cell : row) {
+  	           	 if(cou == 0) {
+  	                     klient = cell.trim();
+  	                }
+  	           	 if(cou == 1) {
+  	                    toode = cell.trim();
+  	                }
+  	           	 if(cou == 2) {
+  	                    hind = Double.parseDouble(cell.trim());
+  	                    hh = cell.trim();
+  	                }
+  	                cou++;
+  	       	   }
+  	              MatrixLine mline = new MatrixLine();
 
-	                 line = line.replaceAll(";"," |");
-	            	StringTokenizer st = new StringTokenizer(line, SEPARATOR);
+ 	             if (klient != null && klient.length() > 0) {
+ 	               mline.setCustID(klient);
+ 	             }
+ 	             
 
-	              if (st.hasMoreTokens()) {
-	            	
-//  Discount_ID;DiscountPercent;Is_Manual;DiscountDescribtion;ValidFrom;ValidTill;Priority;ProductCL3;Customer_ID
-                     st.nextToken();
-                  double percent = Double.parseDouble(st.nextToken().trim());
-                     st.nextToken();
-                     st.nextToken();
-                  String sdate =  st.nextToken().trim() ;
-   	              String edate = st.nextToken().trim();
-   	                 st.nextToken();
-   	             String prodGroup = st.nextToken().trim();
-	             String custID = st.nextToken().trim();
-	             String clGroup = null;
-	             String prodID = null;
-	            
-	             MatrixLine mline = new MatrixLine();
-
-	             if (custID != null && custID.length() > 0) {
-	               mline.setCustID(custID);
-	             }
-	             if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
-	               mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
-	             }
-
-	             if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setStartDate(sdate.substring(0,10));
-	             }
-	             if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setEndDate(edate.substring(0,10));
-	             }
-	             if (prodID != null && prodID.length() > 0) {
-	               mline.setProdID(prodID);
-	             }
-	             if (mline.getProdID() == null &&  prodGroup != null && prodGroup.trim().length() > 0) {
-	               mline.setDiscGroup(prodGroup.trim());
-	             }
-
-	             if (percent != 0) {
-	                 mline.setDiscount(percent);
-                 }
-	             
-	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
-	                 result.add(mline);    
-	               }
-	             }
-	            }
-	            
-	            reader.close();
-	            fr.close();
-	         }catch(Exception e){
-	        	 e.printStackTrace();
-	         }
-		
+ 	              if (toode != null && toode.length() > 0) {
+ 	               mline.setProdID(toode);
+ 	             }
+ 	              
+ 	             if (hind > 0) {
+ 	 	               mline.setPrice(hind);
+ 	 	             }
+ 	             
+ 	             boolean goes = true;
+ 	            if(prodPrices.get(toode) != null) {
+ 	            	String pr  = (String) prodPrices.get(toode);
+ 	            	if(pr.equals(hh)) {
+ 	            	   goes = false;
+ 	            	}
+ 	            }
+ 	             
+ 	             String signa = klient+toode+hind;
+ 	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
+ 	            	 if(!check.contains(signa) && goes) {
+ 	            		    result.add(mline); 
+ 	            		 }
+ 	 	                 check.add(signa);
+ 	            	 }    
+ 	               }
+  	            
+	        		
 	    return result;
 	      }
 
    
-   private Connection getNewConnection() throws SQLException{
-    return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
-  }
-
-   public void insertDefective(DefectiveWrapper wr){}
-
-   public ManagerData getManagerData() throws SQLException{ 	
-
-    String tableName = "dayreport";
-    if(getParent().getProps().getProperty("report.tablename") != null && !getParent().getProps().getProperty("report.tablename").trim().equals("")){
-    	tableName = getParent().getProps().getProperty("report.tablename");
-    }
-   	
-    String sql = " SELECT clid AS klient,endlong AS kuupaev,docsum AS summa,linecount AS ridu,text AS tekst,'' AS dealer,clgroup AS agentname" +
-        " FROM  " + tableName + 
-        " WHERE enddate>(GETDATE()-30) ORDER BY clid ";
-
-   if (isDebug()) System.out.println(sql);
-   this.con = getNewConnection(); 
-   Statement st = con.createStatement();
-    ResultSet rs = st.executeQuery(sql);
-
-    StringBuffer sb = new StringBuffer();
-    String sep = ";";
-
-    while(rs.next()){
-      String cliID = rs.getString("klient").trim();
-      sb.append(cliID + sep);
-      sb.append(rs.getString("kuupaev").trim() + sep);
-      sb.append(getNF().format(rs.getDouble("summa")) + sep);
-      sb.append(rs.getInt("ridu") + sep);
-      String tekst = ensureLen(rs.getString("tekst")  ," ");
-      tekst = tekst.replace('\'', ' ').replace('\"', ' ');
-      tekst = tekst.replace('\n', ' ');
-      String agendinimi = rs.getString("agentname");
-      sb.append(tekst + sep);
-        sb.append(getNF().format(0) + sep);
-        sb.append(getNF().format(0) + sep);
-        sb.append(ensureLen((agendinimi), " ") + sep);
-        sb.append(ensureLen((" "), " ") + sep);
-        sb.append(ensureLen((""), " ") + sep);        
-        sb.append((" ") + sep);
-        sb.append((" ") + sep);
-      sb.append("\n");
-    }
-
-    ManagerData md = new ManagerData();
-    md.setClientVisitInfo(sb.toString());
-
- StringBuffer bf2 = new StringBuffer();
- Enumeration enums = klient.elements();
- while(enums.hasMoreElements()){
- 	Customer cust = (Customer)enums.nextElement();
- 	Iterator agen = cust.getAgents().keySet().iterator();
- 	while(agen.hasNext()){
-    Agent ag = 	(Agent)agents.get((String)agen.next());
-   bf2.append(cust.getID() + sep);
-   bf2.append(ag.getID() + sep);
-   bf2.append(ag.getName() + "\n");
- }	
-	}
-
-    md.setClientAgentInfo(bf2.toString());
-    return md;
-
-  }
    public String getProductSortingData(){
    	return null;
    }
@@ -221,26 +148,40 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 	}
    
    
-   
-   
-   
-   
-   
-   private String ensureLen(String str, String replace){
-    if (str == null) str = "";
-    else str = str.trim().replace('\'', ' ').replace('\"', ' ').replace(';',' ');
-    if (str.length() == 0){
-      return replace;
-    } else {
-      return str;
-    }
-  }
-
-
 
        public String getSaveStockInfo(){
-       return null;
+
+    	   StringBuffer products = new StringBuffer();
+    	   for (String[] row : readCSVData("inventories.csv")) {
+    	       	 int cou = 0;
+    	         String ladu = null; // hetkel ladude p�hist ei teinud 
+    	      	 String toode = null;
+    	       	 double seis = 0 ;
+    	       
+    	       	   for (String cell : row) {
+    	           	 if(cou == 0) {
+    	                     toode = cell.trim();
+    	                }
+    	           	 if(cou == 1) {
+    	                    seis = Double.parseDouble(cell.trim());
+    	                }
+    	           	 if(cou == 2) {
+    	                    ladu = cell.trim();
+    	                }
+    	                cou++;
+    	            }
+
+if(seis > 0) {
+//	System.out.println("Seisx "+ id +" " + seisx);
+ products.append(toode +  "; ;");
+ products.append(getParent().getNF().format(seis) + "; "  +  "\n");
+}
+    	           	  
+    	        }
+       return products.toString();
        }
+       
+       
 
   private Date getDate(String mmddyy){//2008-12-31 00:00:00
   	long lon = 0;
@@ -305,17 +246,18 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                  }
              }
         	 if(cou == 2) {
-                 name = cell.trim();
+                 name = Converter.enCodeEst(cell.trim());
              }
              cou++;
          }
+         if(id.trim().length() > 1) {
          if(id0 != null && id0.trim().length() == 0) {
-            tm.put(id0, name);	
+            tm.put(id, name);	
          } else {
         	 treeGr2.put(id0+id, name);
         	 treeGr.put(id, id0+id);
          }
-         
+         }
          
      }
          return tm;
@@ -535,7 +477,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
              }
              Customer  cust = new Customer(id);
              cust.setName( Converter.enCodeEst(name));
-             cust.setAddress( Converter.adressLink(address, ""));
+             cust.setAddress( Converter.adressLink(Converter.enCodeEst(address), ""));
              cust.setPersonalData( Converter.enCodeEst(contact));
              if(custAgents.get(cust.getID()) != null) {
             	 ArrayList<String> arr = (ArrayList)custAgents.get(cust.getID());
@@ -560,13 +502,16 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
    }
 
 private Hashtable prodNames = null;
-   
+
+private HashMap prodPrices = null;   
+
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
      try {
     	   this.getProdGroups();
     	    	 
         TreeMap prods = new TreeMap(); 
+        prodPrices = new HashMap();
         
         for (String[] row : readCSVData("inventories.csv")) {
        	 int cou = 0;
@@ -626,8 +571,9 @@ private Hashtable prodNames = null;
          	 if(cou == 2) {
                   name = cell.trim();
              }
-         	 if(cou == 14) {
+         	 if(cou == 13) {
                 price = Double.parseDouble(cell.trim());
+                prodPrices.put(id, cell.trim());
              }
          	 if(cou == 7) {
                 inCase = Double.parseDouble(cell.trim());
@@ -670,7 +616,7 @@ private Hashtable prodNames = null;
              prod.setName(Converter.enCodeEst(name));
           
             
-         	 // System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + prod.getUnit() + " " + prod.getPrice());
+         	//  System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + prod.getUnit() + " " + prod.getPrice());
             	
                
             	   tm.put(prod.getName(), prod);   
@@ -698,141 +644,65 @@ private Hashtable prodNames = null;
 
 
    public Vector getCustomerProductsList(String agentCode){
+		Calendar c = Calendar.getInstance();
+   		c.add(Calendar.MONTH, -6);
+   		Date start = new Date(c.getTimeInMillis());   
+
+//"PAŽ224170";"TR0010147";"LT1000243:107548";"4";"gab.";"2021-03-19";"0.89";
+//"PAŽ224170";"TR0011922";"LT1000243:107548";"6";"gab.";"2021-03-19";"0.89";
      Vector vec = new Vector();
-   /*  HashMap kliendid = new HashMap();
-     try {
-       FileReader fr = new FileReader(getDir() + DATA_FILE);
-     BufferedReader reader = new BufferedReader(fr);
-   String line = null;
+    
+         for (String[] row : readCSVData("deliveries.csv")) {
+      	   
+  	   int cou = 0;
+       String custID = null;
+    	 String prodID = null;
+    	 String doc = null;
+    	 String lastdate = null;
+       double price = 0;
+       double amount = 0;
+      
 
-   //   "klient","toode","kogus","viimane kuup�ev","viimane kogus"
+   	   for (String cell : row) {
+   		if(cou == 0) {
+            doc = cell.trim();
+         }
+   		if(cou == 1) {
+            prodID = cell.trim();
+         }
+   		if(cou == 2) {
+            custID = cell.trim();
+         }
+   		if(cou == 3) {
+            amount = Double.parseDouble(cell.trim());
+         }
+   		if(cou == 5) {
+            lastdate = cell.trim();
+         }
+   		if(cou == 6) {
+            price = Double.parseDouble(cell.trim());
+         }
 
-   line=reader.readLine();
-   while((line = reader.readLine()) != null ){
-      line = line.replaceAll(";"," |");
-      StringTokenizer st = new StringTokenizer(line, SEPARATOR);
-       if (st.hasMoreTokens()){
-         String custID = clear(st.nextToken());
-               if (st.hasMoreTokens()){
-                 String prodID = clear(st.nextToken());
-              
-                 double amount = 0;
-                 String lastdate = " ";
-                 if (st.hasMoreTokens()){
-                 	String tok = st.nextToken();
-                 	tok = tok.replaceAll("\"","");
-                 	if(tok.indexOf(",") == 0){
-                 		tok = tok.substring(1,tok.length());
-                 	}
-                 	
-                try{
-                	
-            
-                    amount = Double.parseDouble(clear(tok));
-                
-                 if (st.hasMoreTokens()){
-                     lastdate = clear(st.nextToken());
-                 }
+   		cou++;
+   	   }      
+   		// paneme kaasa siis kui on kuni 6 kuud
+   		if(lastdate != null) {
+   		Date dd = this.getDate(lastdate);
+   
 
-                 if (st.hasMoreTokens()){
-                    Double.parseDouble(clear(st.nextToken()));
-                 }
-                 
+   		if(dd.after(start)) {
                     if(lastdate.length()>4){
-                    lastdate = lastdate.substring(0,5);
                     }else{
                     lastdate =" ";
                     }
-                    Customer cust = (Customer)kliendid.get(custID);
-                    if (cust == null){
-                      cust = new Customer(custID);
-                    }
-                    Product prod = new Product(prodID);
-
-                 CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate,0,0,0," ");
-
-                 cust.addProduct(prod,cp,false);
-                 kliendid.put(custID, cust);
+                    
+                 CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate,price,0,0," ");
+                 cp.setAbiKood(doc);
                  vec.addElement(cp);
-                }catch (Exception e){
-                	System.out.println("aM :" + tok);
-                }
-                 }
-
-           }
-         }
-       }
+   		}
+         }}
 
 
-
-    fr = new FileReader(getDir() + DATA_FILE);
-    reader = new BufferedReader(fr);
-  line = null;
-
-           int counter = 0;
-           int cou = 0;
-          String oldklient = null;
-          String olddate = " ";
-          String oldtoode = null;
- 
-          line=reader.readLine();
- while((line = reader.readLine()) != null){
-    line = line.replaceAll(";"," |");
-    StringTokenizer st = new StringTokenizer(line, SEPARATOR);
-     if (st.hasMoreTokens()){
-       String klient = clear(st.nextToken());
-             if (st.hasMoreTokens()){
-               String toode = clear(st.nextToken());
-               String kogus = "0";
-               String date = " ";
-               if (st.hasMoreTokens()){
-                  kogus = clear(st.nextToken());
-                  kogus = kogus.replace('.',',');
-				  if(kogus.indexOf(",") != -1){
-				  	kogus=kogus.substring(0,kogus.indexOf(",")+2);
-				  }
-              }
-               if (st.hasMoreTokens()){
-                   date = clear(st.nextToken());
-               }
-
-
-               if(cou == 0){oldklient = klient;olddate = date;oldtoode=toode;}
-               if(!oldklient.equals(klient)){
-                             counter = 0;
-                             oldklient = klient;
-                             olddate = date;
-               }
-               if(!toode.equals(oldtoode)){
-               	counter = 0;
-               }
-               Customer c = (Customer)kliendid.get(klient);
-               if (c != null ){
-
-                 ArrayList al = (ArrayList)c.getProducts().get(toode);
-                 if (al != null){
-                   CustProd cp = (CustProd)al.get(1);
-                   if (cp != null){
-                    if(!olddate.equals(date)){counter++;}
-                     if (counter == 0){cp.setS1(kogus );}
-                     if (counter == 1){cp.setS2(kogus );}
-                     if (counter == 2){cp.setS3(kogus );}
-                     if (counter == 3){cp.setS4(kogus );}
-                     if (counter == 4){cp.setS5(kogus );}
-                     
-                     vec.add(cp);
-                   }
-                 }
-                 oldklient = klient;
-                 olddate = date;
-                 oldtoode = toode;
-               }
-               cou++;
-             }}}
-
-     } catch (IOException e){
-       e.printStackTrace();
-     }*/
      return vec;
    }
 
@@ -840,7 +710,7 @@ private Hashtable prodNames = null;
      return null;
    }
    public String getDriverVersion(){
-     return "KGGrupp";
+     return "S1Tabak";
    }
    public String getSubjectFilesTo(){
      return this.subjectFilesTo;
@@ -896,7 +766,7 @@ public void setNF(NumberFormat nf) {
    */
   public void setBulkSales(Map agents) {
 
-  	 try {
+  /*	 try {
         FileReader fr = new FileReader(getDir() + "ManagerSales.csv");
       BufferedReader reader = new BufferedReader(fr);
     String line = null;
@@ -924,13 +794,19 @@ public void setNF(NumberFormat nf) {
     fr.close();
       } catch (IOException e){
         e.printStackTrace();
-      }
+      }*/
   }
 
 public Vector getFixedAssortmentData() {
 	Vector lines = new Vector();
 	return lines;
 
+}
+
+@Override
+public ManagerData getManagerData() throws SQLException {
+	// TODO Auto-generated method stub
+	return null;
 }
 
 }

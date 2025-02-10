@@ -1493,7 +1493,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     		"    LEFT OUTER JOIN dbo.MVGSantykiai AS mvs ON Pr.MVId = mvs.MVId1 AND Pr.IpokavimoMVId = mvs.MVId2 AND Pr.MVGId = mvs.MVGId INNER JOIN \r\n" + 
     		"       dbo.Mokesciai AS mok ON Pr.MokesciaiId = mok.MokesciaiId INNER JOIN dbo.PrekiuTipai AS pt ON Pr.PrekiuTipaiId = pt.PrekiuTipaiId INNER JOIN \r\n" + 
     		"       dbo.MV ON Pr.MVId = dbo.MV.MVid INNER JOIN  dbo.MV AS IpokMV ON Pr.IpokavimoMVId = IpokMV.MVid  \r\n" + 
-    		"      WHERE     (Pr.PrekesID > 1) AND (pt.ArSandeliuojama = 1) and Pr.Nenaudoti <> ( 1 ) and \r\n" + 
+    		"      WHERE     (Pr.PrekesID > 1) AND (pt.ArSandeliuojama = 1) and Pr.Nenaudoti <> ( 1 ) and  DA_ArMerisoft = '1' and \r\n" + 
     		"      CASE WHEN ISNUMERIC(gr.Kodas) = 1 THEN CAST(gr.Kodas AS INT) ELSE 0 END between 100 and 1350  " ; 
    
 

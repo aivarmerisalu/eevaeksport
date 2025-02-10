@@ -1202,6 +1202,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("RivileLedinta")
 					    || driver.getDriverVersion().equals("RivileVasca")
 					    || driver.getDriverVersion().equals("NaviTobisDirecto")
+					    || driver.getDriverVersion().equals("S1Tabak")
 					    || driver.getDriverVersion().equals("SkaiteRoskisko")
 	                	 )
                   
@@ -5694,7 +5695,7 @@ while (itra.hasNext()){
             prod.setStock(-1);
             prod.setMainWarehouseStock(null);
             double stock = stocks.getDealerProductStock(agent.getObject(),prod.getID());
-            //System.out.println(agent.getObject() + " Laoseis "+ prod.getName() +" " + stock);
+          //  System.out.println(agent.getObject() + " Laoseis "+ prod.getName() +" " + stock);
             double mainstock = stocks.getDealerProductStock(agent.getObjektmain(),prod.getID());
              String partii = stocks.getDealerProductLOT(agent.getObject(), prod.getID());
            

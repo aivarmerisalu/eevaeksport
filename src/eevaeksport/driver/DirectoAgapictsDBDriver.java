@@ -99,7 +99,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	} catch (ClassNotFoundException | IOException e) {
 		e.printStackTrace();
 	}
-	System.out.println("loading mem "  + mem );
+	//System.out.println("loading mem "  + mem );
 	return mem;
   }
   
@@ -3139,6 +3139,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		     								}
 		     								tt.setDonevol(tt.getDonevol() + cp.getLastAmount()*cp.getLastPrice());
 		     								customerSales.put(custid, tt);
+		     								if(custid.equals("10558")) {
+		     									System.out.println("10558 "  + number + " " + cp.getProdID()+" "+  cp.getLastAmount()*cp.getLastPrice()+" "+tt.getDonevol());
+		     								}
 
 		     							}
 		     							if(!tehtud.contains(cp.custID+ cp.getProdID())) {
