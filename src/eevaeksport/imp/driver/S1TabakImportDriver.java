@@ -529,8 +529,8 @@ try{
 	        	disc = ol.getDiscount()+"";
 	        }
 	       
-	        sb.append("\""+ol.getPrice()+"\"" + sep);
-	        sb.append("\""+disc+"\"" + sep);
+	        sb.append(ol.getPrice() + sep);
+	        sb.append(disc + sep);
 	        sb.append("0" + sep+sep+sep); //tyhi
 	       
         
