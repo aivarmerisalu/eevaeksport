@@ -1702,7 +1702,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 	         		      
 	         	      	if(mem != null && mem.get(customer.getID()) != null) {
 	         	      		String mm = (String) mem.get(customer.getID());
-	         	      		System.out.println("mem " +  customer.getID() + " " + mem);
+	         	      	//	System.out.println("mem " +  customer.getID() + " " + mem);
 	         	      		if(!mm.startsWith(salesman)) {
 	         	      			customer.diffBack2 = true;
 	         	      			customer.setInfo("Viimase telli tegi : " + mm.substring(0,mm.indexOf("|")) + " " +
@@ -1913,6 +1913,10 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		        		  result.add(cp);
 		        		  check.add(custid+""+toode);
 		        			
+		        	}else {
+		        		CustProd cp = new CustProd(custid, toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," ");
+		        		cp.checkdate = ddd;
+		        		  result.add(cp);
 		        	}
 			       if(prodCodes == null) {
 			    	   prodCodes = new HashSet();

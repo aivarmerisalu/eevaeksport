@@ -697,7 +697,7 @@ private HashMap prodPrices = null;
                     }
                     
                  CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate,price,0,0," ");
-                 cp.setAbiKood(doc);
+                 cp.setAbiKood(Converter.cleanLitLatEst(doc));
                  vec.addElement(cp);
    		}
          }}

@@ -5234,7 +5234,7 @@ try{
 		
 		try {
 			org.json.JSONArray array = serv.getManagerList();
-			System.out.println("oioi "+ array.toString());
+		//	System.out.println("oioi "+ array.toString());
 		//	throw new Exception("demo"); 
 			try {
 				if(array.toString().contains("replaceManagers")) {
@@ -5255,7 +5255,7 @@ try{
 			}
 			
 			
-			System.out.println("Pass " + agent + " " + passx);
+		//	System.out.println("Pass " + agent + " " + passx);
 			
 			Iterator itera =  tm.values().iterator();
 		       while (itera.hasNext()){

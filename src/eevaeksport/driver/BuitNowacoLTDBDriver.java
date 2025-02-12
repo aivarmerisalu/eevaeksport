@@ -345,7 +345,7 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 		if(cust.getID() != null && cust.getID().length() > 0) {
 		 products.append(cust.getID() + ";" + getParent().getNF().format(cust.getDebt()) + ";" + bl + "\n");
 		}
-		if(cust.getPayer().equals("150040692")) {
+		if(cust.getPayer().equals("304476836")) {
 			System.out.println( " asi 1111 " + blockedcusts.contains(cust.getPayer()) + " " +
 					blockedcusts.contains(cust.getPayer()) + " " + cust.isSalesBlockT() + " " + cust.getID());
 		
@@ -1914,7 +1914,7 @@ try{
            debtDays.put(custID,dueint+"") ;
            if(dueint > 24){
         	  	 
-        	   if(debt.getPayerID() != null && debt.getPayerID().equals("150040692")) {
+        	   if(debt.getPayerID() != null && debt.getPayerID().equals("304476836")) {
         		    System.out.println("siit 2 tuleb block" + custID + " " + debt.getDoknr());
         	   }
 
@@ -2055,10 +2055,6 @@ try{
              if( blokk != null && blokk.trim().equals("1") && customer.getName().indexOf("Rimi") == -1){
                customer.setSalesBlockT(true);
                blockedcusts.add(customer.getID());
-               if(customer.getPayer().equals("150040692")) {
-       		    //System.out.println("siit 2 tuleb block" + customer.getID());
-       	       }
-               
              }
        
              
@@ -2137,12 +2133,7 @@ try{
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
             	blockedcusts.add(customer.getPayer());
-            	if(customer.getPayer().equals("150040692")) {
-        		
-               	//   System.out.println("siin222" + customer.getID() +
-               		//	   "  " + customer.getPayer() + " " + totaldebts.get(customer.getPayer()) 
-               			//   + " " + credit + " ? " );
-                  }
+            	
             	
             }
            }else if( this.totaldebts.get(customer.getID()) != null){
@@ -2153,8 +2144,8 @@ try{
              	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
             	customer.setSalesBlockT(true);
             	blockedcusts.add(customer.getID());
-            	if(customer.getPayer().equals("150040692")) {
-            			  // System.out.println("siin3333" + customer.getID() + "  " + customer.getPayer());
+            	if(customer.getPayer().equals("304476836")) {
+            			   System.out.println("siin3333" + customer.getID() + "  " + customer.getPayer());
                     }
             }
            }
@@ -2273,6 +2264,10 @@ try{
            }
           
           
+
+           if(this.blockedcusts.contains(customer.getID())) {
+         	  customer.setSalesBlockT(true);
+           }
            
             tm.put(customer.getName(), customer);
             this.customers.add(customer.getID());
