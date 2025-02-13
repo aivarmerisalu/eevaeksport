@@ -499,7 +499,7 @@ try{
 	            sb0.append(fn + sep);
 		        sb0.append( klient + sep);
 		        sb0.append(getDateTimeString(Calendar.getInstance()) + sep + "L" +
-		        sep + getDateString(call) + sep + agent+sep+sep+sep+"0.00"+sep +"FALSE"+sep +getDateTimeString(Calendar.getInstance()));
+		        sep + getDateString(call) + sep + agent+sep+sep+sep+"0.00"+sep +"FALSE"+sep +getDateTimeString(Calendar.getInstance())+sep+sep);
 		      
 	    	        
 	         String fname = (parent.getProps().getProperty("conv.dir")) + fileName;
@@ -531,7 +531,7 @@ try{
 	       
 	        sb.append(ol.getPrice() + sep);
 	        sb.append(disc + sep);
-	        sb.append("0" + sep+sep+sep); //tyhi
+	        sb.append("0" + sep+sep); //tyhi
 	       
         
 	         arr.add(toode);

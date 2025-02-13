@@ -406,7 +406,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    				
 	                    				Long prodAmnt = (Long) productLine.get("amount");
 	                    				
-	                    			System.out.println(orderSiteCode + " " + ((Product)eanProds.get(prodEan)).getID()+"  "+ prodEan + "  " + prodPrice + "  " + prodAmnt);
+	                    		//	System.out.println(orderSiteCode + " " + ((Product)eanProds.get(prodEan)).getID()+"  "+ prodEan + "  " + prodPrice + "  " + prodAmnt);
 	                    			
 	                    				OrderLine ol = new OrderLine();
 	                    				ol.setKogus(prodAmnt);
@@ -416,7 +416,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    				ol.selActCode = orderProdID+"";
 	                    				//ol.setDiscount(10);
 	                    				
-	                    				if(eanProds.get(prodEan) != null) {
+	                    				if(eanProds != null && eanProds.get(prodEan) != null) {
 	                    					ol.setToode(((Product)eanProds.get(prodEan)).getID() + "");
 	                    				}
 	                    				//System.out.println(((Product)eanProds.get(prodEan)).getID()+"  "+ prodEan + "  " + prodPrice + "  " + prodAmnt);

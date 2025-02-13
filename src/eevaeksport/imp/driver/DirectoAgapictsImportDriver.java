@@ -1042,7 +1042,7 @@ try{
 		      for (int i = 0; i < lines.size(); i++) {
 		    	  OrderLine line = (OrderLine) lines.elementAt(i);
 		    	  Product ppp = (Product)tooted.get(line.getToode());
-		    	  if(!hh.contains(ppp.getEAN())) {
+		    	  if(ppp != null && hh != null && !hh.contains(ppp.getEAN())) {
 		    		  sortOK = false;  
 		    	  }
 		      }
