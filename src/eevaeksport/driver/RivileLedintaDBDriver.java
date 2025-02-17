@@ -1222,10 +1222,32 @@ String ag = rs.getString("agent").trim();
 	           	if(!inpda.exists()) {
 	           	 	Converter.shrinkAndCopyFile(in,inpda);
 	           	}
-	          
 	           	}
 	           
+	         	 in = new File ( picts + toode + ".jpg"); 
+	           	if(in.isFile()){            	
+	           	File inpda = new File ( pictspda + toode + ".jpg" ); 
+	           	if(!inpda.exists()) {
+	           	 	Converter.shrinkAndCopyFile(in,inpda);
+	           	}
+	           	}
+	           	
+	            in = new File ( picts + ean + ".png"); 
+	           	if(in.isFile()){            	
+	           	File inpda = new File ( pictspda + toode + ".png" ); 
+	           	if(!inpda.exists()) {
+	           	 	Converter.shrinkAndCopyFile(in,inpda);
+	           	}
+	           	}
 	           
+	         	 in = new File ( picts + toode + ".png"); 
+	           	if(in.isFile()){            	
+	           	File inpda = new File ( pictspda + toode + ".png" ); 
+	           	if(!inpda.exists()) {
+	           	 	Converter.shrinkAndCopyFile(in,inpda);
+	           	}
+	           	}
+	           	
 		   	    	if(c == 100){
 		   	    		  c = 0;
 		   	    		//  System.out.println("Piltide leidmine "  + a);	
@@ -1240,7 +1262,14 @@ String ag = rs.getString("agent").trim();
 		                   added.add(toode);
 		           	     } 
 		       
-		                 
+		                 f = new File(pictspda + toode+".png");
+		                  len = "0";
+		                 if(f.exists()){
+		                   len =	f.length() + "";
+		                   if(!added.contains(toode))
+		                   buf.append(toode+".png;"  + len + "\n");
+		                   added.add(toode);
+		           	     } 
 		                 }
 		   	    rs.close();
 		   	    stmt.close();

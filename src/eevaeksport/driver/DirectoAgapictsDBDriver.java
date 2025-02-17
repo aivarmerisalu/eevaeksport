@@ -1557,7 +1557,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
                         	 customer.setAddress(""); 
 		         		 }
 
-		         		  if(customerSales.get(customer.getID()) != null) {
+		         		/*  if(customerSales.get(customer.getID()) != null) {
 		         			  Toode t = (Toode)customerSales.get(customer.getID())  ;
 		         			  String asi = null;
 	        	              if(t.getDonecur() != 0 ){
@@ -1574,7 +1574,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
                             if(asi != null) {
 		         			  customer.setInfo(asi);
                             }
-		         		  }
+		         		  }*/
 		         		  try{
 		         			  
 		         			 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
