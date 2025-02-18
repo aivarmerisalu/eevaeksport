@@ -1198,8 +1198,6 @@ String ag = rs.getString("agent").trim();
 		   	    	a++;
 		   	    	c++;
 		   	     String toode = rs.getString("toode").trim();  
-		         toode = toode.replace('/', '_');
-		         toode = toode.replace('/', '_');
 		        
 		         String ean = rs.getString("ean");
 	           if(ean != null && ean.trim().length()>0){

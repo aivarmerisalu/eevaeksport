@@ -2,8 +2,11 @@ package eevaeksport.driver;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -24,12 +27,21 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -51,7 +63,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaFazerEEDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater,Discounter {
+public class AxaFazerEEDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater,Discounter,WebReporter {
   public AxaFazerEEDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -1928,6 +1940,360 @@ return tm;
        }
 
 
+    	@Override
+       	public void WebReporter() {
+       		
+        	   ArrayList<String> filenames = new ArrayList<String>();
+         // teeme kataloogi salvestamiseks
+         		File f = new File("svdata");
+         		if(!f.exists()) {
+         			f.mkdir();
+         		}
+         		
+         		
+         		
+         		Calendar cal = Calendar.getInstance();
+         		String hh = cal.getTime().getHours()+"";
+         		if(hh.length() == 1) {
+         			hh = "0" + hh;
+         		}
+         		String mm = cal.getTime().getMinutes()+"";
+         		if(mm.length() == 1) {
+         			mm = "0" + mm;
+         		}
+         		String time2 = "_" + hh +"-" +mm;
+         	// loeme signatuurid sisse kui on olemas	
+         		HashSet done = null;
+         		try {
+         			done = (HashSet) Converter.readObject("signadone.obj");
+         		}catch(Exception e) {
+         			e.printStackTrace();
+         		}
+         		
+         		if(done == null) {
+         			 done = new HashSet();
+         		}
+         		
+         		
+         		
+         	
+         		Calendar algus = Calendar.getInstance();  
+         	  	Calendar lopp = Calendar.getInstance();  	
+         	  	Integer days = 8;
+         	  if(	parent.getProps().getProperty("webreport.days") != null) {
+         		  try {
+         			  days = Integer.parseInt(parent.getProps().getProperty("webreport.days"));
+         		  }catch(Exception e) {
+         			  
+         		  }
+         	
+         	  }
+
+         	  System.out.println("days " + days);
+         	  	algus.add(Calendar.DATE, -1 * days);
+         	  	algus.set(Calendar.HOUR, 0);
+         	  	lopp.set(Calendar.HOUR, 23);
+         	  	lopp.set(Calendar.MINUTE, 59);
+         	  	lopp.add(Calendar.DATE, +2);
+         	 // Teeme SV listi 
+         	  
+         	  	try {
+         	  		String fnameBASE = this.getExcelDir() + "ReportBase.xlsx";
+         	  		FileInputStream excelifailBase = new FileInputStream(fnameBASE);
+         	  		XSSFWorkbook  wbBASE = new XSSFWorkbook(excelifailBase);
+         			
+         			XSSFSheet worksheetBASE = wbBASE.getSheetAt(0);
+         			
+         			
+         			
+         			CreationHelper createHelper = wbBASE.getCreationHelper();
+         			
+         			 XSSFCellStyle hlinkstyle = wbBASE.createCellStyle();
+         		      XSSFFont hlinkfont = wbBASE.createFont();
+         		      hlinkfont.setUnderline(XSSFFont.U_SINGLE);
+         		      hlinkfont.setColor(IndexedColors.BLUE.getIndex());
+         		      hlinkstyle.setFont(hlinkfont);
+
+         			
+         	  		
+         	  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass, true);
+         	  	//	System.out.println("files " + files.toString());
+       		
+          		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
+          		
+          		Converter.saveFile(f.getPath() + "/currSVjson.json", cc.toString());
+          		int outofstocks = 1;
+        		for (int i = 0; i < cc.length(); i++) {
+          			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
+          			
+          			String filterOutOfStock = (String)cob.get("resint3").toString();
+          			String dateAndTime = (String)cob.get("recetime");
+          		
+          			 cal = Calendar.getInstance();
+       	  			try {
+       	  				cal.setTimeInMillis(Long.parseLong(filterOutOfStock));
+       	  			}catch(Exception e) {
+       	  				cal.setTimeInMillis((Long)cob.get("sentdate"));
+       	  			}
+          			
+       	  			String dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
+       	  					//dateAndTime.split("T")[0];
+       	  			String time = "";
+       	  			String hour = cal.get(Calendar.HOUR_OF_DAY)+"";
+       	  			if(hour.length() == 1) {
+       	  				hour = "0"+hour;
+       	  			}
+
+       	  			String minute = cal.get(Calendar.MINUTE)+"";
+       	  			if(minute.length() == 1) {
+       	  				minute = "0"+minute;
+       	  			}
+       	  			String timeOnly = hour+":"+minute;
+          			
+          	    	String cagid = "";
+          	    	try{
+          	    		cagid =	(String)cob.get("custagent");
+          	    	}catch(Exception e) {
+          	    		
+          	    	}
+          			String cagname = "";
+          			try{
+          				cagname =	(String)cob.get("custagname");
+          	    	}catch(Exception e) {
+          	    		
+          	    	}
+          			String agid = (String)cob.get("agentid");
+          			
+          			String agname = "NoName Manager" ; 
+          			try {
+          			  agname = (String)cob.get("managerName");
+          			 } catch(Exception r) {
+          				
+          			 }
+          			String chain = (String)cob.get("custchain");
+          			
+          		
+          			//System.out.println("signa " + signa + " " + filterOutOfStock + " " + filterProblem);
+          			
+          			String res2 = "";
+       				try {
+       					if((String)cob.get("resstr2") != null) {
+       	  					res2 = (String)cob.get("resstr2");
+       	  				}
+       				}catch(Exception e) {
+       					
+       				}
+       				try {
+       				JSONParser parser = new JSONParser();
+       				JSONObject obj = (JSONObject) parser.parse(res2);
+       			    String segment = (String)obj.get("segment");
+       			    String brand = (String)obj.get("brand");
+       			    String type = (String)obj.get("type");
+       			    Long start = (Long)obj.get("start");
+       			    String startT = (String)obj.get("startT");
+       			    Double  wei =  0d;
+       			    try {
+       			       wei = Double.parseDouble(obj.get("weight")+"");
+       			     } catch(Exception e) {
+       			    	
+       			     }
+       			    Long end = (Long)obj.get("end");
+       			    String endT = (String)obj.get("endT");
+
+       				System.out.println(obj.toJSONString());
+       				
+       				String pricet = "1";
+       				String perct = "0";
+       				Boolean isPerc = (Boolean)cob.get("isgroup");
+       				if(isPerc) {
+       					pricet = "0";
+       					perct  = "1";
+       				}
+       				
+
+       	   			String signa = dateAndTime + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") + brand ;
+          		
+          			
+          			if( done != null && !done.contains(signa)){
+          				
+          				   				
+          				Double addi = 0d;
+          				
+          				try {
+          				  addi = Double.parseDouble(cob.get("grouptotal")+"");
+          				 } catch(Exception e) {}
+          				
+          				worksheetBASE.createRow(outofstocks);
+          				worksheetBASE.getRow(outofstocks).createCell(0).setCellValue(agid);
+          				// agname = new String(agname.getBytes(), "UTF-8");
+          				
+          				if(agid.equals("Klaip")) {
+          					agname = "Asta Razmienė";
+          				}
+          				
+          				if(agid.equals("Panev")) {
+          					agname = "Valentinas Jankevičius";
+          				}
+          				
+          				
+          				worksheetBASE.getRow(outofstocks).createCell(1).setCellValue(agname);
+          				String cuname = (String)cob.get("custname");
+          				String cuid = (String)cob.get("custid");
+          				if(cuname.endsWith(cuid)) {
+          					cuname = cuname.substring(0,cuname.indexOf(cuid)-1);
+          				}
+          				
+          				worksheetBASE.getRow(outofstocks).createCell(3).setCellValue(cuname);
+          				worksheetBASE.getRow(outofstocks).createCell(2).setCellValue(cuid);
+       				String prodid = (String)cob.get("prodid");
+          				
+       				if(brand.startsWith("R") && brand.endsWith("ta")) {
+       					brand = "Rīta";
+       				}
+       				if(brand.startsWith("Sp") && brand.endsWith("katota")) {
+       					brand = "Spēkatota";
+       				}
+       				if(brand.startsWith("Gard")) {
+       					brand = "Gardā";
+       				}
+       				if(brand.startsWith("M") && brand.endsWith("aize")) {
+       					brand = "Mākoņmaize";
+       				}
+       				if(brand.startsWith("Tost") && !brand.contains("maiz") ) {
+       					brand = "Tostē";
+       				}
+       				if(brand.startsWith("Kur")) {
+       					brand = "Kurši";
+       				}
+       				if(brand.startsWith("Maizi")) {
+       					brand = "Maiziņš";
+       				}
+       				
+       				if(brand.startsWith("Dz")) {
+       					brand = "Dzīvā";
+       				}
+       				
+       				if(brand.startsWith("Isten")) {
+       					brand = "Istenā";
+       				}
+          				worksheetBASE.getRow(outofstocks).createCell(4).setCellValue(brand);
+          				
+          				
+          				worksheetBASE.getRow(outofstocks).createCell(5).setCellValue(startT);
+          				worksheetBASE.getRow(outofstocks).createCell(6).setCellValue(endT);
+          				
+
+          				worksheetBASE.getRow(outofstocks).createCell(7).setCellValue(pricet);
+          				worksheetBASE.getRow(outofstocks).createCell(8).setCellValue(perct);
+       			   				
+       			try {
+       			    Double price = Double.parseDouble(cob.get("normalpr")+"");
+       			     if(price > 0) {
+       			   				worksheetBASE.getRow(outofstocks).createCell(9).setCellValue(price);
+       			     }
+       			     }catch(Exception e) {}
+       			
+       			try {
+       			     Double priceA = Double.parseDouble(cob.get("amoun")+"");
+       			     if(priceA > 0) {
+       			   				worksheetBASE.getRow(outofstocks).createCell(10).setCellValue(priceA);
+       			     }
+       			     }catch(Exception e) {}   
+       			
+       			try {          
+       			       if(wei > 0) {
+       					  worksheetBASE.getRow(outofstocks).createCell(11).setCellValue(wei);
+       					}
+       			    } catch (Exception e) {}
+       			
+
+          				if(segment != null) {
+          				  worksheetBASE.getRow(outofstocks).createCell(12).setCellValue(segment);
+          				}
+
+          				if(type != null) {
+          				  worksheetBASE.getRow(outofstocks).createCell(13).setCellValue(type);
+          				}
+          				   				
+
+          				if(addi > 0) {
+          				  worksheetBASE.getRow(outofstocks).createCell(14).setCellValue(addi);
+          				}
+          				
+
+          				try {
+          	  				worksheetBASE.getRow(outofstocks).createCell(15).setCellValue((String)cob.get("comment"));
+          	  				}catch(Exception e) {
+          	  					
+          	  				}
+          				worksheetBASE.getRow(outofstocks).createCell(17).setCellValue(dateOnly);
+          				worksheetBASE.getRow(outofstocks).createCell(18).setCellValue(timeOnly);
+          
+          				
+          				String foto = null;
+         				if(files != null && files.get(cuid) != null) {
+         					ArrayList arr = (ArrayList)files.get(cuid);
+         					for(int e = 0; e<arr.size(); e++) {
+         						Toode t = (Toode)arr.get(e);
+         						if(!t.getID().equals("prodid")) {
+         						//System.out.println(t.getID()+ " " +  (String)cob.get("prodid") +" " + agid+ " " + t.comment +" " + t.getGr1() + " "  + dateOnly );
+         						  if(t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
+         							foto = t.getLadu();
+         						   }
+         					}}
+         				}
+          				
+          				 //URL Link
+          				if(foto != null) {
+          		         Cell  cell = worksheetBASE.getRow(outofstocks).createCell(16);
+          		         cell.setCellValue("Photo Link");
+          		         XSSFHyperlink link = (XSSFHyperlink)createHelper.createHyperlink(Hyperlink.LINK_URL);
+          		         link.setAddress(URLEncoder.encode(foto, StandardCharsets.UTF_8.toString()));
+          		         cell.setHyperlink((XSSFHyperlink) link);
+          		         cell.setCellStyle(hlinkstyle);
+          				}
+          				//worksheetBASE.getRow(outofstocks).createCell(15).setCellValue(cagname);
+          				
+          				
+          				outofstocks++;
+          				done.add(signa);
+          			}
+                     }catch(Exception e) {
+                   	  
+                     }
+          			
+          	   			}
+        		
+       			if(outofstocks > 1) {
+       				String exceldir = this.getExcelDir()  +"reports/est/";
+    	   	   		File ff = new File( exceldir );
+       	   	   		if(!ff.exists()) {
+       	   	   			ff.mkdir();
+       	   	   		}
+       	   	   		excelifailBase.close();
+       	   	   		
+
+       	   	   		FileOutputStream output_file_oos =new FileOutputStream(exceldir +
+       	   	   				"productCamp-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
+       	   	   		filenames.add(exceldir + "productCamp-" + Converter.getYYYY_MM_DD_String(new java.util.Date())+ time2 + ".xlsx");
+       	   	   		wbBASE.write(output_file_oos); //write changes
+       	   	   		output_file_oos.close();  //close the stream
+       	   			}else {
+       	   				System.out.println("pole mida teha");
+       	   			}
+          		
+          		try {
+                Converter.saveObject(done,"signadone.obj");
+         		}catch(Exception e) {
+         			e.printStackTrace();
+         		}
+         	
+         	  	}catch(Exception e) {
+         	  		e.printStackTrace();
+         	  	}
+        	
+       		System.exit(0);
+       	}
 
  
 

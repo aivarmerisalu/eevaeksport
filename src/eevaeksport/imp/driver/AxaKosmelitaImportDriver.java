@@ -197,10 +197,15 @@ private HashSet<String >  testersSet = null;
     	   mprice = price;
     	   sprice = price / (100-discount) * 100;
        }
+       
+       boolean goes = true;
+       
        if(discount == -2 ) {
     	   // vahetame toote testeri vastu 
     	   if(this.tEsters.get(itemid) != null) {
     		   itemid = this.tEsters.get(itemid);
+    	   }else {
+    		   goes = false;
     	   }
        }
     	  //OrderLines  
@@ -215,14 +220,16 @@ private HashSet<String >  testersSet = null;
 
               log.info("SALES_LINE_SQL: " + sql);
               System.out.println(sql);
+            if(goes) {
               Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
               
               PreparedStatement st2 = con.prepareStatement(sql);
-           
-           
               st2.executeUpdate();
-              addNumLine();
               st2.close();
+              con.close();
+            }
+              addNumLine();
+             
 
               }
   }

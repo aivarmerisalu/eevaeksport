@@ -2586,7 +2586,8 @@ String asi3 = "";
    	   			}
  		
 			if(outofstocks > 1) {
-	   	 		String exceldir = this.getExcelDir() + "reports/";
+				
+	   	 		String exceldir = this.getExcelDir()  +"reports/lat/";
 	   	   		File ff = new File( exceldir );
 	   	   		if(!ff.exists()) {
 	   	   			ff.mkdir();
