@@ -466,7 +466,7 @@ try{
 	    Connection con = getNewConnection();
 	  	
 	    String cmd = "SELECT K.NOSAUK AS nimi, K.PK_KLIENTS AS id, K.KODS AS kood FROM   TRIDLV7866.DKLIENTS K " +
-	  			" WHERE ltrim(K.KODS) = '" + kood + "'" ;  
+	  			" WHERE ltrim(K.KODS) = '" + kood + "' and K.DBKRPAZ = 1" ;  
 
 	  	Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(cmd);

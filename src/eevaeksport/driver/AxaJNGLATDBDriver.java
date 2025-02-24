@@ -1822,6 +1822,11 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
         }
       
       prod.setName(nimetus + add);
+      
+      prod.setAllowGift(false);
+      if(prod.getGroup().startsWith("151")) {
+    	  prod.setAllowGift(true);
+      }
    
       
       if(kogusedStr.get(kood) != null){

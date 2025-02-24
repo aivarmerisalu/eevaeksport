@@ -1295,11 +1295,11 @@ try {
          arr.add(prod.getID());
          lineDiscs.put(prgrupp.trim(), arr);
        }
+      prod.setAllowGift(false);
       
-     
       if(this.testerProdsMap.get(prod.getID()) != null){
     	  prod.setDiffColor(true);
-    	  //tester.button
+    	  prod.setAllowGift(true);
       }
       
        if(stocksOld != null && stocksOld.get(prod.getID()) != null) {

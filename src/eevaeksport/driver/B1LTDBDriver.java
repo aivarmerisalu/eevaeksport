@@ -367,7 +367,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
            String name = (String)cob.get("name");
        
            if (name != null && name.trim().length() > 0) {
-        	   tm.put(id,name);
+        	   tm.put(id,Converter.enCodeEst(name));
            }
          	}
 		  
@@ -552,12 +552,15 @@ private void saveFile (String filename, String url ) {
 	          		ss = (ArrayList)addr.get(clientId);
 	          	}
 	          	Customer cu = new Customer(clientId+ "_" + id);
-	          	 cu.setAddress(fullAddress);
+	          	 cu.setAddress(Converter.enCodeEst(fullAddress));
 	          	 cu.setPayer(clientId);
 	          	if(employeeId != null) {
 	          		Agent ag = new Agent(employeeId + "");
 	          		cu.addAgent(ag);
+	          		
 	          	}
+	          	cu.addAgent(new Agent("61"));
+	          	cu.addAgent(new Agent("39"));
 	          	
 	          	ss.add(cu);
 	          	addr.put(clientId, ss);
@@ -607,7 +610,7 @@ private void saveFile (String filename, String url ) {
 	            
 	            String displayName = (String)cob.get("name");
 	            if(displayName != null) {
-	            cust.setName(displayName);
+	            cust.setName(Converter.enCodeEst(displayName));
 	            
 	            cust.setPayer(number);
 	            String address1 = (String)cob.get("registrationAddress");
@@ -635,7 +638,7 @@ private void saveFile (String filename, String url ) {
 	            }
 	            
 	        //    System.out.println("klinfo " + address1 + "'" +address2 + "'" + city  + "'" + state+ "'" + country+ "'" + postalCode);
-	            cust.setAddress((address1 + city + country + postalCode).trim());
+	            cust.setAddress(Converter.enCodeEst((address1 + city + country + postalCode).trim()));
 	            
 	            Agent aa = new Agent("60");
 	            cust.addAgent(aa);

@@ -189,46 +189,18 @@ try{
 	
 	  } else {
 		  
-	 //Vector vv = this.splitOrder(order);
+	 Vector vv = this.splitOrder(order);
     
-	//  for(int k = 0; k<vv.size();k++) {
-    	   
-	 	//  Order ord = (Order)vv.elementAt(k);
-	 		 boolean salvesta = true;
-      	 	 Vector lin = order.getOrderLines();
-      	 	 boolean laks = false;
-      	 	 for (int i = 0; i < lin.size(); i++) {
-      	 		OrderLine ol = (OrderLine) lin.elementAt(i);
-      	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0 && (order.getStatus() == 5 || order.getStatus() == 4)){
-      	 			laks = true;
-      	 		}
-      	 	 }  
-      		    if(laks){
-      		    	salvesta = false;
-      		    }
-      		    
-     if(salvesta){
-      	  		 addlocks(false,false);
-    	 	     makeOutput(order); 
+	  for(int k = 0; k<vv.size();k++) {
+     	  Order ord = (Order)vv.elementAt(k);
+	 		    addlocks(false,false);
+    	 	     makeOutput(ord); 
 	 		String lineSep = System.getProperty("line.separator");
   		  		 writeConsloStr(parent.getProps().getProperty("conv.dir") + "index.csv", fileName + "," + this.getDateTimeString(Calendar.getInstance())+ ",,," + lineSep);
        			 addlocks(true,false);
-			 
-      	 }else{
-      		//H_77428.csv,1,12.11.2018 08:58:08,,,
-      		 
-      		// teeme teise outputi 
-	 	  //    addlocks2(false,false);
-	 		 // makeOutput2(order);
-      		//  String lineSep = System.getProperty("line.separator");
-  		  	//  writeConsloStr(parent.getProps().getProperty("conv.dir3") + "index.csv",fileName + ",0,,," + lineSep);
-       		//  addlocks2(true,false);
-	 		//  setNumAddedLines(lin.size()); 
- 	    	///  System.out.println("Ei Salvesta kuna neagtiivne on tell " +fileName + " " + lin.size());
-      	    }
-      		
+			
 	 	 signatures.add(signature);
-      //	}   
+      	}   
       }
 
 	  try {
@@ -371,7 +343,8 @@ try{
 
 		  Order ordorkla = new Order(order.getCompany(),order.getAgentFirstName());
 		  Order ordorklabonus = new Order(order.getCompany(),order.getAgentFirstName());
-		 
+		  Order ordorklaret = new Order(order.getCompany(),order.getAgentFirstName());
+		  
 		  
 		  
 		  ordorkla.setAgentCode(order.getAgentCode());
@@ -398,12 +371,31 @@ try{
 		  ordorklabonus.setDealer(order.getDealer());
 
 
+		  ordorklaret.setAgentCode(order.getAgentCode());
+		  ordorklaret.setDokNr(order.getDokNr()+"R");
+		  ordorklaret.setCompName(order.getShipMode());
+		  ordorklaret.setShipCal(order.getShipCal().getTimeInMillis() +"");
+		  ordorklaret.setStatus(order.getStatus()); 
+		  ordorklaret.setInfo(order.getInfo());
+		  ordorklaret.setReference(order.getReference());
+		  ordorklaret.setTeostaja(order.getTeostaja());
+		  ordorklaret.setWarehouse(order.getWarehouse());
+		  ordorklaret.setDealer(order.getDealer());
 
 		  
 	
 		  
 		  Vector lines = order.getOrderLines();
-		  
+		  /*
+		   * 	
+      	 	 Vector lin = order.getOrderLines();
+      	 	 boolean laks = false;
+      	 	 for (int i = 0; i < lin.size(); i++) {
+      	 		OrderLine ol = (OrderLine) lin.elementAt(i);
+      	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0 && (order.getStatus() == 5 || order.getStatus() == 4)){
+      	 			laks = true;
+      	 		}
+      	 	 } */
 		  
 		  Enumeration enumr = lines.elements();
 		  while  (enumr.hasMoreElements()){
@@ -413,10 +405,14 @@ try{
 			    	
 			    		ordorklabonus.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-			    		ordorklabonus.setDokNr(order.getDokNr());
+			    		ordorklabonus.setDokNr(order.getDokNr()+"B");
 			    		ordorklabonus.setReference(order.getReference());
-				     	
-			    		
+				 		
+			    	}else if (lin.getKogus() < 0) {
+			    		ordorklaret.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+				     	ordorklaret.setDokNr(order.getDokNr()+"R");
+				     	ordorklaret.setReference(order.getReference());
 			    	}else {
 			    		ordorkla.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
@@ -429,13 +425,16 @@ try{
 		  if(ordorkla.getOrderLines() != null && ordorkla.getOrderLines().size()>0){
 			  result.add(ordorkla);  
 		  }
-		  
+
+		  if(ordorklaret.getOrderLines() != null && ordorklaret.getOrderLines().size()>0){
+			  result.add(ordorklaret);  
+		  }
 		  if(ordorklabonus.getOrderLines() != null && ordorklabonus.getOrderLines().size()>0){
 			  result.add(ordorklabonus);  
 		  }
 	      
 		  
-		 System.out.println("Result =" +order.getDokNr()
+		 System.out.println("Result = " +order.getDokNr()
 				 + " "+ result.size());
 		 //System.exit(0);
 		  return result ;
@@ -453,6 +452,15 @@ try{
 	 	
 	 	try {
 	 	    String doknr = order.getDokNr();
+	 	    System.out.println("doknr " + doknr);
+	 	    boolean tagastus = false;
+	 	    if(doknr.endsWith("R")) {
+	 	    	tagastus = true;
+	 	    }
+	 	   boolean bonus = false;
+	 	    if(doknr.endsWith("B")) {
+	 	    	bonus = true;
+	 	    }
 		      String fn = doknr;
 		      String mills = (Calendar.getInstance().getTimeInMillis()+"").substring(10);
 		      if(doknr.trim().length()== 0){
@@ -493,13 +501,17 @@ try{
 	        	 call = order.getShipCal();
 	         }
 	         
+	         String rrr = "";
+	         if(tagastus) {
+	        	 rrr = "ATG";
+	         }
 	       	 fileName =   "H_" + fn + ".csv";
 	       	 StringBuffer sb0 = new StringBuffer();
 	       	 //369272;LT1004280:242970;12.02.2025 10:01:57;L;13.02.2025;944;;;0.00;FALSE;12.02.2025 10:40:39;;
 	            sb0.append(fn + sep);
 		        sb0.append( klient + sep);
 		        sb0.append(getDateTimeString(Calendar.getInstance()) + sep + "L" +
-		        sep + getDateString(call) + sep + agent+sep+sep+sep+"0.00"+sep +"FALSE"+sep +getDateTimeString(Calendar.getInstance())+sep+sep);
+		        sep + getDateString(call) + sep + agent+sep+sep+sep+"0.00"+sep +"FALSE"+sep +getDateTimeString(Calendar.getInstance())+sep+ rrr +sep);
 		      
 	    	        
 	         String fname = (parent.getProps().getProperty("conv.dir")) + fileName;
@@ -528,8 +540,11 @@ try{
 	        if(ol.getDiscount()> 0 && (ol.getDiscount() < 99 || arr.contains(toode)) ){
 	        	disc = ol.getDiscount()+"";
 	        }
-	       
-	        sb.append(ol.getPrice() + sep);
+	       double pr = ol.getPrice();
+	       if(bonus) {
+	    	   pr = 0;
+	       }
+	        sb.append(pr + sep);
 	        sb.append(disc + sep);
 	        sb.append("0" + sep+sep); //tyhi
 	       

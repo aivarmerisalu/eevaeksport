@@ -1158,13 +1158,10 @@ String ag = rs.getString("agent").trim();
 
 	 private void makePictureCat(){
 
+    String cmd = "SELECT N17_KODAS_PS AS toode,  "+
+	  		   	"	N17_KODAS_PS AS ean, N17_KODAS_GS AS grupp "+
+	  		   " FROM n17_prod a  LEFT JOIN  n37_pmat ON n37_kodas_ps=n17_kodas_ps where  N17_POZ_DATE !=1  order by N17_KODAS_PS ";
 
-	  	  String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus,dbo.papn(L11_LAUKAS , 8, 'c')  AS tykke,dbo.papn(L11_LAUKAS , 9, 'c')  AS alusel, 0 AS myygihind," +
-	  		   		"N17_KODAS_PS AS ean, "+
-	  		   " 0 AS kogus,n17_kodas_ls_5 AS grupp, N17_KODAS_GS AS grupp2 ,N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status , N17_MAX_NUOL as maks," +
-	  		   " case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus " +
-	  		   " FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1 where  N17_POZ_DATE !=1" +
-	  		   " " ;
 
 
 	        String picts = parent.getProps().getProperty("pict.dir");
@@ -1188,19 +1185,18 @@ String ag = rs.getString("agent").trim();
 
 
 		        StringBuffer buf = new StringBuffer();
-		      
-		        int a = 0;
+		       
 		        int c = 0;
 		        
 		        // leiame kataloogid ja peame meeles 
 		        
 		        while (rs.next()) {
-		   	    	a++;
+		   	    	
 		   	    	c++;
 		   	     String toode = rs.getString("toode").trim();  
 		        
 		         String ean = rs.getString("ean");
-	           if(ean != null && ean.trim().length()>0){
+	           if(ean != null && ean.trim().length() == 12){
 	         	  try{
 	         		  EAN13CheckDigit ee = new EAN13CheckDigit();
 	         		  String ean2 = ean.trim() + ee.calculate(ean.trim());
@@ -1212,13 +1208,15 @@ String ag = rs.getString("agent").trim();
 	      	 
 	        System.out.println("Piltide kopeerimine ");	
 	      
-	       	  //System.out.println("gg " + gg[0] + " " + gg.length);
+	       	  System.out.println("gg " + toode);
 	                 	
 	           	File in = new File ( picts + ean + ".jpg"); 
 	           	if(in.isFile()){            	
 	           	File inpda = new File ( pictspda + toode + ".jpg" ); 
 	           	if(!inpda.exists()) {
 	           	 	Converter.shrinkAndCopyFile(in,inpda);
+	           	 System.out.println("ean olemas jpg " + toode);
+		         
 	           	}
 	           	}
 	           
@@ -1227,6 +1225,8 @@ String ag = rs.getString("agent").trim();
 	           	File inpda = new File ( pictspda + toode + ".jpg" ); 
 	           	if(!inpda.exists()) {
 	           	 	Converter.shrinkAndCopyFile(in,inpda);
+
+		           	 System.out.println("toode olemas jpg " + toode);
 	           	}
 	           	}
 	           	
@@ -1235,6 +1235,8 @@ String ag = rs.getString("agent").trim();
 	           	File inpda = new File ( pictspda + toode + ".png" ); 
 	           	if(!inpda.exists()) {
 	           	 	Converter.shrinkAndCopyFile(in,inpda);
+
+		           	 System.out.println("ean olemas png " + toode);
 	           	}
 	           	}
 	           
@@ -1243,6 +1245,8 @@ String ag = rs.getString("agent").trim();
 	           	File inpda = new File ( pictspda + toode + ".png" ); 
 	           	if(!inpda.exists()) {
 	           	 	Converter.shrinkAndCopyFile(in,inpda);
+
+		           	 System.out.println("toode olemas png " + toode);
 	           	}
 	           	}
 	           	
