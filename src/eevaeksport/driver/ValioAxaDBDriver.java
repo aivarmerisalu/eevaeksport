@@ -996,6 +996,17 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				prodsH.add(id);
 				}
 			 }
+			goes.add("61213");
+			prodsH.add("61213");
+					goes.add("61210");
+			prodsH.add("61210");
+			goes.add("61211");
+			prodsH.add("61211");
+			goes.add("61212");
+			prodsH.add("61212");
+			goes.add("61214");
+			prodsH.add("61214");
+			
 			rs2.close();
 			stmt.close();
 			con.close();

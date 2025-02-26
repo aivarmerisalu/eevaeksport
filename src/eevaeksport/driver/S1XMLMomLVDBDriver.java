@@ -141,78 +141,7 @@ public class S1XMLMomLVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	  
    }
    
-   private Hashtable readPlans(){
-		Hashtable hh = new Hashtable();
-		  File f = new File(this.getExcelDir() + "MeatPlan.xlsx");
-		  try {
-				FileInputStream ff = new FileInputStream(f);
-				XSSFWorkbook workbook = new XSSFWorkbook((ff));
-				
-				int currMont = Calendar.getInstance().get(Calendar.MONTH)+1;
-				int currYear = Calendar.getInstance().get(Calendar.YEAR);
-				String sh = currYear + "" + currMont;
-				
-				if((currMont+"").length() == 1) {
-					sh = currYear + "0" + currMont;
-				  }
-				
-				 DataFormatter formatter = new DataFormatter();
-					
-				
-				XSSFSheet sheet = workbook.getSheet(sh);
-				XSSFRow row = null;
-				for (int i = 1; i < sheet.getLastRowNum(); i++) {
-					row = sheet.getRow(i);
-					String agentID = formatter.formatCellValue(row.getCell(0));
-					String meatGroup = formatter.formatCellValue(row.getCell(3));
-					
-					String sum = "";
-					String sumkg = "";
 
-					    try {sum = (row.getCell((short) 5).getStringCellValue());
-						} catch (Exception e) {
-							try { sum = (int) (row.getCell((short) 5).getNumericCellValue()) + "";	
-						} catch (Exception u) {}}
-						
-						try {sumkg = (row.getCell((short) 4).getStringCellValue());
-						} catch (Exception e) {
-							try { sumkg = (int) (row.getCell((short) 4).getNumericCellValue()) + "";	
-						} catch (Exception u) {}}
-						
-				
-						
-						if(agentID != null && agentID.trim().length() > 0){
-						
-							if(meatGroup != null && meatGroup.trim().length() > 0){
-							//	System.out.println(agentID + " " + meatGroup + " " + sum + " " + sumkg );
-								Toode tt = new Toode(agentID);
-								tt.setGr1(meatGroup);
-								
-								if(sum != null && sum.length() > 0) {
-									tt.setPlancur(Double.parseDouble(sum));
-								}
-								if(sumkg != null && sumkg.length() > 0) {
-									tt.setPlanvol(Double.parseDouble(sumkg));
-								}
-							if(tt.getPlanvol() > 0 || tt.getPlancur() > 0 ) {
-								ArrayList arr = new ArrayList();
-								if(hh.get(agentID) != null) {
-									arr = (ArrayList) hh.get(agentID);
-								}
-								  arr.add(tt);
-				                    hh.put(agentID, arr);
-							}
-							    
-				                    
-				                    
-							}}}
-		  
-		  } catch (Exception d) {
-				// System.out.println(row.getCell((short)a).getNumericCellValue());
-			}
-		//  System.out.println(" plans " + hh.toString());
-		return hh;
-	}
    
    private Vector prlists = null;
    
@@ -485,7 +414,74 @@ public class S1XMLMomLVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	     }
 
 
-
+private HashMap loadDeliveryDays() {
+	HashMap res = new HashMap();
+	
+	
+	  File f = new File(this.getExcelDir() + "DeliveryDates.xlsx");
+	  try {
+			FileInputStream ff = new FileInputStream(f);
+			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+			 DataFormatter formatter = new DataFormatter();
+			
+			XSSFSheet sheet = workbook.getSheetAt(0);
+			XSSFRow row = null;
+			for (int i = 1; i < sheet.getLastRowNum(); i++) {
+				row = sheet.getRow(i);
+				String custID = formatter.formatCellValue(row.getCell(1));
+				String mon = formatter.formatCellValue(row.getCell(8));
+				String tue = formatter.formatCellValue(row.getCell(9));
+				String wed = formatter.formatCellValue(row.getCell(10));
+				String thu = formatter.formatCellValue(row.getCell(11));
+				String fri = formatter.formatCellValue(row.getCell(12));
+				String way = formatter.formatCellValue(row.getCell(13));
+				
+				String days = "";
+				if(mon != null && mon.startsWith("J")) {
+					days = "1";
+				}
+				if(tue != null && tue.startsWith("J")) {
+					if(days.length() == 0) {
+						days = days + "2";
+					}else {
+						days = days + ",2";	
+					}
+				}
+				if(wed != null && wed.startsWith("J")) {
+if(days.length() == 0) {
+	days = days + "3";
+					}else {
+						days = days + ",3";	
+					}
+				}
+				if(thu != null && thu.startsWith("J")) {
+if(days.length() == 0) {
+	days = days + "4";
+					}else {
+						days = days + ",4";	
+					}
+				}
+				if(fri != null && fri.startsWith("J")) {
+if(days.length() == 0) {
+	days = days + "5";
+					}else {
+						days = days + ",5";	
+					}
+					
+				}
+				if(way != null && way.length() > 2) {
+					way = way.replaceAll(" stundas", "stu.");
+					days = days + " " + "(" + way + ")";
+				}
+				res.put(custID, days);
+			}
+	  }catch(Exception e) {
+		  e.printStackTrace();
+	  }
+				
+	
+	return res;
+}
 
 	  private int getDue(long dd){
 	      int res = 0;
@@ -543,6 +539,8 @@ TreeMap<String, Double> odue = null;
 			         		}
 				         		
 			         		if(debtDocNr != null) {
+			         			
+			         			
 			         		String debtDocDate   = getNode(debtrida,"DocDate").getFirstChild().getNodeValue();
 			         		String debtPayDate   = null ;
 			         		
@@ -551,18 +549,14 @@ TreeMap<String, Double> odue = null;
 
 			         			  debt.setDuedate(getDate(debtPayDate));
 					      	      debt.setDue(getDue(getDate(debtPayDate).getTime()) + "");
-			         		} else {
-
+			         		 } else {
 
 					      	      debt.setDue(getDue(Calendar.getInstance().getTimeInMillis()) + "");
-					      	        
-			         			  debt.setDuedate(new Date(Calendar.getInstance().getTimeInMillis()));
+					      	      debt.setDuedate(new Date(Calendar.getInstance().getTimeInMillis()));
 			         		}
 			         		
 			         		Double debtOpenAmount   = Double.parseDouble(getNode(debtrida,"OpenAmount").getFirstChild().getNodeValue());
-			         		
-			         	
-			         		
+			         			
 			         		if(debtPayDate != null && (getDate(debtPayDate)).before(now)) {
 			         			if(odue.get(custGUID) != null) {
 			         				Double ol = odue.get(custGUID);
@@ -571,6 +565,14 @@ TreeMap<String, Double> odue = null;
 			         				odue.put(custGUID, debtOpenAmount);
 			         			}
 			         		
+			         		}else if(debtPayDate == null || debtPayDate.trim().length() == 0) {
+			         			// kui poel paydeated mingid kanded siis 
+			         			if(odue.get(custGUID) != null) {
+			         				Double ol = odue.get(custGUID);
+			         				odue.put(custGUID, ol+debtOpenAmount);
+			         			}else {
+			         				odue.put(custGUID, debtOpenAmount);
+			         			}
 			         		}
 			         			
 			      	        debt.setDoknr(debtDocNr);
@@ -584,8 +586,8 @@ TreeMap<String, Double> odue = null;
 			         		}catch(Exception e){}
 			         		
 		         			 if(debtAddressGUID != null) {
-		         				 String addrid = null;
-		         				 addrid = (String) custGUIDS.get(debtAddressGUID);
+		         				 
+		         			String addrid = (String) custGUIDS.get(debtAddressGUID);
 		         				if(addrid != null) {
 		         					debt.setCustID(addrid);
 		         					debt.setPayerID(custid);
@@ -785,6 +787,8 @@ TreeMap<String, Double> odue = null;
 	     custAgents = new Hashtable();
 	     custGUIDS = new HashMap();
 	     HashMap prg = plistGUID();
+	     
+	     HashMap delDays = loadDeliveryDays();
 	     this.getDebt(null);
 
 
@@ -1027,6 +1031,9 @@ TreeMap<String, Double> odue = null;
 		    	      		customer.addAgent(new Agent("35dde408"));
 		    	      		 customer.setPayer(CustCode + "_0");
 	    	      		   
+		    	      		 if(delDays.get(DAddressCode) != null) {
+		    	      			 customer.setCity("Pieg.Dienas " + delDays.get(DAddressCode));
+		    	      		 }
     	      		         tm.put(Converter.cleanLitLatEst(CustName + " "+ DAddressCode), customer);
     	      		        custGUIDS.put(DAddressGUID, customer.getID());
     	      				}
