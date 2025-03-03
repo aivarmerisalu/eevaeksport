@@ -357,7 +357,7 @@ try{
 		  ordorkla.setTeostaja(order.getTeostaja());
 		  ordorkla.setWarehouse(order.getWarehouse());
 		  ordorkla.setDealer(order.getDealer());
-
+		  ordorkla.setShipTime(order.getShipTime());
 		  
 		  ordorklabonus.setAgentCode(order.getAgentCode());
 		  ordorklabonus.setDokNr(order.getDokNr()+"B");
@@ -369,7 +369,8 @@ try{
 		  ordorklabonus.setTeostaja(order.getTeostaja());
 		  ordorklabonus.setWarehouse(order.getWarehouse());
 		  ordorklabonus.setDealer(order.getDealer());
-
+		  ordorklabonus.setShipTime(order.getShipTime());
+			 
 
 		  ordorklaret.setAgentCode(order.getAgentCode());
 		  ordorklaret.setDokNr(order.getDokNr()+"R");
@@ -381,6 +382,7 @@ try{
 		  ordorklaret.setTeostaja(order.getTeostaja());
 		  ordorklaret.setWarehouse(order.getWarehouse());
 		  ordorklaret.setDealer(order.getDealer());
+		  ordorklaret.setShipTime(order.getShipTime());
 
 		  
 	
@@ -488,11 +490,18 @@ try{
 			}
 			String comm = order.getInfo();
 			if ( comm == null ){
-				comm = " ";
+				comm = "";
 			}
+			String time = order.getShipTime();
+			if ( time == null ){
+				time = "";
+			}else{
+				time = " " + time;
+			}
+			
 	         String sep = ";";
 	         String lineSep = System.getProperty("line.separator");
-	         String klient = order.getCompany();
+	         String klient = order.getCompany().replace('_', ':');;
 	         
 	         
 	         Calendar call = Calendar.getInstance();
@@ -501,7 +510,7 @@ try{
 	        	 call = order.getShipCal();
 	         }
 	         
-	         String rrr = "";
+	         String rrr = (comm + time).trim();
 	         if(tagastus) {
 	        	 rrr = "ATG";
 	         }

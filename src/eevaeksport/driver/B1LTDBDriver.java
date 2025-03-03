@@ -604,9 +604,18 @@ private void saveFile (String filename, String url ) {
 	            Boolean juridical = (Boolean)cob.get("isJuridical");
 	            if(juridical) {
 	          	String number = cob.get("id") +"";
-
-	          	String code = cob.get("code") +"";
-	            Customer cust = new Customer(number);
+	          	Customer cust = new Customer(number);
+	            
+	          	String code = (String)cob.get("code") ;
+	          	if(code != null && code.trim().length() > 1) {
+	            	cust.setRegnr(code.trim());
+	            }
+	            
+	          	String vatCode = (String) cob.get("vatCode");
+	            if(vatCode != null && vatCode.trim().length() > 1) {
+	            	cust.setVatnr(vatCode.trim());
+	            }
+	            
 	            
 	            String displayName = (String)cob.get("name");
 	            if(displayName != null) {
@@ -660,6 +669,13 @@ private void saveFile (String filename, String url ) {
 	        		  
 	        		   ccc.addAgent(aa);
 	        		   ccc.setName(displayName);
+	        		   if(code != null && code.trim().length() > 1) {
+	   	            	ccc.setRegnr(code.trim());
+	   	            }
+	   	            
+	   	            if(vatCode != null && vatCode.trim().length() > 1) {
+	   	            	ccc.setVatnr(vatCode.trim());
+	   	            }
 	   	            if(phone != null) {
 	   	            	if(phone.startsWith("370")) {
 	   	            		phone = "+" + phone;

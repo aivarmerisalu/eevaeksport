@@ -7,9 +7,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -18,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +31,19 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import org.apache.poi.common.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFHyperlink;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import ee.mobilejava.wrapper.DefectiveLineWrapper;
 import ee.mobilejava.wrapper.DefectiveWrapper;
@@ -47,6 +64,7 @@ import eevaeksport.report.DefectiveLineWrapperMeri;
 import eevaeksport.report.EmailLogger;
 import eevaeksport.report.SupervisorInfoWrapperMeri;
 import eevaeksport.util.Converter;
+import eevaeksport.util.ReportingService;
 
 
 /**
@@ -59,7 +77,7 @@ import eevaeksport.util.Converter;
  */
 
 
-public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Discounter,Manager,Promo,BulkUpdater,EmailLogger,PictureMaker{
+public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Discounter,Manager,Promo,BulkUpdater,EmailLogger,PictureMaker,WebReporter{
   public MovexLatDBDriver(EksportPanel parent){
     super(parent);
     if(parent.getParentFrame().isDaySales()){
@@ -321,6 +339,25 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
   public String getSaveStockInfo(){
    
     String cmd = "Select TOODE, STOCK, EXPI from cesu.mjstock";
+    cmd = "SELECT MMITNO AS toode," + 
+      		"CASE WHEN round((MLSTQT-MBREQT))<0 THEN 1 ELSE round((MLSTQT-MBREQT)) END as STOCK,\r\n" + 
+      		" EXPI\r\n" + 
+      	
+      		"FROM\r\n" + 
+      		"(" +
+      		"  SELECT MMITNO, SUM(MLSTQT) AS MLSTQT, MIN(LMEXPI) AS EXPI\r\n" + 
+      		"  FROM (\r\n" + 
+      		"    SELECT MMITNO, MMITDS, MLBANO, LMEXPI, MLSTQT\r\n" + 
+      		"    FROM MVXJDTA.MITMAS\r\n" + 
+      		"    LEFT OUTER JOIN MVXJDTA.MITLOC ON MMCONO = MLCONO AND MMITNO = MLITNO AND MLSTQT <> 0\r\n" + 
+      		"    LEFT OUTER JOIN MVXJDTA.MILOMA ON MLCONO = LMCONO AND MLITNO = LMITNO AND MLBANO = LMBANO\r\n" + 
+      		"    WHERE MMCONO = '100' AND MLWHLO IN ('700') AND MLWHSL IN ('700', '715') AND MMBUAR = '111' AND MMPDLN='700'\r\n" + 
+      		"    ORDER BY MMITNO, LMEXPI ASC\r\n" + 
+      		"  )\r\n" + 
+      		"  GROUP BY MMITNO\r\n" + 
+      		") DT\r\n" + 
+      		"INNER JOIN MVXJDTA.MITBAL ON mbcono='100' and MBITNO = DT.MMITNO AND MBWHLO = '700'\r\n" + 
+      		"ORDER BY MMITNO";
 
       if (isDebug()) System.out.println(cmd);
 
@@ -534,7 +571,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
     	  e.printStackTrace();
       }
       
-      System.out.println("salescompa " + compa.size());
+    //  System.out.println("salescompa " + compa.size());
       
       
       
@@ -666,10 +703,12 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
              rs2.close();
              st2.close();
     	
-System.out.println("blockComments " + blockComments.toString());
+//System.out.println("blockComments " + blockComments.toString());
+ String sss = "ALTER SESSION SET NLS_TERRITORY = 'LATVIA'";
+String    cmd2 = " select  KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISIT, LIMIIT, AGENT, PAYER, EILADU, "
+		+ "DEBT, BLOK2, ROUTE_NR, ROUTE_NAME, SQ_INROUTE, GRUPA, LATITUDE, LONGTITUDE, TELENR, GNAME, sysdate from cesu.mjcustomerdata  ";
 
-String    cmd2 = " select KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISIT, LIMIIT, AGENT, PAYER, EILADU, "
-		+ "DEBT, BLOK2, ROUTE_NR, ROUTE_NAME, SQ_INROUTE, GRUPA, LATITUDE, LONGTITUDE, TELENR, GNAME from cesu.mjcustomerdata  ";
+
 
 Calendar cal = Calendar.getInstance();
 	  Converter cc = new Converter();
@@ -677,10 +716,17 @@ Calendar cal = Calendar.getInstance();
 
       if (isDebug()) System.out.println(cmd2);
        st = con.createStatement();
-      ResultSet rs = st.executeQuery(cmd2);
+       
+       ResultSet rs = st.executeQuery(sss);
+       
+       
+       rs = st.executeQuery(cmd2);
       HashMap custMap = new HashMap();
 
       while(rs.next()){
+
+
+    	  
     	  String klgrupp = rs.getString("klgrupp");
     	  if (klgrupp != null ){
     		  klgrupp = klgrupp.trim();
@@ -713,6 +759,7 @@ Calendar cal = Calendar.getInstance();
           }
           
           int  visitsq = rs.getInt("SQ_VISIT");
+          
           if(visitsq > 0){
             cust.isVisitToday();
             String aaa = visitsq + "";
@@ -838,6 +885,11 @@ Calendar cal = Calendar.getInstance();
             String lll = rs.getString("LONGTITUDE");
             String telef = rs.getString("TELENR");
             String gname = rs.getString("gname");
+
+            if(agent1.equals("C13") && visitsq > 0 ){
+          	  System.out.println( cust.getName() + " *" + visitsq);
+            }
+
             
             if(gname != null && gname.trim().length() > 0){
            	 cust.category = gname;
@@ -938,8 +990,8 @@ Calendar cal = Calendar.getInstance();
     return customers;
   }
 
-  private Connection getNewConnection() throws SQLException{
-    return DriverManager.getConnection("jdbc:oracle:thin:@10.10.100.97:1521:GM3REP1", getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
+  private Connection getNewConnection() throws SQLException{//10.10.100.97
+    return DriverManager.getConnection("jdbc:oracle:thin:@GM3REP1DB:1521:GM3REP1", getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
   }
 
   public TreeMap getProdGroups() throws SQLException {
@@ -1130,6 +1182,25 @@ String ex = parent.getProps().getProperty("products");
 
       con = getNewConnection();
       st = con.createStatement();
+      cmd2 = "SELECT MMITNO AS toode," + 
+      		"CASE WHEN round((MLSTQT-MBREQT))<0 THEN 1 ELSE round((MLSTQT-MBREQT)) END as STOCK,\r\n" + 
+      		" EXPI\r\n" + 
+      	
+      		"FROM\r\n" + 
+      		"(" +
+      		"  SELECT MMITNO, SUM(MLSTQT) AS MLSTQT, MIN(LMEXPI) AS EXPI\r\n" + 
+      		"  FROM (\r\n" + 
+      		"    SELECT MMITNO, MMITDS, MLBANO, LMEXPI, MLSTQT\r\n" + 
+      		"    FROM MVXJDTA.MITMAS\r\n" + 
+      		"    LEFT OUTER JOIN MVXJDTA.MITLOC ON MMCONO = MLCONO AND MMITNO = MLITNO AND MLSTQT <> 0\r\n" + 
+      		"    LEFT OUTER JOIN MVXJDTA.MILOMA ON MLCONO = LMCONO AND MLITNO = LMITNO AND MLBANO = LMBANO\r\n" + 
+      		"    WHERE MMCONO = '100' AND MLWHLO IN ('700') AND MLWHSL IN ('700', '715') AND MMBUAR = '111' AND MMPDLN='700'\r\n" + 
+      		"    ORDER BY MMITNO, LMEXPI ASC\r\n" + 
+      		"  )\r\n" + 
+      		"  GROUP BY MMITNO\r\n" + 
+      		") DT\r\n" + 
+      		"INNER JOIN MVXJDTA.MITBAL ON mbcono='100' and MBITNO = DT.MMITNO AND MBWHLO = '700'\r\n" + 
+      		"ORDER BY MMITNO";
        ResultSet rs1 = st.executeQuery(cmd2);
                          while(rs1.next()){
                            String id = rs1.getString("TOODE").trim();
@@ -1489,7 +1560,6 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
           " AND UCSMCD='" + agent.getID() + "' AND UCITTY = '01' GROUP BY ucivno,okcunm ORDER BY ucivno,okcunm";
 
 
-      System.out.println(sql);
       StringBuffer sb = new StringBuffer();
        try {
          sb.append("\n " + getParent().getString("todaysbills") + "\n\n");
@@ -1529,7 +1599,6 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
           String kogus = null;
          Statement st = con2.createStatement();
           ResultSet rs3 = st.executeQuery(sql2);
-          System.out.println(sql2);
           while (rs3.next()) {
             nimetus = rs3.getString("nimetus").trim();
             ale = rs3.getString("ale");
@@ -1541,7 +1610,6 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
         Connection con3 = getNewConnection();
         Statement stv = con3.createStatement();
         ResultSet rs4 = st.executeQuery(sql3);
-        System.out.println(sql3);
         while (rs4.next()) {
           nimetus = rs4.getString("nimetus").trim();
           ale = rs4.getString("ale");
@@ -1992,8 +2060,161 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
   private NumberFormat NF = NumberFormat.getInstance();
   private TreeMap  dealers = new TreeMap();
   
+  private void createWebTasks() {
+	  try{
+			 
+		  
+		  Long twoweeks = Calendar.getInstance().getTimeInMillis() + 1209600000; // täna pluss 2 nädalat
+		  
+		  eevaeksport.util.ReportingService serv = new ReportingService();
+			serv.user =  user;
+			serv.pass = pass;
+			serv.company = company;
+			
+		  String sql2 = "select lineid ,taskid,agentid,agentnam,clid, sentdate,senttime,reminder,photoname, " + 
+		  		"		  		status,mestext,headertext,res1 from cesu.mj_task where sentdate > sysdate-30 " + 
+		  		"                and lineid not in (select a.taskid from cesu.mj_task a where a.sentdate > sysdate-30 and a.taskid is not null) " + 
+		  		"                and taskid is null  order by clid,sentdate";
+		  
+	Connection con2 = this.getNewConnection();
+	Statement stt = con2.createStatement();
+	ResultSet rr = stt.executeQuery(sql2);
+	
+	HashSet loaded = (HashSet)Converter.readObject("tasklist.obj");
+	if(loaded == null) {
+		loaded = new HashSet();
+	}
+	
+	while (rr.next()){
+		String lineid =   rr.getString("lineid");
+		String taskid =   rr.getString("taskid");
+		String agentid =  rr.getString("agentid");
+		String agentnam = rr.getString("agentnam");
+		String clid =     rr.getString("clid");	
+		String sentdate = rr.getString("sentdate");
+		String senttime = rr.getString("senttime");
+		Date reminder =   rr.getDate("reminder");
+		String photoname = rr.getString("photoname");
+		String status = rr.getString("status");
+		String mestext =  rr.getString("mestext");
+		String headertext = rr.getString("headertext");
+		String donetime = rr.getString("res1");
+	     
+		long lll = 0;
+		boolean goes = true;
+        if(donetime != null && donetime.trim().length() > 0){
+        	try{
+        		lll = Long.parseLong(donetime.trim());
+        		if(Calendar.getInstance().getTimeInMillis() - 518400000  > lll){
+        			goes = false;
+        		}
+        	}catch(Exception e){
+        		
+        	}
+        }
+        
+        if(loaded.contains(lineid)) {
+        	goes = false;
+        }else {
+        	loaded.add(lineid);
+        }
+        
+
+		if(clid == null || clid.trim().length() == 0){
+			clid = " ";
+		}else{
+			clid = clid.trim();
+		}
+		
+		if(lineid == null || lineid.trim().length() == 0){
+			lineid = " ";
+		}else{
+			lineid = lineid.trim();
+		}
+		
+		if(taskid == null || taskid.trim().length() == 0){
+			taskid = " ";
+		}else{
+			taskid = taskid.trim();
+		}
+		
+		if(senttime == null || senttime.trim().length() == 0){
+			senttime = " ";
+		}else{
+			senttime = senttime.trim();
+		}
+		
+		
+		if(photoname == null || photoname.trim().length() == 0){
+			photoname = " ";
+		}else{
+			photoname = photoname.trim();
+		}
+		
+		if(mestext == null || mestext.trim().length() == 0){
+			mestext = " ";
+		}else{
+			mestext = mestext.trim();
+		}
+		
+		
+		if(headertext == null || headertext.trim().length() == 0){
+			headertext = " ";
+		}else{
+			headertext = headertext.trim();
+		}
+		
+		Long remi = twoweeks;
+		if(reminder != null){
+			remi = reminder.getTime();
+		}
+		if(goes){
+			
+			JSONObject value = new JSONObject();
+	    	  	value.put("created", Calendar.getInstance().getTimeInMillis());
+					value.put("header", headertext);
+					value.put("message", mestext);
+					value.put("reminder", remi);
+					
+					value.put("customer",new JSONObject().put("code", clid));
+					JSONArray arr = new JSONArray();
+					JSONObject value2 = new JSONObject();
+					value2.put("code", agentid);
+					value2.put("name", agentnam);
+					arr.put(value2);
+					value.put("managers", arr);		
+					
+					System.out.println(photoname + " " + value.toString());
+
+				String done = 	Converter.addNewTask(value, rcompany, user , pass);
+				System.out.println("Task Added " + done);
+			//	System.exit(0);
+				if(photoname != null) {
+					
+				File ff = new File(photoname);
+				
+			//	if( serv.uploadFile("http://merisoft.eu:8080/rest/task/" + done + "/uploadFile/" , ff.getAbsolutePath(), null, "tasks") ){
+     	      //  	System.out.println("Uploaded " + ff.getName() + " " + ff.getAbsolutePath());
+     	        //}
+				}
+				
+		}
+	}
+
+	rr.close();
+	stt.close();
+	con2.close();
+
+	  Converter.saveObject(loaded, "tasklist.obj");
+		  
+	 } catch (Exception e){
+		 e.printStackTrace();
+	 }
+	  
+  }
   
   private void makeTaskFile(String dir){
+	  createWebTasks();
 		 try{
 			 
 			  String sql2 = "select lineid ,taskid,agentid,agentnam,clid, sentdate,senttime,reminder,photoname," +
@@ -2803,5 +3024,292 @@ public  Vector getCustomerProductsDistList() {
 
 }
 
+@Override
+public void WebReporter() {
+
+
+	  ArrayList<String> filenames = new ArrayList<String>();
+	     // teeme kataloogi salvestamiseks
+	     		File f = new File("svdata");
+	     		if(!f.exists()) {
+	     			f.mkdir();
+	     		}
+	     		
+	     		Calendar cal = Calendar.getInstance();
+	     		String hh = cal.getTime().getHours()+"";
+	     		if(hh.length() == 1) {
+	     			hh = "0" + hh;
+	     		}
+	     		String mm = cal.getTime().getMinutes()+"";
+	     		if(mm.length() == 1) {
+	     			mm = "0" + mm;
+	     		}
+	     		String time2 = "_" + hh +"-" +mm;
+	     	// loeme signatuurid sisse kui on olemas	
+	     		HashSet done = null;
+	     		try {
+	     			done = (HashSet) Converter.readObject("signadone.obj");
+	     		}catch(Exception e) {
+	     			e.printStackTrace();
+	     		}
+	     		
+	     		if(done == null) {
+	     			 done = new HashSet();
+	     		}
+	     	
+	
+	     		
+	         	
+	     		Calendar algus = Calendar.getInstance();  
+	     	  	Calendar lopp = Calendar.getInstance();  	
+	     	  	Integer days = 8;
+	     	  if(	parent.getProps().getProperty("webreport.days") != null) {
+	     		  try {
+	     			  days = Integer.parseInt(parent.getProps().getProperty("webreport.days"));
+	     		  }catch(Exception e) {
+	     			  
+	     		  }
+	     	
+	     	  };
+
+	     	  	algus.add(Calendar.DATE, -1 * days);
+	     	  	algus.set(Calendar.HOUR, 0);
+	     	  	lopp.set(Calendar.HOUR, 23);
+	     	  	lopp.set(Calendar.MINUTE, 59);
+	     	  	lopp.add(Calendar.DATE, +2);
+	     		
+
+    			String exceldir = this.getExcelDir() + "reports/";
+           		File ff = new File( exceldir );
+           		if(!ff.exists()) {
+           			ff.mkdir();
+           		}
+	     		
+           		
+
+      		  JSONArray dayreportarray = Converter.getWebDayReport(algus.getTimeInMillis(), lopp.getTimeInMillis(), rcompany, user, pass);
+      		Converter.saveFileInUTF8(f.getPath() + "/currDRjson.json", dayreportarray.toString());
+      		
+      		
+
+            String url = "http://reporting-files.merisoft.eu/gallery/cesu/";
+      		
+      		TreeMap newCusts = new TreeMap();
+      		
+      		org.json.simple.JSONArray cc = 	Converter.readJSONArrFile(f.getPath() + "/currDRjson.json");
+      		
+      		
+  		  int lenn = cc.size();
+  		try {
+  		  for (int i = 0; i < lenn; i++) {
+  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+            	String key = (String)cob.get("custid");
+            	if(key.equals("NAUJAS")) {
+            	try {
+            	String comm = (String)cob.get("comment");
+            	if(comm.contains("\"custname\"")) {
+            		comm = comm.substring(comm.indexOf("{"));
+            		comm = comm.substring(0,comm.lastIndexOf("}") + 1);
+            		comm = comm.replaceAll("\"\"", "\"");
+
+              		//System.out.println("comm " + comm);
+            		newCusts.put(i , comm);
+            	}
+            	
+            	}catch(Exception e){
+            	}
+
+            	}
+  		  }
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  		}
+  		
+  	//	System.out.println("newCusts " + newCusts.toString());
+  		
+  		
+  		
+  		
+           		
+	  try {
+    	   // Siin siis uue kliendi info kogumine
+		  
+		 
+    	  	String fnameNewCust = exceldir + "NewCustomerCesu.xlsx";
+    	  		File gg = new File(fnameNewCust);
+    	  		if(!gg.exists()) {
+    	  		fnameNewCust = 	this.getExcelDir() + "ReportNewCustomer.xlsx";
+    	  		}
+    	  	
+    		FileInputStream excelifailNew = new FileInputStream(fnameNewCust);
+    		XSSFWorkbook  wbNEW = new XSSFWorkbook(excelifailNew);
+    		XSSFSheet worksheetNEW = wbNEW.getSheetAt(0);
+    	     
+    	  	CreationHelper createHelper2 = wbNEW.getCreationHelper();
+    		
+    		 XSSFCellStyle hlinkstyle2 = wbNEW.createCellStyle();
+    	      XSSFFont hlinkfont2 = wbNEW.createFont();
+    	      hlinkfont2.setUnderline(XSSFFont.U_SINGLE);
+    	      hlinkfont2.setColor(IndexedColors.BLUE.getIndex());
+    	      hlinkstyle2.setFont(hlinkfont2);
+    		
+    	      
+    	      Iterator itera  = newCusts.values().iterator();
+    	      int i = worksheetNEW.getLastRowNum()+1;
+    	      while(itera.hasNext()) {
+    	      String com = (String)itera.next();
+    	      JSONParser p = new org.json.simple.parser.JSONParser();
+    	      org.json.simple.JSONObject ob = (org.json.simple.JSONObject) p.parse(com);
+    	      
+    	    	String name = (String)ob.get("custname") ;
+    	    	String contactemail = (String)ob.get("contactemail") ;
+    	    	String contactename = (String)ob.get("contactname") ;
+    	    	String agentid = (String)ob.get("agentid") ;
+    	    	String street = (String)ob.get("street") ;
+    	    	String contactphone = (String)ob.get("contactphone") ;
+    	    	String location = (String)ob.get("location") ;
+    	    	String city = (String)ob.get("city") ;
+    	    	String zipcode = (String)ob.get("zipcode") ;
+    	    	String regnum = (String)ob.get("regnum") ;
+    	    	Long timestamp = (Long)ob.get("timestamp") ;
+    	    	String agentname = (String)ob.get("agentname") ;
+
+    	    	String pictures = (String)ob.get("pictures") ;
+    	    	
+    	    	
+    	    	String foto1 = null;
+    	    	String foto2 = null;
+    	    	String foto3 = null;
+    	    	
+    	    	if(pictures != null) {
+    	    		StringTokenizer st = new StringTokenizer(pictures,",");
+    	    		foto1 = st.nextToken();
+    	    		if(st.hasMoreTokens()) {
+    	    			foto2 = st.nextToken();
+    	    		}
+    	    		if(st.hasMoreTokens()) {
+    	    			foto3 = st.nextToken();
+    	    		}
+    	    	}
+    	    	
+    	    	String contact = "";
+    	    	if(contactename != null) {
+    	    		contact = contactename;
+    	    	}
+    	    	if(contactphone != null) {
+    	    		contact = contact + "," + contactphone ;
+    	    	}
+    	    	if(contactemail != null) {
+    	    		contact = contact + "," + contactemail ;
+    	    	}
+    	    	
+    	    	
+    	    	String aadress = "";
+    	    	if(street != null) {
+    	    		aadress = street;
+    	    	}
+    	    	if(city != null) {
+    	    		aadress = aadress + "," + city ;
+    	    	}
+    	    	if(zipcode != null) {
+    	    		aadress = aadress + "," + zipcode ;
+    	    	}
+    	    	
+    	    	System.out.println(name + " " + contactemail + " " + contactename + " " + contactphone+ " " + street
+    	    			+ " " + location +" " + zipcode + " " + regnum + " " +timestamp+ " " + agentname + "\n"
+    	    			+ URLEncoder.encode("https://maps.google.com/maps?q=" + location, StandardCharsets.UTF_8.toString()));
+    	    	
+    	    	Calendar cal1 = Calendar.getInstance();
+  	  			
+  	  			try {
+  	  				cal1.setTimeInMillis(timestamp);
+  	  			}catch(Exception e) {
+  	  			}
+  	  			
+  	  			String dateOnly = Converter.getYYYYmMMmDDmString(cal1.getTime());
+  	  			
+
+ 	  			String signa = dateOnly + "" + name + "" + agentid ;
+    	    	
+ 	  			if(!done.contains(signa)) {
+ 	  				worksheetNEW.createRow(i);
+ 	  				worksheetNEW.getRow(i).createCell(0).setCellValue(dateOnly);
+    	    	worksheetNEW.getRow(i).createCell(1).setCellValue(name);
+    	    	worksheetNEW.getRow(i).createCell(2).setCellValue(aadress);
+    	    	worksheetNEW.getRow(i).createCell(3).setCellValue(regnum);
+    	    	worksheetNEW.getRow(i).createCell(4).setCellValue(contact);
+
+    	    	worksheetNEW.getRow(i).createCell(5).setCellValue(location);
+    	    	if(location != null) {
+	  		         Cell  cell = worksheetNEW.getRow(i).createCell(6);
+	  		         cell.setCellValue("Maps link");
+	  		         XSSFHyperlink link = (XSSFHyperlink)createHelper2.createHyperlink(Hyperlink.LINK_URL);
+	  		         link.setAddress(URLEncoder.encode("https://maps.google.com/maps?q=" + location, StandardCharsets.UTF_8.toString()));
+	  		         cell.setHyperlink((XSSFHyperlink) link);
+	  		         cell.setCellStyle(hlinkstyle2);
+	  				}
+   	    	
+    	    	
+    	    	worksheetNEW.getRow(i).createCell(7).setCellValue(agentid);
+    	    	
+    	    	if(foto1 != null) {
+	  		         Cell  cell = worksheetNEW.getRow(i).createCell(8);
+	  		         cell.setCellValue("Photo Link 1");
+	  		         XSSFHyperlink link = (XSSFHyperlink)createHelper2.createHyperlink(Hyperlink.LINK_URL);
+	  		         link.setAddress(URLEncoder.encode(url + foto1, StandardCharsets.UTF_8.toString()));
+	  		         cell.setHyperlink((XSSFHyperlink) link);
+	  		         cell.setCellStyle(hlinkstyle2);
+	  				}
+    	    	
+
+    	    	if(foto2 != null) {
+	  		         Cell  cell = worksheetNEW.getRow(i).createCell(9);
+	  		         cell.setCellValue("Photo Link 2");
+	  		         XSSFHyperlink link = (XSSFHyperlink)createHelper2.createHyperlink(Hyperlink.LINK_URL);
+	  		         link.setAddress(URLEncoder.encode(url + foto2, StandardCharsets.UTF_8.toString()));
+	  		         cell.setHyperlink((XSSFHyperlink) link);
+	  		         cell.setCellStyle(hlinkstyle2);
+	  				}
+
+    	    	if(foto3 != null) {
+	  		         Cell  cell = worksheetNEW.getRow(i).createCell(10);
+	  		         cell.setCellValue("Photo Link 3");
+	  		         XSSFHyperlink link = (XSSFHyperlink)createHelper2.createHyperlink(Hyperlink.LINK_URL);
+	  		         link.setAddress(URLEncoder.encode(url + foto3, StandardCharsets.UTF_8.toString()));
+	  		         cell.setHyperlink((XSSFHyperlink) link);
+	  		         cell.setCellStyle(hlinkstyle2);
+	  				}
+    	    	
+ 	  			 done.add(signa);
+
+     	    	i++;
+ 	  			}
+    	      }
+    	     
+    	      
+      if(i > 1) {
+      	
+      	String fname = exceldir + "newCustomer-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx";
+      	
+      	fname = exceldir + "NewCustomerCesu.xlsx";
+         		FileOutputStream output_file_oos =new FileOutputStream(fname);
+         		filenames.add(fname);
+         		wbNEW.write(output_file_oos); 
+         		output_file_oos.close();  
+    	      
+         		
+         		try {
+         			Converter.saveObject(done, "signadone.obj");
+         		} catch (IOException e) {
+         			e.printStackTrace();
+         		}
+           }     		
+    	 } catch (Exception e) {
+ 			e.printStackTrace();
+ 		 }
+	  
+	  System.exit(0);
+	
+}
 
 }

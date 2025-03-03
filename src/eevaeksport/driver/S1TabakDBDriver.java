@@ -85,7 +85,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
   	       
   	       	   for (String cell : row) {
   	           	 if(cou == 0) {
-  	                     klient = cell.trim();
+  	                     klient = cell.trim().replace(':', '_');;
   	                }
   	           	 if(cou == 1) {
   	                    toode = cell.trim();
@@ -346,7 +346,7 @@ if(seis > 0) {
               	 
                    for (String cell : row) {
                   	 if(cou == 1) {
-                            custid = cell.trim();
+                            custid = cell.trim().replace(':', '_');
                        }
                   	 if(cou == 0) {
                            agent = cell.trim();
@@ -395,6 +395,8 @@ if(seis > 0) {
 	    	        	   for (String cell : row) {
 	    	              	 if(cou == 0) {
 	    	              		custID = cell.trim();
+	    	              		custID = custID.replace(':', '_');
+;	    	              		
 	    	                   }
 	    	              	 if(cou == 1) {
 	    	              		docdate = cell.trim();
@@ -457,15 +459,19 @@ if(seis > 0) {
         	 int cou = 0;
         	 String id = null;
         	 String name = null;
+        	 String name2 = null;
         	 String address = null;
         	 String contact = null;
         	 
              for (String cell : row) {
             	 if(cou == 0) {
-                      id = cell.trim();
+                      id = cell.trim().replace(':', '_');;
                  }
             	 if(cou == 1) {
                      name = cell.trim();
+                     name = name.replaceAll("'", " ").trim();
+                     name = name.replaceAll("  ", " ");
+                     name2 = Converter.cleanLitLatEst(name);
                  }
             	 if(cou == 2) {
                      address = cell.trim();
@@ -478,6 +484,8 @@ if(seis > 0) {
              Customer  cust = new Customer(id);
              cust.setName( Converter.enCodeEst(name));
              cust.setAddress( Converter.adressLink(Converter.enCodeEst(address), ""));
+             cust.restStreet = address;
+             cust.restPerson = contact;
              cust.setPersonalData( Converter.enCodeEst(contact));
              if(custAgents.get(cust.getID()) != null) {
             	 ArrayList<String> arr = (ArrayList)custAgents.get(cust.getID());
@@ -492,7 +500,7 @@ if(seis > 0) {
              //  System.out.println("cust " + name + " " + cust.getDebt());
              
              
-             tm.put(cust.getName() + cust.getAddress(), cust);	
+             tm.put(name2 + cust.getAddress(), cust);	
              
          }
      } catch (Exception e) {
@@ -569,7 +577,7 @@ private HashMap prodPrices = null;
                   }
              }
          	 if(cou == 2) {
-                  name = cell.trim();
+                  name = cell.trim().replaceAll("'", " ").trim().replaceAll("  ", " ");
              }
          	 if(cou == 13) {
                 price = Double.parseDouble(cell.trim());
@@ -613,13 +621,14 @@ private HashMap prodPrices = null;
              if(inCase > 0) {
          	 prod.setInCases(inCase);
              }
+             String name2 = Converter.cleanLitLatEst(name);
              prod.setName(Converter.enCodeEst(name));
           
             
          	//  System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + prod.getUnit() + " " + prod.getPrice());
             	
                
-            	   tm.put(prod.getName(), prod);   
+            	   tm.put(name2, prod);   
                
            }
            
@@ -671,7 +680,7 @@ private HashMap prodPrices = null;
             prodID = cell.trim();
          }
    		if(cou == 2) {
-            custID = cell.trim();
+            custID = cell.trim().replace(':', '_');;
          }
    		if(cou == 3) {
             amount = Double.parseDouble(cell.trim());

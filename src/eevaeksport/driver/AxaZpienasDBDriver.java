@@ -872,7 +872,7 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
                             
                                 }
                           if(klient.trim().indexOf("0751001") != -1 ||custID.trim().indexOf("0751001") != -1){
-                        	  System.out.println("0751001" + " " + prodID + " " + custID + " " + discount);
+                        	 // System.out.println("0751001" + " " + prodID + " " + custID + " " + discount);
                           }
                      
                           if (mline.getCustID() == null && clGroup != null
@@ -931,8 +931,10 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
                                   mline.setProdGroup(prodGroup);
                           }
                           mline.setDiscount(discount);
-                          mline.setStartDate(fromdate.substring(0,10));
-                          mline.setEndDate(todate.substring(0,10));
+                          if(!todate.contains("2154")) {
+                              mline.setStartDate(fromdate.substring(0,10));
+                              mline.setEndDate(todate.substring(0,10));
+                          }
                      
                         
                           lines.add(mline);

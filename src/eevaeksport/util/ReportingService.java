@@ -158,6 +158,7 @@ public JSONArray getSVdata(Date from , Date to , String type , String subTypes) 
 	}
 
 
+
 public JSONArray getTaskdata(Date from , Date to ) throws Exception{
 	
 	String web = "http://merisoft.eu:8080/rest/task/list?allManagers=true&from=" + from.getTime() + "&to=" + to.getTime() ;

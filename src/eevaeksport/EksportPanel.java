@@ -1101,6 +1101,7 @@ public class EksportPanel extends JPanel implements ActionListener,
                 	  || driver.getDriverVersion().equals("RivonaKeda")
                 	  
                 	  || driver.getDriverVersion().equals("Biovela")
+                	  || driver.getDriverVersion().equals("RivileSB3")
                 	  || driver.getDriverVersion().equals("RivileCeryx")
                 	  || driver.getDriverVersion().equals("RivileKuryba") 
                 	   || driver.getDriverVersion().equals("RivileLedna") 
@@ -1300,6 +1301,8 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("AxaAmberIB")
 					    || driver.getDriverVersion().equals("RivileRiestlita")
 					    || driver.getDriverVersion().equals("RivileLedinta")
+
+	                	  || driver.getDriverVersion().equals("RivileSB3")
 					    || driver.getDriverVersion().equals("NaviLivikoEST")
 					    || driver.getDriverVersion().equals("NaviLivikoLIT")
 					    || driver.getDriverVersion().equals("NaviLivikoLAT")

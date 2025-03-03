@@ -5350,10 +5350,29 @@ try{
 	  return getSVData(new Date(from) , new Date(to) , company,  user ,  pass,  week, type , subTypes , nameadd);
   }
 	
+  public static String addNewTask(JSONObject json, String company, String user , String pass) {
+	  eevaeksport.util.ReportingService serv = new ReportingService();
+	    serv.user =  user;
+		serv.pass = pass;
+		serv.company = company;
+		serv.https = true;
+		String res = "";
+		
+		try {
+			res = serv.postJson(json.toString(), "https://api.mobitrek.eu/rest/task/save");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	
+	  
+	  return res;
+  }
+  
   
   public static String getTaskData(long from , long to , String company, String user , String pass,  String nameadd){
 	  eevaeksport.util.ReportingService serv = new ReportingService();
-	  serv.user =  user;
+	    serv.user =  user;
 		serv.pass = pass;
 		serv.company = company;
 		String res = "";
