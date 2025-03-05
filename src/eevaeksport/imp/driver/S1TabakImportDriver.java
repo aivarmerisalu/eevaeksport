@@ -335,7 +335,25 @@ try{
   private Vector splitOrder (Order order){
 			  
 		  Vector result = new Vector();
-
+		  
+		  Vector lines = order.getOrderLines();
+		  boolean change = false;
+		  Enumeration enumr = lines.elements();
+		  boolean pos = false;
+		  boolean neg = false;
+		  while  (enumr.hasMoreElements()){
+			  OrderLine lin = (OrderLine)enumr.nextElement();
+			  if(lin.getKogus() > 0) {
+				  pos = true;
+			  }else {
+				  neg = true;
+			  }
+		  }
+		  
+		  if(pos && neg) {
+			  change = true;
+		  }
+		  
 		  if (order.getDokNr() == null || order.getDokNr().trim().length() == 0){
 			  order.setDokNr((Calendar.getInstance().getTimeInMillis() + "").substring(3));
 		  }
@@ -344,8 +362,19 @@ try{
 		  Order ordorkla = new Order(order.getCompany(),order.getAgentFirstName());
 		  Order ordorklabonus = new Order(order.getCompany(),order.getAgentFirstName());
 		  Order ordorklaret = new Order(order.getCompany(),order.getAgentFirstName());
+		  Order ordorklacha = new Order(order.getCompany(),order.getAgentFirstName());
 		  
-		  
+		  ordorklacha.setAgentCode(order.getAgentCode());
+		  ordorklacha.setDokNr(order.getDokNr()+"C");
+		  ordorklacha.setCompName(order.getShipMode());
+		  ordorklacha.setShipCal(order.getShipCal().getTimeInMillis() +"");
+		  ordorklacha.setStatus(order.getStatus()); 
+		  ordorklacha.setInfo(order.getInfo());
+		  ordorklacha.setReference(order.getReference());
+		  ordorklacha.setTeostaja(order.getTeostaja());
+		  ordorklacha.setWarehouse(order.getWarehouse());
+		  ordorklacha.setDealer(order.getDealer());
+		  ordorklacha.setShipTime(order.getShipTime());
 		  
 		  ordorkla.setAgentCode(order.getAgentCode());
 		  ordorkla.setDokNr(order.getDokNr());
@@ -387,7 +416,7 @@ try{
 		  
 	
 		  
-		  Vector lines = order.getOrderLines();
+		   lines = order.getOrderLines();
 		  /*
 		   * 	
       	 	 Vector lin = order.getOrderLines();
@@ -399,11 +428,18 @@ try{
       	 		}
       	 	 } */
 		  
-		  Enumeration enumr = lines.elements();
+		   enumr = lines.elements();
 		  while  (enumr.hasMoreElements()){
 			  OrderLine lin = (OrderLine)enumr.nextElement();
+			  
+			  if(change) {
 			    	
-			    	if(lin.getDiscount() == -2) {
+		    		ordorklacha.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+		    		ordorklacha.setDokNr(order.getDokNr()+"C");
+		    		ordorklacha.setReference(order.getReference());
+			 		
+		    	}  else if(lin.getDiscount() == -2) {
 			    	
 			    		ordorklabonus.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
@@ -431,10 +467,14 @@ try{
 		  if(ordorklaret.getOrderLines() != null && ordorklaret.getOrderLines().size()>0){
 			  result.add(ordorklaret);  
 		  }
+		  
 		  if(ordorklabonus.getOrderLines() != null && ordorklabonus.getOrderLines().size()>0){
 			  result.add(ordorklabonus);  
 		  }
-	      
+		  
+		  if(ordorklacha.getOrderLines() != null && ordorklacha.getOrderLines().size()>0){
+			  result.add(ordorklacha);  
+		  }
 		  
 		 System.out.println("Result = " +order.getDokNr()
 				 + " "+ result.size());
@@ -458,6 +498,10 @@ try{
 	 	    boolean tagastus = false;
 	 	    if(doknr.endsWith("R")) {
 	 	    	tagastus = true;
+	 	    }
+	 	   boolean change = false;
+	 	    if(doknr.endsWith("C")) {
+	 	    	change = true;
 	 	    }
 	 	   boolean bonus = false;
 	 	    if(doknr.endsWith("B")) {
@@ -513,6 +557,9 @@ try{
 	         String rrr = (comm + time).trim();
 	         if(tagastus) {
 	        	 rrr = "ATG";
+	         }
+	         if(change) {
+	        	 rrr = "APM";
 	         }
 	       	 fileName =   "H_" + fn + ".csv";
 	       	 StringBuffer sb0 = new StringBuffer();

@@ -99,7 +99,7 @@ try{
 	"  LEFT OUTER JOIN TRIDLV7866.NMINMAX aa ON aa.PK_NOM=t.PK_NOM and aa.PK_NOL=22013 " +
 	"   LEFT OUTER JOIN [TRIDLV7866].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
 	"   LEFT OUTER JOIN [TRIDLV7866].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
-	"  where t.STATUSS = 0  and PAMVID = 2015  and  gr.kods != 'TM' and t.kods not like 'NIC%'and t.kods not like 'PRV%'   ";
+	"  where t.STATUSS = 0  and PAMVID = 2015  and  gr.kods != 'TM' and t.kods not like 'NIC%' and t.kods not like 'PRV%' and t.kods not like 'XBOS%'   ";
 			    		
 			//	 tubakas mitte jätta .
 	
@@ -127,7 +127,46 @@ try{
 
 	private Vector  alco = null;
 	private Vector  toba = null;
+	private Vector  boost = null;
 	
+	 private void loadBoost(){
+		  try{
+			  boost = new Vector();
+				ResultSet rs1 ;
+		    	Statement stmr ;
+				 String sqldea = "	  select t.PK_NOM as abi, t.KODS as  toode" +
+	" from TRIDLV7866.NNOM  t LEFT OUTER JOIN TRIDLV7866.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 " +
+	" LEFT OUTER JOIN TRIDLV7866.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN " +
+	"  LEFT OUTER JOIN TRIDLV7866.CHD_MG1 gr ON t.PK_MG1=gr.PK_MG1 " +
+	"  LEFT OUTER JOIN TRIDLV7866.NMINMAX aa ON aa.PK_NOM=t.PK_NOM and aa.PK_NOL=22013 " +
+	"   LEFT OUTER JOIN [TRIDLV7866].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
+	"   LEFT OUTER JOIN [TRIDLV7866].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
+	"  where t.STATUSS = 0  and PAMVID = 2015  and t.kods like 'XBOS%'   ";
+			    		
+			//	 tubakas mitte jätta .
+	
+			        	Connection con = this.getNewConnection(); 
+			        		 stmr = con.createStatement();
+			            	
+			                 rs1 = stmr.executeQuery(sqldea);
+			                
+			                 while(rs1.next()){
+			                	String toode = rs1.getString("toode").trim();
+			                	boost.add(toode);
+			                }
+			                
+			               rs1.close();
+			               stmr.close();
+			               con.close();
+			        	}catch(Exception s){
+			        		s.printStackTrace();
+			        	}
+
+			    	System.out.println("alco " + alco.size());
+			    	
+			    	
+	  }
+
 	
 
 	 private void loadToba(){
@@ -143,7 +182,7 @@ try{
 	"   LEFT OUTER JOIN [TRIDLV7866].[NRAZOT] au ON t.PK_RAZOT=au.PK_RAZOT " +
 	"   LEFT OUTER JOIN [TRIDLV7866].[DVALSTS] ri ON ri.PK_VALSTS=au.PK_VALSTS " +
 	"  where t.STATUSS = 0  and PAMVID = 2015  and (t.kods like 'NIC%' or t.kods "
-	+ " like 'PRV%' or t.kods  like 'MYC%')   ";
+	+ " like 'PRV%' or t.kods  like 'MYC%'  )   ";
 			    		
 			//	 tubakas mitte jätta .
 	
@@ -183,7 +222,10 @@ try{
 			  loadToba();
 		  }
 		 
-			  
+		  if(boost == null) {
+			  loadBoost();
+		  }
+		 	  
 		  
 		  
 	          
@@ -225,7 +267,18 @@ try{
 		  ord3.setWarehouse("859");
 		  ord3.setDealer(order.getDealer());
 		  
-
+		  Order ord4 = new Order((order.getCompany()  ),order.getAgentFirstName());
+		  ord4.setAgentCode(order.getAgentCode());
+		  ord4.setDokNr(order.getDokNr()+ "b");
+		  ord4.setInfo(order.getInfo());
+		  ord4.setTeostaja((order.getTeostaja()));
+		  ord4.setChanged(order.isChanged());
+		  ord4.setShipCal(order.getShipCal().getTimeInMillis() +"");
+		  ord4.setStatus(order.getStatus());
+		  ord4.setShipTime(order.getShipTime());
+		  ord4.setWarehouse("859");
+		  ord4.setDealer(order.getDealer());
+		  
 		 
 
 		  
@@ -244,7 +297,12 @@ try{
 	        	   ord1.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 	                 		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 	                 	  
-	                      } else  if(toba.contains(itemid)){
+	                      } else  if(boost.contains(itemid)){
+	                 	    	
+	        	            ord4.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+	                 		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+	                 	  
+	                      }else  if(toba.contains(itemid)){
 	                 	    	
 	        	            ord3.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 	                 		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
@@ -274,6 +332,9 @@ try{
 			  result.add(ord3);  
 		  }
 
+		  if(ord4.getOrderLines() != null && ord4.getOrderLines().size()>0){
+			  result.add(ord4);  
+		  }
 
 		 
 		 System.out.println("Result =" +order.getDokNr()

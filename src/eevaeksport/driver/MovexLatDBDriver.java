@@ -579,8 +579,14 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
        
        // tarne p�evade lisamine 
        String cmd31 = "SELECT ddsmcd, ddcuno as saaja , dddays as days FROM cesu.MJDELDAY ";
+       String sss = "ALTER SESSION SET NLS_TERRITORY = 'LATVIA'";
+       
        Statement st1 = con.createStatement();
+       st1.executeQuery(sss);
+       
+       
     if (isDebug()) System.out.println(cmd31);
+      
         rs1 = st1.executeQuery(cmd31);
         while (rs1.next()) {
        	 String cus = rs1.getString("saaja");
@@ -703,8 +709,6 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
              rs2.close();
              st2.close();
     	
-//System.out.println("blockComments " + blockComments.toString());
- String sss = "ALTER SESSION SET NLS_TERRITORY = 'LATVIA'";
 String    cmd2 = " select  KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VISIT, LIMIIT, AGENT, PAYER, EILADU, "
 		+ "DEBT, BLOK2, ROUTE_NR, ROUTE_NAME, SQ_INROUTE, GRUPA, LATITUDE, LONGTITUDE, TELENR, GNAME, sysdate from cesu.mjcustomerdata  ";
 

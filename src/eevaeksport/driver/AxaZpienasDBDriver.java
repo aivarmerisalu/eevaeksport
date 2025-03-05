@@ -1118,6 +1118,7 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
   
   public TreeMap getAgents(){
 
+	  agent1 = new TreeMap();
     String cmd = " select w.value as kood , w.name as name from  DIMATTRIBUTEHCMWORKER w   inner join HCMWORKER h on h.personnelnumber = w.value " + 
 			" inner join custtable c on c.SALESMANAGER_BBS=h.recid or c.SALESTAKER_BBS=h.recid group by  w.value  , w.name";// +
  // " and title = 'Vadybininkas'";
@@ -1183,6 +1184,8 @@ String email = " ";
           
           agents.put(name + agent.getID(), agent);
           agents2.put(agent.getID(), agent);
+
+          agent1.put(agent.getID(), agent);
           if(props.containsKey(agent.getID())){
         	  agnames.put(agent.getID(), name);
               sb2.append(agent.getID() + ";" + name + "\n");  
@@ -1615,10 +1618,21 @@ try{
 	   return res;
   }
 
- 
+
+  private TreeMap agent1 = new TreeMap();
+  
+  
+  
   public TreeMap getCustomers(Agent agent){
 
 	 // makeFixHash();
+	  
+	  try{
+		   Converter.getManagersReplacements(agent1, rcompany, user, pass, true); 
+	}catch(Exception e){
+
+	}
+	  
 	  getKLPCustomers();
 	  System.out.println("Alustan Kliendid");
 	  
@@ -2001,6 +2015,16 @@ try{
 					cust.addAgent(new Agent((String)agg.getDubbler().elementAt(e)));
 				}
           	}
+			Agent aa = (Agent)agent1.get(agen.trim());
+			
+			Vector vec = aa.getDubbler();
+			if(vec!= null && vec.size() >0){
+				Enumeration en = vec.elements();
+				while(en.hasMoreElements()){
+					String ag = (String) en.nextElement();
+					cust.addAgent(new Agent(ag));
+				}
+			}
 			
           
 /*          if(agen.trim().startsWith("VIL") || agen.trim().startsWith("ALY") ){

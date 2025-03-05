@@ -982,7 +982,14 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		  OrderLine lin = (OrderLine)enums.nextElement();
 		
 		     String itemid = lin.getToode();
-		    System.out.println("ppcheck " + lin.getToode() + " " + lin.getKogus() + " " + order.getPaymTerm());
+		     Boolean goes = true;
+		     if(nonactveProds != null) {
+		    	 if(nonactveProds.contains(itemid)) {
+		    	 goes = false;
+		    	 }
+		     }
+		    System.out.println("ppcheck " + lin.getToode() + " " + goes + " " +  nonactveProds.contains(itemid));
+		    if(goes) {
          if(order.getPaymTerm() == -1 ){
         	 
         	 if(itemid.startsWith("FP") && propsVEGE.containsKey(order.getCompany()) ){
@@ -1123,7 +1130,9 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
 		     	    	  ord2.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			             lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 		     	        }
-		   
+		    }else {
+		    	trouble = "Product was removed from order " + order.getCompany()+ " \n " + lin.getToode() + " " + lin.getKogus(); 
+		    }
 		     
 
 	  }
@@ -1394,22 +1403,28 @@ private Vector splitOrderHRC (Order order){
 		  OrderLine lin = (OrderLine)enums.nextElement();
 		
 		     String itemid = lin.getToode();
+		     Boolean goes = true;
+		     if(nonactveProds != null) {
+		    	 if(nonactveProds.contains(itemid)) {
+		    	 goes = false;
+		    	 }
+		     }
+		     if(goes) {
 		     if(itemid.startsWith("G") ){
-     	    	 
      	    	 ord9.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
      		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-     	  
-               } else  if(itemid.startsWith("Z") ){
-       	    	 
+     	       } else  if(itemid.startsWith("Z") ){
        	    	 ord92.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
        		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
-       	  
-                 } else {
+       	         } else {
 		    	 
 	    		 ord2.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 	    	
                 }
+		     } else {
+			    	trouble = "Product was removed from HORECA order " + order.getCompany()+ " \n " + lin.getToode() + " " + lin.getKogus(); 
+			    }
             
 
 	  }
@@ -1999,6 +2014,11 @@ try{
        if(delDays == null) {
     	 //  delDays =  makeCustomerNextDeliveryData();
        }
+       
+
+  	 if(nonactveProds == null) {
+  		 nonactveProds = this.getActiveProds();
+  	 }
       
        propsVEGE = new Properties();
      		try {
@@ -2207,6 +2227,7 @@ try{
 	    return liik;
 	}
 
+
  public String getProdId(String kood) throws SQLException {
 
 	    Connection con = getNewConnection();
@@ -2227,21 +2248,48 @@ try{
 	    return liik;
 	}
   
+ private HashSet nonactveProds = null;
+ 
+ public HashSet getActiveProds()  {
+
+	    HashSet prods = new HashSet();
+try {
+    Connection con = getNewConnection();
+    String cmd = "SELECT KODS AS id FROM   APV04761.NNOM t " +
+  			" WHERE t.STATUSS = 1 " ;  
+
+  	Statement st = con.createStatement();
+    ResultSet rs = st.executeQuery(cmd);
+    while (rs.next()) {
+      prods.add(rs.getString("id").trim());
+      }
+    rs.close();
+    st.close();
+    con.close();
+    
+}catch(Exception e) {
+	e.printStackTrace();
+}
+
+System.out.println("Nonactive prods size " + prods.size());
+	    return prods;
+	}
+  
 
  private void makeOutput(Order order, Order orig, boolean isHoreca){
 	 
+	 if(nonactveProds == null) {
+		 nonactveProds = this.getActiveProds();
+	 }
 	 Hashtable pandikas =  new Hashtable();
 	
 	 TreeMap pantHinnad = null;
 	
 	 TreeMap	pants = getPandiPakend();
-		//	System.out.println("pants " + pants.size());
 	
 		try {
 			pantHinnad = getPandiPakendHind();
-			//System.out.println("panthinnad " + pantHinnad.size());
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
