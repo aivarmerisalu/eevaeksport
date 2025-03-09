@@ -278,7 +278,7 @@ public class Product {
     private String id = null;
     private String name = null;
     public String weblink = null;
-    private boolean allowGift = true;
+    private boolean allowNotGift = false; // vaikimisi lubatud
     private String alegrupp = " ";
     private double inCases = 0;
     private double price = 0;
@@ -760,12 +760,12 @@ public class Product {
 		this.typeSimi = typeSimi;
 	}
 
-	public boolean isAllowGift() {
-		return allowGift;
+	public boolean isAllowNotGift() {
+		return allowNotGift;
 	}
 
-	public void setAllowGift(boolean allowGift) {
-		this.allowGift = allowGift;
+	public void setAllowNotGift(boolean allowGift) {
+		this.allowNotGift = allowGift;
 	}
 
 	public boolean isLabel() {

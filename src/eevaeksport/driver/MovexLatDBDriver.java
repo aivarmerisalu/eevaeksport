@@ -21,6 +21,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -890,10 +894,6 @@ Calendar cal = Calendar.getInstance();
             String telef = rs.getString("TELENR");
             String gname = rs.getString("gname");
 
-            if(agent1.equals("C13") && visitsq > 0 ){
-          	  System.out.println( cust.getName() + " *" + visitsq);
-            }
-
             
             if(gname != null && gname.trim().length() > 0){
            	 cust.category = gname;
@@ -1166,7 +1166,7 @@ String ex = parent.getProps().getProperty("products");
         	log("TARA " + prod.getName());
         }
         
-        prod.setAllowGift(false);        
+        prod.setAllowNotGift(true);        
         prod.setPrice( (rs.getDouble("price")));
         Integer newP = rs.getInt("statusnew");
         if(newP != null && newP == 1) {
@@ -1231,8 +1231,8 @@ String ex = parent.getProps().getProperty("products");
                           Product prod1 = (Product)prodHash.get(id);
                           
                           if (prod1 != null){
-                            prod1.setAllowGift(true);
-                          System.out.println("gift allowed " + id );
+                            prod1.setAllowNotGift(false);
+                         // System.out.println("gift allowed " + id );
                           }
                         }
 
@@ -2067,13 +2067,24 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
   private void createWebTasks() {
 	  try{
 			 
-		  
-		  Long twoweeks = Calendar.getInstance().getTimeInMillis() + 1209600000; // täna pluss 2 nädalat
+		  LocalDate currentDate = LocalDate.now();
+	        
+	        // Get the current year-month
+	        YearMonth currentYearMonth = YearMonth.from(currentDate);
+	        
+	        // Get the next month
+	        YearMonth nextMonthYearMonth = currentYearMonth.plusMonths(1);
+	        
+	        // Get the last day of the next month
+	        LocalDate lastDayOfNextMonth = nextMonthYearMonth.atEndOfMonth();
+		 
+		  ZonedDateTime zonedDateTime = lastDayOfNextMonth.atStartOfDay(ZoneId.systemDefault());
+	        long twoweeks = zonedDateTime.toInstant().toEpochMilli();
 		  
 		  eevaeksport.util.ReportingService serv = new ReportingService();
 			serv.user =  user;
 			serv.pass = pass;
-			serv.company = company;
+			serv.company = rcompany;
 			
 		  String sql2 = "select lineid ,taskid,agentid,agentnam,clid, sentdate,senttime,reminder,photoname, " + 
 		  		"		  		status,mestext,headertext,res1 from cesu.mj_task where sentdate > sysdate-30 " + 
@@ -2193,18 +2204,29 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 				String done = 	Converter.addNewTask(value, rcompany, user , pass);
 				System.out.println("Task Added " + done);
 			//	System.exit(0);
-				if(photoname != null) {
-					
-				File ff = new File(photoname);
+				if(photoname != null && photoname.trim().length() > 1) {
 				
-			//	if( serv.uploadFile("http://merisoft.eu:8080/rest/task/" + done + "/uploadFile/" , ff.getAbsolutePath(), null, "tasks") ){
-     	      //  	System.out.println("Uploaded " + ff.getName() + " " + ff.getAbsolutePath());
-     	        //}
+				String pictssou = parent.getProps().getProperty("taskpict.dir");
+				File ff = new File(pictssou + photoname);
+				File ffc = new File(pictssou + "00"+ photoname);
+				if(ff.exists()) {
+					// teeme faili väiksemaks
+					Converter.shrinkAndCopyFile(ff.getAbsolutePath(), ffc.getAbsolutePath(),1000);
+					
+				   if( serv.uploadFile("http://merisoft.eu:8080/rest/task/" + done + "/uploadFile/" , ffc.getAbsolutePath(), null, "tasks") ){
+     	       	      System.out.println("Uploaded " + ff.getName() + " " + ff.getAbsolutePath());
+     	           }
+				  // System.exit(0);
+				} 
+				
+				
 				}
+				  Converter.saveObject(loaded, "tasklist.obj");
 				
 		}
+		
 	}
-
+ serv.closeClient();
 	rr.close();
 	stt.close();
 	con2.close();
@@ -2218,7 +2240,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
   }
   
   private void makeTaskFile(String dir){
-	  createWebTasks();
+	 
 		 try{
 			 
 			  String sql2 = "select lineid ,taskid,agentid,agentnam,clid, sentdate,senttime,reminder,photoname," +
@@ -2338,6 +2360,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		 }catch(Exception e){
 			 e.printStackTrace();
 		 }
+		 createWebTasks();
 	 }
 
 
@@ -3030,6 +3053,17 @@ public  Vector getCustomerProductsDistList() {
 
 @Override
 public void WebReporter() {
+	sendTaskReport();
+}
+
+private void sendTaskReport() {
+	// loeme setting kataloogi sisse ja sealt siis managermailid igale agendile-
+	
+	
+}
+
+
+public void WebReporterOLD() {
 
 
 	  ArrayList<String> filenames = new ArrayList<String>();

@@ -99,7 +99,7 @@ public class RivileSB3ImportDriver
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
     try {
       Class.forName(databaseDriverName).newInstance();
-      con = DriverManager.getConnection(url + "rivilesb3",parent.getProps().getProperty("dsn.user"),parent.getProps().getProperty("dsn.pass"));
+      con = DriverManager.getConnection(url + parent.getProps().getProperty("dns.host"),parent.getProps().getProperty("dns.user"),parent.getProps().getProperty("dns.pass"));
     }
     catch (Exception e) {
       parent.showError(e);
@@ -394,7 +394,6 @@ HashMap pants = null;
  
 	  setOrder(order);
 	     
-	     
 	  boolean tag = false;
 	  OrderLine ol = (OrderLine)order.getOrderLines().get(0);
 	  if(ol.getKogus() < 0) {
@@ -410,8 +409,8 @@ HashMap pants = null;
 
  private void makeOutput(Order order,boolean tag){
  	StringBuffer sb = new StringBuffer();
-    HashMap over21 = over21();
-    System.out.println("Over21 " + over21.size());
+   // HashMap over21 = over21();
+   // System.out.println("Over21 " + over21.size());
 	//Hashtable pandikas =  new Hashtable();
 	boolean overDisc = false;
 	
@@ -485,9 +484,9 @@ HashMap pants = null;
       
       String agent = order.getAgent();
       String ov21 = "";
-      if(over21.get(cust.substring(0,cust.lastIndexOf("-")))!= null) {
-    	  ov21 = "OverDue +21D " + over21.get(cust.substring(0,cust.lastIndexOf("-"))) + "€ ";
-      }
+    //  if(over21.get(cust.substring(0,cust.lastIndexOf("-")))!= null) {
+    	//  ov21 = "OverDue +21D " + over21.get(cust.substring(0,cust.lastIndexOf("-"))) + "€ ";
+     // }
       
       String comm = "";
       if(order.getInfo() != null && order.getInfo().trim().length() >0){
@@ -742,7 +741,7 @@ if(ladu.trim().length()!=0){
  }
   
   public String getDriverVersion(){
-    return "RivileSB3";
+    return "RivileSB3Import";
   }
   
   

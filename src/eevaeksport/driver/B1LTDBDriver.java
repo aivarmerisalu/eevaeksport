@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -113,11 +114,34 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	  user =  getParent().getProps().getProperty("rest.user");
       pass = getParent().getProps().getProperty("rest.pass");
       rcompany = getParent().getProps().getProperty("rest.companyx");
-     
+      sendTaskReport();
     //  downloadData("sales");
        //testConn();
      }
   
+  
+  private void sendTaskReport() {
+		// loeme setting kataloogi sisse ja sealt siis managermailid igale agendile-
+		File cat = new File("settings");
+		String[] files = cat.list();
+		
+		for(int i = 0 ;i < files.length; i++) {
+			String file = "settings/" + files[i];
+			 System.out.println("files: " + file);
+			 Properties properties = new Properties();
+		        try (FileInputStream input = new FileInputStream(file)) {
+		          properties.load(input);
+
+		            String username = properties.getProperty("managerinfomail");
+		            String agentid = files[i].substring(0,files[i].indexOf(". "));
+		           
+		        
+		        } catch (IOException e) {
+		            System.err.println("Error loading properties file: " + e.getMessage());
+		        }
+		}
+		
+	}
 	  String user =  null;
 	  String pass = null;
 	  String rcompany = null;

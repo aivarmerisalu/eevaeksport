@@ -618,6 +618,8 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
               Product prod = new Product(kood);
               String nimetus = rs.getString("nimetus").trim();
               prod.setName(Converter.enCodeEst(nimetus).replace('~', '-'));
+              
+              //sellincases=true
               try{
               prod.setInCases(rs.getDouble("tykke"));
             } catch (Exception e){}
@@ -640,33 +642,14 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
             	  }
             
               }
-       
-             
-              
+         
             
              String grupp2 = rs.getString("grupp2");
                     if (grupp2 != null && grupp2.trim().length()>0){
                       prod.setGroup(grupp2.trim());
                     }
-               String minam = rs.getString("minkogus");
-            /*   double res = 0;
-               if (minam != null && minam.trim().length()>0){
-               	try{
-               	if(minam.indexOf("/")!=-1){
-               		res = Double.parseDouble(minam.trim().substring(0,minam.indexOf("/")));
-               	}else if(minam.indexOf("*")!=-1){
-               		res = Double.parseDouble(minam.trim().substring(0,minam.indexOf("*")));
-               	}else{
-               		res = Double.parseDouble(minam.trim());
-               	}
-               	}catch (Exception e){
-               		e.printStackTrace();
-               	}
-               	prod.setInCases(res);
-               }
-              */ 
-               
-              
+       
+                    
                double max = rs.getDouble("maks");
                if(max > 0){
                	if(max < 1){
@@ -676,11 +659,11 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
                	
                	if(uus > 0){
                		prod.setName("t " + nimetus);
-               		//prod.setStatusTop("1");
                	}
-               	//prod.setMaxDiscount(max);
                }
+               
                prod.setVat("21");
+               
                int xx = 1;
                
                String yhik = rs.getString("yhik");

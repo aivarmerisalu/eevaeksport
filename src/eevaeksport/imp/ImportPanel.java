@@ -15212,7 +15212,7 @@ shipdate = getCalXML(asi);
             				   || driver.getDriverVersion().equals("RivileVascaImport")
             				   || driver.getDriverVersion().equals("B1LTImport")
             				   
-            				   || driver.getDriverVersion().equals("RivileSB3")
+            				   || driver.getDriverVersion().equals("RivileSB3Import")
             				   || driver.getDriverVersion().equals("S1TabakImport") 
 
                                || driver.getDriverVersion().equals("ViciCZSQLImport")

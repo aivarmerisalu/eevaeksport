@@ -82,7 +82,7 @@ String sql = " select mainitemcard as itemid ,testeritemid as tester ,istester ,
 		"where testeritemid != ''";
 try {
 
-Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
 Statement stmt = con.createStatement();
 ResultSet rs = stmt.executeQuery(sql);
 

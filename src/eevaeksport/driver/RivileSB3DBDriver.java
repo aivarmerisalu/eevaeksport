@@ -427,8 +427,8 @@ HashSet olemas = new HashSet();
     public String getSaveStockInfo(){
     	stocks = new HashMap();
     
-  	  String  cmd = "  SELECT  I17_KODAS_PS AS toode, sum(I17_kiekis - I17_PARD_UZS) AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS " +
-          " where I17_KODAS_IS in ('02','03','04') AND ((I17_kiekis - I17_PARD_UZS) > 0 OR (I17_P_PAR_K)>0)  and  N17_POZ_DATE =0 " +
+  	  String  cmd = "  SELECT  I17_KODAS_PS AS toode, sum((I17_kiekis - I17_PARD_UZS)/I17_FRAKCIJA) AS STOCK from i17_vpro inner join n17_prod on  I17_KODAS_PS = N17_KODAS_PS " +
+          " where I17_KODAS_IS in ('1') AND ((I17_kiekis - I17_PARD_UZS) > 0 OR (I17_P_PAR_K)>0)  and  N17_POZ_DATE =0 " +
 	      "   GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_PARD_UZS ) >0   ORDER BY I17_KODAS_PS" ;
 
 
@@ -478,7 +478,7 @@ HashSet olemas = new HashSet();
         if (con != null){
           con.close();
         }
-           con = DriverManager.getConnection(url,getParent().getProps().getProperty("dns.user"),getParent().getProps().getProperty("dns.user"));
+           con = DriverManager.getConnection(url,getParent().getProps().getProperty("dns.user"),getParent().getProps().getProperty("dns.pass"));
       } catch (Exception e) {
             getParent().showError(e);
       }
@@ -488,41 +488,22 @@ HashSet olemas = new HashSet();
     
     
     public TreeMap getProdGroups() throws SQLException {
-
       connectionUp(url);
 
       TreeMap tm = new TreeMap();
-
-           
-            String cmd = " SELECT  N19_KODAS_GS AS kood ,N19_PAV  AS nimi , N19_PAV_K1 as sorting FROM  n19_pgr ORDER BY N19_KODAS_GS";
+            String cmd = " SELECT  N19_KODAS_GS AS kood ,N19_PAV  AS nimi  FROM  n19_pgr ORDER BY N19_KODAS_GS";
        try {
         stmt = con.prepareStatement(cmd);
         ResultSet rs = stmt.executeQuery();
       // setTreeGroup(true);
         while (rs.next()) {
           String liik = rs.getString("kood").trim();
-          String sort = rs.getString("sorting");
+          String nimi = rs.getString("nimi").trim();
+        //  String sort = rs.getString("sorting");
           //String nimetus =  Converter.enCodeEst(rs.getString("nimi").trim());
          
           if (liik != "") {
-        	  String nimi = liik;
-        	  if(nimi.equals("BALT_VYNAS")) {
-        		  nimi = "Ba.VYNAS";
-        	  }
-        	  if(nimi.equals("RAUD_VYNAS")) {
-        		  nimi = "Ra.VYNAS";
-        	  }
-        	  if(nimi.equals("ROZ_VYNAS")) {
-        		  nimi = "Ro.VYNAS";
-        	  }
-        	  if(nimi.equals("PUTOJ_VYNAS")) {
-        		  nimi = "Pu.VYNAS";
-        	  }
-        	  
-        	  if(sort == null || sort.trim().length() == 0) {
-        		  sort = "99";
-        	  }
-            tm.put(liik,sort.trim()+nimi);
+        	 tm.put(liik,Converter.enCodeEst(nimi));
           }
         }
       }
@@ -591,11 +572,8 @@ HashSet olemas = new HashSet();
      */
     public TreeMap getAgents() {
         connectionUp(url);
-        String  cmd = "SELECT (CASE WHEN LEN(LTRIM(N33_KODAS_LS_1))=0 or N33_KODAS_LS_1  IS NULL THEN  N08_KODAS_LS_1 ELSE N33_KODAS_LS_1  END) AS agent \r\n" + 
-        		"				  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where \r\n" + 
-        		"				   (CASE WHEN LEN(LTRIM(N33_KODAS_LS_1))=0 or N33_KODAS_LS_1  IS NULL THEN  N08_KODAS_LS_1 ELSE N33_KODAS_LS_1  END) \r\n" + 
-        		"				    is not null  group by  (CASE WHEN LEN(LTRIM(N33_KODAS_LS_1))=0 or N33_KODAS_LS_1  IS NULL THEN  N08_KODAS_LS_1 ELSE N33_KODAS_LS_1  END) \r\n" + 
-        		"					order by  (CASE WHEN LEN(LTRIM(N33_KODAS_LS_1))=0 or N33_KODAS_LS_1  IS NULL THEN  N08_KODAS_LS_1 ELSE N33_KODAS_LS_1  END)";
+        String   cmd = "  SELECT N33_KODAS_VS AS agent  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where N33_KODAS_VS\r\n" + 
+        		"        						    is not null  group by  N33_KODAS_VS order by  N33_KODAS_VS";
         TreeMap agents = new TreeMap();
        
         try {
@@ -706,10 +684,10 @@ HashSet olemas = new HashSet();
     
     public TreeMap getCustomers(Agent agent){
     	
-     	 TreeMap webmerc1 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"ANDREJ");
+     //	 TreeMap webmerc1 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"ANDREJ");
     
     	 try{
-      	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass, false);
+      	//   Converter.getManagersReplacements(agents1, rcompanyx, user , pass, false);
          } catch(Exception e){
          	e.printStackTrace();
          }
@@ -717,13 +695,15 @@ HashSet olemas = new HashSet();
     	 TreeMap<String, String> logistics = getRoutes(); 
     	 
         connectionUp(url);
-        String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, " +
-        		" N08_PAV as nimetus, N33_kodas_ak AS nimetus2, N08_CREDIT_LIM as cred, " +
-				" N33_ADRESAS AS aadress, ltrim(N08_NUOL_GR)   AS ale , " +
-				" ' ' AS visit ,N08_KODAS_KS AS payer ,  " +
-				" (CASE WHEN LEN(LTRIM(N33_KODAS_LS_1))=0 or N33_KODAS_LS_1  IS NULL THEN  N08_KODAS_LS_1 ELSE N33_KODAS_LS_1  END) AS agent ,  " +
-				" (case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm , N33_TEL as phone , N33_SHIP_VIA  as deld, N33_E_MAIL  as email " +
-				"  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where N08_PAV is not null order by N08_PAV ";
+        String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, \r\n" + 
+        		"        		 N08_PAV as nimetus, N33_kodas_ak AS nimetus2, N08_CREDIT_LIM as cred, \r\n" + 
+        		"				 N33_ADRESAS AS aadress, ltrim(N08_NUOL_GR) AS ale , \r\n" + 
+        		"				 ' ' AS visit ,N08_KODAS_KS AS payer ,  \r\n" + 
+        		"				 (CASE WHEN LEN(LTRIM(N33_KODAS_LS_1))=0 or N33_KODAS_LS_1  IS NULL THEN  N08_KODAS_LS_1 ELSE N33_KODAS_LS_1  END) AS agent , \r\n" + 
+        		"				  N33_KODAS_VS as agent2, \r\n" + 
+        		"				 (case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm , \r\n" + 
+        		"				N33_TEL as phone , N33_SHIP_VIA  as deld, N33_E_MAIL  as email \r\n" + 
+        		"				  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where N08_PAV is not null order by N08_PAV";
         log(cmd);
    
         TreeMap customers = new TreeMap();
@@ -827,7 +807,7 @@ HashSet olemas = new HashSet();
               String maks = accountnum;
               String acc = rs.getString("kood");
               boolean goes = true;
-              if (acc != null && acc.trim().length()>2){
+              if (acc != null && acc.trim().length()>0){
               	accountnum = accountnum + "-" + acc.trim();
               }else {
             	  goes = false;
@@ -894,11 +874,19 @@ HashSet olemas = new HashSet();
               }
               
 
-             String ag = rs.getString("agent").trim();
-              cust.addAgent(new Agent(ag));
-             
+              String ag = rs.getString("agent").trim();
+              if(ag != null && ag.trim().length() > 0) {
+            	  cust.addAgent(new Agent(ag.trim())); 
+              }
+            
+              String ag2 = rs.getString("agent2");
+              if(ag2 != null && ag2.trim().length() > 0) {
+            	  cust.addAgent(new Agent(ag2.trim())); 
+              }
+                          
               
               if ( ag != null && agents1.get( ag.trim()) != null){
+            	
                   Agent aa = (Agent) agents1.get( ag.trim());
             
                    Vector vec = aa.getDubbler();
@@ -911,12 +899,21 @@ HashSet olemas = new HashSet();
                   }
             }
               
+              if ( ag2 != null && agents1.get( ag2.trim()) != null){
+            	//  cust.addAgent(new Agent(ag2.trim())); 
+                  Agent aa = (Agent) agents1.get( ag2.trim());
+            
+                   Vector vec = aa.getDubbler();
+                   if( vec!= null && vec.size() >0){
+                        Enumeration en = vec.elements();
+                        while( en.hasMoreElements()){
+                             String agw = (String) en.nextElement();
+                              cust.addAgent( new Agent( agw));
+                       }
+                  }
+            }
               
-              if(webmerc1.get(cust.getID()) != null) {
-            	  cust.addAgent(new Agent("ANDREJ")); 
-           }
-
-
+        
              
            //   cust.setMainAgent(ag);
               try{
@@ -966,13 +963,15 @@ HashSet olemas = new HashSet();
     	
     	System.out.println("stocks suurus " + stocks.size() );
   
-   String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus, N17_KODAS_US as unit ,dbo.papn(L11_LAUKAS , 6, 'c')  AS tykke,dbo.papn(L11_LAUKAS , 14, 'c')  AS alusel, 0 AS myygihind,\r\n" + 
+    	// tykke funktsioondbo.papn(L11_LAUKAS , 6, 'c')
+    	
+   String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus, N17_KODAS_US as unit ,0  AS tykke,0  AS alusel, 0 AS myygihind,\r\n" + 
    		"   		N37_BAR_KODAS AS ean, \r\n" + 
    		"    0 AS kogus,n17_kodas_gs AS grupp2, N17_KODAS_VS_T AS grupp,  N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status ,  N35_PAV_K3 as maks,\r\n" + 
    		"    case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus , ltrim(N17_KODAS_LS_8) as sellout \r\n" + 
    		"  , N17_KODAS_LS_8 as maxdisc  FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
    		"  LEFT JOIN  n37_pmat g ON n37_kodas_ps=n17_kodas_ps  and N37_KODAS_US = N17_KODAS_US"
-   		+ " left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1 and (L02_KODAS_FS is null or L02_KODAS_FS!='NP_O') and N17_MEN_PAV !='IG' and len(ltrim(N17_PAV_K1))  >0\r\n" + 
+   		+ " left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1 " + 
    		"   ";
   
   
@@ -983,7 +982,7 @@ HashSet olemas = new HashSet();
       
         	
         String sql = "select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from I33_PKAI "
-    		+ " where I33_KODAS_iS in ('02','03','04')  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
+    		+ " where I33_KODAS_iS in ('2','3','5')  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
             System.out.println("hind");
           if (isDebug()) System.out.println(sql);
           connectionUp(url);
@@ -1035,51 +1034,9 @@ HashSet olemas = new HashSet();
               if(unit != null && unit.trim().length() > 0) {
             	  prod.setUnit(unit.trim());
               }
-              nimetus = nimetus.replaceAll("Aromatizuotas", "Arom.");
-              nimetus = nimetus.replaceAll("GRAND", "Gra.");
-              nimetus = nimetus.replaceAll("PREMIER", "Pre.");
-              nimetus = nimetus.replaceAll("RIESLING", "Ries.");
-              nimetus = nimetus.replaceAll("CREMANT", "Crem.");
-              nimetus = nimetus.replaceAll("Vynas", "Vyn");
-              nimetus = nimetus.replaceAll("baltais", "balt.");
-              nimetus = nimetus.replaceAll("raudonasis", "raud.");
-              nimetus = nimetus.replaceAll("sausas", "sau.");
-              nimetus = nimetus.replaceAll("geografine", "geo.");
-              nimetus = nimetus.replaceAll("nuoroda", "nuo.");
-              nimetus = nimetus.replaceAll("Putojantis", "Put.");
-             
-              nimetus = nimetus.replaceAll("Champagne", "Cham.");
-              nimetus = nimetus.replaceAll("Grande", "Gra.");
-              nimetus = nimetus.replaceAll("Reserve", "Res.");
-              nimetus = nimetus.replaceAll("Aromatizuota", "Arom.");
-              nimetus = nimetus.replaceAll("CHARDONNAY", "CHARD.");
-              nimetus = nimetus.replaceAll("ampanas", "amp.");
-              nimetus = nimetus.replaceAll("ORIGINAL", "Orig.");
-              nimetus = nimetus.replaceAll("Original", "Orig.");
-              nimetus = nimetus.replaceAll("Likeris", "Lik.");
-              
-              
-              nimetus = nimetus.replaceAll("BARREL", "Barr.");
-              nimetus = nimetus.replaceAll("FERMENTED", "Ferm.");
-              nimetus = nimetus.replaceAll("Cellar", "Cell.");
-              nimetus = nimetus.replaceAll("tabakas", "tab.");
-              nimetus = nimetus.replaceAll("PROSECCO", "Pros.");
-              nimetus = nimetus.replaceAll("Rausvasis", "Raus.");
-              nimetus = nimetus.replaceAll("Baltasis", "Balt.");
-              nimetus = nimetus.replaceAll("baltasis", "balt.");
-              nimetus = nimetus.replaceAll("Raudonasis", "Raud.");
-              nimetus = nimetus.replaceAll("Vienkartinio naudojimo", "Vien.naudo");
-              nimetus = nimetus.replaceAll("SAUVIGNON", "SAUV");
-              nimetus = nimetus.replaceAll("Kalifornija", "Kalif");
-              nimetus = nimetus.replaceAll("VERMOUTH", "Verm.");
-              
-              
-              
-              
-              
-              
-              
-              
+           
+              nimetus = nimetus.replaceAll("\"", " ");
+              nimetus = nimetus.replaceAll("  ", " ");
              
               prod.setName(nimetus);
               try{
@@ -1208,12 +1165,12 @@ HashSet olemas = new HashSet();
         connectionUp(url);
         
         String cmd =" SELECT ltrim(I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) as kood," +
-        		"I07_KODAS AS toode,I07_KIEKIS AS kogus, " +
+        		"I07_KODAS AS toode,I07_KIEKIS/I07_FRAKCIJA AS kogus, " +
 				"I06_DOK_DATA AS kuupaev  ,max(I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end ) as lastprice FROM i07_pard p" +
 				"  INNER JOIN i06_parh ON p.I07_KODAS_PO=I06_KODAS_PO "+
 				" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
 				" WHERE I06_DOK_DATA > getdate()-180 "+
-				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS";
+				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS/I07_FRAKCIJA";
     
         if (isDebug()) {
            System.out.println(cmd);

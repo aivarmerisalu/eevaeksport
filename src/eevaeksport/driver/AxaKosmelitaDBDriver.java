@@ -337,71 +337,47 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
   
   public String getSaveStockInfo() {
 	    stocksOld = new HashMap<String,Double> ();
-	    /*
-		String cmd = " select   summ.itemid  AS stock ,SUM(AVAILPHYSICAL) AS summ " + 
+	    
+		String cmd2 = " select   summ.itemid  AS stock ,SUM(AVAILPHYSICAL) AS summ " + 
 				"	  FROM INVENTSUM summ    INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " + 
-				"	   WHERE  summ.DATAAREAID='kosm' and CLOSED = 0  and dim.inventlocationid in ('" + this.prodStockID + "')" + 
+				"	   WHERE  summ.DATAAREAID='kosm' and CLOSED = 0  and dim.inventlocationid in ('908','920')" + 
 				"	   GROUP BY  summ.itemid  having sum(availphysical) > 0 ";
-	
 
-//		String cmd = " select * from Products where Blocked != '1'";
-
-		StringBuffer products = new StringBuffer();
 		try {
-			 //			Connection con1 = getNewConnection2();
 			Connection con1 = getNewConnection();
 			Statement st = con1.createStatement();
-			ResultSet rs = st.executeQuery(cmd);
+			ResultSet rs = st.executeQuery(cmd2);
 
 			while (rs.next()) {
-
 				String kood = rs.getString("stock").trim();
 				Double kogus = rs.getDouble("summ");
-				
 				stocksOld.put(kood, kogus);
-				String dealer = " ";
-
-				products.append(kood + ";");
-				products.append(" ;");
-				products.append(getParent().getNF().format(kogus) + ";"
-						+ dealer + "\n");
-				// products.append(getParent().getNF().format(rs.getDouble("stock"))
-				// + "; ; \n");
 			}
-			rs.close();
-			
 			rs.close();
 			st.close();
 			con1.close();
 		} catch (Exception e) {
 			getParent().showError(e);
 		}
-		*/
+		
 		
 	    
 		String cmd = " select * from Products where Blocked != '1'";
 
 		StringBuffer products = new StringBuffer();
 		try {
-						Connection con1 = getNewConnection2();
+			Connection con1 = getNewConnection2();
 			Statement st = con1.createStatement();
 			ResultSet rs = st.executeQuery(cmd);
 
 			while (rs.next()) {
-
-
 				String kood = rs.getString("UniqueCode").trim();
 				Double kogus = rs.getDouble("Inventory");
-				
-				stocksOld.put(kood, kogus);
-				String dealer = " ";
-
-				products.append(kood + ";");
-				products.append(" ;");
-				products.append(getParent().getNF().format(kogus) + ";"
-						+ dealer + "\n");
-				// products.append(getParent().getNF().format(rs.getDouble("stock"))
-				// + "; ; \n");
+				double kog = 0;
+				if(stocksOld.get(kood) != null) {
+					kog = Double.parseDouble(stocksOld.get(kood)+"");
+				}
+				stocksOld.put(kood, kogus+kog);
 			}
 			rs.close();
 			st.close();
@@ -410,6 +386,16 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 			getParent().showError(e);
 		}
 		
+		Iterator itera = stocksOld.keySet().iterator();
+		while (itera.hasNext()) {
+			String kood = (String)itera.next();
+			double kogus = Double.parseDouble(stocksOld.get(kood)+"");
+		products.append(kood + ";");
+		products.append(" ;");
+		products.append(getParent().getNF().format(kogus) + "; "
+				+  "\n");
+		}
+
 		
 		return products.toString();
 	}
@@ -1132,8 +1118,8 @@ try {
   private HashMap<String , String> getTestersInfo() {
 	    testersSet = new HashSet<String> ();
   HashMap<String , String> res = new HashMap<String , String>();
-  String sql = " select mainitemcard as itemid ,testeritemid as tester ,istester , MandatoryTester from InventTableAdditionalInfo_KOS \r\n" + 
-  		"where testeritemid != ''";
+  String sql = " select mainitemcard as itemid , (testeritemid) as tester  from InventTableAdditionalInfo_KOS " + 
+  		"  		where testeritemid != '' and mainitemcard != '' ";
   try {
  //String url = "jdbc:odbc:kosmelitaaxatest";
   Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
@@ -1156,7 +1142,7 @@ try {
   }catch(Exception e) {
 	  e.printStackTrace();
   }
- System.out.println();
+ System.out.println("testers size "+ res.size());
   return res;
 }
   
@@ -1295,11 +1281,12 @@ try {
          arr.add(prod.getID());
          lineDiscs.put(prgrupp.trim(), arr);
        }
-      prod.setAllowGift(false);
       
+      prod.setAllowNotGift(true);
       if(this.testerProdsMap.get(prod.getID()) != null){
+    	 // System.out.println("gifting ");
     	  prod.setDiffColor(true);
-    	  prod.setAllowGift(true);
+    	  prod.setAllowNotGift(false);
       }
       
        if(stocksOld != null && stocksOld.get(prod.getID()) != null) {

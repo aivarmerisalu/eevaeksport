@@ -1819,13 +1819,14 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
     	  sort = "xxx";
       }
         
+        
         }
       
       prod.setName(nimetus + add);
       
-      prod.setAllowGift(false);
+      prod.setAllowNotGift(true);
       if(prod.getGroup().startsWith("151")) {
-    	  prod.setAllowGift(true);
+    	  prod.setAllowNotGift(false);
       }
    
       

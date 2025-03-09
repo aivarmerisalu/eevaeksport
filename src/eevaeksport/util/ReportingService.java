@@ -47,11 +47,21 @@ public class ReportingService {
             if(file.exists()){
             	FileBody bin = new FileBody(file);
 
-                HttpEntity  reqEntity=   MultipartEntityBuilder.create()
-                            .addPart("file", bin)
-                            .addPart("itemId", new StringBody(itemID, ContentType.TEXT_PLAIN))
-                            .addPart("module", new StringBody(module, ContentType.TEXT_PLAIN))
-                            .build();
+                HttpEntity  reqEntity=  null;
+                if(itemID != null) {
+                	reqEntity =MultipartEntityBuilder.create()
+                    .addPart("file", bin)
+                    .addPart("itemId", new StringBody(itemID, ContentType.TEXT_PLAIN))
+                    .addPart("module", new StringBody(module, ContentType.TEXT_PLAIN))
+                    .build();
+                }else {
+                	reqEntity = MultipartEntityBuilder.create()
+                    .addPart("file", bin)
+                 
+                    .addPart("module", new StringBody(module, ContentType.TEXT_PLAIN))
+                    .build();
+                }
+                
                 
                 post.addHeader("Content-Disposition", "form-data; name=\"file\"; filename=\"" + file.getName() + "\"");
                 post.setEntity(reqEntity);

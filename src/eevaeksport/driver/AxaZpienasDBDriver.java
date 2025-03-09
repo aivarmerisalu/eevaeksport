@@ -899,12 +899,14 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
                   rs.close();
                   
                   
-                  String sql2 = "  select pd.accountrelation AS clgroup,  " +
-				  " (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +
-				  " (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, " +
-				  "   pd.fromdate as algus , pd.todate as lopp from  " +
-				  "  pricedisctable pd where   pd.fromdate<getdate()+3 and pd.todate>=getdate() and pd.accountcode=1 and percent1 > 0 and pd.dataareaid ='zp' " +
-				  "   order by pd.accountrelation , pd.itemrelation" ;
+                  String sql2 = "   select pd.accountrelation AS clgroup,  \r\n" + 
+                  		"				   (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid,\r\n" + 
+                  		"				   (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, \r\n" + 
+                  		"				     pd.fromdate as algus , pd.todate as lopp from  \r\n" + 
+                  		"				   pricedisctable pd where   pd.fromdate<getdate()+3 and (pd.todate>getdate() or year (pd.todate) <2000) and pd.accountcode=1 and percent1 > 0 and pd.dataareaid ='zp'\r\n" + 
+                  		"				    order by pd.accountrelation , pd.itemrelation,pd.fromdate desc,pd.todate" ;
+                  
+                  HashSet olemas = new HashSet();
                   
                   rs = stmt.executeQuery(sql2);
 
@@ -931,13 +933,16 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
                                   mline.setProdGroup(prodGroup);
                           }
                           mline.setDiscount(discount);
-                          if(!todate.contains("2154")) {
+                          if(!todate.contains("2154") && !todate.contains("1900")) {
                               mline.setStartDate(fromdate.substring(0,10));
                               mline.setEndDate(todate.substring(0,10));
                           }
                      
-                        
-                          lines.add(mline);
+                        if(!olemas.contains(clGroup+prodID)) {
+                            lines.add(mline);	
+                        }
+                     
+                          olemas.add(clGroup+prodID);
                   }
                   
                   

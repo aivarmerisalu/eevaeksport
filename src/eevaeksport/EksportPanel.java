@@ -4790,7 +4790,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
        buf.append(prod.getTypeSimi());
        buf.append(EksportPanel.separator);
        
-       if(prod.isAllowGift()){
+       if(prod.isAllowNotGift()){
            buf.append("1");   
          //  System.out.println("lubatud " + prod.getID());
        }else{

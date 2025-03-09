@@ -1,9 +1,12 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -54,7 +57,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager {
+public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,PictureMaker {
 
   public S1TabakDBDriver(EksportPanel parent) {
     super(parent);
@@ -133,6 +136,91 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 	      }
 
    
+   
+  @Override
+		public void PictureMaker() {
+			makePictureCat();
+			 System.exit(0);
+			
+		}
+	 
+  private void makePictureCat(){
+	    
+  	
+  	String pictssou = parent.getProps().getProperty("pict.dir");
+	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+     
+	 try {
+ 	  
+      File f = new File(pictspda +"list.txt");
+      if (f.exists())f.delete();
+      //Kataloogi sisude kustutamine
+  	 	 File res2 = new File (pictspda);
+           String[] ff2 = res2.list();
+       	 for(int i = 0;ff2.length>i;i++){
+           	(new File ( pictspda + ff2[i])).delete(); 
+           }
+//       	 Lõppes kustutamine 
+		 
+		 TreeMap prods = this.getProducts(null);
+
+       StringBuffer buf = new StringBuffer();
+       Iterator enume = prods.keySet().iterator();
+  
+       while (enume.hasNext()) {
+  	    	String asi = (String)enume.next();
+  	    	Product prod = (Product)prods.get(asi);
+  	    	String toode = prod.getEAN().trim();  
+  	 //   System.out.println("toode " + toode);
+             if(toode.length() > 3){
+              	
+  	   	  res2 = new File (pictssou);
+            ff2 = res2.list();
+           
+       	 for(int i = 0;ff2.length>i;i++){
+           	if( ff2[i].startsWith(toode + "_")){
+           //  System.out.println("pilt olemas " + ff2[i]);
+          	File in = new File ( pictssou + ff2[i]); 
+            	if(in.isFile()){
+            		
+            		if(ff2[i].toLowerCase().endsWith(".png")) {
+            			File inpda = new File ( pictspda + prod.getID()+ ".png");
+                    	if(!inpda.exists()){
+                        	Converter.shrinkAndCopyFile(in,inpda,400);
+                	    if(buf.toString().indexOf(prod.getID()+".png;"  + inpda.length()) == -1){
+                          		buf.append(prod.getID()+".png;"  + inpda.length() + "\n");
+                          	}
+                	    }  
+            		}else {
+            			File inpda = new File ( pictspda + prod.getID()+ ".jpg");
+                    	if(!inpda.exists()){
+                        	Converter.shrinkAndCopyFile(in,inpda,400);
+                	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
+                          		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+                          	}
+                	    }  
+            		}
+            		
+            	
+            	
+            	}
+               }
+             }
+           }
+     }
+       try {
+ 		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+ 		os.write(buf.toString());
+ 		os.close();
+ 	  }catch (Exception ex) {
+ 		ex.printStackTrace();
+ 	  }
+	 
+	 } catch (Exception e) {
+  	    getParent().showError(e);
+  	}
+   
+}
    public String getProductSortingData(){
    	return null;
    }
@@ -705,7 +793,7 @@ private HashMap prodPrices = null;
                     lastdate =" ";
                     }
                     
-                 CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate,price,0,0," ");
+                 CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate.substring(5),price,0,0," ");
                  cp.setAbiKood(Converter.cleanLitLatEst(doc));
                  vec.addElement(cp);
    		}

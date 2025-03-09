@@ -433,11 +433,13 @@ try{
 			  OrderLine lin = (OrderLine)enumr.nextElement();
 			  
 			  if(change) {
-			    	
-		    		ordorklacha.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+			    	if(lin.getKogus() < 0) {
+			    		//paneme ainult ühe rea juurde nende soovi ja nega rida vahetusel ei pane
+		    		ordorklacha.add(lin.getToode(), lin.getKogus()*-1, lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 		    		ordorklacha.setDokNr(order.getDokNr()+"C");
 		    		ordorklacha.setReference(order.getReference());
+			    	}
 			 		
 		    	}  else if(lin.getDiscount() == -2) {
 			    	
@@ -447,7 +449,7 @@ try{
 			    		ordorklabonus.setReference(order.getReference());
 				 		
 			    	}else if (lin.getKogus() < 0) {
-			    		ordorklaret.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+			    		ordorklaret.add(lin.getToode(), lin.getKogus()*-1, lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
 				     	ordorklaret.setDokNr(order.getDokNr()+"R");
 				     	ordorklaret.setReference(order.getReference());
@@ -555,11 +557,12 @@ try{
 	         }
 	         
 	         String rrr = (comm + time).trim();
+	         String hhh = "";
 	         if(tagastus) {
-	        	 rrr = "ATG";
+	        	 hhh = "ATG";
 	         }
 	         if(change) {
-	        	 rrr = "APM";
+	        	 hhh = "APM";
 	         }
 	       	 fileName =   "H_" + fn + ".csv";
 	       	 StringBuffer sb0 = new StringBuffer();
@@ -567,7 +570,7 @@ try{
 	            sb0.append(fn + sep);
 		        sb0.append( klient + sep);
 		        sb0.append(getDateTimeString(Calendar.getInstance()) + sep + "L" +
-		        sep + getDateString(call) + sep + agent+sep+sep+sep+"0.00"+sep +"FALSE"+sep +getDateTimeString(Calendar.getInstance())+sep+ rrr +sep);
+		        sep + getDateString(call) + sep + agent+sep+sep+sep+"0.00"+sep +"FALSE"+sep +getDateTimeString(Calendar.getInstance())+sep+ rrr +sep+hhh);
 		      
 	    	        
 	         String fname = (parent.getProps().getProperty("conv.dir")) + fileName;

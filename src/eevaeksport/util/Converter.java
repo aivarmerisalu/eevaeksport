@@ -5360,6 +5360,7 @@ try{
 		
 		try {
 			res = serv.postJson(json.toString(), "https://api.mobitrek.eu/rest/task/save");
+			serv.closeClient();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -8703,8 +8704,82 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 	             }
 	  }
 
+	
+
+	  public static void shrinkAndCopyFile(String in, String out, int size) throws Exception {
+	      if (in != null && in.toLowerCase().indexOf("thrumbs") == -1) {
+	          if (size == 0) {
+	              size = 301;
+	          }
+
+	          BufferedImage inb = null;
+	          try {
+	              ImageIO.scanForPlugins();
+	              inb = ImageIO.read(new File(in));
+	          } catch (Exception e) {
+	              InputStream ins = new FileInputStream(in);
+	              try {
+	                  inb = JPEGCodec.createJPEGDecoder(ins).decodeAsBufferedImage();
+	              } catch (Exception r) {
+	                  System.out.println("error " + in);
+	              }
+	          }
+
+	          if (inb != null) {
+	              BufferedImage newImage;
+	              ColorModel colorModel = inb.getColorModel();
+	              ColorSpace colorSpace = colorModel.getColorSpace();
+
+	              if (colorSpace.getType() == ColorSpace.TYPE_CMYK) {
+	                  ColorConvertOp op = new ColorConvertOp(colorSpace, ColorSpace.getInstance(ColorSpace.CS_sRGB), null);
+	                  newImage = new BufferedImage(inb.getWidth(), inb.getHeight(), BufferedImage.TYPE_INT_RGB);
+	                  op.filter(inb, newImage);
+	              } else {
+	                  newImage = new BufferedImage(inb.getWidth(), inb.getHeight(), BufferedImage.TYPE_INT_RGB);
+	                  Graphics2D g = newImage.createGraphics();
+	                  g.drawImage(inb, 0, 0, null);
+	                  g.dispose();
+	              }
+
+	              inb.flush();
+	              File outputfile = new File(out);
+	              ImageIO.setUseCache(false);
+	              ImageIO.write(newImage, "jpg", outputfile);
+
+	              Image bb = ImageLoader.fromFile(out);
+	              boolean portrait = false;
+
+	              if (bb.getWidth() < bb.getHeight()) {
+	                  portrait = true;
+	                  double ss = (size / 3.0 * 2.0);
+	                  size = (int) ss;
+	              }
+
+	              int finalWidth = size;
+	              int finalHeight = size;
+
+	              if (bb.getWidth() > size) {
+	                  double aspectRatio = (double) bb.getWidth() / bb.getHeight();
+	                  if (portrait) {
+	                      finalHeight = size;
+	                      finalWidth = (int) (size * aspectRatio);
+	                  } else {
+	                      finalWidth = size;
+	                      finalHeight = (int) (size / aspectRatio);
+	                  }
+
+	                  bb.getResizedToWidth(finalWidth).writeToJPG(new File(out), 0.8f);
+	              }
+
+	              bb.dispose();
+	          } else {
+	              copyFile(new File(in), new File(out));
+	          }
+	      }
+	  }
+
 	  
-	  public static void shrinkAndCopyFile (String in, String out , int size ) throws Exception {
+	  public static void shrinkAndCopyFileOLD  (String in, String out , int size ) throws Exception {
 		   if(in != null && in.toLowerCase().indexOf("thrumbs") == -1){
 			   if(size == 0){
 				   size = 301;
