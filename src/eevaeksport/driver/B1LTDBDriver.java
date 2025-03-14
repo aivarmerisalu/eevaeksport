@@ -62,6 +62,8 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateMidnight;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -82,6 +84,7 @@ import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.util.Converter;
+import eevaeksport.util.ReportingService;
 
 
 /**
@@ -113,35 +116,176 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
       
 	  user =  getParent().getProps().getProperty("rest.user");
       pass = getParent().getProps().getProperty("rest.pass");
-      rcompany = getParent().getProps().getProperty("rest.companyx");
+      company = getParent().getProps().getProperty("rest.companyx");
       sendTaskReport();
-    //  downloadData("sales");
+    // downloadData(null);
        //testConn();
      }
   
   
   private void sendTaskReport() {
+	     HashMap agMail = new HashMap(); 
+	  
 		// loeme setting kataloogi sisse ja sealt siis managermailid igale agendile-
 		File cat = new File("settings");
 		String[] files = cat.list();
 		
 		for(int i = 0 ;i < files.length; i++) {
 			String file = "settings/" + files[i];
-			 System.out.println("files: " + file);
 			 Properties properties = new Properties();
 		        try (FileInputStream input = new FileInputStream(file)) {
 		          properties.load(input);
 
-		            String username = properties.getProperty("managerinfomail");
-		            String agentid = files[i].substring(0,files[i].indexOf(". "));
-		           
+		            String email = properties.getProperty("managerinfomail");
+		            String agentid = files[i].substring(0,files[i].indexOf("."));
+		           agMail.put(agentid.trim(), email);
 		        
 		        } catch (IOException e) {
 		            System.err.println("Error loading properties file: " + e.getMessage());
 		        }
 		}
 		
+		System.out.println(agMail.get("C30"));
+		
+	//	Laeme taskid alla
+		
+
+		       DateMidnight nn = new DateMidnight();
+		  final DateTime input = new DateTime(nn.getMillis());
+		  final DateMidnight startOfLastWeek =   new DateMidnight(input.minusDays(60));
+		  final DateMidnight endOfLastWeek =  new DateMidnight(input.plusDays(1));
+		 
+			  eevaeksport.util.ReportingService serv = new ReportingService();
+			    serv.user =  user;
+				serv.pass = pass;
+				serv.company = company;
+		
+				try {
+				//	org.json.JSONArray array = serv.getTaskdata(new Date(startOfLastWeek.getMillis()), new Date(endOfLastWeek.getMillis()) );
+					try {
+						//	Converter.saveFile(  "svdata/taskdata.json" , array.toString());
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				  serv.closeClient();
+				  } catch (Exception t) {
+					t.printStackTrace();
+				  }
+				
+			
+			
+		
+		HashSet replysDone = new HashSet();
+		HashSet tasksDone = new HashSet();
+		
+		ArrayList newTasksReplies= new ArrayList();
+		
+		org.json.simple.JSONArray json = Converter.readJSONArrFile("svdata/taskdata.json");
+
+		HashMap lines  = new HashMap();
+		  int lenn = json.size();
+		try {
+		  for (int i = 0; i < lenn; i++) {
+			org.json.simple.JSONObject task = (org.json.simple.JSONObject) json.get(i);
+			 String header = (String)task.get("header");
+			 String message = (String)task.get("message");
+			 Long created = (Long)task.get("created");
+			 Long taskID = (Long)task.get("id");
+			 Long closed = (Long) task.get("completed");
+			 
+			 try {
+			 String  custID = ((org.json.simple.JSONObject)task.get("customer")).get("code") + "";
+			 String  custName = ((org.json.simple.JSONObject)task.get("customer")).get("name") + "";
+			 String  cloMan = null;
+			 String  vastus = null;
+			 String repMana = null;
+			 String repManaCode = null;
+			 String cloManCode = null;
+			 
+			 org.json.simple.JSONArray logs = (org.json.simple.JSONArray)task.get("tasklogs");
+			 if(!logs.isEmpty()) {
+				 for(int u = 0; u < logs.size() ; u++) {
+					 org.json.simple.JSONObject lo = (org.json.simple.JSONObject)logs.get(u);
+					 if(((String)lo.get("key")).equals("taskComplete")) {
+						 cloMan =  (String) ((org.json.simple.JSONObject)lo.get("manager")).get("name");
+
+						 cloManCode =  (String) ((org.json.simple.JSONObject)lo.get("manager")).get("code");
+					 }
+					 
+				 }
+				 }
+			
+			 org.json.simple.JSONArray replies = (org.json.simple.JSONArray)task.get("replies");
+			 if(!replies.isEmpty()) {
+				 for(int u = 0; u < replies.size() ; u++) {
+					 org.json.simple.JSONObject rep = (org.json.simple.JSONObject)replies.get(u);
+					  vastus = (String) rep.get("message");
+					  repMana = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("name");
+					  repManaCode = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("code");
+
+					 System.out.println(custID + " " + taskID + " " + message + " " +  vastus 
+							 + "\n " + repMana + cloMan);
+					 
+				 }
+			 }
+			 
+			 if(!replies.isEmpty()) {
+				 if(closed == null) {
+					 String email = (String)agMail.get(repManaCode);
+				   newTasksReplies.add(email+"|"+ custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "| |" + repMana);
+				 } else {
+					 String email = (String)agMail.get(cloManCode);
+				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "|" + closed + "|" + cloMan);
+				 }
+			 } else if(closed != null) {
+				 String email = (String)agMail.get(cloManCode);
+				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "| |"+ created + "|" + closed + "|" + cloMan);
+			 }
+			 // kui on ainult reply ja pole suletud siis paneme replydesse
+			 
+			 
+			 
+			 
+			 
+			 } catch(Exception r) {
+				 
+			 }
+			 
+			 
+		  }
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		System.out.println(newTasksReplies.toString());
+		
+		
+		//Siin nüüd maili saatma
+		TreeMap mails = new TreeMap();
+		
+	   for(int u = 0; u < newTasksReplies.size(); u++) {
+		   String line = (String)newTasksReplies.get(0);
+		   String em = line.substring(0,line.indexOf("|"));
+		   if(mails.get(em) != null) {
+			   ArrayList ls = (ArrayList)mails.get(em);
+			   ls.add(line);
+			   mails.put(em, ls);
+		    } else {
+			   ArrayList ls = new ArrayList();
+			   ls.add(line);
+			   mails.put(em, ls);
+		   }
+	   }
+	   
+	   
+	 //  Nüüd on mailide lõikes info olemas ja tuleb saata.
+	   
+	   
 	}
+  
+  
 	  String user =  null;
 	  String pass = null;
 	  String rcompany = null;
@@ -217,6 +361,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	    		if (dataType == null || dataType.equals("sales")) {
 	    			this.saveFile("sales","https://www.b1.lt/api/warehouse/sales/list");
 	    		}
+	    		
 	    		
 		  
 	 /*
@@ -626,7 +771,8 @@ private void saveFile (String filename, String url ) {
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
 
 	            Boolean juridical = (Boolean)cob.get("isJuridical");
-	            if(juridical) {
+	            Boolean isPotential = (Boolean)cob.get("isPotentialClient");
+	            if(juridical && isPotential) {
 	          	String number = cob.get("id") +"";
 	          	Customer cust = new Customer(number);
 	            
@@ -1540,7 +1686,15 @@ public String getProductSortingData() {
 @Override
 public TreeMap getProducts(Agent agent) {
 	  TreeMap tm = new TreeMap();
-
+  HashSet yesGrups = new HashSet();
+	  if(getParent().getProps().getProperty("yesgroups") != null){
+	    	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("yesgroups"),",");
+	    	while (st.hasMoreElements()){
+	    		String aa = st.nextToken();
+	    		yesGrups.add(aa);
+	    	}
+	    }
+	  
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
 		
 		int pages =  Integer.parseInt(cc.get("pages")+"");
@@ -1569,10 +1723,18 @@ public TreeMap getProducts(Agent agent) {
 
           	String code = (String)cob.get("code");
 			Product prod = new Product(number);
+			
+			boolean goes = false;
 		
           	String itemCatCode = cob.get("groupId") + "";
         	if (itemCatCode != null && itemCatCode.length() > 0) {
         		prod.setGroup(itemCatCode);
+        		if(yesGrups.contains(itemCatCode)) {
+        			goes = true;
+        		}
+        		
+        	
+        		
         	}
           	
           	String gtin = (String)cob.get("ean");
@@ -1608,8 +1770,9 @@ public TreeMap getProducts(Agent agent) {
           		}
           	}
           	 
+          	if(goes) {
             	  tm.put(prod.getName(), prod);	
-            
+          	}
           	
           
           	}

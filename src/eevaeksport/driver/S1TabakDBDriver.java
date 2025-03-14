@@ -74,10 +74,78 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
    	return null;
    }
    
+   private HashMap clGroups = null;
+   
    public Vector getPriceMatrixData(){
 	  	
    HashSet check = new HashSet();
 	       Vector result = new Vector();
+
+	       // teeme kampaaniad kõigepealt
+	       
+	       //peame korduvaid ridu mitte saatma systeemi. 
+	       //kliendi gruppide objekt peab olema 
+
+	       for (String[] row : readCSVData("actions.csv")) {
+  	       	 int cou = 0;
+  	         String klient = null;
+  	         String klientGR = null;
+  	      	 String toode = null;
+  	       	 double hind = 0 ;
+  	       	 String start = null;
+  	       	 String end = null;
+  	       	 //"";"";"Papīra dvieļi 'Ruta' MAX 1r. 2sl.";"1.79";"01.01.0001 00:00:00";"17.03.2025 00:00:00";
+  	       
+  	       	   for (String cell : row) {
+  	           	 if(cou == 0) {
+  	                     klient = cell.trim().replace(':', '_');;
+  	                }
+  	           if(cou == 1) {
+  	        	 klientGR = cell.trim();
+	                }
+  	           	 if(cou == 3) {
+  	                    toode = cell.trim();
+  	                }
+  	           	 if(cou == 4) {
+  	                    hind = Double.parseDouble(cell.trim());
+  	                }
+  	           if(cou == 5) {
+  	        	   start = cell.trim();
+	                }
+  	            if(cou == 6) {
+                   end = cell.trim();
+                   }
+  	            
+  	           	 cou++;
+  	       	   }
+  	              MatrixLine mline = new MatrixLine();
+
+ 	             if (klient != null && klient.length() > 0) {
+ 	               mline.setCustID(klient);
+ 	             }
+
+ 	             if (klientGR != null && klientGR.length() > 0) {
+ 	               mline.setCliGroup(klientGR);
+ 	             } 	             
+
+ 	              if (toode != null && toode.length() > 0) {
+ 	               mline.setProdID(toode);
+ 	             }
+ 	              
+ 	             if (hind > 0) {
+ 	 	               mline.setPrice(hind);
+ 	 	             }
+
+ 	             if (start != null && start.length() > 0) {
+ 	               mline.setStartDate(start.substring(0,10));
+ 	             }
+
+ 	             if (end != null && end.length() > 0) {
+ 	               mline.setEndDate(end.substring(0,10));
+ 	             }
+ 	            result.add(mline); 
+	       }
+	       
 	       
 	       for (String[] row : readCSVData("priceslists.csv")) {
   	       	 int cou = 0;
@@ -88,7 +156,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
   	       
   	       	   for (String cell : row) {
   	           	 if(cou == 0) {
-  	                     klient = cell.trim().replace(':', '_');;
+  	                     klient = cell.trim().replace(':', '_');
   	                }
   	           	 if(cou == 1) {
   	                    toode = cell.trim();
@@ -171,6 +239,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
   	    	String asi = (String)enume.next();
   	    	Product prod = (Product)prods.get(asi);
   	    	String toode = prod.getEAN().trim();  
+  	    	String artikkel = prod.artikkel; 
   	 //   System.out.println("toode " + toode);
              if(toode.length() > 3){
               	
@@ -207,6 +276,43 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                }
              }
            }
+             
+             if(artikkel != null && artikkel.length() > 2){
+               	
+         	   	  res2 = new File (pictssou);
+                   ff2 = res2.list();
+                  
+              	 for(int i = 0;ff2.length>i;i++){
+                  	if( ff2[i].startsWith(artikkel + "_")){
+                  //  System.out.println("pilt olemas " + ff2[i]);
+                 	File in = new File ( pictssou + ff2[i]); 
+                   	if(in.isFile()){
+                   		
+                   		if(ff2[i].toLowerCase().endsWith(".png")) {
+                   			File inpda = new File ( pictspda + prod.getID()+ ".png");
+                           	if(!inpda.exists()){
+                               	Converter.shrinkAndCopyFile(in,inpda,400);
+                       	    if(buf.toString().indexOf(prod.getID()+".png;"  + inpda.length()) == -1){
+                                 		buf.append(prod.getID()+".png;"  + inpda.length() + "\n");
+                                 	}
+                       	    }  
+                   		}else {
+                   			File inpda = new File ( pictspda + prod.getID()+ ".jpg");
+                           	if(!inpda.exists()){
+                               	Converter.shrinkAndCopyFile(in,inpda,400);
+                       	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
+                                 		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+                                 	}
+                       	    }  
+                   		}
+                   		
+                   	
+                   	
+                   	}
+                      }
+                    }
+                  }
+             
      }
        try {
  		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
@@ -463,6 +569,7 @@ if(seis > 0) {
    public TreeMap getCustomers(Agent agent){
 
           Hashtable custAgents = readCustAgents();
+          clGroups = new HashMap();
        
 	    try {
 	        
@@ -550,23 +657,34 @@ if(seis > 0) {
         	 String name2 = null;
         	 String address = null;
         	 String contact = null;
+        	 String group = null;
         	 
              for (String cell : row) {
             	 if(cou == 0) {
                       id = cell.trim().replace(':', '_');;
                  }
+            	 
             	 if(cou == 1) {
                      name = cell.trim();
                      name = name.replaceAll("'", " ").trim();
                      name = name.replaceAll("  ", " ");
                      name2 = Converter.cleanLitLatEst(name);
                  }
+            	 
             	 if(cou == 2) {
                      address = cell.trim();
                  }
+            	 
             	 if(cou == 4) {
                      contact = cell.trim();
                  }
+            	 
+
+            	 if(cou == 13) {
+                     group = cell.trim();
+                   
+                 }
+            	 
                  cou++;
              }
              Customer  cust = new Customer(id);
@@ -575,6 +693,10 @@ if(seis > 0) {
              cust.restStreet = address;
              cust.restPerson = contact;
              cust.setPersonalData( Converter.enCodeEst(contact));
+             if(group != null && group.trim().length() > 0 ) {
+            	//  System.out.println(id + " grupp " + group);
+                 cust.setGroup(group);
+             }
              if(custAgents.get(cust.getID()) != null) {
             	 ArrayList<String> arr = (ArrayList)custAgents.get(cust.getID());
             	 for(String ag : arr) {
@@ -647,6 +769,7 @@ private HashMap prodPrices = null;
       	 String name = null;
       	 String unit = null;
       	 String ean = null;
+      	 String artikkel = null;
       	 String gr2 = null;
       	 String gr1 = null;
          double price = 0;
@@ -681,6 +804,9 @@ private HashMap prodPrices = null;
          	if(cou == 16) {
                 ean = cell.trim();
              }
+         	if(cou == 17) {
+                artikkel = cell.trim();
+             }
               cou++;
           }
          
@@ -712,6 +838,7 @@ private HashMap prodPrices = null;
              String name2 = Converter.cleanLitLatEst(name);
              prod.setName(Converter.enCodeEst(name));
           
+             prod.artikkel = artikkel;
             
          	//  System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + prod.getUnit() + " " + prod.getPrice());
             	

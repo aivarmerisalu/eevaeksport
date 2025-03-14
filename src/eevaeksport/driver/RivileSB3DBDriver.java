@@ -718,7 +718,7 @@ HashSet olemas = new HashSet();
             		"SELECT ltrim(I06_KODAS_KS)  AS klient,(case when (I06_kodas_ak) is null then '1' else ltrim((I06_kodas_ak)) end) as kood ,\r\n" + 
             		"( ltrim( case when month(I06_DOK_DATA) <10 then  '0' + ltrim(str(month(I06_DOK_DATA))) else \r\n" + 
             		"            		ltrim(str(month(I06_DOK_DATA))) end) ) as kuu, \r\n" + 
-            		"            		        		sum(I07_KIEKIS*(I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end )) as summa FROM i07_pard p with(nolock) \r\n" + 
+            		"            		        		sum(I07_ALT_KIEKIS*(I07_SUMA/case when I07_ALT_KIEKIS =0 then 1 else I07_ALT_KIEKIS  end )) as summa FROM i07_pard p with(nolock) \r\n" + 
             		"            						  INNER JOIN i06_parh with(nolock) ON p.I07_KODAS_PO=I06_KODAS_PO \r\n" + 
             		"            						 left JOIN N33_KBAN with(nolock) ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS \r\n" + 
             		"            						 WHERE I06_DOK_DATA > getdate()-200 \r\n" + 
@@ -1028,15 +1028,25 @@ HashSet olemas = new HashSet();
             while (rs.next()) {
               String kood = rs.getString("toode").trim();
               Product prod = new Product(kood);
-           
-              String nimetus =  Converter.enCodeEst(rs.getString("nimetus").trim());
+             String nimorig = rs.getString("nimetus").trim();
+              String nimetus =  Converter.enCodeEst(nimorig);
               String unit = rs.getString("unit");
               if(unit != null && unit.trim().length() > 0) {
             	  prod.setUnit(unit.trim());
               }
            
-              nimetus = nimetus.replaceAll("\"", " ");
+              nimetus = nimetus.replaceAll("\"", " ").trim();
               nimetus = nimetus.replaceAll("  ", " ");
+
+
+              nimetus = nimetus.replaceAll("butelis", "bot");   
+              nimetus = nimetus.replaceAll("bottle", "bot");   
+              nimetus = nimetus.replaceAll("Original", "Orig");
+
+              nimetus = nimetus.replaceAll("Alcoholic", "Alc");
+              
+              
+              
              
               prod.setName(nimetus);
               try{
@@ -1077,13 +1087,13 @@ HashSet olemas = new HashSet();
             String grupp = rs.getString("grupp2");
              if (grupp != null && grupp.trim().length()>0){
                prod.setGroup(grupp.trim());
-               if(grupp.contains("VYN")) {
-            		 String grupp2 = rs.getString("grupp");
+               	 String grupp2 = rs.getString("grupp");
                      if (grupp2 != null && grupp2.trim().length()>0){
                        prod.setGroupSecond(grupp2.trim());
                      }   
+               if(grupp.trim().equals("33")) {
+            	   goes = false;
                }
-              
              }
           
         
@@ -1111,6 +1121,8 @@ HashSet olemas = new HashSet();
                if(prod.getStock() < 1 && !usedProds.contains(prod.getID())) {
             	   goes = false;
                }
+               
+               
             try {
                Double aMaxDiscount = Double.parseDouble(rs.getString("maxdisc"));
                if(aMaxDiscount > 0) {
@@ -1126,8 +1138,16 @@ HashSet olemas = new HashSet();
             }
                
                prod.setVat("21");
+               
+               //pandid välja 
+                if(prod.getID().equals("094") || prod.getID().equals("086") || prod.getID().equals("095") || prod.getID().equals("096") 
+                		|| prod.getID().equals("1470")	|| prod.getID().equals("098") || prod.getID().equals("088") || prod.getID().equals("088") 
+                		|| prod.getID().equals("200")|| prod.getID().equals("097") || prod.getID().equals("087") || prod.getID().equals("090")  || prod.getID().startsWith("TRANS")) {
+                	goes = false;
+                }
+               
                if(goes) {
-            	   products.put(nimetus, prod);
+            	   products.put(nimorig, prod);
                }
               
 
@@ -1165,12 +1185,12 @@ HashSet olemas = new HashSet();
         connectionUp(url);
         
         String cmd =" SELECT ltrim(I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) as kood," +
-        		"I07_KODAS AS toode,I07_KIEKIS/I07_FRAKCIJA AS kogus, " +
-				"I06_DOK_DATA AS kuupaev  ,max(I07_SUMA/case when I07_KIEKIS =0 then 1 else I07_KIEKIS/I07_FRAKCIJA  end ) as lastprice FROM i07_pard p" +
+        		"I07_KODAS AS toode,I07_ALT_KIEKIS AS kogus, " +
+				"I06_DOK_DATA AS kuupaev  ,max(I07_SUMA/case when I07_ALT_KIEKIS =0 then 1 else I07_ALT_KIEKIS  end ) as lastprice FROM i07_pard p" +
 				"  INNER JOIN i06_parh ON p.I07_KODAS_PO=I06_KODAS_PO "+
 				" left JOIN N33_KBAN ON N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
-				" WHERE I06_DOK_DATA > getdate()-180 "+
-				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_KIEKIS/I07_FRAKCIJA";
+				" WHERE I06_DOK_DATA > getdate()-180 and  len(I07_KODAS ) > 3 "+
+				" GROUP BY I06_KODAS_KS,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end),I07_KODAS,I06_DOK_DATA,I07_ALT_KIEKIS ";
     
         if (isDebug()) {
            System.out.println(cmd);
@@ -1319,46 +1339,17 @@ HashSet olemas = new HashSet();
          try {
         	 
         	 
-           stmt = con.prepareStatement(cmd);
 
-           String cmd2 =
-               "SELECT  N08_KODAS_LS_1  AS agent , SUM(i07_kiekis*N37_NETTO / ( case when n17_kodas_gs in  "
-               + "('KOMBUCHA','NEALK_KOKTEI','ALK_KOKTEILI','ALUS','GAZ_GERIMAS','GAZ_VANDUO','N_SIDRAS','NEGAZ_VANDUO','SIDRAS') then 10 else 1 end )) AS liters " + 
-               " FROM i06_parh\r\n" + 
-               "  INNER JOIN i07_pard on  i06_parh.i06_kodas_po = i07_pard.i07_kodas_po  \r\n" + 
-               " inner join n08_klij on n08_klij.N08_KODAS_KS = i06_parh.I06_KODAS_KS\r\n" + 
-               " inner join n17_prod on n17_prod.N17_KODAS_PS =I07_KODAS\r\n" + 
-               " INNER JOIN n37_pmat on N37_KODAS_PS = I07_KODAS\r\n" + 
-               " WHERE  month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) \r\n" + 
-               "	 and I06_PERKELTA='2'  and I06_R_DATE <= getdate()   GROUP BY  N08_KODAS_LS_1 ";
-
-      
-
-       HashMap<String,Integer> liitrid = new HashMap<String,Integer>();
-       stmt = con.prepareStatement(cmd2);  
-     ResultSet	      rs = stmt.executeQuery();
-     while(rs.next()) {
-    	 String agent = rs.getString("agent");
-    	 if(agent != null && agent.trim().length() > 0){
-    		 int ltr = rs.getInt("liters");
-    		 liitrid.put(agent.trim(),ltr);
-    	 }
-     }
-     rs.close();
            
 
      
      stmt = con.prepareStatement(cmd); 
-          rs = stmt.executeQuery();
+       ResultSet   rs = stmt.executeQuery();
              while(rs.next()) {
                String agentID = rs.getString("agent").trim();
                Agent agent = (Agent)agents.get(agentID);
                if (agent != null){
                   agent.setMonthSales((int)rs.getDouble("pluss"));
-                  if(liitrid.get(agentID) != null) {
-                	  agent.setMonthSalesVol(liitrid.get(agentID));
-                	 // System.out.println("Volyyme " + liitrid.get(agentID));
-                  }
                 }
              }
              rs.close();

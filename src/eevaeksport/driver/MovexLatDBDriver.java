@@ -1232,10 +1232,10 @@ String ex = parent.getProps().getProperty("products");
                           
                           if (prod1 != null){
                             prod1.setAllowNotGift(false);
-                         // System.out.println("gift allowed " + id );
                           }
                         }
 
+                        
      rs1.close();
      st.close();
      con.close();

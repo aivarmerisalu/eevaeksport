@@ -972,7 +972,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 				
 				for (int i = 1; i <= sheet.getLastRowNum(); i++) {
 					row = sheet.getRow(i);
-					
+					try {
 					String custID = formatter.formatCellValue(row.getCell((short) 0));
 					String ag = formatter.formatCellValue(row.getCell((short) 1));
 	                       
@@ -989,6 +989,9 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 	                           }
 	                           res.put(custID, vec);
 	                       }
+					}catch(Exception e) {
+						
+					}
 	                    }
 				
 			    } catch(Exception r){
@@ -1818,7 +1821,6 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
       }else {
     	  sort = "xxx";
       }
-        
         
         }
       

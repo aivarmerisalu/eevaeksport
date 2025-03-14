@@ -172,7 +172,8 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
 	   
 	   
 
-	  	 String  sql = " select * from PriceMatrixData where [minamount] = 0 order by salestype desc " ; 
+	  	 String  sql = " select * from PriceMatrixData where [minamount] = 0 order by salestype desc, clgroup desc " ; 
+	  	 // lisasin clgr et saaks odavviinadele õige hinna ette
 	
   	 
 	  	System.out.println("matrix  " + sql);

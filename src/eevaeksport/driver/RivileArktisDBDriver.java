@@ -572,6 +572,9 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
     public TreeMap getProducts(Agent agent){
     	getDealerProductsList();
     	System.out.println("stocks suurus " + stocks.size());
+    	
+    	
+    	
   
    String cmd = " SELECT N17_KODAS_PS AS toode,rtrim(N17_PAV)  AS nimetus,N27_KIEKIS_PAK  AS tykke, 0 AS myygihind, \r\n" + 
    		"           N37_BAR_KODAS AS ean, \r\n" + 
@@ -585,14 +588,34 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
         try {
         	
         	
+        	HashMap<String, Double> kastis = new HashMap<String, Double>();
+        	
+
+        	String cmm = "SELECT N17_KODAS_PS AS toode, N37_KOEFICI  AS tykke\r\n" + 
+        			"   		    FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join n37_pmat on  N37_KODAS_PS= N17_KODAS_PS \r\n" + 
+        			"		   where N37_KOEFICI > 1 and  N37_KOEFICI < 500 ";
+        	  connectionUp(url2+odbc);
+              
+              Statement    stm = con.createStatement();
+                ResultSet  rst = stm.executeQuery(cmm);
+
+                 while (rst.next()) {
+                     String toode = rst.getString("toode").trim();
+                     Double tykke = rst.getDouble("tykke");
+                     kastis.put(toode, tykke);
+                 }
+                 
+                 rst.close();
+                 stm.close();
+        	
         	
     String    sql = "select I33_KODAS_PS AS toode, (I33_KAINA) AS hind from I33_PKAI where I33_KAINA != 0 order by I33_KODAS_PS" ;
             System.out.println("hind");
           if (isDebug()) System.out.println(sql);
           connectionUp(url2+odbc);
           TreeMap tooted = new TreeMap();
-          Statement    stm = con.createStatement();
-            ResultSet  rst = stm.executeQuery(sql);
+              stm = con.createStatement();
+              rst = stm.executeQuery(sql);
 
                while (rst.next()) {
                  String toode = rst.getString("toode").trim();
@@ -620,9 +643,9 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
               prod.setName(Converter.enCodeEst(nimetus).replace('~', '-'));
               
               //sellincases=true
-              try{
-              prod.setInCases(rs.getDouble("tykke"));
-            } catch (Exception e){}
+             if(kastis.get(kood) != null) {
+              prod.setInCases(kastis.get(kood));
+            } 
             
             if(tooted.get(kood) != null){
             	Toode tt = (Toode)tooted.get(kood);

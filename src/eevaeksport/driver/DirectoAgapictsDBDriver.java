@@ -1512,7 +1512,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 		         		String regno = "";
 		         		try{ 
 		         			regno =  rida.getAttributes().getNamedItem("regno").getNodeValue(); 
-		 	         		customer.setRegnr(regno);
+		 	         		//customer.setRegnr(regno);
 		 	         	 }catch(Exception ee){
 		         		 }
                          

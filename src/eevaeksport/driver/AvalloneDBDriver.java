@@ -48,7 +48,8 @@ import eevaeksport.util.Converter;
 public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter {
 
     /**
-     * Constructor declaration
+     * Constructor declarationgetcustomerpr
+     * 
      *
      *
      * @param parent
@@ -391,12 +392,12 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
                 public void setBulkSales(Map agents){
               	  connectionUp();
           		String cmd =  " SELECT sum(rid.kogus*(rid.hind))AS sales, " +
-          		 " dok.pais2obj  AS agent FROM dok " +
+          		 " dok.pais2obj  AS agent FROM dok " + //k.objekt2
                  " INNER JOIN rid ON dok.doktyyp+STR(dok.dokumnr,7)=rid.doktyyp+STR(rid.dokumnr,7)  INNER JOIN yksus y ON y.yksus = dok.pais2obj " +
-                 "  WHERE  len(trim(dok.klient)) > 1  AND YEAR(dok.kuupaev)=YEAR(date()) " +
+                 " WHERE  len(trim(dok.klient)) > 1  AND YEAR(dok.kuupaev)=YEAR(date()) " + // INNER JOIN klient k on k.kood = dok.saaja 
                  "  AND MONTH(dok.kuupaev)=MONTH(date()) AND y.klassif=2 AND (dok.doktyyp = 'G' OR dok.doktyyp = 'Y')" +
                  "  AND (rid.doktyyp ='G' or rid.doktyyp ='Y') " +
-          		 "  AND dok.yksus in ('1','3') AND len(trim(rid.toode))>2  GROUP BY  dok.pais2obj" ;
+          		 "  AND dok.yksus in ('1','3') AND len(trim(rid.toode))>2  GROUP BY  dok.pais2obj" ; //k.objekt2
           	
           		log(cmd);
           		

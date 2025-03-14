@@ -701,7 +701,20 @@ String email = " ";
      	 		"           WHERE   cus.dataareaid='kosm'  ";
 
      	  
-     	  
+     	  cmd = "SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum,\r\n" + 
+     	  		"adr.street as tanav,adr.city as linn, adr.county as regioon,adr.zipcode as indeks ,cus.invoiceaccount AS payer,\r\n" + 
+     	  		"0 AS debt, cus.linedisc , pricegroup,\r\n" + 
+     	  		"adr.address ,(Select h.personnelnumber from axdb.dbo.HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) AS agent , numofdays AS term, cus.blocked AS block ,\r\n" + 
+     	  		"(select max (blocked) from axdb.dbo.custtable cc WITH (NOLOCK) where cc.accountnum=cus.invoiceaccount and cc.dataareaid = cus.dataareaid )\r\n" + 
+     	  		"as payerblock ,(select l.locator from axdb.dbo.LOGISTICSELECTRONICADDRESS l WITH (NOLOCK) where l.recid = dp.primarycontactphone)\r\n" + 
+     	  		"as info\r\n" + 
+     	  		"FROM axdb.dbo.custtable cus with(nolock)\r\n" + 
+     	  		"\r\n" + 
+     	  		"inner join axdb.dbo.DirPartyTable dp with(nolock) ON cus.partY=dp.REcid\r\n" + 
+     	  		"inner join axdb.dbo.LogisticsEntityPostalAddressView adr ON cus.partY=adr.entity and adr.isprimary=0 and adr.entitytype=4 and getdate() >=adr.VALIDFROM and getdate() <= adr.VALIDTO\r\n" + 
+     	  		"left outer JOIN axdb.dbo.paymterm pay on cus.paymtermid = pay.paymtermid and pay.DATAAREAID = cus.DATAAREAID\r\n" + 
+     	  		" WHERE cus.dataareaid='kosm' \r\n" + 
+     	  		" order by dp.name ";
      	  
   if (isDebug()) System.out.println(cmd);
     TreeMap customers = new TreeMap();
@@ -1120,6 +1133,9 @@ try {
   HashMap<String , String> res = new HashMap<String , String>();
   String sql = " select mainitemcard as itemid , (testeritemid) as tester  from InventTableAdditionalInfo_KOS " + 
   		"  		where testeritemid != '' and mainitemcard != '' ";
+  sql = "SELECT  i.[ITEMID], ia.[TESTERITEMID] as tester FROM  [INVENTTABLE] i\r\n" + 
+  		"LEFT JOIN [INVENTTABLEADDITIONALINFO_KOS] ia ON ia.[INVENTTABLE] = i.[RECID]\r\n" + 
+  		"WHERE   ia.[TESTERITEMID] != '' order by i.[ITEMID]";
   try {
  //String url = "jdbc:odbc:kosmelitaaxatest";
   Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
@@ -1164,6 +1180,7 @@ try {
 	   if(testerProdsMap == null) {
 		   testerProdsMap = getTestersInfo();
 	   }
+	   
 	   
 	   
 	   
@@ -1228,7 +1245,7 @@ try {
          if(ean != null && ean.trim().length() > 6) {
         	 ean = ean.trim();
     	  prod.setEAN(ean);
-    	 nimetus = nimetus + " " + ean.substring(ean.length()-5);
+    	  nimetus = nimetus + " " + ean.substring(ean.length()-4);
         }
          String add = "";
          String gruppc = rs.getString("grupp2");
@@ -1243,8 +1260,7 @@ try {
            gruppc = grupp + gruppc.trim();
            prod.setGroupSecond(gruppc);
         }
-   
-       
+      
       prod.setName((nimetus.replaceAll("'", " ").replaceAll("\"", " ").trim()).replaceAll("\n", " ").trim());
 
       String unit = rs.getString("unit");
@@ -1312,7 +1328,31 @@ try {
     }
 
     
-    
+    //lisame vöötkoodid
+    cmd = "Select itemid as toode, itembarcode as ean from axdb.dbo.InventItemBarcode where MAINBARCODE_KOS = 0 and itembarcode != ''";
+	try {
+		
+		  Connection	 con = this.getNewConnection();
+		  Statement    stmt =  con.createStatement();
+		  ResultSet    rs = stmt.executeQuery(cmd);
+
+	           while(rs.next()){
+	        	        String  toode = rs.getString("toode").trim();
+	        	        String  ean = rs.getString("ean").trim();
+	        	        Product pr = (Product)prodHash.get(toode);
+	        	        if(pr != null && !pr.getEAN().equals(ean) ) {
+	        	        	pr.addBarcode(ean);
+	        	        }
+	           }
+	        	        rs.close();
+	        	        stmt.close();
+	        	        con.close();
+	           }catch(Exception e) {
+	        	   e.printStackTrace();
+	           }
+	
+	
+	
 	  cmd = " SELECT (case when pd.itemcode = 1 then pd.itemrelation else ''end) as grupp , accountrelation  as klient ,amount AS hind, quantityamountfrom as kogus\r\n" + 
 	  		"				   ,(percent1) AS perc, (case when pd.itemcode = 1 then pd.itemrelation else ''end) as linedisc  FROM pricedisctable pd \r\n" + 
 	  		"                    left join custtable cus on cus.accountnum = pd.accountrelation  \r\n" + 

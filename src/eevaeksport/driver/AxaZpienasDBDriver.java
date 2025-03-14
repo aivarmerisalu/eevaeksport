@@ -834,67 +834,91 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 
   public Vector getPriceMatrixData() {
           Vector lines = new Vector();
-         String sql = " SELECT (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) as custid, (accountnum) as klient,  '' AS clgroup, " + 
-				 "  (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +  
-				 "  (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,max(percent1) AS discount,max(amount)  " +
-                 "  AS price FROM pricedisctable pd " +
-                 "   left join custtable cus on cus.accountnum = pd.accountrelation  " +
-                 "    and cus.DATAAREAID=pd.DATAAREAID where  " +
-				 "  cus.DATAAREAID = 'zp'   and pd.DATAAREAID = 'zp'   " +
-				 "  and  pd.fromdate<getdate() and pd.todate>getdate()" +
-				 "  and  pd.relation in (4,5)  " +
-				 "  group by (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) " +
-                 "  ,cus.accountnum, pd.itemrelation,pd.itemcode  order by " +
-				 "  (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end),pd.itemrelation ";
+         String sql = " SELECT (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) as custid, (accountnum) as klient,  '' AS clgroup, \r\n" + 
+         		"				   (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, \r\n" + 
+         		"				   (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,max(percent1) AS discount,max(amount)  \r\n" + 
+         		"                   AS price ,  pd.fromdate as algus , pd.todate as lopp , datediff(day,pd.fromdate,pd.todate) as paevi FROM pricedisctable pd \r\n" + 
+         		"                    left join custtable cus on cus.accountnum = pd.accountrelation  \r\n" + 
+         		"                     and cus.DATAAREAID=pd.DATAAREAID where  \r\n" + 
+         		"				   cus.DATAAREAID = 'zp'   and pd.DATAAREAID = 'zp'   \r\n" + 
+         		"				   and  pd.fromdate<getdate() and pd.todate>getdate()\r\n" + 
+         		"				   and  pd.relation in (4,5)\r\n" + 
+         		"				   group by (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end) \r\n" + 
+         		"                   ,cus.accountnum, pd.itemrelation,pd.itemcode,pd.fromdate,pd.todate  order by \r\n" + 
+         		"				   (case when  cus.invoiceaccount = '' then cus.accountnum else cus.invoiceaccount end),pd.itemrelation";
 
           try {
 
                   Connection ss = this.getNewConnection();
         	      Statement stmt = ss.createStatement();
                   ResultSet rs = stmt.executeQuery(sql);
-
+                  HashSet olemas2 = new HashSet();
                   while (rs.next()) {
 
                           String custID = rs.getString("custid");
                           String klient = rs.getString("klient");
-                          String clGroup = rs.getString("clgroup");
+                          
                           String prodID = rs.getString("prodid");
                           String prodGroup = rs.getString("prodgroup");
                           double discount = rs.getDouble("discount");
                           double price = rs.getDouble("price");
+                          String fromdate = rs.getString("algus");
+                          String todate = rs.getString("lopp");
+                          int paevi = rs.getInt("paevi");
+                       
                           MatrixLine mline = new MatrixLine();
                       
+                          String signa = null;
+                          
+                          
+                          boolean payer = false;
+                          if(klient != null && klient.trim().length() > 0 && custID != null && custID.trim().length() > 0) {
+                        	  if(!klient.equals(custID)) {
+                        		payer = true;  
+                        	  }
+                          }
+                          if(payer) {
+                          if (custID != null && custID.trim().length() > 0) {
+                              mline.setCliGroup(custID.trim());
+                              signa = custID.trim();
+                                }
+                          }else {
+                          
                           if (klient != null && klient.trim().length() > 0) {
                               mline.setCustID(klient.trim());
+                              signa = klient;
                                 }   
-                          if (custID != null && custID.trim().length() > 0) {
-                              mline.setCustID(custID.trim());
-                            
-                                }
-                          if(klient.trim().indexOf("0751001") != -1 ||custID.trim().indexOf("0751001") != -1){
-                        	 // System.out.println("0751001" + " " + prodID + " " + custID + " " + discount);
                           }
                      
-                          if (mline.getCustID() == null && clGroup != null
-                                          && clGroup.trim().length() > 0) {
-                                  mline.setCliGroup(clGroup.trim());
-                          }
 
                           if (prodID != null && prodID.trim().length() > 0) {
                                   mline.setProdID(prodID.trim());
+                                  signa = signa + "_"+ prodID.trim();
                           }
                           if (mline.getProdID() == null && prodGroup != null
                                           && prodGroup.trim().length() > 0) {
-                                  mline.setProdGroup(prodGroup);
+                                  mline.setProdGroup(prodGroup.trim());
+
+                                  signa = signa + "_"+ prodGroup.trim();
                           }
-                          mline.setDiscount(discount);
+                      
+                          
+                          if(paevi < 31) {
+                        	  mline.setStartDate(fromdate.substring(0,10));
+                        	  mline.setEndDate(todate.substring(0,10));
+                          }
 
                           if (price != 0) {
                                   mline.setPrice(price);
+                          } 
+                          if(discount > 0 ){
+                        	    mline.setDiscount(discount);
                           }
                           
-                        
+                        if(!olemas2.contains(signa)) {
                           lines.add(mline);
+                          olemas2.add(signa);
+                        }
                   }
                   rs.close();
                   

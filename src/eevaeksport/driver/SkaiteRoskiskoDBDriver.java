@@ -1481,6 +1481,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 	   if("true".equals(getParent().getProps().getProperty("lang.latvia"))) {
 		   lvNames = getLVNames();
 		   lvE = true;
+		   System.out.println("lvNames " + lvNames.size());
 	   }
 	   
 
@@ -1518,13 +1519,13 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
               String kood = rs.getString("kood").trim();
         
               String nimetus =  rs.getString("nimetus").replaceAll("\"", " ").trim();
-              if(lvNames != null && lvNames.get(tid) != null) {
+              if(lvE && lvNames != null && lvNames.get(tid) != null) {
             	  nimetus = (String) lvNames.get(tid) ;
             	  lv = true;
               }
               
               Product prod = new Product(kood);
-            //   goes = false;
+           
              try{
               double price = rs.getDouble("hind");
            	  if(price > 0){
@@ -1536,7 +1537,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
              }
            
              if(nimetus == null){
-           	  // goes = false;
+           	 
              }else{
            	   nimetus =  kood + " " + nimetus.trim().replaceAll("\n", " ") ;
              }
@@ -1610,12 +1611,22 @@ try{
         		
         	}
         	
-              if(goes || lv || prod.getGroup().equals("261412") || used.containsKey(prod.getID())){
-            	  prcodes.put(tid, kood);
+        	if(lvE ) {
+        		if(lv) {
+        			  prcodes.put(tid, kood);
+             		  products.put(nimetus, prod);
+                      prodHash.put(prod.getID(), prod.getPrice());  
+                  	System.out.println("goes " + goes  + " " + lv + " " + nimetus);
+
+        		}
+        	}else {
+              if(goes  || prod.getGroup().equals("261412") || ( used.containsKey(prod.getID())) ){
+
+                          	  prcodes.put(tid, kood);
          		  products.put(nimetus, prod);
                   prodHash.put(prod.getID(), prod.getPrice());  
               }
-             
+        	}  
           }
           rs.close();
           st.close();

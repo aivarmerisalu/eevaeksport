@@ -2440,6 +2440,9 @@ String asi3 = "";
    				if(agid.equals("3")) {
    					agname = "Guntars Silinš";
    				}
+   				if(agid.equals("4")) {
+   					agname = "Laura Jurāne";
+   				}
    				
    				if(agid.equals("10")) {
    					agname = "Sintija Krūmiņa";
@@ -2458,19 +2461,18 @@ String asi3 = "";
    				//worksheetBASE.getRow(outofstocks).createCell(4).setCellValue(prodid);
 				//brand = new String(brand.getBytes(), "UTF-8");
 		   			
-			/*	actionbrand;Istenā
-				actionbrand;Maiziņš
-				actionbrand;Kurši
-				actionbrand;Tostē
-				actionbrand;Rīta
-				actionbrand;Spēkatota
-				actionbrand;Gardā
-				actionbrand;Mākoņmaize
-				actionbrand;Dzīvā
+			/*	
+
 				*/
 				if(brand.startsWith("R") && brand.endsWith("ta")) {
 					brand = "Rīta";
 				}
+				
+				if(brand.startsWith("P") && brand.endsWith("avas")) {
+					brand = "Pļavas";
+				}
+				
+
 				if(brand.startsWith("Sp") && brand.endsWith("katota")) {
 					brand = "Spēkatota";
 				}
@@ -2497,6 +2499,12 @@ String asi3 = "";
 				if(brand.startsWith("Isten")) {
 					brand = "Istenā";
 				}
+				if(brand.startsWith("Latvi") && brand.endsWith("cepts")) {
+					brand = "Latvijā cepts";
+				}
+				
+				
+
    				worksheetBASE.getRow(outofstocks).createCell(4).setCellValue(brand);
    				
    				

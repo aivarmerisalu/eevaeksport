@@ -1,13 +1,6 @@
 package eevaeksport.imp.driver;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -80,6 +73,9 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
 HashMap<String , String> res = new HashMap<String , String>();
 String sql = " select mainitemcard as itemid ,testeritemid as tester ,istester , MandatoryTester from InventTableAdditionalInfo_KOS \r\n" + 
 		"where testeritemid != ''";
+sql = "SELECT  i.[ITEMID] as itemid, ia.[TESTERITEMID]  as tester FROM  [INVENTTABLE] i\r\n" + 
+		"LEFT JOIN [INVENTTABLEADDITIONALINFO_KOS] ia ON ia.[INVENTTABLE] = i.[RECID]\r\n" + 
+		"WHERE   ia.[TESTERITEMID] != '' ";
 try {
 
 Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));

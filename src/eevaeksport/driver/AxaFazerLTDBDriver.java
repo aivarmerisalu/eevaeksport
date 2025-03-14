@@ -2140,6 +2140,9 @@ String cmduus = " SELECT inv.itemid,(inv.itemname) AS nimetus, qtyinbox AS kasti
       				if(agid.equals("Panev")) {
       					agname = "Valentinas Jankevičius";
       				}
+      				if(agid.equals("Kaunas")) {
+      					agname = "Tomas Laurukėnas";
+      				}
       				
       				
       				worksheetBASE.getRow(outofstocks).createCell(1).setCellValue(agname);
