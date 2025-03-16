@@ -701,7 +701,7 @@ String email = " ";
      	 		"           WHERE   cus.dataareaid='kosm'  ";
 
      	  
-     	  cmd = "SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum,\r\n" + 
+     	 String cmduus = "SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum,\r\n" + 
      	  		"adr.street as tanav,adr.city as linn, adr.county as regioon,adr.zipcode as indeks ,cus.invoiceaccount AS payer,\r\n" + 
      	  		"0 AS debt, cus.linedisc , pricegroup,\r\n" + 
      	  		"adr.address ,(Select h.personnelnumber from axdb.dbo.HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) AS agent , numofdays AS term, cus.blocked AS block ,\r\n" + 

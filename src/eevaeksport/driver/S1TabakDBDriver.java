@@ -247,7 +247,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
             ff2 = res2.list();
            
        	 for(int i = 0;ff2.length>i;i++){
-           	if( ff2[i].startsWith(toode + "_")){
+           	if( ff2[i].startsWith(toode + "_") || ff2[i].startsWith(toode + " _") ){
            //  System.out.println("pilt olemas " + ff2[i]);
           	File in = new File ( pictssou + ff2[i]); 
             	if(in.isFile()){
@@ -283,7 +283,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                    ff2 = res2.list();
                   
               	 for(int i = 0;ff2.length>i;i++){
-                  	if( ff2[i].startsWith(artikkel + "_")){
+                  	if( ff2[i].startsWith(artikkel + "_") || ff2[i].startsWith(artikkel + " _")){
                   //  System.out.println("pilt olemas " + ff2[i]);
                  	File in = new File ( pictssou + ff2[i]); 
                    	if(in.isFile()){
@@ -724,6 +724,10 @@ private Hashtable prodNames = null;
 private HashMap prodPrices = null;   
 
    public TreeMap getProducts(Agent agent){
+	   
+	   if(cps ==  null) {
+		   getCustomerProductsList2();
+	   }
      TreeMap tm = new TreeMap();
      try {
     	   this.getProdGroups();
@@ -758,10 +762,16 @@ private HashMap prodPrices = null;
            	  
         }
             
-
-
+        HashSet yesGroups = new HashSet();
+        if(getParent().getProps().getProperty("yesgroups") != null){
+        	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("yesgroups"),",");
+        	while (st.hasMoreElements()){
+        		String aa = st.nextToken();
+        		yesGroups.add(aa);
+        	}
+        }
     
-
+System.out.println(yesGroups.size() + " yesGroups");
            for (String[] row : readCSVData("products.csv")) {
         	   
     	   int cou = 0;
@@ -812,38 +822,54 @@ private HashMap prodPrices = null;
          
          
          Product prod = new Product(id);
+         boolean goes = false;
+         
+
+         if(gr2 != null && treeGr.get(gr2) != null) {
+        	  prod.setGroup((treeGr.get(gr2)+"").substring(0,4));
+        	  prod.setGroupSecond(treeGr.get(gr2)+"");
+        	  
+         }
          
          if(prods.get(id)!= null){
-         	prod.setStock( Double.parseDouble((String)prods.get(id)));         	
+         	prod.setStock( Double.parseDouble((String)prods.get(id)));
+         	 if(yesGroups.contains(prod.getGroup())) {
+      		   goes = true;
+      	   }
          }
+         
              prod.setPrice(price);
              prod.setVat("21");
               if(unit != null) {
             	 prod.setUnit(unit);	 
               }
-             if(gr2 != null && treeGr.get(gr2) != null) {
-            	  prod.setGroup((treeGr.get(gr2)+"").substring(0,4));
-            	  prod.setGroupSecond(treeGr.get(gr2)+"");
-             }
+             
+            
+             
              if(ean != null) {
-             prod.setEAN(ean);
+               prod.setEAN(ean);
              }
-             if(gr1 != null) {
-         	 prod.setGroup(gr1);
-         	 }
+             
              
              if(inCase > 0) {
-         	 prod.setInCases(inCase);
+         	   prod.setInCases(inCase);
              }
+             
              String name2 = Converter.cleanLitLatEst(name);
              prod.setName(Converter.enCodeEst(name));
           
              prod.artikkel = artikkel;
             
+             if(usedProds.contains(id)) {
+            	 if(yesGroups.contains(prod.getGroup())) {
+            		   goes = true;
+            	   }
+             }
          	//  System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + prod.getUnit() + " " + prod.getPrice());
             	
-               
-            	   tm.put(name2, prod);   
+               if(goes) {
+            	   tm.put(name2, prod); 
+               }
                
            }
            
@@ -866,11 +892,19 @@ private HashMap prodPrices = null;
     return sb.toString();
   }
 
+   
+  private  HashSet usedProds = null;
+  private Vector cps = null;
 
-   public Vector getCustomerProductsList(String agentCode){
+  public Vector getCustomerProductsList(String agentCode){
+	  return cps;
+  }
+   public void getCustomerProductsList2(){
 		Calendar c = Calendar.getInstance();
    		c.add(Calendar.MONTH, -6);
    		Date start = new Date(c.getTimeInMillis());   
+   		cps = new Vector();
+   		usedProds = new HashSet();
 
 //"PAŽ224170";"TR0010147";"LT1000243:107548";"4";"gab.";"2021-03-19";"0.89";
 //"PAŽ224170";"TR0011922";"LT1000243:107548";"6";"gab.";"2021-03-19";"0.89";
@@ -922,12 +956,16 @@ private HashMap prodPrices = null;
                     
                  CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate.substring(5),price,0,0," ");
                  cp.setAbiKood(Converter.cleanLitLatEst(doc));
-                 vec.addElement(cp);
+          
+                 cps.addElement(cp);
+                 if(!usedProds.contains(prodID)) {
+                	 usedProds.add(prodID);
+                 }
    		}
          }}
 
 
-     return vec;
+     
    }
 
    public String getStartingTime(){

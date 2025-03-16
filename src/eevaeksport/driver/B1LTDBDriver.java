@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -34,6 +35,8 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -81,6 +84,7 @@ import eevaeksport.Customer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
+import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.util.Converter;
@@ -280,11 +284,42 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	   }
 	   
 	   
-	 //  Nüüd on mailide lõikes info olemas ja tuleb saata.
+	   System.out.println("mails " + mails.toString());
+	   Iterator itera = mails.keySet().iterator();
+	   while(itera.hasNext()) {
+		   String mailTo = itera.next()+"";
+		   try {
+		   Email email = new Email("Report Tasklogs");
+		 
+		   email.setBodyHtml(getHtml(mails.get(mailTo)+""));
+		   email.setSubjectFilesTo("Report Tasklogs");
+		   email.setFrom(getParent().getProps().getProperty("from"));
+		   email.setSMTP(getParent().getProps().getProperty("smtphost"));
+		   email.setFilesTo("aivar@mobilejava.ee");
+		 
+			email.send();
+			
+		} catch (AddressException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
+		   
+		   
+		   
+	   }
 	   
+	   System.exit(0);
 	   
 	}
   
+  private String getHtml(String in) {
+	  String res = "";
+	  res = in;
+	  return res;
+  }
   
 	  String user =  null;
 	  String pass = null;
