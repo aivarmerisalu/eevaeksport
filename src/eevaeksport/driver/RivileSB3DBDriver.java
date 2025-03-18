@@ -208,10 +208,11 @@ HashSet olemas = new HashSet();
 			st = con.createStatement();
 
 
-			String sql = "  SELECT N51_KODAS_KS AS grupp,N52_KODAS AS toode ,N52_KAINA as price ,N52_NUOLAIDA as disc" + 
-					"	          FROM N51_SUTH p INNER JOIN N52_SUTD r ON N51_KODAS_KT=N52_KODAS_KT where " + 
-					"	             ( getdate()  between n52_beg_date and n52_end_date) or     ( getdate()  between n51_beg_date and n51_end_date) or ( n52_end_date > getdate()+600 )  order by N51_KODAS_KS, N52_KODAS";
-
+			String sql = " SELECT N51_KODAS_KS AS grupp,N52_KODAS AS toode ,N52_KAINA as price ,N52_NUOLAIDA as disc\r\n" + 
+					"						          FROM N51_SUTH p INNER JOIN N52_SUTD r ON N51_KODAS_KT=N52_KODAS_KT\r\n" + 
+					"								   where N51_POZ_DATE = 0 or \r\n" + 
+					"								     (( getdate()  between n52_beg_date and n52_end_date) or \r\n" + 
+					"									     ( getdate()  between n51_beg_date and n51_end_date) or ( n52_end_date > getdate()+600 ))  order by N51_KODAS_KS, N52_KODAS " ;
 			ResultSet rs = st.executeQuery(sql);
 
 			while (rs.next()) {

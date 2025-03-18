@@ -2,6 +2,7 @@ package eevaeksport.driver;
 
 import java.io.BufferedReader;
 
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,25 +39,17 @@ import java.util.Vector;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.net.ssl.HttpsURLConnection;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
+
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.common.usermodel.Hyperlink;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -68,16 +61,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
-import com.amazonaws.util.IOUtils;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ee.mobilejava.earve.GenericDOM;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
@@ -85,7 +71,6 @@ import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
 import eevaeksport.Email;
-import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.util.Converter;
 import eevaeksport.util.ReportingService;
@@ -187,8 +172,8 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 		
 		org.json.simple.JSONArray json = Converter.readJSONArrFile("svdata/taskdata.json");
 
-		HashMap lines  = new HashMap();
 		  int lenn = json.size();
+		  int completed = 0;
 		try {
 		  for (int i = 0; i < lenn; i++) {
 			org.json.simple.JSONObject task = (org.json.simple.JSONObject) json.get(i);
@@ -201,6 +186,13 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 			 try {
 			 String  custID = ((org.json.simple.JSONObject)task.get("customer")).get("code") + "";
 			 String  custName = ((org.json.simple.JSONObject)task.get("customer")).get("name") + "";
+			 if(custName.contains(custID)) {
+				 custName = custName.substring(0,custName.indexOf(custID)).trim();
+				 
+				 if(message.contains(custName)) {
+					 message = message.substring(0,message.indexOf(custName));
+				 }
+			 }
 			 String  cloMan = null;
 			 String  vastus = null;
 			 String repMana = null;
@@ -213,11 +205,9 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 					 org.json.simple.JSONObject lo = (org.json.simple.JSONObject)logs.get(u);
 					 if(((String)lo.get("key")).equals("taskComplete")) {
 						 cloMan =  (String) ((org.json.simple.JSONObject)lo.get("manager")).get("name");
-
 						 cloManCode =  (String) ((org.json.simple.JSONObject)lo.get("manager")).get("code");
 					 }
-					 
-				 }
+				   }
 				 }
 			
 			 org.json.simple.JSONArray replies = (org.json.simple.JSONArray)task.get("replies");
@@ -225,16 +215,21 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 				 for(int u = 0; u < replies.size() ; u++) {
 					 org.json.simple.JSONObject rep = (org.json.simple.JSONObject)replies.get(u);
 					  vastus = (String) rep.get("message");
+					  System.out.println("vastus " + vastus);
 					  repMana = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("name");
 					  repManaCode = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("code");
-
-					 System.out.println(custID + " " + taskID + " " + message + " " +  vastus 
-							 + "\n " + repMana + cloMan);
-					 
 				 }
 			 }
 			 
+if(closed != null) {
+
+			 System.out.println(custID + " " + taskID + " " + message + " " +  vastus 
+					 + "\n " + repMana + " " +  cloMan +  " " + closed);
+			 completed++;
+}
+
 			 if(!replies.isEmpty()) {
+				 
 				 if(closed == null) {
 					 String email = (String)agMail.get(repManaCode);
 				   newTasksReplies.add(email+"|"+ custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "| |" + repMana);
@@ -242,9 +237,11 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 					 String email = (String)agMail.get(cloManCode);
 				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "|" + closed + "|" + cloMan);
 				 }
+				 
 			 } else if(closed != null) {
 				 String email = (String)agMail.get(cloManCode);
 				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "| |"+ created + "|" + closed + "|" + cloMan);
+				
 			 }
 			 // kui on ainult reply ja pole suletud siis paneme replydesse
 			 
@@ -263,14 +260,13 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 		}
 		
 		
-		System.out.println(newTasksReplies.toString());
+		//System.out.println(newTasksReplies.toString());
 		
 		
-		//Siin nüüd maili saatma
 		TreeMap mails = new TreeMap();
 		
 	   for(int u = 0; u < newTasksReplies.size(); u++) {
-		   String line = (String)newTasksReplies.get(0);
+		   String line = (String)newTasksReplies.get(u);
 		   String em = line.substring(0,line.indexOf("|"));
 		   if(mails.get(em) != null) {
 			   ArrayList ls = (ArrayList)mails.get(em);
@@ -283,16 +279,17 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 		   }
 	   }
 	   
+	   String headerTXT = "   " + lenn + "  /  " + completed;
 	   
 	   System.out.println("mails " + mails.toString());
 	   Iterator itera = mails.keySet().iterator();
 	   while(itera.hasNext()) {
 		   String mailTo = itera.next()+"";
 		   try {
-		   Email email = new Email("Report Tasklogs");
+		   Email email = new Email("Report - Tasklogs");
 		 
-		   email.setBodyHtml(getHtml(mails.get(mailTo)+""));
-		   email.setSubjectFilesTo("Report Tasklogs");
+		   email.setBodyHtml(getHtml((ArrayList)mails.get(mailTo),headerTXT));
+		   email.setSubjectFilesTo("Report - Tasklogs");
 		   email.setFrom(getParent().getProps().getProperty("from"));
 		   email.setSMTP(getParent().getProps().getProperty("smtphost"));
 		   email.setFilesTo("aivar@mobilejava.ee");
@@ -315,10 +312,52 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	   
 	}
   
-  private String getHtml(String in) {
-	  String res = "";
-	  res = in;
-	  return res;
+  private String getHtml(ArrayList in, String header) {
+	  
+	  StringBuffer sb = new StringBuffer();
+		sb.append("<font face=\"Arial\" size=\"3\"  color=\"#382D2C\"><b>Total tasks / Completed tasks </b><br> " );
+		sb.append("<font face=\"Arial\" size=\"3\" color=\"#E42217\">" + header + "</font><br> ") ;
+		
+		sb.append("<!DOCTYPE html>" + 
+				"<html lang=\"en\">" + 
+				"<head>" + 
+				"    <meta charset=\"UTF-8\">" + 
+				"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" + 
+				"    <title>Table with Horizontal Lines</title>" + 
+				"    <style>" + 
+				"        table {" + 
+				"            width: 100%;" + 
+				"            border-collapse: collapse;" + 
+				"        }" + 
+				"        th, td {" + 
+				"            padding: 8px;" + 
+				"            text-align: left;" + 
+				"        }" + 
+				"        tr:not(:last-child) {" + 
+				"            border-bottom: 1px solid #000; " + 
+				"        }" + 
+				"    </style>" + 
+				"</head>" );
+		
+		sb.append("<body>" + 
+				"    <table><tr><th>Nr.</th><th>Kods</th><th>Klients</th><th>Message</th><th>Reply</th><th>Created</th><th>Done</th><th>Manager</th></tr>" );
+
+	  
+	  for(int i = 0; i < in.size(); i++) {
+		  String aa = in.get(i)+"";
+		  System.out.println("aa " + aa);
+		  
+		  StringTokenizer st = new StringTokenizer(aa,"|");
+		  st.nextElement();//laseme seimese minna
+		  sb.append("<tr><td>"+ (i+1) + ".</td><td>" + st.nextToken()+ "</td><td>" + st.nextToken()+ 
+				  "</td><td>" + st.nextToken()+ "</td><td>" + st.nextToken()+ "</td><td>" + getDateL(st.nextToken())+ "</td>"
+				  		+ "<td>" + getDateL( st.nextToken())+ "</td><td>" + (st.nextToken()) + "</td></tr>" );
+		  }
+	  sb.append(" </table>" + 
+	  		"</body>" + 
+	  		"</html>");
+	  
+	  return sb.toString();
   }
   
 	  String user =  null;
@@ -968,6 +1007,16 @@ private void saveFile (String filename, String url ) {
 		
 	  }
   
+
+   private String getDateL(String stamp){
+	   if(stamp == null || stamp.trim().length() < 13) {
+		   return " ";
+	   }
+	  	Calendar cal = Calendar.getInstance();
+	  	cal.setTimeInMillis(Long.parseLong(stamp));
+	    return Converter.getYYYY_MM_DDpString(cal);
+		
+	  }
    
    private boolean isDueDate(String mmddyy){
 	  	

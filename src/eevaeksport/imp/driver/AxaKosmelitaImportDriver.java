@@ -44,18 +44,17 @@ public class AxaKosmelitaImportDriver extends AbstractImportDriver{
      instance = parent.getProps().getProperty("instance");
     try {
       Class.forName(databaseDriverName).newInstance();
-      
-     
     } catch (Exception e){
        parent.showError(e);
     }
     
     
     if("true".equals(parent.getProps().getProperty("testdb"))) {
-
 	    url2 = "jdbc:odbc:kosmelitaaxatest"; 
- }
+     }
+
   }
+  
   String instance = null;
 
   public String getImportFile(){
@@ -98,7 +97,9 @@ while (rs.next()) {
 }catch(Exception e) {
 	  e.printStackTrace();
 }
-System.out.println();
+
+System.out.println("Testers size" + res.size() );
+
 return res;
 }
 
@@ -122,24 +123,17 @@ private HashSet<String >  testersSet = null;
 	}
   
   public void makeOrder(Order order) throws SQLException{
-	  boolean senddata = true;
 	  
 	  trouble = new StringBuffer();
-	  if(topeltkontroll && order.getStatus() > 3){
-		 
-	  }
-	  if(senddata){
+	  
 		  setOrder(order);
-		  //OrderHeaders
-		//  OrderId     OrderAccount                                       SalesTaker                                         OrderDate               DeliveryDate            Notes                                                                                                Reference                                          Ready 
-		   
 		  
 		 if( tEsters == null) {
 			 tEsters = this.getTestersInfo();
 		 }
            salesid = order.getDokNr() + (Calendar.getInstance().getTimeInMillis()+"").substring(11);
 		    addInvoiceHeader(salesid);
-		    System.out.println("salesid " + salesid);
+		  //  System.out.println("salesid " + salesid);
 		 
 	
 		    addInvoiceLines(salesid);
@@ -149,8 +143,7 @@ private HashSet<String >  testersSet = null;
 		    st2.executeUpdate();
 		    st2.close();
 		    con.close();
-		  //  System.exit(0); 
-	  }
+		
   
   //  makeOutput(order);
   }
@@ -174,10 +167,10 @@ private HashSet<String >  testersSet = null;
       double kogus = orderLine.getKogus();
        String unit = orderLine.getUnit();
         double discount = 0;
-       if(orderLine.getDiscount() > 0){
+       if(orderLine.getDiscount() > 0 || orderLine.getDiscount() == -2){
     	   discount = orderLine.getDiscount();
        }
-       System.out.println("Discount "  + discount + " status " + order.getStatus() );
+      System.out.println("Discount "  + discount + " status " + order.getStatus() + " " + itemid);
     
        double price =  orderLine.getPrice();
        double sprice = -1;
@@ -186,39 +179,44 @@ private HashSet<String >  testersSet = null;
        }else {
     	   sprice = price;
        }
+     
+       
+  boolean goes = true;
+       
+       if(discount == -2 ) {
+    	   // vahetame toote testeri vastu 
+    	   if(this.tEsters.get(itemid) != null) {
+    		   itemid = this.tEsters.get(itemid);
+    		   
+    		   System.out.println("Vahetasime testeri vastu " + orderLine.getToode()+"->"+itemid);
+    	   }else {
+    		   goes = false;
+    	   }
+       }
+    
+       
+       
        double cprice = getPriceFromMatrix(order.getCompany(),itemid,sprice, orderLine.getKogus());
-       System.out.println("cprice " + cprice);
+     //  System.out.println("cprice " + cprice);
        double mprice = -1;
        if(discount > 0) {
     	   mprice = price;
     	   sprice = price / (100-discount) * 100;
        }
        
-       boolean goes = true;
-       
-       if(discount == -2 ) {
-    	   // vahetame toote testeri vastu 
-    	   if(this.tEsters.get(itemid) != null) {
-    		   itemid = this.tEsters.get(itemid);
-    	   }else {
-    		   goes = false;
-    	   }
-       }
-    	  //OrderLines  
+     	  //OrderLines  
   		//    OrderId   ItemId   Quantity    UnitId    Price   Discount 
           
-
+      
   		  
           String sql =" INSERT into  OrderLines (OrderId, ItemID, Quantity, UnitId, Price, Discount"
           		+ ", StandardPrice, CustomerPrice, ManualPrice)  " +
              " values("+salesid+","+itemid+","+kogus+",'" + unit + " '," + price + "," + discount+
              "," + sprice + "," +cprice+ "," + mprice+ ")";
 
-              log.info("SALES_LINE_SQL: " + sql);
               System.out.println(sql);
             if(goes) {
               Connection con = DriverManager.getConnection(url , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
-              
               PreparedStatement st2 = con.prepareStatement(sql);
               st2.executeUpdate();
               st2.close();
@@ -273,7 +271,7 @@ private HashSet<String >  testersSet = null;
            " VALUES (" + salesid + " ,'" + comp +"','" + agent +"',cast(getdate() as date),cast(? as date),'" + ref + "','"
             + com.replace('\'', ' ').replace('\"', ' ') + "',0,'AXA')" ;
           log.info("addInvoiceHeader2: " + sql);
-        System.out.println(sql);
+     //   System.out.println(sql);
         
         PreparedStatement stmt2 = con.prepareStatement(sql);
         java.util.Date dat = new java.util.Date();
@@ -286,7 +284,7 @@ private HashSet<String >  testersSet = null;
         stmt2.close();
         con.close();
     
-        addLog("lisatud arve p�is -> " + order.getCompany() + "\n");
+       // addLog("lisatud arve p�is -> " + order.getCompany() + "\n");
        // System.exit(0);
   }
 
@@ -351,7 +349,7 @@ private HashSet<String >  testersSet = null;
          		+ "and accountrelation = '" + cust + "' and dataareaid = 'kosm'"; 
 
           try {
-System.out.println(sql);
+//System.out.println(sql);
                    Connection con = DriverManager.getConnection(url2 , parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
         	      Statement stmt = con.createStatement();
                   ResultSet rs = stmt.executeQuery(sql);
@@ -373,7 +371,7 @@ System.out.println(sql);
                     		"				  (Select linedisc from inventtablemodule mod where mod.moduletype = 2 and mod.itemid = '" + prodID+ "' ) and\r\n" + 
                     		"				    pd.fromdate<=getdate() and pd.todate>=getdate() and quantityamountfrom <= "+amount+" and dataareaid = 'kosm' "; 
   
-                    System.out.println(sql);
+                   // System.out.println(sql);
                     rs = stmt.executeQuery(sql);
 
                     while (rs.next()) {
@@ -394,7 +392,7 @@ System.out.println(sql);
                       				+ " and (  case when linedisc != '' then linedisc else pricegroup end) != '" + instance + "' )  and "
                       				+ " itemrelation = '" + prodID + "' and dataareaid = 'kosm' "; 
     
-                      System.out.println(sql);
+                    //  System.out.println(sql);
                       rs = stmt.executeQuery(sql);
 
                       while (rs.next()) {
@@ -412,7 +410,7 @@ System.out.println(sql);
                       sql = " SELECT  disc.percent1 AS discount  FROM  pricedisctable disc  WHERE  disc.dataareaid='kosm' AND  ltrim(disc.itemrelation)=''  "
                       		+ "AND fromdate<=getdate() and disc.percent1 > 0 and todate >= getdate() and disc.accountrelation = '" + cust+ "'"; 
       
-                        System.out.println(sql);
+                    //    System.out.println(sql);
                         rs = stmt.executeQuery(sql);
 
                         while (rs.next()) {

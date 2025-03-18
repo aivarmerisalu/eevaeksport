@@ -635,8 +635,6 @@ if(ladu.trim().length()!=0){
 }      
 
 
-
-         // sb.append(getLineNr(cou));
           sb.append("               <I07_KODAS>" +  escape(toode) + "</I07_KODAS>" + ls);
           cou++;
           double kord = 1;
@@ -644,10 +642,10 @@ if(ladu.trim().length()!=0){
         	  kord = -1;
           }
           
-         // sb.append(getLineNr(cou));
           sb.append("               <I07_KIEKIS>" + (int)(line.getKogus() * kord) + "</I07_KIEKIS>" + ls);
           cou++;
-         
+          sb.append("               <I07_KODAS_US>" + line.getUnit() + "</I07_KODAS_US>" + ls);
+          cou++;
     
   if (ale != 0 ){
 	       double hind = this.getProductPrice(toode);

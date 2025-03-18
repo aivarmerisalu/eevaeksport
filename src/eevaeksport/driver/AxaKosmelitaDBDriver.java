@@ -701,7 +701,7 @@ String email = " ";
      	 		"           WHERE   cus.dataareaid='kosm'  ";
 
      	  
-     	 String cmduus = "SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum,\r\n" + 
+     	 cmd = "SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum,\r\n" + 
      	  		"adr.street as tanav,adr.city as linn, adr.county as regioon,adr.zipcode as indeks ,cus.invoiceaccount AS payer,\r\n" + 
      	  		"0 AS debt, cus.linedisc , pricegroup,\r\n" + 
      	  		"adr.address ,(Select h.personnelnumber from axdb.dbo.HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) AS agent , numofdays AS term, cus.blocked AS block ,\r\n" + 
@@ -932,7 +932,7 @@ String email = " ";
           cust.setPersonalData(info.trim().replaceAll("\\r\\n|\\r|\\n", " "));
         }
         
-        double  minord  = rs.getDouble("minord");
+    /*    double  minord  = rs.getDouble("minord");
         if (minord > 0 ) {
           cust.setMinsum(minord);
         }
@@ -945,13 +945,13 @@ String email = " ";
         String rounding = rs.getString("samm");
         if (rounding != null && rounding.trim().equals("2")) {
           cust.setMakeAmountRounding(true);        
-        }
+        }*/
         
         if(aled.get(cust.getID())!= null){
         	cust.setDiscount(Double.parseDouble((String)aled.get(cust.getID())));
         }
         
-        String tyyp = rs.getString("tyyp");
+     /*   String tyyp = rs.getString("tyyp");
         if (tyyp != null && tyyp.trim().length() > 0) {
         	if(cust.getCity()== null || cust.getCity().length() == 0 ){
         		cust.setCity("Tipas :" + tyyp.trim());
@@ -969,7 +969,7 @@ String email = " ";
         	}else{
         		cust.setCity(cust.getCity() + "| Apyv.lygis :" + tyyp2.trim());
         	}     
-        }
+        }*/
         
       
                         customers.put(name, cust);
@@ -1201,7 +1201,7 @@ try {
     String sss = "select bb.itemid, itembarcode from inventitembarcode  bb \r\n" + 
     		"    		 left join inventdim dd on bb.inventdimid = dd.inventdimid and dd.DATAAREAID=bb.DATAAREAID\r\n" + 
     		"    		 left join inventtable tbl on bb.itemid = tbl.itemid and tbl.DATAAREAID=bb.DATAAREAID\r\n" + 
-    		"    		 where bb.dataareaid = 'kosm' and tbl.standardconfigid = dd.configid and tbl.DATAAREAID='kosm'";
+    		"    		 where bb.dataareaid = 'kosm' and tbl.standardconfigid = dd.configid and tbl.DATAAREAID='kosm' and MAINBARCODE_KOS != 0";
 
  
     
