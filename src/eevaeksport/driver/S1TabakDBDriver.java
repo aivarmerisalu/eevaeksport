@@ -94,6 +94,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
   	       	 double hind = 0 ;
   	       	 String start = null;
   	       	 String end = null;
+  	       	 String lisa = null;
   	       	 //"";"";"Papīra dvieļi 'Ruta' MAX 1r. 2sl.";"1.79";"01.01.0001 00:00:00";"17.03.2025 00:00:00";
   	       
   	       	   for (String cell : row) {
@@ -116,6 +117,9 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                    end = cell.trim();
                    }
   	            
+  	            if(cou == 7) {
+                   lisa = cell.trim();
+                   }
   	           	 cou++;
   	       	   }
   	              MatrixLine mline = new MatrixLine();
@@ -126,8 +130,12 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 
  	             if (klientGR != null && klientGR.length() > 0) {
  	               mline.setCliGroup(klientGR);
- 	             } 	             
+ 	              } else if (lisa != null && lisa.trim().length() > 0){
+ 	               mline.setCliGroup(lisa);
+ 	 	         }
 
+ 	             
+ 	             
  	              if (toode != null && toode.length() > 0) {
  	               mline.setProdID(toode);
  	             }
@@ -658,6 +666,7 @@ if(seis > 0) {
         	 String address = null;
         	 String contact = null;
         	 String group = null;
+        	 String group2 = null;
         	 
              for (String cell : row) {
             	 if(cou == 0) {
@@ -678,12 +687,15 @@ if(seis > 0) {
             	 if(cou == 4) {
                      contact = cell.trim();
                  }
-            	 
+            	 if(cou == 12) {
+                     group2 = cell.trim();
+                 }
 
             	 if(cou == 13) {
                      group = cell.trim();
-                   
                  }
+
+            
             	 
                  cou++;
              }
@@ -693,10 +705,17 @@ if(seis > 0) {
              cust.restStreet = address;
              cust.restPerson = contact;
              cust.setPersonalData( Converter.enCodeEst(contact));
+             String setg = "";
              if(group != null && group.trim().length() > 0 ) {
-            	//  System.out.println(id + " grupp " + group);
+            	 // System.out.println(id + " grupp " + group);
                  cust.setGroup(group);
+                 setg = group+ "|";
              }
+             if(group2 != null && group2.trim().length() > 0 ) {
+             	  System.out.println(id + " grupp2 " + group2);
+            	 
+                  cust.setGroup(setg + group2);
+              }
              if(custAgents.get(cust.getID()) != null) {
             	 ArrayList<String> arr = (ArrayList)custAgents.get(cust.getID());
             	 for(String ag : arr) {
