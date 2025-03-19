@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -32,9 +33,13 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 
 import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Cell;
@@ -45,6 +50,8 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateMidnight;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -61,6 +68,7 @@ import eevaeksport.Customer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
+import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.manager.ManagerData;
@@ -3056,11 +3064,7 @@ public void WebReporter() {
 	sendTaskReport();
 }
 
-private void sendTaskReport() {
-	// loeme setting kataloogi sisse ja sealt siis managermailid igale agendile-
-	
-	
-}
+
 
 
 public void WebReporterOLD() {
@@ -3349,5 +3353,285 @@ public void WebReporterOLD() {
 	  System.exit(0);
 	
 }
+
+
+
+
+private void sendTaskReport() {
+	     HashMap agMail = new HashMap(); 
+	  
+		// loeme setting kataloogi sisse ja sealt siis managermailid igale agendile-
+		File cat = new File("settings");
+		String[] files = cat.list();
+		
+		for(int i = 0 ;i < files.length; i++) {
+			String file = "settings/" + files[i];
+			 Properties properties = new Properties();
+		        try (FileInputStream input = new FileInputStream(file)) {
+		          properties.load(input);
+
+		            String email = properties.getProperty("managerinfomail");
+		            String agentid = files[i].substring(0,files[i].indexOf("."));
+		           agMail.put(agentid.trim(), email);
+		        
+		        } catch (IOException e) {
+		            System.err.println("Error loading properties file: " + e.getMessage());
+		        }
+		}
+		
+		
+	//	Laeme taskid alla
+		
+
+		       DateMidnight nn = new DateMidnight();
+		  final DateTime input = new DateTime(nn.getMillis());
+		  final DateMidnight startOfLastWeek =   new DateMidnight(input.minusDays(60));
+		  final DateMidnight endOfLastWeek =  new DateMidnight(input.plusDays(1));
+		 
+			  eevaeksport.util.ReportingService serv = new ReportingService();
+			    serv.user =  user;
+				serv.pass = pass;
+				serv.company = company;
+		
+				try {
+					org.json.JSONArray array = serv.getTaskdata(new Date(startOfLastWeek.getMillis()), new Date(endOfLastWeek.getMillis()) );
+					try {
+							Converter.saveFile(  "svdata/taskdata.json" , array.toString());
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				  serv.closeClient();
+				  } catch (Exception t) {
+					t.printStackTrace();
+				  }
+				
+			
+			
+	HashSet linesDone = null;
+				try {
+					linesDone = (HashSet)Converter.readObject("tasklinesdone.obj");
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}		
+		if(linesDone == null) {
+			linesDone = new HashSet();
+		}
+		
+		
+		ArrayList newTasksReplies= new ArrayList();
+		
+		org.json.simple.JSONArray json = Converter.readJSONArrFile("svdata/taskdata.json");
+
+		  int lenn = json.size();
+		  int completed = 0;
+		try {
+		  for (int i = 0; i < lenn; i++) {
+			org.json.simple.JSONObject task = (org.json.simple.JSONObject) json.get(i);
+			 String header = (String)task.get("header");
+			 String message = (String)task.get("message");
+			 Long created = (Long)task.get("created");
+			 Long taskID = (Long)task.get("id");
+			 Long closed = (Long) task.get("completed");
+			 
+			 try {
+			 String  custID = ((org.json.simple.JSONObject)task.get("customer")).get("code") + "";
+			 String  custName = ((org.json.simple.JSONObject)task.get("customer")).get("name") + "";
+			 if(custName.contains(custID)) {
+				 custName = custName.substring(0,custName.indexOf(custID)).trim();
+				 
+				 if(message.contains(custName)) {
+					 message = message.substring(0,message.indexOf(custName));
+				 }
+			 }
+			 String  cloMan = null;
+			 String  vastus = null;
+			 String repMana = null;
+			 String repManaCode = null;
+			 String cloManCode = null;
+			 
+			 org.json.simple.JSONArray logs = (org.json.simple.JSONArray)task.get("tasklogs");
+			 if(!logs.isEmpty()) {
+				 for(int u = 0; u < logs.size() ; u++) {
+					 org.json.simple.JSONObject lo = (org.json.simple.JSONObject)logs.get(u);
+					 if(((String)lo.get("key")).equals("taskComplete")) {
+						 cloMan =  (String) ((org.json.simple.JSONObject)lo.get("manager")).get("name");
+						 cloManCode =  (String) ((org.json.simple.JSONObject)lo.get("manager")).get("code");
+					 }
+				   }
+				 }
+			
+			 org.json.simple.JSONArray replies = (org.json.simple.JSONArray)task.get("replies");
+			 if(!replies.isEmpty()) {
+				 for(int u = 0; u < replies.size() ; u++) {
+					 org.json.simple.JSONObject rep = (org.json.simple.JSONObject)replies.get(u);
+					  vastus = (String) rep.get("message");
+					  System.out.println("vastus " + vastus);
+					  repMana = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("name");
+					  repManaCode = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("code");
+				 }
+			 }
+			 
+if(closed != null) {
+
+			 System.out.println(custID + " " + taskID + " " + message + " " +  vastus 
+					 + "\n " + repMana + " " +  cloMan +  " " + closed);
+			 completed++;
+}
+
+			 if(!replies.isEmpty()) {
+				 
+				 if(!linesDone.contains(taskID + vastus)) {
+				 if(closed == null) {
+					 String email = (String)agMail.get(repManaCode);
+				   newTasksReplies.add(email+"|"+ custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "| |" + repMana);
+				 } else {
+					 String email = (String)agMail.get(cloManCode);
+				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "|" + closed + "|" + cloMan);
+				 }
+				 linesDone.add(taskID + vastus);
+				 }
+				 
+				 
+			 } else if(closed != null) {
+				 if(!linesDone.contains(taskID + closed)) {
+				 String email = (String)agMail.get(cloManCode);
+				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "| |"+ created + "|" + closed + "|" + cloMan);
+				  linesDone.add(taskID + closed);
+				 }
+			 }
+			 // kui on ainult reply ja pole suletud siis paneme replydesse
+			 
+			 
+			 
+			 
+			 
+			 } catch(Exception r) {
+				 
+			 }
+			 
+			 
+		  }
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		//System.out.println(newTasksReplies.toString());
+		
+		
+		TreeMap mails = new TreeMap();
+		
+	   for(int u = 0; u < newTasksReplies.size(); u++) {
+		   String line = (String)newTasksReplies.get(u);
+		   String em = line.substring(0,line.indexOf("|"));
+		   if(mails.get(em) != null) {
+			   ArrayList ls = (ArrayList)mails.get(em);
+			   ls.add(line);
+			   mails.put(em, ls);
+		    } else {
+			   ArrayList ls = new ArrayList();
+			   ls.add(line);
+			   mails.put(em, ls);
+		   }
+	   }
+	   
+	   String headerTXT = "   " + lenn + "  /  " + completed;
+	   
+	   System.out.println("mails " + mails.toString());
+	   Iterator itera = mails.keySet().iterator();
+	   while(itera.hasNext()) {
+		   String mailTo = itera.next()+"";
+		   try {
+		   Email email = new Email("Report - Tasklogs");
+		 
+		   email.setBodyHtml(getHtml((ArrayList)mails.get(mailTo),headerTXT));
+		   email.setSubjectFilesTo("Report - Tasklogs");
+		   email.setFrom(getParent().getProps().getProperty("from"));
+		   email.setSMTP(getParent().getProps().getProperty("smtphost"));
+		   email.setFilesTo(mailTo); //aivar@mobilejava.ee
+		 
+			email.send();
+			
+		} catch (AddressException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
+		   
+		   try {
+			Converter.saveObject(linesDone, "tasklinesdone.obj");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		   
+	   }
+	   
+	   System.exit(0);
+	   
+	}
+
+private String getHtml(ArrayList in, String header) {
+	  
+	  StringBuffer sb = new StringBuffer();
+		sb.append("<font face=\"Arial\" size=\"3\"  color=\"#382D2C\"><b>Total tasks / Completed tasks </b><br> " );
+		sb.append("<font face=\"Arial\" size=\"3\" color=\"#E42217\">" + header + "</font><br> ") ;
+		
+		sb.append("<!DOCTYPE html>" + 
+				"<html lang=\"en\">" + 
+				"<head>" + 
+				"    <meta charset=\"UTF-8\">" + 
+				"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" + 
+				"    <title>Table with Horizontal Lines</title>" + 
+				"    <style>" + 
+				"        table {" + 
+				"            width: 100%;" + 
+				"            border-collapse: collapse;" + 
+				"        }" + 
+				"        th, td {" + 
+				"            padding: 8px;" + 
+				"            text-align: left;" + 
+				"        }" + 
+				"        tr:not(:last-child) {" + 
+				"            border-bottom: 1px solid #000; " + 
+				"        }" + 
+				"    </style>" + 
+				"</head>" );
+		
+		sb.append("<body>" + 
+				"    <table><tr><th>Nr.</th><th>Kods</th><th>Klients</th><th>Message</th><th>Reply</th><th>Created</th><th>Done</th><th>Manager</th></tr>" );
+
+	  
+	  for(int i = 0; i < in.size(); i++) {
+		  String aa = in.get(i)+"";
+		  System.out.println("aa " + aa);
+		  
+		  StringTokenizer st = new StringTokenizer(aa,"|");
+		  st.nextElement();//laseme seimese minna
+		  sb.append("<tr><td>"+ (i+1) + ".</td><td>" + st.nextToken()+ "</td><td>" + st.nextToken()+ 
+				  "</td><td>" + st.nextToken()+ "</td><td>" + st.nextToken()+ "</td><td>" + getDateL(st.nextToken())+ "</td>"
+				  		+ "<td>" + getDateL( st.nextToken())+ "</td><td>" + (st.nextToken()) + "</td></tr>" );
+		  }
+	  sb.append(" </table>" + 
+	  		"</body>" + 
+	  		"</html>");
+	  
+	  return sb.toString();
+}
+
+
+private String getDateL(String stamp){
+	   if(stamp == null || stamp.trim().length() < 13) {
+		   return " ";
+	   }
+	  	Calendar cal = Calendar.getInstance();
+	  	cal.setTimeInMillis(Long.parseLong(stamp));
+	    return Converter.getYYYY_MM_DDpString(cal);
+		
+	  }
+
+
 
 }
