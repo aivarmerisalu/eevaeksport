@@ -427,11 +427,34 @@ HashSet olemas = new HashSet();
 
     public String getSaveStockInfo(){
     	stocks = new HashMap();
+    	HashMap koefi = new HashMap();
+    	
+    	 String  koef = "SELECT N17_KODAS_PS AS toode ,max(N37_KOEFICI) as koef FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
+    	 		"   		   		  LEFT JOIN  n37_pmat g ON n37_kodas_ps=n17_kodas_ps  and N37_KODAS_US != 'L' \r\n" + 
+    	 		"   		   	 left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1 and (N37_KOEFICI) != 1\r\n" + 
+    	 		"			 group by N17_KODAS_PS" ;
+
+         try {
+             connectionUp();
+              Statement st = con.createStatement();
+              ResultSet rs = st.executeQuery(koef);
+
+              while (rs.next()) {
+
+                String kood = rs.getString("toode").trim();
+                double seis = rs.getDouble("koef");
+                 koefi.put(kood, seis+ "");
+                }
+                  rs.close();
+                  st.close();
+                  this.connectionDown();
+            } catch (Exception e) {
+                getParent().showError(e);
+            }
     
-  	  String  cmd = "  SELECT  I17_KODAS_PS AS toode,  sum((I17_kiekis - I17_PARD_UZS)/N37_KOEFICI) as Stock from i17_vpro d inner join n17_prod s on  I17_KODAS_PS = N17_KODAS_PS\r\n" + 
-  	  		"LEFT JOIN  n37_pmat g ON n37_kodas_ps=i17_kodas_ps  and N37_KODAS_US != 'L'  \r\n" + 
-  	  		"           where I17_KODAS_IS in ('1') AND ( ((I17_kiekis - I17_PARD_UZS)/N37_KOEFICI) > 0 OR (I17_P_PAR_K)>0)  and  N17_POZ_DATE =0 \r\n" + 
-  	  		"	         GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_PARD_UZS ) >0   ORDER BY I17_KODAS_PS" ;
+  	  String  cmd = "    SELECT  I17_KODAS_PS AS toode,  sum((I17_kiekis - I17_PARD_UZS)) as Stock from i17_vpro d inner join n17_prod s on  I17_KODAS_PS = N17_KODAS_PS \r\n" + 
+  	  		"  	  		           where I17_KODAS_IS in ('1') AND ( ((I17_kiekis - I17_PARD_UZS)) > 0 OR (I17_P_PAR_K)>0)  and  N17_POZ_DATE =0 \r\n" + 
+  	  		"  	  			         GROUP BY I17_KODAS_PS  having sum(I17_kiekis - I17_PARD_UZS ) >0   ORDER BY I17_KODAS_PS" ;
 
 
          if (isDebug()) System.out.println(cmd);
@@ -448,7 +471,10 @@ HashSet olemas = new HashSet();
              String kood = rs.getString("toode").trim();
              double seis = rs.getDouble("stock");
              if(seis > 0){
-            	 stocks.put(kood, seis+ "");
+            	 if(koefi.get(kood) != null) {
+            		 seis = seis / Double.parseDouble((String)koefi.get(kood));
+            	 }
+            	 stocks.put(kood, ((int)seis)+ "");
                  products.append(kood +  ";");
                  products.append(" ;");
                  products.append(getParent().getNF().format(seis) + "; "  +  "\n"); 
@@ -574,8 +600,7 @@ HashSet olemas = new HashSet();
      */
     public TreeMap getAgents() {
         connectionUp(url);
-        String   cmd = "  SELECT N33_KODAS_VS AS agent  FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS where N33_KODAS_VS\r\n" + 
-        		"        						    is not null  group by  N33_KODAS_VS order by  N33_KODAS_VS";
+        String   cmd = " SELECT N15_KODAS_MS AS agent , N15_PAV AS nimi  FROM  n15_men ORDER by N15_PAV";
         TreeMap agents = new TreeMap();
        
         try {
@@ -587,7 +612,7 @@ HashSet olemas = new HashSet();
             	if(agg.length() > 1) {
             	
               Agent agent = new Agent(agg);
-              String name = agent.getID();
+              String name =  rs.getString("nimi").trim();
               if(name == null || name.trim().length() == 0) {
             	  name = agent.getID();
               }else {
@@ -707,7 +732,7 @@ HashSet olemas = new HashSet();
         		"        		 N08_PAV as nimetus, N33_kodas_ak AS nimetus2, N08_CREDIT_LIM as cred, \r\n" + 
         		"				 N33_ADRESAS AS aadress, ltrim(N08_NUOL_GR) AS ale , \r\n" + 
         		"				 ' ' AS visit ,N08_KODAS_KS AS payer ,  \r\n" + 
-        		"				 (CASE WHEN LEN(LTRIM(N33_KODAS_LS_1))=0 or N33_KODAS_LS_1  IS NULL THEN  N08_KODAS_LS_1 ELSE N33_KODAS_LS_1  END) AS agent , \r\n" + 
+        		"				 (CASE WHEN LEN(LTRIM(N33_KODAS_LS_1))=0 or N33_KODAS_LS_1  IS NULL THEN  N08_KODAS_MS_P ELSE N33_KODAS_LS_1  END) AS agent , \r\n" + 
         		"				  N33_KODAS_VS as agent2, \r\n" + 
         		"				 (case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm , \r\n" + 
         		"				N33_TEL as phone , N33_SHIP_VIA  as deld, N33_E_MAIL  as email \r\n" + 
@@ -1122,6 +1147,12 @@ HashSet olemas = new HashSet();
               String unit = rs.getString("unit");
               if(unit != null && unit.trim().length() > 0) {
             	  prod.setUnit(unit.trim());
+            	  if(nimorig.contains("30L")) {
+            		  prod.setUnit("ST30");
+            	  }
+            	  if(nimorig.contains("20L")) {
+            		  prod.setUnit("ST20");
+            	  }
               }
            
               nimetus = nimetus.replaceAll("\"", " ").trim();
@@ -1155,9 +1186,17 @@ HashSet olemas = new HashSet();
               if(ean != null && ean.trim().length()>0){
             	  try{
             		  EAN13CheckDigit ee = new EAN13CheckDigit();
-            		  String ean2 = ean.trim() + ee.calculate(ean.trim());
-                      prod.setEAN(ean2);	
-
+            		  if(ean.startsWith("0000")) {
+            			  ean = ean.replaceAll("0000", " ").trim();
+            		  }
+            		  String ean2 = ean.trim() ;
+                      
+            		  if(ean.length() > 8) {
+            			  ean2 = ean2+ ee.calculate(ean.trim());
+            		  }
+            		  
+            		  prod.setEAN(ean2);	
+             		 
                       if(inCases.containsKey(ean2)){
                     	  prod.setInCases(Double.parseDouble(inCases.get(ean2)+""));
                    System.out.println("ean2 " + inCases.get(ean2));
@@ -1425,23 +1464,16 @@ HashSet olemas = new HashSet();
     	
     	 connectionUp(url);
     	 
-       String cmd = " SELECT  N08_KODAS_LS_1  AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + \r\n" + 
-       		"                    sum(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh inner join n08_klij on n08_klij.N08_KODAS_KS = i06_parh.I06_KODAS_KS\r\n" + 
-       		"					  WHERE \r\n" + 
-       		"                     month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) \r\n" + 
-       		"					 and I06_PERKELTA='2'\r\n" + 
-       		"                      and I06_R_DATE <= getdate()   GROUP BY  N08_KODAS_LS_1";
+       String cmd = "  SELECT  N08_KODAS_MS_P  AS agent , SUM(case when I06_OP_TIP = '52' then -I06_SUMA else 0 end) + \r\n" + 
+       		"       		                    sum(case when I06_OP_TIP = '51' then I06_SUMA else 0 end)  AS pluss  FROM i06_parh inner join n08_klij on n08_klij.N08_KODAS_KS = i06_parh.I06_KODAS_KS\r\n" + 
+       		"       						  WHERE  month(I06_OP_DATA)=month(getdate()) AND year(I06_OP_DATA)=year(getdate()) \r\n" + 
+       		"       							 and I06_PERKELTA='2'  and I06_R_DATE <= getdate()   GROUP BY  N08_KODAS_MS_P";
 
        log(cmd);
 
          try {
-        	 
-        	 
-
-           
-
-     
-     stmt = con.prepareStatement(cmd); 
+          
+                 stmt = con.prepareStatement(cmd); 
        ResultSet   rs = stmt.executeQuery();
              while(rs.next()) {
                String agentID = rs.getString("agent").trim();

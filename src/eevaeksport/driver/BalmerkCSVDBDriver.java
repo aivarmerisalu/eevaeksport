@@ -79,7 +79,8 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,PictureMaker, WebReporter {
+public class BalmerkCSVDBDriver extends AbstractDBDriver implements 
+               BulkUpdater,Discounter,Manager,PictureMaker, WebReporter, FixLoader {
 
   public BalmerkCSVDBDriver(EksportPanel parent) {
 	super(parent);
@@ -94,8 +95,41 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	  String user =  null;
 	  String pass = null;
 	  String rcompany = null;
-  private Hashtable dates = new Hashtable();
-   public String getPilotDayData(Agent agent){
+  
+	  
+	  private Hashtable dates = new Hashtable();
+	  private TreeMap eanprods = null;
+
+	  @Override
+		public void FixLoader() {
+		  
+		  eanprods =  Converter.loadMore();
+		  
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
+			this.getProducts(null);
+			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+			System.out.println("Contracts Fixx " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			if(contracts.size() > 0) {
+				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass, "FIXED");
+			}
+			contracts = Converter.loadSuggFromExcels("excelsugg",eanprods,parent);
+			System.out.println("Contracts Sugg " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			if(contracts.size() > 0) {
+				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass, "SUGGESTED");
+			}
+			
+			
+			System.exit(0);
+		}
+	  
+  
+  
+  
+  
+  
+  public String getPilotDayData(Agent agent){
      return null;
    }
    
@@ -219,145 +253,137 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 		return hh;
 	}
    
-   private Vector prlists = null;
    
    
    public Vector getPriceMatrixData(){
-	   Vector result = new Vector();
-	   if(prlists != null) {
-		   return prlists;
-	   }
-	   return result;
+	   Vector prlists= new Vector();
+	   try {
+	          
+      	 FileReader fr = new FileReader(getDir() + "D365GetPriceMatrix_CustomerPrices.csv");
+           BufferedReader reader = new BufferedReader(fr);
+         String line = null;
+         reader.readLine();
+          while((line = reader.readLine()) != null ){
+
+               line = line.replaceAll(","," | ");
+          	StringTokenizer st = new StringTokenizer(line, "|");
+
+            if (st.hasMoreTokens()) {
+          //	System.out.println( line );
+
+              String prodID = st.nextToken().trim();
+               String client = st.nextToken().trim();
+               double price = Double.parseDouble(st.nextToken().trim());
+               String sdate =  st.nextToken().trim();
+	                 String edate = st.nextToken().trim();
+	                
+               
+	            
+	             
+	             MatrixLine mline = new MatrixLine();
+	             mline.setCustID(client);
+           
+           
+           if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
+          	 mline.setStartDate(sdate.substring(0,10));
+           }
+           if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
+          	 mline.setEndDate(edate.substring(0,10));
+           }
+           
+           if (prodID != null && prodID.length() > 0) {
+             mline.setProdID(prodID);
+           }
+       
+           if (price != 0) {
+               mline.setPrice(price);
+           }
+           
+           
+           
+      	
+           if(mline.getPrice() > 0 ){
+          	 prlists.add(mline); 
+          
+             }
+            }
+            
+          }
+          
+          reader.close();
+          fr.close();
+       }catch(Exception e){
+       e.printStackTrace();
+       }
+       
+       
+       try {
+	          
+      	 FileReader fr = new FileReader(getDir() + "D365GetPriceMatrix_GroupPrices.csv");
+           BufferedReader reader = new BufferedReader(fr);
+         String line = null;
+         reader.readLine();
+          while((line = reader.readLine()) != null ){
+
+               line = line.replaceAll(","," | ");
+          	StringTokenizer st = new StringTokenizer(line, "|");
+
+            if (st.hasMoreTokens()) {
+          //	System.out.println( line );
+
+              String clGroup = st.nextToken().trim();
+              String prodID = st.nextToken().trim();
+               double price = Double.parseDouble(st.nextToken().trim());
+               String sdate =  st.nextToken().trim();
+	                 String edate = st.nextToken().trim();
+	                
+               
+	            
+	             
+	             MatrixLine mline = new MatrixLine();
+	                mline.setCliGroup(clGroup);
+           
+           if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
+          	 mline.setStartDate(sdate.substring(0,10));
+           }
+           
+           if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
+          	 mline.setEndDate(edate.substring(0,10));
+           }
+           
+           if (prodID != null && prodID.length() > 0) {
+               mline.setProdID(prodID);
+           }
+       
+           if (price != 0) {
+               mline.setPrice(price);
+           }
+           
+           
+           
+      	
+           if(mline.getPrice() > 0 ){
+          	 prlists.add(mline); 
+          
+             }
+            }
+            
+          }
+          
+          reader.close();
+          fr.close();
+       }catch(Exception e){
+       e.printStackTrace();
+       }
+       
+	System.out.println("prlist " + prlists.size());
+	   
+	   return prlists;
    }
        
        
        
-   public HashMap getPriceMatrixDataCreate(){
-	    prlists = new Vector();
-	         try {
-	          
-	        	 FileReader fr = new FileReader(getDir() + "GetPriceMatrix_CustomerPrices.csv");
-	             BufferedReader reader = new BufferedReader(fr);
-	           String line = null;
-	           reader.readLine();
-	            while((line = reader.readLine()) != null ){
 
-	                 line = line.replaceAll(","," | ");
-	            	StringTokenizer st = new StringTokenizer(line, "|");
-
-	              if (st.hasMoreTokens()) {
-	            	System.out.println( line );
-
-                    String prodID = st.nextToken().trim();
-                     String client = st.nextToken().trim();
-                     double price = Double.parseDouble(st.nextToken().trim());
-                     String sdate =  st.nextToken().trim();
-   	                 String edate = st.nextToken().trim();
-   	                
-                     
-   	            
-   	             
-   	             MatrixLine mline = new MatrixLine();
-   	             mline.setCustID(client);
-	             
-	             
-	             if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setStartDate(sdate.substring(0,10));
-	             }
-	             if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setEndDate(edate.substring(0,10));
-	             }
-	             
-	             if (prodID != null && prodID.length() > 0) {
-	               mline.setProdID(prodID);
-	             }
-	         
-	             if (price != 0) {
-	                 mline.setPrice(price);
-                 }
-	             
-	             
-	             
-            	
-	             if(mline.getPrice() > 0 ){
-	            	 prlists.add(mline); 
-	            
-	               }
-	              }
-	              
-	            }
-	            
-	            reader.close();
-	            fr.close();
-	         }catch(Exception e){
-	         e.printStackTrace();
-	         }
-	         
-	         
-	         System.out.println( "prlist " + prlists.size() );
-	         
-	         try {
-		          
-	        	 FileReader fr = new FileReader(getDir() + "GetPriceMatrix_CustomerPrices.csv");
-	             BufferedReader reader = new BufferedReader(fr);
-	           String line = null;
-	           reader.readLine();
-	            while((line = reader.readLine()) != null ){
-
-	                 line = line.replaceAll(","," | ");
-	            	StringTokenizer st = new StringTokenizer(line, "|");
-
-	              if (st.hasMoreTokens()) {
-	            	System.out.println( line );
-
-                    String clGroup = st.nextToken().trim();
-                    String prodID = st.nextToken().trim();
-                     double price = Double.parseDouble(st.nextToken().trim());
-                     String sdate =  st.nextToken().trim();
-   	                 String edate = st.nextToken().trim();
-   	                
-                     
-   	            
-   	             
-   	             MatrixLine mline = new MatrixLine();
-   	                mline.setCliGroup(clGroup);
-	             
-	             if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setStartDate(sdate.substring(0,10));
-	             }
-	             
-	             if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
-	            	 mline.setEndDate(edate.substring(0,10));
-	             }
-	             
-	             if (prodID != null && prodID.length() > 0) {
-	                 mline.setProdID(prodID);
-	             }
-	         
-	             if (price != 0) {
-	                 mline.setPrice(price);
-                 }
-	             
-	             
-	             
-            	
-	             if(mline.getPrice() > 0 ){
-	            	 prlists.add(mline); 
-	            
-	               }
-	              }
-	              
-	            }
-	            
-	            reader.close();
-	            fr.close();
-	         }catch(Exception e){
-	         e.printStackTrace();
-	         }
-	         
-		System.out.println("prlist " + prlists.size());
-           return null;	       
-	      }
 
 
    
@@ -370,7 +396,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	        	Calendar cal =  Calendar.getInstance();
 	        	 String date = Converter.getYYYYMMString(cal.getTime());
 	          
-	        	 FileReader fr = new FileReader(getDir() + "CustomerSales" + date + ".csv");
+	        	 FileReader fr = new FileReader(getDir() + "D365CustomerSales" + date + ".csv");
 	             BufferedReader reader = new BufferedReader(fr);
 	           String line = null;
 	           reader.readLine();
@@ -475,7 +501,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	  	         StringBuffer products = new StringBuffer();
 	         
 	         try {
-	             FileReader fr = new FileReader(getDir() + "GetStocks.csv");
+	             FileReader fr = new FileReader(getDir() + "D365GetStocks.csv");
 	             BufferedReader reader = new BufferedReader(fr);
 	           String line = null;
 	           reader.readLine();
@@ -535,7 +561,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	    TreeMap   tm = new TreeMap();
 	    //  setTreeGroup(true);
 	      try {
-	    	  FileReader fr = new FileReader(getDir() + "GetProductGroups.csv");
+	    	  FileReader fr = new FileReader(getDir() + "D365GetProductGroups.csv");
 	    	  BufferedReader reader = new BufferedReader(fr);
 	    	  String line = null;
 	  
@@ -591,7 +617,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
 	    }
      agents = new TreeMap();
      try {
-       FileReader fr = new FileReader(getDir() + "GetAgentList.csv");
+       FileReader fr = new FileReader(getDir() + "D365GetAgentList.csv");
        BufferedReader reader = new BufferedReader(fr);
      String line = null;
      reader.readLine();
@@ -693,7 +719,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
   //  System.out.println("Telesales " + tsales + " " + tsal.toString() );
 
      try {
-     FileReader fr = new FileReader(getDir() + "GetDebtList.csv");
+     FileReader fr = new FileReader(getDir() + "D365GetDebtList.csv");
 	 BufferedReader reader = new BufferedReader(fr);
 	 reader.readLine();
 	 
@@ -770,11 +796,11 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
      
 
      
-	  fr = new FileReader(getDir() + "GetCustomers.csv");
+	  fr = new FileReader(getDir() + "D365GetCustomers.csv");
 	  reader = new BufferedReader(fr);
       line = null;
-     //Custcode	 CustName	PayerCode	Address	City	Post Code	DebtDue	SalespersonCode	Contact	PhoneNo	PaymentTerm	CreditLimit	UsedCredit	CustDiscount	Blocked
-
+ 
+      
       Properties propse =  new Properties();
 	    try{
 	    	propse =  EksportFrame.loadProps("emails.txt");
@@ -789,6 +815,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
     	 line = line.replaceAll(","," | ");
         StringTokenizer st = new StringTokenizer(line, "|");
        if (st.hasMoreTokens()){
+    	// name,nimelisa,namealias,accountnum,payer,ssordereraccount,debt,used,linedisc,address,visit,agent,term,block,payerblock,phone,info,grupp,confmail,abiagent,abipaev,credit,chain
 
     	   String name = st.nextToken().trim();
     	   if(name.startsWith("\"")) {
@@ -796,16 +823,13 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
         	   if(!name.endsWith("\"")) {
         		   name = name + " " + st.nextToken().trim();
             	}
-        	   
         	   if(!name.endsWith("\"")) {
         		   name = name + " " + st.nextToken().trim();
                }   
-
         	   if(!name.endsWith("\"")) {
         		   name = name + " " + st.nextToken().trim();
                }   
         	   name = name.replaceAll("\"", " ").trim();
-           //    System.out.println("nimi " + name);
            }
     	   String name2 = st.nextToken().trim();
     	   String nameAlias = st.nextToken().trim();
@@ -819,7 +843,6 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
            if(custdisc.startsWith("\"")) {
         	   custdisc = custdisc + " " + st.nextToken().trim();
         	   custdisc = custdisc.replaceAll("\"", " ").trim();
-             //  System.out.println("address " + address);
            }
 
            
@@ -840,6 +863,11 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
         	   address = address.replaceAll("\"", " ").trim();
              //  System.out.println("address " + address);
            }
+        //   Aardemaa OÜ,,Aardemaa OÜ,AARDE,,DUNKER,,,3,Kastani 1 90508 Haapsalu,,UUSSAAR,21,0,0,475 5075,,AARDEMAA,,,,8784.7,
+//name,nimelisa,namealias,accountnum,payer,ssordereraccount,debt,used,linedisc,address,visit,agent,
+           //term,block,payerblock,phone,info,grupp,confmail,abiagent,abipaev,credit,chain.
+
+           
            String visit = st.nextToken().trim();
            String agentcode = st.nextToken().trim();
            String payterm = st.nextToken().trim();
@@ -857,7 +885,9 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
            String crlimit = st.nextToken().trim();
            String chain = st.nextToken().trim();
            
-
+if(id.equals("AARDE")) {
+//	System.out.println("grupp " +  grupp);
+}
           
   
            Customer customer = new Customer(id);
@@ -871,7 +901,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
         	 customer.setAddress(Converter.enCodeEst(Converter.adressLink(address,"Eesti")));           
            
            
-           customer.setName(Converter.enCodeEst(name) + " " + id + " " + Converter.enCodeEst(Converter.adressLink(address,"Eesti")));
+           customer.setName(Converter.enCodeEst(name) + " " + id );
            
 	       	double dept = 0;
 	       	try{
@@ -882,7 +912,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements BulkUpdater,
            
            if(agentcode.length() > 0) {
         	   customer.addAgent(new Agent(agentcode));
-        	    System.out.println("ag " + agentcode);
+        	 //  System.out.println("ag " + agentcode);
         	   ArrayList arr = new ArrayList();
         	   if(custAgents.get(customer.getID()) != null) {
         		   arr = (ArrayList) custAgents.get(customer.getID());
@@ -993,7 +1023,7 @@ if(stocks == null) {
     	
          String line = null;
          
-		 FileReader fr = new FileReader(getDir() + "GetProducts.csv");
+		 FileReader fr = new FileReader(getDir() + "D365GetProducts.csv");
 		 BufferedReader reader = new BufferedReader(fr);
 
         reader.readLine();
@@ -1005,8 +1035,9 @@ if(stocks == null) {
        StringTokenizer st = new StringTokenizer(line, "|");
 
        if (st.hasMoreTokens()){
-    	   System.out.println(line);
+    	  // System.out.println(line);
     	 //  itemid,nimetus,kastis,alusel,price,ean,grupp,unit,vat,alegr,tarne_kp
+    	   // uus itemid,nimetus,alkohol,kastis,alusel,price,ean,grupp,unit,vat,alegr,tarne_kp
     	   String id = st.nextToken().trim();
     	   String description = st.nextToken().trim();
            if(description.startsWith("\"") && !description.contains("''") ) {
@@ -1026,6 +1057,7 @@ if(stocks == null) {
            }
     	   //itemid,nimetus,kastis,alusel,price,ean,grupp,unit,vat,alegr,tarne_kp
            String incase = st.nextToken().trim();
+           String alkohol = st.nextToken().trim();
            String onPallet = st.nextToken().trim();
 
     	   String unitprice = st.nextToken().trim();
@@ -1078,7 +1110,7 @@ if(stocks == null) {
 			 }
 			 
 			 if(description.length() > 0) {
-				 prod.setName(description + " "+ id);
+				 prod.setName(Converter.enCodeEst(description) + " "+ id);
 			 
 
 				 try {
@@ -1095,10 +1127,11 @@ if(stocks == null) {
 				 }
 				 
 				 prod.setVat(vat);
-				 System.out.println(description + " " + prod.getEAN() + " " + prod.getGroup());
-
 				 
-				 tm.put(Converter.cleanLitLatEst(description + prod.getUnit() + prod.getID()), prod);
+				 
+				 //System.out.println(description + " " + prod.getEAN() + " " + prod.getGroup());
+
+				 tm.put(description + prod.getUnit() + prod.getID(), prod);
 			 
 			 }
 			 
@@ -1131,7 +1164,7 @@ if(stocks == null) {
 	   Vector custProds = new Vector();
   try {
 	  
-     FileReader fr = new FileReader(getDir() + "GetCustomerProductsList.csv");
+     FileReader fr = new FileReader(getDir() + "D365GetCustomerProductList.csv");
 		 BufferedReader reader = new BufferedReader(fr);
 		 String line = null;
       
@@ -1152,7 +1185,7 @@ if(stocks == null) {
 			double lastprice = Double.parseDouble(st.nextToken().trim());	
 			String lastdoc = st.nextToken().trim();
 
-			System.out.println(last + " " + lastdoc);
+			//System.out.println(last + " " + lastdoc);
 			CustProd cp = new CustProd(custID, prodID,
 					 sold, 0,0, last, lastprice, 0, 0, " ");
 	
@@ -1228,7 +1261,7 @@ public void setNF(NumberFormat nf) {
   
 public Vector getFixedAssortmentData() {	
 	//  Vector result = new Vector();
-	  return prlists;
+	  return null;
      /* try {
        
      	 FileReader fr = new FileReader(getDir() + "PriceMatrix.csv");
@@ -1442,7 +1475,7 @@ public void WebReporter() {
 			  		 JSONParser parser = new JSONParser();
 			  		org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader( "svdata/currSVjson.json"));
 		  		//org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
-		  	   System.out.println("cc" + cc.toString() );
+		  	 //  System.out.println("cc" + cc.toString() );
 		  		//Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
 		   
 		  		int palletrow = 1;
@@ -1490,7 +1523,7 @@ public void WebReporter() {
 		  			
 		  		
 		  			if(custname.indexOf("VRV")  != -1) {
-		  			System.out.println("cob " +  cob.toJSONString());
+		  		//	System.out.println("cob " +  cob.toJSONString());
 		  		
 		  			}
 		  			//System.out.println("signa " + signa + " " + filterOutOfStock + " " + filterProblem);
@@ -1675,10 +1708,10 @@ FileOutputStream output_file_oos =new FileOutputStream(exceldir + "productPallet
 	//filenames.add(exceldir + "productOOSbase-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
 	wbBASE.write(output_file_oos); //write changes
 	output_file_oos.close();  //close the stream
-	System.out.println("report saved " + exceldir + "productPallet-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
+	//System.out.println("report saved " + exceldir + "productPallet-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + ".xlsx");
 
 }else {
-System.out.println("no data to save");
+//System.out.println("no data to save");
 }
 		  	
 		  	}catch(Exception e) {

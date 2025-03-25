@@ -15,6 +15,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -25,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -64,7 +67,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
     this.subjectFilesTo = parent.getString("filemsg");
     this.lang = parent.getProps().getProperty("language");
 	teamx = getParent().getProps().getProperty("salesteam");
-	
+	//custgroups();
   }
 
    public String getPilotDayData(Agent agent){
@@ -73,6 +76,110 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
    public String getSaveDebtInfo() {
    	return null;
    }
+   
+   private HashMap custgroups() {
+	   HashMap res = new HashMap();
+	   
+	   Map<String, Set<String>> priceListToCustomers = new HashMap<>();
+       Map<String, Map<String, Double>> priceGroupToProducts = new HashMap<>();
+       Map<String, String> customerToPriceGroup = new HashMap<>();
+       
+       HashSet custs = new HashSet();
+	   
+	   for (String[] row : readCSVData("ClientsProductsDiscounts.csv")) {
+	       	 int cou = 0;
+	         String customer = null; 
+	      	 String product = null;
+	       	 Double price = null ;
+	       	
+	       
+	       	  for (String cell : row) {
+	       		   
+	           	 if(cou == 0) {
+	           		customer = cell.trim().replace(':', '_');
+	           		if(!custs.contains(customer)) {
+	           		custs.add(customer);
+	                }
+	           	 }
+	           	 if(cou == 1) {
+	           		product = cell.trim();
+	                }
+	           	 if(cou == 2) {
+	           		price = Double.parseDouble(cell.trim());
+                    }
+	           	 
+	                cou++;
+	       	   }
+	       	   
+
+	            // Build a unique key for the price list
+	            String priceListKey = customerToPriceGroup.getOrDefault(customer, "") + product + ":" + price + ";";
+
+	            // Store the price list mapping
+	            priceListToCustomers.computeIfAbsent(priceListKey, k -> new HashSet<>()).add(customer);
+
+	            // Store the product-price mapping for this price list
+	            priceGroupToProducts.computeIfAbsent(priceListKey, k -> new HashMap<>()).put(product, price);
+	      
+	         
+
+	        
+	     }
+
+	       	   
+	   
+	       	   
+	   // Step 2: Assign a unique PriceGroup ID
+       int groupCounter = 1;
+       Map<String, String> priceKeyToGroup = new HashMap<>();
+       for (String priceListKey : priceListToCustomers.keySet()) {
+           String priceGroup = "PG-" + groupCounter++;
+           priceKeyToGroup.put(priceListKey, priceGroup);
+       }
+
+       // Step 3: Map Customers to their PriceGroup
+       for (Map.Entry<String, Set<String>> entry : priceListToCustomers.entrySet()) {
+           String priceListKey = entry.getKey();
+           String priceGroup = priceKeyToGroup.get(priceListKey);
+
+           for (String customer : entry.getValue()) {
+               customerToPriceGroup.put(customer, priceGroup);
+           }
+       }
+
+       // Step 4: Rename price group map keys
+       Map<String, Map<String, Double>> finalPriceGroupToProducts = new HashMap<>();
+       for (Map.Entry<String, Map<String, Double>> entry : priceGroupToProducts.entrySet()) {
+           String newPriceGroup = priceKeyToGroup.get(entry.getKey());
+           finalPriceGroupToProducts.put(newPriceGroup, entry.getValue());
+       }
+
+       
+      
+       // Step 5: Print Results
+       System.out.println("Customer to PriceGroup:" +  custs.size());
+     //  customerToPriceGroup.forEach((customer, pg) -> System.out.println(customer + " -> " + pg));
+
+       System.out.println("\nPriceGroup to Customers:" +        priceListToCustomers.size());
+       priceListToCustomers.forEach((key, customers) -> {
+           String pg = priceKeyToGroup.get(key);
+         //  System.out.println(pg + " -> " + customers);
+       });
+
+       System.out.println("\nPriceGroup to Product-Price:" + finalPriceGroupToProducts.size());
+       finalPriceGroupToProducts.forEach((pg, productMap) -> {
+          // System.out.println(pg + ":");
+         //  productMap.forEach((product, price) -> System.out.println("  " + product + " -> " + price));
+       });
+ 	   
+	       	   
+	       	   
+	   
+	             
+	            
+	   return res;
+   }
+   
    
    private HashMap clGroups = null;
    
@@ -153,6 +260,73 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
  	             }
  	            result.add(mline); 
 	       }
+	    
+	       Calendar cal = Calendar.getInstance();
+	       YearMonth yearMonth = YearMonth.of(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1);
+	         LocalDate firstDay = yearMonth.atDay(1);
+	         LocalDate lastDay = yearMonth.atEndOfMonth();
+	       
+	       
+	       for (String[] row : readCSVData("ClientsProductsDiscounts.csv")) {
+  	       	 int cou = 0;
+  	         String klient = null; 
+  	      	 String toode = null;
+  	       	 double hind = 0 ;
+  	  	     double disc = 0 ;
+  	       	 String hh = null;
+  	       
+  	       	   for (String cell : row) {
+  	           	 if(cou == 0) {
+  	                     klient = cell.trim().replace(':', '_');
+  	                }
+  	           	 if(cou == 1) {
+  	                    toode = cell.trim();
+  	                }
+  	           	 if(cou == 2) {
+  	                    hind = Double.parseDouble(cell.trim());
+  	                  hh = cell.trim();
+  	                  }
+  	           if(cou == 3) {
+	                    disc = Double.parseDouble(cell.trim());
+	                  }
+  	                cou++;
+  	       	   }
+  	              MatrixLine mline = new MatrixLine();
+
+ 	             if (klient != null && klient.length() > 0) {
+ 	               mline.setCustID(klient);
+ 	             }
+ 	             
+
+ 	              if (toode != null && toode.length() > 0) {
+ 	               mline.setProdID(toode);
+ 	             }
+ 	              
+ 	             if (hind > 0) {
+ 	 	               mline.setPrice(hind);
+ 	 	             }
+ 	            if (disc > 0) {
+	 	               mline.setDiscount(disc);
+	 	             }
+ 	             mline.setStartDate(firstDay.toString());
+ 	             mline.setEndDate(lastDay.toString());
+ 	             boolean goes = true;
+ 	            if(prodPrices.get(toode) != null) {
+ 	            	String pr  = (String) prodPrices.get(toode);
+ 	            	if(pr.equals(hh)) {
+ 	            	   goes = false;
+ 	            	}
+ 	            }
+ 	             
+ 	             String signa = klient+toode+hh;
+ 	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
+ 	            	 if(!check.contains(signa) && goes) {
+ 	            		    result.add(mline); 
+ 	            		 }
+ 	 	                 check.add(signa);
+ 	            	 }    
+ 	               }
+  	            
 	       
 	       
 	       for (String[] row : readCSVData("priceslists.csv")) {
@@ -198,9 +372,10 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
  	            	}
  	            }
  	             
- 	             String signa = klient+toode+hind;
+ 	             String signa = klient+toode+hh;
  	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
  	            	 if(!check.contains(signa) && goes) {
+ 	            		 mline.setProdLevel("pr");
  	            		    result.add(mline); 
  	            		 }
  	 	                 check.add(signa);
@@ -472,9 +647,27 @@ if(seis > 0) {
 	  return treeGr2;    
   }
 
+   
+   public List<String[]> readCSVData(String fname) {
+       String csvFile = getDir() + fname; // Adjust getDir() accordingly
+       CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
+       List<String[]> data = new ArrayList<>();
+
+       try (CSVReader reader = new CSVReaderBuilder(new FileReader(csvFile))
+               .withCSVParser(parser)
+               .build()) {
+           String[] nextLine;
+           while ((nextLine = reader.readNext()) != null) {
+               data.add(nextLine); // Process each line without loading everything at once
+           }
+       } catch (IOException | CsvException e) {
+           e.printStackTrace();
+       }
+       return data;
+   }
 
 
-   private List<String[]> readCSVData(String fname){
+   private List<String[]> readCSVDataOLD(String fname){
 	  
 	   String csvFile = getDir() + fname; 
        CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
@@ -712,7 +905,7 @@ if(seis > 0) {
                  setg = group+ "|";
              }
              if(group2 != null && group2.trim().length() > 0 ) {
-             	  System.out.println(id + " grupp2 " + group2);
+             	//  System.out.println(id + " grupp2 " + group2);
             	 
                   cust.setGroup(setg + group2);
               }

@@ -602,6 +602,7 @@ try{
 	       double pr = ol.getPrice();
 	       if(bonus) {
 	    	   pr = 0;
+	    	 //  disc = "100.00";
 	       }
 	        sb.append(pr + sep);
 	        sb.append(disc + sep);

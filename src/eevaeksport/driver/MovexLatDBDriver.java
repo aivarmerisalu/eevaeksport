@@ -3391,7 +3391,7 @@ private void sendTaskReport() {
 			  eevaeksport.util.ReportingService serv = new ReportingService();
 			    serv.user =  user;
 				serv.pass = pass;
-				serv.company = company;
+				serv.company = rcompany;
 		
 				try {
 					org.json.JSONArray array = serv.getTaskdata(new Date(startOfLastWeek.getMillis()), new Date(endOfLastWeek.getMillis()) );
@@ -3549,6 +3549,9 @@ if(closed != null) {
 		   email.setSubjectFilesTo("Report - Tasklogs");
 		   email.setFrom(getParent().getProps().getProperty("from"));
 		   email.setSMTP(getParent().getProps().getProperty("smtphost"));
+		   email.setPort(getParent().getProps().getProperty("smtpport"));
+		   email.setUser(getParent().getProps().getProperty("smtpuser"));
+		   email.setPass(getParent().getProps().getProperty("smtppass"));
 		   email.setFilesTo(mailTo); //aivar@mobilejava.ee
 		 
 			email.send();

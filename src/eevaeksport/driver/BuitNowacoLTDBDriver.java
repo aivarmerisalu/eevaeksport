@@ -2600,7 +2600,7 @@ try{
      	String cmd = " SELECT t.preke AS toode,t.prek_id as id,t.pavad AS nimi , t.pavad_3 AS nimiu , t.pard_kaina AS myygihind , kaina_1 as hind1, kaina_2 as hind2,  kaina_3 as hind3, kaina_4 as hind4, " +
  " kaina_5 as hind5, kaina_6 as hind6, kaina_7 as hind7, kaina_8 as hind8, kaina_9 as hind9, kaina_10 as hind10,grup_id AS grupp ,tip_id AS tupe ,t.tipas  " +
 	"		 , t.mato_vien AS unit, t.bar_kodas AS ean,0 AS status ,t.max_nuol AS maxdiscount,  " +
-	"		  t.tipas AS type, t.orig_pak AS kastis,t.pak_kiek as kastis2 ,  t.prek_neto AS kaal,21 AS vat,  pak_kiek as opt ,prek_mode as info ,t.vieta as staatus  " +
+	"		  t.tipas AS type, t.orig_pak AS kastis,t.pak_kiek as kastis2 ,  t.prek_neto AS kaal,t.prek_bruto as kaal2 ,21 AS vat,  pak_kiek as opt ,prek_mode as info ,t.vieta as staatus  " +
 	 "    , orig_pak as origpak, kilm_salis as klimes , laik_salyg as laiksal ,"
 	 + " pak.pakuote as primpak ,t.savik_3 as oma , t.didm_antk as greend, pavad_3 as brandpers, t.aprasymas as otsing , t.mazm_antk as lilla " +	
 	"		  FROM prekes t inner join grupes g on g.grupe=t.grupe inner join tipai ty on ty.tipas=t.tipas " +
@@ -2756,11 +2756,17 @@ try{
              	weight = rs.getString("kaal");
                            if(weight != null && weight.trim().length()>0){
                              weight = weight.trim();
+                             
                              if(weight.indexOf('.')==0){
                              	weight = "0" + weight;
-                             }
+                                }
                                }
+                           
+                      Double bru =rs.getDouble("kaal2");     
 
+                      if(bru > 0) {
+                    	  prod.setBoxbrutto(bru);
+                      }
           	 String vat = rs.getString("vat");
                    if(vat != null && vat.trim().length()>0){
                      	prod.setVat(vat);
@@ -2862,7 +2868,6 @@ try{
                 		 prod.setPartii("|"  +"Pirm.pak:" + primpak.trim()  + "|");	 
                 	 }
                  } 
-                 
                  double oma = rs.getDouble("oma");
                  
                  if(oma > 0){

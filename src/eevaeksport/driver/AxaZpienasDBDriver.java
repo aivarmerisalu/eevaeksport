@@ -962,11 +962,11 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
                               mline.setEndDate(todate.substring(0,10));
                           }
                      
-                        if(!olemas.contains(clGroup+prodID)) {
+                        if(!olemas.contains(clGroup+prodID+prodGroup)) {
                             lines.add(mline);	
                         }
                      
-                          olemas.add(clGroup+prodID);
+                          olemas.add(clGroup + prodID +prodGroup);
                   }
                   
                   

@@ -497,7 +497,7 @@ HashMap pants = null;
       //sb.append(getLineNr(cou));
       
       //KODAS_LS_1
-      sb.append("          <I06_KODAS_LS_1>" + escape(agent) + "</I06_KODAS_LS_1>" + ls);
+      sb.append("          <I06_KODAS_MS>" + escape(agent) + "</I06_KODAS_MS>" + ls);
       cou++;
       
       if(tag) {

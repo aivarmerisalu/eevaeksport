@@ -1207,7 +1207,7 @@ public class Converter {
 								// System.out.println(row.getCell((short)a).getStringCellValue());
 								String gg = row.getCell((short) a).getStringCellValue().trim();
 								
-								if(gg.equals("SAP")){
+								if(gg.equals("SAP") || gg.equals("Material")){
 							      groups.put(a + "", gg);
 							    }
 							
@@ -3961,7 +3961,7 @@ public class Converter {
 											return "coop";
 										}
 										
-										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 ) {
+										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 || formatter.formatCellValue(cellx).indexOf("Material") != -1 ) {
 											return "maxima";
 										}	
 											

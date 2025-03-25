@@ -339,7 +339,7 @@ try{
 		 
 		 System.out.println("Result =" +order.getDokNr()
 				 + " "+ result.size());
-		 //System.exit(0);
+		
 		  
 		 return result ;
 	  }
@@ -803,7 +803,7 @@ try{
 	      
 	       if(xml.contains("error") || xml.toLowerCase().contains("kont")) {
 	    	   trouble = "NOT IMPORTED ORDER \n" + xml;
-	    	   System.exit(0);
+	    	  // System.exit(0);
 	       }
 	    
 	 	
@@ -811,7 +811,7 @@ try{
 	 		e.printStackTrace();
 	 		
 	 	  trouble = "NOT IMPORTED ORDER \n" + order_xml;
-	 	//  System.exit(0);
+	 
 	 	}
 
 	 	}
@@ -819,7 +819,7 @@ try{
 			e.printStackTrace();
 
 		 	  trouble = "NOT IMPORTED ORDER \n" + order.getDokNr();
-		 //	  System.exit(0);
+		 
 		}
 		
 	 }
