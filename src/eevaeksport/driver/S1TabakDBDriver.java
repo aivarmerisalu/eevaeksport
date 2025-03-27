@@ -430,7 +430,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
             ff2 = res2.list();
            
        	 for(int i = 0;ff2.length>i;i++){
-           	if( ff2[i].startsWith(toode + "_") || ff2[i].startsWith(toode + " _") ){
+           	if( ff2[i].startsWith(toode + "_") || ff2[i].startsWith(toode + " _") || ff2[i].startsWith(toode + " ") ){
            //  System.out.println("pilt olemas " + ff2[i]);
           	File in = new File ( pictssou + ff2[i]); 
             	if(in.isFile()){
@@ -466,7 +466,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                    ff2 = res2.list();
                   
               	 for(int i = 0;ff2.length>i;i++){
-                  	if( ff2[i].startsWith(artikkel + "_") || ff2[i].startsWith(artikkel + " _")){
+                  	if( ff2[i].startsWith(artikkel + "_") || ff2[i].startsWith(artikkel + " _") || ff2[i].startsWith(artikkel + " ")){
                   //  System.out.println("pilt olemas " + ff2[i]);
                  	File in = new File ( pictssou + ff2[i]); 
                    	if(in.isFile()){
@@ -893,7 +893,7 @@ if(seis > 0) {
                  cou++;
              }
              Customer  cust = new Customer(id);
-             cust.setName( Converter.enCodeEst(name));
+             cust.setName( Converter.enCodeEst(name) + " " + Converter.enCodeEst(address));
              cust.setAddress( Converter.adressLink(Converter.enCodeEst(address), ""));
              cust.restStreet = address;
              cust.restPerson = contact;
@@ -982,6 +982,16 @@ private HashMap prodPrices = null;
         		yesGroups.add(aa);
         	}
         }
+        
+        HashSet noSubGroups = new HashSet();
+        if(getParent().getProps().getProperty("noSubGroups") != null){
+        	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("noSubGroups"),",");
+        	while (st.hasMoreElements()){
+        		String aa = st.nextToken();
+        		noSubGroups.add(aa);
+        	}
+        }
+        
     
 System.out.println(yesGroups.size() + " yesGroups");
            for (String[] row : readCSVData("products.csv")) {
@@ -1047,28 +1057,35 @@ System.out.println(yesGroups.size() + " yesGroups");
          	prod.setStock( Double.parseDouble((String)prods.get(id)));
          	 if(yesGroups.contains(prod.getGroup())) {
       		   goes = true;
-      	   }
+      	    }
+         	
          }
          
+         if(noSubGroups.contains(prod.getGroupSecond())) {
+     		   goes = false;
+     	    }
              prod.setPrice(price);
              prod.setVat("21");
+             
               if(unit != null) {
             	 prod.setUnit(unit);	 
               }
              
             
-             
-             if(ean != null) {
+
+              String e4 = "";
+             if(ean != null && ean.trim().length() > 4) {
                prod.setEAN(ean);
+               e4 = " " +ean.substring(ean.length()-4);
              }
-             
              
              if(inCase > 0) {
          	   prod.setInCases(inCase);
              }
              
              String name2 = Converter.cleanLitLatEst(name);
-             prod.setName(Converter.enCodeEst(name));
+             prod.setName(Converter.enCodeEst(name) + " " + artikkel + e4);
+           //  
           
              prod.artikkel = artikkel;
             
@@ -1078,9 +1095,36 @@ System.out.println(yesGroups.size() + " yesGroups");
             	   }
              }
          	//  System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + prod.getUnit() + " " + prod.getPrice());
-            	
+
+             // producti 0126
+             String sorting = "aa";
+
+             //alkogol 0007
+             if(prod.getGroup().equals("0007")) {
+            	 sorting = "bb";
+             }
+             //nonfood 0327
+
+             if(prod.getGroup().equals("0327")) {
+            	 sorting = "cc";
+             }
+             //tabaka 0060
+
+             if(prod.getGroup().equals("0060")) {
+            	 sorting = "dd";
+             }
+             //e.actise 6040
+
+             if(prod.getGroup().equals("6040")) {
+            	 sorting = "ee";
+             }
+             if(prod.getGroup().equals("0076")) {
+            	 sorting = "ff";
+             } 
+             prod.setNameSorting(sorting + name);
                if(goes) {
-            	   tm.put(name2, prod); 
+            	   System.out.println( prod.getGroup() +" "+ sorting + name);
+            	   tm.put(sorting+name2, prod); 
                }
                
            }

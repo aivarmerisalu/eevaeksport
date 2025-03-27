@@ -109,7 +109,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
       company = getParent().getProps().getProperty("rest.companyx");
     
      // getPriceMatrixData();
-    // downloadData(null);
+   // downloadData("vat");
        
   }
   
@@ -138,8 +138,13 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	  
 	  private void downloadData(String dataType) {
 	
-
-		  if (dataType == null || dataType.equals("salesPersons")) {
+		  https://www.b1.lt/api/reference-book/vat-classifications/list
+		
+			  if (dataType == null || dataType.equals("vat")) {
+				  this.saveFile("vat", "https://www.b1.lt/api/reference-book/vat-classifications/list");
+			}
+			  
+			  if (dataType == null || dataType.equals("salesPersons")) {
 			  this.saveFile("salesPersons", "https://www.b1.lt/api/personnel/employees/list");
 		}
 		  
@@ -172,8 +177,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	    			this.saveFileWithFilter("pricelist","https://www.b1.lt/api/client/item-prices/list", filter);
 	    		}
 	    		
-		  
-
+	    		
 
 
 		  
@@ -1188,10 +1192,8 @@ public TreeMap getProducts(Agent agent) {
           		prod.setPrice(Double.parseDouble(price));
           	}
           	
-          	String vat = cob.get("vat")+ "";
-          	if (vat != null && vat.length() > 1) {
-          		prod.setVat(vat);
-          	} 
+          		prod.setVat("21");
+          	 
           	
           	String inventory = cob.get("stock")+"";
           	if (inventory != null) {

@@ -222,7 +222,7 @@ try{
 	    	   String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim() +  ".json";
 	 	      String fileName2 = parent.getProps().getProperty("conv.dir2") + order.getDokNr().trim() + (uni + "").trim() +  "res.txt";
 	    	  
-	    	  String headerurl = "https://www.b1.lt/api/e-commerce/orders/create";
+	    	  String headerurl = "https://www.b1.lt/api/warehouse/sales/create";
 	    	  
 
 JSONObject ordsave = new JSONObject();
@@ -232,46 +232,52 @@ String custid = order.getCompany().substring(0,u);
 String addrid = order.getCompany().substring(u+1);
 
 
-ord.put("shopId", custid);
-ord.put("internalId", order.getDokNr());
-ord.put("date", Converter.getYYYY_MM_DDpString(Calendar.getInstance()));
-ord.put("number", order.getDokNr());
-ord.put("currencyCode", "EUR");
-ord.put("total", order.getSum());
-ord.put("discount", 0);
+ord.put("saleDate", Converter.getYYYY_MM_DDpString(Calendar.getInstance()));
+ord.put("autoGenerateNumberAndSeriesoptional", false);
 
-System.out.println();
 
-String name = ((Customer)customers.get(order.getCompany())).getName();
+ord.put("series", order.getDokNr().substring(0, 3));
+ord.put("number", order.getDokNr().substring(3));
 
-JSONObject billing = new JSONObject();
-billing.put("name", ((Customer)customers.get(custid)).getName());
-billing.put("countryCode", "LT");
-ord.put("billing", billing);
+ord.put("warehouseId", "1");
+ord.put("clientId", custid);
+ord.put("operationTypeId", "2");
+ord.put("employeeId", order.getAgent());
 
-JSONObject delivery = new JSONObject();
-delivery.put("name", name);
-delivery.put("countryCode", "LT");
-ord.put("delivery", delivery);
+String comm = order.getInfo();
+if(comm != null && comm.trim().length() > 0) {
+	ord.put("notes", comm.trim());
+}
 
-JSONObject payer = new JSONObject();
-payer.put("name", ((Customer)customers.get(custid)).getName());
-payer.put("countryCode", "LT");
-ord.put("payer", payer);
+ord.put("unloadAddressIdoptional", addrid);
+
+
+System.out.println(ord);
+
+
 
 
 	String data =  this.postJson(ord.toJSONString(), fileName2, headerurl);
+
+System.out.println("ord " + data);
+	//System.exit(0);
+	
+	
 	JSONParser pp = new JSONParser();
 	JSONObject dd = (JSONObject)pp.parse(data);
 	
-	String id = ((JSONObject)dd.get("data")).get("id") + "";
+	JSONArray dat  = (JSONArray)dd.get("data");
+	
+	
+	String id = ((JSONObject)dat.get(1)).get("id") + "";
 
 System.out.println("ord " + id);
+	    System.exit(0);
 	    
 ordsave.put("header", ord);
 
 	        //RIDADE LISAMINE
-String urlLine = "https://www.b1.lt/api/e-commerce/order-items/create";
+String urlLine = "https://www.b1.lt/api/warehouse/sale-items/create";
 	   
 	  
 	        Iterator iter = order.getOrderLines().iterator();
@@ -281,12 +287,13 @@ String urlLine = "https://www.b1.lt/api/e-commerce/order-items/create";
 	 	    	  counter++;
 	        	  
 	        JSONObject ll = new JSONObject();
-	       	 ll.put("orderId", id);
+	         ll.put("calculationMode", "1");
+	       	 ll.put("saleId", id);
 	       	 ll.put("itemId", toode);
 	       	 ll.put("quantity", line.getKogus());
-	       	 ll.put("name", toode);
-	       	 ll.put("price", line.getPrice());
-	       	 ll.put("sum", line.getPrice() * line.getKogus());
+	       	 ll.put("priceWithoutVat", line.getPrice());
+	       	 ll.put("warehouseId", "1");
+	       	 ll.put("vatClassificationId", "68");
 
               ordsave.put("line" + counter, ll);
               

@@ -844,6 +844,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
         	   custdisc = custdisc + " " + st.nextToken().trim();
         	   custdisc = custdisc.replaceAll("\"", " ").trim();
            }
+           
 
            
            String address = st.nextToken().trim();
@@ -986,7 +987,13 @@ if(id.equals("AARDE")) {
         	customer.setPaymTerm(payterm);
         }
    
-        
+        if(custdisc.trim().length() > 0) {
+        	try {
+        	customer.setDiscount(Double.parseDouble(custdisc));
+        	}catch(Exception e){
+        		
+        	}
+        }
         
         if(block != null && block.trim().equals("B")) {
         	customer.setSalesBlockT(true);
