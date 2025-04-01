@@ -78,7 +78,6 @@ public class BC365ImportDriver extends AbstractImportDriver{
   public BC365ImportDriver(ImportPanel parent) {
     this.parent = parent;
     PropertyConfigurator.configure("log4j.properties");
-    company = parent.getProps().getProperty("company");
     secret = parent.getProps().getProperty("365.secret"); //"I~c8Q~fgLOHhFnFcIe2RHUSX6HWlPHXN8fon9b4Q"; 
 	  tenantID = parent.getProps().getProperty("365.tenantID"); //"bcf61030-52c2-4048-9e18-042d8a0c856f";
 	  clientID =  parent.getProps().getProperty("365.clientID"); //"075984fb-65fc-45e1-9a26-168935061542";
@@ -101,19 +100,12 @@ public class BC365ImportDriver extends AbstractImportDriver{
   String clientID =  null;
   String token =  null;
 
- 
-  private String company = null;
-
 	  
   
   public static String deCode(String res ){
 	return Converter.deCode(res);
 }
-  
 
-	  
-  
-  
   
   
   public String getImportFile(){
@@ -124,26 +116,17 @@ public class BC365ImportDriver extends AbstractImportDriver{
 
   
   public String identifyCustomer(String id,String regnr)  {
-
-	  if(regnr != null && impCodes.get(regnr) != null){
-		  return impCodes.get(regnr) + "";
+   // Kodupaberi Maxima cased
+	  if(id != null && (id.equals("T956") || id.equals("956"))) {
+		  return "11121";
 	  }
 
-	  if(id != null && impCodes.get(id) != null){
-		  return impCodes.get(id) + "";
+	  if(id != null && (id.equals("T955") || id.equals("955"))) {
+		  return "11120";
 	  }
-	  
-	  if(kliendid.get(id) != null){
-		  return id;
-	  }
-	  
-	  if(kliendid.get(regnr) != null){
-		  return kliendid.get(regnr) + "";
-	  }
-
 
 	  
-    return null;
+    return id;
   }
 
   private String  getMSToken() {
@@ -184,7 +167,9 @@ public class BC365ImportDriver extends AbstractImportDriver{
 		}
   
   public String identifyProduct(String ean, String prodID) throws SQLException{ 
-	  
+	   if(eans == null) {
+		   this.getProducts();
+	   }
 	  if(eans.get(ean) != null){
 		  return eans.get(ean) + "";
 	  }
@@ -220,14 +205,11 @@ public class BC365ImportDriver extends AbstractImportDriver{
   }
 
   public void makeOrder(Order order) throws SQLException{
-       counter = 0;
-       if (token == null) {
-    	  // token = getMSToken();
-       }
+       
        if(paymTerms == null) {
     	   paymTerms = getPaymTerm();
        } if(products == null) {
-    	   products = getProducts(null);
+    	   products = getProducts();
        }
 		 makeOutput(order); 
     
@@ -243,9 +225,8 @@ public class BC365ImportDriver extends AbstractImportDriver{
 		  token = this.getMSToken();
 	  }
 	  String res = null;
-	  String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/itera/kp/v2.0/"
+	  String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/LIVE/api/itera/kp/v2.0/"
 	          + "companies(" + companyID + ")/";
-		// https://api.businesscentral.dynamics.com/v2.0/%7B%7Bkodupaber%7D%7D/DEV/api/itera/kp/v2.0/companies(%7B%7BIT-TEST%7D%7D)/salesPersons
 
 	    String url = urlBase + type;
 	    
@@ -262,7 +243,6 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	      if (entity != null) {
 	      String result = EntityUtils.toString(entity);
 	      res = result;
-	      System.out.println("kliendid tehtud");
 	      }} catch (IOException e) {
 	          e.printStackTrace();
 	          }
@@ -324,7 +304,7 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	   	  
 	 	String name = prod.getName();
 	 	  if (name != null) {
-	 	  lin.put("description", name );
+	 	  lin.put("description", Converter.cleanLitLatEst(name) );
 	   }
 	 	  
 
@@ -364,9 +344,11 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	    
 	    lin.put("lineObjectNumber", toode);
 	    linesA.add(lin);
+	    this.addNumLine();;
 	     }
 	  ord.put("salesOrderLines", linesA);
 	  
+	  Converter.saveFile("orders/response/" + order.getDokNr() + "request.json" , ord.toJSONString() );
 	  String res = postData("salesOrders", ord.toJSONString());
 	  JSONParser parser = new JSONParser();
 	  String ordId = null;
@@ -374,6 +356,7 @@ public class BC365ImportDriver extends AbstractImportDriver{
 		JSONObject res2 = (JSONObject) parser.parse(res);
 		ordId = (String) res2.get("id");
 		System.out.println(res2.toJSONString());
+		  Converter.saveFile("orders/response/" + order.getDokNr() + "reply.json" , res2.toJSONString() );
 	} catch (ParseException e) {
 		e.printStackTrace();
 	}
@@ -381,18 +364,19 @@ public class BC365ImportDriver extends AbstractImportDriver{
 
 	  
 	  
-	System.exit(0); 
+//	System.exit(0); 
 
 
 	      
 
 	 }
  
-  public TreeMap getProducts(Agent agent) {
+  public TreeMap getProducts() {
 	  TreeMap tm = new TreeMap();
+	  
+	  eans = new TreeMap();
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
-  	
-		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+  		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
 		  int lenn = values.size();
 		try {
@@ -413,9 +397,12 @@ public class BC365ImportDriver extends AbstractImportDriver{
           	Boolean blocked = (Boolean) cob.get("blocked");
           	
           	
-          	String gtin = (String)cob.get("gtin");
+          	String gtin = (String)cob.get("barcode");
           	if (gtin != null && gtin.length() > 5) {
              	prod.setEAN(gtin);
+             	eans.put(number, gtin);
+
+             	eans.put(gtin, number);
           	}
           	
           	String name = (String)cob.get("displayName");
@@ -444,11 +431,7 @@ public class BC365ImportDriver extends AbstractImportDriver{
           		prod.setPrice(Double.parseDouble(price));
           	}
           	
-          	Long inventory = (Long)cob.get("inventory");
-          	if (inventory != null) {
-          		prod.setStock(inventory);
-          	}
-          	  	
+        
             
            
             
@@ -486,30 +469,14 @@ System.out.println("Prodsize " + tm.size());
           return isAmount;
   }
 
-  /**
-  *
-  * @param aUseEAN - the new value for useEAN
-  */
   public void setAmount(boolean aAmount){
            isAmount= aAmount;
   }
 
 
-
-  
-  private int counter = 0;
   private ImportPanel parent;
-  private TreeMap kliendid = null;
-  private TreeMap impCodes = null;
-  
-  private TreeMap grupid = null;
   private TreeMap eans = null;
-  
-  
-  private TreeMap tooted = null;
-  private Vector mlines = null;
   private boolean isAmount = false;
-
 
   
 }

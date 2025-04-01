@@ -33,6 +33,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
@@ -114,7 +115,7 @@ public class RivileSB3ImportDriver
 	    return parent.getProps().getProperty("imp.read");
 	  }
 
-HashMap pants = null;
+private HashMap pants = null;
 
   public String getPandiPakend(String toode) {
 	
@@ -132,7 +133,6 @@ HashMap pants = null;
 		   	     String tood  = rs1.getString("toode").trim();
 		   	     String pant  = rs1.getString("pant").trim();
 		   	         pants.put(tood, pant);
-		   	  
 		   	    }
 		   	       
 		   	    rs1.close();
@@ -361,105 +361,135 @@ HashMap pants = null;
   }
   
   
-  private HashMap over21 () {
-	  HashMap res = new HashMap();
-      String sql =
-              "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
-             " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
-             " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
-             " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11  group by i44.i44_kodas_ks,i44.i44_dok_nr "+
-               " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) and i44_data_mok <= getdate()-21  group by I44_KODAS_KS order by I44_KODAS_KS ";
-      try {
-      PreparedStatement  stmt = con.prepareStatement(sql);
-           //stmt.setInt(1, Integer.parseInt(agent.getID()));
-           //stmt.setDate(2, getStartingDate());
-      ResultSet  rs1 = stmt.executeQuery();
 
-          while (rs1.next()) {
-            String id = rs1.getString("klient").trim();
-            double debt = Double.parseDouble(rs1.getString("summa").trim());
-            if(debt > 0)
-              res.put(id, debt);
-          }
-          rs1.close();
-          stmt.close();
-      }catch(Exception e ) {
-   	   
-      }
-      
-      return res;
+  
+  private Vector splitOrder (Order order){
+	  
+	  HashSet stats = getStats();
+	  Vector result = new Vector();
+	  Vector lines = order.getOrderLines();
+	  
+	  Enumeration enumr = lines.elements();
+	  
+	   
+	  if (order.getDokNr() == null || order.getDokNr().trim().length() == 0){
+		  order.setDokNr((Calendar.getInstance().getTimeInMillis() + "").substring(3));
+	  }
+	  
+	
+	  Order ordorkla = new Order(order.getCompany(),order.getAgentFirstName());
+	  Order ordorklaret = new Order(order.getCompany(),order.getAgentFirstName());
+	 	  
+	 	  ordorkla.setAgentCode(order.getAgentCode());
+	  ordorkla.setDokNr(order.getDokNr());
+	  ordorkla.setCompName(order.getShipMode());
+	  ordorkla.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordorkla.setStatus(order.getStatus()); 
+	  ordorkla.setInfo(order.getInfo());
+	  ordorkla.setReference(order.getReference());
+	  ordorkla.setTeostaja(order.getTeostaja());
+	  ordorkla.setWarehouse(order.getWarehouse());
+	  ordorkla.setDealer(order.getDealer());
+	  ordorkla.setShipTime(order.getShipTime());
+	 	 
+
+	  ordorklaret.setAgentCode(order.getAgentCode());
+	  ordorklaret.setDokNr(order.getDokNr()+"R");
+	  ordorklaret.setCompName(order.getShipMode());
+	  ordorklaret.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordorklaret.setStatus(order.getStatus()); 
+	  ordorklaret.setInfo(order.getInfo());
+	  ordorklaret.setReference(order.getReference());
+	  ordorklaret.setTeostaja(order.getTeostaja());
+	  ordorklaret.setWarehouse(order.getWarehouse());
+	  ordorklaret.setDealer(order.getDealer());
+	  ordorklaret.setShipTime(order.getShipTime());
+	  
+	   lines = order.getOrderLines();
+	   enumr = lines.elements();
+
+	   while  (enumr.hasMoreElements()){
+		  OrderLine lin = (OrderLine)enumr.nextElement();
+		
+		   if (stats.contains(lin.getToode())) {
+		  		double kord = 1;
+		  		if(lin.getKogus() < 0) {
+		  			kord = -1;
+		  		}
+		    		ordorklaret.add(lin.getToode(), lin.getKogus()*kord, lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+			     	ordorklaret.setDokNr(order.getDokNr()+"R");
+			     	ordorklaret.setReference(order.getReference());
+		    	}else {
+		    		ordorkla.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+			     	ordorkla.setDokNr(order.getDokNr());
+			     	ordorkla.setReference(order.getReference());
+		    	}
+		  
+	  }
+	  
+	  if(ordorkla.getOrderLines() != null && ordorkla.getOrderLines().size()>0){
+		  result.add(ordorkla);  
+	  }
+
+	  if(ordorklaret.getOrderLines() != null && ordorklaret.getOrderLines().size()>0){
+		  result.add(ordorklaret);  
+	  }
+	  
+	
+	  
+	 System.out.println("Result = " +order.getDokNr()
+			 + " "+ result.size());
+	 //System.exit(0);
+	  return result ;
   }
+
   
   public void makeOrder(Order order) throws SQLException{
  
 	  setOrder(order);
-	     
+	  
+	  
+	 Vector vv = this.splitOrder(order);
+    
+	  for(int k = 0; k<vv.size();k++) {
+     	  Order ord = (Order)vv.elementAt(k);
+	 
 	  boolean tag = false;
-	  OrderLine ol = (OrderLine)order.getOrderLines().get(0);
-	  if(ol.getKogus() < 0) {
+	  if(ord.getDokNr().endsWith("R")) {
 		  tag = true;
 	  }
 	  
+	   Vector lines = ord.getOrderLines();
+	   
+	    pandikas = new HashMap();
+	     for (int i = 0; i < lines.size(); i++) {
+	      	OrderLine line = (OrderLine)lines.elementAt(i);
+	          String toode = line.getToode();
+	         String pant = getPandiPakend(toode);
+	          if(pant != null ){
+	        	  double aaa = line.getKogus();
+	         	  if(pandikas.get(pant) == null){
+	         		  pandikas.put(pant,aaa+"");
+	               } else {
+	               	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+(aaa))+"");
+	               }
+	            }
+	         }
+	  
+	  
 	  System.out.println("On Tagastus " + tag );
-    makeOutput(order,tag);
- 
+    makeOutput(ord,tag );
+	  }
   }
   
- 
+ private HashMap pandikas = null;
 
  private void makeOutput(Order order,boolean tag){
  	StringBuffer sb = new StringBuffer();
-   // HashMap over21 = over21();
-   // System.out.println("Over21 " + over21.size());
-	//Hashtable pandikas =  new Hashtable();
-	boolean overDisc = false;
 	
-	 Vector lines = order.getOrderLines();
-     for (int i = 0; i < lines.size(); i++) {
-    		OrderLine line = (OrderLine)lines.elementAt(i);
-    		
-    		if(line.getPartii() != null && line.getPartii().trim().length() > 1) {
-    			overDisc = true;
-    		}
-    		
-    		System.out.println("partii " + line.getPartii() + " " + overDisc);
-     }
-         
-     
-	/* Vector lines = order.getOrderLines();
-     for (int i = 0; i < lines.size(); i++) {
-    	    
-      	OrderLine line = (OrderLine)lines.elementAt(i);
-          String toode = line.getToode();
-        //'  String pant = getPandiPakend(toode);
-          if(pant != null ){
-        	  double aaa = line.getKogus();
-         	  if(pandikas.get(pant) == null){
-         		  pandikas.put(pant,aaa+"");
-               } else {
-               	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+(aaa))+"");
-               }
-            }
-         }*/
-  
-     
-	
-     boolean shipmodeown  = false ;
-     boolean noinvoice = false; 
-     
-     if(order.getShipMode() != null && order.getShipMode().trim().length() > 0) {
-     	String uu =  order.getShipMode();
-     	
-     	if(uu.contains("-3")) {
-     		noinvoice = true;
-     	}
-     	
-     	if( uu.contains("B")) {
-     		shipmodeown = true;
-     	}
-     	
-     }
-	
+    
  	
  	String ls = System.getProperty("line.separator");
  	try {
@@ -468,7 +498,7 @@ HashMap pants = null;
       sb.append("       <I06>" + ls);
       cou++;
 
-      String type = "55"; //tellimus
+      String type = "51"; //tellimus
       if(tag) {
     	  type = "52";
       }
@@ -484,24 +514,16 @@ HashMap pants = null;
       
       String agent = order.getAgent();
       String ov21 = "";
-    //  if(over21.get(cust.substring(0,cust.lastIndexOf("-")))!= null) {
-    	//  ov21 = "OverDue +21D " + over21.get(cust.substring(0,cust.lastIndexOf("-"))) + "€ ";
-     // }
       
       String comm = "";
       if(order.getInfo() != null && order.getInfo().trim().length() >0){
-		
 	        comm = order.getInfo().replaceAll("\\r\\n|\\r|\\n", " ");
       }
       
-      //sb.append(getLineNr(cou));
-      
-      //KODAS_LS_1
       sb.append("          <I06_KODAS_MS>" + escape(agent) + "</I06_KODAS_MS>" + ls);
       cou++;
       
       if(tag) {
-    	//  sb.append(getLineNr(cou));
           sb.append("          <I06_ISAF>5</I06_ISAF>" + ls);
           cou++;  
       }
@@ -509,12 +531,8 @@ HashMap pants = null;
       
       
       String name =  null;
-      String cuname = null;
-  	try {
-  		
-  		
+   try {
   		name = identifyCustomerName(cust);
-  		cuname = name;
   		if(name == null){
   			name ="nonam";
   		}else{
@@ -528,23 +546,12 @@ HashMap pants = null;
   		e1.printStackTrace();
   	}
 
-     // sb.append(getLineNr(cou));
-   //   sb.append("          <I06_DOK_NR>U" +  escape(agent)+ "-" + name + "-"  +  escape(order.getDokNr())  + "</I06_DOK_NR>" + ls);
-     // cou++;
-      
-
-    //  sb.append(getLineNr(cou));
-      sb.append("          <I06_OP_DATA>" +  getDateString(order.getShipCal()) + "</I06_OP_DATA>" + ls);
+          sb.append("          <I06_OP_DATA>" +  getDateString(order.getShipCal()) + "</I06_OP_DATA>" + ls);
       cou++;
       
-      
-  //    sb.append(getLineNr(cou));
       sb.append("          <I06_DOK_DATA>" +  getDateString(order.getShipCal()) + "</I06_DOK_DATA>" + ls);
       cou++;
   
-
-
-	//sb.append(getLineNr(cou));
       sb.append("          <I06_KODAS_KS>" + escape(cust.substring(0,cust.lastIndexOf("-"))) + "</I06_KODAS_KS>" + ls);
       cou++;
       
@@ -552,32 +559,19 @@ HashMap pants = null;
       cou++;
       
       
-      if(shipmodeown) {
-    	  String carPlate = this.getAgentCar(agent);
-    	  System.out.println("PLATE " + carPlate );
-    	  if(carPlate != null) {
-    		  sb.append("          <I06_KODAS_AU>" + escape(carPlate) + "</I06_KODAS_AU>" + ls);
-    	      cou++;  
-    	  }
-    	  
-    	        
-      }
-      
-      
       
       String addr =  null;
-	try {
-		addr = identifyCustomerADDR(cust);
-	} catch (SQLException e1) {
-		e1.printStackTrace();
-	}
-//	sb.append(getLineNr(cou));
-      sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
+		try {
+			addr = identifyCustomerADDR(cust);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+
+	sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
       cou++;
       
       String aeg = null;
       if(order.getShipTime() != null && order.getShipTime().trim().length() > 0) {
-    	
     	  aeg =   order.getShipTime().trim();
     	  sb.append("          <I06_ADR3>" + escape(aeg) + "</I06_ADR3>" + ls);
           cou++;
@@ -588,26 +582,19 @@ HashMap pants = null;
     	  lisa = order.getInfo().trim();
       }
       
-    
-      
       
       if(lisa != null){
-    	//  sb.append(getLineNr(cou));
           sb.append("          <I06_PASTABOS>" + escape(ov21 + lisa) + "</I06_PASTABOS>" + ls);
           cou++;  
       }
      
-      lines = order.getOrderLines();
+    Vector  lines = order.getOrderLines();
       for (int i = 0; i < lines.size(); i++) {
-      //	 sb.append(getLineNr(cou));
          sb.append("          <I07>" + ls);
          cou++;
-        
           
       	OrderLine line = (OrderLine)lines.elementAt(i);
           String toode = line.getToode();
-          String partii = line.getPartii();
-          //System.out.println("partii " + partii);
           
           double ale = line.getDiscount();
           if (ale == -1 ){
@@ -617,106 +604,85 @@ HashMap pants = null;
         	  ale = 100;
           }
           
-          //sb.append(getLineNr(cou));
           sb.append("               <I07_TIPAS>1</I07_TIPAS>" + ls);
           cou++;
-          /*
-          Fillial 01   -  agent 007
-Fillial 02   -  agent 020
-Fillial 03    - agent 016*/
-          String ladu = "04";
-          
-if(ladu.trim().length()!=0){
-	
-        //  sb.append(getLineNr(cou));
-          sb.append("               <I07_KODAS_IS>" + ladu  + "</I07_KODAS_IS>" + ls);
+
+
+  if (tag) {
+	  if(toode.length() == 3) {
+		 String obj =  this.getVaatObjekt(toode);
+		  sb.append("               <I07_KODAS_OS>" +  escape(obj) + "</I07_KODAS_OS>" + ls);
           cou++;
-
-}      
-
+		  toode = changeVaat(toode);
+	  }
+  }
 
           sb.append("               <I07_KODAS>" +  escape(toode) + "</I07_KODAS>" + ls);
           cou++;
+
           double kord = 1;
-          if(tag) {
+          if(tag && line.getKogus() < 0) {
         	  kord = -1;
           }
-          
+          if(tag) {
           sb.append("               <I07_KIEKIS>" + (int)(line.getKogus() * kord) + "</I07_KIEKIS>" + ls);
           cou++;
+          }else {
+        	  sb.append("               <T_KIEKIS>" + (int)(line.getKogus() * kord) + "</T_KIEKIS>" + ls);
+              cou++;  
+          }
+
+          if (!tag) {
           sb.append("               <I07_KODAS_US>" + line.getUnit() + "</I07_KODAS_US>" + ls);
           cou++;
+          }
     
   if (ale != 0 ){
-	       double hind = this.getProductPrice(toode);
-	   //   sb.append(getLineNr(cou));
-         sb.append("               <I07_KAINA_BE>" + escape(nf.format(hind)) + "</I07_KAINA_BE>" + ls);
+	     sb.append("               <I07_KAINA_BE>" + escape(nf.format(line.getPrice())) + "</I07_KAINA_BE>" + ls);
          cou++;
-  	    //  sb.append(getLineNr(cou));
-          sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
+  	
+         sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
           cou++;
-
-  }     
-         // sb.append(getLineNr(cou));
-         // sb.append("               <I07_MOKESTIS_P>" + prod.getVat() + "</I07_MOKESTIS_P>" + ls);
-         // cou++;
-          
-         // sb.append(getLineNr(cou));
-         // sb.append("               <I07_SUMA>" + escape(getConc().getNF().format((line.getAmount()* price)*(100-ale)/100)
-          //		)+ "</I07_SUMA>" + ls);
-          //cou++;
-          
-
+    } else if(tag) {
+	  sb.append("               <I07_KAINA_BE>30.00</I07_KAINA_BE>" + ls);
+      cou++;
+    }
+  
   addNumLine();
-
-       //   sb.append(getLineNr(cou));
           sb.append("          </I07>" + ls);
           cou++;
       }
-
       
-    /*  if( pandikas.size()>0){
-      	Enumeration enumpant = pandikas.keys();
-       while(enumpant.hasMoreElements()){
-       	
-       	String toode = (String)enumpant.nextElement();
-      	double pand = new Double((String)pandikas.get(toode)).doubleValue();
-    	  
-   	 //sb.append(getLineNr(cou));
-     sb.append("          <I07>" + ls);
-     cou++;
+      
+        if( pandikas.size()>0){
+    	Iterator enumpant = pandikas.keySet().iterator();
+     while(enumpant.hasNext()){
+     	
+     	String toode = (String)enumpant.next();
+    	double pand = new Double((String)pandikas.get(toode)).doubleValue();
+  	  
+   sb.append("          <I07>" + ls);
+   cou++;
+  
+    sb.append("               <I07_TIPAS>2</I07_TIPAS>" + ls);
+    cou++;
+
+    sb.append("               <I07_KODAS>" +  escape(toode) + "</I07_KODAS>" + ls);
+    cou++;
+    double kord = 1;
+    if(tag) {
+  	  kord = -1;
+    }
     
-     // sb.append(getLineNr(cou));
-      sb.append("               <I07_TIPAS>2</I07_TIPAS>" + ls);
-      cou++;
+    sb.append("               <I07_KIEKIS>" + escape(nf.format(pand * kord)) + "</I07_KIEKIS>" + ls);
+    cou++;
+   
+    sb.append("          </I07>" + ls);
+    cou++;
+ 	  }
+    }
 
-      String ladu = "";   
-if(ladu.trim().length()!=0){
-
-      //sb.append(getLineNr(cou));
-      sb.append("               <I07_KODAS_IS>" + ladu  + "</I07_KODAS_IS>" + ls);
-      cou++;
-}      
-
-      //sb.append(getLineNr(cou));
-      sb.append("               <I07_KODAS>" +  escape(toode) + "</I07_KODAS>" + ls);
-      cou++;
-      double kord = 1;
-      if(tag) {
-    	  kord = -1;
-      }
-      
-      //sb.append(getLineNr(cou));
-      sb.append("               <I07_KIEKIS>" + escape(nf.format(pand * kord)) + "</I07_KIEKIS>" + ls);
-      cou++;
      
-     // sb.append(getLineNr(cou));
-      sb.append("          </I07>" + ls);
-      cou++;
-   	  }
-      }*/
-      
-      //sb.append(getLineNr(cou));
       sb.append("          </I06>" + ls);
       cou++;
 
@@ -727,12 +693,9 @@ if(ladu.trim().length()!=0){
  	
       String fileName = escape(cat + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".EIP";
       System.out.println(fileName);
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(sb.toString().getBytes());
-        fos.close();
-        
-     //   sendConfirmEmail(comm,order,cuname,addr, ov21, overDisc);
-        
+      
+      Converter.saveFile(fileName, sb.toString());
+   
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
@@ -742,6 +705,72 @@ if(ladu.trim().length()!=0){
     return "RivileSB3Import";
   }
   
+   private String  getVaatObjekt(String toode) {
+	   String res = null;
+	   if(toode.equals("022")) {
+		   res = "04";
+	   }
+	   if(toode.equals("023")) {
+		   res = "06";
+	   }
+	   if(toode.equals("024")) {
+		   res = "09";
+	   }
+	   if(toode.equals("025")) {
+		   res = "52";
+	   }
+	   if(toode.equals("026")) {
+		   res = "33v";
+	   }
+	   if(toode.equals("027")) {
+		   res = "33o";
+	   }
+	   if(toode.equals("028")) {
+		   res = "33g";
+	   }
+	   
+	   if(toode.equals("030")) {
+		   res = "11";
+	   }
+	   if(toode.equals("031")) {
+		   res = "44";
+	   }
+	   if(toode.equals("029")) {
+		   res = "11";
+	   }
+	   if(toode.equals("032")) {
+		   res = "06";
+	   }
+	   /*
+
+
+		   04 - barrel 20L:
+		   it must be 11 („objektas“)-haacht statinė            -> barcode from invoice 030
+		   it must be 44 („objektas“)-westmalle statinė    -> barcode from invoice 031
+
+		   08 - barrel 15L:
+		   it must be 11 („objektas“)-haacht statinė             -> barcode from invoice 029
+		   it must be 06 („objektas“) -k.brewery statinė      -> barcode from invoice 032
+		   			*/																																																	
+	   
+	   
+	   return res;
+   }
+   private String changeVaat(String toode) {
+	   
+	   String res  = toode;
+	   if(toode.equals("022") || toode.equals("023") ||  toode.equals("024") || toode.equals("025") || toode.equals("026") || toode.equals("027") || toode.equals("028")) {
+		   res = "02";
+	   }
+	   if(toode.equals("030") || toode.equals("031") ) {
+		   res = "04";
+	   }
+	   if(toode.equals("029") || toode.equals("032") ) {
+		   res = "08";
+	   }
+
+	   return res;
+   }
   
   private void sendConfirmEmail(String comment, Order ord , String cuname , String delaadr, String ov21, boolean overDisc){
 	   	try{
@@ -985,6 +1014,42 @@ if(ladu.trim().length()!=0){
 
       return prod;
   }
+
+  private HashSet getStats(){
+	   HashSet res = new HashSet();
+	   String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus, N37_KODAS_US as unit ,0  AS tykke,0  AS alusel, 0 AS myygihind,\r\n" + 
+		   		"   		  		N37_BAR_KODAS AS ean, \r\n" + 
+		   		"   		    0 AS kogus,n17_kodas_gs AS grupp2, N17_KODAS_VS_T AS grupp,  N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status ,  N35_PAV_K3 as maks,\r\n" + 
+		   		"   		    case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus , ltrim(N17_KODAS_LS_8) as sellout \r\n" + 
+		   		"   		  , N17_KODAS_LS_8 as maxdisc ,a.* FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
+		   		"   		  LEFT JOIN  n37_pmat g ON n37_kodas_ps=n17_kodas_ps  and N37_KODAS_US != 'L' \r\n" + 
+		   		"   	 left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1  " + 
+		   		"   ";
+	   
+	          System.out.println(cmd);
+
+	      try {
+	      	
+	    	  Statement st1 = con.createStatement();
+	    	    ResultSet rs = st1.executeQuery(cmd);
+
+	          while (rs.next()) {
+	            String kood = rs.getString("toode").trim();
+	            String grupp = rs.getString("grupp2");
+	            if(grupp != null  && grupp.trim().equals("STATINES") && kood.length() == 3) {
+	            	res.add(kood);
+	               }
+
+	          }
+	          rs.close();
+	          st1.close();
+	      } catch (Exception e) {
+	          e.printStackTrace();
+	          }
+	      System.out.println("stats "+ res.toString());
+	      return res;
+	  }
+
 
   
   private String url = "jdbc:odbc:";

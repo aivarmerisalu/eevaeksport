@@ -1186,7 +1186,7 @@ try {
 	   
     String cmd = "  SELECT inv.itemid, inv. namealias AS nimetus, DISPLAYVALUE  AS kastis,'' AS alusel, 0 AS price \r\n" + 
     		"    		       ,CATEGORY AS grupp2, PARENTCATEGORY  AS grupp , \r\n" + 
-    		"    		   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 20 as vat ,  \r\n" + 
+    		"    		   ww.displayvalue as grkood, 0 as grid,mod.unitid As unit, 21 as vat ,  \r\n" + 
     		"    		    0  as samm ,sortcode as sorting  ,  0 as nosales ,linedisc as prgrupp  FROM  inventtable inv  \r\n" + 
     		"    			 INNER JOIN  ECORESPRODUCT i  on i.DISPLAYPRODUCTNUMBER = inv.ITEMID\r\n" + 
     		"    			 INNER JOIN ECORESPRODUCTCATEGORY g on g.product = i.RECID and g.categoryhierarchy in ('" + prodHierID + "')  \r\n" + 

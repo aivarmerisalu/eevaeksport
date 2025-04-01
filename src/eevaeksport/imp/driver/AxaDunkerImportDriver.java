@@ -6,8 +6,10 @@
 package eevaeksport.imp.driver;
 
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
@@ -21,6 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -67,6 +70,9 @@ public class AxaDunkerImportDriver
     }
   }
 
+  
+
+	
 
   public String identifyCustomer(String id,String regnr) throws SQLException {
   	String sql1 = null;
@@ -285,10 +291,47 @@ public class AxaDunkerImportDriver
   
   private HashMap eans = null;
   private HashMap prodnames = null;
+  private HashMap vanaUusKood = null;
+  
+
+  private String getDir(){
+	     String dir = parent.getProps().getProperty("readin");
+	     if (!(dir.endsWith("/") || (dir.endsWith("\\")))) dir = dir + "/";
+	     return dir;
+	   }
+  
     
     private HashMap makeEans() throws SQLException{
   	 
-  	  	
+    	if(vanaUusKood == null) {
+    		vanaUusKood = new HashMap();
+    		try {
+    		 FileReader fr = new FileReader(getDir() + "VanaUusKood.csv");
+     		 BufferedReader reader = new BufferedReader(fr);
+
+      	     String line = null;
+             reader.readLine();
+             while(( line = reader.readLine()) != null ){
+             line = line.replaceAll(","," |");
+             
+             line = line.replaceAll("\"\"", "''");
+          
+            StringTokenizer st = new StringTokenizer(line, "|");
+
+            if (st.hasMoreTokens()){
+         	   String vana = st.nextToken().trim();
+         	   String uus = st.nextToken().trim();
+         	   vanaUusKood.put(vana, uus);
+            }
+            
+             }
+             reader.close();
+    		}catch(Exception e) {
+    			e.printStackTrace();
+    		}
+    		
+    	}
+    	
   	  	if(eans == null){
   	  		eans = new HashMap();
   	  		prodnames = new HashMap();
@@ -489,10 +532,12 @@ public class AxaDunkerImportDriver
             sb.append("      <ItemEntry>" + ls);
             sb.append("      <LineItemNum>"  + (i+1) + "</LineItemNum>" + ls);
           
-           
-           // <GTIN>4740072222752</GTIN> 
-           // <BaseUnit>TK</BaseUnit> 
-            sb.append("         <SellerItemCode>" + line.getToode() + "</SellerItemCode>" + ls);
+            String toode = line.getToode() ;
+            if(this.vanaUusKood.get(toode) != null) {
+	        	toode = (String)vanaUusKood.get(toode); 
+	        }
+            
+            sb.append("         <SellerItemCode>" + toode + "</SellerItemCode>" + ls);
             try{
 
                 String ean = eans.get(line.getToode())+"";
@@ -870,7 +915,12 @@ public class AxaDunkerImportDriver
 	        if(ol.getKogus() < 0){
 	        	minus = true;
 	        }
-	    	  sb.append(ol.getToode() + sep);
+	        
+	        String toode = ol.getToode() ;
+            if(this.vanaUusKood.get(toode) != null) {
+	        	toode = (String)vanaUusKood.get(toode); 
+	        }
+	    	  sb.append(toode + sep);
 	          sb.append(ol.getTooteNimi().replace(',',' ') + sep);
 	          sb.append(ol.getUnit() + sep);
 	          sb.append(ol.getKogus() + sep);

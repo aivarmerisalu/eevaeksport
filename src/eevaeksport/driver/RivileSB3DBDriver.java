@@ -1033,7 +1033,7 @@ HashSet olemas = new HashSet();
  		} catch (Exception d){
  			d.printStackTrace();
  		}
- 		System.out.println(res.toString());
+ 		//System.out.println(res.toString());
 
      //	System.exit(0);
      	return res ;
@@ -1051,6 +1051,17 @@ HashSet olemas = new HashSet();
     	}catch(Exception e) {
     		System.exit(0);
     	}
+    	
+    	
+    	HashSet noSubGroups = new HashSet();
+        if(getParent().getProps().getProperty("noSubGroups") != null){
+        	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("noSubGroups"),",");
+        	while (st.hasMoreElements()){
+        		String aa = st.nextToken();
+        		noSubGroups.add(aa);
+        	}
+        }
+    	
     	
     	TreeMap inCases = getInCases();
     	
@@ -1199,7 +1210,7 @@ HashSet olemas = new HashSet();
              		 
                       if(inCases.containsKey(ean2)){
                     	  prod.setInCases(Double.parseDouble(inCases.get(ean2)+""));
-                   System.out.println("ean2 " + inCases.get(ean2));
+                   //System.out.println("ean2 " + inCases.get(ean2));
                       }
             	  }catch(Exception y){
             		  
@@ -1231,6 +1242,10 @@ HashSet olemas = new HashSet();
                if(grupp.trim().equals("33")) {
             	   goes = false;
                }
+
+               if(noSubGroups.contains(grupp.trim())) {
+              	 goes = false;
+               }     
              }
           
         
@@ -1259,7 +1274,18 @@ HashSet olemas = new HashSet();
             	   goes = false;
                }
                
+               if(grupp != null  && grupp.trim().equals("STATINES") && prod.getID().length() == 3) {
+            	   goes = true;
+            	   prod.setName("x " + prod.getName());
+            	   System.out.println("stat sisse " + prod.getName());
+            	   prod.setUnit("VNT");
+            	   prod.setPrice(30);
+               }
                
+
+               if(grupp != null  && grupp.trim().equals("STATINES") && prod.getID().length() == 2) {
+            	   goes = false;
+               }
             try {
                Double aMaxDiscount = Double.parseDouble(rs.getString("maxdisc"));
                if(aMaxDiscount > 0) {

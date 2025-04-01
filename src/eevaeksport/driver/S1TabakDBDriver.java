@@ -601,8 +601,16 @@ if(seis > 0) {
      treeGr = new TreeMap();
      
      setTreeGroup(true);
-     //
-   //  "00000000299";"00000006843";"Orbitol";"0";
+     
+     HashSet yesGroups = new HashSet();
+     if(getParent().getProps().getProperty("yesgroups") != null){
+     	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("yesgroups"),",");
+     	while (st.hasMoreElements()){
+     		String aa = st.nextToken();
+     		yesGroups.add(aa);
+     	}
+     }
+     
      
      for (String[] row : readCSVData("groups.csv")) {
     	 int cou = 0;
@@ -631,8 +639,10 @@ if(seis > 0) {
          if(id0 != null && id0.trim().length() == 0) {
             tm.put(id, name);	
          } else {
+        	 if(yesGroups.contains(id0)) {
         	 treeGr2.put(id0+id, name);
         	 treeGr.put(id, id0+id);
+        	 }
          }
          }
          
@@ -1083,19 +1093,21 @@ System.out.println(yesGroups.size() + " yesGroups");
          	   prod.setInCases(inCase);
              }
              
-             String name2 = Converter.cleanLitLatEst(name);
+             String name2 = Converter.cleanLitLatEst(name.replace('Ø', ' '));
              prod.setName(Converter.enCodeEst(name) + " " + artikkel + e4);
            //  
           
              prod.artikkel = artikkel;
             
-             if(usedProds.contains(id)) {
+             if(usedProds.contains(id) || prods.get(id) != null) {
             	 if(yesGroups.contains(prod.getGroup())) {
             		   goes = true;
             	   }
              }
-         	//  System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + prod.getUnit() + " " + prod.getPrice());
-
+             
+             if(prod.getID().equals("TR0018545")) {
+         	 System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + gr2+ " " + treeGr.get(gr2) +" " + goes);
+             }
              // producti 0126
              String sorting = "aa";
 
@@ -1122,8 +1134,13 @@ System.out.println(yesGroups.size() + " yesGroups");
             	 sorting = "ff";
              } 
              prod.setNameSorting(sorting + name);
-               if(goes) {
-            	   System.out.println( prod.getGroup() +" "+ sorting + name);
+             
+
+             if(prod.getID().equals("TR0018545")) {
+         	 System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + prod.getUnit() + " " + prod.getPrice() + " " + goes);
+             }
+             if(goes) {
+            	 //  System.out.println( prod.getGroup() +" "+ sorting + name);
             	   tm.put(sorting+name2, prod); 
                }
                

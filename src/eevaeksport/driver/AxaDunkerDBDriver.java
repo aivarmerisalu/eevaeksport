@@ -97,13 +97,6 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
    	return null;
    }
 
-  private String getDir() {
-		String dir = getParent().getProps().getProperty("readin");
-		if (!(dir.endsWith("/") || (dir.endsWith("\\"))))
-			dir = dir + "/";
-		return dir;
-	}
-  
   
   private TreeMap getRimi(){
 	  
@@ -135,7 +128,7 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
 
 	public Vector getFixedAssortmentData() {
 		Vector result = new Vector();
-		File f = new File(this.getDir() + "/xls/sortimendid.xls");
+		File f = new File( "/xls/sortimendid.xls");
 		TreeMap rimi = getRimi(); 
 		
 		try {
@@ -694,7 +687,7 @@ System.out.println(sb.toString());
 
 	  sortimendid = new HashMap();
       
-      File fff = new File(this.getDir() + "/xls/sortimendid.xls" );
+      File fff = new File( "/xls/sortimendid.xls" );
       TreeMap groups = new TreeMap(); 
   	try{
           FileInputStream ff = new FileInputStream(fff);

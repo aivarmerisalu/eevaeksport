@@ -116,8 +116,8 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
     
       System.out.println("Token " + token);
 
-      this.downloadData("salesPrices");
-    //this.downloadData(null);
+      //this.downloadData("salesPrices");
+  //  this.downloadData(null);
     // this.getDebt(null);
     // this.getCustomerProductsList(null);
      //this.setBulkSales(null);
@@ -142,7 +142,7 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 	  private void testConn() {
 		  String url = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/environments";
 
-		  url = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/v2.0/"
+		  url = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/LIVE/api/v2.0/"
 		  		+ "companies(3b92aaf0-963a-ef11-8409-000d3ab2813a)/items";
 		  
 		  try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -488,12 +488,13 @@ private void saveFile (String dataType) {
               System.out.println("Failed to create the folder at: " + folderPath);
           }
       } 
-      String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/itera/kp/v2.0/"
+      String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/LIVE/api/itera/kp/v2.0/"
 	          + "companies(" + companyID + ")/";
-      //https://api.businesscentral.dynamics.com/v2.0/{{kodupaber}}/DEV/api/itera/kp/v2.0/companies({{IT-TEST}})/endpointinimi
       
 
 	      String url = urlBase + dataType;
+	      
+	      System.out.println( "url " + url);
 	      
 	      try (CloseableHttpClient client = HttpClients.createDefault()) {
 	        HttpGet request = new HttpGet(url);
@@ -535,18 +536,15 @@ private void saveFile (String dataType) {
               System.out.println("Failed to create the folder at: " + folderPath);
           }
       } 
-      String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/DEV/api/itera/kp/v2.0/"
-	          + "companies(" + companyID + ")/";
-      
-      //https://{businesscentralPrefix}/api/v2.0/companies({id})/salesInvoices({id})/salesInvoiceLines({salesInvoiceLineId})
+
+      if (dataType == null || dataType.equals("salesPersons")) {
+    	  this.saveFile("salesPersons");
+    }
+
       
       if (dataType == null || dataType.equals("salesPrices")) {
     	  this.saveFile("salesPrices");
-
-}
-      
-
-      
+         }
       
       
       if (dataType == null || dataType.equals("salesInvoices")) {
@@ -576,7 +574,9 @@ private void saveFile (String dataType) {
 		        	
 		        	
 
-  		  
+
+		        	      String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/LIVE/api/itera/kp/v2.0/"
+		        		          + "companies(" + companyID + ")/";
   		  
   		  
 	     String url = urlBase + "salesInvoices("+ id +")/salesInvoiceLines";
@@ -624,9 +624,6 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	this.saveFile("itemCategories");
 }
 
-if (dataType == null || dataType.equals("salesPersons")) {
-	  this.saveFile("salesPersons");
-}
 
 
 
@@ -640,6 +637,8 @@ if (dataType == null || dataType.equals("salesPersons")) {
        
        
    public TreeMap getCustomers(Agent agent){
+	   
+	   downloadData(null);
 	   
 	   TreeMap<String, Double>volad = new TreeMap<String, Double>();
 		org.json.simple.JSONObject cc1 = 	Converter.readJSONFile("data//agedAccountsReceivables.json");
@@ -1634,7 +1633,7 @@ public TreeMap getProducts(Agent agent) {
           	Boolean blocked = (Boolean) cob.get("blocked");
           	
           	
-          	String gtin = (String)cob.get("gtin");
+          	String gtin = (String)cob.get("barcode");
           	if (gtin != null && gtin.length() > 5) {
              	prod.setEAN(gtin);
           	}

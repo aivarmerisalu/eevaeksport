@@ -1122,7 +1122,7 @@ System.out.println("fixed size " + result.size());
 	   "   LEFT JOIN veoring0100 vr on vr.VR=SL01027    LEFT OUTER JOIN SL140100 ON SL01001=SL14001 AND SL14002='00' " +
        "   LEFT OUTER JOIN SY240100 ON SL01035=SY24002 AND SY24001='BK' " +
        "   LEFT OUTER JOIN SL220100 ON SL01024=SL22002 AND SL22001='0'  " +
-       "   WHERE len(SL01001)>4 ORDER BY SL01002"; 
+       "   WHERE  left(SL01001,1)='T' ORDER BY SL01002"; 
 
         connectionUp(url);	
         log(cmd);

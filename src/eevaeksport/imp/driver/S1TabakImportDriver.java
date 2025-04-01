@@ -132,17 +132,11 @@ try{
  }
 
 
-
   public String identifyCustomer(String id,String regnr) throws SQLException {
   return id;
 	  }
 
 
-
-  
-
-  
- 
 	  public String identifyProduct(String ean, String prodID) throws SQLException{
 		    return prodID;
 		  }
@@ -244,33 +238,6 @@ try{
 	  }
   
   
-  private void addlocks2(boolean delete , boolean kondit){
-		 
-	  	String fileNam = parent.getProps().getProperty("conv.dir3") + "lock"; 
-		  File lck = new File(fileNam);
-	  	
-		  if(delete){
-			 lck.delete(); 
-		  }else{
-			
-		  if(lck.exists()){
-			  System.out.println("LOCK Exists " + fileNam);
-			  log.error(" LOCK Exists :" + new Date(lck.lastModified()).toGMTString());
-			  System.exit(0);
-		  }else {
-			  try{
-		      FileOutputStream fos = new FileOutputStream(fileNam);
-		        fos.write("".getBytes());
-		        fos.close();
-		        log.error(" LOCK Created :" + new Date(lck.lastModified()).toGMTString());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}	  
-			  }
-		  
-		  }
-		  
-		  }
 	  
   
   
@@ -354,6 +321,9 @@ try{
 			  change = true;
 		  }
 		  
+		  
+		 
+		  
 		  if (order.getDokNr() == null || order.getDokNr().trim().length() == 0){
 			  order.setDokNr((Calendar.getInstance().getTimeInMillis() + "").substring(3));
 		  }
@@ -363,7 +333,8 @@ try{
 		  Order ordorklabonus = new Order(order.getCompany(),order.getAgentFirstName());
 		  Order ordorklaret = new Order(order.getCompany(),order.getAgentFirstName());
 		  Order ordorklacha = new Order(order.getCompany(),order.getAgentFirstName());
-		  
+		  Order ordorklarepr = new Order(order.getCompany(),order.getAgentFirstName());
+			  
 		  ordorklacha.setAgentCode(order.getAgentCode());
 		  ordorklacha.setDokNr(order.getDokNr()+"C");
 		  ordorklacha.setCompName(order.getShipMode());
@@ -376,6 +347,19 @@ try{
 		  ordorklacha.setDealer(order.getDealer());
 		  ordorklacha.setShipTime(order.getShipTime());
 		  
+
+		  ordorklarepr.setAgentCode(order.getAgentCode());
+		  ordorklarepr.setDokNr(order.getDokNr()+"P");
+		  ordorklarepr.setCompName(order.getShipMode());
+		  ordorklarepr.setShipCal(order.getShipCal().getTimeInMillis() +"");
+		  ordorklarepr.setStatus(order.getStatus()); 
+		  ordorklarepr.setInfo(order.getInfo());
+		  ordorklarepr.setReference(order.getReference());
+		  ordorklarepr.setTeostaja(order.getTeostaja());
+		  ordorklarepr.setWarehouse(order.getWarehouse());
+		  ordorklarepr.setDealer(order.getDealer());
+		  ordorklarepr.setShipTime(order.getShipTime());
+		
 		  ordorkla.setAgentCode(order.getAgentCode());
 		  ordorkla.setDokNr(order.getDokNr());
 		  ordorkla.setCompName(order.getShipMode());
@@ -427,7 +411,19 @@ try{
       	 			laks = true;
       	 		}
       	 	 } */
+		 
+		   
+		   Vector lins = order.getOrderLines();
+		 	 
+		 	 boolean repr = false;
+	 	 	 for (int i = 0; i < lins.size(); i++) {
+	 	 		OrderLine ol = (OrderLine) lins.elementAt(i);
+	 	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0.1 && (order.getStatus() == 5 || order.getStatus() == 4)){
+	 	 			repr = true;
+	 	 		}
+	 	 	 } 
 		  
+		   
 		   enumr = lines.elements();
 		  while  (enumr.hasMoreElements()){
 			  OrderLine lin = (OrderLine)enumr.nextElement();
@@ -448,6 +444,11 @@ try{
 			    		ordorklabonus.setDokNr(order.getDokNr()+"B");
 			    		ordorklabonus.setReference(order.getReference());
 				 		
+			    	}else if (repr) {
+			    		ordorklarepr.add(lin.getToode(), lin.getKogus()*-1, lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
+				     	ordorklarepr.setDokNr(order.getDokNr()+"P");
+				     	ordorklarepr.setReference(order.getReference());
 			    	}else if (lin.getKogus() < 0) {
 			    		ordorklaret.add(lin.getToode(), lin.getKogus()*-1, lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 				     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
@@ -476,6 +477,10 @@ try{
 		  
 		  if(ordorklacha.getOrderLines() != null && ordorklacha.getOrderLines().size()>0){
 			  result.add(ordorklacha);  
+		  }
+		
+		  if(ordorklarepr.getOrderLines() != null && ordorklarepr.getOrderLines().size()>0){
+			  result.add(ordorklarepr);  
 		  }
 		  
 		 System.out.println("Result = " +order.getDokNr()
@@ -509,6 +514,13 @@ try{
 	 	    if(doknr.endsWith("B")) {
 	 	    	bonus = true;
 	 	    }
+	 	    boolean korrekt = false;
+	 	    if(doknr.endsWith("P")) {
+	 	    	korrekt = true;
+	 	    }
+	 	    		
+	 	    
+	 	    
 		      String fn = doknr;
 		      String mills = (Calendar.getInstance().getTimeInMillis()+"").substring(10);
 		      if(doknr.trim().length()== 0){
@@ -600,13 +612,15 @@ try{
 	        	disc = ol.getDiscount()+"";
 	        }
 	       double pr = ol.getPrice();
+	       String ex = "";
 	       if(bonus) {
-	    	   pr = 0;
+	    	  // pr = 0;
 	    	 //  disc = "100.00";
+	    	   ex = "100";
 	       }
 	        sb.append(pr + sep);
 	        sb.append(disc + sep);
-	        sb.append("0" + sep+sep); //tyhi
+	        sb.append("0" + sep + ex + sep); //tyhi
 	       
         
 	         arr.add(toode);

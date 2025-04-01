@@ -983,20 +983,14 @@ private String escape(String s){
 }
 
 
- 
 	public NumberFormat getNF() {
 		return this.nf;
 	}
 	
-
-
-
  
   public String getDriverVersion(){
     return "AxaDunkerImport";
   }
-
-
 
 
   public static final String addSpaces(String s, int totalLen){
@@ -1011,85 +1005,18 @@ private String escape(String s){
     return sb.toString();
   }
   
+  
   public String getImportFile(){
     return parent.getProps().getProperty("imp.read");
   }
   
-  private NumberFormat calNF = NumberFormat.getInstance();
-
-  public static final String cleanLitLatEst(String ret){
-	    if (ret != null){
-	      
-	        ret = ret.replaceAll("�","e");
-	        ret = ret.replace((char) 0x3f,' ');
-	        
-	        
-	       // ret = ret.replaceAll("?","s");
-	       // ret = ret.replaceAll("?","c");
-	     // ret = ret.replace('',' ');
-	        ret = ret.replaceAll("�","I");
-	        ret = ret.replaceAll("�","u");
-	        ret = ret.replaceAll("�","c");
-	        ret = ret.replaceAll("�","z");
-	        ret = ret.replaceAll("�","s");
-	        ret = ret.replaceAll("�","S");
-	        ret = ret.replaceAll("�","c");
-	        ret = ret.replaceAll("�","I");
-	        ret = ret.replaceAll("�","u");
-	        ret = ret.replaceAll("�","i");
-	        ret = ret.replaceAll("�","c");
-	        ret = ret.replaceAll("�","Z");
-	        ret = ret.replaceAll("�","E");
-	        ret = ret.replaceAll("�","U");
-	        ret = ret.replaceAll("�","U");
-	        ret = ret.replaceAll("�","Pg.");
-	        
-	        ret = ret.replaceAll("�","Z");
-	        ret = ret.replaceAll("�","A");
-	        ret = ret.replaceAll("�","a");
-	        ret = ret.replaceAll("�","C");
-
-	        ret = ret.replaceAll("�","c");
-	        ret = ret.replaceAll("�","E");
-	        ret = ret.replaceAll("�","e");
-	        ret = ret.replaceAll("�","G");
-	        ret = ret.replaceAll("�","g");
-	        ret = ret.replaceAll("�","I");
-	        ret = ret.replaceAll("�","i");
-	        ret = ret.replaceAll("�","K");
-	        ret = ret.replaceAll("�","k");
-	        ret = ret.replaceAll("�","L");
-	        ret = ret.replaceAll("�","l");
-	        ret = ret.replaceAll("�","N");
-	        ret = ret.replaceAll("�","n");
-	        
-	        ret = ret.replaceAll("�","o");
-	        ret = ret.replaceAll("�","a");
-	        ret = ret.replaceAll("�","o");
-	        ret = ret.replaceAll("�","u");
-	       
-	        ret = ret.replaceAll("�","O");
-	        ret = ret.replaceAll("�","A");
-	        ret = ret.replaceAll("�","O");
-	        ret = ret.replaceAll("�","U");
-	    }
-	        
-	        if(ret == null || ret.trim().length()==0){
-	        return " ";
-	        }else {
-	        	System.out.println(ret);
-	        return ret;
-	        }        
-	      }
   
-  private String url = "jdbc:odbc:AXA";
+  private NumberFormat calNF = NumberFormat.getInstance();
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
-
   private int counter = 0;
   private ImportPanel parent;
 
 public String getTrouble() {
-	// TODO Auto-generated method stub
 	return null;
 }
 }
