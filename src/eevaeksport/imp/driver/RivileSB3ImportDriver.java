@@ -361,11 +361,11 @@ private HashMap pants = null;
   }
   
   
-
+private HashSet stats = null;
   
   private Vector splitOrder (Order order){
 	  
-	  HashSet stats = getStats();
+	   stats = getStats();
 	  Vector result = new Vector();
 	  Vector lines = order.getOrderLines();
 	  
@@ -664,16 +664,25 @@ private HashMap pants = null;
    sb.append("          <I07>" + ls);
    cou++;
   
-    sb.append("               <I07_TIPAS>2</I07_TIPAS>" + ls);
+    sb.append("               <I07_TIPAS>1</I07_TIPAS>" + ls);
     cou++;
 
     sb.append("               <I07_KODAS>" +  escape(toode) + "</I07_KODAS>" + ls);
     cou++;
     double kord = 1;
-    if(tag) {
-  	  kord = -1;
+    /*094-deposits of bottle
+096-deposits of can
+095 deposits of pet
+*/
+    String price = "0.10";
+    if(stats.contains(toode)) {
+    	price = "30.00";
     }
     
+    sb.append("               <I07_KAINA_BE>" + price + "</I07_KAINA_BE>" + ls);
+    cou++;
+    sb.append("               <I07_KAINA_SU>" + price + "</I07_KAINA_SU>" + ls);
+    cou++;
     sb.append("               <I07_KIEKIS>" + escape(nf.format(pand * kord)) + "</I07_KIEKIS>" + ls);
     cou++;
    
