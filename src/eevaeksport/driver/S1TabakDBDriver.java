@@ -870,6 +870,7 @@ if(seis > 0) {
         	 String contact = null;
         	 String group = null;
         	 String group2 = null;
+        	 String chain = null;
         	 
              for (String cell : row) {
             	 if(cou == 0) {
@@ -890,6 +891,11 @@ if(seis > 0) {
             	 if(cou == 4) {
                      contact = cell.trim();
                  }
+
+            	 if(cou == 10) {
+                     chain = cell.trim();
+                 }
+
             	 if(cou == 12) {
                      group2 = cell.trim();
                  }
@@ -907,18 +913,21 @@ if(seis > 0) {
              cust.setAddress( Converter.adressLink(Converter.enCodeEst(address), ""));
              cust.restStreet = address;
              cust.restPerson = contact;
+             
              cust.setPersonalData( Converter.enCodeEst(contact));
              String setg = "";
              if(group != null && group.trim().length() > 0 ) {
-            	 // System.out.println(id + " grupp " + group);
-                 cust.setGroup(group);
+            	 cust.setGroup(group);
                  setg = group+ "|";
              }
              if(group2 != null && group2.trim().length() > 0 ) {
-             	//  System.out.println(id + " grupp2 " + group2);
-            	 
-                  cust.setGroup(setg + group2);
+             	  cust.setGroup(setg + group2);
               }
+             
+             if(chain != null && chain.trim().length() > 0 ) {
+            	  cust.setChain(chain);
+             }
+            
              if(custAgents.get(cust.getID()) != null) {
             	 ArrayList<String> arr = (ArrayList)custAgents.get(cust.getID());
             	 for(String ag : arr) {
@@ -929,6 +938,7 @@ if(seis > 0) {
             	 cust.setDebt(Double.parseDouble(overdebts.get(id)+""));
              }
 
+           //  cust.setChain(chain);
              //  System.out.println("cust " + name + " " + cust.getDebt());
              
              

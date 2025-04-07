@@ -370,7 +370,7 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
 
             while (rs.next()) {
               Agent agent = new Agent(rs.getString("kood").trim());
-              String name = rs.getString("nimi").trim();
+              String name = rs.getString("nimi").trim() +" "+ agent.getID();
               String ob = rs.getString("objekt");
             //  if(ob != null && ob.trim().length()>0){
               	
@@ -389,7 +389,7 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
              // }
               agent.setName(name);
               agents1.put(agent.getID(), agent);
-              agents.put(name, agent);
+              agents.put(name , agent);
 
               if(sb2.length() > 2){
                 	try{
@@ -592,8 +592,8 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
         	
 
         	String cmm = "SELECT N17_KODAS_PS AS toode, N37_KOEFICI  AS tykke\r\n" + 
-        			"   		    FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join n37_pmat on  N37_KODAS_PS= N17_KODAS_PS \r\n" + 
-        			"		   where N37_KOEFICI > 1 and  N37_KOEFICI < 500 ";
+        			"        		  		    FROM n17_prod a  left join n37_pmat on  N37_KODAS_PS= N17_KODAS_PS \r\n" + 
+        			"							   and  N37_KOEFICI != 1000 and  N37_KOEFICI > 1  order by N17_KODAS_PS ";
         	  connectionUp(url2+odbc);
               
               Statement    stm = con.createStatement();
@@ -602,7 +602,14 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
                  while (rst.next()) {
                      String toode = rst.getString("toode").trim();
                      Double tykke = rst.getDouble("tykke");
-                     kastis.put(toode, tykke);
+                     if(tykke > 0) {
+
+                    	 if(tykke > 1000) {
+                    		 tykke = tykke / 1000;
+                    	 }
+                    	 
+                         kastis.put(toode, tykke); 
+                     }
                  }
                  
                  rst.close();

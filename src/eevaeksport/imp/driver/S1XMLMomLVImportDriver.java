@@ -371,9 +371,6 @@ try{
 	         		 String CustGUID   = null;
 	         		 String CustName   = null;		
 	         		 String CustCode   = null;
-	         		 String DAddressGUID   = null;
-	         		 String DAddressCode   = null;
-	         		 String DAddress   = null;
 	         		  
 	         		  try{
 		         		 CustGUID   = getNode(rida,"CustomerGUID").getFirstChild().getNodeValue();
@@ -390,19 +387,21 @@ try{
 		         		  e.printStackTrace();
 		         	  }
 	         	  
-	         		  Customer customer = new Customer(CustGUID);
-	      		         if(DAddressGUID != null ) {
-	      		        	 customer.setPayer(DAddressGUID);
-	      		         }
-	      		         customer.setName(Converter.enCodeEst(CustName));
-	      		         
       		  	Node addressNode = getNode(rida, "DeliveryAddressList");
       		  	if(addressNode != null){
 	      			for (int j = 0; j < addressNode.getChildNodes().getLength(); j++){
+
+		         		  Customer customer = new Customer(CustGUID);
+		      		         
+		      		         customer.setName(Converter.enCodeEst(CustName));
+		      		         
 	      				Node ridaAddress = addressNode.getChildNodes().item(j);
 	      				
 	      				if(ridaAddress.getNodeName().equals("DeliveryAddress")){
-	      				
+	      					 String DAddressGUID   = null;
+	    	         		 String DAddressCode   = null;
+	    	         		 String DAddress   = null;
+	    	         		
 	      				
 	      				try {
 	      					DAddressGUID   = getNode(ridaAddress,"AddressGUID").getFirstChild().getNodeValue();
@@ -425,7 +424,11 @@ try{
 	      		         customerstm.put(CustCode + "_" + DAddressCode, customer); 
 	      				}
 	      			}
+	      			
       		  	} else {
+
+	         		  Customer customer = new Customer(CustGUID);
+	      		         customer.setName(Converter.enCodeEst(CustName));
       		  	 customerstm.put(CustCode + "_0" , customer); 
       		  	}
 			       }
@@ -622,11 +625,13 @@ if(getNode(rida,"Code") != null && getNode(rida,"Code").getFirstChild() != null)
 					docheader.appendChild(comment);
 				}
 				
-				if(order.getShipMode().equals("-3")) {
+				//if(order.getShipMode().equals("-3")) {
 					// tellitud vedu endale.
-				}
+				//}
 				
 				Customer cust = ((Customer)customerstm.get( order.getCompany()));
+				System.out.println("asi " + order.getCompany() + " " + cust + " " + cust.getPayer());
+				
 				Node customer = doc.createElement("Customer");
 				Node custGUID = doc.createElement("CustomerGUID");
 				Text custGUIDVal = doc.createTextNode(cust.getID()+"");

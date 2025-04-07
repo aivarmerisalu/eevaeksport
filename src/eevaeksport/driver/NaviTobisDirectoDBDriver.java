@@ -3133,10 +3133,11 @@ System.out.println(cmd);
            
     	 String cmd = "  SELECT  t.[No_] AS toode,(t.[Description] + ' ' +   t.[Description 2] ) AS nimi, t.[Unit Price] AS myygihind,"
     	 		+ " '' AS grupp2,t.[Global Dimension 2 Code] AS grupp " +
-			" ,t.[Base Unit of Measure] AS unit,[No_ 2] AS ean,'' AS status ,0 AS maxdiscount, " +
+			" ,t.[Base Unit of Measure] AS unit,[No_ 2] AS ean,'' AS status , [Max discount]  AS maxdiscount, " +
 			 " '' AS type, [Units per Parcel] AS kastis, [Sell only in parcels]  as optam ,[Item Disc_ Group] as alegr ,  '' AS kaal, "
 			 + "[VAT Prod_ Posting Group] AS vat ,[Units per Pallet] as pallet " +
-			 " ,[Unit List Price] as listprice,[New until] as newprod ,[Nelikvidas]  as status2 , [Minimum Unit Price]  as jaeh FROM [2015_Tobis$Item] t  WHERE t.[Blocked]=0    ORDER BY t.[No_] ";
+			 " ,[Unit List Price] as listprice,[New until] as newprod ,[Nelikvidas]  as status2 , [Minimum Unit Price]  as jaeh, "
+			 + " [Home Page] as webpage FROM [2015_Tobis$Item] t  WHERE t.[Blocked]=0    ORDER BY t.[No_] ";
       
     	 System.out.println(cmd);
      	 con = getNewConnection2();
@@ -3171,18 +3172,19 @@ System.out.println(cmd);
 
                  	if(maxdisc != null && maxdisc.get(grupp) != null){
                     prod.setMaxDiscount(maxdisc.get(grupp));
+
+               	   prod.addPartii("|  Brand MaxD: " + getNF().format(maxdisc.get(grupp)) + "%");
                     }
         			 if(this.cateFullGroup.get(grupp) != null) {
                   	   String g1 = cateFullGroup.get(grupp);
-                  	 
-
-                    	if(maxdisc != null && maxdisc.get(g1) != null){
+                      	if(maxdisc != null && maxdisc.get(g1) != null){
                        prod.setMaxDiscount(maxdisc.get(g1));
+                       prod.addPartii("|  Catrgory MaxD: " + getNF().format(maxdisc.get(grupp)) + "%");
                        }
                   	   prod.setGroup(g1);
                   	   prod.setGroupSecond(g1+grupp);
                      }
-        			//prod.setGroup(Converter.cleanLitLatEst(grupp.trim()));	
+
         		}
         	prod.setType("TOBIS");
         		
@@ -3198,8 +3200,11 @@ System.out.println(cmd);
                     	prod.setStatusTop("1");
                     }
   
-              
-
+                    double maxdiscount = rs.getDouble("maxdiscount");
+                    if(maxdiscount > 0) {
+                    	prod.setMaxDiscount(maxdiscount);
+                    }
+                    
 
                 double	cases = rs.getDouble("kastis");
                 	if(cases > 0){
@@ -3264,11 +3269,17 @@ System.out.println(cmd);
                    }
                    
                    
+                   String wb = rs.getString("webpage");
+                   if(wb != null && wb.trim().length() > 0 ) {
+                	   prod.weblink = wb.trim();
+                   }
+                   
+                   
                    if(luba.contains(prod.getID()) && !name.equals("")){
                 	   prod.setName(name);
                        tm.put(name, prod);  
 
-           	    	prodHash.put(prod.getID(), prod);
+           	    	   prodHash.put(prod.getID(), prod);
                        String normcode = prod.getID().replace('/', '_');
                        if(!docCodes.contains(normcode)){
                     	     docCodes.add(normcode);

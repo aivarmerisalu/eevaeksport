@@ -1459,18 +1459,27 @@ try{
 	              ff2 = res2.list();
 	             
 	         	 for(int i = 0;ff2.length>i;i++){
-	             	if( ff2[i].startsWith(ean+".")){
-	               // System.out.println("pilt olemas " + ff2[i]);
-	            	File in = new File ( pictssou + ff2[i]); 
+	             	if( ff2[i].startsWith(toode + "_")){
+	             	File in = new File ( pictssou + ff2[i]); 
 	              	if(in.isFile()){
+	              		if(ff2[i].endsWith(".jpg")) {
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
 	              	if(!inpda.exists()){
 	                  	Converter.shrinkAndCopyFile(in,inpda,400);
             	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
 	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-	                    	}
-            	  	}   }
-	                 }
+	                    	}}}	
+	                 
+	              		if(ff2[i].endsWith(".png")) {
+	    	              	File inpda = new File ( pictspda + prod.getID()+ ".png");
+	    	              	if(!inpda.exists()){
+	    	                  	Converter.shrinkAndCopyFile(in,inpda,400);
+	                	    if(buf.toString().indexOf(prod.getID()+".png;"  + inpda.length()) == -1){
+	    	                    		buf.append(prod.getID()+".png;"  + inpda.length() + "\n");
+	    	                    	}}}
+	              	
+	              	
+	              	}}
 	               }
 	             }
 	       }

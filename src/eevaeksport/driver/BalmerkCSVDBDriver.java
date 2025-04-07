@@ -1,15 +1,23 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -20,6 +28,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -33,6 +42,22 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -56,6 +81,8 @@ import org.joda.time.DateTime;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 
+import com.sun.net.ssl.TrustManager;
+
 import ee.mobilejava.wrapper.DefectiveLineWrapper;
 import ee.mobilejava.wrapper.DefectiveWrapper;
 import eevaeksport.Agent;
@@ -69,6 +96,27 @@ import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.util.Converter;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.util.EntityUtils;
+
+import javax.net.ssl.SSLContext;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * <p>Title: </p>
@@ -89,8 +137,86 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 	     user =  getParent().getProps().getProperty("rest.user");
 	     pass = getParent().getProps().getProperty("rest.pass");
 	    rcompany = getParent().getProps().getProperty("rest.companyx");
+	   try {
+	    testConn();
+	   }catch (Exception e) {
+		   e.printStackTrace();
+	   }
 	     }
   
+  
+  
+  private void testConn() throws KeyStoreException {
+
+	          String urlString = "https://daivida2407-api.teliacallcenter.lt/v1/api/agents";
+	          String username = "adm1";
+	          String password = "bn2SdwJQ@";
+
+	          try {
+	              // Trust all SSL certificates (REMOVE for production)
+	             Converter.doTrustToCertificates();
+
+	              // Create URL object
+	              URL url = new URL(urlString);
+	              HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+	              // Set request method to GET
+	              connection.setRequestMethod("GET");
+	              connection.setRequestProperty("Content-Type", "application/json");
+	              connection.setRequestProperty("Accept", "application/json");
+	              connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+	              // Encode Basic Auth
+	              String auth = username + ":" + password;
+	              String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+	              System.out.println("Encoded Auth: " + encodedAuth); // Debugging
+
+	              connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
+
+	              // Get response code
+	              int responseCode = connection.getResponseCode();
+	              System.out.println("Response Code: " + responseCode);
+
+	              // Read response
+	              String response = readResponse(connection);
+	              System.out.println("Response: " + response);
+
+	              // Save response to file
+	              saveFile("response.json", response);
+
+	              // Close connection
+	              connection.disconnect();
+	          } catch (Exception e) {
+	              e.printStackTrace();
+	          }
+	      }
+
+
+
+	      // Read API response
+	      private static String readResponse(HttpURLConnection connection) throws IOException {
+	          try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+	              StringBuilder response = new StringBuilder();
+	              String line;
+	              while ((line = reader.readLine()) != null) {
+	                  response.append(line);
+	              }
+	              return response.toString();
+	          }
+	      }
+
+	      // Save response to a file
+	      private static void saveFile(String filename, String data) {
+	          try (FileWriter file = new FileWriter(filename)) {
+	              file.write(data);
+	              System.out.println("Saved response to " + filename);
+	          } catch (IOException e) {
+	              e.printStackTrace();
+	          }
+	      }
+	  
+
+
   
 	  String user =  null;
 	  String pass = null;
@@ -269,7 +395,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
           	StringTokenizer st = new StringTokenizer(line, "|");
 
             if (st.hasMoreTokens()) {
-          //	System.out.println( line );
+         //	System.out.println( line );
 
               String prodID = st.nextToken().trim();
                String client = st.nextToken().trim();
@@ -295,19 +421,11 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
              mline.setProdID(prodID);
            }
        
-           if (price != 0) {
+           if (price > 0) {
                mline.setPrice(price);
+               prlists.add(mline);
            }
-           
-           
-           
-      	
-           if(mline.getPrice() > 0 ){
-          	 prlists.add(mline); 
-          
-             }
             }
-            
           }
           
           reader.close();
@@ -329,16 +447,12 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
           	StringTokenizer st = new StringTokenizer(line, "|");
 
             if (st.hasMoreTokens()) {
-          //	System.out.println( line );
-
+      
               String clGroup = st.nextToken().trim();
               String prodID = st.nextToken().trim();
                double price = Double.parseDouble(st.nextToken().trim());
                String sdate =  st.nextToken().trim();
 	                 String edate = st.nextToken().trim();
-	                
-               
-	            
 	             
 	             MatrixLine mline = new MatrixLine();
 	                mline.setCliGroup(clGroup);
@@ -355,19 +469,11 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
                mline.setProdID(prodID);
            }
        
-           if (price != 0) {
+           if (price > 0) {
                mline.setPrice(price);
-           }
-           
-           
-           
-      	
-           if(mline.getPrice() > 0 ){
-          	 prlists.add(mline); 
-          
+            	 prlists.add(mline); 
              }
             }
-            
           }
           
           reader.close();
@@ -633,6 +739,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
             
                 tm.put(agent.getName(), agent);	
                 agents.put(agent.getID(), agent);
+                agent1.put(agent.getID(), agent);
           
         
       }
@@ -674,40 +781,21 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
     	  }
       
        
-       private boolean isDueDate(String yyyymmdd){
-    	  	
-    	  	Calendar cal = Calendar.getInstance();
-    	  	if( yyyymmdd.trim().length() == 0 ) {
-    	  		return false;
-    	  	 }
-    	  
-    	    cal.set(Calendar.YEAR, Integer.parseInt( yyyymmdd.substring(0, 4)));
-    	    cal.set(Calendar.MONTH, Integer.parseInt(yyyymmdd.substring(4, 6))-1);
-    	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(yyyymmdd.substring(6, 8)));
-    		Calendar ca = Calendar.getInstance();
-    		ca.add(Calendar.DAY_OF_YEAR, -1);
-    		
-    		if(cal.before(ca)){
-    			return true;
-    		}else{
-    			return false;
-    		}
-    		
-    	  }
 
 
+       private TreeMap agent1 = new TreeMap();
    public TreeMap getCustomers(Agent agent){
      TreeMap tm = new TreeMap();
      custAgents = new Hashtable();
      debtList = new Vector();
    
 
-    try{
- 	 //  Converter.getManagersReplacements(agents, rcompany, user, pass); 
- 		
- }catch(Exception e){
- 	
- }
+     try{
+  	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
+  		
+  }catch(Exception e){
+  	e.printStackTrace();
+  }
     String tsales =  parent.getProps().getProperty("telesales");
     HashSet tsal = new HashSet();
     if(tsales != null) {
@@ -718,6 +806,31 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
     }
   //  System.out.println("Telesales " + tsales + " " + tsal.toString() );
 
+    HashSet payers = new HashSet();
+
+    try {
+    FileReader fr = new FileReader(getDir() + "D365GetPayers.csv");
+	 BufferedReader reader = new BufferedReader(fr);
+	 reader.readLine();
+	 
+	 String line = null;
+	 
+    while((line = reader.readLine()) != null){
+    	 line = line.replaceAll(","," |");
+         StringTokenizer st = new StringTokenizer(line, "|");
+            	while (st.hasMoreTokens()){
+            		payers.add(st.nextToken());
+            	}
+      	
+    }
+    reader.close();
+    
+    }catch(Exception e) {
+     e.printStackTrace();	
+    }
+    
+    System.out.println("payers " + payers.size());   
+    
      try {
      FileReader fr = new FileReader(getDir() + "D365GetDebtList.csv");
 	 BufferedReader reader = new BufferedReader(fr);
@@ -730,20 +843,14 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
     	 line = line.replaceAll(","," |");
         StringTokenizer st = new StringTokenizer(line, "|");
            	while (st.hasMoreTokens()){
-     	//DocumentNo;DocDate;PayDate;OpenAmount;CustomerCode;PayerCode	
-           		String custid = st.nextToken().trim();
+     		String custid = st.nextToken().trim();
            		String number = st.nextToken().trim();
            		String duedate = st.nextToken().trim();
            		String volg = st.nextToken().trim();
            		String date = st.nextToken().trim();
            		String days = st.nextToken().trim();
-           		
-     			String payer = st.nextToken().trim();
-	        	
-     		
-	        
-		        //	System.out.println(custid  + " " + number + " " + date  + " " + duedate  + " " + volg );	
-		       
+           		String payer = st.nextToken().trim();
+	           
 	        try {
 	        		 double vv = Double.parseDouble(volg);
 	        		 if(vv != 0){
@@ -776,9 +883,6 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 				     				  }
 				     				 debtList.add(dd);
 
-							        		
-				        	// }
-	        			 
 
 	     				  if(usedCredit.get(payer) != null){
 	     					  double ss = Double.parseDouble(usedCredit.get(payer) + "")+ vv ;
@@ -831,11 +935,14 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
                }   
         	   name = name.replaceAll("\"", " ").trim();
            }
+    	   try {
     	   String name2 = st.nextToken().trim();
     	   String nameAlias = st.nextToken().trim();
            String id = st.nextToken().trim();
            String payer = st.nextToken().trim();
     	   String firma = st.nextToken().trim();
+    	   
+    	   if(firma.equals("DUNKER")) {
            String deptdue = st.nextToken().trim();
            String usedcredit = st.nextToken().trim();
            String custdisc = st.nextToken().trim();
@@ -848,6 +955,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 
            
            String address = st.nextToken().trim();
+        //   System.out.println(address);
            if(address.startsWith("\"")) {
         	   address = address + " " + st.nextToken().trim();
         	   if(!address.endsWith("\"")) {
@@ -864,11 +972,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
         	   address = address.replaceAll("\"", " ").trim();
              //  System.out.println("address " + address);
            }
-        //   Aardemaa OÜ,,Aardemaa OÜ,AARDE,,DUNKER,,,3,Kastani 1 90508 Haapsalu,,UUSSAAR,21,0,0,475 5075,,AARDEMAA,,,,8784.7,
-//name,nimelisa,namealias,accountnum,payer,ssordereraccount,debt,used,linedisc,address,visit,agent,
-           //term,block,payerblock,phone,info,grupp,confmail,abiagent,abipaev,credit,chain.
 
-           
            String visit = st.nextToken().trim();
            String agentcode = st.nextToken().trim();
            String payterm = st.nextToken().trim();
@@ -887,13 +991,13 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
            String chain = st.nextToken().trim();
            
 if(id.equals("AARDE")) {
-//	System.out.println("grupp " +  grupp);
+	System.out.println("grupp " +  grupp + " " + custdisc);
 }
           
   
            Customer customer = new Customer(id);
            if(grupp.length() > 0) {
-            customer.setGroup(grupp);
+            customer.setGroup(grupp.trim());
            }
            
            if(chain.length() > 0) {
@@ -912,7 +1016,23 @@ if(id.equals("AARDE")) {
 	       	}
            
            if(agentcode.length() > 0) {
+        	   
         	   customer.addAgent(new Agent(agentcode));
+        	   
+        	   Agent aa1 = (Agent)agent1.get(agentcode);
+            	if(aa1 != null) {
+            	
+        		Vector vec = aa1.getDubbler();
+        		if(vec!= null && vec.size() >0){
+        			Enumeration en = vec.elements();
+        			while(en.hasMoreElements()){
+        				String age = (String) en.nextElement();
+        				customer.addAgent(new Agent(age));
+        			}
+        		}
+            }
+        	   
+        	   
         	 //  System.out.println("ag " + agentcode);
         	   ArrayList arr = new ArrayList();
         	   if(custAgents.get(customer.getID()) != null) {
@@ -941,8 +1061,16 @@ if(id.equals("AARDE")) {
         	  
            }
            
-         //  Lisame telesalestele kõik kliendid
-     
+           if(customer.getID().equals("ERAISIK") || customer.getID().equals("PAKKUMINE") || 
+        		   customer.getID().equals("MUUD") ){
+           	Enumeration enume = getParent().getAgentsHash().elements();
+               while (enume.hasMoreElements()) {
+                 Agent a = (Agent) enume.nextElement();
+                 customer.addAgent(a);
+               }
+           }
+           
+           
            
            String cont = "";
            if(contactname.length() > 0) {
@@ -997,13 +1125,21 @@ if(id.equals("AARDE")) {
         
         if(block != null && block.trim().equals("B")) {
         	customer.setSalesBlockT(true);
-        	//System.out.println("Blocked " + customer.getName());
         }
-        
-	tm.put(Converter.cleanLitLatEst(name + " "+ id), customer);
-    
+          boolean goes = true;
+          
+          if(payers.contains(customer.getID())) {
+        	  goes = false;
+          }
+          if(goes) {
+	     tm.put(Converter.cleanLitLatEst(name + " "+ id), customer);
+          }
+        }
+       
+       }catch(Exception e) {
+    	 //  e.printStackTrace();
        }
-     }
+     }}
      
      reader.close();
      fr.close();
@@ -1042,7 +1178,7 @@ if(stocks == null) {
        StringTokenizer st = new StringTokenizer(line, "|");
 
        if (st.hasMoreTokens()){
-    	  // System.out.println(line);
+    	 //  System.out.println(line);
     	 //  itemid,nimetus,kastis,alusel,price,ean,grupp,unit,vat,alegr,tarne_kp
     	   // uus itemid,nimetus,alkohol,kastis,alusel,price,ean,grupp,unit,vat,alegr,tarne_kp
     	   String id = st.nextToken().trim();
@@ -1062,14 +1198,14 @@ if(stocks == null) {
                }   
         	   description = description.replaceAll("\"", " ").trim();
            }
-    	   //itemid,nimetus,kastis,alusel,price,ean,grupp,unit,vat,alegr,tarne_kp
+    	   
+       //    WIN10108,Guigal Crozes-Hermitage Rouge 75cl 12.5%,12.5,12,576,30.66,3536650801003,11,pudel,22%,All,
+         //  String alko = st.nextToken().trim();
+           
            String incase = st.nextToken().trim();
-           String alkohol = st.nextToken().trim();
            String onPallet = st.nextToken().trim();
-
     	   String unitprice = st.nextToken().trim();
     	   String ean = st.nextToken().trim();
-
     	   String groupcode = st.nextToken().trim();
            String unit = st.nextToken().trim();
     	   String vat = st.nextToken().trim();
@@ -1079,7 +1215,6 @@ if(stocks == null) {
     	   if(st.hasMoreTokens()) {
     		   tarne_KP = st.nextToken().trim();
     	   }
-    	 
 
     	   Product prod = new Product(id);
     	   if(onPallet.length() > 0) {
@@ -1109,35 +1244,32 @@ if(stocks == null) {
 			 if(unit.length() > 0) {
 				 prod.setUnit(unit);
 			 }
-			 
-			
 			
 			 if(groupcode.length() > 0) {
 				 prod.setGroup(groupcode);
 			 }
 			 
 			 if(description.length() > 0) {
-				 prod.setName(Converter.enCodeEst(description) + " "+ id);
-			 
-
-				 try {
-
+						 try {
 					 if(Double.parseDouble(unitprice) > 0) {
 						 prod.setPrice(Double.parseDouble(unitprice));
 					 } 
 				 }catch(Exception e) {
-					 
 				 }
 				 
-				 if(ean.length() > 0) {
+				 String add = "";
+				 if(ean.length() > 4) {
 					 prod.setEAN(ean);
+				        int ll  = ean.trim().length();
+				        add = " " +  ean.trim().substring(ll-3);
+				        System.out.println(add);
+				        
 				 }
 				 
-				 prod.setVat(vat);
+				 prod.setName(Converter.enCodeEst(description) + " "+ id + add );
+				 prod.restName = description;
+				 prod.setVat(vat.replace("%", " ").trim());
 				 
-				 
-				 //System.out.println(description + " " + prod.getEAN() + " " + prod.getGroup());
-
 				 tm.put(description + prod.getUnit() + prod.getID(), prod);
 			 
 			 }
@@ -1171,7 +1303,7 @@ if(stocks == null) {
 	   Vector custProds = new Vector();
   try {
 	  
-     FileReader fr = new FileReader(getDir() + "D365GetCustomerProductList.csv");
+     FileReader fr = new FileReader(getDir() + "D365GetCustomerProductsList.csv");
 		 BufferedReader reader = new BufferedReader(fr);
 		 String line = null;
       
@@ -1265,75 +1397,8 @@ public void setNF(NumberFormat nf) {
   }
 
   
-  
 public Vector getFixedAssortmentData() {	
-	//  Vector result = new Vector();
 	  return null;
-     /* try {
-       
-     	 FileReader fr = new FileReader(getDir() + "PriceMatrix.csv");
-          BufferedReader reader = new BufferedReader(fr);
-        String line = null;
-        reader.readLine();
-         while((line = reader.readLine()) != null ){
-
-              line = line.replaceAll(";"," | ");
-         	StringTokenizer st = new StringTokenizer(line, "|");
-
-           if (st.hasMoreTokens()) {
-         	//System.out.println( line );
-//00012;;00012;0019D;;;7.6;;
-              st.nextToken();
-              st.nextToken();
-              
-              String clGroup = st.nextToken().trim();
-              String prodID = st.nextToken().trim();
-              st.nextToken();
-              st.nextToken();
-              double price = Double.parseDouble(st.nextToken().trim());
-              String sdate =  st.nextToken().trim();
-                 String edate = st.nextToken().trim();
-                 String act = st.nextToken().trim();
-            
-          MatrixLine mline = new MatrixLine();
-          if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
-            mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
-          }
-          
-          if(act.equals("Akc")) {
-        	  
-         
-try {
-	if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
-    	 mline.setStartDate(sdate.substring(0,8));
-     }
-     if(edate != null && !edate.startsWith("1753") && sdate.trim().length() > 0 ){
-    	 mline.setEndDate(edate.substring(0,8));
-     }
-}catch(Exception e) {
-	
-}
-          }  
-          
-          
-          if (prodID != null && prodID.length() > 0) {
-            mline.setProdID(prodID);
-          }
-         
-
-              result.add(mline);    
-            
-          }
-         }
-         
-         reader.close();
-         fr.close();
-      }catch(Exception e){
-      e.printStackTrace();
-      }
-	
-    // System.out.println("fixed " + result.toString());
- return result;*/
 }
 
 
@@ -1365,7 +1430,7 @@ public void PictureMaker() {
 	 	 File res2 = new File (pictspda);
          String[] ff2 = res2.list();
      	 for(int i = 0;ff2.length>i;i++){
-         	(new File ( pictspda + ff2[i])).delete(); 
+         	//(new File ( pictspda + ff2[i])).delete(); 
          }
 //     	 Lõppes kustutamine 
 		 
@@ -1377,8 +1442,8 @@ public void PictureMaker() {
      while (enume.hasNext()) {
 	    	String asi = (String)enume.next();
 	    	Product prod = (Product)prods.get(asi);
-	    	String toode = prod.getEAN().trim();  
-	    	//System.out.println("pildid" + toode);
+	    	String toode = prod.getID().trim();  
+	    	System.out.println("pildid" + toode);
            if(toode.length() > 0){
             	
 	   	  res2 = new File (pictssou);
@@ -1386,7 +1451,7 @@ public void PictureMaker() {
          
      	 for(int i = 0;ff2.length>i;i++){
          	if( ff2[i].startsWith(toode)){
-           // System.out.println("pilt olemas " + ff2[i]);
+        //    System.out.println("pilt olemas " + ff2[i]);
         	File in = new File ( pictssou + ff2[i]); 
           	if(in.isFile()){
           	File inpda = new File ( pictspda + prod.getID()+ ".jpg");

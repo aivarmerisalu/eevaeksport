@@ -2,12 +2,17 @@
 
 package eevaeksport.driver;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.KeyStoreException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -26,6 +32,21 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.net.ssl.HttpsURLConnection;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 
 import eevaeksport.Agent;
@@ -54,8 +75,13 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
 	super(parent);
         this.subjectFilesTo = parent.getString("filemsg");
 	// String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
+        try {
+        testConn();
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }
 	String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
-
+    
 	try {
 	    Class.forName(databaseDriverName).newInstance();
 	  
@@ -67,6 +93,80 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
       rcompany = getParent().getProps().getProperty("rest.company");
       rcompanyx = getParent().getProps().getProperty("rest.companyx");
     }
+    
+	
+    private void testConn() throws KeyStoreException {
+
+        String urlString = "https://daivida2407-api.teliacallcenter.lt/v1/api/agents";
+        String username = "adm";
+        String password = "bn2SdwJQ@";
+
+        try {
+            // Trust all SSL certificates (REMOVE for production)
+           Converter.doTrustToCertificates();
+
+            // Create URL object
+            URL url = new URL(urlString);
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+            // Set request method to GET
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+            // Encode Basic Auth
+            String auth = username + ":" + password;
+            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+            System.out.println("Encoded Auth: " + encodedAuth); // Debugging
+
+            connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
+
+            // Get response code
+            int responseCode = connection.getResponseCode();
+            System.out.println("Response Code: " + responseCode);
+
+            // Read response
+            String response = readResponse(connection);
+            System.out.println("Response: " + response);
+
+            // Save response to file
+            saveFile("response.json", response);
+
+            // Close connection
+            connection.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    // Read API response
+    private static String readResponse(HttpURLConnection connection) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            return response.toString();
+        }
+    }
+
+    // Save response to a file
+    private static void saveFile(String filename, String data) {
+        try (FileWriter file = new FileWriter(filename)) {
+            file.write(data);
+            System.out.println("Saved response to " + filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    
 
     String user =  null;
     String pass = null;
@@ -1038,7 +1138,13 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
                 }
                
 
-                // cust.setGroup(cust.getID());
+                if(lepMap.get(id) != null){
+               	 if(cust.getGroup().trim().length() > 0 ){
+               		 cust.setGroup(cust.getGroup() + "|" +lepMap.get(id));
+               	 }else{
+               		 cust.setGroup("" +lepMap.get(id)); 
+               	 }
+                }
                 
                  if(locistics.get(cust.getID()) != null) {
                  	cust.addCity("" + locistics.get(cust.getID()) );

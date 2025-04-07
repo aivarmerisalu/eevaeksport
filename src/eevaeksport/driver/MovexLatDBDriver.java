@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -3575,6 +3576,27 @@ if(closed != null) {
 	   System.exit(0);
 	   
 	}
+
+
+private void addToTaskDB(String agent, String cucode, String title, String desc, boolean isResp, long comlpTime , String parentID) {
+	 String sql = "INSERT INTO cesu.agent_tasks (agent_code, customer_number, title, description, is_response, completed_at,created_at ,parent_task_id)  \r\n" + 
+	 		"VALUES ('"+ agent + "', '" + cucode +"', '" + title +"','" + desc +"'," + isResp + ", ?,sysdate, " + parentID + ");" + 
+	 		"";
+     try {
+       Connection con = getNewConnection();
+         PreparedStatement ps = con.prepareStatement(sql);
+         Timestamp ss = new Timestamp(comlpTime);
+         ps.setTimestamp(1, ss);
+       
+           ps.executeUpdate();
+           con.commit();
+         ps.close();
+         con.close();
+     } catch (SQLException e) {
+   	     e.printStackTrace();
+     }    
+
+}
 
 private String getHtml(ArrayList in, String header) {
 	  

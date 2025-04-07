@@ -112,6 +112,7 @@ public class BalmerkCSVImportDriver
 	    	 line = line.replaceAll(","," | ");
 	        StringTokenizer st = new StringTokenizer(line, "|");
 	       if (st.hasMoreTokens()){
+	    	// name,nimelisa,namealias,accountnum,payer,ssordereraccount,debt,used,linedisc,address,visit,agent,term,block,payerblock,phone,info,grupp,confmail,abiagent,abipaev,credit,chain
 
 	    	   String name = st.nextToken().trim();
 	    	   if(name.startsWith("\"")) {
@@ -119,22 +120,22 @@ public class BalmerkCSVImportDriver
 	        	   if(!name.endsWith("\"")) {
 	        		   name = name + " " + st.nextToken().trim();
 	            	}
-	        	   
 	        	   if(!name.endsWith("\"")) {
 	        		   name = name + " " + st.nextToken().trim();
 	               }   
-
 	        	   if(!name.endsWith("\"")) {
 	        		   name = name + " " + st.nextToken().trim();
 	               }   
 	        	   name = name.replaceAll("\"", " ").trim();
-	           //    System.out.println("nimi " + name);
 	           }
+	    	   try {
 	    	   String name2 = st.nextToken().trim();
 	    	   String nameAlias = st.nextToken().trim();
 	           String id = st.nextToken().trim();
 	           String payer = st.nextToken().trim();
 	    	   String firma = st.nextToken().trim();
+	    	   
+	    	   if(firma.equals("DUNKER")) {
 	           String deptdue = st.nextToken().trim();
 	           String usedcredit = st.nextToken().trim();
 	           String custdisc = st.nextToken().trim();
@@ -142,11 +143,12 @@ public class BalmerkCSVImportDriver
 	           if(custdisc.startsWith("\"")) {
 	        	   custdisc = custdisc + " " + st.nextToken().trim();
 	        	   custdisc = custdisc.replaceAll("\"", " ").trim();
-	             //  System.out.println("address " + address);
 	           }
+	           
 
 	           
 	           String address = st.nextToken().trim();
+	        //   System.out.println(address);
 	           if(address.startsWith("\"")) {
 	        	   address = address + " " + st.nextToken().trim();
 	        	   if(!address.endsWith("\"")) {
@@ -164,6 +166,8 @@ public class BalmerkCSVImportDriver
 	             //  System.out.println("address " + address);
 	           }
 	        //   Aardemaa OÜ,,Aardemaa OÜ,AARDE,,DUNKER,,,3,Kastani 1 90508 Haapsalu,,UUSSAAR,21,0,0,475 5075,,AARDEMAA,,,,8784.7,
+	//name,nimelisa,namealias,accountnum,payer,ssordereraccount,debt,used,linedisc,address,visit,agent,
+	           //term,block,payerblock,phone,info,grupp,confmail,abiagent,abipaev,credit,chain.
 
 	           
 	           String visit = st.nextToken().trim();
@@ -183,7 +187,10 @@ public class BalmerkCSVImportDriver
 	           String crlimit = st.nextToken().trim();
 	           String chain = st.nextToken().trim();
 	           
-	
+	if(id.equals("AARDE")) {
+//		System.out.println("grupp " +  grupp);
+	}
+	          
 	  
 	           Customer customer = new Customer(id);
 	           if(grupp.length() > 0) {
@@ -196,7 +203,7 @@ public class BalmerkCSVImportDriver
 	        	 customer.setAddress(Converter.enCodeEst(Converter.adressLink(address,"Eesti")));           
 	           
 	           
-	           customer.setName(name);
+	           customer.setName(Converter.enCodeEst(name) + " " + id );
 	           
 		       	double dept = 0;
 		       	try{
@@ -208,9 +215,7 @@ public class BalmerkCSVImportDriver
 	           if(agentcode.length() > 0) {
 	        	   customer.addAgent(new Agent(agentcode));
 	           }
-	        	 //  System.out.println("ag " + agentcode);
-	         //  Lisame telesalestele kõik kliendid
-	     
+	           
 	           
 	           String cont = "";
 	           if(contactname.length() > 0) {
@@ -226,20 +231,50 @@ public class BalmerkCSVImportDriver
 	         	}
 	           
 
+	         if(payer.length() > 0){
+	             customer.setPayer(payer);  
+	            
+	           
+	         }
+	         
+	             
+	    	double limit = 0;
+	    	try{
+	    		limit = Double.parseDouble(crlimit);
+	    		if(limit > 0) {
+	    			customer.setCredit(limit + "");	
+	      		  
+	    		}
+	    	
+	    	}catch(Exception e ){
+	    	}
+	    	
+	       
 	        
 	        if(payterm.length() > 0) {
 	        	customer.setPaymTerm(payterm);
 	        }
 	   
-	        
+	        if(custdisc.trim().length() > 0) {
+	        	try {
+	        	customer.setDiscount(Double.parseDouble(custdisc));
+	        	}catch(Exception e){
+	        		
+	        	}
+	        }
 	        
 	        if(block != null && block.trim().equals("B")) {
 	        	customer.setSalesBlockT(true);
 	        }
 	        
-		   tm.put(id, customer);
+		     tm.put(Converter.cleanLitLatEst( id), customer);
 	    
+	        }
+	       
+	       }catch(Exception e) {
+	    	 //  e.printStackTrace();
 	       }
+	     }
 	     }
 	     
 	     reader.close();

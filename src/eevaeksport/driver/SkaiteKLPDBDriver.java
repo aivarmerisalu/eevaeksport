@@ -1451,8 +1451,8 @@ private Vector baashk = null;
       
        
        
-      String sql = " select  CustomerCode AS klient,Payer as payer, billcode AS number,billissuedate+paymenttime AS kuupaev, " + 
-		" (case when OperacijosTipoId =64 then -1 else 1 end)*billamount-paidamount AS summa  , datediff(day,billissuedate+paymenttime ,getdate())as yle from  " +
+      String sql = " select  CustomerCode AS klient,Payer as payer, billcode AS number,billissuedate AS kuupaev, billissuedate+PaymentTime AS mkuupaev ," + 
+		" (case when OperacijosTipoId =64 then -1 else 1 end)*billamount-paidamount AS summa  , datediff(day, billissuedate+PaymentTime ,getdate()) as yle from  " +
 	 " (  SELECT     OrderAsID = CONVERT(varchar(20), op.OperacijosId), DeliveredOrderAsID = CONVERT(varchar(20), " + 
          "             (CASE WHEN op.OperacijosTipoId = 50 THEN op.OperacijosId ELSE NULL END)), OrderDate = op.Data, OrderDiscount = CONVERT(Real, 0),  " +
           "            BillCode = CONVERT(varchar(20), op.DokNr), BillIssueDate = op.Data, BillPaymentDate = CONVERT(DateTime, NULL), BillAmount = CONVERT(Money, op.Suma),  " +
@@ -1512,14 +1512,23 @@ private Vector baashk = null;
     	        if(dok != null){
     	        	 dok = dok.trim();
     	    	        if(dok.length() >5){
-    	    	        	dok = dok.substring(4);
+    	    	        	dok = dok.substring(5);
     	    	        }
     	    	        debt.setDoknr(dok);   	    	        
-    	    	        debt.setDuedate(rs.getDate("kuupaev"));
+    	    	        debt.setDate(rs.getDate("kuupaev"));
+    	    	        debt.setDuedate(rs.getDate("mkuupaev"));
     	    	        debt.setSum(rs.getDouble("summa")); 
     	    	        int duu = rs.getInt("yle");
     	    	        debt.setDue(duu+""); 	
-    	    	        if((duu - lisa) >= 0 && payer.length() > 0) {
+    	    	        
+    	    	        Calendar cal = Calendar.getInstance();
+    	    	        cal.setTime(debt.getDate());
+    	    	        int extra = 0;
+    	    	        if(cal.get(Calendar.MONTH) < 3 && cal.get(Calendar.YEAR) < 2026 ) {
+    	    	        	extra = 16;
+    	    	        }
+    	    	        
+    	    	        if((duu - (lisa + extra)) >= 0 && payer.length() > 0) {
     	    	        	if(payer.equals("ND")) {
     	    	        		payer = debt.getCustID();
     	    	        	}
