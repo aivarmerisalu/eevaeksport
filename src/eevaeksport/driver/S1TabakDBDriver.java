@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -520,8 +521,65 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
    }
 
 	public Vector getLastThreeData() {
-		// TODO Auto-generated method stub
-		return null;
+		Vector vec = new Vector();
+	
+		Calendar c = Calendar.getInstance();
+   		c.add(Calendar.MONTH, -3);
+   		Date start = new Date(c.getTimeInMillis());   
+        for (String[] row : readCSVData("deliveries.csv")) {
+       	   
+ 	   int cou = 0;
+      String custID = null;
+   	 String prodID = null;
+   	 String doc = null;
+   	 String lastdate = null;
+      double price = 0;
+      double amount = 0;
+     
+
+  	   for (String cell : row) {
+  		if(cou == 0) {
+           doc = cell.trim();
+        }
+  		if(cou == 1) {
+           prodID = cell.trim();
+        }
+  		if(cou == 2) {
+           custID = cell.trim().replace(':', '_');;
+        }
+  		if(cou == 3) {
+           amount = Double.parseDouble(cell.trim());
+        }
+  		if(cou == 5) {
+           lastdate = cell.trim();
+        }
+  		if(cou == 6) {
+           price = Double.parseDouble(cell.trim());
+        }
+
+  		cou++;
+  	   }
+  	 if(lastdate != null) {
+    		Date dd = this.getDate(lastdate);
+    
+
+    		if(dd.after(start)) {
+
+  	   	MatrixLine ml = new MatrixLine();
+			ml.setCustID(custID);
+			ml.setStartDate(lastdate.substring(5));
+			ml.setProdID(prodID);
+			ml.setPrice(amount);
+			ml.setLineinfo(Converter.cleanLitLatEst(doc));
+		   // System.out.println(ml.getStringForLastThree());
+			vec.add(ml);
+		}
+  	 }
+        }
+        
+        Collections.reverse(vec);
+        
+		return   vec;
 	}
    
    
@@ -1212,7 +1270,7 @@ System.out.println(yesGroups.size() + " yesGroups");
             prodID = cell.trim();
          }
    		if(cou == 2) {
-            custID = cell.trim().replace(':', '_');;
+            custID = cell.trim().replace(':', '_');
          }
    		if(cou == 3) {
             amount = Double.parseDouble(cell.trim());

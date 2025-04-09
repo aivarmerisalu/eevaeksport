@@ -641,7 +641,7 @@ private HashSet stats = null;
 	 //    sb.append("               <I07_KAINA_BE>" + escape(nf.format(line.getPrice())) + "</I07_KAINA_BE>" + ls);
        //  cou++;
   	
-         sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
+         sb.append("               <I07_NUOLAIDA>" + escape(getNF().format(ale)) + "</I07_NUOLAIDA>" + ls);
           cou++;
     } else if(tag) {
 	  sb.append("               <I07_KAINA_BE>30.00</I07_KAINA_BE>" + ls);
@@ -683,7 +683,7 @@ private HashSet stats = null;
     cou++;
     sb.append("               <I07_KAINA_SU>" + price + "</I07_KAINA_SU>" + ls);
     cou++;
-    sb.append("               <I07_KIEKIS>" + escape(nf.format(pand * kord)) + "</I07_KIEKIS>" + ls);
+    sb.append("               <I07_KIEKIS>" + escape(getNF().format(pand * kord)) + "</I07_KIEKIS>" + ls);
     cou++;
    
     sb.append("          </I07>" + ls);
@@ -1062,16 +1062,15 @@ private HashSet stats = null;
 
   
   private String url = "jdbc:odbc:";
-  private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
   private Connection con;
   private ImportPanel parent;
 
   public NumberFormat getNF() {
-		nf.setGroupingUsed(false);
-		
+	 NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
+	  nf.setGroupingUsed(false);
 		nf.setMaximumFractionDigits(2);
 		nf.setMinimumFractionDigits(2);
-		return this.nf;
+		return nf;
 	}
   
   

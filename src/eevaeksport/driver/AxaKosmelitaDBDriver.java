@@ -667,7 +667,9 @@ String email = " ";
                 	  String email = parent.make(rs1.getString("email"));
                 	  String phone = parent.make(rs1.getString("phone"));
               //	  String cell = parent.make(rs1.getString("cellularphone"));
+                	  if(klient.length() > 0) {
                     sb2.append(klient+";"+ nimi + ";" + synna.getTime() + "; ;" + phone  + ";" + email +  "\n");
+                	  }
                    }
                   rs1.close();  
                   stm.close();
@@ -1040,7 +1042,7 @@ try {
     TreeMap   tm = new TreeMap();
   //  String    sql = "   SELECT PRODUCTLINEID as liik,name as nimi FROM  inventproductline  where dataareaid ='kosm'  ";
  
-    String    sql = " 	Select e.PARENTCATEGORY as liik , e.code,   (Select name from ECORESCATEGORY a where a.RECID = e.PARENTCATEGORY) as nimi from ECORESPRODUCTCATEGORY g \r\n" + 
+    String    sql = " 	Select e.PARENTCATEGORY as liik , e.code,   (Select code from ECORESCATEGORY a where a.RECID = e.PARENTCATEGORY) as nimi from ECORESPRODUCTCATEGORY g \r\n" + 
     		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('" + prodHierID + "') group by e.recid , e.name, e.code ,PARENTCATEGORY ";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
@@ -1048,7 +1050,6 @@ try {
     HashSet names = new HashSet();
     while (rs.next()) {
       String liik = rs.getString("liik").trim();
-
       String code = rs.getString("code").trim();
       String nim = rs.getString("nimi").trim();
       if(nim.startsWith("Plauk")) {
@@ -1058,7 +1059,7 @@ try {
       if(nim.startsWith("Priemon")) {
     	  nim = "Pri " + nim.substring(10).trim();
       }
-        tm.put(liik,  Converter.enCodeEst( liik ));
+        tm.put(liik,  Converter.enCodeEst( nim ));
     }
     rs.close();
     st.close();

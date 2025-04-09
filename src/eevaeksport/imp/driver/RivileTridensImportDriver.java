@@ -748,16 +748,17 @@ if(ladu.trim().length()!=0){
   
   
   private void sendConfirmEmail(String comment, Order ord , String cuname , String delaadr, String ov21, boolean overDisc){
+	  String sub = "nosub ";
 	   	try{
 	   		
 	   			
-	   			System.out.println(comment);
+	   			//System.out.println(comment);
 	   			Email mail = new Email(null);
 	   			String ll = "";
 	   			if(overDisc) {
 	   				ll = "OVERDISCOUNTED ";
 	   			}
-		  		   String sub = ll + ov21 + "Order by : " + ord.getAgent() + " " + ord.getCompany() + " " + cuname + " " + delaadr;
+		  		    sub = ll + ov21 + "Order by : " + ord.getAgent() + " " + ord.getCompany() + " " + cuname + " " + delaadr;
 		  	
 		  		   if(ov21.length() > 1 || overDisc) {
 		  			   mail.setImportance(Email.IMPORTANCE_HIGH);
@@ -775,10 +776,14 @@ if(ladu.trim().length()!=0){
 		  	  		mail.send();
 		  	  
 		  	  		System.out.println("Request Sent");
+		  	  		
+		  	  	log.info("Email sent " + sub);
 		  	
 		  	
 		  			}catch(Exception e){
 		  			e.printStackTrace();	
+		  			log.info("Email sent " + sub);
+		  			log.info(e);
 		  			}
 		  	
 	   }

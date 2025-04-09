@@ -2259,7 +2259,7 @@ try{
            String om = rs.getString("onmaksja");
            if(om == null || om.trim().length() == 0){
         	      customer.setIsPayer(true);
-        	   //   customer.diffBack = true;
+        	      customer.diffBack = true;
         	     // System.out.println("Maksja " + customer.getID());
            }
           
