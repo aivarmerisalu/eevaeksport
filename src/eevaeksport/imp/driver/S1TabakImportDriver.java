@@ -620,8 +620,8 @@ try{
 	       }
 	        sb.append(pr + sep);
 	        sb.append(disc + sep);
-	        sb.append("0" + sep + ex + sep); //tyhi
-	       
+	        sb.append("0" + sep  + sep + sep+ sep+ sep+ sep+ sep+ ex + sep ); //tyhi
+	       //TR0017489;14.0;-1;gab.;0.495;0.00;0;;;;;;;100;
         
 	         arr.add(toode);
 	          sb.append(lineSep);

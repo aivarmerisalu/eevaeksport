@@ -1058,7 +1058,7 @@ try {
       if(nim.startsWith("Priemon")) {
     	  nim = "Pri " + nim.substring(10).trim();
       }
-        tm.put(liik,  Converter.enCodeEst( nim ));
+        tm.put(liik,  Converter.enCodeEst( liik ));
     }
     rs.close();
     st.close();
@@ -1245,7 +1245,7 @@ try {
          if(ean != null && ean.trim().length() > 6) {
         	 ean = ean.trim();
     	  prod.setEAN(ean);
-    	  nimetus = nimetus + " " + ean.substring(ean.length()-4);
+    	  nimetus = nimetus + " " + ean.substring(ean.length()-6);
         }
          String add = "";
          String gruppc = rs.getString("grupp2");

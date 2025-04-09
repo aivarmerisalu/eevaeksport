@@ -347,7 +347,7 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 	   TreeMap tm = new TreeMap();
 	   
 	   
-		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//itemCategories.json");
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
 	  	
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
@@ -356,13 +356,14 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 		  for (int i = 0; i < lenn; i++) {
 			  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-           String id = (String)cob.get("id");
-           String code = (String)cob.get("code");
-           String name = (String)cob.get("displayName");
-       
+          
+           String code = (String)cob.get("manufacturerCode");
+           if(tm.get(code) == null) {
+           String name = (String)cob.get("manufacturerName");
            if (name != null && name.trim().length() > 0) {
-        	   tm.put(code,name);
-           }
+        	    tm.put(code,name);
+        	   }
+              }
          	}
 		  
 		} catch (Exception e) {
@@ -751,14 +752,13 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	            
 	            String salesCode = (String)cob.get("salespersonCode");
 	            cust.addAgent(new Agent (salesCode));
-	           
+
+	            String salesCode2 = (String)cob.get("salespersonCode2");
+	            if(salesCode2 != null) {
+	              cust.addAgent(new Agent (salesCode2));
+	            }
 	            
-	            
-	            
-	            String balanceDue = cob.get("balanceDue")+ "";
-	            
-	            
-	            
+	           // String balanceDue = cob.get("balanceDue")+ "";
 	            
 	            String creditLimit = cob.get("creditLimit")+"";
 	            cust.setCredit(creditLimit);
@@ -1492,7 +1492,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
 		} catch (Exception e) {
            e.printStackTrace();
            }
-		System.out.println("Query result " + custProds.toString());
+		System.out.println("Query result " + custProds.size());
  
 	   return custProds;
    }
@@ -1625,22 +1625,33 @@ public TreeMap getProducts(Agent agent) {
 			Product prod = new Product(number);
 		
 
-          	String itemCatCode = (String)cob.get("itemCategoryCode");
+          	String itemCatCode = (String)cob.get("manufacturerCode");
         	if (itemCatCode != null && itemCatCode.length() > 0) {
         		prod.setGroup(itemCatCode);
         	}
         	
           	Boolean blocked = (Boolean) cob.get("blocked");
           	
-          	
+          	String add = "";
           	String gtin = (String)cob.get("barcode");
           	if (gtin != null && gtin.length() > 5) {
              	prod.setEAN(gtin);
+             	add = " " + gtin.substring(gtin.length() -5);
+          	}
+          	
+
+          	String kastis = cob.get("packageQty")+"";
+          	if(kastis != null) {
+          		try {
+          		prod.setInCases(Double.parseDouble(kastis));
+          		}catch(Exception e) {
+          			
+          		}
           	}
           	
           	String name = (String)cob.get("displayName");
           	String name2 = (String)cob.get("displayName2");
-          	prod.setName((name + " " + name2).trim());
+          	prod.setName(name2.trim() + " " + number + add);
           	
         
         	String unit = (String)cob.get("baseUnitOfMeasureCode");
@@ -1653,21 +1664,15 @@ public TreeMap getProducts(Agent agent) {
           		prod.setPrice(Double.parseDouble(price));
           	}
           	
-          	Long inventory = (Long)cob.get("inventory");
+          	String inventory = cob.get("inventory") +"";
           	if (inventory != null) {
-          		prod.setStock(inventory);
+          		prod.setStock(Double.parseDouble(inventory));
           	}
           	  	
-            
-           
-            
-            
-            
+             
             if(!blocked) {
             	  tm.put(prod.getName(), prod);	
             }
-
-          	
           
           	}
 		  

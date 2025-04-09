@@ -785,7 +785,7 @@ String picts = parent.getProps().getProperty("pict.dir");
               String discStr = rs.getString("ale");
               if (discStr != null || discStr.trim().length() >0 ){
             	  try{
-            		     cust.setDiscount(Double.parseDouble(discStr.trim()));
+            		    // cust.setDiscount(Double.parseDouble(discStr.trim()));
             	            		  
             	  }catch(Exception e){
             		  

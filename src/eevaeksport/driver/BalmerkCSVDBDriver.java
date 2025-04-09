@@ -138,7 +138,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 	     pass = getParent().getProps().getProperty("rest.pass");
 	    rcompany = getParent().getProps().getProperty("rest.companyx");
 	   try {
-	    testConn();
+	  //  testConn();
 	   }catch (Exception e) {
 		   e.printStackTrace();
 	   }
@@ -148,7 +148,8 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
   
   private void testConn() throws KeyStoreException {
 
-	          String urlString = "https://daivida2407-api.teliacallcenter.lt/v1/api/agents";
+	  String callname = "calls";
+	          String urlString = "https://daivida2407-api.teliacallcenter.lt/v1/api/monitoring/"+ callname;
 	          String username = "adm1";
 	          String password = "bn2SdwJQ@";
 
@@ -182,7 +183,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 	              System.out.println("Response: " + response);
 
 	              // Save response to file
-	              saveFile("response.json", response);
+	              saveFile(callname + ".json", response);
 
 	              // Close connection
 	              connection.disconnect();
@@ -1155,6 +1156,9 @@ private Hashtable prodNames = null;
 
    public TreeMap getProducts(Agent agent){
      TreeMap tm = new TreeMap();
+     if(eanprods == null) {
+    	 eanprods = new TreeMap();
+     }
      
 if(stocks == null) {
 	getSaveStockInfo();
@@ -1263,8 +1267,8 @@ if(stocks == null) {
 				        int ll  = ean.trim().length();
 				        add = " " +  ean.trim().substring(ll-3);
 				        System.out.println(add);
-				        
-				 }
+				        eanprods.put(ean.trim(), prod.getID());
+				   }
 				 
 				 prod.setName(Converter.enCodeEst(description) + " "+ id + add );
 				 prod.restName = description;
@@ -1454,13 +1458,15 @@ public void PictureMaker() {
         //    System.out.println("pilt olemas " + ff2[i]);
         	File in = new File ( pictssou + ff2[i]); 
           	if(in.isFile()){
-          	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
+          	
+          		File inpda = new File ( pictspda + prod.getID()+ ".jpg");
           	if(!inpda.exists()){
               	Converter.shrinkAndCopyFile(in,inpda,400);
-      	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-                		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-                	}
-      	  	}   }
+          	}
+          	
+      		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+            
+          	}
              }
            }
          }

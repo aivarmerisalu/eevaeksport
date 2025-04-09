@@ -1094,9 +1094,9 @@ System.out.println(yesGroups.size() + " yesGroups");
             
 
               String e4 = "";
-             if(ean != null && ean.trim().length() > 4) {
+             if(ean != null && ean.trim().length() > 6) {
                prod.setEAN(ean);
-               e4 = " " +ean.substring(ean.length()-4);
+               e4 = " " +ean.substring(ean.length()-6);
              }
              
              if(inCase > 0) {

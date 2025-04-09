@@ -638,8 +638,8 @@ private HashSet stats = null;
           }
     
   if (ale != 0 ){
-	     sb.append("               <I07_KAINA_BE>" + escape(nf.format(line.getPrice())) + "</I07_KAINA_BE>" + ls);
-         cou++;
+	 //    sb.append("               <I07_KAINA_BE>" + escape(nf.format(line.getPrice())) + "</I07_KAINA_BE>" + ls);
+       //  cou++;
   	
          sb.append("               <I07_NUOLAIDA>" + escape(nf.format(ale)) + "</I07_NUOLAIDA>" + ls);
           cou++;

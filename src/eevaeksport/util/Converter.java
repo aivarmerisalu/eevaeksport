@@ -1207,7 +1207,7 @@ public class Converter {
 								// System.out.println(row.getCell((short)a).getStringCellValue());
 								String gg = row.getCell((short) a).getStringCellValue().trim();
 								
-								if(gg.equals("SAP") || gg.equals("Material")){
+								if(gg.equals("SAP") || gg.equals("Material") || gg.equals("Kauba koodde")){
 							      groups.put(a + "", gg);
 							    }
 							
@@ -1231,16 +1231,22 @@ public class Converter {
 							 
 							 
 							
-							 System.out.println("uu " + (1+start) + " - " + i);
+							// System.out.println("uu " + (1+start) + " - " + i);
 							 try {
 								String ean = getNumeric(formatter.formatCellValue(row.getCell(1+start)));
-								//System.out.println("uu " + ean);
+								
 								 if(ean != "") {
 										
 								String tnimi = formatter.formatCellValue(row.getCell(2+start));
 								String toode = getToode(prods,ean);
-								String level = loe +  "|" + formatter.formatCellValue(row.getCell(3+start));
+								String level = formatter.formatCellValue(row.getCell(3+start));
 								
+								if(level.startsWith("PP")) {
+									level = level.substring(2);
+								}
+								
+								level = loe +  "|" + level;
+								System.out.println("uu " + ean + " " + level + " " + toode);
 								nimed.put(toode, tnimi);
 							  if(toode.equals(ean)  ) { //  && false
 								  
@@ -1277,7 +1283,7 @@ public class Converter {
 					 }
 					
 					//nyyd loeme kliendi info sisse koos leveliga ja kohe sortimendi ka otsa 
-					//System.out.println("suurus " + prodSortLevels.keySet().toString());
+					System.out.println("suurus " + prodSortLevels.keySet().toString());
 					
 					Iterator itera = groups.keySet().iterator();
 					
@@ -1299,6 +1305,9 @@ public class Converter {
 						 
 							String pood = formatter.formatCellValue(row.getCell(start));
 							String level = formatter.formatCellValue(row.getCell(2+start));
+							if(level.startsWith("PP")) {
+								level = level.substring(2);
+							}
 							// if(start == 32) 
 								// System.out.println("start " + start + " " + gr + " " + pood);
 						
@@ -3961,7 +3970,8 @@ public class Converter {
 											return "coop";
 										}
 										
-										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 || formatter.formatCellValue(cellx).indexOf("Material") != -1 ) {
+										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 || formatter.formatCellValue(cellx).indexOf("Material") != -1
+												 || formatter.formatCellValue(cellx).indexOf("Kauba koodde") != -1 ) {
 											return "maxima";
 										}	
 											

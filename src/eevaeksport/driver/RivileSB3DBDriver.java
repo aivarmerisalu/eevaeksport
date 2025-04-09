@@ -916,7 +916,8 @@ HashSet olemas = new HashSet();
               if(ag2 != null && ag2.trim().length() > 0) {
             	  cust.addAgent(new Agent(ag2.trim())); 
               }
-                          
+                     
+              
               
               if ( ag != null && agents1.get( ag.trim()) != null){
             	
@@ -945,8 +946,29 @@ HashSet olemas = new HashSet();
                        }
                   }
             }
+             
+              if(cust.getID().contains("NAUJAS")) {
+            	  Enumeration enume = getParent().getAgentsHash().elements();
+                  while (enume.hasMoreElements()) {
+                    Agent a = (Agent) enume.nextElement();
+                    cust.addAgent(a);
+                  }  
+              }
               
+              if (cust.getID().equals("302310253-12")) {
+            	  cust.addAgent(new Agent("26"));
+              }
         
+
+              if (cust.getID().equals("302310253-12")) {
+            	  cust.addAgent(new Agent("26"));
+              }
+              
+
+              if (cust.getID().equals("302310253-10")) {
+            	  cust.addAgent(new Agent("34"));
+            	  cust.addAgent(new Agent("33"));
+              }
              
            //   cust.setMainAgent(ag);
               try{
@@ -1073,10 +1095,9 @@ HashSet olemas = new HashSet();
    		"   		  		N37_BAR_KODAS AS ean, \r\n" + 
    		"   		    0 AS kogus,n17_kodas_gs AS grupp2, N17_KODAS_VS_T AS grupp,  N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status ,  N35_PAV_K3 as maks,\r\n" + 
    		"   		    case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus , ltrim(N17_KODAS_LS_8) as sellout \r\n" + 
-   		"   		  , N17_KODAS_LS_8 as maxdisc ,a.* FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
+   		"   		  , N17_KODAS_LS_8 as maxdisc  FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
    		"   		  LEFT JOIN  n37_pmat g ON n37_kodas_ps=n17_kodas_ps  and N37_KODAS_US != 'L' \r\n" + 
-   		"   	 left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1  " + 
-   		"   ";
+   		"   	 left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1 ";
   
   
             System.out.println(cmd);
@@ -1086,7 +1107,7 @@ HashSet olemas = new HashSet();
       
         	
         String sql = "select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from I33_PKAI "
-    		+ " where I33_KODAS_iS in ('2','3','5')  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
+    		+ " where I33_KODAS_iS in ('1','2','3','5')  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
             System.out.println("hind");
           if (isDebug()) System.out.println(sql);
           connectionUp(url);
