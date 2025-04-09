@@ -299,7 +299,7 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	   	  
 	   	String locID = prod.getGroupSecond();
 	   	  if (locID != null) {
-	   	  lin.put("locationId", locID );
+	   //	  lin.put("locationId", locID );
 	     }
 	   	  
 	 	String name = prod.getName();
@@ -315,7 +315,7 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	 	  
 	 	Double price = prod.getPrice();
 	 	  if (price != null) {
-	 	  lin.put("unitPrice", price );
+	 	 // lin.put("unitPrice", price );
 	   }
 	 	  
 	 	String unitMeasureId = prod.getDefectiveList();

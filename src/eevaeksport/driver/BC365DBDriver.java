@@ -1659,7 +1659,7 @@ public TreeMap getProducts(Agent agent) {
         		prod.setUnit(unit);
         	}
         	
-          	String price = cob.get("unitPrice")+ "";
+          	String price = cob.get("currentSalesPrice")+ "";
           	if (price != null) {
           		prod.setPrice(Double.parseDouble(price));
           	}

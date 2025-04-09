@@ -15277,6 +15277,7 @@ shipdate = getCalXML(asi);
             				           || driver.getDriverVersion().equals("KulcsSoftImport")
             				           || driver.getDriverVersion().equals("Rinku")
             				           || driver.getDriverVersion().equals("SkaiteRoskiskoImport")
+            				           || driver.getDriverVersion().equals("BC365")
             				           
             				           
             						  )){
