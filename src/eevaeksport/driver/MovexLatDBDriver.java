@@ -3434,17 +3434,29 @@ private void sendTaskReport() {
 			 Long created = (Long)task.get("created");
 			 Long taskID = (Long)task.get("id");
 			 Long closed = (Long) task.get("completed");
+			 String manager = "API";
+			 try {
+				 org.json.simple.JSONArray manas = (org.json.simple.JSONArray)task.get("managers");
+				 if(!manas.isEmpty()) {
+					 for(int u = 0; u < manas.size() ; u++) {
+						 org.json.simple.JSONObject lo = (org.json.simple.JSONObject)manas.get(u);
+						 manager = lo.get("code") + "";
+					 }
+				 }
+			 }catch(Exception e) {
+				 e.printStackTrace();
+			 }
 			 
 			 try {
 			 String  custID = ((org.json.simple.JSONObject)task.get("customer")).get("code") + "";
 			 String  custName = ((org.json.simple.JSONObject)task.get("customer")).get("name") + "";
 			 if(custName.contains(custID)) {
 				 custName = custName.substring(0,custName.indexOf(custID)).trim();
-				 
 				 if(message.contains(custName)) {
 					 message = message.substring(0,message.indexOf(custName));
 				 }
 			 }
+			 
 			 String  cloMan = null;
 			 String  vastus = null;
 			 String repMana = null;
@@ -3472,6 +3484,27 @@ private void sendTaskReport() {
 					  repManaCode = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("code");
 				 }
 			 }
+			 
+			 String filename = null;
+			 try {
+				 org.json.simple.JSONArray files2 = (org.json.simple.JSONArray)task.get("files");
+				 if(!files2.isEmpty()) {
+					 for(int u = 0; u < files2.size() ; u++) {
+						 org.json.simple.JSONObject lo = (org.json.simple.JSONObject)files2.get(u);
+						 filename = lo.get("url") + "";
+					 }
+				 }
+			 }catch(Exception e) {
+				 e.printStackTrace();
+			 }
+			 
+			 // siin lisame kõik uued taskid andmebaasi
+			 if(!linesDone.contains(taskID + "ise")) {
+				 addToTaskDB(manager, custID, filename,header,message,false,0 ,null,taskID+"");
+				 //S agent, Scucode,St filename, S title,  desc, bo isResp, lo comlpTime ,St compagent, St parentID
+				 linesDone.add(taskID + "ise");
+			 }
+			System.exit(0);
 			 
 if(closed != null) {
 
@@ -3578,9 +3611,9 @@ if(closed != null) {
 	}
 
 
-private void addToTaskDB(String agent, String cucode, String title, String desc, boolean isResp, long comlpTime , String parentID) {
-	 String sql = "INSERT INTO cesu.agent_tasks (agent_code, customer_number, title, description, is_response, completed_at,created_at ,parent_task_id)  \r\n" + 
-	 		"VALUES ('"+ agent + "', '" + cucode +"', '" + title +"','" + desc +"'," + isResp + ", ?,sysdate, " + parentID + ");" + 
+private void addToTaskDB(String agent, String cucode,String filename, String title, String desc, boolean isResp, long comlpTime ,String compagent, String parentID) {
+	 String sql = "INSERT INTO cesu.agent_tasks (AGENT_CODE, CUSTOMER_NUMBER,FILE_PATH, TITLE, DESCRIPTION, IS_RESPONSE, COMPLETED_AT,COMPLETED_AGENT,CREATED_AT ,PARENT_TASK_ID)  \r\n" + 
+	 		"VALUES ('"+ agent + "', '" + cucode +"', '" + filename +"','" + title +"','" + desc +"'," + isResp + ",?," + compagent + ",sysdate, " + parentID + ");" + 
 	 		"";
      try {
        Connection con = getNewConnection();

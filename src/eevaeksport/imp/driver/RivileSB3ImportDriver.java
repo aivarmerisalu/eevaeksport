@@ -551,8 +551,23 @@ private HashSet stats = null;
       
       sb.append("          <I06_DOK_DATA>" +  getDateString(order.getShipCal()) + "</I06_DOK_DATA>" + ls);
       cou++;
-  
-      sb.append("          <I06_KODAS_KS>" + escape(cust.substring(0,cust.lastIndexOf("-"))) + "</I06_KODAS_KS>" + ls);
+   String cuid = cust.substring(0,cust.lastIndexOf("-"));
+   if(cuid.length() > 8) {
+	   String s = cuid.substring(cuid.length()-1);
+	   if(!Converter.isNumeric(s)) {
+		   cuid = cuid.substring(0,cuid.length()-1);
+	   }
+	   s = cuid.substring(cuid.length()-1);
+	   if(!Converter.isNumeric(s)) {
+		   cuid = cuid.substring(0,cuid.length()-1);
+	   }
+	   s = cuid.substring(cuid.length()-1);
+	   if(!Converter.isNumeric(s)) {
+		   cuid = cuid.substring(0,cuid.length()-1);
+	   }
+   }
+      
+      sb.append("          <I06_KODAS_KS>" + escape(cuid) + "</I06_KODAS_KS>" + ls);
       cou++;
       
       sb.append("          <I06_KODAS_AK>" + escape(cust.substring(cust.lastIndexOf("-")+1)) + "</I06_KODAS_AK>" + ls);
@@ -633,7 +648,12 @@ private HashSet stats = null;
           }
 
           if (!tag) {
-          sb.append("               <I07_KODAS_US>" + line.getUnit() + "</I07_KODAS_US>" + ls);
+        	  String unit = line.getUnit() ;
+        	  if(toode.equals("102010")) {
+        		  unit = "PET20.0";
+        	  }
+        	  
+          sb.append("               <I07_KODAS_US>" + unit + "</I07_KODAS_US>" + ls);
           cou++;
           }
     

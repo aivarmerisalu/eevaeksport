@@ -1183,7 +1183,12 @@ HashSet olemas = new HashSet();
             		  prod.setUnit("ST30");
             	  }
             	  if(nimorig.contains("20L")) {
-            		  prod.setUnit("ST20");
+            		  if(nimorig.toLowerCase().contains("poly")) {
+            			  prod.setUnit("PET20.0"); 
+            		  }else {
+            			  prod.setUnit("ST20"); 
+            		  }
+            		  
             	  }
               }
            
