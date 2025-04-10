@@ -1084,7 +1084,7 @@ String ag = rs.getString("agent").trim();
 
     // private String url = "jdbc:DBF:///c://work/avallone/dbf";
     public static final String DRIVER_VERSION = "RivileLedna";
-    private String         url = "jdbc:odbc:rivile";
+    private String         url = "jdbc:odbc:rivileL";
  
     private String	       subjectFilesTo = null;
 	@Override

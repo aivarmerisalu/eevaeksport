@@ -65,7 +65,7 @@ public class RivileLednaImportDriver
 	
     System.out.println(sql1);
     String acc = null;
-    Connection con = DriverManager.getConnection(url + "rivile","sa","142536");
+    Connection con = DriverManager.getConnection(url + "rivileL","sa","142536");
 
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
@@ -89,7 +89,7 @@ public class RivileLednaImportDriver
 	  	
 	    System.out.println(sql1);
 	    String acc = null;
-	   Connection con = DriverManager.getConnection(url + "rivile","sa","142536");
+	   Connection con = DriverManager.getConnection(url + "rivileL","sa","142536");
 
 	    Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql1);
@@ -110,7 +110,7 @@ public class RivileLednaImportDriver
   	 		"  rtrim(N08_KODAS_KS) + '-' + N33_kodas_ak = '" + id.trim() +"'"; 
    
     String acc = null;
-   Connection con = DriverManager.getConnection(url + "rivile","sa","142536");
+   Connection con = DriverManager.getConnection(url + "rivileL","sa","142536");
 
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
@@ -131,7 +131,7 @@ public class RivileLednaImportDriver
  	
    System.out.println(sql1);
    String acc = null;
-  Connection con = DriverManager.getConnection(url + "rivile","sa","142536");
+  Connection con = DriverManager.getConnection(url + "rivileL","sa","142536");
 
    Statement st1 = con.createStatement();
    ResultSet rs1 = st1.executeQuery(sql1);
@@ -154,7 +154,7 @@ public class RivileLednaImportDriver
 	 	
 	   System.out.println(sql1);
 	   String acc = null;
-	 Connection  con = DriverManager.getConnection(url + "rivile","sa","142536");
+	 Connection  con = DriverManager.getConnection(url + "rivileL","sa","142536");
 	   Statement st1 = con.createStatement();
 	   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -185,7 +185,7 @@ public class RivileLednaImportDriver
    	"  WHERE  N17_KODAS_PS = '" + prodID.trim() + "'";
 
     String prod = null;
-   Connection con = DriverManager.getConnection(url + "rivile","sa","142536");
+   Connection con = DriverManager.getConnection(url + "rivileL","sa","142536");
 
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
