@@ -173,6 +173,30 @@ private HashMap pants = null;
     return acc;
 
   }
+  public boolean isKeg1Euro(String id) throws SQLException {
+	  	 String	sql1 = "SELECT N08_aprasymas1 as asi FROM n08_klij k  WHERE rtrim(N08_KODAS_KS) = '" + id +"'"; 
+	  	
+	    System.out.println(sql1);
+	    boolean acc = false;
+
+	    Statement st1 = con.createStatement();
+	    ResultSet rs1 = st1.executeQuery(sql1);
+
+	    while (rs1.next()) {
+	    	String ss = rs1.getString("asi");
+	    	if(ss != null && ss.trim().length() >0 ) {
+	    		if(ss.toLowerCase().trim().equals("sta1eur")) {
+	    			 acc = true;
+	    		}
+	    	}
+	     
+	    }
+	    rs1.close();
+	    st1.close();
+
+	    return acc;
+
+	  }
 
   public String identifyCustomerName(String id) throws SQLException {
 	  	 String	sql1 = "SELECT N08_PAV AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
@@ -489,7 +513,7 @@ private HashSet stats = null;
  private void makeOutput(Order order,boolean tag){
  	StringBuffer sb = new StringBuffer();
 	
-    
+  
  	
  	String ls = System.getProperty("line.separator");
  	try {
@@ -573,7 +597,8 @@ private HashSet stats = null;
       sb.append("          <I06_KODAS_AK>" + escape(cust.substring(cust.lastIndexOf("-")+1)) + "</I06_KODAS_AK>" + ls);
       cou++;
       
-      
+      boolean sta1Eur = isKeg1Euro(cuid);
+      System.out.println("sta1Eur " + sta1Eur);
       
       String addr =  null;
 		try {
@@ -697,6 +722,9 @@ private HashSet stats = null;
     String price = "0.10";
     if(stats.contains(toode)) {
     	price = "30.00";
+    	if(sta1Eur) {
+    		price = "1.00";	
+    	}
     }
     
     sb.append("               <I07_KAINA_BE>" + price + "</I07_KAINA_BE>" + ls);

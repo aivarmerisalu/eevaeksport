@@ -1229,7 +1229,10 @@ if(stocks == null) {
     		   }
     	   }
     	   //System.out.println(description);
-            if(stocks.get(id) != null) {
+
+       	     prod.setStock(0);
+             
+       	    if(stocks.get(id) != null) {
            	 if(Double.parseDouble(stocks.get(id)+"") > 1) {
 				 prod.setStock(Double.parseDouble(stocks.get(id)+""));
 			 }

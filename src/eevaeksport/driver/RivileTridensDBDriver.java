@@ -709,15 +709,14 @@ HashSet olemas = new HashSet();
     	
      	 TreeMap webmerc1 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"ANDREJ");
     	 TreeMap webmerc2 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"DANELIUS");
-    	 TreeMap webmerc3 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"LUKAS");
+    	 TreeMap webmerc3 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"LUKAS_MATAS");
     	 TreeMap webmerc4 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"MANTAS");
     	 TreeMap webmerc5 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"PAULIUS");
     	 TreeMap webmerc6 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"ROBERTAS");
-    	 TreeMap webmerc7 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"SIMAS");
+    	 TreeMap webmerc7 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"TOMAS");
     	 TreeMap webmerc8 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"TADAS_KLP");
-    	 TreeMap webmerc9 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"URNIEZIUS");
-    	 TreeMap webmerc10 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"SARUNAS");
-    	 TreeMap webmerc11 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"ANDRIUS");
+    	 TreeMap webmerc9 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"SARUNAS");
+    	 TreeMap webmerc10 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"ANDRIUS");
     	 try{
       	   Converter.getManagersReplacements(agents1, rcompanyx, user , pass, false);
          } catch(Exception e){
@@ -920,7 +919,7 @@ HashSet olemas = new HashSet();
                        }
                   }
             }
-              
+     
               
               if(webmerc1.get(cust.getID()) != null) {
             	  cust.addAgent(new Agent("ANDREJ")); 
@@ -929,7 +928,7 @@ HashSet olemas = new HashSet();
         	  cust.addAgent(new Agent("DANELIJUS")); 
            }
           if(webmerc3.get(cust.getID()) != null) {
-        	  cust.addAgent(new Agent("LUKAS")); 
+        	  cust.addAgent(new Agent("LUKAS_MATAS")); 
            }
           if(webmerc4.get(cust.getID()) != null) {
         	  cust.addAgent(new Agent("MANTAS")); 
@@ -943,22 +942,20 @@ HashSet olemas = new HashSet();
         	  cust.addAgent(new Agent("ROBERTAS")); 
            }
           if(webmerc7.get(cust.getID()) != null) {
-        	  cust.addAgent(new Agent("SIMAS")); 
+        	  cust.addAgent(new Agent("TOMAS")); 
            }
             
           if(webmerc8.get(cust.getID()) != null) {
         	  cust.addAgent(new Agent("TADAS_KLP")); 
            }
           if(webmerc9.get(cust.getID()) != null) {
-        	  cust.addAgent(new Agent("URNIEZIUS")); 
+        	  cust.addAgent(new Agent("SARUNAS")); 
            } 
           if(webmerc10.get(cust.getID()) != null) {
-         	  cust.addAgent(new Agent("SARUNAS")); 
-            }
-          
-          if(webmerc11.get(cust.getID()) != null) {
          	  cust.addAgent(new Agent("ANDRIUS")); 
             }
+          
+          
              
            //   cust.setMainAgent(ag);
               try{

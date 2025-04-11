@@ -3500,7 +3500,7 @@ private void sendTaskReport() {
 			 
 			 // siin lisame kõik uued taskid andmebaasi
 			 if(!linesDone.contains(taskID + "ise")) {
-				 addToTaskDB(manager, custID, filename,header,message,false,0 ,null,taskID+"");
+				 addToTaskDB(taskID,manager, custID, filename,header,message,false,0 ,null,null);
 				 //S agent, Scucode,St filename, S title,  desc, bo isResp, lo comlpTime ,St compagent, St parentID
 				 linesDone.add(taskID + "ise");
 			 }
@@ -3611,15 +3611,22 @@ if(closed != null) {
 	}
 
 
-private void addToTaskDB(String agent, String cucode,String filename, String title, String desc, boolean isResp, long comlpTime ,String compagent, String parentID) {
-	 String sql = "INSERT INTO cesu.agent_tasks (AGENT_CODE, CUSTOMER_NUMBER,FILE_PATH, TITLE, DESCRIPTION, IS_RESPONSE, COMPLETED_AT,COMPLETED_AGENT,CREATED_AT ,PARENT_TASK_ID)  \r\n" + 
-	 		"VALUES ('"+ agent + "', '" + cucode +"', '" + filename +"','" + title +"','" + desc +"'," + isResp + ",?," + compagent + ",sysdate, " + parentID + ");" + 
-	 		"";
+private void addToTaskDB(Long taskid,String agent, String cucode,String filename, String title, String desc, boolean isResp, long comlpTime ,String compagent, String parentID) {
+	int resB = 0;
+	if(isResp) {
+		resB = 1;
+	}
+	 String sql = "INSERT INTO cesu.agent_tasks   " + 
+	 		" VALUES (" + taskid + ",'"+ agent + "', '" + cucode +"', '" + filename +"',?,?," + resB + "," + parentID + ",?," + compagent + ",sysdate)"  ;
      try {
+    	 System.out.println(sql);
        Connection con = getNewConnection();
          PreparedStatement ps = con.prepareStatement(sql);
          Timestamp ss = new Timestamp(comlpTime);
-         ps.setTimestamp(1, ss);
+         
+         ps.setString(1, title);
+         ps.setString(2, desc);
+         ps.setTimestamp(3, ss);
        
            ps.executeUpdate();
            con.commit();

@@ -1093,12 +1093,13 @@ System.out.println(sb.toString());
         String kood = rs.getString("itemid").trim();
         Product prod = new Product(kood);
         String nimetus = kood.substring(0,2) + " " +rs.getString("nimetus").trim() + " " + kood.substring(2) ;
-     nimetus =  Converter.enCodeEst(nimetus);
+        nimetus =  Converter.enCodeEst(nimetus);
+
+ 	    prod.setStock(0);
     if(kogused.get(kood) != null){
     	prod.setStock(Double.parseDouble((String)kogused.get(kood)));
-    }else{
-    	prod.setStock(0);
     }
+    
        prod.setInCases(rs.getDouble("kastis"));
         prod.setOnPallet(rs.getDouble("alusel"));
         prod.setPrice(rs.getDouble("price"));
