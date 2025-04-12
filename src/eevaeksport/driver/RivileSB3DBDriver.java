@@ -1095,7 +1095,7 @@ HashSet olemas = new HashSet();
    		"   		  		N37_BAR_KODAS AS ean, \r\n" + 
    		"   		    0 AS kogus,n17_kodas_gs AS grupp2, N17_KODAS_VS_T AS grupp,  N17_MEN_PAV AS minkogus ,N17_KODAS_LS_4 AS status ,  N35_PAV_K3 as maks,\r\n" + 
    		"   		    case when N17_DATA_NAUJA>getdate() AND N17_AR_NAUJA=1 then 1 else 0 end AS uus , ltrim(N17_KODAS_LS_8) as sellout \r\n" + 
-   		"   		  , N17_KODAS_LS_8 as maxdisc  FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
+   		"   		  , N17_KODAS_LS_8 as maxdisc , N17_NUOL_GR as alegrupp FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
    		"   		  LEFT JOIN  n37_pmat g ON n37_kodas_ps=n17_kodas_ps  and N37_KODAS_US != 'L' \r\n" + 
    		"   	 left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1 ";
   
@@ -1320,12 +1320,16 @@ HashSet olemas = new HashSet();
             	  prod.setMinPrice(minPrice);
             	 // prod.setMaxDiscount(-1);
                }
-            
               
             }catch(Exception e) {
             	
             }
+            String group = rs.getString("alegrupp");
+                if(group!= null && group.trim().equals("BENUOL") ) {
+             	  prod.setMaxDiscount(-1);
+                }
                
+             
                prod.setVat("21");
                
                //pandid välja 

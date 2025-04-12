@@ -3461,7 +3461,9 @@ private void sendTaskReport() {
 			 String  vastus = null;
 			 String repMana = null;
 			 String repManaCode = null;
+			 String repFileName = null;
 			 String cloManCode = null;
+			 Long cloTime = null;
 			 
 			 org.json.simple.JSONArray logs = (org.json.simple.JSONArray)task.get("tasklogs");
 			 if(!logs.isEmpty()) {
@@ -3470,6 +3472,7 @@ private void sendTaskReport() {
 					 if(((String)lo.get("key")).equals("taskComplete")) {
 						 cloMan =  (String) ((org.json.simple.JSONObject)lo.get("manager")).get("name");
 						 cloManCode =  (String) ((org.json.simple.JSONObject)lo.get("manager")).get("code");
+						 cloTime =  (Long) lo.get("longValue");
 					 }
 				   }
 				 }
@@ -3478,10 +3481,25 @@ private void sendTaskReport() {
 			 if(!replies.isEmpty()) {
 				 for(int u = 0; u < replies.size() ; u++) {
 					 org.json.simple.JSONObject rep = (org.json.simple.JSONObject)replies.get(u);
-					  vastus = (String) rep.get("message");
-					  System.out.println("vastus " + vastus);
-					  repMana = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("name");
-					  repManaCode = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("code");
+					 if(vastus == null ) {
+						 
+						  vastus = (String) rep.get("message");
+						  if(!linesDone.contains(taskID + vastus)) {
+							  repMana = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("name");
+							  repManaCode = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("code");
+							  org.json.simple.JSONArray files2 = (org.json.simple.JSONArray)rep.get("files");
+								 if(!files2.isEmpty()) {
+									 for(int e = 0; e < files2.size() ; e++) {
+										 org.json.simple.JSONObject lo = (org.json.simple.JSONObject)files2.get(e);
+										 repFileName = lo.get("url") + "";
+									 }
+								 } 
+							  System.out.println("vastus " + vastus + " " +  repFileName);  
+						  }	else {
+							  vastus = null;
+						  }
+					 }
+
 				 }
 			 }
 			 
@@ -3500,11 +3518,9 @@ private void sendTaskReport() {
 			 
 			 // siin lisame kõik uued taskid andmebaasi
 			 if(!linesDone.contains(taskID + "ise")) {
-				 addToTaskDB(taskID,manager, custID, filename,header,message,false,0 ,null,null);
-				 //S agent, Scucode,St filename, S title,  desc, bo isResp, lo comlpTime ,St compagent, St parentID
-				 linesDone.add(taskID + "ise");
+				   addToTaskDB(taskID,manager, custID, filename,header,message,false,0 ,null,null);
+				 	 linesDone.add(taskID + "ise");
 			 }
-			System.exit(0);
 			 
 if(closed != null) {
 
@@ -3513,27 +3529,40 @@ if(closed != null) {
 			 completed++;
 }
 
+//System.out.println("replies " + replies.isEmpty() + " " + repManaCode + " " + vastus);
 			 if(!replies.isEmpty()) {
-				 
+
 				 if(!linesDone.contains(taskID + vastus)) {
 				 if(closed == null) {
 					 String email = (String)agMail.get(repManaCode);
 				   newTasksReplies.add(email+"|"+ custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "| |" + repMana);
+				   addToTaskDB(taskID,repManaCode, custID, repFileName,message,vastus,true,0 ,null,taskID);
+
 				 } else {
 					 String email = (String)agMail.get(cloManCode);
 				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "|" + closed + "|" + cloMan);
+
+				   addToTaskDB(taskID,cloManCode, custID, repFileName,message,vastus,true,cloTime ,cloManCode,taskID);
+				 
 				 }
+				 
+
 				 linesDone.add(taskID + vastus);
+				   
 				 }
 				 
 				 
 			 } else if(closed != null) {
+				 //  addToTaskDB(taskID,manager, custID, repFileName,header,message,true,cloTime ,cloManCode,taskID);
+					 
 				 if(!linesDone.contains(taskID + closed)) {
 				 String email = (String)agMail.get(cloManCode);
 				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "| |"+ created + "|" + closed + "|" + cloMan);
+
+				   addToTaskDB(taskID,manager, custID, repFileName,header,message,true,cloTime ,cloManCode,taskID);
 				  linesDone.add(taskID + closed);
 				 }
-			 }
+		 }
 			 // kui on ainult reply ja pole suletud siis paneme replydesse
 			 
 			 
@@ -3590,11 +3619,7 @@ if(closed != null) {
 		 
 			email.send();
 			
-		} catch (AddressException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (MessagingException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		   
@@ -3611,13 +3636,17 @@ if(closed != null) {
 	}
 
 
-private void addToTaskDB(Long taskid,String agent, String cucode,String filename, String title, String desc, boolean isResp, long comlpTime ,String compagent, String parentID) {
+private void addToTaskDB(Long taskid,String agent, String cucode,String filename, String title, String desc, boolean isResp, 
+		long comlpTime ,String compagent, Long parentID) {
 	int resB = 0;
 	if(isResp) {
 		resB = 1;
 	}
+	if(isResp) {
+		taskid = Calendar.getInstance().getTimeInMillis();
+	}
 	 String sql = "INSERT INTO cesu.agent_tasks   " + 
-	 		" VALUES (" + taskid + ",'"+ agent + "', '" + cucode +"', '" + filename +"',?,?," + resB + "," + parentID + ",?," + compagent + ",sysdate)"  ;
+	 		" VALUES (" + taskid + ",'"+ agent + "', '" + cucode +"', '" + filename +"',?,?," + resB + "," + parentID + ",?,'" + compagent + "',sysdate)"  ;
      try {
     	 System.out.println(sql);
        Connection con = getNewConnection();
