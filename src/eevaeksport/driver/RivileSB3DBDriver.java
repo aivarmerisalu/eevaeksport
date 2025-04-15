@@ -668,7 +668,7 @@ HashSet olemas = new HashSet();
  				}
  				
  				try {
- 					link =  formatter.formatCellValue(row.getCell((short) 23));
+ 					link =  formatter.formatCellValue(row.getCell((short) 17));
  				} catch (Exception e) {
  					e.printStackTrace();
  				}

@@ -262,15 +262,20 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	  JSONObject ord = new JSONObject();
 	  ord.put("salesperson", order.getAgent());
 	  
-	  Calendar cal =  Calendar.getInstance();;
+	  
+	  ord.put("orderingDate", Converter.jsonDateOnly(Calendar.getInstance().getTime()));
+
+	  
 	 	if(order.isShipDateUsed()) {
-	 		cal = order.getShipCal();
+	 	  ord.put("requestedDeliveryDate", Converter.jsonDateOnly(order.getShipCal().getTime()));
 	 	}
-	  ord.put("orderingDate", Converter.jsonDateOnly(cal.getTime()));
+	 	
+	 	
+	 	
 	  ord.put("customerNumber", order.getCompany());
 	  ord.put("currencyCode", "EUR");
 	  if (comm != null) {
-		  ord.put("comment", comm);
+		  ord.put("comment", Converter.cleanLitLatEst(comm));
 	  }
 	  
 	  if (paymTerm != null) {
@@ -304,7 +309,10 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	   	  
 	 	String name = prod.getName();
 	 	  if (name != null) {
-	 	  lin.put("description", Converter.cleanLitLatEst(name) );
+	 		  if(name.length() > 100) {
+	 			  name = name.substring(0,99);
+	 		  }
+	 	//  lin.put("description", Converter.cleanLitLatEst(name) );
 	   }
 	 	  
 

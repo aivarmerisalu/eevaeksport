@@ -505,7 +505,7 @@ public String parseFirstEmail(String emails) {
           }else if (sap && file.getName().toLowerCase().endsWith(".txt") && 
         		  ((file.getName().startsWith("S") && file.getName().length() == 14 ) || (file.getName().startsWith("45") && file.getName().indexOf("45.") == -1) ||
         		  (file.getName().startsWith("S00")) || (file.getName().startsWith("S01")) || (file.getName().startsWith("S02")) ||
-        		  (file.getName().startsWith("47") && (file.getName().indexOf("47.") == -1 || file.getName().indexOf("47.") > 2  )) ||
+        		  (file.getName().startsWith("47") && (file.getName().indexOf("47.") == -1 || file.getName().indexOf("47.") > 2  ) && file.getName().indexOf("478") == -1 ) ||
         		  (file.getName().startsWith("Z") && !file.getName().startsWith("ZJA") && !file.getName().startsWith("ZEM") && !file.getName().startsWith("ZI") && !file.getName().startsWith("Z-2") &&  !file.getName().startsWith("ZO."))
           		|| ((file.getName().indexOf("L00")>-1 || file.getName().indexOf("L01")>-1 ) && file.getName().indexOf("VIL0") == -1
           				&& file.getName().indexOf("KL0") == -1 && file.getName().indexOf("TEL00") == -1) || file.getName().indexOf("PO_4")>-1) ||
