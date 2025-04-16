@@ -576,6 +576,9 @@ try{
 	         if(change) {
 	        	 hhh = "APM";
 	         }
+	         if(bonus) {
+	        	 hhh = "BONUS";
+	         }
 	       	 fileName =   "H_" + fn + ".csv";
 	       	 StringBuffer sb0 = new StringBuffer();
 	       	 //369272;LT1004280:242970;12.02.2025 10:01:57;L;13.02.2025;944;;;0.00;FALSE;12.02.2025 10:40:39;;

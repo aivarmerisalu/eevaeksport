@@ -302,6 +302,9 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
  	              if (toode != null && toode.length() > 0) {
  	               mline.setProdID(toode);
  	             }
+ 	              if(toode.equals("00000002681")) {
+ 	            	  System.out.println(klient + " " + toode + " " + hind + " " + disc);
+ 	              }
  	              
  	             if (hind > 0) {
  	 	               mline.setPrice(hind);
@@ -372,6 +375,10 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
  	            	   goes = false;
  	            	}
  	            }
+
+	              if(toode.equals("00000002681")) {
+	            	  System.out.println(klient + " iii " + toode + " " + hind );
+	              }
  	             
  	             String signa = klient+toode+hh;
  	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
