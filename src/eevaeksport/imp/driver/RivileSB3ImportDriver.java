@@ -627,6 +627,9 @@ private HashSet stats = null;
           sb.append("          <I06_PASTABOS>" + escape(ov21 + lisa) + "</I06_PASTABOS>" + ls);
           cou++;  
       }
+      
+      sb.append("          <PAP_3>1</PAP_3>" + ls);
+      cou++; 
      
     Vector  lines = order.getOrderLines();
       for (int i = 0; i < lines.size(); i++) {
@@ -689,7 +692,10 @@ private HashSet stats = null;
          sb.append("               <I07_NUOLAIDA>" + escape(getNF().format(ale)) + "</I07_NUOLAIDA>" + ls);
           cou++;
     } else if(tag) {
-	  sb.append("               <I07_KAINA_BE>30.00</I07_KAINA_BE>" + ls);
+    	
+    	
+    	
+	  sb.append("               <I07_KAINA_BE>" + getKegPrice(line.getToode(),sta1Eur) + "</I07_KAINA_BE>" + ls);
       cou++;
     }
   
@@ -721,10 +727,7 @@ private HashSet stats = null;
 */
     String price = "0.10";
     if(stats.contains(toode)) {
-    	price = "30.00";
-    	if(sta1Eur) {
-    		price = "1.00";	
-    	}
+    	price = getKegPrice(toode,sta1Eur);
     }
     
     sb.append("               <I07_KAINA_BE>" + price + "</I07_KAINA_BE>" + ls);
@@ -758,6 +761,25 @@ private HashSet stats = null;
 	}
  }
   
+ 
+ private String getKegPrice(String toode, boolean sta1Eur ) {
+	 String res = "30.00";
+
+	 /*031 Statinė Westmalle 20L
+ 	030 Statinė Haacht 20L
+ 	029 Statinė Haacht 15L
+ 	032 Statinė Brewery Trade 15L       
+    */
+	 if(toode.equals("031") || toode.equals("030") || toode.equals("029") || toode.equals("032") ) {
+		 res = "75.00";
+	 }
+	 
+	 if(sta1Eur) {
+			res = "1.00";	
+		} 
+	 
+	 return res;
+ }
   public String getDriverVersion(){
     return "RivileSB3Import";
   }

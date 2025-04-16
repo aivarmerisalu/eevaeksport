@@ -14974,10 +14974,11 @@ shipdate = getCalXML(asi);
       }
       }
       
-      
-      FileReader ff = new FileReader(file);
-      BufferedReader in = new BufferedReader(ff);
- 
+   //   FileReader ff = new FileReader(file);
+    //  BufferedReader in = new BufferedReader(ff);
+
+      BufferedReader in = new BufferedReader( new InputStreamReader(new FileInputStream(file), "windows-1257"));
+     	          
       String line;
       String num = "";
       String agcode = null;
@@ -15375,7 +15376,7 @@ shipdate = getCalXML(asi);
       }
       
       in.close();
-      ff.close();     
+      //ff.close();     
 
     } catch (IOException e){
       EksportFrame.showError(e);

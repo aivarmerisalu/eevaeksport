@@ -307,10 +307,8 @@ public class BalmerkCSVImportDriver
 	 	 
 	 	  while(en.hasMoreElements()){
 	 		  Order ord = (Order)en.nextElement();
-	 		 makeOutput(ord); 	 
 	 		 
-	 		  boolean salvesta = true;
-	      	 	 Vector lin = ord.getOrderLines();
+	 		 	 Vector lin = ord.getOrderLines();
 	      	 	 
 	      	 	 boolean laks = false;
 	      	 	 boolean tagastus = false;
@@ -325,12 +323,8 @@ public class BalmerkCSVImportDriver
 	      	 			tagastus = true;
 	      	 		}
 	      	 		
-	      	 	 }  
-	      		    if(laks){
-	      		    	salvesta = false;
-	      		    }		
-	 		 
-	      		    
+	      	 	 }  	
+	 		 	    
 	      		  
 	  		 	  boolean repr = false;
 	  		 	 	 for (int i = 0; i < lin.size(); i++) {
@@ -489,7 +483,7 @@ public class BalmerkCSVImportDriver
               cal = shipDate;
             }
       
-        sb.append("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + ls);
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" + ls);
         sb.append("<E-Document>" + ls);
    
         sb.append("<Header>" + ls);
@@ -682,26 +676,16 @@ public class BalmerkCSVImportDriver
    
    
   String  fileName = escape(parent.getProps().getProperty("conv.dirxml") + agent) + "-" + counter + "." + sss  +  ".xml";
-   System.out.println(fileName);
-   Writer out = new BufferedWriter(new OutputStreamWriter(
-			    new FileOutputStream(fileName), "UTF-8"));
-			try {
-			    out.write(sb.toString());
-			} finally {
-			    out.close();
-			}
-			
-			 log.error(" File Saved " + fileName );
+  
+  System.out.println(fileName + " " + System.getProperty("file.encoding"));
+   
+           Converter.saveFileInUTF8(fileName, sb.toString());
+   		   //log.error(" File Saved " + fileName );
+   		 
 			 fileName = escape(parent.getProps().getProperty("conv.dircxml") + agent) + "-" + counter + "." + sss  +  ".xml";
-		      System.out.println(fileName);
-		       out = new BufferedWriter(new OutputStreamWriter(
-					    new FileOutputStream(fileName), "UTF-8"));
-					try {
-					    out.write(sb.toString());
-					} finally {
-					    out.close();
-					}
-					 log.error(" copy Saved " + fileName );
+			 Converter.saveFileInUTF8(fileName, sb.toString());
+			//log.error(" copy Saved " + fileName );
+					 
 	} catch (Exception e) {
 		 log.error(" Output error 1 " + order.getCompany() );
 		 log.error(e);
@@ -801,201 +785,7 @@ public class BalmerkCSVImportDriver
 	  }
 
 
-  
-  
-  private void makeOutput(Order order){
-	 	StringBuffer sb = new StringBuffer();
-	 	boolean minus = false;
-	 	try {
-	 	  String extra = "";
-		      
-
-		    Vector linesy = order.getOrderLines();
-		      for (int i = 0; i < linesy.size(); i++) {
-		    	    OrderLine ol = (OrderLine) linesy.elementAt(i);
-		 		 if(ol.getPartii() != null && ol.getPartii().trim().length() > 0){
-		        	  extra  = extra + "("+ ol.getToode() + " - " +ol.getPartii() + ")  ";
-		          }  
-		      }
-		    	
-	 		
-		    String doknr = order.getDokNr();
-		      String fn = doknr;
-		      if(doknr.trim().length()== 0){
-		    	  fn =( Calendar.getInstance().getTimeInMillis() + "").substring(3);
-		      }
-		      String dd = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) + "";
-		      
-			    String agent = order.getAgent();
-			    
-			      if(agent == null || agent.trim().length()== 0){
-			    	 agent = "xxx";
-			      } else{
-			    	  agent = agent.trim();
-			      }
-			String ref = order.getTeostaja(); //mobiilse telli ref number
-			if ( ref == null ){
-				ref =  "";
-			}
-			String com = order.getEmailBody();
-			if ( com == null ){
-				com =  " ";
-			}		
-		
-			String ware = order.getWarehouse();
-			if ( ware == null ){
-				ware = " ";
-			}
-		
-			
-			String comm = order.getInfo();
-			if ( comm == null ){
-				comm = " ";
-			}
-			comm = comm + " " + extra;
-	         
-	        String ootele = "0";
-	        try{
-	        	if(order.getShipMode() != null  && order.getShipMode().equals("-3")){
-	 	        	ootele = "1";
-	 	        }	
-	        }catch(Exception e){
-	        	
-	        }
-	       
-	        
-	        boolean tagastus = false;
-		 	 Vector lin = order.getOrderLines();
-	        
-	        int nega = 0;
-		 	 for (int i = 0; i < lin.size(); i++) {
-		 		OrderLine ol = (OrderLine) lin.elementAt(i);
-		 		if(ol.getKogus() < 0 && (order.getStatus() == 5 || order.getStatus() == 4 || order.getStatus() == 2)){
-		 			nega++;
-		 		}
-		 	 }  
-		
-		 	
-		 	 
-		 	 if(nega == lin.size()){
-			    	tagastus = true;
-			    }
-		 	 
-		 	 
-		 	  boolean repr = false;
-		 	 	 for (int i = 0; i < lin.size(); i++) {
-		 	 		OrderLine ol = (OrderLine) lin.elementAt(i);
-		 	 		if(ol.getKogus() < 0 && ol.getDiscount() > 0.1 && (order.getStatus() == 5 || order.getStatus() == 4)){
-		 	 			repr = true;
-		 	 			tagastus = false;
-		 	 		}
-		 	 	 } 
-	        
-	         
-	         String sep = ",";
-	         String lineSep = System.getProperty("line.separator");
-	         String type = "tellimus";
-	         
-	         if( repr ) {
-	        	 type = "ymberhindlus";
-	         }
-	         if( tagastus ) {
-	        	 type = "tagastus";
-	         }
-	         
-	         sb.append(type + lineSep);
-
-	         sb.append("tellija.regnr:" + sep  + ""+ lineSep);
-	         sb.append("tellija_kood:" + sep  + order.getCompany() + lineSep );
-	         sb.append("filiaal:" + sep  + order.getCompany() + lineSep);
-	         sb.append("aasta:" + sep + order.getShipCal().get(Calendar.YEAR) + lineSep);
-	         sb.append("nr:" + sep + "MJ"+ agent + dd + fn + lineSep);
-	         sb.append("tarnija.regnr:" + sep + lineSep);
-	         sb.append("kuupaev:" + sep + getDateString(order.getShipCal()) + lineSep);
-	         sb.append("tarne_kuupaev:" + sep + getDateString(order.getShipCal()) + lineSep);
-	         sb.append("tarne_aadress:" + sep + lineSep);
-	         sb.append("koostaja.eesnimi:" + sep + "agentname" + lineSep);
-	         sb.append("koostaja.perenimi:" + sep + "agentname"  + lineSep);
-	       	 sb.append("koostaja.kood:"  + sep +"" + lineSep);	         
-	         sb.append("koostaja.email:" + sep + ""  + lineSep); 
-	         sb.append("tellija_viide:" + sep + ref  + lineSep);   
-	         sb.append("markused:" + sep +escape(comm) + lineSep);
-	         sb.append("ootele:" + sep +escape(ootele) + lineSep);
-	         
-	       
-	        
-	         sb.append("read" + lineSep);
-	       	 sb.append("toote_kood,nimetus,yhik,kogus,km,yhiku_hind,ean_kood,summa" + lineSep); 
-	        
-	         
-	    Vector lines =  Converter.joinLines(order.getOrderLines());
-	      for (int i = 0; i < lines.size(); i++) {
-	    	  
-	        OrderLine ol = (OrderLine) lines.elementAt(i);
-	        if(ol.getKogus() < 0){
-	        	minus = true;
-	        }
-	        String toode = ol.getToode();
-	        if(this.vanaUusKood.get(toode) != null) {
-	        	toode = (String)vanaUusKood.get(toode); 
-	        }
-	    	  sb.append(toode + sep);
-	          sb.append(ol.getTooteNimi().replace(',',' ') + sep);
-	          sb.append(ol.getUnit() + sep);
-	          sb.append(ol.getKogus() + sep);
-	          sb.append(sep);
-	          sb.append("0" + sep);
-	          String ean = "";
-	          if(ean == null || ean.trim().length()==0){
-	          	ean = "";
-	          	}
-	          sb.append(ean);
-	          
-	          sb.append( sep +  "0" );
-
-	        
-	          String text = "";
-	          
-	          if(ol.getPartii() != null && ol.getPartii().trim().length() > 0){
-	        	  text = ol.getPartii();
-	          }
-	          
-	          sb.append( sep +  text );
-	          
-	          if(repr) {
-	        	  double disc = ol.getDiscount();
-		          if (disc < 0){
-		            disc = 0;
-		          }
-
-	        	  sb.append( sep +  disc );
-	          }
- 
-	          sb.append(lineSep);
-	 
-	       counter++;
-	      }
-	
-	      
-	      setNumAddedLines(counter); 
-
-	    
-	     
-	        	  String fileName = escape(parent.getProps().getProperty("conv.dir")) +  "t-" + order.getAgent() +"."+ order.getCompany()+"." +fn  + ".csv";
-			      System.out.println(fileName);		
-			      if(minus){
-			    	  fileName = escape(parent.getProps().getProperty("conv.dir2")) +  "t-" + order.getAgent() +"."+ order.getCompany()+"." +fn  + ".csv";
-			      }
-			      FileOutputStream fos = new FileOutputStream(fileName);
-			        fos.write(sb.toString().getBytes());
-			        fos.close();
-	    		
-	    
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	 }
-	  
+ 	  
 
 private String escape(String s){
   if (s == null) return s;

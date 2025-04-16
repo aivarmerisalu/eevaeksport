@@ -990,11 +990,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
            String abipaev = st.nextToken().trim();
            String crlimit = st.nextToken().trim();
            String chain = st.nextToken().trim();
-           
-if(id.equals("AARDE")) {
-	System.out.println("grupp " +  grupp + " " + custdisc);
-}
-          
+
   
            Customer customer = new Customer(id);
            if(grupp.length() > 0) {
@@ -1013,6 +1009,12 @@ if(id.equals("AARDE")) {
 	       	try{
 	       		dept = Double.parseDouble(deptdue);
 	       		customer.setDebt(dept);
+	       	}catch(Exception e ){
+	       	}
+	       	double used = 0;
+	       	try{
+	       		used = Double.parseDouble(usedcredit);
+	       		customer.setUsedCredit(used);
 	       	}catch(Exception e ){
 	       	}
            
@@ -1089,11 +1091,6 @@ if(id.equals("AARDE")) {
 
          if(payer.length() > 0){
              customer.setPayer(payer);  
-            
-             if(dueSums.get(payer) != null) {
-            	 customer.setDebt(Double.parseDouble(dueSums.get(payer) +""));
-             }
-           
          }
          
              
@@ -1102,10 +1099,7 @@ if(id.equals("AARDE")) {
     		limit = Double.parseDouble(crlimit);
     		if(limit > 0) {
     			customer.setCredit(limit + "");	
-      		  if(usedCredit.get(payer) != null) {
-               	 customer.setUsedCredit(Double.parseDouble(usedCredit.get(payer) +""));
-                }
-    		}
+      		}
     	
     	}catch(Exception e ){
     	}
@@ -1227,6 +1221,9 @@ if(stocks == null) {
     		   }catch(Exception e) {
     			   
     		   }
+    	   }
+    	   if(tarne_KP != null) {
+    		   prod.setPartii("Saabub : " + tarne_KP.substring(0,10));
     	   }
     	   //System.out.println(description);
 
