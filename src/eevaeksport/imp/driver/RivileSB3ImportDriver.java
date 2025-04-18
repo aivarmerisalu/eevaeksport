@@ -677,7 +677,8 @@ private HashSet stats = null;
 
           if (!tag) {
         	  String unit = line.getUnit() ;
-        	  if(toode.equals("102010")) {
+        	  if(toode.equals("102010") || toode.equals("506063373053") || toode.equals("506063373010")  || 
+        			  toode.equals("506063373005") || toode.equals("506063373006") || toode.equals("506063373009") || toode.equals("31320001")) {
         		  unit = "PET20.0";
         	  }
         	  

@@ -233,13 +233,13 @@ String addrid = order.getCompany().substring(u+1);
 
 
 ord.put("saleDate", Converter.getYYYY_MM_DDpString(Calendar.getInstance()));
-ord.put("autoGenerateNumberAndSeriesoptional", false);
+ord.put("autoGenerateNumberAndSeries", false);
 
 
-ord.put("series", order.getDokNr().substring(0, 3));
-ord.put("number", order.getDokNr().substring(3));
+ord.put("series", "MOBI");
+ord.put("number", order.getDokNr());
 
-ord.put("warehouseId", "1");
+ord.put("warehouseId", "6");
 ord.put("clientId", custid);
 ord.put("operationTypeId", "2");
 ord.put("employeeId", order.getAgent());
@@ -249,7 +249,7 @@ if(comm != null && comm.trim().length() > 0) {
 	ord.put("notes", comm.trim());
 }
 
-ord.put("unloadAddressIdoptional", addrid);
+ord.put("unloadAddressId", addrid);
 
 
 System.out.println(ord);
@@ -266,13 +266,13 @@ System.out.println("ord " + data);
 	JSONParser pp = new JSONParser();
 	JSONObject dd = (JSONObject)pp.parse(data);
 	
-	JSONArray dat  = (JSONArray)dd.get("data");
+	JSONObject dat  = (JSONObject)dd.get("data");
 	
 	
-	String id = ((JSONObject)dat.get(1)).get("id") + "";
+	String id = dat.get("id") + "";
 
 System.out.println("ord " + id);
-	    System.exit(0);
+	   // System.exit(0);
 	    
 ordsave.put("header", ord);
 
@@ -290,12 +290,14 @@ String urlLine = "https://www.b1.lt/api/warehouse/sale-items/create";
 	         ll.put("calculationMode", "1");
 	       	 ll.put("saleId", id);
 	       	 ll.put("itemId", toode);
+	       //	 ll.put("purchaseItemId", toode);
 	       	 ll.put("quantity", line.getKogus());
 	       	 ll.put("priceWithoutVat", line.getPrice());
-	       	 ll.put("warehouseId", "1");
+	       	 ll.put("warehouseId", "6");
 	       	 ll.put("vatClassificationId", "68");
 
               ordsave.put("line" + counter, ll);
+              System.out.println("line " + ll.toJSONString());
               
               String data2 =  this.postJson(ll.toJSONString(), null, urlLine);
               System.out.println("line enter " + data2);

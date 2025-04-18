@@ -465,13 +465,20 @@ if(ladu.trim().length()!=0){
       sb.append("          </I06>" + ls);
       cou++;
 
+      String fname = order.getAgent() + "-"  + ( Calendar.getInstance().getTimeInMillis()+"").substring(8,13) + "_" + order.getDokNr() ;
  	
-      String fileName = escape(parent.getProps().getProperty("conv.dir") + order.getAgent()) + "-"  + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".EIP";
+      String fileName = escape(parent.getProps().getProperty("conv.dir") +  fname )+  ".EIP";
       System.out.println(fileName);
         FileOutputStream fos = new FileOutputStream(fileName);
         fos.write(sb.toString().getBytes());
         fos.close();
 
+        fileName = escape(parent.getProps().getProperty("conv.dircopy") + fname ) +  ".EIP";
+         fos = new FileOutputStream(fileName);
+        fos.write(sb.toString().getBytes());
+        fos.close();
+ 
+        
 	} catch (Exception e) {
 		e.printStackTrace();
 	}

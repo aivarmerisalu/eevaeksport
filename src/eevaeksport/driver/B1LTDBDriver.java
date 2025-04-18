@@ -138,7 +138,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	  
 	  private void downloadData(String dataType) {
 	
-		  https://www.b1.lt/api/reference-book/vat-classifications/list
+		
 		
 			  if (dataType == null || dataType.equals("vat")) {
 				  this.saveFile("vat", "https://www.b1.lt/api/reference-book/vat-classifications/list");
@@ -558,6 +558,8 @@ private void saveFile (String filename, String url ) {
        
        
    public TreeMap getCustomers(Agent agent){
+	   
+	   downloadData(null);
 	   
 	/*   TreeMap<String, Double>volad = new TreeMap<String, Double>();
 		org.json.simple.JSONObject cc1 = 	Converter.readJSONFile("data//agedAccountsReceivables.json");
