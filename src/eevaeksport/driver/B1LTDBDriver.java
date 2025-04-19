@@ -109,7 +109,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
       company = getParent().getProps().getProperty("rest.companyx");
     
      // getPriceMatrixData();
-   // downloadData("vat");
+  // downloadData("stocks");
        
   }
   
@@ -168,6 +168,12 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	    		if (dataType == null || dataType.equals("sales")) {
 	    			this.saveFile("sales","https://www.b1.lt/api/warehouse/sales/list");
 	    		}
+	    		
+	    		if (dataType == null || dataType.equals("stocks")) {
+	    			this.saveFile("stocks","https://www.b1.lt/api/warehouse/stock/list");
+	    		}
+	    		
+	    		
 	    		if (dataType == null || dataType.equals("pricelist")) {
 	    			org.json.simple.JSONObject filter = new org.json.simple.JSONObject();
 	    			filter.put("field", "clientPrice");
@@ -1120,9 +1126,65 @@ public TreeMap getProducts(Agent agent) {
 	    	}
 	    }
 	  
-		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
+	  
+	  //loeme sisse jäägid 
+	  HashMap<String,Double> stock = new HashMap<String,Double>();
+	  
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//stocks.json");
 		
 		int pages =  Integer.parseInt(cc.get("pages")+"");
+			  System.out.println("pages prod " + pages);
+			for (int u = 0; pages > u ;u++) {
+				System.out.println( "ii " + u);
+				 String fname ="stocks.json";
+				 if(u > 0) {
+					 fname ="stocks" + (u+1) + ".json";
+				 }
+			
+				cc = 	Converter.readJSONFile("data//" + fname);
+	
+		//System.out.println("fname " + fname);
+		
+		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
+		
+		  int lenn = values.size();
+		  
+		try {
+		  for (int i = 0; i < lenn; i++) {
+		  
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+
+          	String warehouseId = cob.get("warehouseId")+"";
+          	if(warehouseId.equals("6")) {
+
+              	String number = cob.get("id") + "";
+              	try {
+              	Double st = Double.parseDouble(cob.get("stock")+"");
+              	if(stock.get(number) != null) {
+              		stock.put(number,stock.get(number)+ st);
+                    	
+              	}else {
+              		stock.put(number, st);
+               }
+              	}catch(Exception e) {
+              		
+              	}
+          	}
+          	
+          	
+		  }
+		}catch(Exception r) {
+			r.printStackTrace();
+		}
+	  
+			}
+			
+			
+			
+			
+		 cc = 	Converter.readJSONFile("data//items.json");
+		
+		 pages =  Integer.parseInt(cc.get("pages")+"");
 			  System.out.println("pages prod " + pages);
 			for (int u = 0; pages > u ;u++) {
 				System.out.println( "ii " + u);
@@ -1200,11 +1262,14 @@ public TreeMap getProducts(Agent agent) {
           	String inventory = cob.get("stock")+"";
           	if (inventory != null) {
           		try {
-          		prod.setStock(Double.parseDouble(inventory));
+          		//prod.setStock(Double.parseDouble(inventory));
           		}catch(Exception e) {
           			
           		}
           	}
+          	if(stock.get(prod.getID()) != null) {
+          		  prod.setStock(stock.get(prod.getID()));
+          	 	}
           	 
           	if(goes) {
             	  tm.put(prod.getName(), prod);	

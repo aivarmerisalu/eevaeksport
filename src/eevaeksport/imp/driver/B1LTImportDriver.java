@@ -197,7 +197,7 @@ try{
 	  }else{
 		  makeOutput(order);  
 		  signatures.add(signature);
-		  this.troubles = null;
+		  this.troubles = new StringBuffer();
 	  }	    
 	  
 	   try {
@@ -277,30 +277,35 @@ System.out.println("ord " + id);
 ordsave.put("header", ord);
 
 	        //RIDADE LISAMINE
-String urlLine = "https://www.b1.lt/api/warehouse/sale-items/create";
+String urlLine = "https://www.b1.lt/api/warehouse/sale-items/create-simple";
 	   
 	  
 	        Iterator iter = order.getOrderLines().iterator();
 	        while (iter.hasNext()){
 	          OrderLine line = (OrderLine)iter.next();
 	          String toode  = line.getToode();
-	 	    	  counter++;
+	 	    	
 	        	  
 	        JSONObject ll = new JSONObject();
-	         ll.put("calculationMode", "1");
+	      //   ll.put("calculationMode", "1");
 	       	 ll.put("saleId", id);
 	       	 ll.put("itemId", toode);
-	       //	 ll.put("purchaseItemId", toode);
+	        // ll.put("purchaseItemId", toode);
 	       	 ll.put("quantity", line.getKogus());
 	       	 ll.put("priceWithoutVat", line.getPrice());
-	       	 ll.put("warehouseId", "6");
-	       	 ll.put("vatClassificationId", "68");
+	       	 //ll.put("warehouseId", "6");
+	       	 //ll.put("vatClassificationId", "68");
 
               ordsave.put("line" + counter, ll);
-              System.out.println("line " + ll.toJSONString());
+            //  System.out.println("line " + ll.toJSONString());
               
               String data2 =  this.postJson(ll.toJSONString(), null, urlLine);
               System.out.println("line enter " + data2);
+              if(!data2.contains("Klaida")) {
+               counter++;
+              }else {
+            	  this.troubles = this.troubles.append(data2);
+              }
           	
 	          }
 	      
