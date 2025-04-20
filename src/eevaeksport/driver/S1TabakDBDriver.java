@@ -2,6 +2,7 @@ package eevaeksport.driver;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -17,6 +18,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -32,6 +34,11 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -49,6 +56,8 @@ import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.Quest;
+import eevaeksport.QuestLine;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.util.Converter;
 
@@ -61,7 +70,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,PictureMaker {
+public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,PictureMaker,WebReporter {
 
   public S1TabakDBDriver(EksportPanel parent) {
     super(parent);
@@ -1407,6 +1416,135 @@ public void setNF(NumberFormat nf) {
       }*/
   }
 
+  private void uploadQuests() {
+	  
+//	  1- loeme küsimused sisse 
+	  //otsime faile mille nimes on pallets
+	  
+	  HashMap<String , Quest> questArr = new HashMap<String ,Quest>();
+	  
+		File folder = new File(this.getExcelDir());
+		 File done = new File(this.getExcelDir()+ "done");
+		 if(!done.exists()) {
+			 done.mkdir();
+		 }
+		
+	          if (folder.exists() && folder.isDirectory()) {
+	              File[] files = folder.listFiles();
+
+	              for (File file : files) {
+	                  if (file.isFile() && file.getName().contains("pallets")) {
+	                      System.out.println("Found: " + file.getAbsolutePath());
+	                 		try {
+	                 			FileInputStream ff = new FileInputStream(file);
+	                 			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+	                 			XSSFSheet sheet = workbook.getSheetAt(0);
+	                 			XSSFRow row = sheet.getRow(0);
+	                 			 
+	                 			 DataFormatter formatter = new DataFormatter();
+	                 		//loeme sisse küsimused 			 
+	                 					 
+	                 					row = sheet.getRow(5);
+                                 HashMap kyssad = new HashMap();
+	    	                 			for (int a = 6; a <  row.getLastCellNum(); a++) {
+	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) a));
+	    	                 				kyssad.put(a, kyssa);
+	    	                 			}
+	    	                 			
+	    	                 			System.out.println("kyssad " + kyssad.toString());
+		                 				
+	    	                 			//System.exit(0);
+	    	                 			
+	                 			for (int a = 6; a <  sheet.getLastRowNum(); a++) {
+	                 				row = sheet.getRow(a);
+	                 			
+	                 				String klient = "";
+	                 				String question = "";
+	                 				String period = "";
+	                 				
+	                 				try {
+	                 					klient =  formatter.formatCellValue(row.getCell((short) 1));
+	                 				} catch (Exception e) {
+	                 					try {
+	                 						klient =  ((int)row.getCell((short) 1).getNumericCellValue()) + "";
+	                    				} catch (Exception r) {
+	                    				}
+	                 				}
+	                 				
+	                 				try {
+	                 					period =  formatter.formatCellValue(row.getCell((short) 5));
+	                 				} catch (Exception e) {
+	                 					try {
+	                 						period =  ((int)row.getCell((short) 5).getNumericCellValue()) + "";
+	                    				} catch (Exception r) {
+	                    				}
+	                 				}
+	                 				
+	                 				
+	                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
+    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
+    	                 				
+    	                 				if(kyssa != null && kyssa.trim().length() > 0) {
+    	                 					
+    	                 					String kysimus = (String)kyssad.get(b) + " [" + kyssa + "]";
+    	                 				
+    	                 					Quest qq = questArr.get(klient);
+    	                 					if( qq == null) {
+    	                 					   qq = new Quest();
+    	                 					   qq.custID = klient;
+    	                 					DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    	                 					String[] dateStrings = period.split(" - ");
+    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format);
+    	                 				    qq.qEnd = LocalDate.parse(dateStrings[1], format);
+    	                 				    
+    	                 				       QuestLine ql = new QuestLine();
+    	                 				          ql.qname = kysimus;
+    	                 				          ql.qtype = "YESNOFORCEDYESPICT";
+    	                 				    qq.questLines = new ArrayList<QuestLine>();
+    	                 				    qq.questLines.add(ql);
+    	                 				   
+    	                 				    questArr.put(klient, qq);
+    	                 				   
+    	                 					} else {
+    	                 						
+    	                 					 QuestLine ql = new QuestLine();
+     	                 				        ql.qname = kysimus;
+     	                 				        ql.qtype = "YESNOFORCEDYESPICT";
+     	                 				      qq.questLines.add(ql);
+     	                 				      
+    	                 					}
+    	                 					
+    	                 					
+    	                 				}
+    	                 					
+    	                 			}
+    	                 	
+	                 				
+	                 			 }
+	                 			
+	                 			
+	                 			System.out.println(questArr.toString());	
+	                 				System.exit(0);
+	                 			}catch(Exception e) {
+	                 				e.printStackTrace();
+	                 			}
+	                 	
+	                 	
+	                      
+	                  }
+	              }
+	          } else {
+	              System.out.println("The provided path is not a valid folder.");
+	          }
+	      
+	  
+
+
+		
+   	  
+  }
+  
+  
 public Vector getFixedAssortmentData() {
 	Vector lines = new Vector();
 	return lines;
@@ -1417,6 +1555,12 @@ public Vector getFixedAssortmentData() {
 public ManagerData getManagerData() throws SQLException {
 	// TODO Auto-generated method stub
 	return null;
+}
+
+@Override
+public void WebReporter() {
+ uploadQuests();
+	System.exit(0);
 }
 
 }
