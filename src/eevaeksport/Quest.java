@@ -18,12 +18,13 @@ public class Quest implements Serializable {
 	 static final long serialVersionUID = 2L; 
 	 public Long id = null;
   public String custID = null;
-  public LocalDate qStart = null;
-  public LocalDate qEnd = null;
+  public Long qStart = null;
+  public Long qEnd = null;
   public Boolean forced = null;
-  public String frequency = null;
+  public String frequency = "DAILY";
+  public String title = null;
   public String manager = null;
-  public String appearance = null;
+  public String appearance = "ON_CUSTOMER_SELECTION";
   public ArrayList<QuestLine> questLines = null;
  
    @Override   

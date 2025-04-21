@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -17,7 +19,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -35,10 +39,15 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.poi.common.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -78,7 +87,17 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
     this.lang = parent.getProps().getProperty("language");
 	teamx = getParent().getProps().getProperty("salesteam");
 	//custgroups();
-  }
+	  user =  getParent().getProps().getProperty("rest.user");
+      pass = getParent().getProps().getProperty("rest.pass");
+      companyx = getParent().getProps().getProperty("rest.companyx");
+   
+       }
+    
+    String user =  null;
+    String pass = null;
+    String companyx = null;
+
+
 
    public String getPilotDayData(Agent agent){
      return null;
@@ -1421,12 +1440,28 @@ public void setNF(NumberFormat nf) {
 //	  1- loeme küsimused sisse 
 	  //otsime faile mille nimes on pallets
 	  
+	  HashSet questsDone = null;
+		try {
+			questsDone = (HashSet)Converter.readObject("questsdone.obj");
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}		
+if(questsDone == null) {
+	questsDone = new HashSet();
+}
+
+	  
 	  HashMap<String , Quest> questArr = new HashMap<String ,Quest>();
 	  
 		File folder = new File(this.getExcelDir());
 		 File done = new File(this.getExcelDir()+ "done");
 		 if(!done.exists()) {
 			 done.mkdir();
+		 }
+
+	 File svdata = new File( "svdata");
+		 if(!svdata.exists()) {
+			 svdata.mkdir();
 		 }
 		
 	          if (folder.exists() && folder.isDirectory()) {
@@ -1450,20 +1485,17 @@ public void setNF(NumberFormat nf) {
 	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) a));
 	    	                 				kyssad.put(a, kyssa);
 	    	                 			}
-	    	                 			
-	    	                 			System.out.println("kyssad " + kyssad.toString());
-		                 				
-	    	                 			//System.exit(0);
-	    	                 			
+	    	                 	
 	                 			for (int a = 6; a <  sheet.getLastRowNum(); a++) {
 	                 				row = sheet.getRow(a);
 	                 			
 	                 				String klient = "";
+	                 				String chain = "";
 	                 				String question = "";
 	                 				String period = "";
 	                 				
 	                 				try {
-	                 					klient =  formatter.formatCellValue(row.getCell((short) 1));
+	                 					    klient =  formatter.formatCellValue(row.getCell((short) 1));
 	                 				} catch (Exception e) {
 	                 					try {
 	                 						klient =  ((int)row.getCell((short) 1).getNumericCellValue()) + "";
@@ -1472,7 +1504,16 @@ public void setNF(NumberFormat nf) {
 	                 				}
 	                 				
 	                 				try {
-	                 					period =  formatter.formatCellValue(row.getCell((short) 5));
+	                 					   chain =  formatter.formatCellValue(row.getCell((short) 2));
+	                 				} catch (Exception e) {
+	                 					try {
+	                 						chain =  ((int)row.getCell((short) 2).getNumericCellValue()) + "";
+	                    				} catch (Exception r) {
+	                    				}
+	                 				}
+	                 				
+	                 				try {
+	                 					   period =  formatter.formatCellValue(row.getCell((short) 5));
 	                 				} catch (Exception e) {
 	                 					try {
 	                 						period =  ((int)row.getCell((short) 5).getNumericCellValue()) + "";
@@ -1480,23 +1521,28 @@ public void setNF(NumberFormat nf) {
 	                    				}
 	                 				}
 	                 				
+	                 				String signa = klient +"_"+ period;
+	                 				if(!questsDone.contains(signa)) {
 	                 				
 	                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
     	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
     	                 				
     	                 				if(kyssa != null && kyssa.trim().length() > 0) {
     	                 					
-    	                 					String kysimus = (String)kyssad.get(b) + " [" + kyssa + "]";
+    	                 					String kysimus = (String)kyssad.get(b) + " PAL" + kyssa + "";
     	                 				
     	                 					Quest qq = questArr.get(klient);
     	                 					if( qq == null) {
     	                 					   qq = new Quest();
     	                 					   qq.custID = klient;
+    	                 					   qq.title = chain + " " + klient + " " + period;
+    	                 					   
     	                 					DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     	                 					String[] dateStrings = period.split(" - ");
-    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format);
-    	                 				    qq.qEnd = LocalDate.parse(dateStrings[1], format);
-    	                 				    
+    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    	                 				    qq.qEnd = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    	                 				   
+    	                 				   
     	                 				       QuestLine ql = new QuestLine();
     	                 				          ql.qname = kysimus;
     	                 				          ql.qtype = "YESNOFORCEDYESPICT";
@@ -1518,13 +1564,27 @@ public void setNF(NumberFormat nf) {
     	                 				}
     	                 					
     	                 			}
-    	                 	
+	                 				questsDone.add(signa);
+	                 				}
 	                 				
 	                 			 }
 	                 			
 	                 			
 	                 			System.out.println(questArr.toString());	
-	                 				System.exit(0);
+	                 			
+	                 			// Saadame ära
+	                 			if(questArr.size() > 0) {
+	                 			Iterator<String> itera = questArr.keySet().iterator();
+	                 			 while (itera.hasNext()) {
+	                 				 String custID = itera.next();
+	                 				 Quest qq = questArr.get(custID);
+	                 				boolean added =  Converter.addNewQuest(qq, companyx, user, pass);
+	                 			 }
+	                 				
+	                 				
+	                 			}
+	                 			
+	                 				//System.exit(0);
 	                 			}catch(Exception e) {
 	                 				e.printStackTrace();
 	                 			}
@@ -1539,8 +1599,101 @@ public void setNF(NumberFormat nf) {
 	      
 	  
 
+	          try {
+	  			Converter.saveObject(questsDone, "questsdone.obj");
+	  		} catch (IOException e) {
+	  			e.printStackTrace();
+	  		}
+	          
+	          
+	          
+	          // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
+		 Calendar from = Calendar.getInstance();
+		 from.add(Calendar.DAY_OF_YEAR, -1);
+		 Calendar to = Calendar.getInstance();    
+		 to.add(Calendar.DAY_OF_YEAR, 2);
+		 
+		 TreeMap files = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
+	  		System.out.println("files " + files.toString());
+		 
+	        String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "YESNOFORCE", null, "SV-");
 
-		
+	        JSONParser parser = new JSONParser();
+	  		try {
+				org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader(filename));
+			
+
+		  		for (int i = 0; i < cc.size(); i++) {
+		  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+		  			String dateAndTime = (String)cob.get("recetime");
+		  			String dateOnly = dateAndTime.split("T")[0];
+		  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
+		  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
+		  		  
+		  			String custID = (String)cob.get("custid");
+		  			String agentname = (String)cob.get("agentname");
+		  			String agid = (String)cob.get("agentid");
+		  			String qname = (String)cob.get("prodname");
+		  			String title = (String)cob.get("extData");
+		  			String created = (String)cob.get("resstr3"); // see on tegelt Long
+		  			String comment = (String)cob.get("comment");
+		  			String prodid = (String)cob.get("prodid");
+		  			
+		  			
+		  			
+		  			
+		  			try {
+		  				String foto = null;
+		  				if(cob.get("pictureLinks") != null) {
+		  				org.json.simple.JSONArray phs = (org.json.simple.JSONArray)parser.parse((cob.get("pictureLinks").toString()));
+		  				
+		  				if(files != null && files.get(custID) != null && phs != null) {
+		  					int a = 0;
+		  				//	if(cuid.equals("747724"))
+		  					//	System.out.println("phs " + phs.toString());
+		  						for(int y = 0; y < phs.size() ; y++) {
+		  							String fname = (String)phs.get(y);
+		  						
+		  						//	System.out.println("fname " + fname);
+				  					
+		  				
+		  					ArrayList arr = (ArrayList)files.get(custID);
+		  					for(int e = 0; e<arr.size(); e++) {
+		  						Toode t = (Toode)arr.get(e);
+		  						foto = t.getLadu();
+		  					//	System.out.println("ff " + foto + " " + t.getID() + " " + prodid);
+		  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
+		  							
+		  							System.out.println("foto " + foto);
+		  								
+		  				  		    /*     Cell  cell = worksheetBASE.getRow(palletrow).createCell(14+a);
+		  				  		         cell.setCellValue("Photo Link "+(a+1) );
+		  				  		         XSSFHyperlink link = (XSSFHyperlink)createHelper.createHyperlink(Hyperlink.LINK_URL);
+		  				  		         link.setAddress(URLEncoder.encode(foto, StandardCharsets.UTF_8.toString()));
+		  				  		         cell.setHyperlink((XSSFHyperlink) link);
+		  				  		         cell.setCellStyle(hlinkstyle);*/
+		  							
+		  				  		     a++;
+		  				  				
+		  						   }
+		  					     }
+		  					  }
+		  				   }	
+		  				}
+		  				}catch(Exception e) {
+		  					e.printStackTrace();
+		  				}
+		  			
+		  			
+		  			
+		  		}
+	  		
+	  		} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+ 	
+	      
    	  
   }
   

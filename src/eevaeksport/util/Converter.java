@@ -125,6 +125,8 @@ import eevaeksport.EksportPanel;
 import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.Quest;
+import eevaeksport.QuestLine;
 import eevaeksport.driver.Toode;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
@@ -5380,6 +5382,77 @@ try{
 	  return res;
   }
   
+  
+
+  public static boolean addNewQuest(Quest qq, String company, String user , String pass) {
+	  eevaeksport.util.ReportingService serv = new ReportingService();
+	    serv.user =  user;
+		serv.pass = pass;
+		serv.company = company;
+		serv.https = true;
+		boolean res = false;
+
+		JSONObject json = new JSONObject();
+		try{
+		
+		json.put("forceAnswers", qq.forced);
+		json.put("periodEnd", qq.qEnd);
+		json.put("periodStart", qq.qStart);
+		json.put("appearance", qq.appearance); // deafult ON customerSEL
+		json.put("frequency", qq.frequency); // defautl on DAILY
+	//	json.put("company", company);
+		json.put("title", qq.title);
+
+		
+		JSONArray custs = new JSONArray();
+		JSONObject cust = new JSONObject();
+		    cust.put("code", qq.custID);
+		  custs.put(cust);
+		json.put("customers", custs);
+		
+		JSONArray lines = new JSONArray();
+		int n = 1;
+		for(QuestLine ql : qq.questLines){
+			JSONObject line = new JSONObject();
+			line.put("question", ql.qname);
+			line.put("points", ql.points);
+			line.put("rownum", n);
+			line.put("questionType", questionType(ql.qtype));
+			lines.put(line);
+			n++;
+		}
+		json.put("questions", lines);
+		
+		System.out.println(json.toString());
+		
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			//String aa = serv.postJson(json.toString(), "https://api.mobitrek.eu/rest/questionnaire/save");
+			//System.out.println(aa);
+			//serv.closeClient();
+			res = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	
+	  
+	  return res;
+  }
+  
+  private static JSONObject questionType(String type) {
+	  JSONObject res = new JSONObject();
+	  try {
+		res.put("code", type);
+	} catch (JSONException e) {	
+		e.printStackTrace();
+	}
+	  return res;
+
+  }
   
   public static String getTaskData(long from , long to , String company, String user , String pass,  String nameadd){
 	  eevaeksport.util.ReportingService serv = new ReportingService();
