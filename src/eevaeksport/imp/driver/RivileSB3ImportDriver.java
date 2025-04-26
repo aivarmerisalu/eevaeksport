@@ -107,9 +107,18 @@ public class RivileSB3ImportDriver
     }
     
    
-   }
+    logurl = "https://api.manorivile.lt/client/v2";
+    if( parent.getProps().getProperty("logurl") != null){
+    	  logurl = parent.getProps().getProperty("logurl");
+    }
+    if( parent.getProps().getProperty("apikey") != null){
+    	APIKEY = parent.getProps().getProperty("apikey");
+    }
+  }
   
   
+  private String logurl = null;
+  private String APIKEY = null;
   
   public String getImportFile(){
 	    return parent.getProps().getProperty("imp.read");
@@ -756,12 +765,114 @@ private HashSet stats = null;
       System.out.println(fileName);
       
       Converter.saveFile(fileName, sb.toString());
+      
+      if(APIKEY != null) {
+          String data = "	<body><method>EDIT_I06_FULL</method><data>" + sb.toString() + "</data>" + 
+          		"</body>";
+          System.out.println(data);
+          
+          HttpResponse aaa = restPostRequest(data);
+         
+          String sbb = EntityUtils.toString(aaa.getEntity());
+          System.out.println("Response " + sbb);
+       //  StringBuffer sbb = postData(data);
+       //  System.out.println("Response " + sbb);
+         
+          
+          fileName = escape(cat + order.getAgent()) + "-" + name + "-" + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  "response.txt";
+         System.out.println(fileName);
+         FileOutputStream  fos = new FileOutputStream(fileName);
+           fos.write(sbb.toString().getBytes());
+           fos.close();
+           if(sbb.contains("<h1>Error: Server Error") || sbb.contains("Connection refused") ||  sbb.contains("connect timed out") ||  sbb.contains("errorMessage")) {
+              
+          	   this.sendOrderEmail(order, tag, sbb);
+          	      
+          	 System.exit(0);	
+           }
+           if(sbb.contains("<errorMessage></errorMessage>") ) {
+
+        	   this.sendOrderEmail(order, tag, sbb);
+               System.exit(0);	
+            }
+          }
    
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
  }
+ 
+ private void sendOrderEmail(Order ord , boolean ret , String error){
+	  
+     
+     try {
+
+String address = parent.getProps().getProperty("errormail");
+
+String cusname = this.identifyCustomerName(ord.getCompany());
+
+if(address != null ){
+Email email = new Email("Order Import error 3BS: " + order.getCompany() + " " + cusname);
+email.setFrom(parent.getProps().getProperty("from"));
+email.setSMTP(parent.getProps().getProperty("smtphost"));
+email.setUser(parent.getProps().getProperty("smtpuser"));
+email.setPass(parent.getProps().getProperty("smtppass"));
+email.setPort(parent.getProps().getProperty("smtpport"));
+email.setSubjectFilesTo("Order Import error : " + cusname);
+
+email.setEncoding("iso-8859-1");
+try {
+
+email.setBody("Order Import error 3BS \n " + error );
+StringTokenizer st =  new StringTokenizer(address,";");
+String aadr = null;
+while(st.hasMoreTokens()){
+	 aadr = new InternetAddress(st.nextToken()).toString();
+email.setFilesTo(aadr);
+email.send();
+}
+System.out.println("mail saatmisel " );
+
+} catch (AddressException e) {
+log.error(e);
+e.printStackTrace();
+System.exit(0);
+} catch (MessagingException e) {
+// TODO Auto-generated catch block
+e.printStackTrace();
+log.error(e);
+System.exit(0);
+}
+	  
+}
+ } catch (Exception e) {
+		e.printStackTrace();
+		log.error(e);
+		System.exit(0);
+ }
+     
+     System.out.println("mail saadetud");
+	
+}
+
   
+ private HttpResponse restPostRequest(String data) throws Exception {
+
+	 HttpPost httpPost = new HttpPost(this.logurl);
+	 if(data != null){
+		 httpPost.setEntity(new StringEntity(data,"utf-8"));
+		  httpPost.setHeader("ApiKey", APIKEY);
+	        httpPost.setHeader("Accept", "application/xml");
+	        httpPost.setHeader("Content-type", "application/xml;charset=utf-8");
+	 }
+        return HttpClients.createDefault().execute(httpPost);
+
+}
+
+
+
+
+
  
  private String getKegPrice(String toode, boolean sta1Eur ) {
 	 String res = "30.00";

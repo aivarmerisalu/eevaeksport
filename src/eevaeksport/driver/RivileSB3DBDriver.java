@@ -659,22 +659,22 @@ HashSet olemas = new HashSet();
  				String klient = "";
  				
  				try {
- 					klient =  formatter.formatCellValue(row.getCell((short) 3));
+ 					klient =  formatter.formatCellValue(row.getCell((short) 0));
  				} catch (Exception e) {
  					try {
- 						klient =  ((int)row.getCell((short) 3).getNumericCellValue()) + "";
+ 						klient =  ((int)row.getCell((short) 0).getNumericCellValue()) + "";
      				} catch (Exception r) {
      				}
  				}
  				
  				try {
- 					link =  formatter.formatCellValue(row.getCell((short) 17));
+ 					link =  formatter.formatCellValue(row.getCell((short) 1));
  				} catch (Exception e) {
  					e.printStackTrace();
  				}
  				
  				try {
- 					aeg =  formatter.formatCellValue(row.getCell((short) 11));
+ 					aeg =  formatter.formatCellValue(row.getCell((short) 2));
  				} catch (Exception e) {
  					e.printStackTrace();
  				}

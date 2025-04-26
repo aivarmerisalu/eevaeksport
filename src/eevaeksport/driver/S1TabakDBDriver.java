@@ -1,6 +1,7 @@
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,14 +11,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -26,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -653,15 +650,16 @@ if(seis > 0) {
        
        
 
-  private Date getDate(String mmddyy){//2008-12-31 00:00:00
-  	long lon = 0;
-  	Calendar cal = Calendar.getInstance();
-    cal.set(Calendar.YEAR, Integer.parseInt(mmddyy.substring(0, 4)));
-    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(6, 7))-1);
-    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(9, 10)));
-  //  System.out.println(cal.getTime());  //05.02.14
-   Date date = new Date(lon);
-   date.setTime(cal.getTimeInMillis());
+  private java.util.Date getDate(String mmddyy){//2008-12-31 00:00:00
+	  java.util.Date date = null;
+	    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+		          try {
+					date = formatter.parse(mmddyy);
+				} catch (java.text.ParseException e) {
+						e.printStackTrace();
+				}
+ 
   return date;
   }
 
@@ -1380,8 +1378,8 @@ System.out.println(yesGroups.size() + " yesGroups");
    private Vector debtList = new Vector();
    private Vector klient = new Vector();
    private TreeMap agents = new TreeMap();
-   private String url = "jdbc:odbc:vicireport";
-   private Connection con;
+ 
+ 
    private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);
    private TreeMap debtDays = new TreeMap();
    private String lang = null;

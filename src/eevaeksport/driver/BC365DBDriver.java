@@ -1,30 +1,20 @@
 package eevaeksport.driver;
 
-import java.io.BufferedReader;
 
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.net.URLEncoder;
 
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -33,9 +23,6 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -50,9 +37,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.common.usermodel.Hyperlink;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -62,16 +46,12 @@ import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 import com.amazonaws.util.IOUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ee.mobilejava.earve.GenericDOM;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
@@ -97,7 +77,6 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
   public BC365DBDriver(EksportPanel parent) {
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
-      company = parent.getProps().getProperty("company");
       secret = parent.getProps().getProperty("365.secret"); //"I~c8Q~fgLOHhFnFcIe2RHUSX6HWlPHXN8fon9b4Q"; 
 	  tenantID = parent.getProps().getProperty("365.tenantID"); //"bcf61030-52c2-4048-9e18-042d8a0c856f";
 	  clientID =  parent.getProps().getProperty("365.clientID"); //"075984fb-65fc-45e1-9a26-168935061542";
@@ -108,7 +87,17 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
      
       
       
-      
+      String node = getParent().getProps().getProperty("nodebt");
+      if(node != null) {
+    	  nodebt = new HashSet();
+    	  StringTokenizer st = new StringTokenizer(node,",");
+    	  while(st.hasMoreTokens()) {
+    		  String nn = (String)st.nextToken();
+    		  if(nn.trim().length() > 0) {
+    		  nodebt.add(nn.trim());
+    		  }
+    	  }
+      }
      
     
   
@@ -124,6 +113,8 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
    
 
      }
+  
+     HashSet nodebt =  null;
   
 	  String user =  null;
 	  String pass = null;
@@ -154,33 +145,7 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 			  if (entity != null) {
 			  String result = EntityUtils.toString(entity);
 			  Converter.saveFile("test.json", result);
-			 // System.out.println("Query result " + result);
-			  
-			  /* {
-      "@odata.etag": "W/\"JzIwOzEwNDU0MjEwNDEyNDg0NjMxODY3MTswMDsn\"",
-      "id": "e81e48a3-ae33-ef11-8409-0022489f6722",
-      "number": "47SISI000603",
-      "displayName": "SISI Relax 40 den nero M SP",
-      "displayName2": "SUKKP\u00dcKSID Relax",
-      "type": "Inventory",
-      "itemCategoryId": "040414c1-b354-ef11-bfe2-000d3adbde7b",
-      "itemCategoryCode": "SUKKPX SISI",
-      "blocked": false,
-      "gtin": "",
-      "inventory": 0,
-      "unitPrice": 0,
-      "priceIncludesTax": false,
-      "unitCost": 0,
-      "taxGroupId": "00000000-0000-0000-0000-000000000000",
-      "taxGroupCode": "",
-      "baseUnitOfMeasureId": "e087a81b-7829-ef11-9f88-000d3ab16a11",
-      "baseUnitOfMeasureCode": "TK",
-      "generalProductPostingGroupId": "dd6282ee-041c-ef11-9f88-000d3a69189e",
-      "generalProductPostingGroupCode": "KAUP",
-      "inventoryPostingGroupId": "08dea46d-751e-ef11-9f88-000d3a69189e",
-      "inventoryPostingGroupCode": "KAUBAD",
-      "lastModifiedDateTime": "2024-09-17T15:49:54.307Z"
-    }*/
+		
 			  }
 			  } catch (IOException e) {
 			  e.printStackTrace();
@@ -223,8 +188,6 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 		    Map<String, String> parsed = new ObjectMapper().readValue(response, type);
 		    return parsed.get("access_token");
 		}
-  
-  private String company = null;
   
   
   public String getSaveDebtInfo() {
@@ -290,7 +253,6 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 			        	Double volg = Double.parseDouble(cob.get("remainingAmount") + "");
 			        	String payer = (String) cob.get("billToCustomerNumber");
 			        	String custid = (String) cob.get("customerNumber");
-					  
 
 
        		     Debt dd = new Debt();
@@ -299,30 +261,25 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 				  dd.setDoknr(number);
 				  dd.setDate(getDate(date));
 				  dd.setDuedate(getDate(duedate));
-				  
 				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
 				  dd.setDue(ff + "");
 				  dd.setSum(volg);
-				//	System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " +ff);	
-
-				 tm.add(dd);
-
-		        		
+		            if(!nodebt.contains(payer)) { 
+				       tm.add(dd);
+		            }
 		          	}
 				  
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				
-		System.out.println("Debtsize " + tm.size());
-
-		  
-
+		  System.out.println("Debtsize " + tm.size());
 	     return tm;
 	   }
 
    public void connectionDown(){
    }
+
    public void connectionUp(){
    }
 
@@ -333,13 +290,6 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
        public String  getCustProdDiscounts(Agent agent){
                      return null;
             }
-  private TreeMap   prGroups= new TreeMap();
-  
- 
-  
-  
-  
-  
   
   
   
@@ -760,15 +710,16 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	            
 	           // String balanceDue = cob.get("balanceDue")+ "";
 	            
-	            String creditLimit = cob.get("creditLimit")+"";
-	            cust.setCredit(creditLimit);
+	           // String creditLimit = cob.get("creditLimit")+"";
+	           // cust.setCredit(creditLimit);
 	            
-	            
+	            if(!nodebt.contains(cust.getPayer())) {
 	            if (volad.get(cust.getID() ) != null) {
 	            	cust.setDebt(volad.get(cust.getID()));
 	            }
 	            if (volad.get(cust.getPayer() ) != null) {
 	            	cust.setDebt(volad.get(cust.getPayer()));
+	            }
 	            }
 	            
 	            
@@ -785,65 +736,9 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	System.out.println("Custsize " + tm.size());
 		  
 		return tm;
-	    
-		 /*
-		  * {
-	      "@odata.etag": "W/\"JzE5OzE5NTUyMzgxOTY2ODM5NTk2NzExOzAwOyc=\"",
-	      "id": "a2ea5579-8933-ef11-8409-0022489f6722",
-	      "number": "10001",
-	    1  "displayName": "Selver Anne",
-	      "type": "Company",
-	    1  "addressLine1": "Kalda tee 43",
-	     1 "addressLine2": "",
-	     1 "city": "Tartu, Tartu",
-	     1 "state": "",
-	    1  "country": "EE",
-	     1 "postalCode": "50707",
-	    1  "phoneNumber": "7461604",
-	    1  "email": "selver.kaubakategooriajuhtanne@selver.ee",
-	      "website": "",
-	    1  "salespersonCode": "IRMAL",
-	    1  "balanceDue": 0,
-	    1  "creditLimit": 1,
-	      "taxLiable": false,
-	      "taxAreaId": "cdafba67-db1c-ef11-9f88-000d3a69189e",
-	      "taxAreaDisplayName": "Kodumaised kliendid ja hankijad",
-	      "taxRegistrationNumber": "",
-	      "currencyId": "00000000-0000-0000-0000-000000000000",
-	      "currencyCode": "EUR",
-	      "paymentTermsId": "597a462b-5d1e-ef11-9f88-000d3a69189e",
-	      "shipmentMethodId": "a834a542-b82f-ef11-8409-000d3a6922b3",
-	      "paymentMethodId": "cf59ca74-6729-ef11-9f88-000d3ab16a11",
-	   1   "blocked": "_x0020_",
-	      "lastModifiedDateTime": "2024-11-05T11:39:49.14Z"
-	    },
-		  */
-
-     
    }
    
    
-  
-
-   private boolean isOkDate(String mmddyy){
-	  	long lon = 0;
-	  	Calendar cal = Calendar.getInstance();
-	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
-	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(6, 7))-1);
-	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(9, 10)));
-	  // System.out.println(cal.getTime()); 
-	   Date date = new Date(lon);
-	   date.setTime(cal.getTimeInMillis());
-		Calendar ca = Calendar.getInstance();
-		ca.add(Calendar.MONTH, -6);
-		
-		if(cal.after(ca)){
-			return true;
-		}else{
-			return false;
-		}
-		
-	  }
    
    private Date getDate(String mmddyy){
 	  	long lon = 0;
@@ -859,570 +754,14 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	  }
   
    
-   private boolean isDueDate(String mmddyy){
-	  	
-	  	Calendar cal = Calendar.getInstance();
-	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
-	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(5, 7))-1);
-	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(8, 10)));
-		Calendar ca = Calendar.getInstance();
-		ca.add(Calendar.DAY_OF_YEAR, -1);
-		
-		if(cal.before(ca)){
-			return true;
-		}else{
-			return false;
-		}
-		
-	  }
-
-   private Vector getCP(String custid , String number, String date ){
-
-	   Vector result = new Vector();
-	   try{
-			String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice_row&get=1&number=" + number;
-		       // System.out.println("httpsURL " + httpsURL);
-				URL myurl = new URL(httpsURL);
-		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-		        InputStream ins = con.getInputStream();
-		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-		        BufferedReader in = new BufferedReader(isr);
-		        
-		        String inputLine;
-		        StringBuffer inputLineBuf = new StringBuffer();
-		        while ((inputLine = in.readLine()) != null){
-		        	inputLine = this.enCode(inputLine);
-		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ));
-		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
-		        	while (st.hasMoreTokens()){
-		        		
-		        		String line = st.nextToken();
-		        		int ind =  line.indexOf("item=") ;
-		        		String toode = "";
-			        	if(ind != -1){
-			        		toode = line.substring(ind + 6);
-			        		toode = toode.substring(0,toode.indexOf("\""));
-			        	
-			        	}
-		        
-			        	
-			        	ind =  line.indexOf("quantity=") ;
-		        		double kogus = 0;
-		        		String kkk = "";
-			        	if(ind != -1){
-			        		kkk = line.substring(ind + 10);
-			        		kkk = kkk.substring(0,kkk.indexOf("\""));
-			        		
-			        		 kogus = Double.parseDouble(kkk);
-			        	}
-			        	
-			        	ind =  line.indexOf("total=") ;
-			        	double hind = 0;
-		        		 kkk = "";
-			        	if(ind != -1){
-			        		kkk = line.substring(ind + 7);
-			        		kkk = kkk.substring(0,kkk.indexOf("\""));
-			        		
-			        		 hind = Double.parseDouble(kkk)/kogus;
-			        		// System.out.println("toode " + toode + " " + hind);
-			        	}
-			        	
-		        
-		        result.add(new CustProd(custid, toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
-		         }
-		        	
-		        }
-		        in.close();
-		      //  System.out.println("buffer " + result);
-		        
-	   }catch(Exception e){
-		   e.printStackTrace();
-		   return null;
-	   }
-	   return result;
-   }
-
+  
    Hashtable prodCodes = null;
-   
-   
-   public TreeMap s(Agent agent){
-
-	   
-     TreeMap tm = new TreeMap();
-     HashMap prodHash = new HashMap();
-    
-     prodCodes = new Hashtable();
-     Vector noGrups = new Vector();
-     Vector codeEnds = new Vector();
-     Vector noTexts = new Vector();
-     Vector yesClasses = new Vector();
-     Vector noBrands = new Vector();
-     String groupIndent = null;
-         TreeMap brands = new TreeMap();
-         boolean sortBR = false;
-         boolean useBrandAsType = false;
-         if(getParent().getProps().getProperty("usebrand") != null){
-        	 useBrandAsType = true;
-         }
-     
-     if(getParent().getProps().getProperty("codeends") != null){
-     	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("codeends"),",");
-     	while (st.hasMoreElements()){
-     		codeEnds.addElement(st.nextToken());
-     	}
-     }
-     
-     if(getParent().getProps().getProperty("yesclasses") != null){
-      	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("yesclasses"),",");
-      	while (st.hasMoreElements()){
-      		yesClasses.addElement(st.nextToken());
-      	}
+  
+     public String getAssortmentStr(Agent agent){
+       return null;
       }
+
      
-     if(getParent().getProps().getProperty("usedataforgroups") != null){
-         groupIndent = getParent().getProps().getProperty("usedataforgroups");
-      	prGroups = new TreeMap();
-      }
-     
-     
-     
-     if(getParent().getProps().getProperty("nogroups") != null){
-     	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("nogroups"),",");
-     	while (st.hasMoreElements()){
-     		noGrups.addElement(st.nextToken());
-     	}
-     }
-     
-     
-     if(getParent().getProps().getProperty("notexts") != null){
-     	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("notexts"),",");
-     	while (st.hasMoreElements()){
-     		noTexts.addElement(st.nextToken().toLowerCase());
-     	}
-     }
-     
-     Hashtable prices = null;
-     
-     if(getParent().getProps().getProperty("usepricelist") != null){
-     	String pr = getParent().getProps().getProperty("usepricelist");
-     //	prices = getPricelists(pr);
-     }
-     
-    
-     if("true".equals(getParent().getProps().getProperty("sortbybrands"))){
-     	try {
- 			brands = this.getProdGroupsSecond();
- 			sortBR = true;
- 		} catch (SQLException e) {
- 			// TODO Auto-generated catch block
- 			e.printStackTrace();
- 		}
-     }
-     
-     if(getParent().getProps().getProperty("nobrands") != null){
-     	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("nobrands"),",");
-     	while (st.hasMoreElements()){
-     		noBrands.addElement(st.nextToken());
-     	}
-     }
-    
-     
-     try {
- 
-    	   FileReader fr = new FileReader(getDir() + "tooted.xml");
-           BufferedReader reader = new BufferedReader(fr);
-         String line = null;
-
-         //line = reader.readLine();
-         
-         System.out.println("suurus " +prodsInUse.size());
-          while((line = reader.readLine()) != null  ){
-        	  
-        	  if((line.trim().length()) > 50 ){
-        		  
-        	  int len = line.indexOf("code=");
-        	  String id   = line.substring(len +6);
-        	  id = id.substring(0,id.indexOf("\""));
-      	     Product prod = new Product(id);
-      	   
-      	      len = line.indexOf("default_name=");
-      	    String namec  = line.substring(len + 14);
-      	     	 namec = namec.substring(0,namec.indexOf("\""));
-      
-      	    
-      	 
-      			String add = "";
-      	    len = line.indexOf("stripe_code=");
-      	    if(len != -1){
-      	    	 String ean   = line.substring(len + 13);
-      	    	 ean = ean.substring(0,ean.indexOf("\""));
-          	     prod.setEAN(ean);
-          	     
-          	   if("true".equals(getParent().getProps().getProperty("add.ean"))){
-          			add = ean.substring(ean.length()-3); 
-          		 }
-      	    }
-      	   
-      	
-      	     
-    	    
-        	  if("true".equals(getParent().getProps().getProperty("name.code.front"))){
-     			 prod.setName(id + " " + Converter.enCodeEst(namec) + " " +  add); 
-     		 }else{
-     			 prod.setName(Converter.enCodeEst(namec) + " " + id + " " + add); 
-     		 }
-        	    
-      	    
-      	     
-      	     
-      	   len = line.indexOf("web_price1=");
-      	 len = line.indexOf("base_price=");
-      	   if(len == -1){
-      		 len = line.indexOf("base_price=");
-      		String price   =  line.substring(len + 12);  
- 	    	// System.out.println(" siin " +  prod.getName() + " " + price);
- 	    	 try{
-
- 	      	    prod.setPrice(Double.parseDouble(price.substring(0,price.indexOf("\""))) ); 
- 	    	 }catch (Exception e){
- 	    		prod.setPrice(1);
- 	    	 }
-      	   }else{
-      		 String price   =  line.substring(len + 12);  
-  	    	// System.out.println(" siin " +  prod.getName() + " " + price);
-       	    prod.setPrice(Double.parseDouble(price.substring(0,price.indexOf("\""))));
-       	    
-      	   }
-      	    	
-           	 len = line.indexOf("unit=");
-           	 if(len != -1){
-           	   String unit   =  line.substring(len + 6);  
- 	          prod.setUnit(unit.substring(0,unit.indexOf("\"")));
-   	   		 
-           	 }
-      	  boolean goes = true;
-      	if(noTexts.size() > 0){
-      		
-      		for(int u = 0 ; u < noTexts.size(); u++){
-      			String aa = noTexts.elementAt(u) + "";
-      			if(namec.toLowerCase().contains(aa)){
-          			goes = false;	
-      			}	
-      		}
-      	}
-	 	    
-      	
-	if(codeEnds.size() > 0){
-      		
-      		for(int u = 0 ; u < codeEnds.size(); u++){
-      			String aa = codeEnds.elementAt(u) + "";
-      			if(id.toLowerCase().endsWith(aa.toLowerCase())){
-          			goes = false;	
-      			}	
-      		}
-      	}
-	 	     
-      	  
-      		 len = line.indexOf("class=");
-      	 	 if(len != -1){
-      	 	     String grupp   = line.substring(len + 7);
-      	 	     grupp =   grupp.substring(0,grupp.indexOf("\""));
-      	 	    // System.out.println("grupp" + grupp + " " + yesClasses.toString());
-      	 	     if(!yesClasses.contains(grupp)){
-      	 	    	goes = false; 
-      	 	     }
-      	 	  prod.setGroup(grupp);
-      	 	  
-      	 	  if( groupIndent !=  null){
-            		
-           		 len = line.indexOf("<data code=\"" +groupIndent + "\"");
-           		 int lll = ("<data code=\"" +groupIndent + "\"").length();
-            	    if(len != -1){
-            	    	 String  gr   = line.substring(len + lll + 10);
-            	    	 
-            	    	 gr = gr.substring(0,gr.indexOf("\""));
-            	    	 prod.setGroup(gr);
-                	   this.prGroups.put(gr, gr);  
-                	 }
-           		
-           	}
-      	 	 }
-        	
-      	 	 String areto = "";
-      	 	 
-      	 	 len = line.indexOf("data code=\"ALK_REG\""); 
-      	 	 if(len != -1){
-      	 	      areto =  line.substring(len + 29); 
-      	 	      areto = areto.substring(0,areto.indexOf("\""));
-                // System.out.println("areto " + areto );
-
-      	 	 }
-      	 	 
-      	 	 len = line.indexOf("data code=\"BRAND\""); 
-      	 	 if(len != -1){
-      	 	      areto =  line.substring(len + 27); 
-      	 	      areto = areto.substring(0,areto.indexOf("\""));
-                 System.out.println("areto " + prod.getID() + " " + areto );
-                if(useBrandAsType) {
-                	prod.setType(areto);
-                }
-
-      	 	 }
-
-      	 	 double mahto = 0;
-      	 	 String maht = "";
-      	 	 len = line.indexOf("data code=\"KOGUS\""); 
-      	 	 if(len != -1){
-      	 	      maht =  line.substring(len + 27); 
-      	 	      maht = maht.substring(0,maht.indexOf("\""));
-                 //  System.out.println("maht " + maht );
-                   try{
-                	   mahto = Double.parseDouble(maht.replace(',', '.'));
-                   }catch(Exception e){
-                	   
-                   }
-      	 	 }
-      	 	 
-      	 	 len = line.indexOf("stock_level_total=");
-      	 	 if(len != -1){
-      	 	     String stock   = line.substring(len + 19);  
-     	          prod.setStock((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
-     	          
-      	 	 }
-      	 	 
-      	
-        	  
-      	  if(line.indexOf("ARTIKKEL_KAMP") != -1){
-      	    	prod.setStatusDiscount("1");
-      	    }
-      	    	  
-      	    
-      	  if(namec.startsWith("*") && prod.getStock() < 1){
-    	    	//goes = false;
-    	    }
-      	    
-      	  if(namec.startsWith("**")){
-    	    //	goes = false;
-    	    }
-      	  
-      	  
-      	if(!prodsInUse.contains(prod.getID())){
-      	//  goes = false;
-      	}
-      	 
-      	    if(goes){
-      	         prodHash.put(prod.getID(), prod);
-      	         tm.put(prod.getName(), prod);	
-      	       if("true".equals(parent.getProps().getProperty("logistika.pluss"))){
-      	            addLPProduct(prod,areto,mahto); 	
-      	            }
-      	        }
-      	    
-              }
-          }
-    
-     } catch (Exception e){
-       e.printStackTrace();
-     }
-     return tm;
-   }
-
-   
-   private void addLPProduct(Product prod,String areto ,double maht){
-	   
-	   //lisame toote LP-sse
-	   	double nkaal = 0;
-		double bkaal = 0;
-		//double maht =  0;
-		double alusel = 0;
-		double protsent  = 0;
-		String pandikood = "" ;
-		String maa = "";
-		String ekn = "";
-		//String areto = "";
-		String tootjaKood = "";
-		String tootjaNimi = "";
-		String grupinimi = "";
-	 
-	 
-	    
-	   
-	      
-	        
-	      }
-	  
-
-	   
-   
-
-   
-   public TreeMap s2(){
-
-	    TreeMap tm = new TreeMap();
-	     
-	     try {
-	 
-	    	   FileReader fr = new FileReader(getDir() + "tooted.xml");
-	           BufferedReader reader = new BufferedReader(fr);
-	         String line = null;
-
-	          while((line = reader.readLine()) != null  ){
-	        	 
-		        	
-	        	  if((line.trim().length()) > 50){
-	        		 // System.out.println(line);
-	        		  int len = line.indexOf("code=");
-		        	  String id   = line.substring(len + 6);
-		      	      Product prod = new Product(id.substring(0,id.indexOf("\"")).trim());
-		      	      len = line.indexOf("default_name=");
-		      	     String name   = line.substring(len + 14);
-		      	     prod.setName( prod.getID() + " " + deCode(name.substring(0,name.indexOf("\""))));
-		      	     tm.put(prod.getID(), prod); 
-	        	  }
-	        	
-	          }	    	 
-	    
-	     } catch (Exception e){
-	       e.printStackTrace();
-	     }
-	     return tm;
-	     
-	   }
-   
-   public String getAssortmentStr(Agent agent){
-    return null;
-  }
-
-   private Hashtable dueSums = new Hashtable();
-   private Hashtable usedCredit = new Hashtable();
-
-   public Vector makeDebtlist(){
-	   //1.teeme klientide arvete nimekirja .
-	   Vector debts = new Vector();
-	   Enumeration enums = this.custtsUsed.elements();
-	   while(enums.hasMoreElements()){
-		String custid = (String)enums.nextElement();
-		
-		   try{
-			 	String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice&get=1&customer=" + custid;
-		      // System.out.println(httpsURL);
-			 	Converter.doTrustToCertificates();
-			 	URL myurl = new URL(httpsURL);
-		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-		        InputStream ins = con.getInputStream();
-		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-		        BufferedReader in = new BufferedReader(isr);
-
-		        String inputLine;
-		        StringBuffer inputLineBuf = new StringBuffer();
-		        while ((inputLine = in.readLine()) != null){
-		        	inputLine = this.enCode(inputLine);
-		        //	System.out.println(inputLine);
-		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\"l\"","\"L\""));
-		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
-		        	while (st.hasMoreTokens()){
-		        		
-		        		String line = st.nextToken();
-		        		String number = "";
-			        	String date = "";
-			        	String duedate = "";
-			        	String volg = "";
-			        	String payer = "";
-		        		
-			        	int ind =  line.indexOf("invoice number=") ;
-		        		if(ind != -1){
-			        		 number = line.substring(ind + 16);
-			        		 number = number.substring(0,number.indexOf("\""));
-			        	}
-			        	
-			        	ind =  line.indexOf("date=") ;
-				        	if(ind != -1){
-				        		 date = line.substring(ind + 6);
-				        		 date = date.substring(0,date.indexOf("\""));
-				        	}
-				        		
-				        	
-			        	 ind =  line.indexOf("due_date=") ;
-			        	if(ind != -1){
-			        		 duedate = line.substring(ind + 10);
-			        		duedate = duedate.substring(0,duedate.indexOf("\""));
-			        	 }
-			        	
-			        	 ind =  line.indexOf("regno=") ;
-				        	if(ind != -1){
-				        		 payer = line.substring(ind + 7);
-				        		 payer = payer.substring(0,payer.indexOf("\""));
-				        	 }
-				        	
-			        	
-			        	ind =  line.indexOf("balance=") ;
-				        	if(ind != -1){
-				        		 volg = line.substring(ind + 9);
-				        		 volg = volg.substring(0,volg.indexOf("\""));
-				        	 }
-				        //	System.out.println(custid  + " " + number + " " + date  + " " + duedate  + " " + volg );	
-				       
-			        	try{
-			        		 double vv = Double.parseDouble(volg);
-			        		 if(vv != 0){
-			        			 if(isDueDate(duedate)){
-						        		     Debt dd = new Debt();
-						     				  dd.setCustID(custid);
-						     				  
-						     				  dd.setDoknr(number);
-						     				  dd.setDate(getDate(date));
-						     				  dd.setDuedate(getDate(duedate));
-						     				  
-						     				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
-						     				  dd.setDue(ff + "");
-						     				  dd.setSum(vv);
-						     				//	System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " +ff);	
-								        			  
-						     				  if(dueSums.get(custid) != null){
-						     					  double ss = Double.parseDouble(dueSums.get(custid) + "")+ vv ;
-						     					 dueSums.put(custid, ss);    
-						     				  }else{
-						     					 dueSums.put(custid, volg); 
-						     				  }
-						     				 debts.add(dd);
-
-									        		
-						        	 }
-			        			 
-
-			     				  if(usedCredit.get(custid) != null){
-			     					  double ss = Double.parseDouble(usedCredit.get(custid) + "")+ vv ;
-			     					 usedCredit.put(custid, ss);    
-			     				  }else{
-			     					 usedCredit.put(custid, volg); 
-			     				  }
-			        			 
-			        		 }
-				        	
-				        	  
-			        	}catch(Exception e){
-			        		//e.printStackTrace();
-			        	}
-				        
-			        	 
-		        	}           	
-		        }
-		      //  System.out.println(inputLineBuf);
-		        in.close();
-		        
-		       
-		   } catch (Exception a){
-			   a.printStackTrace();
-		   }
-		   
-	   }
-	   
-	     System.out.println("debts size" + debts.size());
-	   
-	   return debts;
-   }
-
-   
    public Vector getCustomerProductsList(String agentCode){
 	   Vector custProds = new Vector();
 	   
@@ -1513,23 +852,12 @@ if (dataType == null || dataType.equals("itemCategories")) {
      return 0;
    }
 
-   private String getDir(){
-     String dir = getParent().getProps().getProperty("readin");
-     if (!(dir.endsWith("/") || (dir.endsWith("\\")))) dir = dir + "/";
-     return dir;
-   }
 
 
    public static final String SEPARATOR = "|";
    public static final String DATA_FILE = "DATA.TXT";
    public static final String SALES_BILLS_FILE = "orders.log";
    private String subjectFilesTo = null;
-   private ArrayList customers = null;
-   private Vector debtList = new Vector();
-   private Vector fixedLines = new Vector();
-   private Vector prodsInUse = new Vector();
-   private Vector pricelists = new Vector();
-   private Vector custtsUsed = new Vector();
    
 
   /**

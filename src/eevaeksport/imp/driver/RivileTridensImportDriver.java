@@ -90,7 +90,8 @@ import eevaeksport.util.Converter;
 public class RivileTridensImportDriver
     extends AbstractImportDriver {
 
-  static Category log = Category.getInstance(IceImportDriver.class.getName());
+	static Category log = Category.getRoot();
+
 
   public RivileTridensImportDriver(ImportPanel parent) {
     this.parent = parent;
@@ -777,18 +778,22 @@ if(ladu.trim().length()!=0){
 		  	  
 		  	  		System.out.println("Request Sent");
 		  	  		
-		  	  	log.info("Email sent " + sub);
+		  	  	log("Email sent " + sub);
 		  	
 		  	
 		  			}catch(Exception e){
 		  			e.printStackTrace();	
-		  			log.info("Email sent " + sub);
-		  			log.info(e);
+		  			log("Email sent " + sub);
+		  			log.error(e);
 		  			}
 		  	
 	   }
   
 
+  public void log(String s) {
+	     log.error(s);
+	   }
+  
   
   private String getOOSEmailText( Order ord, String agent, String custname, String addr, boolean overDisc, String ov21) throws SQLException {
 		int i = 0;
