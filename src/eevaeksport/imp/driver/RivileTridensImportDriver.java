@@ -736,7 +736,23 @@ if(ladu.trim().length()!=0){
         fos.write(sb.toString().getBytes());
         fos.close();
         
-        sendConfirmEmail(comm,order,cuname,addr, ov21, overDisc);
+      boolean sent = sendConfirmEmail(comm,order,cuname,addr, ov21, overDisc);
+      if(!sent) {
+    	  try {
+              Thread.sleep(2000); 
+             sent =  sendConfirmEmail(comm,order,cuname,addr, ov21, overDisc);
+          } catch (InterruptedException e) {
+              e.printStackTrace();
+              if(!sent) {
+            	  try {
+                      Thread.sleep(5000); 
+                      sendConfirmEmail(comm,order,cuname,addr, ov21, overDisc);
+                  } catch (InterruptedException r) {
+                      r.printStackTrace();
+                  }
+              }
+          }
+      }
         
 	} catch (Exception e) {
 		e.printStackTrace();
@@ -748,7 +764,7 @@ if(ladu.trim().length()!=0){
   }
   
   
-  private void sendConfirmEmail(String comment, Order ord , String cuname , String delaadr, String ov21, boolean overDisc){
+  private boolean sendConfirmEmail(String comment, Order ord , String cuname , String delaadr, String ov21, boolean overDisc){
 	  String sub = "nosub ";
 	   	try{
 	   		
@@ -785,8 +801,9 @@ if(ladu.trim().length()!=0){
 		  			e.printStackTrace();	
 		  			log("Email sent " + sub);
 		  			log.error(e);
+		  			return false;
 		  			}
-		  	
+		  return true;	
 	   }
   
 

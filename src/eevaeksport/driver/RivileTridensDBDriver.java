@@ -91,7 +91,114 @@ public class RivileTridensDBDriver extends AbstractDBDriver implements  BulkUpda
 
     
     
-   
+      private String makeDeldays(String deldays){
+    	  String res = null;
+    	  char[] chars = deldays.toCharArray();
+    	  for (int i = 0; i < chars.length ; i++) {
+    	      char c = chars[i];
+    	     // System.out.println("char " + c);
+    		  if(res == null){
+    			  res = getcal(c);
+    		  }else{
+    			  res = res + "," + getcal(c);
+    		  }
+    	  }
+    	  return res ;
+      }
+
+      private String getcal(char day){
+    	  String res = null;
+    	  Calendar cal = Calendar.getInstance();
+    	  int weekday = cal.get(Calendar.DAY_OF_WEEK);
+    	 
+    	
+    	  if(day =='A'){
+    		  if (weekday != Calendar.MONDAY){
+    			  while (weekday != Calendar.MONDAY) {
+    				    cal.add(Calendar.DATE, 1);
+    				    weekday = cal.get(Calendar.DAY_OF_WEEK);
+    				}
+    		  }else{
+    			  cal.add(Calendar.DAY_OF_YEAR, 7); 
+    		  }
+    	  }
+    	  
+
+    	  if(day =='B'){
+    		  if (weekday != Calendar.TUESDAY){
+    			  while (weekday != Calendar.TUESDAY) {
+    				    cal.add(Calendar.DATE, 1);
+    				    weekday = cal.get(Calendar.DAY_OF_WEEK);
+    				}
+    		   }else{
+    			  cal.add(Calendar.DAY_OF_YEAR, 7); 
+    		  }
+    	  }
+
+    	  if(day =='C'){
+    		  if (weekday != Calendar.WEDNESDAY){
+    			  while (weekday != Calendar.WEDNESDAY) {
+    				    cal.add(Calendar.DATE, 1);
+    				    weekday = cal.get(Calendar.DAY_OF_WEEK);
+    				}
+    		  }else{
+    			  cal.add(Calendar.DAY_OF_YEAR, 7); 
+    		  }
+    	  }
+    	  
+
+    	  if(day =='D'){
+    		  if (weekday != Calendar.THURSDAY){
+    			  while (weekday != Calendar.THURSDAY) {
+    				    cal.add(Calendar.DATE, 1);
+    				    weekday = cal.get(Calendar.DAY_OF_WEEK);
+    				}
+    		  }else{
+    			  cal.add(Calendar.DAY_OF_YEAR, 7); 
+    		  }
+    	  }
+
+    	  if(day =='E'){
+    		  if (weekday != Calendar.FRIDAY){
+    			  while (weekday != Calendar.FRIDAY) {
+    				    cal.add(Calendar.DATE, 1);
+    				    weekday = cal.get(Calendar.DAY_OF_WEEK);
+    				}
+    		  }else{
+    			  cal.add(Calendar.DAY_OF_YEAR, 7); 
+    		  }
+    	  }
+    	  
+
+    	  if(day =='F'){
+    		  if (weekday != Calendar.SATURDAY){
+    			  while (weekday != Calendar.SATURDAY) {
+    				    cal.add(Calendar.DATE, 1);
+    				    weekday = cal.get(Calendar.DAY_OF_WEEK);
+    				}
+    		  }else{
+    			  cal.add(Calendar.DAY_OF_YEAR, 7); 
+    		  }
+    	  }
+
+    	  if(day =='G'){
+    		  if (weekday != Calendar.SUNDAY){
+    			  while (weekday != Calendar.SUNDAY) {
+    				    cal.add(Calendar.DATE, 1);
+    				    weekday = cal.get(Calendar.DAY_OF_WEEK);
+    				}
+    		  }else{
+    			  cal.add(Calendar.DAY_OF_YEAR, 7); 
+    		  }
+    	  }
+    	  
+    	  res = cal.getTimeInMillis() + "";
+    	  cal.add(Calendar.DATE, 7);
+    	  res = res + "," + cal.getTimeInMillis() + "";  
+    	  
+    	  
+    	  return res ;
+      }
 
 
     public String getAssortmentStr(Agent agent){
@@ -675,11 +782,12 @@ HashSet olemas = new HashSet();
      				}
  				}
  				
- 			
- 					
  					res.put(klient.trim(), "Route : " + link + " Time : " + aeg);
- 		     
- 	 			
+ 					String p =link.replace('1', 'A').replace('2', 'B').replace('3', 'C').replace('4', 'D')
+ 							.replace('5', 'E').replace('6', 'F').replace('7', 'G');
+ 					p = p.replace(",", "");
+ 					res.put("day" + klient.trim(), p);
+ 		 		
  			}
  		}catch (Exception d){
  			d.printStackTrace();
@@ -890,6 +998,7 @@ HashSet olemas = new HashSet();
               }
               
 
+              
              String ag = rs.getString("agent").trim();
               cust.addAgent(new Agent(ag));
              
@@ -962,6 +1071,14 @@ HashSet olemas = new HashSet();
             	  cust.setCity(logistics.get(acc.trim()));
               }
                 
+
+
+              if(logistics != null && logistics.get("day"+acc.trim()) != null && !logistics.get("day"+acc.trim()).equals("ABCDEFG")){
+					cust.setDelDays(makeDeldays(logistics.get("day"+acc.trim())));
+		        }
+              
+              
+              
               if(goes) {
                   customers.put(name, cust);  	  
               }
