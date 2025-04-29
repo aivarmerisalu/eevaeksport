@@ -5430,9 +5430,9 @@ try{
 		}
 		
 		try {
-			//String aa = serv.postJson(json.toString(), "https://api.mobitrek.eu/rest/questionnaire/save");
-			//System.out.println(aa);
-			//serv.closeClient();
+			String aa = serv.postJson(json.toString(), "https://api.mobitrek.eu/rest/questionnaire/save");
+			System.out.println(aa);
+			serv.closeClient();
 			res = true;
 		} catch (Exception e) {
 			e.printStackTrace();

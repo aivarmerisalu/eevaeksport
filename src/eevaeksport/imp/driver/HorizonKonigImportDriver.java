@@ -1854,13 +1854,9 @@ try{
   
 
   public String identifyCustomer(String id,String regnr) throws SQLException {
-	  	String sql1 = null;
 	  
-	  //	 System.out.println("Kliendi Määramine: "  + id + " " + regnr);
-	  	
-	  	    sql1 = " select PK_KLIENTS as kood from APV04761.NADRESES where LIC_NR= '" + id + "'";	
+	  String  sql1 = " select PK_KLIENTS as kood from APV04761.NADRESES where LIC_NR= '" + id + "'";	
 	  	   Connection con = getNewConnection();
-	 //   System.out.println(sql1);
 	    String acc = null;
 
 	    Statement st1 = con.createStatement();
@@ -1872,7 +1868,7 @@ try{
 	    rs1.close();
 	    st1.close();
 	    
-	    if(acc == null){
+	    /*if(acc == null){
 	    	 sql1 ="  select PK_KLIENTS as kood  from APV04761.DKLIENTS k where  PAP_KODS= '" + id + "'";	
 		 //     System.out.println(sql1);
 		  
@@ -1882,7 +1878,7 @@ try{
 		    while (rs1.next()) {
 		    //  acc = rs1.getString("kood").trim() ;
 		    }
-	    }
+	    }*/
 	    
 
         con.close();

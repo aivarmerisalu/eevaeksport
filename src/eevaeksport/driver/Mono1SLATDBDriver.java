@@ -303,7 +303,7 @@ import eevaeksport.Product;
        String sql = "SELECT k.code AS klid,d.docno AS doknr,iif(sp909>date()-1000,sp909,d.date) AS maksepaev,-sp270 AS debt," +
        		"date()-iif(sp909>date()-1000,sp909,d.date) " +
 			"	  AS yle FROM RG267 alg " +
-          " left JOIN 1sjourn d ON  ltrim(RIGHT(alg.sp1356,7)) = rtrim(ltrim(d.iddoc)) left JOIN DH410 info ON " +
+          " left JOIN 1sjourn d ON  ltrim(RIGHT(alg.sp1356,9)) = rtrim(ltrim(d.iddoc)) left JOIN DH410 info ON " +
           "ltrim(rtrim(info.iddoc))=ltrim(rtrim(d.iddoc)) " +
           "  left JOIN DT410 abi ON abi.iddoc=info.iddoc left JOIN  sc46 k ON k.id = sp413 " +
           "  WHERE MONTH(date())=MONTH(alg.period) AND YEAR(date())=YEAR(alg.period) " +
@@ -312,7 +312,7 @@ import eevaeksport.Product;
        String sqle =" SELECT k.descr,k.code AS klid,right(ltrim(left(sp1008,23)),9) AS doknr,SP654  as kuup,sp1753 AS maksepaev,-sp270 AS debt, " + 
 		"	 date()-iif(sp1753>date()-1000,sp1753,SP654 )   AS yle " +
 	"		  FROM RG267 alg " +
-     "      left JOIN DH649 d ON  ltrim(RIGHT(alg.sp1356,7)) = rtrim(ltrim(d.iddoc)) " +
+     "      left JOIN DH649 d ON  ltrim(RIGHT(alg.sp1356,9)) = rtrim(ltrim(d.iddoc)) " +
       "       left JOIN  sc46 k ON k.id = sp651 " +
        "     WHERE MONTH(date())=MONTH(alg.period) AND YEAR(date())=YEAR(alg.period) " +
         "    AND k.descr!='' AND sp270<>0 ORDER BY k.descr,sp1008 GROUP BY d.sp1008 ";

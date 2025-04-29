@@ -1142,6 +1142,19 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
      } catch (IOException e){
        e.printStackTrace();
      }
+     
+     Customer cccr = new Customer("OTHERSTUFF");
+     cccr.setName("x Muud Tegevused");
+     cccr.setAddress("Kuskil kohas");
+
+    	Enumeration enume = getParent().getAgentsHash().elements();
+        while (enume.hasMoreElements()) {
+          Agent a = (Agent) enume.nextElement();
+          cccr.addAgent(a);
+        }
+   
+        tm.put("x Muud Tegevused", cccr);
+    
      return tm;
    }
 

@@ -654,29 +654,16 @@ HashSet olemas = new HashSet();
  				String aeg = "";
  				String klient = "";
  				try {
- 					// System.out.println(row.getCell((short)a).getStringCellValue());
  					link =  formatter.formatCellValue(row.getCell((short) 14));
  				} catch (Exception e) {
  					e.printStackTrace();
- 					try {
- 						
-     					// System.out.println(row.getCell((short)a).getStringCellValue());
-     					link =  ((int)row.getCell((short) 0).getNumericCellValue()) + "14";
-     				} catch (Exception r) {
-     					// System.out.println(row.getCell((short)a).getNumericCellValue());
-     				}// System.out.println(row.getCell((short)a).getNumericCellValue());
+ 					
  				}
  				
  				try {
- 					// System.out.println(row.getCell((short)a).getStringCellValue());
  					aeg =  formatter.formatCellValue(row.getCell((short) 10));
  				} catch (Exception e) {
  					e.printStackTrace();
- 					try {
- 						aeg =  ((int)row.getCell((short) 0).getNumericCellValue()) + "10";
-     				} catch (Exception r) {
-     					// System.out.println(row.getCell((short)a).getNumericCellValue());
-     				}// System.out.println(row.getCell((short)a).getNumericCellValue());
  				}
  				
  				try {

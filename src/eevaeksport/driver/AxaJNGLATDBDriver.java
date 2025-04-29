@@ -1164,7 +1164,10 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
         HashMap custMap = new HashMap();
         HashMap custMap2 = new HashMap();
         HashMap<String,Vector<String>> custAgents = new HashMap<String,Vector<String>>();
-        HashMap<String,Vector<String>> custMercs = getMerc();
+        HashMap<String,Vector<String>> custMercs = null;
+        if(!instance.equals("shell")) {
+        	custMercs =  getMerc();
+        }
         
         try {
         	Connection  con = getNewConnection();
@@ -1347,7 +1350,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
                 	}
                 }
                 
-                if(custMercs.get(cust.getID()) != null) {
+                if(custMercs != null && custMercs.get(cust.getID()) != null) {
                 	Vector<String> ags = custMercs.get(cust.getID());
                 	for (String ag : ags) {
                 		cust.addAgent(new Agent(ag));
@@ -1632,8 +1635,10 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
         	}
         	
         	sb.append("</body></html>");
+        	if(!instance.equals("shell")) {
         	Converter.saveFile("reports/mustreportagent.html", sb.toString());
         	Converter.saveFile("reports/mustreportagent.csv", sb2.toString());
+        	}
         
          }
         

@@ -1577,12 +1577,13 @@ if(questsDone == null) {
 	                 				 String custID = itera.next();
 	                 				 Quest qq = questArr.get(custID);
 	                 				boolean added =  Converter.addNewQuest(qq, companyx, user, pass);
+	                 				System.exit(0);
 	                 			 }
 	                 				
 	                 				
 	                 			}
 	                 			
-	                 				//System.exit(0);
+	                 				System.exit(0);
 	                 			}catch(Exception e) {
 	                 				e.printStackTrace();
 	                 			}
