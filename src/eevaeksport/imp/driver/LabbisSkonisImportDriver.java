@@ -1,4 +1,5 @@
 
+
 /**
  * @author Aivar  Merisalu
  * MobileJava Junior Programmer +37256248034 
@@ -550,7 +551,7 @@ change 3DBV009 manager order warehouse – we want this manager to make orders o
     		   ladu =    "1TS200";
     	   }
     	   if(agent.substring(0,1).equals("2")){ //Klaipeda agent
-    		   ladu =    "2TS300";
+    		   ladu =    "0TS100";
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1TS200";
@@ -581,7 +582,7 @@ change 3DBV009 manager order warehouse – we want this manager to make orders o
     		   ladu =    "1AS203";
     	   }
     	   if(agent.substring(0,1).equals("2")){ //Klaipeda agent
-    		   ladu =    "2AS303";
+    		   ladu =    "0AS101";
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1AS203";
@@ -609,7 +610,7 @@ change 3DBV009 manager order warehouse – we want this manager to make orders o
     		   ladu =    "1PS210";
     	   }
     	   if(agent.substring(0,1).equals("2")){ //Klaipeda agent
-    		   ladu =    "2PS308";
+    		   ladu =    "0PS119";
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1PS210";
@@ -637,7 +638,7 @@ change 3DBV009 manager order warehouse – we want this manager to make orders o
     		   ladu =    "1AS203";
     	   }
     	   if(agent.substring(0,1).equals("2")){ //Klaipeda agent
-    		   ladu =    "2AS303";
+    		   ladu =    "4XX002";
     	   }
     	   if(agent.substring(0,1).equals("3")){ //Panevezys agent
     		   ladu =    "1AS203";
