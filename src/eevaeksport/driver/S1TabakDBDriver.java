@@ -2,9 +2,11 @@ package eevaeksport.driver;
 
 import java.io.BufferedReader;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -36,10 +38,23 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFComment;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -1206,8 +1221,9 @@ System.out.println(yesGroups.size() + " yesGroups");
             	   }
              }
              
-             if(prod.getID().equals("TR0018545")) {
-         	 System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + gr2+ " " + treeGr.get(gr2) +" " + goes);
+             if(prod.getID().equals("TR0019433")) {
+         	 System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() 
+         	 + " " + gr2+ " " + treeGr.get(gr2) +" " + goes);
              }
              // producti 0126
              String sorting = "aa";
@@ -1237,9 +1253,6 @@ System.out.println(yesGroups.size() + " yesGroups");
              prod.setNameSorting(sorting + name);
              
 
-             if(prod.getID().equals("TR0018545")) {
-         	 System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() + " " + prod.getUnit() + " " + prod.getPrice() + " " + goes);
-             }
              if(goes) {
             	 //  System.out.println( prod.getGroup() +" "+ sorting + name);
             	   tm.put(sorting+name2, prod); 
@@ -1435,8 +1448,112 @@ public void setNF(NumberFormat nf) {
 
   private void uploadQuests() {
 	  
+	  
+	//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
+	  
+      
+	  HashSet answersDone = null;
+		try {
+			answersDone = (HashSet)Converter.readObject("answersdone.obj");
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}		
+if(answersDone == null) {
+  answersDone = new HashSet();
+}
+
+
+TreeMap<String, org.json.simple.JSONObject> answBuffer = new TreeMap<String, org.json.simple.JSONObject>();
+
+      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
+ Calendar from = Calendar.getInstance();
+ from.add(Calendar.DAY_OF_YEAR, -1);
+ Calendar to = Calendar.getInstance();    
+ to.add(Calendar.DAY_OF_YEAR, 2);
+ 
+ TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
+		System.out.println("files " + files1.toString());
+ 
+    String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "YESNOFORCE", null, "SV-");
+
+    JSONParser parser = new JSONParser();
+		try {
+		org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader(filename));
+	
+
+  		for (int i = 0; i < cc.size(); i++) {
+  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+  			String dateAndTime = (String)cob.get("recetime");
+  			String dateOnly = dateAndTime.split("T")[0];
+  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
+  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
+  		   
+  			String custID = (String)cob.get("custid");
+  			String agentname = (String)cob.get("agentname");
+  			String agid = (String)cob.get("agentid");
+  			String qname = (String)cob.get("prodname");
+  			 
+  			String title = (String)cob.get("extData");
+  			String created = (String)cob.get("resstr3"); // see on tegelt Long
+  			String comment = (String)cob.get("comment");
+  			String prodid = (String)cob.get("prodid");
+  			
+  			
+  			
+  			String signa = custID + "-" + dateAndTime;
+
+				String foto = null;
+  			
+  			try {
+  				if(cob.get("pictureLinks") != null) {
+  				org.json.simple.JSONArray phs = (org.json.simple.JSONArray)parser.parse((cob.get("pictureLinks").toString()));
+  				String fotoOK = null;
+  				if(files1 != null && files1.get(custID) != null && phs != null) {
+  					int a = 0;
+  						for(int y = 0; y < phs.size() ; y++) {
+  							String fname = (String)phs.get(y);
+  				
+  					ArrayList arr = (ArrayList)files1.get(custID);
+  					for(int e = 0; e<arr.size(); e++) {
+  						Toode t = (Toode)arr.get(e);
+  						foto = t.getLadu();
+  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
+  							fotoOK = foto;
+  							 a++;
+  				  		   }
+  					     }
+  					  }
+  				   }	
+
+  				if(fotoOK != null) {
+  					cob.put("phurl", fotoOK);
+  				}
+  				}
+  				
+  				}catch(Exception e) {
+  					e.printStackTrace();
+  				}
+  			
+
+				answBuffer.put(custID + "-" + qname + "-" + title, cob);
+  			
+  		}	  		
+		} catch (Exception e) {
+		e.printStackTrace();
+	}
+		
+		System.out.println("buffer " + answBuffer);
+
+	  try {
+			Converter.saveObject(answersDone, "answersdone.obj");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	//  System.exit(0);
+
 //	  1- loeme küsimused sisse 
 	  //otsime faile mille nimes on pallets
+	  
 	  
 	  HashSet questsDone = null;
 		try {
@@ -1461,12 +1578,12 @@ if(questsDone == null) {
 		 if(!svdata.exists()) {
 			 svdata.mkdir();
 		 }
-		
+		boolean changesMade = false;
 	          if (folder.exists() && folder.isDirectory()) {
 	              File[] files = folder.listFiles();
 
 	              for (File file : files) {
-	                  if (file.isFile() && file.getName().contains("pallets")) {
+	                  if (file.isFile() && file.getName().contains("example")) { // pallets example
 	                      System.out.println("Found: " + file.getAbsolutePath());
 	                 		try {
 	                 			FileInputStream ff = new FileInputStream(file);
@@ -1527,7 +1644,7 @@ if(questsDone == null) {
     	                 				
     	                 				if(kyssa != null && kyssa.trim().length() > 0) {
     	                 					
-    	                 					String kysimus = (String)kyssad.get(b) + " PAL" + kyssa + "";
+    	                 					String kysimus =  "|PAL" + kyssa + "| " + (String)kyssad.get(b);
     	                 				
     	                 					Quest qq = questArr.get(klient);
     	                 					if( qq == null) {
@@ -1563,12 +1680,151 @@ if(questsDone == null) {
     	                 					
     	                 			}
 	                 				questsDone.add(signa);
+	                 				}else {
+	                 	//seda tehakse juhul kui see rida on küsimusena juba olemas aga vaatame kas on ka äkki vastust tulnud.
+	                 					// ja laksame tulemused peale.
+	                 					
+
+		                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
+	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
+	    	                 				
+	    	                 				XSSFCell cell = row.getCell((short) b);
+	    	                 				
+	    	                 				if(kyssa != null && kyssa.trim().length() > 0) {
+	    	                 					
+	    	                 					String kysimus =  "|PAL" + kyssa + "| " + (String)kyssad.get(b);
+	    	                 					//vaatame kas selline asi on meil olemas
+	    	                 				
+	    	                 					String key = klient + "-" + kysimus + "-"+ chain +" "+ klient + " " + period;
+	    	                 					if(answBuffer.get(key) != null) {
+                                                  
+	    	                 						org.json.simple.JSONObject ob = answBuffer.get(key);
+                                                   
+		    	                 					System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
+		    	                 					
+		    	                 					CellStyle originalStyle = cell.getCellStyle();
+
+			    	                 				CellStyle newStyle = workbook.createCellStyle();
+			    	                 				newStyle.cloneStyleFrom(originalStyle);
+                                                       System.out.println("oioi " + ob.get("resint1"));
+                                                       
+                                                       String cobComm = (String)ob.get("comment");
+                                                       
+			    	                 				if((ob.get("resint1")+ "").equals("0")) {
+			    	                 			       newStyle.setFillForegroundColor(IndexedColors.LIME.getIndex());
+			    	                 			       if(cobComm != null && cobComm.trim().length() > 0) {
+			    	                 			    	  newStyle.setFillForegroundColor(IndexedColors.GOLD.getIndex());
+			    	                 			       }
+			    	                 				 } else {
+			    	                 				   newStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+			    	                 				}
+			    	                 			      newStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+			    	                 			     cell.setCellStyle(newStyle);
+			    	                 			     
+			    	                 			     
+		    	                 					XSSFDrawing drawing = sheet.createDrawingPatriarch();
+		    	                 			        XSSFComment comment = cell.getCellComment();
+
+
+		    	                 			        if(cobComm == null) {
+		    	                 			        	cobComm = "";
+		    	                 			        }
+		    	                 			        
+		    	                  String newComm = (cobComm +  " " 
+				    	                   + (String)ob.get("agentname") + " " + ((String)ob.get("recetime")).replace('T', ' ').replace('Z', ' ')).trim();
+		    	                 			            
+		    	                 			        
+		    	                 			        if (comment == null) {
+
+				    	                 				CreationHelper helper = workbook.getCreationHelper();
+		    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+		    	                 			            anchor.setCol1(cell.getColumnIndex());
+		    	                 			            anchor.setCol2(cell.getColumnIndex() + 3);
+		    	                 			            anchor.setRow1(row.getRowNum());
+		    	                 			            anchor.setRow2(row.getRowNum() + 3);
+		    	                 			            comment = drawing.createCellComment(anchor);
+
+	                                                     XSSFRichTextString commentText = new XSSFRichTextString(newComm);
+			    	                 			        comment.setString(commentText);
+			    	                 			        comment.setAuthor("Merisoft-Mobitrek");
+			    	                 			        cell.setCellComment(comment);
+		    	                 			        } else {
+		    	                 			        	
+		    	                 			        	
+			    	                 			        // Set comment text
+			    	                 			        if(comment.getString() != null) {
+
+			    	                 			      System.out.println("comm " + comment.getString().getString()+ "\n" + newComm);
+			    	                 			        	if( !comment.getString().getString().contains(newComm)) {
+			    	                 			        		String oldText = comment != null ? comment.getString().getString() : "";
+			    	                 			        		cell.removeCellComment();
+
+						    	                 				CreationHelper helper = workbook.getCreationHelper();
+				    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+				    	                 			            anchor.setCol1(cell.getColumnIndex());
+				    	                 			            anchor.setCol2(cell.getColumnIndex() + 5);
+				    	                 			            anchor.setRow1(row.getRowNum());
+				    	                 			            anchor.setRow2(row.getRowNum() + 5);
+				    	                 			          Comment  commentNew = drawing.createCellComment(anchor);
+			    	             XSSFRichTextString commentText = new XSSFRichTextString(oldText+ "\n" + newComm);
+			    	             commentNew.setString(commentText);
+			    	             commentNew.setAuthor("Merisoft-Mobitrek");
+						    	                 			        cell.setCellComment(commentNew);
+				    	                 			       	
+			    	                 			        		
+			    	                 			            }
+			    	                 			        }
+	                                                     	 }
+		    	                 			        	
+		    	                 			        
+		    	                 			        
+		    	                 			        
+
+		    	                 					
+		    	                 				 if(answBuffer.get(key).get("phurl") != null) {
+		    	                 					 
+		    	                 					 
+		    	                 					 
+		    	                 				
+		    	                 				Font originalFont = workbook.getFontAt(originalStyle.getFontIndex());
+		    	                 				Font linkFont = workbook.createFont();
+		    	                 				linkFont.setColor(IndexedColors.BLUE.getIndex());
+		    	                 				linkFont.setUnderline(Font.U_SINGLE);
+		    	                 				linkFont.setFontName(originalFont.getFontName());
+		    	                 				linkFont.setFontHeight(originalFont.getFontHeight()); // preserve font size
+		    	                 				newStyle.setFont(linkFont); // use the new font
+		    	                 					
+		    	                 			       
+
+			    	                 				CreationHelper helper = workbook.getCreationHelper();
+		    	                 			        Hyperlink link = helper.createHyperlink(Hyperlink.LINK_URL);
+		    	                 			        
+		    	                 			       String safeUrl = ((String)answBuffer.get(key).get("phurl")).replace("{", "%7B")
+		    	                                           .replace("}", "%7D")
+		    	                                           .replace("[", "%5B")
+		    	                                           .replace("]", "%5D")
+		    	                                           .replace("!", "%21")
+		    	                                           .replace(" ", "%20");
+		    	                 			        link.setAddress(safeUrl);
+		    	                 			        cell.setHyperlink(link);
+		    	                 					changesMade = true;
+	    	                 					}
+	    	                 				 }
+	    	                 				}
+		                 				}
+	                 					
 	                 				}
 	                 				
 	                 			 }
 	                 			
-	                 			
-	                 			System.out.println(questArr.toString());	
+	                 			if(changesMade) {
+
+	                 			       FileOutputStream fos = new FileOutputStream(this.getExcelDir() + "example.xlsx"); // Same file name
+	                 			      workbook.write(fos);
+	                 			      fos.close();
+	                 			      
+	                 			}
+	                 			//System.out.println(questArr.toString());	
 	                 			
 	                 			// Saadame ära
 	                 			if(questArr.size() > 0) {
@@ -1577,13 +1833,13 @@ if(questsDone == null) {
 	                 				 String custID = itera.next();
 	                 				 Quest qq = questArr.get(custID);
 	                 				boolean added =  Converter.addNewQuest(qq, companyx, user, pass);
-	                 				System.exit(0);
+	                 			//	System.exit(0);
 	                 			 }
 	                 				
 	                 				
 	                 			}
 	                 			
-	                 				System.exit(0);
+	                 				//System.exit(0);
 	                 			}catch(Exception e) {
 	                 				e.printStackTrace();
 	                 			}
@@ -1604,95 +1860,9 @@ if(questsDone == null) {
 	  			e.printStackTrace();
 	  		}
 	          
+	      //  System.exit(0);  
 	          
-	          
-	          // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
-		 Calendar from = Calendar.getInstance();
-		 from.add(Calendar.DAY_OF_YEAR, -1);
-		 Calendar to = Calendar.getInstance();    
-		 to.add(Calendar.DAY_OF_YEAR, 2);
-		 
-		 TreeMap files = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
-	  		System.out.println("files " + files.toString());
-		 
-	        String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "YESNOFORCE", null, "SV-");
 
-	        JSONParser parser = new JSONParser();
-	  		try {
-				org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader(filename));
-			
-
-		  		for (int i = 0; i < cc.size(); i++) {
-		  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
-		  			String dateAndTime = (String)cob.get("recetime");
-		  			String dateOnly = dateAndTime.split("T")[0];
-		  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
-		  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
-		  		  
-		  			String custID = (String)cob.get("custid");
-		  			String agentname = (String)cob.get("agentname");
-		  			String agid = (String)cob.get("agentid");
-		  			String qname = (String)cob.get("prodname");
-		  			String title = (String)cob.get("extData");
-		  			String created = (String)cob.get("resstr3"); // see on tegelt Long
-		  			String comment = (String)cob.get("comment");
-		  			String prodid = (String)cob.get("prodid");
-		  			
-		  			
-		  			
-		  			
-		  			try {
-		  				String foto = null;
-		  				if(cob.get("pictureLinks") != null) {
-		  				org.json.simple.JSONArray phs = (org.json.simple.JSONArray)parser.parse((cob.get("pictureLinks").toString()));
-		  				
-		  				if(files != null && files.get(custID) != null && phs != null) {
-		  					int a = 0;
-		  				//	if(cuid.equals("747724"))
-		  					//	System.out.println("phs " + phs.toString());
-		  						for(int y = 0; y < phs.size() ; y++) {
-		  							String fname = (String)phs.get(y);
-		  						
-		  						//	System.out.println("fname " + fname);
-				  					
-		  				
-		  					ArrayList arr = (ArrayList)files.get(custID);
-		  					for(int e = 0; e<arr.size(); e++) {
-		  						Toode t = (Toode)arr.get(e);
-		  						foto = t.getLadu();
-		  					//	System.out.println("ff " + foto + " " + t.getID() + " " + prodid);
-		  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
-		  							
-		  							System.out.println("foto " + foto);
-		  								
-		  				  		    /*     Cell  cell = worksheetBASE.getRow(palletrow).createCell(14+a);
-		  				  		         cell.setCellValue("Photo Link "+(a+1) );
-		  				  		         XSSFHyperlink link = (XSSFHyperlink)createHelper.createHyperlink(Hyperlink.LINK_URL);
-		  				  		         link.setAddress(URLEncoder.encode(foto, StandardCharsets.UTF_8.toString()));
-		  				  		         cell.setHyperlink((XSSFHyperlink) link);
-		  				  		         cell.setCellStyle(hlinkstyle);*/
-		  							
-		  				  		     a++;
-		  				  				
-		  						   }
-		  					     }
-		  					  }
-		  				   }	
-		  				}
-		  				}catch(Exception e) {
-		  					e.printStackTrace();
-		  				}
-		  			
-		  			
-		  			
-		  		}
-	  		
-	  		} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
- 	
-	      
    	  
   }
   

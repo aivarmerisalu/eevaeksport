@@ -2206,7 +2206,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 					value2.put("code", agentid);
 					value2.put("name", agentnam);
 					arr.put(value2);
-					value.put("managers", arr);		
+				//	value.put("managers", arr);		
 					
 					System.out.println(photoname + " " + value.toString());
 
