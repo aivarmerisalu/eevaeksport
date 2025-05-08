@@ -35,6 +35,7 @@ import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.util.Converter;
+import sun.util.logging.resources.logging;
 
 /**
  * Title:        Eeva eksport
@@ -1286,8 +1287,15 @@ rs.close();
 
 
 
-  private Connection getNewConnection() throws SQLException{
-    return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
+  private Connection getNewConnection() {
+    try {
+		return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
+	} catch (SQLException e) {
+		parent.logerror(e);
+		e.printStackTrace();
+		System.exit(0);
+	}
+    return null;
   }
 
 

@@ -939,6 +939,7 @@ public String getProductSortingData() {
 @Override
 public TreeMap getProducts(Agent agent) {
 	  TreeMap tm = new TreeMap();
+	  String weblink = parent.getProps().getProperty("weblink") ;
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
   	
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
@@ -997,6 +998,9 @@ public TreeMap getProducts(Agent agent) {
           		prod.setStock(Double.parseDouble(inventory));
           	}
           	  	
+          	if(weblink != null) {
+          		prod.weblink = weblink + prod.getID();
+          	}
              
             if(!blocked) {
             	  tm.put(prod.getName(), prod);	

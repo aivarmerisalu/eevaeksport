@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -44,11 +45,21 @@ import javax.mail.internet.AddressException;
 
 import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFComment;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateMidnight;
@@ -72,6 +83,8 @@ import eevaeksport.EksportPanel;
 import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.Quest;
+import eevaeksport.QuestLine;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.report.DefectiveLineWrapperMeri;
 import eevaeksport.report.EmailLogger;
@@ -2073,6 +2086,437 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
   private NumberFormat NF = NumberFormat.getInstance();
   private TreeMap  dealers = new TreeMap();
   
+  
+  private void uploadQuestsAndAnswers() {
+	  
+	  
+		//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
+		  
+	      
+		  HashSet answersDone = null;
+			try {
+				answersDone = (HashSet)Converter.readObject("answersdone.obj");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}		
+	if(answersDone == null) {
+	  answersDone = new HashSet();
+	}
+
+
+	TreeMap<String, org.json.simple.JSONObject> answBuffer = new TreeMap<String, org.json.simple.JSONObject>();
+
+	      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
+	 Calendar from = Calendar.getInstance();
+	 from.add(Calendar.DAY_OF_YEAR, -1);
+	 Calendar to = Calendar.getInstance();    
+	 to.add(Calendar.DAY_OF_YEAR, 2);
+	 
+	 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), rcompany, user, pass, true);
+			System.out.println("files " + files1.toString());
+	 
+	    String filename =  Converter.getSVData(from.getTime(), to.getTime(), rcompany, user, pass, false, "YESNOFORCE", null, "SV-");
+
+	    JSONParser parser = new JSONParser();
+			try {
+			org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader(filename));
+		
+
+	  		for (int i = 0; i < cc.size(); i++) {
+	  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+	  			String dateAndTime = (String)cob.get("recetime");
+	  			String dateOnly = dateAndTime.split("T")[0];
+	  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
+	  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
+	  		   
+	  			String custID = (String)cob.get("custid");
+	  			String agentname = (String)cob.get("agentname");
+	  			String agid = (String)cob.get("agentid");
+	  			String qname = (String)cob.get("prodname");
+	  			 
+	  			String title = (String)cob.get("extData");
+	  			String created = (String)cob.get("resstr3"); // see on tegelt Long
+	  			String comment = (String)cob.get("comment");
+	  			String prodid = (String)cob.get("prodid");
+	  			
+	  			
+	  			
+	  			String signa = custID + "-" + dateAndTime;
+
+					String foto = null;
+	  			
+	  			try {
+	  				if(cob.get("pictureLinks") != null) {
+	  				org.json.simple.JSONArray phs = (org.json.simple.JSONArray)parser.parse((cob.get("pictureLinks").toString()));
+	  				String fotoOK = null;
+	  				if(files1 != null && files1.get(custID) != null && phs != null) {
+	  					int a = 0;
+	  						for(int y = 0; y < phs.size() ; y++) {
+	  							String fname = (String)phs.get(y);
+	  				
+	  					ArrayList arr = (ArrayList)files1.get(custID);
+	  					for(int e = 0; e<arr.size(); e++) {
+	  						Toode t = (Toode)arr.get(e);
+	  						foto = t.getLadu();
+	  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
+	  							fotoOK = foto;
+	  							 a++;
+	  				  		   }
+	  					     }
+	  					  }
+	  				   }	
+
+	  				if(fotoOK != null) {
+	  					cob.put("phurl", fotoOK);
+	  				}
+	  				}
+	  				
+	  				}catch(Exception e) {
+	  					e.printStackTrace();
+	  				}
+	  			
+	  			 
+ if(!answersDone.contains(cob)) {
+				answBuffer.put(custID + "-" + qname + "-" + title, cob);
+	  			answersDone.add(cob);
+ }
+ 
+	  		}	  		
+			} catch (Exception e) {
+			e.printStackTrace();
+		}
+			
+			System.out.println("buffer " + answBuffer);
+
+		  try {
+				Converter.saveObject(answersDone, "answersdone.obj");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		//  System.exit(0);
+
+//		  1- loeme küsimused sisse 
+		  //otsime faile mille nimes on pallets
+		  
+		  
+		  HashSet questsDone = null;
+			try {
+				questsDone = (HashSet)Converter.readObject("questsdone.obj");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}		
+	if(questsDone == null) {
+		questsDone = new HashSet();
+	}
+
+		  
+		  HashMap<String , Quest> questArr = new HashMap<String ,Quest>();
+		  
+			File folder = new File(this.getExcelDir());
+			 File done = new File(this.getExcelDir()+ "done");
+			 if(!done.exists()) {
+				 done.mkdir();
+			 }
+
+		 File svdata = new File( "svdata");
+			 if(!svdata.exists()) {
+				 svdata.mkdir();
+			 }
+			boolean changesMade = false;
+		          if (folder.exists() && folder.isDirectory()) {
+		              File[] files = folder.listFiles();
+
+		              for (File file : files) {
+		                  if (file.isFile() && file.getName().contains("pallets")) { // pallets example
+		                      System.out.println("Found: " + file.getAbsolutePath());
+		                 		try {
+		                 			FileInputStream ff = new FileInputStream(file);
+		                 			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+		                 			XSSFSheet sheet = workbook.getSheetAt(0);
+		                 			XSSFRow row = sheet.getRow(0);
+		                 			 
+		                 			 DataFormatter formatter = new DataFormatter();
+		                 		//loeme sisse küsimused 			 
+		                 					 
+		                 					row = sheet.getRow(5);
+	                                 HashMap kyssad = new HashMap();
+		    	                 			for (int a = 6; a <  row.getLastCellNum(); a++) {
+		    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) a));
+		    	                 				kyssad.put(a, kyssa);
+		    	                 			}
+		    	                 	
+		                 			for (int a = 6; a <  sheet.getLastRowNum(); a++) {
+		                 				row = sheet.getRow(a);
+		                 			
+		                 				String klient = "";
+		                 				String chain = "";
+		                 				String question = "";
+		                 				String period = "";
+		                 				
+		                 				try {
+		                 					    klient =  formatter.formatCellValue(row.getCell((short) 1));
+		                 				} catch (Exception e) {
+		                 					try {
+		                 						klient =  ((int)row.getCell((short) 1).getNumericCellValue()) + "";
+		                    				} catch (Exception r) {
+		                    				}
+		                 				}
+		                 				
+		                 				try {
+		                 					   chain =  formatter.formatCellValue(row.getCell((short) 2));
+		                 				} catch (Exception e) {
+		                 					try {
+		                 						chain =  ((int)row.getCell((short) 2).getNumericCellValue()) + "";
+		                    				} catch (Exception r) {
+		                    				}
+		                 				}
+		                 				
+		                 				try {
+		                 					   period =  formatter.formatCellValue(row.getCell((short) 5));
+		                 				} catch (Exception e) {
+		                 					try {
+		                 						period =  ((int)row.getCell((short) 5).getNumericCellValue()) + "";
+		                    				} catch (Exception r) {
+		                    				}
+		                 				}
+		                 				
+		                 				String signa = klient +"_"+ period;
+		                 				if(!questsDone.contains(signa)) {
+		                 				
+		                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
+	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
+	    	                 				
+	    	                 				if(kyssa != null && kyssa.trim().length() > 0) {
+	    	                 					
+	    	                 					String kysimus =  "|PAL" + kyssa + "| " + (String)kyssad.get(b);
+	    	                 				
+	    	                 					Quest qq = questArr.get(klient);
+	    	                 					if( qq == null) {
+	    	                 					   qq = new Quest();
+	    	                 					   qq.custID = klient;
+	    	                 					   qq.title = chain + " " + klient + " " + period;
+	    	                 					   
+	    	                 					DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+	    	                 					String[] dateStrings = period.split(" - ");
+	    	                 					// hakkame 7 päeva enne näitame
+	    	                 					long week = 1000*60*60*24*7;
+	    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() - week;
+	    	                 				    qq.qEnd = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+	    	                 				   
+	    	                 				   
+	    	                 				       QuestLine ql = new QuestLine();
+	    	                 				          ql.qname = kysimus;
+	    	                 				          ql.qtype = "YESNOFORCEDYESPICT";
+	    	                 				    qq.questLines = new ArrayList<QuestLine>();
+	    	                 				    qq.questLines.add(ql);
+	    	                 				   
+	    	                 				    questArr.put(klient, qq);
+	    	                 				   
+	    	                 					} else {
+	    	                 						
+	    	                 					 QuestLine ql = new QuestLine();
+	     	                 				        ql.qname = kysimus;
+	     	                 				        ql.qtype = "YESNOFORCEDYESPICT";
+	     	                 				      qq.questLines.add(ql);
+	     	                 				      
+	    	                 					}
+	    	                 					
+	    	                 					
+	    	                 				}
+	    	                 					
+	    	                 			}
+		                 				questsDone.add(signa);
+		                 				}else {
+		                 	//seda tehakse juhul kui see rida on küsimusena juba olemas aga vaatame kas on ka äkki vastust tulnud.
+		                 					// ja laksame tulemused peale.
+		                 					
+
+			                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
+		    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
+		    	                 				
+		    	                 				XSSFCell cell = row.getCell((short) b);
+		    	                 				
+		    	                 				if(kyssa != null && kyssa.trim().length() > 0) {
+		    	                 					
+		    	                 					String kysimus =  "|PAL" + kyssa + "| " + (String)kyssad.get(b);
+		    	                 					//vaatame kas selline asi on meil olemas
+		    	                 				
+		    	                 					String key = klient + "-" + kysimus + "-"+ chain +" "+ klient + " " + period;
+		    	                 					if(answBuffer.get(key) != null) {
+	                                                  
+		    	                 						org.json.simple.JSONObject ob = answBuffer.get(key);
+	                                                   
+			    	                 					System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
+			    	                 					
+			    	                 					CellStyle originalStyle = cell.getCellStyle();
+
+				    	                 				CellStyle newStyle = workbook.createCellStyle();
+				    	                 				newStyle.cloneStyleFrom(originalStyle);
+	                                                       System.out.println("oioi " + ob.get("resint1"));
+	                                                       
+	                                                       String cobComm = (String)ob.get("comment");
+	                                                       
+				    	                 				if((ob.get("resint1")+ "").equals("0")) {
+				    	                 			       newStyle.setFillForegroundColor(IndexedColors.LIME.getIndex());
+				    	                 			       if(cobComm != null && cobComm.trim().length() > 0) {
+				    	                 			    	  newStyle.setFillForegroundColor(IndexedColors.GOLD.getIndex());
+				    	                 			       }
+				    	                 				 } else {
+				    	                 				   newStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+				    	                 				}
+				    	                 			      newStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				    	                 			     cell.setCellStyle(newStyle);
+				    	                 			     
+				    	                 			     
+			    	                 					XSSFDrawing drawing = sheet.createDrawingPatriarch();
+			    	                 			        XSSFComment comment = cell.getCellComment();
+
+
+			    	                 			        if(cobComm == null) {
+			    	                 			        	cobComm = "";
+			    	                 			        }
+			    	                 			        
+			    	                  String newComm = (cobComm +  " " 
+					    	                   + (String)ob.get("agentname") + " " + ((String)ob.get("recetime")).replace('T', ' ').replace('Z', ' ')).trim();
+			    	                 			            
+			    	                 			        
+			    	                 			        if (comment == null) {
+
+					    	                 				CreationHelper helper = workbook.getCreationHelper();
+			    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+			    	                 			            anchor.setCol1(cell.getColumnIndex());
+			    	                 			            anchor.setCol2(cell.getColumnIndex() + 3);
+			    	                 			            anchor.setRow1(row.getRowNum());
+			    	                 			            anchor.setRow2(row.getRowNum() + 3);
+			    	                 			            comment = drawing.createCellComment(anchor);
+
+		                                                     XSSFRichTextString commentText = new XSSFRichTextString(newComm);
+				    	                 			        comment.setString(commentText);
+				    	                 			        comment.setAuthor("Merisoft-Mobitrek");
+				    	                 			        cell.setCellComment(comment);
+				    	                 			       changesMade = true;
+				    	                 			       
+			    	                 			        } else {
+			    	                 			        	
+				    	                 			        if(comment.getString() != null) {
+
+				    	                 			      
+				    	                 			        	System.out.println("comm " + comment.getString().getString()+ "\n" + newComm);
+				    	                 			        	if( !comment.getString().getString().contains(newComm)) {
+				    	                 			        		String oldText = comment != null ? comment.getString().getString() : "";
+				    	                 			        		cell.removeCellComment();
+
+							    	                 				CreationHelper helper = workbook.getCreationHelper();
+					    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+					    	                 			            anchor.setCol1(cell.getColumnIndex());
+					    	                 			            anchor.setCol2(cell.getColumnIndex() + 5);
+					    	                 			            anchor.setRow1(row.getRowNum());
+					    	                 			            anchor.setRow2(row.getRowNum() + 5);
+					    	                 			          Comment  commentNew = drawing.createCellComment(anchor);
+				    	             XSSFRichTextString commentText = new XSSFRichTextString(oldText+ "\n" + newComm);
+				    	             commentNew.setString(commentText);
+				    	             commentNew.setAuthor("Merisoft-Mobitrek");
+							    	                 			        cell.setCellComment(commentNew);
+					    	                 			       	
+				    	                 			        		
+				    	                 			            }
+				    	                 			        	changesMade = true;
+				    	                 			        }
+		                                                     	 }
+			    	                 			        	
+			    	                 			        
+			    	                 			        
+			    	                 			        
+
+			    	                 					
+			    	                 				 if(answBuffer.get(key).get("phurl") != null) {
+			    	                 					 
+			    	                 					 
+			    	                 					 
+			    	                 				
+			    	                 				Font originalFont = workbook.getFontAt(originalStyle.getFontIndex());
+			    	                 				Font linkFont = workbook.createFont();
+			    	                 				linkFont.setColor(IndexedColors.BLUE.getIndex());
+			    	                 				linkFont.setUnderline(Font.U_SINGLE);
+			    	                 				linkFont.setFontName(originalFont.getFontName());
+			    	                 				linkFont.setFontHeight(originalFont.getFontHeight()); // preserve font size
+			    	                 				newStyle.setFont(linkFont); // use the new font
+			    	                 					
+			    	                 			       
+
+				    	                 				CreationHelper helper = workbook.getCreationHelper();
+			    	                 			        org.apache.poi.ss.usermodel.Hyperlink link = helper.createHyperlink(Hyperlink.LINK_URL);
+			    	                 			        
+			    	                 			       String safeUrl = ((String)answBuffer.get(key).get("phurl")).replace("{", "%7B")
+			    	                                           .replace("}", "%7D")
+			    	                                           .replace("[", "%5B")
+			    	                                           .replace("]", "%5D")
+			    	                                           .replace("!", "%21")
+			    	                                           .replace(" ", "%20");
+			    	                 			        link.setAddress(safeUrl);
+			    	                 			        cell.setHyperlink(link);
+			    	                 					changesMade = true;
+		    	                 					}
+		    	                 				 }
+		    	                 				}
+			                 				}
+		                 					
+		                 				}
+		                 				
+		                 			 }
+		                 			
+		                 			if(changesMade) {
+
+		                 			       FileOutputStream fos = new FileOutputStream(this.getExcelDir() + file.getName()); // Same file name
+		                 			      workbook.write(fos);
+		                 			      fos.close();
+		                 			      
+		                 			}
+		                 			//System.out.println(questArr.toString());	
+		                 			
+		                 			// Saadame ära
+		                 			if(questArr.size() > 0) {
+		                 			Iterator<String> itera = questArr.keySet().iterator();
+		                 			 while (itera.hasNext()) {
+		                 				 String custID = itera.next();
+		                 				 Quest qq = questArr.get(custID);
+		                 				boolean added =  Converter.addNewQuest(qq, rcompany, user, pass);
+		                 			//	System.exit(0);
+		                 			 }
+		                 				
+		                 				
+		                 			}
+		                 			
+		                 				//System.exit(0);
+		                 			}catch(Exception e) {
+		                 				e.printStackTrace();
+		                 			}
+		                 	
+		                 	
+		                      
+		                  }
+		              }
+		          } else {
+		              System.out.println("The provided path is not a valid folder.");
+		          }
+		      
+		  
+
+		          try {
+		  			Converter.saveObject(questsDone, "questsdone.obj");
+		  		} catch (IOException e) {
+		  			e.printStackTrace();
+		  		}
+		          
+		      //  System.exit(0);  
+		          
+
+	   	  
+	  }
+	  
+
+  
+  
   private void createWebTasks() {
 	  try{
 			 
@@ -3063,6 +3507,7 @@ public  Vector getCustomerProductsDistList() {
 @Override
 public void WebReporter() {
 	sendTaskReport();
+	uploadQuestsAndAnswers();
 }
 
 
