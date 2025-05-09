@@ -2254,7 +2254,7 @@ public String parseFirstEmail(String emails) {
       File file = new File(path);
       fileName = file.getCanonicalFile().getName();
     } catch (IOException e){}
-    int index = fileName.lastIndexOf(".");
+    int index = fileName.indexOf(".");
     if (index > 0){
       agentName = fileName.substring(0, index);
     }

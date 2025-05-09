@@ -1360,7 +1360,7 @@ private Vector baashk = null;
 		 	}
 		 	
 		 	String kuupaev = rs.getString("kuupaev").substring(0,10);
-		 	buf.append(id + ";" + pr + ";" + ((int)am) + ";" + hi+ ";" + ordnum +" "+ kuupaev + "\n");
+		 	buf.append(id + ";" + pr + ";" + ((int)am) + ";" + hi+ ";" + ordnum +" "+ kuupaev + ";" + kuupaev + "\n");
 		 	
 		 }
 		}
