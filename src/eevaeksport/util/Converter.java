@@ -5541,7 +5541,10 @@ try{
 					
 				}else if(array.length() > 0) {
 					Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + tt  + ww + mm  + yyyy + ".json" , array.toString());
-				}
+         		}else{
+         			res = "";
+         		}
+					
 					
 			
 					

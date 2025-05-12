@@ -81,7 +81,8 @@ public class LabbisSkonisImportDriver
   private Vector splitOrder (Order order){
 	  Vector result = new Vector();
 	  System.out.println("order.getWarehouse() " + order.getWarehouse());
-      if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 1 && (order.getAgent().startsWith("0") || order.getAgent().startsWith("3"))) {
+      if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 1 && 
+    		  (order.getAgent().startsWith("0") || order.getAgent().startsWith("2") || order.getAgent().startsWith("3"))) {
     	  orderware = order.getWarehouse();
       } else {
     	  orderware = null;

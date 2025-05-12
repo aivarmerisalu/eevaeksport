@@ -2091,7 +2091,16 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	  
 	  
 		//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
-		  
+			File folder = new File(this.getExcelDir());
+			 File done = new File(this.getExcelDir()+ "done");
+			 if(!done.exists()) {
+				 done.mkdir();
+			 }
+
+		 File svdata = new File( "svdata");
+			 if(!svdata.exists()) {
+				 svdata.mkdir();
+			 }	  
 	      
 		  HashSet answersDone = null;
 			try {
@@ -2112,14 +2121,17 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	 Calendar to = Calendar.getInstance();    
 	 to.add(Calendar.DAY_OF_YEAR, 2);
 	 
-	 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), rcompany, user, pass, true);
-			System.out.println("files " + files1.toString());
-	 
+
 	    String filename =  Converter.getSVData(from.getTime(), to.getTime(), rcompany, user, pass, false, "YESNOFORCE", null, "SV-");
 
 	    JSONParser parser = new JSONParser();
 			try {
-			org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader(filename));
+				if(filename.length() > 1) {
+
+					 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), rcompany, user, pass, true);
+						System.out.println("files " + files1.toString());
+				 
+					org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader(filename));
 		
 
 	  		for (int i = 0; i < cc.size(); i++) {
@@ -2175,24 +2187,17 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	  					e.printStackTrace();
 	  				}
 	  			
-	  			 
- if(!answersDone.contains(cob)) {
-				answBuffer.put(custID + "-" + qname + "-" + title, cob);
-	  			answersDone.add(cob);
- }
- 
-	  		}	  		
+
+					answBuffer.put(custID + "-" + qname + "-" + title, cob);
+	  			
+	  		}	
+				}
 			} catch (Exception e) {
 			e.printStackTrace();
 		}
 			
 			System.out.println("buffer " + answBuffer);
 
-		  try {
-				Converter.saveObject(answersDone, "answersdone.obj");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		//  System.exit(0);
 
 //		  1- loeme küsimused sisse 
@@ -2211,17 +2216,8 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 
 		  
 		  HashMap<String , Quest> questArr = new HashMap<String ,Quest>();
-		  
-			File folder = new File(this.getExcelDir());
-			 File done = new File(this.getExcelDir()+ "done");
-			 if(!done.exists()) {
-				 done.mkdir();
-			 }
+		  long week = 1000*60*60*24*7;
 
-		 File svdata = new File( "svdata");
-			 if(!svdata.exists()) {
-				 svdata.mkdir();
-			 }
 			boolean changesMade = false;
 		          if (folder.exists() && folder.isDirectory()) {
 		              File[] files = folder.listFiles();
@@ -2238,14 +2234,14 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 			 DataFormatter formatter = new DataFormatter();
 		                 		//loeme sisse küsimused 			 
 		                 					 
-		                 					row = sheet.getRow(5);
+		                 					row = sheet.getRow(2);
 	                                 HashMap kyssad = new HashMap();
 		    	                 			for (int a = 6; a <  row.getLastCellNum(); a++) {
 		    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) a));
 		    	                 				kyssad.put(a, kyssa);
 		    	                 			}
 		    	                 	
-		                 			for (int a = 6; a <  sheet.getLastRowNum(); a++) {
+		                 			for (int a = 3; a <  sheet.getLastRowNum()+1; a++) {
 		                 				row = sheet.getRow(a);
 		                 			
 		                 				String klient = "";
@@ -2281,8 +2277,11 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 				}
 		                 				
 		                 				String signa = klient +"_"+ period;
-		                 				if(!questsDone.contains(signa)) {
 		                 				
+		                 			//	System.out.println("signa " + signa);
+		                 				
+		                 				if(!questsDone.contains(signa)) {
+		                 				// kui pole lisatud küsimust siis 
 		                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
 	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
 	    	                 				
@@ -2298,9 +2297,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	    	                 					   
 	    	                 					DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 	    	                 					String[] dateStrings = period.split(" - ");
-	    	                 					// hakkame 7 päeva enne näitame
-	    	                 					long week = 1000*60*60*24*7;
-	    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() - week;
+	    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()-week;
 	    	                 				    qq.qEnd = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	    	                 				   
 	    	                 				   
@@ -2320,12 +2317,9 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	     	                 				      qq.questLines.add(ql);
 	     	                 				      
 	    	                 					}
-	    	                 					
-	    	                 					
-	    	                 				}
-	    	                 					
-	    	                 			}
-		                 				questsDone.add(signa);
+	    	                 				 }	
+	    	                 			  }
+		                 				  questsDone.add(signa);
 		                 				}else {
 		                 	//seda tehakse juhul kui see rida on küsimusena juba olemas aga vaatame kas on ka äkki vastust tulnud.
 		                 					// ja laksame tulemused peale.
@@ -2342,11 +2336,14 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		    	                 					//vaatame kas selline asi on meil olemas
 		    	                 				
 		    	                 					String key = klient + "-" + kysimus + "-"+ chain +" "+ klient + " " + period;
+		    	                 				//	System.out.println("keys " + key);
+		    	                 					//System.out.println("keys2 " + answBuffer.get(key) + " " + answBuffer.toString() + "\n" ) ;
+		    	                 					
 		    	                 					if(answBuffer.get(key) != null) {
 	                                                  
 		    	                 						org.json.simple.JSONObject ob = answBuffer.get(key);
 	                                                   
-			    	                 					System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
+			    	                 				//	System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
 			    	                 					
 			    	                 					CellStyle originalStyle = cell.getCellStyle();
 
@@ -2394,14 +2391,13 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 				    	                 			        comment.setString(commentText);
 				    	                 			        comment.setAuthor("Merisoft-Mobitrek");
 				    	                 			        cell.setCellComment(comment);
-				    	                 			       changesMade = true;
-				    	                 			       
 			    	                 			        } else {
 			    	                 			        	
+			    	                 			        	
+				    	                 			        // Set comment text
 				    	                 			        if(comment.getString() != null) {
 
-				    	                 			      
-				    	                 			        	System.out.println("comm " + comment.getString().getString()+ "\n" + newComm);
+				    	                 			      System.out.println("comm " + comment.getString().getString()+ "\n" + newComm);
 				    	                 			        	if( !comment.getString().getString().contains(newComm)) {
 				    	                 			        		String oldText = comment != null ? comment.getString().getString() : "";
 				    	                 			        		cell.removeCellComment();
@@ -2420,7 +2416,6 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 					    	                 			       	
 				    	                 			        		
 				    	                 			            }
-				    	                 			        	changesMade = true;
 				    	                 			        }
 		                                                     	 }
 			    	                 			        	
@@ -2445,7 +2440,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 			    	                 			       
 
 				    	                 				CreationHelper helper = workbook.getCreationHelper();
-			    	                 			        org.apache.poi.ss.usermodel.Hyperlink link = helper.createHyperlink(Hyperlink.LINK_URL);
+			    	                 			       org.apache.poi.ss.usermodel.Hyperlink link = helper.createHyperlink(Hyperlink.LINK_URL);
 			    	                 			        
 			    	                 			       String safeUrl = ((String)answBuffer.get(key).get("phurl")).replace("{", "%7B")
 			    	                                           .replace("}", "%7D")
@@ -2467,7 +2462,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 			
 		                 			if(changesMade) {
 
-		                 			       FileOutputStream fos = new FileOutputStream(this.getExcelDir() + file.getName()); // Same file name
+		                 			       FileOutputStream fos = new FileOutputStream(file.getAbsolutePath()); // Same file name
 		                 			      workbook.write(fos);
 		                 			      fos.close();
 		                 			      
@@ -2500,7 +2495,12 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		              System.out.println("The provided path is not a valid folder.");
 		          }
 		      
-		  
+
+				  try {
+						Converter.saveObject(answersDone, "answersdone.obj");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 
 		          try {
 		  			Converter.saveObject(questsDone, "questsdone.obj");
@@ -3508,6 +3508,7 @@ public  Vector getCustomerProductsDistList() {
 public void WebReporter() {
 	sendTaskReport();
 	uploadQuestsAndAnswers();
+	  System.exit(0);
 }
 
 
@@ -4076,7 +4077,7 @@ if(closed != null) {
 		   
 	   }
 	   
-	   System.exit(0);
+	 //  System.exit(0);
 	   
 	}
 

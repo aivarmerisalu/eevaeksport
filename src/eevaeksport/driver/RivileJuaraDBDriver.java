@@ -666,18 +666,19 @@ String picts = parent.getProps().getProperty("pict.dir");
              	}
              }
              
-          //   00025- 1 manager Klaipedos profesionaia, storage number 45 Kristina Ramonaite,
-           //  00027- 1 manager Panevezio profesionalai; storage number 29 Inga Kairiene;
-            // 00024; 00026; 00028 -1 manager (Vilnius, Kaunas, Alytus); storage number 47 
-              	
+             
              if(agent.getID().trim().equals("00025")){
               		ob = "010000000045";
               	}
               	
-             if(agent.getID().trim().equals("00024")){
+             if(agent.getID().trim().equals("00026")){
               		ob = "010000000047";
               	}
-              	
+             
+             if(agent.getID().trim().equals("00024")){
+           		ob = "010000000069";
+           	}
+             
              if(agent.getID().trim().equals("00027")){
               		ob = "010000000057";
               	}
@@ -814,7 +815,11 @@ String picts = parent.getProps().getProperty("pict.dir");
               if(ag.equals("00026") || ag.equals("00028") ){
             	  cust.addAgent(new Agent("00024"));  
               }
-             
+           
+              if(ag.equals("00028") ){
+            	  cust.addAgent(new Agent("00026"));  
+              }
+           
               
           	Agent agg = ((Agent)this.getAgents1().get(ag));
 				
@@ -1207,6 +1212,9 @@ String picts = parent.getProps().getProperty("pict.dir");
                String agentID = rs.getString("agent").trim();
                if(agentID.equals("00028") || agentID.equals("00026")) {
             	   agentID = "00024";
+               }
+               if(agentID.equals("00028")) {
+            	   agentID = "00026";
                }
                
                Agent agent = (Agent)agents.get(agentID);

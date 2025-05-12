@@ -1450,7 +1450,16 @@ public void setNF(NumberFormat nf) {
 	  
 	  
 	//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
-	  
+		File folder = new File(this.getExcelDir());
+		 File done = new File(this.getExcelDir()+ "done");
+		 if(!done.exists()) {
+			 done.mkdir();
+		 }
+
+	 File svdata = new File( "svdata");
+		 if(!svdata.exists()) {
+			 svdata.mkdir();
+		 }	  
       
 	  HashSet answersDone = null;
 		try {
@@ -1471,14 +1480,17 @@ TreeMap<String, org.json.simple.JSONObject> answBuffer = new TreeMap<String, org
  Calendar to = Calendar.getInstance();    
  to.add(Calendar.DAY_OF_YEAR, 2);
  
- TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
-		System.out.println("files " + files1.toString());
- 
+
     String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "YESNOFORCE", null, "SV-");
 
     JSONParser parser = new JSONParser();
 		try {
-		org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader(filename));
+			if(filename.length() > 1) {
+
+				 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
+					System.out.println("files " + files1.toString());
+			 
+				org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader(filename));
 	
 
   		for (int i = 0; i < cc.size(); i++) {
@@ -1537,18 +1549,14 @@ TreeMap<String, org.json.simple.JSONObject> answBuffer = new TreeMap<String, org
 
 				answBuffer.put(custID + "-" + qname + "-" + title, cob);
   			
-  		}	  		
+  		}	
+			}
 		} catch (Exception e) {
 		e.printStackTrace();
 	}
 		
 		System.out.println("buffer " + answBuffer);
 
-	  try {
-			Converter.saveObject(answersDone, "answersdone.obj");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	//  System.exit(0);
 
 //	  1- loeme küsimused sisse 
@@ -1567,23 +1575,14 @@ if(questsDone == null) {
 
 	  
 	  HashMap<String , Quest> questArr = new HashMap<String ,Quest>();
-	  
-		File folder = new File(this.getExcelDir());
-		 File done = new File(this.getExcelDir()+ "done");
-		 if(!done.exists()) {
-			 done.mkdir();
-		 }
+	  long week = 1000*60*60*24*7;
 
-	 File svdata = new File( "svdata");
-		 if(!svdata.exists()) {
-			 svdata.mkdir();
-		 }
 		boolean changesMade = false;
 	          if (folder.exists() && folder.isDirectory()) {
 	              File[] files = folder.listFiles();
 
 	              for (File file : files) {
-	                  if (file.isFile() && file.getName().contains("example")) { // pallets example
+	                  if (file.isFile() && file.getName().contains("pallets")) { // pallets example
 	                      System.out.println("Found: " + file.getAbsolutePath());
 	                 		try {
 	                 			FileInputStream ff = new FileInputStream(file);
@@ -1594,14 +1593,14 @@ if(questsDone == null) {
 	                 			 DataFormatter formatter = new DataFormatter();
 	                 		//loeme sisse küsimused 			 
 	                 					 
-	                 					row = sheet.getRow(5);
+	                 					row = sheet.getRow(2);
                                  HashMap kyssad = new HashMap();
 	    	                 			for (int a = 6; a <  row.getLastCellNum(); a++) {
 	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) a));
 	    	                 				kyssad.put(a, kyssa);
 	    	                 			}
 	    	                 	
-	                 			for (int a = 6; a <  sheet.getLastRowNum(); a++) {
+	                 			for (int a = 3; a <  sheet.getLastRowNum()+1; a++) {
 	                 				row = sheet.getRow(a);
 	                 			
 	                 				String klient = "";
@@ -1637,8 +1636,11 @@ if(questsDone == null) {
 	                 				}
 	                 				
 	                 				String signa = klient +"_"+ period;
-	                 				if(!questsDone.contains(signa)) {
 	                 				
+	                 			//	System.out.println("signa " + signa);
+	                 				
+	                 				if(!questsDone.contains(signa)) {
+	                 				// kui pole lisatud küsimust siis lisame
 	                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
     	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
     	                 				
@@ -1654,7 +1656,7 @@ if(questsDone == null) {
     	                 					   
     	                 					DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     	                 					String[] dateStrings = period.split(" - ");
-    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()-week;
     	                 				    qq.qEnd = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     	                 				   
     	                 				   
@@ -1674,12 +1676,9 @@ if(questsDone == null) {
      	                 				      qq.questLines.add(ql);
      	                 				      
     	                 					}
-    	                 					
-    	                 					
-    	                 				}
-    	                 					
-    	                 			}
-	                 				questsDone.add(signa);
+    	                 				 }	
+    	                 			  }
+	                 				  questsDone.add(signa);
 	                 				}else {
 	                 	//seda tehakse juhul kui see rida on küsimusena juba olemas aga vaatame kas on ka äkki vastust tulnud.
 	                 					// ja laksame tulemused peale.
@@ -1696,11 +1695,15 @@ if(questsDone == null) {
 	    	                 					//vaatame kas selline asi on meil olemas
 	    	                 				
 	    	                 					String key = klient + "-" + kysimus + "-"+ chain +" "+ klient + " " + period;
-	    	                 					if(answBuffer.get(key) != null) {
-                                                  
+	    	                 				//	System.out.println("keys " + key);
+	    	                 					//System.out.println("keys2 " + answBuffer.get(key) + " " + answBuffer.toString() + "\n" ) ;
+	    	                 					
+	    	                 					if(answBuffer.get(key) != null ) {
 	    	                 						org.json.simple.JSONObject ob = answBuffer.get(key);
-                                                   
-		    	                 					System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
+
+	                                                  if( !answersDone.contains(ob)) {
+	                                                	
+		    	                 				//	System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
 		    	                 					
 		    	                 					CellStyle originalStyle = cell.getCellStyle();
 
@@ -1797,7 +1800,7 @@ if(questsDone == null) {
 		    	                 			       
 
 			    	                 				CreationHelper helper = workbook.getCreationHelper();
-		    	                 			        Hyperlink link = helper.createHyperlink(Hyperlink.LINK_URL);
+			    	                 				 org.apache.poi.ss.usermodel.Hyperlink link = helper.createHyperlink(Hyperlink.LINK_URL);
 		    	                 			        
 		    	                 			       String safeUrl = ((String)answBuffer.get(key).get("phurl")).replace("{", "%7B")
 		    	                                           .replace("}", "%7D")
@@ -1809,7 +1812,13 @@ if(questsDone == null) {
 		    	                 			        cell.setHyperlink(link);
 		    	                 					changesMade = true;
 	    	                 					}
-	    	                 				 }
+		    	                 		        answersDone.add(ob);
+	                                              
+	                                                  }
+	                                                  
+	                                            }
+
+	    	                 					
 	    	                 				}
 		                 				}
 	                 					
@@ -1819,7 +1828,7 @@ if(questsDone == null) {
 	                 			
 	                 			if(changesMade) {
 
-	                 			       FileOutputStream fos = new FileOutputStream(this.getExcelDir() + "example.xlsx"); // Same file name
+	                 			       FileOutputStream fos = new FileOutputStream(file.getAbsolutePath()); // Same file name
 	                 			      workbook.write(fos);
 	                 			      fos.close();
 	                 			      
@@ -1859,6 +1868,12 @@ if(questsDone == null) {
 	  		} catch (IOException e) {
 	  			e.printStackTrace();
 	  		}
+
+			  try {
+					Converter.saveObject(answersDone, "answersdone.obj");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 	          
 	      //  System.exit(0);  
 	          
