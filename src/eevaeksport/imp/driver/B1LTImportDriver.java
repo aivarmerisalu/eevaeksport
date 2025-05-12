@@ -239,6 +239,8 @@ ord.put("autoGenerateNumberAndSeries", false);
 ord.put("series", "MOBI");
 ord.put("number", order.getDokNr());
 
+ord.put("vatRateId",1);
+
 ord.put("warehouseId", "6");
 ord.put("clientId", custid);
 ord.put("operationTypeId", "2");
@@ -293,6 +295,10 @@ String urlLine = "https://www.b1.lt/api/warehouse/sale-items/create-simple";
 	        // ll.put("purchaseItemId", toode);
 	       	 ll.put("quantity", line.getKogus());
 	       	 ll.put("priceWithoutVat", line.getPrice());
+	       	 ll.put("vatRate", 21);
+	       	
+	       //	 ll.put("priceWithVat", line.getPrice() * 1.21);
+	       	
 	       	 //ll.put("warehouseId", "6");
 	       	 //ll.put("vatClassificationId", "68");
 
