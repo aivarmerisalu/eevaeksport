@@ -813,7 +813,7 @@ String picts = parent.getProps().getProperty("pict.dir");
              String ag = rs.getString("agent").trim();
               cust.addAgent(new Agent(ag));
               if(ag.equals("00026") || ag.equals("00028") ){
-            	  cust.addAgent(new Agent("00024"));  
+            	//  cust.addAgent(new Agent("00024"));  
               }
            
               if(ag.equals("00028") ){
@@ -1211,7 +1211,7 @@ String picts = parent.getProps().getProperty("pict.dir");
             	 
                String agentID = rs.getString("agent").trim();
                if(agentID.equals("00028") || agentID.equals("00026")) {
-            	   agentID = "00024";
+            	 //  agentID = "00024";
                }
                if(agentID.equals("00028")) {
             	   agentID = "00026";

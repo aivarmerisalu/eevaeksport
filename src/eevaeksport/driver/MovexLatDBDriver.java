@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -2090,6 +2091,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
   private void uploadQuestsAndAnswers() {
 	  
 	  
+	  
 		//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
 			File folder = new File(this.getExcelDir());
 			 File done = new File(this.getExcelDir()+ "done");
@@ -2129,9 +2131,12 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 				if(filename.length() > 1) {
 
 					 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), rcompany, user, pass, true);
-						System.out.println("files " + files1.toString());
+					//	System.out.println("files " + files1.toString());
 				 
-					org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader(filename));
+					 
+					   InputStreamReader reader = new InputStreamReader(new FileInputStream(filename), "UTF-8");
+
+					org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(reader);
 		
 
 	  		for (int i = 0; i < cc.size(); i++) {
@@ -2196,7 +2201,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 			e.printStackTrace();
 		}
 			
-			System.out.println("buffer " + answBuffer);
+			System.out.println("buffer " + answBuffer.size());
 
 		//  System.exit(0);
 
@@ -2223,7 +2228,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		              File[] files = folder.listFiles();
 
 		              for (File file : files) {
-		                  if (file.isFile() && file.getName().contains("pallets")) { // pallets example
+		                  if (file.isFile() && file.getName().contains("pallets") && !file.getName().contains("$")) { // pallets example
 		                      System.out.println("Found: " + file.getAbsolutePath());
 		                 		try {
 		                 			FileInputStream ff = new FileInputStream(file);
@@ -2337,7 +2342,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		    	                 				
 		    	                 					String key = klient + "-" + kysimus + "-"+ chain +" "+ klient + " " + period;
 		    	                 				//	System.out.println("keys " + key);
-		    	                 					//System.out.println("keys2 " + answBuffer.get(key) + " " + answBuffer.toString() + "\n" ) ;
+		    	                 					//System.out.println("keys2 " + answBuffer.get(key) + " " + answBuffer.keySet().toString() + "\n" ) ;
 		    	                 					
 		    	                 					if(answBuffer.get(key) != null) {
 	                                                  
@@ -2349,17 +2354,18 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 
 				    	                 				CellStyle newStyle = workbook.createCellStyle();
 				    	                 				newStyle.cloneStyleFrom(originalStyle);
-	                                                       System.out.println("oioi " + ob.get("resint1"));
+	                                                    //   System.out.println("oioi " + ob.get("resint1"));
 	                                                       
 	                                                       String cobComm = (String)ob.get("comment");
 	                                                       
 				    	                 				if((ob.get("resint1")+ "").equals("0")) {
 				    	                 			       newStyle.setFillForegroundColor(IndexedColors.LIME.getIndex());
-				    	                 			       if(cobComm != null && cobComm.trim().length() > 0) {
-				    	                 			    	  newStyle.setFillForegroundColor(IndexedColors.GOLD.getIndex());
-				    	                 			       }
+				    	                 			       
 				    	                 				 } else {
 				    	                 				   newStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+				    	                 				  if(cobComm != null && cobComm.trim().length() > 0) {
+				    	                 			    	  newStyle.setFillForegroundColor(IndexedColors.GOLD.getIndex());
+				    	                 			       }
 				    	                 				}
 				    	                 			      newStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
 				    	                 			     cell.setCellStyle(newStyle);
@@ -2397,7 +2403,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 				    	                 			        // Set comment text
 				    	                 			        if(comment.getString() != null) {
 
-				    	                 			      System.out.println("comm " + comment.getString().getString()+ "\n" + newComm);
+				    	                 			  //    System.out.println("comm " + comment.getString().getString()+ "\n" + newComm);
 				    	                 			        	if( !comment.getString().getString().contains(newComm)) {
 				    	                 			        		String oldText = comment != null ? comment.getString().getString() : "";
 				    	                 			        		cell.removeCellComment();
@@ -2459,6 +2465,9 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 				}
 		                 				
 		                 			 }
+
+	                 				//System.exit(0);
+	                 			ff.close();
 		                 			
 		                 			if(changesMade) {
 
@@ -2476,13 +2485,9 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 				 String custID = itera.next();
 		                 				 Quest qq = questArr.get(custID);
 		                 				boolean added =  Converter.addNewQuest(qq, rcompany, user, pass);
-		                 			//	System.exit(0);
-		                 			 }
-		                 				
-		                 				
-		                 			}
+		                 			   }
+		                 			  }
 		                 			
-		                 				//System.exit(0);
 		                 			}catch(Exception e) {
 		                 				e.printStackTrace();
 		                 			}
@@ -2652,7 +2657,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 					arr.put(value2);
 				//	value.put("managers", arr);		
 					
-					System.out.println(photoname + " " + value.toString());
+					//System.out.println(photoname + " " + value.toString());
 
 				String done = 	Converter.addNewTask(value, rcompany, user , pass);
 				System.out.println("Task Added " + done);
@@ -3940,7 +3945,7 @@ private void sendTaskReport() {
 										 repFileName = lo.get("url") + "";
 									 }
 								 } 
-							  System.out.println("vastus " + vastus + " " +  repFileName);  
+							 // System.out.println("vastus " + vastus + " " +  repFileName);  
 						  }	else {
 							  vastus = null;
 						  }
@@ -3970,8 +3975,8 @@ private void sendTaskReport() {
 			 
 if(closed != null) {
 
-			 System.out.println(custID + " " + taskID + " " + message + " " +  vastus 
-					 + "\n " + repMana + " " +  cloMan +  " " + closed);
+			// System.out.println(custID + " " + taskID + " " + message + " " +  vastus 
+				//	 + "\n " + repMana + " " +  cloMan +  " " + closed);
 			 completed++;
 }
 
@@ -4034,6 +4039,7 @@ if(closed != null) {
 	   for(int u = 0; u < newTasksReplies.size(); u++) {
 		   String line = (String)newTasksReplies.get(u);
 		   String em = line.substring(0,line.indexOf("|"));
+		   if(em != null) {
 		   if(mails.get(em) != null) {
 			   ArrayList ls = (ArrayList)mails.get(em);
 			   ls.add(line);
@@ -4043,6 +4049,7 @@ if(closed != null) {
 			   ls.add(line);
 			   mails.put(em, ls);
 		   }
+		   }
 	   }
 	   
 	   String headerTXT = "   " + lenn + "  /  " + completed;
@@ -4050,7 +4057,7 @@ if(closed != null) {
 	   System.out.println("mails " + mails.toString());
 	   Iterator itera = mails.keySet().iterator();
 	   while(itera.hasNext()) {
-		   String mailTo = itera.next()+"";
+		   String mailTo = (String)itera.next();
 		   try {
 		   Email email = new Email("Report - Tasklogs");
 		 
@@ -4062,10 +4069,12 @@ if(closed != null) {
 		   email.setUser(getParent().getProps().getProperty("smtpuser"));
 		   email.setPass(getParent().getProps().getProperty("smtppass"));
 		   email.setFilesTo(mailTo); //aivar@mobilejava.ee
-		 
+		 if(mailTo != null && mailTo.length() > 0 && !mailTo.equals("null")) {
 			email.send();
+		 }
 			
 		} catch (Exception e) {
+			System.out.println("mail to " + mailTo);
 			e.printStackTrace();
 		}
 		   
@@ -4094,7 +4103,7 @@ private void addToTaskDB(Long taskid,String agent, String cucode,String filename
 	 String sql = "INSERT INTO cesu.agent_tasks   " + 
 	 		" VALUES (" + taskid + ",'"+ agent + "', '" + cucode +"', '" + filename +"',?,?," + resB + "," + parentID + ",?,'" + compagent + "',sysdate)"  ;
      try {
-    	 System.out.println(sql);
+    	// System.out.println(sql);
        Connection con = getNewConnection();
          PreparedStatement ps = con.prepareStatement(sql);
          Timestamp ss = new Timestamp(comlpTime);
