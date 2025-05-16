@@ -299,19 +299,31 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 	        		  custid = formatter.formatCellValue(row.getCell((short) 0)).trim();
 	        	  }catch(Exception e) {
 	        		  custid = ((int)(row.getCell((short) 0).getNumericCellValue())+"").trim();
-	        		//  System.out.println("Jama koodiga " + custid + " " + a);
+	        		// System.out.println("Jama koodiga " + custid + " " + a);
 	        	  }
+	        	  
+	        	  if(custid.startsWith("11921")) {
+	        			 System.out.println("Jama koodiga " + custid + " " + a);
+	     	        	
+	        	  }
+	        	  
 	        	 try { 
 	        	  String last = custid.substring(custid.length()-1);
-	        	  if(!Converter.isNumeric(last)) {
+	        	  if(!Converter.isNumeric(last) && !last.equals("A")) {
 	        		  custid = custid.substring(0,custid.length()-1);
+	        	  }
+
+	        	  if(custid.startsWith("11921")) {
+	        			 System.out.println("Jama koodiga2 " + custid + " " + a);
+	     	        	
 	        	  }
 	        	 }catch(Exception e) {
 	        		 
 	        	 }
 	        	
-	        	  if(!abicusts.contains(custid))
+	        	  if(!abicusts.contains(custid)) {
 	        	  abicusts.add(custid);
+	        	  }
 	        	  
 	        	  String agent =  Converter.cleanLitLatEst(formatter.formatCellValue(row.getCell((short) 13)));
 		        	StringTokenizer st = new StringTokenizer(agent,";");
@@ -359,6 +371,9 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
 		        		  if(name != null && name.length() >0) {
 		        			  asi.put(custid+"name", name);
 		        			  asi.put("0"+custid+"name", name);
+		        			  if(name.contains("BENESCA")) {
+		        				  System.out.println("benecsa " + name + " '" + custid);
+		        			  }
 		        		  }
 		        	}catch(Exception e) {
 		        		
@@ -1035,11 +1050,20 @@ public class SmartenRDBDriver extends AbstractDBDriver  implements Manager,Promo
               }
              }
             
-   		 
+
+
    		 
        	String ags = (String)custAgs.get(cust.getID());
+       	
+       	if(cust.getID().startsWith("11921")) {
+ 			 System.out.println("Jama koodiga3 " + cust.getID() + " " + ags);
+	  }
+       	
+       	
        	if(ags != null) {
-       		
+       		if(cust.getID().startsWith("11921")) {
+   			 System.out.println("Jama koodiga4 " + cust.getID() + " " + ags + " " + abicusts.contains(cust.getID()));
+   	  }	
 
        	if(ags.startsWith(":")) {
        			ags = ags.substring(1);

@@ -1269,7 +1269,7 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
  		try {
  			FileInputStream ff = new FileInputStream(f);
  			XSSFWorkbook workbook = new XSSFWorkbook((ff));
- 			XSSFSheet sheet = workbook.getSheet("Sheet1");
+ 			XSSFSheet sheet = workbook.getSheetAt(0);
  			XSSFRow row = null;
  		
  			row = sheet.getRow(0);
@@ -1310,13 +1310,13 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
  				}
  				
  				if(link.length()> 0 && 
- 						link.indexOf("https://joogikultuur.ee/") != -1){
- 					link = link.substring("https://joogikultuur.ee/".length());
+ 						link.indexOf("https://anora.ee/") != -1){
+ 					link = link.substring("https://anora.ee/".length());
  					res.put(toode, link);
  		     		
  	 				// System.out.println(toode +  " " + link);
  				}
- 				//System.out.println(toode +  " " + link);
+ 				System.out.println(toode +  " " + link);
  				
  	 			
  			}

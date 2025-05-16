@@ -1832,7 +1832,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
       prod.setName(nimetus + add);
       
       prod.setAllowNotGift(true);
-      if(prod.getGroup().startsWith("151")) {
+      if(prod.getGroup().startsWith("151") || prod.getGroup().startsWith("159")) {
     	  prod.setAllowNotGift(false);
       }
    

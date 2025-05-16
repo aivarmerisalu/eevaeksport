@@ -19,7 +19,9 @@ import java.util.Locale;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Enumeration;
 
 import eevaeksport.Customer;
@@ -3100,6 +3102,17 @@ try {
 	  		 TreeMap prods = this.getProducts(null);
 
 	         StringBuffer buf = new StringBuffer();
+
+   	   	  res2 = new File (pictssou);
+             File[] files = res2.listFiles();
+
+             // Sort files by last modified date (descending)
+             Arrays.sort(files, new Comparator<File>() {
+                 public int compare(File f1, File f2) {
+                     return Long.compare(f2.lastModified(), f1.lastModified());
+                 }
+             });
+
 	         Iterator enume = prods.keySet().iterator();
 	    
 	         while (enume.hasNext()) {
@@ -3108,13 +3121,13 @@ try {
 	    	    	String toode = prod.getID().trim();  
 	               if(toode.length() > 0){
 	                	
-	    	   	  res2 = new File (pictssou);
-	              ff2 = res2.list();
-	             
-	         	 for(int i = 0;ff2.length>i;i++){
-	             	if( ff2[i].startsWith(toode)){
+
+	              // Print sorted files
+	              for (File file : files) {
+	              
+	             	if( file.getName().startsWith(toode)){
 	               // System.out.println("pilt olemas " + ff2[i]);
-	            	File in = new File ( pictssou + ff2[i]); 
+	            	File in = new File ( pictssou + file.getName()); 
 	              	if(in.isFile()){
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
 	              	if(!inpda.exists()){
