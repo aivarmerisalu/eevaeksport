@@ -467,7 +467,7 @@ import eevaeksport.util.Converter;
 	      }
 	      
 	      String doknr = order.getDokNr();
-	      if(doknr.contains(" 202") && doknr.contains("P")) {
+	      if(doknr.contains(" 202") && (doknr.contains("P") || doknr.contains("C"))) {
 	    	  doknr =  doknr.substring(0 ,doknr.indexOf(" "));
 	      } else if(doknr.contains(" 202") ) {
 	    	  doknr = "U00" + doknr.substring(0 ,doknr.indexOf(" "));
@@ -476,7 +476,7 @@ import eevaeksport.util.Converter;
 	      String reference = "";
 	      if(order.getTeostaja() != null && order.getTeostaja().trim().length() > 0 ){
 	    	  reference = order.getTeostaja().replace('|', ' ' ).replace('|', ' ' ).trim(); 
-	    	  if(reference.contains(" 202") && reference.contains("P")) {
+	    	  if(reference.contains(" 202") && (reference.contains("P") || reference.contains("C"))) {
 		    	  reference =  reference.substring(0 ,reference.indexOf(" "));
 		      }else if(reference.contains(" 202") ) {
 		    	  reference = "U00" + reference.substring(0 ,reference.indexOf(" "));

@@ -3986,12 +3986,12 @@ if(closed != null) {
 				 if(!linesDone.contains(taskID + vastus)) {
 				 if(closed == null) {
 					 String email = (String)agMail.get(repManaCode);
-				   newTasksReplies.add(email+"|"+ custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "| |" + repMana);
+				   newTasksReplies.add(email+"|" + repFileName +"|"+ custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "| |" + repMana);
 				   addToTaskDB(taskID,repManaCode, custID, repFileName,message,vastus,true,0 ,null,taskID);
 
 				 } else {
 					 String email = (String)agMail.get(cloManCode);
-				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "|" + closed + "|" + cloMan);
+				  newTasksReplies.add(email+"|" + repFileName +"|"+custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "|" + closed + "|" + cloMan);
 
 				   addToTaskDB(taskID,cloManCode, custID, repFileName,message,vastus,true,cloTime ,cloManCode,taskID);
 				 
@@ -4008,7 +4008,7 @@ if(closed != null) {
 					 
 				 if(!linesDone.contains(taskID + closed)) {
 				 String email = (String)agMail.get(cloManCode);
-				  newTasksReplies.add(email+"|"+custID + "|" + custName +"|" + message + "| |"+ created + "|" + closed + "|" + cloMan);
+				  newTasksReplies.add(email+"|" + repFileName +"|"+custID + "|" + custName +"|" + message + "| |"+ created + "|" + closed + "|" + cloMan);
 
 				   addToTaskDB(taskID,manager, custID, repFileName,header,message,true,cloTime ,cloManCode,taskID);
 				  linesDone.add(taskID + closed);
@@ -4159,6 +4159,7 @@ private String getHtml(ArrayList in, String header) {
 		  
 		  StringTokenizer st = new StringTokenizer(aa,"|");
 		  st.nextElement();//laseme seimese minna
+		  String url = st.nextToken();
 		  sb.append("<tr><td>"+ (i+1) + ".</td><td>" + st.nextToken()+ "</td><td>" + st.nextToken()+ 
 				  "</td><td>" + st.nextToken()+ "</td><td>" + st.nextToken()+ "</td><td>" + getDateL(st.nextToken())+ "</td>"
 				  		+ "<td>" + getDateL( st.nextToken())+ "</td><td>" + (st.nextToken()) + "</td></tr>" );

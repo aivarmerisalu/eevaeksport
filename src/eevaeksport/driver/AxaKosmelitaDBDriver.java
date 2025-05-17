@@ -974,7 +974,7 @@ String email = " ";
         }*/
         
       
-                        customers.put(name, cust);
+                        customers.put(name + cust.getID(), cust);
                         custMap.put(cust.getID(),cust);	
                     
       }
