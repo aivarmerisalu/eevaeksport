@@ -813,7 +813,7 @@ String picts = parent.getProps().getProperty("pict.dir");
              String ag = rs.getString("agent").trim();
               cust.addAgent(new Agent(ag));
               if(ag.equals("00026") || ag.equals("00028") ){
-            	//  cust.addAgent(new Agent("00024"));  
+            	// cust.addAgent(new Agent("00024"));  
               }
            
               if(ag.equals("00028") ){

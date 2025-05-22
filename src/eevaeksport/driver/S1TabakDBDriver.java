@@ -618,6 +618,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 			ml.setProdID(prodID);
 			ml.setPrice(amount);
 			ml.setLineinfo(Converter.cleanLitLatEst(doc));
+			ml.setPrice(price);
 		   // System.out.println(ml.getStringForLastThree());
 			vec.add(ml);
 		}

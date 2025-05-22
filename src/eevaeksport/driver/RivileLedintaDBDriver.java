@@ -225,7 +225,7 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
 		     Vector list = new Vector();
 		     String sql = "SELECT I44_KODAS_KS AS kood1, max(case when (N33_kodas_ak) is null then '1' else ((N33_kodas_ak)) end) as kood ,I44_DOK_NR AS number ,max(I44_DATA_MOK) AS maksepaev , " +
 		         " sum(i44_suma_db-i44_suma_cr) AS tasumata ,max(DateDiff(dayofyear,I44_DATA_MOK,getdate())) AS yle FROM i44_skol,n08_klij, i06_parh, N33_KBAN WHERE " +
-		         " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and I44_DOK_NR= I06_DOK_NR and N33_KODAS_KS = I06_KODAS_KS AND I06_ADR2=N33_ADRESAS " +
+		         " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and I44_DOK_NR= I06_DOK_NR and N33_KODAS_KS = I06_KODAS_KS AND left(N33_ADRESAS,40) = left(I06_ADR2,40) " +
 		         " and exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
 		         " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok <= getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr " +
 		        " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_DOK_NR,I44_KODAS_KS order by I44_KODAS_KS,i44_dok_nr ";
@@ -495,13 +495,38 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
         	
         	
         	 Connection con = DriverManager.getConnection(url,"LEDIN_API","P455W0rd_*1");
-             PreparedStatement   stmt = con.prepareStatement(cmd);
-             ResultSet  rs = stmt.executeQuery();
+             
            
+HashMap<String, Double> debts = new HashMap<String, Double>();
+             
+             String sql =
+                     "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa , max(datediff(d,I44_DATA_MOK,getdate())) AS yle FROM i44_skol,n08_klij WHERE " +
+                    " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
+                    " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
+                    " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok<=getdate() group by i44.i44_kodas_ks,i44.i44_dok_nr "+
+                      " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_KS order by I44_KODAS_KS ";
 
+                PreparedStatement stmt = con.prepareStatement(sql);
+                  ResultSet	      rs = stmt.executeQuery();
+
+                 while (rs.next()) {
+                   String id = rs.getString("klient").trim();
+                   double debt = Double.parseDouble(rs.getString("summa").trim());
+                  debts.put(id, debt);
+                 }
+                 
+                 rs.close();
+                 stmt.close();
+                // con.close();
+             
+                 
+                 stmt = con.prepareStatement(cmd);
+                  rs = stmt.executeQuery();
+             
             while (rs.next()) {
             	
               String accountnum = rs.getString("kood1").trim();
+              String base = accountnum;
               String acc = rs.getString("kood");
               if (acc != null && acc.trim().length()>0){
               	accountnum = accountnum + "-" + acc.trim();
@@ -553,11 +578,14 @@ public class RivileLedintaDBDriver extends AbstractDBDriver implements  BulkUpda
               if (visit != null && visit.trim().length()>0){
                 cust.setVisit(visit.trim());
               }
-              
+              if(debts.get(base) != null) {
+              	cust.setDebt(debts.get(base));
+              }
               
               String payer =rs.getString("payer");
               if(payer != null && payer.trim().length()> 0){
                 cust.setPayer(payer.trim());
+                
               }
 String ag = rs.getString("agent").trim();
 	
@@ -625,44 +653,10 @@ String ag = rs.getString("agent").trim();
               
               
               customers.put(cust.getName(), cust);
-              if(custMap.get(cust.getPayer()) != null){
-            	  Vector cc = (Vector)custMap.get(cust.getPayer());
-            	  cc.addElement(cust);
-            	  custMap.put(cust.getPayer(), cc);
-              }else{
-            	  Vector ss = new Vector ();
-            	  ss.addElement(cust);
-                  custMap.put(cust.getPayer(),ss );  
-              }
+              
             }
 
-            String sql =
-                "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa , max(datediff(d,I44_DATA_MOK,getdate())) AS yle FROM i44_skol,n08_klij WHERE " +
-               " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
-               " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
-               " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_dok<=getdate()group by i44.i44_kodas_ks,i44.i44_dok_nr "+
-                 " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_KS order by I44_KODAS_KS ";
 
-            stmt = con.prepareStatement(sql);
-             ResultSet	      rs1 = stmt.executeQuery();
-
-            while (rs1.next()) {
-              String id = rs1.getString("klient").trim();
-              double debt = Double.parseDouble(rs1.getString("summa").trim());
-              int yle = rs1.getInt("yle");
-
-              Vector custv = (Vector) custMap.get(id);
-              if (custv != null) {
-            	  
-            	  for (int i = 0;i < custv.size();i++){
-            		  Customer cust = (Customer)custv.elementAt(i);
-            		  cust.setDebt(cust.getDebt() + debt );
-                  }
-            	}
-            }
-            rs1.close();
-            stmt.close();
-            con.close();
           }
           catch (Exception e) {
             getParent().showError(e);

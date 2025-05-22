@@ -2325,6 +2325,13 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	    	                 				 }	
 	    	                 			  }
 		                 				  questsDone.add(signa);
+		                 				  try {
+		                 			  			Converter.saveObject(questsDone, "questsdone.obj");
+		                 			  		} catch (IOException e) {
+		                 			  			e.printStackTrace();
+		                 			  		}
+		                 			          
+		                 				  
 		                 				}else {
 		                 	//seda tehakse juhul kui see rida on küsimusena juba olemas aga vaatame kas on ka äkki vastust tulnud.
 		                 					// ja laksame tulemused peale.
@@ -4160,14 +4167,22 @@ private String getHtml(ArrayList in, String header) {
 		  StringTokenizer st = new StringTokenizer(aa,"|");
 		  st.nextElement();//laseme seimese minna
 		  String url = st.nextToken();
+		  String a1 = "";
+		  String a2 = "";
+		  if(url.length() > 1) {
+			  a1 = "<a href='" + url + "' target='_blank'>";
+			  a2 = "</a>";
+		  }
+		  
+		  
 		  sb.append("<tr><td>"+ (i+1) + ".</td><td>" + st.nextToken()+ "</td><td>" + st.nextToken()+ 
-				  "</td><td>" + st.nextToken()+ "</td><td>" + st.nextToken()+ "</td><td>" + getDateL(st.nextToken())+ "</td>"
+				  "</td><td>"+ a1 +  st.nextToken() + a2 + "</td><td>" + st.nextToken()+ "</td><td>" + getDateL(st.nextToken())+ "</td>"
 				  		+ "<td>" + getDateL( st.nextToken())+ "</td><td>" + (st.nextToken()) + "</td></tr>" );
 		  }
 	  sb.append(" </table>" + 
 	  		"</body>" + 
 	  		"</html>");
-	  
+	  System.out.println(sb.toString());
 	  return sb.toString();
 }
 

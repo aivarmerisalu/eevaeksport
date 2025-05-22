@@ -423,6 +423,7 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 								 // res = res +  ";" + getProd().getPrice() +  ";" + price +  ";" +getDiscount() + ";" + Utils.getCal(start).getTimeInMillis() + ";" + Utils.getCal(end).getTimeInMillis() + ";"
 									//	   + Utils.getCal(end).getTimeInMillis() + ";" + com ;
 		      String cuids = getCustname(st.nextToken());
+		      cuids = cuids.replaceAll("\"", " ");
 		      
 		      String toode = st.nextToken();
 		      double kogus = Double.parseDouble(st.nextToken());
@@ -490,50 +491,41 @@ String cmd3 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS 
 						localhost.ButentWS.wsdl.ButentWebServiceSoapPort port = ws.getButentWebServiceSoapPort(); 
 						String login = port.login("butentws", "wsadmin");
 						login = port.login("butentws", "wsadmin");
+						
 						if (login.indexOf("Already logged in") != -1) {
-							//saveFile("login-" + uniq + ".txt"  ,login);
 							   String process = port.process("PostNuolaid", xml.toString());
-							//	System.out.println("process=" + process);
 								res = process; 
-								//login=<Error><Message>Already logged in</Message></Error>
-								//process=OK
 								Converter.saveFile(getParent().getProps().getProperty("action.read") +"response/process-" + uniq + ".txt"  , process + "\n" + xml.toString().replaceAll("><", ">\n<"));
-							  
-						}else{
+						
+						} else {
 							port.login("butentws", "wsadmin");
 							System.out.println("login=" + login);
 							System.exit(0);
 						}
 					
-		    	  
 					}catch(Exception e){
 						e.printStackTrace();
-					    String err = e.toString();
-							
 					}
 		    	  
-		    	  
-		      loetud.add(uniq);
+		        loetud.add(uniq);
 		      }
-							}
-					
-							
-						
-						
-						
+					}
 						} 
 						br.close();
 						fr.close();
 						File dest = new File(getParent().getProps().getProperty("action.read") + "done/" + file.getName());
-						if(dest.exists()){
-							dest.delete();
+						if(!dest.exists()){
+							boolean rena =     file.renameTo(dest);
+
+							System.out.println("Renamed " + rena);
 						}
-					//	System.out.println("renamed " + file.renameTo(dest));
 			    	  }catch(Exception e){
 			    		  e.printStackTrace();
+			    	   }
+			    	  
+			    	  
 			    	  }
-			    	  }
-			      
+			       
 			    }
 			   // System.exit(0);
 			  return null;

@@ -1024,8 +1024,9 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
 	     this.customers = new ArrayList();
 	     
 	     try{
+	    	 if(rcompany != null) {
 	     	   Converter.getManagersReplacements(agents1, rcompany, user, pass , false); 
-	     		
+	    	 }
 	     }catch(Exception e){
 	     	e.printStackTrace();
 	     }
