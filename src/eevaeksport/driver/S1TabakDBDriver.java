@@ -58,6 +58,7 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -618,7 +619,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 			ml.setProdID(prodID);
 			ml.setPrice(amount);
 			ml.setLineinfo(Converter.cleanLitLatEst(doc));
-			ml.setPrice(price);
+			ml.setDiscount(price);
 		   // System.out.println(ml.getStringForLastThree());
 			vec.add(ml);
 		}
@@ -1408,48 +1409,11 @@ public void setNF(NumberFormat nf) {
 	NF = nf;
 }
 
-
-  /**
-   * setBulkSales
-   *
-   * @param agents Map
-   */
   public void setBulkSales(Map agents) {
-
-  /*	 try {
-        FileReader fr = new FileReader(getDir() + "ManagerSales.csv");
-      BufferedReader reader = new BufferedReader(fr);
-    String line = null;
-
-
-    line=reader.readLine();
-    while((line = reader.readLine()) != null){
-       line = line.replaceAll(";"," |");
-     
-       StringTokenizer st = new StringTokenizer(line, SEPARATOR);
-        if (st.hasMoreTokens()){
-        	 String agentID = st.nextToken().trim();
-          double sales = Double.parseDouble(st.nextToken().trim());
-          double volume = Double.parseDouble(st.nextToken().trim());
-               
-        //  System.out.println("nnn " + sales + " " + volume + " " + agentID + ".");
-                 Agent agent = (Agent)agents.get(agentID);
-                 if (agent != null){
-                   agent.setMonthSales((int)(sales));
-                   agent.setKgSales((int)volume);
-            }
-         }
-      }
-    reader.close();
-    fr.close();
-      } catch (IOException e){
-        e.printStackTrace();
-      }*/
   }
 
+
   private void uploadQuests() {
-	  
-	  
 	//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
 		File folder = new File(this.getExcelDir());
 		 File done = new File(this.getExcelDir()+ "done");
@@ -1897,7 +1861,7 @@ public ManagerData getManagerData() throws SQLException {
 
 @Override
 public void WebReporter() {
- uploadQuests();
+	
 	System.exit(0);
 }
 
