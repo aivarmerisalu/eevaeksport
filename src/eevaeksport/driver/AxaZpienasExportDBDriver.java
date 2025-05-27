@@ -801,8 +801,7 @@ private String coulist = null;
    
  
   public TreeMap getCustomers(Agent agent){
-	  Converter cc = new Converter();
-	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+	
 	  makeFixHash();
 	  
 	  
@@ -1158,7 +1157,6 @@ private String coulist = null;
         
         
         
-        cc.addQuestiosToCustomer(cust,kyssad);
      
                     boolean laks = true;
                     if((payer == null || payer.trim().length() == 0) && payers.contains(cust.getID())){

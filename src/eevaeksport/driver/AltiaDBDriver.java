@@ -852,8 +852,8 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
 	}
    
    public TreeMap getAgents(){
-	   Converter cc = new Converter();
-		  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+	 
+		
 		  loadpayers();
 		  
      TreeMap tm = new TreeMap(); 

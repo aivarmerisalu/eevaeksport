@@ -262,10 +262,7 @@ public class OzolsEkoDBDriver extends AbstractDBDriver implements Manager,Promo,
 	 
 	public TreeMap getCustomers(Agent agent){
 		connectionUp(url);
-		  Converter cc = new Converter();
-		  
-		 HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-		String cmd = "SELECT  rtrim(nos) AS nimi,ltrim(str(cps_id)) as kood0, ltrim(str(cpa_id)) AS kood,kods as code , rtrim(iela) + ' '+ rtrim( pils) + ' ' +  rtrim(pi) AS aadress,0 AS ale, " + 
+			String cmd = "SELECT  rtrim(nos) AS nimi,ltrim(str(cps_id)) as kood0, ltrim(str(cpa_id)) AS kood,kods as code , rtrim(iela) + ' '+ rtrim( pils) + ' ' +  rtrim(pi) AS aadress,0 AS ale, " + 
 	   "  '' AS visit , not_used  AS blokk,  cps_id AS payer,'' AS ware  , cpa.cps_id_m AS agent ,cps.cps_id_m as agent2 " +
 	   "  ,kredits as limiit, 'pur' as type " +
 	   "  From cps left join cpa on cpa.dok_id=cps.cps_id  where s_stra = 0";
@@ -310,7 +307,6 @@ public class OzolsEkoDBDriver extends AbstractDBDriver implements Manager,Promo,
 					cust.setSalesBlockT(true);
 				}
 				
-				 cc.addQuestiosToCustomer(cust,kyssad);
 				String payer = rs.getString("payer");
 				if(payer != null && payer.trim().length() > 0){
 					cust.setPayer(payer.trim());

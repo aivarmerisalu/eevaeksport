@@ -564,7 +564,7 @@ public class AlitaLTDBDriver extends AbstractDBDriver  implements Manager,Promo,
   public TreeMap getCustomers(Agent agent){
 	  custnames = new TreeMap();
 	  Converter cc = new Converter();
-	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+	
 	  TreeMap customers = new TreeMap();
 	  custMap = new TreeMap();
 	   Vector payers =  new Vector();
@@ -731,7 +731,7 @@ public class AlitaLTDBDriver extends AbstractDBDriver  implements Manager,Promo,
 		    	    			        
 		    	    			        
 		    	    			        if(kood.trim().length() > 3){
-		    	    			            cc.addQuestiosToCustomer(cust,kyssad);
+		    	    			            
 			    	    			        customers.put(cust.getName(), cust);
 			    	    			        custMap.put(kood.trim(), cust);	
 		    	    			        }

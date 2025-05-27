@@ -844,8 +844,6 @@ while (rs2.next()){
       ResultSet rs = st.executeQuery(cmd2);
       HashMap custMap = new HashMap();
       
-      Converter cc = new Converter();
-   	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
       while(rs.next()){
     	  
     	  String klgrupp = rs.getString("klgrupp");
@@ -869,8 +867,6 @@ while (rs2.next()){
           }
           String info = rs.getString("info");
           if (info != null){cust.setInfo(cust.getInfo() + Converter.enCodeEst(info.trim()));}
-       
-          cc.addQuestiosToCustomer(cust,kyssad);    	
           
          // System.out.println(limiit);
           //if (limiit != null){cust.setCredit(info.trim());}

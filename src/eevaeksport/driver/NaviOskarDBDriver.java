@@ -480,10 +480,7 @@ public class NaviOskarDBDriver extends AbstractDBDriver implements BulkUpdater,D
   
   
        public TreeMap getCustomers(Agent agent){
-
-     	   Converter cc = new Converter();
-	    	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-	    	
+	
 	    	  try{
 	    		   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
 	    	}catch(Exception e){
@@ -722,8 +719,7 @@ public class NaviOskarDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	               customer.setMainAgent(" ");
     	           }
     	           
-    	           cc.addQuestiosToCustomer(customer,kyssad);    	          
-
+    	       
     	           String alegr = rs.getString("alegr");
     	           if(alegr != null && alegr.trim().length()>0){
     	        	customer.setGroup(Converter.cleanLitLatEst(alegr.trim()));   

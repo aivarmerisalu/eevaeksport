@@ -52,14 +52,7 @@ public class SkaiteMERCDBDriver extends AbstractDBDriver implements BulkUpdater,
 
 	try {
 	    Class.forName(databaseDriverName).newInstance();
-	    Converter conv = new Converter();
-	    
-	    questIDs = conv.getQuestActiveIDs(this.getExcelDir());
-	   if( questIDs != null){
-		   System.out.println(questIDs.toString());
-	   }else {
-		   System.out.println("guestID" + questIDs );
-	   }
+	   
 	   
 	} catch (Exception e) {
 	    parent.showError(e);
@@ -747,8 +740,6 @@ try{
     public TreeMap getCustomers(Agent agent){
         connectionUp(url);
         
-        Converter conv = new Converter();
-  	  HashMap kyssad =   conv.getQuestionaire(this.getExcelDir());
   
         String cmd = "SELECT kl.customername  AS nimi,kl.address as addr,regno as payer,kl.customercode AS kood,kl.address + ' ' + rtrim(kl.city) AS aadress, " +
      "   paymenttime AS term,'' AS ale, debt , " +
@@ -779,8 +770,7 @@ try{
 		String payer = enCode(rs.getString("payer").replaceAll("\""," ").trim());
 	
                 Customer cust = new Customer(Converter.cleanLitLatEst(rs.getString("kood").trim()));
-                conv.addQuestiosToCustomer(cust,kyssad);
-                cust.setPayer(payer);
+               cust.setPayer(payer);
                 if(nimi.startsWith("UAB ")){
                 	nimi = (nimi.substring(4,nimi.length()) + " UAB").trim();
                 }

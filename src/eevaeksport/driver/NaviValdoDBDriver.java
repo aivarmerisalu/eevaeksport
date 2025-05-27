@@ -1336,7 +1336,8 @@ con3.close();
                 	      
                 	      double	pallet = rs.getDouble("pallet");
                        	if(pallet > 0){
-                             prod.setOnPallet(pallet);
+                       		int rr = (int)(pallet+0.001);
+                             prod.setOnPallet(rr);
                         	}
                        	
                        	

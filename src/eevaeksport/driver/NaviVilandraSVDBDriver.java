@@ -923,9 +923,6 @@ return result;
   
        public TreeMap getCustomers(Agent agent){
 
-     	   Converter cc = new Converter();
-	    	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-	    	System.out.print("Kyssad " + kyssad.size());
 	    	  HashMap prgroups = getPrGroups();
 	    try {
 
@@ -1150,8 +1147,7 @@ return result;
     	             customer.setAnkeediTyyp(cat.trim());
     	           }
     	           
-    	           cc.addQuestiosToCustomer(customer,kyssad);
-
+    	      
     	           String alegr = rs.getString("alegr");
     	           if(alegr != null && alegr.trim().length()>0){
     	        	customer.setGroup(Converter.cleanLitLatEst(alegr.trim()));   

@@ -949,9 +949,8 @@ public class VichiLITMercDBDriver extends AbstractDBDriver implements
 	  	HashMap saamata = new HashMap();
 		TreeMap tm = new TreeMap();
 		this.customers = new ArrayList();
-		Converter conv = new Converter();
-    	  HashMap kyssad =   conv.getQuestionaire(this.getExcelDir());
-    	  String qqq = "select Agent as agent , Customer  as klient , [Route Code] as day from " +
+		
+		String qqq = "select Agent as agent , Customer  as klient , [Route Code] as day from " +
 	 		"[Vičiūnai ir Ko$Route sequence]	 ";
   	  
   	  String sql2 = "SELECT d.[Document No_] AS dokumentas,d.No_ AS preke,d.Quantity AS kiekis,d.[Užsakytas kiekis] AS UzsKiekis,d.[Shortcut Dimension 1 Code] AS padalinys, " +
@@ -1213,8 +1212,7 @@ public class VichiLITMercDBDriver extends AbstractDBDriver implements
             	}
          
          
-              conv.addQuestiosToCustomer(customer,kyssad);
-				   String cont = rs.getString("kontakt");
+       		   String cont = rs.getString("kontakt");
 		           if(cont != null && cont.trim().length()>0){
 		               customer.setPersonalData(Converter.enCodeEst(cont.trim()));   
 		           }

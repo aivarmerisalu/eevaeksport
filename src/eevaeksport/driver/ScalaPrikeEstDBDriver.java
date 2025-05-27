@@ -1109,8 +1109,6 @@ System.out.println("fixed size " + result.size());
         TreeMap longVisits = longVisits();
         TreeMap tableExtra = longTableExtra();
         
-        Converter cc = new Converter();
-        HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
         
         Vector kysi = new Vector();
         String cmd = "SELECT SL01002 AS nimi,SL01001 AS kood,(SL01003 + ' (' + SL01004 + ')') AS aadress,"
@@ -1552,7 +1550,6 @@ System.out.println("fixed size " + result.size());
                    	cust.setInfo(Converter.enCodeEst(lisa));	
                 }
                 
-                cc.addQuestiosToCustomer(cust,kyssad);
                 
                 
                 //otsime vï¿½lasumma igale kauplusele 

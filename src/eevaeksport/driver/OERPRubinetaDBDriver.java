@@ -1000,9 +1000,7 @@ try{
    	     	
           TreeMap hinnakirjad = new TreeMap();
           //andmebaasist kysimine 
-          Converter cc = new Converter();
-    	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-    	
+        
     	   if(makedb){
     	  
     try {
@@ -1213,8 +1211,7 @@ try{
                  customer.setAnkeediTyyp(cat);
                }
                
-               cc.addQuestiosToCustomer(customer,kyssad);    	          
-
+            
                String alegr = rs.getString("alegr");
                if(alegr != null && alegr.trim().length()>0){
             	customer.setGroup(Converter.cleanLitLatEst(alegr.trim()));  

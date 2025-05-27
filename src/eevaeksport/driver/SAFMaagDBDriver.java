@@ -1357,10 +1357,7 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
     	
       Connection con = getNewConnection();
       Statement st = con.createStatement();
-     //  makeCurrentDistribution();
- 	   Converter cc = new Converter();
- 	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-
+ 
   
       String cmd2 = " SELECT id , kl.code AS kood,ltrim(kl.name) AS nimi,(select name from grcompany where id=kl.idsettlcompany)as mnimi,kl.locationaddr AS address,U_Kylastusgraafik AS visit ,creditlimit AS limiit,kl.i_agent AS agent, " +
           " (case when len(ltrim(kl.idsettlcompany)) >0 then kl.idsettlcompany else kl.id end) AS payer,-kl.pricecut AS ale ,phone,i_ladu  AS ladu  " +
@@ -1474,7 +1471,6 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
           	cust.setSalesBlockT(true);
           }
           
-          cc.addQuestiosToCustomer(cust,kyssad);
           
           customers.put(name, cust);
           custMap.put(cust.getID(), cust);

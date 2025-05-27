@@ -168,6 +168,23 @@ public JSONArray getSVdata(Date from , Date to , String type , String subTypes) 
 	}
 
 
+public JSONArray getQuestdata() throws Exception{
+	
+	String web = "http://merisoft.eu:8080/rest/questionnaire/list?active=true" ;
+	if(https) {
+		web = "https://api.mobitrek.eu/rest/questionnaire/list?active=true" ;
+	}
+	HttpClient cli = getClient();
+	HttpGet aa = new HttpGet(web);
+	//aa.setHeader (HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
+	HttpResponse resp = cli.execute(aa);
+	String aaa = EntityUtils.toString(resp.getEntity());
+//	System.out.println("ahaaa SV data " + aaa);
+	JSONArray json = new JSONArray(aaa);
+	return json;
+	
+}
+
 
 public JSONArray getTaskdata(Date from , Date to ) throws Exception{
 	

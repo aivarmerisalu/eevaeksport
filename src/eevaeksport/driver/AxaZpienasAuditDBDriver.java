@@ -656,8 +656,7 @@ public class AxaZpienasAuditDBDriver extends AbstractDBDriver  implements Manage
   
  
   public TreeMap getCustomers(Agent agent){
-	  Converter cc = new Converter();
-	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+	
 	  makeFixHash();
 	  
  String cmd = "  SELECT cus.name,street as nimelisa,cus.namealias,cus.accountnum,cus.invoiceaccount AS payer, " +
@@ -835,7 +834,7 @@ public class AxaZpienasAuditDBDriver extends AbstractDBDriver  implements Manage
         	cust.setPictEmail(pictemail.trim());
         }
         
-        cc.addQuestiosToCustomer(cust,kyssad);
+        
      
                     boolean laks = true;
                     if((payer == null || payer.trim().length() == 0) && payers.contains(cust.getID())){

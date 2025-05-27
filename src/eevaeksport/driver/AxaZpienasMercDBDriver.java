@@ -486,8 +486,7 @@ public class AxaZpienasMercDBDriver extends AbstractDBDriver  implements Manager
 
   public TreeMap getCustomers(Agent agent){
 	  
-	  Converter cc = new Converter();
-	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+	 
 	  makeFixHash();
 	
 	  
@@ -621,9 +620,7 @@ public class AxaZpienasMercDBDriver extends AbstractDBDriver  implements Manager
            	}	
         }
      
-        
-  
-                    cc.addQuestiosToCustomer(cust,kyssad);
+                 
                     customers.put(name, cust);
                     custMap.put(cust.getID(),cust);	
              }

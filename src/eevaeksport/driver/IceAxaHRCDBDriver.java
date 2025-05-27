@@ -332,8 +332,7 @@ public class IceAxaHRCDBDriver extends AbstractDBDriver implements BulkUpdater,D
     
     HashSet custs = new HashSet();
 	  
-    Converter cc = new Converter();
-	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+   
 	  sortimendid = new HashMap();
 	  ketid = new HashMap();
 	  HashSet asses = new HashSet();
@@ -364,9 +363,6 @@ public class IceAxaHRCDBDriver extends AbstractDBDriver implements BulkUpdater,D
         }
         
        
-        
-        cc.addQuestiosToCustomer(cust,kyssad);
-        
         
         String aadr = rs.getString("address");
         if (aadr != null) {

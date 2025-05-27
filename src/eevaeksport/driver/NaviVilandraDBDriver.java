@@ -897,9 +897,7 @@ public class NaviVilandraDBDriver extends AbstractDBDriver implements BulkUpdate
   
        public TreeMap getCustomers(Agent agent){
 
-     	   Converter cc = new Converter();
-	    	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-	    	
+     	 	
 	    	  try{
 	    		   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
 	    			
@@ -1153,8 +1151,7 @@ public class NaviVilandraDBDriver extends AbstractDBDriver implements BulkUpdate
     	             customer.setChain(cat.trim());
     	           }
     	           
-    	           cc.addQuestiosToCustomer(customer,kyssad);    	          
-
+    	      
     	           String alegr = rs.getString("alegr");
     	           if(alegr != null && alegr.trim().length()>0){
     	        	customer.setGroup(Converter.cleanLitLatEst(alegr.trim()));   

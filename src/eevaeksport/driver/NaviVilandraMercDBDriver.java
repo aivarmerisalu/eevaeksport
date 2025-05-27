@@ -905,9 +905,7 @@ return result;
   
        public TreeMap getCustomers(Agent agent){
     	   HashSet diff = getTopVisit();
-     	   Converter cc = new Converter();
-	    	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-	    	  HashMap prgroups = getPrGroups();
+       	  HashMap prgroups = getPrGroups();
 	    	  
 	    	  try{
 	    		   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
@@ -1168,9 +1166,7 @@ return result;
     	             customer.setAnkeediTyyp(cat);
     	           }
     	           
-    	           cc.addQuestiosToCustomer(customer,kyssad);
-    	          
-    	      
+    	     
 
     	           String alegr = rs.getString("alegr");
     	           if(alegr != null && alegr.trim().length()>0){

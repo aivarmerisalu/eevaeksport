@@ -961,8 +961,7 @@ System.out.println("Alustan kliendid ");
   this.groupsAG = new TreeMap();
 //Teeme kysimuste failid valmis  p02831
 
-  Converter cc = new Converter();
-  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+ 
 
   TreeMap deldays =  makeCustomerDeliveryFile();
   
@@ -1318,7 +1317,7 @@ String volg = "select CTR.ACCOUNTNUM AS maksja,   Sum(CTR.AmountMst - CTR.Settle
         if(deldays.get(cust.getID())  != null){
         	cust.setDelDays((String)deldays.get(cust.getID()));
         }
-        cc.addQuestiosToCustomer(cust,kyssad);
+       
         
         if(custAgents.get(cust.getID()) != null){
         	Vector vv = (Vector) custAgents.get(cust.getID());

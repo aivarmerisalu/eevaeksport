@@ -335,12 +335,6 @@ public class LeiburLATCallDBDriver extends AbstractDBDriver implements Manager, 
 
 	public TreeMap getCustomers(Agent agent) {
 		TreeMap customers = new TreeMap();
-		  Converter ccd = new Converter();
-		  HashMap kyssad =   ccd.getQuestionaire(this.getExcelDir());
-		
-		  
-		
-		  
 		  
 
 	    	 String rou = "select CustCode, DelivDOW, l.RouteID, r.RouteName, DRDEPDOW from RoutePSEL l "

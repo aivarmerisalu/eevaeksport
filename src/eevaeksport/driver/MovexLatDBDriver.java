@@ -68,6 +68,7 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import ee.mobilejava.wrapper.DefectiveLineWrapper;
 import ee.mobilejava.wrapper.DefectiveWrapper;
@@ -742,9 +743,7 @@ String    cmd2 = " select  KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VIS
 
 
 Calendar cal = Calendar.getInstance();
-	  Converter cc = new Converter();
-	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-
+	 
       if (isDebug()) System.out.println(cmd2);
        st = con.createStatement();
        
@@ -772,8 +771,7 @@ Calendar cal = Calendar.getInstance();
           if("31RKi".equals(klgrupp)){
         	cust.allowGift = true;  
           }
-          
-          cc.addQuestiosToCustomer(cust,kyssad);  
+       
           String aadress1 = rs.getString("aadress1");
       
 
@@ -2090,6 +2088,43 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
   
   private void uploadQuestsAndAnswers() {
 	  
+	  HashSet qutitles = new HashSet();
+
+		 File svdata = new File( "svdata");
+			 if(!svdata.exists()) {
+				 svdata.mkdir();
+			 }	  
+	      	  
+	   String sisu = Converter.getQuestData(company, user, pass);
+	    
+	   Converter.saveFile("svdata/Questionnaire.json", sisu);
+	   
+
+	   JSONParser parser = new JSONParser();
+	   org.json.simple.JSONArray arrs = null;
+	   try {
+		 arrs = (org.json.simple.JSONArray)parser.parse(sisu);
+	} catch (ParseException e) {
+		e.printStackTrace();
+	}
+
+	   
+	   if(arrs != null) {
+		   for(int y = 0;  y < arrs.size(); y++) {
+			
+			try {
+				JSONObject ob = (JSONObject) arrs.get(y) ;
+				
+				String nimi = (String)ob.get("title");
+				System.out.println(nimi);
+				qutitles.add(nimi);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		   }
+	   }
+	   
 	  
 	  
 		//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
@@ -2099,11 +2134,6 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 				 done.mkdir();
 			 }
 
-		 File svdata = new File( "svdata");
-			 if(!svdata.exists()) {
-				 svdata.mkdir();
-			 }	  
-	      
 		  HashSet answersDone = null;
 			try {
 				answersDone = (HashSet)Converter.readObject("answersdone.obj");
@@ -2126,7 +2156,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 
 	    String filename =  Converter.getSVData(from.getTime(), to.getTime(), rcompany, user, pass, false, "YESNOFORCE", null, "SV-");
 
-	    JSONParser parser = new JSONParser();
+	     parser = new JSONParser();
 			try {
 				if(filename.length() > 1) {
 
@@ -2283,6 +2313,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 				
 		                 				String signa = klient +"_"+ period;
 		                 				
+		                 				String pais = chain + " " + klient + " " + period;
 		                 			//	System.out.println("signa " + signa);
 		                 				
 		                 				if(!questsDone.contains(signa)) {
@@ -2298,7 +2329,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	    	                 					if( qq == null) {
 	    	                 					   qq = new Quest();
 	    	                 					   qq.custID = klient;
-	    	                 					   qq.title = chain + " " + klient + " " + period;
+	    	                 					   qq.title = pais;
 	    	                 					   
 	    	                 					DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 	    	                 					String[] dateStrings = period.split(" - ");
@@ -2311,16 +2342,21 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	    	                 				          ql.qtype = "YESNOFORCEDYESPICT";
 	    	                 				    qq.questLines = new ArrayList<QuestLine>();
 	    	                 				    qq.questLines.add(ql);
+	    	                 				//Kui pole juba sellise päisega küsimustikku WEB-is olemas siis lisame.   
 	    	                 				   
-	    	                 				    questArr.put(klient, qq);
+	    	                 				    if(!qutitles.contains(pais)) {
+	    	                 				       questArr.put(klient, qq);
+	    	                 				    }
 	    	                 				   
 	    	                 					} else {
-	    	                 						
+	    	                 						 if(!qutitles.contains(pais)) {
+	    		    	                 				   
 	    	                 					 QuestLine ql = new QuestLine();
-	     	                 				        ql.qname = kysimus;
-	     	                 				        ql.qtype = "YESNOFORCEDYESPICT";
-	     	                 				      qq.questLines.add(ql);
+	     	                 				             ql.qname = kysimus;
+	     	                 				             ql.qtype = "YESNOFORCEDYESPICT";
+	     	                 				       qq.questLines.add(ql);
 	     	                 				      
+	    	                 						} 
 	    	                 					}
 	    	                 				 }	
 	    	                 			  }
@@ -3518,7 +3554,7 @@ public  Vector getCustomerProductsDistList() {
 
 @Override
 public void WebReporter() {
-	makeDayreportData();
+	//makeDayreportData();
 	sendTaskReport();
 	uploadQuestsAndAnswers();
 	  System.exit(0);

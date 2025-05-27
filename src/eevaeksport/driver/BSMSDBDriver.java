@@ -703,8 +703,7 @@ public void PictureMaker() {
    
   public TreeMap getCustomers(Agent agent){
 	  custnames = new TreeMap();
-	  Converter cc = new Converter();
-	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
+	
 	  TreeMap customers = new TreeMap();
 	  TreeMap custMap = new TreeMap();
 	   Vector payers =  new Vector();
@@ -898,7 +897,7 @@ public void PictureMaker() {
 		    	    			        
 		    	    			        
 		    	    			        if(kood.trim().length() > 2){
-		    	    			            cc.addQuestiosToCustomer(cust,kyssad);
+		    	    			        
 			    	    			        customers.put(cust.getName().trim(), cust);
 			    	    			        custMap.put(kood.trim(), cust);	
 			    	    			        

@@ -685,9 +685,7 @@ public class SAFWiruDBDriver extends AbstractDBDriver implements Manager,Promo,B
     TreeMap customers = new TreeMap();
   TreeMap payers = new TreeMap();
   
-  Converter cc = new Converter();
-  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-    try {
+     try {
       Connection con = getNewConnection();
       Statement st = con.createStatement();
 
@@ -818,9 +816,7 @@ public class SAFWiruDBDriver extends AbstractDBDriver implements Manager,Promo,B
           	  System.out.println("grupp " + cust.getName() + " "+ cust.getGroup());
            }
         
-          
-          cc.addQuestiosToCustomer(cust,kyssad);
-          
+         
           customers.put(name, cust);
           custMap.put(cust.getID(), cust);
     }

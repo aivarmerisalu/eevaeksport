@@ -720,10 +720,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
     		   
     	   }
     	  
-    	   
-     	   Converter cc = new Converter();
-	    	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-	    	
+    		
 	    	  HashMap volad = new HashMap();
               String sql3 =  " select Kontrahentas as klient , sum(SUMA1) AS yle FROM dba.v_DebtList_SkoluKartotekaPagalDokDebitor where " + 
 				  "   SUMA1 != 0 and RegardingObjectEntity in ('Sale','TransactionJournal') " +
@@ -957,9 +954,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
     	           if(cat != null && cat.trim().length()>0){
     	             customer.setAnkeediTyyp(cat);
     	           }
-    	           
-    	           cc.addQuestiosToCustomer(customer,kyssad);    	          
-
+    	     
     	           String alegr = rs.getString("alegr");
     	           if(alegr != null && alegr.trim().length()>0){
     	        	customer.setGroup(Converter.cleanLitLatEst(alegr.trim()));   

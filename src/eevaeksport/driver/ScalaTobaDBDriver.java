@@ -1162,8 +1162,6 @@ String email = " ";
     	
     	int week = 0;
     	  TreeMap custagents = new TreeMap();
-    	   Converter conv = new Converter();
-    	  	  HashMap kyssad =   conv.getQuestionaire(getExcelDir());
     	try {
     		FileReader reader = new FileReader("kliendiagent.txt");
 			BufferedReader br = new BufferedReader(reader);
@@ -1565,7 +1563,6 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
 		String nimi2 = nimi;
                 Customer cust = new Customer(rs.getString("kood").trim());
                 String addr = rs.getString("aadress").trim();
-                conv.addQuestiosToCustomer(cust,kyssad);
                   cust.setAddress(Converter.adressLink(Converter.enCodeEst(addr),"Estonia"));
                   nimi =  Converter.enCodeEst(nimi + " " + addr);
                 

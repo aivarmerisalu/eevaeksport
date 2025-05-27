@@ -849,6 +849,10 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
           String name = rs.getString("nimi").trim() ;
                    agent.setName(name);
           agent.setIsPilot(true);
+          
+          if("true".equals(  getParent().getProps().getProperty("usewebpass"))) {
+          	agent.needsZipPass = true;
+          }
           agents1.put(agent.getID(), agent);
           agents.put(name, agent);
           ags.add(agent.getID());

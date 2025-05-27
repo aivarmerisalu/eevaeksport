@@ -576,8 +576,6 @@ public class ScalaLFDBDriver extends AbstractDBDriver implements Manager,Promo,B
 	 
 	public TreeMap getCustomers(Agent agent){
 		connectionUp(url);
-		  Converter cc = new Converter();
-		 HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
 		String cmd = "SELECT ( ltrim(SL01002) + ' ' + SL14004) AS nimi,SL01001 AS kood,ltrim(SL01003) +' '+SL14005 AS aadress," +
 				" (case when SY24002 = null then '0' " +
     " else SY24002 end) AS ale, " +
@@ -711,7 +709,6 @@ public class ScalaLFDBDriver extends AbstractDBDriver implements Manager,Promo,B
 					//System.out.println("Blokk 2 " + cust.getName());
 				}
 				
-				 cc.addQuestiosToCustomer(cust,kyssad);
 				String payer = rs.getString("payer");
 				if(payer != null && payer.trim().length() > 0){
 					cust.setPayer(payer.trim());

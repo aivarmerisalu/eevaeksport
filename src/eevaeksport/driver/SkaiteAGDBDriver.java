@@ -94,10 +94,8 @@ public class SkaiteAGDBDriver extends AbstractDBDriver implements BulkUpdater,Ma
 	private HashMap questIDs = null;
     
     public void insertSuperVisorSQLMeri(SupervisorInfoWrapperMeri wr) {
-    	
-Converter conv = new Converter();
-	    
-	    questIDs = conv.getQuestActiveIDs(this.getExcelDir());
+    
+	  
 	 
 	   
     	
@@ -1172,17 +1170,11 @@ try{
 
     public TreeMap getCustomers(Agent agent){
     	
-    	
-Converter conv = new Converter();
-	    
-	  
-	   
+      
         connectionUp(url);
         this.loadMaster();
         TreeMap ccd = null;
-    
-  	  HashMap kyssad =   conv.getQuestionaire(this.getExcelDir());
-  	  
+     
   	  TreeMap minsums = loadMinsums();
   	  //
   	  
@@ -1250,10 +1242,9 @@ Converter conv = new Converter();
                   cust.restZipCode = indeks.trim();
                 }
 
-                cust.setCountry("Lithuania");
+                 cust.setCountry("Lithuania");
                 
-                conv.addQuestiosToCustomer(cust,kyssad);
-                cust.setPayer(payer);
+                 cust.setPayer(payer);
                 if(nimi.startsWith("UAB ")){
                 	nimi = (nimi.substring(4,nimi.length()) + " UAB").trim();
                 }

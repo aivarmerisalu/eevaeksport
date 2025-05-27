@@ -397,10 +397,7 @@ public class NaviAlcorViaDBDriver extends AbstractDBDriver implements BulkUpdate
   
        public TreeMap getCustomers(Agent agent){
 
-     	   Converter cc = new Converter();
-	    	  HashMap kyssad =   cc.getQuestionaire(this.getExcelDir());
-	    	
-
+     	
 	    	  
 	    try {
 
@@ -617,9 +614,7 @@ public class NaviAlcorViaDBDriver extends AbstractDBDriver implements BulkUpdate
     	               }
     	               customer.setMainAgent(" ");
     	           }
-    	           
-    	           cc.addQuestiosToCustomer(customer,kyssad);    	          
-
+    	 
     	           String alegr = rs.getString("alegr");
     	           if(alegr != null && alegr.trim().length()>0){
     	        	customer.setGroup(Converter.cleanLitLatEst(alegr.trim()));   

@@ -581,13 +581,7 @@ public class OskarLTDBDriver extends AbstractDBDriver  implements Manager,Promo,
   
   public TreeMap getCustomers(Agent agent){
 	  custnames = new TreeMap();
-	  Converter cc = new Converter();
-	  HashMap kyssad = null;
-	  try{
-		  kyssad = cc.getQuestionaire(this.getExcelDir());  
-	  }catch(Exception e){
-		  
-	  }
+	
 	
 	  TreeMap customers = new TreeMap();
 	  TreeMap custMap = new TreeMap();
@@ -752,8 +746,7 @@ public class OskarLTDBDriver extends AbstractDBDriver  implements Manager,Promo,
 		    	    			        
 		    	    			        
 		    	    			        if(kood.trim().length() > 3){
-		    	    			            cc.addQuestiosToCustomer(cust,kyssad);
-			    	    			        customers.put(cust.getName(), cust);
+		    	    			            customers.put(cust.getName(), cust);
 			    	    			        custMap.put(kood.trim(), cust);	
 		    	    			        }
 		    	    			  	 }
