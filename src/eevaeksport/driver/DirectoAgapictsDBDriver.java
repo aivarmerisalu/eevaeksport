@@ -2548,7 +2548,9 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
     }
     
     prGroups = grups;
-         
+         if(tm.size() < 5) {
+        	 System.exit(0);
+         }
      return tm;
    }
    

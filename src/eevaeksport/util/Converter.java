@@ -4177,7 +4177,7 @@ public class Converter {
 										if(cellx != null) {
 											try {
 										//	System.out.println("Aldar " + cellx.getStringCellValue());
-											if(formatter.formatCellValue(cellx).indexOf("30.Roela") != -1 ) {
+											if(formatter.formatCellValue(cellx).indexOf("13.Laekvere") != -1 ) {
 												return "aldar";
 											}
                                       }catch(Exception e) {
