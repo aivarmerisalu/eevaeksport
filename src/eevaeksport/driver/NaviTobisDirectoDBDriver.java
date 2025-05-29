@@ -3171,15 +3171,15 @@ System.out.println(cmd);
         			grupp = grupp.trim();
 
                  	if(maxdisc != null && maxdisc.get(grupp) != null){
-                    prod.setMaxDiscount(maxdisc.get(grupp));
-
-               	   prod.addPartii("|  Brand MaxD: " + getNF().format(maxdisc.get(grupp)) + "%");
+                      prod.setMaxDiscount(maxdisc.get(grupp));
+               	      prod.addPartii("|  Brand MaxD: " + getNF().format(maxdisc.get(grupp)) + "%");
                     }
+                 	
         			 if(this.cateFullGroup.get(grupp) != null) {
                   	   String g1 = cateFullGroup.get(grupp);
                       	if(maxdisc != null && maxdisc.get(g1) != null){
                        prod.setMaxDiscount(maxdisc.get(g1));
-                       prod.addPartii("|  Catrgory MaxD: " + getNF().format(maxdisc.get(grupp)) + "%");
+                       prod.addPartii("|  Catergory MaxD: " + getNF().format(maxdisc.get(grupp)) + "%");
                        }
                   	   prod.setGroup(g1);
                   	   prod.setGroupSecond(g1+grupp);

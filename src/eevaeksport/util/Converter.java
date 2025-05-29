@@ -5440,7 +5440,7 @@ try{
 		}
 		json.put("questions", lines);
 		
-		System.out.println(json.toString());
+		//System.out.println(json.toString());
 		
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -5448,7 +5448,7 @@ try{
 		
 		try {
 			String aa = serv.postJson(json.toString(), "https://api.mobitrek.eu/rest/questionnaire/save");
-			System.out.println(aa);
+		//	System.out.println(aa);
 			serv.closeClient();
 			res = true;
 		} catch (Exception e) {

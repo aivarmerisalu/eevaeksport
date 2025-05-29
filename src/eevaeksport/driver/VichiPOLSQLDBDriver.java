@@ -477,7 +477,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	   HashSet   tm = new HashSet();
 	     setTreeGroup(true);
 	 	 
-	  	 String sql ="  select [Item No_] as prodid from [VICIUNAI-POL$Sales Price] where [Sales Code] = '' and [Unit Price] > 0 and\r\n" + 
+	  	 String sql ="  select [Item No_] as prodid from [VICIUNAI-POL$Sales Price] where  [Unit Price] > 0 and\r\n" +  //[Sales Code] = '' and
 	  	 		"							  ((getdate() BETWEEN [Starting Date] AND [Ending Date] ) \r\n" + 
 	  	 		"	  	 		        OR (  year([Starting Date]) < 1900 AND year([Ending Date]) < 1900 )\r\n" + 
 	  	 		"	  	 		        OR (  year([Starting Date]) < 1900 AND getdate() <= [Ending Date] )\r\n" + 

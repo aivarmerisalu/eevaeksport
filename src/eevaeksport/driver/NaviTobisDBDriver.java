@@ -69,12 +69,98 @@ public class NaviTobisDBDriver extends AbstractDBDriver implements BulkUpdater,D
      return null;
    }
    public String getSaveDebtInfo() {
-		  makeeCat();
+	   makePictureCat();
 		  System.exit(0);
    	return null;
    }
 
-   
+   private void makePictureCat(){
+	    
+	   	
+	   	String pictssou = parent.getProps().getProperty("pict.dir");
+	 	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	 	   
+	 	 try {
+		  
+	     File f = new File(pictspda +"list.txt");
+	     if (f.exists())f.delete();
+	     //Kataloogi sisude kustutamine
+	 	 	 File res2 = new File (pictspda);
+	            String[] ff3 = res2.list();
+	        	 for(int i = 0;ff3.length>i;i++){
+	        		 
+	            	//(new File ( pictspda + ff2[i])).delete(); 
+	            }
+//	        	 Lõppes kustutamine 
+	        //	custProds.add("suva");
+	 		  this.getProducts(null);
+	 		// System.out.println("olemas " + prodHash.get("ALC-300630"));
+
+	        StringBuffer buf = new StringBuffer();
+	        Iterator enume = prodHash.keySet().iterator();
+	   
+	        while (enume.hasNext()) {
+	   	    	String asi = (String)enume.next();
+	   	    	
+	   	    	String toode = asi; 
+	   	    	
+	   	    	  toode = toode.replace('/', '_');
+	   	          toode = toode.replace('/', '_');
+	   	          
+	              if(toode.length() > 0){
+	               	
+	   	   	  res2 = new File (pictssou);
+	   	   String[]  ff2 = res2.list();
+	            
+	        	 for(int i = 0;ff2.length>i;i++){
+	            	if( ff2[i].startsWith(toode+".")){
+	              // System.out.println("pilt olemas " + ff2[i]);
+	           	File in = new File ( pictssou + ff2[i]); 
+	             	if(in.isFile()){
+	             		if(in.getName().toLowerCase().endsWith("png")) {
+	             		 	File inpda = new File ( pictspda + toode+ ".png");
+	                     	if(!inpda.exists() || (inpda.exists() && inpda.lastModified() < in.lastModified())){ // kui on 72h ja uuem
+	                        	if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
+	                     			Converter.copyFile(in,inpda);
+	                     		}else {
+	                     			Converter.shrinkAndCopyFile(in,inpda,600);
+	                     		}
+	                       	 }
+	                     	buf.append(toode +".png;"  + inpda.length() + "\n");
+	                   	
+	                     	 			
+	             		}else {
+	             	File inpda = new File ( pictspda + toode+ ".jpg");
+	             	if(!inpda.exists() || (inpda.exists() && inpda.lastModified() < in.lastModified())){ // kui on 72h ja uuem
+	                	if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
+	             			Converter.copyFile(in,inpda);
+	             		}else {
+	             			Converter.shrinkAndCopyFile(in,inpda,600);
+	             		}
+	               	 }
+	             	buf.append(toode +".jpg;"  + inpda.length() + "\n");
+	           	
+	             	
+	             	   }
+	             	}
+	                }
+	              }
+	            }
+	      }
+	     try {
+			PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+			os.write(buf.toString());
+			os.close();
+		  }catch (Exception ex) {
+			ex.printStackTrace();
+		  }
+	 	 
+	 	 } catch (Exception e) {
+	   	    getParent().showError(e);
+	   	}
+	    
+	 }
+
    private void makeeCat(){
 	     
    	String  cmd2 = " SELECT [No_] as toode from [2015_Tobis$Item] where  [Show in mob_ device] = 1";
@@ -1502,6 +1588,7 @@ System.out.println(cmd);
                    
                    if(luba.contains(prod.getID()) && !name.equals("")){
                 	   prod.setName(name);
+                	   prodHash.put(prod.getID(), prod);
                        tm.put(name, prod);  
                        String normcode = prod.getID().replace('/', '_');
                        if(!docCodes.contains(normcode)){
@@ -1749,6 +1836,8 @@ System.out.println(cmd);
      return tm;
    }
 
+
+HashMap prodHash = new HashMap();
    
 	public static void saveObject(Object obj, String file) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);

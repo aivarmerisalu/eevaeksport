@@ -1120,7 +1120,40 @@ System.out.println(cmd);
      StringBuffer buf = new StringBuffer();
      
      
+     HashMap<String, Double> maxdisc = new HashMap<String, Double>();
      
+     try {
+   	  String cmd = "select [Group Code] as kood, [Group 2 Code] as kood2 , code ,  [Max Discount]  as mdisc from [NAV40].[dbo].[2015_Tobis$Dimension Value] where  [Max Discount]  > 0 " ;
+   	  
+      	 Connection con = getNewConnection2();
+  	        Statement stmt = con.createStatement();
+  	        ResultSet rs = stmt.executeQuery(cmd);
+  	        while(rs.next()){
+  	              	String toode =rs.getString("kood");
+  	              	String toode2 =rs.getString("kood2");
+  	              	String toode3 =rs.getString("code");
+  	              	
+  	                Double seis = rs.getDouble("mdisc");
+  	              
+  	              if(toode != null && toode.trim().length() > 0)
+  	              maxdisc.put(toode, seis );
+
+  	              if(toode2 != null && toode2.trim().length() > 0)
+  	              maxdisc.put(toode2, seis );
+
+  	              if(toode3 != null && toode3.trim().length() > 0)
+  	              maxdisc.put(toode3, seis );
+  	              	
+  	        }
+
+  	      rs.close();
+  	      stmt.close();
+  	      con.close();
+
+  	   // System.out.println(cmd);
+   } catch (Exception e) {
+       e.printStackTrace();
+   }
   
      try {
      
@@ -1139,7 +1172,7 @@ System.out.println(cmd);
            stmt.close();
            con.close();
     	 String cmd = "  SELECT  t.[No_] AS toode,(t.[Description] + t.[Description 2] ) AS nimi, t.[Unit Price] AS myygihind, '' AS grupp2,t.[Global Dimension 2 Code] AS grupp " +
-			" ,t.[Base Unit of Measure] AS unit,[No_ 2] AS ean,'' AS status ,0 AS maxdiscount, " +
+			" ,t.[Base Unit of Measure] AS unit,[No_ 2] AS ean,'' AS status ,[Max discount]  AS maxdiscount, " +
 			 " '' AS type, [Units per Parcel] AS kastis,[Item Disc_ Group] as alegr ,  '' AS kaal, [VAT Prod_ Posting Group] AS vat ,[Units per Pallet] as pallet " +
 			 " ,[Unit List Price] as listprice ,[Nelikvidas]  as status2  FROM [2015_Tobis$Item] t  WHERE t.[Blocked]=0    ORDER BY t.[No_] ";
    
@@ -1166,7 +1199,7 @@ System.out.println(cmd);
     	 cmd =" SELECT   t.[No_] AS toode, (case when isnull(est.Translation,'')<>'' THEN est.Translation  else case when isnull(enu.Translation,'')<>'' THEN enu.Translation  " +
     	" else case when t.[Aprašas 3]<>'' then t.[Aprašas 3] else (t.[Description] + t.[Description 2]) end end end) " +
     	" as nimi,  t.[Unit Price] AS myygihind,  '' AS grupp2, t.[Global Dimension 2 Code] AS grupp  , " +
-    	" t.[Base Unit of Measure] AS unit, [No_ 2] AS ean, '' AS status , 0 AS maxdiscount,  '' aS type, [Units per Parcel] AS kastis, " +
+    	" t.[Base Unit of Measure] AS unit, [No_ 2] AS ean, '' AS status , [Max discount]  AS maxdiscount,  '' aS type, [Units per Parcel] AS kastis, " +
     	" [Item Disc_ Group] as alegr ,  '' AS kaal,[VAT Prod_ Posting Group] AS vat , [Units per Pallet] as pallet  , " +
     	" [Unit List Price] as listprice ,[New until] as newprod ,[Nelikvidas]  as status2 FROM [2015_Tobis$Item] t   LEFT JOIN [2015_Tobis$Translations] est on  est.TableNo=27  " +
     	" and est.Field=3  and est.Language='EST' and t.No_=est.[Primary Key Value 1]  	 LEFT JOIN [2015_Tobis$Translations] enu on  " +
@@ -1200,6 +1233,11 @@ System.out.println(cmd);
               String grupp = cleardots(rs.getString("grupp"));
         		if(grupp != null && grupp.trim().length() >0){
         			prod.setGroup(grupp.trim());	
+        			if(maxdisc != null && maxdisc.get(grupp) != null){
+                        prod.setMaxDiscount(maxdisc.get(grupp));
+                 	      prod.addPartii("|  Brand MaxD: " + getNF().format(maxdisc.get(grupp)) + "%");
+                      }
+                   	
         		}
         	
         		
@@ -1273,8 +1311,8 @@ System.out.println(cmd);
                    
                    Date newprod = rs.getDate("newprod");
                    if(newprod.after(new Date())){
-                	  // prod.setStatusNew("1");
-                	   prod.setMustBe("1");
+                	   prod.setStatusNew("1");
+                	   //prod.setMustBe("1");
                    }
                    
                    try {

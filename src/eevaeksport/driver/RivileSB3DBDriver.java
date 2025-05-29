@@ -957,17 +957,16 @@ HashSet olemas = new HashSet();
               
               if (cust.getID().equals("302310253-12")) {
             	  cust.addAgent(new Agent("26"));
+            	  cust.addAgent(new Agent("13"));
               }
         
 
-              if (cust.getID().equals("302310253-12")) {
-            	  cust.addAgent(new Agent("26"));
-              }
-              
+
 
               if (cust.getID().equals("302310253-10")) {
             	  cust.addAgent(new Agent("34"));
             	  cust.addAgent(new Agent("33"));
+            	  cust.addAgent(new Agent("13"));
               }
              
            //   cust.setMainAgent(ag);

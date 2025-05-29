@@ -751,7 +751,7 @@ if(https) {
 		}
 		HttpResponse resp = restPostRequest(url, login, client);
 		if (resp.getStatusLine().getStatusCode() != 200) throw new Exception("Login failed! " + login);
-		System.out.println( EntityUtils.toString(resp.getEntity()));
+		//System.out.println( EntityUtils.toString(resp.getEntity()));
 	}
 	
 	

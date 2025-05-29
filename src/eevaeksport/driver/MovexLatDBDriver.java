@@ -2095,7 +2095,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 				 svdata.mkdir();
 			 }	  
 	      	  
-	   String sisu = Converter.getQuestData(company, user, pass);
+	   String sisu = Converter.getQuestData(rcompany, user, pass);
 	    
 	   Converter.saveFile("svdata/Questionnaire.json", sisu);
 	   
@@ -2113,11 +2113,15 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		   for(int y = 0;  y < arrs.size(); y++) {
 			
 			try {
-				JSONObject ob = (JSONObject) arrs.get(y) ;
-				
+			
+				org.json.simple.JSONObject ob = (org.json.simple.JSONObject) arrs.get(y) ;
 				String nimi = (String)ob.get("title");
-				System.out.println(nimi);
-				qutitles.add(nimi);
+				
+				if(!qutitles.contains(nimi)) {
+			    	qutitles.add(nimi);
+			    	System.out.println(nimi);
+				}
+			
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -2125,7 +2129,6 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		   }
 	   }
 	   
-	  
 	  
 		//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
 			File folder = new File(this.getExcelDir());
@@ -2314,9 +2317,9 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 				String signa = klient +"_"+ period;
 		                 				
 		                 				String pais = chain + " " + klient + " " + period;
-		                 			//	System.out.println("signa " + signa);
+		                 				System.out.println("pais  " + pais + " " + qutitles.contains(pais));
 		                 				
-		                 				if(!questsDone.contains(signa)) {
+		                 				if( !qutitles.contains(pais)) { //!questsDone.contains(signa)
 		                 				// kui pole lisatud küsimust siis 
 		                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
 	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
@@ -2344,19 +2347,16 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	    	                 				    qq.questLines.add(ql);
 	    	                 				//Kui pole juba sellise päisega küsimustikku WEB-is olemas siis lisame.   
 	    	                 				   
-	    	                 				    if(!qutitles.contains(pais)) {
-	    	                 				       questArr.put(klient, qq);
-	    	                 				    }
+	    	                 				      questArr.put(klient, qq);
+	    	                 				    
 	    	                 				   
 	    	                 					} else {
-	    	                 						 if(!qutitles.contains(pais)) {
 	    		    	                 				   
 	    	                 					 QuestLine ql = new QuestLine();
 	     	                 				             ql.qname = kysimus;
 	     	                 				             ql.qtype = "YESNOFORCEDYESPICT";
 	     	                 				       qq.questLines.add(ql);
 	     	                 				      
-	    	                 						} 
 	    	                 					}
 	    	                 				 }	
 	    	                 			  }
@@ -2520,7 +2520,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 			      
 		                 			}
 		                 			//System.out.println(questArr.toString());	
-		                 			
+		                 	//	System.exit(0);	
 		                 			// Saadame ära
 		                 			if(questArr.size() > 0) {
 		                 			Iterator<String> itera = questArr.keySet().iterator();
@@ -2531,6 +2531,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 			   }
 		                 			  }
 		                 			
+		                 			questArr.clear();
 		                 			}catch(Exception e) {
 		                 				e.printStackTrace();
 		                 			}
@@ -3554,7 +3555,7 @@ public  Vector getCustomerProductsDistList() {
 
 @Override
 public void WebReporter() {
-	//makeDayreportData();
+	makeDayreportData();
 	sendTaskReport();
 	uploadQuestsAndAnswers();
 	  System.exit(0);
@@ -3668,7 +3669,7 @@ public void WebReporter() {
 					
 		    		System.out.println("d1 " + custid + " " + agentid + " " + dateOnly + " " + foto1 );
 	    	    	this.addToDayReportDB(agentid, custid, foto1, timestamp);
-	    	    	System.exit(0);
+	    	    	//System.exit(0);
 	    	    	
 	    	    	
 	 	  			 done.add(signa);
@@ -3684,7 +3685,7 @@ public void WebReporter() {
 	    	 } catch (Exception e) {
 	 			e.printStackTrace();
 	 		 }
-		  System.exit(0);
+		 // System.exit(0);
 	  }
 
 
@@ -3975,13 +3976,15 @@ if(closed != null) {
 private void addToDayReportDB(String agent, String cucode, String filename, long comlpTime ) {
 	
 	
-	 String sql = "INSERT INTO cesu.CUSTOMER_VISIT_PHOTOS   " + 
-	 		" VALUES ('"+ agent + "', '" + cucode +"', '" + filename +"',?,sysdate)"  ;
+	 String sql = "\r\n" + 
+	 		" INSERT INTO  cesu.CUSTOMER_VISIT_PHOTOS ( CUSTOMER_NUMBER, VISIT_DATE, FILE_PATH, CREATED_AT ,AGENT_CODE)\r\n" + 
+	 		" VALUES ( '" + cucode +"',?, ? , sysdate ,'" + agent + "')"  ;
      try {
     	Connection con = getNewConnection();
         PreparedStatement ps = con.prepareStatement(sql);
           Timestamp ss = new Timestamp(comlpTime);
-            ps.setTimestamp(3, ss);
+            ps.setTimestamp(1, ss);
+            ps.setString(2, filename);
             ps.executeUpdate();
             con.commit();
          ps.close();
