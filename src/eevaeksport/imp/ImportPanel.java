@@ -15279,7 +15279,7 @@ shipdate = getCalXML(asi);
             				           || driver.getDriverVersion().equals("Rinku")
             				           || driver.getDriverVersion().equals("SkaiteRoskiskoImport")
             				           || driver.getDriverVersion().equals("BC365")
-            				           
+            				           || driver.getDriverVersion().equals("PreseLV")
             				           
             						  )){
             	  dokNr = agordnum;         	  

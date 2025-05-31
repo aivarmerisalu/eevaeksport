@@ -18,6 +18,7 @@ import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -160,218 +161,20 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
       
       
     public String getSaveDebtInfo() {
-    	// System.out.println("xxxxxyyyy");
-    	        File dir = new File("import");
-    	        File block = new File("block.txt");
-    	        if(block.exists()){
-    	        	System.exit(0);
-    	        }
-    	        try {
-					saveObject("",block.getName());
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-    	        
-    	        File[] files = dir.listFiles();
-    	        for (int i = 0; i < files.length ; i++){
-    	          File file = files[i];
-    	  //        System.out.println("xxxxxyyyy");
-    	          if (file.isFile()){
-    	            Vector vec = null;
-    	            try {
-    	            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-    	           
-    				
-    					vec = (Vector)ois.readObject();
-    					ois.close();
-    				} catch (IOException e) {
-    					// TODO Auto-generated catch block
-    					e.printStackTrace();
-    				} catch (ClassNotFoundException e) {
-    					// TODO Auto-generated catch block
-    					e.printStackTrace();
-    				}
-    		//		System.out.println("xxxxx");
-    	             insertStock(vec);
-    	             File done = new File("import/done/" + file.getName());
-    	             if(done.exists()){
-    	             	done.delete();
-    	             }
-    	            file.renameTo(done);
-    	             file.delete();
-    	            
-    	          }
-	         
-    	        }
-    	        
-    	        if(block.exists()){
-    	        	block.delete();
-    	        }
-    	        System.exit(0);
-    	    	
+    	 	
     	    	return null;
     	       }
 
     
     
-    private void insertStock(Vector vec){
-    	if(vec != null){
-    		
-    		
-    		int doknr = 0;
-    		
-    		try{
-    			String sql1 = "select dok.dokumnr from dok inner join rid on dok.dokumnr=rid.dokumnr " +
-              " where dok.doktyyp='K' and rid.doktyyp='K' and dok.kinnitatud = 0 and dok.inventuur=1 and dok.kuupaev > date() -5 " +
-              "and trim(dok.tekst1)= ''";
-
-            	  Connection con = this.getNewCon();
-            	 System.out.println(sql1);
-        		Statement st = con.createStatement();
-        		ResultSet rs = st.executeQuery(sql1);
-        		if (rs.next()){
-        			doknr = (rs.getInt("dokumnr"));
-        		}
-        		rs.close();
-        		st.close();
-        		con.close();
-        			
-    		}catch (Exception e){
-    			e.printStackTrace();
-    		}
-    		
-    		System.out.println("Dok nr  : " + doknr);
-    		
-    		
-    		
-    		if (doknr >0){
-    		
-    		
-    		Enumeration enume = vec.elements();
-    		while(enume.hasMoreElements()){
-    			InventoryLine lin = (InventoryLine)enume.nextElement();
-    			String objekt = lin.getCustId();
-    			String location = lin.getLocation();
-    			double kogus  = lin.getAmount();
-    			String ean = lin.getEan();
-    			String prName = lin.getProdName();
-    			String wrk = lin.getWorker();
-    			String wrkname = lin.getWorkername();
-    			String prodid = lin.getProdId();
-    			
-    			java.sql.Date entered = new java.sql.Date(lin.getEnterTime().getTime());
-    	
-				
-    			String sqq = "select kogus from rid where dokumnr= " + doknr +" and toode ='" + prodid + "' and doktyyp ='K' ";
-    			 try{
-    			  
-    			 	
-    				Connection con =  this.getNewCon();
-
-    			
-    			Statement stq = con.createStatement();
-    			ResultSet rsq = stq.executeQuery(sqq);
-    			double kogusq = 0;
-    			if(rsq.next()){
-    				kogusq = rsq.getDouble("kogus");
-    			}
-    			rsq.close();
-    			stq.close();
-    			
-    			System.out.println(objekt + " " + location + " " + kogus + " " +  prodid + " " + 
-    					ean + " " + prName+ " " + wrk + " " + wrkname+ " " + entered.toString() + " " + kogusq);
-    			
-    			 String sql = " UPDATE RID SET  rtaitkogus= ? WHERE dokumnr =" + doknr + " and doktyyp ='K' and toode ='" + prodid + "'";
-    		
-    		
-     		        PreparedStatement stpr = con.prepareStatement(sql);
-     		        stpr.setDouble(1,kogus + kogusq);
-     		      try{
-     		        stpr.executeUpdate();  
-    			 }catch (Exception e){
-    			 	this.log(e.toString());
-    			 	log(objekt + " " + location + " " + kogus + " " +  prodid + " " + 
-        					ean + " " + prName+ " " + wrk + " " + wrkname+ " " + entered.toString() + " " + kogusq);
-    			 	
-    			 }
-     		      	System.out.println(sql  + "Rida updatetud");
-     		      
-     		        stpr.close();
-     		        con.close();
-     		        
-    			 }catch (Exception e){
-    			 	e.printStackTrace();
-    			 }
-    		
-    			
-    		}
-    		
-    		String sss = "update dok set tekst1='Sisselugemine tehtud' where doktyyp='K' and dokumnr=?"  ;
-    		try {
-				Connection con =  this.getNewCon();
-			
-		        PreparedStatement stpr = con.prepareStatement(sss);
-		        stpr.setInt(1,doknr);
-		      	stpr.executeUpdate();  
-		      	System.out.println(sss  + "Tekst muudetud");
-		        stpr.close();
-		        con.close();
-		        
-    		} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-    		
-   		  }
-    	}
-    }
-
+  
     
     
     
            
     public String getSaveStockInfo(){
  
-    	 
-    	 connectionUp();
-   		String cmd =  "    select  toode.aktsiis,dok.dokumnr , rid.toode , dok.klient from dok inner join klient on dok.klient = klient.kood inner join rid on rid.dokumnr = dok.dokumnr inner join toode on rid.toode = toode.toode " + 
-   				"    where kuupaev > date()-45 and dok.doktyyp='G' and (otsekorral != '' or dok.klient like 'ARAXES%' or dok.klient like 'A-SELVER%') "
-   				+ " and dok.yksus = '1' and rid.toode != 'KM' and rid.toode not like '00%'  "; //and toode.aktsiis > 0
-   		cmd = "select  toode.aktsiis,dok.dokumnr , rid.toode , dok.klient  from dok inner join klient on dok.klient = klient.kood inner join rid on rid.dokumnr = dok.dokumnr inner join toode on rid.toode = toode.toode  " + 
-   				"   				    where kuupaev > date()-40 and dok.doktyyp='G' and toode.aktsiis != rid.kulum " + 
-   				"   				 and dok.yksus = '1' and rid.toode != 'KM' and rid.toode not like '00%'";
-   	Vector doks = new Vector();
-   		log(cmd);
-   		
-   		try {
-
-        	  Connection con = this.getNewCon();
-           
-   			Statement stmt = con.createStatement();		
-   			ResultSet	      rs = stmt.executeQuery(cmd);
-   			Connection cc =  this.getNewCon();
-
-   			while(rs.next()) {
-   				String sss = "update rid set kulum = " + rs.getDouble("aktsiis")+ " where dokumnr = " + rs.getString("dokumnr") +
-   						" and toode ='" + rs.getString("toode").trim() + "'";
-   				Statement stm = cc.createStatement();
-   				stm.executeUpdate(sss);
-   			    stm.close();
-   			System.out.println("Tehtud " + sss);
-   			}
-   			rs.close();
-   			cc.close();
-   			
-   			stmt.close();
-   			con.close();
-   		}catch (Exception e) {
-   			
-   		}
-   			
-    	 
-   			
-   		 
+  		 
     	 return null ;
     	
     	
@@ -390,7 +193,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                  }
 
                 public void setBulkSales(Map agents){
-              	  connectionUp();
+             /* 	
           		String cmd =  " SELECT sum(rid.kogus*(rid.hind))AS sales, " +
           		 " dok.pais2obj  AS agent FROM dok " + //k.objekt2
                  " INNER JOIN rid ON dok.doktyyp+STR(dok.dokumnr,7)=rid.doktyyp+STR(rid.dokumnr,7)  INNER JOIN yksus y ON y.yksus = dok.pais2obj " +
@@ -422,7 +225,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
           		} catch (Exception e) {
           			getParent().showError(e);
           		}
-          		
+          		*/
           	}
            
      
@@ -474,9 +277,9 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
      }
         // String cmd = "SELECT k.kood, k.nimi FROM (klient k INNER JOIN omrid ON k.kood = omrid.klient INNER JOIN rid ON rid.dokumnr = omrid.tasudjrk) WHERE omrid.rid2obj='" + agentCode + "' AND (len(rid.toode) > 2) GROUP BY k.kood";
         String cmd =
-            "SELECT k.kood, k.nimi,TRIM(k.tanav) + ' ' + trim(k.piirkond) AS aadress,' ' AS ale,k.riik AS visit,email ,k.objekt2 " +
-          "  AS agent,k.maksja , telefon , piirkond, tanav, postiindek as indeks, kontaktisi as kontakt, "
-          + "email,k.objekt7 as chain, k.liik as category,keeld as blokk FROM klient k where (k.objekt2 !='' or k.kood like '%UUSKLIENT%') and k.mitteakt=.F. ORDER BY k.nimi " ;
+            "SELECT kioski.NIMI AS nimi, kioski.MYYGIPUNKT_ID AS kood, kioski.adrese AS aadress, kioski.MP_TYYP_KD AS kett, kioski.Parzinis AS agent, "
+            + "kioski.Rajons AS piirkond, kioski.Pilseta AS City FROM kioski\r\n" + 
+            "WHERE (((kioski.NIMI) Not Like 'Sl%') AND ((kioski.Parzinis) Not Like 'MENED%')) " ;
 
         log(cmd);
 
@@ -489,27 +292,20 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
             ResultSet	      rs = stmt.executeQuery(cmd);
            
             while (rs.next()) {
+              String nimi = rs.getString("nimi").trim();
               Customer cust = new Customer(rs.getString("kood").trim());
-            String nimi = rs.getString("nimi").trim();
-            cust.setName(Converter.enCodeEst(nimi));
+               cust.setName(Converter.enCodeEst(nimi));
 
-            String visit = rs.getString("visit");
-            if (visit != null){
-              cust.setVisit(visit.trim());
-            }
+        
 
             String aadress = rs.getString("aadress") ;
-            if (aadress != null){
-            	String aadr = aadress.trim();
-            	aadr = "." + aadr + ",Estonia.";
-              cust.setAddress(Converter.enCodeEst(aadr));
+            
+            
+            String kett = rs.getString("kett");
+            if(kett != null && kett.trim().length() >0){
+            	cust.setChain(kett.trim());
             }
-            cust.setDiscount(rs.getDouble("ale"));
-            String email = rs.getString("email");
-            if (email != null && email.trim().length()>0){
-//            cust.setConfirmEmail(email.trim());
-
-            }
+            
             
             String ag = rs.getString("agent");
             if(ag != null && ag.trim().length() >0){
@@ -533,22 +329,26 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 					}
 				}
             }
-            	
-            	
         	}
-        
-        			
-        			
-
-        	if (cust.getID().equals("UUSKLIENT")) {
-                Enumeration enume = getParent().getAgentsHash().elements();
-                while (enume.hasMoreElements()) {
-                  Agent a = (Agent) enume.nextElement();
-                  cust.addAgent(a);
-                }
-              }
+            String piirkond = rs.getString("piirkond");
+           
+            String linn = rs.getString("city");
+            if(linn != null && linn.trim().length() >0){
+            	cust.restCity = linn.trim();
+            }
             
-            String payer = rs.getString("maksja");
+            if (aadress != null){
+            	String aadr = aadress.trim();
+            	 if(piirkond != null && piirkond.trim().length() >0){
+            		 aadr = aadr + ", " +piirkond.trim();
+                 }
+            	 cust.restStreet = aadr.trim();
+            	aadr = "." + aadr + ",Latvia.";
+              cust.setAddress(Converter.enCodeEst(aadr));
+             }
+         	
+            
+            /*   String payer = rs.getString("maksja");
             if(payer != null && payer.trim().length() >0){
             	cust.setPayer(payer.trim());
             }
@@ -557,20 +357,8 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
             	cust.setPersonalData(Converter.enCodeEst("Tel:" + telefon.trim().replaceAll(";", ":")));
             }
             
-            String piirkond = rs.getString("piirkond");
-            if(piirkond != null && piirkond.trim().length() >0){
-            	cust.restCity = piirkond.trim();
-            }
-            String tanav = rs.getString("tanav");
-            if(tanav != null && tanav.trim().length() >0){
-            	cust.restStreet = tanav.trim();
-            }
-            
-            String indeks = rs.getString("indeks");
-            if(indeks != null && indeks.trim().length() >0){
-            	cust.restZipCode = indeks.trim();
-            }
-            
+         
+       
             String kontakt = rs.getString("kontakt");
             if(kontakt != null && kontakt.trim().length() >0){
             	if(cust.getPersonalData() != null && cust.getPersonalData().length() > 0){
@@ -579,24 +367,8 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
             		cust.setPersonalData(Converter.enCodeEst(kontakt.trim().replaceAll(";", ":") ));	
             	}
             	
-            }
+            }*/
             
-            
-            String chain = rs.getString("chain");
-            if(chain != null && chain.trim().length() >0){
-            	cust.setChain(chain.trim());
-            }
-            
-            String category = rs.getString("category");
-            if(category != null && category.trim().length() >0){
-            	cust.category = category.trim();
-            	cust.setGroup(category.trim());
-            }
-            
-            int keeld = rs.getInt("blokk");
-            if(keeld == 1) {
-            	cust.setSalesBlockT(true);
-            }
             
                 customers.put(nimi, cust);
                 custMap2.put(cust.getID(), cust);
@@ -605,7 +377,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
             rs.close();
             
 
-            String sql = "SELECT d.klient AS klient, SUM(d.tasumata) AS summa  from dok d  WHERE  " +
+      /*      String sql = "SELECT d.klient AS klient, SUM(d.tasumata) AS summa  from dok d  WHERE  " +
               "  date()>d.tasukuup and d.doktyyp='G' AND d.tasumata <> 0 AND len(klient) > 0 GROUP BY d.klient ORDER BY d.klient";
            ResultSet   rst =  stmt.executeQuery(sql);
             while(rst.next()){
@@ -625,7 +397,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
             	  
               
             }
-            rst.close();
+            rst.close();*/
             stmt.close();
             con.close();
             
@@ -647,164 +419,124 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
         
 
     public TreeMap getProducts(Agent agent) {
-        connectionUp();
-    Hashtable dateOut = new Hashtable();
+       
+   
 
 	TreeMap products = new TreeMap();
-	TreeMap sto1 = new TreeMap();
-	TreeMap sto3 = new TreeMap();
+	TreeMap<String, Double> hinnad = new TreeMap<String, Double>();
+
+	TreeMap<String, String> eans = new TreeMap<String, String>();
+	
+	
 	try {
    
 		
-        String sql3 = " select toode , kogus as kokku from seisud  " +
-        "   where  osak='1' order by toode  " ;
-				
-				try{
-					Connection con =  this.getNewCon();	
+		   String  cmd = "WITH LatestIssues AS (\r\n" + 
+		   		"    SELECT VALJAANNE_ID, MAX(izndat) AS LatestDate\r\n" + 
+		   		"    FROM Numuri where izndat > getdate() -400\r\n" + 
+		   		"    GROUP BY VALJAANNE_ID\r\n" + 
+		   		")\r\n" + 
+		   		"SELECT \r\n" + 
+		   		"    N.VA_NUMBER_ID,\r\n" + 
+		   		"    N.VALJAANNE_ID,\r\n" + 
+		   		"    N.VA_NUMBER,\r\n" + 
+		   		"    N.KAANEHIND,\r\n" + 
+		   		"    N.izndat AS issue_date,\r\n" + 
+		   		"    N.slegts AS Status , EAN \r\n" + 
+		   		"FROM \r\n" + 
+		   		"    Numuri N\r\n" + 
+		   		"JOIN \r\n" + 
+		   		"    LatestIssues L\r\n" + 
+		   		"    ON N.VALJAANNE_ID = L.VALJAANNE_ID AND N.izndat = L.LatestDate";
+	    
+	
 
-				PreparedStatement pstm = con.prepareStatement(sql3);
-				ResultSet rs6 = pstm.executeQuery();
-				
-				while(rs6.next()){
-				sto1.put(rs6.getString("toode").trim(), rs6.getDouble("kokku"));
-				}
-				rs6.close();
-				pstm.close();
-				con.close();
-				}catch (Exception e){
-				e.printStackTrace();
-				}   
-				
-				
-				
-				String sql4 = " select toode , kogus as kokku from seisud  " +
-				        "   where  osak='3' order by toode  " ; 
-				
-				try{
-					Connection con =  this.getNewCon();
-				PreparedStatement pstm1 = con.prepareStatement(sql4);
-				ResultSet rs7 = pstm1.executeQuery();
-				
-				while(rs7.next()){
-				sto3.put(rs7.getString("toode").trim(), "VIA:" + rs7.getDouble("kokku") + "|");
-				}
-				rs7.close();
-				pstm1.close();
-				con.close();
-				}catch (Exception e){
-				e.printStackTrace();
-				}   
+	                       Connection con =  this.getNewCon();
+		                   Statement stmt = con.createStatement();		
+	                       ResultSet rs = stmt.executeQuery(cmd);
 
-
+	                      while (rs.next()) {
+	                        String kood = rs.getString("VALJAANNE_ID").trim();
+	                        Double hind = rs.getDouble("kaanehind");
+	                        String ean = rs.getString("EAN");
+                            if(ean != null && ean.trim().length() > 0) {
+                            	eans.put(kood, ean.trim());
+                            }
+	                        hinnad.put(kood, hind);  
+	                      }
+	                      
+	                      rs.close();
+	                      stmt.close();
+	                      con.close();
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
 		
 		
-		
-                  
+	try {            
         // String cmd = "SELECT toode, nimetus, yhik, myygihind FROM toode WHERE (len(trim(toode)) > 3) AND (trim(toode.grupp) = 'L')";
-         String  cmd = "SELECT toode, rusnimetus ,nimetus , kastis as tykke, myygihind, yhik,liik AS grupp,ribakood AS ean,markused,maxale,ended,tasusumma as link , toptoode as top , uuskuni as uus FROM toode WHERE " +
-         " (myygikood = 'K' OR  myygikood = '5%' OR  myygikood = 'TUB' OR  myygikood = 'M') AND len(trim(toode)) >2 AND (keeld2=.F. )  ORDER BY toode";
+         String  cmd = "SELECT IZDEVUMI.VALJAANNE_ID as toode, IZDEVUMI.NIMI as nimetus, Periodi.NIMI AS Period, Tipi.Tips As Type, IZDEVUMI.grupa as grupp, Valoda as keel \r\n" + 
+         		"FROM (IZDEVUMI INNER JOIN Tipi ON IZDEVUMI.VA_TYYP_KD = Tipi.VA_TYYP_KD) INNER JOIN Periodi ON IZDEVUMI.VA_PERIOOD_KD = Periodi.VA_PERIOOD_KD\r\n" + 
+         		"WHERE (((IZDEVUMI.NIMI) Not Like 'Sl%'))";
        if (isDebug()) {
            	System.out.println(cmd);
            	}
-StringBuffer sb = new StringBuffer();
-Connection con =  this.getNewCon();
-	Statement stmt = con.createStatement();		
 
-                      ResultSet rs = stmt.executeQuery(cmd);
+                       Connection con =  this.getNewCon();
+	                   Statement stmt = con.createStatement();		
+                       ResultSet rs = stmt.executeQuery(cmd);
 
                       while (rs.next()) {
-                          String kood = rs.getString("toode").trim();
-                          
-                          
-                      	String rusnimetus =rs.getString("rusnimetus");
-                        String nimetus =rs.getString("nimetus");
+                        String kood = rs.getString("toode").trim();
+                        String nimetus = rs.getString("nimetus");
+                        String period = Converter.enCodeEst(rs.getString("Period"));
+                        String type = Converter.enCodeEst(rs.getString("type"));
+                        String grupp = Converter.enCodeEst(rs.getString("grupp"));
+                        String keel = Converter.enCodeEst(rs.getString("keel"));
+                       // String ean = rs.getString("ean");
+                  
                         Product prod = new Product(kood);
-                        if(rusnimetus != null && rusnimetus.trim().length()>0){
-                        	nimetus = rusnimetus.trim();
+                        if(hinnad.get(kood) != null) {
+                        	prod.setPrice(hinnad.get(kood));
                         }
                         
-                        if(kood.startsWith("RR")){
-                        	nimetus = "ZZZ " + nimetus;
+                        if(eans.get(kood) != null) {
+                        	prod.setEAN(eans.get(kood));
                         }
-                        prod.setName(Converter.enCodeEst(nimetus.trim()));
-                                             
-        
-                          prod.setPrice(rs.getDouble("myygihind"));
-                          String grupp = Converter.enCodeEst(rs.getString("grupp"));
-
+                        
+                        String partii = "";
+                        if(period != null && period.trim().length() > 0) {
+                        	partii = period;
+                        }
+                        if(type != null && type.trim().length() > 0) {
+                        	partii = partii + " " + type;
+                        }
+                        if(keel != null && keel.trim().length() > 0) {
+                        	partii = partii + " " + keel;
+                        }
+                        
+                        if(partii.length() > 0) {
+                        	prod.setPartii(partii.trim());
+                        }
+                        
+                          prod.setName(Converter.enCodeEst(nimetus.trim()));
+                          
                           if(grupp != null && grupp.trim().length()>0){
-                          prod.setGroup(grupp.trim());}
-                          if(kood.startsWith("RR")){
-                        	  prod.setGroup("RRR");
+                            prod.setGroup(grupp.trim());
                           }
-                          prod.setInCases(rs.getDouble("tykke"));
-                          String ean = rs.getString("ean");
-                          if (ean != null && ean.trim().length()>0){
-                            prod.setEAN(ean.trim());
-                          }
+                        
+                       
        
-                          
-                          
-                          
-                          double maxale = rs.getDouble("maxale");
-                          if (maxale >0){
-                              prod.setMaxDiscount(maxale);
-                          }else{
-                        	//  prod.setMaxDiscount(25);
-                          }
-       
-                          int lopp = rs.getInt("ended");
-                          if (lopp == 1) {
-                        	  prod.setStatusSellout("1");
-                          }
-                          
-        				String add ="";
-        			
-          			if(sto3.get(prod.getID()) != null){
-          				add = sto3.get(prod.getID()) + "";
-          			}
-          				
-          			if(sto1.get(prod.getID()) != null){
-          				prod.setStock(Double.parseDouble(sto1.get(prod.getID())+""));
-          			}
-          				
-          			 String link = Converter.enCodeEst(rs.getString("link"));
-
-                     if(link != null && link.trim().length()>10){
-                    	 prod.weblink = link.trim();
-                     }
-          			
-                     int top = rs.getInt("top");
-                     
-                     if(top == 1) {
-                    	 prod.setStatusTop("1");
-                     }
-                     
-                     Date dd = rs.getDate("uus");
-          			
-                     if(dd != null ) {
-                    	 if(dd.getTime() > Calendar.getInstance().getTimeInMillis()) {
-                    		 prod.setStatusNew("1");
-                    	 }
-                     }
-          				prod.setVat("22");
-          				prod.setName(prod.getName() + add);
-          				prod.setPartii(prod.getPartii() + add);
-          				nimetus = prod.getName();
-          				
-          				          
-                     sb.append(prod.getID()+ ";" + nimetus + ";" + prod.getEAN() + ";" + prod.getStock()+"\n");
-                          
-                          products.put(nimetus, prod);
+          				  prod.setVat("21");
+          			     
+                          products.put(prod.getName(), prod);
 
                       }
                       rs.close();
                       stmt.close();
                       con.close();
                       
-              if(sb.length()> 0) {
-            	  Converter.saveFile("webileht/tooted.csv", sb.toString());
-              }
+              
 
         } catch (Exception e) {
             getParent().showError(e);
@@ -813,24 +545,19 @@ Connection con =  this.getNewCon();
        
         return products;
     }
-	public static void saveObject(Object obj, String file) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
-		oos.writeObject(obj);
-		oos.close();
-	}
+	
 
     public TreeMap getProdGroups() throws SQLException {
      TreeMap   tm = new TreeMap();
-     String    sql = "SELECT t.liik AS liik , l.artlnimi AS nimi FROM toode t INNER JOIN  " +
-                 " ../andmed/artliik l ON l.liik=t.liik GROUP BY t.liik";
+     String    sql = "select kods, grupa from grupas";
 		Connection con =  this.getNewCon();
 			Statement stmt = con.createStatement();		
 
      ResultSet rs = stmt.executeQuery(sql);
 
      while (rs.next()) {
-       String liik=Converter.enCodeEst(rs.getString("liik").trim());
-       String nimetus=Converter.enCodeEst(rs.getString("nimi").trim());
+       String liik=Converter.enCodeEst(rs.getString("kods").trim());
+       String nimetus=Converter.enCodeEst(rs.getString("grupa").trim());
        if (liik != ""){
        tm.put(liik,nimetus);
        }
@@ -839,46 +566,121 @@ Connection con =  this.getNewCon();
      stmt.close();
      con.close();
 
-     tm.put("RRR","Reklaam kaubad");
+     
      
      return tm;
  }
+    
+    private HashMap getVas() {
+    	HashMap   tm = new HashMap();
+    	
+    	try {
+       
+    		
+    		   String  cmd = "WITH LatestIssues AS (\r\n" + 
+    		   		"    SELECT VALJAANNE_ID, MAX(izndat) AS LatestDate\r\n" + 
+    		   		"    FROM Numuri where izndat > getdate() -400\r\n" + 
+    		   		"    GROUP BY VALJAANNE_ID\r\n" + 
+    		   		")\r\n" + 
+    		   		"SELECT \r\n" + 
+    		   		"    N.VA_NUMBER_ID,\r\n" + 
+    		   		"    N.VALJAANNE_ID,\r\n" + 
+    		   		"    N.VA_NUMBER,\r\n" + 
+    		   		"    N.KAANEHIND,\r\n" + 
+    		   		"    N.izndat AS issue_date,\r\n" + 
+    		   		"    N.slegts AS Status\r\n" + 
+    		   		"FROM \r\n" + 
+    		   		"    Numuri N\r\n" + 
+    		   		"JOIN \r\n" + 
+    		   		"    LatestIssues L\r\n" + 
+    		   		"    ON N.VALJAANNE_ID = L.VALJAANNE_ID AND N.izndat = L.LatestDate";
+    	    
+    	
 
+    	                       Connection con =  this.getNewCon();
+    		                   Statement stmt = con.createStatement();		
+    	                       ResultSet rs = stmt.executeQuery(cmd);
+
+    	                      while (rs.next()) {
+    	                    	   String vas = rs.getString("VA_NUMBER_ID").trim();
+    	                        String kood = rs.getString("VALJAANNE_ID").trim();
+    	                     
+    	                          tm.put(vas, kood);  
+    	                      }
+    	                      
+    	                      rs.close();
+    	                      stmt.close();
+    	                      con.close();
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+        
+        return tm;
+    }
 
 
 
     public Vector getCustomerProductsList(String agentCode) {
        
-	String cmd =
-	    "SELECT dok.saaja,rid.toode,dok.kuupaev,rid.kogus, rid.hind FROM dok INNER \r\n" + 
-	    "	   JOIN rid ON dok.dokumnr = rid.dokumnr INNER JOIN toode on rid.toode = toode.toode WHERE \r\n" + 
-	    "	     len(trim(dok.klient)) > 1 AND len(trim(rid.toode)) > 2 \r\n" + 
-	    "	      AND dok.kuupaev >= date() -180 \r\n" + 
-	    "	     AND  dok.doktyyp = 'G' AND rid.doktyyp= 'G' and rid.toode not in ('001','002','003','004') GROUP BY dok.saaja, rid.toode ORDER BY dok.saaja, toode.toode,dok.kuupaev";
+	String cmd =  "			  WITH LatestRows AS (\r\n" + 
+			"    SELECT \r\n" + 
+			"        TPID,\r\n" + 
+			"        numid,\r\n" + 
+			"        MAX(Datums) AS LatestDate\r\n" + 
+			"    FROM Datafin\r\n" + 
+			"    WHERE Datums >= GETDATE() - 300 and nosut > 0  \r\n" + 
+			"    GROUP BY TPID, numid\r\n" + 
+			")\r\n" + 
+			"SELECT \r\n" + 
+			"    D.TPID AS saaja,\r\n" + 
+			"    D.numid AS toode,\r\n" + 
+			"    D.Datums AS kuupaev,\r\n" + 
+			"    D.atgr AS kogus,\r\n" + 
+			"    D.nosut AS kogus1,\r\n" + 
+			"    D.cena AS hind,\r\n" + 
+			"    D.PVZnum AS dok\r\n" + 
+			"FROM \r\n" + 
+			"    Datafin D\r\n" + 
+			"JOIN \r\n" + 
+			"    LatestRows L\r\n" + 
+			"    ON D.TPID = L.TPID \r\n" + 
+			"       AND D.numid = L.numid \r\n" + 
+			"       AND D.Datums = L.LatestDate;";
 
 	if (isDebug()) {
 	    System.out.println(cmd);
 	}
-
+     HashMap vas = getVas();
+     HashSet<String> olemas = new HashSet<String>();
 	Vector custProds = new Vector();
 
 	try {
+		
 		Connection con =  this.getNewCon();
-			Statement stmt = con.createStatement();		
-
+		Statement stmt = con.createStatement();		
 	    ResultSet	      rs = stmt.executeQuery(cmd);
 
 	    while (rs.next()) {
 		String kliendikood = rs.getString("saaja").trim();
 		String tootekood = rs.getString("toode").trim();
+		if(vas.get(tootekood) != null) {
+			tootekood =  vas.get(tootekood)+"";
+		}
 		 String kuupaev = rs.getString("kuupaev");
-        double kogus = Double.parseDouble(rs.getString("kogus").trim());
+        double kogus = Double.parseDouble(rs.getString("kogus1").trim());
         double hind = Double.parseDouble(rs.getString("hind").trim());
+   	     String dok = rs.getString("dok");
      
 
                 if (kliendikood.length() > 1) {
+                	String signa = kliendikood+"_"+tootekood;
+                	if(!olemas.contains(signa)) {
+                	
                   CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,kuupaev.substring(5,10),hind,0,0," ");
+                  cp.setAbiKood(dok.trim());
                   custProds.add(cp);
+                	}
+                	olemas.add(signa);
                 }
 	    }
 
@@ -896,7 +698,7 @@ Connection con =  this.getNewCon();
     public Vector getDebt(String agentCode) throws SQLException{
       Vector list = new Vector();
       
-      String sql = "SELECT saaja,tasudok AS number,tasukuup AS maksepaev,tasumata, kuupaev,(date()-tasukuup) AS yle FROM " +
+    /*  String sql = "SELECT saaja,tasudok AS number,tasukuup AS maksepaev,tasumata, kuupaev,(date()-tasukuup) AS yle FROM " +
                    " dok WHERE  doktyyp='G' AND tasumata<>0  " + // tasukuup<date()+10 AND
                    " ORDER BY saaja ";
 		Connection con =  this.getNewCon();
@@ -917,7 +719,7 @@ Connection con =  this.getNewCon();
     rs.close();
     stmt.close();
     con.close();
-    
+    */
       return list;
     }
 
@@ -989,38 +791,7 @@ Connection con =  this.getNewCon();
 
     public String getNonMobileOrders(Agent agent){
       
-
-     String sql = " SELECT tasudok AS arve,kuupaev,k.nimi,doksumma AS summa FROM dok d INNER JOIN klient k ON k.kood=d.klient " +
-               " WHERE kalktoode!='MobileJava' AND kuupaev > date()-3 AND pais2obj=?";
-
-
-      StringBuffer sb = new StringBuffer();
-
-        try {
-			Connection con =  this.getNewCon();
-  			Statement stmt = con.createStatement();		
-
-            PreparedStatement st = con.prepareStatement(sql);
-            st.setString(1, agent.getID());
-            String sep= System.getProperty("line.separator");
-            ResultSet	      rs = st.executeQuery();
-
-            sb.append("ARVE    Nimi  \t\t\tKuup�ev\t\tSumma" + sep);
-            sb.append("------------------------------------------------------" + sep);
-            while(rs.next()){
-              sb.append(rs.getString("arve").trim() + "\t");
-              sb.append(rs.getString("nimi").trim() + "\t");
-              sb.append(rs.getString("kuupaev").trim() + "\t");
-              sb.append(rs.getString("summa").trim() + sep);
-            }
-rs.close();
-stmt.close();
-con.close();
-        } catch (Exception e) {
-            getParent().showError(e);
-        }
-
-        return sb.toString();
+        return null;
     }
 
 
