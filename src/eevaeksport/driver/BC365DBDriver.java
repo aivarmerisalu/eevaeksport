@@ -360,12 +360,13 @@ System.out.println("ProdGroup size :  " + tm.size());
    
    public TreeMap getAgents(){
 		  TreeMap tm = new TreeMap();
+			try {
 			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPersons.json");
 	  	
 			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 			
 			  int lenn = values.size();
-			try {
+		
 			  for (int i = 0; i < lenn; i++) {
 				  
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);

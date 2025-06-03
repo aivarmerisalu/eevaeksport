@@ -124,12 +124,12 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
     company = getParent().getProps().getProperty("companycode");
     user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
-    rcompany = getParent().getProps().getProperty("rest.company");
+    companyx = getParent().getProps().getProperty("rest.company");
      }
   
   String user =  null;
   String pass = null;
-  String rcompany = null;
+  String companyx = null;
   String company = null;
 
           public String getDealerCustomerCSV(String agent){
@@ -2095,7 +2095,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 				 svdata.mkdir();
 			 }	  
 	      	  
-	   String sisu = Converter.getQuestData(rcompany, user, pass);
+	   String sisu = Converter.getQuestData(companyx, user, pass);
 	    
 	   Converter.saveFile("svdata/Questionnaire.json", sisu);
 	   
@@ -2157,13 +2157,13 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	 to.add(Calendar.DAY_OF_YEAR, 2);
 	 
 
-	    String filename =  Converter.getSVData(from.getTime(), to.getTime(), rcompany, user, pass, false, "YESNOFORCE", null, "SV-");
+	    String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "YESNOFORCE", null, "SV-");
 
 	     parser = new JSONParser();
 			try {
 				if(filename.length() > 1) {
 
-					 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), rcompany, user, pass, true);
+					 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
 					//	System.out.println("files " + files1.toString());
 				 
 					 
@@ -2527,7 +2527,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 			 while (itera.hasNext()) {
 		                 				 String custID = itera.next();
 		                 				 Quest qq = questArr.get(custID);
-		                 				boolean added =  Converter.addNewQuest(qq, rcompany, user, pass);
+		                 				boolean added =  Converter.addNewQuest(qq, companyx, user, pass);
 		                 			   }
 		                 			  }
 		                 			
@@ -2586,7 +2586,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		  eevaeksport.util.ReportingService serv = new ReportingService();
 			serv.user =  user;
 			serv.pass = pass;
-			serv.company = rcompany;
+			serv.company = companyx;
 			
 		  String sql2 = "select lineid ,taskid,agentid,agentnam,clid, sentdate,senttime,reminder,photoname, " + 
 		  		"		  		status,mestext,headertext,res1 from cesu.mj_task where sentdate > sysdate-30 " + 
@@ -2699,11 +2699,11 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 					value2.put("code", agentid);
 					value2.put("name", agentnam);
 					arr.put(value2);
-				//	value.put("managers", arr);		
+			//		value.put("managers", arr);		
 					
 					//System.out.println(photoname + " " + value.toString());
 
-				String done = 	Converter.addNewTask(value, rcompany, user , pass);
+				String done = 	Converter.addNewTask(value, companyx, user , pass);
 				System.out.println("Task Added " + done);
 			//	System.exit(0);
 				if(photoname != null && photoname.trim().length() > 1) {
@@ -3610,9 +3610,9 @@ public void WebReporter() {
 		     	  	lopp.add(Calendar.DATE, +2);
 
 		     	  	
-	      		JSONArray dayreportarray = Converter.getWebDayReport(algus.getTimeInMillis(), lopp.getTimeInMillis(), rcompany, user, pass);
+	      		JSONArray dayreportarray = Converter.getWebDayReport(algus.getTimeInMillis(), lopp.getTimeInMillis(), companyx, user, pass);
 	      		Converter.saveFileInUTF8(f.getPath() + "/currDRjson.json", dayreportarray.toString());
-	           	TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass, true);//true lõpus et teeks uusi andmeid
+	           	TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), companyx, user, pass, true);//true lõpus et teeks uusi andmeid
 	      		
 	      		org.json.simple.JSONArray cc = 	Converter.readJSONArrFile(f.getPath() + "/currDRjson.json");
 	      		
@@ -3724,7 +3724,7 @@ private void sendTaskReport() {
 			  eevaeksport.util.ReportingService serv = new ReportingService();
 			    serv.user =  user;
 				serv.pass = pass;
-				serv.company = rcompany;
+				serv.company = companyx;
 		
 				try {
 					org.json.JSONArray array = serv.getTaskdata(new Date(startOfLastWeek.getMillis()), new Date(endOfLastWeek.getMillis()) );
@@ -3791,6 +3791,8 @@ private void sendTaskReport() {
 			 
 			 String  cloMan = null;
 			 String  vastus = null;
+
+			 String  vastusID = null;
 			 String repMana = null;
 			 String repManaCode = null;
 			 String repFileName = null;
@@ -3814,27 +3816,28 @@ private void sendTaskReport() {
 				 for(int u = 0; u < replies.size() ; u++) {
 					 org.json.simple.JSONObject rep = (org.json.simple.JSONObject)replies.get(u);
 					 if(vastus == null ) {
-						 
+						 vastusID =  rep.get("id") + "";
 						  vastus = (String) rep.get("message");
-						  if(!linesDone.contains(taskID + vastus)) {
+						  if(!linesDone.contains(taskID + vastusID)) {
 							  repMana = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("name");
 							  repManaCode = (String) ((org.json.simple.JSONObject)rep.get("replyManager")).get("code");
-							  org.json.simple.JSONArray files2 = (org.json.simple.JSONArray)rep.get("files");
-								 if(!files2.isEmpty()) {
-									 for(int e = 0; e < files2.size() ; e++) {
-										 org.json.simple.JSONObject lo = (org.json.simple.JSONObject)files2.get(e);
-										 repFileName = lo.get("url") + "";
-									 }
-								 } 
+							   
 							 // System.out.println("vastus " + vastus + " " +  repFileName);  
 						  }	else {
 							  vastus = null;
 						  }
 					 }
+					 org.json.simple.JSONArray files2 = (org.json.simple.JSONArray)rep.get("files");
+					 if(!files2.isEmpty()) {
+						 for(int e = 0; e < files2.size() ; e++) {
+							 org.json.simple.JSONObject lo = (org.json.simple.JSONObject)files2.get(e);
+							 repFileName = lo.get("url") + "";
+						 }
+					 }
 
 				 }
 			 }
-			 
+			
 			 String filename = null;
 			 try {
 				 org.json.simple.JSONArray files2 = (org.json.simple.JSONArray)task.get("files");
@@ -3864,7 +3867,7 @@ if(closed != null) {
 //System.out.println("replies " + replies.isEmpty() + " " + repManaCode + " " + vastus);
 			 if(!replies.isEmpty()) {
 
-				 if(!linesDone.contains(taskID + vastus)) {
+				 if(!linesDone.contains(taskID + vastusID)) {
 				 if(closed == null) {
 					 String email = (String)agMail.get(repManaCode);
 				   newTasksReplies.add(email+"|" + repFileName +"|"+ custID + "|" + custName +"|" + message + "|" + vastus +"|"+ created + "| |" + repMana);
@@ -4060,7 +4063,9 @@ private String getHtml(ArrayList in, String header) {
 	  
 	  for(int i = 0; i < in.size(); i++) {
 		  String aa = in.get(i)+"";
-		  System.out.println("aa " + aa);
+		//  System.out.println("aa " + aa);
+
+		  aa = aa.replaceAll("||", "| |");
 		  
 		  StringTokenizer st = new StringTokenizer(aa,"|");
 		  st.nextElement();//laseme seimese minna

@@ -424,8 +424,10 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 
 	TreeMap products = new TreeMap();
 	TreeMap<String, Double> hinnad = new TreeMap<String, Double>();
+	TreeMap<String, Double> vats = new TreeMap<String, Double>();
 
 	TreeMap<String, String> eans = new TreeMap<String, String>();
+	TreeMap<String, String> vaids = new TreeMap<String, String>();
 	
 	
 	try {
@@ -442,7 +444,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 		   		"    N.VA_NUMBER,\r\n" + 
 		   		"    N.KAANEHIND,\r\n" + 
 		   		"    N.izndat AS issue_date,\r\n" + 
-		   		"    N.slegts AS Status , EAN \r\n" + 
+		   		"    N.slegts AS Status , EAN , km_prots as vat \r\n" + 
 		   		"FROM \r\n" + 
 		   		"    Numuri N\r\n" + 
 		   		"JOIN \r\n" + 
@@ -457,12 +459,16 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 
 	                      while (rs.next()) {
 	                        String kood = rs.getString("VALJAANNE_ID").trim();
+	                        String vaID = rs.getString("VA_NUMBER").trim();
 	                        Double hind = rs.getDouble("kaanehind");
 	                        String ean = rs.getString("EAN");
-                            if(ean != null && ean.trim().length() > 0) {
+	                        Double vat = rs.getDouble("vat") * 100;
+	                         vats.put(kood, vat);
+	                       if(ean != null && ean.trim().length() > 0) {
                             	eans.put(kood, ean.trim());
                             }
-	                        hinnad.put(kood, hind);  
+	                        hinnad.put(kood, hind); 
+	                        vaids.put(kood, vaID);
 	                      }
 	                      
 	                      rs.close();
@@ -492,28 +498,38 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                         String period = Converter.enCodeEst(rs.getString("Period"));
                         String type = Converter.enCodeEst(rs.getString("type"));
                         String grupp = Converter.enCodeEst(rs.getString("grupp"));
-                        String keel = Converter.enCodeEst(rs.getString("keel"));
                        // String ean = rs.getString("ean");
                   
                         Product prod = new Product(kood);
                         if(hinnad.get(kood) != null) {
-                        	prod.setPrice(hinnad.get(kood));
+                        	Double hind = hinnad.get(kood);
+                        	if(vats.get(kood) >0) {
+                        		hind = hind / (100 + vats.get(kood)) * 100;
+                        	}
+                        	prod.setPrice(hind);
                         }
                         
                         if(eans.get(kood) != null) {
                         	prod.setEAN(eans.get(kood));
                         }
                         
+                        if(vats.get(kood) != null) {
+                        	prod.setVat(((int)vats.get(kood).doubleValue())+"");
+                        }
+                        
                         String partii = "";
+                        if(vaids.get(kood) != null) {
+                        	partii = "Numurs :" + vaids.get(kood);
+                        }
+                        
                         if(period != null && period.trim().length() > 0) {
-                        	partii = period;
+                        	partii = partii + "|"+  period;
                         }
+                        
                         if(type != null && type.trim().length() > 0) {
-                        	partii = partii + " " + type;
+                        	partii = partii + "|" + type;
                         }
-                        if(keel != null && keel.trim().length() > 0) {
-                        	partii = partii + " " + keel;
-                        }
+                        
                         
                         if(partii.length() > 0) {
                         	prod.setPartii(partii.trim());
@@ -524,11 +540,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                           if(grupp != null && grupp.trim().length()>0){
                             prod.setGroup(grupp.trim());
                           }
-                        
-                       
        
-          				  prod.setVat("21");
-          			     
                           products.put(prod.getName(), prod);
 
                       }
@@ -667,6 +679,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 			tootekood =  vas.get(tootekood)+"";
 		}
 		 String kuupaev = rs.getString("kuupaev");
+		             kuupaev =  Converter.turn(kuupaev);
         double kogus = Double.parseDouble(rs.getString("kogus1").trim());
         double hind = Double.parseDouble(rs.getString("hind").trim());
    	     String dok = rs.getString("dok");
@@ -676,7 +689,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                 	String signa = kliendikood+"_"+tootekood;
                 	if(!olemas.contains(signa)) {
                 	
-                  CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,kuupaev.substring(5,10),hind,0,0," ");
+                  CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,kuupaev.substring(0,5),hind,0,0," ");
                   cp.setAbiKood(dok.trim());
                   custProds.add(cp);
                 	}
