@@ -867,19 +867,11 @@ Calendar cal = Calendar.getInstance();
           cust.setSalesBlock(true);
           }
 
-        /*  String allagents = rs.getString("toall");
-            if(allagents.trim().equals("1")){
-            Enumeration enums = getParent().getAgentsHash().elements();
-             while (enums.hasMoreElements()) {
-              Agent a =(Agent) enums.nextElement();
-              cust.addAgent(a);
-            }
-            }*/
-         // cust.setDebt(rs.getDouble("debt"));
             
             if(debts.get(cust.getPayer()) != null){
             	cust.setDebt(Double.parseDouble((String)debts.get(cust.getPayer())));
             }
+            
             if(debtsnotara.get(cust.getPayer()) != null) {
               cust.debtnotara = Double.parseDouble(debtsnotara.get(cust.getPayer()) + "");
             }

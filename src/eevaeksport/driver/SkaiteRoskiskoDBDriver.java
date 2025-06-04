@@ -1595,7 +1595,7 @@ public class SkaiteRoskiskoDBDriver extends AbstractDBDriver implements BulkUpda
     		"     CONVERT(Money, tt.PK_PardKaina) AS hind, CASE WHEN pr.mvid = pr.ipokavimomvid OR \r\n" + 
     		"     ISNULL(pr.ipokavimomvid, 0) < 2 OR  pr.MVId NOT IN (2, 62733) THEN mv.Kodas ELSE ipokmv.Kodas END AS unit , 0  AS kastis, \r\n" + 
     		"      CONVERT(Money, NULL) AS CostPrice, CONVERT(varchar(20), Pr.KAPKodas) AS ean, CONVERT(varchar(20),  pr.PrekiuGrupesID) AS grupp, '' AS grupp2 ,gr.kodas \r\n" + 
-    		"   ,  gr.Pavad as grnimi, 0 as topstatus ,'' as aggroup, pr.mase as kaal FROM  dbo.Prekes AS Pr INNER JOIN dbo.PL_Prekes pl on pl.prekesid=pr.prekesID \r\n" + 
+    		"   ,  gr.Pavad as grnimi,DA_StatusTOP as topstatus ,'' as aggroup, pr.mase as kaal , DA_StatusNEW as newstatus FROM  dbo.Prekes AS Pr INNER JOIN dbo.PL_Prekes pl on pl.prekesid=pr.prekesID \r\n" + 
     		"   inner join xPrekes tt on tt.PrekesID = pr.PrekesID LEFT JOIN PrekiuGrupes gr on gr.PrekiuGrupesId= pr.PrekiuGrupesID \r\n" + 
     		"    LEFT OUTER JOIN dbo.MVGSantykiai AS mvs ON Pr.MVId = mvs.MVId1 AND Pr.IpokavimoMVId = mvs.MVId2 AND Pr.MVGId = mvs.MVGId INNER JOIN \r\n" + 
     		"       dbo.Mokesciai AS mok ON Pr.MokesciaiId = mok.MokesciaiId INNER JOIN dbo.PrekiuTipai AS pt ON Pr.PrekiuTipaiId = pt.PrekiuTipaiId INNER JOIN \r\n" + 
@@ -1697,6 +1697,12 @@ try{
               if(kaal != null && kaal > 0){
             	  prod.setMeasure(kaal);
                }
+              
+              String newstatus = rs.getString("newstatus");
+              if(newstatus != null && newstatus.trim().equals("1")){
+             	prod.setStatusNew("1");
+              }
+              
               
               if(prod.getUnit().equals("kg")) {
               	   prod.setMeasure(1);

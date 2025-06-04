@@ -741,6 +741,7 @@ HashSet olemas = new HashSet();
    
         TreeMap customers = new TreeMap();
         HashMap volad = new HashMap();
+        HashMap voladtaarata = new HashMap();
         HashMap used = new HashMap();
         HashMap salesres = new HashMap();
 
@@ -804,7 +805,25 @@ HashSet olemas = new HashSet();
             rs1.close();
             stmt.close();
         	
+            Calendar cal = Calendar.getInstance();
+          String date =  Converter.getYYYYmMMmDDmString(cal.getTime());
+            sql =
+                    " select i06_kodas_ks as klient, i06_pav, sum( case when i06_op_tip=52 then -1 else 1 end * i07_alt_kiekis/i07_alt_frak) as Kiekis, SUM(i07_suma+i07_pvm) as Skola \r\n" + 
+                    "from I06_PARH inner join I07_PARD on i06_kodas_po=i07_kodas_po where I06_OP_DATA < '" + date+ "' and i06_op_tip in('51','52') and i07_kodas in ('022','023') \r\n" + 
+                    "group by i06_kodas_ks, i06_pav ";
 
+                stmt = con.prepareStatement(sql);
+                 //stmt.setInt(1, Integer.parseInt(agent.getID()));
+                 //stmt.setDate(2, getStartingDate());
+                   rs1 = stmt.executeQuery();
+
+                while (rs1.next()) {
+                  String id = rs1.getString("klient").trim();
+                  double debt = Double.parseDouble(rs1.getString("Skola").trim());
+                  voladtaarata.put(id, debt);
+                }
+                rs1.close();
+                stmt.close();
 
             String sqlu =
                 "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
@@ -860,6 +879,10 @@ HashSet olemas = new HashSet();
             	  cust.setDebt(Double.parseDouble("" +volad.get(maks)));
               }
               
+              if(voladtaarata.get(maks) != null) {
+                  cust.debtnotara = cust.getDebt() - Double.parseDouble(voladtaarata.get(maks) + "");
+                }
+               
               if(used.get(maks) != null){
             	  cust.setUsedCredit(Double.parseDouble("" +used.get(maks)));
               }

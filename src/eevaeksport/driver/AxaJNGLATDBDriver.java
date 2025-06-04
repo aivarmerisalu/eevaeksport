@@ -278,7 +278,7 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
 							   res.put(klkood + "sold", soldGR);
 							   res.put(klkood + "nonsold", nonSoldGR);
 							   if(soldGR.size() > 0) {
-								   System.out.println("Must% " + klkood + " " + soldGR.size() + " " + nonSoldGR.size() + " " + perc); 
+								//   System.out.println("Must% " + klkood + " " + soldGR.size() + " " + nonSoldGR.size() + " " + perc); 
 								   sb.append(klkood + "," + (perc*100) + ","+ soldGR.size() + "," + nonSoldGR.size() + "\n");
 							   }
 							  }

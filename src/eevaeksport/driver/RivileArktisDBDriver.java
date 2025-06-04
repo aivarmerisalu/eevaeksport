@@ -256,6 +256,7 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
            con = DriverManager.getConnection(url,"sa","Rivile_2023");
       } catch (Exception e) {
             getParent().showError(e);
+            System.exit(0);
       }
 
     }

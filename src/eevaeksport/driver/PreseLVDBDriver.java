@@ -421,7 +421,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
     public TreeMap getProducts(Agent agent) {
        
    
-
+    	TreeMap prodHash = new TreeMap();
 	TreeMap products = new TreeMap();
 	TreeMap<String, Double> hinnad = new TreeMap<String, Double>();
 	TreeMap<String, Double> vats = new TreeMap<String, Double>();
@@ -517,10 +517,9 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                         	prod.setVat(((int)vats.get(kood).doubleValue())+"");
                         }
                         
+                        prod.setUnit("gab.");
+                        
                         String partii = "";
-                        if(vaids.get(kood) != null) {
-                        	partii = "Numurs :" + vaids.get(kood);
-                        }
                         
                         if(period != null && period.trim().length() > 0) {
                         	partii = partii + "|"+  period;
@@ -529,7 +528,10 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                         if(type != null && type.trim().length() > 0) {
                         	partii = partii + "|" + type;
                         }
-                        
+                       
+                        if(vaids.get(kood) != null) {
+                        	partii = "|Numurs :" + vaids.get(kood);
+                        }
                         
                         if(partii.length() > 0) {
                         	prod.setPartii(partii.trim());
@@ -542,13 +544,14 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                           }
        
                           products.put(prod.getName(), prod);
+                          prodHash.put(prod.getID(), prod);
 
                       }
                       rs.close();
                       stmt.close();
                       con.close();
                       
-              
+                    //  makeTexts(prodHash);
 
         } catch (Exception e) {
             getParent().showError(e);
@@ -558,6 +561,8 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
         return products;
     }
 	
+    
+   
 
     public TreeMap getProdGroups() throws SQLException {
      TreeMap   tm = new TreeMap();
@@ -631,6 +636,86 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
     }
 
 
+    private HashMap<String, String> getLisaInfo() {
+    	HashMap<String, String>   tm = new HashMap<String, String>();
+    	
+    	try {
+       
+    		
+    		   String  cmd = "WITH AggregatedData AS (\r\n" + 
+    		   		"    SELECT   \r\n" + 
+    		   		"        D.TPID AS saaja, \r\n" + 
+    		   		"        D.numid AS toode, \r\n" + 
+    		   		"        MAX(N.VALJAANNE_ID) AS vaid,\r\n" + 
+    		   		"        MAX(N.VA_NUMBER) AS nimi, \r\n" + 
+    		   		"        SUM(D.atgr) AS kogus, \r\n" + 
+    		   		"        SUM(D.nosut) AS kogus1, \r\n" + 
+    		   		"        AVG(D.cena) AS hind,\r\n" + 
+    		   		"        MIN(D.Datums) AS kuup\r\n" + 
+    		   		"    FROM Datafin D  \r\n" + 
+    		   		"    INNER JOIN Numuri N ON N.VA_NUMBER_ID = D.numid  \r\n" + 
+    		   		"    WHERE D.Datums > GETDATE() - 180\r\n" + 
+    		   		"    GROUP BY D.TPID, D.numid\r\n" + 
+    		   		"),\r\n" + 
+    		   		"MaxNumber AS \r\n" + 
+    		   		"               (SELECT \r\n" + 
+    		   		"                              n.Valjaanne_Id AS valj,\r\n" + 
+    		   		"                              MAX(N.Va_number_Id) AS maxnum\r\n" + 
+    		   		"               FROM Numuri N\r\n" + 
+    		   		"               WHERE n.izndat> GETDATE()-180\r\n" + 
+    		   		"               GROUP BY n.Valjaanne_Id            \r\n" + 
+    		   		"),\r\n" + 
+    		   		"RankedData AS (\r\n" + 
+    		   		"    SELECT *,\r\n" + 
+    		   		"        ROW_NUMBER() OVER (PARTITION BY saaja, vaid ORDER BY toode DESC) AS rn\r\n" + 
+    		   		"    FROM AggregatedData WHERE toode NOT IN (SELECT Maxnum FROM MaxNumber)\r\n" + 
+    		   		")\r\n" + 
+    		   		"\r\n" + 
+    		   		"SELECT *\r\n" + 
+    		   		"FROM RankedData\r\n" + 
+    		   		"WHERE rn <= 4\r\n" + 
+    		   		"ORDER BY saaja, vaid,rn, kuup DESC";
+    	    
+    	
+
+    	                       Connection con =  this.getNewCon();
+    		                   Statement stmt = con.createStatement();		
+    	                       ResultSet rs = stmt.executeQuery(cmd);
+
+    	                      while (rs.next()) {
+    	                    		String kliendikood = rs.getString("saaja").trim();
+    	                    		String tootekood = rs.getString("toode").trim();
+    	                    		String vaid = rs.getString("vaid").trim();
+    	                    		String nimi = rs.getString("nimi").trim();
+    	                    		Double valja = rs.getDouble("kogus");
+    	                    		Double sisse = rs.getDouble("kogus1");
+    	                    	//	Double hind = rs.getDouble("hind");
+    	                    		String kuup = rs.getString("kuup").trim();
+    	                    		
+    	                    		String id = kliendikood +"-"+ vaid;
+    	                    		String sisu = "|Num." + nimi;
+    	                    		
+    	                    		//sisu = sisu +  " Pieg:" + sisse + " Atgr:" + valja +" Pārd.:" + (sisse - valja);
+    	                    		
+    	                    		sisu = sisu +   "  ( " + (int)(sisse - valja) + " = +" +((int) sisse.doubleValue()) + " -" + (int) valja.doubleValue() + " )" ;
+    	                    		if(tm.get(id) != null) {
+    	                    			tm.put(id, tm.get(id) + sisu);  	
+    	                    		}else {
+    	                    			tm.put(id, sisu);  	
+    	                    		}
+    	                    		
+    	                      }
+    	                      
+    	                      rs.close();
+    	                      stmt.close();
+    	                      con.close();
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+        
+        return tm;
+    }
+
 
     public Vector getCustomerProductsList(String agentCode) {
        
@@ -663,6 +748,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 	    System.out.println(cmd);
 	}
      HashMap vas = getVas();
+     HashMap<String, String> lisad = getLisaInfo();
      HashSet<String> olemas = new HashSet<String>();
 	Vector custProds = new Vector();
 
@@ -675,6 +761,7 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 	    while (rs.next()) {
 		String kliendikood = rs.getString("saaja").trim();
 		String tootekood = rs.getString("toode").trim();
+		
 		if(vas.get(tootekood) != null) {
 			tootekood =  vas.get(tootekood)+"";
 		}
@@ -690,7 +777,11 @@ public class PreseLVDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                 	if(!olemas.contains(signa)) {
                 	
                   CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,kuupaev.substring(0,5),hind,0,0," ");
-                  cp.setAbiKood(dok.trim());
+                  String lisa = lisad.get(kliendikood +"-"+ tootekood);
+                  if(lisa == null) {
+                	  lisa = "";
+                  }
+                  cp.setAbiKood(dok.trim() + "|" + lisa );
                   custProds.add(cp);
                 	}
                 	olemas.add(signa);

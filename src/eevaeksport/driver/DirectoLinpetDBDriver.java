@@ -3866,7 +3866,7 @@ public void WebShopper2() {
 	
 	
 	ArrayList confOrders = loadOpenOrders();
-	//System.out.println("confOrders " + confOrders.size());
+	System.out.println("confOrders " + confOrders.size());
      vp.confirmLinesGetSlip(confOrders);
 	
 	
