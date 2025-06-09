@@ -28,6 +28,10 @@ import java.util.Vector;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -80,12 +84,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
 
     private HashMap sortimendid = null;
     
-    private String getDir() {
-		String dir = getParent().getProps().getProperty("readin");
-		if (!(dir.endsWith("/") || (dir.endsWith("\\"))))
-			dir = dir + "/";
-		return dir;
-	}
+    
     
     public String getAssortmentStr(Agent agent){
         StringBuffer sb = new StringBuffer();
@@ -505,7 +504,94 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
  		  }
 
     
- 		
+  	   private   void getProdGroupsMilk(TreeMap groups){
+	    	File f = new File(this.getExcelDir() + "tootedmilk.xlsx");
+			
+			try {
+				
+				FileInputStream ff = new FileInputStream(f);
+				XSSFWorkbook workbook = new XSSFWorkbook((ff));
+				XSSFSheet sheet = workbook.getSheet("Tooted");
+				XSSFRow row = null;
+	  	        DataFormatter formatter = new DataFormatter();
+
+	  			for (int a = 1; a <  sheet.getLastRowNum()+1; a++) {
+	  				row = sheet.getRow(a);
+					try {
+						
+						String grupp = formatter.formatCellValue(row.getCell((short) 6)).trim();
+						String gname = formatter.formatCellValue(row.getCell((short) 7)).trim();
+						groups.put(grupp, Converter.enCodeEst(gname));
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+				}
+	  			
+			}catch(Exception e ) {
+				e.printStackTrace();
+			}
+	    
+	   }   		
+ 	   
+ 	   private   void getProductsMilk(TreeMap prods){
+ 	    	File f = new File(this.getExcelDir() + "tootedmilk.xlsx");
+ 			
+ 			try {
+ 				
+ 				FileInputStream ff = new FileInputStream(f);
+ 				XSSFWorkbook workbook = new XSSFWorkbook((ff));
+ 				XSSFSheet sheet = workbook.getSheet("Tooted");
+ 				XSSFRow row = null;
+ 	  	        DataFormatter formatter = new DataFormatter();
+
+ 	  			for (int a = 1; a <  sheet.getLastRowNum()+1; a++) {
+ 	  				row = sheet.getRow(a);
+ 					try {
+ 						
+ 						String kood = formatter.formatCellValue(row.getCell((short) 0)).trim();
+ 						String nimi = formatter.formatCellValue(row.getCell((short) 2)).trim();
+ 						String ean = formatter.formatCellValue(row.getCell((short) 3)).trim();
+ 						String unit = "tk.";
+ 						Double kastis = 1.0 ;
+ 						try {
+ 						kastis = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 5)).trim());
+ 						}catch (Exception r) {
+ 							
+ 						}
+ 						String grupp = formatter.formatCellValue(row.getCell((short) 6)).trim();
+ 						String gname = formatter.formatCellValue(row.getCell((short) 7)).trim();
+ 						
+ 						Double kaal = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 8)).trim());
+ 						if(nimi.length() > 3) {
+ 						Product prod = new Product(kood);
+ 						prod.setUnit(unit);
+ 						prod.setName(" NM " + nimi);
+ 						prod.setEAN(ean);
+ 						prod.setInCases(kastis);
+ 						prod.setGroup(grupp);
+ 						prod.setGroupname(gname);
+ 						prod.setInUnit(kaal);
+ 						prod.setVat("22");
+ 						prod.setType("PIIM");
+ 						
+ 						prods.put(" NM " + nimi, prod);
+ 						System.out.println(kood + " " + nimi + " " + ean + " " + gname);
+ 						}
+ 					} catch (Exception e) {
+ 						e.printStackTrace();
+ 					}
+ 					
+ 				}
+ 	  			
+ 	  		//	System.exit(0);
+ 			}catch(Exception e ) {
+ 				e.printStackTrace();
+ 			}
+ 	    
+ 	   }  
+ 	   	    
  	    private   TreeMap getVisits(){
  		     TreeMap tm = new TreeMap();
  		     System.out.println("Visiidid alustan");
@@ -739,7 +825,38 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
         }
 
      
-        
+        private HashMap<String, String> getProdNamesExcel() {
+        	HashMap<String, String> res = new HashMap<String, String>();
+        	File f = new File(this.getExcelDir() + "sortiments.xls");
+			
+    		try {
+    			
+    			FileInputStream ff = new FileInputStream(f);
+    			HSSFWorkbook workbook = new HSSFWorkbook((ff));
+    			HSSFSheet sheet = workbook.getSheet("Assortment");
+    			HSSFRow row = null;
+
+    		    DataFormatter formatter = new DataFormatter();
+
+      			for (int a = 4; a <  sheet.getLastRowNum()+1; a++) {
+      				row = sheet.getRow(a);
+    				try {
+    					// System.out.println(a + " " +formatter.formatCellValue(row.getCell((short) 0)));
+    					
+    					String kood = formatter.formatCellValue(row.getCell((short) 0)).trim();
+    					String nimi = formatter.formatCellValue(row.getCell((short) 1)).trim();
+         				
+    					res.put(kood,nimi);
+    				} catch (Exception e) {
+    					 System.out.println(row.getCell((short)a).getNumericCellValue());
+    				}
+    				
+    			}
+    		}catch(Exception e ) {
+    			e.printStackTrace();
+    		}
+        	return res;
+        }
         
         public Vector getFixedAssortmentData() {
     		Vector result = new Vector();
@@ -747,25 +864,6 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     		File f = new File(this.getExcelDir() + "sortiments.xls");
     				
     		try {
-    			
-    			
-    			/*  String sql = "SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE())) from mj_assortment where res3 = 'EE' and DATEADD(dd, 0, DATEDIFF(dd, 0, sortdate)) = DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE())) ";
-           	  boolean insertassort = true;
-            	
-           	   Connection con = getNewConnection(url);
-     	           Statement stmt = con.createStatement();
-     	        
-     	        ResultSet rs = stmt.executeQuery(sql);
-     	        if(rs.next()){
-     	        	insertassort = false;
-     	        	//kontrollime kas on vaja insertida 
-     	        }
-     	        rs.close();
-     	        stmt.close();
-     	        con.close();
-     	        
-     	        System.out.println("Sisestame sortimenti " + insertassort );
-    			*/
     			
     			FileInputStream ff = new FileInputStream(f);
     			HSSFWorkbook workbook = new HSSFWorkbook((ff));
@@ -1192,6 +1290,8 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     st.close();
     con.close();
 
+    getProdGroupsMilk(tm);
+    
     return tm;
     }
 
@@ -1513,7 +1613,11 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
             System.out.println(cmd);
         }
 
+        HashMap<String, String> names =  getProdNamesExcel();
+     //   System.out.println("names " + names.size());
+       
         TreeMap products = new TreeMap();
+        
         try {
           Connection con = getNewCon();
           Statement st = con.createStatement();
@@ -1523,26 +1627,19 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
                 String kood = rs.getString("toode").trim();
                 String nimetus = rs.getString("nimi").trim();
                 Product prod = new Product(kood);
+               // System.out.println("kood " + kood + " " + names.get(kood));
+                if(names.get(kood) != null) {
+                	nimetus = names.get(kood);
+                }
 
                 prod.setPrice(parseDouble(rs.getString("myygihind").trim()));
                 prod.setUnit(rs.getString("unit").trim() );
                 prod.setInCases(parseDouble(rs.getString("tykke").trim()));
-                //prod.setStock(parseDouble(rs.getString("stock").trim()));
                 String grupp = rs.getString("uusgrupp").trim();
                 prod.setGroup(grupp);
                 prod.setVat("22");
-                grupp = rs.getString("grupp").trim();
-                int xx = rs.getInt("xx");
-                if(xx == 2){
-                   // prod.setMustBe("1");
-                }
-                if(xx == 1){
-                	//prod.setStatusTop("1");
-                }
-                if(xx == 3){
-                	//prod.setMustBe("1");
-                	//prod.setStatusTop("1");
-                }
+                
+                prod.setType("LIHA");
 
                 prod.setName(Converter.enCodeEst(nimetus  + " " + kood));
                 String ean = rs.getString("ean");
@@ -1570,6 +1667,8 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
             getParent().showError(e);
         }
 
+        this.getProductsMilk(products);
+        
         return products;
     }
 

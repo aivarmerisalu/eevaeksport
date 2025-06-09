@@ -2181,7 +2181,10 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	  			String comment = (String)cob.get("comment");
 	  			String prodid = (String)cob.get("prodid");
 	  			
-	  			
+
+	  			Calendar cal = Calendar.getInstance();
+	  			cal.setTimeInMillis(Long.parseLong(created));
+	  			dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
 	  			
 	  			String signa = custID + "-" + dateAndTime;
 
@@ -4057,7 +4060,7 @@ private String getHtml(ArrayList in, String header) {
 		  String aa = in.get(i)+"";
 		//  System.out.println("aa " + aa);
 
-		  aa = aa.replaceAll("||", "| |");
+		  aa = aa.replaceAll("\\|\\|", "\\| \\|");
 		  
 		  StringTokenizer st = new StringTokenizer(aa,"|");
 		  st.nextElement();//laseme seimese minna

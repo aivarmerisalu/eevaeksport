@@ -461,8 +461,8 @@ System.out.println("ProdGroup size :  " + tm.size());
      return tm;
    }
 
-   
-   
+
+
 
         	  
         	  
@@ -486,7 +486,7 @@ System.out.println("ProdGroup size :  " + tm.size());
     		  fil.put("rules", rules);
     		  
     		  obj.put("filters", fil);
-    		  
+     		  
     		      try (CloseableHttpClient client = HttpClients.createDefault()) {
     		        HttpPost request = this.getPost(url, obj.toJSONString());
     		        HttpResponse response = (HttpResponse) client.execute(request);
@@ -1398,7 +1398,7 @@ private void uploadQuestsAndAnswers() {
 				
 				if(!qutitles.contains(nimi)) {
 			    	qutitles.add(nimi);
-			    	System.out.println(nimi);
+			    	//System.out.println(nimi);
 				}
 			
 			} catch (Exception e) {
@@ -1431,7 +1431,7 @@ private void uploadQuestsAndAnswers() {
 
 	      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
 	 Calendar from = Calendar.getInstance();
-	 from.add(Calendar.DAY_OF_YEAR, -1);
+	 from.add(Calendar.DAY_OF_YEAR, -7);
 	 Calendar to = Calendar.getInstance();    
 	 to.add(Calendar.DAY_OF_YEAR, 2);
 	 
@@ -1468,10 +1468,10 @@ private void uploadQuestsAndAnswers() {
 	  			String comment = (String)cob.get("comment");
 	  			String prodid = (String)cob.get("prodid");
 	  			
+	  			Calendar cal = Calendar.getInstance();
+	  			cal.setTimeInMillis(Long.parseLong(created));
+	  			dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
 	  			
-	  			
-	  			String signa = custID + "-" + dateAndTime;
-
 					String foto = null;
 	  			
 	  			try {
@@ -1487,6 +1487,10 @@ private void uploadQuestsAndAnswers() {
 	  					for(int e = 0; e<arr.size(); e++) {
 	  						Toode t = (Toode)arr.get(e);
 	  						foto = t.getLadu();
+	  						if(custID.equals("77001351") && foto.contains("QUEST")) {
+	  				  		//	System.out.println("foto check " + foto + " " + t.comment + "-" + agid + "  "+
+	  				  			//	t.getGr1() + "-" +dateOnly + "  " + t.getID() +"-" +(String)cob.get("prodid")	);
+	  						}
 	  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
 	  							fotoOK = foto;
 	  							 a++;
@@ -1506,7 +1510,9 @@ private void uploadQuestsAndAnswers() {
 	  			
 
 					answBuffer.put(custID + "-" + qname + "-" + title, cob);
-	  			
+	  			if(custID.equals("77001351")) {
+	  				//System.out.println("answ Buffer " + custID + "-" + qname + "-" + title + " " + cob.toJSONString());
+	  			}
 	  		}	
 				}
 			} catch (Exception e) {
@@ -1515,7 +1521,7 @@ private void uploadQuestsAndAnswers() {
 			
 			System.out.println("buffer " + answBuffer.size());
 
-		//  System.exit(0);
+		// System.exit(0);
 
 //		  1- loeme küsimused sisse 
 		  //otsime faile mille nimes on pallets
@@ -1598,7 +1604,7 @@ private void uploadQuestsAndAnswers() {
 		                 				String pais = chain + " " + klient + " " + period;
 		                 				System.out.println("pais  " + pais + " " + qutitles.contains(pais));
 		                 				
-		                 				if( !qutitles.contains(pais)) { //!questsDone.contains(signa)
+		              	if( !qutitles.contains(pais) && false) { //!questsDone.contains(signa)
 		                 				// kui pole lisatud küsimust siis 
 		                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
 	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
@@ -1663,9 +1669,10 @@ private void uploadQuestsAndAnswers() {
 		    	                 					//vaatame kas selline asi on meil olemas
 		    	                 				
 		    	                 					String key = klient + "-" + kysimus + "-"+ chain +" "+ klient + " " + period;
+		    	                 			//	if(klient.equals("77001351")) {
 		    	                 				//	System.out.println("keys " + key);
 		    	                 					//System.out.println("keys2 " + answBuffer.get(key) + " " + answBuffer.keySet().toString() + "\n" ) ;
-		    	                 					
+		    	                 				//}
 		    	                 					if(answBuffer.get(key) != null) {
 	                                                  
 		    	                 						org.json.simple.JSONObject ob = answBuffer.get(key);

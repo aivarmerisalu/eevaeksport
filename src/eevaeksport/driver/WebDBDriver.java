@@ -5,13 +5,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,25 +29,36 @@ import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFComment;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import ee.merisoft.sm.Product;
 import eevaeksport.Agent;
 import eevaeksport.DealerProduct;
 import eevaeksport.EksportPanel;
+import eevaeksport.Quest;
+import eevaeksport.QuestLine;
 import eevaeksport.util.Converter;
 
 /**
@@ -54,19 +70,19 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,FixLoader,FixReporter,WebReporter {
+public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,FixLoader,FixReporter,WebReporter,WebReporter2 {
 
   public WebDBDriver(EksportPanel parent) {
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
     user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
-    rcompany = getParent().getProps().getProperty("rest.companyx");
+    companyx = getParent().getProps().getProperty("rest.companyx");
      }
   
   String user =  null;
   String pass = null;
-  String rcompany = null;
+  String companyx = null;
   
   public String getSaveDebtInfo() {
    	return null;
@@ -158,7 +174,7 @@ public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discoun
 	   if(eanprods == null)
 	   eanprods = new TreeMap();
 	   
-	 JSONArray prods =  Converter.getWebProducts( rcompany, user ,  pass);
+	 JSONArray prods =  Converter.getWebProducts( companyx , user ,  pass);
 	 
 	 for(int i = 0; i < prods.length(); i++) {
 		 
@@ -283,10 +299,10 @@ public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discoun
 
 			  	
 			  		
-			  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass, true);
+			  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), companyx, user, pass, true);
 			  	//	System.out.println("files " + files.toString());
 			 
-		  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
+		  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), companyx, user, pass, false, "PRODUCT", null, "test");
 		  		
 		  		Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
 		  		int palletrow = 1;
@@ -623,10 +639,10 @@ System.out.println("no data to save");
 
 			
 	  		
-	  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass, true);
+	  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), companyx, user, pass, true);
 	  	//	System.out.println("files " + files.toString());
 	 
-  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, null, null, "test");
+  		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), companyx, user, pass, false, null, null, "test");
   		
   		Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
   		int outofstocks = 1;
@@ -1033,7 +1049,7 @@ System.out.println("no data to save");
   	this.getProducts(null);
   	TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
   	System.out.println("Contracts " + contracts.toString());
-  	Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+  	Converter.sendContractJson(contracts ,  companyx,  user ,  pass);
   	System.exit(0);
   }
   
@@ -1057,7 +1073,7 @@ System.out.println("no data to save");
 	  	lopp.set(Calendar.MINUTE, 59);
 	  	lopp.add(Calendar.DATE, +2);
 	  
-	  ArrayList<String> arr = Converter.createExcelProductProblemsOosReport(algus, lopp, this.getExcelDir(), rcompany, user, pass);
+	  ArrayList<String> arr = Converter.createExcelProductProblemsOosReport(algus, lopp, this.getExcelDir(), companyx, user, pass);
 	  System.out.println("tulemus " + arr);
 	  for(String fname : arr) {
 		  String tekst = " ";
@@ -1075,5 +1091,506 @@ System.out.println("no data to save");
 	  
 	  System.exit(0);
   }
+
+@Override
+public void WebReporter2() {
+	uploadQuestsAndAnswers();
+	System.exit(0);
+}
+
+
+private void uploadQuestsAndAnswers() {
+	  
+	  HashSet qutitles = new HashSet();
+
+		 File svdata = new File( "svdata");
+			 if(!svdata.exists()) {
+				 svdata.mkdir();
+			 }	  
+	      	  
+	   String sisu = Converter.getQuestData(companyx, user, pass);
+	    
+	   Converter.saveFile("svdata/Questionnaire.json", sisu);
+	   
+
+	   JSONParser parser = new JSONParser();
+	   org.json.simple.JSONArray arrs = null;
+	   try {
+		 arrs = (org.json.simple.JSONArray)parser.parse(sisu);
+	} catch (ParseException e) {
+		e.printStackTrace();
+	}
+
+	   
+	   if(arrs != null) {
+		   for(int y = 0;  y < arrs.size(); y++) {
+			
+			try {
+			
+				org.json.simple.JSONObject ob = (org.json.simple.JSONObject) arrs.get(y) ;
+				String nimi = (String)ob.get("title");
+				
+				if(!qutitles.contains(nimi)) {
+			    	qutitles.add(nimi);
+			    	System.out.println(nimi);
+				}
+			
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		   }
+	   }
+	   
+	  
+		//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
+			File folder = new File(this.getExcelDir()+"pallets");
+			 if(!folder.exists()) {
+				 folder.mkdir();
+			 }
+
+			 File done = new File(this.getExcelDir()+"pallets/"+ "done");
+			 if(!done.exists()) {
+				 done.mkdir();
+			 }
+
+		  HashSet answersDone = null;
+			try {
+				answersDone = (HashSet)Converter.readObject("answersdone.obj");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}		
+	if(answersDone == null) {
+	  answersDone = new HashSet();
+	}
+
+	TreeMap<String, org.json.simple.JSONObject> answBuffer = new TreeMap<String, org.json.simple.JSONObject>();
+
+	      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
+	 Calendar from = Calendar.getInstance();
+	 from.add(Calendar.DAY_OF_YEAR, -1);
+	 Calendar to = Calendar.getInstance();    
+	 to.add(Calendar.DAY_OF_YEAR, 2);
+	 
+
+	    String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "YESNOFORCE", null, "SV-");
+
+	     parser = new JSONParser();
+			try {
+				if(filename.length() > 1) {
+
+					 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
+					//	System.out.println("files " + files1.toString());
+				 
+					 
+					   InputStreamReader reader = new InputStreamReader(new FileInputStream(filename), "UTF-8");
+
+					org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(reader);
+		
+
+	  		for (int i = 0; i < cc.size(); i++) {
+	  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+	  			String dateAndTime = (String)cob.get("recetime");
+	  			String dateOnly = dateAndTime.split("T")[0];
+	  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
+	  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
+	  		   
+	  			String custID = (String)cob.get("custid");
+	  			String agentname = (String)cob.get("agentname");
+	  			String agid = (String)cob.get("agentid");
+	  			String qname = (String)cob.get("prodname");
+	  			 
+	  			String title = (String)cob.get("extData");
+	  			String created = (String)cob.get("resstr3"); // see on tegelt Long
+	  			String comment = (String)cob.get("comment");
+	  			String prodid = (String)cob.get("prodid");
+	  			
+
+	  			Calendar cal = Calendar.getInstance();
+	  			cal.setTimeInMillis(Long.parseLong(created));
+	  			dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
+	  			
+	  			String signa = custID + "-" + dateAndTime;
+
+					String foto = null;
+	  			
+	  			try {
+	  				if(cob.get("pictureLinks") != null) {
+	  				org.json.simple.JSONArray phs = (org.json.simple.JSONArray)parser.parse((cob.get("pictureLinks").toString()));
+	  				String fotoOK = null;
+	  				if(files1 != null && files1.get(custID) != null && phs != null) {
+	  					int a = 0;
+	  						for(int y = 0; y < phs.size() ; y++) {
+	  							String fname = (String)phs.get(y);
+	  				
+	  					ArrayList arr = (ArrayList)files1.get(custID);
+	  					for(int e = 0; e<arr.size(); e++) {
+	  						Toode t = (Toode)arr.get(e);
+	  						foto = t.getLadu();
+	  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
+	  							fotoOK = foto;
+	  							 a++;
+	  				  		   }
+	  					     }
+	  					  }
+	  				   }	
+
+	  				if(fotoOK != null) {
+	  					cob.put("phurl", fotoOK);
+	  				}
+	  				}
+	  				
+	  				}catch(Exception e) {
+	  					e.printStackTrace();
+	  				}
+	  			
+
+					answBuffer.put(custID + "-" + qname + "-" + title, cob);
+	  			
+	  		}	
+				}
+			} catch (Exception e) {
+			e.printStackTrace();
+		}
+			
+			System.out.println("buffer " + answBuffer.size());
+
+		//  System.exit(0);
+
+//		  1- loeme küsimused sisse 
+		  //otsime faile mille nimes on pallets
+		  
+		  
+		  HashSet questsDone = null;
+			try {
+				questsDone = (HashSet)Converter.readObject("questsdone.obj");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}		
+	if(questsDone == null) {
+		questsDone = new HashSet();
+	}
+
+		  
+		  HashMap<String , Quest> questArr = new HashMap<String ,Quest>();
+		  long week = 1000*60*60*24*7;
+
+			boolean changesMade = false;
+		          if (folder.exists() && folder.isDirectory()) {
+		              File[] files = folder.listFiles();
+
+		              for (File file : files) {
+		                  if (file.isFile() && file.getName().contains("pallets") && !file.getName().contains("$")) { // pallets example
+		                      System.out.println("Found: " + file.getAbsolutePath());
+		                 		try {
+		                 			FileInputStream ff = new FileInputStream(file);
+		                 			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+		                 			XSSFSheet sheet = workbook.getSheetAt(0);
+		                 			XSSFRow row = sheet.getRow(0);
+		                 			 
+		                 			 DataFormatter formatter = new DataFormatter();
+		                 		//loeme sisse küsimused 			 
+		                 					 
+		                 					row = sheet.getRow(2);
+	                                 HashMap kyssad = new HashMap();
+		    	                 			for (int a = 6; a <  row.getLastCellNum(); a++) {
+		    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) a));
+		    	                 				kyssad.put(a, kyssa);
+		    	                 			}
+		    	                 	
+		                 			for (int a = 3; a <  sheet.getLastRowNum()+1; a++) {
+		                 				row = sheet.getRow(a);
+		                 			
+		                 				String klient = "";
+		                 				String chain = "";
+		                 				String question = "";
+		                 				String period = "";
+		                 				
+		                 				try {
+		                 					    klient =  formatter.formatCellValue(row.getCell((short) 1));
+		                 				} catch (Exception e) {
+		                 					try {
+		                 						klient =  ((int)row.getCell((short) 1).getNumericCellValue()) + "";
+		                    				} catch (Exception r) {
+		                    				}
+		                 				}
+		                 				
+		                 				try {
+		                 					   chain =  formatter.formatCellValue(row.getCell((short) 2));
+		                 				} catch (Exception e) {
+		                 					try {
+		                 						chain =  ((int)row.getCell((short) 2).getNumericCellValue()) + "";
+		                    				} catch (Exception r) {
+		                    				}
+		                 				}
+		                 				
+		                 				try {
+		                 					   period =  formatter.formatCellValue(row.getCell((short) 5));
+		                 				} catch (Exception e) {
+		                 					try {
+		                 						period =  ((int)row.getCell((short) 5).getNumericCellValue()) + "";
+		                    				} catch (Exception r) {
+		                    				}
+		                 				}
+		                 				
+		                 				String signa = klient +"_"+ period;
+		                 				
+		                 				String pais = chain + " " + klient + " " + period;
+		                 				System.out.println("pais  " + pais + " " + qutitles.contains(pais));
+		                 				
+		                 				if( !qutitles.contains(pais)  && pais.trim().length() > 0) { //!questsDone.contains(signa)
+		                 				// kui pole lisatud küsimust siis 
+		                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
+	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
+	    	                 				
+	    	                 				if(kyssa != null && kyssa.trim().length() > 0) {
+	    	                 					
+	    	                 					String kysimus =  "|PAL" + kyssa + "| " + (String)kyssad.get(b);
+	    	                 				
+	    	                 					Quest qq = questArr.get(klient);
+	    	                 					if( qq == null) {
+	    	                 					   qq = new Quest();
+	    	                 					   qq.custID = klient;
+	    	                 					   qq.title = pais;
+	    	                 					   
+	    	                 					DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+	    	                 					String split = " - ";
+	    	                 					if(!period.contains(" - ")) {
+	    	                 						split = "-";
+	    	                 					}
+	    	                 					String[] dateStrings = period.split(split);
+	    	                 					try {
+	    	                 					    qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()-week;
+	    	                 				        qq.qEnd = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+	    	                 					} catch (Exception e) {
+	    	                 						format = DateTimeFormatter.ofPattern("dd.MM.yy");
+	    	                 						qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()-week;
+		    	                 				    qq.qEnd = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+		    	             					}
+	    	                 				   
+	    	                 				       QuestLine ql = new QuestLine();
+	    	                 				          ql.qname = kysimus;
+	    	                 				          ql.qtype = "YESNOFORCEDYESPICT";
+	    	                 				    qq.questLines = new ArrayList<QuestLine>();
+	    	                 				    qq.questLines.add(ql);
+	    	                 				//Kui pole juba sellise päisega küsimustikku WEB-is olemas siis lisame.   
+	    	                 				   
+	    	                 				      questArr.put(klient, qq);
+	    	                 				    
+	    	                 				   
+	    	                 					} else {
+	    		    	                 				   
+	    	                 					 QuestLine ql = new QuestLine();
+	     	                 				             ql.qname = kysimus;
+	     	                 				             ql.qtype = "YESNOFORCEDYESPICT";
+	     	                 				       qq.questLines.add(ql);
+	     	                 				      
+	    	                 					}
+	    	                 				 }	
+	    	                 			  }
+		                 				  questsDone.add(signa);
+		                 				  try {
+		                 			  			Converter.saveObject(questsDone, "questsdone.obj");
+		                 			  		} catch (IOException e) {
+		                 			  			e.printStackTrace();
+		                 			  		}
+		                 			          
+		                 				  
+		                 				}else {
+		                 	//seda tehakse juhul kui see rida on küsimusena juba olemas aga vaatame kas on ka äkki vastust tulnud.
+		                 					// ja laksame tulemused peale.
+		                 					
+		                 				if (row != null) {
+			                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
+		    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
+		    	                 				
+		    	                 				XSSFCell cell = row.getCell((short) b);
+		    	                 				
+		    	                 				if(kyssa != null && kyssa.trim().length() > 0) {
+		    	                 					
+		    	                 					String kysimus =  "|PAL" + kyssa + "| " + (String)kyssad.get(b);
+		    	                 					//vaatame kas selline asi on meil olemas
+		    	                 				
+		    	                 					String key = klient + "-" + kysimus + "-"+ chain +" "+ klient + " " + period;
+		    	                 				//	System.out.println("keys " + key);
+		    	                 					//System.out.println("keys2 " + answBuffer.get(key) + " " + answBuffer.keySet().toString() + "\n" ) ;
+		    	                 					
+		    	                 					if(answBuffer.get(key) != null) {
+	                                                  
+		    	                 						org.json.simple.JSONObject ob = answBuffer.get(key);
+	                                                   
+			    	                 				//	System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
+			    	                 					
+			    	                 					CellStyle originalStyle = cell.getCellStyle();
+
+				    	                 				CellStyle newStyle = workbook.createCellStyle();
+				    	                 				newStyle.cloneStyleFrom(originalStyle);
+	                                                    //   System.out.println("oioi " + ob.get("resint1"));
+	                                                       
+	                                                       String cobComm = (String)ob.get("comment");
+	                                                       
+				    	                 				if((ob.get("resint1")+ "").equals("0")) {
+				    	                 			       newStyle.setFillForegroundColor(IndexedColors.LIME.getIndex());
+				    	                 			       
+				    	                 				 } else {
+				    	                 				   newStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+				    	                 				  if(cobComm != null && cobComm.trim().length() > 0) {
+				    	                 			    	  newStyle.setFillForegroundColor(IndexedColors.GOLD.getIndex());
+				    	                 			       }
+				    	                 				}
+				    	                 			      newStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				    	                 			     cell.setCellStyle(newStyle);
+				    	                 			     
+				    	                 			     
+			    	                 					XSSFDrawing drawing = sheet.createDrawingPatriarch();
+			    	                 			        XSSFComment comment = cell.getCellComment();
+
+
+			    	                 			        if(cobComm == null) {
+			    	                 			        	cobComm = "";
+			    	                 			        }
+			    	                 			        
+			    	                  String newComm = (cobComm +  " " 
+					    	                   + (String)ob.get("agentname") + " " + ((String)ob.get("recetime")).replace('T', ' ').replace('Z', ' ')).trim();
+			    	                 			            
+			    	                 			        
+			    	                 			        if (comment == null) {
+
+					    	                 				CreationHelper helper = workbook.getCreationHelper();
+			    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+			    	                 			            anchor.setCol1(cell.getColumnIndex());
+			    	                 			            anchor.setCol2(cell.getColumnIndex() + 3);
+			    	                 			            anchor.setRow1(row.getRowNum());
+			    	                 			            anchor.setRow2(row.getRowNum() + 3);
+			    	                 			            comment = drawing.createCellComment(anchor);
+
+		                                                     XSSFRichTextString commentText = new XSSFRichTextString(newComm);
+				    	                 			        comment.setString(commentText);
+				    	                 			        comment.setAuthor("Merisoft-Mobitrek");
+				    	                 			        cell.setCellComment(comment);
+			    	                 			        } else {
+			    	                 			        	
+			    	                 			        	
+				    	                 			        // Set comment text
+				    	                 			        if(comment.getString() != null) {
+
+				    	                 			  //    System.out.println("comm " + comment.getString().getString()+ "\n" + newComm);
+				    	                 			        	if( !comment.getString().getString().contains(newComm)) {
+				    	                 			        		String oldText = comment != null ? comment.getString().getString() : "";
+				    	                 			        		cell.removeCellComment();
+
+							    	                 				CreationHelper helper = workbook.getCreationHelper();
+					    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+					    	                 			            anchor.setCol1(cell.getColumnIndex());
+					    	                 			            anchor.setCol2(cell.getColumnIndex() + 5);
+					    	                 			            anchor.setRow1(row.getRowNum());
+					    	                 			            anchor.setRow2(row.getRowNum() + 5);
+					    	                 			          Comment  commentNew = drawing.createCellComment(anchor);
+				    	             XSSFRichTextString commentText = new XSSFRichTextString(oldText+ "\n" + newComm);
+				    	             commentNew.setString(commentText);
+				    	             commentNew.setAuthor("Merisoft-Mobitrek");
+							    	                 			        cell.setCellComment(commentNew);
+					    	                 			       	
+				    	                 			        		
+				    	                 			            }
+				    	                 			        }
+		                                                     	 }
+			    	                 			        	
+			    	                 			        
+			    	                 			        
+			    	                 			        
+
+			    	                 					
+			    	                 				 if(answBuffer.get(key).get("phurl") != null) {
+			    	                 					 
+			    	                 					 
+			    	                 					 
+			    	                 				
+			    	                 				Font originalFont = workbook.getFontAt(originalStyle.getFontIndex());
+			    	                 				Font linkFont = workbook.createFont();
+			    	                 				linkFont.setColor(IndexedColors.BLUE.getIndex());
+			    	                 				linkFont.setUnderline(Font.U_SINGLE);
+			    	                 				linkFont.setFontName(originalFont.getFontName());
+			    	                 				linkFont.setFontHeight(originalFont.getFontHeight()); // preserve font size
+			    	                 				newStyle.setFont(linkFont); // use the new font
+			    	                 					
+			    	                 			       
+
+				    	                 				CreationHelper helper = workbook.getCreationHelper();
+			    	                 			       org.apache.poi.ss.usermodel.Hyperlink link = helper.createHyperlink(Hyperlink.LINK_URL);
+			    	                 			        
+			    	                 			       String safeUrl = ((String)answBuffer.get(key).get("phurl")).replace("{", "%7B")
+			    	                                           .replace("}", "%7D")
+			    	                                           .replace("[", "%5B")
+			    	                                           .replace("]", "%5D")
+			    	                                           .replace("!", "%21")
+			    	                                           .replace(" ", "%20");
+			    	                 			        link.setAddress(safeUrl);
+			    	                 			        cell.setHyperlink(link);
+			    	                 					changesMade = true;
+		    	                 					}
+		    	                 				 }
+		    	                 				}
+			                 				}
+		                 				}
+		                 				}
+		                 				
+		                 			 }
+
+	                 				//System.exit(0);
+	                 			ff.close();
+		                 			
+		                 			if(changesMade) {
+
+		                 			       FileOutputStream fos = new FileOutputStream(file.getAbsolutePath()); // Same file name
+		                 			      workbook.write(fos);
+		                 			      fos.close();
+		                 			      
+		                 			}
+		                 			//System.out.println(questArr.toString());	
+		                 	//	System.exit(0);	
+		                 			// Saadame ära
+		                 			if(questArr.size() > 0) {
+		                 			Iterator<String> itera = questArr.keySet().iterator();
+		                 			 while (itera.hasNext()) {
+		                 				 String custID = itera.next();
+		                 				 Quest qq = questArr.get(custID);
+		                 				boolean added =  Converter.addNewQuest(qq, companyx, user, pass);
+		                 			   }
+		                 			  }
+		                 			
+		                 			questArr.clear();
+		                 			}catch(Exception e) {
+		                 				e.printStackTrace();
+		                 			}
+		                 	
+		                 	
+		                      
+		                  }
+		              }
+		          } else {
+		              System.out.println("The provided path is not a valid folder.");
+		          }
+		      
+
+				  try {
+						Converter.saveObject(answersDone, "answersdone.obj");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+		          try {
+		  			Converter.saveObject(questsDone, "questsdone.obj");
+		  		} catch (IOException e) {
+		  			e.printStackTrace();
+		  		}
+		          
+		      //  System.exit(0);  
+		          
+
+	   	  
+	  }
+	  
+
 
   }

@@ -5034,13 +5034,37 @@ System.out.println("token" + token);
 	           String partii = null;
 	           try{
                   partii =  getNode(getNode(rida, "ItemReserve"), "LotNum").getFirstChild().getNodeValue();
-		       	partii = partii + "|" + getCalLit(getNode(getNode(rida, "ItemReserve"),
-		       			"BestBeforeMin").getFirstChild().getNodeValue()).getTime();
-	           }catch(Exception e){
+		       }catch(Exception e){
 	        	   
 	           }
+	        
+	           try{
+	        	   if(partii != null) {
+	        		partii = partii + "|" + getCalLit(getNode(getNode(rida, "ItemReserve"),
+	    	       			"BestBeforeMin").getFirstChild().getNodeValue()).getTime();
+	        	   }else {
+	        			partii = "" + getCalLit(getNode(getNode(rida, "ItemReserve"),
+		    	       			"BestBeforeMin").getFirstChild().getNodeValue()).getTime();
+		           }
+	                  }catch(Exception e){
+		        	   
+		           }
+		       
+
+	           try{
+	        	   if(partii != null) {
+	        		    partii = partii + "|" + (getNode(rida, "BestBeforeMin").getFirstChild().getNodeValue());
+	        	    } else {
+	        			partii = (getNode(rida, "BestBeforeMin").getFirstChild().getNodeValue());
+		           }
+	                  }catch(Exception e){
+		        	   
+		           }
+		        
 	           
-	         
+	           
+	           System.out.println("partii " + partii + " prod:" + prod);
+           
 	           
 	          	double  kogus =  0;
 	          	try{
@@ -5087,7 +5111,6 @@ System.out.println("token" + token);
 	                  }
 	                  boolean up = false;
 	                  double convert = 1;
-	               //   System.out.println("conCod.size()" + conCod.size() + " prod:" + prod);
 	                  if(conCod != null && prod != null){
 	                  	Enumeration enume = conCod.elements();
 	                  	while(enume.hasMoreElements()){
