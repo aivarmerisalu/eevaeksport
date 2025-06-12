@@ -3963,6 +3963,36 @@ public class Converter {
 								
 								
 								Cell cellx = row.getCell((short)0);
+								
+								
+								if(i == 0 || i == 1 || i == 2 || i == 3 || i == 4) {
+									for(int y = 4 ; y < 15 ;y++) {
+									
+									cellx = row.getCell((short)y);
+									if(cellx != null) {
+									//	System.out.println("RIMI " + y + " " + i + " " + cellx.getStringCellValue());
+										try {
+											if(formatter.formatCellValue(cellx).indexOf("ER47") != -1 || formatter.formatCellValue(cellx).indexOf("ER11") != -1  ) { // || formatter.formatCellValue(cellx).indexOf("") != -1 
+												return "rimi";
+											}		
+										}catch(Exception e) {
+											
+										}
+										
+										try {
+											if(formatter.formatCellValue(cellx).indexOf("EEHM") != -1 || formatter.formatCellValue(cellx).indexOf("EESM") != -1  ) { // || formatter.formatCellValue(cellx).indexOf("") != -1 
+												return "rimi2";
+											}		
+										}catch(Exception e) {
+											
+										}
+										
+									}	
+								
+									}
+								}
+								
+								
 								try {
 									if(cellx != null) {
 									//	System.out.println("xx " +formatter.formatCellValue(cellx));
@@ -4144,32 +4174,6 @@ public class Converter {
 									
 								
 								
-								if(i == 0 || i == 1 || i == 2 || i == 3 || i == 4) {
-									for(int y = 4 ; y < 15 ;y++) {
-									
-									cellx = row.getCell((short)y);
-									if(cellx != null) {
-									//	System.out.println("RIMI " + y + " " + i + " " + cellx.getStringCellValue());
-										try {
-											if(formatter.formatCellValue(cellx).indexOf("ER47") != -1 || formatter.formatCellValue(cellx).indexOf("ER11") != -1  ) { // || formatter.formatCellValue(cellx).indexOf("") != -1 
-												return "rimi";
-											}		
-										}catch(Exception e) {
-											
-										}
-										
-										try {
-											if(formatter.formatCellValue(cellx).indexOf("EEHM") != -1 || formatter.formatCellValue(cellx).indexOf("EESM") != -1  ) { // || formatter.formatCellValue(cellx).indexOf("") != -1 
-												return "rimi2";
-											}		
-										}catch(Exception e) {
-											
-										}
-										
-									}	
-								
-									}
-								}
 								
 								if(i == 3) {
 									//kui on kolmas rida 
