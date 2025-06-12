@@ -369,7 +369,8 @@ public class Converter {
 			   if(!ff.exists()) {
 				  ff =  new File("excelsort/eans/eans.txt");
 			   }
-			   FileInputStream is = new FileInputStream(ff);
+			   
+			    FileInputStream is = new FileInputStream(ff);
 				InputStreamReader isr = new InputStreamReader(is, "utf-8");
 				BufferedReader reader = new BufferedReader(isr);
 				
@@ -395,7 +396,7 @@ public class Converter {
 		   
 		
 		   
-		 System.out.println("lis suurus " + res.size());
+	//	 System.out.println("lis suurus " + res.size());
 		   
 		   return res;
 	   }

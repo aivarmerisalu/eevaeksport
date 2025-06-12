@@ -786,6 +786,7 @@ HashSet olemas = new HashSet();
  					String p =link.replace('1', 'A').replace('2', 'B').replace('3', 'C').replace('4', 'D')
  							.replace('5', 'E').replace('6', 'F').replace('7', 'G');
  					p = p.replace(",", "");
+ 					p = p.replace(".", "");
  					res.put("day" + klient.trim(), p);
  		 		
  			}
@@ -1081,7 +1082,7 @@ HashSet olemas = new HashSet();
               
               if(goes) {
                   customers.put(name, cust);  	  
-              }
+               }
        
             }
             rs.close();

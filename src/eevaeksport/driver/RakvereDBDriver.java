@@ -34,6 +34,8 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import eevaeksport.Agent;
+import eevaeksport.Contract;
+import eevaeksport.ContractLine;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
 import eevaeksport.Debt;
@@ -53,7 +55,7 @@ import eevaeksport.util.Converter;
  * @author Tarmo Tubr
  * @version 1.0
  */
-public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Manager,Promo, BulkUpdater{
+public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Manager,Promo, BulkUpdater,FixLoader{
 
     /**
      * Constructor declaration
@@ -77,10 +79,23 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
         } catch (Exception e) {
             parent.showError(e);
         }
-    }
+        user =  getParent().getProps().getProperty("rest.user");
+        pass = getParent().getProps().getProperty("rest.pass");
+        rcompany = getParent().getProps().getProperty("rest.company");
+        rcompanyx = getParent().getProps().getProperty("rest.companyx");
+             }
+          
+          String user =  null;
+          String pass = null;
+          String rcompany = null; 
+          String rcompanyx = null;
+          private TreeMap eanprods = null;
+          
+          
     public String getSaveDebtInfo() {
        	return null;
        }
+    
 
     private HashMap sortimendid = null;
     
@@ -108,7 +123,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
       }
 
     public String getSaveStockInfo(){
-       	sendDistributionReport(null);
+      // 	sendDistributionReport(null);
        	System.exit(0);
         return null;
     }
@@ -552,7 +567,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
  						
  						String kood = formatter.formatCellValue(row.getCell((short) 0)).trim();
  						String nimi = formatter.formatCellValue(row.getCell((short) 2)).trim();
- 						String ean = formatter.formatCellValue(row.getCell((short) 3)).trim();
+ 						String ean = formatter.formatCellValue(row.getCell((short) 3));
  						String unit = "tk.";
  						Double kastis = 1.0 ;
  						try {
@@ -568,16 +583,18 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
  						Product prod = new Product(kood);
  						prod.setUnit(unit);
  						prod.setName(" NM " + nimi);
- 						prod.setEAN(ean);
+ 						if(ean != null && ean.trim().length() > 4) {
+ 							prod.setEAN(ean.trim());
+ 	 						 eanprods.put(ean.trim(), prod.getID());
+ 	 							
+ 						}
  						prod.setInCases(kastis);
  						prod.setGroup(grupp);
  						prod.setGroupname(gname);
  						prod.setInUnit(kaal);
  						prod.setVat("22");
  						prod.setType("PIIM");
- 						
  						prods.put(" NM " + nimi, prod);
- 						System.out.println(kood + " " + nimi + " " + ean + " " + gname);
  						}
  					} catch (Exception e) {
  						e.printStackTrace();
@@ -859,7 +876,8 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
         }
         
         public Vector getFixedAssortmentData() {
-    		Vector result = new Vector();
+    	return null;
+        	/*Vector result = new Vector();
     		this.getProducts(null);
     		File f = new File(this.getExcelDir() + "sortiments.xls");
     				
@@ -1178,7 +1196,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     			e.printStackTrace();
     		}
 
-    		return result;
+    		return result;*/
 
     	}
 
@@ -1329,6 +1347,73 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
         }
         return agents;
     }
+    
+    
+    private HashMap getSortGroups() {
+    	HashMap groups = new HashMap();
+    	
+try {
+        File fff = new File(this.getExcelDir() + "sortiments.xls" );
+        FileInputStream ff = new FileInputStream(fff);
+		HSSFWorkbook workbook = new HSSFWorkbook((ff));
+		HSSFSheet sheet = workbook.getSheet("customer");
+		HSSFRow row = null;
+		
+		row = sheet.getRow(0);
+	    // teeme valmis gruppide Treemapi key grupp ja Vectoris koodid
+		
+	//	System.out.println("rownum " + row.getLastCellNum());
+		
+		
+		for(int a = 1 ; a < sheet.getLastRowNum()+1;a++){
+			try{
+			//	Loeme sisse rea
+				row = sheet.getRow(a);
+				if (row.getCell((short) 0) != null) {
+				
+
+
+	    			   String kood = null;
+	    			  if(row.getCell((short)0) != null){
+	    	    			  	try{
+	    	    			  	  kood = row.getCell((short)0).getStringCellValue();  
+	    	    			  	 }catch (Exception e){
+	    	    			   	  kood = row.getCell((short)0).getNumericCellValue()+"";  
+	    	    	    		} 
+	    	    			  	 if(kood.indexOf(".")!= -1){
+	    	    			  	 	 kood = (kood.substring(0,kood.indexOf(".")));	
+	    	    			  	 }
+	    	    			  //	 System.out.println("kood" + kood);
+	    	    			  	 if(kood.trim().length() > 6){
+	    	    			  		 kood = kood.trim().substring(0,6);
+	    	    			  	 }
+	    	    			  	 String sort = null;
+	    	    			  	try{
+	    	    			  		sort = row.getCell((short)1).getStringCellValue();  
+		    	    			  	 }catch (Exception e){
+		    	    			  		sort = row.getCell((short)1).getNumericCellValue()+"";  
+		    	    	    		} 
+		    	    			  	 if(sort.indexOf(".")!= -1){
+		    	    			  	 	 sort = (sort.substring(0,kood.indexOf(".")));	
+		    	    			  	 }
+	    	    			  	 groups.put(kood.trim(),sort.trim());
+	    	    			   sortimendid.put(kood.trim(),sort.trim());
+	    			  
+	    				
+				}	   
+				}
+			}catch (Exception e){
+			}
+		}
+     }catch (Exception e){
+	}
+		
+
+System.out.println(groups.toString());
+
+
+    	return groups;
+    }
 
     public TreeMap getCustomers(Agent agent){
 
@@ -1336,68 +1421,9 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     	ketid = new HashMap();
     	
     	 TreeMap visits = getVisits();
-        File fff = new File(this.getExcelDir() + "sortiments.xls" );
-        TreeMap groups = new TreeMap(); 
-    	try{
-            FileInputStream ff = new FileInputStream(fff);
-    		HSSFWorkbook workbook = new HSSFWorkbook((ff));
-    		HSSFSheet sheet = workbook.getSheet("customer");
-    		HSSFRow row = null;
-    		
-    		row = sheet.getRow(0);
-    	    // teeme valmis gruppide Treemapi key grupp ja Vectoris koodid
-    		
-    	//	System.out.println("rownum " + row.getLastCellNum());
-    		
-    		
-    		for(int a = 1 ; a < sheet.getLastRowNum()+1;a++){
-    			try{
-    			//	Loeme sisse rea
-    				row = sheet.getRow(a);
-    				if (row.getCell((short) 0) != null) {
-    				
-
-
-    	    			   String kood = null;
-    	    			  if(row.getCell((short)0) != null){
-  	    	    			  	try{
-  	    	    			  	  kood = row.getCell((short)0).getStringCellValue();  
-  	    	    			  	 }catch (Exception e){
-  	    	    			   	  kood = row.getCell((short)0).getNumericCellValue()+"";  
-  	    	    	    		} 
-  	    	    			  	 if(kood.indexOf(".")!= -1){
-  	    	    			  	 	 kood = (kood.substring(0,kood.indexOf(".")));	
-  	    	    			  	 }
-  	    	    			  //	 System.out.println("kood" + kood);
-  	    	    			  	 if(kood.trim().length() > 6){
-  	    	    			  		 kood = kood.trim().substring(0,6);
-  	    	    			  	 }
-  	    	    			  	 String sort = null;
-  	    	    			  	try{
-  	    	    			  		sort = row.getCell((short)1).getStringCellValue();  
-  		    	    			  	 }catch (Exception e){
-  		    	    			  		sort = row.getCell((short)1).getNumericCellValue()+"";  
-  		    	    	    		} 
-  		    	    			  	 if(sort.indexOf(".")!= -1){
-  		    	    			  	 	 sort = (sort.substring(0,kood.indexOf(".")));	
-  		    	    			  	 }
-  	    	    			  	 groups.put(kood.trim(),sort.trim());
-  	    	    			   sortimendid.put(kood.trim(),sort.trim());
-    	    			  
-    	    				
-    				}	   
-    				}
-   			}catch (Exception e){
-    			//	System.out.println(row.getCell((short)a).getNumericCellValue());
-    			}
-    		}
-    		
-    		//System.out.println(groups.toString());
-    
-    	 }catch (Exception e){
-    	//	e.printStackTrace();
-    	}
-
+        
+        HashMap groups = getSortGroups();
+        
     	
       String  cmd = "SELECT nimi,kood,aadress,discount,visit,info,agent,payer,'' as listcode,block, Chain as kett FROM customers k " +
         " WHERE agent != 'LUKUS' ORDER BY nimi ";
@@ -1486,6 +1512,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
          String gro = (String) groups.get(cust.getID());
          if( gro != null){
          	cust.addFixSortCode(gro.trim());
+         	//cust.level = gro.trim();
          }
 
          String kett =  rs.getString("kett");
@@ -1571,11 +1598,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
         } catch (Exception e) {
             getParent().showError(e);
         }
-
-
-
-
-
+        
         return customers;
     }
 
@@ -1617,6 +1640,10 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
      //   System.out.println("names " + names.size());
        
         TreeMap products = new TreeMap();
+
+        if(eanprods == null) {
+     	   eanprods = new TreeMap();
+        }
         
         try {
           Connection con = getNewCon();
@@ -1645,7 +1672,12 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
                 String ean = rs.getString("ean");
                 if(ean != null && ean.trim().length()>0){
                 	prod.setEAN(ean.trim());
+
+                    eanprods.put(prod.getEAN(), prod.getID());
                 }
+                
+                
+                
                 products.put(nimetus  + " " + kood, prod);
                 prodHash.put(prod.getID(), prod);
             }
@@ -2288,6 +2320,349 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     private Connection ccc ;
     private String	       subjectFilesTo = null;
     private NumberFormat NF = NumberFormat.getInstance();
+
+    private TreeMap getFixSortimentContracts() {
+    	TreeMap res = new TreeMap();
+    	File f = new File(this.getExcelDir() + "sortiments.xls");
+    	//teeme seda kõike juhul kui faili oli muudetud.
+    	String lasttime = null;
+		try {
+			boolean readdata = true;
+	    	if(f.exists()) {
+	          lasttime =  f.lastModified() + "";
+			 String olemasolev = null;
+			try {
+				File ff = new File("lastfixed.txt");
+				olemasolev = Converter.readFile(ff, "utf-8", null).substring(0,13);
+				readdata = !lasttime.equals(olemasolev);
+			} catch (IOException e1) {
+				//e1.printStackTrace();
+			}
+			}
+			
+		if(readdata) {	
+			
+			FileInputStream ff = new FileInputStream(f);
+			HSSFWorkbook workbook = new HSSFWorkbook((ff));
+			HSSFSheet sheet = workbook.getSheet("Assortment");
+			HSSFRow row = null;
+			
+			HSSFSheet sheetKood = workbook.getSheet("Code");
+			
+			HSSFSheet sheetKoodSort = workbook.getSheet("CodeSorts");
+			
+			TreeMap omakoodid = new TreeMap();
+
+			TreeMap omagroups = new TreeMap();
+			
+			TreeMap omaTootegroups = new TreeMap();
+			
+			row = sheetKood.getRow(0);
+			// M��RAME �RA MIS V�LJAS ASUVAD TOOTEKOODIDE Sortimendi t�hised.
+
+			// System.out.println("rownum " + row.getLastCellNum());
+			for (int a = 1; a < row.getLastCellNum(); a++) {
+				try {
+					// System.out.println(row.getCell((short)a).getStringCellValue());
+					omagroups.put(a + "", row.getCell((short) a)
+							.getStringCellValue());
+				} catch (Exception e) {
+					// System.out.println(row.getCell((short)a).getNumericCellValue());
+				}
+			}
+
+		//	 System.out.println("omagroups " + omagroups.toString());
+
+			
+			//mis kood on sortimedi koodid ja tootekoodide sortimendi t�hised kokku 
+			for (int i = 0; i < sheetKoodSort.getLastRowNum() + 1; i++) {
+				row = sheetKoodSort.getRow(i);
+				String sortkood = "";
+				if (row.getCell((short) 0) != null) {
+                  try {
+						sortkood = (int) (row.getCell((short) 0)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						sortkood = (row.getCell((short) 0).getStringCellValue());
+					}
+			}
+				String omakood = "";
+
+				if (row.getCell((short) 1) != null) {
+
+					try {
+						omakood = (int) (row.getCell((short) 1)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						omakood = (row.getCell((short) 1).getStringCellValue());
+					}
+					//System.out.println("omakood" + omakood + " " + sortkood);
+
+			}
+				
+				if(!omakood.equals("") && !sortkood.equals("")){
+					
+						omaTootegroups.put(sortkood, omakood);
+					//	omaTootegroups.put(sortkood, i+"");
+				}
+			}
+				
+	//		 System.out.println("omaTootegroups " + omaTootegroups.toString());
+			
+			TreeMap tulemusKood = new TreeMap();
+
+			for (int i = 1; i < sheetKood.getLastRowNum(); i++) {
+				row = sheetKood.getRow(i);
+				
+				String prodID = "";
+               if (row.getCell((short) 0) != null) {
+                 try {
+						prodID = (int) (row.getCell((short) 0)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID = (row.getCell((short) 0).getStringCellValue());
+					}
+								}
+				
+
+				String prodID1 = "";
+               if (row.getCell((short) 1) != null) {
+                	try {
+						prodID1 = (int) (row.getCell((short) 1)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID1 = (row.getCell((short) 1).getStringCellValue());
+					}
+			     }
+
+               if(prodID.trim().length() > 0 && prodID1.trim().length() > 0){
+            	   String key = omagroups.get("1") + "";
+            	   if(tulemusKood.get(key) != null){
+            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
+            		   t1.put(prodID, key + ":" + prodID1);
+            		   tulemusKood.put(key, t1);
+            	   }else{
+            		   TreeMap t1 = new TreeMap();
+            		   t1.put(prodID,key + ":" +  prodID1);
+            		   tulemusKood.put(key, t1);
+            	    }
+                          
+               }
+				
+               
+				String prodID2 = "";
+               if (row.getCell((short) 2) != null) {
+                 try {
+						prodID2 = (int) (row.getCell((short) 2)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID2 = (row.getCell((short) 2).getStringCellValue());
+					}
+			       }
+				
+
+               if(prodID.trim().length() > 0 && prodID2.trim().length() > 0){
+             	  
+            	   String key = omagroups.get("2") + "";
+            	   if(tulemusKood.get(key) != null){
+            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
+            		   t1.put(prodID,key + ":" +  prodID2);
+            		   tulemusKood.put(key, t1);
+            	   }else{
+            		   TreeMap t1 = new TreeMap();
+            		   t1.put(prodID,key + ":" +  prodID2);
+            		   tulemusKood.put(key, t1);
+            	    }
+               }
+               
+               
+				String prodID3 = "";
+               if (row.getCell((short) 3) != null) {
+              	try {
+						prodID3 = (int) (row.getCell((short) 3)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID3 = (row.getCell((short) 3).getStringCellValue());
+					}
+			    }
+				
+
+               if(prodID.trim().length() > 0 && prodID3.trim().length() > 0){
+             	  
+            	   String key = omagroups.get("3") + "";
+            	   if(tulemusKood.get(key) != null){
+            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
+            		   t1.put(prodID,key + ":" +  prodID3);
+            		   tulemusKood.put(key, t1);
+            	   }else{
+            		   TreeMap t1 = new TreeMap();
+            		   t1.put(prodID, key + ":" + prodID3);
+            		   tulemusKood.put(key, t1);
+            	    }
+               }
+               
+				String prodID4 = "";
+               if (row.getCell((short) 4) != null) {
+             	try {
+						prodID4 = (int) (row.getCell((short) 4)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID4 = (row.getCell((short) 4).getStringCellValue());
+					}
+			    }
+               
+
+
+               if(prodID.trim().length() > 0 && prodID4.trim().length() > 0){
+             	  
+            	   String key = omagroups.get("4") + "";
+            	   if(tulemusKood.get(key) != null){
+            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
+            		   t1.put(prodID,key + ":" +  prodID4);
+            		   tulemusKood.put(key, t1);
+            	   }else{
+            		   TreeMap t1 = new TreeMap();
+            		   t1.put(prodID, key + ":" + prodID4);
+            		   tulemusKood.put(key, t1);
+            	    }
+               }
+			}
+			
+		//	System.out.println("TulemusKood " + tulemusKood.toString());
+			
+			
+			
+			TreeMap groups = new TreeMap();
+			row = sheet.getRow(2);
+			// M��RAME �RA MIS V�LJAS ASUVAD Sortimendi t�hised.
+             
+			for (int a = 2; a < row.getLastCellNum(); a++) {
+				try {
+					groups.put(a + "", row.getCell((short) a)
+							.getStringCellValue());
+				} catch (Exception e) {
+				}
+			}
+
+			// System.out.println("groups" + groups.toString());
+
+			for (int d = 6; d < sheet.getLastRowNum(); d++) {
+				row = sheet.getRow(d);
+				String prodIDe = "";
+
+				if (row.getCell((short) 0) != null) {
+
+					try {
+						prodIDe = (int) (row.getCell((short) 0)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodIDe = (row.getCell((short) 0).getStringCellValue());
+					}
+					
+                      if(!prodIDe.equals("0")){
+                   	
+					// Siin l�heme reasisse rokkima ja vaatama kas se toode
+					// l�heb kaasa
+					for (int a = 2; a < row.getLastCellNum(); a++) {
+
+						String group = (String) groups.get(a + "");
+						if (group != null && group.trim().length() > 0) {
+
+							String custID = " ";
+							String clGroup = " ";
+							String prodGroup = " ";
+							
+
+							String go = null;
+							clGroup = group;
+
+							if (row.getCell((short) a) != null) {
+
+								try {
+									go = (int) (row.getCell((short) a)
+											.getNumericCellValue()) + "";
+								} catch (Exception e) {
+									go = (row.getCell((short) a)
+											.getStringCellValue());
+								}
+
+							}
+
+							if (go != null && go.equals("1")) {
+
+						//	 System.out.println( a + " " + prodID + " " +
+							//	 clGroup + " " + go);
+                              
+								
+								if (clGroup != null
+										&& clGroup.trim().length() > 0) {
+									
+
+								
+								  String pood =  clGroup;
+			                         Contract con = new Contract(pood);
+									
+			                        	// System.out.println("Sees " +a + " " + pood + " " + prodIDe + " " + pood);
+			                        
+										if(res.get(pood) != null){
+			            	                 con = (Contract)res.get(pood);
+			            	                } 
+										  ContractLine ll = new ContractLine(prodIDe);
+			            	               if(con.lines == null){
+			            		                 con.lines = new Vector();
+			            	                  }
+			            	              con.lines.add(ll);
+			            	               res.put(pood, con);
+			            	              
+								 		
+							  }
+							}
+						  }
+					    }
+					  }
+				   }
+			    }
+			if(lasttime != null) {
+			  Converter.saveFile("lastfixed.txt", lasttime);
+			}
+			} else {
+				System.out.println("Sortimendi fail on sama mis enne ja ei lae midagi.");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+    	return res;
+    }
+
+
+	@Override
+	public void FixLoader() {
+		  
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
+			this.getProducts(null);
+		
+			
+			TreeMap contractsMilk = getFixSortimentContracts();
+			//	System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+				if(contractsMilk.size() > 0) {
+					Converter.sendContractJson(contractsMilk , rcompanyx,  user ,  pass);
+				}
+			
+			
+			
+			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+			System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			if(contracts.size() > 0) {
+				Converter.sendContractJson(contracts , rcompanyx,  user ,  pass);
+			}
+
+			System.exit(0);
+
+			}
 }
 
 

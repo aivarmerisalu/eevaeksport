@@ -3699,6 +3699,7 @@ private void sendTaskReport() {
 		          properties.load(input);
 
 		            String email = properties.getProperty("managerinfomail");
+		          //  email = "aivar@mobilejava.ee";
 		            String agentid = files[i].substring(0,files[i].indexOf("."));
 		           agMail.put(agentid.trim(), email);
 		        
@@ -3877,7 +3878,7 @@ if(closed != null) {
 				 }
 				 
 
-				 linesDone.add(taskID + vastus);
+				 linesDone.add(taskID + vastusID);
 				   
 				 }
 				 
@@ -3887,8 +3888,7 @@ if(closed != null) {
 					 
 				 if(!linesDone.contains(taskID + closed)) {
 				 String email = (String)agMail.get(cloManCode);
-				  newTasksReplies.add(email+"|" + repFileName +"|"+custID + "|" + custName +"|" + message + "| |"+ created + "|" + closed + "|" + cloMan);
-
+				   newTasksReplies.add(email+"|" + repFileName +"|"+custID + "|" + custName +"|" + message + "| |"+ created + "|" + closed + "|" + cloMan);
 				   addToTaskDB(taskID,manager, custID, repFileName,header,message,true,cloTime ,cloManCode,taskID);
 				  linesDone.add(taskID + closed);
 				 }
@@ -3909,7 +3909,11 @@ if(closed != null) {
 			e.printStackTrace();
 		}
 		
-		
+		   try {
+				Converter.saveObject(linesDone, "tasklinesdone.obj");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		//System.out.println(newTasksReplies.toString());
 		
 		
@@ -3957,11 +3961,7 @@ if(closed != null) {
 			e.printStackTrace();
 		}
 		   
-		   try {
-			Converter.saveObject(linesDone, "tasklinesdone.obj");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
 		   
 	   }
 	   
