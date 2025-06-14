@@ -81,9 +81,6 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
   
    //   token = getMSToken();
     
-  //    System.out.println("Token " + makeDeldays("C.E"));
-
-    
       
     //  this.downloadData("getCustomers");
     //  getCustomers(null);
@@ -581,15 +578,20 @@ System.out.println("ProdGroup size :  " + tm.size());
 	            
 	        //    System.out.println("klinfo " + address1 + "'" +address2 + "'" + city  + "'" + state+ "'" + country+ "'" + postalCode);
 	            cust.setAddress((address1  + city + postalCode).trim());
+	            cust.restStreet = address1;
+	            cust.restCity = city;
+	            cust.restZipCode = postalCode;
 
 	            String phone = (String)cob.get("phone");
 	            if(phone.length() > 0) {
 	              cust.setPersonalData("Tel:" + phone);
+	              cust.restPhone = phone;
 	            }
 	           
 	            String cper = (String)cob.get("contact");
 	            if(cper.length() > 0) {
 	              cust.adPersonalData("|" + cper);
+	              cust.restPerson = cper;
 	            }
 	           
 	            String salesCode = (String)cob.get("salesperson_code");
@@ -604,8 +606,8 @@ System.out.println("ProdGroup size :  " + tm.size());
 	            String payment_term = cob.get("payment_term")+"";
 	            try {
 	            	if(payment_term.length() < 4) {
-	               cust.setPaymTerm(payment_term.substring(0,payment_term.length()-1));
-	            	System.out.println("jj " + payment_term);
+	                   cust.setPaymTerm(payment_term.substring(0,payment_term.length()-1));
+	            	//System.out.println("jj " + payment_term);
 	            	}
 	 	           
 	            }catch(Exception e) {
@@ -628,8 +630,9 @@ System.out.println("ProdGroup size :  " + tm.size());
 	               cust.setSalesBlock(true);
 	            }
 	            
-	          	
-	          tm.put(cust.getName(), cust);
+	          	if(cust.getID().length() < 8 && cust.getName().length() > 2 ) {
+	              tm.put(cust.getName(), cust);
+	          	}
 	          	}
 			  
 			} catch (Exception e) {
@@ -637,6 +640,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 			}
 		 	}
 	System.out.println("Custsize " + tm.size());
+	System.exit(0);
 		  
 		return tm;
    }
