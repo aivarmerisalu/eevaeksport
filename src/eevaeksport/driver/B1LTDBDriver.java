@@ -108,13 +108,18 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
   public B1LTDBDriver(EksportPanel parent) {
     super(parent);
     
-    String folderPath = "Data"; // Update this path as needed
+    String folderPath = "Data"; 
     File folder = new File(folderPath);
 
     if (!folder.exists()) {
            folder.mkdirs(); 
     } 
+    folderPath = "Data/lines"; 
+    folder = new File(folderPath);
 
+    if (!folder.exists()) {
+           folder.mkdirs(); 
+    } 
     
     this.subjectFilesTo = parent.getString("filemsg");
       apikey = parent.getProps().getProperty("b1.apikey");
@@ -126,7 +131,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
       companyx = getParent().getProps().getProperty("rest.companyx");
     
      // getPriceMatrixData();
-  // downloadData("stocks");
+  //downloadData(null);
        
   }
   
@@ -159,19 +164,19 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 		
 			  if (dataType == null || dataType.equals("vat")) {
 				  this.saveFile("vat", "https://www.b1.lt/api/reference-book/vat-classifications/list");
-			}
+			    }
 			  
 			  if (dataType == null || dataType.equals("salesPersons")) {
 			  this.saveFile("salesPersons", "https://www.b1.lt/api/personnel/employees/list");
-		}
+		        }
 		  
 		  if (dataType == null || dataType.equals("customers")) {
 				this.saveFile("customers","https://www.b1.lt/api/clients/list");
-			}
+			   } 
 		  
 		  if (dataType == null || dataType.equals("custaddr")) {
 				this.saveFile("custaddr","https://www.b1.lt/api/client/client-addresses/list");
-			}
+			   } 
 	
 	      
 	    		if (dataType == null || dataType.equals("items")) {
@@ -183,8 +188,20 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	    		}
 	    		
 	    		if (dataType == null || dataType.equals("sales")) {
-	    			this.saveFile("sales","https://www.b1.lt/api/warehouse/sales/list");
+	    			
+	    			Calendar cal = Calendar.getInstance();
+	    			cal.add(Calendar.MONTH, -7);
+	    			String date = Converter.getYYYY_MM_DDpString(cal);
+
+	    			org.json.simple.JSONObject filter = new org.json.simple.JSONObject();
+	    			filter.put("field", "saleDate");
+	    			filter.put("op", "gt");
+	    			filter.put("data", date);
+	    		
+	    			this.saveFileWithFilter("sales","https://www.b1.lt/api/warehouse/sales/list", filter);
 	    		}
+	    		
+	    		
 	    		
 	    		if (dataType == null || dataType.equals("stocks")) {
 	    			this.saveFile("stocks","https://www.b1.lt/api/warehouse/stock/list");
@@ -199,10 +216,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	    		
 	    			this.saveFileWithFilter("pricelist","https://www.b1.lt/api/client/item-prices/list", filter);
 	    		}
-	    		
-	    		
-
-
+	  
 		  
 	  }
 
@@ -236,7 +250,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	int pages =  Integer.parseInt(cc.get("pages")+"");
 		  System.out.println("pages prod " + pages);
 		for (int u = 0; pages > u ;u++) {
-			System.out.println( "ii " + u);
+			//System.out.println( "ii " + u);
 			 String fname ="pricelist.json";
 			 if(u > 0) {
 				 fname ="pricelist" + (u+1) + ".json";
@@ -244,7 +258,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 		
 			cc = 	Converter.readJSONFile("data//" + fname);
 
-	System.out.println("fname " + fname);
+	//System.out.println("fname " + fname);
 	
 	org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
 	
@@ -437,7 +451,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 	    	
 			
 			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPersons.json");
-	  	
+	  	if(cc != null) {
 			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
 			
 			  int lenn = values.size();
@@ -458,7 +472,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+	  	}
 	  System.out.println("Managersize " + tm.size());
 
      return tm;
@@ -506,12 +520,16 @@ System.out.println("ProdGroup size :  " + tm.size());
     		    	  
     		  	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//" + filename + ".json");
     		  	
-    			int pages =  Integer.parseInt(cc.get("pages")+"");
-    			
-    			if(pages > 1) {
-    				  System.out.println("pages " + pages);
+    			int pages = 0;
+    			try {
+    			pages = Integer.parseInt(cc.get("pages")+"");
+    			} catch (Exception e) {
+    				e.printStackTrace();
+    			}
+    			if(pages > 0) {
+    				 // System.out.println("pages " + pages);
     				for (int i = 2; pages > i-1 ;i++) {
-    					System.out.println( "ii " + i);
+    				//	System.out.println( "ii " + i);
     					 obj.put("page", i);
     					 try (CloseableHttpClient client = HttpClients.createDefault()) {
     					        HttpPost request = this.getPost(url, obj.toJSONString());
@@ -558,7 +576,7 @@ private void saveFile (String filename, String url ) {
 		if(pages > 1) {
 			  System.out.println("pages " + pages);
 			for (int i = 2; pages > i-1 ;i++) {
-				System.out.println( "ii " + i);
+				//System.out.println( "ii " + i);
 				 obj.put("page", i);
 				 try (CloseableHttpClient client = HttpClients.createDefault()) {
 				        HttpPost request = this.getPost(url, obj.toJSONString());
@@ -585,34 +603,9 @@ private void saveFile (String filename, String url ) {
        
    public TreeMap getCustomers(Agent agent){
 	   
+	   
 	   downloadData(null);
-	   
-	/*   TreeMap<String, Double>volad = new TreeMap<String, Double>();
-		org.json.simple.JSONObject cc1 = 	Converter.readJSONFile("data//agedAccountsReceivables.json");
- 	
-		org.json.simple.JSONArray values1 = (org.json.simple.JSONArray) cc1.get("value");
-		
-		  int lenn1 = values1.size();
-		try {
-		  for (int i = 0; i < lenn1; i++) {
-			  
-			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values1.get(i);
 
-         	String number = (String)cob.get("customerNumber");
-         	Double balDue = Double.parseDouble( cob.get("balanceDue")+"");
-         	if (balDue != 0 && number != null && number.trim().length() > 0) {
-             	volad.put(number, balDue+0.0);
-         	}
-
-          
-		  }
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		System.out.println("Võlad"+ volad.toString());
-	   
-	   
-	   */
 	   
 	   HashMap<String, ArrayList> addr = new HashMap<String, ArrayList>();
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//custaddr.json");
@@ -620,7 +613,7 @@ private void saveFile (String filename, String url ) {
 		int pages =  Integer.parseInt(cc.get("pages")+"");
 			  System.out.println("pages " + pages);
 			for (int u = 0; pages > u ;u++) {
-				System.out.println( "ii " + u);
+				//System.out.println( "ii " + u);
 				 String fname ="custaddr.json";
 				 if(u > 0) {
 					 fname ="custaddr" + (u+1) + ".json";
@@ -645,7 +638,7 @@ private void saveFile (String filename, String url ) {
 	          	if(addr.get(clientId) != null ) {
 	          		ss = (ArrayList)addr.get(clientId);
 	          	}
-	          	Customer cu = new Customer(clientId+ "_" + id);
+	          	Customer cu = new Customer(clientId + "_" + id);
 	          	 cu.setAddress(Converter.enCodeEst(fullAddress));
 	          	 cu.setPayer(clientId);
 	          	 cu.setGroup(clientId+"pr");
@@ -655,9 +648,18 @@ private void saveFile (String filename, String url ) {
 	          		cu.addAgent(ag);
 	          		
 	          	}
-	          	cu.addAgent(new Agent("61"));
-	          	cu.addAgent(new Agent("39"));
-	           	cu.addAgent(new Agent("64"));
+	          	if(getParent().getProps().getProperty("agents") != null) {
+	          		StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("agents"),",");
+	          		while(st.hasMoreElements()) {
+	          			cu.addAgent(new Agent(st.nextToken()));	
+	          		}
+	          	}else {
+	          		//romo case
+	          		cu.addAgent(new Agent("61"));
+		          	cu.addAgent(new Agent("39"));
+		           	cu.addAgent(new Agent("64"));
+		          	
+	          	}
 	          	
 	          	ss.add(cu);
 	          	addr.put(clientId, ss);
@@ -679,7 +681,7 @@ private void saveFile (String filename, String url ) {
 	  		  pages =  Integer.parseInt(cc.get("pages")+"");
 				  System.out.println("pages " + pages);
 				for (int u = 0; pages > u ;u++) {
-					System.out.println( "ii " + u);
+				//	System.out.println( "ii " + u);
 					 String fname ="customers.json";
 					 if(u > 0) {
 						 fname ="customers" + (u+1) + ".json";
@@ -692,6 +694,7 @@ private void saveFile (String filename, String url ) {
 			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
 			
 			  int lenn = values.size();
+			  String idd = "xxx";
 			  
 			try {
 			  for (int i = 0; i < lenn; i++) {
@@ -719,9 +722,13 @@ private void saveFile (String filename, String url ) {
 	            if(displayName != null) {
 	            cust.setName(Converter.enCodeEst(displayName));
 	            
+	            
 	            cust.setPayer(number);
 	            String address1 = (String)cob.get("registrationAddress");
-	            
+	            if(cust.getName().equals("Prodenta, UAB")) {
+	            	System.out.println("prodent " + cust.getID() + " " + address1);
+	            	idd = cust.getID();
+	            }
 	            String city = (String)cob.get("registrationCity");
 	            if (city != null && city.trim().length() > 1) {
 	            	city = ", " + city.trim();
@@ -762,9 +769,14 @@ private void saveFile (String filename, String url ) {
 	            
 	           if(addr.get(number) != null) {
 	        	   ArrayList arr = (ArrayList)addr.get(number);
+	        	   
 	        	   for(int y = 0; y < arr.size();y++) {
 	        		   Customer ccc = (Customer)arr.get(y);
 	        		  
+	        		   if(number.equals(idd)) {
+	        			   System.out.println("oioi " + ccc.getID() +" "+ ccc.getAddress());
+	        		   }
+	        		   
 	        		   ccc.addAgent(aa);
 	        		   ccc.setName(displayName);
 	        		   if(code != null && code.trim().length() > 1) {
@@ -774,6 +786,7 @@ private void saveFile (String filename, String url ) {
 	   	            if(vatCode != null && vatCode.trim().length() > 1) {
 	   	            	ccc.setVatnr(vatCode.trim());
 	   	            }
+	   	            
 	   	            if(phone != null) {
 	   	            	if(phone.startsWith("370")) {
 	   	            		phone = "+" + phone;
@@ -788,22 +801,10 @@ private void saveFile (String filename, String url ) {
 	        		   
 	        	   }
 	        	   
-	           }else {
-	            
-	            
-	          /*  if (volad.get(cust.getID() ) != null) {
-	            	cust.setDebt(volad.get(cust.getID()));
-	            }
-	            if (volad.get(cust.getPayer() ) != null) {
-	            	cust.setDebt(volad.get(cust.getPayer()));
-	            }
-	            */
-	            
-	            //String blocked = (String)cob.get("blocked");
-	            
-	          	
+	           } else {
+	        	  // kui aadresse pole siis läheb pea klient
 	            tm.put(displayName, cust);
-	           }
+	            }
 	          	}
 			  } 
 			  }
@@ -828,57 +829,7 @@ private void saveFile (String filename, String url ) {
    
   
 
-   private boolean isOkDate(String mmddyy){
-	  	long lon = 0;
-	  	Calendar cal = Calendar.getInstance();
-	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
-	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(6, 7))-1);
-	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(9, 10)));
-	  // System.out.println(cal.getTime()); 
-	   Date date = new Date(lon);
-	   date.setTime(cal.getTimeInMillis());
-		Calendar ca = Calendar.getInstance();
-		ca.add(Calendar.MONTH, -6);
-		
-		if(cal.after(ca)){
-			return true;
-		}else{
-			return false;
-		}
-		
-	  }
    
-   private Date getDate(String mmddyy){
-	  	long lon = 0;
-	  	Calendar cal = Calendar.getInstance();
-	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
-	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(5, 7))-1);
-	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(8, 10)));
-	  // System.out.println(cal.getTime()); 
-	   Date date = new Date(lon);
-	   date.setTime(cal.getTimeInMillis());
-	    return date;
-		
-	  }
-  
-
-   private boolean isDueDate(String mmddyy){
-	  	
-	  	Calendar cal = Calendar.getInstance();
-	    cal.set(Calendar.YEAR, Integer.parseInt( mmddyy.substring(0, 4)));
-	    cal.set(Calendar.MONTH, Integer.parseInt(mmddyy.substring(5, 7))-1);
-	    cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(mmddyy.substring(8, 10)));
-		Calendar ca = Calendar.getInstance();
-		ca.add(Calendar.DAY_OF_YEAR, -1);
-		
-		if(cal.before(ca)){
-			return true;
-		}else{
-			return false;
-		}
-		
-	  }
-
    private Vector getCP(String custid , String number, String date ){
 
 	   Vector result = new Vector();
@@ -954,6 +905,103 @@ private void saveFile (String filename, String url ) {
 
    public Vector getCustomerProductsList(String agentCode){
 	   Vector custProds = new Vector();
+	   
+	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//sales.json");
+	  	
+		int pages =  Integer.parseInt(cc.get("pages")+"");
+			  System.out.println("pages " + pages);
+			for (int u = 0; pages > u ;u++) {
+				//System.out.println( "ii " + u);
+				 String fname ="sales.json";
+				 if(u > 0) {
+					 fname ="sales" + (u+1) + ".json";
+				 }
+			
+				cc = 	Converter.readJSONFile("data//" + fname);
+	
+		//System.out.println("fname " + fname);
+		
+		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
+		
+		  int lenn = values.size();
+		  
+		try {
+		  
+			for (int i = 0; i < lenn; i++) {
+				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+	          	
+	          	Object aadr = cob.get("unloadAddressId") ;
+
+	          	if(aadr != null) {
+	          		String clientId = cob.get("clientId") +"";
+	          		
+	          		String customerNumber = clientId + "_" + aadr;
+	          		
+	          	Integer id = Integer.parseInt(cob.get("id")+"");
+	          	String date = cob.get("saleDate") +"";
+	          	String dnumber = cob.get("series") + "" + cob.get("number");
+	          	
+	        	
+	        	File f = new File("data//lines//"+id+"-saleItems.json");
+	        	
+	        		if(!f.exists()) {
+		    			org.json.simple.JSONObject filter = new org.json.simple.JSONObject();
+		    			filter.put("field", "saleId");
+		    			filter.put("op", "eq");
+		    			filter.put("data", id);
+		    		
+		    			 saveFileWithFilter("lines/" + id + "-saleItems","https://www.b1.lt/api/warehouse/sale-items/list", filter);
+		    			}
+	        	
+	        	if (f.exists()) {
+	        		org.json.simple.JSONObject ccL = 	Converter.readJSONFile("data//lines//"+id+"-saleItems.json");
+	        	  	
+	        		org.json.simple.JSONArray valuesL = (org.json.simple.JSONArray) ccL.get("data");
+	        		
+	      		  int lennL = valuesL.size();
+	      		  
+	    		  for (int ii = 0; ii < lennL; ii++) {
+	  				org.json.simple.JSONObject line = (org.json.simple.JSONObject) valuesL.get(ii);
+	         		String prodId = line.get("itemId") + "";
+	         	
+	         		
+	         		Double netAmnt = 0d;
+	         		try {
+	         			netAmnt = Double.parseDouble(line.get("priceWithoutVatWithDiscount")+"");
+	         		}catch(Exception E) {
+	         		}
+	         		
+	         		
+	         		Double qty = 0d;
+	         		try {
+	         			qty = Double.parseDouble(line.get("quantity")+"");;
+	         		}catch(Exception E) {
+	         		}
+	         		
+	         				
+	         		Double price = 0d;
+	         		try {
+	         			price = netAmnt / qty;
+	         		}catch(Exception E) {
+	         		}
+	         		  System.out.println("CP " + customerNumber + " " + prodId + " " + qty + " " + price + " " + date);
+	         		  CustProd cp = new CustProd(customerNumber, prodId, qty ,0 ,0 ,Converter.turn(date).substring(0,5),price,0,0," ");
+	         		  cp.setAbiKood(dnumber);
+	         		  custProds.add(cp);
+	         		
+	    		  }
+	        	
+	          	}		
+	          	
+	          	}
+			}
+		  
+		  
+		} catch (Exception e) {
+	           e.printStackTrace();
+	    }
+			
+			}
 	   
 	/*	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
 	  	
@@ -1133,7 +1181,7 @@ public String getSaveStockInfo() {
 		int pages =  Integer.parseInt(cc.get("pages")+"");
 			  System.out.println("pages prod " + pages);
 			for (int u = 0; pages > u ;u++) {
-				System.out.println( "ii " + u);
+			//	System.out.println( "ii " + u);
 				 String fname ="stocks.json";
 				 if(u > 0) {
 					 fname ="stocks" + (u+1) + ".json";
@@ -1195,12 +1243,12 @@ public String getProductSortingData() {
 @Override
 public TreeMap getProducts(Agent agent) {
 	  TreeMap tm = new TreeMap();
+	  
   HashSet yesGrups = new HashSet();
 	  if(getParent().getProps().getProperty("yesgroups") != null){
 	    	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("yesgroups"),",");
 	    	while (st.hasMoreElements()){
-	    		String aa = st.nextToken();
-	    		yesGrups.add(aa);
+	    	 	yesGrups.add(st.nextToken());
 	    	}
 	    }
 	  
@@ -1213,7 +1261,7 @@ public TreeMap getProducts(Agent agent) {
 		int pages =  Integer.parseInt(cc.get("pages")+"");
 			  System.out.println("pages prod " + pages);
 			for (int u = 0; pages > u ;u++) {
-				System.out.println( "ii " + u);
+				//System.out.println( "ii " + u);
 				 String fname ="stocks.json";
 				 if(u > 0) {
 					 fname ="stocks" + (u+1) + ".json";
@@ -1265,7 +1313,7 @@ public TreeMap getProducts(Agent agent) {
 		 pages =  Integer.parseInt(cc.get("pages")+"");
 			  System.out.println("pages prod " + pages);
 			for (int u = 0; pages > u ;u++) {
-				System.out.println( "ii " + u);
+			//	System.out.println( "ii " + u);
 				 String fname ="items.json";
 				 if(u > 0) {
 					 fname ="items" + (u+1) + ".json";
@@ -1297,11 +1345,12 @@ public TreeMap getProducts(Agent agent) {
         		if(yesGrups.contains(itemCatCode)) {
         			goes = true;
         		}
-        		
-        	
-        		
         	}
           	
+        	if(yesGrups.size() == 0) {
+        		goes = true;
+        	}
+        	
           	String gtin = (String)cob.get("barcode");
           	if (gtin != null && gtin.length() > 5) {
              	prod.setEAN(gtin);
@@ -1490,9 +1539,9 @@ private void uploadQuestsAndAnswers() {
 	  					for(int e = 0; e<arr.size(); e++) {
 	  						Toode t = (Toode)arr.get(e);
 	  						foto = t.getLadu();
-	  						if(custID.equals("77001351") && foto.contains("QUEST")) {
-	  				  		//	System.out.println("foto check " + foto + " " + t.comment + "-" + agid + "  "+
-	  				  			//	t.getGr1() + "-" +dateOnly + "  " + t.getID() +"-" +(String)cob.get("prodid")	);
+	  						if(custID.equals("77115444") && foto.contains("QUEST")) {
+	  				  		System.out.println("foto check " + foto + " " + t.comment + "-" + agid + "  "+
+	  				  				t.getGr1() + "-" +dateOnly + "  " + t.getID() +"-" +(String)cob.get("prodid")	);
 	  						}
 	  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
 	  							fotoOK = foto;
@@ -1513,8 +1562,8 @@ private void uploadQuestsAndAnswers() {
 	  			
 
 					answBuffer.put(custID + "-" + qname + "-" + title, cob);
-	  			if(custID.equals("77001351")) {
-	  				//System.out.println("answ Buffer " + custID + "-" + qname + "-" + title + " " + cob.toJSONString());
+	  			if(custID.equals("77115444")) {
+	  				System.out.println("answ Buffer " + custID + "-" + qname + "-" + title + " " + cob.toJSONString());
 	  			}
 	  		}	
 				}
@@ -1524,7 +1573,7 @@ private void uploadQuestsAndAnswers() {
 			
 			System.out.println("buffer " + answBuffer.size());
 
-		// System.exit(0);
+		 System.exit(0);
 
 //		  1- loeme küsimused sisse 
 		  //otsime faile mille nimes on pallets
@@ -1858,7 +1907,7 @@ public void WebReporter() {
 
 	//sendTaskReport() ;
 	
-	uploadQuestsAndAnswers();
+	//uploadQuestsAndAnswers();
    
 	     System.exit(0);
 	

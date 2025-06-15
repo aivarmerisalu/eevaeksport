@@ -566,7 +566,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 			serv.pass = pass;
 			serv.company = rcompany;
 			try {
-			 cc = 	serv.getCustomersAll();
+			 cc = 	serv.getCustomersAll(false);
 		      serv.closeClient();
 
 	    		int lenn = cc.length();

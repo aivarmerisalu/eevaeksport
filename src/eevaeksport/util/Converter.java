@@ -10520,7 +10520,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 			serv.pass = pass;
 			serv.company = company;
 			try {
-			 cc = 	serv.getCustomersAll();
+			 cc = 	serv.getCustomersAll(false);
 			int lenn = cc.length();
 			//System.out.println("WebCust suurus " + lenn);
         	} catch (Exception e) {
@@ -10581,7 +10581,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 			
 			
 			try {
-			JSONArray cc = 	serv.getCustomersAll();
+			JSONArray cc = 	serv.getCustomersAll(true);
 			
 		
     		int lenn = cc.length();

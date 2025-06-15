@@ -81,7 +81,6 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
   
    //   token = getMSToken();
     
-      
     //  this.downloadData("getCustomers");
     //  getCustomers(null);
       //  this.downloadData(null);
@@ -89,7 +88,8 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     // this.getCustomerProductsList(null);
      //this.setBulkSales(null);
    
-
+   
+     
      }
    
      HashSet nodebt =  null;
@@ -528,7 +528,7 @@ System.out.println("ProdGroup size :  " + tm.size());
    public TreeMap getCustomers(Agent agent){
 	   
 	 //  downloadData(null);
-
+		 TreeMap custagents =  Converter.getWebCustomersAgents(rcompany, user, pass);
 	   
 		  TreeMap tm = new TreeMap();
 		  Integer total = getPagination("getCustomers");
@@ -560,17 +560,22 @@ System.out.println("ProdGroup size :  " + tm.size());
 	            cust.setPayer(payer);
 	            
 	            String address1 = (String)cob.get("address");
+	            cust.restStreet = address1;
+	            
 	            
 	            
 	            String city = (String)cob.get("city");
 	            if (city != null && city.trim().length() > 1) {
+	            	cust.restCity = city;
 	            	city = ", " + city.trim();
 	            }else {
 	            	city = "";
 	            }
 	            
 	            String postalCode = (String)cob.get("post_code");
-	            if (postalCode != null && postalCode.trim().length() > 1) {
+	            if (postalCode != null && postalCode.trim().length() > 3) {
+
+		            cust.restZipCode = postalCode;
 	            	postalCode = ", " + postalCode.trim();
 	            }else {
 	            	postalCode = "";
@@ -578,9 +583,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 	            
 	        //    System.out.println("klinfo " + address1 + "'" +address2 + "'" + city  + "'" + state+ "'" + country+ "'" + postalCode);
 	            cust.setAddress((address1  + city + postalCode).trim());
-	            cust.restStreet = address1;
-	            cust.restCity = city;
-	            cust.restZipCode = postalCode;
+	            
 
 	            String phone = (String)cob.get("phone");
 	            if(phone.length() > 0) {
@@ -596,6 +599,12 @@ System.out.println("ProdGroup size :  " + tm.size());
 	           
 	            String salesCode = (String)cob.get("salesperson_code");
 	            cust.addAgent(new Agent (salesCode));
+	            if(custagents.get(cust.getID()) != null) {
+	            	ArrayList ags = (ArrayList) custagents.get(cust.getID());
+	            	for(int e = 0 ; e < ags.size(); e++) {
+	            		cust.addAgent(new Agent(ags.get(e)+""));
+	            	}
+	            }
 
 	            
 	         	Double used_credit = Double.parseDouble( (String)cob.get("used_credit") );
@@ -640,7 +649,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 			}
 		 	}
 	System.out.println("Custsize " + tm.size());
-	System.exit(0);
+	//System.exit(0);
 		  
 		return tm;
    }

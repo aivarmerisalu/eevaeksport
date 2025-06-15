@@ -269,18 +269,20 @@ public JSONArray getCustomersTypes() throws Exception{
 	return json;
 }
 
-	public JSONArray getCustomersAll() throws Exception{
+	public JSONArray getCustomersAll(boolean includeManagers) throws Exception{
 		
-		String web = "http://merisoft.eu:8080/rest/customer/allCustomers";
+		String add = "";
+		if(includeManagers) {
+			add = "?includeManagers=true";
+		}
+		String web = "http://merisoft.eu:8080/rest/customer/allCustomers" + add;
 		if(https) {
-			web = "https://api.mobitrek.eu/rest/customer/allCustomers";
+			web = "https://api.mobitrek.eu/rest/customer/allCustomers" + add;
 		}
 		HttpClient cli = getClient();
 		HttpGet aa = new HttpGet(web);
-		//aa.setHeader (HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
 		HttpResponse resp = cli.execute(aa);
 		String aaa = EntityUtils.toString(resp.getEntity());
-	//	System.out.println("ahaaa CustomersAll " + aaa.toString());
 		JSONArray json = new JSONArray(aaa);
 		return json;
 	}
