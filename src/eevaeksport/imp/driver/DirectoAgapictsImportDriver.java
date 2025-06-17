@@ -1117,19 +1117,20 @@ try{
 	 				ordnum = teo;
 	 			}
 	 			teo = "cutomer_orderno=\""+ teo + "\" " ;
-	 			
 	 		}
 
+	 		
 	 		String shdate = "";
 	 		if(order.isShipDateUsed()) {
-	 			
 	 			shdate = "deliverydate=\""+ getDateNiceString(order.getShipCal()) + "\" " ;
 	 		}
+	 		
 	 		
 	 		if(ordnum.indexOf("|") != -1) {
 	 			ordnum = ordnum.replace('|', ' ').replace('|', ' ').trim();
 	 		}
 	 	    
+	 		
 	 		String hooaeg = "";
 	 		try{
 	        	if(order.getShipMode() != null  && order.getShipMode().equals("-3")){
@@ -1138,9 +1139,6 @@ try{
 	        }catch(Exception e){
 	        	
 	        }
-	 		
-	 		
-	 		
 	 		
 	 		String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
 	          "<transport>" +
@@ -1184,7 +1182,6 @@ try{
 		    		  hind =  this.getPriceAction(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
 				  }catch(Exception e){
 		    	  }
-				 // System.out.println("HindAction " + line.getToode() + " " + hind);
 			    	
 				  if(hind < 0.0006){
                       try{
@@ -1192,8 +1189,6 @@ try{
 					  }catch(Exception e){
 			    	  }
 			     }
-		    	  
-		    	//System.out.println("Hind "Muudatus " " + hind);
 		    	  
                   if(line.getDiscount() > 0) {
                 	  hind = line.getPrice();
