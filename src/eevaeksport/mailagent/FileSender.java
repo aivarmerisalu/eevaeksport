@@ -142,16 +142,12 @@ public class FileSender {
 	   		   
 		        
 
-	        	 System.out.println(time + " Sees " + new File(sourceDirectoryPath).listFiles() + " " + sourceDirectoryPath);
+	        //	 System.out.println(time + " Sees " + new File(sourceDirectoryPath).listFiles() + " " + sourceDirectoryPath);
 	    	        for (File f : new File(sourceDirectoryPath).listFiles())  {
 	    	        	 System.out.println(time + " Sees " + f.getName());
 	    	        	try {
 
-	    	                // Upload a text string as a new object.
-	    	               // s3Client.putObject(bucketName, dirOut, "Uploaded String Object");
-
-	    	                // Upload a file as a new object with ContentType and title specified.
-	    	        		if(f.getName().contains("_pincode.txt")) {
+                 		if(f.getName().contains("_pincode.txt")) {
 	    	        		
 	    	                PutObjectRequest request = new PutObjectRequest(bucketName, dirOut + "pincode/" + f.getName(), f);
 	    	                ObjectMetadata metadata = new ObjectMetadata();
@@ -193,7 +189,7 @@ public class FileSender {
 		                    Files.move(sourceFilePath, targetFilePath);
 		                    System.out.println("Moved file: " + sourceFilePath + " to " + targetFilePath);
 		                } catch (IOException e) {
-		                    System.out.println("An error occurred while moving the file: " + file.getAbsolutePath());
+		                  //  System.out.println("An error occurred while moving the file: " + file.getAbsolutePath());
 		                    e.printStackTrace();
 		                }
 		            }
@@ -602,6 +598,9 @@ public class FileSender {
 		      if (args[i].trim().equalsIgnoreCase("/dash")){
 			        this.sendDash = true;
 			      }
+		      if (args[i].trim().equalsIgnoreCase("/keygen")){
+			        this.sendKeygen = true;
+			      }
 		      }
 		  } 
 		
@@ -615,7 +614,7 @@ public class FileSender {
 			in.close();
 		}
 		
-		if(getOrders || sendMaster || sendStock || sendPicts || sendDash ) {
+		if(getOrders || sendMaster || sendStock || sendPicts || sendDash || this.sendKeygen) {
 			getAWS(props);
 	        System.exit(0);
 	    }
