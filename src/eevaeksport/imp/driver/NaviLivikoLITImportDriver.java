@@ -569,14 +569,16 @@ private HashMap prodnames = null;
              
              if (reason != null) {
             	 if(comm == null) {
-            		 comm = reason.trim();
+            		 comm = Converter.escapeXML(reason.trim());
             	 }else {
+            		comm= Converter.escapeXML(comm);
             		 comm = (comm + reason).trim();
             	 }
              	 
                 }
              
              if(comm != null && comm.length()>100){
+            
               	comm = comm.substring(0,100);
               }
              if((comm != null && comm.trim().length() > 0)  || reasonCode != null){

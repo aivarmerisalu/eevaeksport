@@ -55,7 +55,7 @@ import eevaeksport.util.Converter;
  * @author Tarmo Tubro
  * @version 1.0
  */
-public class ScalaPrikeEstDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Promo,Discounter{
+public class ScalaPrikeEstDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Promo,Discounter, FixLoader{
 
     /**
      * Constructor declaration
@@ -1120,7 +1120,7 @@ System.out.println("fixed size " + result.size());
 	   "   LEFT JOIN veoring0100 vr on vr.VR=SL01027    LEFT OUTER JOIN SL140100 ON SL01001=SL14001 AND SL14002='00' " +
        "   LEFT OUTER JOIN SY240100 ON SL01035=SY24002 AND SY24001='BK' " +
        "   LEFT OUTER JOIN SL220100 ON SL01024=SL22002 AND SL22001='0'  " +
-       "   WHERE  left(SL01001,1)='T' ORDER BY SL01002"; 
+       "   WHERE  left(SL01001,1)='T' and SL01124= 0 ORDER BY SL01002 "; 
 
         connectionUp(url);	
         log(cmd);
@@ -1845,6 +1845,10 @@ System.out.println("fixed size " + result.size());
                 if(gr != null && gr.trim().length()>4){
                   prod.setEAN(gr.trim());
                   nimetus = nimetus + " "+ gr.trim().substring(gr.trim().length()-4); 
+                  if(eanprods == null) {
+	                   	eanprods =new TreeMap();
+	                   }
+	                   eanprods.put(gr.trim(), prod.getID());
                 }
                 
                 if(aksiis.get(kood) != null){
@@ -2868,6 +2872,34 @@ return "";//sb.toString();
     private PreparedStatement  stmt = null;
     private String	       subjectFilesTo = null;
     private NumberFormat NF = NumberFormat.getInstance();
+
+	   private TreeMap eanprods = null;
+
+	  @Override
+			public void FixLoader() {
+			   
+			  boolean hasFile = Converter.hasFixFromExcels("excelsort",parent);
+			   if(hasFile) {
+			   eanprods =  Converter.loadMore();
+				  
+				  if(eanprods == null) {
+					  eanprods = new TreeMap();
+				  }
+				System.out.println("EanProds " + eanprods.toString());
+				this.getProducts(null);
+				
+				TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+				System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+				if(contracts.size() > 0) {
+					Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+				}
+				
+			     } else {
+				   System.out.println("No sortiments to read");
+			   }
+				System.exit(0);
+			}
+		
   
 	
 }

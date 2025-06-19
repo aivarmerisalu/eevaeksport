@@ -209,6 +209,7 @@ try{
   }
   
   
+  String warehouse  =  "6";
   
  private void makeOutput(Order order){
 	  
@@ -218,8 +219,8 @@ try{
 	 
 	    	  long uni = Calendar.getInstance().getTimeInMillis();
 	    	  
-	    	  
-	    	   String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim() +  ".json";
+	    	  warehouse = parent.getProps().getProperty("warehouse");
+	    	  String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim() +  ".json";
 	 	      String fileName2 = parent.getProps().getProperty("conv.dir2") + order.getDokNr().trim() + (uni + "").trim() +  "res.txt";
 	    	  
 	    	  String headerurl = "https://www.b1.lt/api/warehouse/sales/create";
@@ -241,7 +242,7 @@ ord.put("number", order.getDokNr());
 
 ord.put("vatRateId",1);
 
-ord.put("warehouseId", "6");
+ord.put("warehouseId", warehouse);
 ord.put("clientId", custid);
 ord.put("operationTypeId", "2");
 ord.put("employeeId", order.getAgent());

@@ -96,7 +96,7 @@ String picts = parent.getProps().getProperty("pict.dir");
 	        StringBuffer buf = new StringBuffer();
 	        StringBuffer buf0 = new StringBuffer();
 	        int a = 0;
-	        int b = 0;
+	       
 	        int c = 0;
 	        
 	        // leiame kataloogid ja peame meeles 
@@ -147,7 +147,7 @@ String picts = parent.getProps().getProperty("pict.dir");
 	                 	buf0.append(toode+".jpg\n");
 	                 }else{
 	                 	buf.append(toode+".jpg;"  + len + "\n");
-	           	    	b++;
+	           	    	
 	                 }
 	                 }
 	   	    rs.close();

@@ -406,8 +406,8 @@ public class DeaNewDBDriver extends AbstractDBDriver implements Manager, ClientB
                 cust.setName(nimi);
                 cust.setDebt(rs.getDouble("tasumata"));
                
-                 cust.setVisit(rs.getString("visit").trim());
-                //cust.setVisit(Converter.visitTurn(rs.getString("visit").trim()));
+                // cust.setVisit(rs.getString("visit").trim());
+                cust.setVisit(Converter.visitTurn(rs.getString("visit").trim()));
                 
                 cust.setAddress(rs.getString("address").trim());
                 String dealerID = rs.getString("dealer").trim();

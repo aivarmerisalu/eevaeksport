@@ -617,9 +617,12 @@ private HashMap prodnames = null;
              
              if (reason != null) {
             	 if(comm == null) {
-            		 comm = reason.trim();
+             		 comm = Converter.escapeXML(reason.trim());
+                     
             	 }else {
             		 comm = (comm + reason).trim();
+             		 comm = Converter.escapeXML(comm);
+                     
             	 }
              	 
                 }

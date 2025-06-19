@@ -81,7 +81,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
   
    //   token = getMSToken();
     
-    //  this.downloadData("getCustomers");
+     // this.downloadData("getCustomers");
     //  getCustomers(null);
       //  this.downloadData(null);
     // this.getDebt(null);
@@ -527,7 +527,7 @@ System.out.println("ProdGroup size :  " + tm.size());
        
    public TreeMap getCustomers(Agent agent){
 	   
-	 //  downloadData(null);
+	   downloadData(null);
 		 TreeMap custagents =  Converter.getWebCustomersAgents(rcompany, user, pass);
 	   
 		  TreeMap tm = new TreeMap();

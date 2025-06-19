@@ -121,6 +121,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
            folder.mkdirs(); 
     } 
     
+    warehouse = parent.getProps().getProperty("warehouse");
     this.subjectFilesTo = parent.getString("filemsg");
       apikey = parent.getProps().getProperty("b1.apikey");
       secret = parent.getProps().getProperty("b1.secret"); 
@@ -135,6 +136,8 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
        
   }
   
+  
+     String warehouse  =  "6";
     
 	  String user =  null;
 	  String pass = null;
@@ -621,7 +624,7 @@ private void saveFile (String filename, String url ) {
 			
 				cc = 	Converter.readJSONFile("data//" + fname);
 	
-		//System.out.println("fname " + fname);
+	//	System.out.println("fname " + fname);
 		
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
 		
@@ -646,8 +649,8 @@ private void saveFile (String filename, String url ) {
 	          	if(employeeId != null) {
 	          		Agent ag = new Agent(employeeId + "");
 	          		cu.addAgent(ag);
-	          		
 	          	}
+	          	
 	          	if(getParent().getProps().getProperty("agents") != null) {
 	          		StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("agents"),",");
 	          		while(st.hasMoreElements()) {
@@ -675,6 +678,12 @@ private void saveFile (String filename, String url ) {
 	  
 			System.out.println("addr suurus " + addr.size());
 	  // System.exit(0);
+			
+			boolean usecustfilter = true;
+			
+			if("false".equals(getParent().getProps().getProperty("usecustfilter"))) {
+				usecustfilter = false;
+			}
 	   
 		  TreeMap tm = new TreeMap();
 			 cc = 	Converter.readJSONFile("data//customers.json");
@@ -694,7 +703,8 @@ private void saveFile (String filename, String url ) {
 			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
 			
 			  int lenn = values.size();
-			  String idd = "xxx";
+
+
 			  
 			try {
 			  for (int i = 0; i < lenn; i++) {
@@ -703,9 +713,10 @@ private void saveFile (String filename, String url ) {
 
 	            Boolean juridical = (Boolean)cob.get("isJuridical");
 	            Boolean isPotential = (Boolean)cob.get("isPotentialClient");
-	            if(juridical && isPotential) {
+	            if(juridical && isPotential || !usecustfilter) {
 	          	String number = cob.get("id") +"";
 	          	Customer cust = new Customer(number);
+	          	cust.setGroup(number + "pr");
 	            
 	          	String code = (String)cob.get("code") ;
 	          	if(code != null && code.trim().length() > 1) {
@@ -725,10 +736,7 @@ private void saveFile (String filename, String url ) {
 	            
 	            cust.setPayer(number);
 	            String address1 = (String)cob.get("registrationAddress");
-	            if(cust.getName().equals("Prodenta, UAB")) {
-	            	System.out.println("prodent " + cust.getID() + " " + address1);
-	            	idd = cust.getID();
-	            }
+	            
 	            String city = (String)cob.get("registrationCity");
 	            if (city != null && city.trim().length() > 1) {
 	            	city = ", " + city.trim();
@@ -754,8 +762,6 @@ private void saveFile (String filename, String url ) {
 	        //    System.out.println("klinfo " + address1 + "'" +address2 + "'" + city  + "'" + state+ "'" + country+ "'" + postalCode);
 	            cust.setAddress(Converter.enCodeEst((address1 + city + country + postalCode).trim()));
 	            
-	            Agent aa = new Agent("60");
-	            cust.addAgent(aa);
 	            
 	            String phone = (String)cob.get("phoneNumber");
 	            if(phone != null) {
@@ -767,17 +773,27 @@ private void saveFile (String filename, String url ) {
 	             cust.setInfoEmail(email);
 	            }
 	            
+	            if(getParent().getProps().getProperty("agents") != null) {
+	          		StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("agents"),",");
+	          		while(st.hasMoreElements()) {
+	          			cust.addAgent(new Agent(st.nextToken()));	
+	          		}
+	          	}else {
+	          		//romo case
+	          		cust.addAgent(new Agent("61"));
+		          	cust.addAgent(new Agent("39"));
+		           	cust.addAgent(new Agent("64"));
+		          	
+	          	}
+	          	
+
+	            
+	            
 	           if(addr.get(number) != null) {
 	        	   ArrayList arr = (ArrayList)addr.get(number);
 	        	   
 	        	   for(int y = 0; y < arr.size();y++) {
 	        		   Customer ccc = (Customer)arr.get(y);
-	        		  
-	        		   if(number.equals(idd)) {
-	        			   System.out.println("oioi " + ccc.getID() +" "+ ccc.getAddress());
-	        		   }
-	        		   
-	        		   ccc.addAgent(aa);
 	        		   ccc.setName(displayName);
 	        		   if(code != null && code.trim().length() > 1) {
 	   	            	ccc.setRegnr(code.trim());
@@ -804,6 +820,7 @@ private void saveFile (String filename, String url ) {
 	           } else {
 	        	  // kui aadresse pole siis läheb pea klient
 	            tm.put(displayName, cust);
+	            System.out.println("Peaklient only " +  cust.getID());
 	            }
 	          	}
 			  } 
@@ -1176,6 +1193,8 @@ public String getSaveStockInfo() {
 	
 	downloadData("stocks");
 	
+	
+	
 	  HashMap<String,Double> stock = new HashMap<String,Double>();
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//stocks.json");
 		int pages =  Integer.parseInt(cc.get("pages")+"");
@@ -1196,7 +1215,7 @@ public String getSaveStockInfo() {
 		  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
         	String warehouseId = cob.get("warehouseId")+"";
-        	if(warehouseId.equals("6")) {
+        	if(warehouseId.equals(warehouse)) {
             	String number = cob.get("id") + "";
             	try {
             	Double st = Double.parseDouble(cob.get("stock")+"");
@@ -1281,7 +1300,7 @@ public TreeMap getProducts(Agent agent) {
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
 
           	String warehouseId = cob.get("warehouseId")+"";
-          	if(warehouseId.equals("6")) {
+          	if(warehouseId.equals(warehouse)) {
 
               	String number = cob.get("id") + "";
               	try {
