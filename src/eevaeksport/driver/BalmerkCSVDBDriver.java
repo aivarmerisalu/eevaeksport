@@ -146,78 +146,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
   
   
   
-  private void testConn() throws KeyStoreException {
-
-	  String callname = "calls";
-	          String urlString = "https://daivida2407-api.teliacallcenter.lt/v1/api/monitoring/"+ callname;
-	          String username = "adm1";
-	          String password = "bn2SdwJQ@";
-
-	          try {
-	              // Trust all SSL certificates (REMOVE for production)
-	             Converter.doTrustToCertificates();
-
-	              // Create URL object
-	              URL url = new URL(urlString);
-	              HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-
-	              // Set request method to GET
-	              connection.setRequestMethod("GET");
-	              connection.setRequestProperty("Content-Type", "application/json");
-	              connection.setRequestProperty("Accept", "application/json");
-	              connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-
-	              // Encode Basic Auth
-	              String auth = username + ":" + password;
-	              String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
-	              System.out.println("Encoded Auth: " + encodedAuth); // Debugging
-
-	              connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
-
-	              // Get response code
-	              int responseCode = connection.getResponseCode();
-	              System.out.println("Response Code: " + responseCode);
-
-	              // Read response
-	              String response = readResponse(connection);
-	              System.out.println("Response: " + response);
-
-	              // Save response to file
-	              saveFile(callname + ".json", response);
-
-	              // Close connection
-	              connection.disconnect();
-	          } catch (Exception e) {
-	              e.printStackTrace();
-	          }
-	      }
-
-
-
-	      // Read API response
-	      private static String readResponse(HttpURLConnection connection) throws IOException {
-	          try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-	              StringBuilder response = new StringBuilder();
-	              String line;
-	              while ((line = reader.readLine()) != null) {
-	                  response.append(line);
-	              }
-	              return response.toString();
-	          }
-	      }
-
-	      // Save response to a file
-	      private static void saveFile(String filename, String data) {
-	          try (FileWriter file = new FileWriter(filename)) {
-	              file.write(data);
-	              System.out.println("Saved response to " + filename);
-	          } catch (IOException e) {
-	              e.printStackTrace();
-	          }
-	      }
-	  
-
-
+	
   
 	  String user =  null;
 	  String pass = null;
@@ -306,81 +235,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 		return products.toString();
 	  
    }
-   
-   private Hashtable readPlans(){
-		Hashtable hh = new Hashtable();
-		  File f = new File(this.getExcelDir() + "MeatPlan.xlsx");
-		  try {
-				FileInputStream ff = new FileInputStream(f);
-				XSSFWorkbook workbook = new XSSFWorkbook((ff));
-				
-				int currMont = Calendar.getInstance().get(Calendar.MONTH)+1;
-				int currYear = Calendar.getInstance().get(Calendar.YEAR);
-				String sh = currYear + "" + currMont;
-				
-				if((currMont+"").length() == 1) {
-					sh = currYear + "0" + currMont;
-				  }
-				
-				 DataFormatter formatter = new DataFormatter();
-					
-				
-				XSSFSheet sheet = workbook.getSheet(sh);
-				XSSFRow row = null;
-				for (int i = 1; i < sheet.getLastRowNum(); i++) {
-					row = sheet.getRow(i);
-					String agentID = formatter.formatCellValue(row.getCell(0));
-					String meatGroup = formatter.formatCellValue(row.getCell(3));
-					
-					String sum = "";
-					String sumkg = "";
-
-					    try {sum = (row.getCell((short) 5).getStringCellValue());
-						} catch (Exception e) {
-							try { sum = (int) (row.getCell((short) 5).getNumericCellValue()) + "";	
-						} catch (Exception u) {}}
-						
-						try {sumkg = (row.getCell((short) 4).getStringCellValue());
-						} catch (Exception e) {
-							try { sumkg = (int) (row.getCell((short) 4).getNumericCellValue()) + "";	
-						} catch (Exception u) {}}
-						
-				
-						
-						if(agentID != null && agentID.trim().length() > 0){
-						
-							if(meatGroup != null && meatGroup.trim().length() > 0){
-							//	System.out.println(agentID + " " + meatGroup + " " + sum + " " + sumkg );
-								Toode tt = new Toode(agentID);
-								tt.setGr1(meatGroup);
-								
-								if(sum != null && sum.length() > 0) {
-									tt.setPlancur(Double.parseDouble(sum));
-								}
-								if(sumkg != null && sumkg.length() > 0) {
-									tt.setPlanvol(Double.parseDouble(sumkg));
-								}
-							if(tt.getPlanvol() > 0 || tt.getPlancur() > 0 ) {
-								ArrayList arr = new ArrayList();
-								if(hh.get(agentID) != null) {
-									arr = (ArrayList) hh.get(agentID);
-								}
-								  arr.add(tt);
-				                    hh.put(agentID, arr);
-							}
-							    
-				                    
-				                    
-							}}}
-		  
-		  } catch (Exception d) {
-				// System.out.println(row.getCell((short)a).getNumericCellValue());
-			}
-		//  System.out.println(" plans " + hh.toString());
-		return hh;
-	}
-   
-   
+      
    
    public Vector getPriceMatrixData(){
 	   Vector prlists= new Vector();
@@ -1257,6 +1112,7 @@ if(stocks == null) {
 			 }catch(Exception e) {
 				 
 			 }
+			 prod.weblink = prod.getID();
 			 
 			 if(unit.length() > 0) {
 				 prod.setUnit(unit);
