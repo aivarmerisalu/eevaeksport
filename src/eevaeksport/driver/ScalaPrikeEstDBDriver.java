@@ -1549,8 +1549,7 @@ System.out.println("fixed size " + result.size());
                 	String lisa = (String)broninfo.get(cust.getID());
                    	cust.setInfo(Converter.enCodeEst(lisa));	
                 }
-                
-                
+                cust.setQueryIDs("di01");
                 
                 //otsime vï¿½lasumma igale kauplusele 
                 

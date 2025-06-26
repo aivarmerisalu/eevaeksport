@@ -15350,11 +15350,12 @@ shipdate = getCalXML(asi);
               if("true".equals(parent.getProps().getProperty("reference.topartii"))){
             	  partii = reference;
                 }
-              
+
+              if("true".equals(parent.getProps().getProperty("erijuhtum"))){ // vikstal
               if(!datelong.startsWith("1") && datelong.length()!= 13) {
             	  orders.setInfo(datelong); 
             	  datelong = Calendar.getInstance().getTimeInMillis() + "";
-              }
+              }}
               
               orders.add(firma,toode,name,kogus,num, dealer, bonus, discount,datelong,pl,price,paymterm,false,agcode,status,unit,warehouse,partii,null,shiptime,shipDateUsed,selActCode,docType);
               
