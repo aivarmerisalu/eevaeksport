@@ -1392,14 +1392,15 @@ Statement st = null;
     " CONVERT(Money, tt.PK_PardKaina) AS hind, CASE WHEN pr.mvid = pr.ipokavimomvid OR " +
     " ISNULL(pr.ipokavimomvid, 0) < 2 OR  pr.MVId NOT IN (2, 62733) THEN mv.Kodas ELSE ipokmv.Kodas END AS unit , 0  AS kastis, " +
     "  CONVERT(Money, NULL) AS CostPrice, CONVERT(varchar(20), Pr.KAPKodas) AS ean, CONVERT(varchar(20),  pr.PrekiuGrupesID) AS grupp, '' AS grupp2 ,gr.kodas " +
-   " ,  gr.Pavad as grnimi, mes_prior_preke as topstatus ,MES_NR2 as aggroup, pr.mase as kaal FROM  dbo.Prekes AS Pr INNER JOIN dbo.PL_Prekes pl on pl.prekesid=pr.prekesID " +
+   " ,  gr.Pavad as grnimi, mes_prior_preke as topstatus ,MES_NR2 as aggroup, pr.mase as kaal, MES_Skrajute  as add1 , MES_Ispardavimas as add2  FROM  dbo.Prekes AS Pr INNER JOIN dbo.PL_Prekes pl on pl.prekesid=pr.prekesID " +
   " inner join xPrekes tt on tt.PrekesID = pr.PrekesID LEFT JOIN PrekiuGrupes gr on gr.PrekiuGrupesId= pr.PrekiuGrupesID " +
   "  LEFT OUTER JOIN dbo.MVGSantykiai AS mvs ON Pr.MVId = mvs.MVId1 AND Pr.IpokavimoMVId = mvs.MVId2 AND Pr.MVGId = mvs.MVGId INNER JOIN " +
      "  dbo.Mokesciai AS mok ON Pr.MokesciaiId = mok.MokesciaiId INNER JOIN dbo.PrekiuTipai AS pt ON Pr.PrekiuTipaiId = pt.PrekiuTipaiId INNER JOIN " +
      "  dbo.MV ON Pr.MVId = dbo.MV.MVid INNER JOIN  dbo.MV AS IpokMV ON Pr.IpokavimoMVId = IpokMV.MVid  " +
      " WHERE     (Pr.PrekesID > 1) AND (pt.ArSandeliuojama = 1) and Pr.Nenaudoti <> ( 1 ) and " +
   " CASE WHEN ISNUMERIC(gr.Kodas) = 1 THEN CAST(gr.Kodas AS INT) ELSE 0 END between 1100 and 1350 and pl.MES_MES_PAV_TRUMPINYS != '' ";  
-      if (isDebug()) {
+    
+    if (isDebug()) {
           System.out.println(cmd);
       }
 
@@ -1517,6 +1518,24 @@ try{
                  }
               
 
+              String add1 = rs.getString("add1");
+              if(add1 != null && add1.trim().length() > 0){
+            	  if(prod.getAgentGroup().equals("LV")) {
+            		   prod.addPartii("Skrej%: " + add1.trim());
+            	    } else {
+            	       prod.addPartii("Skraj%: " + add1.trim());
+            	    }
+                }
+              
+              String add2 = rs.getString("add2");
+              if(add2 != null && add2.trim().length() > 0){
+                 if(prod.getAgentGroup().equals("LV")) {
+                	 prod.addPartii("Izpārd%" + add2.trim());
+            	  } else {
+                    prod.addPartii("Išpard%" + add2.trim());
+                }
+              }
+              
         	  if(pkood > 1) {
         		  Vector vec = (Vector)piltcodes.get(pkood);
         		  if(vec  == null) {

@@ -11750,7 +11750,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		   
 	  try{
 		  JSONArray dayreportarray = getWebDayReport(monTimestamp, satTimestamp, rcompany, user, pass);
-		  saveFileInUTF8(exceldir + "vigestareport" + stDay + ".json", dayreportarray.toString());
+		  saveFileInUTF8(exceldir + rcompany + "report" + stDay + ".json", dayreportarray.toString());
 		  JSONArray webcustarray = getWebCustomersAll(rcompany, user, pass);
          
 		  System.out.println(dayreportarray.toString());
@@ -11883,7 +11883,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
        
 		  }
 
-			saveFileInUTF8(exceldir + "vigestareport" + stDay + ".csv",sb);
+			saveFileInUTF8(exceldir +  rcompany + "report" + stDay + ".csv",sb);
 			Converter.sendReportEmail("Dayreport weekly report", exceldir + "vigestareport" + stDay + ".csv", parent);
 			
 		  

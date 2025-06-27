@@ -1360,6 +1360,10 @@ HashSet olemas = new HashSet();
             	   goes = true;
                }
                
+               if(gruppabi != null && gruppabi.trim().equals("NE_MS")) {
+            	   goes = false;
+               }
+               
                if(pants.get(prod.getID()) != null ) {
                Double pant = (Double)pants.get(prod.getID()) ;
                if(pant != null && pant > 0){

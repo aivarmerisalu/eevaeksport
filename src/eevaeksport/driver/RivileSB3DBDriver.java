@@ -1212,6 +1212,10 @@ HashSet olemas = new HashSet();
             		  }
             		  
             	  }
+            	  
+            	  if(prod.getID().equals("100040")) {
+            		  prod.setUnit("ST20"); 
+            	  }
               }
            
               nimetus = nimetus.replaceAll("\"", " ").trim();
