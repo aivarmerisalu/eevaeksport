@@ -46,11 +46,11 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaZpienasTransaImportDriver2 extends AbstractImportDriver{
+public class AxaZpienasTransa2ImportDriver extends AbstractImportDriver{
 
   static Category log = Category.getInstance(IceAxaImportDriver.class.getName());
 
-  public AxaZpienasTransaImportDriver2(ImportPanel parent) {
+  public AxaZpienasTransa2ImportDriver(ImportPanel parent) {
     this.parent = parent;
     PropertyConfigurator.configure("log4j.properties");
     String databaseDriverName = "oracle.jdbc.driver.OracleDriver";
