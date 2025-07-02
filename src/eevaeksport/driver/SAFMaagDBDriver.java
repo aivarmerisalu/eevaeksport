@@ -1663,7 +1663,7 @@ String textf = "Kontrollperiood : " + days.toString() + "\nKontrollimise kordade
            }
          }
          
-   prod.setVat("22");
+   prod.setVat("24");
 
          prod.setInCases( (rs.getDouble("tykke")));
         String unit = rs.getString("yhik");

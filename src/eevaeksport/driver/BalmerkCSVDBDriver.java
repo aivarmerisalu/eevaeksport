@@ -231,7 +231,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 			getParent().showError(e);
 		}
 		
-		this.connectionDown();
+		
 		return products.toString();
 	  
    }
@@ -495,6 +495,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 	             e.printStackTrace();
 	           }
 	       //  System.out.println("stocks " + products.toString());
+	         getStockBronnData();
 	  	  
 	  		  return products.toString();
 	     }
@@ -502,6 +503,47 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 
 
 
+	  public void getStockBronnData(){
+		  StringBuffer sb = new StringBuffer();
+	 	    
+		  try {
+	             FileReader fr = new FileReader(getDir() + "D365GetStockBronnData.csv");
+	             BufferedReader reader = new BufferedReader(fr);
+	           String line = null;
+	           reader.readLine();
+	            while((line = reader.readLine()) != null ){
+
+	                 line = line.replaceAll(","," |");
+	            	StringTokenizer st = new StringTokenizer(line, "|");
+
+	              if (st.hasMoreTokens()) {
+	            	   String toode = st.nextToken().trim();
+	            	   if(toode.length() > 0) {
+	            		try {
+	            			String kuhu = st.nextToken();
+	            			 double seis = Double.parseDouble(st.nextToken());
+	      	  	             if(seis > 0){
+	      	  	             sb.append(kuhu + ";" + toode + ";" + seis + "\n" );
+	      	  	               }		
+	            		}catch(Exception e) {
+	            		}
+	  	             }
+	              }
+	           }
+	             reader.close();
+	             fr.close();
+	           } catch (Exception e){
+	             e.printStackTrace();
+	           }
+
+	 
+
+
+	 Converter.saveFile(parent.getProps().getProperty("stockrefdir") + "stockbronn.txt", sb.toString());
+	 System.out.println(sb.toString());
+	 			  
+
+	   }
 
 
 

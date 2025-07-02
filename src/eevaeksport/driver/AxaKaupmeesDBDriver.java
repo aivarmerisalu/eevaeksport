@@ -1047,7 +1047,7 @@ st.close();
       
       String vat = rs.getString("vat");
       if(vat!=null && vat.trim().length()>0){
-       prod.setVat("22");
+       prod.setVat("24");
     }
   
       String alegr = rs.getString("alegr");

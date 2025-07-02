@@ -1049,7 +1049,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				prod.setName(nimetus);
 				prod.setNameSorting(prod.getGroup() + nimetus);
 				
-                prod.setVat("22");
+                prod.setVat("24");
 
 				String unit = rs.getString("unit");
 				if (unit != null && unit.trim().length() > 0) {

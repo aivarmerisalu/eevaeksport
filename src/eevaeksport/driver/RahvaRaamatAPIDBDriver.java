@@ -424,7 +424,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 	        }} catch (IOException e) {
 	            e.printStackTrace();
 	            }
-	       
+	       try {
 
 	        if(pagination) {
 	        	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//" + dataType+ ".json");
@@ -459,6 +459,9 @@ System.out.println("ProdGroup size :  " + tm.size());
 	        	}
 	        	
 	        }
+	       }catch(Exception e) {
+	    	   e.printStackTrace();
+	       }
 	      
 	      // System.out.println("Query result " + result);
       

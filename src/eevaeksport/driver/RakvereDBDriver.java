@@ -592,7 +592,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
  						prod.setGroup(grupp);
  						prod.setGroupname(gname);
  						prod.setInUnit(kaal);
- 						prod.setVat("22");
+ 						prod.setVat("24");
  						prod.setType("PIIM");
  						prods.put(" NM " + nimi, prod);
  						}
@@ -1664,7 +1664,7 @@ System.out.println(groups.toString());
                 prod.setInCases(parseDouble(rs.getString("tykke").trim()));
                 String grupp = rs.getString("uusgrupp").trim();
                 prod.setGroup(grupp);
-                prod.setVat("22");
+                prod.setVat("24");
                 
                 prod.setType("LIHA");
 

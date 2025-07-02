@@ -1104,7 +1104,7 @@ con3.close();
 
                  	 
                  	 
-                 	 prod.setVat("22");
+                 	 prod.setVat("24");
                            
 
                  	     String grd = rs.getString("grd");

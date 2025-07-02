@@ -1410,7 +1410,7 @@ String region = rs.getString("region");
        
         
         prod.setStock(0);
-        prod.setVat("22");
+        prod.setVat("24");
     
         double wei =rs.getDouble("grr");
     

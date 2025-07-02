@@ -627,7 +627,7 @@ HashMap pants = null;
           Fillial 01   -  agent 007
 Fillial 02   -  agent 020
 Fillial 03    - agent 016*/
-          String ladu = "04";
+          String ladu = "02";
           
 if(ladu.trim().length()!=0){
 	

@@ -963,7 +963,7 @@ public class AtriaDBDriver extends AbstractDBDriver implements Manager,Promo, Bu
      			        	prod.setEAN(ean.trim());
         			        }
 
-     			        prod.setVat("22");
+     			        prod.setVat("24");
      			       products.put(namee, prod);
 	                   prodHash.put(prod.getID(), prod);
  			        	  

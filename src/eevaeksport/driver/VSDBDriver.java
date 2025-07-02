@@ -1046,7 +1046,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
                              prod.setStatusSellout("1");
                           }
                 }
-                prod.setVat("22");
+                prod.setVat("24");
 		products.put( nimetus, prod);
 
 		// }

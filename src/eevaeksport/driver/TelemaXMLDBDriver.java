@@ -800,7 +800,7 @@ private HashMap prodsGUID = new HashMap();
 		   				 
 		   			 }
 	   				 
-	   				prod.setVat("22");
+	   				prod.setVat("24");
 
 		    	
 		 			

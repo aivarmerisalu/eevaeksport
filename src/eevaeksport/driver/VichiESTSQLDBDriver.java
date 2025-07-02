@@ -1882,6 +1882,9 @@ con3.close();
                      } else if (vat.equals("GRUPE22")){
                        	prod.setVat("22");
                       }
+                     else if (vat.equals("GRUPE24")){
+                        	prod.setVat("24");
+                       }
                    }
                    
              /*      if(prod.getEAN().trim().length()==0){

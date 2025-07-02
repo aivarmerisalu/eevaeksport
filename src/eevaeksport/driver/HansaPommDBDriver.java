@@ -1371,7 +1371,7 @@ TreeMap tr = new TreeMap();
         }
        System.out.println("Out1 " + prod.getID() + " " + part);
         prod.setPartii(part);
-        prod.setVat("22");
+        prod.setVat("24");
          	if( goes && prod.getName()!= null ){
                  tm.put(name, prod);       	
          	}

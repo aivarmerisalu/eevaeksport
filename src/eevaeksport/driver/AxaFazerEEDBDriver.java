@@ -1619,7 +1619,7 @@ return tm;
 
                
                
-               prod.setVat("22");
+               prod.setVat("24");
  //  if(prod.getStock() > 1 || (prods.contains(prod.getID()) && prod.getStock() >0 && prod.getStock() < 3) ){
     products.put(nimetus, prod);
     prodHash.put(prod.getID(), prod);

@@ -90,7 +90,7 @@ public class AxaZpienasTransa2DBDriver extends AbstractDBDriver  implements Mana
 	   try {
 		   
 		 String  cmd = " select r.routeid as kood , r.name as nimi from TRWayBill d  inner join trroutetable r on d.routeid = r.routeid "
-		 		+ " and d.createddatetime > getdate()-2 and d.dataareaid = 'sr'  group by r.routeid, r.name"; 
+		 		+ " and d.createddatetime > getdate()-2 and d.dataareaid = 'sr' and r.name != ''  group by r.routeid, r.name"; 
 		 Connection ss = this.getNewConnection();
 	      Statement stmt = ss.createStatement();
 		      ResultSet rs = stmt.executeQuery(cmd);
@@ -109,7 +109,7 @@ public class AxaZpienasTransa2DBDriver extends AbstractDBDriver  implements Mana
 	   }catch (Exception e){
       	  e.printStackTrace();
   	  }
-	   System.out.println("Routesid kokku " + tm.size() );
+	  // System.out.println("Routesid kokku " + tm.size() );
 	   return tm;
 	   }  
 
@@ -186,7 +186,7 @@ public class AxaZpienasTransa2DBDriver extends AbstractDBDriver  implements Mana
 		   		"		   								 inner join TRDestinationTable s ON s.destinationid = r.destinationid \r\n" + 
 		   		"		   				   				  inner join HCMWORKER h on h.recid = driverrecid \r\n" + 
 		   		"										  right join TRTransportTable c ON c.transportid=vehicle\r\n" + 
-		   		"										  left join TRTransportTable t ON t.transportid=trailer  where d.routegroupid like 'PS%'  order by r.routeid,waybill,r.rowno"; 
+		   		"										  left join TRTransportTable t ON t.transportid=trailer  where d.routegroupid like 'SR%'  order by r.routeid,waybill,r.rowno"; 
 			 Connection ss = this.getNewConnection();
 		      Statement stmt = ss.createStatement();
 			      ResultSet rs = stmt.executeQuery(cmd);
@@ -311,7 +311,6 @@ public class AxaZpienasTransa2DBDriver extends AbstractDBDriver  implements Mana
 	         		 lines.add(pr);
 	         		 Calendar ccc = Calendar.getInstance();
 	         		 Date now = new Date(ccc.getTimeInMillis());
-	         		SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
 	         		
 	       			
 	         		Order shipit = new Order(custid,"autosender");
@@ -407,10 +406,9 @@ public class AxaZpienasTransa2DBDriver extends AbstractDBDriver  implements Mana
 	 
 	 
 	  
-    String cmd = "select inventlocationid as kood , w.name as name , worker_bbs from  InventLocation w where dataareaid = 'sr' and inventlocationid like '0%'"; 
-      cmd = "  select  h.personnelnumber as kood,w.name as name  from  TRWayBill d  " + 
-    		"		   								 inner join HCMWORKER h on h.recid = driverrecid inner join InventLocation w on h.recid = worker_bbs " + 
-    		"										  where d.routegroupid like 'PS%'  and d.transdate > getdate()-1 and d.transdate < getdate()"; 
+    String cmd  = "  select  h.personnelnumber as kood,w.name as name  from  TRWayBill d   \r\n" + 
+      		"    			   								 inner join HCMWORKER h on h.recid = driverrecid inner join InventLocation w on h.recid = worker_bbs  \r\n" + 
+      		"    												  where  d.routegroupid like 'SR%' and d.transdate > getdate()-1 and d.transdate < getdate()"; 
 
     Properties propse = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
     if (isDebug()) System.out.println(cmd);
@@ -545,18 +543,18 @@ public class AxaZpienasTransa2DBDriver extends AbstractDBDriver  implements Mana
  " FROM  vendtable cus  inner join DirPartyTable dp ON cus.partY=dp.REcid  " +
 " INNER JOIN LOGISTICSPOSTALADDRESS adr ON adr.LOCATION = dp.PRIMARYADDRESSLOCATION and getdate() >=VALIDFROM  and  getdate() <= VALIDTO " +
  "  left  JOIN  paymterm   pay on cus.paymtermid= pay.paymtermid " +
-	" and pay.DATAAREAID = cus.DATAAREAID and  pay.dataareaid='sr'  left  JOIN  custtable  asi  on asi.vendaccount= cus.accountnum  " +
- " and asi.DATAAREAID = cus.DATAAREAID and  asi.dataareaid='sr'   WHERE   (cus.dataareaid='sr' AND cus.blocked != 2 )" +
+	" and pay.DATAAREAID = cus.DATAAREAID and  pay.dataareaid='zp'  left  JOIN  custtable  asi  on asi.vendaccount= cus.accountnum  " +
+ " and asi.DATAAREAID = cus.DATAAREAID and  asi.dataareaid='zp'   WHERE   (cus.dataareaid='zp' AND cus.blocked != 2 )" +
   " union " +
  "SELECT 'P' + stationid + ' ' +dim.description as name,'' as  nimelisa,'' as namealias, stationid as accountnum,'' as  payer, '' as linedisc ,'Lithuania' as address ," +
 	"(select personnelnumber as kood from  DirPArtyTable w   inner join HCMWORKER h on h.person = w.recid where h.recid = dim.responsible ) AS agent ," +
    " 0 as  term, ''  as  ph1 , ''  as  em1, ''  as  ph2, ''  as  fax, ''  as  em2 ,'' as  driver ,   '' as  grupp,'' as  prgrupp  " +
 "	,  '' as  regnum	, '' as vatnum , 'Somewhere' as  state , 'County' as  county,'' as taxgroup,'' as encode ,'' as economyid,''  as agreement, '' as volainfo " +
 " FROM  BBSStationTable dim " +
-" where   dataareaid = 'sr'"; // OK
+" where   dataareaid = 'zp'"; // OK
 	 
 	       String todays = "select destinationid as cust , planningcapacity as pla from TRRouteWaypoint r " + 
-	       		"	       		 inner join TRWayBill d on d.routeid = r.routeid  and d.transdate > getdate()-2  group by destinationid,planningcapacity"; 
+	       		"	       		 inner join TRWayBill d on d.routeid = r.routeid  where d.transdate > getdate()-2 and d.createddatetime > getdate()-20 and d.dataareaid = 'sr' group by destinationid,planningcapacity"; 
 	           
 	  if (isDebug()) System.out.println(cmd);
 	    TreeMap customers = new TreeMap();
@@ -587,7 +585,7 @@ public class AxaZpienasTransa2DBDriver extends AbstractDBDriver  implements Mana
 		    	
 		      }
 		      
-		 //     System.out.println("ppp " + paak.toString());
+		     System.out.println("ppp " + paak.toString());
 	     
 		  rs.close();
 	      rs = stmt.executeQuery(cmd);
@@ -605,7 +603,6 @@ public class AxaZpienasTransa2DBDriver extends AbstractDBDriver  implements Mana
 	        		name =  name + " " + alias ;
 		        	  cust.restStreet = (alias.trim().replaceAll("\\r\\n|\\r|\\n", " "));	
 	        	}
-	        	
 	        }
 	        
 	        name = accountnum + " " + name;

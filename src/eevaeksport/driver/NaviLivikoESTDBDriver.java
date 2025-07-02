@@ -1501,7 +1501,7 @@ tm.put("X-TEGEVUSED Kontor", c1);
                       prod.setInCases(cases);
                     }
                 	
-                	prod.setVat("22");
+                	prod.setVat("24");
               
                    
 

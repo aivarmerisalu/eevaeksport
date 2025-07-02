@@ -384,7 +384,7 @@ public class Mono1sDBDriver
 
         prod.setStock(kogus);
         prod.setInCases(kastis);
-        prod.setVat("22");
+        prod.setVat("24");
 
         if (ok == 0){
           products.put(nimetus, prod);
