@@ -409,11 +409,12 @@ public class Reporter {
         }
         if("true".equals(props.getProperty("loadbl"))){
         	pop3 = getPop3("LAOSEIS",0);
+        	try {
         	files = pop3.readFiles(true);
         	if(toDB)
         	updateClientStock(files);
         	System.out.println("Ladu");
-           	
+        	}catch(Exception e) {e.printStackTrace();}
         }
     	
         System.out.println("Qualityinfo");
@@ -424,13 +425,13 @@ public class Reporter {
 	        
     System.out.println("report");
     if("true".equals(props.getProperty("loadbl"))){
-    
+    try {
 	pop3 = getPop3("BLOKAAD",0);
 	files = pop3.readFiles(true);
 	if(toDB)
 	updateClientBlock(files);
 	System.out.println("Blok");
-	
+    }catch(Exception e) {e.printStackTrace();}
     }}
 
 

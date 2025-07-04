@@ -1140,7 +1140,7 @@ if(stocks == null) {
        	     prod.setStock(0);
              
        	    if(stocks.get(id) != null) {
-           	 if(Double.parseDouble(stocks.get(id)+"") > 1) {
+           	 if(Double.parseDouble(stocks.get(id)+"") > 0) {
 				 prod.setStock(Double.parseDouble(stocks.get(id)+""));
 			 }
 			 	

@@ -164,7 +164,7 @@ public class AxaZpienasTransa2ImportDriver extends AbstractImportDriver{
 	  String res = company;
 	  
 
-	    String sql2 = " SELECT   stationid_bbs AS kood  FROM  vendtable where dataareaid='sr' and  accountnum =  '" + company + "'";
+	    String sql2 = " SELECT   stationid_bbs AS kood  FROM  vendtable where dataareaid='zp' and  accountnum =  '" + company + "'";
 	   
    try {
 	    Statement st2 = con5.createStatement();
@@ -416,17 +416,12 @@ public class AxaZpienasTransa2ImportDriver extends AbstractImportDriver{
             
                String loca = parent.getProps().getProperty("conv.dir");
               
-               fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() +  ".csv";
-               
-               
                //date_ путевой лист_ код из_ Признак.csv
-               fileName =  loca + dateString2 +  "_" + extDoc + "_" +  driverStock + "_" + trip +  "_TIE.csv";
+               fileName =  loca + dateString2 +  "_" + extDoc + "_" +  driverStock + "_" + trip +  "_SR_TIE.csv";
  		      
                if(refe){
             	   loca = parent.getProps().getProperty("conv2.dir");
-
-            	   
-    		 	   fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() + "_" + trip +   ".csv";
+    		 	   fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() + "_" + trip +   "_SR.csv";
     		 	   System.out.println("tagastus" + fileName);
     		 	  writeToFile(sb.toString(),fileName);
                }else {
@@ -445,7 +440,7 @@ public class AxaZpienasTransa2ImportDriver extends AbstractImportDriver{
         	           }
             	   }else {
             	 	  // fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() +  ".csv";
-            	          fileName =  loca + dateString2 +  "_" + extDoc + "_" +  driverStock +  "_" + trip +  "_TIE.csv";
+            	          fileName =  loca + dateString2 +  "_" + extDoc + "_" +  driverStock +  "_" + trip +  "_SR_TIE.csv";
         		 	   System.out.println("uus fail" + fileName);
         		 	  writeToFile(sb.toString(),fileName);
             	   }

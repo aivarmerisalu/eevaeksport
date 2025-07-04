@@ -10593,7 +10593,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
          
             	JSONObject cob = (JSONObject) cc.getJSONObject(i);
             	String key = (String)cob.get("code");
-            	System.out.println("manas " + cob.toString());
+            //	System.out.println("manas " + cob.toString());
 				
 				try{
 					JSONArray manas = (JSONArray)cob.get("managers");

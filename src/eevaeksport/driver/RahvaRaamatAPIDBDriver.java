@@ -80,8 +80,10 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
      
   
    //   token = getMSToken();
-    
-     // this.downloadData("getCustomers");
+   
+      
+      
+      this.downloadData("getItems");
     //  getCustomers(null);
       //  this.downloadData(null);
     // this.getDebt(null);
