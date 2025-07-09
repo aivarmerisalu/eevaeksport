@@ -705,13 +705,6 @@ private  TreeMap<String, Double> getHinnad(){
         	cust = (Customer)custs.get(order.getCompany());
         }
    
-    
-        Calendar cal = Calendar.getInstance();
-       
-        if (shipDate != null) {
-              cal = shipDate;
-            }
-      
         sb.append("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + ls);
         sb.append("<E-Document>" + ls);
    
@@ -869,21 +862,7 @@ private  TreeMap<String, Double> getHinnad(){
      	   sb.append("<DocumentNum>" + escape(doknr)+ "</DocumentNum>" + ls);   
         }
            
-      /*  sb.append("<CreatedByContact>" + ls);
-       
-          if(order.getAgent().equals("M09")) {
-	        sb.append("<ContactFirstName>Eda</ContactFirstName>" + ls);
-	        sb.append("<ContactLastName>Raal</ContactLastName>" + ls); 
-	        sb.append("<PhoneNum>56565219</PhoneNum>" + ls); 
-	       } else {
-        	 sb.append("<ContactFirstName>Elle</ContactFirstName>" + ls);
-             sb.append("<ContactLastName>Vesinurm</ContactLastName>" + ls); 
-             sb.append("<PhoneNum>56622929</PhoneNum>" + ls); 
-          }
-        
-        sb.append("<MobileNum>+372 5062 350</MobileNum>" + ls);
-        sb.append("</CreatedByContact>" + ls);
-        */
+     
         sb.append("</DocumentInfo>" + ls);
        
         
@@ -912,18 +891,7 @@ private  TreeMap<String, Double> getHinnad(){
          
             Product prod = (Product) prods.get(line.getToode());
             
-            /*><LineItemNum>1</LineItemNum><SellerItemCode>13908</SellerItemCode>
-             * <GTIN>8590311102965</GTIN><ItemDescription>Chew &amp; Tattoo Pop 8g</ItemDescription>
-             * <ItemUnitRecord><ItemUnit>TK</ItemUnit></ItemUnitRecord>
-             * <BaseUnit>TK</BaseUnit>
-             * <AmountInvoiced>50</AmountInvoiced>
-             * <ItemPrice>0.1</ItemPrice>
-             * <ItemModifiedPrice></ItemModifiedPrice>
-             * <ItemBasePrice>0.1</ItemBasePrice>
-             * <ItemSum>5</ItemSum>
-             * <Addition addCode="DSC"><AddRate>0</AddRate></Addition><VAT vatID="TAX">
-             * <SumBeforeVAT>5</SumBeforeVAT><VATRate>20</VATRate><VATSum>1</VATSum></VAT>
-             * <ItemTotal>6</ItemTotal></ItemEntry><*/
+           
             String yhik = line.getUnit();
             if (ale == -1 ){
                 ale = 0 ;
@@ -932,8 +900,6 @@ private  TreeMap<String, Double> getHinnad(){
             sb.append("      <LineItemNum>"  + (i+1) + "</LineItemNum>" + ls);
           
            
-           // <GTIN>4740072222752</GTIN> 
-           // <BaseUnit>TK</BaseUnit> 
             sb.append("         <SellerItemCode>" + line.getToode() + "</SellerItemCode>" + ls);
             sb.append("         <GTIN>" + prod.getEAN() + "</GTIN>" + ls);
             sb.append("         <ItemDescription>" + prod.getName() + "</ItemDescription>" + ls);
@@ -1019,7 +985,7 @@ private  TreeMap<String, Double> getHinnad(){
    }
    
    
-  String  fileName = escape(parent.getProps().getProperty("conv.dirxml") + "invoice-" + agent) + "-" + counter + "." + sss  + "-" + doknr +  ".xml";
+  String  fileName = escape(parent.getProps().getProperty("conv.dirxml") + "invoice-" + agent) + "-" + counter + "."   + "-" + doknr +  ".xml";
    System.out.println(fileName);
    Writer out = new BufferedWriter(new OutputStreamWriter(
 			    new FileOutputStream(fileName), "UTF-8"));
@@ -1030,7 +996,7 @@ private  TreeMap<String, Double> getHinnad(){
 			}
 			
 			 log.error(" File Saved " + fileName );
-			 fileName = escape(parent.getProps().getProperty("conv.dircxml") + "invoice-" + agent) + "-" + counter + "." + sss  +  "-" + doknr +  ".xml";
+			 fileName = escape(parent.getProps().getProperty("conv.dircxml") + "invoice-" + agent) + "-" + counter + "."   +  "-" + doknr +  ".xml";
 		      System.out.println(fileName);
 		       out = new BufferedWriter(new OutputStreamWriter(
 					    new FileOutputStream(fileName), "UTF-8"));
