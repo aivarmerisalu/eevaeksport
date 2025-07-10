@@ -2281,6 +2281,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 				String chain = "";
 		                 				String question = "";
 		                 				String period = "";
+		                 				Long nowL = Calendar.getInstance().getTimeInMillis();
 		                 				
 		                 				try {
 		                 					    klient =  formatter.formatCellValue(row.getCell((short) 1));
@@ -2309,11 +2310,24 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                    				}
 		                 				}
 		                 				
-		                 				String signa = klient +"_"+ period;
+		                 				DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+	                 					String[] dateStrings = period.split(" - ");
+	                 					Long stL = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()-week;
+	                 				    Long endL = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+	                 				
+	                 				    if(endL < nowL) {
+	                 				    	break;
+	                 				    }
+	                 				    
+	                 				    
+		                 				if(endL > nowL) {
 		                 				
-		                 				String pais = chain + " " + klient + " " + period;
-		                 				System.out.println("pais  " + pais + " " + qutitles.contains(pais));
-		                 				
+		                 					String signa = klient +"_"+ period;
+			                 				
+			                 				String pais = chain + " " + klient + " " + period;
+			                 				System.out.println("pais  " + pais + " " + qutitles.contains(pais));
+			                 				
+		                 					
 		                 				if( !qutitles.contains(pais)) { //!questsDone.contains(signa)
 		                 				// kui pole lisatud küsimust siis 
 		                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
@@ -2329,11 +2343,8 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	    	                 					   qq.custID = klient;
 	    	                 					   qq.title = pais;
 	    	                 					   
-	    	                 					DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-	    	                 					String[] dateStrings = period.split(" - ");
-	    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()-week;
-	    	                 				    qq.qEnd = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-	    	                 				   
+	    	                 					   qq.qStart = stL;
+	    	                 					   qq.qEnd = endL;
 	    	                 				   
 	    	                 				       QuestLine ql = new QuestLine();
 	    	                 				          ql.qname = kysimus;
@@ -2342,7 +2353,9 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	    	                 				    qq.questLines.add(ql);
 	    	                 				//Kui pole juba sellise päisega küsimustikku WEB-is olemas siis lisame.   
 	    	                 				   
-	    	                 				      questArr.put(klient, qq);
+	    	                 				    if(qq.qEnd < Calendar.getInstance().getTimeInMillis()) {
+	    	                 				       questArr.put(klient, qq);
+	    	                 				    }
 	    	                 				    
 	    	                 				   
 	    	                 					} else {
@@ -2363,11 +2376,10 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 			  		}
 		                 			          
 		                 				  
-		                 				}else {
+		                 				} else {
 		                 	//seda tehakse juhul kui see rida on küsimusena juba olemas aga vaatame kas on ka äkki vastust tulnud.
 		                 					// ja laksame tulemused peale.
-		                 					
-
+    	                 				
 			                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
 		    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
 		    	                 				
@@ -2497,12 +2509,12 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 			    	                 					changesMade = true;
 		    	                 					}
 		    	                 				 }
-		    	                 				}
+		    	                 			   }
 			                 				}
-		                 					
+                                          }
 		                 				}
-		                 				
-		                 			 }
+		                 				}
+		                 			 
 
 	                 				//System.exit(0);
 	                 			ff.close();

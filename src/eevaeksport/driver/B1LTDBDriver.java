@@ -1581,7 +1581,7 @@ private void uploadQuestsAndAnswers() {
 	  			
 
 					answBuffer.put(custID + "-" + qname + "-" + title, cob);
-	  			if(custID.equals("77115444")) {
+	  			if(custID.equals("77100168")) {
 	  				System.out.println("answ Buffer " + custID + "-" + qname + "-" + title + " " + cob.toJSONString());
 	  			}
 	  		}	
@@ -1592,7 +1592,7 @@ private void uploadQuestsAndAnswers() {
 			
 			System.out.println("buffer " + answBuffer.size());
 
-		 System.exit(0);
+		// System.exit(0);
 
 //		  1- loeme küsimused sisse 
 		  //otsime faile mille nimes on pallets
@@ -1642,6 +1642,8 @@ private void uploadQuestsAndAnswers() {
 		                 				String chain = "";
 		                 				String question = "";
 		                 				String period = "";
+
+		                 				Long nowL = Calendar.getInstance().getTimeInMillis();
 		                 				
 		                 				try {
 		                 					    klient =  formatter.formatCellValue(row.getCell((short) 1));
@@ -1670,6 +1672,16 @@ private void uploadQuestsAndAnswers() {
 		                    				}
 		                 				}
 		                 				
+		                 				DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+	                 					String[] dateStrings = period.split(" - ");
+	                 					Long stL = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()-week;
+	                 				    Long endL = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+	                 				   
+	                 				    if(endL < nowL) {
+	                 				    	break;
+	                 				    }
+	                 				    
+		                 				if(endL > nowL) {
 		                 				String signa = klient +"_"+ period;
 		                 				
 		                 				String pais = chain + " " + klient + " " + period;
@@ -1690,11 +1702,8 @@ private void uploadQuestsAndAnswers() {
 	    	                 					   qq.custID = klient;
 	    	                 					   qq.title = pais;
 	    	                 					   
-	    	                 					DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-	    	                 					String[] dateStrings = period.split(" - ");
-	    	                 					qq.qStart = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()-week;
-	    	                 				    qq.qEnd = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-	    	                 				   
+	    	                 					qq.qStart = stL;
+	    	                 					qq.qEnd = endL;                 				   
 	    	                 				   
 	    	                 				       QuestLine ql = new QuestLine();
 	    	                 				          ql.qname = kysimus;
@@ -1740,16 +1749,17 @@ private void uploadQuestsAndAnswers() {
 		    	                 					//vaatame kas selline asi on meil olemas
 		    	                 				
 		    	                 					String key = klient + "-" + kysimus + "-"+ chain +" "+ klient + " " + period;
-		    	                 			//	if(klient.equals("77001351")) {
-		    	                 				//	System.out.println("keys " + key);
-		    	                 					//System.out.println("keys2 " + answBuffer.get(key) + " " + answBuffer.keySet().toString() + "\n" ) ;
-		    	                 				//}
+		    	                 				if(klient.equals("77001421")) {
+		    	                 					System.out.println("keys " + key);
+		    	                 					System.out.println("keys2 " + answBuffer.get(key) ) ;
+		    	                 			}
 		    	                 					if(answBuffer.get(key) != null) {
 	                                                  
 		    	                 						org.json.simple.JSONObject ob = answBuffer.get(key);
-	                                                   
-			    	                 				//	System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
-			    	                 					
+		    	                 						if(klient.equals("77001421")) {
+		    			    	                 			    
+			    	                 					System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
+		    	                 						}	
 			    	                 					CellStyle originalStyle = cell.getCellStyle();
 
 				    	                 				CellStyle newStyle = workbook.createCellStyle();
@@ -1863,7 +1873,7 @@ private void uploadQuestsAndAnswers() {
 			                 				}
 		                 					
 		                 				}
-		                 				
+		                 				}
 		                 			 }
 
 	                 				//System.exit(0);
@@ -1926,7 +1936,7 @@ public void WebReporter() {
 
 	//sendTaskReport() ;
 	
-	//uploadQuestsAndAnswers();
+	uploadQuestsAndAnswers();
    
 	     System.exit(0);
 	
