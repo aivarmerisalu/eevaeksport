@@ -1128,8 +1128,18 @@ HashSet olemas = new HashSet();
         try {
       
         	
-        String sql = "select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from I33_PKAI "
-    		+ " where I33_KODAS_iS in ('1','2','3','5') and I33_KODAS_VL='EUR' GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
+        String sql = " 		  WITH ranked AS (\r\n" + 
+        		"  SELECT I33_KODAS_PS AS toode,\r\n" + 
+        		"         I33_KAINA AS hind,\r\n" + 
+        		"         I33_PPK_DATE AS dd,\r\n" + 
+        		"         ROW_NUMBER() OVER (PARTITION BY I33_KODAS_PS ORDER BY I33_PPK_DATE DESC) AS rn\r\n" + 
+        		"  FROM I33_PKAI\r\n" + 
+        		"  WHERE I33_KODAS_iS IN ('1','2','3','5')  and I33_KAINA > 0\r\n" + 
+        		")\r\n" + 
+        		"SELECT toode, hind, dd\r\n" + 
+        		"FROM ranked\r\n" + 
+        		"WHERE rn = 1;" ;
+        		
             System.out.println("hind");
           if (isDebug()) System.out.println(sql);
           connectionUp(url);
