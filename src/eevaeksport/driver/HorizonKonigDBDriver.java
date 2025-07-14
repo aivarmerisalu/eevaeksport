@@ -649,7 +649,7 @@ try{
 		  
 	   String    cmd = " SELECT toode, sum(kogus) as kogus, ladu FROM\r\n" + 
 	   		"(select toode , kogus , \r\n" + 
-	   		"case  when ladu = 81209 then 53296  \r\n" + 
+	   		"case  when ladu = 81209 then 53270  \r\n" + 
 	   		"else(case  when ladu = 81208 then 53269  \r\n" + 
 	   		"else (case  when ladu = 53277 then 53268  \r\n" + 
 	   		"else  (case  when ladu = 81161 then 53268  \r\n" + 
@@ -782,7 +782,7 @@ try{
 
 	  String    cmd = "SELECT toode, sum(kogus) as kogus, ladu FROM\r\n" + 
 	  		"(select toode , kogus , \r\n" + 
-	  		"case  when ladu = 81209 then 53296  \r\n" + 
+	  		"case  when ladu = 81209 then 53270  \r\n" + 
 	  		"else(case  when ladu = 81208 then 53269  \r\n" + 
 	  		"else (case  when ladu = 53277 then 53268  \r\n" + 
 	  		"else  (case  when ladu = 81161 then 53268  \r\n" + 

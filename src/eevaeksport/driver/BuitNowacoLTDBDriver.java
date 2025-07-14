@@ -1758,8 +1758,9 @@ rs.close();
      
      
 	 String cmd2 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS summa FROM apyvarta a INNER JOIN klientai b ON b.klientas=a.gavejas " +
-     "  where dok_serija is not null and (kitas_dok) > 0 and dok_serija not in ( 'KRV5', 'LKS' ,'KRV7', 'LKP1','LDS','URM') and operacija like 'Pardav%' "
+     "  where  (kitas_dok) > 0 and (dok_serija not in ( 'KRV5', 'LKS' ,'KRV7', 'LKP1','LDS','URM') OR dok_serija IS NULL) and operacija like 'Pardav%' "
      + " and DATE_ADD(a.data,interval 500 day) > current_date()  group by b.kodas having sum(skola_w) != 0 " ;
+
 System.out.println(cmd2);
   Connection   cons2 = this.getNewConnection();
     Statement stmt12 = cons2.createStatement();
@@ -1781,8 +1782,8 @@ System.out.println(cmd2);
     rs12.close();
     
     cmd2 = " select  b.kodas AS maksja,b.klient_id as klient,sum(skola_w) AS summa FROM apyvarta a INNER JOIN klientai b ON b.klientas=a.gavejas \r\n" + 
-    		"      where dok_serija is not null and (kitas_dok) > 0 and DATE_ADD(a.data,interval 500 day) > current_date() and dok_serija not in"
-    		+ " ( 'KRV5', 'LKS' ,'KRV7', 'LKP1','LDS','URM') and operacija like 'Pardav%' \r\n" + 
+    		"      where (kitas_dok) > 0 and DATE_ADD(a.data,interval 500 day) > current_date() and "
+    		+ "(dok_serija not in ( 'KRV5', 'LKS' ,'KRV7', 'LKP1','LDS','URM') OR dok_serija IS NULL) and operacija like 'Pardav%' \r\n" + 
     		"	   group by b.klient_id having sum(skola_w) != 0 " ;
     	 
     	   rs12 = stmt12.executeQuery(cmd2);
@@ -3061,6 +3062,7 @@ try{
 
   while (rs2.next()){
        String klient = rs2.getString("klient").trim();
+       try {
                String toode = rs2.getString("toode").trim();
                String kogus = "0";
                String date = " ";
@@ -3103,8 +3105,11 @@ try{
                  oldtoode = toode;
                }
                cou++;
-             }
-
+             
+  }catch(Exception e) {
+	  
+  }
+  }
 
   rs2.close();
   con2.close();

@@ -2283,7 +2283,7 @@ System.out.println(cmd);
             	 if(prod.getPartii() != null && prod.getPartii().trim().length() > 0){
             		 prod.setPartii(prod.getPartii() + tt.getLadu() + ":" + tt.getKogus() + " BB:" + tt.getBrand() + "|");	
             	 }else{
-            		 prod.setPartii("|" + tt.getLadu() + ":" + tt.getKogus() + " BB: " + tt.getBrand() + "|");	 
+            		 prod.setPartii(("|" + tt.getLadu() + ":" + tt.getKogus() + " BB: " + tt.getBrand() + "|").replaceAll(";", " "));	 
             	 }
             	
             	}
