@@ -2111,7 +2111,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 				
 				if(!qutitles.contains(nimi)) {
 			    	qutitles.add(nimi);
-			    	System.out.println(nimi);
+			    	//System.out.println(nimi);
 				}
 			
 			} catch (Exception e) {
@@ -2325,14 +2325,14 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 					String signa = klient +"_"+ period;
 			                 				
 			                 				String pais = chain + " " + klient + " " + period;
-			                 				System.out.println("pais  " + pais + " " + qutitles.contains(pais));
 			                 				
 		                 					
 		                 				if( !qutitles.contains(pais)) { //!questsDone.contains(signa)
 		                 				// kui pole lisatud küsimust siis 
 		                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
 	    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
-	    	                 				
+	    	                 				System.out.println("pais  " + pais + " " + kyssa);
+			                 				
 	    	                 				if(kyssa != null && kyssa.trim().length() > 0) {
 	    	                 					
 	    	                 					String kysimus =  "|PAL" + kyssa + "| " + (String)kyssad.get(b);
@@ -2353,7 +2353,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	    	                 				    qq.questLines.add(ql);
 	    	                 				//Kui pole juba sellise päisega küsimustikku WEB-is olemas siis lisame.   
 	    	                 				   
-	    	                 				    if(qq.qEnd < Calendar.getInstance().getTimeInMillis()) {
+	    	                 				    if(qq.qEnd > Calendar.getInstance().getTimeInMillis()) {
 	    	                 				       questArr.put(klient, qq);
 	    	                 				    }
 	    	                 				    
@@ -2526,7 +2526,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 		                 			      fos.close();
 		                 			      
 		                 			}
-		                 			//System.out.println(questArr.toString());	
+		                 		//	System.out.println("Questupload " +  questArr.toString());	
 		                 	//	System.exit(0);	
 		                 			// Saadame ära
 		                 			if(questArr.size() > 0) {

@@ -1072,7 +1072,11 @@ hind =   Converter.Round((float)hind, 2);
 		    	  order_xml = order_xml + "<line ";
 		    	  order_xml = order_xml + "quantity=\"" + line.getKogus() + "\" ";
 			      order_xml = order_xml +"pcode=\""+ Converter.deCode(line.getToode()) + "\" ";
-		    	 // order_xml = order_xml + "description=\"" + ppp.getName() + "\" " ;
+		    	 
+			      if(line.getPartii() != null && line.getPartii().trim().length() > 0) {
+			    	  order_xml = order_xml + "comment=\"" + line.getPartii() + "\" " ;
+				  }
+			      // order_xml = order_xml + "description=\"" + ppp.getName() + "\" " ;
 		    	  double hind = 0;
 		    	  
 		    	  try{
@@ -1097,10 +1101,8 @@ hind =   Converter.Round((float)hind, 2);
                 	  }else {
                 		  order_xml = order_xml +"discount=\"0\" ";
                 	  }
-                	  
-                	
-                	  
-    		      }
+                  }
+                
                   if (line.getDiscount() > 0 && order.getStatus() == 0) {
     			      order_xml = order_xml +"price=\""+ Converter.Round((float)hind, 2) +"\" ";  
                    } else if(order.getStatus() == 1000) {

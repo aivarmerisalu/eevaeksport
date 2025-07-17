@@ -1134,7 +1134,7 @@ HashSet olemas = new HashSet();
         		"         I33_PPK_DATE AS dd,\r\n" + 
         		"         ROW_NUMBER() OVER (PARTITION BY I33_KODAS_PS ORDER BY I33_PPK_DATE DESC) AS rn\r\n" + 
         		"  FROM I33_PKAI\r\n" + 
-        		"  WHERE I33_KODAS_iS IN ('1','2','3','5')  and I33_KAINA > 0\r\n" + 
+        		"  WHERE I33_KODAS_iS IN ('1')  and I33_KAINA > 0\r\n" +  //,'2','3','5'
         		")\r\n" + 
         		"SELECT toode, hind, dd\r\n" + 
         		"FROM ranked\r\n" + 
