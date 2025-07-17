@@ -33,6 +33,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -83,7 +87,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
    
       
       
-      this.downloadData("getItems");
+     // this.downloadData("getItems");
     //  getCustomers(null);
       //  this.downloadData(null);
     // this.getDebt(null);
@@ -334,6 +338,7 @@ System.out.println("ProdGroup size :  " + tm.size());
    public TreeMap getAgents(){
 		  TreeMap tm = new TreeMap();
 			try {
+				
 			org.json.simple.JSONObject cc = Converter.readJSONFile("data//getAgents.json");
 	  	
 			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
@@ -366,8 +371,23 @@ System.out.println("ProdGroup size :  " + tm.size());
 			}
 			
 	System.out.println("Managersize " + tm.size());
-
+  
+	Agent agent1 = new Agent("AGENT1");
+	agent1.setName("AGENT1");
+	  tm.put(agent1.getName(), agent1);
+  
+	  Agent agent2 = new Agent("AGENT2");
+		agent2.setName("AGENT2");
+		  tm.put(agent2.getName(), agent2);
 	  
+		  Agent agent3 = new Agent("AGENT3");
+			agent3.setName("AGENT3");
+			  tm.put(agent3.getName(), agent3);
+		  
+			  Agent agent4 = new Agent("AGENT4");
+				agent4.setName("AGENT4");
+				  tm.put(agent4.getName(), agent4);
+			  
 
      return tm;
    }
@@ -520,19 +540,146 @@ System.out.println("ProdGroup size :  " + tm.size());
   			            }
       
 
-
-
-
 	  
   }
        
-       
+       private TreeMap getRouting() {
+    	  
+    	   TreeMap rr = new TreeMap();
+    	   File f = new File(this.getExcelDir() + "Contactplan.xlsx");
+		
+		try {
+			
+	       if(f.exists()){
+			
+	    	   Calendar cal = Calendar.getInstance();
+	    	   cal.setFirstDayOfWeek(Calendar.MONDAY);
+	           cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+	    	   
+	    	   String calKuu = "Jaanuar";
+	    	   if(cal.get(Calendar.MONTH) == 1) {
+	    		   calKuu = "Veebruar";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 2) {
+	    		   calKuu = "Märts";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 3) {
+	    		   calKuu = "Aprill";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 4) {
+	    		   calKuu = "Mai";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 5) {
+	    		   calKuu = "Juuni";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 6) {
+	    		   calKuu = "Juuli";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 7) {
+	    		   calKuu = "August";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 8) {
+	    		   calKuu = "September";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 9) {
+	    		   calKuu = "Oktoober";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 10) {
+	    		   calKuu = "November";
+	    	   }
+	    	   if(cal.get(Calendar.MONTH) == 11) {
+	    		   calKuu = "Detsember";
+	    	   }
+	    	   
+	    	   
+			FileInputStream ff = new FileInputStream(f);
+			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+			XSSFSheet sheet = workbook.getSheetAt(0);
+			DataFormatter formatter = new DataFormatter();
+
+			int jooksevKuu = 0;
+			int jooksevPaev = 0;
+			
+			XSSFRow row = sheet.getRow(0);
+			for (int i = 0; i < row.getLastCellNum(); i++) {
+				
+				String kuu = null;
+				try {
+					kuu = formatter.formatCellValue(row.getCell((short) i));
+					if(kuu != null && kuu.trim().length() > 0) {
+						jooksevKuu = i;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+			
+			//otsime päevasid
+			row = sheet.getRow(1);
+				
+				String paev = null;
+				try {
+					paev = formatter.formatCellValue(row.getCell((short) jooksevKuu));
+					
+					int day = Integer.parseInt(paev);
+					int vahe = - cal.get(Calendar.DAY_OF_MONTH) + day;
+					
+							
+					jooksevPaev = jooksevKuu - vahe;
+
+							System.out.println(paev + " " + vahe + " " + jooksevPaev );
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				
+				// nüüd on vaja leida selle nädala esmaspäev ja siis sealt alustada 5 välja kaupa scannimist.
+				
+
+				for (int i = 2; i < sheet.getLastRowNum(); i++) {
+					row = sheet.getRow(i);
+					if(row != null) {
+					String custID = formatter.formatCellValue(row.getCell((short) 0));
+					
+					for (int u = jooksevPaev;  u < jooksevPaev + 5  ; u++) {
+					String pluss = formatter.formatCellValue(row.getCell((short) u)).trim();
+					if(pluss.equals("+")) {
+					  int pp = u-jooksevPaev;
+					  String aa = "E";
+					  if(pp == 1) {  aa = "T";}
+					  if(pp == 2) {  aa = "K";}
+					  if(pp == 3) {  aa = "N";}
+					  if(pp == 4) {  aa = "R";}
+					  if(rr.get(custID) != null) {
+						  rr.put(custID, rr.get(custID) + aa);
+					    } else {
+						  rr.put(custID, aa);
+					  }
+					  
+					}
+					}
+					}
+				}
+	     }
+	 
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+    	   System.out.println(rr.toString());
+    	   return rr;
+       }
        
        
        
    public TreeMap getCustomers(Agent agent){
 	   
-	   downloadData(null);
+	   //downloadData(null);
+	   
+	   TreeMap routes = getRouting();
+	   
+	 //  System.exit(0);
+	   
 		 TreeMap custagents =  Converter.getWebCustomersAgents(rcompany, user, pass);
 	   
 		  TreeMap tm = new TreeMap();
@@ -558,6 +705,10 @@ System.out.println("ProdGroup size :  " + tm.size());
 
 	          	String number = (String)cob.get("code");
 	            Customer cust = new Customer(number);
+	            
+	            if(routes.get(number)!= null) {
+	            	cust.setVisit(routes.get(number)+"");
+	            }
 	            
 	            cust.setName((String)cob.get("name"));
 	            

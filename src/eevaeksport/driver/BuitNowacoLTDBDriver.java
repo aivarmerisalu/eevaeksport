@@ -1490,11 +1490,11 @@ rs.close();
 	 		try {
 	 	
 	 		
-	 			String cmd = "  SELECT preke , (kiekis ) as kiekis  FROM likuciai where kiekis  > 0 and sandelis in ('S6','S4','B1','S4(b)')  order by preke  ";
+	 			String cmd = "  SELECT preke , (kiekis ) as kiekis  FROM likuciai where kiekis  > 0 and sandelis in ('S6')  order by preke  ";
 	 	     	 
 	 			String cmd2 = "SELECT  gr.preke AS preke,SUM(gr.kiekis) AS ORDERED FROM  apyv_gr AS gr " +
      "  LEFT JOIN apyvarta AS a ON gr.apyv_id = a.apyv_id " +
-     "  WHERE  a.ivestas IS NULL AND a.tiek_sand IN ('S6' , 'S4', 'B1' ,'S4(b)') " +
+     "  WHERE  a.ivestas IS NULL AND a.tiek_sand IN ('S6' ) " +
      "   AND gr.kiekis > 0  and gr.kiekis is not null AND a.gav_sand is null GROUP BY gr.preke  order by gr.preke";
 	 			
 	 	       	 Connection con = getNewConnection();
@@ -1905,7 +1905,7 @@ try{
         
         if(old<dueint){
            debtDays.put(custID,dueint+"") ;
-           if(dueint > 24){
+           if(dueint > 23){
         	  	 
         	   if(debt.getPayerID() != null && debt.getPayerID().equals("304476836")) {
         		    System.out.println("siit 2 tuleb block" + custID + " " + debt.getDoknr());
@@ -2291,7 +2291,7 @@ try{
 	   try {
 			  
 	    	 String cmd =  "  select preke as toode , kiekis  as kogus , sandelis as ladu ,artikulas as bb , savikaina as cost from likuciai"
-	    	 		+ " where  sandelis in ('S6','S4','B1' ,'S4(b)')  and kiekis  > 0";
+	    	 		+ " where  sandelis in ('S6')  and kiekis  > 0";
 	    	//	  System.out.println(cmd);
 	    	 
 	    	 
@@ -2530,7 +2530,7 @@ try{
      try {
       	  
     	 String cmd = "    SELECT preke as toode, sum(kiekis) as seis FROM likuciai where kiekis  > 0 "
-    	 		+ " and sandelis  IN ('S6' , 'S4')  group by preke order by preke  ";
+    	 		+ " and sandelis  IN ('S6' )  group by preke order by preke  ";
     	   	  System.out.println(cmd);
     	 
     	 
@@ -2570,7 +2570,7 @@ try{
   	             String toode =rs.getString("toode").trim();
   	             double seis = rs.getDouble("seis");
   	             if(ladub1o.get(toode) == null){
-  	            	 ladub1.put(toode,seis);
+  	            	// ladub1.put(toode,seis);
   	             }
   	             
   	              
