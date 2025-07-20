@@ -164,7 +164,7 @@ HashMap pants = null;
 	  " FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS " +
 	  " where right(rtrim(N33_PAV),3) =  '" + id + "'";	
 	
-    System.out.println(sql1);
+   // System.out.println(sql1);
     String acc = null;
     con = DriverManager.getConnection(url + "meri","LEDIN_API","P455W0rd_*1");
     Statement st1 = con.createStatement();
@@ -186,7 +186,7 @@ HashMap pants = null;
 	  	 String	sql1 = "SELECT N08_PAV AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
 	  	 		"  rtrim(rtrim(N08_KODAS_KS))+'-'+ rtrim(ltrim(N33_kodas_ak)) = '" + id +"'"; 
 	  	
-	    System.out.println(sql1);
+	  //  System.out.println(sql1);
 	    String acc = null;
 	    con = DriverManager.getConnection(url + "meri","LEDIN_API","P455W0rd_*1");
 	    Statement st1 = con.createStatement();
@@ -206,7 +206,7 @@ HashMap pants = null;
   public String identifyCustomerADDR(String id) throws SQLException {
   	 String	sql1 = "SELECT N33_ADRESAS AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
   	 		"  rtrim(rtrim(N08_KODAS_KS))+'-'+ rtrim(ltrim(N33_kodas_ak)) = '" + id +"'"; 
-    System.out.println(sql1);
+   // System.out.println(sql1);
     String acc = null;
     con = DriverManager.getConnection(url + "meri","LEDIN_API","P455W0rd_*1");
     Statement st1 = con.createStatement();
@@ -231,7 +231,7 @@ HashMap pants = null;
   public String getAgentCar(String age) throws SQLException {
 	 	 String	sql1 = "SELECT N72_KODAS_AU AS carplate FROM N72_mas  WHERE N72_KODAS_MS = '" + age +"'"; 
 	 	
-	   System.out.println(sql1);
+	//   System.out.println(sql1);
 	   String acc = null;
 	   con = DriverManager.getConnection(url + "meri","LEDIN_API","P455W0rd_*1");
 	   Statement st1 = con.createStatement();
@@ -291,33 +291,6 @@ HashMap pants = null;
   
   
   
-  private double getProductPrice(String toode) {
-	  double res = 0;
-	  
-	  String    sql = "select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from I33_PKAI "
-	    		+ " where I33_KODAS_iS = 'SAND1' and  I33_KODAS_PS = '" + toode + "'  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
-	            System.out.println("hind");
-	       try {
-	    	   
-	    	   con = DriverManager.getConnection(url + "meri","LEDIN_API","P455W0rd_*1");
-	            Statement st1 = con.createStatement();
-	            ResultSet rst = st1.executeQuery(sql);
-	            
-	       
-	               while (rst.next()) {
-	                 res = rst.getDouble("hind");
-	                }
-	             rst.close();
-	             st1.close();
-	             con.close();
-           }catch(Exception e ) {
-	    	   
-	       }
-	  return res;
-			  
-  }
-  
-	
 	 private Vector d30 = new Vector();
 	 private HashMap<String, Double> usedCr = new HashMap<String, Double>();
 	 
@@ -409,7 +382,7 @@ public Vector getDebt() throws SQLException{
   		e.printStackTrace();
   	 }
   	
-  	System.out.println("d30.size() " + d30.size());
+//  	System.out.println("d30.size() " + d30.size());
 
 
       String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, " +
@@ -715,7 +688,7 @@ public Vector getDebt() throws SQLException{
 	sb.append(getLineNr(cou));
      sb.append("          <I06_KODAS_KS>" + escape(cust.substring(0,cust.lastIndexOf("-"))) + "</I06_KODAS_KS>" + ls);
      cou++;
-     System.out.println("aadress "+ addr);
+   //  System.out.println("aadress "+ addr);
    if(addr != null) {
    	sb.append(getLineNr(cou));
        sb.append("          <I06_ADR2>" + escape(addr) + "</I06_ADR2>" + ls);
@@ -808,7 +781,7 @@ if(ladu.trim().length()!=0){
              	  sb.append(getLineNr(cou));
                    sb.append("               <I07_KODAS_OS>" +  escape(partii.trim()) + "</I07_KODAS_OS>" + ls);
                    cou++;
-                   System.out.println("Seeria " + partii);
+                //   System.out.println("Seeria " + partii);
              }
              
          }catch(Exception e){
@@ -915,14 +888,18 @@ if(ladu.trim().length()!=0){
          fos.write(sbb.toString().getBytes());
          fos.close();
          if(sbb.contains("<h1>Error: Server Error") || sbb.contains("Connection refused") ||  sbb.contains("connect timed out") ||  sbb.contains("errorMessage")) {
+        	
+        	 coun++;
+        	 if(coun > 2) {
+                 System.exit(0);	
+                }
+           	
         	 order.setDokNr(order.getDokNr()+"r");
         	 this.makeOrder(order);
-        	 coun++;
-        	 if(coun > 2)
-            System.exit(0);	
+        	
          }
-       
-         
+
+    	 
     	} catch (Exception o) {
     		o.printStackTrace();
     		this.log.info(o);
@@ -946,7 +923,7 @@ if(ladu.trim().length()!=0){
 	 	 String	sql1 = "SELECT  N06_KODAS_OS AS partii  from i17_vpro LEFT OUTER JOIN N06_OBJ AS b ON I17_KODAS_OS = N06_KODAS_OS " +
 	 	 		" where I17_KODAS_IS in ('" + ladu + "') and I17_KIEKIS >= " + kogus + " and I17_KODAS_PS = '" + toode +"'"; 
 	 	
-	   System.out.println(sql1);
+	 //  System.out.println(sql1);
 	   String acc = null;
 	 Connection  con = DriverManager.getConnection(url + "meri","LEDIN_API","P455W0rd_*1");
 	   Statement st1 = con.createStatement();
@@ -1048,7 +1025,7 @@ if(ladu.trim().length()!=0){
  " FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1 where  N17_POZ_DATE !=1" +
  "  and  N17_KODAS_PS = '" + toode +"'" ;
    
-          System.out.println(cmd);
+       //   System.out.println(cmd);
 
       try {
     	  con = DriverManager.getConnection(url + "meri","LEDIN_API","P455W0rd_*1");
