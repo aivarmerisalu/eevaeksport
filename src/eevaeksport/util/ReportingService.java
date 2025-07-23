@@ -99,10 +99,8 @@ public class ReportingService {
 	
 	public JSONArray getContracts() throws Exception{
 		
-		String web = "http://merisoft.eu:8080/rest/contract/list?showActive=true";
-		if(https) {
-			web = "https://api.mobitrek.eu/rest/contract/list?showActive=true";
-		}
+		String web =  "https://api.mobitrek.eu/rest/contract/list?showActive=true";
+		
 		
 		HttpClient cli = getClient();
 		HttpGet aa = new HttpGet(web);
@@ -116,16 +114,12 @@ public class ReportingService {
 
 	public JSONArray getCustomers(String user) throws Exception{
 		
-		String web = "http://merisoft.eu:8080/rest/customer/list";
-		if(https) {
-			web = "https://api.mobitrek.eu/rest/customer/list";
-		}
+		String web = "https://api.mobitrek.eu/rest/customer/list";
+		
 		
 		if(user != null){
-			web = "http://merisoft.eu:8080/rest/customer/byManagerCode/" + user;
-			if(https) {
-				web = "https://api.mobitrek.eu/rest/customer/byManagerCode/" + user;
-			}
+			web =  "https://api.mobitrek.eu/rest/customer/byManagerCode/" + user;
+			
 		}
 		
 		
@@ -141,10 +135,8 @@ public class ReportingService {
 	
 public JSONArray getSVdata(Date from , Date to , String type , String subTypes) throws Exception{
 		
-		String web = "http://merisoft.eu:8080/rest/supervisor?from=" + from.getTime() + "&to=" + to.getTime() ;
-		if(https) {
-			web = "https://api.mobitrek.eu/rest/supervisor?from=" + from.getTime() + "&to=" + to.getTime() ;
-		}
+		String web = "https://api.mobitrek.eu/rest/supervisor?from=" + from.getTime() + "&to=" + to.getTime() ;
+		
 		if(type != null) {
 			web = web + "&type=" + type;
 		}
@@ -170,10 +162,8 @@ public JSONArray getSVdata(Date from , Date to , String type , String subTypes) 
 
 public JSONArray getQuestdata() throws Exception{
 	
-	String web = "http://merisoft.eu:8080/rest/questionnaire/list?active=true" ;
-	if(https) {
-		web = "https://api.mobitrek.eu/rest/questionnaire/list?active=true" ;
-	}
+	String web = "https://api.mobitrek.eu/rest/questionnaire/list?active=true" ;
+	
 	HttpClient cli = getClient();
 	HttpGet aa = new HttpGet(web);
 	//aa.setHeader (HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
@@ -188,10 +178,8 @@ public JSONArray getQuestdata() throws Exception{
 
 public JSONArray getTaskdata(Date from , Date to ) throws Exception{
 	
-	String web = "http://merisoft.eu:8080/rest/task/list?allManagers=true&from=" + from.getTime() + "&to=" + to.getTime() ;
-	if(https) {
-		web = "https://api.mobitrek.eu/rest/task/list?allManagers=true&from=" + from.getTime() + "&to=" + to.getTime() ;
-	}
+	String web = "https://api.mobitrek.eu/rest/task/list?allManagers=true&from=" + from.getTime() + "&to=" + to.getTime() ;
+	
 	HttpClient cli = getClient();
 	HttpGet aa = new HttpGet(web);
 	//aa.setHeader (HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
@@ -206,10 +194,8 @@ public JSONArray getTaskdata(Date from , Date to ) throws Exception{
 	
 
 public JSONArray getCustomersChains() throws Exception{
-	String web = "http://merisoft.eu:8080/rest/customer/chained";
-	if(https) {
-		web = "https://api.mobitrek.eu/rest/customer/chained";
-	}
+	String web = "https://api.mobitrek.eu/rest/customer/chained";
+	
 	HttpClient cli = getClient();
     HttpResponse resp = cli.execute(getReq(web));
     JSONArray json = new JSONArray(EntityUtils.toString(resp.getEntity()));
@@ -218,10 +204,8 @@ public JSONArray getCustomersChains() throws Exception{
 
 public JSONArray getUploadedFileList(Date algus, Date lopp) throws Exception{
 	
-	String web = "http://merisoft.eu:8080/rest/fileUpload/list";
-	if(https) {
-		web = "https://api.mobitrek.eu/rest/fileUpload/list";
-	}
+	String web = "https://api.mobitrek.eu/rest/fileUpload/list";
+	
 	if(algus != null) {
 		web = web + "?from=" + algus.getTime();
 	}
@@ -237,10 +221,8 @@ public JSONArray getUploadedFileList(Date algus, Date lopp) throws Exception{
 }
 
 public JSONArray getVisitedList(String status) throws Exception{
-	String web = "http://merisoft.eu:8080/rest/visitlinesBy?contactstatus=" + status + "&days=60"; // visitlinesBy?contactstatus=plan&days=30
-	if(https) {
-		web = "https://api.mobitrek.eu/rest/visitlinesBy?contactstatus=" + status + "&days=60";
-	}
+	String web = "https://api.mobitrek.eu/rest/visitlinesBy?contactstatus=" + status + "&days=60";
+	
 	HttpClient cli = getClient();
     HttpResponse resp = cli.execute(getReq(web));
   //  System.out.println(EntityUtils.toString(resp.getEntity()));
@@ -249,20 +231,16 @@ public JSONArray getVisitedList(String status) throws Exception{
 }
 
 public JSONArray getCustomersLevel() throws Exception{
-	String web = "http://merisoft.eu:8080/rest/customer/levelled";
-	if(https) {
-		web = "https://api.mobitrek.eu/rest/customer/levelled";
-	}
+	String web = "https://api.mobitrek.eu/rest/customer/levelled";
+	
 	HttpClient cli = getClient();
 	HttpResponse resp = cli.execute(getReq(web));
     JSONArray json = new JSONArray(EntityUtils.toString(resp.getEntity()));
 	return json;
 }
 public JSONArray getCustomersTypes() throws Exception{
-	String web = "http://merisoft.eu:8080/rest/customer/typed";
-	if(https) {
-		web = "https://api.mobitrek.eu/rest/customer/typed";
-	}
+	String web = "https://api.mobitrek.eu/rest/customer/typed";
+	
 	HttpClient cli = getClient();
 	HttpResponse resp = cli.execute(getReq(web));
     JSONArray json = new JSONArray(EntityUtils.toString(resp.getEntity()));
@@ -275,10 +253,8 @@ public JSONArray getCustomersTypes() throws Exception{
 		if(includeManagers) {
 			add = "?includeManagers=true";
 		}
-		String web = "http://merisoft.eu:8080/rest/customer/allCustomers" + add;
-		if(https) {
-			web = "https://api.mobitrek.eu/rest/customer/allCustomers" + add;
-		}
+		String web ="https://api.mobitrek.eu/rest/customer/allCustomers" + add;
+		
 		HttpClient cli = getClient();
 		HttpGet aa = new HttpGet(web);
 		HttpResponse resp = cli.execute(aa);
@@ -288,10 +264,8 @@ public JSONArray getCustomersTypes() throws Exception{
 	}
 	
 	public JSONArray getDayReport(long timestampstart, long timestampend) throws Exception{
-		String web = "http://merisoft.eu:8080/rest/dayreport?from=" + timestampstart + "&to=" + timestampend;
-		if(https) {
-			web = "https://api.mobitrek.eu/rest/pod/dayreport?from=" + timestampstart + "&to=" + timestampend;
-		}
+		String web =  "https://api.mobitrek.eu/rest/pod/dayreport?from=" + timestampstart + "&to=" + timestampend;
+		
 		HttpClient cli = getClient();
 		HttpGet aa = new HttpGet(web);
 		//aa.setHeader (HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
@@ -306,10 +280,8 @@ public JSONArray getCustomersTypes() throws Exception{
 	
 	public Vector getCustomersCodes() throws Exception{
 		
-		String web = "http://merisoft.eu:8080/rest/customer/allCodes";
-		if(https) {
-			web = "https://api.mobitrek.eu/rest/customer/allCodes";
-		}
+		String web = "https://api.mobitrek.eu/rest/customer/allCodes";
+		
 		
 		HttpClient cli = getClient();
 		
@@ -330,10 +302,8 @@ public JSONArray getCustomersTypes() throws Exception{
 	
 public Vector getPodsCodes() throws Exception{
 		
-		String web = "http://merisoft.eu:8080/rest/pod/allCodes";
-		if(https) {
-			web = "https://api.mobitrek.eu/rest/pod/allCodes";
-		}
+		String web = "https://api.mobitrek.eu/rest/pod/allCodes";
+		
 		
 		HttpClient cli = getClient();
 		
@@ -362,10 +332,8 @@ public Vector getPodsCodes() throws Exception{
 	
 	public JSONArray getAssets(String user) throws Exception{
 		
-		 String url = "http://merisoft.eu:8080/rest/countit/items";
-		 if(https) {
-				url = "https://api.mobitrek.eu/rest/countit/items";
-			}
+		 String url =  "https://api.mobitrek.eu/rest/countit/items";
+			
 		HttpClient cli = getClient();
 		HttpResponse resp = cli.execute(new HttpGet(url));
 	    JSONArray json = new JSONArray(EntityUtils.toString(resp.getEntity()));
@@ -374,15 +342,11 @@ public Vector getPodsCodes() throws Exception{
 	
 	public JSONArray getDocumentsShipit(long timestamp) throws Exception{
 		
-		String web = "http://merisoft.eu:8080/rest/shipit/list";
-		if(https) {
-			web = "https://api.mobitrek.eu/rest/shipit/list";
-		}
+		String web = "https://api.mobitrek.eu/rest/shipit/list";
+		
 		if(timestamp > 0){
-			web = "http://merisoft.eu:8080/rest/shipit/list?allManagers=true&date=" + timestamp;
-			if(https) {
-				web = "https://api.mobitrek.eu/rest/shipit/list?allManagers=true&date=" + timestamp;
-			}
+			web = "https://api.mobitrek.eu/rest/shipit/list?allManagers=true&date=" + timestamp;
+			
 		}
 		HttpClient cli = getClient();
 		HttpResponse resp = cli.execute(new HttpGet(web));
@@ -396,15 +360,11 @@ public Vector getPodsCodes() throws Exception{
 	
 public JSONObject getManager(String user) throws Exception{
 		
-		String web = "http://merisoft.eu:8080/rest/manager/list";
-		if(https) {
-			web = "https://api.mobitrek.eu/rest/manager/list";
-		}
+		String web = "https://api.mobitrek.eu/rest/manager/list";
+		
 		if(user != null){
-			web = "http://merisoft.eu:8080/rest/manager/byCode/" + user;
-			if(https) {
-				web = "https://api.mobitrek.eu/rest/manager/byCode" + user;
-			}
+			web = "https://api.mobitrek.eu/rest/manager/byCode" + user;
+			
 		}
 		
 	
@@ -422,15 +382,12 @@ public JSONObject getManager(String user) throws Exception{
 		return json;
 	}
 
-public boolean https = false;
+public boolean https = true;
 
 public JSONArray getManagerList() throws Exception{
 	
-	String web = "http://merisoft.eu:8080/rest/manager/list";
+	String web = "https://api.mobitrek.eu/rest/manager/list";
 	
-	if(https) {
-		web = "https://api.mobitrek.eu/rest/manager/list";
-	}
 
 	HttpClient cli = getClient();
 	HttpResponse resp = cli.execute(new HttpGet(web));
@@ -451,10 +408,8 @@ public JSONArray getManagerList() throws Exception{
 
 public JSONArray getPackgages() throws Exception{
 	
-String web = "http://merisoft.eu:8080/rest/package/list";
-if(https) {
-	web = "https://api.mobitrek.eu/rest/package/list/";
-}
+String web =  "https://api.mobitrek.eu/rest/package/list/";
+
 
 
 	HttpClient cli = getClient();
@@ -468,11 +423,9 @@ if(https) {
 
     public JSONArray getProducts() throws Exception{
 		
-	String web = "http://merisoft.eu:8080/rest/product/list";
-	if(https) {
-    	web = "https://api.mobitrek.eu/rest/product/list/";
-	}
+	String web = "https://api.mobitrek.eu/rest/product/list/";
 	
+
 		HttpClient cli = getClient();
 		HttpResponse resp = cli.execute(new HttpGet(web));
 		String aaa = EntityUtils.toString(resp.getEntity());
@@ -495,11 +448,8 @@ if(https) {
 	    	}
 	    }
 	 
-    	String web = "http://merisoft.eu:8080/rest/pod/updateFields/" + code + "?" + add; //tag=" + tag + "&location=" + location;
-    
-	 	if(https) {
-	    	web = "https://api.mobitrek.eu/rest/pod/updateFields/" + code + "?" + add;
-		}
+    	String web =  "https://api.mobitrek.eu/rest/pod/updateFields/" + code + "?" + add;
+		
 		
     	HttpClient cli = getClient();
 		HttpResponse resp = cli.execute(new HttpPost(web));
@@ -591,10 +541,8 @@ if(https) {
 	    //System.out.println("add : " + add);
 	 	HttpClient cli = getClient();
 	 	
-	 	String web = "http://merisoft.eu:8080/rest/shipit/insertDoc";
-	 	if(https) {
-	    	web = "https://api.mobitrek.eu/rest/shipit/insertDoc";
-		}
+	 	String web =  "https://api.mobitrek.eu/rest/shipit/insertDoc";
+		
 		HttpResponse resp = restPostRequest(web, add, cli);
 		String aaa = EntityUtils.toString(resp.getEntity());
 		//System.out.println("Response " + aaa);
@@ -650,10 +598,8 @@ if(https) {
 	    add = add + "}";
 	    
 	 	HttpClient cli = getClient();
-	 	String web = "http://merisoft.eu:8080/rest/shipit/complete";
-	 	if(https) {
-	    	web = "https://api.mobitrek.eu/rest/shipit/complete";
-		}
+	 	String web =  "https://api.mobitrek.eu/rest/shipit/complete";
+		
 		HttpResponse resp = restPostRequest(web, add, cli);
 		String aaa = EntityUtils.toString(resp.getEntity());
 	//	System.out.println("teen completet " +add + " " + aaa);
@@ -679,10 +625,8 @@ if(https) {
 	    	}
 	    }
 	 
- 	String web = "http://merisoft.eu:8080/rest/customer/updateFields/" + code + "?" + add; //tag=" + tag + "&location=" + location;
- 	if(https) {
-    	web = "https://api.mobitrek.eu/rest/customer/updateFields/" + code + "?" + add;
-	}
+ 	String web = "https://api.mobitrek.eu/rest/customer/updateFields/" + code + "?" + add;
+	
  	HttpClient cli = getClient();
 		HttpResponse resp = cli.execute(new HttpPost(web));
 		String aaa = EntityUtils.toString(resp.getEntity());
@@ -694,16 +638,12 @@ if(https) {
     
     public JSONArray getPods(String filter) throws Exception{
 		
-    	String web = "http://merisoft.eu:8080/rest/pod/list";
-    	if(https) {
-	    	web = "https://api.mobitrek.eu/rest/pod/list";
-		}
+    	String web =  "https://api.mobitrek.eu/rest/pod/list";
+		
 		
     	if(filter != null){
-    		web = "http://merisoft.eu:8080/rest/pod/byRouteCode/"+ filter;
-    		if(https) {
-    	    	web = "https://api.mobitrek.eu/rest/pod/byRouteCode/"+ filter;
-    		}
+    		web = "https://api.mobitrek.eu/rest/pod/byRouteCode/"+ filter;
+    		
     	}
 	
     	HttpClient cli = getClient();
@@ -747,10 +687,8 @@ if(https) {
 	private void login() throws Exception{
 
 		String login = "{username: \"" + user + "\", password: \"" + pass + "\", company: \"" + company + "\"}";
-		String url = "http://merisoft.eu:8080/rest/login";
-		if(https) {
-	    	url = "https://api.mobitrek.eu/rest/login";
-		}
+		String url =  "https://api.mobitrek.eu/rest/login";
+		
 		HttpResponse resp = restPostRequest(url, login, client);
 		if (resp.getStatusLine().getStatusCode() != 200) throw new Exception("Login failed! " + login);
 		//System.out.println( EntityUtils.toString(resp.getEntity()));

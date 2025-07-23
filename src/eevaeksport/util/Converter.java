@@ -5448,7 +5448,7 @@ System.out.println(asjad.toString());
 		  return;
 	  }
 		MyJSON myson = new MyJSON();
-		myson.setUrl("http://merisoft.eu:8080/rest/contract/list/");
+		myson.setUrl("https://api.mobitrek.eu/rest/contract/list/");
 	  JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		int cou = 0;
@@ -5564,11 +5564,8 @@ try{
 		  return;
 	  }
 		MyJSON myson = new MyJSON();
-		myson.setUrl("http://merisoft.ee:8080/rest/product/list/");
-		if(https) {
-
-			myson.setUrl("https://api.mobitrek.eu/rest/product/list/");
-		}
+	myson.setUrl("https://api.mobitrek.eu/rest/product/list/");
+		
 	  JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		int cou = 0;
@@ -6959,10 +6956,9 @@ public static void loadVisitLines(String status,String company, String user , St
 		
 		
 		MyJSON myson = new MyJSON();
-		myson.setUrl("http://merisoft.eu:8080/rest/customer/list/");
-		if(https) {
+		
 			myson.setUrl("https://api.mobitrek.eu/rest/customer/list/");
-		}
+		
 	  JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		
@@ -7564,10 +7560,8 @@ try{
 		  System.out.println("Add companycode to export.ini for Resting");
 		  return;
 	  }
-		String url = "http://merisoft.eu:8080/rest/pod/list/";
-		if(https) {
-			url = "https://api.mobitrek.eu/rest/pod/list/";
-		}
+		String url  = "https://api.mobitrek.eu/rest/pod/list/";
+		
 	    JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		
@@ -7686,7 +7680,7 @@ try{
 		  return;
 	  }
 		
-	String url = "http://merisoft.eu:8080/rest/cargoroute/list/";
+	String url = "https://api.mobitrek.eu/rest/cargoroute/list/";
 	 
 	JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
@@ -8235,7 +8229,7 @@ String ees = "";
 		  return;
 	  }
 		
-	String url = "http://merisoft.eu:8080/rest/routecal/list/";
+	String url = "https://api.mobitrek.eu/rest/routecal/list/";
 	 
 	JSONArray array = new JSONArray();
 		Enumeration itera = vec.elements();
@@ -8307,7 +8301,7 @@ String ees = "";
 	 // "ean": "1234677",
 	 // "nfcTag": "UneMati34124423DDHH",
 	 // "factoryId": "345HD67383"
-	String url = "http://merisoft.eu:8080/rest/countit/items/";
+	String url = "https://api.mobitrek.eu/rest/countit/items/";
 	 
 	JSONArray array = new JSONArray();
 		Enumeration itera = vec.elements();
@@ -8363,7 +8357,7 @@ String ees = "";
 		  return;
 	  }
 		
-	String url = "http://merisoft.eu:8080/rest/countit/addItemToCustomer";
+	String url = "https://api.mobitrek.eu/rest/countit/addItemToCustomer";
 	  System.out.println("Vec size " + vec.size());
 	JSONArray array = new JSONArray();
 		Enumeration itera = vec.elements();
@@ -8435,7 +8429,7 @@ String ees = "";
 		  return;
 	    }
 		
-	String url = "http://merisoft.eu:8080/rest/routecal/deleteAll";
+	String url = "https://api.mobitrek.eu/rest/routecal/deleteAll";
 	 
 
 	
@@ -8470,7 +8464,7 @@ String ees = "";
 		  return;
 	  }
 		
-	String url = "http://merisoft.eu:8080/rest/vechicle/list/";
+	String url = "https://api.mobitrek.eu/rest/vechicle/list/";
 	 
 	JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
@@ -8540,11 +8534,10 @@ try{
 		  return;
 	  }
 		MyJSON myson = new MyJSON();
-		myson.setUrl("http://merisoft.ee:8080/rest/managers/");
-		if(https) {
+		
 			myson.setUrl("https://api.mobitrek.eu/rest/managers/");
 			
-		}
+		
 	  JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		while (itera.hasNext()){
@@ -8625,10 +8618,8 @@ try{
 		  return;
 	  }
 		
-	String url = "http://merisoft.eu:8080/rest/dashboard/salesData";
-	if(https) {
-		url = "https://api.mobitrek.eu/rest/dashboard/salesData";	
-	}
+	String url =  "https://api.mobitrek.eu/rest/dashboard/salesData";	
+	
 
 	JSONArray array = new JSONArray();
 		Iterator itera = vec.iterator();
@@ -8677,7 +8668,7 @@ try{
 		  return;
 	  }
 		
-	String url = "http://merisoft.eu:8080/rest/dashboard/salesData&delete?" + cal.getTimeInMillis();
+	String url = "https://api.mobitrek.eu/rest/dashboard/salesData&delete?" + cal.getTimeInMillis();
 	
 				String asi = "";
 				try {
@@ -8727,7 +8718,7 @@ try{
 			  return;
 		  }
 			
-		String url = "http://merisoft.eu:8080/rest/shipit/list/";
+		String url = "https://api.mobitrek.eu/rest/shipit/list/";
 		 
 		JSONArray array = new JSONArray();
 			Enumeration itera = vec.elements();

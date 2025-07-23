@@ -3685,7 +3685,7 @@ private void makeNewCustExcel() {
 	        		
 	        		
 
-	              String url = "http://reporting-files.merisoft.eu/gallery/droid@zpienas.lt/";
+	              String url = "https://reporting-files.mobitrek.eu/gallery/droid@zpienas.lt/";
 	        		
 	        		TreeMap newCusts = new TreeMap();
 	        		

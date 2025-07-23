@@ -2358,7 +2358,7 @@ try{
         		
         		
 
-              String url = "http://reporting-files.merisoft.eu/gallery/klp/";
+              String url = "https://reporting-files.mobitrek.eu/gallery/klp/";
         		
         		TreeMap newCusts = new TreeMap();
         		

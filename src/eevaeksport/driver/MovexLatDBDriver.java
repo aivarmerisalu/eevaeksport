@@ -2230,7 +2230,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 					// teeme faili väiksemaks
 					Converter.shrinkAndCopyFile(ff.getAbsolutePath(), ffc.getAbsolutePath(),1000);
 					
-				   if( serv.uploadFile("http://merisoft.eu:8080/rest/task/" + done + "/uploadFile/" , ffc.getAbsolutePath(), null, "tasks") ){
+				   if( serv.uploadFile("https://reporting-files.mobitrek.eu/rest/task/" + done + "/uploadFile/" , ffc.getAbsolutePath(), null, "tasks") ){
      	       	      System.out.println("Uploaded " + ff.getName() + " " + ff.getAbsolutePath());
      	           }
 				  // System.exit(0);
