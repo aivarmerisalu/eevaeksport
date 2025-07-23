@@ -661,10 +661,8 @@ String web =  "https://api.mobitrek.eu/rest/package/list/";
 	private HttpClient getClient() throws Exception{
 		if (client == null){
 			client =  HttpClients.createDefault();
+			client = TrustAllCertsApache.createHttpClient_AcceptsUntrustedCerts();
 			
-			if(https) {
-				client = TrustAllCertsApache.createHttpClient_AcceptsUntrustedCerts();
-			}
 			login();
 		}
 		
@@ -673,11 +671,9 @@ String web =  "https://api.mobitrek.eu/rest/package/list/";
 	
 	public void closeClient(){
 		if(client != null){
-			
 			try {
 				client.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		    client = null;
