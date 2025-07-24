@@ -56,6 +56,10 @@ public class Toode    {
     sb.append("\tbrand = " + brand + "\n");
     sb.append("\tgr1 = " + this.gr1 + "\n");
     sb.append("\tgr2 = " + this.gr2 + "\n");
+
+    sb.append("\tcomm = " + this.comment + "\n");
+    sb.append("\tcomm2 = " + this.comment2 + "\n");
+    sb.append("\tcomm3 = " + this.comment3 + "\n");
     
     return sb.toString();
   }
@@ -73,6 +77,8 @@ public class Toode    {
   private double donecur = 0;
   private String brand = null;
   public String comment = null;
+  public String comment2 = null;
+  public String comment3 = null;
   public JSONObject json = null;
   public Long timestamp = 0l;
 public double getPlanvol() {

@@ -247,12 +247,16 @@ public class Converter {
 
 		TreeMap<String, org.json.simple.JSONObject> answBuffer = new TreeMap<String, org.json.simple.JSONObject>();
 
+	
 		      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
 		 Calendar from = Calendar.getInstance();
 		 from.add(Calendar.DAY_OF_YEAR, -4);
 		 Calendar to = Calendar.getInstance();    
 		 to.add(Calendar.DAY_OF_YEAR, 2);
+
 		 
+
+		 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
 
 		    String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "YESNOFORCE", null, "SV-");
 
@@ -260,7 +264,6 @@ public class Converter {
 				try {
 					if(filename.length() > 1) {
 
-						 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
 						//	System.out.println("files " + files1.toString());
 					 
 						 
@@ -277,14 +280,10 @@ public class Converter {
 		  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
 		  		   
 		  			String custID = (String)cob.get("custid");
-		  			String agentname = (String)cob.get("agentname");
 		  			String agid = (String)cob.get("agentid");
 		  			String qname = (String)cob.get("prodname");
-		  			 
 		  			String title = (String)cob.get("extData");
 		  			String created = (String)cob.get("resstr3"); // see on tegelt Long
-		  			String comment = (String)cob.get("comment");
-		  			String prodid = (String)cob.get("prodid");
 		  			
 
 		  			Calendar cal = Calendar.getInstance();
@@ -336,6 +335,9 @@ public class Converter {
 				
 				System.out.println("buffer " + answBuffer.size());
 
+				
+				
+				
 			//  System.exit(0);
 
 //			  1- loeme küsimused sisse 
@@ -384,7 +386,6 @@ public class Converter {
 			                 			
 			                 				String klient = "";
 			                 				String chain = "";
-			                 				String question = "";
 			                 				String period = "";
 			                 				Long nowL = Calendar.getInstance().getTimeInMillis();
 			                 				
@@ -499,6 +500,7 @@ public class Converter {
 			    	                 					//vaatame kas selline asi on meil olemas
 			    	                 				
 			    	                 					String key = klient + "-" + kysimus + "-"+ chain +" "+ klient + " " + period;
+			    	                 					String key2 = klient;
 			    	                 				//	System.out.println("keys " + key);
 			    	                 					//System.out.println("keys2 " + answBuffer.get(key) + " " + answBuffer.keySet().toString() + "\n" ) ;
 			    	                 					
@@ -512,7 +514,6 @@ public class Converter {
 
 					    	                 				CellStyle newStyle = workbook.createCellStyle();
 					    	                 				newStyle.cloneStyleFrom(originalStyle);
-		                                                    //   System.out.println("oioi " + ob.get("resint1"));
 		                                                       
 		                                                       String cobComm = (String)ob.get("comment");
 		                                                       
@@ -616,7 +617,82 @@ public class Converter {
 				    	                 			        cell.setHyperlink(link);
 				    	                 					changesMade = true;
 			    	                 					}
+				    	                 				 
+				    	                 				 
+			    	                 				 } else if (files1 != null && files1.get(key2) != null){
+			    	                 					 
+			    	            		  				String foto = null;
+			    	            		  				String comm = null;
+			    	            		  					ArrayList arr = (ArrayList)files1.get(key2);
+			    	            		  					for(int e = 0; e<arr.size(); e++) {
+			    	            		  						Toode t = (Toode)arr.get(e);
+			    	            		  									    	            		  						
+			    	            		  						if( t.getLadu() != null && t.comment2.contains("|PAL") && 
+			    	            		  								t.comment2.contains(kyssa.toUpperCase())){
+			    	            		  							foto =  t.getLadu();
+			    	            		  							comm =  t.comment3 + " " + t.getGr1() + " " + t.getGr2() ;
+			    	            		  						   }
+			    	            		  					     }
+			    	            		  					
+			    	            		  					
+			    	            		  					
+                                             if(foto != null) {
+                                            	  // System.out.println("foto olemas ja siin sees. " + key2 + " " + comm + " :: "+ kyssa + " " + foto  );	
+   	            		  						
+			    	                 					 // siin siis vaatame fotobufrist kas on midagi mis huvitab
+			    	                 					
+			    	                 					 CellStyle originalStyle = cell.getCellStyle();
+
+				    	                 				CellStyle newStyle = workbook.createCellStyle();
+				    	                 				  newStyle.cloneStyleFrom(originalStyle);
+	                                                      newStyle.setFillForegroundColor(IndexedColors.LIME.getIndex());
+					    	                 			  newStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				    	                 			     cell.setCellStyle(newStyle);
+				    	                 			     
+				    	                 			     
+			    	                 					XSSFDrawing drawing = sheet.createDrawingPatriarch();
+			    	                 			        XSSFComment comment = cell.getCellComment();
+
+
+					    	                 				CreationHelper helper = workbook.getCreationHelper();
+			    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+			    	                 			            anchor.setCol1(cell.getColumnIndex());
+			    	                 			            anchor.setCol2(cell.getColumnIndex() + 3);
+			    	                 			            anchor.setRow1(row.getRowNum());
+			    	                 			            anchor.setRow2(row.getRowNum() + 3);
+			    	                 			            comment = drawing.createCellComment(anchor);
+		                                                     XSSFRichTextString commentText = new XSSFRichTextString(comm);
+				    	                 			        comment.setString(commentText);
+				    	                 			        comment.setAuthor("Merisoft-Mobitrek");
+				    	                 			        cell.setCellComment(comment);
+			    	                 			        	
+
+			    	                 					
+			    	                 					 
+			    	                 				Font originalFont = workbook.getFontAt(originalStyle.getFontIndex());
+			    	                 				Font linkFont = workbook.createFont();
+			    	                 				linkFont.setColor(IndexedColors.BLUE.getIndex());
+			    	                 				linkFont.setUnderline(Font.U_SINGLE);
+			    	                 				linkFont.setFontName(originalFont.getFontName());
+			    	                 				linkFont.setFontHeight(originalFont.getFontHeight()); // preserve font size
+			    	                 				newStyle.setFont(linkFont); // use the new font
+			    	                 				
+			    	                 			       org.apache.poi.ss.usermodel.Hyperlink link = helper.createHyperlink(Hyperlink.LINK_URL);
+			    	                 			        
+			    	                 			       String safeUrl = foto.replace("{", "%7B")
+			    	                                           .replace("}", "%7D")
+			    	                                           .replace("[", "%5B")
+			    	                                           .replace("]", "%5D")
+			    	                                           .replace("!", "%21")
+			    	                                           .replace(" ", "%20");
+			    	                 			        link.setAddress(safeUrl);
+			    	                 			        cell.setHyperlink(link);
+			    	                 					changesMade = true;
+		    	                 						 
+			    	                 					 
 			    	                 				 }
+			    	                 					
+			    	                 				 }	
 			    	                 			   }
 				                 				}
 	                                          }
@@ -6256,6 +6332,7 @@ try{
 		            	String cuid = key.substring(key.indexOf("{")+1, key.indexOf("}"));
 		            	String date = key.substring(key.indexOf("}")+2, key.indexOf("}")+8);
 		            	String time = key.substring(key.indexOf("}")+9, key.indexOf("}")+17).replaceAll("_", ".");
+		            	String comment = (String)cob.get("comment");
 		            	String gr = " "; 
 		            	try {
 		            		gr = key.substring(key.indexOf("[")+1, key.indexOf("]"));
@@ -6271,7 +6348,6 @@ try{
 		            	
 		            	
 		            	//if(cuid.equals("747724"))
-		            	//System.out.println( prodid + ";" +cuid + ";" + agent + ";" + date + ";"  + key  );
 		            	
 		            	Toode t = new Toode(prodid);
 		            	t.comment = agent;
@@ -6279,6 +6355,12 @@ try{
 		            	t.setGr1(date);
 		            	t.setGr2(time);
 		            	t.setLadu(key);
+		            	t.comment2 = comment;
+		            	t.timestamp = (Long)cob.get("created");
+		            	t.comment3 = (String)cob.get("agentname");
+		            	
+
+		            //	System.out.println( prodid + ";" +cuid + ";" + agent + ";" + date + ";"  + key + " ; " + t.comment2 + " " + t.ti );
 		            	
 		            	ArrayList arr = new ArrayList();
 		            	if(res.get(cuid) != null) {

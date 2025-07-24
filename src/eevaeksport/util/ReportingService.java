@@ -264,7 +264,7 @@ public JSONArray getCustomersTypes() throws Exception{
 	}
 	
 	public JSONArray getDayReport(long timestampstart, long timestampend) throws Exception{
-		String web =  "https://api.mobitrek.eu/rest/pod/dayreport?from=" + timestampstart + "&to=" + timestampend;
+		String web =  "https://api.mobitrek.eu/rest/dayreport?from=" + timestampstart + "&to=" + timestampend;
 		
 		HttpClient cli = getClient();
 		HttpGet aa = new HttpGet(web);
