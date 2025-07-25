@@ -87,7 +87,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
    
       
       
-     // this.downloadData("getItems");
+      this.downloadData("getItems");
     //  getCustomers(null);
       //  this.downloadData(null);
     // this.getDebt(null);
@@ -514,6 +514,14 @@ System.out.println("ProdGroup size :  " + tm.size());
     		this.saveFile("getCustomers",true);
     	 }
 
+       
+      if (dataType == null || dataType.equals("getCustomerNewProducts")) {
+    		this.saveFile("getCustomerNewProducts",true);
+    	 }
+      
+      if (dataType == null || dataType.equals("getStockAndSales")) {
+  		this.saveFile("getCustomerStockAndSales",true);
+  	 }
       
       if (dataType == null || dataType.equals("getItems")) {
     		 this.saveFile("getItems", true);
