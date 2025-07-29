@@ -1286,9 +1286,28 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
      * @see
      */
 
+    private HashMap getNimed() {
+    	HashMap nim = new HashMap();
+    	
+    	try {
+   ArrayList<String> arr = new ArrayList<String>();
+   Converter.readFile(new File("grupinimed.txt"), "utf-8", arr);
+   for (String line: arr) {
+	   StringTokenizer st = new StringTokenizer(line,";");
+	     nim.put(st.nextToken(), st.nextToken());
+	      }
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	System.out.println("mined " + nim.toString());
+    	return nim;
+    }
+    
     public TreeMap getProdGroups() throws SQLException {
       Connection con = getNewCon();
     TreeMap   tm = new TreeMap();
+    HashMap nimed = getNimed();
     String    sql = "SELECT [Code] as liik , [Description] as nimetus FROM [SalesData].[dbo].[SC2Subgroups]" ;
 
     Statement st = con.createStatement();
@@ -1297,6 +1316,9 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     while (rs.next()) {
     	String liik = rs.getString("liik").trim();
     	String nimi = rs.getString("nimetus");
+    	if(nimed.get(liik) != null) {
+    		nimi = nimed.get(liik) + "";
+    	}
     	
     	if (nimi == null || nimi.trim().length() == 0){
     		nimi = liik ;

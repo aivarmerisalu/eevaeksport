@@ -12,6 +12,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -82,14 +83,14 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     	  }
       }
      
-  
+      getProducts(null);
    //   token = getMSToken();
    
       
-      
-      this.downloadData("getItems");
+     // getCustomerNewProducts();
+     // this.downloadData("getItems");
     //  getCustomers(null);
-      //  this.downloadData(null);
+     //   this.downloadData(null);
     // this.getDebt(null);
     // this.getCustomerProductsList(null);
      //this.setBulkSales(null);
@@ -165,9 +166,9 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
    }
 
 	public Vector getLastThreeData() {
-		// TODO Auto-generated method stub
 		return null;
 	}
+	
    public Vector getPriceMatrixData() {
 
    	Vector lines = new Vector();
@@ -176,20 +177,12 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 
    }
 
- //  public Vector getFixedAssortmentData() {
-      // return fixedLines ;
- //}
-   
    
    
    public Vector getFixedAssortmentData() {
 	return null;
 	}
 
-   
-   
-   
-  
    
  
 
@@ -204,53 +197,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
  
 
    public Vector getDebt(String agentCode){
-	   
 			  Vector tm = new Vector();
-				
-	        	int total = this.getPagination("getDebtList");
-	        	
-	        	for (int a = 0 ; a < total; a++) {
-	        	
-	        		String aa = "";
-	        	    if(a > 0) {
-	        	    	aa = a + "";
-	        	    }
-	        		
-	        	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getDebtList" + aa +".json");
-				org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
-				
-				  int lenn = values.size();
-				try {
-				  for (int i = 0; i < lenn; i++) {
-						org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-		        		String number = (String) cob.get("document_no");
-			        	String date =(String) cob.get("document_date");
-			        	String duedate = (String) cob.get("pay_date");
-			        	Double volg = Double.parseDouble(cob.get("open_amount") + "");
-			        	String payer = (String) cob.get("payer_code");
-			        	String custid = (String) cob.get("customer_code");
-			        	
-
-       		     Debt dd = new Debt();
-				  dd.setCustID(custid);
-				  dd.setPayerID(payer);
-				  dd.setDoknr(number);
-				  dd.setDate(getDate(date));
-				  dd.setDuedate(getDate(duedate));
-				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
-				  dd.setDue(ff + "");
-				  dd.setSum(volg);
-		            if(!nodebt.contains(payer)) { 
-				       tm.add(dd);
-		            }
-		          	}
-				  
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
-	        	}
-		  System.out.println("Debtsize " + tm.size());
 	     return tm;
 	   }
 
@@ -304,16 +251,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 
 }
 	   
-	   
-	   
-	   /*   {
-      "@odata.etag": "W/\"JzIwOzE0NTcxMzI1NDExNjY1NDUyMDYwMTswMDsn\"",
-      "id": "2a7525a9-b354-ef11-bfe2-000d3adbde7b",
-      "code": "AINEDISP",
-      "displayName": "puhastusaine dispenser",
-      "lastModifiedDateTime": "2024-08-07T11:53:31.527Z"
-    },
-    */
+	  
 	   
    
 
@@ -323,10 +261,6 @@ System.out.println("ProdGroup size :  " + tm.size());
 
 
 
-   private String enCode(String res ){
-	 
-	   return Converter.enCodeEst(res);
-	  }
 	  
    
    public static String deCode(String res ){
@@ -372,23 +306,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 			
 	System.out.println("Managersize " + tm.size());
   
-	Agent agent1 = new Agent("AGENT1");
-	agent1.setName("AGENT1");
-	  tm.put(agent1.getName(), agent1);
-  
-	  Agent agent2 = new Agent("AGENT2");
-		agent2.setName("AGENT2");
-		  tm.put(agent2.getName(), agent2);
-	  
-		  Agent agent3 = new Agent("AGENT3");
-			agent3.setName("AGENT3");
-			  tm.put(agent3.getName(), agent3);
-		  
-			  Agent agent4 = new Agent("AGENT4");
-				agent4.setName("AGENT4");
-				  tm.put(agent4.getName(), agent4);
-			  
-
+	
      return tm;
    }
 
@@ -537,10 +455,6 @@ System.out.println("ProdGroup size :  " + tm.size());
     	  this.saveFile("getPriceMatrix", true);
          }
 
-      
-      if (dataType == null || dataType.equals("getDebtList")) {
-    	  this.saveFile("getDebtList", true);
-         }
       
       
       if (dataType == null || dataType.equals("getCustomerProducts")) {
@@ -852,9 +766,127 @@ System.out.println("ProdGroup size :  " + tm.size());
  	   }
      
      
+     private HashMap getStockAndSales() {
+
+    	 HashMap res = new HashMap();
+    	 Integer total = getPagination("getCustomerStockAndSales");
+         
+ 	 	for (int a = 0 ; a < total; a++) {
+ 	 		String aa = "";
+ 	 	    if(a > 0) {
+ 	 	    	aa = a + "";
+ 	 	    }
+ 	 		
+     	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getCustomerStockAndSales" + aa +".json");
+ 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
+ 		
+ 		  int lenn = values.size();
+ 		try {
+ 		  for (int i = 0; i < lenn; i++) {
+ 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+         		String customerNumber = (String) cob.get("location");
+ 	        	String prodId = ((String) cob.get("product_id")).trim();
+ 	        	Double qty = Double.parseDouble(cob.get("quantity") + "");
+ 	        	Double s30 = Double.parseDouble(cob.get("sales30d") + "");
+ 	       	    Double s60 = Double.parseDouble(cob.get("sales60d") + "");
+ 	   	        Double s90 = Double.parseDouble(cob.get("sales90d") + "");
+ 	 	
+ 	         		Toode tt = new Toode(prodId);
+ 	         		tt.addKogus(qty);
+ 	         		tt.addDonecur(s30);
+ 	         		tt.addDonevol(s60);
+ 	         		tt.addPlancur(s90);
+ 	         		
+ 	         		HashMap sisu = new HashMap();
+ 	         		if(res.get(customerNumber) != null) {
+ 	         			sisu = (HashMap)res.get(customerNumber);
+ 	         		}
+ 	         		
+ 	         		sisu.put(prodId, tt);
+ 	         		res.put(customerNumber, sisu);
+ 	         		
+ 	         		
+ 	    		  }
+        
+
+ 		   } catch (Exception e) {
+               e.printStackTrace();
+            }
+     	}
+
+ 	 	
+ 	 	System.out.println("getCustomerStockAndSales size " + res.size());
+  
+    	 
+    	 return res;
+     }
+
+     
+     private HashMap getCustomerNewProducts() {
+
+    	 HashMap res = new HashMap();
+    	 Integer total = getPagination("getCustomerNewProducts");
+         
+ 	 	for (int a = 0 ; a < total; a++) {
+ 	 		String aa = "";
+ 	 	    if(a > 0) {
+ 	 	    	aa = a + "";
+ 	 	    }
+ 	 		
+     	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getCustomerNewProducts" + aa +".json");
+ 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
+ 		
+ 		  int lenn = values.size();
+ 		try {
+ 		  for (int i = 0; i < lenn; i++) {
+ 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+         		String customerNumber = (String) cob.get("customer");
+ 	        	String prodId = (String) cob.get("item_no");
+ 	        	String date = (String) cob.get("date");
+ 	 	         
+ 	         		Toode tt = new Toode(prodId);
+ 	         		tt.setAlguspaev(getDate(date));
+ 	         		
+ 	         		HashMap sisu = new HashMap();
+ 	         		if(res.get(customerNumber) != null) {
+ 	         			sisu = (HashMap)res.get(customerNumber);
+ 	         		}
+ 	         		
+ 	         		sisu.put(prodId, tt);
+ 	         		res.put(customerNumber, sisu);
+ 	         		
+ 	         		
+ 	        	    
+ 	        	/*
+ 	        	   "date": "2025-06-30",
+                   "customer": "3T520",
+                    "item_no": "R841040",*/
+ 	         		
+ 	    		  }
+        
+
+ 		   } catch (Exception e) {
+               e.printStackTrace();
+            }
+     	}
+
+ 	 	
+ 	 	System.out.println("getCustomerNewProducts size " + res.size());
+  
+    	 
+    	 return res;
+     }
+     
+
+     
+     
    public Vector getCustomerProductsList(String agentCode){
 	  
 	   Vector custProds = new Vector();
+	   HashMap stock = getStockAndSales();
+	   HashMap newProds = getCustomerNewProducts();
+	   
+	   
 	   
        Integer total = getPagination("getCustomerProducts");
        
@@ -876,7 +908,10 @@ System.out.println("ProdGroup size :  " + tm.size());
 	        	String last_date = (String) cob.get("last_date");
 	        	Double qty = Double.parseDouble(cob.get("qty") + "");
 	        	String number = (String) cob.get("invoice_no");
-	        	Double price = Double.parseDouble(cob.get("last_price") + "");
+	        	Double price = (Double)cob.get("last_price");
+	        	if(price == null) {
+	        		price = 0d;
+	        	}
 	
 	         		  
 	         		  CustProd cp = new CustProd(customerNumber, prodId, qty ,0 ,0 ,last_date,price,0,0," ");
@@ -944,79 +979,97 @@ public TreeMap getProducts(Agent agent) {
 	  String weblink = parent.getProps().getProperty("weblink") ;
 	  
 	  
-		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//getItems.json");
-  	
+	  
+	  Integer total = getPagination("getItems");
+      
+	 	for (int a = 0 ; a < total; a++) {
+	 		String aa = "";
+	 	    if(a > 0) {
+	 	    	aa = a + "";
+	 	    }
+	 		
+  	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getItems" + aa +".json");
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
 
+		org.json.simple.JSONObject cob = null;
 		try {
 		  int lenn = values.size();
 		  
 		  for (int i = 0; i < lenn; i++) {
 			  
-			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+			 cob = (org.json.simple.JSONObject) values.get(i);
+			 /*
+			  * "product_id": "R227729",
+      "description": "IMEP\u00c4RANE J\u00d5ULU\u00d6\u00d6",
+      "division_code": "RAAMATUD",
+      "item_category_code": "LASTENOOR",
+      "product_group_code": "KOOLIEEL",
+      "manufacturer_code": "SINISUKK",
+      "vendor_no": "H10034",
+      "purchaser_code": "TENEK",
+      "unit_price": "2.5",
+      "unit_cost": "3.89",
+      "wholesale_price": "4.94",
+      "date_created": "2018-09-04 00:00:00",
+      "updated": "2025-06-05 14:22:38",
+      "EAN": "9789949346745"
+    
+			  */
 
-          	String number = (String)cob.get("number");
+          	String number = (String)cob.get("product_id");
 			Product prod = new Product(number);
 		
-
-          	String itemCatCode = (String)cob.get("manufacturerCode");
+			String price = (String)cob.get("wholesale_price");
+          	if (price != null) {
+          		prod.setPrice(Double.parseDouble(price));
+          	}
+			
+          	String itemDivCode = (String)cob.get("division_code");
+        	
+          	String itemCatCode = (String)cob.get("item_category_code");
         	if (itemCatCode != null && itemCatCode.length() > 0) {
         		prod.setGroup(itemCatCode);
         	}
+         	
+        	String itemGrCode = (String)cob.get("product_group_code");
+        	if (itemGrCode != null && itemGrCode.length() > 0) {
+        		prod.setGroupSecond(itemGrCode);
+        	}
         	
-          	Boolean blocked = (Boolean) cob.get("blocked");
-          	
           	String add = "";
-          	String gtin = (String)cob.get("barcode");
+          	String gtin = (String)cob.get("EAN");
           	if (gtin != null && gtin.length() > 5) {
              	prod.setEAN(gtin);
              	add = " " + gtin.substring(gtin.length() -5);
           	}
+        
           	
-
-          	String kastis = cob.get("packageQty")+"";
-          	if(kastis != null) {
-          		try {
-          		prod.setInCases(Double.parseDouble(kastis));
-          		}catch(Exception e) {
-          			
-          		}
-          	}
           	
-          	String name = (String)cob.get("displayName");
-          	String name2 = (String)cob.get("displayName2");
-          	prod.setName(name2.trim() + " " + number + add);
+          	String name = (String)cob.get("description");
+          	prod.setName(name + " " + number + add);
           	
         
-        	String unit = (String)cob.get("baseUnitOfMeasureCode");
+        	String unit = (String)cob.get("unit");
         	if (unit != null) {
-        		prod.setUnit(unit);
+        		prod.setUnit("tk");
         	}
         	
-          	String price = cob.get("currentSalesPrice")+ "";
-          	if (price != null) {
-          		prod.setPrice(Double.parseDouble(price));
-          	}
           	
-          	String inventory = cob.get("inventory") +"";
+          	String inventory = (String)cob.get("inventory") ;
           	if (inventory != null) {
           		prod.setStock(Double.parseDouble(inventory));
           	}
-          	  	
-          	if(weblink != null) {
-          		prod.weblink = weblink + prod.getID();
-          	}
-             
-            if(!blocked) {
-            	  tm.put(prod.getName(), prod);	
-            }
-          
+          	
+            
+           	  tm.put(prod.getName(), prod);	
+            
           	}
 		  
 		} catch (Exception e) {
+			System.out.println("cob "+  cob.toString());
 			e.printStackTrace();
 		}
-		
+	 	}
 System.out.println("Prodsize " + tm.size());
 	  
 	return tm;
