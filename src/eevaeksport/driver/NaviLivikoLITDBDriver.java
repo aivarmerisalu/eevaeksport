@@ -1420,7 +1420,11 @@ con3.close();
                    if (pant != null && pant.trim().length()>0){
                 	   prod.setPandPakendiKood(pant.trim());
                    }
-                        
+
+                   String link  = rs.getString("weblink");
+                    if(link != null && link.trim().length() > 4 ) {
+                        prod.weblink = link;
+                     }
                           
                        
                 

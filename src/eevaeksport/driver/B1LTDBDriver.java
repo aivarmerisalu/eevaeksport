@@ -130,6 +130,24 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 	  user =  getParent().getProps().getProperty("rest.user");
       pass = getParent().getProps().getProperty("rest.pass");
       companyx = getParent().getProps().getProperty("rest.companyx");
+      
+
+	  if(getParent().getProps().getProperty("nogroups") != null){
+	    	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("nogroups"),",");
+	    	while (st.hasMoreElements()){
+	    		nogroups.add(st.nextToken());
+	    		
+	    	}
+	    }
+	  
+	//  System.out.println(nogroups.toString());
+	  if(getParent().getProps().getProperty("yesgroups") != null){
+	    	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("yesgroups"),",");
+	    	while (st.hasMoreElements()){
+	    	 	yesGrups.add(st.nextToken());
+	    	}
+	    }
+
     
      // getPriceMatrixData();
   //downloadData(null);
@@ -148,8 +166,9 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
       String companyID = null;
 	  String clientID =  null;
 	  String token =  null;
-  
-		 
+      HashSet nogroups = new HashSet();
+      HashSet yesGrups = new HashSet();
+  	
 		 
 		 private HttpPost getPost(String url, String data) {
 			 HttpPost request = new HttpPost(url);
@@ -412,9 +431,23 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
            String id = cob.get("id")+"";
            String name = (String)cob.get("name");
-       
+           
+         boolean goes = true;
            if (name != null && name.trim().length() > 0) {
-        	   tm.put(id,Converter.enCodeEst(name));
+
+//System.out.println("ProdGroup size :  " + nogroups.contains(name)  + " '" + name+ "'");
+        	   
+        	   if(nogroups.contains(name)) {
+        		   if(!nogroups.contains(id)) {
+        		   nogroups.add(id);
+        		   }
+        		   goes = false;
+        	   }
+        	   
+        	   if(goes) {
+        	      tm.put(id,Converter.enCodeEst(name));   
+        	   }
+        	   
            }
          	}
 		  
@@ -601,16 +634,17 @@ private void saveFile (String filename, String url ) {
 
         
        
-       
+       private HashSet<String> activeCust = null;
        
        
    public TreeMap getCustomers(Agent agent){
 	   
-	   
-	   downloadData(null);
-
-	   
-	   HashMap<String, ArrayList> addr = new HashMap<String, ArrayList>();
+	   if(!"true".equals(getParent().getProps().getProperty("testing"))) {
+	       downloadData(null);
+	   }
+	    
+	   activeCust = new HashSet<String>();
+	    addr = new HashMap<String, ArrayList>();
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//custaddr.json");
 	  	
 		int pages =  Integer.parseInt(cc.get("pages")+"");
@@ -716,6 +750,7 @@ private void saveFile (String filename, String url ) {
 	            if(juridical && isPotential || !usecustfilter) {
 	          	String number = cob.get("id") +"";
 	          	Customer cust = new Customer(number);
+	          	activeCust.add(number);
 	          	cust.setGroup(number + "pr");
 	            
 	          	String code = (String)cob.get("code") ;
@@ -820,7 +855,7 @@ private void saveFile (String filename, String url ) {
 	           } else {
 	        	  // kui aadresse pole siis läheb pea klient
 	            tm.put(displayName, cust);
-	            System.out.println("Peaklient only " +  cust.getID());
+	           // System.out.println("Peaklient only " +  cust.getID());
 	            }
 	          	}
 			  } 
@@ -847,81 +882,18 @@ private void saveFile (String filename, String url ) {
   
 
    
-   private Vector getCP(String custid , String number, String date ){
-
-	   Vector result = new Vector();
-	   try{
-			String httpsURL = "https://login.directo.ee/xmlcore/" + company + "/xmlcore.asp?what=invoice_row&get=1&number=" + number;
-		       // System.out.println("httpsURL " + httpsURL);
-				URL myurl = new URL(httpsURL);
-		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-		        InputStream ins = con.getInputStream();
-		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-		        BufferedReader in = new BufferedReader(isr);
-		        
-		        String inputLine;
-		        StringBuffer inputLineBuf = new StringBuffer();
-		        while ((inputLine = in.readLine()) != null){
-		        	inputLine = this.enCode(inputLine);
-		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ));
-		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
-		        	while (st.hasMoreTokens()){
-		        		
-		        		String line = st.nextToken();
-		        		int ind =  line.indexOf("item=") ;
-		        		String toode = "";
-			        	if(ind != -1){
-			        		toode = line.substring(ind + 6);
-			        		toode = toode.substring(0,toode.indexOf("\""));
-			        	
-			        	}
-		        
-			        	
-			        	ind =  line.indexOf("quantity=") ;
-		        		double kogus = 0;
-		        		String kkk = "";
-			        	if(ind != -1){
-			        		kkk = line.substring(ind + 10);
-			        		kkk = kkk.substring(0,kkk.indexOf("\""));
-			        		
-			        		 kogus = Double.parseDouble(kkk);
-			        	}
-			        	
-			        	ind =  line.indexOf("total=") ;
-			        	double hind = 0;
-		        		 kkk = "";
-			        	if(ind != -1){
-			        		kkk = line.substring(ind + 7);
-			        		kkk = kkk.substring(0,kkk.indexOf("\""));
-			        		
-			        		 hind = Double.parseDouble(kkk)/kogus;
-			        		// System.out.println("toode " + toode + " " + hind);
-			        	}
-			        	
-		        
-		        result.add(new CustProd(custid, toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
-		         }
-		        	
-		        }
-		        in.close();
-		      //  System.out.println("buffer " + result);
-		        
-	   }catch(Exception e){
-		   e.printStackTrace();
-		   return null;
-	   }
-	   return result;
-   }
-
-   Hashtable prodCodes = null;
+    Hashtable prodCodes = null;
    
    public String getAssortmentStr(Agent agent){
     return null;
   }
 
+  private  HashMap<String, ArrayList> addr = null;
+   
 
    public Vector getCustomerProductsList(String agentCode){
 	   Vector custProds = new Vector();
+	   
 	   
 	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//sales.json");
 	  	
@@ -949,27 +921,22 @@ private void saveFile (String filename, String url ) {
 	          	
 	          	Object aadr = cob.get("unloadAddressId") ;
 
-	          	if(aadr != null) {
-	          		String clientId = cob.get("clientId") +"";
-	          		
-	          		String customerNumber = clientId + "_" + aadr;
-	          		
 	          	Integer id = Integer.parseInt(cob.get("id")+"");
 	          	String date = cob.get("saleDate") +"";
 	          	String dnumber = cob.get("series") + "" + cob.get("number");
-	          	
-	        	
+          		String clientId = cob.get("clientId") +"";
+
 	        	File f = new File("data//lines//"+id+"-saleItems.json");
-	        	
-	        		if(!f.exists()) {
-		    			org.json.simple.JSONObject filter = new org.json.simple.JSONObject();
-		    			filter.put("field", "saleId");
-		    			filter.put("op", "eq");
-		    			filter.put("data", id);
-		    		
-		    			 saveFileWithFilter("lines/" + id + "-saleItems","https://www.b1.lt/api/warehouse/sale-items/list", filter);
-		    			}
-	        	
+               if(activeCust.contains(clientId)) {
+        		if(!f.exists()) {
+	    			org.json.simple.JSONObject filter = new org.json.simple.JSONObject();
+	    			filter.put("field", "saleId");
+	    			filter.put("op", "eq");
+	    			filter.put("data", id);
+	    			 saveFileWithFilter("lines/" + id + "-saleItems","https://www.b1.lt/api/warehouse/sale-items/list", filter);
+	    			}
+        	
+	          	
 	        	if (f.exists()) {
 	        		org.json.simple.JSONObject ccL = 	Converter.readJSONFile("data//lines//"+id+"-saleItems.json");
 	        	  	
@@ -1001,15 +968,27 @@ private void saveFile (String filename, String url ) {
 	         			price = netAmnt / qty;
 	         		}catch(Exception E) {
 	         		}
+	         		String customerNumber = clientId;
+	         		if(aadr != null) {
+		          		 customerNumber = clientId + "_" + aadr;
 	         		  System.out.println("CP " + customerNumber + " " + prodId + " " + qty + " " + price + " " + date);
 	         		  CustProd cp = new CustProd(customerNumber, prodId, qty ,0 ,0 ,Converter.turn(date).substring(0,5),price,0,0," ");
 	         		  cp.setAbiKood(dnumber);
 	         		  custProds.add(cp);
-	         		
-	    		  }
+	         		} else {
+	         		    if(addr.get(clientId) != null) {
+	         		       ArrayList<Customer> arr = addr.get(clientId);
+	         		       for(Customer custAdr : arr) {
+	         			  CustProd cp = new CustProd(custAdr.getID(), prodId, qty ,0 ,0 ,Converter.turn(date).substring(0,5),price,0,0," ");
+		         		  cp.setAbiKood(dnumber);
+		         		  custProds.add(cp);
+		         		  }
+		         	    }
+	         		  }
+	    		  
 	        	
 	          	}		
-	          	
+	        	}
 	          	}
 			}
 		  
@@ -1262,15 +1241,16 @@ public String getProductSortingData() {
 @Override
 public TreeMap getProducts(Agent agent) {
 	  TreeMap tm = new TreeMap();
-	  
-  HashSet yesGrups = new HashSet();
-	  if(getParent().getProps().getProperty("yesgroups") != null){
-	    	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("yesgroups"),",");
-	    	while (st.hasMoreElements()){
-	    	 	yesGrups.add(st.nextToken());
-	    	}
-	    }
-	  
+
+	  try {
+		this.getProdGroups();
+	} catch (SQLException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+  
+	//  System.out.println("nogr " + nogroups.toString());
+
 	  
 	  //loeme sisse jäägid 
 	  HashMap<String,Double> stock = new HashMap<String,Double>();
@@ -1363,17 +1343,24 @@ public TreeMap getProducts(Agent agent) {
         		prod.setGroup(itemCatCode);
         		if(yesGrups.contains(itemCatCode)) {
         			goes = true;
+        		}else if(nogroups.size() > 0 && !nogroups.contains(itemCatCode)) {
+        			goes = true;
         		}
+        			
         	}
           	
-        	if(yesGrups.size() == 0) {
+        	if(yesGrups.size() == 0 && nogroups.size() == 0) {
         		goes = true;
         	}
         	
+        	
+        	
+        	if(!"true".equals(parent.getProps().getProperty("nobarcode"))) {
           	String gtin = (String)cob.get("barcode");
           	if (gtin != null && gtin.length() > 5) {
              	prod.setEAN(gtin);
-          	}
+             //	System.out.println("ean ok ");
+          	}}
           	
           	String name = (String)cob.get("name");
           	name = name.replaceAll("\"", " ");

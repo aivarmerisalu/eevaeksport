@@ -1486,7 +1486,7 @@ st.close();
         String add = "";
         if(ean != null && ean.trim().length()>0){
         	if(ean.startsWith("0")) {
-        		ean = ean.substring(1);
+        		//ean = ean.substring(1);
         	}
         prod.setEAN(ean.trim());
         

@@ -180,7 +180,8 @@ public class Converter {
 	
 	
 	 public static void uploadQuestsAndAnswers(String companyx, String user, String pass, Properties props, String excelDir) {
-		  
+	
+		 // Algus - vaatame mis küsimused on juba olemas
 		  HashSet qutitles = new HashSet();
 
 			 File svdata = new File( "svdata");
@@ -222,12 +223,18 @@ public class Converter {
 			   }
 		   }
 		   
+	 // Lõpp - vaatame mis küsimused on juba olemas
+		   
+		   
+		   
+		   
+		   
 		   String cat = "";
 		  if( props.getProperty("pallet.dir") != null) {
 			  cat = props.getProperty("pallet.dir") + "/";
 		  }
 		  
-			//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
+	//  Kõigepealt vaatame vastuseid ja kui on siis üritame kohe sisse salvestada.
 				File folder = new File( excelDir + cat);
 				 File done = new File( excelDir + cat + "done");
 				 if(!done.exists()) {
@@ -255,22 +262,20 @@ public class Converter {
 		 to.add(Calendar.DAY_OF_YEAR, 2);
 
 		 
-
+// failide kaudu info salvestamine 
 		 TreeMap files1 = Converter.makeWebFilesTree(from.getTime(), to.getTime(), companyx, user, pass, true);
 
+// SV kaudu info kogumine. 
 		    String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "YESNOFORCE", null, "SV-");
 
 		     parser = new JSONParser();
+		     
 				try {
-					if(filename.length() > 1) {
-
-						//	System.out.println("files " + files1.toString());
-					 
-						 
-						   InputStreamReader reader = new InputStreamReader(new FileInputStream(filename), "UTF-8");
-
-						org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(reader);
 			
+					if(filename.length() > 1) {
+						 
+				   InputStreamReader reader = new InputStreamReader(new FileInputStream(filename), "UTF-8");
+						org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(reader);
 
 		  		for (int i = 0; i < cc.size(); i++) {
 		  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
@@ -290,11 +295,10 @@ public class Converter {
 		  			cal.setTimeInMillis(Long.parseLong(created));
 		  			dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
 		  			
-		  			String signa = custID + "-" + dateAndTime;
-
 						String foto = null;
 		  			
 		  			try {
+		  				
 		  				if(cob.get("pictureLinks") != null) {
 		  				org.json.simple.JSONArray phs = (org.json.simple.JSONArray)parser.parse((cob.get("pictureLinks").toString()));
 		  				String fotoOK = null;
@@ -315,9 +319,9 @@ public class Converter {
 		  					  }
 		  				   }	
 
-		  				if(fotoOK != null) {
-		  					cob.put("phurl", fotoOK);
-		  				}
+			  				if(fotoOK != null) {
+			  					cob.put("phurl", fotoOK);
+			  				}
 		  				}
 		  				
 		  				}catch(Exception e) {
@@ -338,7 +342,6 @@ public class Converter {
 				
 				
 				
-			//  System.exit(0);
 
 //			  1- loeme küsimused sisse 
 			  //otsime faile mille nimes on pallets
@@ -428,7 +431,7 @@ public class Converter {
 		                 				    	break;
 		                 				    }
 		                 				    
-		                 				    
+		                 	//tegeleme ainult kehtivate alustega			    
 			                 				if(endL > nowL) {
 			                 				
 			                 					String signa = klient +"_"+ period;
@@ -436,8 +439,8 @@ public class Converter {
 				                 				String pais = chain + " " + klient + " " + period;
 				                 				
 			                 					
-			                 				if( !qutitles.contains(pais)) { //!questsDone.contains(signa)
-			                 				// kui pole lisatud küsimust siis 
+			                 				if( !qutitles.contains(pais)) { 
+			               // kui pole küsimust olemas tuleb ta lisada ja vastustega ei tegele
 			                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
 		    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
 		    	                 				System.out.println("pais  " + pais + " " + kyssa);
@@ -623,24 +626,22 @@ public class Converter {
 			    	                 					 
 			    	            		  				String foto = null;
 			    	            		  				String comm = null;
-			    	            		  					ArrayList arr = (ArrayList)files1.get(key2);
-			    	            		  					for(int e = 0; e<arr.size(); e++) {
+			    	            		  ArrayList arr = (ArrayList)files1.get(key2);
+			    	            		  	for(int e = 0; e<arr.size(); e++) {
 			    	            		  						Toode t = (Toode)arr.get(e);
 			    	            		  									    	            		  						
-			    	            		  						if( t.getLadu() != null && t.comment2.contains("|PAL") && 
-			    	            		  								t.comment2.contains(kyssa.toUpperCase())){
+			    	            		  						if( t.getLadu() != null && t.comment2.contains("|PAL" + kyssa) && 
+			    	            		  								t.comment2.contains(((String)kyssad.get(b)).toUpperCase())){
 			    	            		  							foto =  t.getLadu();
 			    	            		  							comm =  t.comment3 + " " + t.getGr1() + " " + t.getGr2() ;
-			    	            		  						   }
-			    	            		  					     }
 			    	            		  					
+			    	            		  			/*if(key2.equals("77012054")) {
+			    	            		  				System.out.println("77012054 " + comm + " -- " + ((String)kyssad.get(b)).toUpperCase());
+			    	            		  				System.out.println("77012054 '" + kyssa.toUpperCase() + "' " + t.comment2);
+				    	            		  		}*/
 			    	            		  					
-			    	            		  					
-                                             if(foto != null) {
-                                            	  // System.out.println("foto olemas ja siin sees. " + key2 + " " + comm + " :: "+ kyssa + " " + foto  );	
-   	            		  						
-			    	                 					 // siin siis vaatame fotobufrist kas on midagi mis huvitab
-			    	                 					
+                                                    if(foto != null) {
+                                            	
 			    	                 					 CellStyle originalStyle = cell.getCellStyle();
 
 				    	                 				CellStyle newStyle = workbook.createCellStyle();
@@ -688,10 +689,11 @@ public class Converter {
 			    	                 			        link.setAddress(safeUrl);
 			    	                 			        cell.setHyperlink(link);
 			    	                 					changesMade = true;
-		    	                 						 
-			    	                 					 
-			    	                 				 }
-			    	                 					
+		    	                 					 }
+			    	                 				
+			    	            		  					   }
+		    	            		  					     }
+		    	            		  			
 			    	                 				 }	
 			    	                 			   }
 				                 				}

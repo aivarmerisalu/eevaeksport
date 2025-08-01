@@ -770,7 +770,7 @@ public class VSDBDriver extends AbstractDBDriver implements Manager,BulkUpdater,
 		String visit = rs.getString("visit").trim();
 
 		
-		cust.setVisit(visit);
+		//cust.setVisit(visit);
 		/*String vis = visit;
 		 visit = visitTurn4(visit);
 		if(visit.equals(vis)) {

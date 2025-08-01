@@ -1318,13 +1318,14 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     	String nimi = rs.getString("nimetus");
     	if(nimed.get(liik) != null) {
     		nimi = nimed.get(liik) + "";
+    		liik = nimi;
     	}
     	
     	if (nimi == null || nimi.trim().length() == 0){
     		nimi = liik ;
     	}
     	
-        tm.put(liik ,Converter.enCodeEst(nimi));
+        tm.put(Converter.cleanLitLatEst(liik) ,Converter.enCodeEst(nimi));
     }
     rs.close();
     st.close();
@@ -1661,6 +1662,7 @@ System.out.println(groups.toString());
         HashMap<String, String> names =  getProdNamesExcel();
      //   System.out.println("names " + names.size());
        
+        HashMap nimed = getNimed();
         TreeMap products = new TreeMap();
 
         if(eanprods == null) {
@@ -1684,8 +1686,13 @@ System.out.println(groups.toString());
                 prod.setPrice(parseDouble(rs.getString("myygihind").trim()));
                 prod.setUnit(rs.getString("unit").trim() );
                 prod.setInCases(parseDouble(rs.getString("tykke").trim()));
+               
                 String grupp = rs.getString("uusgrupp").trim();
-                prod.setGroup(grupp);
+                if(nimed.get(grupp) != null) {
+                	grupp = nimed.get(grupp)+"";
+                }
+                prod.setGroup(Converter.cleanLitLatEst(grupp));
+                
                 prod.setVat("24");
                 
                 prod.setType("LIHA");
