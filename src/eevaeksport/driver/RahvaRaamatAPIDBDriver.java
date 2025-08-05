@@ -89,8 +89,8 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
       
      // getCustomerNewProducts();
      // this.downloadData("getItems");
-    //  getCustomers(null);
-     //   this.downloadData(null);
+     // getCustomers(null);
+        //downloadData(null);
     // this.getDebt(null);
     // this.getCustomerProductsList(null);
      //this.setBulkSales(null);
@@ -231,11 +231,13 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 			  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
           
-           String code = (String)cob.get("code");
-           if(tm.get(code) == null) {
-           String name = (String)cob.get("description");
+           String code = (String)cob.get("item_category_code");
+           if(tm.get(code) == null ) {
+           String name =  (String)cob.get("category_description");
            if (name != null && name.trim().length() > 0) {
+        	  if( grinUse.contains(code)) {
         	    tm.put(code,name);
+        	  }
         	   }
               }
          	}
@@ -244,7 +246,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 			e.printStackTrace();
 		}
 		
-System.out.println("ProdGroup size :  " + tm.size());
+System.out.println("ProdGroup size :  " + tm.size() );
 	  
 	return tm;
    
@@ -437,10 +439,6 @@ System.out.println("ProdGroup size :  " + tm.size());
     		this.saveFile("getCustomerNewProducts",true);
     	 }
       
-      if (dataType == null || dataType.equals("getStockAndSales")) {
-  		this.saveFile("getCustomerStockAndSales",true);
-  	 }
-      
       if (dataType == null || dataType.equals("getItems")) {
     		 this.saveFile("getItems", true);
     	 }
@@ -462,6 +460,10 @@ System.out.println("ProdGroup size :  " + tm.size());
   			            }
       
 
+      if (dataType == null || dataType.equals("getStockAndSales")) {
+  		this.saveFile("getCustomerStockAndSales",true);
+  	 }
+      
 	  
   }
        
@@ -592,11 +594,14 @@ System.out.println("ProdGroup size :  " + tm.size());
     	   return rr;
        }
        
-       
+       private HashMap<String, String> locations = null; 
        
    public TreeMap getCustomers(Agent agent){
 	   
-	   //downloadData(null);
+	   locations = new HashMap<String, String>();
+	   if(this.loadData) {
+	    // downloadData(null);
+	   }
 	   
 	   TreeMap routes = getRouting();
 	   
@@ -626,12 +631,14 @@ System.out.println("ProdGroup size :  " + tm.size());
 
 
 	          	String number = (String)cob.get("code");
+	          	String locCode = (String)cob.get("location_code");
+	          	locations.put(locCode, number);
 	            Customer cust = new Customer(number);
 	            
 	            if(routes.get(number)!= null) {
 	            	cust.setVisit(routes.get(number)+"");
 	            }
-	            
+	                  
 	            cust.setName((String)cob.get("name"));
 	            
 	            String payer = (String)cob.get("payer");
@@ -683,7 +690,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 	            		cust.addAgent(new Agent(ags.get(e)+""));
 	            	}
 	            }
-
+	            custInUse.add(cust.getID());
 	            
 	         	Double used_credit = Double.parseDouble( (String)cob.get("used_credit") );
             	if(used_credit != 0) {
@@ -776,36 +783,56 @@ System.out.println("ProdGroup size :  " + tm.size());
  	 	    if(a > 0) {
  	 	    	aa = a + "";
  	 	    }
- 	 		
+ 	 	  try {	
      	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getCustomerStockAndSales" + aa +".json");
  		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
  		
  		  int lenn = values.size();
- 		try {
+ 		
  		  for (int i = 0; i < lenn; i++) {
  				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
          		String customerNumber = (String) cob.get("location");
- 	        	String prodId = ((String) cob.get("product_id")).trim();
- 	        	Double qty = Double.parseDouble(cob.get("quantity") + "");
- 	        	Double s30 = Double.parseDouble(cob.get("sales30d") + "");
- 	       	    Double s60 = Double.parseDouble(cob.get("sales60d") + "");
- 	   	        Double s90 = Double.parseDouble(cob.get("sales90d") + "");
- 	 	
- 	         		Toode tt = new Toode(prodId);
- 	         		tt.addKogus(qty);
- 	         		tt.addDonecur(s30);
- 	         		tt.addDonevol(s60);
- 	         		tt.addPlancur(s90);
+         		String cuCode = locations.get(customerNumber);
+         		if(cuCode != null) {
+         			try {
+
+         	        	String prodId = ((String) cob.get("product_id"));
+         				if(prodId == null) {
+         					prodId = ((String) cob.get("item_id"));
+         				}
+         				prodId = prodId.trim();
+ 	        	
+	         		Toode tt = new Toode(prodId);
+     if(cob.get("quantity") != null) {
+    	 tt.addKogus(Double.parseDouble(cob.get("quantity") + "")); 
+     }
+     
+     if(cob.get("sales30d") != null) {
+    	 tt.addDonecur(Double.parseDouble(cob.get("sales30d") + "")); 
+     }
+     
+     if(cob.get("sales60d") != null) {
+    	 tt.addDonevol(Double.parseDouble(cob.get("sales60d") + "")); 
+     }
+     
+     if(cob.get("sales90d") != null) {
+    	 tt.addPlancur(Double.parseDouble(cob.get("sales90d") + "")); 
+     }
+	    
  	         		
  	         		HashMap sisu = new HashMap();
- 	         		if(res.get(customerNumber) != null) {
- 	         			sisu = (HashMap)res.get(customerNumber);
+ 	         		if(res.get(cuCode) != null) {
+ 	         			sisu = (HashMap)res.get(cuCode);
  	         		}
  	         		
  	         		sisu.put(prodId, tt);
- 	         		res.put(customerNumber, sisu);
+ 	         		res.put(cuCode, sisu);
+         			}catch(Exception e) {
+         			System.out.println(cob.toJSONString());
+         				e.printStackTrace();
+         			}
  	         		
- 	         		
+         		}
  	    		  }
         
 
@@ -841,6 +868,10 @@ System.out.println("ProdGroup size :  " + tm.size());
  		  for (int i = 0; i < lenn; i++) {
  				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
          		String customerNumber = (String) cob.get("customer");
+         		
+         		String cuCode = locations.get(customerNumber);
+         		if(cuCode != null) {
+ 	        	
  	        	String prodId = (String) cob.get("item_no");
  	        	String date = (String) cob.get("date");
  	 	         
@@ -848,14 +879,14 @@ System.out.println("ProdGroup size :  " + tm.size());
  	         		tt.setAlguspaev(getDate(date));
  	         		
  	         		HashMap sisu = new HashMap();
- 	         		if(res.get(customerNumber) != null) {
- 	         			sisu = (HashMap)res.get(customerNumber);
+ 	         		if(res.get(cuCode) != null) {
+ 	         			sisu = (HashMap)res.get(cuCode);
  	         		}
  	         		
  	         		sisu.put(prodId, tt);
- 	         		res.put(customerNumber, sisu);
+ 	         		res.put(cuCode, sisu);
  	         		
- 	         		
+         		}
  	        	    
  	        	/*
  	        	   "date": "2025-06-30",
@@ -878,14 +909,53 @@ System.out.println("ProdGroup size :  " + tm.size());
      }
      
 
+     private boolean loadData = true;
      
+     
+     /* if(cob.get("quantity") != null) {
+    	 tt.addKogus(Double.parseDouble(cob.get("quantity") + "")); 
+     }
+     
+     if(cob.get("sales30d") != null) {
+    	 tt.addDonecur(Double.parseDouble(cob.get("sales30d") + "")); 
+     }
+     
+     if(cob.get("sales60d") != null) {
+    	 tt.addDonevol(Double.parseDouble(cob.get("sales60d") + "")); 
+     }
+     
+     if(cob.get("sales90d") != null) {
+    	 tt.addPlancur(Double.parseDouble(cob.get("sales90d") + "")); 
+     }*/
+     
+     private String getLineInff(Toode tt) {
+    	 String res = "";
+    	 if(tt.getKogus() > 0) {
+    		 res = "Laos:" + tt.getKogus() + " ";
+    	 }
+    	 if(tt.getDonecur() > 0) {
+    		 res = "M30:" + tt.getDonecur() + " ";
+    	 }
+    	 if(tt.getDonevol() > 0) {
+    		 res = "M60:" + tt.getDonevol() + " ";
+    	 }
+    	 if(tt.getPlancur() > 0) {
+    		 res = "M90:" + tt.getPlancur();
+    	 }
+    	 return res.trim();
+     }
      
    public Vector getCustomerProductsList(String agentCode){
 	  
+	   loadData = false;
+	   if(locations == null) {
+		   getCustomers(null);
+	   }
+	   
+	   
 	   Vector custProds = new Vector();
 	   HashMap stock = getStockAndSales();
-	   HashMap newProds = getCustomerNewProducts();
-	   
+	   //HashMap newProds = getCustomerNewProducts();
 	   
 	   
        Integer total = getPagination("getCustomerProducts");
@@ -903,24 +973,54 @@ System.out.println("ProdGroup size :  " + tm.size());
 		try {
 		  for (int i = 0; i < lenn; i++) {
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-        		String customerNumber = (String) cob.get("code");
-	        	String prodId =(String) cob.get("product_code");
+        		String customerLoc = (String) cob.get("customer");
+        		String cuCode = locations.get(customerLoc);
+        		if(cuCode != null) {
+        			
+        		if(custInUse.contains(cuCode)) {
+        			
+              			String prodId =(String) cob.get("item_no");
+
+        //			System.out.println("Kl kood olemas ja kasutusel " + cuCode + " " + prodsInUse.size() + " " + prodsInUse.contains(prodId));        			
+	      
+        			
+        			if(prodsInUse.contains(prodId)) {
+        				
+        				String lineInff = null;
+        				
+        				HashMap st = (HashMap)stock.get(cuCode);
+            			if(st != null) {
+            				Toode stT = (Toode)st.get(prodId);
+            				if(stT != null) {
+            				 lineInff = getLineInff(stT);
+            				}
+            			}
+            			 
+        				
+        				
 	        	String last_date = (String) cob.get("last_date");
 	        	Double qty = Double.parseDouble(cob.get("qty") + "");
 	        	String number = (String) cob.get("invoice_no");
-	        	Double price = (Double)cob.get("last_price");
-	        	if(price == null) {
-	        		price = 0d;
+	        	Double price = 0d ;
+	        	try {
+	        	price = Double.parseDouble((String)cob.get("unit_price"));
+	        	}catch(Exception e) {
+	        		
 	        	}
 	
 	         		  
-	         		  CustProd cp = new CustProd(customerNumber, prodId, qty ,0 ,0 ,last_date,price,0,0," ");
+	         		  CustProd cp = new CustProd(cuCode, prodId, qty ,0 ,0 ,last_date,price,0,0," ");
 	         		  cp.setAbiKood(number);
+	         		  if(lineInff != null) {
+	         			  cp.setAbiKood(lineInff);
+	         		  }
 	         		  custProds.add(cp);
 	         		
 	    		  }
+		  }
+        		}
        
-
+		  }
 		   } catch (Exception e) {
               e.printStackTrace();
            }
@@ -935,7 +1035,7 @@ System.out.println("ProdGroup size :  " + tm.size());
      return null;
    }
    public String getDriverVersion(){
-     return "Directo";
+     return "RahvaRaamat";
    }
    public String getSubjectFilesTo(){
      return this.subjectFilesTo;
@@ -972,6 +1072,12 @@ public String getProductSortingData() {
 	// TODO Auto-generated method stub
 	return null;
 }
+
+private HashSet grinUse = new HashSet();
+private HashSet prodsInUse = new HashSet();
+private HashSet custInUse = new HashSet();
+
+
 
 @Override
 public TreeMap getProducts(Agent agent) {
@@ -1018,7 +1124,8 @@ public TreeMap getProducts(Agent agent) {
 
           	String number = (String)cob.get("product_id");
 			Product prod = new Product(number);
-		
+			 prodsInUse.add(number);
+			
 			String price = (String)cob.get("wholesale_price");
           	if (price != null) {
           		prod.setPrice(Double.parseDouble(price));
@@ -1029,6 +1136,9 @@ public TreeMap getProducts(Agent agent) {
           	String itemCatCode = (String)cob.get("item_category_code");
         	if (itemCatCode != null && itemCatCode.length() > 0) {
         		prod.setGroup(itemCatCode);
+        		if(!grinUse.contains(itemCatCode)) {
+        			grinUse.add(itemCatCode);
+        		}
         	}
          	
         	String itemGrCode = (String)cob.get("product_group_code");

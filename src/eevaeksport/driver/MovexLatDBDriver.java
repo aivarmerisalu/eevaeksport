@@ -2085,19 +2085,19 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	  try{
 			 
 		  LocalDate currentDate = LocalDate.now();
-	        
-	        // Get the current year-month
+		  LocalDate futureDate = currentDate.plusDays(14);
+		  
 	        YearMonth currentYearMonth = YearMonth.from(currentDate);
-	        
-	        // Get the next month
 	        YearMonth nextMonthYearMonth = currentYearMonth.plusMonths(1);
-	        
-	        // Get the last day of the next month
 	        LocalDate lastDayOfNextMonth = nextMonthYearMonth.atEndOfMonth();
 		 
 		  ZonedDateTime zonedDateTime = lastDayOfNextMonth.atStartOfDay(ZoneId.systemDefault());
-	        long twoweeks = zonedDateTime.toInstant().toEpochMilli();
 		  
+	        long  twoweeks = futureDate.toEpochDay();
+		  
+	        ZonedDateTime zdt = futureDate.atStartOfDay(ZoneId.systemDefault());
+	         twoweeks = zdt.toInstant().toEpochMilli();
+	        
 		  eevaeksport.util.ReportingService serv = new ReportingService();
 			serv.user =  user;
 			serv.pass = pass;

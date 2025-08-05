@@ -732,7 +732,7 @@ HashSet olemas = new HashSet();
         		"        		 N08_PAV as nimetus, N33_kodas_ak AS nimetus2, N08_CREDIT_LIM as cred, \r\n" + 
         		"				 N33_ADRESAS AS aadress, ltrim(N08_NUOL_GR) AS ale , \r\n" + 
         		"				 ' ' AS visit ,N08_KODAS_KS AS payer ,  \r\n" + 
-        		"				 (CASE WHEN LEN(LTRIM(N33_KODAS_LS_1))=0 or N33_KODAS_LS_1  IS NULL THEN  N08_KODAS_MS_P ELSE N33_KODAS_LS_1  END) AS agent , \r\n" + 
+        		"				 (CASE WHEN LEN(LTRIM(N33_KODAS_MS))=0 or N33_KODAS_MS  IS NULL THEN  N08_KODAS_MS_P ELSE N33_KODAS_MS  END) AS agent , \r\n" + 
         		"				  N33_KODAS_VS as agent2, \r\n" + 
         		"				 (case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm , \r\n" + 
         		"				N33_TEL as phone , N33_SHIP_VIA  as deld, N33_E_MAIL  as email \r\n" + 
