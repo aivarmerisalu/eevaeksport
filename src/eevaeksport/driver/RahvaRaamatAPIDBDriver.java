@@ -88,7 +88,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
    
       
      // getCustomerNewProducts();
-     // this.downloadData("getItems");
+     // this.downloadData("getKeskInventory");
      // getCustomers(null);
         //downloadData(null);
     // this.getDebt(null);
@@ -312,7 +312,38 @@ System.out.println("ProdGroup size :  " + tm.size() );
      return tm;
    }
 
-   
+
+   public TreeMap getStock(){
+		  TreeMap tm = new TreeMap();
+			try {
+				
+			org.json.simple.JSONObject cc = Converter.readJSONFile("data//getKeskInventory.json");
+	  	
+			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
+			
+			  int lenn = values.size();
+		
+			  for (int i = 0; i < lenn; i++) {
+				  
+				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+
+	            String prod = (String)cob.get("product_id");
+	            Double kogus = Double.parseDouble((String)cob.get("quantity"));
+	            
+  tm.put(prod, kogus);
+	          	}
+			  
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+	System.out.println("Managersize " + tm.size());
+
+	
+  return tm;
+}
+
+
 
        public String getDistribution() {
          return null;
@@ -429,6 +460,10 @@ System.out.println("ProdGroup size :  " + tm.size() );
     	  this.saveFile("getAgents", false);
          }
 
+
+      if (dataType == null || dataType.equals("getKeskInventory")) {
+    	  this.saveFile("getKeskInventory", false);
+         }
       
       if (dataType == null || dataType.equals("getCustomers")) {
     		this.saveFile("getCustomers",true);
@@ -931,16 +966,16 @@ System.out.println("ProdGroup size :  " + tm.size() );
      private String getLineInff(Toode tt) {
     	 String res = "";
     	 if(tt.getKogus() > 0) {
-    		 res = "Laos:" + tt.getKogus() + " ";
+    		 res = "Laos:" + (int)tt.getKogus() + " ";
     	 }
     	 if(tt.getDonecur() > 0) {
-    		 res = "M30:" + tt.getDonecur() + " ";
+    		 res = res +  "M30:" + (int)tt.getDonecur() + " ";
     	 }
     	 if(tt.getDonevol() > 0) {
-    		 res = "M60:" + tt.getDonevol() + " ";
+    		 res = res + "M60:" + (int)tt.getDonevol() + " ";
     	 }
     	 if(tt.getPlancur() > 0) {
-    		 res = "M90:" + tt.getPlancur();
+    		 res = res + "M90:" + (int)tt.getPlancur();
     	 }
     	 return res.trim();
      }
@@ -998,7 +1033,7 @@ System.out.println("ProdGroup size :  " + tm.size() );
             			 
         				
         				
-	        	String last_date = (String) cob.get("last_date");
+	        	String last_date = ((String) cob.get("date")).substring(5);
 	        	Double qty = Double.parseDouble(cob.get("qty") + "");
 	        	String number = (String) cob.get("invoice_no");
 	        	Double price = 0d ;
@@ -1008,12 +1043,13 @@ System.out.println("ProdGroup size :  " + tm.size() );
 	        		
 	        	}
 	
-	         		  
+	        	if(lineInff != null) {
+       			 // cp.setAbiKood(lineInff);
+	        		last_date = last_date + " " + lineInff;
+       		  }
 	         		  CustProd cp = new CustProd(cuCode, prodId, qty ,0 ,0 ,last_date,price,0,0," ");
-	         		  cp.setAbiKood(number);
-	         		  if(lineInff != null) {
-	         			  cp.setAbiKood(lineInff);
-	         		  }
+	         		//  cp.setAbiKood(number);
+	         		  
 	         		  custProds.add(cp);
 	         		
 	    		  }
@@ -1084,7 +1120,7 @@ public TreeMap getProducts(Agent agent) {
 	  TreeMap tm = new TreeMap();
 	  String weblink = parent.getProps().getProperty("weblink") ;
 	  
-	  
+	  TreeMap stocks =  getStock() ;
 	  
 	  Integer total = getPagination("getItems");
       
@@ -1104,28 +1140,16 @@ public TreeMap getProducts(Agent agent) {
 		  for (int i = 0; i < lenn; i++) {
 			  
 			 cob = (org.json.simple.JSONObject) values.get(i);
-			 /*
-			  * "product_id": "R227729",
-      "description": "IMEP\u00c4RANE J\u00d5ULU\u00d6\u00d6",
-      "division_code": "RAAMATUD",
-      "item_category_code": "LASTENOOR",
-      "product_group_code": "KOOLIEEL",
-      "manufacturer_code": "SINISUKK",
-      "vendor_no": "H10034",
-      "purchaser_code": "TENEK",
-      "unit_price": "2.5",
-      "unit_cost": "3.89",
-      "wholesale_price": "4.94",
-      "date_created": "2018-09-04 00:00:00",
-      "updated": "2025-06-05 14:22:38",
-      "EAN": "9789949346745"
-    
-			  */
+	
 
           	String number = (String)cob.get("product_id");
 			Product prod = new Product(number);
 			 prodsInUse.add(number);
 			
+			 if(stocks.get(number) != null) {
+				 prod.setStock((Double)stocks.get(number));
+			 }
+			 
 			String price = (String)cob.get("wholesale_price");
           	if (price != null) {
           		prod.setPrice(Double.parseDouble(price));
