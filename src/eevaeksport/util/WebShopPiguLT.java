@@ -401,7 +401,7 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    				String prodName = (String) modification.get("title");
 	                    				String prodEan = (String) modification.get("ean");
 	                    				
-	                    				Double prodPriceVAT = (Double) productLine.get("price");
+	                    			//	Double prodPriceVAT = (Double) productLine.get("price");
 	                    				Double prodPrice = Double.parseDouble((String) productLine.get("price_without_vat"));
 	                    				
 	                    				Long prodAmnt = (Long) productLine.get("amount");

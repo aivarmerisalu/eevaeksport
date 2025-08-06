@@ -4554,13 +4554,13 @@ public class Converter {
 						
 						for(int i = 0 ; i < a;i++){
 							
-							
+
 							Row row = sheet.getRow(i);	
 							if(row != null) {
 								
 								
 								Cell cellx = row.getCell((short)0);
-								
+							
 								
 								if(i == 0 || i == 1 || i == 2 || i == 3 || i == 4) {
 									for(int y = 4 ; y < 15 ;y++) {
@@ -4588,11 +4588,10 @@ public class Converter {
 								
 									}
 								}
-								
-								
+	// setime tagasi esimese välja peale peale rimit
+								cellx = row.getCell((short)0);
 								try {
 									if(cellx != null) {
-									//	System.out.println("xx " +formatter.formatCellValue(cellx));
 										if(formatter.formatCellValue(cellx).indexOf("Maksimarket") != -1 ) {
 											return "coop";
 										}
@@ -4602,6 +4601,8 @@ public class Converter {
 										
 										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 || formatter.formatCellValue(cellx).indexOf("Material") != -1
 												 || formatter.formatCellValue(cellx).indexOf("Kauba koodde") != -1 ) {
+
+											System.out.println("xx00 " +formatter.formatCellValue(cellx));	
 											return "maxima";
 										}	
 											
