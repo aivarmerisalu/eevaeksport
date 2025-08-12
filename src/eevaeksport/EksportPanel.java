@@ -1216,7 +1216,8 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("SkaiteRoskisko")
 					    || driver.getDriverVersion().equals("BalmerkCSV")
 					    || driver.getDriverVersion().equals("B1LT")
-	                	 )
+					    || driver.getDriverVersion().equals("RahvaRaamat")
+                		  )
                   
                   {
                 	  if(matrix != null){

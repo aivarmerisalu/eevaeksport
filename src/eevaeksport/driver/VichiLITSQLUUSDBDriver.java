@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -1514,7 +1515,6 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	public TreeMap getProducts(Agent agent) {
 		TreeMap tm = new TreeMap();
 		TreeMap KAU = new TreeMap();
-		TreeMap allowedstuff = new TreeMap();
 		Vector topstuff = new Vector();
 		TreeMap discT = new TreeMap();
 		TreeMap mintime = new TreeMap();
@@ -1577,7 +1577,13 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	rs = stmt.executeQuery(top2);
 	while (rs.next()) {
 		String pro = rs.getString("itemid").trim();
-		mintime.put( pro,rs.getTime("asi").getTime());
+		Calendar calendar = Calendar.getInstance();
+		Time time = rs.getTime("asi");
+		calendar.setTime(time);
+		int hour = calendar.get(Calendar.HOUR_OF_DAY);
+		int minute = calendar.get(Calendar.MINUTE);
+		Long ll = (long) (hour *60*60*1000 + minute *60*1000);
+		mintime.put( pro,ll);
 		nullseis.put(pro, pro);
 				}
 
@@ -1632,9 +1638,6 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				}
 				prod.setGroup(grupp);
    
-				if(allowedstuff.get(prod.getID()) != null){
-					prod.setTimeToSell(Long.parseLong(""+allowedstuff.get(prod.getID())));
-				}
 				
 				
   
