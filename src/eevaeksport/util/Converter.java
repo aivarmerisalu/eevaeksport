@@ -8992,14 +8992,14 @@ try{
 	public static void setSendRestMsg(Vector<MyJSON> json, boolean https ){
 		
 		CloseableHttpClient  client = HttpClients.createDefault();
-		if(https) {
+		
 			try {
 				client = TrustAllCertsApache.createHttpClient_AcceptsUntrustedCerts();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		
 		
 		
 		RequestConfig defaultRequestConfig = RequestConfig.custom()
