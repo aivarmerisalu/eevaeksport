@@ -715,6 +715,9 @@ public class NaviLivikoLITDBDriver extends AbstractDBDriver implements BulkUpdat
   
        public TreeMap getCustomers(Agent agent){
     	   
+    	   
+    	 TreeMap webAgs =   Converter.getWebCustomersAgents(rcompanyx, user, pass);
+    	   
     	   TreeMap openOrders = this.getOpenOrders();
     	   
     	   try {
@@ -1026,7 +1029,12 @@ con3.close();
     	 			          }
     	 			}
                   
-    	         	
+    	         	if( webAgs != null && webAgs.get(customer.getID()) != null) {
+    	         		ArrayList arr =  (ArrayList)webAgs.get(customer.getID());
+    	         		for(int i = 0 ; i< arr.size();i++) {
+    	         		   customer.addAgent(new Agent(arr.get(i)+""));
+  	 			       	}
+    	         	}
     	         	
     	            String paym = rs.getString("payment");
 

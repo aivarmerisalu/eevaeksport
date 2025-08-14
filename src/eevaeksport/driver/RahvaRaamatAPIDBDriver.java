@@ -1089,7 +1089,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	         			  HashMap hh = (HashMap)newProds.get(cuCode);
 	         			  if(hh.get(prodId) != null) {
 	         				  String tt = (String)hh.get(prodId);
-	    	         		  cp.setAbiKood("|t" + tt);
+	    	         		  cp.setAbiKood("|tUus: " + tt);
 	    	         		//  System.out.println("uus toode " + cuCode + " " + prodId);
 	         			  }
 	         		  }
