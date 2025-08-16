@@ -37,22 +37,26 @@ import eevaeksport.imp.OrderLine;
        Class.forName(databaseDriverName).newInstance();
      
      
+       String ur = parent.getProps().getProperty("dsn.url");
+       if(ur != null) {
+    	   urlP = ur;
+       }
       
     
-      
-     
-
      }
      catch (Exception e) {
        parent.showError(e);
      }
    }
 
+   private String urlP = "SAF";
+   
+   
    public String identifyCustomer(String id,String regnr)throws SQLException {
     String custid = null;
     
     String cmd = "SELECT kl.code FROM grcompany kl WHERE U_ImpordiFiliaal = '" + id + "'";   
-    Connection con4 = DriverManager.getConnection(url + "saf"
+    Connection con4 = DriverManager.getConnection(url + urlP
             , "mobile", "mobile");
     PreparedStatement st2 = con4.prepareStatement(cmd);
     ResultSet rs = st2.executeQuery();
@@ -107,7 +111,7 @@ import eevaeksport.imp.OrderLine;
     log.info("2_LINE_SQL: " + sql2);
 
     String prod = null;
-Connection ccc = DriverManager.getConnection(url + "saf"
+Connection ccc = DriverManager.getConnection(url + urlP
         , "mobile", "mobile");
     Statement st1 = ccc.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
@@ -180,11 +184,6 @@ Connection ccc = DriverManager.getConnection(url + "saf"
        double kogus = orderLine.getKogus();
        double ale = orderLine.getDiscount();
     
-       
-    
-       String agent = order.getAgent();
-      
- 
            
            String sql = " SELECT max(hi.price) AS hind  ,pr.id AS kood" +
         " FROM grarticle pr  " +
@@ -194,7 +193,7 @@ Connection ccc = DriverManager.getConnection(url + "saf"
         " WHERE hi.idgrpricelist=1  AND (articletype='G' OR articletype='P')  AND pr.code='" + itemid + "'  group by pr.id ";
            
          log.info("SALES_LINE_SQL: " + sql);
-         Connection con5 = DriverManager.getConnection(url + "saf"
+         Connection con5 = DriverManager.getConnection(url + urlP
                  , "mobile", "mobile");
          Statement st = con5.createStatement();
          ResultSet rs = st.executeQuery(sql);
@@ -240,7 +239,7 @@ System.out.println(sql);
 	String sql = "SELECT id FROM grcompany WHERE LTRIM(code)='" + order.getCompany() + "'";
 
 	log.info("addInvoiceHeader: " + sql);
-	Connection con4 = DriverManager.getConnection(url + "saf"
+	Connection con4 = DriverManager.getConnection(url + urlP
             , "mobile", "mobile");
        Statement st = con4.createStatement();
        ResultSet rs = st.executeQuery(sql);
@@ -256,7 +255,6 @@ System.out.println(sql);
 
        
        while(rs.next()){
-         String custCode = rs.getString("id").trim();
             
           agent = "telema";
 
