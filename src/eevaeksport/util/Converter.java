@@ -4866,19 +4866,21 @@ public class Converter {
 	
 	public static void sendReportEmail(String comment1 , String fileName, EksportPanel parent ){
 	   	try{
-	   		String comment = null ;
+	   		String comment = null;
+	   		String sub = "";
+	   		
 	   		if(comment1 != null && comment1.trim().length() > 0) {
-	   			comment =  comment1 + "\n\n" ;
+	   			if(comment1.contains("|")) {
+	   				sub = " " + comment1.substring(0, comment1.indexOf("|"));
+		   			comment =  comment1.substring(comment1.indexOf("|")+1) + "\n\n" ;	
+	   			}
 	   		}
 	   		
 	   		
 	   		if(comment != null && comment.trim().length() >0){
 	   			
-	   			//System.out.println(comment);
 	   			Email mail = new Email(null);
-		  		   
-	   			
-	                mail.setSMTP(parent.getProps().getProperty("smtphost"));
+		  	        mail.setSMTP(parent.getProps().getProperty("smtphost"));
 	                if(parent.getProps().getProperty("smtpuser") != null)
 	                mail.setUser(parent.getProps().getProperty("smtpuser"));
 	                
@@ -4889,30 +4891,28 @@ public class Converter {
 	                mail.setPort(parent.getProps().getProperty("smtpport"));
 	               
 	              
-	                	mail.setSubjectFilesTo("Merisoft Report " );
-		                if(parent.getProps().getProperty("report.subject") != null)
-		                	mail.setSubjectFilesTo(parent.getProps().getProperty("report.subject"));
+	                mail.setSubjectFilesTo("Merisoft Report ");
+		                if(parent.getProps().getProperty("report.subject") != null) {
+		                	mail.setSubjectFilesTo(parent.getProps().getProperty("report.subject")+ sub);
+		                }
 		                
 		  	  		mail.setFrom(parent.getProps().getProperty("from"));
 		  	  		
-		  	  
-		  	  	
-		  	  		String lisa = "";
-		  	  		
 		  	  		mail.setEncoding("utf-8");
-		  	  		mail.setBodyHtml("<br>" + lisa + comment.replaceAll("\n", "<br>") + "<br><br>");
+		  	  		mail.setBodyHtml("<br>" +  comment.replaceAll("\n", "<br>") + "<br><br>");
 		  	  		mail.setSendNotice(false);
-		  	  		mail.addAttach(fileName);
+		  	  		
+		  	  		if(fileName != null) {
+		  	  		  mail.addAttach(fileName);
+		  	  		}
+		  	  		
 		  	  	 StringTokenizer st = new StringTokenizer(parent.getProps().getProperty("report.email"),",");
 		  	  	 while(st.hasMoreTokens()) {
 		  	  		 String tt = st.nextToken();
 		  	  	    mail.setFilesTo(tt);
 		  	  		mail.send(); 
-		  	  	 System.out.println(tt + " " + fileName);
 		  	  	 }
-		  	  	
-	               	
-	   		}
+		 	}
 		  	
 		  			}catch(Exception e){
 		  			e.printStackTrace();	
@@ -11058,32 +11058,51 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
 
 
-	public static String getOrderText(Order order,TreeMap names) {
-		String res = "\n";
-		 Iterator iter = order.getOrderLines().iterator();
-	        while (iter.hasNext()){
-	          OrderLine line = (OrderLine)iter.next();
-	          String toode  = line.getToode();
-	 	     if(toode!= null){
-	 	    	 toode = toode.trim();
-	 	     }else{
-	 	    	 toode = "";
-	 	     }
-	 	     String name = line.getTooteNimi();
-	 	     if(name.trim().length() == 0){
-	 	    	 name = toode;
-	 	     }
-	 	     if(names != null && names.get(toode) != null){
-	 	    	 name = names.get(toode) + "";
-	 	     }
-	 	     
-	          if(line.getKogus()!= 0 && !toode.equals("")){
-	           res = res + toode + " " + name + " " + line.getPrice() + "  [" + line.getKogus() + "] " +" \n";  
-	          }
-	          }
+	 public static String getOrderText(Order order, TreeMap<String, String> names) {
+		    StringBuilder res = new StringBuilder();
 
-		return res;
-	}
+		    // Start HTML table
+		    res.append("<table border='1' cellspacing='0' cellpadding='5'>");
+		    res.append("<tr>")
+		       .append("<th>Kood</th>")
+		       .append("<th>Nimetus</th>")
+		       .append("<th>Hind</th>")
+		       .append("<th>Kogus</th>")
+		       .append("</tr>");
+
+		    Iterator<OrderLine> iter = order.getOrderLines().iterator();
+		    while (iter.hasNext()) {
+		        OrderLine line = iter.next();
+		        String toode = line.getToode();
+		        if (toode != null) {
+		            toode = toode.trim();
+		        } else {
+		            toode = "";
+		        }
+
+		        String name = line.getTooteNimi();
+		        if (name == null || name.trim().isEmpty()) {
+		            name = toode;
+		        }
+
+		        if (names != null && names.get(toode) != null) {
+		            name = names.get(toode);
+		        }
+
+		        if (line.getKogus() != 0 && !toode.isEmpty()) {
+		            res.append("<tr>")
+		               .append("<td>").append(toode).append("</td>")
+		               .append("<td>").append(name).append("</td>")
+		               .append("<td>").append(line.getPrice()).append("</td>")
+		               .append("<td>").append(line.getKogus()).append("</td>")
+		               .append("</tr>");
+		        }
+		    }
+
+		    res.append("</table>");
+		    return res.toString();
+		}
+
 
 	
  public static Object readObject(String s) throws IOException,

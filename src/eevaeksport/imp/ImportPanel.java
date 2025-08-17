@@ -15303,6 +15303,7 @@ shipdate = getCalXML(asi);
             				           || driver.getDriverVersion().equals("SkaiteRoskiskoImport")
             				           || driver.getDriverVersion().equals("BC365")
             				           || driver.getDriverVersion().equals("PreseLV")
+            				           || driver.getDriverVersion().equals("RahvaRaamatAPI")
             				           
             						  )){
             	  dokNr = agordnum;         	  
