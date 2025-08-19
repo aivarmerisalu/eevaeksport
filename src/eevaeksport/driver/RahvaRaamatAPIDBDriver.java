@@ -1224,7 +1224,7 @@ public TreeMap getProducts(Agent agent) {
           	
           	
           	String name = (String)cob.get("description");
-          	prod.setName(name + " " + number + add);
+          	prod.setName(name.replace('*', '\'').replace('*', '\'') + " " + number + add);
           	
         
         	String unit = (String)cob.get("unit");
