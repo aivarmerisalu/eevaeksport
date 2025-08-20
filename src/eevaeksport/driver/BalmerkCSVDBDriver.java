@@ -752,27 +752,18 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 	        try {
 	        		 double vv = Double.parseDouble(volg);
 	        		 if(vv != 0){
-	        			// if(isDueDate(duedate)){
-				        		     Debt dd = new Debt();
+	        			
+	        			 Debt dd = new Debt();
 				     				  dd.setCustID(custid);
 				     				  dd.setPayerID(payer);
 				     				  dd.setDoknr(number);
 				     				  dd.setDate(getDate(date));
 				     				  Calendar cc = Calendar.getInstance();
-				     				  cc.setTime(getDate(date));
-				     				  cc.add(Calendar.DAY_OF_YEAR, 14);
-				     				  
-				     				  
-				     				  if(duedate != null && duedate.length() == 8) {
-				     					 cc.setTime(getDate(duedate));
-				     				  }
-				     				  
-				     				 dd.setDuedate(cc.getTime());
-				     				  dd.setDue(days);  
-				     				 
-				     				  dd.setSum(vv);
-				     				//	System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " + days + " " + vv);	
-						        			  
+				     				   cc.setTime(getDate(duedate));
+				     				   dd.setDuedate(cc.getTime());
+				     				   dd.setDue(days);  
+				     				   dd.setSum(vv);
+				     						  
 				     				  if(dueSums.get(payer) != null){
 				     					  double ss = Double.parseDouble(dueSums.get(payer) + "")+ vv ;
 				     					 dueSums.put(payer, ss);    
