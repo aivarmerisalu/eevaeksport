@@ -94,6 +94,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.format.CellFormatType;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -104,6 +105,7 @@ import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.FormulaError;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -4640,7 +4642,7 @@ public class Converter {
 									
 								}
 								
-								for(int y = 4 ; y < 12 ;y++) {
+								for(int y = 4 ; y < 16 ;y++) {
 									
 									cellx = row.getCell((short)y);
 									if(cellx != null) {
@@ -4720,8 +4722,18 @@ public class Converter {
 										cellx = row.getCell((short)y);
 										if(cellx != null) {
 											try {
-											//System.out.println("selver " + formatter.formatCellValue(cellx) + " " + i + " " + y + " " + a);
-											if(formatter.formatCellValue(cellx).indexOf("Kadaka Selver") != -1 ) {
+												String value;
+												if (cellx == null) {
+												    value = "";
+												} else if (cellx.getCellType() == 5) {
+												    // Handle error cells explicitly
+												    value = FormulaError.forInt(cellx.getErrorCellValue()).getString();
+												} else {
+												    value = formatter.formatCellValue(cellx);
+												}
+												
+												
+											if(value.indexOf("Kadaka Selver") != -1 ) {
 												return "selver";
 											}	
 										}catch(Exception k) {

@@ -817,7 +817,7 @@ String picts = parent.getProps().getProperty("pict.dir");
               }
            
               if(ag.equals("00028")){
-            	  cust.addAgent(new Agent("00026"));  
+            	//  cust.addAgent(new Agent("00026"));  
               }
            
               

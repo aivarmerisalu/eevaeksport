@@ -72,7 +72,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,WebReporter {
+public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,WebReporter,FixLoader {
 
   public BC365DBDriver(EksportPanel parent) {
     super(parent);
@@ -967,6 +967,11 @@ public TreeMap getProducts(Agent agent) {
           	if (gtin != null && gtin.length() > 5) {
              	prod.setEAN(gtin);
              	add = " " + gtin.substring(gtin.length() -5);
+             	if(eanprods == null) {
+                   	eanprods =new TreeMap();
+                   }
+                   eanprods.put(gtin.trim(), prod.getID());
+                
           	}
           	
 
@@ -1297,6 +1302,33 @@ public void WebReporter() {
 	     System.exit(0);
 	
 }
+
+
+private TreeMap eanprods = null;
+
+@Override
+		public void FixLoader() {
+		   
+		  boolean hasFile = Converter.hasFixFromExcels("excelsort",parent);
+		   if(hasFile) {
+		   eanprods =  Converter.loadMore();
+			  if(eanprods == null) {
+				  eanprods = new TreeMap();
+			  }
+			this.getProducts(null);
+			
+			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+			
+			System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			if(contracts.size() > 0) {
+				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+			}
+			
+		     } else {
+			   System.out.println("No sortiments to read");
+		   }
+			System.exit(0);
+		}
 
 
 }

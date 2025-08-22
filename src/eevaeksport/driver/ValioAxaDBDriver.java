@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -605,14 +606,9 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 	       	System.exit(0);
 	       }
 
-	    	 TreeMap webmerc4856 =  Converter.getWebMercagents(rcompany, user, pass,false,"4856");
-	    	 TreeMap webmerc4542 =  Converter.getWebMercagents(rcompany, user, pass,false,"4542");
-	    	 TreeMap webmerc4545 =  Converter.getWebMercagents(rcompany, user, pass,false,"4545");
-	    	 TreeMap webmerc4705 =  Converter.getWebMercagents(rcompany, user, pass,false,"4705");
-	    	 TreeMap webmerc0061 =  Converter.getWebMercagents(rcompany, user, pass,false,"0061");
-	    	 TreeMap webmerc5249 =  Converter.getWebMercagents(rcompany, user, pass,false,"5249");
-	    	 TreeMap webmerc0099 =  Converter.getWebMercagents(rcompany, user, pass,false,"0099");
-			 
+
+	    	 TreeMap webAgs =   Converter.getWebCustomersAgents(rcompany, user, pass);
+	    	   
 	    	
 				
 			
@@ -708,33 +704,17 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 				String aadr = rs.getString("address");
 				if (aadr != null) {
 					cust.setAddress(aadr.trim().replace('\n', ' '));
-					// System.out.println(aleke +aadr.replace('\n',' '));
 				}
 				  
 				  
-				  if(webmerc4856.get(cust.getID()) != null) {
-	            		 cust.addAgent(new Agent("4856")); 
-	              }
-	             if(webmerc4542.get(cust.getID()) != null) {
-         		 cust.addAgent(new Agent("4542")); 
-               }
-	             if(webmerc4545.get(cust.getID()) != null) {
-         		 cust.addAgent(new Agent("4545")); 
-               }
-	             if(webmerc4705.get(cust.getID()) != null) {
-         		 cust.addAgent(new Agent("4705")); 
-               }
-	             
-	             if(webmerc0061.get(cust.getID()) != null) {
-         		 cust.addAgent(new Agent("0061")); 
-               }
-	             if(webmerc5249.get(cust.getID()) != null) {
-	         		 cust.addAgent(new Agent("5249")); 
-	               }
-	             if(webmerc0099.get(cust.getID()) != null) {
-	         		 cust.addAgent(new Agent("0099")); 
-	               }
+				
 		              
+	             if( webAgs != null && webAgs.get(cust.getID()) != null) {
+ 	         		ArrayList arr =  (ArrayList)webAgs.get(cust.getID());
+ 	         		for(int i = 0 ; i< arr.size();i++) {
+ 	         		   cust.addAgent(new Agent(arr.get(i)+""));
+	 			       	}
+ 	         	}
 
  	         	String ag = rs.getString("agent").trim();
 	             if (ag != null ){

@@ -233,6 +233,9 @@ public class AxaZpienasTransa2DBDriver extends AbstractDBDriver  implements Mana
 		         	    	if(note.indexOf("DP") != -1) {
 		         	    		 note = "YELLOW";
 		         	    	 }
+		         	    	if(note.indexOf("GP") != -1) {
+		         	    		 note = "GREEN";
+		         	    	 }
 		         	     }else {
 		         	    	 note = null;
 		         	     }
