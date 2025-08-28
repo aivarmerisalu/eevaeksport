@@ -5540,6 +5540,7 @@ System.out.println(asjad.toString());
 	  }
 		MyJSON myson = new MyJSON();
 		myson.setUrl("https://api.mobitrek.eu/rest/contract/list/");
+	//	myson.setUrl("http://merisoft.eu:8080/rest/contract/list/");
 	  JSONArray array = new JSONArray();
 		Iterator itera = tm.values().iterator();
 		int cou = 0;
@@ -5600,10 +5601,10 @@ try{
 		array.put(value);
 	}
 	
-	if(cou == 1){
+	if(cou == 3){
 		myson.setJson(deCode(array.toString()));
 		json.add(myson);
-		System.out.println("MYJSON Contracts 1 " );
+		System.out.println("MYJSON Contracts 3 " + new Date().toGMTString() );
 		if(json.size() > 0){
 			try {
 				String aaa = serv.postJson(array.toString(), myson.getUrl());
@@ -5614,6 +5615,7 @@ try{
 				e.printStackTrace();
 			}
 		}
+		//Converter.saveFile("contr.json", array.toString());
 		json = new Vector<MyJSON> ();
 		array = new JSONArray();
 		cou = 0;
@@ -5622,10 +5624,10 @@ try{
 		}
    
 		
-
+  if(array.length() > 0) {
 		myson.setJson(deCode(array.toString()));
 		json.add(myson);
-		System.out.println("MYJSON Contract ");
+		System.out.println("MYJSON Contract end ");
 		
 		if(json.size() > 0){
 			try {
@@ -5639,6 +5641,7 @@ try{
 				e.printStackTrace();
 			}
 		}
+  }
 		
 		serv.closeClient();
 	}

@@ -1400,6 +1400,7 @@ public TreeMap getProducts(Agent agent) {
           			
           		}
           	}
+          	prod.setStock(0);
           	if(stock.get(prod.getID()) != null) {
           		  prod.setStock(stock.get(prod.getID()));
           	 	}

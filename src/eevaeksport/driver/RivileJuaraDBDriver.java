@@ -134,12 +134,7 @@ String picts = parent.getProps().getProperty("pict.dir");
 	                 if(f.exists()){
 	                   len =	f.length() + "";
 	                 } 
-	            
-	                 if(toode.trim().indexOf("5012233096") != -1){
-	       	   	   	  System.out.println("Piltide Asi "  + toode.trim() + " " + ean2 + " " + picts + ean2+".jpg" + " "
-	       	   	   			  + f.exists() + " " + len);
-	       	   	    	}
-	       	   	    	
+	                	
 	                 
 	                 
 	                 if(len.equals("0")){
@@ -817,7 +812,7 @@ String picts = parent.getProps().getProperty("pict.dir");
               }
            
               if(ag.equals("00028")){
-            	//  cust.addAgent(new Agent("00026"));  
+            	  cust.addAgent(new Agent("00026"));  
               }
            
               

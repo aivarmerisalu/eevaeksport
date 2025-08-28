@@ -343,9 +343,6 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
  	              if (toode != null && toode.length() > 0) {
  	               mline.setProdID(toode);
  	             }
- 	              if(toode.equals("00000002681")) {
- 	            	  System.out.println(klient + " " + toode + " " + hind + " " + disc);
- 	              }
  	              
  	             if (hind > 0) {
  	 	               mline.setPrice(hind);
@@ -1187,6 +1184,8 @@ System.out.println(yesGroups.size() + " yesGroups");
       		   goes = true;
       	    }
          	
+         }else {
+        	 prod.setStock(0);
          }
          
          if(noSubGroups.contains(prod.getGroupSecond())) {

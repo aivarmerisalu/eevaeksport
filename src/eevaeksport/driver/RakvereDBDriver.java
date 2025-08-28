@@ -130,46 +130,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     private HashMap prodHash = new HashMap();
     HashMap ketid = new HashMap();
     
-   	    private String getYYYYpMMpDDpTimeNiceString(java.util.Date dd){
- 		    StringBuffer sb = new StringBuffer();
- 		    Calendar cal= Calendar.getInstance();
- 		    cal.setTime(dd);
- 		    
- 		    
- 		    
- 		    String hour =   cal.get(Calendar.HOUR_OF_DAY) + "";
- 		    
- 		    
- 			String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
- 			if (day.length() == 1) {day = "0" + day;}
-
- 			String month = String.valueOf(cal.get(Calendar.MONTH ) + 1);
- 			if (month.length() == 1){month = ("0") + month;}
-
- 			sb.append("" + cal.get(Calendar.YEAR));
- 			sb.append("-" + month  + "-");
- 			sb.append(day +" ");
- 		    
- 		    String min = String.valueOf(cal.get(Calendar.MINUTE));
- 		    String sec = String.valueOf(cal.get(Calendar.SECOND));
- 		     if (hour.length() == 1){
- 		      sb.append("0");
- 		    }
- 		     sb.append(hour);
- 		     sb.append("_");
- 		    if (min.length() == 1){
- 		     sb.append("0");
- 		   }
- 		     sb.append(min);
- 		     sb.append("_");
- 		     if (sec.length() == 1){
- 		        sb.append("0");
- 		      }
- 		    sb.append(sec);
- 		    return sb.toString();
- 		  }
-
-    
+       
   	   private   void getProdGroupsMilk(TreeMap groups){
 	    	File f = new File(this.getExcelDir() + "tootedmilk.xlsx");
 			
@@ -2319,7 +2280,8 @@ System.out.println(groups.toString());
 
 	@Override
 	public void FixLoader() {
-		  
+		
+		 eanprods =   Converter.loadMore();
 		  if(eanprods == null) {
 			  eanprods = new TreeMap();
 		  }

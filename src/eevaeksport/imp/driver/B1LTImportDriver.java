@@ -218,8 +218,9 @@ try{
 	      try {
 	 
 	    	  long uni = Calendar.getInstance().getTimeInMillis();
-	    	  
-	    	  warehouse = parent.getProps().getProperty("warehouse");
+	    	  if(parent.getProps().getProperty("warehouse") != null) {
+	    	      warehouse = parent.getProps().getProperty("warehouse");
+	    	  }
 	    	  String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim() +  ".json";
 	 	      String fileName2 = parent.getProps().getProperty("conv.dir2") + order.getDokNr().trim() + (uni + "").trim() +  "res.txt";
 	    	  

@@ -1184,17 +1184,17 @@ System.out.println("tooted " + products.size());
     	    					      } catch (Exception e) {
     	    					    	  agent = (int)(row.getCell((short) 1).getNumericCellValue()) + "";	  
     	    					}
-    	 						System.out.println("agent " + agent );
-    	 						int kenn = 3;
+    	 						//System.out.println("agent " + agent );
+    	 						/*int kenn = 3;
     	 						double kent = (row.getCell((short) kenn + jooksev ).getNumericCellValue());
     	 						int certt = 16;
-    	 						double cert = (row.getCell((short) certt + jooksev ).getNumericCellValue());
-    	 						int alll = 29;
+    	 						double cert = (row.getCell((short) certt + jooksev ).getNumericCellValue());*/
+    	 						int alll = 3;
     	 						double all = (row.getCell((short) alll + jooksev ).getNumericCellValue());
     	 						
     	 						Toode tt = new Toode (agent);
-    	 						tt.addKogus(kent);
-    	 						tt.setDonecur(cert);
+    	 						//tt.addKogus(kent);
+    	 						//tt.setDonecur(cert);
     	 						tt.setDonevol(all);
     	 					
     	 						res.put(agent, tt);
@@ -1218,21 +1218,18 @@ System.out.println("tooted " + products.size());
     
     
 		  connectionUp();
-    		String cmd =  "  select sum(doksumma)/1.22 as sales , dok.pais2obj  AS agent   from firma34.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) " +
+    		String cmd =  "  select sum(doksumma)/1.24 as sales , dok.pais2obj  AS agent   from firma34.dok where (month(kuupaev))=(month(current_date)) and doktyyp='G' AND year(current_date)=year(kuupaev) " +
 			  "  GROUP BY dok.pais2obj" ;
     		
     		String cmd2 =  "  select sum(doksumma) as sales , dok.pais2obj  AS agent   from firma34.dok where "
     				+ " (month(kuupaev))=(month(current_date)) and doktyyp='T' AND year(current_date)=year(kuupaev) " +
     				  "  GROUP BY dok.pais2obj " ;
     	
-    	
     		log(cmd);
     		
     		try {
     			
     			Statement stmt = con.createStatement();		
-    		
-    			
     			ResultSet	      rs = stmt.executeQuery(cmd);
     			while(rs.next()) {
     				String agentID = rs.getString("agent");
@@ -1242,11 +1239,10 @@ System.out.println("tooted " + products.size());
         					agent.setStart("Vormistatud : " + (int)rs.getDouble("sales")+ "€");
         				}
     				}
-    				
     			}
     			
     			 rs = stmt.executeQuery(cmd2);
-     			while(rs.next()) {
+     			  while(rs.next()) {
      				String agentID = rs.getString("agent");
      				if(agentID != null){
      					Agent agent = (Agent)agents.get(agentID.trim());
@@ -1273,7 +1269,7 @@ System.out.println("tooted " + products.size());
      				
      			}
     			
-     			
+     	/*		
         		String cmd3 =  "  select sum(kogus *hind *(100-ostuale)/100) as sales , dok.pais2obj  AS agent , liik  from firma34.dok inner join \r\n" + 
         				"			   firma34.rid ON dok.dokumnr = rid.dokumnr INNER JOIN firma34.toode on rid.toode = toode.toode where \r\n" + 
         				"    				 (month(kuupaev))=(month(current_date)) and doktyyp='T' AND year(current_date)=year(kuupaev) \r\n" + 
@@ -1324,7 +1320,7 @@ System.out.println("tooted " + products.size());
       				if(done < 0 ) {
       					asi = "ÜLE : " + -1*done ;
       				}
-      				agent.setStart(agent.getStart()+"|KENT : " + (int)ksal + "€|" + asi + "€|" );
+      				//agent.setStart(agent.getStart()+"|KENT : " + (int)ksal + "€|" + asi + "€|" );
          		}
       			
       			if(cert > 0) {
@@ -1337,14 +1333,14 @@ System.out.println("tooted " + products.size());
           				if(done < 0 ) {
           					asi = "ÜLE : " + -1*done ;
           				}
-      					agent.setStart(agent.getStart()+"|CERTANIUM : " + (int)kcert + "€|"+ asi + "€" );
+      					//agent.setStart(agent.getStart()+"|CERTANIUM : " + (int)kcert + "€|"+ asi + "€" );
       				}	
       			}
       			
       			
   				}
       			
-      		}
+      		}*/
       			
     			rs.close();
     			stmt.close();

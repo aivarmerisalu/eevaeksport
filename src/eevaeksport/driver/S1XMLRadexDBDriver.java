@@ -1145,6 +1145,7 @@ private HashMap prodsGUID = new HashMap();
 			   	 String ProdUnit = null;  
 			   	 String GroupGUID = null;
 			   	 String UnitPrice = null;  
+			   	 String inCase = null;  
 			   	 String ProdBlocked = null; 
 			   	 String inventory = null; 
 		    	
@@ -1167,6 +1168,11 @@ private HashMap prodsGUID = new HashMap();
 		    		  try{
 		    			  ProdDesc   = getNode(rida,"Description").getFirstChild().getNodeValue();
 		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
+		    		  try{
+		    			  inCase   = getNode(rida,"incase").getFirstChild().getNodeValue();
+		    		  }catch(Exception e){e.printStackTrace();}
+		    		  
 		    		  
 		    		  try{
 		    			  ProdUnit   = getNode(rida,"Unit").getFirstChild().getNodeValue();
@@ -1211,10 +1217,11 @@ private HashMap prodsGUID = new HashMap();
 		    			 prod.setStock(Double.parseDouble(inventory));
 		    		 }
 		   			
-		   			 
-		   			 //if(Double.parseDouble(incase) > 1) {
-		   				 //prod.setInCases(Double.parseDouble(incase));
-		   			 //}
+		   			 try {
+		   			 if(Double.parseDouble(inCase) > 1) {
+		   				 prod.setInCases(Double.parseDouble(inCase));
+		   			 }
+		   			 }catch(Exception e) {}
 		   			 
 		   			 if(ProdUnit.length() > 0) {   
 		   				 prod.setUnit(ProdUnit);
