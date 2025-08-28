@@ -1176,9 +1176,10 @@ System.out.println(groups.toString());
  			e.printStackTrace();  
  		  }
          
+         if(!cust.getID().startsWith("9999")) {
          customers.put(cust.getName(), cust);
                 custMap.put(cust.getPayer(), cust);
-
+         }
             }
           //  System.out.println(ketid.toString());
             rs.close();
