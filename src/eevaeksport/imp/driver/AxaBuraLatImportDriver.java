@@ -184,7 +184,7 @@ public class AxaBuraLatImportDriver extends AbstractImportDriver{
 		      	if(mail!= null && mail.trim().length() > 0 ){
 		        	sendEmail("Pasūtījuma numurs: " + order.getDokNr() +  "\nKlients : " + name + " " + aadr +
 		        			 "\nAģents: " + agnimi + "\n\nKrājuma kods Krājuma nosaukums Cena Daudzums" 
-		        			 + Converter.getOrderText(order,names) + "\n"
+		        			 + Converter.getOrderText(order, names) + "\n"
 		        			+ "Komentāri : " + comment , 
 		        			"Saņemts pasūtījums par iekārtu piegādi: " + name  + " Nr.: " + order.getDokNr() + " Dat.:" +
 		        			getDateString(order.getShipCal())

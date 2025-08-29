@@ -21,6 +21,7 @@ import org.apache.log4j.PropertyConfigurator;
 import eevaeksport.Agent;
 import eevaeksport.Customer;
 import eevaeksport.Product;
+import eevaeksport.driver.Toode;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -67,12 +68,20 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
  
   TreeMap custs = null;
   TreeMap names = null;
+
+  TreeMap eans = null;
+
+  HashMap poeStock = null;
   
   
   public void makeOrder(Order order){
     
     if(custs == null) {
     	custs = getCustomers();
+    }
+    
+    if(poeStock == null) {
+    	poeStock = poeStock();
     }
     
     if(names == null) {
@@ -83,20 +92,91 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
          komm =  "Kommentaar : " + order.getInfo();
     }
     
+    
+    HashMap st = (HashMap)poeStock.get(order.getCompany());
+	
+    
     String agnimi = ((Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent())).getName();
     String name = getKliendiNimi(order.getCompany());
     	String text = " " + name +  "|Tellimuse number: " + order.getDokNr() +  "\nKlient : " + name + " " + order.getCompany() +
     			 "\nAgent: " + agnimi + "\n\n" 
-    			 + Converter.getOrderText(order,names) + "\n" + komm ;    			  ;
+    			 + getOrderText(order,names,eans,st) + "\n" + komm ;   
     	
     	Converter.sendReportEmail(text, null, parent.getEksportFrame().getEksportPanel());
     	this.setNumAddedLines(order.getOrderLines().size());
  }
   
   
+  private  String getOrderText(Order order, TreeMap<String, String> names,TreeMap<String, String> eans, HashMap st) {
+	    StringBuilder res = new StringBuilder();
+     
+	    
+	    // Start HTML table
+	    res.append("<table border='1' cellspacing='0' cellpadding='5'>");
+	    res.append("<tr>")
+	       .append("<th>Kood</th>")
+	       .append("<th>Ean</th>")
+	       .append("<th>Nimetus</th>")
+	       .append("<th>Hind</th>")
+	       .append("<th>Laoseis</th>")
+	       .append("<th>Tagastusse</th>")
+	       .append("<th>Kadunud</th>") 
+	       .append("<th>Kahjustunud</th>")
+	       .append("</tr>");
+
+	    Iterator<OrderLine> iter = order.getOrderLines().iterator();
+	    while (iter.hasNext()) {
+	        OrderLine line = iter.next();
+	        String toode = line.getToode();
+	        if (toode != null) {
+	            toode = toode.trim();
+	        } else {
+	            toode = "";
+	        }
+          String lseis = "";
+	        if(st != null) {
+				Toode stT = (Toode)st.get(toode);
+				if(stT != null) {
+					lseis = (int)stT.getKogus() + "";
+				}
+			}
+	        
+	        
+	        String name = line.getTooteNimi();
+	        if (name == null || name.trim().isEmpty()) {
+	            name = toode;
+	        }
+
+	        if (names != null && names.get(toode) != null) {
+	            name = names.get(toode);
+	        }
+	        
+	        String ean = "";
+	        if (eans != null && eans.get(toode) != null) {
+	            ean = eans.get(toode);
+	        }
+
+	        if (line.getKogus() != 0 && !toode.isEmpty()) {
+	            res.append("<tr>")
+	               .append("<td>").append(toode).append("</td>")
+	               .append("<td>").append(ean).append("</td>")
+	               .append("<td>").append(name).append("</td>")
+	               .append("<td>").append(line.getPrice()).append("</td>")
+	               .append("<td>").append(lseis).append("</td>")
+	               .append("<td>").append((int)line.getKogus()).append("</td>")
+	               .append("<td>").append("").append("</td>")
+	               .append("<td>").append("").append("</td>")
+	               .append("</tr>");
+	        }
+	    }
+
+	    res.append("</table>");
+	    return res.toString();
+	}
+  
   public TreeMap getProductNames() {
 	  TreeMap tm = new TreeMap();
-	  
+	  eans = new TreeMap();
 	  Integer total = getPagination("getItems");
       
 	 	for (int a = 0 ; a < total; a++) {
@@ -114,7 +194,12 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
 		  
 		  for (int i = 0; i < lenn; i++) {
 			  cob = (org.json.simple.JSONObject) values.get(i);
-	       	  tm.put((String)cob.get("product_id"), (String)cob.get("description"));	
+	       	  tm.put((String)cob.get("product_id"), (String)cob.get("description"));
+	      	
+	       	  String gtin = (String)cob.get("EAN");
+	          	if (gtin != null && gtin.length() > 5) {
+		       	   eans.put((String)cob.get("product_id"), gtin);
+	          	}
           	}
 		  
 		} catch (Exception e) {
@@ -142,6 +227,9 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
   public TreeMap getCustomers(){
 	   
 		  TreeMap tm = new TreeMap();
+		  
+		  locations = new HashMap<String, String>();
+		  
 		  Integer total = getPagination("getCustomers");
 	       
 		 	for (int a = 0 ; a < total; a++) {
@@ -162,6 +250,8 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
 
 	          	String number = (String)cob.get("code");
 	            Customer cust = new Customer(number);
+	        	String locCode = (String)cob.get("location_code");
+	          	locations.put(locCode, number);
 	                  
 	            cust.setName((String)cob.get("name"));
 
@@ -218,6 +308,71 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
 		return tm;
   }
 
+
+  private HashMap<String, String> locations = null; 
+  private HashMap poeStock() {
+
+ 	 HashMap res = new HashMap();
+ 	 Integer total = getPagination("getCustomerStockAndSales");
+      
+	 	for (int a = 0 ; a < total; a++) {
+	 		String aa = "";
+	 	    if(a > 0) {
+	 	    	aa = a + "";
+	 	    }
+	 	  try {	
+  	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getCustomerStockAndSales" + aa +".json");
+		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
+		
+		  int lenn = values.size();
+		
+		  for (int i = 0; i < lenn; i++) {
+				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+      		String customerNumber = (String) cob.get("location");
+      		String cuCode = locations.get(customerNumber);
+      		if(cuCode != null) {
+      			try {
+
+      	        	String prodId = ((String) cob.get("product_id"));
+      				if(prodId == null) {
+      					prodId = ((String) cob.get("item_id"));
+      				}
+      				prodId = prodId.trim();
+	        	
+	         		Toode tt = new Toode(prodId);
+			  if(cob.get("quantity") != null) {
+			 	 tt.addKogus(Double.parseDouble(cob.get("quantity") + "")); 
+			  }
+  
+ 	         		HashMap sisu = new HashMap();
+	         		if(res.get(cuCode) != null) {
+	         			sisu = (HashMap)res.get(cuCode);
+	         		}
+	         		
+	         		sisu.put(prodId, tt);
+	         		res.put(cuCode, sisu);
+      			}catch(Exception e) {
+      			System.out.println(cob.toJSONString());
+      				e.printStackTrace();
+      			}
+	         		
+      		}
+	    		  }
+     
+
+		   } catch (Exception e) {
+            e.printStackTrace();
+         }
+  	}
+
+	 	
+	 	System.out.println("getCustomerStockAndSales size " + res.size());
+
+ 	 
+ 	 return res;
+  }
+
+  
     public String getDriverVersion(){
     return "RahvaRaamatAPI";
   }

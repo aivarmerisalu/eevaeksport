@@ -38,6 +38,7 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.JSONArray;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -205,8 +206,16 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	      	String custgr = (String)cob.get("customer_group");
 	      	String payer = (String)cob.get("payer");
 	      	String prodid = (String)cob.get("product_code");
-	      	Double price = Double.parseDouble("" +cob.get("price"));
-	      	int disc = Integer.parseInt( (String)cob.get("discount"));
+	      	Double sPrice = Double.parseDouble("" +cob.get("campaign_pricestick_price"));
+
+	      	Double price = Double.parseDouble("" +cob.get("campaign_sales_price"));
+	      	
+	      	
+	    	String cName = (String)cob.get("campaign_name");
+	      
+	        
+	      	
+	      	Long isCamp = (Long)cob.get("is_campaign");
 	      	
 	      	MatrixLine mline = new MatrixLine();
 	      	
@@ -219,9 +228,15 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
       	    }
       	
       	    mline.setProdID(prodid);
+      	    if(isCamp == 1) {
       	    mline.setStartDate(startDate);
       	    mline.setEndDate(endDate);
-      	    mline.setDiscount(1);
+      	    mline.setLineinfo(cName + " (" + sPrice + "€)");
+      	    mline.setPrice(price);
+      	     } else {
+      	    	mline.setDiscount(0);
+      	    }
+      	    
       	    System.out.println(mline.getStartDate() + " " + mline.getEndDate() + " " + mline.getCliGroup() );
       	    lines.add(mline);
 	     }
@@ -684,7 +699,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	   
 	   locations = new HashMap<String, String>();
 	   if(this.loadData) {
-	    // downloadData(null);
+	     //downloadData(null);
 	   }
 	   
 	   TreeMap routes = getRouting();
@@ -726,16 +741,16 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	                  
 	            cust.setName((String)cob.get("name"));
 	            
-	            if(cust.getName().toLowerCase().contains("maxima")) {
-	            	cust.setGroup("MAXIMA");
+	            JSONArray group = (JSONArray)cob.get("customer_group");
+	            if(group != null) {
+	            for (int r = 0; r < group.size(); r++) {
+	                String gr = (String) group.get(r);
+	                if(!gr.equals("HULGI")) {
+	                	cust.setGroup(gr);	
+	                }
 	            }
-	            if(cust.getName().toLowerCase().contains("selver")) {
-	            	cust.setGroup("SELVER");
 	            }
-	            if(cust.getName().toLowerCase().contains("rimi ")) {
-	            	cust.setGroup("RIMI");
-	            }
-	            
+
 	            String payer = (String)cob.get("payer");
 	            cust.setPayer(payer);
 	            
@@ -867,10 +882,13 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
  	     return Integer.parseInt(cc1.get("totalPages") + "");
  	   }
      
+
+     private HashMap custProdABCD = null;
      
      private HashMap getStockAndSales() {
 
     	 HashMap res = new HashMap();
+    	 custProdABCD = new HashMap();
     	 Integer total = getPagination("getCustomerStockAndSales");
          
  	 	for (int a = 0 ; a < total; a++) {

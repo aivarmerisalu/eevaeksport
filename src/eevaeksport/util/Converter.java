@@ -11075,14 +11075,15 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
 	 public static String getOrderText(Order order, TreeMap<String, String> names) {
 		    StringBuilder res = new StringBuilder();
-
+           
+		    
 		    // Start HTML table
 		    res.append("<table border='1' cellspacing='0' cellpadding='5'>");
 		    res.append("<tr>")
-		       .append("<th>Kood</th>")
-		       .append("<th>Nimetus</th>")
-		       .append("<th>Hind</th>")
-		       .append("<th>Kogus</th>")
+		       .append("<th>Code</th>")
+		       .append("<th>Name</th>")
+		       .append("<th>Price</th>")
+		       .append("<th>Amount</th>")
 		       .append("</tr>");
 
 		    Iterator<OrderLine> iter = order.getOrderLines().iterator();
@@ -11095,6 +11096,9 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		            toode = "";
 		        }
 
+		        
+		        
+		        
 		        String name = line.getTooteNimi();
 		        if (name == null || name.trim().isEmpty()) {
 		            name = toode;
@@ -11103,7 +11107,8 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		        if (names != null && names.get(toode) != null) {
 		            name = names.get(toode);
 		        }
-
+		        
+		       
 		        if (line.getKogus() != 0 && !toode.isEmpty()) {
 		            res.append("<tr>")
 		               .append("<td>").append(toode).append("</td>")
