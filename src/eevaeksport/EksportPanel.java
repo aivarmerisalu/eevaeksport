@@ -1326,6 +1326,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("MovexLAT")
 					    || driver.getDriverVersion().equals("NaviTobisDirecto")
 					    || driver.getDriverVersion().equals("SkaiteRoskisko")
+					    || driver.getDriverVersion().equals("RahvaRaamat")
 					  ){
                 	 
                 	  System.out.println("Teen Fixi " + jsonDate(Calendar.getInstance().getTime()) );

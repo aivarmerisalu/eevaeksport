@@ -520,8 +520,8 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 	            	   String toode = st.nextToken().trim();
 	            	   if(toode.length() > 0) {
 	            		try {
-	            			String kuhu = st.nextToken();
-	            			 double seis = Double.parseDouble(st.nextToken());
+	            			String kuhu = st.nextToken().trim();
+	            			 double seis = Double.parseDouble(st.nextToken().trim());
 	      	  	             if(seis > 0){
 	      	  	             sb.append(kuhu + ";" + toode + ";" + seis + "\n" );
 	      	  	               }		

@@ -210,11 +210,8 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 
 	      	Double price = Double.parseDouble("" +cob.get("campaign_sales_price"));
 	      	
-	      	
 	    	String cName = (String)cob.get("campaign_name");
 	      
-	        
-	      	
 	      	Long isCamp = (Long)cob.get("is_campaign");
 	      	
 	      	MatrixLine mline = new MatrixLine();
@@ -237,7 +234,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
       	    	mline.setDiscount(0);
       	    }
       	    
-      	    System.out.println(mline.getStartDate() + " " + mline.getEndDate() + " " + mline.getCliGroup() );
+      	  //  System.out.println(mline.getStartDate() + " " + mline.getEndDate() + " " + mline.getCliGroup() );
       	    lines.add(mline);
 	     }
       }
@@ -254,7 +251,33 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
    
    
    public Vector getFixedAssortmentData() {
-	return null;
+	   
+	   Vector res = new Vector();
+	   if(returnList == null) {
+		   this.getStockAndSales();
+	   }
+	   System.out.println("Fix listis " + this.returnList.size());
+	   
+	  Iterator itera =  returnList.keySet().iterator();
+	  while(itera.hasNext()) {
+		  String custID = (String)itera.next();
+		  HashMap sisu = (HashMap)returnList.get(custID);
+	
+		  Iterator iterax =  sisu.keySet().iterator();
+		  while(iterax.hasNext()) {
+			  String prodid = (String) iterax.next();
+			  MatrixLine mline = new MatrixLine();
+			  mline.setProdID(prodid);
+			  mline.setCliGroup(custID);
+			  res.add(mline);
+		  }
+		
+		  
+	  }
+	   
+	  System.out.println("Fixed lõpetan");
+	   
+	return res;
 	}
 
    
@@ -733,6 +756,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	          	String locCode = (String)cob.get("location_code");
 	          	locations.put(locCode, number);
 	            Customer cust = new Customer(number);
+	            cust.addFixSortCode(number);
 	            
 	            if(routes.get(number)!= null) {
 	            	cust.setVisit(routes.get(number)+"");
@@ -883,12 +907,12 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
  	   }
      
 
-     private HashMap custProdABCD = null;
+     private HashMap returnList = null;
      
      private HashMap getStockAndSales() {
 
     	 HashMap res = new HashMap();
-    	 custProdABCD = new HashMap();
+    	 returnList = new HashMap();
     	 Integer total = getPagination("getCustomerStockAndSales");
          
  	 	for (int a = 0 ; a < total; a++) {
@@ -932,6 +956,48 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     	 tt.addPlancur(Double.parseDouble(cob.get("sales90d") + "")); 
      }
 	    
+
+     if(cob.get("ABCD") != null) {
+    	 
+    	 tt.comment = (String) cob.get("ABCD");
+    	 String inSort = (String) cob.get("in_sortiment");
+    	 
+    	 boolean seis = false;
+    	 boolean myyk = false;
+    	 String stat = tt.comment;
+    	 
+    	 if(tt.getKogus() > 0) {
+    		 seis = true;
+    	 }
+    	 
+    	 if(tt.getDonecur() > 0 || tt.getDonevol() > 0 || tt.getPlancur() > 0 ) {
+    		 myyk = true;
+    	 }
+    	 
+    	 if(stat.equals("C") || stat.equals("D") && seis && !myyk) {
+    	//	 System.out.println("Seisev välja " + prodId);
+    		 HashMap sisu = new HashMap();
+       		if(returnList.get(cuCode) != null) {
+       			sisu = (HashMap)returnList.get(cuCode);
+       			}
+      		sisu.put(prodId, tt);
+      		returnList.put(cuCode, sisu);
+    	 }
+    	 
+        if((stat.equals("A") || stat.equals("B") || stat.equals("C") || stat.equals("D")) && inSort.equals("0")) {
+    		// System.out.println("ABCD välja " + prodId);
+    		 HashMap sisu = new HashMap();
+       		if(returnList.get(cuCode) != null) {
+       			sisu = (HashMap)returnList.get(cuCode);
+       			}
+      		sisu.put(prodId, tt);
+      		returnList.put(cuCode, sisu);
+        }
+    	 
+    	 
+     }
+     
+     
  	         		
  	         		HashMap sisu = new HashMap();
  	         		if(res.get(cuCode) != null) {
@@ -956,6 +1022,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 
  	 	
  	 	System.out.println("getCustomerStockAndSales size " + res.size());
+ 	 	System.out.println("ReturnList  size " + returnList.size());
   
     	 
     	 return res;
@@ -1018,8 +1085,11 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     
      private String getLineInff(Toode tt) {
     	 String res = "";
+    	 if(tt.comment != null && tt.comment.length() > 0) {
+    		 res = "@" + tt.comment;
+    	 }
     	 if(tt.getKogus() > 0) {
-    		 res = "Laos:" + (int)tt.getKogus() + " ";
+    		 res = res + "Laos:" + (int)tt.getKogus() + " ";
     	 }
     	 if(tt.getDonecur() > 0) {
     		 res = res +  "M30:" + (int)tt.getDonecur() + " ";
