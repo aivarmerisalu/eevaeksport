@@ -646,7 +646,7 @@ String email = " ";
      	  System.out.println("Alustan Kliendid 1 " + aled.toString());
            try{
                
-               String fff = " select custaccount as klient,name as nimi ,  " +
+               String fff = " select custaccount as klient,name as nimi ,   " +
   " case when birthyear  > 1930 then CONVERT(date, ( CAST(birthyear AS varchar) +'-'+ CAST(birthmonth AS varchar)  +'-'+ CAST(birthday AS varchar) ), 126) else null end " +
   "   as synna , (select l.locator  from  LOGISTICSELECTRONICADDRESS l  where l.recid = dp.primarycontactemail)  as email, " +
   " (select l.locator  from  LOGISTICSELECTRONICADDRESS l  where l.recid = dp.primarycontactphone)  as phone " +
@@ -689,7 +689,7 @@ String email = " ";
            
        //    tal_visitationdays ,talspartnercode,
 
-     	 String cmd = "   SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum, \r\n" + 
+     	 String cmd = "   SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum,  \r\n" + 
      	 		"             adr.street as tanav,adr.city as linn, adr.county as regioon,adr.zipcode as indeks ,cus.invoiceaccount AS payer, \r\n" + 
      	 		"             0 AS debt, cus.linedisc , pricegroup, \r\n" + 
      	 		"             adr.address ,(Select h.personnelnumber from HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) AS agent ,  numofdays AS term, cus.blocked AS block , \r\n" + 
@@ -703,7 +703,7 @@ String email = " ";
      	 		"           WHERE   cus.dataareaid='kosm'  ";
 
      	  
-     	 cmd = "SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum,\r\n" + 
+     	 cmd = "SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum, mandatoryassorment_kos as fixok , \r\n" + 
      	  		"adr.street as tanav,adr.city as linn, adr.county as regioon,adr.zipcode as indeks ,cus.invoiceaccount AS payer,\r\n" + 
      	  		"0 AS debt, cus.linedisc , pricegroup,\r\n" + 
      	  		"adr.address ,(Select h.personnelnumber from axdb.dbo.HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) AS agent , numofdays AS term, cus.blocked AS block ,\r\n" + 
@@ -807,6 +807,8 @@ String email = " ";
         String accountnum = rs.getString("accountnum").trim();
         Customer cust = new Customer(accountnum);
        	
+        
+        int mandaSort = rs.getInt("fixok");
         
         String tanav = rs.getString("tanav");
         if (tanav != null && tanav.length() > 0){
@@ -1204,6 +1206,8 @@ try {
     		"    		 left join inventtable tbl on bb.itemid = tbl.itemid and tbl.DATAAREAID=bb.DATAAREAID\r\n" + 
     		"    		 where bb.dataareaid = 'kosm' and tbl.standardconfigid = dd.configid and tbl.DATAAREAID='kosm' and MAINBARCODE_KOS != 0";
 
+    String lll = "select bb.mainitemcard as toode, inventorylevel as lisa from inventtableadditionalinfo_kos  bb \r\n" + 
+    		"    		 where bb.dataareaid = 'kosm' and inventorylevel != '' ";
  
     
     if (isDebug()) System.out.println(cmd);
@@ -1219,6 +1223,16 @@ try {
     	  String kood = rs.getString("itemid").trim();
     	  String ean = rs.getString("itembarcode").trim();
     	  eans.put(kood, ean);
+      }
+      rs.close();
+      
+      HashMap lisa = new HashMap();
+
+      rs = stmt.executeQuery(lll);
+      while(rs.next()){
+    	  String kood = rs.getString("toode").trim();
+    	  String ll = rs.getString("lisa").trim();
+    	  lisa.put(kood, ll);
       }
       rs.close();
       
@@ -1309,6 +1323,11 @@ try {
        if(stocksOld != null && stocksOld.get(prod.getID()) != null) {
     	   prod.setStock(stocksOld.get(prod.getID()));
        }
+    
+       if(lisa.get(prod.getID()) != null) {
+    	   prod.setPartii("["+(String)lisa.get(prod.getID())+"]");
+       }
+       
        if(this.testersSet.contains(prod.getID())) {
     	   goes = false;
        }
