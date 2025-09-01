@@ -156,6 +156,28 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
 	            ean = eans.get(toode);
 	        }
 
+	        String kadund = "";
+	        String kahju = "";
+	        String par = line.getPartii();
+	        
+	        if (par != null && par.length() > 0) {
+	        	if(par.indexOf("@") != -1 ) {
+	        		kahju = par.substring(par.indexOf("@")+1, par.lastIndexOf("@"));
+	        	}
+               if(par.indexOf("*") != -1 ) {
+	        	 kadund = 	par.substring(par.indexOf("*")+1, par.lastIndexOf("*"));
+	        	}
+	        }
+	        
+	        int kk = (int)line.getKogus();
+	        if(kk == 1) {
+	        	
+	        }
+	        String kog = "";
+	        if(kk < 0) {
+	        	kog = (kk *-1)+"";
+	        }
+	        
 	        if (line.getKogus() != 0 && !toode.isEmpty()) {
 	            res.append("<tr>")
 	               .append("<td>").append(toode).append("</td>")
@@ -163,9 +185,9 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
 	               .append("<td>").append(name).append("</td>")
 	               .append("<td>").append(line.getPrice()).append("</td>")
 	               .append("<td>").append(lseis).append("</td>")
-	               .append("<td>").append((int)line.getKogus()).append("</td>")
-	               .append("<td>").append("").append("</td>")
-	               .append("<td>").append("").append("</td>")
+	               .append("<td>").append(kog).append("</td>")
+	               .append("<td>").append(kadund).append("</td>")
+	               .append("<td>").append(kahju).append("</td>")
 	               .append("</tr>");
 	        }
 	    }
