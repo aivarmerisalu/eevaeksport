@@ -1886,7 +1886,7 @@ con3.close();
                         	prod.setVat("24");
                        }
                    }
-                   
+                   prod.setVat("24");
              /*      if(prod.getEAN().trim().length()==0){
                   	 dateOut.put(id.trim(),id.trim() + "|" + deCode (name.trim()) + "|" + prod.getStock());
                   	 buf.append(id.trim() + ";"+ id.trim() + "|" + deCode (name.trim()) + "|" + prod.getStock() + "\n");

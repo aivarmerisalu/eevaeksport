@@ -703,7 +703,7 @@ String email = " ";
      	 		"           WHERE   cus.dataareaid='kosm'  ";
 
      	  
-     	 cmd = "SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum, mandatoryassorment_kos as fixok , \r\n" + 
+     	 cmd = "SELECT dp.name,street as nimelisa,dp.namealias,cus.accountnum, mandatoryassortment_kos as fixok , \r\n" + 
      	  		"adr.street as tanav,adr.city as linn, adr.county as regioon,adr.zipcode as indeks ,cus.invoiceaccount AS payer,\r\n" + 
      	  		"0 AS debt, cus.linedisc , pricegroup,\r\n" + 
      	  		"adr.address ,(Select h.personnelnumber from axdb.dbo.HCMWORKER h WITH (NOLOCK) where MAINCONTACTWORKER = h.recid) AS agent , numofdays AS term, cus.blocked AS block ,\r\n" + 
@@ -809,6 +809,9 @@ String email = " ";
        	
         
         int mandaSort = rs.getInt("fixok");
+        if(mandaSort == 1) {
+        	System.out.println("manda " + accountnum);
+        }
         
         String tanav = rs.getString("tanav");
         if (tanav != null && tanav.length() > 0){
@@ -1206,8 +1209,9 @@ try {
     		"    		 left join inventtable tbl on bb.itemid = tbl.itemid and tbl.DATAAREAID=bb.DATAAREAID\r\n" + 
     		"    		 where bb.dataareaid = 'kosm' and tbl.standardconfigid = dd.configid and tbl.DATAAREAID='kosm' and MAINBARCODE_KOS != 0";
 
-    String lll = "select bb.mainitemcard as toode, inventorylevel as lisa from inventtableadditionalinfo_kos  bb \r\n" + 
-    		"    		 where bb.dataareaid = 'kosm' and inventorylevel != '' ";
+    String lll = " select itemid as toode, inventorylevel as lisa  from inventtableadditionalinfo_kos  bb inner join inventtable inv  on inv.recid = bb.inventtable \r\n" + 
+    		"    		   		 where bb.dataareaid = 'kosm' and inventorylevel != '' " ; 
+    		
  
     
     if (isDebug()) System.out.println(cmd);

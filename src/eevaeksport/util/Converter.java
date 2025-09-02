@@ -4885,9 +4885,13 @@ public class Converter {
 	   			if(comment1.contains("|")) {
 	   				sub = " " + comment1.substring(0, comment1.indexOf("|"));
 		   			comment =  comment1.substring(comment1.indexOf("|")+1) + "\n\n" ;	
+	   			}else {
+	   				comment = comment1;
 	   			}
+	   			
 	   		}
-	   		
+
+	  	  	// System.out.println("Mail 1 " + comment);
 	   		
 	   		if(comment != null && comment.trim().length() >0){
 	   			
@@ -4917,12 +4921,14 @@ public class Converter {
 		  	  		if(fileName != null) {
 		  	  		  mail.addAttach(fileName);
 		  	  		}
-		  	  		
+
+			  	  	// System.out.println("Mail 1 " + fileName);
 		  	  	 StringTokenizer st = new StringTokenizer(parent.getProps().getProperty("report.email"),",");
 		  	  	 while(st.hasMoreTokens()) {
 		  	  		 String tt = st.nextToken();
 		  	  	    mail.setFilesTo(tt);
 		  	  		mail.send(); 
+		  	  	// System.out.println("Mail saadetud " + tt);
 		  	  	 }
 		 	}
 		  	
@@ -12387,7 +12393,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		  saveFileInUTF8(exceldir + rcompany + "report" + stDay + ".json", dayreportarray.toString());
 		  JSONArray webcustarray = getWebCustomersAll(rcompany, user, pass);
          
-		  System.out.println(dayreportarray.toString());
+		 // System.out.println(dayreportarray.toString());
 		  
 		  int lenn = webcustarray.length();
 		  TreeMap custsloc = new TreeMap();
@@ -12442,9 +12448,9 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 				  starttime = hhmmFormat.format(startdatee);
 			  }catch (Exception e){
 			  }
-			  if (agentname.contains("Linas")) {
-		        	 System.out.println(startdates + ";"+key + ";" + agentname );
-		         }
+			 // if (agentname.contains("Linas")) {
+		       // 	 System.out.println(startdates + ";"+key + ";" + agentname );
+		        // }
 
 			  String endtime = null;
 			  Integer duration = null;
@@ -12516,9 +12522,11 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 				  sb.append(agentname + "\t" + key + "\t" + custname + "\t" + startdates + "\t" + starttime + "\t" + endtime + "\t" + clientcoords + "\t" + ooo + "\t" + isInRange + "\t" + sum +"\r\n");
        
 		  }
-
-			saveFileInUTF8(exceldir +  rcompany + "report" + stDay + ".csv",sb);
-			Converter.sendReportEmail("Dayreport weekly report", exceldir + "vigestareport" + stDay + ".csv", parent);
+		  
+		  String fname = exceldir +  rcompany + "report" + stDay + ".csv";
+//System.out.println("Faili salvestus " + exceldir +  rcompany + "report" + stDay + ".csv");
+			saveFileInUTF8(fname,sb);
+			Converter.sendReportEmail("Dayreport weekly report", fname, parent);
 			
 		  
 	     } catch (Exception e){
