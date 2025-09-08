@@ -4565,7 +4565,17 @@ HashMap prodHash = new HashMap();
  	    	 }catch (Exception e){
  	    
  	    	 }
+   	    	 
+   	    	 try{
+   	      		 String package1 =  rida.getAttributes().getNamedItem("package1").getNodeValue(); 
+   	      	 	      	    prod.setInCases(Double.parseDouble(package1)); 
+   	 	    	 }catch (Exception e){
+   	 	           e.printStackTrace();
+   	 	    	 }
       	   	
+   	    	 
+   	    	 
+   	    	 
     	   if("true".equals(getParent().getProps().getProperty("stocktozero"))){
       	 		prod.setStock(0);
            	 }

@@ -73,9 +73,16 @@ public class RivileJuaraDBDriver extends AbstractDBDriver implements  BulkUpdate
         } catch (Exception e) {
             parent.showError(e);
         }
+
+        user =  getParent().getProps().getProperty("rest.user");
+        pass = getParent().getProps().getProperty("rest.pass");
+        rcompany = getParent().getProps().getProperty("rest.company");
     }
 
-    
+
+    String user =  null;
+    String pass = null;
+    String rcompany = null;
     
     private void makePictureCat(){
 
@@ -702,6 +709,13 @@ String picts = parent.getProps().getProperty("pict.dir");
       private TreeMap agents1 = new TreeMap();
 
     public TreeMap getCustomers(Agent agent){
+    	
+    	 try{
+        	   Converter.getManagersReplacements(agents1, rcompany, user , pass, false);
+        	        	
+        }catch(Exception e){
+        	e.printStackTrace();
+        }
         connectionUp(url2);
         String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, \r\n" + 
         		"        	ltrim(N08_PAV) + ' ' AS nimetus , ltrim(N33_kodas_ak) as nimetus2,  \r\n" + 
@@ -816,7 +830,7 @@ String picts = parent.getProps().getProperty("pict.dir");
               }
            
               
-          	Agent agg = ((Agent)this.getAgents1().get(ag));
+          	Agent agg = ((Agent)agents1.get(ag));
 				
 				if(agg != null && agg.getDubbler().size()>0){
 					//System.out.println("dubbing " + agg + "  " + agg.getDubbler().toString());

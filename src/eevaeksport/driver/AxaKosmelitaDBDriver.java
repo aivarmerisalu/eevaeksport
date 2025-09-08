@@ -179,7 +179,44 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
  
 
   public Vector getFixedAssortmentData() {
-    return null;
+	  Vector lines = new Vector();
+      String sql = " select accountrelation as clgroup, itemrelation as prodid from pricedisctable pd where \r\n" + 
+      		"  pd.fromdate<getdate() and year( pd.todate)< 1910  and dataareaid = 'kosm' ";
+
+       try {
+
+               Connection ss = this.getNewConnection();
+     	      Statement stmt = ss.createStatement();
+               ResultSet rs = stmt.executeQuery(sql);
+
+               while (rs.next()) {
+
+                       String clGroup = rs.getString("clgroup");
+                       String prodID = rs.getString("prodid");
+                       MatrixLine mline = new MatrixLine();
+                       
+                  
+                       if (mline.getCustID() == null && clGroup != null
+                                       && clGroup.trim().length() > 0) {
+                               mline.setCliGroup(clGroup.trim());
+                       }
+
+                       if (prodID != null && prodID.trim().length() > 0) {
+                               mline.setProdID(prodID.trim());
+                       }
+                     
+                       lines.add(mline);
+               }
+               
+               rs.close();
+               stmt.close();
+               ss.close();
+
+       } catch (SQLException ex) {
+       ex.printStackTrace();
+       }
+       return lines;
+
   }
 
 
@@ -717,11 +754,19 @@ String email = " ";
      	  		"left outer JOIN axdb.dbo.paymterm pay on cus.paymtermid = pay.paymtermid and pay.DATAAREAID = cus.DATAAREAID\r\n" + 
      	  		" WHERE cus.dataareaid='kosm' \r\n" + 
      	  		" order by dp.name ";
-     	  
+
+     	 
+    	  
+    	String  cmd3 = "SELECT cus.accountnum, mandatoryassortment_kos as fixok " +
+    	  		"FROM axdb.dbo.custtable cus with(nolock)  WHERE cus.dataareaid='kosm' and mandatoryassortment_kos > 0" ; 
+    	  		
+    	
   if (isDebug()) System.out.println(cmd);
     TreeMap customers = new TreeMap();
     TreeMap custMap = new TreeMap();
     TreeMap custDebt = new TreeMap();
+
+    HashSet custFix = new HashSet();
   
     TreeMap totalDebt = new TreeMap();
    
@@ -730,6 +775,20 @@ String email = " ";
     try {
     	ResultSet rs1 ;
     	Statement stmr ;
+    	
+    	try{
+   		 stmr = con.createStatement();
+       	 rs1 = stmr.executeQuery(cmd3);
+           while(rs1.next()){
+        	   custFix.add(rs1.getString("accountnum").trim());
+           }
+          rs1.close();
+          stmr.close();
+    	}catch(Exception s){
+   		
+   	}
+    	
+    	System.out.println("custFIx " + custFix.toString());
     	try{
     		 stmr = con.createStatement();
         	 rs1 = stmr.executeQuery(salessql);
@@ -870,6 +929,9 @@ String email = " ";
              	}else {
                     cust.setGroup(aleke);
             	}
+            	if( custFix.contains(cust.getPayer()) || custFix.contains(cust.getID())){
+               	   cust.addFixSortCode(aleke);  
+                  }
             }
         } 
         
@@ -884,10 +946,13 @@ String email = " ";
                 	   if(!cust.getGroup().contains(aleke2))
             	    cust.setGroup(cust.getGroup() + "|" + aleke2);
                    }
-               
-            
+                  if( custFix.contains(cust.getPayer()) || custFix.contains(cust.getID())){
+                 	 cust.addFixSortCode(aleke2);  
+                    }
         } 
         }
+       
+        
         if(salesres.get(accountnum) != null){
         	cust.setInfo("CHART Pardavimai :|Menuo ir metai|Pardavimai €|" + salesres.get(accountnum) );
         }
@@ -902,22 +967,16 @@ String email = " ";
       
         if (agen != null && agen.trim().length() >0) {
           cust.addAgent(new Agent(agen.trim()));
-    
-       
           cust.setMainAgent(agen.trim());
-          
-          
+
           Agent agg = ((Agent)this.agents2.get(agen.trim()));
-			
 			if(agg != null && agg.getDubbler().size()>0){
 				for (int e = 0 ; e < agg.getDubbler().size() ; e++){
 					cust.addAgent(new Agent((String)agg.getDubbler().elementAt(e)));
 				}
           	}
+    
         }
-        
-      
-        
         
        
         int term = rs.getInt("term");
@@ -939,45 +998,10 @@ String email = " ";
           cust.setPersonalData(info.trim().replaceAll("\\r\\n|\\r|\\n", " "));
         }
         
-    /*    double  minord  = rs.getDouble("minord");
-        if (minord > 0 ) {
-          cust.setMinsum(minord);
-        }
-        
-        String transa = rs.getString("transa");
-        if (transa != null && transa.trim().length()>0) {
-          cust.setCity("Marsruto numeris: " +transa.trim());
-          
-        }
-        String rounding = rs.getString("samm");
-        if (rounding != null && rounding.trim().equals("2")) {
-          cust.setMakeAmountRounding(true);        
-        }*/
-        
         if(aled.get(cust.getID())!= null){
         	cust.setDiscount(Double.parseDouble((String)aled.get(cust.getID())));
         }
-        
-     /*   String tyyp = rs.getString("tyyp");
-        if (tyyp != null && tyyp.trim().length() > 0) {
-        	if(cust.getCity()== null || cust.getCity().length() == 0 ){
-        		cust.setCity("Tipas :" + tyyp.trim());
-        	}else{
-        		cust.setCity(cust.getCity() + "| Tipas :" + tyyp.trim());
-        	}
-          cust.setMakeAmountRounding(true);        
-        }
-        
-        String tyyp2 = rs.getString("tyyp2");
-        if (tyyp2 != null && tyyp2.trim().length() > 0) {
 
-        	if(cust.getCity()== null || cust.getCity().length() == 0 ){
-        		cust.setCity("Apyv.lygis :" + tyyp2.trim());
-        	}else{
-        		cust.setCity(cust.getCity() + "| Apyv.lygis :" + tyyp2.trim());
-        	}     
-        }*/
-        
       
                         customers.put(name + cust.getID(), cust);
                         custMap.put(cust.getID(),cust);	
@@ -1567,7 +1591,7 @@ System.out.println("CustProdlisti tegemine ");
   }
 
   public String getDriverVersion(){
-    return "AxaZpienas";
+    return "AxaKosmelita";
   }
 
   public String getSubjectFilesTo(){

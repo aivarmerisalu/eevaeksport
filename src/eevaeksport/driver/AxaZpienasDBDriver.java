@@ -112,46 +112,9 @@ public class AxaZpienasDBDriver extends AbstractDBDriver  implements Manager,Pro
 		 System.exit(0);
 		
 	}
-	  private void copyPictures() {
-		  String pictsorig = parent.getProps().getProperty("pict.dirorig");
-		  String pictssou = parent.getProps().getProperty("pict.dir");
-		  
-		  
-		  File res2 = new File (pictsorig);
-          String[] ff2 = res2.list();
-          
-          for(int i = 0; ff2.length>i; i++){
-        	
-        	  String toode =  ff2[i];
-        	  File f = new File(pictsorig + toode);
-        	
-        	  if(f.isDirectory()) {
-        		  File ori = new File(pictsorig + toode + "\\262.png");
-        		  File out = new File(pictssou + toode + ".png");
-        		  
-        		  System.out.println("catalogue file " + ff2[i] + ori.exists() + " 1" + pictsorig + toode + "\\262.png");
-        		  if(ori.exists()) {
-        			  try {
-						Converter.copyFile(ori, out);
-						  System.out.println("catalogue copy " + ff2[i]);
-					} catch (Exception e) {
-					
-						e.printStackTrace();
-					}
-        		  }
-        		 
-        		  
-        	  }
-        
-           }
-       
-	  }
 	
 	  private void makePictureCat(){
 		  
-		 // copyPictures();
-	  	    
-	    	
 	    	String pictssou = parent.getProps().getProperty("pict.dir");
 	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
 	       
@@ -1676,7 +1639,7 @@ try{
          "                    ROUTECODE_TR as transa,'' as discount ,'' as samm , SubGroupCode_BBS as tyyp ,TURNOVERLEVEL_BBS as tyyp2 ," +
 			"				 (Select top 1 DISPLAYVALUE from DIMENSIONATTRIBUTEVALUESETITEM dv WITH (NOLOCK) where dv.DIMENSIONATTRIBUTEVALUESET = cus.DEFAULTDIMENSION    ) as osad, SHELFAREA_BBS as sharea, " +
             " SHELFSHARE_BBS As shshare ,'' as pictemail ,(select top  1 defaultagreementlineexpirationdate from agreementheader ah WITH (NOLOCK) where ah.custaccount=cus.invoiceaccount or ah.custaccount=cus.accountnum order by defaultagreementlineexpirationdate desc)  as contrend  "
-            + " FROM  custtable cus with(nolock) inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join " +
+            + " , AlcoholSales_bbs as licence  FROM  custtable cus with(nolock) inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join " +
 			" LOGISTICSPOSTALADDRESS adr ON adr.LOCATION = dp.PRIMARYADDRESSLOCATION and getdate() >=VALIDFROM  and  getdate() <= VALIDTO left outer JOIN  paymterm  " +
              "           pay on cus.paymtermid = pay.paymtermid  and pay.DATAAREAID  = cus.DATAAREAID  " +
               "                WHERE   (cus.dataareaid='zp'  and (SALESMANAGER_BBS != 0 or SALESTAKER_bbs != 0)) OR cus.accountnum in ('NAUJAS','OFISAS') " ; //47406
@@ -2209,6 +2172,11 @@ try{
         	
         		cust.setContractOver(contrend.getTime() + "");	 //PANEME LÕPU KUUPÄEVA KÜLGE
         	
+        }
+        
+        String lic = rs.getString("licence");
+        if(lic != null && lic.trim().equals("1")) {
+        	cust.addCity("Alkoholio licencija: Taip" );
         }
         
         String taraStr = (String)taraDebt.get(payer);

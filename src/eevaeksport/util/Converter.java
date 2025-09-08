@@ -4530,7 +4530,8 @@ public class Converter {
 				 
 				 Workbook workbook = null; 
 					Sheet sheet = null; 
-			  if(f.getName().endsWith("xlsx")) {
+					
+			  if(f.getName().toLowerCase().endsWith("xlsx")) {
 			       workbook = new XSSFWorkbook(ff); 
 					 sheet = workbook.getSheetAt(0); 
 			  }else {

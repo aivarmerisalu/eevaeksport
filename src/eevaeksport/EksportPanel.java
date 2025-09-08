@@ -1217,6 +1217,9 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("BalmerkCSV")
 					    || driver.getDriverVersion().equals("B1LT")
 					    || driver.getDriverVersion().equals("RahvaRaamat")
+
+					    || driver.getDriverVersion().equals("AxaKosmelita")
+					    
                 		  )
                   
                   {
@@ -1327,6 +1330,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("NaviTobisDirecto")
 					    || driver.getDriverVersion().equals("SkaiteRoskisko")
 					    || driver.getDriverVersion().equals("RahvaRaamat")
+					    || driver.getDriverVersion().equals("AxaKosmelita")
 					  ){
                 	 
                 	  System.out.println("Teen Fixi " + jsonDate(Calendar.getInstance().getTime()) );

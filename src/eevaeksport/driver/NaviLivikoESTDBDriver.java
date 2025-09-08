@@ -222,7 +222,7 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
              if( type == 3 ){ // on kampaania
             	
             	 
-            	 if(green) {
+            	// if(green) {
             		 
             	 if(sdate != null  && !sdate.toLocaleString().startsWith("1753")){
                 	 mline.setStartDate(Converter.getDDsMMMsYYYYString(sdate));
@@ -232,9 +232,9 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
             		 if(date != null && !date.toLocaleString().startsWith("1753")){
                     	 mline.setEndDate(Converter.getDDsMMMsYYYYString(date));
                      }	 
-            	 }else {
+            	 //}else {
             		// mline.setProdLevel("pr");
-            	 }
+            	 //}
                  
                  
                  if(actions.get(Converter.cleanLitLatEst(clGroup.trim())) != null) {
