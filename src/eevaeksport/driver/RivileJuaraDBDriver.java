@@ -76,7 +76,7 @@ public class RivileJuaraDBDriver extends AbstractDBDriver implements  BulkUpdate
 
         user =  getParent().getProps().getProperty("rest.user");
         pass = getParent().getProps().getProperty("rest.pass");
-        rcompany = getParent().getProps().getProperty("rest.company");
+        rcompany = getParent().getProps().getProperty("rest.companyx");
     }
 
 
@@ -716,6 +716,9 @@ String picts = parent.getProps().getProperty("pict.dir");
         }catch(Exception e){
         	e.printStackTrace();
         }
+
+    	 TreeMap webAgs =   Converter.getWebCustomersAgents(rcompany, user, pass);
+    	 
         connectionUp(url2);
         String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, \r\n" + 
         		"        	ltrim(N08_PAV) + ' ' AS nimetus , ltrim(N33_kodas_ak) as nimetus2,  \r\n" + 
@@ -842,11 +845,17 @@ String picts = parent.getProps().getProperty("pict.dir");
 			
              
              cust.setMainAgent(ag);
+             
+             if( webAgs != null && webAgs.get(cust.getID()) != null) {
+	         		ArrayList arr =  (ArrayList)webAgs.get(cust.getID());
+	         		for(int i = 0 ; i< arr.size();i++) {
+	         		   cust.addAgent(new Agent(arr.get(i)+""));
+			       	}
+	         	}
+             
               try{
             	  cust.setPaymTerm(rs.getString("paymterm")+"");
-                    
               }catch(Exception e){
-            	  
               }
               
               String phone = rs.getString("phone");
