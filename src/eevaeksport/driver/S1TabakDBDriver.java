@@ -1222,10 +1222,10 @@ System.out.println(yesGroups.size() + " yesGroups");
             	   }
              }
              
-             if(prod.getID().equals("TR0019433")) {
+           /* if(prod.getID().equals("TR0019433")) {
          	 System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() 
          	 + " " + gr2+ " " + treeGr.get(gr2) +" " + goes);
-             }
+             }*/
              // producti 0126
              String sorting = "aa";
 

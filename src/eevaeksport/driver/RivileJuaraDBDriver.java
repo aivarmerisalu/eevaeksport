@@ -263,6 +263,7 @@ String picts = parent.getProps().getProperty("pict.dir");
     	HashMap gruppmap = new HashMap();
     	try {
     	
+    		
     	
   	  String  sql = " select L01_KODAS_FS as kood, L02_KODAS_FIL as toode from l02_fild inner join l01_filh on L01_KODAS_FS=L02_KODAS_FS "
   	  		+ " where L01_TIPAS=1  order by  L01_KODAS_FS,L02_KODAS_FIL" ;
@@ -469,7 +470,7 @@ String picts = parent.getProps().getProperty("pict.dir");
     
     public TreeMap getProdGroups() throws SQLException {
 
-      connectionUp(url2);
+      connectionUp(url);
 
       TreeMap tm = new TreeMap();
 
@@ -721,14 +722,17 @@ String picts = parent.getProps().getProperty("pict.dir");
     	 
         connectionUp(url2);
         String cmd = "SELECT  ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, \r\n" + 
-        		"        	ltrim(N08_PAV) + ' ' AS nimetus , ltrim(N33_kodas_ak) as nimetus2,  \r\n" + 
-        		"		 (case when N33_ADRESAS  !='' then N33_ADRESAS else ltrim(N08_ADR) end)  AS aadress,\r\n" + 
-        		"		  (case when N08_NUOL_GR ='JURA' then '0' else ltrim(N08_NUOL_GR) end)  AS ale , \r\n" + 
-        		"			' ' AS visit ,N08_KODAS_KS AS payer ,  \r\n" + 
-        		"			(CASE WHEN len(TRIM(N33_SHIP_VIA))=0 or N33_SHIP_VIA IS NULL THEN  N08_KODAS_MS_P ELSE N33_SHIP_VIA END) AS agent ,  \r\n" + 
-        		"			(case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm ,\r\n" + 
-        		"			 (case when N33_TEL  !='' then N33_TEL else ((case when N08_TEL  !='' then N08_TEL else (N08_MOB_TEL) end) ) end)  as phone \r\n" + 
-        		"			, N08_E_MAIL as mail FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS  order by N08_PAV";
+        		"        		        	ltrim(N08_PAV) + ' ' AS nimetus , ltrim(N33_kodas_ak) as nimetus2, \r\n" + 
+        		"        			 (case when N33_ADRESAS  !='' then N33_ADRESAS else ltrim(N08_ADR) end)  AS aadress,\r\n" + 
+        		"					 (case when N33_KODAS_VS  !='' then  ltrim(N33_KODAS_VS) else ltrim( N09_PAV ) end)  AS city,\r\n" + 
+        		"        				  (case when N08_NUOL_GR ='JURA' then '0' else ltrim(N08_NUOL_GR) end)  AS ale , \r\n" + 
+        		"        					' ' AS visit ,N08_KODAS_KS AS payer ,  \r\n" + 
+        		"        					(CASE WHEN len(TRIM(N33_SHIP_VIA))=0 or N33_SHIP_VIA IS NULL THEN  N08_KODAS_MS_P ELSE N33_SHIP_VIA END) AS agent ,   \r\n" + 
+        		"        					(case when N08_KODAS_TS_P in ('REAL','SEKAN','ISANKSTINIS','NER') then '0' else ltrim(N08_KODAS_TS_P) end) as paymterm , \r\n" + 
+        		"        					 (case when N33_TEL  !='' then N33_TEL else ((case when N08_TEL  !='' then N08_TEL else (N08_MOB_TEL) end) ) end)  as phone  \r\n" + 
+        		"        					, N08_E_MAIL as mail FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS and N33_NUTYL = 1\r\n" + 
+        		"							 left join N09_VIET on N08_KODAS_VS = N09_KODAS_VS\r\n" + 
+        		"							order by N08_PAV";
         log(cmd);
         TreeMap customers = new TreeMap();
         HashMap custMap = new HashMap();
@@ -789,21 +793,20 @@ String picts = parent.getProps().getProperty("pict.dir");
               
             
               String aadr = rs.getString("aadress");
+              String city = rs.getString("city");
+
               if(aadr != null && aadr.trim().length()>0){
+            	  
+            	  if(city != null && city.trim().length() > 0) {
+            		  if(!aadr.toLowerCase().contains(city.trim().toLowerCase())) {
+            			  aadr = aadr.trim()+ ", " + city.trim();
+            		  }
+            	  }
                 cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim()),"Lithuania"));
                 name = name + " " + cust.getAddress();
               }
               cust.setName(Converter.enCodeEst(name).replaceAll("  ", " ").replaceAll("  ", " "));
 
-              String discStr = rs.getString("ale");
-              if (discStr != null || discStr.trim().length() >0 ){
-            	  try{
-            		    // cust.setDiscount(Double.parseDouble(discStr.trim()));
-            	            		  
-            	  }catch(Exception e){
-            		  
-            	  }
-              }
               
               String visit = rs.getString("visit");
               if (visit != null && visit.trim().length()>0){

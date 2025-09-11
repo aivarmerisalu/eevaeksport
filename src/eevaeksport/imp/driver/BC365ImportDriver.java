@@ -280,7 +280,7 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	  
 	  if (paymTerm != null) {
 		  
-		  ord.put("paymentTermsId", paymTerm);  
+		//  ord.put("paymentTermsId", paymTerm);  
 	  }
 	  
 	  Vector lines2 = order.getOrderLines();

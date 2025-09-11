@@ -559,7 +559,7 @@ try{
 			
 	         String sep = ";";
 	         String lineSep = System.getProperty("line.separator");
-	         String klient = order.getCompany().replace('_', ':');;
+	         String klient = order.getCompany().replace('_', ':');
 	         
 	         
 	         Calendar call = Calendar.getInstance();
@@ -586,14 +586,17 @@ try{
 		        sb0.append( klient + sep);
 		        sb0.append(getDateTimeString(Calendar.getInstance()) + sep + "L" +
 		        sep + getDateString(call) + sep + agent+sep+sep+sep+"0.00"+sep +"FALSE"+sep +getDateTimeString(Calendar.getInstance())+sep+ rrr +sep+hhh);
-		      
+		     
+		        if(!klient.contains("fake")) {
 	    	        
 	         String fname = (parent.getProps().getProperty("conv.dir")) + fileName;
 	      		      FileOutputStream fos = new FileOutputStream(fname);
 	    			        fos.write(sb0.toString().getBytes());
 	    			        fos.close(); 
 	      
-	         
+		      }
+		      
+		      
 	         ArrayList arr = new ArrayList ();
 	    Vector lines = order.getOrderLines();
 	      for (int i = 0; i < lines.size(); i++) {
@@ -636,8 +639,8 @@ try{
 
    	 String fileName2 =   "B_" + fn + ".csv";
 	        
-      fname = (parent.getProps().getProperty("conv.dir")) + fileName2;
-  		       fos = new FileOutputStream(fname);
+      String fname = (parent.getProps().getProperty("conv.dir")) + fileName2;
+      FileOutputStream   fos = new FileOutputStream(fname);
 			        fos.write(sb.toString().getBytes());
 			        fos.close();
 	    		
