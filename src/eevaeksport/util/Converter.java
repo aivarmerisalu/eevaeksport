@@ -433,6 +433,7 @@ public class Converter {
 		                 				    	break;
 		                 				    }
 		                 				    
+		                 				 //   System.out.println("klient " + klient);
 		                 	//tegeleme ainult kehtivate alustega			    
 			                 				if(endL > nowL) {
 			                 				
@@ -445,7 +446,7 @@ public class Converter {
 			               // kui pole küsimust olemas tuleb ta lisada ja vastustega ei tegele
 			                 				for (int b = 6; b <  row.getLastCellNum(); b++) {
 		    	                 				String kyssa = formatter.formatCellValue(row.getCell((short) b));
-		    	                 				System.out.println("pais  " + pais + " " + kyssa);
+		    	                 			//	System.out.println("pais  " + pais + " " + kyssa);
 				                 				
 		    	                 				if(kyssa != null && kyssa.trim().length() > 0) {
 		    	                 					
@@ -625,23 +626,23 @@ public class Converter {
 				    	                 				 
 				    	                 				 
 			    	                 				 } else if (files1 != null && files1.get(key2) != null){
-			    	                 					 
+			    	                 					// System.out.println("key2 " + key2 + " " + files1.get(key2).toString());
 			    	            		  				String foto = null;
 			    	            		  				String comm = null;
 			    	            		  ArrayList arr = (ArrayList)files1.get(key2);
 			    	            		  	for(int e = 0; e<arr.size(); e++) {
 			    	            		  						Toode t = (Toode)arr.get(e);
-			    	            		  									    	            		  						
-			    	            		  						if( t.getLadu() != null && t.comment2.contains("|PAL" + kyssa) && 
-			    	            		  								t.comment2.contains(((String)kyssad.get(b)).toUpperCase())){
+			    	            		  				
+			    	            		  					//	System.out.println("77012054 " + t.comment + " -- " + t.comment2 );
+			    	            		  						//77001349
+			    	            		  					
+			    	            		  							
+			    	            		  						if( t.getLadu() != null && t.comment2 != null && t.comment2.contains("|PAL" + kyssa.toUpperCase()) && 
+			    	            		  								t.comment2.contains(((String)kyssad.get(b)).trim().toUpperCase())){
 			    	            		  							foto =  t.getLadu();
 			    	            		  							comm =  t.comment3 + " " + t.getGr1() + " " + t.getGr2() ;
-			    	            		  					
-			    	            		  			/*if(key2.equals("77012054")) {
-			    	            		  				System.out.println("77012054 " + comm + " -- " + ((String)kyssad.get(b)).toUpperCase());
-			    	            		  				System.out.println("77012054 '" + kyssa.toUpperCase() + "' " + t.comment2);
-				    	            		  		}*/
-			    	            		  					
+
+				    	            		  				
                                                     if(foto != null) {
                                             	
 			    	                 					 CellStyle originalStyle = cell.getCellStyle();
