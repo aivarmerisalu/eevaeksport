@@ -938,12 +938,12 @@ public class DansgDBDriver extends AbstractDBDriver implements Discounter, Manag
                 	 Iterator itera2 =  planas.keySet().iterator();
                 	 while(itera2.hasNext()) {
                 		 String grupp = (String)itera2.next();
-                		 String done = "ls / 0ls";
+                		 String done = "€ / 0€";
                 		 String pl = "" + planas.get(grupp);
                 		 if(myydud.get(agentID)!= null){
                 		      TreeMap mm = (TreeMap)myydud.get(agentID);
                 		      if(mm.get(grupp)!= null){
-                		    	  done = "ls / " +(String)mm.get(grupp) + "ls";
+                		    	  done = "€ / " +(String)mm.get(grupp) + "€";
                 		      }
                 		 }
                 		 agent.setStartText(agent.getStartText() + grupp + " |" + pl + done + "||");

@@ -69,10 +69,14 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
     user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.companyx");
+    if( getParent().getProps().getProperty("dimension") != null ) {
+    	dimension =  getParent().getProps().getProperty("dimension");
+    }
      }
   String user =  null;
   String pass = null;
   String rcompany = null;
+  String dimension = "ALL";
 
   private TreeMap eanprods = null;
 	
@@ -537,9 +541,12 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
 	  
     public TreeMap getAgents(){
   	
-    String cmd = "select i_agent AS agent,"
-    		+ " (select firstname + ' ' + surname from eremployee e where e.id = i_agent) AS nimetus "
-    		+ " from grcompany cat where i_agent !='' group by i_agent" ;
+    String cmd = "select i_agent AS agent,\r\n" + 
+    		"    		 (select firstname + ' ' + surname from eremployee e where e.id = i_agent) AS nimetus \r\n" + 
+    		"    		 from grcompany cat where i_agent !='' group by i_agent \r\n" + 
+    		"			 union\r\n" + 
+    		"			 select e.id as agent,  e.firstname + ' ' + e.surname as nimetus from eremployee e inner join EREmployeeCatRel r on e.id = r.ideremployee  \r\n" + 
+    		"			 where ideremployeecat = 76 order by 2" ;
   
     if (isDebug()) System.out.println(cmd);
   
@@ -788,6 +795,11 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
   public TreeMap getProducts(Agent agent){
 	  eanprods= new TreeMap();
 
+	  String filter = " arca.id = 905 and pl.code = 'horeka' ";
+	  if(dimension.equals("RR")) {
+		  filter = "rtrim(pl.code)='1' and arca.category = 'tooterühm'  and  U_Merisoft = 1 and pr.code not like 'arh%'";
+	  }
+	  
     String cmd = "SELECT pr.code AS kood, rtrim(pr.name) + ' ' +  rtrim(pr.code)  AS nimi,  " +
     	"	hi.price AS hind,U_unikood AS EAN ,cat.idgrarticlecat AS grupp, " +
         " pr.contentquantity AS tykke ,y.name AS yhik ,u_komp_ruum as type   " +
@@ -795,13 +807,11 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
         " hi.idgrarticle=pr.id RIGHT JOIN grpricelist pl ON pl.id=hi.idgrpricelist RIGHT JOIN  " +
 		" grarticlecat arca ON arca.id = cat.idgrarticlecat  " +
         " RIGHT JOIN grunit y ON y.id=pr.idgrunit  " +
-        " WHERE rtrim(pl.code)='1'  and arca.category = 'tooterühm'  and  U_Merisoft = 1  and pr.code not like 'arh%' " + // and pr.name not like 'EI TO%'
-		" order by pr.code ";
+        " WHERE  " + filter + " order by pr.code ";
     
     String cmd2 = " SELECT pr.code AS toode,SUM(quantity) AS seis FROM dcurbalancestore ss  " +
     		" INNER JOIN grarticle pr ON idgrarticle = pr.id WHERE ss.iddrstore in (2,5) AND quantity >0 GROUP BY  pr.code " ;
 
-    StringBuffer top = new StringBuffer();
     
     String cmd3 = " select pr.code as toode, Ltrim(kir.name) +  " +
 " case when U_Parimenne > getdate()-400 then ' P:' + ltrim(str(day(U_Parimenne)))+'.'+ltrim(str(month(U_Parimenne)))+  " +
