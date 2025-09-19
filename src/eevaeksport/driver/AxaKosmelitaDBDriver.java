@@ -528,9 +528,11 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 			      }
 	
 		   
-		   System.out.println("prodHierID " + prodHierID);
-			
-		   
+		     System.out.println("prodHierID2 " + prodHierID);
+			  System.out.println("prodHier2 " + prodHier);
+			  System.out.println("channelID2 " + channelID);
+			  System.out.println("prodStockID2 " + prodStockID);
+			  
     String cmd = " select w.value as kood , w.name as name from  DIMATTRIBUTEHCMWORKER w inner join HCMWORKER h on h.personnelnumber = w.value \r\n" + 
     		"    				 inner join custtable c on c.MAINCONTACTWORKER=h.recid   group by  w.value  , w.name  ";
     
@@ -1073,6 +1075,7 @@ try {
  
     String    sql = " 	Select e.PARENTCATEGORY as liik , e.code,   (Select code from ECORESCATEGORY a where a.RECID = e.PARENTCATEGORY) as nimi from ECORESPRODUCTCATEGORY g \r\n" + 
     		"	 inner join ECORESCATEGORY e on e.RECID = g.CATEGORY where  g.categoryhierarchy in ('" + prodHierID + "') group by e.recid , e.name, e.code ,PARENTCATEGORY ";
+   System.out.println(sql);
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 

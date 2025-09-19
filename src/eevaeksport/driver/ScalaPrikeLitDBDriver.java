@@ -70,7 +70,7 @@ public class ScalaPrikeLitDBDriver extends AbstractDBDriver implements BulkUpdat
      *
      * @param pare
      *
-     * @see
+     * @seer
      */
 	
 	
@@ -917,9 +917,39 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
           }
    
         
+       HashMap salesres = new HashMap(); 
         
-        
-        
+      	try {
+          String salessql = "\r\n" + 
+          		"SELECT OR20004 AS klient ,( ltrim( case when month(OR20015) < 10 then  '0' + ltrim(str(month(OR20015))) else \r\n" + 
+          		"          		          		ltrim(str(month(OR20015))) end) ) as kuu,sum(OR20024) AS sales  FROM OR200500 \r\n" + 
+          		"				WHERE OR20015 > getdate()-200 GROUP BY OR20004 , ltrim( case when month(OR20015) < 10 then  '0' + ltrim(str(month(OR20015))) else \r\n" + 
+          		"          		          		ltrim(str(month(OR20015))) end)  order by  OR20004 , ltrim( case when month(OR20015) < 10 then  '0' + ltrim(str(month(OR20015))) else \r\n" + 
+          		"          		          		ltrim(str(month(OR20015))) end)";
+          	
+      
+          connectionUp(url);
+          stmt = con.prepareStatement(salessql);
+          ResultSet rs1 = stmt.executeQuery();
+          while(rs1.next()){
+          	String klient = rs1.getString("klient").trim();
+          	String kuu = rs1.getString("kuu");
+          	int summa = (int)rs1.getDouble("sales");
+            if(salesres.get(klient) == null){
+          	  salesres.put(klient,"   " + kuu + " : " + summa + " " );
+            }else{
+          	  String asi = (String)salesres.get(klient);     	  
+          	  salesres.put(klient,"   " + kuu + " : " + summa +" |" + asi);
+            }
+          }
+         rs1.close();
+         stmt.close();
+         connectionDown();
+      	} catch(Exception e) {
+      		e.printStackTrace();
+      	}
+          
+          
         
 	log(cmd);
 
@@ -1035,12 +1065,17 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 	
                 }
                 
-                if(payments.get(cust.getPayer()) != null){
+              if(payments.get(cust.getPayer()) != null){
                	 cust.payments = (String) payments.get(cust.getPayer());
                }
                 
               if(taraSaldo.get(cust.getID()) != null) {
-            	  cust.setInfo("Tara Saldo " + taraSaldo.get(cust.getID()) +  " kegs");
+            	  cust.setInfo("Tara Saldo " + taraSaldo.get(cust.getID()) +  " kegs|");
+              }
+              
+
+              if(salesres.get(cust.getID()) != null){
+              	cust.addInfo(Converter.enCodeEst("CHART sales :|Month & year|Sales |" )+ salesres.get(cust.getID()) );
               }
 
                 String delday =(String) deldays.get(cust.getID()+"aeg");

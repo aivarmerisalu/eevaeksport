@@ -658,6 +658,13 @@ public void setShowfullpricelist(boolean showfullpricelist) {
     info = aInfo;
   }
 
+  public void addInfo(String aInfo) {
+	  if(info == null) {
+		  info = aInfo;
+	  }else {
+	    info = info + aInfo;
+	  }
+	  }
   /**
    *
    * @return the String value of printean.
