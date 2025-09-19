@@ -751,6 +751,8 @@ public class RivileKurybaDBDriver extends AbstractDBDriver implements  BulkUpdat
             	  cust.bonusAvailable = Double.parseDouble(bonus.get(kkood)+"");
               }
               
+              cust.allowGift = true;
+              
              //System.out.println(cust.getID() +" " + cust.getAgents().toString());
               customers.put(name, cust);
               custMap.put(cust.getPayer(), cust);

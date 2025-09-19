@@ -943,7 +943,7 @@ String region = rs.getString("region");
 	
     	  
     	  
-    	  System.out.println("Asses size enne  " + asscusts.size());
+    	//  System.out.println("Asses size enne  " + asscusts.size());
     	  Vector vec = new Vector(); 
     	  String cmd3 = "select a.ASSETID as code ,b.name , '' as ean ,'' as nfcTag, a.ASSETID as factoryID ,b.make as description , " + 
     	  		" b.createddatetime as born , LENDINGDATE as contract ,a.CUSTACCOUNT as custcode " +
@@ -1067,9 +1067,6 @@ String region = rs.getString("region");
                          String custcode = rs1.getString("custcode").trim();
                          obj.put("customerCode", custcode);
                          
-                         if(code.indexOf("MI.04459") != -1){
-                        	 System.out.println("MI.04459 " + custcode +" "+ (asses.contains(code)) + " " +custs.contains(custcode));
-                         }
                        
                          if(asses.contains(code)  ){ // && custs.contains(custcode)
                         	  String olemas = (String)asscusts.get(code);
@@ -1090,7 +1087,6 @@ String region = rs.getString("region");
                       rs1.close();
                       stm.close();
     	     
-                      System.out.println("assets cou " +  cou + " "+ coua + " " + vec.size());
                       
                       // siis peaks tegema vahele kontrolli et kui on muudatus siis ainult laksad ylesse
     	   
@@ -1404,7 +1400,7 @@ String region = rs.getString("region");
         	prod.setMaxDiscount(maxdisc);
         	prod.setStatusDiscount("1");
         	prod.setName(nimetus.trim() + " MD:" + (int)maxdisc+ "%");
-        	System.out.println("MD:" + (int)maxdisc+ "% " +nimetus.trim());
+        //	System.out.println("MD:" + (int)maxdisc+ "% " +nimetus.trim());
         }
         
        
@@ -1703,7 +1699,7 @@ while(rs.next()){
 
 
 Converter.saveFile(parent.getProps().getProperty("stockrefdir") + "stockbronn.txt", sb.toString());
-System.out.println(sb.toString());
+//System.out.println(sb.toString());
 			  
 
     }
@@ -1770,10 +1766,13 @@ PreparedStatement stmt2 = con.prepareStatement(sql);
  	sb.append("  Nr." + id+ "\t  ");
  	
 	String asi = rs.getString("asi").trim();
-	
- 	double summa = Double.parseDouble(rs.getString("summa").trim());
+	String su = rs.getString("summa");
+	double summa = 0;
+	if(su != null) {
+ 	 summa = Double.parseDouble(su.trim());
  	String sum = nf.format(summa) ;
   sb.append(sum + " eur\n" + sep);
+	}
    
  
  	

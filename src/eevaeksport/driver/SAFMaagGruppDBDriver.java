@@ -307,7 +307,7 @@ public class SAFMaagGruppDBDriver extends AbstractDBDriver implements Manager,Pr
       public String getSaveStockInfo(){
 
     	  String cmd = " SELECT pr.code AS toode , SUM(quantity) as ladu  FROM dcurbalancestore ss \r\n" + 
-    	  	 		" INNER JOIN grarticle pr ON idgrarticle = pr.id WHERE ss.iddrstore in (34,35,45,52) AND quantity > 0 \r\n" + 
+    	  	 		" INNER JOIN grarticle pr ON idgrarticle = pr.id WHERE ss.iddrstore in (37,36,47,54) AND quantity > 0 \r\n" + 
     	  	 		"	GROUP BY  pr.code "; 
       	 
 
@@ -599,7 +599,7 @@ String cmd = "SELECT kl.id FROM grcompany kl " +
     public TreeMap getAgents(){
   	
     String cmd = "select e.id as agent,  e.firstname + ' ' + e.surname as nimetus from eremployee e inner join EREmployeeCatRel r on e.id = r.ideremployee  \r\n" + 
-    		"    	 where ideremployeecat = 76" ;
+    		"    	 where ideremployeecat = 75 " ;
   
     if (isDebug()) System.out.println(cmd);
   
@@ -667,7 +667,7 @@ String cmd = "SELECT kl.id FROM grcompany kl " +
 		  "  INNER JOIN grarticle t ON t.id= r.idgrarticle  " +
 		  "	LEFT JOIN grarticleCatrel cat ON cat.idgrarticle=t.id " +
 		  "    WHERE d.docdate >='2025-04-01 00:06:49.340'  "+
-		  "    AND cat.idgrarticlecat = 916 GROUP BY d.idgrcompany,t.code HAVING SUM(r.quantity) != 0 and sum(r.amount)!= 0 ORDER BY  d.idgrcompany,t.code";
+		  "    AND cat.idgrarticlecat = 116 GROUP BY d.idgrcompany,t.code HAVING SUM(r.quantity) != 0 and sum(r.amount)!= 0 ORDER BY  d.idgrcompany,t.code";
  	  
  	  ResultSet rs = st.executeQuery(cmd);
  	  while(rs.next()){
@@ -713,7 +713,7 @@ String cmd = "SELECT kl.id FROM grcompany kl " +
 	  rs.close();
  	  
  	  String cmd2 = "SELECT  kl.id AS kood,ltrim(kl.name) AS nimi,(select name from grcompany where id=kl.idsettlcompany)as mnimi,kl.deliveryaddr AS address,'' AS visit " + 
-    "  ,creditlimit AS limiit,kl.i_teostaja AS agent, " +
+    "  ,creditlimit AS limiit,kl.i_teostaja AS agent, I_Horeca_Myygiagent as agent2, " +
      "      (case when len(ltrim(kl.idsettlcompany)) >0 then kl.idsettlcompany else kl.id end) AS payer,-kl.pricecut AS ale ,phone,'' AS ladu  " +
       "    ,idgrpricelist as grupp ,'' as sort ,case when message like '%mitte m%' then 1 else 0 end as block , message as info,'Transp.: ' + pr.name as transa  , " +
 	"	 te.code as paymterm , e_mail as email ,idgrpricelistc as kamp , " +
@@ -761,6 +761,12 @@ String cmd = "SELECT kl.id FROM grcompany kl " +
           String ag = rs.getString("agent").trim();
           
           cust.addAgent(new Agent(ag));
+          
+          String ag2 = rs.getString("agent2");
+          if(ag2 != null && ag2.trim().length() > 0) {
+        	  cust.addAgent(new Agent(ag2));
+          }
+          
           cust.addAgent(new Agent("HOUSE"));
           
           Agent aa = (Agent)aHash.get(ag);
@@ -961,10 +967,10 @@ String cmd = "SELECT kl.id FROM grcompany kl " +
     		"         FROM grarticle pr LEFT JOIN grarticleCatrel cat ON cat.idgrarticle=pr.id LEFT JOIN grpricelistrel hi ON \r\n" + 
     		"         hi.idgrarticle=pr.id LEFT JOIN grpricelist pl ON pl.id=hi.idgrpricelist LEFT JOIN   grarticlecat arca ON arca.id = cat.idgrarticlecat   \r\n" + 
     		"         LEFT JOIN grunit y ON y.id=pr.idgrunit  WHERE  \r\n" + 
-    		"        ( left(pr.code,1)!='9' and pl.id in (1230,1224,1254,1285) and  (left(arca.code,1)= '0' or arca.id = 905) ) OR pr.code = 'T'  order by pr.code  " ;
+    		"        ( left(pr.code,1)!='9' and pl.id in (1227,1224,1301,1449) and  (left(arca.code,1)= '0' or arca.id = 895) ) OR pr.code = 'T'  order by pr.code  " ;
     
   	 String cmd2 = " SELECT pr.code AS toode , SUM(quantity) as ladu  FROM dcurbalancestore ss \r\n" + 
-  	 		" INNER JOIN grarticle pr ON idgrarticle = pr.id WHERE ss.iddrstore in (34,35,45,52) AND quantity > 0 \r\n" + 
+  	 		" INNER JOIN grarticle pr ON idgrarticle = pr.id WHERE ss.iddrstore in (37,36,47,54) AND quantity > 0 \r\n" + 
   	 		"	GROUP BY  pr.code "; 
 
   	 
@@ -1292,7 +1298,7 @@ String cmd = "SELECT kl.id FROM grcompany kl " +
 	    "	inner  JOIN grarticleCatrel cat ON cat.idgrarticle=r.idgrarticle  " + 
 	    "	inner JOIN grarticleCat ca  ON ca.id=cat.idgrarticlecat and ca.category='0'	" +    
 	    "	WHERE YEAR(d.docdate)=YEAR(getdate()) AND MONTH(d.docdate)=MONTH(getdate()) " +
-	    "	AND cat.idgrarticlecat != 916 and d.IDWorker is not null GROUP BY d.IDWorker ";
+	    "	AND cat.idgrarticlecat != 116 and d.IDWorker is not null GROUP BY d.IDWorker ";
 
        if (isDebug()) System.out.println(cmd);
           try {

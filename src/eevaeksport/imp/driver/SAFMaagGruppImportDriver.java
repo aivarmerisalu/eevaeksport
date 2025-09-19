@@ -50,8 +50,8 @@ import eevaeksport.util.Converter;
 
    public String identifyCustomer(String id,String regnr)throws SQLException {
     String custid = null;
-    Connection  con = DriverManager.getConnection(url + "safgr"
-            , "mobile", "mobilemaag");     
+    Connection  con = DriverManager.getConnection(url + "SAFTEST"
+            , "mobile", "mobile");     
    
     String cmd = "SELECT kl.code FROM grcompany kl WHERE U_ImpordiFiliaal = '" + id + "'";   
     PreparedStatement st2 = con.prepareStatement(cmd);
@@ -79,10 +79,10 @@ import eevaeksport.util.Converter;
 
    public int getSalesid() throws SQLException{
 	   String cmd = "SELECT MAX(id) AS id from SDO  where  filename like '%MJ%'"; 
-	   DriverManager.getConnection(url + "safgr"
-	            , "mobile", "mobilemaag");
-	  Connection con2 =  DriverManager.getConnection(url + "importgr"
-	            , "mobile", "mobilemaag");
+	   DriverManager.getConnection(url + "SAFTEST"
+	            , "mobile", "mobile");
+	  Connection con2 =  DriverManager.getConnection(url + "import"
+	            , "mobile", "mobile");
      PreparedStatement st2 = con2.prepareStatement(cmd);
      ResultSet rs = st2.executeQuery();
      int result = 0 ;
@@ -108,7 +108,7 @@ import eevaeksport.util.Converter;
     log.info("2_LINE_SQL: " + sql2);
 
     String prod = null;
-Connection ccc = DriverManager.getConnection(url + "saf"
+Connection ccc = DriverManager.getConnection(url + "saftest"
         , "mobile", "mobile");
     Statement st1 = ccc.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
@@ -169,8 +169,8 @@ Connection ccc = DriverManager.getConnection(url + "saf"
            
          log.info("SALES_LINE_SQL: " + sql);
        System.out.println(sql);
-       Connection con5 = DriverManager.getConnection(url + "safgr"
-               , "mobile", "mobilemaag");
+       Connection con5 = DriverManager.getConnection(url + "saftest"
+               , "mobile", "mobile");
       
          Statement st = con5.createStatement();
          ResultSet rs = st.executeQuery(sql);
@@ -194,8 +194,8 @@ Connection ccc = DriverManager.getConnection(url + "saf"
        System.out.println(sql);
        
             log.info("SALES_LINE_SQL: " + sql);
-            Connection  con3 = DriverManager.getConnection(url + "importgr"
-                    , "mobile", "mobilemaag");
+            Connection  con3 = DriverManager.getConnection(url + "import"
+                    , "mobile", "mobile");
              
                PreparedStatement st2 = con3.prepareStatement(sql);
                st2.executeUpdate();
@@ -215,8 +215,8 @@ Connection ccc = DriverManager.getConnection(url + "saf"
      
      
      if(!"true".equals(parent.getProps().getProperty("testing"))){
-    	 Connection con9 = DriverManager.getConnection(url + "importgr"
-    	            , "mobile", "mobilemaag");
+    	 Connection con9 = DriverManager.getConnection(url + "import"
+    	            , "mobile", "mobile");
     	     PreparedStatement st2 = con9.prepareStatement(sql4);
     	     try{
     	     	 st2.executeUpdate();
@@ -252,8 +252,8 @@ boolean send2 = false;
 	     String sql = "SELECT code , name FROM grcompany WHERE id=" + order.getCompany() + "";
 	    // String idladu = order.getWarehouse();
 	       log.info("addInvoiceHeader: " + sql);
-	       Connection  con = DriverManager.getConnection(url + "safgr"
-	               , "mobile", "mobilemaag");     
+	       Connection  con = DriverManager.getConnection(url + "saftest"
+	               , "mobile", "mobile");     
 	      
 	       Statement st = con.createStatement();
 	       ResultSet rs = st.executeQuery(sql);
@@ -331,8 +331,8 @@ boolean send2 = false;
   			 "','" + KOMPL + " " +  ARVE + "' ,0,'" + veoring + "','MJ', '" + KT  + "')";
 
 	     System.out.println("addInvoiceHeader2: " + sql);
-	     Connection con6 = DriverManager.getConnection(url + "importgr"
-	             , "mobile", "mobilemaag");
+	     Connection con6 = DriverManager.getConnection(url + "import"
+	             , "mobile", "mobile");
 
 	         PreparedStatement stmt2 = con6.prepareStatement(sql);
 	         

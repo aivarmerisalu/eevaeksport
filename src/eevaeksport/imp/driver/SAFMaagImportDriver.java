@@ -39,7 +39,7 @@ import eevaeksport.imp.OrderLine;
      
        String ur = parent.getProps().getProperty("dsn.url");
        if(ur != null) {
-    	   urlP = ur;
+    	  // urlP = ur;
        }
       
     
@@ -49,7 +49,7 @@ import eevaeksport.imp.OrderLine;
      }
    }
 
-   private String urlP = "SAF";
+   private String urlP = "SAFTEST";
    
    
    public String identifyCustomer(String id,String regnr)throws SQLException {
