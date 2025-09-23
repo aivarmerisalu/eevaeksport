@@ -6328,7 +6328,7 @@ try{
 		 
 		 TreeMap res = new TreeMap();
 		 if(makedata)
-		   Converter.loadUploadedFiles(algus, null ,company,  user ,  pass);
+		   Converter.loadUploadedFiles(algus, lopp ,company,  user ,  pass);
 		
 		  StringBuffer sb  = new StringBuffer();
 		

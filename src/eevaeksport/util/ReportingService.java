@@ -211,8 +211,10 @@ public JSONArray getUploadedFileList(Date algus, Date lopp) throws Exception{
 	}
 	
 	if(lopp != null) {
-		web = web + "to=" + lopp.getTime();
+		web = web + "&to=" + lopp.getTime();
 	}
+	
+	System.out.println("web query " + web);
 	
 	HttpClient cli = getClient();
     HttpResponse resp = cli.execute(getReq(web));

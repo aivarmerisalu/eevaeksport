@@ -1500,7 +1500,6 @@ TreeMap tr = new TreeMap();
 				
 				// loeme abifaili sisse.
 				
-				org.json.simple.JSONArray picts = getPictData();
 				//System.exit(0);
 				String user =  getParent().getProps().getProperty("rest.user");
 				String   pass = getParent().getProps().getProperty("rest.pass");
@@ -1519,10 +1518,8 @@ TreeMap tr = new TreeMap();
 				}
 				
 				
-	//teeme perioodi valmis
-				Calendar algus = Calendar.getInstance();  
-			  	Calendar lopp = Calendar.getInstance();  	
-			  	Integer days = 20;
+	//teeme perioodi valmis	
+			  	Integer days = 1;
 			  if(	parent.getProps().getProperty("webreport.days") != null) {
 				  try {
 					  days = Integer.parseInt(parent.getProps().getProperty("webreport.days"));
@@ -1531,12 +1528,24 @@ TreeMap tr = new TreeMap();
 				  }
 			  };
 
-			  	algus.add(Calendar.DATE, -1 * days);
-			  	algus.set(Calendar.HOUR, 0);
-			  	lopp.set(Calendar.HOUR, 23);
-			  	lopp.set(Calendar.MINUTE, 59);
-			  	lopp.add(Calendar.DATE, +2);
-				
+
+				Calendar algus = Calendar.getInstance();  
+			  	Calendar lopp = Calendar.getInstance();  
+			    algus.add(Calendar.DATE, -days);
+		        algus.set(Calendar.HOUR_OF_DAY, 0);
+		        algus.set(Calendar.MINUTE, 0);
+		        algus.set(Calendar.SECOND, 0);
+		        algus.set(Calendar.MILLISECOND, 0);
+
+		        // End of yesterday
+		        lopp.add(Calendar.DATE, -1);
+		        lopp.set(Calendar.HOUR_OF_DAY, 23);
+		        lopp.set(Calendar.MINUTE, 59);
+		        lopp.set(Calendar.SECOND, 59);
+		        lopp.set(Calendar.MILLISECOND, 999);
+			  //	lopp.add(Calendar.DATE, +2);
+			  	System.out.println("algus " +algus.getTime().toGMTString());
+				System.out.println("lopp " +lopp.getTime().toGMTString());
 			  	
 			  	try {
 			  		String fnameBASE = this.getExcelDir() + "reportbase.xlsx";
@@ -1555,11 +1564,11 @@ TreeMap tr = new TreeMap();
 				      System.out.println("files alustan" );
 				  		
 				  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass,true);
-				  		System.out.println("files " + files.toString());
+				  		//System.out.println("files " + files.toString());
 				 
-			  	//	org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
+			  	org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
 			  	  // System.out.println("cc" + cc.toString() );
-			  	//	Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
+			  		Converter.saveFileInUTF8(f.getPath() + "/currSVjson.json", cc.toString());
 			  		int palletrow = 1;
 			  		boolean savefile = false;
 			  		
@@ -1578,17 +1587,21 @@ TreeMap tr = new TreeMap();
 			  		 
 			  		
 			  		
-			  		 cc2.addAll(picts);
+			  		// cc2.addAll(picts);
 			  		
 			  		 
 			  		for (int i = 0; i < cc2.size(); i++) {
 			  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc2.get(i);
+			  			if(((String)cob.get("custid")).equals("36552")) {
+			  				System.out.println(cob.toJSONString());
+			  			}
+			  			
 			  		   	String filterOutOfStock = (String)cob.get("resint3").toString();
 			  			String dateAndTime = (String)cob.get("recetime");
 			  			String dateOnly = dateAndTime.split("T")[0];
 			  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
 			  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
-			  		  String signa = dateAndTime + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") ;
+			  		  String signa = dateAndTime + "" + (String)cob.get("custid") + "" + (String)cob.get("prodid") ;
 			  		  
 			  		 
 			  		  
@@ -1744,21 +1757,30 @@ TreeMap tr = new TreeMap();
 			  				
 			  				if(files != null && files.get(cuid) != null && phs != null) {
 			  					int a = 0;
-			  					if(cuid.equals("79128"))
-			  						System.out.println("phs " + phs.toString());
+			  				//	if(cuid.equals("85389"))
+			  					//	System.out.println("phs " + phs.toString());
 			  					
 			  						for(int y = 0; y < phs.size() ; y++) {
 			  							String fname = (String)phs.get(y);
 			  						
-			  					
+
+			  							Calendar c1 = Calendar.getInstance();
+			  							c1.setTimeInMillis((Long) cob.get("sentdate"));
 			  				
 			  					ArrayList arr = (ArrayList)files.get(cuid);
 			  					for(int e = 0; e<arr.size(); e++) {
 			  						Toode t = (Toode)arr.get(e);
 			  						foto = t.getLadu();
-			  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
-			  							
-			  							
+			  				/*		if(cuid.equals("85398")) {
+			  					System.out.println(	( foto.indexOf(fname) !=-1) +"  "+ t.comment.equals(agid) +"  "+  t.getGr1().equals(dateOnly)
+			  							+"  "+ (t.getID().equals((String)cob.get("prodid")) + " " + t.getGr1() + "' '" + dateOnly + " " + Converter.getYYYY_MM_DDpString(c1))
+				  					);		
+			  						
+			  						}*/
+			  						
+			  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  
+			  								(t.getGr1().equals(dateOnly) || t.getGr1().equals(Converter.getYYYY_MM_DDpString(c1))) 
+			  								&& t.getID().equals((String)cob.get("prodid"))){
 			  							
 			  								
 			  				  		         Cell  cell = worksheetBASE.getRow(palletrow).createCell(14+a);

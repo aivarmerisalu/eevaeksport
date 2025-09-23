@@ -2479,11 +2479,28 @@ try{
 				  }
 			  };
 
-			  	algus.add(Calendar.DATE, -1 * days);
-			  	algus.set(Calendar.HOUR, 0);
-			  	lopp.set(Calendar.HOUR, 23);
-			  	lopp.set(Calendar.MINUTE, 59);
-			  	lopp.add(Calendar.DATE, +2);
+			  	Integer daysEnd = -2;
+			  if(	parent.getProps().getProperty("webreport.daysend") != null) {
+				  try {
+					  daysEnd = Integer.parseInt(parent.getProps().getProperty("webreport.daysend"));
+				  }catch(Exception e) {
+					  
+				  }
+			  };
+
+			  
+			  algus.add(Calendar.DATE, -1 * days);
+			  algus.set(Calendar.HOUR_OF_DAY, 0);
+		        algus.set(Calendar.MINUTE, 0);
+		        algus.set(Calendar.SECOND, 0);
+		        algus.set(Calendar.MILLISECOND, 0);
+		        
+			  	
+			  	lopp.add(Calendar.DATE, -1 * daysEnd);
+			  	 lopp.set(Calendar.HOUR_OF_DAY, 23);
+			        lopp.set(Calendar.MINUTE, 59);
+			        lopp.set(Calendar.SECOND, 59);
+			        lopp.set(Calendar.MILLISECOND, 999);
 				
 			  	
 			  	try {
@@ -2704,10 +2721,12 @@ try{
 			  					for(int e = 0; e<arr.size(); e++) {
 			  						Toode t = (Toode)arr.get(e);
 			  						foto = t.getLadu();
-			  						if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
-			  							
-			  							
-			  							
+			  						Calendar c1 = Calendar.getInstance();
+		  							c1.setTimeInMillis((Long) cob.get("sentdate"));
+		  							
+		  							if(foto != null && foto.indexOf(fname) !=-1 && t.comment.equals(agid) &&  
+			  								(t.getGr1().equals(dateOnly) || t.getGr1().equals(Converter.getYYYY_MM_DDpString(c1))) 
+			  								&& t.getID().equals((String)cob.get("prodid"))){
 			  								
 			  				  		         Cell  cell = worksheetBASE.getRow(palletrow).createCell(14+a);
 			  				  		         cell.setCellValue("Photo Link "+(a+1) );
@@ -2804,58 +2823,7 @@ if(savefile) {
 				HSSFRow row = null;
 				
 				row = sheet.getRow(0);
-			    // teeme valmis gruppide Treemapi key grupp ja Vectoris koodid
-				
-			//	System.out.println("rownum " + row.getLastCellNum());
-				
-				
-				/*
-				 *  "custcomme": "{\"comNa\":\"\",\"comID\":\"\"}",
-		    "sentdate": 1699880013000,
-		    "prodgroup": "2.186",
-		  
-		    "amoun": 0,
-		    "isaction": false,
-		    "isgroup": false,
-		    "id": 132813261,
-		    "longitude": 0,
-		    "resint3": 333,
-		   "ideal": false,
-		    "created": 1699880526405,
-		    "resint2": 0,
-		    "resint1": 0,
-		    "pertotcat": 0,
-		    "resstr3": "1699880013851",
-		    "priceCamp": 0,
-		    "resstr1": "PRODUCT",
-		    "prodid": "P3322ABDEP",
-		    "ispartner": false,
-		    "mustbe": false,
-		    "resstr2": "4860019002831",
-		    "custchain": "BETA GROUP",
-		    "actiontota": 0,
-		    "grouptotal": 0,
-		    "prodtype": "NF",
-		    "percolcat": 0,
-		    "pictureLinks": "[\"104-{39746}-231113-14_53_30-[]!P3322ABDEP!.jpg\"]",
-		    "prodtypename": "NF",
-		    "latitude": 0,
-		    "prodname": "BORJOMI DEP 1.0 L Pet (6gb) pud.gāzēts min.ūdens 2831 (6",
-		    "perpalcat": 0,
-		    "isbrand": false,
-		    "company": "koniglv",
-		    "normalpr": 1,
-		    "actionaeva": 0,
-		    "lineId": 26214000,
-		    "pershecat": 0,
-		    "recetime": "2023-11-13T13:02:06Z",
-		    "custeval": 0,
-		    "custpayer": "39746",
-		    "extData": "2.186",
-		    "cattotal": 1,
-		    "comment": "{\"disNa\":\"1\\/4 paletes\",\"bonAm\":\"18\",\"bonID\":\"Y123462\",\"disAm\":1.0,\"eDay\":1699880003642,\"disID\":\"id12\",\"sDay\":1699880003642,\"bonNa\":\"BORJOMI DEP 1.0 L Pet (6gb) pud.gāzēts min.ūdens\"}",
-		    "prodgroupname": "Borjomi",
-		    */
+			
 				   SimpleDateFormat  dfor = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault() );
 				for(int a = 1 ; a < sheet.getLastRowNum()+1;a++){
 					try{

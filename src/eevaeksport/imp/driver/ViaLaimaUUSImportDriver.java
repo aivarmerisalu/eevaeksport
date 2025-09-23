@@ -271,8 +271,9 @@ JSONObject ord = new JSONObject();
 	   }
 	 
 	   String shipmode = order.getShipMode();
+	   System.out.println("SHIPMODE " + shipmode);
 	   
-	   if(shipmode != null && shipmode.trim().length()>0){
+	   if(shipmode != null && shipmode.trim().length() > 2){
 		      String ID = "";
 		      String CARR = "";
 		      String NAME = "";
