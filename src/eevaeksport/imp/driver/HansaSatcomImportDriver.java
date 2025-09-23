@@ -485,15 +485,10 @@ public class HansaSatcomImportDriver
             }
             sb.append("<UserId>" +  agent + "</UserId>" + ls);
             sb.append("</DeliveryParty>" + ls);
-            
-            
             sb.append("<SellerParty>" +ls);
             sb.append("<PartyCode>-</PartyCode>" +ls);
             sb.append("</SellerParty>" +ls);
-            
             sb.append("</DocumentParties>" + ls);
-          
-            
             sb.append("<DocumentInfo>" + ls);
             
 
@@ -511,12 +506,6 @@ public class HansaSatcomImportDriver
             
             String subType = "tellimus";
             
-         /* if(smarten){
-         	   sb.append(" <CreatedBy>" + agent + "</CreatedBy>" + ls ) ;	
-          	  subType = "myyk";
-          	  sb.append("<DocumentName>tellimus</DocumentName>" + ls); 
-         }*/
-            
         String    sss = (Calendar.getInstance().getTime().getTime()+ "").substring(5) ;
         if(ref != null && ref.trim().length() > 0){
         	sss = ref;
@@ -529,20 +518,10 @@ public class HansaSatcomImportDriver
             sb.append("<DocumentNum>" + escape(sss).trim()+ "</DocumentNum>" + ls); 
             sb.append("<DateInfo>" + ls);
             sb.append("<OrderDate>" +escape(getDateString(Calendar.getInstance())) + "</OrderDate>" + ls);
-            String time = "T00:01:00";
-
             sb.append("<DeliveryDateRequested>" +  escape(getDateString(cal)) + "</DeliveryDateRequested>" + ls); //aeg taha panna  T10:00:00
-            //  seal lõpus T10:00:00
-            // põhiveo puhul T01:00:00
             sb.append("</DateInfo>" + ls);
             sb.append("</DocumentInfo>" + ls);
-           // if(smarten){
-             //   sb.append("<DocumentSumGroup>" + ls + "<Currency>EUR</Currency>" + ls + "</DocumentSumGroup>" + ls);    	  
-            //}
-            
             sb.append("   <DocumentItem>" + ls);
-
-
 
             
             Vector sortedLines = order.getOrderLines();
@@ -558,9 +537,6 @@ public class HansaSatcomImportDriver
                 sb.append("      <ItemEntry>" + ls);
                 sb.append("      <LineItemNum>"  + (i+1) + "</LineItemNum>" + ls);
               
-               
-               // <GTIN>4740072222752</GTIN> 
-               // <BaseUnit>TK</BaseUnit> 
                 sb.append("         <SellerItemCode>" + line.getToode() + "</SellerItemCode>" + ls);
                 String nimi = "";
                 if( ean == null || ean.length() < 6 ) {
@@ -583,34 +559,18 @@ public class HansaSatcomImportDriver
               	  sb.append("         <ItemUnitRecord>" + ls);
                    sb.append("                <ItemUnit>tk</ItemUnit>" + ls);
                    sb.append("         </ItemUnitRecord>" + ls);
-                   
-               // if(smarten)
                    sb.append("          <ItemDescription>" + cleanLitLatEst(escape(nimi)) + "</ItemDescription>" + ls);               
                    sb.append("         <AmountOrdered>" + escape(getNF().format(line.getKogus())) + "</AmountOrdered>" + ls);
                  
                 if(line.getDiscount() > 0){
-              	  double discprice = (100d -line.getDiscount())*line.getPrice()/100d ;
+              	
+                	double discprice = (100d -line.getDiscount())*line.getPrice()/100d ;
                   sb.append("         <ItemPrice>" + escape(getNF().format(discprice)) + "</ItemPrice>" + ls); 
-                 } else if(order.getStatus() == 59 && line.getPrice() > 0 ){//telema variant readprice seadega 
+                   
+                } else if(order.getStatus() == 59 && line.getPrice() > 0 ){//telema variant readprice seadega 
                 	   sb.append("         <ItemPrice>" + escape(getNF().format(line.getPrice())) + "</ItemPrice>" + ls); 
-                       
-                  } else {
-              	 // sb.append("         <ItemPrice>" + escape(getNF().format(line.getPrice())) + "</ItemPrice>" + ls); 
-                 } 
-               
-            
-      /*          sb.append("         <VAT>" + ls + "                <VATRate>" +  + "</VATRate>" + ls);
-                sb.append("         </VAT>"+  ls);
+                }
                 
-                sb.append("         <ItemReserve>" + ls );
-          
-                sb.append("             <ItemReserveUnit>" + ls );
-              
-                
-                sb.append("                <ItemUnit>" +  escape(yhik.trim()) + "</ItemUnit>" + ls );
-                sb.append("                <AmountActual>" + getNF().format(line.getKogus()) + "</AmountActual>" + ls );
-                sb.append("             </ItemReserveUnit>" + ls );
-                sb.append("         </ItemReserve>" + ls );*/
                 sb.append("      </ItemEntry>" + ls);
             }
               sb.append("   </DocumentItem>" + ls);
@@ -666,7 +626,7 @@ public class HansaSatcomImportDriver
 	
 	
 	  private String getCustName(String id) {
-		  String res = null;
+		  String res = "noname";
 		  if(custs.get(id) != null) {
 			  res = ((Customer)custs.get(id)).getName();
 		  }

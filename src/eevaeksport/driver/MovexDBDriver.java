@@ -1784,59 +1784,7 @@ con.close();
          rs5.close();
          con4.close();
 
-//         System.out.println("ESIMENE TEHTUD" + sss);
-       /*  sb.append("\n\n " + getParent().getString("string5") + "\n\t" +
-                   getParent().getString("string6") + "\n\n");
-        sb.append(getParent().getString("string4") +  "\n");
-        NumberFormat nn = getNF();
-        nn.setGroupingUsed(false);
 
-          Connection con = getNewConnection();
-          stmt = con.createStatement();
-          ResultSet rs2 = stmt.executeQuery(sql);
-          while (rs2.next()) {
-
-            sb.append(" " + rs2.getString("grupp") + "\n                 " +
-                      nn.format(rs2.getDouble("summa")) +
-
-                      " EUR.\n-------------------------------------\n");
-          }
-          System.out.println("Teine TEHTUD");
-          System.out.println(sb.toString());
-          con.close();
-          sb.append("\n\n" + getParent().getString("string3") + "\n\n");
-          sb.append(getParent().getString("string2") + "\n\n");
-          Connection con2 = getNewConnection();
-          String nimetus = null;
-          String ale = null;
-          String kogus = null;
-         Statement st = con2.createStatement();
-          ResultSet rs3 = st.executeQuery(sql2);
-          System.out.println("" + sql2);
-          while (rs3.next()) {
-            nimetus = rs3.getString("nimetus").trim();
-            ale = rs3.getString("ale");
-            kogus = rs3.getString("tase").trim();
-           sb.append(nimetus + "\n");
-           sb.append("\t\t" + ale + " %\t" + kogus + "\n\n");
-          }
-          System.out.println("KOLMAS TEHTUD");
-        Connection con3 = getNewConnection();
-        Statement stv = con3.createStatement();
-        ResultSet rs4 = st.executeQuery(sql3);
-        ResultSetMetaData md4 = rs4.getMetaData();
-        System.out.println(sql3);
-        while (rs4.next()) {
-          nimetus = rs4.getString("nimetus").trim();
-          ale = rs4.getString("ale");
-          kogus = rs4.getString("tase").trim();
-          sb.append(nimetus + "\n");
-          sb.append("\t\t" + ale + " %\t" + kogus + "\n\n");
-        }
-        con2.close();
-        st.close();
-        con3.close();
-        stv.close();*/
       }
         catch (Exception e) {
           getParent().showError(e);
@@ -2079,13 +2027,10 @@ con.close();
  	 public void insertSuperVisorSQLMeri(SupervisorInfoWrapperMeri wr){
        
 
-         String kuhu = "supervisor";
-         boolean pv = true;
-     	kuhu = "supervisorsh";
+         String kuhu = "supervisorsh";
+         
      	 boolean fixing = false;
-     	
-		pv = false;
-           try {	
+     	  try {	
           	
          
           
@@ -2197,12 +2142,9 @@ con.close();
             	   
             		kuhu = "supervisorsh";
                 	 fixing = false;
-                     pv = false;
-                   if( lw.getLine().getProdID() != null && !lw.getLine().getProdID().toLowerCase().startsWith("pv")){
-                  		kuhu = "supervisorsh";	
-                  		pv = false;
-                  		}
-                  		if(lw.getLine().getResStr1().equals("INVPROBLEM")){
+                   
+                  
+                   if(lw.getLine().getResStr1().equals("INVPROBLEM")){
                   			fixing = true;
                   			kuhu = "tehnik"; 
                   		}
@@ -2330,21 +2272,10 @@ con.close();
               	  res1 = "";
                 }
                
-                
-                //System.out.println("PV " + pv + " " + fixing);
-               
-                if(pv){
-                    ps.setString(16, res2.replaceAll("'", " "));
-                     //System.out.println(res2 +"'");
-                     ps.setString(17, Converter.deCode(lw.getLine().getCustComment()).replaceAll("'", " "));
-                     //System.out.println( lw.getLine().getCustComment() +"'");  
-                }else{
                     ps.setString(16, res1);
                      ps.setString(17, res2);
-                }
-     
+               
                  ps.setInt(18, lw.getLine().getResInt1());
-                // System.out.println(lw.getLine().getResInt1() +"'");
                  ps.setInt(19, lw.getLine().getResInt2());
                  
                  System.out.println("lopp '" + lw.getLine().getResInt2() +"'");
