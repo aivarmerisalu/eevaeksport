@@ -506,7 +506,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 
    public TreeMap getProdGroupsSecond() throws SQLException {
     TreeMap   tm = new TreeMap();
-    String cmd = " SELECT  [Code] AS kood,[Description] AS nimi  FROM [VICIUNAI-POL$Product Group] where [Code] != ''order by [Code]";
+    String cmd = " SELECT  [Code] AS kood,[Description] AS nimi  FROM [VICIUNAI-POL$Product Group] where [Code] != '' order by [Code]";
    // System.out.println("Asike 2 " +cmd);
     try {
     	 Connection con = getNewConnection2();

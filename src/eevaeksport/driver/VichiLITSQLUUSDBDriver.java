@@ -835,54 +835,10 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	 	TreeMap freeze = new TreeMap();
 	    TreeMap custAgents = new TreeMap();
 	   	HashMap custagVisit = new HashMap();
-	   	HashMap custagName = new HashMap();
-	   	HashMap agendiTyyp = new HashMap();
 	   	HashMap custVisit = new HashMap();
 	    Vector kliendid = new Vector();
 		try {
 
-		
-			
-			
-			 
-		
-		/*	 
-			  Connection cone = this.getNewConnection2();
-		    
-		   	Statement stme = cone.createStatement();
-		
-		       ResultSet rse = stme.executeQuery(qqq);
-		       while(rse.next()){
-		   	   
-		    		String age = rse.getString("agent").trim();
-		       	    String klient = rse.getString("klient").trim();
-		       	    String day = rse.getString("day").trim();
-		       	 
-		       	   String visit = day;
-		       	   custagVisit.put(age + klient, visit);
-		           
-		    	   custVisit.put(klient, visit);
-		       	 kliendid.add(klient);
-		       	 
-		       	 
-		       if(custAgents.get(klient) != null){
-		    	   Vector vv = (Vector)custAgents.get(klient) ;
-		    	   vv.add(age);
-		    	   custAgents.put(klient, vv);
-		       }else{
-		    	   Vector vv = new Vector() ;
-		    	   vv.add(age);
-		    	   custAgents.put(klient, vv);
-		       }
-		    	
-		       }
-		    
-		       rse.close();
-		      stme.close();
-		      cone.close();
-*/
-		   //   System.out.println("custAgents " + custAgents);
-		    
 			
 			
 	String ccc =  "select custcode as cust ,Code+ ' ' +name as last from MobilejavaVIK.v_VIK_FA ";
@@ -893,12 +849,12 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	while (rscn.next()) {
 		String cid = rscn.getString("cust").trim();
 		String name = rscn.getString("last");
-		//String dd = rscn.getString("dd").substring(0,10);
+		
 		name = name.trim();// + " " + dd;
+		
 		if(freeze.get(cid) != null){
 			Vector vv = (Vector)freeze.get(cid);
 			if(!vv.contains(name)){
-				
 				vv.addElement(name);
 				freeze.put(cid, vv);
 			}
@@ -1413,8 +1369,8 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		                        
 		                      
 				                       
-		                        if(goes ){  // võtsin välja et alati kirjutaks koodi yle 
-		                        	//&& !cuus.contains(code)
+		                        if(goes && !cuus.contains(code) ){  // võtsin välja et alati kirjutaks koodi yle 
+		                        	//
 		                        	 vec.add(obj);
 		                        	counter ++;
 		                        }
@@ -1443,8 +1399,11 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		    	   //siin saadame seosed ära jujul kui customer on olemas selline 
 		     	   vec = new Vector(); 
 		     
-		 cmd3 = " select a.code,  custcode, k.[Customer ILN] as kl from MobilejavaVIK.v_VIK_FA a  left join MobilejavaVIK.v_VIK_Customers  k  on a.custcode = k.[kood]  where a.custcode != ''" ;
-		     	   int cou = 0;
+		 cmd3 = //" select a.code,  custcode, k.[Customer ILN] as kl from MobilejavaVIK.v_VIK_FA a  left join MobilejavaVIK.v_VIK_Customers  k  on a.custcode = k.[kood]  where a.custcode != ''" ;
+		     	 
+		 " select p.code , custcode , k.[Ship-to Address ILN] as kl  from MobilejavaVIK.v_VIK_FA "
+	  		+ " p inner join MobilejavaVIK.v_VIK_Customers k on p.custcode = k.kood and p.custcode2 = k.[Ship-to-address code] ";
+		 int cou = 0;
 		              int coua = 0;
 		     	  rs1 = stm.executeQuery(cmd3);
 		                  while(rs1.next()){
@@ -1460,10 +1419,10 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		                         
 		                         String kl = rs1.getString("kl");
 		                         if(kl != null) {
-		                         obj.put("customerCode", kl.trim() + "_" + custcode);
+		                         obj.put("customerCode",  custcode  + "_" + kl.trim());
 		                         
 		                       
-		                         if(asses.contains(code) && custs.contains(custcode) ){
+		                         if(asses.contains(code) && custs.contains(custcode + "_" + kl.trim()) ){
 		                        	  String olemas = (String)asscusts.get(code);
 		                        	  if(olemas == null){
 		                                  vec.add(obj);  
