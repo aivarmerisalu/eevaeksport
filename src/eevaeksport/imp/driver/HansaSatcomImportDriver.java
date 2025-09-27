@@ -567,8 +567,10 @@ public class HansaSatcomImportDriver
                 	double discprice = (100d -line.getDiscount())*line.getPrice()/100d ;
                   sb.append("         <ItemPrice>" + escape(getNF().format(discprice)) + "</ItemPrice>" + ls); 
                    
-                } else if(order.getStatus() == 59 && line.getPrice() > 0 ){//telema variant readprice seadega 
-                	   sb.append("         <ItemPrice>" + escape(getNF().format(line.getPrice())) + "</ItemPrice>" + ls); 
+              //  } else if(order.getStatus() == 59 && line.getPrice() > 0 ){//telema variant readprice seadega 
+                }else {
+             	   sb.append("         <ItemPrice>" + escape(getNF().format(line.getPrice())) + "</ItemPrice>" + ls); 
+                   	
                 }
                 
                 sb.append("      </ItemEntry>" + ls);

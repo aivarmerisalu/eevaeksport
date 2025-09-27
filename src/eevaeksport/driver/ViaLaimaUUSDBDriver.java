@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -1991,7 +1993,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 			e.printStackTrace();
 		}
 		
-		if ("78".equals(getParent().getProps().getProperty("stockcode"))) {
+		if ("TB".equals(getParent().getProps().getProperty("stockcode"))) {
 			grs = new TreeMap();
 			grs.put("olu", Converter.enCodeEst("Õlu"));
 			grs.put("mahl", "Mahl");
@@ -2016,42 +2018,23 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 	}
 	
 	
-	private String getGroup(String code){
-		String res = "muu";
-		if(code.equals("2978") || code.equals("2878") || code.equals("2778") || code.equals("2578") || code.equals("2678")) {
-			return "pepsi";
-		}
-		if(code.equals("2178") || code.equals("278") || code.equals("378")|| code.equals("30078")|| code.equals("20078")|| code.equals("10278")
-				|| code.equals("478") ||code.equals("10078") || code.equals("2078") || code.equals("MKõlu78") || code.equals("3078") || code.equals("178")
-				|| code.equals("1878")|| code.equals("SOL78")) {
-			return "olu";
-		}
-		if( code.equals("778") || code.equals("10378")  
-				|| code.equals("10178")|| code.equals("678") || code.equals("578")) { 
-			return "muu";
-		}
-		if(code.equals("1578") || code.equals("1778") || code.equals("1378") || code.equals("10478")) {
-			return "karas";
-		}
-		if(code.equals("1978") || code.equals("2278") || code.equals("1078")||  code.equals("8178") || code.equals("878") 
-				|| code.equals("978") || code.equals("3178") || code.equals("1278")|| code.equals("1178")) {
-			return "mahl";
-		}
-		if(code.equals("6178") || code.equals("MKsiider78")) {
-			return "siider";
-		}
-		if(code.equals("2378")) {
-			return "jtee";
-		}
-		if(code.equals("1478") || code.equals("2478")) {
-			return "vesi";
-		}
-		if(code.equals("1678")) {
-			return "pos";
-		}
+	private TreeMap getGroups(){
+		 TreeMap<String, String> map = new TreeMap<>();
 
-		
-		return res;
+	        try (BufferedReader br = new BufferedReader(new FileReader(getStatDir() + "tootegrupid.txt"))) {
+	            String line;
+	            while ((line = br.readLine()) != null) {
+	                String[] tokens = line.split(";");
+	                if (tokens.length >= 3) {
+	                    String key = tokens[0].trim();
+	                    String value = tokens[2].trim();
+	                    map.put(key, value);
+	                }
+	            }
+	        } catch (IOException e) {
+	           // e.printStackTrace();
+	        }		
+		return map;
 	}
 	
 	
@@ -2616,6 +2599,50 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 	}
 	
 	private TreeMap koodiga = null;
+	
+	public static String toTitleCase(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        String[] words = text.toLowerCase().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+
+        for (String word : words) {
+            if (word.length() > 0) {
+                sb.append(Character.toUpperCase(word.charAt(0)))
+                  .append(word.substring(1))
+                  .append(" ");
+            }
+        }
+
+        String name = sb.toString().trim();
+        
+        Pattern pattern = Pattern.compile("\\d+(?:/\\d+)+"); 
+        
+            Matcher matcher = pattern.matcher(name);
+            if (matcher.find()) {
+                String found = matcher.group(); // the part like 48/24/20
+                name = matcher.replaceAll("").replaceAll("\\s{2,}", " ").trim();
+            }
+        
+        return name;
+    }
+	
+	  public static String extractNthPart(String text, int index) {
+	        Pattern pattern = Pattern.compile("\\d+(?:/\\d+)+");
+	        Matcher matcher = pattern.matcher(text);
+
+	        if (matcher.find()) {
+	            String sequence = matcher.group(); // e.g. "48/24/20"
+	            String[] parts = sequence.split("/");
+
+	            if (index >= 0 && index < parts.length) {
+	                return parts[index].trim();  // return requested part
+	            }
+	        }
+	        return null; // not found or index invalid
+	    }
 
 	public TreeMap getProducts(Agent agent) {
 		makeFixSortNewProds();
@@ -2623,6 +2650,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		HashSet allowedProds = this.loadAllowedProds();
 		koodiga = new TreeMap();
 		TreeMap tm = new TreeMap();
+		
+		TreeMap groups = this.getGroups();
+		System.out.println(groups.toString());
 		
 		String laod = getParent().getProps().getProperty("laoseis.laod");
 		
@@ -2722,14 +2752,14 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		    	   
 		    	   File  vv  = new File("productjson"   + u+ ".txt");   
 		    	   File  uu  = new File("productjsontemp"   + u+ ".txt");  
-		    	   System.out.println("productJson suurus " +  uu.length() );
+		    	//   System.out.println("productJson suurus " +  uu.length() );
 		    	   if(uu.exists() && uu.length() > 2000) {
 		    		 if(vv.exists()) {
 		    			   vv.delete();
 		   		    }
 		    		
 		    		 boolean done =   uu.renameTo(new File("productjson"   + u+ ".txt")) ;
-		    		 System.out.println("productJson renamed");
+		    		// System.out.println("productJson renamed");
 		    	   }
 		    	   
 		    	 
@@ -2785,9 +2815,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 					
 						 if ("22".equals(getParent().getProps().getProperty("stockcode"))) {
 						 	prod.setName( Converter.enCodeEst(id.substring(0,2) + " " + name));	
-						 } else if ("78".equals(getParent().getProps().getProperty("stockcode"))) {
+						 } else if ("TB".equals(getParent().getProps().getProperty("stockcode"))) {
 					
-							// prod.setPartii(nameOrig);
 							 int ind = name.indexOf("pant ");
 							 if(ind != -1) {
 								 name = name.substring(0,ind) + name.substring(ind + 6);
@@ -2801,6 +2830,18 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 							 ind = name.indexOf("PANT ");
 							 if(ind != -1) {
 								 name = name.substring(0,ind) + name.substring(ind + 6);
+							 }
+							 
+							 
+							 String onPallet = extractNthPart(name,0);
+							 
+							// System.out.println("onPallet " + onPallet);
+							 if(onPallet != null && onPallet.trim().length() > 1) {
+								 try {
+								  prod.setOnPallet(Double.parseDouble(onPallet));
+								  }catch(Exception e) {
+									 
+								 }
 							 }
 							 
 							  name = name.replaceAll("alk.", " ");
@@ -2847,24 +2888,50 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 							  name = name.replaceAll("Pint ", " ");
 							  name = name.replaceAll("Õlu ", " ");
 							  name = name.replaceAll("   ", " ");
-							  name = name.replaceAll("  ", " ");
-							  name = name.replaceAll("  ", " ");
 							  
 							  if(name.contains("kasti EAN")) {
 								  name = name.substring(0, name.indexOf("kasti EAN"));
 							  }
 							  
+
+								// System.out.println("name 0 " + name);
+								   
+							  name = toTitleCase(name);
+							  //System.out.println("name 1 " + name);
+
+							  name = name.replaceAll("Prism", " ");
+							  name = name.replaceAll("Pris.", " ");
+							  name = name.replaceAll("Pris", " ");
+
+							  name = name.replaceAll("pantc", " ");
+							  name = name.replaceAll("pantl D", " ");
+
+							  name = name.replaceAll("Klaaspudel\\+", "pdl");
+							  name = name.replaceAll("Purk\\+", "purk");
+							  name = name.replaceAll("Pet\\+", "pet");
+							  name = name.replaceAll("\\+ ", " ");
+							  name = name.replaceAll(" \\+", " ");
+
+							  name = name.replaceAll(" D ", " ");
+
+							  name = name.replaceAll("Original", "Orig.");
+							  name = name.replaceAll("   ", " ");
+							  name = name.replaceAll("  ", " ");
+							  name = name.replaceAll("  ", " ");
+							  name = name.replaceAll("  ", " ");
+							  
+							  name = name.trim();
 							  
 							 prod.setName(Converter.enCodeEst(name));	
 							 prod.setNameSorting(name);
 						 
+
 							 if(prod.getName().contains("1/4") || 
 									 prod.getName().contains("1/2") || 
 									 prod.getName().contains("¼") ||
 									 prod.getName().contains("½")  ) {
 								 prod.setDiffColor(true);
 							 }
-							
 						 
 						 }else if ("17".equals(getParent().getProps().getProperty("stockcode"))) {
 							 
@@ -2909,21 +2976,21 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 										if (ean.length() > 0) {
 											prod.setEAN(ean);
                                            if(ean.length() > 4){
-                                        	   prod.setName(prod.getName() +  " " + ean.substring(ean.length()-4));
+                                        	   prod.setName(prod.getName().trim() +  " " + ean.substring(ean.length()-4).trim());
                                            }
 										}
 										
 										
-											if (gr.length() > 0) {
+										if (gr.length() > 0) {
 												prod.setGroup(gr);
-												if ("78".equals(getParent().getProps().getProperty("stockcode"))) {
-													prod.setGroup(this.getGroup(gr));
+												if ("TB".equals(getParent().getProps().getProperty("stockcode"))) {
+													if(groups.get(prod.getID()) != null) {
+													prod.setGroup((String)groups.get(prod.getID()));
+													System.out.println("TB grupp " + prod.getID() + " " + prod.getGroup());
+													}
 												}
 											}
 										
-							              //  if(partii.get(id) != null){
-							                //    prod.setPartii((String) partii.get(id));
-							   	           // }
 									
 							                prod.setStock(0);
 		        
@@ -3031,7 +3098,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 												   
 												   if(noprods != null) {
 													   if(noprods.contains(prod.getID().substring(0, prod.getID().length()-2))) {
-														   System.out.println("Nimi noprods " + prod.getName());
+														//   System.out.println("Nimi noprods " + prod.getName());
 														   goes = false;
 													   }
 												   }
@@ -3040,7 +3107,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 													       goes = false;
 													   if(allowedProds.contains(prod.getID())) {
 
-															  System.out.println("Nimi allowed " + prod.getName());
+															//  System.out.println("Nimi allowed " + prod.getName());
 														   goes = true;
 													   }
 												   }
