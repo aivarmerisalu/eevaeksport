@@ -80,10 +80,16 @@ public class LabbisSkonisImportDriver
   
   private Vector splitOrder (Order order){
 	  Vector result = new Vector();
-	  System.out.println("order.getWarehouse() " + order.getWarehouse());
-      if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 1 && 
+	  String warex = order.getWarehouse();
+			  
+			  if(warex != null && warex.startsWith("")) {
+					warex = warex.substring(1);
+				}
+		         
+	  System.out.println("order.getWarehouse() " + warex);
+      if(warex != null && warex.trim().length() > 1 && 
     		  (order.getAgent().startsWith("0") || order.getAgent().startsWith("2") || order.getAgent().startsWith("3"))) {
-    	  orderware = order.getWarehouse();
+    	  orderware = warex;
       } else {
     	  orderware = null;
       }
@@ -820,6 +826,9 @@ change 3DBV009 manager order warehouse – we want this manager to make orders o
 			String ware = order.getWarehouse();
 			if ( ware == null ){
 				ware = " ";
+			}
+			if(ware.startsWith("")) {
+				ware = ware.substring(1);
 			}
 	         
     

@@ -623,7 +623,7 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	   String sql =  "   SELECT k.[Name] AS nimi , k.City as addr2 ,k.[No_] AS kood,k.[Bill-to Customer No_] AS payer,k.[Address] + ' ' + k.[City] AS aadress " +  
     	"   	,k.[Salesperson Code] AS agent ,  k.Blocked AS blokk,   " +
     	"  [Payment Terms Code] AS payment,'' AS alekood, [Credit Limit (LCY)] AS krediit,'' AS visit,'' AS type,  " +
-    	"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt , 0 AS minsum ,k.Contact +' ' + k.[Phone No_] as kontakt , 0 as sendall " +
+    	"	   0 AS extradays ,[Customer Price Group]  AS sort,'' AS debt , 0 AS minsum ,k.Contact +' ' + k.[Phone No_] as kontakt , k.[E-Mail] as email , 0 as sendall " +
     	" ,[Customer Price Group] as alegr ,k.[Customer Disc_ Group] as alegr2 , [Service Zone Code] as logist  FROM ["+ base + "$Customer] k  " +
 	  	"	  WHERE k.[Salesperson Code] != '' and k.[Remove Card] = 0 AND Blocked != 3  " ;
 
@@ -786,6 +786,19 @@ public class NaviIcecoDBDriver extends AbstractDBDriver implements BulkUpdater,D
     	           if(cont != null && cont.trim().length()>0){
     	               customer.setPersonalData(cont.trim());   
     	           }
+    	           
+    	           String mail = rs.getString("email");
+    	           if (mail != null && mail.trim().length() > 4) {
+    	           	if(customer.getPersonalData() != null && customer.getPersonalData().trim().length() >0 ){
+    	           		customer.setPersonalData(customer.getPersonalData() + " | " + mail.trim());	
+    	           	}else{
+    	           		customer.setPersonalData( mail.trim());
+    	           	}
+    	           }
+    	          
+    	       //    System.out.println(customer.getPersonalData());
+    	           
+    	           
     	           
     	           String all = rs.getString("sendall");
     	           if("1".equals(all)){

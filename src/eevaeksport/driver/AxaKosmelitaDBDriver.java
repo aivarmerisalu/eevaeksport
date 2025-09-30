@@ -1501,7 +1501,7 @@ System.out.println("CustProdlisti tegemine ");
    		+ "tra.lineamount/case when tra.qty = 0 then 1 else tra.qty end as hind , tra.salesprice as oprice ,max(jou.salesid) as dok " +
      "  FROM  custinvoicetrans  tra INNER JOIN  custinvoicejour jou ON " +
      "  tra.invoiceid =  jou.invoiceid  and  tra.DATAAREAID = jou.DATAAREAID  " +
-     " and tra.SALESID  = jou.SALESID   WHERE  jou.invoicedate > getdate()-180 AND tra.DATAAREAID  = ('kosm')  AND jou.DATAAREAID   = ('kosm')  " +
+     " and tra.SALESID  = jou.SALESID   WHERE  jou.invoicedate > getdate()-360 AND tra.DATAAREAID  = ('kosm')  AND jou.DATAAREAID   = ('kosm')  " +
      "  GROUP BY orderaccount,tra.itemid,tra.name ,jou.invoicedate ,tra.qty ,(tra.lineamount/case when tra.qty = 0 then 1 else tra.qty end),tra.salesprice "
      + " Order by orderaccount,tra.name,jou.invoicedate desc " ;
   
