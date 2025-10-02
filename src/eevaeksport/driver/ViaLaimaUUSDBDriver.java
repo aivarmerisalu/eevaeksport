@@ -2984,6 +2984,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 										if (gr.length() > 0) {
 												prod.setGroup(gr);
 												if ("TB".equals(getParent().getProps().getProperty("stockcode"))) {
+													prod.setGroup("muu");
 													if(groups.get(prod.getID()) != null) {
 													prod.setGroup((String)groups.get(prod.getID()));
 													System.out.println("TB grupp " + prod.getID() + " " + prod.getGroup());

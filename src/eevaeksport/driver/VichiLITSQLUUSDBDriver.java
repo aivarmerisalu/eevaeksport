@@ -822,18 +822,22 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
   
 	public TreeMap getCustomers(Agent agent) {
 		
-		
+		TreeMap custAgents =   Converter.getWebCustomersAgents(rcompanyx, user, pass);
 		try{
-			if(rcompanyx != null)
+			if(rcompanyx != null) {
 			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
-				
+			 
+			}
+			
+			
 		}catch(Exception e){
 			
 		}
 		
+		
+		
 		HashSet custs = new HashSet();
 	 	TreeMap freeze = new TreeMap();
-	    TreeMap custAgents = new TreeMap();
 	   	HashMap custagVisit = new HashMap();
 	   	HashMap custVisit = new HashMap();
 	    Vector kliendid = new Vector();
@@ -1053,32 +1057,10 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 					
 				
 				   if(custAgents.get(customer.getID()) != null){
-			        	Vector vv = (Vector) custAgents.get(customer.getID());
+			        	ArrayList vv = (ArrayList) custAgents.get(customer.getID());
 			        	for(int i = 0; i < vv.size();i++){
-			        		
-			        		Agent aa = new Agent((String) vv.elementAt(i));
-			        		String visi = (String)custagVisit.get(aa.getID() + customer.getID());
-			        		if(visi != null && visi.trim().length() > 0){
-			        			aa.setVisit(visi);	
-			        		}
-			        		
+			        		Agent aa = new Agent((String) vv.get(i));
 			        		customer.addAgent(aa);	
-			        		 
-			        		  if (aa != null ){
-			      				Agent agg = ((Agent)this.getAgents1().get(aa.getID()));
-			      				
-			      				if(agg != null && agg.getDubbler().size()>0){
-			      					//System.out.println("dubbing " + agg + "  " + agg.getDubbler().toString());
-			      					for (int r = 0 ; r < agg.getDubbler().size() ; r++){
-			      						Agent dub = new Agent((String)agg.getDubbler().elementAt(r));
-			      						if(custVisit.get(customer.getID()) != null){
-			      							dub.setVisit(custVisit.get(customer.getID()) + "");
-			      						}
-			      						customer.addAgent(dub);
-			      					//	System.out.println(cust.getName() + cust.getAgents());
-			      					}
-			      				}
-			      			}
 			        	}
 			        }
 				
