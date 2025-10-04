@@ -296,7 +296,9 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		             }
 		             
                    if(type != null && type.trim().length() > 0) {
+                	   if(!type.trim().equals("AKC")) {
                 	   mline.setLineinfo(type.trim());
+                	   }
                    }
 		          //   if(mline.getPrice() > 0 || mline.getDiscount() > 0){
 		                 result.add(mline);    
@@ -1383,6 +1385,10 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		     
 		 cmd3 = //" select a.code,  custcode, k.[Customer ILN] as kl from MobilejavaVIK.v_VIK_FA a  left join MobilejavaVIK.v_VIK_Customers  k  on a.custcode = k.[kood]  where a.custcode != ''" ;
 		     	 
+				 
+
+				
+				
 		 " select p.code , custcode , k.[Ship-to Address ILN] as kl  from MobilejavaVIK.v_VIK_FA "
 	  		+ " p inner join MobilejavaVIK.v_VIK_Customers k on p.custcode = k.kood and p.custcode2 = k.[Ship-to-address code] ";
 		 int cou = 0;
@@ -1406,19 +1412,45 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		                       
 		                         if(asses.contains(code) && custs.contains(custcode + "_" + kl.trim()) ){
 		                        	  String olemas = (String)asscusts.get(code);
-		                        	  if(olemas == null){
-		                                  vec.add(obj);  
-		                                  cou++;  
-		                         	  }else if(olemas != null){
-		                        		 // if(!olemas.equals(custcode)){
+		                        	  if(olemas != null){
+		                        		  if(!olemas.equals(custcode)){
 		                        			   vec.add(obj);  
 		                                       cou++; 
-		                        		  //}
+		                        		  }
 		                        	  }
 		                          }
 		                       }}
+		                  rs1.close();
 		                  
-		                  stm.close();
+		             //LADUDES ASUVAD ASJAD KA SISSE   
+		                  
+		                cmd3 =  "  select code , custcode  from MobilejavaVIK.v_VIK_FA  " + 
+		                		"				where len(custcode) = 3  and custcode2 = '' order by custcode";
+		      		
+		      		     	  rs1 = stm.executeQuery(cmd3);
+		      		                  while(rs1.next()){
+		      		                 	
+		      		                 	 JSONObject obj = new JSONObject();
+		      		                 	 coua++;
+		      		                 	 
+		      		                         String code = rs1.getString("code").trim();
+		      		                         obj.put("inventoryItemCode", code);
+		      		                         
+		      		                         String custcode = rs1.getString("custcode").trim();
+		      		                         obj.put("customerCode",  custcode);
+		      		                        	  String olemas = (String)asscusts.get(code);
+		      		                        	  System.out.println(olemas + " " + obj.toString());
+		      		                        	   
+		      		                        		  if(olemas == null || !olemas.equals(custcode)){
+		      		                        			   vec.add(obj);  
+		      		                                       cou++; 
+		      		                        		  }
+		      		                        	  
+		      		                          }
+		      		                       
+		      		                  
+		      		         rs1.close();
+		                     stm.close();
 		                     con4.close();
 		    	//   System.out.println("assets cou " +  cou + " "+ coua);
 		                      

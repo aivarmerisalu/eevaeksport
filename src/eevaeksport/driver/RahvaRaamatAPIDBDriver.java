@@ -12,6 +12,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -357,9 +358,12 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
  	return Converter.deCode(res);
  }
    
+   private TreeMap agent1 = new TreeMap();
+   
    
    public TreeMap getAgents(){
 		  TreeMap tm = new TreeMap();
+		    agent1 = new TreeMap();
 			try {
 				
 			org.json.simple.JSONObject cc = Converter.readJSONFile("data//getAgents.json");
@@ -384,14 +388,24 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	            		e.printStackTrace();
 	            	}
 	            	  tm.put(agent.getName(), agent);
-	            }
-
-	        
+	 				 agent1.put(agent.getID(), agent);
+	              }
 	          	}
 			  
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			Agent agent0 = new Agent("ANIKEN");
+        	agent0.setName("ANIKEN");
+            tm.put(agent0.getName(), agent0);
+			agent1.put(agent0.getID(), agent0);
+			
+			Agent agent = new Agent("NELEK");
+        	agent.setName("NELEK");
+            tm.put(agent.getName(), agent);
+			agent1.put(agent.getID(), agent);
+			
 			
 	System.out.println("Managersize " + tm.size());
   
@@ -731,6 +745,18 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	   
 		 TreeMap custagents =  Converter.getWebCustomersAgents(rcompany, user, pass);
 	   
+		 
+		 try{
+				if(rcompany != null) {
+				   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
+				 
+				}
+				
+				
+			}catch(Exception e){
+				
+			}
+		 
 		  TreeMap tm = new TreeMap();
 		  Integer total = getPagination("getCustomers");
 	       
@@ -816,13 +842,42 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	              cust.restPerson = cper;
 	            }
 	           
+	            
+	            
 	            String salesCode = (String)cob.get("salesperson_code");
+	            
+	            
+	            
 	            cust.addAgent(new Agent (salesCode));
 	            if(custagents.get(cust.getID()) != null) {
 	            	ArrayList ags = (ArrayList) custagents.get(cust.getID());
 	            	for(int e = 0 ; e < ags.size(); e++) {
 	            		cust.addAgent(new Agent(ags.get(e)+""));
 	            	}
+	            }
+
+		          TreeMap ags = (TreeMap) cust.getAgents().clone();
+	            try {
+	           Iterator itera = ags.keySet().iterator();
+	          while (itera.hasNext()) {
+	        	  String a1 = (String) itera.next();
+	            if (a1 != null && agent1.get(a1.trim()) != null){
+					Agent aab = (Agent)agent1.get(a1.trim());
+					Vector vec = aab.getDubbler();
+					if(vec!= null && vec.size() >0){
+						Enumeration en = vec.elements();
+						while(en.hasMoreElements()){
+							String age = (String) en.nextElement();
+							if(!cust.hasAgent(age)) {
+							cust.addAgent(new Agent(age));
+						 }
+					   }
+					}
+				}
+	          }
+	            }catch(Exception e) {
+	            	System.out.println("ags " + ags.toString());
+	            	e.printStackTrace();
 	            }
 	            custInUse.add(cust.getID());
 	            
@@ -1086,7 +1141,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
      private String getLineInff(Toode tt) {
     	 String res = "";
     	 if(tt.comment != null && tt.comment.length() > 0) {
-    		 res = "@" + tt.comment;
+    		 res = "@" + tt.comment + " ";
     	 }
     	 if(tt.getKogus() > 0) {
     		 res = res + "Laos:" + (int)tt.getKogus() + " ";
