@@ -85,7 +85,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     		  }
     	  }
       }
-     
+  //this.getRouting();
      // getProducts(null);
    //   token = getMSToken();
    
@@ -612,11 +612,9 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 			
 	       if(f.exists()){
 			
-	    	   Calendar cal = Calendar.getInstance();
-	    	   cal.setFirstDayOfWeek(Calendar.MONDAY);
-	           cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-	    	   
-	    	   String calKuu = "Jaanuar";
+//Teeme kuupäeva alati nädala päevaks kui on laup pühap siis lükkame edasi
+	    
+	    		/*   String calKuu = "Jaanuar";
 	    	   if(cal.get(Calendar.MONTH) == 1) {
 	    		   calKuu = "Veebruar";
 	    	   }
@@ -650,76 +648,88 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	    	   if(cal.get(Calendar.MONTH) == 11) {
 	    		   calKuu = "Detsember";
 	    	   }
+	    	   */
+	     Calendar cal = Calendar.getInstance();
+	    	   cal.setFirstDayOfWeek(Calendar.MONDAY);
+	    	   if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+	    		   cal.add(Calendar.DAY_OF_MONTH, 1);
+	    	   }
+	    	  
+	    	   if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+	    		   cal.add(Calendar.DAY_OF_MONTH, 2);
+	    	   }
 	    	   
+	    	   int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+	    	   
+	    
 	    	   
 			FileInputStream ff = new FileInputStream(f);
 			XSSFWorkbook workbook = new XSSFWorkbook((ff));
 			XSSFSheet sheet = workbook.getSheetAt(0);
 			DataFormatter formatter = new DataFormatter();
 
-			int jooksevKuu = 0;
+			int jooksevPaevCell = 0;
 			int jooksevPaev = 0;
+			int jooksevNadalaPaev = 0;
 			
-			XSSFRow row = sheet.getRow(0);
-			for (int i = 0; i < row.getLastCellNum(); i++) {
-				
-				String kuu = null;
-				try {
-					kuu = formatter.formatCellValue(row.getCell((short) i));
-					if(kuu != null && kuu.trim().length() > 0) {
-						jooksevKuu = i;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 
-			}
+			//otsime tänase päeva ja peame meeles
+			 XSSFRow row = sheet.getRow(1);
 			
-			//otsime päevasid
-			row = sheet.getRow(1);
+				for (int w = 9; w < row.getLastCellNum(); w++) {
 				
 				String paev = null;
 				try {
-					paev = formatter.formatCellValue(row.getCell((short) jooksevKuu));
+					paev = formatter.formatCellValue(row.getCell((short) w)).trim();
 					
 					int day = Integer.parseInt(paev);
-					int vahe = - cal.get(Calendar.DAY_OF_MONTH) + day;
+					if(day == cal.get(Calendar.DAY_OF_MONTH)) {
+						jooksevPaevCell = w;
+						jooksevPaev = cal.get(Calendar.DAY_OF_MONTH);
+						jooksevNadalaPaev = cal.get(Calendar.DAY_OF_WEEK)-1; //siis on 1 esmaspäev
+					}
 					
-							
-					jooksevPaev = jooksevKuu - vahe;
-
-							System.out.println(paev + " " + vahe + " " + jooksevPaev );
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-
+				}
 				
-				// nüüd on vaja leida selle nädala esmaspäev ja siis sealt alustada 5 välja kaupa scannimist.
-				
+				// nüüd on vaja leida selle kuu jooksev päev ja sealt + 7 päeva sisse lugeda
+			//	System.out.println("jooksev Päev " + jooksevPaevCell + " " + jooksevPaev + " " + jooksevNadalaPaev);
 
 				for (int i = 2; i < sheet.getLastRowNum(); i++) {
 					row = sheet.getRow(i);
 					if(row != null) {
 					String custID = formatter.formatCellValue(row.getCell((short) 0));
+					int kuniLaup = 6-jooksevNadalaPaev;
 					
-					for (int u = jooksevPaev;  u < jooksevPaev + 5  ; u++) {
+					for (int u = jooksevPaevCell;  u < jooksevPaevCell + kuniLaup ; u++) {
 					String pluss = formatter.formatCellValue(row.getCell((short) u)).trim();
 					if(pluss.equals("+")) {
-					  int pp = u-jooksevPaev;
+
+					//	System.out.println("jooksev Päev2 " + jooksevNadalaPaev + " " + (u - jooksevPaevCell));
+					
+				      // käime kuni reedeni välja aga mitte kaugemale 		
+						
+					  int pp = u-jooksevPaevCell;
 					  String aa = "E";
 					  if(pp == 1) {  aa = "T";}
 					  if(pp == 2) {  aa = "K";}
 					  if(pp == 3) {  aa = "N";}
 					  if(pp == 4) {  aa = "R";}
+					  
+
+					//	System.out.println("jooksev Päev3  " + " " + pp + " " + custID);
+					  
 					  if(rr.get(custID) != null) {
 						  rr.put(custID, rr.get(custID) + aa);
 					    } else {
 						  rr.put(custID, aa);
 					  }
-					  
+					 }
 					}
-					}
-					}
+				   
+				  }
 				}
 	     }
 	 
@@ -727,6 +737,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 			e.printStackTrace();
 		}
     	   System.out.println(rr.toString());
+    	 //  System.exit(0);
     	   return rr;
        }
        
