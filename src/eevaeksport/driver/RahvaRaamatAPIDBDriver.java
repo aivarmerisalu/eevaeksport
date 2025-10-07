@@ -10,6 +10,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -172,6 +174,17 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 		return null;
 	}
 	
+	private String getDateX(String input) {
+		if(input == null) {
+			return null;
+		}
+		   DateTimeFormatter inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	        LocalDateTime dateTime = LocalDateTime.parse(input, inputFormat);
+	        LocalDateTime previousDay = dateTime.minusDays(1);
+	        DateTimeFormatter outputFormat = DateTimeFormatter.ofPattern("d_MMM");
+	        return previousDay.format(outputFormat);
+	}
+	
    public Vector getPriceMatrixData() {
 
    	Vector lines = new Vector();
@@ -197,8 +210,20 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	  for (int i = 0; i < lenn; i++) {
 		  
 		org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-           String startDate = (String)cob.get("start_day");
-           String endDate = (String)cob.get("end_day");
+
+        String startDate = (String)cob.get("start_day");
+        String endDate = (String)cob.get("end_day");
+           String startDateA = getDateX((String)cob.get("campaign_start"));
+           String endDateA = getDateX((String)cob.get("campaign_end"));
+           String startDateR = getDateX((String)cob.get("campaign_real_start_date"));
+           String endDateR = getDateX((String)cob.get("campaign_real_end_date"));
+           /* "campaign_start": "2025-08-12 00:00:00",
+      "campaign_end": "2025-10-31 00:00:00",
+      "campaign_name": "Selver HH 12 2025",
+      "campaign_pricestick_price": 1.19,
+      "campaign_real_start_date": "2025-08-12 00:00:00",
+      "campaign_real_end_date": "2025-09-08 00:00:00",*/
+           
  		   Date std = getDate(startDate);
 	       Date end = getDate(endDate);
 	     
@@ -227,8 +252,15 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
       	
       	    mline.setProdID(prodid);
       	    if(isCamp == 1) {
-      	    mline.setStartDate(startDate);
-      	    mline.setEndDate(endDate);
+      	    	String add = "";
+      	    	if(startDateR != null) {
+      	    		add = " K:[" +startDateR;
+      	    	}
+      	    	if(endDateR != null) {
+      	    		add = add+ "->" + endDateR +"]";
+      	    	}
+      	    mline.setStartDate(startDateA);
+      	    mline.setEndDate(endDateA + add );
       	    mline.setLineinfo(cName + " (" + sPrice + "€)");
       	    mline.setPrice(price);
       	     } else {
@@ -258,8 +290,25 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 		   this.getStockAndSales();
 	   }
 	   System.out.println("Fix listis " + this.returnList.size());
+	
+	   Iterator itera =  returnList2.keySet().iterator();
+		  while(itera.hasNext()) {
+			  String custID = (String)itera.next();
+			  HashMap sisu = (HashMap)returnList2.get(custID);
+		
+			  Iterator iterax =  sisu.keySet().iterator();
+			  while(iterax.hasNext()) {
+				  String prodid = (String) iterax.next();
+				  MatrixLine mline = new MatrixLine();
+				  mline.setProdID(prodid);
+				  mline.setCliGroup(custID);
+				  res.add(mline);
+			  }
+			
+			  
+		  }
 	   
-	  Iterator itera =  returnList.keySet().iterator();
+	   itera =  returnList.keySet().iterator();
 	  while(itera.hasNext()) {
 		  String custID = (String)itera.next();
 		  HashMap sisu = (HashMap)returnList.get(custID);
@@ -736,7 +785,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-    	   System.out.println(rr.toString());
+    	  // System.out.println(rr.toString());
     	 //  System.exit(0);
     	   return rr;
        }
@@ -797,7 +846,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	            
 	            if(routes.get(number)!= null) {
 	            	cust.setVisit(routes.get(number)+"");
-	            	System.out.println(cust.getVisit() + " " + cust.getID());
+	            	//System.out.println(cust.getVisit() + " " + cust.getID());
 	            }
 	                  
 	            cust.setName((String)cob.get("name"));
@@ -974,11 +1023,14 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
      
 
      private HashMap returnList = null;
+
+     private HashMap returnList2 = null;
      
      private HashMap getStockAndSales() {
 
     	 HashMap res = new HashMap();
     	 returnList = new HashMap();
+    	 returnList2 = new HashMap();
     	 Integer total = getPagination("getCustomerStockAndSales");
          
  	 	for (int a = 0 ; a < total; a++) {
@@ -993,6 +1045,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
  		  int lenn = values.size();
  		
  		  for (int i = 0; i < lenn; i++) {
+ 			  
  				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
          		String customerNumber = (String) cob.get("location");
          		String cuCode = locations.get(customerNumber);
@@ -1005,21 +1058,35 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
          				}
          				prodId = prodId.trim();
  	        	
+         				boolean gg = false;		
+         				
 	         		Toode tt = new Toode(prodId);
      if(cob.get("quantity") != null) {
     	 tt.addKogus(Double.parseDouble(cob.get("quantity") + "")); 
+    	 if(tt.getKogus() > 0) {
+    	   gg = true;
+    	 }
      }
      
      if(cob.get("sales30d") != null) {
     	 tt.addDonecur(Double.parseDouble(cob.get("sales30d") + "")); 
+    	 if(tt.getDonecur() > 0 ) {
+    	 gg = true;
+    	 }
      }
      
      if(cob.get("sales60d") != null) {
     	 tt.addDonevol(Double.parseDouble(cob.get("sales60d") + "")); 
+    	 if(tt.getDonevol() > 0 ) {
+        	 gg = true;
+        	 }
      }
      
      if(cob.get("sales90d") != null) {
     	 tt.addPlancur(Double.parseDouble(cob.get("sales90d") + "")); 
+    	 if(tt.getPlancur() > 0 ) {
+        	 gg = true;
+        	 }
      }
 	    
 
@@ -1040,25 +1107,31 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     		 myyk = true;
     	 }
     	 
-    	 if(stat.equals("C") || stat.equals("D") && seis && !myyk) {
-    	//	 System.out.println("Seisev välja " + prodId);
+    	 if((stat.equals("A") || stat.equals("B") || stat.equals("C") || stat.equals("D")) && inSort.equals("0") && gg) {
+    		/* if(cuCode.equals("K951666")) {
+        		 System.out.println("ABCD välja " + prodId + " " + cuCode + " " + gg + " " + myyk + " " + seis); 
+    		 }*/
     		 HashMap sisu = new HashMap();
-       		if(returnList.get(cuCode) != null) {
-       			sisu = (HashMap)returnList.get(cuCode);
+       		if(returnList2.get(cuCode) != null) {
+       			sisu = (HashMap)returnList2.get(cuCode);
        			}
       		sisu.put(prodId, tt);
-      		returnList.put(cuCode, sisu);
-    	 }
-    	 
-        if((stat.equals("A") || stat.equals("B") || stat.equals("C") || stat.equals("D")) && inSort.equals("0")) {
-    		// System.out.println("ABCD välja " + prodId);
-    		 HashMap sisu = new HashMap();
-       		if(returnList.get(cuCode) != null) {
-       			sisu = (HashMap)returnList.get(cuCode);
-       			}
-      		sisu.put(prodId, tt);
-      		returnList.put(cuCode, sisu);
-        }
+      		returnList2.put(cuCode, sisu);
+      		
+      		
+        } else  if((stat.equals("C") || stat.equals("D")) && seis && !myyk) {
+    		/* if(cuCode.equals("K951666")) {
+   	     System.out.println("Seisev välja " + customerNumber + " " + prodId + " "+ tt.getKogus());
+   		 }*/
+   		
+   		 HashMap sisu = new HashMap();
+      		if(returnList.get(cuCode) != null) {
+      			sisu = (HashMap)returnList.get(cuCode);
+      			}
+     		sisu.put(prodId, tt);
+     		returnList.put(cuCode, sisu);
+     		
+   	 } 
     	 
     	 
      }
@@ -1168,8 +1241,81 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     	 }
     	 return res.trim();
      }
+    
+     public Vector getCustomerProductsList(String agentCode){
+   	  
+  	   loadData = false;
+  	   if(locations == null) {
+  		   getCustomers(null);
+  	   }
+  	   
+  	   
+  	   Vector custProds = new Vector();
+  	   HashMap stock = getStockAndSales();
+  	   HashMap newProds = getCustomerNewProducts();
      
-   public Vector getCustomerProductsList(String agentCode){
+      Iterator itera = stock.keySet().iterator();
+      while (itera.hasNext()) {
+			String cuCode = (String) itera.next();
+			HashMap prods = (HashMap)stock.get(cuCode);
+			 Iterator iteraw = prods.keySet().iterator();
+		      while (iteraw.hasNext()) {
+					String prodId = (String)iteraw.next();
+					Toode tt = (Toode)prods.get(prodId);
+					
+					String lineInff = null;
+    				
+    				HashMap st = (HashMap)stock.get(cuCode);
+        			if(st != null) {
+        				Toode stT = (Toode)st.get(prodId);
+        				if(stT != null) {
+        				 lineInff = getLineInff(stT);
+        				}
+        			}
+        			
+      	String last_date = "";
+      	if(lineInff != null) {
+  			last_date = last_date + " " + lineInff;
+  		  }
+      	Double qty = tt.getKogus() ;
+      
+      	Double price = 0d ;
+      	
+
+       		  CustProd cp = new CustProd(cuCode, prodId, qty ,0 ,0 ,last_date,price,0,0," ");
+       	
+       		  
+       		  if(newProds != null && newProds.get(cuCode) != null) {
+       			  HashMap hh = (HashMap)newProds.get(cuCode);
+       			  if(hh.get(prodId) != null) {
+       				  String ttx = (String)hh.get(prodId);
+  	         		  cp.setAbiKood("|tUus: " + ttx);
+  	         	  }
+       		  }
+       		
+       		  if(returnList != null && returnList.get(cuCode) != null) {
+       			  HashMap hh = (HashMap)returnList.get(cuCode);
+       			  if(hh.get(prodId) != null) {
+  	         		  cp.setAbiKood("|v");
+  	         	  }
+       		  }
+       		  
+       		  if(returnList2 != null && returnList2.get(cuCode) != null) {
+       			  HashMap hh = (HashMap)returnList2.get(cuCode);
+       			  if(hh.get(prodId) != null) {
+  	         		  cp.setAbiKood("|z");
+  	         	  }
+       		  }
+       		  
+       		  custProds.add(cp);
+      }
+  	   
+      }
+  	   
+  	   return custProds;
+     }
+     
+   public Vector getCustomerProductsListOld(String agentCode){
 	  
 	   loadData = false;
 	   if(locations == null) {
@@ -1239,13 +1385,25 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	         		  CustProd cp = new CustProd(cuCode, prodId, qty ,0 ,0 ,last_date,price,0,0," ");
 	         	
 	         		  
-	         		  if(newProds.get(cuCode) != null) {
+	         		  if(newProds != null && newProds.get(cuCode) != null) {
 	         			  HashMap hh = (HashMap)newProds.get(cuCode);
 	         			  if(hh.get(prodId) != null) {
 	         				  String tt = (String)hh.get(prodId);
 	    	         		  cp.setAbiKood("|tUus: " + tt);
-	    	         		//  System.out.println("uus toode " + cuCode + " " + prodId);
-	         			  }
+	    	         	  }
+	         		  }
+	         		
+	         		  if(returnList != null && returnList.get(cuCode) != null) {
+	         			  HashMap hh = (HashMap)returnList.get(cuCode);
+	         			  if(hh.get(prodId) != null) {
+	    	         		  cp.setAbiKood("|v");
+	    	         	  }
+	         		  }
+	         		 if(returnList2 != null && returnList2.get(cuCode) != null) {
+	         			  HashMap hh = (HashMap)returnList2.get(cuCode);
+	         			  if(hh.get(prodId) != null) {
+	    	         		  cp.setAbiKood("|z");
+	    	         	  }
 	         		  }
 	         		  
 	         		  custProds.add(cp);
@@ -1353,6 +1511,8 @@ public TreeMap getProducts(Agent agent) {
           		prod.setPrice(Double.parseDouble(price));
           	}
 			
+          	prod.setVat("24");
+          	
           	String itemDivCode = (String)cob.get("division_code");
         	
           	String itemCatCode = (String)cob.get("item_category_code");

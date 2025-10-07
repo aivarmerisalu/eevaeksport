@@ -1036,11 +1036,6 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
                 }
      	    	 
                 
-                
-         
-   	   
-   	    	 
-                
      	  
                } else if(itemid.startsWith("J") ){
      	    	 
