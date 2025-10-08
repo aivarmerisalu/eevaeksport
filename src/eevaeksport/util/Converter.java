@@ -2131,6 +2131,23 @@ public class Converter {
 							
 						}
 						
+						 row = sheet.getRow(1);
+						 for(int i = 0 ; i < row.getLastCellNum();i++){
+							 if(formatter.formatCellValue(row.getCell(i)).contains("EAN")) {
+								 ea = i;
+							 }
+							 if(formatter.formatCellValue(row.getCell(i)).contains("Desc") 
+									 || formatter.formatCellValue(row.getCell(i)).contains("Nime")) {
+								 ni = i;
+								 
+								 ri = 2;
+							 }
+							 if(formatter.formatCellValue(row.getCell(i)).contains("Prof")) {
+								 gr = i;
+							 }
+						 }
+						 
+						
 						 row = sheet.getRow(2);
 						 for(int i = 0 ; i < row.getLastCellNum();i++){
 							 if(formatter.formatCellValue(row.getCell(i)).contains("EAN")) {
@@ -2237,6 +2254,7 @@ public class Converter {
 						int ea = 0;
 						int ni = 0;
 						int gr = 2;
+						int ri = 0;
 				
 						 for(int i = 0 ; i < row.getLastCellNum();i++){
 							 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("ean")) {
@@ -2255,7 +2273,29 @@ public class Converter {
 								 gr = i;
 							 }
 						 }
-						
+						 row = sheet.getRow(1);
+							
+					
+							 for(int i = 0 ; i < row.getLastCellNum();i++){
+								 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("ean")) {
+									 ea = i;
+									 ri = 1;
+								 }
+								 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("desc")) {
+									 ni = i;
+								 }
+								 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("dec")) {
+									 ni = i;
+								 }
+								 if(formatter.formatCellValue(row.getCell(i)).toLowerCase().contains("toode")) {
+									 ni = i;
+								 }
+								 if(formatter.formatCellValue(row.getCell(i)).contains("Siku")) {
+									 gr = i;
+								 }
+							 }
+							 row = sheet.getRow(ri);
+						 
 						TreeMap groups = new TreeMap();
 						for (int a = gr; a < row.getLastCellNum(); a++) {
 							try {
@@ -2272,7 +2312,7 @@ public class Converter {
 						}
 					
 						
-						for(int i = 1 ; i < sheet.getLastRowNum()+1;i++){
+						for(int i = ri+1 ; i < sheet.getLastRowNum()+1;i++){
 							 row = sheet.getRow(i);
 							 
 							
@@ -4746,7 +4786,7 @@ public class Converter {
 								}
 								
 								
-								if(i == 0 || i == 3) {
+								if(i == 0 || i == 3 || i == 1) {
 									//kui on kolmas rida 
 									for(int y = 2 ; y < 40 ;y++) {
 										cellx = row.getCell((short)y);

@@ -297,7 +297,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		             
                    if(type != null && type.trim().length() > 0) {
                 	   if(!type.trim().equals("AKC")) {
-                	   mline.setLineinfo(type.trim());
+                	   mline.setLineinfo("EXP");
                 	   }
                    }
 		          //   if(mline.getPrice() > 0 || mline.getDiscount() > 0){
@@ -994,9 +994,15 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				String idorig = id; 
 				String id2 = rs.getString("kood2");
 				String acode = rs.getString("kood3");
+				boolean wareID = false;
+				if(id.equals("103") || id.equals("105") || id.equals("107") || id.equals("108") || id.equals("111")) {
+					wareID = true;
+				}
 				
-				if(id2 != null && id2.trim().length() > 0) {
+				if(!wareID) {
+				if(id2 != null && id2.trim().length() > 0 ) {
 					id = id + "_" + id2.trim();
+				}
 				}
 				String name2 = rs.getString("nimi2").trim();
 				String name3 = rs.getString("nimi3");

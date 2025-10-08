@@ -932,7 +932,7 @@ String email = " ";
         	e.printStackTrace();
         }
        
-        String cmd = "    SELECT    ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim(str(N33_kodas_ak)) end) AS kood, " +     		
+        String cmd = "    SELECT    ltrim(N08_KODAS_KS) AS kood1, (case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) AS kood, " +     		
         		" rtrim(N08_PAV) + ' ' + rtrim(N33_kodas_ak) AS nimetus,  N33_ADRESAS as tanav,'' as linn, '' as regioon, '' as indeks, " +
 				" rtrim(N33_ADRESAS)  AS aadress, " +
 				"   N33_KODAS_LS_3 AS visit ,N08_KODAS_KS AS payer ,N08_IM_KODAS as regnum, " +

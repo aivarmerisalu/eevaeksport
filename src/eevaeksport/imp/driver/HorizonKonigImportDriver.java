@@ -1100,7 +1100,7 @@ public class HorizonKonigImportDriver extends AbstractImportDriver{
                  	    	 ord6.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
                  		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
                  	  
-                      }else if(itemid.startsWith("H") ){
+                      }else if(itemid.startsWith("H") || itemid.startsWith("RP") ){
                  	    	//paneme P mitte kontaktsega kaasa  
                  	    	 ord1.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
                  		     			 lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,null);
