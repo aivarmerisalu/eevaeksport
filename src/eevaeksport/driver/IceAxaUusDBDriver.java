@@ -1473,6 +1473,10 @@ String region = rs.getString("region");
         		prod.setOnPallet(64);
         	}
         	
+        	if(prod.getID().equals("JES008")) {
+        		prod.setOnPallet(44);
+        	}
+        	
         	if(prod.getID().equals("PFS084")) {
         		prod.setOnPallet(360);
         	}

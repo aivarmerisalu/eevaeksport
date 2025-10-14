@@ -297,7 +297,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		             
                    if(type != null && type.trim().length() > 0) {
                 	   if(!type.trim().equals("AKC")) {
-                	   mline.setLineinfo("EXP");
+                	//   mline.setLineinfo("EXP");
                 	   }
                    }
 		          //   if(mline.getPrice() > 0 || mline.getDiscount() > 0){
@@ -1496,6 +1496,8 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		TreeMap KAU = new TreeMap();
 		Vector topstuff = new Vector();
 		TreeMap discT = new TreeMap();
+		TreeMap discTSta = new TreeMap();
+		
 		TreeMap mintime = new TreeMap();
 		HashMap nullseis = new HashMap();
 
@@ -1517,19 +1519,19 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 //System.out.println("KAU suurus " + KAU.size());
 			rs.close();
 			con.close();
-
+ 
 			String cmd7 = "select * from MobilejavaVIK.v_VIK_GetDiscount";
 			con = getNewConnectionView();
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(cmd7);
 			while (rs.next()) {
-				String toode = null;
-				double seis = 0;
+				String toode = rs.getString("kood").trim();
+				double seis = rs.getDouble("disc");
+				String status = rs.getString("discType");
 				
-				toode = rs.getString("kood").trim();
-				seis = rs.getDouble("disc");
 				discT.put(toode, seis + "");
-		
+				discTSta.put(toode, status);
+				
 			}
 
 			rs.close();
@@ -1729,8 +1731,16 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				if (discT.containsKey(id)) {
 					String aaa = (String) discT.get(id);
 					prod.setMaxDiscount(Double.parseDouble(aaa));
-					prod.setStatusDiscount("1");
+					String sta = (String)discTSta.get(id); 
+					if(sta != null && sta.trim().length() > 2) {
+						if(sta.startsWith("AKC")) {
+						    prod.setStatusDiscount("1");	
+					     } else {
+						    prod.setStatusSellout("1");
+					     }
+				     }
 				}
+				
 				double opt = rs.getDouble("optimum");
 				if (opt > 0) {
 					prod.setOptAmountInUnits(opt);

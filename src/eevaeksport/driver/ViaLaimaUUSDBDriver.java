@@ -959,6 +959,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
                 
                 String sdate =  (String)cob.get("FROMDATE");
 				String tdate =  (String)cob.get("TODATE");
+				String relation = (cob.get("RELATION"))+"";
                 		
 
                 MatrixLine mline = new MatrixLine();
@@ -980,13 +981,15 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
                           mline.setDiscount(discount);
                
                 String algus = "";
+               
                 java.util.Date alg = null;
                 if(sdate != null && sdate.trim().length() != 0){
                 	algus = sdate.substring(0,10);
-                	
                 }
+               
                 java.util.Date lop = null;
-				 if(tdate != null && tdate.trim().length() != 0){
+                
+				 if(tdate != null && tdate.trim().length() != 0 && relation.equals("8")){
                    mline.setEndDate(tdate.substring(0,10));
                    lop = getCalLit(tdate.substring(0,10));
                    if(!algus.equals("")){
@@ -1005,7 +1008,23 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 						  lines.add(mline);	
 						  pmLines.add(mline);	
 					}
-				
+				}else if ("TB".equals(getParent().getProps().getProperty("stockcode"))){
+					
+					
+					if(alg == null && tdate.trim().startsWith("1900")){
+						if(discount != 0) {
+							//System.out.println("aaanull " + alg + " " +  tdate + " " +discount);
+							lines.add(mline);	
+							  pmLines.add(mline);	
+						}
+					} else if(alg != null && tdate.trim().length() != 0 && dd.after(alg) && tdate.trim().startsWith("1900")){
+						if(discount != 0) {
+							//System.out.println("aaa " + alg + " " +  tdate + " " +discount);
+							  lines.add(mline);	
+							  pmLines.add(mline);	
+						}
+					}
+					
 				}
 				 
               
@@ -1704,7 +1723,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 				    	String laod = getParent().getProps().getProperty("laoseis.laod");
 				    	//võtame välja ainut yhe laoseisu 
 				    	String laod2 = null;
-				    	if(laod.indexOf(",") != -1) {
+				    	if(laod != null && laod.indexOf(",") != -1) {
 				    		laod2 = laod.substring(laod.indexOf(",") +1);
 				    		laod = laod.substring(0,laod.indexOf(","));
 				    		
@@ -1763,7 +1782,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 				    	e.printStackTrace();
 				    }
 				    
-			//	    System.out.println("laduBR " + laduBR.toString());
+				    System.out.println("laduBR " + laduBR.toString());
 			   return products.toString();
 		   }
 
@@ -2815,6 +2834,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 					
 						 if ("22".equals(getParent().getProps().getProperty("stockcode"))) {
 						 	prod.setName( Converter.enCodeEst(id.substring(0,2) + " " + name));	
+						 	
 						 } else if ("TB".equals(getParent().getProps().getProperty("stockcode"))) {
 					
 							 int ind = name.indexOf("pant ");
@@ -2913,17 +2933,19 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 							  name = name.replaceAll(" \\+", " ");
 
 							  name = name.replaceAll(" D ", " ");
+                              name = name.replaceAll(" K ", " ");
 
+							  name = name.replaceAll("0.5l", "0,5l");
 							  name = name.replaceAll("Original", "Orig.");
-							  name = name.replaceAll("   ", " ");
-							  name = name.replaceAll("  ", " ");
-							  name = name.replaceAll("  ", " ");
-							  name = name.replaceAll("  ", " ");
+							  name = name.replaceAll("Tagastatav Taara K", " ");
+							  name = name.replaceAll("Klaaspudel", "Klaas K");
 							  
+							  //tyhikuts mitemkordsed maha
+							  name = name.replaceAll("\\s+", " ");
 							  name = name.trim();
 							  
-							 prod.setName(Converter.enCodeEst(name));	
-							 prod.setNameSorting(name);
+							 prod.setName(Converter.enCodeEst(name + " " + prod.getID()));	
+							 prod.setNameSorting(name + " " + prod.getID());
 						 
 
 							 if(prod.getName().contains("1/4") || 
@@ -2933,6 +2955,13 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 								 prod.setDiffColor(true);
 							 }
 						 
+
+							 if(prod.getName().contains(" Alusel") || 
+									 prod.getName().contains(" Vaat") ) {
+								 prod.setDiffColor(true);
+							 }
+							 
+							 
 						 }else if ("17".equals(getParent().getProps().getProperty("stockcode"))) {
 							 
 							 name = name.replaceAll("šokolaad ", "šok. ");
@@ -2984,10 +3013,10 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 										if (gr.length() > 0) {
 												prod.setGroup(gr);
 												if ("TB".equals(getParent().getProps().getProperty("stockcode"))) {
-													prod.setGroup("muu");
+													prod.setGroup("Muud");
 													if(groups.get(prod.getID()) != null) {
 													prod.setGroup((String)groups.get(prod.getID()));
-													System.out.println("TB grupp " + prod.getID() + " " + prod.getGroup());
+													//System.out.println("TB grupp " + prod.getID() + " " + prod.getGroup());
 													}
 												}
 											}
