@@ -790,6 +790,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     	   return rr;
        }
        
+       
        private HashMap<String, String> locations = null; 
        
    public TreeMap getCustomers(Agent agent){

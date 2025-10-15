@@ -2831,6 +2831,11 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 					
 					Product prod = new Product(id);
 					
+
+					 if (inCases != null && inCases > 0) {
+						prod.setInCases(inCases);	
+			  		 }
+					
 					
 						 if ("22".equals(getParent().getProps().getProperty("stockcode"))) {
 						 	prod.setName( Converter.enCodeEst(id.substring(0,2) + " " + name));	
@@ -2959,6 +2964,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 							 if(prod.getName().contains(" Alusel") || 
 									 prod.getName().contains(" Vaat") ) {
 								 prod.setDiffColor(true);
+								 prod.setInCases(1);
 							 }
 							 
 							 
@@ -2997,9 +3003,6 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 						
 						 prod.setPrice(price);
 							
-						 if (inCases != null && inCases > 0) {
-							prod.setInCases(inCases);	
-				  		 }
 								String compname = 	prod.getName();
 								
 										if (ean.length() > 0) {

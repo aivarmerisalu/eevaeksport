@@ -1671,7 +1671,9 @@ try{
            "  group by  accountnum";
            
            
-          
+          String mails = " select cus.accountnum as klient ,loc.locator as mail  from DIRPARTYLOCATION dir  inner join  CUSTTABLE cus on dir.PARTY = cus.PARTY \r\n" + 
+          		"  INNER JOIN LOGISTICSELECTRONICADDRESS loc on dir.LOCATION = loc.LOCATION   where loc.type = 25 "; 
+          		
 
            
            String ddd = "select accountnum as klp ,ExtCodeValue as zp from  custtable a ,  ExtCodeValueTable b " +
@@ -1700,7 +1702,27 @@ try{
         	   System.out.println(cmd2);
         	   r.printStackTrace();
            }
+           TreeMap confmails = new TreeMap();
            
+           try{
+               con = this.getNewConnection();
+      	   Statement stm = con.createStatement();
+      	  ResultSet rs1 = stm.executeQuery(mails);
+             while(rs1.next()){
+          	   String klient = rs1.getString("klient").trim();
+          	   
+          	   String email = rs1.getString("mail").trim();
+          	   email = email.replaceAll(";", ",");
+          	 confmails.put(klient, email);
+             }
+            rs1.close();  
+            stm.close();
+          
+         }catch (Exception r){
+      	   System.out.println(cmd2);
+      	   r.printStackTrace();
+         }
+         
            TreeMap deldays = new TreeMap();
            
            try{
@@ -1931,7 +1953,10 @@ try{
         cust.restName = name;
         cust.setCountry("Lithuania");
 
-
+        if(confmails.get(cust.getID()) != null) {
+        	cust.setConfirmEmail((String)confmails.get(cust.getID()));    	
+        }
+    
         
       //  cust.setMakeAmountRounding(false);
         
