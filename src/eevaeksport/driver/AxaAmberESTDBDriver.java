@@ -1403,7 +1403,7 @@ private TreeMap groups = null;
 "  left join inventitembarcode bar   on bar.dataareaid = inv.dataareaid  and  bar.itemid = inv.itemid and bar.barcodesetupid ='EANBottle'  and useforprinting = 1  " +
 " left JOIN inventtablemodule mod ON mod.itemid = inv.itemid and mod.dataareaid=inv.dataareaid  " +
 " WHERE  inv.dataareaid='ade'    AND mod.dataareaid='ade'   " +
-"  AND moduletype=2 and active = 1  and inv.ITEMID not like  'AM%' and inv.ITEMID not like  'NE%' and inv.ITEMGROUPID not like  'Taara1' " +
+"  AND moduletype=2 and active = 1 and inv.onlyretail = 0   and inv.ITEMID not like  'AM%' and inv.ITEMID not like  'NE%' and inv.ITEMGROUPID not like  'Taara1' " +
 "  order by inv.itemid, disc.todate desc ";
     
     HashMap prodHash = new HashMap();

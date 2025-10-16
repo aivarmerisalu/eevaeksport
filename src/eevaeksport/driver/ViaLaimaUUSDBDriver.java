@@ -2957,16 +2957,23 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 									 prod.getName().contains("1/2") || 
 									 prod.getName().contains("¼") ||
 									 prod.getName().contains("½")  ) {
+								 prod.setInCases(1);
 								 prod.setDiffColor(true);
 							 }
 						 
 
 							 if(prod.getName().contains(" Alusel") || 
-									 prod.getName().contains(" Vaat") ) {
+									 prod.getName().contains(" Vaat") ||
+									 prod.getName().contains("672 Tk") 
+									 ) {
 								 prod.setDiffColor(true);
 								 prod.setInCases(1);
 							 }
 							 
+							 if(prod.getID().equals("36048TB")) {
+								 prod.setDiffColor(true);
+											 
+							 }
 							 
 						 }else if ("17".equals(getParent().getProps().getProperty("stockcode"))) {
 							 
