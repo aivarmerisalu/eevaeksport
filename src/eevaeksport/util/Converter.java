@@ -1606,6 +1606,144 @@ public class Converter {
 	return res;
 }
 	 
+	 public static TreeMap loadFixA1000(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
+			String errors = null;
+		 try{
+			 
+			 Workbook workbook = null;
+			 Sheet sheet = null;
+			       FileInputStream	 ff = new FileInputStream(file);
+			       if(file.getName().endsWith(".xlsx")) {
+			    	   workbook = new XSSFWorkbook(ff); 
+						 sheet = workbook.getSheetAt(0); 
+			       }else {
+			    	    workbook = new HSSFWorkbook(ff); 
+						 sheet = workbook.getSheetAt(0); 
+					
+			       }
+					
+					
+					System.out.println("A1000 lugemine " + file.getName());
+					
+					ff.close();	
+					
+					if(sheet != null){
+						TreeMap groups = new TreeMap();
+					   Row row = sheet.getRow(2);
+					
+						
+						int r = 2;
+						int ea = 0;
+						int ni = 1;
+						
+						
+						
+						for (int a = 0; a < row.getLastCellNum(); a++) {
+							try {
+							
+								//System.out.println(row.getCell((short)a).getStringCellValue());
+								String gg = row.getCell((short) a).getStringCellValue().trim();
+								if(gg.toLowerCase().indexOf("ribakood") != -1 ) {
+									ea = a;
+								}
+								if(gg.toLowerCase().indexOf("artikkel") != -1 ) {
+									ni = a;
+								}
+								
+								
+							
+							} catch (Exception e) {
+								// System.out.println(row.getCell((short)a).getNumericCellValue());
+							}
+						}
+					
+					//	System.out.println("ea" + ea + "ni "+ ni);
+						
+						
+						for (int a = r; a < row.getLastCellNum(); a++) {
+							try {
+							//	 System.out.println(row.getCell((short)a).getStringCellValue() + " " + r);
+								String gg = row.getCell((short) a).getStringCellValue().trim();
+								if(gg.length()>1){
+							      groups.put(a + "", gg);
+							    }
+								if(gg.equals("Võru")) {
+									break;
+								}
+							
+							} catch (Exception e) {
+								// System.out.println(row.getCell((short)a).getNumericCellValue());
+							}
+						}
+						
+					//	System.out.println("Groups " +  r + " " + ea +" "+ ni);
+						
+						
+						for(int i = 1 ; i < sheet.getLastRowNum()+1;i++){
+							 row = sheet.getRow(i);
+							 
+							 DataFormatter formatter = new DataFormatter();
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(ea)));
+								String tnimi = formatter.formatCellValue(row.getCell(ni));
+								String toode = getToode(prods,ean);
+							 
+							  if(toode.equals(ean)) {
+								  if(errors == null) {
+									  errors = "Tuvastamatta tooted sortimendis\n A1000 formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
+								  }
+								  if(!errors.contains(ean)) {
+									  errors = errors + ean + "   " + tnimi + "\n";
+								  }
+								
+							  }
+							 
+							 for (int a = r; a < row.getLastCellNum(); a++) {
+
+									String group = (String) groups.get(a + "");
+									if (group != null && group.trim().length() > 0) {
+							 
+                            String pood = "A1000-" + group;
+                            Contract con = new Contract(pood);
+							
+                          String value =  formatter.formatCellValue(row.getCell(a));
+                          
+                           
+                           if(value.trim().length() > 0 && value.trim().equals("x")) {
+                           //	 System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
+                           
+							if(res.get(pood) != null){
+               	  con = (Contract)res.get(pood);
+               	 } 
+							  ContractLine ll = new ContractLine(toode);
+               	  if(con.lines == null){
+               		  con.lines = new Vector();
+               	  }
+               	  con.lines.add(ll);
+               	  res.put(pood, con);
+                           }
+						   }
+							 }
+						}
+					 }
+					
+					
+					//System.out.println("sorts size " + res.toString() );
+				//System.exit(0);
+						
+					 }catch(Exception e) {
+						 e.printStackTrace();
+					 }	 
+		// System.exit(0);;
+		 if(errors != null) {
+			 sendFixLoadErrorEmail(errors, parent, "a1000",true);
+		 }
+		 sendFixLoadErrorEmail("\n A1000 imported " + res.keySet().size() + " shops fixed sortiments", parent, "a1000",false);
+
+	return res;
+}
+	 
+
+	 
 
 	 public static TreeMap loadFixcoopRist(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
@@ -2005,7 +2143,15 @@ public class Converter {
 					ff.close();	
 					 DataFormatter formatter = new DataFormatter();
 					if(sheet != null){
-						XSSFRow row = sheet.getRow(3);
+
+						XSSFRow row = sheet.getRow(2);
+						int data = 3;
+						if(formatter.formatCellValue(row.getCell(0)).equals("Ribakood")) {
+							data = 2;
+						}
+							
+						
+						 row = sheet.getRow(data);
 						TreeMap groups = new TreeMap();
 						for (int a = 3; a < row.getLastCellNum(); a++) {
 							try {
@@ -2020,7 +2166,7 @@ public class Converter {
 						}
 						
 					//	System.out.println("Groups " +  groups.toString());
-						 row = sheet.getRow(3);
+						 row = sheet.getRow(data);
 						 int y = 1;
 						 if(formatter.formatCellValue(row.getCell(0)).equals("Ribakood")) {
 							 y = 0;
@@ -4258,6 +4404,7 @@ public class Converter {
 						 TreeMap nimi = new TreeMap();
 						int  reanr = 4;
 						int sortasuk = 3;
+						int eanasuk = 0;
 						 // määrame andmete rea
 						 for(int i = 0 ; i < 10;i++){
 							
@@ -4278,13 +4425,28 @@ public class Converter {
 								}	
 							}
 						 
+						 for(int y = 0 ; y < 4 ;y++) {
+							 try {
+							 Cell cellx = row.getCell((short)y);
+								if(cellx != null) {
+									
+									System.out.println("Elektra " + cellx.getStringCellValue());
+									if(formatter.formatCellValue(cellx).toLowerCase().indexOf("ribakood") != -1 ) {
+										eanasuk = y;
+									}
+								}
+                           }catch(Exception e) {
+									//e.printStackTrace();
+								}	
+							}
+						 
 						 }
 						 
 						 
 						//Teeme kõigepealt treemapi valmis kja siis krutime läbi 
 							for(int i = reanr ; i < sheet.getLastRowNum()+1;i++){
 							Row row = sheet.getRow(i);
-								String ean = getNumeric(formatter.formatCellValue(row.getCell(0)));
+								String ean = getNumeric(formatter.formatCellValue(row.getCell(eanasuk)));
 								String code = formatter.formatCellValue(row.getCell(sortasuk));
 								String nimis = formatter.formatCellValue(row.getCell(sortasuk-1));
 								
@@ -4419,7 +4581,10 @@ public class Converter {
 		        	  
 		        	  System.out.println("Format tuvastatud '" + format + "' " );
 		      //  System.exit(0);
-		        
+
+				        if(format.equals("a1000")) {
+				        	loadFixA1000(res, file , prods, parent);
+				          }
 		        if(format.equals("mjsortiment")) {
 		        	loadFixMJ(res, file , prods, parent);
 		          }
@@ -4734,6 +4899,18 @@ public class Converter {
 								 }
 									
 									
+									 if(row != null) {
+										 
+											cellx = row.getCell((short)3);
+											String a4 = formatter.formatCellValue(cellx);
+
+											cellx = row.getCell((short)4);
+											String a5 = formatter.formatCellValue(cellx);
+											if(a4 != null && a4.equals("Kohtla-Järve") && a5 != null && a5.equals("Maardu")) {
+												return "a1000";
+											}
+										 
+								 }
 								
 								
 	                      for(int y = 3 ; y < 12 ;y++) {
@@ -4827,8 +5004,7 @@ public class Converter {
 								
 								
 								
-								if(i == 3) {
-									//kui on kolmas rida 
+								if(i == 3 || i == 2) { 
 									for(int y = 3 ; y < 15 ;y++) {
 										cellx = row.getCell((short)y);
 										if(cellx != null) {
@@ -4842,8 +5018,6 @@ public class Converter {
 										}
 										}	
 									}
-									
-									
 								}
 								
 								

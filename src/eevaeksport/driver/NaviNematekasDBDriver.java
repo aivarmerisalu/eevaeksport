@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -1097,13 +1098,13 @@ con3.close();
                 		 prod.setInUnit(1);
                 	 }
                 	 
-                java.sql.Time  time =  rs.getTime("mintime");
-             //   System.out.println("time " + time);
-                if (time != null &&  time.getTime() > 100){
-                	prod.setTimeToSell(time.getTime());
+                
+                LocalTime time = rs.getObject("mintime", LocalTime.class);
+                if (time != null) {
+                    long millisSinceMidnight = time.toSecondOfDay() * 1000L;
+                    prod.setTimeToSell(millisSinceMidnight);
                 }
-                	
-               
+                
                 	 if(ladupraak.get(id) != null ){
                       	  prod.setName(prod.getName() + " @S3:" + ((int)(ladupraak.get(id).doubleValue())));
                       	  if(pricesS03.get(id) != null){

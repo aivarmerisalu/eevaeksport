@@ -1687,9 +1687,12 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 
 	private TreeMap<String,String> laduBR = null;
 
+	private TreeMap<String,String> laduParimEnne = null;
+
         public String getSaveStockInfo(){
         	StringBuffer products = new StringBuffer();
         	laduBR = new TreeMap<String,String>();
+        	laduParimEnne = new TreeMap<String,String>();
         	TreeMap<String,Double> seisudSum = new TreeMap<String,Double>();
 				    try {
 				    
@@ -1726,7 +1729,6 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 				    	if(laod != null && laod.indexOf(",") != -1) {
 				    		laod2 = laod.substring(laod.indexOf(",") +1);
 				    		laod = laod.substring(0,laod.indexOf(","));
-				    		
 				    	}
 				    	
         	
@@ -1743,19 +1745,30 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 	    	  String ladu = (String)cob.get("Ladu");
 	    	  try {
 	    		  double nn = Double.parseDouble(((Long)cob.get("Laoseis"))+"");
-	    		    
+
 					if( nn > 0){
+
+				    	  String parim = (String)cob.get("S\u00e4ilivusaeg");
+				    	  
 						if(laod == null) {
 							 products.append(prodid +  ";");
 				               products.append( ladu +";");
 				               products.append(getParent().getNF().format(nn) + "; "  +  "\n"); // + dealer +  "\n");
-						}else if (laod.contains("." +ladu+ ".")) {
-						 
+						} else if (laod.contains("." +ladu+ ".")) {
+						     if(parim != null) {
+						    	 String asi = (String)laduParimEnne.get(prodid);
+						    	 if(asi == null) {
+						    		 asi = "BB:" + parim +" Ls:" + nn;  
+						    	 }else {
+						    		 asi = asi + "|BB:" + parim +" Ls:" + nn; 
+						    	 }
+						    	 laduParimEnne.put(prodid, asi);
+						     }
 							if(seisudSum.get(prodid) != null) {
 								nn = nn + Double.parseDouble(seisudSum.get(prodid) + "");
 							}
 							seisudSum.put(prodid, nn);
-						}else if (laod2.contains("." +ladu+ ".")) {
+						} else if (laod2.contains("." +ladu+ ".")) {
 							laduBR.put(prodid, "'" + ladu + "@" + (int)nn + "'");
 						}
 						      
@@ -2820,6 +2833,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		    	  Long stock = (Long)cob.get("Qty");
 			      String unit = (String)cob.get("UnitId");
 			      String gr = (String)cob.get("MmfItemProductGroupId");
+			      
+			      Long onPallet = (Long)cob.get("OnPallet");
 		    	 
 			      String ette = "";
 			      if(laduBR != null && laduBR.get(id) != null) {
@@ -2830,7 +2845,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		    	//  System.out.println(name);
 					
 					Product prod = new Product(id);
-					
+					if(laduParimEnne != null && laduParimEnne.get(id) != null) {
+						prod.setPartii(laduParimEnne.get(id));
+					}
 
 					 if (inCases != null && inCases > 0) {
 						prod.setInCases(inCases);	
@@ -2858,15 +2875,12 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 							 }
 							 
 							 
-							 String onPallet = extractNthPart(name,0);
 							 
-							// System.out.println("onPallet " + onPallet);
-							 if(onPallet != null && onPallet.trim().length() > 1) {
+							 if(onPallet != null && onPallet > 1) {
 								 try {
-								  prod.setOnPallet(Double.parseDouble(onPallet));
+								    prod.setOnPallet(onPallet);
 								  }catch(Exception e) {
-									 
-								 }
+								  }
 							 }
 							 
 							  name = name.replaceAll("alk.", " ");

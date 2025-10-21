@@ -469,6 +469,9 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
   	    	Product prod = (Product)prods.get(asi);
   	    	String toode = prod.getEAN().trim();  
   	    	String artikkel = prod.artikkel; 
+  	    	if(artikkel != null) {
+  	    		artikkel = artikkel.trim();
+  	    	}
   	 //   System.out.println("toode " + toode);
              if(toode.length() > 3){
               	
@@ -513,7 +516,10 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                   
               	 for(int i = 0;ff2.length>i;i++){
                   	if( ff2[i].startsWith(artikkel + "_") || ff2[i].startsWith(artikkel + " _") || ff2[i].startsWith(artikkel + " ")){
-                  //  System.out.println("pilt olemas " + ff2[i]);
+                  
+                  		if(artikkel.equals("23266")) {
+                  		System.out.println("23266 pilt olemas " + ff2[i]);
+                  		}
                  	File in = new File ( pictssou + ff2[i]); 
                    	if(in.isFile()){
                    		

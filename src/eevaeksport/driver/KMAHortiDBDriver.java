@@ -943,7 +943,6 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 					prod.setStock(0);
 				}
 
-				prod.setName( Converter.enCodeEst(nimetus + " " +  add).trim());
 
 				String weblink = rs.getString("PildiLink");
 				if (weblink != null && weblink.trim().length() > 0 && agent != null && agent.getID().equals("pilt")) {
@@ -997,7 +996,14 @@ public class KMAHortiDBDriver extends AbstractDBDriver implements Manager, Promo
 					
 					
 				}
-				
+
+				Double soov = rs.getDouble("SoovituslikKogus");
+				String sss = "";
+				if (soov != null && soov > 0) {
+					sss = " *" + (soov.intValue())+ "*";
+				}
+
+				prod.setName( Converter.enCodeEst(nimetus + " " +  add + sss).trim());				
 				if(kood.startsWith("LV")) {
 				//	goes = false;
 				}
