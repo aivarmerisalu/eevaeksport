@@ -11,9 +11,11 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.text.NumberFormat;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +23,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -1099,8 +1102,9 @@ con3.close();
                 	 }
                 	 
                 
-                LocalTime time = rs.getObject("mintime", LocalTime.class);
-                if (time != null) {
+                Time sqlTime = rs.getTime("mintime", Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin")));
+                if (sqlTime != null) {
+                	LocalTime time = sqlTime.toLocalTime();
                     long millisSinceMidnight = time.toSecondOfDay() * 1000L;
                     prod.setTimeToSell(millisSinceMidnight);
                 }

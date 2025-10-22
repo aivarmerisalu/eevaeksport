@@ -969,7 +969,9 @@ public class Converter {
 			   if(!ff.exists()) {
 				  ff =  new File("excelsort/eans/eans.txt");
 			   }
-			   
+			   if(!ff.exists()) {
+					  ff =  new File("c:/mobilejava/excelsort/eans/eans.txt");
+				   }
 			    FileInputStream is = new FileInputStream(ff);
 				InputStreamReader isr = new InputStreamReader(is, "utf-8");
 				BufferedReader reader = new BufferedReader(isr);
@@ -1512,7 +1514,7 @@ public class Converter {
 									ni = a;
 								}
 								
-								if(gg.toLowerCase().equals("Kad")) {
+								if(gg.toLowerCase().equals("kad") || gg.toLowerCase().equals("kadaka")) {
 									r = a;
 									break;
 								}
@@ -1531,7 +1533,7 @@ public class Converter {
 								if(gg.length()>1){
 							      groups.put(a + "", gg);
 							    }
-								if(gg.equals("Narv")) {
+								if(gg.equals("Narv") || gg.equals("Narva") ) {
 									break;
 								}
 							
@@ -1572,7 +1574,7 @@ public class Converter {
                              String value =  formatter.formatCellValue(row.getCell(a));
                              
                               
-                              if(value.trim().length() > 0 && (value.trim().equals("PS") || value.trim().equals("HK") )) {
+                              if(value.trim().length() > 0 && (value.trim().equals("PS") || value.trim().equals("HK") || value.trim().equals("x"))) {
                               //	 System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
                               
 							if(res.get(pood) != null){
@@ -1591,7 +1593,7 @@ public class Converter {
 					 }
 					
 					
-					//System.out.println("sorts size " + res.toString() );
+					System.out.println("sorts size " + res.toString() );
 				//System.exit(0);
 						
 					 }catch(Exception e) {
@@ -4919,11 +4921,13 @@ public class Converter {
 									if(cellx != null) {
 										
 										try {
-											if(formatter.formatCellValue(cellx).indexOf("1ka") != -1 ) {
+											String aa = formatter.formatCellValue(cellx);
+											//System.out.println("aa");
+											if(aa.indexOf("1ka") != -1 ) {
 												return "kaupmees";
 											}
 											
-											if(formatter.formatCellValue(cellx).equals("Kad") ) {
+											if(aa.equals("Kad") || aa.equals("Kadaka") ) {
 												return "kaupmees2";
 											}
 										}catch(Exception k) {
