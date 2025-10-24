@@ -4,7 +4,9 @@ package eevaeksport.driver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLEncoder;
 
 import java.nio.charset.StandardCharsets;
@@ -63,7 +65,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter {
+public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker {
 
   public RahvaRaamatAPIDBDriver(EksportPanel parent) {
     super(parent);
@@ -1522,7 +1524,7 @@ public String getProductSortingData() {
 private HashSet grinUse = new HashSet();
 private HashSet prodsInUse = new HashSet();
 private HashSet custInUse = new HashSet();
-
+private HashMap pictsLink = new HashMap();
 
 
 @Override
@@ -1606,6 +1608,12 @@ public TreeMap getProducts(Agent agent) {
           		prod.setStock(Double.parseDouble(inventory));
           	}
           	
+          	String fname = (String)cob.get("image_filename") ;
+          	if(fname != null && fname.trim().length() > 4) {
+          		pictsLink.put(prod.getID() , fname);
+          		
+          	}
+          		
             
            	  tm.put(prod.getName(), prod);	
             
@@ -1616,12 +1624,137 @@ public TreeMap getProducts(Agent agent) {
 			e.printStackTrace();
 		}
 	 	}
+	 	
 System.out.println("Prodsize " + tm.size());
-	  
-	return tm;
+System.out.println("Imagelinks " + pictsLink.size());
+	
+   return tm;
 }
 
 
+
+@Override
+public void PictureMaker() {
+		
+		String pictssou = parent.getProps().getProperty("pict.dir");
+		    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	   
+		    String link = "http://kontor.rahvaraamat.ee/pildid_backup/";
+		    
+		    TreeMap prods = this.getProducts(null);
+		    
+		 try {
+	 	  
+	      File f = new File(pictspda +"list.txt");
+	      if (f.exists())f.delete();
+	      //Vaatame kas on vaja allalaadida
+	      
+	  	 	 	
+	     	Iterator enume2 = pictsLink.keySet().iterator();
+	   	      while (enume2.hasNext()) {
+	   	         String toode = (String)enume2.next();
+	   		     String fname  = (String)pictsLink.get(toode);
+	   	         File gg = new File (pictssou + fname); 
+	             if(!gg.exists()) {
+	            	 Converter.downloadFile(link + fname, pictssou + fname);
+	            	 
+	            	 if(!isRealJpeg(gg)) {
+	            		 gg.delete();
+	            	 }
+	            	 
+	              }
+	   	       }
+	     	 
+	     //	 System.exit(0);
+	     	 
+//	     	 Lõppes kustutamine 
+			// siin teeme allalaadimised juhul kui seda faili veel pole 
+			 
+
+	     StringBuffer buf = new StringBuffer();
+	     Iterator enume = pictsLink.keySet().iterator();
+	     while (enume.hasNext()) {
+	    	 String toode = (String)enume.next();
+		     String fname  = (String)pictsLink.get(toode);
+		     
+		    	
+	           if(toode.length() > 0 && prods.get(toode) != null){
+	        	   
+	        	   // siia allalaadimine teha
+	            	
+		   File	  res2 = new File (pictssou);
+		   String[]    ff2 = res2.list();
+	         
+	     	 for(int i = 0;ff2.length>i;i++){
+	         	if( ff2[i].startsWith(toode)){
+	           // System.out.println("pilt olemas " + ff2[i]);
+	        	File in = new File ( pictssou + ff2[i]); 
+	          	if(in.isFile()){
+	          	File inpda = new File ( pictspda + fname); 
+	          	if(!inpda.exists()) {
+	              	Converter.shrinkAndCopyFile(in,inpda,400);
+	        	     }
+	          	if(buf.toString().indexOf(fname +";"  + inpda.length()) == -1){
+            		buf.append(fname + ";"  + inpda.length() + "\n");
+            	}
+	          	
+	          	   }
+	             }
+	           }
+	         }
+		
+	              
+	                	 
+	     }
+	     try {
+	 		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+	 		os.write(buf.toString());
+	 		os.close();
+	 	  }catch (Exception ex) {
+	 		ex.printStackTrace();
+	 	  }
+		 
+		 } catch (Exception e) {
+		    getParent().showError(e);
+		}
+
+		 
+		 
+	
+
+
+	
+	
+}
+
+public static boolean isRealJpeg(File file) {
+    if (!file.exists() || !file.isFile()) return false;
+
+    try (FileInputStream fis = new FileInputStream(file)) {
+        byte[] start = new byte[2];
+        byte[] end = new byte[2];
+        long length = file.length();
+
+        if (length < 4) return false;
+
+        // Read first 2 bytes
+        if (fis.read(start) != 2) return false;
+
+        // Read last 2 bytes
+        fis.getChannel().position(length - 2);
+        if (fis.read(end) != 2) return false;
+
+        // Check JPEG magic bytes
+        boolean hasJpegMarkers = 
+            (start[0] & 0xFF) == 0xFF && (start[1] & 0xFF) == 0xD8 &&
+            (end[0] & 0xFF) == 0xFF && (end[1] & 0xFF) == 0xD9;
+
+        return hasJpegMarkers;
+    } catch (IOException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 
 
 }

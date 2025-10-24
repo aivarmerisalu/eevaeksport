@@ -1101,13 +1101,18 @@ con3.close();
                 		 prod.setInUnit(1);
                 	 }
                 	 
+                	 Calendar calendar = Calendar.getInstance();
+             		Time time = rs.getTime("mintime");
+             		if(time != null) {
+             		calendar.setTime(time);
+             		int hour = calendar.get(Calendar.HOUR_OF_DAY);
+             		if(hour > 10) {
+             		int minute = calendar.get(Calendar.MINUTE);
+             		Long ll = (long) (hour *60*60*1000 + minute *60*1000);
+             		  prod.setTimeToSell(ll);
+             		}
+             		}
                 
-                Time sqlTime = rs.getTime("mintime", Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin")));
-                if (sqlTime != null) {
-                	LocalTime time = sqlTime.toLocalTime();
-                    long millisSinceMidnight = time.toSecondOfDay() * 1000L;
-                    prod.setTimeToSell(millisSinceMidnight);
-                }
                 
                 	 if(ladupraak.get(id) != null ){
                       	  prod.setName(prod.getName() + " @S3:" + ((int)(ladupraak.get(id).doubleValue())));
