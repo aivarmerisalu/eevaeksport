@@ -254,15 +254,31 @@ System.out.println(sql);
               }
 
        
+       String veoring = order.getShipMode();
+	   if(veoring != null && veoring.trim().length() > 0 ){
+		   veoring = veoring.trim();
+		   if(veoring.contains("|")) {
+			   veoring = veoring.substring(0,veoring.indexOf("|"));
+		   }
+		   try{
+			   int aa = Integer.parseInt(veoring);
+		   }catch(Exception e){
+			   veoring = veoring.substring(1);
+		   }
+	   }else{
+		   veoring = "";
+	   }
+       
+       
        while(rs.next()){
             
           agent = "telema";
 
           sql = "INSERT INTO SDO (doknr,dok_kuup,tarne_kuup,firma_kood" +
-              "  ,sisestaja,lisainfo) " +
+              "  ,sisestaja,lisainfo,veoring) " +
               "VALUES ((SELECT MAX(id)+1  from SDO), cast(getdate() as date) ,cast(? as date)" +  // " + salesid + "
               ",'" + order.getCompany().replace('\'',' ') + "','"  + agent + 
-  			 "','MJ " + text + "' )";
+  			 "','MJ " + text + "' ,'"+ veoring + "' )";
 
      log.info("addInvoiceHeader2: " + sql);
      System.out.println("addInvoiceHeader2: " + sql);

@@ -1527,6 +1527,7 @@ private HashSet custInUse = new HashSet();
 private HashMap pictsLink = new HashMap();
 
 
+
 @Override
 public TreeMap getProducts(Agent agent) {
 	  TreeMap tm = new TreeMap();
@@ -1641,7 +1642,9 @@ public void PictureMaker() {
 	   
 		    String link = "http://kontor.rahvaraamat.ee/pildid_backup/";
 		    
-		    TreeMap prods = this.getProducts(null);
+		     this.getProducts(null);
+
+		     StringBuffer buf = new StringBuffer();
 		    
 		 try {
 	 	  
@@ -1654,58 +1657,27 @@ public void PictureMaker() {
 	   	      while (enume2.hasNext()) {
 	   	         String toode = (String)enume2.next();
 	   		     String fname  = (String)pictsLink.get(toode);
-	   	         File gg = new File (pictssou + fname); 
+	   	         File gg = new File (pictssou + fname);
+	   	         boolean isJpg = true;
 	             if(!gg.exists()) {
 	            	 Converter.downloadFile(link + fname, pictssou + fname);
-	            	 
 	            	 if(!isRealJpeg(gg)) {
 	            		 gg.delete();
+	            		 isJpg = false;
 	            	 }
-	            	 
 	              }
-	   	       }
-	     	 
-	     //	 System.exit(0);
-	     	 
-//	     	 Lõppes kustutamine 
-			// siin teeme allalaadimised juhul kui seda faili veel pole 
-			 
-
-	     StringBuffer buf = new StringBuffer();
-	     Iterator enume = pictsLink.keySet().iterator();
-	     while (enume.hasNext()) {
-	    	 String toode = (String)enume.next();
-		     String fname  = (String)pictsLink.get(toode);
-		     
-		    	
-	           if(toode.length() > 0 && prods.get(toode) != null){
-	        	   
-	        	   // siia allalaadimine teha
-	            	
-		   File	  res2 = new File (pictssou);
-		   String[]    ff2 = res2.list();
-	         
-	     	 for(int i = 0;ff2.length>i;i++){
-	         	if( ff2[i].startsWith(toode)){
-	           // System.out.println("pilt olemas " + ff2[i]);
-	        	File in = new File ( pictssou + ff2[i]); 
-	          	if(in.isFile()){
-	          	File inpda = new File ( pictspda + fname); 
-	          	if(!inpda.exists()) {
-	              	Converter.shrinkAndCopyFile(in,inpda,400);
-	        	     }
-	          	if(buf.toString().indexOf(fname +";"  + inpda.length()) == -1){
-            		buf.append(fname + ";"  + inpda.length() + "\n");
-            	}
-	          	
-	          	   }
-	             }
+	            
+	            		File dest =  new File(pictspda + fname);
+	            		if(!dest.exists() && isJpg) {
+	            			Converter.shrinkAndCopyFile(gg,dest,200);
+	            		}
+	            		if(dest.length() > 0) {
+	            		if(buf.toString().indexOf(fname +";"  + dest.length()) == -1){
+	                		buf.append(fname + ";"  + dest.length() + "\n");
+	                	}
+	            		}
 	           }
-	         }
-		
-	              
-	                	 
-	     }
+	    
 	     try {
 	 		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
 	 		os.write(buf.toString());
@@ -1717,15 +1689,11 @@ public void PictureMaker() {
 		 } catch (Exception e) {
 		    getParent().showError(e);
 		}
-
 		 
-		 
-	
-
-
-	
+	System.exit(0);
 	
 }
+
 
 public static boolean isRealJpeg(File file) {
     if (!file.exists() || !file.isFile()) return false;
