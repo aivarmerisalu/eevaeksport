@@ -224,6 +224,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
    
    
    private HashMap clGroups = null;
+   private HashSet tnams200 = new HashSet();
    
    public Vector getPriceMatrixData(){
 	  	
@@ -300,7 +301,9 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
  	             if (end != null && end.length() > 0) {
  	               mline.setEndDate(end.substring(0,10));
  	             }
- 	            result.add(mline); 
+ 	             if(!tnams200.contains(klient)) {
+ 	               result.add(mline); 
+ 	             }
 	       }
 	    
 	       Calendar cal = Calendar.getInstance();
@@ -422,7 +425,9 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
  	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
  	            	 if(!check.contains(signa) && goes) {
  	            		 mline.setProdLevel("pr");
+ 	            		 if(!tnams200.contains(klient)) {
  	            		    result.add(mline); 
+ 	            		 }
  	            		 }
  	 	                 check.add(signa);
  	            	 }    
@@ -1030,6 +1035,9 @@ if(seis > 0) {
              if(group != null && group.trim().length() > 0 ) {
             	 cust.setGroup(group);
                  setg = group+ "|";
+                 if(group.startsWith("TN 2000")) {
+                	 tnams200.add(id);
+                 }
              }
              if(group2 != null && group2.trim().length() > 0 ) {
              	  cust.setGroup(setg + group2);

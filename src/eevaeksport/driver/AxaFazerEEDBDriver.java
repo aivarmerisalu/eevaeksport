@@ -840,9 +840,12 @@ try {
     
         while(rs.next()){
         	String agentID = rs.getString("kood").trim();
-        	if(agentID.equals("Lääne")) {
-           	 agentID = "Laane";
+        	if(agentID.equals("Lääne-Eest")) {
+           	 agentID = "Laane-Eest";
             }
+        	if(agentID.equals("Lõuna-Eest")) {
+              	 agentID = "Louna-Eest";
+               }
           Agent agent = new Agent(agentID);
           String name = rs.getString("name").trim();
           agent.setName(name);
@@ -873,31 +876,7 @@ try {
      stmt.close();
      con.close();
          
-     Agent agent = new Agent("MERC1");
-     
-     String name = "MERC1";
-     agent.setName(name);
-     agent.setIsPilot(true);
-     agent1.put("MERC", agent);
-     
-     
-     agent.setLanguage("LAT");
-     agent.setCountry("lv");
-     agent.setPassWord("0000");
-     String email = " ";
-     
-     if(propse.get(agent.getID()) != null){
-   	  email = Converter.parseFirstEmail(propse.get(agent.getID())+"");
-     }
-     
-     if(email.length() > 3){
-   	  agent.setEmail(email);
-     }
    
-     if(email.length() > 0){
-   	  agent.setActive(true);
-     }
-     agents.put(name, agent);
     } catch (Exception e){
         getParent().showError(e);
       }
@@ -1302,9 +1281,12 @@ if(grupp.equals("leib") ){
         String agen = rs.getString("agent");
         if (agen != null) {
         	String agentID = agen.trim();
-        	if(agentID.equals("Lääne")) {
-           	 agentID = "Laane";
+        	if(agentID.equals("Lääne-Eest")) {
+           	 agentID = "Laane-Eest";
             }
+        	if(agentID.equals("Lõuna-Eest")) {
+              	 agentID = "Louna-Eest";
+               }
           cust.addAgent(new Agent(agentID));
     
           Agent aa1 = (Agent)agent1.get(agentID);
@@ -1317,33 +1299,17 @@ if(grupp.equals("leib") ){
   				String age = (String) en.nextElement();
   				cust.addAgent(new Agent(age));
   			}
-  		}
-      }
+  	       }
+          }
       	
-      	if(agen.trim().startsWith("3T")) {
-      		
-      		cust.addAgent(new Agent("3T 01"));
-      		cust.addAgent(new Agent("3T 02"));
-      		cust.addAgent(new Agent("3T 03"));
-      		cust.addAgent(new Agent("3T 04"));
-      		cust.addAgent(new Agent("3T 05"));
-      		cust.addAgent(new Agent("3T 06"));
-      		cust.addAgent(new Agent("3T 07"));
-      		cust.addAgent(new Agent("3T 08"));
-      		cust.addAgent(new Agent("3T 09"));
-      		cust.addAgent(new Agent("3T 10"));
-      		cust.addAgent(new Agent("3T 11"));
-      		cust.addAgent(new Agent("Kesk"));
-      		
-      	}
-      	
+     	
         }
         
         
     
 
         
-        int term = rs.getInt("term");
+       /* int term = rs.getInt("term");
         if (term > 0) {
        //   cust.setPaymTerm(term + "");
         }
@@ -1357,7 +1323,7 @@ if(grupp.equals("leib") ){
         if (payerblock == 2) {
          // cust.setSalesBlock(true);
         }
-        }
+        }*/
         
         String info = rs.getString("info");
         if (info != null && info.trim().length()>0) {
@@ -1397,35 +1363,7 @@ if(grupp.equals("leib") ){
   
       }
 
-  /*    String sql = "SELECT  a.accountnum AS klient,a.invoice AS number,co.duedate AS maksepaev,co.amountmst AS tasumata, " +
-               "co.transdate AS kuupaev , datediff(day,co.duedate,getdate()) AS yle FROM custtransopen co INNER JOIN custtrans a ON co.REFRECID=a.recid  and  co.dataareaid= a.dataareaid " +
-               "WHERE co.dataareaid='eee' AND a.dataareaid='eee' and ltrim(a.accountnum) not in ('511' , '109') ORDER BY a.accountnum,co.transdate ";
 
-      sql = "SELECT  a.accountnum AS klient, regnum_w as payer ,a.invoice AS number,co.duedate AS maksepaev,co.amountmst AS tasumata, \r\n" + 
-      		"               co.transdate AS kuupaev , datediff(day,co.duedate,getdate()) AS yle FROM custtransopen co INNER JOIN custtrans a ON co.REFRECID=a.recid  and  co.dataareaid= a.dataareaid \r\n" + 
-      		"			   INNER JOIN custtable cus ON  a.accountnum  = cus.accountnum and  cus.dataareaid= a.dataareaid \r\n" + 
-      		"               WHERE co.dataareaid='eee' AND a.dataareaid='eee' and ltrim(cus.regnum_w) not in ('10714195' , '10180925' , '10765896' , '10263574' , '10379733') ORDER BY a.accountnum,co.transdate" ;
-    
-      rs = stmt.executeQuery(sql);
-                      while(rs.next()){
-                        Debt debt = new Debt();
-                        debt.setCustID(rs.getString("klient").trim());
-                        String pay = rs.getString("payer");
-                        if(pay != null && pay.trim().length() > 0) {
-                        	debt.setPayerID(pay.trim());	
-                        }
-                        
-                        String number = rs.getString("number").trim();
-                        debt.setDoknr(number);
-                        debt.setDuedate(rs.getDate("maksepaev"));
-                        debt.setSum(rs.getDouble("tasumata"));
-                        debt.setDate(rs.getDate("kuupaev"));
-                        debt.setDue(rs.getString("yle"));
-                        
-                        
-
-                      //  this.debt.addElement(debt);
-                      }*/
 
   rs.close();
   stmt.close();
@@ -1700,8 +1638,11 @@ return tm;
                ResultSet	      rs = stmt.executeQuery(cmd);
                while(rs.next()) {
                  String agentID = rs.getString("agent").trim();
-                 if(agentID.equals("Lääne")) {
-                	 agentID = "Laane";
+                 if(agentID.equals("Lääne-Eest")) {
+                	 agentID = "Laane-Eest";
+                 }
+                 if(agentID.equals("Lõuna-Eest")) {
+                	 agentID = "Louna-Eest";
                  }
                  Agent agent = (Agent)agents.get(agentID);
                  

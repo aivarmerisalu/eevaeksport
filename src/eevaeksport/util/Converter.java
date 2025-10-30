@@ -5876,7 +5876,7 @@ try{
 	
 	 
 	 
-	public static void sendProductJson(TreeMap tm , String company, boolean https){
+	public static void sendProductJson(TreeMap tm ,String user , String pass , String company, boolean https){
 		Vector<MyJSON> json = new Vector<MyJSON> ();
 		
 	  if(company == null){
@@ -6022,9 +6022,21 @@ try{
 		json.add(myson);
 		System.out.println("MYJSON Product 200 " );
 		
-		if(json.size() > 0){
-			setSendRestMsg(json,https);
-		}
+			if(json.size() > 0){
+				 try {
+					 eevaeksport.util.ReportingService  serv = new ReportingService();
+						serv.user =  user;
+						serv.pass = pass;
+						serv.company = company;
+						serv.https = https;
+					    serv.postJson(deCode(array.toString()), myson.getUrl());
+						serv.closeClient();
+					} catch (Exception e) {
+						System.out.println(deCode(array.toString()));
+						e.printStackTrace();
+					}
+				}
+		
 		json = new Vector<MyJSON> ();
 		array = new JSONArray();
 		cou = 0;
@@ -6041,7 +6053,18 @@ try{
 		System.out.println("MYJSON PRODUCT " );
 		
 		if(json.size() > 0){
-			setSendRestMsg(json,https);
+			try {
+				 eevaeksport.util.ReportingService  serv = new ReportingService();
+					serv.user =  user;
+					serv.pass = pass;
+					serv.company = company;
+					serv.https = https;
+				    serv.postJson(deCode(array.toString()), myson.getUrl());
+					serv.closeClient();
+				} catch (Exception e) {
+					System.out.println(deCode(array.toString()));
+					e.printStackTrace();
+				}
 		}
 		
 	}
@@ -7566,13 +7589,9 @@ try{
 		System.out.println("MYJSON CUSTOMER 150 ");
 		
 		if(json.size() > 0){
-		//	setSendRestMsg(json);
 		
 			 try {
-				 
-				 
 				 eevaeksport.util.ReportingService  serv = new ReportingService();
-				   
 					serv.user =  user;
 					serv.pass = pass;
 					serv.company = company;
@@ -7629,11 +7648,8 @@ try{
 			System.out.println(deCode(array.toString()));
 			e.printStackTrace();
 		}
-       //  setSendRestMsg(json);
 		}
-		if(	addRoutes){
-			//addRoutes(visits,user,pass,company);
-		}
+		
 		
 		
 	}
@@ -8852,7 +8868,7 @@ try{
 	 
 	
 	
-	public static void sendAgentJson(TreeMap tm , String company, boolean merc, boolean https){
+	public static void sendAgentJson(TreeMap tm ,String user , String pass, String company, boolean merc, boolean https){
 		Vector<MyJSON> json = new Vector<MyJSON> ();
 		
 	  if(company == null){
@@ -8925,7 +8941,18 @@ try{
 //		System.out.println("MYJSON " + array.toString());
 		
 		if(json.size() > 0){
-			setSendRestMsg(json,https);
+		 try {
+			 eevaeksport.util.ReportingService  serv = new ReportingService();
+				serv.user =  user;
+				serv.pass = pass;
+				serv.company = company;
+				serv.https = https;
+			    serv.postJson(deCode(array.toString()), myson.getUrl());
+				serv.closeClient();
+			} catch (Exception e) {
+				System.out.println(deCode(array.toString()));
+				e.printStackTrace();
+			}
 		}
 		
 	}
@@ -9230,7 +9257,7 @@ try{
 	  
 	
 	
-	public static void setSendRestMsg(Vector<MyJSON> json, boolean https ){
+	public static void setSendRestMsgOld(Vector<MyJSON> json, boolean https ){
 		
 		CloseableHttpClient  client = HttpClients.createDefault();
 		

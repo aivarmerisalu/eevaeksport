@@ -518,9 +518,14 @@ private Vector signatures = new Vector();
 	           if(fixagent != null){
 	         	  agent = fixagent;
 	           }
-	           if(agent.equals("mand")){
-	            //   agent = "m�nd";
-	          }
+	           
+	           if(agent.equals("Laane-Eest")){
+	               agent = "Lääne-Eest";
+	            }
+	           if(agent.equals("Louna-Eest")){
+	               agent = "Lõuna-Eest";
+	            }
+
 	           
 	           sb.append("<UserId>" +  agent + "</UserId>" + ls);
 	           sb.append("</DeliveryParty>" + ls);

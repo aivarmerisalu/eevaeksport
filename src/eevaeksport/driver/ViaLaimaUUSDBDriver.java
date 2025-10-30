@@ -1723,12 +1723,22 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 						
 						}
 						System.out.println("stockJson lopp ");
-				    	String laod = getParent().getProps().getProperty("laoseis.laod");
+				    	String laodq = getParent().getProps().getProperty("laoseis.laod");
 				    	//võtame välja ainut yhe laoseisu 
-				    	String laod2 = null;
-				    	if(laod != null && laod.indexOf(",") != -1) {
-				    		laod2 = laod.substring(laod.indexOf(",") +1);
-				    		laod = laod.substring(0,laod.indexOf(","));
+				    	String ladu1 = null;
+				    	String ladu2 = null;
+				    	String ladu3 = null;
+				    	if(laodq != null && laodq.indexOf(",") != -1) {
+				    		StringTokenizer st = new StringTokenizer(laodq,",");
+				    		if(st.hasMoreTokens()) {
+                             ladu1 = st.nextToken();
+				    		}
+				    		if(st.hasMoreTokens()) {
+	                             ladu2 = st.nextToken();
+					    		}
+				    		if(st.hasMoreTokens()) {
+	                             ladu3 = st.nextToken();
+					    		}
 				    	}
 				    	
         	
@@ -1746,15 +1756,17 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 	    	  try {
 	    		  double nn = Double.parseDouble(((Long)cob.get("Laoseis"))+"");
 
-					if( nn > 0){
+					if( nn > 0 ){
 
-				    	  String parim = (String)cob.get("S\u00e4ilivusaeg");
+						String parim = (String)cob.get("S\u00e4ilivusaeg");
 				    	  
-						if(laod == null) {
-							 products.append(prodid +  ";");
+						if(laodq == null) {
+							
+							   products.append(prodid +  ";");
 				               products.append( ladu +";");
 				               products.append(getParent().getNF().format(nn) + "; "  +  "\n"); // + dealer +  "\n");
-						} else if (laod.contains("." +ladu+ ".")) {
+				               
+						  } else if (ladu1.equals("." + ladu + ".") || (ladu3 != null && ladu3.equals("." + ladu + ".")) ) {
 						     if(parim != null) {
 						    	 String asi = (String)laduParimEnne.get(prodid);
 						    	 if(asi == null) {
@@ -1768,7 +1780,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 								nn = nn + Double.parseDouble(seisudSum.get(prodid) + "");
 							}
 							seisudSum.put(prodid, nn);
-						} else if (laod2.contains("." +ladu+ ".")) {
+						} else if ( ladu2.equals("." +ladu+ ".") ) {
 							laduBR.put(prodid, "'" + ladu + "@" + (int)nn + "'");
 						}
 						      
@@ -2231,10 +2243,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 				e.printStackTrace();
 			}
         
+        
         if ("true".equals(getParent().getProps().getProperty("shipmodefile"))) {
-		
-        	makeShipModeFile("EE");
-			
+			makeShipModeFile("EE");
 		}
         
       TreeMap  oOrders = this.getOpenOrders();
@@ -2246,12 +2257,15 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		}
 	
 		TreeMap custAgs = null;
-		
 		if ("78".equals(getParent().getProps().getProperty("stockcode")) || "17".equals(getParent().getProps().getProperty("stockcode"))) {
 			custAgs = getCustAgsExcel();
+		}
+
+		TreeMap custAgsWeb = null;
+		if ("true".equals(getParent().getProps().getProperty("webcustagents"))) {
+			custAgsWeb = Converter.getWebCustomersAgents(rcompanyx, user, pass);
 			//System.out.println("custAgs " + custAgs.toString());
 		}
-		
 		
 		TreeMap tm = new TreeMap();
      	custMap = new HashMap();
@@ -2336,6 +2350,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 
 					Customer customer = new Customer(id);
 					customer.setAddress(" ");
+					customer.restName = name;
                     customer.setPayer(payer);
                     customer.setGroup(payer);
 					name = name + " " + id;
@@ -2354,6 +2369,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 										aadress = aadress.substring(0,aadress.lastIndexOf("EST"));
 									}
 									customer.setAddress(Converter.adressLink(Converter.enCodeEst(aadress),"Estonia"));
+						            customer.restStreet = aadress;
 								}
 							
 
@@ -2401,10 +2417,12 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		                    	
 		                     }
 		              
-		                    
-	                		 
-			                   
-		                	 if (("78".equals(getParent().getProps().getProperty("stockcode")) || "17".equals(getParent().getProps().getProperty("stockcode"))) 
+		                     if( custAgsWeb != null && custAgsWeb.get(customer.getID()) != null) {
+		     	         		ArrayList arr =  (ArrayList) custAgsWeb.get(customer.getID());
+		     	         		for(int i = 0 ; i< arr.size();i++) {
+		     	         		   customer.addAgent(new Agent(arr.get(i)+""));
+		   	 			       	}
+		     	         	}else if ("17".equals(getParent().getProps().getProperty("stockcode"))
 		                			 && custAgs != null) {
 		                		// if(customer.getName().startsWith("P"))
 		                		 //System.out.println("acust " + customer.getID()+ " " + custAgs.get(customer.getID()));
@@ -2473,9 +2491,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		                    		
 		                    	
 		                     } else if(age != null ){
+		                    	 if(!age.equals("0000"))
 									customer.addAgent(age);	
-									
-								    customer.addAgent(new Agent("manager"));
+									//customer.addAgent(new Agent("manager"));
 								}
 								
 								

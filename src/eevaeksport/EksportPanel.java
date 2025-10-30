@@ -5026,13 +5026,13 @@ if (getProps().getProperty("no.matrixagent") != null) {
     	 System.out.println("restalla duplicates " + duplicates);
     	 if(rcompany != null){
     		if(what == null){
-    			 Converter.sendAgentJson(driver.getAgents(), rcompany, false, https);
-        		 Converter.sendProductJson(driver.getProducts(null), rcompany , https);
+    			 Converter.sendAgentJson(driver.getAgents(),user,pass, rcompany, false, https);
+        		 Converter.sendProductJson(driver.getProducts(null),user,pass, rcompany , https);
         		 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, false,user,pass,duplicates,sendpartner , https);
         			
     		}else{
     			if(what.equals("prod")){
-    				 Converter.sendProductJson(driver.getProducts(null), rcompany , https);
+    				 Converter.sendProductJson(driver.getProducts(null),user ,pass , rcompany , https);
     		    }
     			if(what.equals("cust")){
     				 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, false,user,pass,duplicates,sendpartner, https);
