@@ -2229,7 +2229,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 
         try{
         	if(rcompanyx != null) {
+        		//if(!"false".equals(getParent().getProps().getProperty("webagentreplacement"))) {
      	   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
+        		//}
         	}
      }catch(Exception e){
      	
@@ -2257,7 +2259,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		}
 	
 		TreeMap custAgs = null;
-		if ("78".equals(getParent().getProps().getProperty("stockcode")) || "17".equals(getParent().getProps().getProperty("stockcode"))) {
+		if ( "17".equals(getParent().getProps().getProperty("stockcode"))) {
 			custAgs = getCustAgsExcel();
 		}
 
@@ -2492,7 +2494,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		                    	
 		                     } else if(age != null ){
 		                    	 if(!age.equals("0000"))
-									customer.addAgent(age);	
+									customer.addAgent(age);
+		                    	 customer.setMainAgent(age.getID());
 									//customer.addAgent(new Agent("manager"));
 								}
 								

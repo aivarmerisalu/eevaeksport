@@ -196,15 +196,6 @@ public class FereDBDriver extends AbstractDBDriver implements  BulkUpdater ,Disc
 
 	  
 	          	 
-	          	 
-	        	 File res2 = new File (pictspda);
-	            String[] ff2 = res2.list();
-	        	 for(int i = 0;ff2.length>i;i++){
-	            //	System.out.println("fff " + ff2[i]);
-	            //	(new File ( pictspda + ff2[i])).delete(); 
-	         
-	            }
-//	        	 Lõppes kustutamine 
 	        	 
 	          System.out.println("Piltide kopeerimine ");	
 	          //Failide kopeerimine  
@@ -214,8 +205,8 @@ public class FereDBDriver extends AbstractDBDriver implements  BulkUpdater ,Disc
 	             for(int i = 0;gg.length>i;i++){          	
 	             	File in = new File ( picts + gg[i]); 
 	             	if(in.isFile()){            	
-	             	File inpda = new File ( pictspda + toUpper(gg[i])); 
-	             	if(!inpda.exists()) {
+	             	File inpda = new File ( pictspda + toUpper(gg[i]).trim()); 
+	             	if(!inpda.exists() && !in.getName().contains("(") && !in.getName().contains("_") && in.getName().length() > 6) {
 	             	   	Converter.shrinkAndCopyFile(in,inpda);
 		            	}
 	                }
@@ -228,8 +219,8 @@ public class FereDBDriver extends AbstractDBDriver implements  BulkUpdater ,Disc
 	            		
 	              String[]  ff = new File(picts + cats.elementAt(h)+ "/").list();
 	               	   for(int i = 0;i < ff.length  ;i++){          	
-	                   	File in = new File ( picts + cats.elementAt(h)+ "/" + ff[i]); 
-	                   	if(in.isFile()){   
+	                   	File in = new File ( picts + cats.elementAt(h)+ "/" + ff[i].trim()); 
+	                   	if(in.isFile() && !in.getName().contains("(") && !in.getName().contains("_") && in.getName().length() > 6){   
 	                   		
 	                   	File inpda = new File ( pictspda + toUpper(ff[i])); 
 	                         	copyFile(in,inpda);
@@ -642,10 +633,54 @@ con.close();
 
 
 
+    public String getSaveStockInfo(){
+    	
+  	  StringBuffer products = new StringBuffer();
 
-        public String getSaveStockInfo(){
-        return null;
+
+  	   String sql = " SELECT a.siffer AS toode,  (kak+tulek-minek) AS kogus " +
+  	   " FROM osmy/lm_mat a INNER JOIN osmy/lm_kla k ON a.grupp = k.klkood LEFT JOIN ladu/ll010000 ll " +
+  	   " ON ll.siffer=a.siffer WHERE (a.uhik not in ('------') OR (right(ltrim(str(tarnaeg)),2)=right(str(year(date())),2) AND " +
+  	    " left(ltrim(str(tarnaeg)),2)>iif(len(ltrim(str(month(date()))))=1,'0'+ltrim(str(month(date()))),ltrim(str(month(date()))))))" +
+  	    " ORDER BY a.siffer " ;
+  	   
+       if (isDebug()) {
+           System.out.println(sql);
+       }
+
+       try {
+
+      	 Connection con = DriverManager.getConnection(url);
+      	 PreparedStatement pstm = con.prepareStatement(sql);
+      	 
+
+         ResultSet rs = pstm.executeQuery();
+        
+        while (rs.next()) {
+      	  String  toode =  rs.getString("toode").trim();
+      	  double seis = rs.getDouble("kogus");
+
+      	  if(seis > 0){
+      		  products.append(toode + ";");
+         		  products.append(" ;");
+         		  products.append(getParent().getNF().format(seis) + "; "
+         				+ "\n");
+
+               // System.out.println("IA laoseisud " + seis + " " + toode);
+      	  }
+      	
         }
+        rs.close();
+        pstm.close();
+         con.close();
+          } catch (Exception e) {
+              getParent().showError(e);
+          }
+          
+       //  System.out.println("K�ik laoseisud tehtud " + products.toString());
+          
+          return products.toString();
+      }
 
 
 

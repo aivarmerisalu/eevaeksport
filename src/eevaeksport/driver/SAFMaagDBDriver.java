@@ -613,8 +613,48 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
     	st2.close();
     	con2.close();
     	
+    	
+    	
+  	   TreeMap taarad = new TreeMap();
+
+   	 
+   	    cmd = "SELECT  d.idgrcompany  AS klient ,t.code ,SUM(r.quantity)  AS kogus ,sum(r.amount), max(t.name) as nimi\r\n" + 
+   	    		"            , isnull((select sum(Y.Quantity)\r\n" + 
+   	    		"                from maag_taara_ladu_doc X\r\n" + 
+   	    		"                    inner join maag_taara_ladu_read Y on Y.iddoc=X.id\r\n" + 
+   	    		"                where X.reftype=N'SDConsignmD' and X.IDGRCompany=D.IDGRCompany and Y.IDGRArticle=T.ID),0) as taara_saldo\r\n" + 
+   	    		"FROM gdocument d INNER JOIN sdinvoicerow r ON d.id=r.idsdinvoice \r\n" + 
+   	    		"    INNER JOIN grcompany cus  ON cus.id=d.idgrcompany \r\n" + 
+   	    		"    INNER JOIN grarticle t ON t.id= r.idgrarticle \r\n" + 
+   	    		"    LEFT JOIN grarticleCatrel cat ON cat.idgrarticle=t.id\r\n" + 
+   	    		"WHERE d.docdate >='2025-04-01 00:06:49.340'\r\n" + 
+   	    		"    AND cat.idgrarticlecat = 116 \r\n" + 
+   	    		"GROUP BY d.idgrcompany, t.ID, t.code \r\n" + 
+   	    		"HAVING SUM(r.quantity) != 0 and sum(r.amount)!= 0 \r\n" + 
+   	    		"ORDER BY  d.idgrcompany,t.code";
+   	   con2 = getNewConnection();
+       Statement st = con2.createStatement();
+   	   rs = st.executeQuery(cmd);
+   	  while(rs.next()){
+   		 String kl = rs.getString("klient").trim();
+          
+           double kogus = rs.getDouble("kogus");
+           String name = rs.getString("nimi").trim();
+           String asi = "["  + ((int)kogus) + "] " + name ; 
+           if(taarad.get(kl) != null){
+          	 String u = (String)taarad.get(kl);
+          	 taarad.put(kl, u + "|" + asi); 
+           }else{
+          	 taarad.put(kl, asi); 
+           }
+           
+   	  }
+        rs.close();
+        st2.close();
+    	con2.close();
+    	
       Connection con = getNewConnection();
-      Statement st = con.createStatement();
+       st = con.createStatement();
  
   
       String cmd2 = " SELECT id , kl.code AS kood,ltrim(kl.name) AS nimi,(select name from grcompany where id=kl.idsettlcompany)as mnimi,kl.locationaddr AS address,U_Kylastusgraafik AS visit ,creditlimit AS limiit,kl.i_agent AS agent, " +
@@ -717,6 +757,10 @@ public class SAFMaagDBDriver extends AbstractDBDriver implements Manager,Promo,B
           String plokk = rs.getString("block");
           if(plokk != null && plokk.trim().length()>0 && plokk.equals("1")){
           	cust.setSalesBlockT(true);
+          }
+       
+          if(taarad.get(accountnum) != null){
+        	    cust.setInfo("|Taara käes:|" + (String)taarad.get(accountnum));  
           }
           
           

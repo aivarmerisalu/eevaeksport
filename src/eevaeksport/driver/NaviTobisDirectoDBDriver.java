@@ -3128,8 +3128,25 @@ System.out.println(cmd);
            stmt.close();
            con.close();
            
-           
-           
+           String sss = "  SELECT [Item No_] AS prodid, [Unit Price] AS price  from " + 
+           		"          [2015_Tobis$Sales Price] where [Starting Date] < getdate()-1  and ([Ending Date] > getdate()+1 or " + 
+           		"              year ([Ending Date]) = 1753)  and [Sales Type] = 2 " ;
+         
+
+           HashMap<String,Double> prices = new HashMap<String,Double>();
+              	 
+              	  con = getNewConnection2();
+                    stmt = con.createStatement();
+                    rs = stmt.executeQuery(sql3);
+                   while(rs.next()){
+                  	  String id = rs.getString("prodid").trim();
+                  	  Double pr = rs.getDouble("price");
+                  	  prices.put(id, pr);
+                   }
+                 //  System.out.println("top suurus " + top.size());
+                     rs.close();
+                     stmt.close();
+                     con.close();
            
     	 String cmd = "  SELECT  t.[No_] AS toode,(t.[Description] + ' ' +   t.[Description 2] ) AS nimi, t.[Unit Price] AS myygihind,"
     	 		+ " '' AS grupp2,t.[Global Dimension 2 Code] AS grupp " +
@@ -3151,6 +3168,11 @@ System.out.println(cmd);
          	
              double price = rs.getDouble("myygihind");
                 prod.setPrice(price);
+                
+                if(prices.get(id) != null) {
+                	prod.setPrice(prices.get(id));
+                }
+                
               if(ladutr.get(id) != null ){
             	  prod.setStock(new Double((String)ladutr.get(id)).doubleValue());
               }else{
