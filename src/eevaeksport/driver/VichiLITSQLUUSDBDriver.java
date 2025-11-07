@@ -1002,6 +1002,9 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				if(!wareID) {
 				if(id2 != null && id2.trim().length() > 0 ) {
 					id = id + "_" + id2.trim();
+				}else if(acode != null && acode.trim().length() > 0 ) {
+					 
+					id = id + "_" + acode;
 				}
 				}
 				String name2 = rs.getString("nimi2").trim();
@@ -1395,7 +1398,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 
 				
 				
-		 " select p.code , custcode , k.[Ship-to Address ILN] as kl  from MobilejavaVIK.v_VIK_FA "
+		 " select p.code , custcode , k.[Ship-to Address ILN] as kl ,k.[Ship-to-address code] as ad2 from MobilejavaVIK.v_VIK_FA "
 	  		+ " p inner join MobilejavaVIK.v_VIK_Customers k on p.custcode = k.kood and p.custcode2 = k.[Ship-to-address code] ";
 		 int cou = 0;
 		              int coua = 0;
@@ -1412,6 +1415,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		                         String custcode = rs1.getString("custcode").trim();
 		                         
 		                         String kl = rs1.getString("kl");
+		                         String ad2 = rs1.getString("ad2");
 		                         if(kl != null) {
 		                         obj.put("customerCode",  custcode  + "_" + kl.trim());
 		                         
@@ -1423,9 +1427,30 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		                        			   vec.add(obj);  
 		                                       cou++; 
 		                        		  }
-		                        	  }
+		                        	  }else {
+			                       		   vec.add(obj);  
+	                                       cou++; 
+	                        		    }
 		                          }
-		                       }}
+		                       } else  if(ad2 != null && ad2.trim().length() > 0) {
+			                         obj.put("customerCode",  custcode  + "_" + ad2.trim());
+			                         
+				                       
+			                         if(asses.contains(code) && custs.contains(custcode + "_" + ad2.trim()) ){
+			                        	  String olemas = (String)asscusts.get(code);
+			                        	  if(olemas != null){
+			                        		  if(!olemas.equals(custcode)){
+			                        			   vec.add(obj);  
+			                                       cou++; 
+			                        		  }
+			                        	  }else {
+			                       		   vec.add(obj);  
+	                                       cou++; 
+	                        		    }
+			                          }
+			                       }
+		                         
+		                  }
 		                  rs1.close();
 		                  
 		             //LADUDES ASUVAD ASJAD KA SISSE   
@@ -1445,7 +1470,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		      		                         String custcode = rs1.getString("custcode").trim();
 		      		                         obj.put("customerCode",  custcode);
 		      		                        	  String olemas = (String)asscusts.get(code);
-		      		                        	  System.out.println(olemas + " " + obj.toString());
+		      		                        	//  System.out.println(olemas + " " + obj.toString());
 		      		                        	   
 		      		                        		  if(olemas == null || !olemas.equals(custcode)){
 		      		                        			   vec.add(obj);  
@@ -1462,7 +1487,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		                      
 		                      // siis peaks tegema vahele kontrolli et kui on muudatus siis ainult laksad ylesse
 		    	   
-		    	   
+		    	       Converter.saveFile("assetscust.json", vec.toString());
 		    	   
 		                    Converter.sendAssetsCustomerJson(vec,this.user,this.pass,this.rcompanyx);     
 		               	   

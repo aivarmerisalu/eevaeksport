@@ -83,7 +83,7 @@ public class KMAHortiImportDriver
   		File f = new File("signatures.vec");
   		Calendar ss = Calendar.getInstance();
   		
-  		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 7200000) {// kui on yle tunni vana siis maha 
+  		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 9200000) {// kui on yle tunni vana siis maha 
   			f.delete();
   			signatures = new Vector();
   		} else {
@@ -228,15 +228,8 @@ public class KMAHortiImportDriver
 		
 	  if(signatures.contains(signature)){
 		  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
-	  }else{
+	  } else {
 		
-	  
-	/*  Vector splitted =  splitOrder(order);
- 	  Enumeration en = splitted.elements();
- 	  while(en.hasMoreElements()){
- 		  Order ord = (Order)en.nextElement();
- 			  makeOutput(ord);  
-	}*/
  	  makeOutput(order);  
  	  signatures.add(signature);
  	  

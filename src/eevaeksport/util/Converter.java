@@ -3,6 +3,7 @@ package eevaeksport.util;
 import java.awt.Color;
 
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
@@ -62,6 +63,8 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -8729,11 +8732,11 @@ String ees = "";
 		
 	
 		try {
-			Converter.saveFile("json" + System.getProperty("file.separator") 
-			+ Calendar.getInstance().getTimeInMillis()+ ".txt" , array.toString());
+		//	Converter.saveFile("json" + System.getProperty("file.separator") 
+			//+ Calendar.getInstance().getTimeInMillis()+ ".txt" , array.toString());
 		
 			String aaa = serv.postJson(array.toString(), url);
-			System.out.println("MYJSON RCals left  "+ aaa  + " " + array.toString() );
+			//System.out.println("MYJSON RCals left  "+ aaa  + " " + array.toString() );
 		
 		
 		} catch (Exception e) {
@@ -9661,23 +9664,85 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		  }
 			  
 		  
-	  public static void shrinkAndCopyFileNEW (String in, String out , int size ) throws Exception {
-   if(in != null && in.toLowerCase().indexOf("thrumbs") == -1){
-	   if(size == 0){
-		   size = 301;
-	   }   
-	   
+		  public static void shrinkAndCopyFiles(String inputPath, String outputPath, int size) throws IOException {
+		        // Ensure TwelveMonkeys plugins are loaded
+			  
+			  if (size == 0) {
+	              size = 301;
+	          }
 
-		  MarvinImage image = MarvinImageIO.loadImage(in);
-		 //   thresholding(image, 85);
-	        scale(image.clone(), image, size);
-	        MarvinImageIO.saveImage(image, out);
-	             }
-	  }
+			  
+			  if (inputPath != null && inputPath.toLowerCase().indexOf("thrumbs") == -1) {
+		        ImageIO.scanForPlugins();
 
-	
+		        
+		        
+		        
+		        Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName("JPEG");
+		        ImageReader reader = null;
+		        while (readers.hasNext()) {
+		            ImageReader r = readers.next();
+		            if (r.getClass().getName().startsWith("com.twelvemonkeys")) {
+		                reader = r;
+		                break;
+		            }
+		        }
 
-	  public static void shrinkAndCopyFile(String in, String out, int size) throws Exception {
+		        if (reader == null) {
+		            throw new IOException("No TwelveMonkeys JPEG reader found on classpath!");
+		        }
+
+		        
+		        
+		        ImageInputStream iis = ImageIO.createImageInputStream(new File(inputPath));
+		        reader.setInput(iis);
+		        BufferedImage original = reader.read(0);
+		        iis.close();
+		        
+		        // Read image (supports CMYK, YCCK, ICC profiles automatically)
+		      //  BufferedImage original = ImageIO.read(new File(inputPath));
+		        if (original == null) {
+		            throw new IOException("Could not read image: " + inputPath);
+		        }
+
+		        // Determine orientation (portrait or landscape)
+		        boolean portrait = original.getHeight() > original.getWidth();
+		        if (portrait) {
+		            size = (int) (size * 2.0 / 3.0);
+		        }
+
+		        // Compute final dimensions
+		        int width = original.getWidth();
+		        int height = original.getHeight();
+		        double aspect = (double) width / height;
+
+		        int newWidth = size;
+		        int newHeight = size;
+		        if (width > height) {
+		            newHeight = (int) (size / aspect);
+		        } else {
+		            newWidth = (int) (size * aspect);
+		        }
+
+		        // Resize using high-quality rendering hints
+		        BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+		        Graphics2D g2d = resized.createGraphics();
+		        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		        g2d.drawImage(original, 0, 0, newWidth, newHeight, null);
+		        g2d.dispose();
+
+		        // Write output as high-quality JPEG
+		        ImageIO.write(resized, "jpg", new File(outputPath));
+
+			  }
+		    }
+
+	  
+	  
+
+	  public static void shrinkAndCopyFile2(String in, String out, int size) throws Exception {
 	      if (in != null && in.toLowerCase().indexOf("thrumbs") == -1) {
 	          if (size == 0) {
 	              size = 301;
@@ -9750,7 +9815,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 	  }
 
 	  
-	  public static void shrinkAndCopyFileOLD  (String in, String out , int size ) throws Exception {
+	  public static void shrinkAndCopyFile  (String in, String out , int size ) throws Exception {
 		   if(in != null && in.toLowerCase().indexOf("thrumbs") == -1){
 			   if(size == 0){
 				   size = 301;

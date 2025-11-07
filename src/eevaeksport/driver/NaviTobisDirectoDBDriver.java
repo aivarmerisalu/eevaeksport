@@ -642,6 +642,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 
    public Vector getPriceMatrixData(){
 
+
 	
 	  	 String    sql = "  SELECT [Sales Code] AS custid,'' AS clgroup,[Item No_] AS prodid,'' AS prodgroup, " +
             "  [Unit Price] AS price ,0 as disc, [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val from" +
@@ -673,9 +674,29 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
        Vector result = new Vector();
          try {
           
-      	   Connection con = getNewConnection2();
-   	        Statement stmt = con.createStatement();
-   	        ResultSet rs = stmt.executeQuery(sql);
+      	   
+             String sss = "  SELECT [Item No_] AS prodid, [Unit Price] AS price  from " + 
+                		"          [2015_Tobis$Sales Price] where [Starting Date] < getdate()-1  and ([Ending Date] > getdate()+1 or " + 
+                		"              year ([Ending Date]) = 1753)  and [Sales Type] = 2" ;
+                HashMap<String,Double> prices = new HashMap<String,Double>();
+                Connection	  con = getNewConnection2();
+                   	 Statement  stmt = con.createStatement();
+                   	ResultSet  rs = stmt.executeQuery(sss);
+                        while(rs.next()){
+                       	  String id = rs.getString("prodid").trim();
+                       	  Double pr = rs.getDouble("price");
+                       	  prices.put(id, pr);
+                        }
+                     
+                        rs.close();
+                        stmt.close();
+                        con.close();
+        	 
+        	 
+                        
+      	     con = getNewConnection2();
+   	         stmt = con.createStatement();
+   	         rs = stmt.executeQuery(sql);
            while (rs.next()) {
 
              String custID = Converter.enCodeEst(rs.getString("custid").trim());
@@ -721,10 +742,14 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 
              }
              if (disc != 0) {
-                 mline.setDiscount(disc);
-
+            	 if(prices.containsKey(prodID)) {
+                     mline.setPrice(prices.get(prodID));
+            	 }else {
+                     mline.setDiscount(disc); 
+            	 }
                }
-             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
+             
+             if((mline.getPrice() > 0 || mline.getDiscount() > 0) ){
                  result.add(mline);    
              }
              
@@ -3130,14 +3155,14 @@ System.out.println(cmd);
            
            String sss = "  SELECT [Item No_] AS prodid, [Unit Price] AS price  from " + 
            		"          [2015_Tobis$Sales Price] where [Starting Date] < getdate()-1  and ([Ending Date] > getdate()+1 or " + 
-           		"              year ([Ending Date]) = 1753)  and [Sales Type] = 2 " ;
+           		"              year ([Ending Date]) = 1753)  and [Sales Type] = 2" ;
          
 
            HashMap<String,Double> prices = new HashMap<String,Double>();
               	 
               	  con = getNewConnection2();
                     stmt = con.createStatement();
-                    rs = stmt.executeQuery(sql3);
+                    rs = stmt.executeQuery(sss);
                    while(rs.next()){
                   	  String id = rs.getString("prodid").trim();
                   	  Double pr = rs.getDouble("price");
@@ -3170,7 +3195,7 @@ System.out.println(cmd);
                 prod.setPrice(price);
                 
                 if(prices.get(id) != null) {
-                	prod.setPrice(prices.get(id));
+                	//prod.setPrice(prices.get(id));
                 }
                 
               if(ladutr.get(id) != null ){

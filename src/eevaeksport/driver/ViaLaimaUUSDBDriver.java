@@ -947,7 +947,10 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
     	      Iterator<org.json.simple.JSONObject> iterator = ((List) companyList).iterator();
     	      while (iterator.hasNext()) {
     	    	  org.json.simple.JSONObject cob = iterator.next();
-    	  	  
+    	    	  
+
+                  Long isProdGroup = (Long)cob.get("ITEMCODE");
+                  
                 String clGroup = (String)cob.get("ACCOUNTRELATION");
                 String prodID = (String)cob.get("ITEMRELATION");
                 double discount = 0;
@@ -975,8 +978,14 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
                        
                 }
 
-                if (prodID != null && prodID.trim().length() > 0 ) {
-                        mline.setProdID(prodID.trim());
+                if (prodID != null && prodID.trim().length() > 0) {
+                	
+                	if( isProdGroup == 0) {
+                		mline.setProdID(prodID.trim());
+                    } else {
+                	   mline.setProdGroup(prodID.trim());
+                	   
+                    }
                 }
                           mline.setDiscount(discount);
                
@@ -1954,7 +1963,27 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 			return sb.toString();
 		}
       
-
+      public TreeMap getProdGroupsSecond() throws SQLException {
+          TreeMap res = new TreeMap();
+  		if ( "TB".equals(getParent().getProps().getProperty("stockcode"))) {
+    	  ArrayList arr = new ArrayList();
+    	  try {
+			Converter.readFile(new File("prodgrsec.txt"), "UTF-8", arr);
+			for(int i = 0; i< arr.size();i++) {
+				String line = (String)arr.get(i);
+				if(line != null && line.trim().length() > 3 && line.contains(";")) {
+					res.put(line.substring(0,line.indexOf(";")), line.substring(line.indexOf(";")+1));
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+  		}
+  		System.out.println("res "+ res);
+          return res;
+    }
+      
       public TreeMap getProdGroups(){
     	  return grs;
       }
@@ -2037,18 +2066,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 			e.printStackTrace();
 		}
 		
-		if ("TB".equals(getParent().getProps().getProperty("stockcode"))) {
-			grs = new TreeMap();
-			grs.put("olu", Converter.enCodeEst("Õlu"));
-			grs.put("mahl", "Mahl");
-			grs.put("pepsi", "Pepsi");
-			grs.put("muu", "Muu");
-			grs.put("karas", "Karastusjook");
-			grs.put("siider", "Siider");
-			grs.put("vesi", "Vesi");
-			grs.put("pos", "pos");
-			grs.put("jtee", Converter.enCodeEst("Jäätee"));
-		}
+		
 		
 		
 		if(lisagrupid != null) {
@@ -2064,7 +2082,29 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 	
 	private TreeMap getGroups(){
 		 TreeMap<String, String> map = new TreeMap<>();
+		 if("true".equals(getParent().getProps().getProperty("webprodgroups"))) {
+		
+		JSONArray arr =  Converter.getWebProducts(rcompanyx, user, pass);
 
+		Converter.saveFile("webprods.json", arr.toString());
+	   //	 System.out.println("arr " + arr);
+	   	 int lennx = arr.length();
+				for (int u = 0; u < lennx; u++) {
+	        	JSONObject gr = null;
+				try {
+					gr = arr.getJSONObject(u);
+					String prodID = (String)gr.get("code");
+					JSONArray key = (JSONArray)gr.get("group");
+					JSONObject grr = (JSONObject)key.get(0);
+					String grcode = (String)grr.get("code");
+					map.put(prodID, grcode);
+				}catch(Exception e) {
+				  e.printStackTrace();	
+				}
+			//	System.out.println("map " + map);		
+				}
+		 }else {
+				
 	        try (BufferedReader br = new BufferedReader(new FileReader(getStatDir() + "tootegrupid.txt"))) {
 	            String line;
 	            while ((line = br.readLine()) != null) {
@@ -2077,7 +2117,8 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 	            }
 	        } catch (IOException e) {
 	           // e.printStackTrace();
-	        }		
+	        }	
+		 }
 		return map;
 	}
 	
@@ -3057,10 +3098,11 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 										
 										if (gr.length() > 0) {
 												prod.setGroup(gr);
+												//prod.setDiscgrupp(gr);
 												if ("TB".equals(getParent().getProps().getProperty("stockcode"))) {
-													prod.setGroup("Muud");
+													prod.setGroupSecond("Muud");
 													if(groups.get(prod.getID()) != null) {
-													prod.setGroup((String)groups.get(prod.getID()));
+													prod.setGroupSecond((String)groups.get(prod.getID()));
 													//System.out.println("TB grupp " + prod.getID() + " " + prod.getGroup());
 													}
 												}

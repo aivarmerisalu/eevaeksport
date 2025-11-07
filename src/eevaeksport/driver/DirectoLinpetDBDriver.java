@@ -1355,7 +1355,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            System.out.println("Tootegrupid tehtud" );
            //algab Hinnakirja faili moodustamine
            
-           httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=stocklevel";
+       /*    httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=stocklevel";
            myurl = new URL(httpsURL);
            con = (HttpsURLConnection)myurl.openConnection();
            ins = con.getInputStream();
@@ -1387,6 +1387,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            }
           
           System.out.println("Laoseisud tehtud" );
+          */
           try {
         	  
         
@@ -1394,6 +1395,8 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
            httpsURL = logurl  + company + "/xmlcore.asp?get=1&what=priceformula";
            myurl = new URL(httpsURL);
            con = (HttpsURLConnection)myurl.openConnection();
+           con.setConnectTimeout(200000); // 10 seconds
+           con.setReadTimeout(200000);
            ins = con.getInputStream();
            isr = new InputStreamReader(ins,"UTF-8");
            in = new BufferedReader(isr);

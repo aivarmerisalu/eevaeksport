@@ -34,6 +34,8 @@ import com.amazonaws.services.s3.model.ListVersionsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.S3VersionSummary;
 import com.amazonaws.services.s3.model.VersionListing;
@@ -206,7 +208,7 @@ public class FileSender {
 	        if(this.getOrders) {
 	            ObjectListing objects = s3Client.listObjects(bucketName, stringObjKeyName);
 	            log(time + " Starting session download file from AWS" );
-	    	        for (S3ObjectSummary objectSummary : objects.getObjectSummaries())  {
+	    	       /* for (S3ObjectSummary objectSummary : objects.getObjectSummaries())  {
 	    	        	 if(!objectSummary.getKey().equals(stringObjKeyName)) {
 	    	            String keyy = objectSummary.getKey();
 	    	        		 String filen = dirIn + keyy.substring(keyy.lastIndexOf("/")+1);
@@ -222,7 +224,35 @@ public class FileSender {
 	    	            log(time + " Deleting file from AWS : " + objectSummary.getKey());
 	    	            System.out.println(time + " Deleting " + objectSummary.getKey());
 	    	            }	 
-		           }  
+		           } */
+	            
+	            for (S3ObjectSummary objectSummary : objects.getObjectSummaries()) {
+	                if (!objectSummary.getKey().equals(stringObjKeyName)) {
+	                    String key = objectSummary.getKey();
+	                    String fileName = dirIn + key.substring(key.lastIndexOf("/") + 1);
+	                    File localFile = new File(fileName);
+
+	                    try (S3Object s3Object = s3Client.getObject(bucketName, key);
+	                         S3ObjectInputStream s3is = s3Object.getObjectContent()) {
+
+	                        FileUtils.copyInputStreamToFile(s3is, localFile);
+	                        long fileSize = localFile.length();
+
+	                        if (fileSize > 0) {
+	                            log(time + " Downloaded file from AWS: " + fileName + " (" + fileSize + " bytes)");
+	                            s3Client.deleteObject(bucketName, key);
+	                            log(time + " Deleted file from AWS: " + key);
+	                        } else {
+	                            log("⚠️ Warning: Downloaded file " + fileName + " is 0 bytes. Skipping delete.");
+	                        }
+
+	                    } catch (Exception e) {
+	                        log("❌ Error downloading key " + key + ": " + e.getMessage());
+	                        e.printStackTrace();
+	                    }
+	                }
+	            }
+
 	    	        
 	    	        if(catalogueLOG != null ) {
 	    	        	objects = s3Client.listObjects(bucketName, stringObjKeyNameLOG);

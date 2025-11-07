@@ -349,47 +349,7 @@ public class B1LTDBDriver extends AbstractDBDriver implements BulkUpdater,Discou
 
    public Vector getDebt(String agentCode){
 			  Vector tm = new Vector();
-			/*	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
-		  	
-				org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
-				
-				  int lenn = values.size();
-				try {
-				  for (int i = 0; i < lenn; i++) {
-						org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-		        		String number = (String) cob.get("number");
-			        	String date =(String) cob.get("invoiceDate");
-			        	String duedate = (String) cob.get("dueDate");
-			        	Double volg = Double.parseDouble(cob.get("remainingAmount") + "");
-			        	String payer = (String) cob.get("billToCustomerNumber");
-			        	String custid = (String) cob.get("customerNumber");
-					  
-
-
-       		     Debt dd = new Debt();
-				  dd.setCustID(custid);
-				  dd.setPayerID(payer);
-				  dd.setDoknr(number);
-				  dd.setDate(getDate(date));
-				  dd.setDuedate(getDate(duedate));
-				  
-				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
-				  dd.setDue(ff + "");
-				  dd.setSum(volg);
-				//	System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " +ff);	
-
-				 tm.add(dd);
-
-		        		
-		          	}
-				  
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
-		System.out.println("Debtsize " + tm.size());
-
-		  */
+		
 
 	     return tm;
 	   }
