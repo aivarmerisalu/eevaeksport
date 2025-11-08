@@ -971,7 +971,8 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
                                 && clGroup.trim().length() > 0) {
                 	clGroup = clGroup.trim();
                        // mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()).substring(0, clGroup.trim().length() - 2));
-                       mline.setDiscGroup(clGroup);
+                   //    mline.setDiscGroup(clGroup);
+                       mline.setCliGroup(clGroup);
                         if(!pmCodes.contains(clGroup)) {
                         	 pmCodes.add(clGroup);	
                         }
@@ -983,7 +984,8 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
                 	if( isProdGroup == 0) {
                 		mline.setProdID(prodID.trim());
                     } else {
-                	   mline.setProdGroup(prodID.trim());
+                	 //  mline.setProdGroup(prodID.trim());
+                	   mline.discGroup = prodID.trim();
                 	   
                     }
                 }

@@ -1412,18 +1412,24 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		                         obj.put("inventoryItemCode", code);
 		                        // Date contract = rs1.getDate("contract");
 		                        // obj.put("contractDate",contract.getTime() );
+
+		                         if(code.equals("VIK1401")) {
+		                        	 System.out.println("VIK1401 " + asses.contains(code));
+		                         }
+		                         
+		                         String olemas = (String)asscusts.get(code);
+	                        	 
 		                         String custcode = rs1.getString("custcode").trim();
 		                         
 		                         String kl = rs1.getString("kl");
 		                         String ad2 = rs1.getString("ad2");
-		                         if(kl != null) {
+		                         if(kl != null && kl.trim().length() > 0) {
 		                         obj.put("customerCode",  custcode  + "_" + kl.trim());
 		                         
 		                       
 		                         if(asses.contains(code) && custs.contains(custcode + "_" + kl.trim()) ){
-		                        	  String olemas = (String)asscusts.get(code);
 		                        	  if(olemas != null){
-		                        		  if(!olemas.equals(custcode)){
+		                        		  if(!olemas.equals(custcode + "_" + kl.trim())){
 		                        			   vec.add(obj);  
 		                                       cou++; 
 		                        		  }
@@ -1431,15 +1437,22 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 			                       		   vec.add(obj);  
 	                                       cou++; 
 	                        		    }
+		                        	  
+
+				                         
 		                          }
+		                         
+		                         if(code.equals("VIK1401")) {
+		                        	 System.out.println("VIK1401 kl " + asses.contains(code) + " " + olemas);
+		                         }
 		                       } else  if(ad2 != null && ad2.trim().length() > 0) {
 			                         obj.put("customerCode",  custcode  + "_" + ad2.trim());
 			                         
-				                       
+
 			                         if(asses.contains(code) && custs.contains(custcode + "_" + ad2.trim()) ){
-			                        	  String olemas = (String)asscusts.get(code);
+			                        	 
 			                        	  if(olemas != null){
-			                        		  if(!olemas.equals(custcode)){
+			                        		  if(!olemas.equals(custcode + "_" + ad2.trim())){
 			                        			   vec.add(obj);  
 			                                       cou++; 
 			                        		  }
@@ -1448,6 +1461,10 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	                                       cou++; 
 	                        		    }
 			                          }
+
+			                         if(code.equals("VIK1401")) {
+			                        	 System.out.println("VIK1401 ad2 " + asses.contains(code) + olemas);
+			                         }
 			                       }
 		                         
 		                  }
