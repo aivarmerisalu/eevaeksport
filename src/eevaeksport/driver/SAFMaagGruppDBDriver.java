@@ -667,7 +667,7 @@ String cmd = "SELECT kl.id FROM grcompany kl " +
 		  "  INNER JOIN grarticle t ON t.id= r.idgrarticle  " +
 		  "	LEFT JOIN grarticleCatrel cat ON cat.idgrarticle=t.id " +
 		  "    WHERE d.docdate >='2025-04-01 00:06:49.340'  "+
-		  "    AND cat.idgrarticlecat = 116 GROUP BY d.idgrcompany,t.code HAVING SUM(r.quantity) != 0 and sum(r.amount)!= 0 ORDER BY  d.idgrcompany,t.code";
+		  "    AND cat.idgrarticlecat = 901 GROUP BY d.idgrcompany,t.code HAVING SUM(r.quantity) != 0 and sum(r.amount)!= 0 ORDER BY  d.idgrcompany,t.code";
  	  
  	  ResultSet rs = st.executeQuery(cmd);
  	  while(rs.next()){

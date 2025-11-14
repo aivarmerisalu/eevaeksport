@@ -1,12 +1,16 @@
 package eevaeksport.driver;
 
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.net.URLEncoder;
 
 import java.nio.charset.StandardCharsets;
@@ -26,6 +30,12 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
+import javax.net.ssl.HttpsURLConnection;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -44,6 +54,8 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -1525,6 +1537,7 @@ private HashSet grinUse = new HashSet();
 private HashSet prodsInUse = new HashSet();
 private HashSet custInUse = new HashSet();
 private HashMap pictsLink = new HashMap();
+private HashSet allProdIds = new HashSet();
 
 
 
@@ -1611,13 +1624,15 @@ public TreeMap getProducts(Agent agent) {
           	
           	String fname = (String)cob.get("image_filename") ;
           	if(fname != null && fname.trim().length() > 4) {
-          		pictsLink.put(prod.getID() , fname);
+          		pictsLink.put(number , fname);
           		
+          	} else {
+          	  	allProdIds.add(number);
           	}
           		
             
            	  tm.put(prod.getName(), prod);	
-            
+         
           	}
 		  
 		} catch (Exception e) {
@@ -1632,6 +1647,11 @@ System.out.println("Imagelinks " + pictsLink.size());
    return tm;
 }
 
+private void addWebShopLinks(TreeMap prods) {
+	
+	
+	
+}
 
 
 @Override
@@ -1642,7 +1662,8 @@ public void PictureMaker() {
 	   
 		    String link = "http://kontor.rahvaraamat.ee/pildid_backup/";
 		    
-		     this.getProducts(null);
+		     TreeMap prods = this.getProducts(null);
+		     
 
 		     StringBuffer buf = new StringBuffer();
 		    
@@ -1652,8 +1673,10 @@ public void PictureMaker() {
 	      if (f.exists())f.delete();
 	      //Vaatame kas on vaja allalaadida
 	      
-	  	 	 	
-	     	Iterator enume2 = pictsLink.keySet().iterator();
+	      HashSet pictExists = new HashSet();
+ // pictsLink = new HashMap();
+	     	
+	       Iterator enume2 = pictsLink.keySet().iterator();
 	   	      while (enume2.hasNext()) {
 	   	         String toode = (String)enume2.next();
 	   		     String fname  = (String)pictsLink.get(toode);
@@ -1672,11 +1695,53 @@ public void PictureMaker() {
 	            			Converter.shrinkAndCopyFile(gg,dest,200);
 	            		}
 	            		if(dest.length() > 0) {
+	            			pictExists.add(toode);
 	            		if(buf.toString().indexOf(fname +";"  + dest.length()) == -1){
 	                		buf.append(fname + ";"  + dest.length() + "\n");
 	                	}
 	            		}
 	           }
+	   	      
+	   	      // siin on otsesysteemi pildid laetud alla.
+	   	      //nüüd lisame webipoets puuduvad.
+	   	      
+	   	   Iterator itera = allProdIds.iterator();
+	   	      while(itera.hasNext()) {
+	   	    	  String prodID = (String)itera.next();
+	   	    	  if(!pictExists.contains(prodID)) {
+	   	    	File dest =  new File(pictspda + prodID+ ".jpg");
+	   	    
+	   	    	
+        		if(!dest.exists()) {
+        			  try {
+        			String url = "https://web.rahvaraamat.ee/product/images?nav_product_code=" + prodID;
+        			 String xml = fetchXml(url);
+        			 String ur = parseImagesXml(xml);
+        			 if(ur != null) {
+        			  Converter.downloadFile(ur, pictssou + prodID+ ".jpg");
+        			 
+        			  if(!dest.exists() ) {
+        					File gg =  new File(pictssou + prodID+ ".jpg");
+	            			Converter.shrinkAndCopyFile(gg,dest,200);
+	            		}
+        			  }
+        			  } catch(Exception e) {
+        				  e.printStackTrace();
+        			  }
+        		}
+	   	      
+	   	       if(dest.exists()) {
+	   	    	if(dest.length() > 0) {
+        			pictExists.add(prodID);
+        		if(buf.toString().indexOf(prodID+ ".jpg" +";"  + dest.length()) == -1){
+            		buf.append(prodID+ ".jpg" + ";"  + dest.length() + "\n");
+            	}
+        		} 
+	   	       }
+	   	      // System.exit(0);
+	   	    	  }
+	   	      }
+	   	      
 	    
 	     try {
 	 		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
@@ -1692,6 +1757,60 @@ public void PictureMaker() {
 		 
 	System.exit(0);
 	
+}
+
+
+ 
+public String parseImagesXml(String xml) throws Exception {
+	//System.out.println(xml);
+	String res = null;
+     JSONParser parser = new JSONParser();
+    JSONObject ob = (JSONObject) parser.parse(xml);
+     JSONArray ims = (JSONArray)ob.get("images");
+ 	int lenn = ims.size();
+ 	  
+ 	try {
+ 	  for (int i = 0; i < lenn; i++) {
+ 		org.json.simple.JSONObject cob = (org.json.simple.JSONObject) ims.get(i);
+ 		String type = (String) cob.get("type");
+ 		if(type.equals("product_image")){
+ 			JSONObject urls = (JSONObject) cob.get("urls");
+ 			
+ 			res = (String)urls.get("main");
+ 			
+ 		}
+ 	  }
+ 	} catch(Exception e) {
+ 		e.printStackTrace();
+ 	}
+ 	//System.out.println(res);
+   
+    return res;
+}
+
+public String fetchXml(String urlStr) throws Exception {
+    URL url = new URL(urlStr);
+    HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+    conn.setRequestMethod("GET");
+    conn.setConnectTimeout(10_000);
+    conn.setReadTimeout(10_000);
+
+    int status = conn.getResponseCode();
+    if (status != HttpsURLConnection.HTTP_OK) {
+        throw new RuntimeException("Failed to fetch XML: HTTP status " + status);
+    }
+
+    try (InputStream in = conn.getInputStream();
+         BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+        return sb.toString();
+    } finally {
+        conn.disconnect();
+    }
 }
 
 

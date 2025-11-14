@@ -2669,7 +2669,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
      		String visit = st.nextToken();
      		if (visit != null && visit.trim().length()>0){
      			
-     			if(abi.hasAgent("TAL51") || abi.hasAgent("RAU51") || abi.hasAgent("LAA51") || abi.hasAgent("POH51") || abi.hasAgent("PAR51")) {
+     			if(abi.hasAgent("KIR51")  || abi.hasAgent("TAL51") || abi.hasAgent("RAU51") || abi.hasAgent("LAA51") || abi.hasAgent("POH51") || abi.hasAgent("PAR51")) {
          			abi.setVisit((visit));		
      			}else {
      				abi.setVisit(Converter.visitTurn(visit));	// 

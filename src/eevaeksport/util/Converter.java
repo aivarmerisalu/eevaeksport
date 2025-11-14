@@ -936,7 +936,7 @@ public class Converter {
 		    HttpConnectionParams.setSoTimeout(httpParams, 10000);
 			HttpClient  httpclient = new DefaultHttpClient(httpParams);
 			HttpGet httpGet= new HttpGet(ur.toString());
-			System.out.println("url " + ur.toString());
+			System.out.println("url " + ur.toString() + " fn:" + filename);
 			HttpResponse resp = httpclient.execute(httpGet);
 			InputStream is = resp.getEntity().getContent(); 
 			
@@ -1437,7 +1437,7 @@ public class Converter {
                                 
                                  
                                  if(value.trim().length() > 0 && (value.trim().equals("PS") || value.trim().equals("HK") )) {
-                                 	 System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
+                                 	// System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
                                  
 							if(res.get(pood) != null){
                      	  con = (Contract)res.get(pood);
@@ -2345,7 +2345,7 @@ public class Converter {
 
 									String group = groupt.substring(old,a);
 									old = a;
-									System.out.println("Sees " +a + " " + group + " " + ean);
+									//System.out.println("Sees " +a + " " + group + " " + ean);
 									
 					if (group != null && group.trim().length() > 0) {
 							 
@@ -2470,7 +2470,7 @@ public class Converter {
 								String ean = getNumeric(formatter.formatCellValue(row.getCell(ea)));
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
-								System.out.println("Sees " + ean + " " + toode );
+							//	System.out.println("Sees " + ean + " " + toode );
 							  if(toode.equals(ean)) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Prisma formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
@@ -2611,7 +2611,7 @@ public class Converter {
 								if(ean.length() > 13) {
 									ean = ean.substring(1);
 								}
-								 System.out.println("Sees  '" + ean + "'" + formatter.formatCellValue(row.getCell(ea)).trim());
+							//	 System.out.println("Sees  '" + ean + "'" + formatter.formatCellValue(row.getCell(ea)).trim());
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
 							 
@@ -3323,7 +3323,7 @@ public class Converter {
                        
                         
                         if(value.trim().length() > 0 && value.trim().toLowerCase().equals("1")) {
-                        	 System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
+                        	// System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
                         
 							if(res.get(pood) != null){
             	                 con = (Contract)res.get(pood);
@@ -3674,7 +3674,7 @@ public class Converter {
 										
 										Contract con = new Contract(pood);
 										
-										 System.out.println("Sees " + pood + " " + ean);
+										// System.out.println("Sees " + pood + " " + ean);
 
 										  
 										if(res.get(pood) != null){
@@ -3722,7 +3722,7 @@ public class Converter {
 							 String value =  formatter.formatCellValue(row.getCell(0));
                        
                         
-                        	 System.out.println("Sees "  + " " + value + " " + ean + " " + pood);
+                        	// System.out.println("Sees "  + " " + value + " " + ean + " " + pood);
                         
 							if(res.get(pood) != null){
             	                 con = (Contract)res.get(pood);
@@ -3775,6 +3775,7 @@ public class Converter {
 						 int eanp = 6;
 						 int tnim = 8;
 						 int seis = 0;
+						 int poo = 0;
 						 XSSFRow rowu = sheet.getRow(0);
 						 String pais = formatter.formatCellValue(rowu.getCell(0));
 						 if (pais.equals("Kauplus")) {
@@ -3811,22 +3812,40 @@ public class Converter {
 							 if(pais.equals("Seisund")) {
 								 seis = 7;
 							 }
+							 pais = formatter.formatCellValue(rowu.getCell(13));
+							
+							 
+							 
 						 }
 						 
 						 
 						 pais = formatter.formatCellValue(rowu.getCell(1));
 						 if (pais.equals("Kauplus")) {
 							 u = 1;
+							 poo = 1;
 							 pais = formatter.formatCellValue(rowu.getCell(2));
 							 if(pais.equals("EAN")) {
 								 eanp = 2;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(3));
+							 if(pais.equals("EAN")) {
+								 eanp = 3;
 							 }
 							 
 							 pais = formatter.formatCellValue(rowu.getCell(3));
 							 if(pais.equals("Nimetus")) {
 								 tnim = 3;
 							 }
+							 pais = formatter.formatCellValue(rowu.getCell(4));
+							 if(pais.equals("Toote nimetus")) {
+								 tnim = 4;
+							 }
 							  seis = 0;
+							  pais = formatter.formatCellValue(rowu.getCell(13));
+							//  System.out.println("pais " + pais + " "+pais.equals("Sortimendi muudatus"));
+								 if(pais.equals("Sortimendi muudatus")) {
+									 seis = 13;
+								 }
 							 
 						 }
 						 
@@ -3923,7 +3942,7 @@ public class Converter {
 						 }
 						 
 
-						 int poo = 0;
+						
 						 
 						try { 
 						 pais = formatter.formatCellValue(rowu.getCell(2));
@@ -4047,7 +4066,7 @@ public class Converter {
 							Boolean seisund = true;
 							if(seis != 0 ) {
 								String snimi = formatter.formatCellValue(row.getCell(seis));
-								if(!snimi.equals("Sortimendis") && !snimi.equals("Toote hankimine")) {
+								if(!snimi.equals("Sortimendis") && !snimi.equals("Toote hankimine")  && !snimi.equals("Lisatud sortimenti")) {
 									seisund = false;
 								}
 								
@@ -4338,7 +4357,7 @@ public class Converter {
 							Contract con = new Contract(pood);
 							String toode = getToode(prods,ean);
 							// if(ean.equals("4744136010477"))
-						System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
+						//System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
 							  if(toode.equals(ean) && !toode.equals("EAN")) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted SUGG sortimendis\n Coop formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
@@ -4806,6 +4825,9 @@ public class Converter {
 								cellx = row.getCell((short)0);
 								try {
 									if(cellx != null) {
+										if(formatter.formatCellValue(cellx).indexOf("Abja") != -1 ) {
+											return "coop";
+										}
 										if(formatter.formatCellValue(cellx).indexOf("Maksimarket") != -1 ) {
 											return "coop";
 										}
@@ -4813,7 +4835,7 @@ public class Converter {
 											return "coop";
 										}
 										
-										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 || formatter.formatCellValue(cellx).indexOf("Material") != -1
+										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 || formatter.formatCellValue(cellx).indexOf("Material de") != -1
 												 || formatter.formatCellValue(cellx).indexOf("Kauba koodde") != -1 ) {
 
 											System.out.println("xx00 " +formatter.formatCellValue(cellx));	
@@ -5099,7 +5121,7 @@ public class Converter {
 	}
 	
 	
-	public static void sendReportEmail(String comment1 , String fileName, EksportPanel parent ){
+	public static void sendReportEmail(String comment1 , String fileName, EksportPanel parent, String email ){
 	   	try{
 	   		String comment = null;
 	   		String sub = "";
@@ -5152,6 +5174,10 @@ public class Converter {
 		  	  	    mail.setFilesTo(tt);
 		  	  		mail.send(); 
 		  	  	// System.out.println("Mail saadetud " + tt);
+		  	  	 }
+		  	  	 if(email != null) {
+		  	  	    mail.setFilesTo(email);
+		  	  		mail.send(); 
 		  	  	 }
 		 	}
 		  	
@@ -12838,7 +12864,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		  String fname = exceldir +  rcompany + "report" + stDay + ".csv";
 //System.out.println("Faili salvestus " + exceldir +  rcompany + "report" + stDay + ".csv");
 			saveFileInUTF8(fname,sb);
-			Converter.sendReportEmail("Dayreport weekly report", fname, parent);
+			Converter.sendReportEmail("Dayreport weekly report", fname, parent,null);
 			
 		  
 	     } catch (Exception e){

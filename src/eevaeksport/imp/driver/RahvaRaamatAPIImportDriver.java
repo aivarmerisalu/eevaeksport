@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
@@ -20,6 +21,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 import eevaeksport.Agent;
 import eevaeksport.Customer;
+import eevaeksport.EksportFrame;
 import eevaeksport.Product;
 import eevaeksport.driver.Toode;
 import eevaeksport.imp.ImportPanel;
@@ -92,17 +94,28 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
          komm =  "Kommentaar : " + order.getInfo();
     }
     
+	Properties props = new Properties();
+	try {
+		props = EksportFrame.loadProps("emailsreturn.txt");
+    	} catch (Exception e) {
+		   e.printStackTrace();
+	   }
+	
+          String emailto = (String)props.get(order.getAgent());
+
     
     HashMap st = (HashMap)poeStock.get(order.getCompany());
 	
     
     String agnimi = ((Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(order.getAgent())).getName();
+    
+    
     String name = getKliendiNimi(order.getCompany());
     	String text = " " + name +  "|Tellimuse number: " + order.getDokNr() +  "\nKlient : " + name + " " + order.getCompany() +
     			 "\nAgent: " + agnimi + "\n\n" 
     			 + getOrderText(order,names,eans,st) + "\n" + komm ;   
     	
-    	Converter.sendReportEmail(text, null, parent.getEksportFrame().getEksportPanel());
+    	Converter.sendReportEmail(text, null, parent.getEksportFrame().getEksportPanel(),emailto);
     	this.setNumAddedLines(order.getOrderLines().size());
  }
   

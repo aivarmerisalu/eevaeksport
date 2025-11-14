@@ -1022,7 +1022,7 @@ System.out.println("no data to save");
 		 
 			  tekst = "Out Of Stock Report CHAIN ";
 		
-		  Converter.sendReportEmail(tekst, fname, parent);
+		  Converter.sendReportEmail(tekst, fname, parent,null);
 	  }
 	  
 	  
@@ -1082,7 +1082,7 @@ System.out.println("no data to save");
 		  }else {
 			  tekst = "Distribution Problems Report";
 		  }
-		  Converter.sendReportEmail(tekst, fname, parent);
+		  Converter.sendReportEmail(tekst, fname, parent,null);
 	  }
 	  
 	  

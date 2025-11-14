@@ -717,13 +717,7 @@ HashSet olemas = new HashSet();
     
     public TreeMap getCustomers(Agent agent){
     	
-     //	 TreeMap webmerc1 =  Converter.getWebMercagents(rcompanyx, user, pass,false,"ANDREJ");
     
-    	 try{
-      	//   Converter.getManagersReplacements(agents1, rcompanyx, user , pass, false);
-         } catch(Exception e){
-         	e.printStackTrace();
-         }
     	
     	 TreeMap<String, String> logistics = getRoutes(); 
     	 
@@ -808,9 +802,10 @@ HashSet olemas = new HashSet();
             Calendar cal = Calendar.getInstance();
           String date =  Converter.getYYYYmMMmDDmString(cal.getTime());
             sql =
-                    " select i06_kodas_ks as klient, i06_pav, sum( case when i06_op_tip=52 then -1 else 1 end * i07_alt_kiekis/i07_alt_frak) as Kiekis, SUM(i07_suma+i07_pvm) as Skola \r\n" + 
-                    "from I06_PARH inner join I07_PARD on i06_kodas_po=i07_kodas_po where I06_OP_DATA < '" + date+ "' and i06_op_tip in('51','52') and i07_kodas in ('022','023') \r\n" + 
-                    "group by i06_kodas_ks, i06_pav ";
+                    " select i06_kodas_ks as klient, i06_pav, sum( case when i06_op_tip=52 then -1 else 1 end * i07_alt_kiekis/i07_alt_frak) as Kiekis, sum(case when i06_op_tip=52 then -1 else 1 end *(i07_suma+i07_pvm)) as Skola \r\n" + 
+                    "from I06_PARH inner join I07_PARD on i06_kodas_po=i07_kodas_po where I06_OP_DATA < '" + date+ "' and i06_op_tip in('51','52') and i07_kodas in " + 
+                    " ('022','023','032','029','030','025','026','027','028','024','031') group by i06_kodas_ks, i06_pav ";
+           
 
                 stmt = con.prepareStatement(sql);
                  //stmt.setInt(1, Integer.parseInt(agent.getID()));

@@ -4496,7 +4496,7 @@ private void makeNewCustExcel() {
      	 	
      	   for(String fname : filenames) {
      		  String tekst =  "Out Of Stock Report by CHAIN";
-     		  Converter.sendReportEmail(tekst, fname, parent);
+     		  Converter.sendReportEmail(tekst, fname, parent,null);
      	  }
      	  
      	

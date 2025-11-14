@@ -1008,6 +1008,9 @@ public TreeMap getProducts(Agent agent) {
           		prod.weblink = weblink + prod.getID();
           	}
              
+          	
+          	prod.setVat("24");
+          	
             if(!blocked) {
             	  tm.put(prod.getName(), prod);	
             }

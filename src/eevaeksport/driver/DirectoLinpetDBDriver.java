@@ -2873,6 +2873,12 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
       		goes = false;
       	}
       	
+      	if( "true".equals(getParent().getProps().getProperty("merisoft.only"))){
+      		goes = false;
+      		if(line.indexOf("MERISOFT\" content=\"YES\"") != -1){
+          		goes = true;
+          	}
+      	}
      
       	    if(goes ){
       	    	if(!usedGroups.contains(prod.getGroup())){
