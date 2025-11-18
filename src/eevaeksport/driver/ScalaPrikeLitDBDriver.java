@@ -1624,14 +1624,33 @@ return bomKount;
     public TreeMap getProducts(Agent agent){
         connectionUp(url);
         String opt = getParent().getProps().getProperty("optimumAmountProducts");
-        HashSet opts = new HashSet();
+        HashMap opts = new HashMap();
         if(opt != null) {
         	StringTokenizer st = new StringTokenizer(opt,",");
         	while(st.hasMoreTokens()) {
-        		opts.add(st.nextToken());
+        	//	opts.add(st.nextToken());
         	}
         }
+        
+        String sql = "SELECT  ProductCode  as prodid, QtyInBox AS jagaja  FROM QtyMultipliers0500 where  ClientCode = 'Any'";
 
+    	try {
+            Statement st = con.createStatement();
+  	    ResultSet	      rs = st.executeQuery(sql);
+
+  	    while (rs.next()) {
+  		String kood = rs.getString("prodid").trim();
+  		Double jagaja = rs.getDouble("jagaja");
+  		if(jagaja > 0) {
+  		 opts.put(kood, jagaja);
+  		}
+  	    }
+  	    st.close();
+  	    rs.close();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+        
 		  if(poscomm == null) {
 			  poscomm =  readPosExcel() ;
 		  }
@@ -1710,8 +1729,8 @@ return bomKount;
                 }
                 prod.setStock(0);
                 prod.setInCases(parseDouble(rs.getString("tykke").trim()));
-                if(opts.contains(prod.getID())) {
-                	prod.setOptAmountInUnits(prod.getInCases());
+                if(opts.get(prod.getID()) != null) {
+                	prod.setOptAmountInUnits((Double)opts.get(prod.getID()));
                 }
                
                 if(girteka){

@@ -246,10 +246,21 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	      	String custgr = (String)cob.get("customer_group");
 	      	String payer = (String)cob.get("payer");
 	      	String prodid = (String)cob.get("product_code");
-	      	Double sPrice = Double.parseDouble("" +cob.get("campaign_pricestick_price"));
-
-	      	Double price = Double.parseDouble("" +cob.get("campaign_sales_price"));
+	      	Double sPrice = null ;
+	      	try {
+	      	sPrice = Double.parseDouble("" +cob.get("campaign_pricestick_price"));
+	      	} catch(Exception e) {
+	      		
+	      	}
 	      	
+	      	
+	      	Double price = null;
+	      	try {
+	      price = 	Double.parseDouble("" +cob.get("campaign_sales_price"));
+	      	
+} catch(Exception e) {
+	      		
+	      	}
 	    	String cName = (String)cob.get("campaign_name");
 	      
 	      	Long isCamp = (Long)cob.get("is_campaign");
@@ -275,14 +286,23 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
       	    	}
       	    mline.setStartDate(startDateA);
       	    mline.setEndDate(endDateA + add );
-      	    mline.setLineinfo(cName + " (" + sPrice + "€)");
-      	    mline.setPrice(price);
-      	     } else {
-      	    	mline.setDiscount(0);
+      	    String ww = "";
+      	    if(sPrice != null) {
+      	    	ww = " (" + sPrice + "€)";
       	    }
+      	    mline.setLineinfo(cName + ww);
+      	    if(price != null) {
+      	    mline.setPrice(price);
       	    
-      	  //  System.out.println(mline.getStartDate() + " " + mline.getEndDate() + " " + mline.getCliGroup() );
       	    lines.add(mline);
+      	    }
+      	     } else {
+      	    	//mline.setDiscount(0);
+      	    	//lines.add(mline);
+      	     }
+      	    
+      	 //   System.out.println(mline.getStartDate() + " " + mline.getEndDate() + " " + mline.getCliGroup() );
+      	    
 	     }
       }
 	}catch(Exception e) {
@@ -325,15 +345,21 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	   itera =  returnList.keySet().iterator();
 	  while(itera.hasNext()) {
 		  String custID = (String)itera.next();
-		  HashMap sisu = (HashMap)returnList.get(custID);
+		  TreeMap sisu = (TreeMap)returnList.get(custID);
 	
 		  Iterator iterax =  sisu.keySet().iterator();
 		  while(iterax.hasNext()) {
-			  String prodid = (String) iterax.next();
-			  MatrixLine mline = new MatrixLine();
-			  mline.setProdID(prodid);
-			  mline.setCliGroup(custID);
-			  res.add(mline);
+			  String prodid = ((String) iterax.next());
+			//  Paneme ainult sorditud kaasa 
+			  if(prodid.contains("|")) {
+				 // System.out.println(custID + " " + prodid);
+				  prodid = prodid.substring(prodid.indexOf("|")+1);  
+
+				  MatrixLine mline = new MatrixLine();
+				  mline.setProdID(prodid);
+				  mline.setCliGroup(custID);
+				  res.add(mline);
+			  }
 		  }
 		
 		  
@@ -666,144 +692,6 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	  
   }
        
-       private TreeMap getRouting() {
-    	  
-    	   TreeMap rr = new TreeMap();
-    	   File f = new File(this.getExcelDir() + "Contactplan.xlsx");
-		
-		try {
-			
-	       if(f.exists()){
-			
-//Teeme kuupäeva alati nädala päevaks kui on laup pühap siis lükkame edasi
-	    
-	    		/*   String calKuu = "Jaanuar";
-	    	   if(cal.get(Calendar.MONTH) == 1) {
-	    		   calKuu = "Veebruar";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 2) {
-	    		   calKuu = "Märts";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 3) {
-	    		   calKuu = "Aprill";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 4) {
-	    		   calKuu = "Mai";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 5) {
-	    		   calKuu = "Juuni";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 6) {
-	    		   calKuu = "Juuli";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 7) {
-	    		   calKuu = "August";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 8) {
-	    		   calKuu = "September";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 9) {
-	    		   calKuu = "Oktoober";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 10) {
-	    		   calKuu = "November";
-	    	   }
-	    	   if(cal.get(Calendar.MONTH) == 11) {
-	    		   calKuu = "Detsember";
-	    	   }
-	    	   */
-	     Calendar cal = Calendar.getInstance();
-	    	   cal.setFirstDayOfWeek(Calendar.MONDAY);
-	    	   if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-	    		   cal.add(Calendar.DAY_OF_MONTH, 1);
-	    	   }
-	    	  
-	    	   if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-	    		   cal.add(Calendar.DAY_OF_MONTH, 2);
-	    	   }
-	    	   
-	    	   int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-	    	   
-	    
-	    	   
-			FileInputStream ff = new FileInputStream(f);
-			XSSFWorkbook workbook = new XSSFWorkbook((ff));
-			XSSFSheet sheet = workbook.getSheetAt(0);
-			DataFormatter formatter = new DataFormatter();
-
-			int jooksevPaevCell = 0;
-			int jooksevPaev = 0;
-			int jooksevNadalaPaev = 0;
-			
-
-			//otsime tänase päeva ja peame meeles
-			 XSSFRow row = sheet.getRow(1);
-			
-				for (int w = 9; w < row.getLastCellNum(); w++) {
-				
-				String paev = null;
-				try {
-					paev = formatter.formatCellValue(row.getCell((short) w)).trim();
-					
-					int day = Integer.parseInt(paev);
-					if(day == cal.get(Calendar.DAY_OF_MONTH)) {
-						jooksevPaevCell = w;
-						jooksevPaev = cal.get(Calendar.DAY_OF_MONTH);
-						jooksevNadalaPaev = cal.get(Calendar.DAY_OF_WEEK)-1; //siis on 1 esmaspäev
-					}
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				}
-				
-				// nüüd on vaja leida selle kuu jooksev päev ja sealt + 7 päeva sisse lugeda
-			//	System.out.println("jooksev Päev " + jooksevPaevCell + " " + jooksevPaev + " " + jooksevNadalaPaev);
-
-				for (int i = 2; i < sheet.getLastRowNum(); i++) {
-					row = sheet.getRow(i);
-					if(row != null) {
-					String custID = formatter.formatCellValue(row.getCell((short) 0));
-					int kuniLaup = 6-jooksevNadalaPaev;
-					
-					for (int u = jooksevPaevCell;  u < jooksevPaevCell + kuniLaup ; u++) {
-					String pluss = formatter.formatCellValue(row.getCell((short) u)).trim();
-					if(pluss.equals("+")) {
-
-					//	System.out.println("jooksev Päev2 " + jooksevNadalaPaev + " " + (u - jooksevPaevCell));
-					
-				      // käime kuni reedeni välja aga mitte kaugemale 		
-						
-					  int pp = u-jooksevPaevCell;
-					  String aa = "E";
-					  if(pp == 1) {  aa = "T";}
-					  if(pp == 2) {  aa = "K";}
-					  if(pp == 3) {  aa = "N";}
-					  if(pp == 4) {  aa = "R";}
-					  
-
-					//	System.out.println("jooksev Päev3  " + " " + pp + " " + custID);
-					  
-					  if(rr.get(custID) != null) {
-						  rr.put(custID, rr.get(custID) + aa);
-					    } else {
-						  rr.put(custID, aa);
-					  }
-					 }
-					}
-				   
-				  }
-				}
-	     }
-	 
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-    	  // System.out.println(rr.toString());
-    	 //  System.exit(0);
-    	   return rr;
-       }
-       
        
        private HashMap<String, String> locations = null; 
        
@@ -814,7 +702,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	     downloadData(null);
 	   }
 	   
-	   TreeMap routes = getRouting();
+	//   TreeMap routes = getRouting();
 	   
 	 //  System.exit(0);
 	   
@@ -855,10 +743,10 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	            Customer cust = new Customer(number);
 	            cust.addFixSortCode(number);
 	            
-	            if(routes.get(number)!= null) {
-	            	cust.setVisit(routes.get(number)+"");
+	          //  if(routes.get(number)!= null) {
+	            //	cust.setVisit(routes.get(number)+"");
 	            	//System.out.println(cust.getVisit() + " " + cust.getID());
-	            }
+	            //}
 	                  
 	            cust.setName((String)cob.get("name"));
 	            
@@ -1069,6 +957,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
          				}
          				prodId = prodId.trim();
  	        	
+         				
          				boolean gg = false;		
          				
 	         		Toode tt = new Toode(prodId);
@@ -1099,8 +988,15 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
         	 gg = true;
         	 }
      }
-	    
+    // if(cuCode.equals("K802755")) { //10ETKKOKOS
+		// System.out.println("ABCD välja " + prodId + " " + cuCode + " " + gg ); 
+	 //}
 
+     
+     if( gg && !prodsInUse.contains(prodId)) {
+				prodsInUse.add(prodId);
+     }
+     
      if(cob.get("ABCD") != null) {
     	 
     	 tt.comment = (String) cob.get("ABCD");
@@ -1118,10 +1014,12 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     		 myyk = true;
     	 }
     	 
-    	 if((stat.equals("A") || stat.equals("B") || stat.equals("C") || stat.equals("D")) && inSort.equals("0") && gg) {
-    		/* if(cuCode.equals("K951666")) {
-        		 System.out.println("ABCD välja " + prodId + " " + cuCode + " " + gg + " " + myyk + " " + seis); 
-    		 }*/
+    	 if(cuCode.equals("K80170")) { //10ETKKOKOS
+    		 System.out.println("ABCD välja " + prodId + " " + cuCode + " " + gg + " " + stat); 
+		 }
+    	 
+    	 if((stat.startsWith("A") || stat.equals("B") || stat.equals("C") || stat.equals("D")) && inSort.equals("0") && gg) {
+    		 
     		 HashMap sisu = new HashMap();
        		if(returnList2.get(cuCode) != null) {
        			sisu = (HashMap)returnList2.get(cuCode);
@@ -1130,16 +1028,24 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
       		returnList2.put(cuCode, sisu);
       		
       		
-        } else  if((stat.equals("C") || stat.equals("D")) && seis && !myyk) {
+       // } else  if((stat.equals("C") || stat.equals("D")) && seis && !myyk) {
+
+        } else  if(stat.equals("D") && seis ) {
     		/* if(cuCode.equals("K951666")) {
    	     System.out.println("Seisev välja " + customerNumber + " " + prodId + " "+ tt.getKogus());
    		 }*/
-   		
-   		 HashMap sisu = new HashMap();
+	        	String date  = (String) cob.get("first_arrival");
+
+   		 TreeMap sisu = new TreeMap();
       		if(returnList.get(cuCode) != null) {
-      			sisu = (HashMap)returnList.get(cuCode);
+      			sisu = (TreeMap)returnList.get(cuCode);
       			}
      		sisu.put(prodId, tt);
+     		
+     		if(date != null && date.trim().length() > 2) {
+     			sisu.put(date + "|" + prodId, tt);
+         	}
+     		
      		returnList.put(cuCode, sisu);
      		
    	 } 
@@ -1172,7 +1078,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 
  	 	
  	 	System.out.println("getCustomerStockAndSales size " + res.size());
- 	 	System.out.println("ReturnList  size " + returnList.size());
+ 	 	System.out.println("ReturnList  size " + returnList.size() + " " + total);
   
     	 
     	 return res;
@@ -1362,7 +1268,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
        		  }
        		
        		  if(returnList != null && returnList.get(cuCode) != null) {
-       			  HashMap hh = (HashMap)returnList.get(cuCode);
+       			  TreeMap hh = (TreeMap)returnList.get(cuCode);
        			  if(hh.get(prodId) != null) {
   	         		  cp.setAbiKood("|v");
   	         	  }
@@ -1382,115 +1288,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
   	   
   	   return custProds;
      }
-     
-   public Vector getCustomerProductsListOld(String agentCode){
-	  
-	   loadData = false;
-	   if(locations == null) {
-		   getCustomers(null);
-	   }
-	   
-	   
-	   Vector custProds = new Vector();
-	   HashMap stock = getStockAndSales();
-	   HashMap newProds = getCustomerNewProducts();
-	   
-	   
-       Integer total = getPagination("getCustomerProducts");
-       
-	 	for (int a = 0 ; a < total; a++) {
-	 		String aa = "";
-	 	    if(a > 0) {
-	 	    	aa = a + "";
-	 	    }
-	 		
-    	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getCustomerProducts" + aa +".json");
-		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
-		
-		  int lenn = values.size();
-		try {
-		  for (int i = 0; i < lenn; i++) {
-				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-        		String customerLoc = (String) cob.get("customer");
-        		String cuCode = locations.get(customerLoc);
-        		if(cuCode != null) {
-        			
-        		if(custInUse.contains(cuCode)) {
-        			
-              			String prodId =(String) cob.get("item_no");
-
-        //			System.out.println("Kl kood olemas ja kasutusel " + cuCode + " " + prodsInUse.size() + " " + prodsInUse.contains(prodId));        			
-	      
-        			
-        			if(prodsInUse.contains(prodId)) {
-        				
-        				String lineInff = null;
-        				
-        				HashMap st = (HashMap)stock.get(cuCode);
-            			if(st != null) {
-            				Toode stT = (Toode)st.get(prodId);
-            				if(stT != null) {
-            				 lineInff = getLineInff(stT);
-            				}
-            			}
-            			 
-        				
-        				
-	        	String last_date = ((String) cob.get("date")).substring(5);
-	        	Double qty = Double.parseDouble(cob.get("qty") + "");
-	        	String number = (String) cob.get("invoice_no");
-	        	Double price = 0d ;
-	        	try {
-	        	price = Double.parseDouble((String)cob.get("unit_price"));
-	        	}catch(Exception e) {
-	        		
-	        	}
-	
-	        	if(lineInff != null) {
-       			 // cp.setAbiKood(lineInff);
-	        		last_date = last_date + " " + lineInff;
-       		  }
-	         		  CustProd cp = new CustProd(cuCode, prodId, qty ,0 ,0 ,last_date,price,0,0," ");
-	         	
-	         		  
-	         		  if(newProds != null && newProds.get(cuCode) != null) {
-	         			  HashMap hh = (HashMap)newProds.get(cuCode);
-	         			  if(hh.get(prodId) != null) {
-	         				  String tt = (String)hh.get(prodId);
-	    	         		  cp.setAbiKood("|tUus: " + tt);
-	    	         	  }
-	         		  }
-	         		
-	         		  if(returnList != null && returnList.get(cuCode) != null) {
-	         			  HashMap hh = (HashMap)returnList.get(cuCode);
-	         			  if(hh.get(prodId) != null) {
-	    	         		  cp.setAbiKood("|v");
-	    	         	  }
-	         		  }
-	         		 if(returnList2 != null && returnList2.get(cuCode) != null) {
-	         			  HashMap hh = (HashMap)returnList2.get(cuCode);
-	         			  if(hh.get(prodId) != null) {
-	    	         		  cp.setAbiKood("|z");
-	    	         	  }
-	         		  }
-	         		  
-	         		  custProds.add(cp);
-	         		
-	    		  }
-		  }
-        		}
-       
-		  }
-		   } catch (Exception e) {
-              e.printStackTrace();
-           }
-    	}
-		System.out.println("CustProds size " + custProds.size());
- 
-	   return custProds;
-   }
-
-
+  
    public String getStartingTime(){
      return null;
    }
@@ -1544,8 +1342,10 @@ private HashSet allProdIds = new HashSet();
 @Override
 public TreeMap getProducts(Agent agent) {
 	  TreeMap tm = new TreeMap();
-	  String weblink = parent.getProps().getProperty("weblink") ;
-	  
+	  String weblink = parent.getProps().getProperty("weblink");
+	  if(allProdIds.size() == 0) {
+	   getStockAndSales();
+	  }
 	  TreeMap stocks =  getStock() ;
 	  
 	  Integer total = getPagination("getItems");
@@ -1569,8 +1369,8 @@ public TreeMap getProducts(Agent agent) {
 	
 
           	String number = (String)cob.get("product_id");
+          	if(prodsInUse.contains(number)) {
 			Product prod = new Product(number);
-			 prodsInUse.add(number);
 			
 			 if(stocks.get(number) != null) {
 				 prod.setStock((Double)stocks.get(number));
@@ -1626,15 +1426,15 @@ public TreeMap getProducts(Agent agent) {
           	if(fname != null && fname.trim().length() > 4) {
           		pictsLink.put(number , fname);
           		
-          	} else {
-          	  	allProdIds.add(number);
-          	}
+          	} 
+          	 	allProdIds.add(number);
+          	
           		
             
            	  tm.put(prod.getName(), prod);	
          
           	}
-		  
+		  }
 		} catch (Exception e) {
 			System.out.println("cob "+  cob.toString());
 			e.printStackTrace();
@@ -1661,10 +1461,15 @@ public void PictureMaker() {
 		    String pictspda = parent.getProps().getProperty("pictpda.dir");
 	   
 		    String link = "http://kontor.rahvaraamat.ee/pildid_backup/";
+
+		     loadData = false;
+		  	   if(locations == null || locations.size() == 0) {
+		  		   getCustomers(null);
+		  	   }
+		  	   
 		    
 		     TreeMap prods = this.getProducts(null);
 		     
-
 		     StringBuffer buf = new StringBuffer();
 		    
 		 try {
@@ -1676,13 +1481,14 @@ public void PictureMaker() {
 	      HashSet pictExists = new HashSet();
  // pictsLink = new HashMap();
 	     	
-	       Iterator enume2 = pictsLink.keySet().iterator();
+	    /*   Iterator enume2 = pictsLink.keySet().iterator();
 	   	      while (enume2.hasNext()) {
 	   	         String toode = (String)enume2.next();
 	   		     String fname  = (String)pictsLink.get(toode);
 	   	         File gg = new File (pictssou + fname);
 	   	         boolean isJpg = true;
 	             if(!gg.exists()) {
+	            	 System.out.println(gg.getName());
 	            	 Converter.downloadFile(link + fname, pictssou + fname);
 	            	 if(!isRealJpeg(gg)) {
 	            		 gg.delete();
@@ -1700,11 +1506,14 @@ public void PictureMaker() {
 	                		buf.append(fname + ";"  + dest.length() + "\n");
 	                	}
 	            		}
-	           }
+	           }*/
 	   	      
 	   	      // siin on otsesysteemi pildid laetud alla.
 	   	      //nüüd lisame webipoets puuduvad.
 	   	      
+	      System.out.println("allProdIds " + allProdIds.size());
+      	
+	      
 	   	   Iterator itera = allProdIds.iterator();
 	   	      while(itera.hasNext()) {
 	   	    	  String prodID = (String)itera.next();
@@ -1717,6 +1526,8 @@ public void PictureMaker() {
         			String url = "https://web.rahvaraamat.ee/product/images?nav_product_code=" + prodID;
         			 String xml = fetchXml(url);
         			 String ur = parseImagesXml(xml);
+        			 
+        			 System.out.println("ur " + ur);
         			 if(ur != null) {
         			  Converter.downloadFile(ur, pictssou + prodID+ ".jpg");
         			 

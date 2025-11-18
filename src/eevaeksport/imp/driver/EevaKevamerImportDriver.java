@@ -65,25 +65,32 @@ public class EevaKevamerImportDriver
 
   public void makeOrder(Order order) throws SQLException{
     setOrder(order);
+    
     int invoiceID = getNextID();
-      addInvoiceHeader(invoiceID);
+       addInvoiceHeader(invoiceID);
 	   addInvoiceLines(invoiceID);   
    
   }
 
-private int getNextID() throws SQLException{
+private int getNextID() {
  
 	    String sql =  " select nextval('firma34.dok_dokumnr_seq') as seeralgus";
+	    int intNr = -1;
+	    try {
 	    Connection con = DriverManager.getConnection(url,"odbcmerisa","pMerisiil49");
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
-	    int intNr = -1;
+	    
 	    while(rs.next()){
 	      intNr = rs.getInt("seeralgus");
 	    }
 	    rs.close();
 	    st.close();
 	    con.close();
+	     } catch(Exception e) {
+	    	log.error(e);
+	    	System.exit(0);
+	     }
 	    return intNr;
 }
   
