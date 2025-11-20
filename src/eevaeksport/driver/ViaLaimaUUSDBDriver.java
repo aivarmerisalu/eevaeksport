@@ -1,3 +1,4 @@
+
 package eevaeksport.driver;
 
 import java.io.BufferedReader;
@@ -67,7 +68,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter,PictureMaker {
+public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater,Manager,Discounter,PictureMaker,WebReporter {
 
 	
 	
@@ -3507,5 +3508,12 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 System.exit(0);
 
 		
+	}
+	
+	@Override
+	public void WebReporter() {
+		
+		Converter.uploadQuestsAndAnswers(rcompanyx,user,pass,parent.getProps(),this.getExcelDir());
+		  System.exit(0);
 	}
 }

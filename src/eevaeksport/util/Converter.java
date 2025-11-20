@@ -425,9 +425,15 @@ public class Converter {
 			                 				}
 			                 				
 			                 				DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-		                 					String[] dateStrings = period.split(" - ");
+			                 				String sp = "-";
+			                 				if(period.indexOf(" - ")!= -1) {
+			                 					sp = " - ";
+			                 				}
+		                 					String[] dateStrings = period.split(sp);
 		                 					try {
-		                 						
+		                 						if(dateStrings[0].length() < 10) {
+		                 							format = DateTimeFormatter.ofPattern("dd.MM.yy");	
+		                 						}
 		                 					
 		                 					Long stL = LocalDate.parse(dateStrings[0], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()-week;
 		                 				    Long endL = LocalDate.parse(dateStrings[1], format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -9945,6 +9951,41 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
    	 return aaa.substring(0,1).toUpperCase() + aaa.substring(1).toLowerCase();
     }
     
+    
+    public static String getVisitDayLetter(Calendar cal){
+		  String input = "";
+		  
+		  if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+			  return "E";
+		  }
+
+		  if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
+			  return "T";
+		  }
+
+		  if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY) {
+			  return "K";
+		  }
+
+		  if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) {
+			  return "N";
+		  }
+
+		  if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+			  return "R";
+		  }
+
+		  if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+			  return "L";
+		  }
+
+		  if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+			  return "P";
+		  }
+
+		 
+		  return input ;
+	  }
     
     public static String getVisitDayLetter(String input){
 		

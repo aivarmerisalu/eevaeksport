@@ -13,6 +13,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,6 +28,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -40,6 +46,7 @@ import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -80,11 +87,12 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.companyx");
+    country = getParent().getProps().getProperty("country");
      }
   String user =  null;
   String pass = null;
   String rcompany = null;
-
+  String country = null;
   
   
 
@@ -952,6 +960,79 @@ if(grupp.equals("leib") ){
   
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
   
+
+  private TreeMap makeCustomerDeliveryDays(){
+		TreeMap res = new TreeMap();
+		try{
+
+	      
+	String sql3 = "select    BackOfficeId as klient ,  nextdelivery as paev1 ,nextdelivery2 as paev2 \r\n" + 
+			"	  from dbo.EPASAULE_CLIENTS";
+
+	Connection con = this.getNewConnection();
+		Statement stmt = con.createStatement();
+
+	ResultSet rs3 = stmt.executeQuery(sql3);
+	while(rs3.next()){
+	String klient = rs3.getString("klient").trim();
+	java.sql.Date day1 = rs3.getDate("paev1");
+	java.sql.Date day2 = rs3.getDate("paev2");
+
+	String olemas = null;
+	
+	if (day1.getTime() > 10000) {
+		olemas = day1.getTime() + "";
+		
+		if (day2.getTime() != day1.getTime() && day2.getTime() > 10000) {
+	        olemas = olemas + "," +  day2.getTime();
+		}
+		
+			res.put(klient, olemas);
+		}
+	
+
+
+	}
+	rs3.close();
+	stmt.close();
+	con.close();
+	 
+	  }catch (Exception e){
+		  e.printStackTrace();
+	    //getParent().showError(e);
+	  }
+	  return res;
+	}
+  
+
+  
+  private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+  
+  public static boolean matchesCycle( String pattern) {
+
+	  LocalDate cycleStart = LocalDate.parse("01.11.2021", FMT);
+
+      LocalDate date = LocalDate.now();  // or any date to test
+	  
+      long days = Duration.between(cycleStart.atStartOfDay(), date.atStartOfDay()).toDays();
+
+      if (days < 0) {
+          return false; // before cycle start
+      }
+
+      int weekInCycle = (int)((days / 7) % 8) + 1;  // 1–8
+      int weekday = date.getDayOfWeek().getValue(); // 1=Mon…7=Sun
+
+      char cycleWeekLetter = (char)('A' + (weekInCycle - 1)); // A–H
+
+      // Build what we expect, e.g. "A1"
+      String expected = "" + cycleWeekLetter + weekday;
+
+      // Check if pattern contains expected code
+      return pattern.contains(expected);
+  }
+  
+  
   
   public TreeMap getCustomers(Agent agent){
 	  nf.setMinimumFractionDigits(2);
@@ -963,7 +1044,10 @@ if(grupp.equals("leib") ){
     }
 	//  makeCustprod();
 	  
-    HashMap<String, Vector<String>> cliags = new HashMap<String, Vector<String>>();
+   TreeMap deldays =  makeCustomerDeliveryDays();
+   
+    HashMap<String, Vector<Agent>> cliags = new HashMap<String, Vector<Agent>>();
+  
     
    TreeMap customers = new TreeMap();
     TreeMap custMap = new TreeMap();
@@ -973,16 +1057,23 @@ if(grupp.equals("leib") ){
     	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
       		
     	   Connection con = this.getNewConnection();
-    	   
+    	   Calendar cal = Calendar.getInstance();
 
     		 Statement stmt = con.createStatement();
     	     ResultSet rs1 = stmt.executeQuery(aaa);
     	               while(rs1.next()){
-    	                 String ag = rs1.getString("kood");
+    	                 Agent ag = new Agent(rs1.getString("kood").trim());
     	                 String cli = rs1.getString("klient").trim();
-    	                 Vector<String> vv = cliags.get(cli);
+    	                 String route = rs1.getString("route");
+    	                 if(route != null && route.trim().length() > 0) {
+    	                	 if(matchesCycle(route)) {
+    	                		 ag.setVisit(Converter.getVisitDayLetter(cal)); 
+    	                	 }
+    	                	
+    	                 }
+    	                 Vector<Agent> vv = cliags.get(cli);
     	                 if(vv == null) {
-    	                	 vv = new Vector<String>();
+    	                	 vv = new Vector<Agent>();
     	                 }
     	                 vv.add(ag);
     	                 cliags.put(cli, vv);
@@ -1004,7 +1095,7 @@ if(grupp.equals("leib") ){
     	  stmt = con.createStatement();
             rs1 = stmt.executeQuery(cmd2);
                      while(rs1.next()){
-                       double volg = rs1.getDouble("summa");
+                       double volg = rs1.getDouble("tasumata");
                        String pay = rs1.getString("maksja").trim();
                        debts.put(pay, volg);
                      }
@@ -1014,9 +1105,10 @@ if(grupp.equals("leib") ){
                     
               	  
                     String cmd = "Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , minOrderSum as minsum, '' as linedisc\r\n" + 
-                    		"		, pricelistBackOfficeId as pricegroup,address ,\r\n" + 
-                    		"		 '' AS visit ,''  AS agent ,  '' AS term, Status AS block , assortimentBackOfficeId as fixed, channel as chain , clientType as type,\r\n" + 
-                    		"		* from  dbo.EPASAULE_CLIENTS" ;
+                       		"		, pricelistBackOfficeId as pricegroup,address ,\r\n" + 
+                       		"		  Status AS block , assortimentBackOfficeId as fixed, channel as chain , clientType as type, phone , email as peremail, contactPerson as pername, contactPhone as perphone,"
+                       		+ " consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic, contractDate as cdate " + 
+                       		"		 from  dbo.EPASAULE_CLIENTS" ; 
                     
 
                      if (isDebug()) System.out.println(cmd);
@@ -1081,7 +1173,7 @@ if(grupp.equals("leib") ){
         String pricegroup = rs.getString("pricegroup");
         if(pricegroup != null && pricegroup.trim().length()>0){
         	
-       if(!pricegroup.trim().equals("GENERAL")) {
+       if(!pricegroup.trim().equals("BASE")) {
     	   
          if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
         	 cust.setGroup(cust.getGroup() + "|" +pricegroup.trim());
@@ -1094,27 +1186,41 @@ if(grupp.equals("leib") ){
         
         String aadr = rs.getString("address");
         if (aadr != null) {
-          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll("Estonia", " ").trim()), "Estonia"));
-         // System.out.println(aleke +aadr.replace('\n',' '));
-        }
+        	if(aadr.endsWith(", %1")) {
+        	 aadr = aadr.substring(0,aadr.indexOf(", %1")).trim();
+        	}
+          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll(country, " ").trim()), country));
+       
+          if(aadr.contains(",")) {
+          		cust.restStreet = aadr.trim().substring(0,aadr.trim().indexOf(","));
+          		cust.restCity = aadr.trim().substring(aadr.trim().indexOf(",")+1);
+          	}else {
+          		cust.restStreet = aadr.trim();	
+          	}
+           	cust.setCountry(country);
+          }
         
+        if(deldays.get(cust.getID())  != null){
+        	cust.setDelDays((String)deldays.get(cust.getID()));
+        }    
+
         cust.restName = name;
         
         name = name + " " + cust.getAddress() + " " + accountnum ;
         
         cust.setName(name );
         
-        String visit = rs.getString("visit");
+      /*  String visit = rs.getString("visit");
         if (visit != null && visit.trim().length()>0) {
           cust.setVisit(visit.trim());
-        }
+        }*/
         
         if(cliags.get(cust.getID()) != null) {
-         Vector<String> vv = cliags.get(cust.getID());
+         Vector<Agent> vv = cliags.get(cust.getID());
          
-         for(String agentID : vv) {
-          cust.addAgent(new Agent(agentID));
-          Agent aa1 = (Agent)agent1.get(agentID);
+         for(Agent agentID : vv) {
+          cust.addAgent(agentID);
+          Agent aa1 = (Agent)agent1.get(agentID.getID());
     
           if(aa1 != null) {
       	
@@ -1130,53 +1236,74 @@ if(grupp.equals("leib") ){
          }
      	}
       
-        
-    
+
 
         
-       /* int term = rs.getInt("term");
-        if (term > 0) {
-       //   cust.setPaymTerm(term + "");
-        }
+       
         if(de) {
-        int block = rs.getInt("block");
-        if (block == 1 || block == 2) {
-         // cust.setSalesBlock(true);
+        String block = rs.getString("block");
+        if (block.equals("B")) {
+          cust.setSalesBlockT(true);
+        }
         }
         
-        int payerblock = rs.getInt("payerblock");
-        if (payerblock == 2) {
-         // cust.setSalesBlock(true);
-        }
-        }*/
-        
-        String info = rs.getString("info");
-        if (info != null && info.trim().length()>0) {
-          cust.setPersonalData("Tel:" + info.trim());
-        }
-
-        
-        
-        
-
-        String city  = rs.getString("city");
-        if (city != null ) {
-         	cust.restCity = city.trim();
-        }
-        String street  = rs.getString("street");
-        if (street != null ) {
-        	if(street.contains(",")) {
-        		cust.restCity = street.trim().substring(0,street.trim().indexOf(","));
-        		cust.restStreet = street.trim().substring(street.trim().indexOf(",")+1);
-        	}else {
-        		cust.restStreet = street.trim();	
-        	}
-         	cust.setCountry("Estonia");
-        }
         String fixed = rs.getString("fixed");
         if(fixed != null && fixed.trim().length() > 0) {
         	cust.addFixSortCode(fixed.trim());
         }
+        
+        String chain = rs.getString("chain");
+        if(chain != null && chain.trim().length() > 0) {
+        	cust.setChain(chain);
+        }
+        
+        String type = rs.getString("type");
+        if(chain != null && type.trim().length() > 0) {
+        	cust.setCustType(type);
+        }
+        
+        
+        String info = rs.getString("phone");
+        if (info != null && info.trim().length()>0) {
+          cust.setPersonalData("Tel:" + info.trim());
+        }
+        
+        String peremail = rs.getString("peremail");
+        if (peremail != null && peremail.trim().length()>0) {
+            cust.restPerEmail = peremail.trim(); 
+        }
+        
+        String pername = rs.getString("pername");
+        if (pername != null && pername.trim().length()>0) {
+            cust.restPerson = pername.trim(); 
+        }
+        
+        String perphone = rs.getString("perphone");
+        if (perphone != null && perphone.trim().length()>0) {
+            cust.restPerPhone = perphone.trim(); 
+        }
+        
+        Integer term = rs.getInt("term");
+        if(term != null && term > 0) {
+        	cust.setPaymTerm(term + "");
+        }
+
+        String alic = rs.getString("alic");
+        if(alic != null && alic.trim().length() > 0) {
+        	//cust.setPaymTerm(term + "");
+        }
+        
+        String tlic = rs.getString("tlic");
+        if(tlic != null && tlic.trim().length() > 0) {
+        	//cust.setPaymTerm(term + "");
+        }
+        
+        java.sql.Date cdate = rs.getDate("cdate");
+        if(cdate.getYear() > 1900) {
+        	
+        }
+        
+        
         
         
         if(goes) {
@@ -1210,6 +1337,40 @@ if(grupp.equals("leib") ){
   }
   
   
+  
+  
+  String fff = "select BackOfficeId as klient,contactPerson as nimi ,  \r\n" + 
+  		"							 '' as synna , email  as email,contactPhone  as phone from  dbo.EPASAULE_CLIENTS where contactPerson != ''";
+ 
+
+      StringBuffer sb2 = new StringBuffer();
+   
+	   rs1 = stmt.executeQuery(fff);
+      while(rs1.next()){
+   	   String klient = rs1.getString("klient").trim();
+   	   String nimi = rs1.getString("nimi").trim();
+   	   java.sql.Date synna = null ;//rs1.getDate("synna");
+   	   if(synna == null){
+   		   synna = new java.sql.Date(0);
+   	   }
+   	  String email = parent.make(rs1.getString("email"));
+   	  String phone = parent.make(rs1.getString("phone"));
+ //	  String cell = parent.make(rs1.getString("cellularphone"));
+   	  if(klient.length() > 0) {
+       sb2.append(klient+";"+ nimi + ";" + synna.getTime() + "; ;" + phone  + ";" + email +  "\n");
+   	  }
+      }
+     rs1.close();  
+              if(sb2.length() > 2){
+        		 Converter.saveFileInUTF8( "custcontacts.txt", sb2);
+        	}
+     
+
+              stmt.close();
+              con.close();
+
+
+
   
   
   stmt.close();
@@ -1404,7 +1565,43 @@ if(grupp.equals("leib") ){
   private TreeMap brandplans = null; 
 
   
+  
   public void setBulkSales(Map agents){
+	 
+  
+    
+    
+    String cmd =" SELECT  cus.salesrep as agent,round(SUM(lineamount),0) AS summa  " +
+     "  FROM custinvoicetrans sal INNER JOIN inventtable inv ON sal.itemid=inv.itemid INNER JOIN custinvoicejour jou ON  " +
+     "  sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid  INNER JOIN custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid  WHERE " + 
+	  "	 inv.dataareaid='pre' AND sal.dataareaid='pre' AND cus.dataareaid='pre'  AND jou.dataareaid='pre' AND YEAR(sal.invoicedate) = YEAR(getdate())  " +
+    "    AND MONTH(sal.invoicedate) = MONTH(getdate())  and AssortmentGroup != 6 " +
+    "  GROUP BY cus.salesrep ";
+
+       if (isDebug()) System.out.println(cmd);
+          try {
+        	  Connection con =   this.getNewConnection();
+              Statement stmt =  con.createStatement();
+              ResultSet	      rs = stmt.executeQuery(cmd);
+              while(rs.next()) {
+                String agentID = rs.getString("agent").trim();
+                Agent agent = (Agent)agents.get(agentID);
+                if (agent != null){
+                  agent.setMonthSales((int)rs.getDouble("summa"));
+                 // System.out.println(agent.getMonthSales());
+                }
+              }
+              rs.close();
+              stmt.close();
+              con.close();
+          } catch (Exception e) {
+              getParent().showError(e);
+           }
+        }
+  
+  
+  
+  public void setBulkSalesOLD(Map agents){
    this.connectionUp();
  
     brandplans = this.makePlans("Budget.xlsx");
