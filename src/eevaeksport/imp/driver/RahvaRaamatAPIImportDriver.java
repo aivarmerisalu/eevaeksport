@@ -5,19 +5,39 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import eevaeksport.Agent;
 import eevaeksport.Customer;
@@ -70,11 +90,104 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
  
   TreeMap custs = null;
   TreeMap names = null;
-
   TreeMap eans = null;
-
   HashMap poeStock = null;
   
+  
+  private HttpResponse restPostRequest(String uri, String json, HttpClient client) throws Exception {
+	String  token = getMSToken();
+		 HttpPost httpPost = new HttpPost(uri);
+		 if(json != null){
+			 httpPost.setEntity(new StringEntity(json,"utf-8"));
+		        httpPost.setHeader("Accept", "application/json");
+		        httpPost.setHeader("Content-type", "application/json;charset=utf-8");
+		 }
+	        return client.execute(httpPost);
+
+	}
+  
+  private String  getMSToken() {
+		 String res = null;
+		 String  secret = parent.getProps().getProperty("api.secret"); //"I~c8Q~fgLOHhFnFcIe2RHUSX6HWlPHXN8fon9b4Q"; 
+		 String  clientID =  parent.getProps().getProperty("api.clientID"); //"075984fb-65fc-45e1-9a26-168935061542";
+	  try {
+		return getAuthToken(clientID,secret);
+	   } catch (ClientProtocolException e2) {
+		e2.printStackTrace();
+	   } catch (IOException e2) {
+		e2.printStackTrace();
+	   }
+
+	 return res;
+	 }
+  
+	 
+	 public String getAuthToken(String clientId,String clientSecret) throws ClientProtocolException, IOException {
+		 String url = "https://api.rahvaraamat.ee/oauth/token";
+       
+       String token = null;
+      try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+          
+     	 HttpPost post = new HttpPost(url);
+          post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+          List<NameValuePair> params = new ArrayList<>();
+          params.add(new BasicNameValuePair("grant_type", "client_credentials"));
+          params.add(new BasicNameValuePair("client_id", clientId));
+          params.add(new BasicNameValuePair("client_secret", clientSecret));
+          post.setEntity(new UrlEncodedFormEntity(params));
+
+          try (CloseableHttpResponse response = httpClient.execute(post)) {
+              String responseBody = EntityUtils.toString(response.getEntity());
+               token = (new org.json.JSONObject(responseBody)).getString("access_token");
+          }
+
+      } catch (Exception e) {
+          e.printStackTrace();
+      }
+      return token;
+		}
+	        
+
+	
+  public String postJson(String jsonIn, String filename) throws Exception{
+	
+	  Converter.trustAllHttpsURLConnection();
+	  String url = "https://api.rahvaraamat.ee/wholesale/returns";
+	 
+	 
+      String token = getMSToken();
+      String result = null;
+
+      
+      System.out.println( "url " + url);
+      
+      try (CloseableHttpClient client = HttpClients.createDefault()) {
+        HttpPost request = new HttpPost(url);
+        request.setHeader("Authorization", "Bearer " + token);
+        request.setHeader("Content-Type", "application/json");
+        
+       
+         
+        StringEntity enti = new StringEntity(jsonIn, "UTF-8");
+        request.setEntity(enti);
+
+        HttpResponse response = (HttpResponse) client.execute(request);
+        HttpEntity entity = ((org.apache.http.HttpResponse) response).getEntity();
+        if (entity != null) {
+         result = EntityUtils.toString(entity);
+        Converter.saveFile(filename , result);
+        
+        
+        
+        }} catch (IOException e) {
+            e.printStackTrace();
+            }
+	 	
+	
+			
+			
+    	return result;
+	}
   
   public void makeOrder(Order order){
     
@@ -116,8 +229,145 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
     			 + getOrderText(order,names,eans,st) + "\n" + komm ;   
     	
     	Converter.sendReportEmail(text, null, parent.getEksportFrame().getEksportPanel(),emailto);
+    	
+    	makeOutput(order,name,names,eans);
+    	
     	this.setNumAddedLines(order.getOrderLines().size());
  }
+  
+
+  private void makeOutput(Order order, String klname, TreeMap names,TreeMap eans){
+	  
+	  
+	    
+      try {
+ 
+    	  long uni = Calendar.getInstance().getTimeInMillis();
+ 
+   
+   JSONObject header = new JSONObject();
+   
+   header.put( "DocType", "SalesReturn");
+
+   header.put( "SalesPerson", order.getAgent());
+   
+   header.put( "OrderNumber", order.getAgent() + "-" + order.getDokNr());
+
+   header.put( "OrderAccount",Converter.deCode(order.getCompany()));
+   
+ 
+
+	 
+   
+   
+   String com = (order.getInfo());
+   
+   if(com != null && com.trim().length()>0){
+			header.put( "Comment", com);
+	}
+
+	
+
+        //RIDADE LISAMINE
+
+   
+   JSONArray linex = new JSONArray();
+   header.put("Line", linex);
+	   
+        int coun = 0;
+        Iterator iter = order.getOrderLines().iterator();
+        while (iter.hasNext()){
+          OrderLine line = (OrderLine)iter.next();
+          String toode  = line.getToode();
+ 	    	  coun++;
+        	
+        	  
+        JSONObject ll = new JSONObject();
+       	 ll.put("LineNum", coun);
+       	 ll.put("ProductId", toode);
+       
+       	 
+         String name = line.getTooteNimi();
+	        if (name == null || name.trim().isEmpty()) {
+	            name = toode;
+	        }
+
+	        if (names != null && names.get(toode) != null) {
+	            name = (String)names.get(toode);
+	        }
+	        
+	        String ean = "";
+	        if (eans != null && eans.get(toode) != null) {
+	            ean = (String)eans.get(toode);
+	        }
+	   	     ll.put("EAN", ean);
+	   	   
+	        String kadund = "";
+	        String kahju = "";
+	        String par = line.getPartii();
+	        
+	        if (par != null && par.length() > 0) {
+	        	if(par.indexOf("@") != -1 ) {
+	        		kahju = par.substring(par.indexOf("@")+1, par.lastIndexOf("@"));
+	        		kahju = "Kahjustunud";
+	        	}
+            if(par.indexOf("*") != -1 ) {
+	        	 kadund = 	par.substring(par.indexOf("*")+1, par.lastIndexOf("*"));
+	        	 kadund = "Kadunud";
+	        	}
+	        }
+	        
+	        int kk = (int)line.getKogus();
+	       
+	        String kog = "";
+	        if(kk < 0) {
+	        	kog = (kk *-1)+"";
+	        }
+       	 
+       	 
+       	 
+       	 
+       	 
+       	 ll.put("Qty", kog);
+       	 if((kadund+kahju).length() > 1) {
+       	 ll.put("ReturnType", kadund+kahju);
+       	 }else {
+       		 ll.put("ReturnType", "Tagastus"); 
+       	 }
+       	
+       	    linex.add(ll);
+       	 
+          }
+    	   
+       	
+
+ 	
+      String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim() +  ".json";
+      String fileName2 = parent.getProps().getProperty("conv.dir2") + order.getDokNr().trim() + (uni + "").trim() +  "res.txt";
+	    
+      // System.out.println(fileName);
+      boolean testing = false;
+      Converter.saveFile(fileName, header.toString());
+      
+      if("true".equals(parent.getProps().getProperty("testing"))) {
+    	  testing = true;
+      }
+
+    
+	   
+	   if(!testing) {
+		   postJson(header.toString(), fileName2);
+	   }else {
+		   
+	   }
+	   System.out.println("json " + header.toString());
+      
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+ }
+
+  
   
   
   private  String getOrderText(Order order, TreeMap<String, String> names,TreeMap<String, String> eans, HashMap st) {

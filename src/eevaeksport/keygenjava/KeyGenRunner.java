@@ -155,7 +155,10 @@ public class KeyGenRunner extends Frame implements TextListener
     
     private void generate()
     {
-    	String key = KeyGen.getKey(codeField.getText(), Calendar.getInstance().get(Calendar.DAY_OF_MONTH)+"");
+    	String code = codeField.getText();
+    	code = code.replace("\\","-" );
+    	code = code.replace("/","-" );
+    	String key = KeyGen.getKey(code, Calendar.getInstance().get(Calendar.DAY_OF_MONTH)+"");
     	if(key.length() > 4){
     		key = key.substring(key.length()-4);
     	}
@@ -171,7 +174,7 @@ public class KeyGenRunner extends Frame implements TextListener
         String formattedDate = dateFormat.format(date);
         
         String currentWorkingDirectory = Paths.get(".").toAbsolutePath().normalize().toString();
-        String logName = codeField.getText() + "_pincode.txt";
+        String logName = code + "_pincode.txt";
         String userName = System.getProperty("user.name");
         String newData = formattedDate + ";" + userName + ";" + codeField.getText() + ";" + key;
         
