@@ -289,8 +289,9 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
 				  " (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +
 				  " (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, amount as price, " +
 				  "   pd.fromdate as algus , pd.todate as lopp , datediff(day,pd.fromdate,pd.todate) as days from  " +
-				  "  pricedisctable pd where   pd.fromdate<getdate()+3 and pd.todate>=getdate() and pd.accountcode=1 and pd.dataareaid ='kosm' " +
+				  "  pricedisctable pd where   pd.fromdate<getdate()+3 and (pd.todate>=getdate() or pd.todate < getdate()-2000) and pd.accountcode=1 and pd.dataareaid ='kosm' " +
 				  " and  pd.accountrelation != '" + instance + "' order by pd.accountrelation , pd.itemrelation" ;
+                 
                   
                   rs = stmt.executeQuery(sql2);
 
@@ -328,7 +329,8 @@ public class AxaKosmelitaDBDriver extends AbstractDBDriver  implements Manager,P
                         	  mline.setPrice(price);
                         	  goes = true; 
                           }
-                         if(days < 60) {
+                          
+                         if(days < 60 && !todate.contains("1900")) {
                           mline.setStartDate(fromdate.substring(0,10));
                           mline.setEndDate(todate.substring(0,10));
                          }

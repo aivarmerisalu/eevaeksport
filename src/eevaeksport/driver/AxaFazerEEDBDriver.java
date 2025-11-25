@@ -63,7 +63,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class AxaFazerEEDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater,Discounter,WebReporter {
+public class AxaFazerEEDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater,Discounter,WebReporter,FixLoader {
   public AxaFazerEEDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -1438,13 +1438,15 @@ return tm;
   
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
-    String cmd = "   SELECT inv.itemid,(inv.itemname) AS nimetus, qtyinbox AS kastis,  mod.price AS price, '' AS ean,asttelemaitemgroupid AS grupp ,\r\n" + 
-    		"    		 itemgroupid AS grupp2,mod.unitid AS unit FROM inventtable inv \r\n" + 
-    		"    		   		                 INNER JOIN inventtablemodule mod ON mod.itemid = inv.itemid  and  mod.dataareaid= inv.dataareaid \r\n" + 
-    		"    		    		                       INNER JOIN inventitemsalessetup bar ON bar.itemid = inv.itemid  and  bar.dataareaid= inv.dataareaid\r\n" + 
-    		"    		    							     WHERE   inv.dataareaid='eee' AND mod.dataareaid='eee'   AND moduletype=2  AND ASTITEMFORSALE = 1  \r\n" + 
-    		"    		    		                            AND len(inv.itemname)>0   and inv.itemid not like ( '%TP') and inv.itemid not like ( '%EX') \r\n" + 
-    		"													and bar.stopped =0  order by inv.itemid "  ;
+    String cmd = "  SELECT inv.itemid,(inv.itemname) AS nimetus, qtyinbox AS kastis,  mod.price AS price, itembarcode AS ean,asttelemaitemgroupid AS grupp ,\r\n" + 
+    		"    		    		 itemgroupid AS grupp2,mod.unitid AS unit ,bar.* FROM inventtable inv \r\n" + 
+    		"    		    		   		                 INNER JOIN inventtablemodule mod ON mod.itemid = inv.itemid  and  mod.dataareaid= inv.dataareaid \r\n" + 
+    		"    		    		    		                       INNER JOIN inventitemsalessetup ar ON ar.itemid = inv.itemid  and  ar.dataareaid= inv.dataareaid \r\n" + 
+    		"														   LEFT JOIN inventitembarcode bar ON bar.itemid = inv.itemid  and  bar.dataareaid= inv.dataareaid\r\n" + 
+    		"    		            						    and bar.barcodesetupid='ean'\r\n" + 
+    		"    		    		    							     WHERE   inv.dataareaid='eee' AND mod.dataareaid='eee'   AND moduletype=2  AND ASTITEMFORSALE = 1   \r\n" + 
+    		"    		    		    		                            AND len(inv.itemname)>0   and inv.itemid not like ( '%TP') and inv.itemid not like ( '%EX') \r\n" + 
+    		"    															and ar.stopped =0  order by inv.itemid"  ;
 
              String cmd2 = "  SELECT summ.itemid AS toode , sum(AVAILPHYSICAL) AS stock , max(dim.inventlocationid) as ladu  FROM INVENTSUM summ \r\n" + 
              		"			 INNER JOIN inventtable t ON summ.itemid = t.itemid  and  summ.dataareaid=t.dataareaid\r\n" + 
@@ -1512,8 +1514,13 @@ return tm;
 
         String ean = rs.getString("ean");
         if(ean!=null && ean.trim().length()>0){
-       // prod.setEAN(ean);
-      }
+            prod.setEAN(ean.trim());
+
+            if(eanprods == null) {
+          	   eanprods = new TreeMap();
+             }
+             eanprods.put(prod.getEAN(), prod.getID());
+         }
 
       String grupp = rs.getString("grupp");
        if(grupp!=null && grupp.trim().length()>0){
@@ -2253,5 +2260,28 @@ return tm;
   private Vector custProds = new Vector();
   private String subjectFilesTo = null;
   private Vector prods = new Vector();
+
+  private TreeMap eanprods = null;
     private NumberFormat NF = NumberFormat.getInstance();
+
+
+
+	@Override
+	public void FixLoader() {
+		 eanprods =  Converter.loadMore();
+		  
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
+			this.getProducts(null);
+			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+		//	System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			if(contracts.size() > 0) {
+				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+			}
+			
+			
+			System.exit(0);
+		
+	}
 }

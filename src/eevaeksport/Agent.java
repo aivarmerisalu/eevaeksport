@@ -100,6 +100,7 @@ public class Agent {
  
   
   public ArrayList prodGroupList = new ArrayList();
+  public ArrayList prodGroupListSec = new ArrayList();
   private int monthSales = 0;
   private int monthSales1 = 0;
   private boolean hasEmail = false;
@@ -215,6 +216,10 @@ private int monthBonusSales = 0;
   public ArrayList getProdGroupList(){
   return this.prodGroupList;
   }
+  
+  public ArrayList getProdGroupListSec(){
+	  return this.prodGroupListSec;
+	  }
 
   /**
    *
@@ -271,11 +276,23 @@ private int monthBonusSales = 0;
   public boolean hasProdGroupList(String prodGroup) {
     return prodGroupList.contains(prodGroup);
   }
+  public boolean hasProdGroupListSec(String prodGroup) {
+	    return prodGroupListSec.contains(prodGroup);
+	  }
 
   public void addProdGroupList(String prodGroup) {
     prodGroupList.add(prodGroup);
   }
+  public void setProdGroupList(ArrayList prodGroup) {
+	    prodGroupList = prodGroup;
+	  }
 
+  public void setProdGroupListSec(ArrayList prodGroup) {
+	    prodGroupListSec = prodGroup;
+	  }
+  public void addProdGroupListSec(String prodGroup) {
+	    prodGroupListSec.add(prodGroup);
+	  }
   /**
    *
    * @return the String value of prodGroup.
@@ -298,6 +315,9 @@ private int monthBonusSales = 0;
     for (Iterator iter = prodGroupList.iterator(); iter.hasNext(); ) {
       sb.append( (String) iter.next() + ",");
     }
+    for (Iterator iter = prodGroupListSec.iterator(); iter.hasNext(); ) {
+        sb.append( (String) iter.next() + ",");
+      }
     sb.append("day:" + getDays() + " type:" + getCode() + " sales:" + this.getMonthSales());
     sb.append("\n");
     return sb.toString();
@@ -311,6 +331,15 @@ private int monthBonusSales = 0;
       return true;
     }
   }
+  
+  public boolean hasProdGroupsSec() {
+	    if (prodGroupListSec.size() == 0) {
+	      return false;
+	    }
+	    else {
+	      return true;
+	    }
+	  }
 /**
  * @return Returns the objektmain.
  */ 

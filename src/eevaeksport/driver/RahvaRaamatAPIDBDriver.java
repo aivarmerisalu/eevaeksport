@@ -755,9 +755,13 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	            for (int r = 0; r < group.size(); r++) {
 	                String gr = (String) group.get(r);
 	                if(!gr.equals("HULGI")) {
-	                	cust.setGroup(gr);	
-	                }
-	            }
+	                	if(cust.getGroup() != null && cust.getGroup().trim().length() > 0 ){
+		              		cust.setGroup(cust.getGroup() + "|" + Converter.cleanLitLatEst(gr.trim()));
+		              	}else{
+		              		cust.setGroup(Converter.cleanLitLatEst(gr.trim()));
+		              	}
+	                	}
+	              }
 	            }
 
 	            String payer = (String)cob.get("payer");

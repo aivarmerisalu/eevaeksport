@@ -5683,6 +5683,8 @@ while (itra.hasNext()){
       if (agent != null){
 
         boolean hasGroups = agent.hasProdGroups();
+        boolean hasGroupsSec = agent.hasProdGroupsSec();
+
         boolean hasDisProds = agent.getDiscountProds() != null;
        System.out.println("agent" + agent.getName() + " " + agent.getObject() +  agent.getObjektmain() 
        + agent.isIspilot() + agent.getProdGroupList().size() + " " + hasGroups);
@@ -5755,20 +5757,25 @@ while (itra.hasNext()){
            
             if (hasGroups) {
             	
-            	
-            
-                  System.out.println(prod.getAgentGroup() + " " + agent.hasProdGroupList(prod.getAgentGroup()));
-              if (agent.hasProdGroupList(prod.getGroup()) || agent.hasProdGroupList(prod.getGroupSecond())
-            		  || ( agent.hasProdGroupList(prod.getAgentGroup()) || prod.getAgentGroup().equals("all"))
-            		  ||   agent.hasProdGroupList(prod.getID()) 
-            		  ) {
-
-               // System.out.println(prod.getName());
-                agProds.add(prod);
-                result.add(prod.getID());
-              }
-            }
-            else {
+                if (hasGroups && hasGroupsSec) {
+                	
+                	// kui on mõlemad olemas Siis on Eugesta juhtum ja toode läheb läbi siis kui kuulub mõlemasse gruppi korraga
+                	if ( agent.hasProdGroupList(prod.getGroup()) && agent.hasProdGroupListSec(prod.getGroupSecond()) ) {
+  	                  agProds.add(prod);
+  	                  result.add(prod.getID());
+  	                  }
+                  } else {
+	            
+	                 // System.out.println(prod.getAgentGroup() + " " + agent.hasProdGroupList(prod.getAgentGroup()));
+	                 if (agent.hasProdGroupList(prod.getGroup()) || agent.hasProdGroupList(prod.getGroupSecond())
+	            		  || ( agent.hasProdGroupList(prod.getAgentGroup()) || prod.getAgentGroup().equals("all"))
+	            		  ||   agent.hasProdGroupList(prod.getID())   ) {
+	                  agProds.add(prod);
+	                  result.add(prod.getID());
+	                  }
+	               }
+                
+            } else {
               agProds.add(prod);
               result.add(prod.getID());
             }

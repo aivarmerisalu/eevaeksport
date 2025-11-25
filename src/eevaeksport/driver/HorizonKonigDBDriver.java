@@ -1355,10 +1355,39 @@ try{
     		s.printStackTrace();
     	}
     
-    
-    
-    
+
+    	ArrayList<String> arr = new ArrayList<String>();
     try {
+		Converter.readFile(new File("klblock.txt"), "utf-8", arr);
+	} catch (IOException e1) {
+		e1.printStackTrace();
+	}
+    HashMap blnames = new HashMap();
+    for(String ss : arr) {
+    	blnames.put(ss.substring(0,ss.indexOf(";")), ss.substring(ss.indexOf(";") + 1));
+    }
+    
+    System.out.println("blnames " + blnames.toString());
+    
+    HashMap<String, String> clbls = new HashMap<String, String>(); 
+
+	String cmdi = " select PK_KLIENTS as klient ,PK_NIPAS as bltext from  APV04761.DKLIPAS " ;
+	try {	
+	Connection con = this.getNewConnection();
+	Statement stmt =con.createStatement();
+    ResultSet rs = stmt.executeQuery(cmdi);
+  
+  while(rs.next()){
+    String lkcode = (rs.getString("klient").trim());
+    String abi  =  rs.getString("bltext").trim();
+    String nimi = (String) blnames.get(abi);
+    clbls.put(lkcode, nimi);
+  }
+    
+  rs.close();
+  stmt.close();
+  con.close();
+    
 
     	
     	 
@@ -1379,9 +1408,9 @@ try{
        
     	
     	
-    	Connection con = this.getNewConnection();
-    	Statement stmt =con.createStatement();
-      ResultSet rs = stmt.executeQuery(cmd);
+    	 con = this.getNewConnection();
+    	 stmt =con.createStatement();
+         rs = stmt.executeQuery(cmd);
       
       while(rs.next()){
         String name = (rs.getString("nimi").trim());
@@ -1482,6 +1511,10 @@ try{
         }
         
     
+        if(clbls.get(cust.getID())!= null) {
+        	cust.addCity("Nosacijumi: " + clbls.get(cust.getID()));
+        }
+        
      //  String aadr = rs.getString("address");
        String aadr = rs.getString("address3");
        

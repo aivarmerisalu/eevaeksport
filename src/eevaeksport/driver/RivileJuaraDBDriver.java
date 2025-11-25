@@ -556,10 +556,11 @@ String picts = parent.getProps().getProperty("pict.dir");
         DealerProduct dealerProds = new DealerProduct();
         try {
 
-          String  sql = "  SELECT  I17_KODAS_PS AS toode, I17_KIEKIS-I17_ATIDUOTA AS STOCK , I17_KODAS_IS AS LADU  " + 
-          		" from i17_vpro where I17_KODAS_IS in ('010000000022','010000000052','010000000058', '010000000029','010000000057','010000000045','010000000047','010000000049'"
-          		+ ",'SA0000000002', 'MD0000000003') and I17_KIEKIS > 0 "
-          		+ " ORDER BY I17_KODAS_PS" ;
+            String  sql = "  SELECT  I17_KODAS_PS AS toode, I17_KIEKIS-I17_ATIDUOTA AS STOCK , I17_KODAS_IS AS LADU  " + 
+              		" from i17_vpro where I17_KODAS_IS in ('010000000022','010000000052','010000000058', '010000000029','010000000057','010000000045','010000000047'"
+              		+ ",'010000000049','010000000071','010000000064','010000000054'"
+              		+ ",'SA0000000002', 'MD0000000003') and I17_KIEKIS > 0 "
+              		+ " ORDER BY I17_KODAS_PS" ;
 
              if (isDebug()) System.out.println(sql);
              connectionUp(url2);
@@ -669,21 +670,24 @@ String picts = parent.getProps().getProperty("pict.dir");
              	}
              }
              
+          //   . Rasa- number of storage 71, Aušrinė - 64, Aistė - 54
+           //  Viktorija 47 all rest of goods are visible
+
              
-             if(agent.getID().trim().equals("00025")){
-              		ob = "010000000045";
+             if(agent.getID().trim().equals("00025")){ // Ausrine
+              		ob = "010000000064";
               	}
               	
-             if(agent.getID().trim().equals("00026")){
+             if(agent.getID().trim().equals("00026")){ //Viktorija
               		ob = "010000000047";
               	}
              
-             if(agent.getID().trim().equals("00024")){
-           		ob = "010000000069";
-           	}
+             if(agent.getID().trim().equals("00024")){ // Rasa
+           		ob = "010000000071";
+           	    }
              
-             if(agent.getID().trim().equals("00027")){
-              		ob = "010000000057";
+             if(agent.getID().trim().equals("00027")){ // Aiste
+              		ob = "010000000054";
               	}
              
           
@@ -908,6 +912,15 @@ String picts = parent.getProps().getProperty("pict.dir");
     		}
     	}
     	
+    	String groupsno =  getParent().getProps().getProperty("groups.no");
+    	HashSet<String> nogr = new HashSet<String>();
+    	if(groupsno != null) {
+    		StringTokenizer st = new StringTokenizer(groupsno,";");
+    		while(st.hasMoreTokens()) {
+    			nogr.add(st.nextToken());
+    		}
+    	}
+    	
   
    String cmd = " SELECT N17_KODAS_PS AS toode,trim(N17_PAV)  AS nimetus,N27_KIEKIS_PAK  AS tykke, 0 AS myygihind," +
    		"N17_KODAS_PS AS ean, "+
@@ -998,6 +1011,9 @@ String picts = parent.getProps().getProperty("pict.dir");
              if (grupp != null && grupp.trim().length()>0){
                prod.setGroup(grupp.trim());
                if(!okgr.contains(grupp.trim())) {
+            	   goes = false;
+               }
+               if(nogr.contains(grupp.trim())) {
             	   goes = false;
                }
              }

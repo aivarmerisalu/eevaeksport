@@ -74,21 +74,22 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   public EugestaESTDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
-    //String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 
      PropertyConfigurator.configure("log4j.properties");
     try {
       Class.forName(databaseDriverName).newInstance();
-     
     } catch (Exception e){
        parent.showError(e);
     }
+    
     user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.companyx");
     country = getParent().getProps().getProperty("country");
+    
      }
+  
   String user =  null;
   String pass = null;
   String rcompany = null;
@@ -109,15 +110,13 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 		try {
 		
 
-	String sq3 = "  SELECT jou.custaccount as klient, jou.deliverydate  as kuup , tra.itemid as toode ,\r\n" + 
-			"						 sum(case when tra.salesqty > 0 then tra.salesqty else 0 end) as kogus,\r\n" + 
-			"				 sum(case when tra.salesqty < 0 then tra.salesqty else 0 end) as kogusmin, max (jou.salesid) as doknr , \r\n" + 
-			"			 case when  jou.deliverydate > CAST(GETDATE() AS DATE)then 1 else 0 end as color FROM salesline  tra INNER JOIN salestable jou ON \r\n" + 
-			"			 tra.salesid=jou.salesid  and  tra.dataareaid= jou.dataareaid  WHERE  jou.deliverydate >=   \r\n" + 
-			"			(select top 1 kuupaev  from ( 	 SELECT top 10 jou2.deliverydate as kuupaev FROM  salestable jou2  where ltrim(jou2.custaccount) = ltrim(jou.custaccount)  and jou2.dataareaid= 'eee'  \r\n" + 
-			"			 and jou2.deliverydate > getdate()-14 and jou2.deliverydate < getdate()+4 group by jou2.custaccount , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)  \r\n" + 
-			"			 AND tra.dataareaid ='eee'\r\n" + 
-			"	 GROUP BY jou.custaccount,jou.deliverydate , tra.itemid ORDER BY jou.custaccount,jou.deliverydate desc, max(jou.salesid) desc, tra.itemid" ;
+	String sq3 = "   SELECT jou.clientBackOfficeId as klient, jou.deliverydate  as kuup , jou.productBackOfficeId as toode ,\r\n" + 
+			"			 sum(case when jou.Quantity > 0 then jou.Quantity else 0 end) as kogus,\r\n" + 
+			"			 sum(case when jou.Quantity < 0 then jou.Quantity else 0 end) as kogusmin, max (jou.invoiceNumber) as doknr ,\r\n" + 
+			"			 case when  jou.deliverydate > CAST(GETDATE() AS DATE)then 1 else 0 end as color FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >=   \r\n" + 
+			"						(select top 1 kuupaev  from ( 	 SELECT top 10 jou2.deliverydate as kuupaev FROM  EPASAULE_DELIVERIES jou2  where ltrim(jou2.clientBackOfficeId) = ltrim(jou.clientBackOfficeId)   \r\n" + 
+			"						 and jou2.deliverydate > getdate()-14 and jou2.deliverydate < getdate()+4 group by jou2.clientBackOfficeId , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)   \r\n" + 
+			"				 GROUP BY jou.clientBackOfficeId,jou.deliverydate , jou.productBackOfficeId ORDER BY jou.clientBackOfficeId,jou.deliverydate desc, max(jou.invoiceNumber) desc, jou.productBackOfficeId" ;
 					
 					Connection con3 = getNewConnection();
 					Statement st3 = con3.createStatement();
@@ -618,28 +617,37 @@ try {
   private void makeCustprod(){
 	  int counter = 1;
 	  
-	  String cmd2 = "SELECT jou.orderaccount,tra.itemid ,sum (tra.qty) as kog\r\n" + 
-	  		"	       FROM custinvoicetrans  tra INNER JOIN custinvoicejour jou ON \r\n" + 
-	  		"	       tra.invoiceid=jou.invoiceid  and  tra.dataareaid= jou.dataareaid INNER JOIN inventTABLE cus ON cus.itemid=tra.itemid \r\n" + 
-	  		"	         and  tra.dataareaid= cus.dataareaid  WHERE  jou.invoicedate > getdate()- 30\r\n" + 
-	  		"			 AND tra.dataareaid ='eee'  AND jou.dataareaid = 'eee'  AND cus.dataareaid = 'eee' \r\n" + 
-	  		"	       GROUP BY jou.orderaccount,tra.itemid \r\n" + 
-	  		"	       ORDER BY jou.orderaccount,tra.itemid";
+	  String cmd2 = "WITH agg AS (\r\n" + 
+	  		"    SELECT  \r\n" + 
+	  		"        clientBackOfficeId AS klient,\r\n" + 
+	  		"        productBackOfficeId AS toode,\r\n" + 
+	  		"        (Quantity) AS sisse,\r\n" + 
+	  		"        deliverydate as lastdate,\r\n" + 
+	  		"        (lineAmount / CASE WHEN Quantity <> 0 THEN Quantity ELSE 1 END) AS lastprice,\r\n" + 
+	  		"        invoiceNumber AS lastdoc,\r\n" + 
+	  		"        ROW_NUMBER() OVER (\r\n" + 
+	  		"            PARTITION BY clientBackOfficeId, productBackOfficeId\r\n" + 
+	  		"            ORDER BY deliverydate DESC\r\n" + 
+	  		"        ) AS rn\r\n" + 
+	  		"    FROM EPASAULE_DELIVERIES\r\n" + 
+	  		"    WHERE deliveryDate > GETDATE() - 90\r\n" + 
+	  		"    GROUP BY \r\n" + 
+	  		"        clientBackOfficeId,\r\n" + 
+	  		"        productBackOfficeId,\r\n" + 
+	  		"        invoiceNumber,\r\n" + 
+	  		"        deliverydate,\r\n" + 
+	  		"		Quantity,\r\n" + 
+	  		"		lineAmount\r\n" + 
+	  		")\r\n" + 
+	  		"SELECT *\r\n" + 
+	  		"FROM agg\r\n" + 
+	  		"WHERE rn = 1\r\n" + 
+	  		"ORDER BY klient, toode;";
 	  
 	  
-	   String cmd = " SELECT jou.custaccount,tra.itemid ,max(case when tra.salesqty > 0 then tra.salesqty end)  as sisse ,\r\n" + 
-	   		"	  min(case when tra.salesqty < 0 then tra.salesqty end ) as puudu,\r\n" + 
-	   		"	  jou.deliverydate AS lastdate,max(tra.lineamount/case when tra.salesqty != 0 then tra.salesqty else 1 end) as lastprice \r\n" + 
-	   		"	  , packingslipid as lastdoc\r\n" + 
-	   		"	    FROM salesline  tra INNER JOIN salestable jou ON \r\n" + 
-	   		"	   tra.salesid=jou.salesid  and  tra.dataareaid= jou.dataareaid INNER JOIN inventTABLE cus ON cus.itemid=tra.itemid \r\n" + 
-	   		"	 and  tra.dataareaid= cus.dataareaid  WHERE  jou.deliverydate > getdate()-14\r\n" + 
-	   		"	 AND tra.dataareaid ='eee'  AND jou.dataareaid = 'eee'  AND cus.dataareaid = 'eee' \r\n" + 
-	   		"	    GROUP BY packingslipid,jou.custaccount,tra.itemid ,jou.deliverydate \r\n" + 
-	   		"	    ORDER BY packingslipid,jou.custaccount,tra.itemid ,jou.deliverydate " ;
 
 
-	    if (isDebug()) System.out.println(cmd);
+	    if (isDebug()) System.out.println(cmd2);
 
 	    try {
 	    	
@@ -648,41 +656,20 @@ try {
 	     	Statement stmt = con.createStatement();
 	        ResultSet rs = stmt.executeQuery(cmd2);
 	
-	        HashMap<String,Double> cpp = new HashMap<String,Double>();
-	        while(rs.next()){
-	        String kliendikood = rs.getString("orderaccount").trim();
-	        String tootekood = rs.getString("itemid").trim();
-	        double kogus = rs.getDouble("kog");
-	        cpp.put(kliendikood+"-"+tootekood,kogus);
-	     
-	      }
-	    	
-	    	
-	    	rs.close();
-	    	
-	    	
 	
-	        rs = stmt.executeQuery(cmd);
 	      counter++;
 	      while(rs.next()){
-	        String kliendikood = rs.getString("custaccount").trim();
-	        String tootekood = rs.getString("itemid").trim();
+	        String kliendikood = rs.getString("klient").trim();
+	        String tootekood = rs.getString("toode").trim();
 	        double kogus = rs.getDouble("sisse");
-	        double puudu = 0;
-	        try {
-	        	puudu = rs.getDouble("puudu");
-	        }catch(Exception e) {
-	        	
-	        }
+	        
 	        String lastdate = rs.getString("lastdate").substring(0,10);
 	                 lastdate = lastdate.substring(5,10);
 	                 double lastprice = rs.getDouble("lastprice");
-	                 double l30 = 0;
-	                 if(cpp.get(kliendikood+"-"+tootekood) != null) {
-	                	 l30 = cpp.get(kliendikood+"-"+tootekood);
-	                 }
-	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , l30,0,lastdate,lastprice,puudu,0," ");
-
+	         String lastdoc = rs.getString("lastdoc").trim();
+	      	               
+	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , 0,0,lastdate,lastprice,0,0," ");
+                cp.setAbiKood(lastdoc);
 	        //cp.setRedline(rs.getString("date"));
 	        custProds.add(cp);
 	        prods.addElement(tootekood);
@@ -692,52 +679,57 @@ try {
 	      con.close();
 	    } catch (Exception e){
 	      getParent().showError(e);
-	      if(counter< 4){
-	      	try{
-	      		Connection con = getNewConnection();
-	            Statement stmt =  con.createStatement();
-	            ResultSet	rs = stmt.executeQuery(cmd);
-	        	
-	             counter++;
-	             while(rs.next()){
-	               String kliendikood = rs.getString("custaccount").trim();
-	               String tootekood = rs.getString("itemid").trim();
-	               double kogus = rs.getDouble("sisse");
-	   	        double puudu = 0;
-	   	        try {
-	   	        	puudu = rs.getDouble("puudu");
-	   	        }catch(Exception u) {
-	   	        	
-	   	        }
-	               String lastdate = rs.getString("lastdate").substring(0,10);
-	                        lastdate = lastdate.substring(5,10);
-	                        double lastprice = rs.getDouble("lastprice");
-	               CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,lastdate,lastprice,puudu,0," ");
-	               custProds.add(cp);
-	             }
-	             rs.close();
-	   	      stmt.close();
-	   	      con.close();
-	      	}catch (Exception ee){
-
-	      	}
-
-	      }
 	    }
   }
   
   public TreeMap getAgents(){
 	  
 	    
-    String cmd = "select backOfficeId as kood ,agentName as name, * from  dbo.EPASAULE_AGENTS";
-    
+    String cmd = "select backOfficeId as kood ,agentName as name from  dbo.EPASAULE_AGENTS";
+
+    String cmdg = "select Agent_BackofficeID as kood , group_backofficeID as grupp,forSale, forMerch from EPASAULE_AGENTS_EAGENTGROUPS";
+    String cmdb = "select Agent_BackofficeID as kood , brand_backofficeID as brand,forSale, forMerch from EPASAULE_AGENTS_EAGENTBRANDS";
     
     if (isDebug()) System.out.println(cmd);
     TreeMap agents = new TreeMap();
+    
     try {
     	Connection con = getNewConnection();
         Statement stmt =  con.createStatement();
-        ResultSet	rs = stmt.executeQuery(cmd);
+        ResultSet	rs = stmt.executeQuery(cmdg);
+        
+        HashMap grs = new HashMap();
+         
+         while(rs.next()){
+          String agentID = rs.getString("kood").trim();
+          String gr = rs.getString("grupp").trim();
+          ArrayList gr1 = (ArrayList)grs.get(agentID);
+        		  if(gr1 == null) {
+        			 gr1 =  new ArrayList();
+        		  }
+        	gr1.add(gr);
+        	grs.put(agentID, gr1);
+         }
+        
+        rs.close();
+        
+        HashMap grsS = new HashMap();
+        
+        rs = stmt.executeQuery(cmdb);
+        while(rs.next()){
+         String agentID = rs.getString("kood").trim();
+         String br = rs.getString("brand").trim();
+         ArrayList gr1 = (ArrayList)grsS.get(agentID);
+       		  if(gr1 == null) {
+       			 gr1 =  new ArrayList();
+       		  }
+       	gr1.add(br);
+       	grsS.put(agentID, gr1);
+        }
+       
+       rs.close();
+        	
+        rs = stmt.executeQuery(cmd);
     
         while(rs.next()){
         String agentID = rs.getString("kood").trim();
@@ -746,9 +738,20 @@ try {
           agent.setName(name);
           agent.setIsPilot(true);
           
+          if(grs.size() > 0 && grs.get(agentID) != null) {
+        	  agent.setProdGroupList((ArrayList)grs.get(agentID));
+          }
+          
+          if(grsS.size() > 0 && grsS.get(agentID) != null) {
+        	  agent.setProdGroupListSec((ArrayList)grsS.get(agentID));
+          }
+          
           agent.setLanguage("EST");
           agent.setCountry("et");
           agent.setPassWord("0000");
+        if(grs.size() > 0) {
+        	
+        }
           
           agents.put(name, agent);
           agent1.put(agent.getID(), agent);
@@ -1550,6 +1553,7 @@ if(grupp.equals("leib") ){
 
 
   public Vector getCustomerProductsList(String agentCode){
+	  makeCustprod();
     return custProds;
   }
 
@@ -1569,8 +1573,7 @@ if(grupp.equals("leib") ){
   public void setBulkSales(Map agents){
 	 
   
-    
-    
+    /*
     String cmd =" SELECT  cus.salesrep as agent,round(SUM(lineamount),0) AS summa  " +
      "  FROM custinvoicetrans sal INNER JOIN inventtable inv ON sal.itemid=inv.itemid INNER JOIN custinvoicejour jou ON  " +
      "  sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid  INNER JOIN custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid  WHERE " + 
@@ -1596,7 +1599,8 @@ if(grupp.equals("leib") ){
               con.close();
           } catch (Exception e) {
               getParent().showError(e);
-           }
+           }*/
+	  
         }
   
   
