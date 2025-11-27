@@ -340,7 +340,7 @@ HashMap pants = null;
 	  double res = 0;
 	  
 	  String    sql = "select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from I33_PKAI "
-	    		+ " where I33_KODAS_iS = '03' and  I33_KODAS_PS = '" + toode + "'  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
+	    		+ " where I33_KODAS_iS = '02' and  I33_KODAS_PS = '" + toode + "'  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
 	            System.out.println("hind");
 	       try {
 	    	   

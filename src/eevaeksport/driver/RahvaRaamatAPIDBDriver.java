@@ -16,6 +16,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -698,13 +699,17 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
    public TreeMap getCustomers(Agent agent){
 	   
 	   locations = new HashMap<String, String>();
-	   if(this.loadData) {
+	   
+	   
+	   if(this.loadData ) {
 	     downloadData(null);
 	   }
 	   
 	//   TreeMap routes = getRouting();
 	   
 	 //  System.exit(0);
+	   HashMap lastDeliveries = getLastDeliveryDates();
+	   System.out.println("ld : " + lastDeliveries.toString());
 	   
 		 TreeMap custagents =  Converter.getWebCustomersAgents(rcompany, user, pass);
 	   
@@ -789,6 +794,9 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	            	postalCode = "";
 	            }
 	            
+	            if(lastDeliveries.get(locCode) != null) {
+	            	cust.setCity("VT: " + lastDeliveries.get(locCode));
+	            }
 	        //    System.out.println("klinfo " + address1 + "'" +address2 + "'" + city  + "'" + state+ "'" + country+ "'" + postalCode);
 	            cust.setAddress((address1  + city + postalCode).trim());
 	            
@@ -1018,9 +1026,6 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     		 myyk = true;
     	 }
     	 
-    	 if(cuCode.equals("K80170")) { //10ETKKOKOS
-    		 System.out.println("ABCD välja " + prodId + " " + cuCode + " " + gg + " " + stat); 
-		 }
     	 
     	 if((stat.startsWith("A") || stat.equals("B") || stat.equals("C") || stat.equals("D")) && inSort.equals("0") && gg) {
     		 
@@ -1163,6 +1168,56 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     	 return res.trim();
      }
      
+
+     
+     private HashMap getLastDeliveryDates() {
+    	 Integer total = getPagination("getCustomerProducts");
+    	   DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+         
+    	   HashMap res = new HashMap();
+    	   
+ 	 	for (int a = 0 ; a < total; a++) {
+ 	 		String aa = "";
+ 	 	    if(a > 0) {
+ 	 	    	aa = a + "";
+ 	 	    }
+	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getCustomerProducts" + aa +".json");
+	org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
+	
+	  int lenn = values.size();
+	try {
+	  for (int i = 0; i < lenn; i++) {
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+    		String customerLoc = (String) cob.get("customer");
+    		String cuCode = customerLoc;
+    		
+    			
+          			String prodId =(String) cob.get("item_no");
+    			
+		    			
+		    	 String last_date = ((String) cob.get("date"));
+		    	 String oldD = (String)res.get(cuCode);
+		    	 if(oldD != null) {
+		    		  LocalDate dateL = LocalDate.parse(last_date, fmt);
+		              LocalDate dateD = LocalDate.parse(oldD, fmt);
+		              if(dateL.isBefore(dateD)) {
+		            	  res.put(cuCode, oldD);
+		              }else {
+		            	  res.put(cuCode, last_date);	  
+		              }
+		    	 } else {
+		    		 res.put(cuCode, last_date);	 
+		    	 }
+             
+    		
+	  }
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+ 	 	}
+   return res;
+     }
      
      private HashMap getLastDates() {
     	 Integer total = getPagination("getCustomerProducts");

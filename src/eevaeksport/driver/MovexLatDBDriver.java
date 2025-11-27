@@ -28,7 +28,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -41,40 +40,13 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 
-import org.apache.poi.common.usermodel.Hyperlink;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Comment;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFComment;
-import org.apache.poi.xssf.usermodel.XSSFDrawing;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFHyperlink;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import ee.mobilejava.wrapper.DefectiveLineWrapper;
 import ee.mobilejava.wrapper.DefectiveWrapper;
-import ee.mobilejava.wrapper.DistEvalLineWrapper;
 import ee.mobilejava.wrapper.DistEvalListWrapper;
-import ee.mobilejava.wrapper.SuperVisorLineWrapper;
 import ee.mobilejava.wrapper.SupervisorInfoWrapper;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -85,8 +57,6 @@ import eevaeksport.EksportPanel;
 import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
-import eevaeksport.Quest;
-import eevaeksport.QuestLine;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.report.DefectiveLineWrapperMeri;
 import eevaeksport.report.EmailLogger;
@@ -1184,6 +1154,16 @@ String ex = parent.getProps().getProperty("products");
         Integer newP = rs.getInt("statusnew");
         if(newP != null && newP == 1) {
         	prod.setStatusNew("1");
+        }
+        
+
+        Double wei = rs.getDouble("weiMeasure");
+        if(wei > 0) {
+        	prod.setMeasure(wei);
+        }
+        Double vol = rs.getDouble("volMeasure");
+        if(vol > 0) {
+        	prod.volMeasure = vol;
         }
         
         prodHash.put(prod.getID(), prod);

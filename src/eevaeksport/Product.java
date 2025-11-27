@@ -402,6 +402,7 @@ public class Product {
 	public String artikkel = null;
 	public double TAARA_VAT = 0;
 	public double DEPO_WO_VAT = 0;
+	public double volMeasure = 0;
 	
    
    public double getOptAmountInUnits() {

@@ -775,6 +775,7 @@ String jwttoken = null;
 	          		 }
 	          		
 	               		 String clGroup  = getNode(rida,"pricelistID").getFirstChild().getNodeValue();
+	               		        clGroup = String.format("%03d", Integer.parseInt(clGroup));
 	               		String startDate  = getNode(rida,"startDate").getFirstChild().getNodeValue();
 	               		String endDate  = getNode(rida,"endDate").getFirstChild().getNodeValue();
 	              
@@ -3803,7 +3804,7 @@ public TreeMap getGrupidPayer(){
 	                 if(prlist == null){
 	                	 prlist = "";
 	                 }else{
-	                	 prlist = prlist + "|";
+	                	 prlist = String.format("%03d", Integer.parseInt(prlist)) + "|";
 	                 }
 	                 
 	                 String prlist2 = null;
@@ -3815,7 +3816,7 @@ public TreeMap getGrupidPayer(){
 	 	        	 }catch(Exception ee){
 		        	 } 
 	                 if(prlist2 != null){
-	                	 prlist = prlist + prlist2 + "|";
+	                	 prlist = prlist +String.format("%03d", Integer.parseInt(prlist2)) + "|";
 	                 }
 	                 
 	                 String prlist3 = null;
@@ -3828,7 +3829,7 @@ public TreeMap getGrupidPayer(){
  	         		 }
 	                
 	                 if(prlist3 != null){
-	                	 prlist = prlist + prlist3 + "|" ;
+	                	 prlist = prlist + String.format("%03d", Integer.parseInt(prlist3)) + "|" ;
 	                 }
 	                 
 	                 String prlist4 = null;
@@ -3841,7 +3842,7 @@ public TreeMap getGrupidPayer(){
  	         		 }
 	                 
 	                 if(prlist4 != null){
-	                	 prlist = prlist + prlist4 + "|" ;
+	                	 prlist = prlist + String.format("%03d", Integer.parseInt(prlist4)) + "|" ;
 	                 }
 	                
 	                 
@@ -3855,7 +3856,7 @@ public TreeMap getGrupidPayer(){
  	         		 }
 	                 
 	                 if(prlist5 != null){
-	                	 prlist = prlist + prlist5 ;
+	                	 prlist = prlist + String.format("%03d", Integer.parseInt(prlist5)) ;
 	                 }
 	                 
 	                
@@ -4060,7 +4061,8 @@ private TreeMap afterOrders = null;
     	                 if(prlist == null){
     	                	 prlist = "";
     	                 }else{
-    	                	 prlist = prlist + "|";
+    	                	 
+    	                	 prlist = String.format("%03d", Integer.parseInt(prlist)) + "|";
     	                 }
     	                 
     	                 String prlist2 = null;
@@ -4072,7 +4074,7 @@ private TreeMap afterOrders = null;
     	 	        	 }catch(Exception ee){
     		        	 } 
     	                 if(prlist2 != null){
-    	                	 prlist = prlist + prlist2 + "|";
+    	                	 prlist = prlist + String.format("%03d", Integer.parseInt(prlist2)) + "|";
     	                 }
     	                 
     	                 String prlist3 = null;
@@ -4085,7 +4087,7 @@ private TreeMap afterOrders = null;
  	 	         		 }
     	                
     	                 if(prlist3 != null){
-    	                	 prlist = prlist + prlist3 + "|" ;
+    	                	 prlist = prlist + String.format("%03d", Integer.parseInt(prlist3)) + "|" ;
     	                 }
     	                 
     	                 String prlist4 = null;
@@ -4098,7 +4100,7 @@ private TreeMap afterOrders = null;
  	 	         		 }
     	                 
     	                 if(prlist4 != null){
-    	                	 prlist = prlist + prlist4 + "|" ;
+    	                	 prlist = prlist + String.format("%03d", Integer.parseInt(prlist4)) + "|" ;
     	                 }
     	                
     	                 
@@ -4112,7 +4114,7 @@ private TreeMap afterOrders = null;
  	 	         		 }
     	                 
     	                 if(prlist5 != null){
-    	                	 prlist = prlist + prlist5 ;
+    	                	 prlist = prlist + String.format("%03d", Integer.parseInt(prlist5)) ;
     	                 }
     	                 
     	                 if(prlist.endsWith("|")){
@@ -4132,7 +4134,7 @@ private TreeMap afterOrders = null;
  		         		        		  while(st.hasMoreTokens()) {
  		         		        			  String ss = st.nextToken();
  		         		        			  if(!prlist.contains(ss)) {
- 		         		        				 prlist = prlist + "|" + ss ; 
+ 		         		        				 prlist = String.format("%03d", Integer.parseInt(prlist)) + "|" + ss ; 
  		         		        			  }
  		         		        		
  		         		        		  }

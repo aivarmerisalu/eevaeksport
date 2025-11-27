@@ -70,7 +70,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater,Discounter,WebReporter {
+public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater,Discounter,WebReporter,PictureMaker {
   public EugestaESTDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -156,127 +156,73 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 
   public String getSaveDebtInfo() {
-	  makePictureCat();
-	  System.exit(0);
+	
    	return null;
    }
 
   
   private void makePictureCat(){
 	     
-	  getProducts(null);
-    	
-    	String picts = parent.getProps().getProperty("pict.dir");
-  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
-  	 
+	  	    
+	    	
+	    	String pictssou = parent.getProps().getProperty("pict.dir");
+	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	       
+	  	 try {
+	     	  
+	          File f = new File(pictspda +"list.txt");
+	          if (f.exists())f.delete();
+	         
+	          File res2 = new File (pictspda);
+	             String[] ff2 = res2.list();
+	         	 for(int i = 0;ff2.length>i;i++){
+	             	(new File ( pictspda + ff2[i])).delete(); 
+	             }
 
-    	try {
+	  		 TreeMap prods = this.getProducts(null);
+	         StringBuffer buf = new StringBuffer();
+	         Iterator enume = prods.keySet().iterator();
+	    
+	         while (enume.hasNext()) {
+	    	    	String asi = (String)enume.next();
+	    	    	Product prod = (Product)prods.get(asi);
+	    	    	String toode = prod.getID().trim();  
+	               if(toode.length() > 0){
+	                	
+	    	   	  res2 = new File (pictssou);
+	              ff2 = res2.list();
+	             
+	         	 for(int i = 0;ff2.length>i;i++){
+	             	if( ff2[i].startsWith(toode)){
+	               // System.out.println("pilt olemas " + ff2[i]);
+	            	File in = new File ( pictssou + ff2[i]); 
+	              	if(in.isFile()){
+	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+	                  	Converter.shrinkAndCopyFile(in,inpda,400);
+	            	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
+	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+	                    	}
+	                   }
+	                 }
+	               }
+	             }
+	    	 }
+	         try {
+	     		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+	     		os.write(buf.toString());
+	     		os.close();
+	     	  }catch (Exception ex) {
+	     		ex.printStackTrace();
+	     	  }
+	  	 
+	  	 } catch (Exception e) {
+	    	    getParent().showError(e);
+	    	}
+	     
+	  }
+	    
 
- HashSet tooted = new HashSet();
-         StringBuffer buf = new StringBuffer();
-         StringBuffer buf0 = new StringBuffer();
-         int a = 0;
-         int b = 0;
-         int c = 0;
-         System.out.println("Piltide leidmine ");
-         
-    	   for  (int i = 0 ; i<prodcodes.size();i++) {
-    	    	a++;
-    	    	c++;
-    	    	if(c == 100){
-    	    		  c =0;
-    	    		  System.out.println("Piltide leidmine "  + a);	
-    	    	}
-    	     
-                  String toode = prodcodes.elementAt(i) + "";  
-                  toode = toode.replace('/', '_');
-                  toode = toode.replace('\\', '_');
-                
-                  File f = new File(picts + toode+".jpg");
-                  String len = "0";
-                  if(f.exists()){
-                    len =	f.length() + "";
-                  }
-          if(len.equals("0")){
-            	//System.out.println(toode+".jpg;"  + len);
-            	buf0.append(toode+".jpg\n");
-            }else{
-            	tooted.add((toode+".jpg").toLowerCase());
-            	buf.append(toode+".jpg;"  + len + "\n");
-      	    	b++;
-            }
-          
-	   }
-      
-    	
-    	    //oleasoleva kataloogi kustutamine
-    	  System.out.println("Kataloogi kustutamine "  + a);	    
-                File f = new File("list.txt");
-                if (f.exists())f.delete();
-                
-                  try {
-            		PrintWriter os = new PrintWriter(new FileWriter(
-            				  "list.txt", true));
-            		os.write(buf.toString());
-            		os.close();
-            	
-            	  }catch (Exception ex) {
-            		ex.printStackTrace();
-            	  }
-            	//  System.out.println("buf 0 " + a  + " " +  b + " "+ buf0.toString());
-            	  File f0 = new File("list0.txt");
-            	
-            	  	
-                     if (f0.exists())f0.delete();
-                  
-                    try {
-              		PrintWriter os1 = new PrintWriter(new FileWriter(
-              				  "list0.txt", true));
-              		os1.write(buf0.toString());
-              		os1.close();
-              		//System.out.println( buf.toString());
-              	  }catch (Exception ex) {
-              		ex.printStackTrace();
-              	  }
-
-    //Kataloogi sisude kustutamine
-              	  
-   
-           	 ArrayList names = new ArrayList();
-           	 
-         	 File res2 = new File (pictspda);
-             String[] ff2 = res2.list();
-         	 for(int i = 0;ff2.length>i;i++){
-             //	System.out.println("fff " + ff2[i]);
-             //	(new File ( pictspda + ff2[i])).delete(); 
-          names.add(ff2[i].toLowerCase());
-             }
-//         	 L�ppes kustutamine 
-         	 
-           System.out.println("Piltide kopeerimine ");	
-           //Failide kopeerimine  
-             String[] gg = new File(picts).list();
-          	  //System.out.println("gg " + gg[0] + " " + gg.length);
-             
-              for(int i = 0;gg.length>i;i++){
-              	String fn = gg[i];
-              	File in = new File ( picts + fn); 
-              	if(in.isFile() && tooted.contains(fn.toLowerCase()) && !names.contains(fn.toLowerCase())){
-              	
-              	File inpda = new File ( pictspda +  toUpper( fn )); 
-                    	Converter.shrinkAndCopyFile(in,inpda);
-              	}
-              }
-              File fff =  new File (pictspda +  "list.txt");
-              Converter.copyFile(f,fff);  	
-        	  File fff0 =  new File (pictspda +  "list0.txt");
-        	  Converter.copyFile(f0,fff0);  	
-    	} catch (Exception e) {
-    	    getParent().showError(e);
-    	}
-    
-}
-  
+ 
   private String toUpper(String asi ){
 	   
 	   asi = asi.replace('\\', '_');
@@ -298,251 +244,60 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
        Vector lines = new Vector();
 try {
 
-    String sql4a = "SELECT PRI.ACCOUNTRELATION as grupp,   PRI.ITEMRELATION as toode ,pri.AMOUNT as hind , PERCENT1 as perc ,PRI.FROMDATE as algus " +
-    		" ,PRI.TODATE as lopp,month(PRI.TODATE -PRI.FROMDATE)  as kamp ,PRI.RELATION , astcampaignid as kamp2 " +
-" FROM PRICEDISCTABLE pri INNER JOIN INVENTTABLE inv on inv.dataareaid=pri.dataareaid and inv.itemid =pri.itemrelation " +
-"  WHERE PRI.DATAAREAID='eee' AND PRI.RELATION in (4,5) AND PRI.ACCOUNTCODE=1 AND pri.itemcode=0  and  " +
-"    (GETDATE() between PRI.FROMDATE AND PRI.TODATE+1)    and astcampaignid != '' " +
-"   ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation " ;
+	String sss = "Select c.pricelistBackOfficeId as pricegroup\r\n" + 
+			"                       				 from  dbo.EPASAULE_CLIENTS c inner join EPASAULE_AGENTS_CLIENTS a on a.ClientBackofficeID = c.BackOfficeId group  by c.pricelistBackOfficeId";
+	
+    String sql4a = "SELECT p.pricelistBackOfficeId as grupp, p.productBackOfficeId, p.price\r\n" + 
+    		" FROM EPASAULE_PRICES p inner join   dbo.EPASAULE_CLIENTS c  on c.pricelistBackOfficeId = p.pricelistBackOfficeId \r\n" + 
+    		" inner join EPASAULE_AGENTS_CLIENTS a on a.ClientBackofficeID = c.BackOfficeId where price > 0 " ;
     
+   getProducts(null);
   
                          
     Connection con = getNewConnection();
  	Statement stmt = con.createStatement();
     
-         ResultSet  rs = stmt.executeQuery(sql4a);
+ 	 ResultSet  rs = stmt.executeQuery(sss);
+ 	 HashSet prs = new HashSet();
 
+     while (rs.next()) {
+    	 prs.add(rs.getString("pricegroup"));
+     }
+      rs.close();
+ 	
+           rs = stmt.executeQuery(sql4a);
+
+         
+         
            while (rs.next()) {
 
-                   String clGroup = Converter.cleanLitLatEst(rs.getString("grupp"));
-                   String prodID = rs.getString("toode");
-                   double price = rs.getDouble("hind");
-                   double perc = rs.getDouble("perc");
-                   String algus = rs.getString("algus").substring(0,10);
-                   String lopp = rs.getString("lopp").substring(0,10);
-                   int kuu = rs.getInt("kamp");
-                  // int relation = rs.getInt("RELATION");
-                   String kamp2 = rs.getString("kamp2");
-                   boolean iscamp = false;
-                   if(kamp2 != null && kamp2.trim().length() > 0) {
-                	   iscamp = true;
-                   }
+                   String gr = rs.getString("grupp");
+                   if(prs.contains(gr)) {
+                   String tt = rs.getString("toode");
+                   Double pr = rs.getDouble("hind");
                    
-                   MatrixLine mline = new MatrixLine();
-                   
-               
-                   if (clGroup != null && clGroup.trim().length() > 0) {
-                           mline.setCliGroup(clGroup.trim());
-                   }
+                           if(prodprices.get (tt) != pr) {
 
-                   if (prodID != null && prodID.trim().length() > 0) {
-                           mline.setProdID(prodID.trim());
-                   }
-                   
-                   if( iscamp ){
-                  	
-                    if (algus  != null && algus.trim().length() > 0 && algus.indexOf("1900")== -1) {
-                           mline.setStartDate(algus.trim());
-                   }
-
-                   if (lopp  != null && lopp.trim().length() > 0  && lopp.indexOf("1900")== -1) {
-                           mline.setEndDate(lopp.trim());
-                   }
-                   
-                   if(kuu > 2  && algus.indexOf("1900")== -1 && lopp.indexOf("1900")== -1){
-                  	 //mline.setProdLevel("pr");
-                   }
-                   
-                  // ainult kampaaniate puhul paneme hinna info kaasa .
-                   if(price > 0){
-                	   mline.setPrice(price);
-                       lines.add(mline);
-                   }
-                     
-                       if(perc > 0){
-                    	   mline.setDiscount(perc);
-                           lines.add(mline);
-                       }
-                       
-                       
-                   }
-                
-                  	
-                
-                  	
-                      
-                	
-           }
-           
-           rs.close();
-
-           
-           
-           String sql4 = "SELECT PRI.ACCOUNTRELATION as grupp,   PRI.ITEMRELATION as toode ,pri.AMOUNT as hind  , PERCENT1 as perc ,PRI.FROMDATE as algus " +
-           		" ,PRI.TODATE as lopp,month(PRI.TODATE -PRI.FROMDATE)  as kamp ,PRI.RELATION , astcampaignid as kamp2 " +
-       " FROM PRICEDISCTABLE pri INNER JOIN INVENTTABLE inv on inv.dataareaid=pri.dataareaid and inv.itemid =pri.itemrelation " +
-       "  WHERE PRI.DATAAREAID='eee' AND PRI.RELATION in (4,5) AND PRI.ACCOUNTCODE=1 AND pri.itemcode=0  and  " +
-       "    ((GETDATE() between PRI.FROMDATE AND PRI.TODATE+1) " +
-       "  or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
-       "  or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
-       "  or( GETDATE()<=PRI.TODATE+1) )   and astcampaignid = '' " +
-       "   ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation " ;
-           
-           
-           
-           rs = stmt.executeQuery(sql4);
-
-           while (rs.next()) {
-
-                   String clGroup = Converter.cleanLitLatEst(rs.getString("grupp"));
-                   String prodID = rs.getString("toode");
-                   double price = rs.getDouble("hind");
-                   double perc = rs.getDouble("perc");
-                   String algus = rs.getString("algus").substring(0,10);
-                   String lopp = rs.getString("lopp").substring(0,10);
-                   int kuu = rs.getInt("kamp");
-                  
-                   String kamp2 = rs.getString("kamp2");
-                   boolean iscamp = false;
-                   if(kamp2 != null && kamp2.trim().length() > 0) {
-                	   iscamp = true;
-                   }
-                   
-                   MatrixLine mline = new MatrixLine();
-                   
-               
-                   if (clGroup != null && clGroup.trim().length() > 0) {
-                           mline.setCliGroup(clGroup.trim());
-                   }
-
-                   if (prodID != null && prodID.trim().length() > 0) {
-                           mline.setProdID(prodID.trim());
-                   }
-                   
-                   if( iscamp ){
-                  	
-                    if (algus  != null && algus.trim().length() > 0 && algus.indexOf("1900")== -1) {
-                           mline.setStartDate(algus.trim());
-                   }
-
-                   if (lopp  != null && lopp.trim().length() > 0  && lopp.indexOf("1900")== -1) {
-                           mline.setEndDate(lopp.trim());
-                   }
-                   
-                   if(kuu > 2  && algus.indexOf("1900")== -1 && lopp.indexOf("1900")== -1){
-                  	 //mline.setProdLevel("pr");
-                   }
-                   
-                   }
-                   boolean goes = true;
-                 
-                   
-                   if(goes && iscamp){  //ainult kampaaniate puhul 
-                  	
-                           if(price > 0){
-                        	   mline.setPrice(price);
+                               MatrixLine mline = new MatrixLine();
+                                       mline.setCliGroup(gr);
+                                       mline.setProdID(tt);
+                                       mline.setPrice(pr);
                                lines.add(mline);
                            }
-                	
-                		
-                           if(perc > 0){
-                        	   mline.setDiscount(perc);
-                               lines.add(mline);
-                           }
-                	   }
-                  
-           }
+                   }
+             }
            
            rs.close();
-
            
-           
-         sql4 = "SELECT PRI.ACCOUNTRELATION as grupp,   PRI.ITEMRELATION as toode ,pri.AMOUNT as hind , PERCENT1 as perc ,PRI.FROMDATE as algus " +
-           		" ,PRI.TODATE as lopp,month(PRI.TODATE -PRI.FROMDATE)  as kamp,  astcampaignid as kamp2 " +
-" FROM PRICEDISCTABLE pri INNER JOIN INVENTTABLE inv on inv.dataareaid=pri.dataareaid and inv.itemid =pri.itemrelation " +
-" WHERE PRI.DATAAREAID='eee' AND PRI.RELATION=4 AND PRI.ACCOUNTCODE=0 AND pri.itemcode=0  and " +
-"   ((GETDATE() between PRI.FROMDATE AND PRI.TODATE+1) "+
-" or(GETDATE()>=PRI.FROMDATE AND year(PRI.toDATE) =1900) " +
-" or(year(PRI.FROMDATE) =1900 and year(PRI.toDATE) =1900) " +
-" or( GETDATE()<=PRI.TODATE+1) )   " +
-"    ORDER BY PRI.ACCOUNTRELATION,pri.itemrelation" ;
-                  
-                  rs = stmt.executeQuery(sql4);
 
-                  while (rs.next()) {
-
-                          String custID = Converter.cleanLitLatEst(rs.getString("grupp"));
-                          String prodID = rs.getString("toode");
-                          double price = rs.getDouble("hind");
-                          double perc = rs.getDouble("perc");
-                          String algus = rs.getString("algus").substring(0,10);
-                          String lopp = rs.getString("lopp").substring(0,10);
-                          int kuu = rs.getInt("kamp");
-                          String kamp2 = rs.getString("kamp2");
-                          boolean iscamp = false;
-                          if(kamp2 != null && kamp2.trim().length() > 0) {
-                       	   iscamp = true;
-                          }
-                          
-                          MatrixLine mline = new MatrixLine();
-                          
-                      
-                          if (custID != null && custID.trim().length() > 0) {
-                                  mline.setCliGroup(custID.trim());
-                          }
-
-                          if (prodID != null && prodID.trim().length() > 0) {
-                                  mline.setProdID(prodID.trim());
-                          }
-                          
-                          
-                          if(iscamp) {
-                        
-                              if (algus  != null && algus.trim().length() > 0  && algus.indexOf("1900")== -1) {
-                                  mline.setStartDate(algus.trim());
-                          }
-
-                          if (lopp  != null && lopp.trim().length() > 0  && lopp.indexOf("1900")== -1) {
-                                  mline.setEndDate(lopp.trim());
-                          }
-                          
-                          if(kuu > 2 ){
-                         	 mline.setProdLevel("pr");
-                          }  
-                          
-                          
-                          
-                      	   if(price > 0 ) {
-                   		   mline.setPrice(price);
-                              if(price > 0){
-                                  lines.add(mline);
-                              }
-                   	   }
-                     	
-                   	   if(perc > 0 ) {
-                   		   mline.setDiscount(perc);
-                              if(perc > 0){
-                                  lines.add(mline);
-                              }
-                   	   }
-                   	   
-                          }
-
-                       
-                     
-                	   
-                         
-                 
-                  }
-                  
-                  rs.close();
-                  stmt.close();
-                  con.close();
-                  
        } catch (SQLException ex) {
-       ex.printStackTrace();
+          ex.printStackTrace();
        }
-       return lines;}
+
+       return lines;
+       
+   }
+   
    
   public String getProductSortingData(){
    	return null;
@@ -1440,11 +1195,13 @@ if(grupp.equals("leib") ){
   }
 
   private Vector prodcodes = null;
+
+  private HashMap<String,Double> prodprices = null;
   
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
     String cmd = "   Select backOfficeId as itemid,Name AS nimetus, quantityBox AS kastis,quantityPallete as alusel,increasestep as opt, minimalOrderQuantity as mini, Price AS price, barCode AS ean,groupBackOfficeId AS grupp,\r\n" + 
-    		"brandBackofficeId AS grupp2,unitName AS unit, vatPercent as vat,* from  dbo.EPASAULE_PRODUCTS"  ;
+    		"brandBackofficeId AS grupp2,unitName AS unit, vatPercent as vat from  dbo.EPASAULE_PRODUCTS"  ;
 
              String cmd2 = " Select productBackofficeId as toode,Inventory as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES ";
         
@@ -1455,6 +1212,7 @@ if(grupp.equals("leib") ){
     TreeMap products = new TreeMap();
     TreeMap<String, Double> stocks = new TreeMap<String, Double>();
     TreeMap<String, String> partii = new TreeMap<String, String>();
+    prodprices = new HashMap<String,Double>();
     
     try {
         Connection con =   this.getNewConnection();
@@ -1499,6 +1257,7 @@ if(grupp.equals("leib") ){
         prod.setOptAmountInUnits(rs.getDouble("opt"));
         prod.setMinAmountInUnits(rs.getDouble("mini"));
         prod.setPrice(rs.getDouble("price"));
+        prodprices.put(prod.getID(), prod.getPrice());
 
         String ean = rs.getString("ean");
         if(ean!=null && ean.trim().length()>0){
@@ -1812,7 +1571,7 @@ if(grupp.equals("leib") ){
   }
 
   public String getDriverVersion(){
-    return "AxaFazerLV";
+    return "EugestaEST";
   }
 
   public String getSubjectFilesTo(){
@@ -2247,4 +2006,14 @@ if(grupp.equals("leib") ){
   private String subjectFilesTo = null;
   private Vector prods = new Vector();
     private NumberFormat NF = NumberFormat.getInstance();
+
+
+
+
+	@Override
+	public void PictureMaker() {
+		  makePictureCat();
+		  System.exit(0);
+		
+	}
 }

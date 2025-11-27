@@ -8,7 +8,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -97,35 +103,45 @@ public class RivileBalmerkDBDriver extends AbstractDBDriver implements  BulkUpda
     		   " " ;
 
 
-String pictsa = parent.getProps().getProperty("picta.dir");
-String picts = parent.getProps().getProperty("pict.dir");
-
-File d1  = new File(pictsa);
-File[] dd1 = d1.listFiles();
 
 
-for(int i = 0;dd1.length>i;i++){
-	File fil = dd1[i];
-	String name = fil.getName();
-//	System.out.println(name);
-	if(name.contains("(") && name.contains(")") && name.toLowerCase().endsWith("jpg")) {
-		String ean = name.substring(name.lastIndexOf("(")+1,name.lastIndexOf(")"));
-		
-		if(ean.length() > 4) {
-			 File fff =  new File (picts + ean + ".jpg");
-			 if(!fff.exists() || fff.length() != fil.length()) {
-				  try {
-						Converter.copyFile(fil,fff);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}  
-			 }
-	        	
-		}
-	}
-	
-}
+    	      String pictsa = parent.getProps().getProperty("picta.dir");   // source dir
+    	      String picts  = parent.getProps().getProperty("pict.dir");     // target dir
+
+    	      Path sourceDir = Paths.get(pictsa);
+    	      Path targetDir = Paths.get(picts);
+
+    	      try (DirectoryStream<Path> stream = Files.newDirectoryStream(sourceDir)) {
+
+    	          for (Path file : stream) {
+
+    	              String name = file.getFileName().toString();
+
+    	              if (name.contains("(") && name.contains(")") && name.toLowerCase().endsWith("jpg")) {
+
+    	                  String ean = name.substring(name.lastIndexOf("(") + 1,
+    	                                              name.lastIndexOf(")"));
+
+    	                  if (ean.length() > 4) {
+
+    	                      Path targetFile = targetDir.resolve(ean + ".jpg");
+
+	                          try {
+    	                      if (Files.notExists(targetFile) || Files.size(targetFile) != Files.size(file)) {
+    	                              Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
+    	                         }
+    	                          } catch (IOException e) {
+    	                              e.printStackTrace();
+    	                          }
+    	                      
+    	                  }
+    	              }
+    	          }
+    	      } catch (IOException e1) {
+				e1.printStackTrace();
+			}
+    	  
+
 
 
 

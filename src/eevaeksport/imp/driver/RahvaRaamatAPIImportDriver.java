@@ -227,7 +227,7 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
     	String text = " " + name +  "|Tellimuse number: " + order.getDokNr() +  "\nKlient : " + name + " " + order.getCompany() +
     			 "\nAgent: " + agnimi + "\n\n" 
     			 + getOrderText(order,names,eans,st) + "\n" + komm ;   
-    	
+    	System.out.println("Saadan emaili " + emailto);
     	Converter.sendReportEmail(text, null, parent.getEksportFrame().getEksportPanel(),emailto);
     	
     	makeOutput(order,name,names,eans);

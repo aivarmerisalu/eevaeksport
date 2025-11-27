@@ -371,7 +371,7 @@ public class Converter {
 			              File[] files = folder.listFiles();
 
 			              for (File file : files) {
-			                  if (file.isFile() && file.getName().contains("pallets") && !file.getName().contains("$")) { // pallets example
+			                  if (file.isFile() && file.getName().contains("pallet") && !file.getName().contains("$")) { // pallets example
 			                      System.out.println("Found: " + file.getAbsolutePath());
 			                 		try {
 			                 			FileInputStream ff = new FileInputStream(file);
@@ -5184,6 +5184,8 @@ public class Converter {
 		  	  	 if(email != null) {
 		  	  	    mail.setFilesTo(email);
 		  	  		mail.send(); 
+		  	  	System.out.println("Mail saadetud " + email);
+
 		  	  	 }
 		 	}
 		  	

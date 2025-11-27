@@ -939,7 +939,9 @@ public class EksportPanel extends JPanel implements ActionListener,
             		|| driver.getDriverVersion().equals("SmartenR")
             		|| driver.getDriverVersion().equals("Kalev")
             		|| driver.getDriverVersion().equals("S1Tabak")
-            		
+            		|| driver.getDriverVersion().equals("EugestaLIT")
+            		|| driver.getDriverVersion().equals("EugestaLAT")
+            		|| driver.getDriverVersion().equals("EugestaEST")
             		|| driver.getDriverVersion().equals("NaviLivikoLIT")){
             	lastThree = ((Discounter) driver).getLastThreeData();
             }
@@ -1217,8 +1219,10 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("BalmerkCSV")
 					    || driver.getDriverVersion().equals("B1LT")
 					    || driver.getDriverVersion().equals("RahvaRaamat")
-
 					    || driver.getDriverVersion().equals("AxaKosmelita")
+	            		|| driver.getDriverVersion().equals("EugestaLIT")
+	            		|| driver.getDriverVersion().equals("EugestaLAT")
+	            		|| driver.getDriverVersion().equals("EugestaEST")
 					    
                 		  )
                   
@@ -1331,6 +1335,9 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("SkaiteRoskisko")
 					    || driver.getDriverVersion().equals("RahvaRaamat")
 					    || driver.getDriverVersion().equals("AxaKosmelita")
+	            		|| driver.getDriverVersion().equals("EugestaLIT")
+	            		|| driver.getDriverVersion().equals("EugestaLAT")
+	            		|| driver.getDriverVersion().equals("EugestaEST")
 					  ){
                 	 
                 	  System.out.println("Teen Fixi " + jsonDate(Calendar.getInstance().getTime()) );
@@ -1353,6 +1360,10 @@ public class EksportPanel extends JPanel implements ActionListener,
                 		  || driver.getDriverVersion().equals("Kalev")
                 		  || driver.getDriverVersion().equals("SmartenR")
                 		  || driver.getDriverVersion().equals("AxaFazerEE")
+
+                  		|| driver.getDriverVersion().equals("EugestaLIT")
+                  		|| driver.getDriverVersion().equals("EugestaLAT")
+                  		|| driver.getDriverVersion().equals("EugestaEST")
                 		  || driver.getDriverVersion().equals("S1Tabak")){
                      LastThreeFile(agentCode, customers,  lastThree);
                    }
@@ -4898,6 +4909,8 @@ if (getProps().getProperty("no.matrixagent") != null) {
        buf.append(EksportPanel.separator);
        buf.append(prod.DEPO_WO_VAT);
 
+       buf.append(EksportPanel.separator);
+       buf.append(prod.volMeasure);
        
        buf.append(lineSeparator);
        
