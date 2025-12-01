@@ -4248,6 +4248,10 @@ if (getProps().getProperty("no.matrixagent") != null) {
            buf.append(EksportPanel.separator);
            buf.append(cust.debtnotara); 
            
+           buf.append(EksportPanel.separator);
+           buf.append(cust.getMinVolSum()); 
+           
+           
            buf.append(lineSeparator);
       }
 

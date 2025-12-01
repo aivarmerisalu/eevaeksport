@@ -381,6 +381,7 @@ private String ankeediTyyp = " ";
     private String paymterm = " ";
     private boolean useSecondPricelist = false ;
     private String custType = " ";
+    private String minOrdVol = "0";
     private double budget = 0;
     private double sold = 0;
     private double average = 0;
@@ -1138,5 +1139,12 @@ public boolean isAskContactData() {
 
 public void setAskContactData(boolean askContactData) {
 	this.askContactData = askContactData;
+}
+
+public void setMinVolSum(String sum) {
+	this.minOrdVol = sum;
+}
+public String getMinVolSum() {
+	return minOrdVol;
 }
 }

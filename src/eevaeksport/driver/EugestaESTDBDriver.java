@@ -247,47 +247,65 @@ try {
 	String sss = "Select c.pricelistBackOfficeId as pricegroup\r\n" + 
 			"                       				 from  dbo.EPASAULE_CLIENTS c inner join EPASAULE_AGENTS_CLIENTS a on a.ClientBackofficeID = c.BackOfficeId group  by c.pricelistBackOfficeId";
 	
-    String sql4a = "SELECT p.pricelistBackOfficeId as grupp, p.productBackOfficeId, p.price\r\n" + 
-    		" FROM EPASAULE_PRICES p inner join   dbo.EPASAULE_CLIENTS c  on c.pricelistBackOfficeId = p.pricelistBackOfficeId \r\n" + 
-    		" inner join EPASAULE_AGENTS_CLIENTS a on a.ClientBackofficeID = c.BackOfficeId where price > 0 " ;
-    
-   getProducts(null);
-  
                          
     Connection con = getNewConnection();
  	Statement stmt = con.createStatement();
     
  	 ResultSet  rs = stmt.executeQuery(sss);
- 	 HashSet prs = new HashSet();
+ 	 HashSet<String> prs = new HashSet<String>();
 
      while (rs.next()) {
     	 prs.add(rs.getString("pricegroup"));
      }
       rs.close();
  	
+      
+	    String sql4a = "SELECT p.pricelistBackOfficeId as grupp, p.productBackOfficeId as toode, p.price as hind" + 
+	    		" FROM EPASAULE_PRICES p inner join EPASAULE_PRODUCTS a on a.backOfficeId = productBackOfficeId and p.price !=a.price where "
+	    		+ "p.price > 0 " ;	
            rs = stmt.executeQuery(sql4a);
-
-         
-         
            while (rs.next()) {
 
                    String gr = rs.getString("grupp");
                    if(prs.contains(gr)) {
                    String tt = rs.getString("toode");
                    Double pr = rs.getDouble("hind");
-                   
-                           if(prodprices.get (tt) != pr) {
-
-                               MatrixLine mline = new MatrixLine();
+                             MatrixLine mline = new MatrixLine();
                                        mline.setCliGroup(gr);
                                        mline.setProdID(tt);
                                        mline.setPrice(pr);
                                lines.add(mline);
-                           }
                    }
+                   
              }
            
+           rs.close();    	
+      
+           String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, minPrice as price from dbo.EPASAULE_PROMOTIONOBJECTS a "
+           		+ "inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId " + 
+           		" where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91 " + 
+           		" group by  a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice " + 
+           		" order by a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice ";
+           rs = stmt.executeQuery(sql2);
+           while (rs.next()) {
+
+           String clGroup = rs.getString("clgroup");
+           String prodID = rs.getString("prodid").trim();
+           String sdate = rs.getString("startday");
+           String edate = rs.getString("endday");
+           double price = rs.getDouble("price");
+           
+           MatrixLine mline = new MatrixLine();
+           mline.setCliGroup(clGroup);
+           mline.setProdID(prodID);
+           mline.setStartDate(sdate.substring(0,10));
+           mline.setEndDate(edate.substring(0,10));
+           mline.setPrice(price);
+   lines.add(mline);
+           
+           }
            rs.close();
+           stmt.close();
            
 
        } catch (SQLException ex) {
@@ -804,6 +822,11 @@ if(grupp.equals("leib") ){
 	  
    TreeMap deldays =  makeCustomerDeliveryDays();
    
+
+	
+	HashMap<String, String> promos = new HashMap<String, String>();
+	  
+	
     HashMap<String, Vector<Agent>> cliags = new HashMap<String, Vector<Agent>>();
   
     
@@ -837,11 +860,30 @@ if(grupp.equals("leib") ){
     	                 cliags.put(cli, vv);
     	               }
     	              rs1.close();
-    	              stmt.close();
     		
     	
+    	              aaa = "select clientBackOfficeId as klient,  a.promotionBackOfficeId as promo   from dbo.EPASAULE_PROMOTIONOBJECTS a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
+    	              		"	where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91\r\n" + 
+    	              		"	group by  a.promotionBackOfficeId , clientBackOfficeId \r\n" + 
+    	              		"	order by  clientBackOfficeId  " ;
+    	        		
+    	              	rs1 = stmt.executeQuery(aaa);
+    	       	               while(rs1.next()){
+    	       	                 String cli = rs1.getString("klient").trim();
+    	       	                 String route = rs1.getString("promo").trim();
+    	       	                 String aa = promos.get(cli);
+    	       	                 if(aa == null) {
+    	       	                	 promos.put(cli, route);
+    	       	                 }else {
+    	       	                	promos.put(cli, aa + "|" + route);
+    	       	                 }
+    	       	                  
+    	       	                  }
+    	       	              rs1.close();
+    	       	              stmt.close();
+    	       		
+    	       	
     	
-    	 con = this.getNewConnection();
     	
       	
     	TreeMap<String,Double> debts = new TreeMap<String ,Double>();
@@ -942,12 +984,20 @@ if(grupp.equals("leib") ){
          
         } 
         
+        if(promos.get(cust.getID()) != null) {
+        	 if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
+            	 cust.setGroup(cust.getGroup() + "|" +promos.get(cust.getID()));
+             } else {
+            	 cust.setGroup(promos.get(cust.getID()));
+             }
+        }
+        
         String aadr = rs.getString("address");
         if (aadr != null) {
         	if(aadr.endsWith(", %1")) {
         	 aadr = aadr.substring(0,aadr.indexOf(", %1")).trim();
         	}
-          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll(country, " ").trim()), country));
+          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll(country, " ").replaceAll("  "," ").trim()), country));
        
           if(aadr.contains(",")) {
           		cust.restStreet = aadr.trim().substring(0,aadr.trim().indexOf(","));
@@ -1298,13 +1348,36 @@ if(grupp.equals("leib") ){
     
       }
       rs.close();
-      stmt.close();
-      con.close();
+      
+  	StringBuffer sb = new StringBuffer();
+    rs = stmt.executeQuery("select BACKOFFICEID as id, NAME as nimi from dbo.EPASAULE_RETURN_REASONS");
+   while(rs.next()){
+   	String id = rs.getString("id");
+   	String name = rs.getString("nimi");
+   	if(name != null && name.trim().length() > 0){
+   	      sb.append( id+ ";" +Converter.enCodeEst(name.trim()) + "\n");	
+   	}
+   }
+   
+  rs.close();
+  stmt.close();
+  con.close();
+ // System.out.println("REASON " + sb.toString());
+  if(sb.length() > 0){
+	   Converter.saveFile("returnreason.txt", sb.toString());
+  }
+
+      
       
     } catch (Exception e){
       getParent().showError(e);
     }
 
+    
+    
+    
+    
+    
     return products;
   }
 

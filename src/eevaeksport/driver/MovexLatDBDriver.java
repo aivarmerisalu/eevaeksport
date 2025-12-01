@@ -932,11 +932,17 @@ Calendar cal = Calendar.getInstance();
             		cust.addCity( blcomm.replace('.', '-').replace('.', '-'));
             }
                   
+            if(getParent().getProps().getProperty("minordvol") != null) {
+                cust.setMinVolSum(getParent().getProps().getProperty("minordvol"));
+            }
             
           if(  horecaGrs != null && (horecaGrs.contains("," + klgrupp) || horecaGrs.contains(klgrupp + ","))) {
         	 // cust.addFixSortCode("HORECAFIX");
         	  cust.statusHoreca = true;
         	  cust.setShowfullpricelist(true);
+        	  if(getParent().getProps().getProperty("minordvolHRC") != null) {
+                  cust.setMinVolSum(getParent().getProps().getProperty("minordvolHRC"));
+              }
           }
           
         //  if(cal.get(Calendar.DAY_OF_MONTH) > 5) {
