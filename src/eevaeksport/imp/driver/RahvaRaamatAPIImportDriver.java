@@ -94,18 +94,6 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
   HashMap poeStock = null;
   
   
-  private HttpResponse restPostRequest(String uri, String json, HttpClient client) throws Exception {
-	String  token = getMSToken();
-		 HttpPost httpPost = new HttpPost(uri);
-		 if(json != null){
-			 httpPost.setEntity(new StringEntity(json,"utf-8"));
-		        httpPost.setHeader("Accept", "application/json");
-		        httpPost.setHeader("Content-type", "application/json;charset=utf-8");
-		 }
-	        return client.execute(httpPost);
-
-	}
-  
   private String  getMSToken() {
 		 String res = null;
 		 String  secret = parent.getProps().getProperty("api.secret"); //"I~c8Q~fgLOHhFnFcIe2RHUSX6HWlPHXN8fon9b4Q"; 
@@ -279,12 +267,8 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
         while (iter.hasNext()){
           OrderLine line = (OrderLine)iter.next();
           String toode  = line.getToode();
- 	    	  coun++;
+ 	    	  
         	
-        	  
-        JSONObject ll = new JSONObject();
-       	 ll.put("LineNum", coun);
-       	 ll.put("ProductId", toode);
        
        	 
          String name = line.getTooteNimi();
@@ -300,7 +284,22 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
 	        if (eans != null && eans.get(toode) != null) {
 	            ean = (String)eans.get(toode);
 	        }
-	   	     ll.put("EAN", ean);
+	   	  
+	        
+	   	  int kk = (int)line.getKogus();
+	         String kog = "";
+	        if(kk < 0) {
+	        	coun++;
+	        	kog = (kk *-1)+"";
+	        	JSONObject ll = new JSONObject();
+		       	 ll.put("LineNum", coun);
+		       	 ll.put("ProductId", toode);
+		         ll.put("EAN", ean);
+		   	     ll.put("Qty", kog);
+	       		 ll.put("ReturnType", "Tagastus"); 
+	       	      linex.add(ll);
+	        }
+    	 
 	   	   
 	        String kadund = "";
 	        String kahju = "";
@@ -309,34 +308,34 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
 	        if (par != null && par.length() > 0) {
 	        	if(par.indexOf("@") != -1 ) {
 	        		kahju = par.substring(par.indexOf("@")+1, par.lastIndexOf("@"));
-	        		kahju = "Kahjustunud";
+	        		 if(!kahju.equals("0")) {
+	        		coun++;
+	        		  JSONObject ll1 = new JSONObject();
+	        	       	 ll1.put("LineNum", coun);
+	        	       	 ll1.put("ProductId", toode);
+	        	   	     ll1.put("EAN", ean);
+	        	   	     ll1.put("ReturnType", "Kahjustunud");
+	               	     ll1.put("Qty", kahju);
+	               	    
+	               	  linex.add(ll1);
+	               	     }
 	        	}
+	        	
             if(par.indexOf("*") != -1 ) {
 	        	 kadund = 	par.substring(par.indexOf("*")+1, par.lastIndexOf("*"));
-	        	 kadund = "Kadunud";
+	        	 if(!kadund.equals("0")) {
+	 	            
+	        	 coun++;
+       		  JSONObject ll1 = new JSONObject();
+       	       	 ll1.put("LineNum", coun);
+       	       	 ll1.put("ProductId", toode);
+       	   	     ll1.put("EAN", ean);
+       	   	     ll1.put("ReturnType", "Kadunud");
+              	 ll1.put("Qty", kadund);
+                   	  linex.add(ll1);
+	               	     }
 	        	}
-	        }
-	        
-	        int kk = (int)line.getKogus();
-	       
-	        String kog = "";
-	        if(kk < 0) {
-	        	kog = (kk *-1)+"";
-	        }
-       	 
-       	 
-       	 
-       	 
-       	 
-       	 ll.put("Qty", kog);
-       	 if((kadund+kahju).length() > 1) {
-       	 ll.put("ReturnType", kadund+kahju);
-       	 }else {
-       		 ll.put("ReturnType", "Tagastus"); 
-       	 }
-       	
-       	    linex.add(ll);
-       	 
+	         }
           }
     	   
        	
