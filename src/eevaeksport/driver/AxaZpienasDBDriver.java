@@ -1269,8 +1269,8 @@ String email = " ";
 
 		try {
 			System.out.println("jamxxx");
-			Connection con = getNewConnection3();
-			PreparedStatement ps = con.prepareStatement(sql);
+		//	Connection con = getNewConnection3();
+			//PreparedStatement ps = con.prepareStatement(sql);
 			TreeMap custs = getCusts();
 			
         
@@ -1279,7 +1279,7 @@ String email = " ";
 				
 				eevaeksport.report.SuperVisorLineWrapperMeri lw = new eevaeksport.report.SuperVisorLineWrapperMeri(
 						iter.next());
-				ps.setString(1, wr.getInfo().getAgentID());
+			/*	ps.setString(1, wr.getInfo().getAgentID());
 				ps.setString(2, Converter.deCode(wr.getInfo().getAgentName()));
 				ps.setString(3, lw.getLine().getCustID());
 				ps.setString(4, Converter.deCode(lw.getLine().getCustName()));
@@ -1301,46 +1301,47 @@ String email = " ";
 				ps.setDouble(20, lw.getLine().getAction1Eval());
 				ps.setDouble(21, lw.getLine().getAction2Eval());
 				ps.setDouble(22, lw.getLine().getActionTotalEval());
-				ps.setDouble(23, lw.getLine().getCustEval());
+				ps.setDouble(23, lw.getLine().getCustEval()); */
 				String cc = lw.getLine().getCustComment();
 				if (cc == null) {
 					cc = " ";
 				}
-				ps.setString(24, Converter.deCode(cc));
+				//ps.setString(24, Converter.deCode(cc));
 
 				String cd = lw.getLine().getComment();
 				if (cd == null) {
 					cd = " ";
 				}
-				ps.setString(25, Converter.deCode(cd));
+			//	ps.setString(25, Converter.deCode(cd));
 
 				String ce = lw.getLine().getCustAgentId();
 				if (ce == null) {
 					ce = " ";
 				}
 
-				ps.setString(26, ce);
+				//ps.setString(26, ce);
 
 				String cf = lw.getLine().getCustAgentName();
 				if (cf == null) {
 					cf = " ";
 				}
+				/*
 				ps.setString(27, Converter.deCode(cf));
 				ps.setInt(28, lw.getLine().getDealNr());
 				ps.setInt(29, lw.getLine().getIdealNr());
-
+*/
 				String cr1 = lw.getLine().getResStr1();
 				if (cr1 == null) {
 					cr1 = " ";
 				}
 				
-				ps.setString(30, cr1);
+				//ps.setString(30, cr1);
 
 				String cr2 = lw.getLine().getResStr2();
 				if (cr2 == null) {
 					cr2 = " ";
 				}
-				ps.setString(31, cr2);
+				//ps.setString(31, cr2);
 
 				String cr3 = lw.getLine().getResStr3();
 				if (cr3 == null) {
@@ -1357,10 +1358,10 @@ String email = " ";
 
 				}
 
-				ps.setString(32, getDateStr(cal));
+			/*	ps.setString(32, getDateStr(cal));
 				ps.setInt(33, lw.getLine().getResInt1());
 				ps.setInt(34, lw.getLine().getResInt2());
-				ps.setInt(35, lw.getLine().getResInt3());
+				ps.setInt(35, lw.getLine().getResInt3());*/
 			//	System.out.println("ps asse");
 				String skai = "";
 				
@@ -1388,13 +1389,13 @@ String email = " ";
 				if(cr1.equals("INVSCAN")){
 					makeCSV(sb , cr2 + "-"+ cal.get(Calendar.MILLISECOND));
 				}else{
-					ps.executeUpdate();	
+					//ps.executeUpdate();	
 				}
 				
 			}
 
-			ps.close();
-			con.close();
+		//	ps.close();
+			//con.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

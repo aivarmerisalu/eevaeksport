@@ -497,9 +497,12 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
               cust.setName(Converter.enCodeEst(name));
 
               String discStr = rs.getString("ale");
-              if (discStr != null || discStr.trim().length() >0 ){
+              if (discStr != null && discStr.trim().length() >0 ){
             	  try{
-            		     cust.setDiscount(Double.parseDouble(discStr.trim()));
+            		  double dd = Double.parseDouble(discStr.trim());
+            		  if(dd < 100) {
+            		     cust.setDiscount(dd);
+            		  }
             	            		  
             	  }catch(Exception e){
             		  
