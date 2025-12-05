@@ -403,6 +403,7 @@ public class Product {
 	public double TAARA_VAT = 0;
 	public double DEPO_WO_VAT = 0;
 	public double volMeasure = 0;
+	public double pack = 0;
 	
    
    public double getOptAmountInUnits() {

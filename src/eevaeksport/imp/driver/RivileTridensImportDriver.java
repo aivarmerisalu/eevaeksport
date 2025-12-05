@@ -429,22 +429,7 @@ HashMap pants = null;
      }
          
      
-	/* Vector lines = order.getOrderLines();
-     for (int i = 0; i < lines.size(); i++) {
-    	    
-      	OrderLine line = (OrderLine)lines.elementAt(i);
-          String toode = line.getToode();
-        //'  String pant = getPandiPakend(toode);
-          if(pant != null ){
-        	  double aaa = line.getKogus();
-         	  if(pandikas.get(pant) == null){
-         		  pandikas.put(pant,aaa+"");
-               } else {
-               	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+(aaa))+"");
-               }
-            }
-         }*/
-  
+	
      
 	
      boolean shipmodeown  = false ;
@@ -814,7 +799,7 @@ if(ladu.trim().length()!=0){
   
   private String getOOSEmailText( Order ord, String agent, String custname, String addr, boolean overDisc, String ov21) throws SQLException {
 		int i = 0;
-		int j = 0;
+		double ordSum = 0;
 		 String text = order.getInfo();
 		  
 		   if(text != null && text.trim().length() > 0){
@@ -858,16 +843,16 @@ if(ladu.trim().length()!=0){
 			for (; i < ord.getOrderLines().size(); i++) {
 				OrderLine line = (OrderLine) ord.getOrderLines().elementAt(i);
 				String discS = "";
-				 Double price = line.getPrice();
-				 if(line.getDiscount() > 0 ) {
-					// price = price * (100-line.getDiscount())/100;
+				 
+
+				 double hind = this.getProductPrice(line.getToode());
+				if(line.getDiscount() > 0 ) {
+
+					hind = hind * (100-line.getDiscount())/100;
 					 discS = getNF().format(line.getDiscount()) + "%";
 				 }
-				
 				 
-				String priceS = getNF().format(price) ;
-				
-				
+				String priceS = getNF().format(hind) ;
 				
 				String col = "";
 				String part = "";
@@ -875,20 +860,20 @@ if(ladu.trim().length()!=0){
 					part = "<br>" +line.getPartii().trim();
 					col = "color: red; font-weight: bold;";
 				}
-				
+				ordSum = ordSum + hind *line.getKogus();
 				
 					sb.append("<tr><td>" + (i+1) + ".</td><td>" + line.getToode() + 
 							"</td><td><div style=\"min-width: 250px\" >" + identifyProductName(line.getToode()) + part + "</div></td>"
 									+ "<td><div style=\"min-width: 150px\" >" + line.getKogus() + "</div></td>"
 											+ "<td><div  style=\"min-width: 200px; "+col+"\" >" + discS + "</div></td>"
 													+ "<td><div style=\"min-width: 200px\" >" + priceS + "</div></td></tr>" );
-				j++;
+				
 			}
 			
-		String ordSum =	getNF().format(getCalcSum(ord.getOrderLines())) + " €";
+		String ordSumw =	getNF().format(ordSum) + " €";
 		sb.append("</table><br><font face=\"Arial\" size=\"3\" color=\"#000000\"><span style=\"float: right\"> <b>" 
-				+ "Suma  " + ":</b> " +" " +  ordSum+ "</span></font> <br>") ;
-		System.out.println("ordSum " + ordSum);
+				+ "Suma  " + ":</b> " +" " +  ordSumw+ "</span></font> <br>") ;
+		System.out.println("ordSum " + ordSumw);
 		return sb.toString();
 	}
 

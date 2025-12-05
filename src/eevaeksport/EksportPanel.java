@@ -4612,42 +4612,14 @@ if (getProps().getProperty("no.matrixagent") != null) {
         
         if(driver.getDriverVersion().equals("AltiaLAT")){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(2,prod.getName().length()));
-            	
         }else if(driver.getDriverVersion().equals("Miesnieks")){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(5,prod.getName().length()));
         }else if(driver.getDriverVersion().equals("Dansg")){
         	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(2,prod.getName().length()));
-        }else if(driver.getDriverVersion().equals("AxaJNGLATww")){
-        	buf.append(  (prod.getName().replace(';', '-').replace(':', '-')).substring(3,prod.getName().length()));
-        }else if(driver.getDriverVersion().equals("SAFSaaremaa")){
-        	buf.append((prod.getName().replace(';', '-').replace(':', '-')).substring(3,prod.getName().length()).replaceAll("\\r\\n|\\r|\\n", " "));
-        }else if(driver.getDriverVersion().equals("Rakvere")){
-        	String add = "";
-        	if(prod.getStatusTop().equals("1") && prod.getMustBe().equals("1")){
-        		add = "N+T ";
-        	}
-        	
-        	if(prod.getStatusTop().equals("1")){
-        		add = "TOP ";        	}
-        	if(prod.getMustBe().equals("1")){
-        		add = "NT ";
-        	} 	
-
-           // System.out.println((add + "'"+  (prod.getName().replace(';', ':'))).trim());
-        	buf.append((add + (prod.getName().replace(';', '-').replace(':', '-').replaceAll("\\r\\n|\\r|\\n", " "))).trim());	
-       
         }else if(driver.getDriverVersion().equals("ScalaPrikeEst")){
         	String add = "  ";
         	if(prod.getOldName() != null &&prod.getOldName().trim().length() != 0){
         		add = prod.getOldName() +" ";
-        	}
-        
-          	buf.append("   " + add +(prod.getName().trim().replace(';', '-').replace(':', '-').replaceAll("\\r\\n|\\r|\\n", " ")).trim());	
-        }else if(driver.getDriverVersion().equals("ScalaPrikeEstCC")){
-        	String add = "  ";
-        	if(prod.getOldName() != null &&prod.getOldName().trim().length() != 0){
-        		add = prod.getOldName() +" ";
-        		// System.out.println((add + "'"+  (prod.getName().replace(';', ':'))).trim());
         	}
         
           	buf.append("   " + add +(prod.getName().trim().replace(';', '-').replace(':', '-').replaceAll("\\r\\n|\\r|\\n", " ")).trim());	
@@ -4656,7 +4628,6 @@ if (getProps().getProperty("no.matrixagent") != null) {
         }else{
         	buf.append(prod.getName().replace(';', '-').replace(':', '-').replaceAll("\\r\\n|\\r|\\n", " ")
         			.replace('²', '2').replace('¹', '1').replace('¼', ' ').replace('¾', ' ').replace('~', ' ').replace('¤', ' '));
-        	
         }
         
         
@@ -4915,6 +4886,9 @@ if (getProps().getProperty("no.matrixagent") != null) {
 
        buf.append(EksportPanel.separator);
        buf.append(prod.volMeasure);
+
+       buf.append(EksportPanel.separator);
+       buf.append(prod.pack);
        
        buf.append(lineSeparator);
        

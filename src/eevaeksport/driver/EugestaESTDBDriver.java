@@ -997,7 +997,9 @@ if(grupp.equals("leib") ){
         	if(aadr.endsWith(", %1")) {
         	 aadr = aadr.substring(0,aadr.indexOf(", %1")).trim();
         	}
-          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll(country, " ").replaceAll("  "," ").trim()), country));
+        	aadr = aadr.replaceAll("\\s+", " ").trim();
+        	
+          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll(country, " ").replaceAll("\\s+", " ").trim()), country));
        
           if(aadr.contains(",")) {
           		cust.restStreet = aadr.trim().substring(0,aadr.trim().indexOf(","));
@@ -1012,10 +1014,10 @@ if(grupp.equals("leib") ){
         	cust.setDelDays((String)deldays.get(cust.getID()));
         }    
 
+        name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
         cust.restName = name;
         
         name = name + " " + cust.getAddress() + " " + accountnum ;
-        
         cust.setName(name );
         
       /*  String visit = rs.getString("visit");
@@ -1250,8 +1252,9 @@ if(grupp.equals("leib") ){
   
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
-    String cmd = "   Select backOfficeId as itemid,Name AS nimetus, quantityBox AS kastis,quantityPallete as alusel,increasestep as opt, minimalOrderQuantity as mini, Price AS price, barCode AS ean,groupBackOfficeId AS grupp,\r\n" + 
-    		"brandBackofficeId AS grupp2,unitName AS unit, vatPercent as vat from  dbo.EPASAULE_PRODUCTS"  ;
+    String cmd = "   Select a.backOfficeId as itemid,a.Name AS nimetus, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini, \r\n" + 
+    		"a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
+    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat ,a.* from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId"  ;
 
              String cmd2 = " Select productBackofficeId as toode,Inventory as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES ";
         
@@ -1271,19 +1274,19 @@ if(grupp.equals("leib") ){
         
     	while(rs1.next()){
           String id = rs1.getString("toode").trim();   
-          Double sto = rs1.getDouble("stock");
+          double sto = rs1.getDouble("stock");
           String ladu = rs1.getString("ladu").trim();
           String part = rs1.getString("partii");
-          
+          String gg = "";
           if(part != null && !part.startsWith("1900")) {
-
-              String gg = "BB:" + part.substring(0,10);
-              gg = sto + "-" +ladu + "-" + gg;
-        	  if(partii.get(id) != null) {
-            	 gg = partii.get(id)+ "|" + gg;
-              }  
-        	  partii.put(id, gg);
+              gg = " - BB:" + part.substring(0,10);
           }
+          gg = (int)sto + " - " +ladu  + gg;
+          
+    	  if(partii.get(id) != null) {
+        	 gg = partii.get(id)+ "|" + gg;
+           }  
+    	  partii.put(id, gg);
           
           if(stocks.get(id) != null) {
         	  sto = stocks.get(id) + sto; //summeerime laoseisu 
@@ -1300,10 +1303,22 @@ if(grupp.equals("leib") ){
       while(rs.next()){
         String kood = rs.getString("itemid").trim();
         Product prod = new Product(kood);
-        String nimetus = Converter.enCodeEst(Converter.firstToUpperCase(rs.getString("nimetus").trim())) + " " + kood;
+        String nimetus = Converter.enCodeEst((rs.getString("nimetus").trim())) + " " + kood;
      
         prod.setInCases(rs.getDouble("kastis"));
-        prod.setOnPallet(rs.getDouble("alusel"));
+        Double pall = rs.getDouble("alusel");
+        if(pall > 0) {
+        prod.setOnPallet(pall);
+        }
+        Double layer = rs.getDouble("layer");
+        if(layer > 0) {
+        	prod.layer = layer;
+        }
+        Double pack = rs.getDouble("pakk");
+        if(layer > 0) {
+        	prod.pack = pack;
+        }
+        
         prod.setOptAmountInUnits(rs.getDouble("opt"));
         prod.setMinAmountInUnits(rs.getDouble("mini"));
         prod.setPrice(rs.getDouble("price"));
