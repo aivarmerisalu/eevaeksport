@@ -23,6 +23,7 @@ import org.apache.log4j.PropertyConfigurator;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
@@ -260,7 +261,7 @@ public class RivileJuaraImportDriver
       }
       if(lisa != null){
     	  sb.append(getLineNr(cou));
-          sb.append("          <I06_PASTABOS>" + escape(lisa) + "</I06_PASTABOS>" + ls);
+          sb.append("          <I06_PASTABOS>" + escape(Converter.cleanLitLatEst(lisa)) + "</I06_PASTABOS>" + ls);
           cou++;  
       }
      

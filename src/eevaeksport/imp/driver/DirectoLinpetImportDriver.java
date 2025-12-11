@@ -1016,6 +1016,10 @@ hind =   Converter.Round((float)hind, 2);
 	 		if(ccc != null && ccc.getVAT() == 0){
 	 			vat = 0;
 	 		}
+	 		String lan ="EST";
+	 		if(order.getAgent().equals("DOVILE")) {
+	 			lan = "LT";
+	 		}
 	 		
 	 		String coun = "0";
 	 		if(vat == 0 ) {
@@ -1048,8 +1052,8 @@ hind =   Converter.Round((float)hind, 2);
              comm + 
               ladu +
 	         "amount=\"" + order.getSum() + "\" " +
-	         "amount_vat=\"" + (order.getSum() + order.getSum() * (0.22 * vat)) + "\" " +
-	         "currency=\"EUR\" language=\"EST\">" +
+	         "amount_vat=\"" + (order.getSum() + order.getSum() * (0.24 * vat)) + "\" " +
+	         "currency=\"EUR\" language=\"" + lan + "\">" +
 	         priceList+
 	     
 	       

@@ -177,9 +177,9 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 		 //   POST https://login.microsoftonline.com/{tenant_id}/oauth2/token
 		    HttpPost loginPost = new HttpPost("https://login.microsoftonline.com/" + tanantId + "/oauth2/token");
 		   
-		    String scopes = "https://api.businesscentral.dynamics.com/.default";
+		//    String scopes = "https://api.businesscentral.dynamics.com/.default";
 		    String encodedBody = "client_id=" + clientId  + "&client_secret=" + client_secret
-		            + "&grant_type=client_credentials";
+		            + "&grant_type=client_credentials&resource=https://vic-2-uat.sandbox.operations.eu.dynamics.com";
 		    
 		    
 		    loginPost.setEntity(new StringEntity(encodedBody, ContentType.APPLICATION_FORM_URLENCODED));
@@ -449,7 +449,7 @@ private void saveFile (String dataType , String uri) {
           }
       } 
       String urlBase = "https://vic-2-uat.sandbox.operations.eu.dynamics.com/data/";
-          urlBase = "https://d365fodevbox2426b8a301ff944f9devaos.cloudax.eu.dynamics.com/data/";
+        //  urlBase = "https://d365fodevbox2426b8a301ff944f9devaos.cloudax.eu.dynamics.com/data/";
 
 	      String url =  urlBase + uri;
 	      	      
@@ -469,12 +469,15 @@ private void saveFile (String dataType , String uri) {
 	        HttpEntity entity = ((org.apache.http.HttpResponse) response).getEntity();
 	        if (entity != null) {
 	        String result = EntityUtils.toString(entity);
+	        int statusCode = response.getStatusLine().getStatusCode();
+	        System.out.println("HTTP Status Code: " + statusCode);
+
+	        System.out.println("Query result " + result);
 	        Converter.saveFile("data//" + dataType + ".json", result);
-	        System.out.println(dataType + " tehtud");
+	        System.out.println(dataType + " tehtud " + result.length());
 	        }} catch (IOException e) {
 	            e.printStackTrace();
 	            }
-	       // System.out.println("Query result " + result);
 
       
       
