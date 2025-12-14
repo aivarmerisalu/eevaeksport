@@ -1,5 +1,6 @@
 package eevaeksport;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -76,6 +77,7 @@ public class Agent {
   private String days = null;
   private String prodGroup = null;
   public int buffer = 0;
+  public LocalDate nextContact = null;
   public int buffer2 = 0;
   public String zipPass = null;
   private Vector todayCusts = null;

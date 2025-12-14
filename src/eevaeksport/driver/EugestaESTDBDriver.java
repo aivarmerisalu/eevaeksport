@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -809,6 +810,38 @@ if(grupp.equals("leib") ){
   }
   
   
+
+	private static final LocalDate CYCLE_START =
+	        LocalDate.parse("01.11.2021", FMT);
+
+	public static LocalDate nextMatchingDate(String pattern) {
+
+	    LocalDate date = LocalDate.now().plusDays(1); // start from tomorrow
+
+	    while (true) {
+
+	        long days = ChronoUnit.DAYS.between(
+	                CYCLE_START,
+	                date
+	        );
+
+	        if (days >= 0) {
+	            int weekInCycle = (int) ((days / 7) % 8) + 1; // 1–8
+	            int weekday = date.getDayOfWeek().getValue(); // 1–7
+
+	            char weekLetter = (char) ('A' + weekInCycle - 1);
+	            String code = "" + weekLetter + weekday;
+
+	            if (pattern.contains(code)) {
+	                return date;
+	            }
+	        }
+
+	        date = date.plusDays(1);
+	    }
+	}
+
+  
   
   public TreeMap getCustomers(Agent agent){
 	  nf.setMinimumFractionDigits(2);
@@ -850,7 +883,7 @@ if(grupp.equals("leib") ){
     	                	 if(matchesCycle(route)) {
     	                		 ag.setVisit(Converter.getVisitDayLetter(cal)); 
     	                	 }
-    	                	
+    	                	ag.nextContact = nextMatchingDate(route);
     	                 }
     	                 Vector<Agent> vv = cliags.get(cli);
     	                 if(vv == null) {
@@ -905,10 +938,10 @@ if(grupp.equals("leib") ){
                     
               	  
                     String cmd = "Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , minOrderSum as minsum, '' as linedisc\r\n" + 
-                       		"		, pricelistBackOfficeId as pricegroup,address ,\r\n" + 
-                       		"		  Status AS block , assortimentBackOfficeId as fixed, channel as chain , clientType as type, phone , email as peremail, contactPerson as pername, contactPhone as perphone,"
-                       		+ " consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic, contractDate as cdate " + 
-                       		"		 from  dbo.EPASAULE_CLIENTS" ; 
+                       		" , pricelistBackOfficeId as pricegroup,address ,\r\n" + 
+                       		"  Status AS block , assortimentBackOfficeId as fixed, channel as chain , clientType as type, phone , contactPerson as pername, email as peremail,"
+                       		+ " contactPhone as perphone,  accountantemail as acco ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,"
+                       		+ " contractDate as cdate , segmentname as seg ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  from  dbo.EPASAULE_CLIENTS " ; 
                     
 
                      if (isDebug()) System.out.println(cmd);
@@ -919,7 +952,8 @@ if(grupp.equals("leib") ){
       ResultSet rs = stmt.executeQuery(cmd);
  
       while(rs.next()){
-        String name = Converter.enCodeEst(rs.getString("name").trim());
+        String name = rs.getString("name").trim();
+        
         boolean goes = true;
         
         String accountnum = rs.getString("accountnum").trim();
@@ -945,7 +979,7 @@ if(grupp.equals("leib") ){
         		(regno.trim().equals("10714195") || regno.trim().equals("10180925") // abc + circle
         				|| regno.trim().equals("10765896") || regno.trim().equals("10263574") // maxima + rimi
         				|| regno.trim().equals("10379733")  )) { // selver + 
-        	de = false;
+        	//de = false;
         }
         
       
@@ -959,8 +993,7 @@ if(grupp.equals("leib") ){
         }
         
 
-       // cust.addToCustDataVec(cust.getID());
-        
+       
         
         String aleke = rs.getString("linedisc");
         if(aleke != null && aleke.trim().length()>0){
@@ -1014,11 +1047,12 @@ if(grupp.equals("leib") ){
         	cust.setDelDays((String)deldays.get(cust.getID()));
         }    
 
-        name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
-        cust.restName = name;
         
+        cust.restName = name;
+        name = Converter.enCodeEst(name);
+        name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
         name = name + " " + cust.getAddress() + " " + accountnum ;
-        cust.setName(name );
+        cust.setName(name);
         
       /*  String visit = rs.getString("visit");
         if (visit != null && visit.trim().length()>0) {
@@ -1030,6 +1064,9 @@ if(grupp.equals("leib") ){
          
          for(Agent agentID : vv) {
           cust.addAgent(agentID);
+          if(agentID.nextContact != null) {
+              cust.addCity("Järg.kontakt: " + agentID.getID() + " " + agentID.nextContact.format(FMT));  
+          }
           Agent aa1 = (Agent)agent1.get(agentID.getID());
     
           if(aa1 != null) {
@@ -1068,29 +1105,59 @@ if(grupp.equals("leib") ){
         }
         
         String type = rs.getString("type");
-        if(chain != null && type.trim().length() > 0) {
-        	cust.setCustType(type);
+        if(type != null && type.trim().length() > 0) {
+        	//cust.setCustType(type);
         }
         
         
         String info = rs.getString("phone");
-        if (info != null && info.trim().length()>0) {
-          cust.setPersonalData("Tel:" + info.trim());
-        }
-        
-        String peremail = rs.getString("peremail");
-        if (peremail != null && peremail.trim().length()>0) {
-            cust.restPerEmail = peremail.trim(); 
-        }
-        
         String pername = rs.getString("pername");
-        if (pername != null && pername.trim().length()>0) {
+        String peremail = rs.getString("peremail");
+        String perphone = rs.getString("perphone");
+        
+        if (pername != null && pername.trim().length()>0 && !cust.restName.contains(pername)) {
             cust.restPerson = pername.trim(); 
+            cust.adPersonalData( pername.trim() + "|");
         }
         
-        String perphone = rs.getString("perphone");
+
         if (perphone != null && perphone.trim().length()>0) {
             cust.restPerPhone = perphone.trim(); 
+            cust.adPersonalData("Tel:" + perphone.trim() + "|");
+            }
+        
+        
+        
+        if (peremail != null && peremail.trim().length()>0) {
+            cust.restPerEmail = peremail.trim();
+            if(!cust.getPersonalData().contains(peremail.trim())) {
+               cust.adPersonalData( peremail.trim() + "|");
+            }
+                 
+        }
+        
+
+        if (info != null && info.trim().length()>0) {
+        	 if(!cust.getPersonalData().contains(info.trim())) {
+                cust.adPersonalData("Tel:" + info.replaceAll("/", " / ").trim() + "|");
+          }}
+        
+          
+        
+        String raam = rs.getString("acco");
+        if (raam != null && raam.trim().length()>0) {
+           if(raam.contains(";")) {
+        	   raam = raam.substring(0, raam.indexOf(";"));
+           }
+           if(raam.indexOf("@") != -1) {
+        	   if(!cust.getPersonalData().contains(raam.trim()) && !raam.contains("arvekontroll")) {
+        	        cust.adPersonalData("RP:" + raam.trim());
+        	   }
+           }
+        }
+        
+        if(cust.getPersonalData().endsWith("|")) {
+        	cust.setPersonalData(cust.getPersonalData().substring(0,cust.getPersonalData().length()-1));
         }
         
         Integer term = rs.getInt("term");
@@ -1115,6 +1182,34 @@ if(grupp.equals("leib") ){
         
         
         
+        String seg = rs.getString("seg");
+        
+        if(seg != null && seg.trim().length() > 0) {
+        	cust.addCity("Kett: " + seg.trim());
+        }
+
+        String segsub = rs.getString("segsub");
+        if(segsub != null && segsub.trim().length() > 0) {
+        	cust.addCity("Segment: " + segsub.trim());
+        }
+        
+        if(type != null && type.trim().length() > 0) {
+        	cust.addCity("Tüüp: " + type.trim());
+        }
+        
+        String via3l = rs.getString("via3l");
+        String del1 = rs.getString("del1");
+        String del2 = rs.getString("del2");
+        if(via3l != null && via3l.trim().length() > 0) {
+        	cust.addCity("GKRTarne: '" + via3l.trim() + "'");
+        }
+        
+        if(del1 != null && del1.trim().length() > 0) {
+        	cust.addCity("Tarne 1: '" + del1.trim() + "'");
+        }
+        if(del2 != null && del2.trim().length() > 0) {
+        	cust.addCity("Tarne 2: '" + del2.trim()+ "'");
+        }
         
         if(goes) {
             customers.put(name, cust);
@@ -1208,7 +1303,7 @@ if(grupp.equals("leib") ){
 
 	   Connection con = getNewConnection();
 	    TreeMap   tm = new TreeMap();
-	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_GROUPS ";
+	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_BRANDS  ";
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
@@ -1229,7 +1324,7 @@ if(grupp.equals("leib") ){
 	  
 	  Connection con = getNewConnection();
 	    TreeMap   tm = new TreeMap();
-	    String    sql = "  SELECT backOfficeId as liik, Name as nimetus FROM dbo.EPASAULE_BRANDS  ";
+	    String    sql = "  SELECT backOfficeId as liik, Name as nimetus FROM dbo.EPASAULE_GROUPS  ";
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
@@ -1254,9 +1349,10 @@ if(grupp.equals("leib") ){
 	  prodcodes = new Vector();
     String cmd = "   Select a.backOfficeId as itemid,a.Name AS nimetus, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini, \r\n" + 
     		"a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat ,a.* from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId"  ;
+    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat  from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId"  ;
 
-             String cmd2 = " Select productBackofficeId as toode,Inventory as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES ";
+             String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail \r\n" + 
+             		"group by productBackofficeId,regionBackofficeId,bestBefore ";
         
 
              
@@ -1331,14 +1427,14 @@ if(grupp.equals("leib") ){
 
       String grupp = rs.getString("grupp");
        if(grupp!=null && grupp.trim().length()>0){
-         prod.setGroup(grupp.trim());
+         prod.setGroupSecond(grupp.trim());
        }
 
       prod.setName(nimetus.trim());
 
      String grupp2 = rs.getString("grupp2");
           if(grupp2 != null && grupp2.trim().length()>0){ 
-              prod.setGroupSecond(grupp2);
+              prod.setGroup(grupp2);
            }
 
           String unit = rs.getString("unit");
@@ -1354,7 +1450,9 @@ if(grupp.equals("leib") ){
             	  prod.setPartii(partii.get(prod.getID())); 
                }
                
-               prod.setVat("24");
+
+               Double vat = rs.getDouble("vat");
+               prod.setVat(vat + "");
                
        products.put(nimetus, prod);
        prodHash.put(prod.getID(), prod);

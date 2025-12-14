@@ -256,7 +256,9 @@ public class Customer {
     this.personalData = pers;
   }
   public void adPersonalData(String pers) {
-	    this.personalData = this.personalData +  pers;
+	  if(pers != null && pers.trim().length() > 0) {
+	    this.personalData = (this.personalData +  pers).trim();
+	  }
 	  }
   public String getLicence() {
      return this.licence;
