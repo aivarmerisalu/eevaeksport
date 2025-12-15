@@ -4251,6 +4251,12 @@ if (getProps().getProperty("no.matrixagent") != null) {
            buf.append(EksportPanel.separator);
            buf.append(cust.getMinVolSum()); 
            
+           buf.append(EksportPanel.separator);
+           bb = "0";
+           if(cust.useOptAmount){
+        	   bb =  "1";
+           }
+           buf.append(bb); 
            
            buf.append(lineSeparator);
       }

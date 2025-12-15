@@ -785,6 +785,8 @@ if(grupp.equals("leib") ){
   
   private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
   
+
+  private static final DateTimeFormatter FM2 = DateTimeFormatter.ofPattern("dd-MM-yyyy");
   public static boolean matchesCycle( String pattern) {
 
 	  LocalDate cycleStart = LocalDate.parse("01.11.2021", FMT);
@@ -1059,19 +1061,18 @@ if(grupp.equals("leib") ){
           cust.setVisit(visit.trim());
         }*/
         
-        if(cliags.get(cust.getID()) != null) {
+       if(cliags.get(cust.getID()) != null) {
          Vector<Agent> vv = cliags.get(cust.getID());
          
-         for(Agent agentID : vv) {
-          cust.addAgent(agentID);
-          if(agentID.nextContact != null) {
-              cust.addCity("Järg.kontakt: " + agentID.getID() + " " + agentID.nextContact.format(FMT));  
+         for(Agent agentL : vv) {
+          cust.addAgent(agentL);
+          if(agentL.nextContact != null) {
+              cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FM2)+ "'");  
           }
-          Agent aa1 = (Agent)agent1.get(agentID.getID());
-    
-          if(aa1 != null) {
-      	
-  	    	Vector vec = aa1.getDubbler();
+        
+         Agent aa1 = (Agent)agent1.get(agentL.getID());
+           if(aa1 != null) {
+      		Vector vec = aa1.getDubbler();
   		      if(vec!= null && vec.size() >0){
   			   Enumeration en = vec.elements();
   			   while(en.hasMoreElements()){
@@ -1131,7 +1132,7 @@ if(grupp.equals("leib") ){
         if (peremail != null && peremail.trim().length()>0) {
             cust.restPerEmail = peremail.trim();
             if(!cust.getPersonalData().contains(peremail.trim())) {
-               cust.adPersonalData( peremail.trim() + "|");
+               cust.adPersonalData( peremail.trim().toLowerCase() + "|");
             }
                  
         }
@@ -1151,7 +1152,7 @@ if(grupp.equals("leib") ){
            }
            if(raam.indexOf("@") != -1) {
         	   if(!cust.getPersonalData().contains(raam.trim()) && !raam.contains("arvekontroll")) {
-        	        cust.adPersonalData("RP:" + raam.trim());
+        	        cust.adPersonalData("RP:" + raam.trim().toLowerCase());
         	   }
            }
         }

@@ -1084,6 +1084,8 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
                 }
                 //otsime võlasumma igale kauplusele 
                 
+                //cust.useOptAmount = true;
+                
                 String sql6 = "SELECT SUM( case when SL03006<=getdate() then SL03013-SL03053 else 0 end ) AS debtover,"
                 		+ "SUM(SL03013-SL03053) AS debt , max(datediff(dd, SL03006,getdate())) as days"
                 		+ " FROM SL030500 INNER JOIN SL010500 ON SL03001 = SL01001  WHERE  " +

@@ -384,6 +384,7 @@ private String ankeediTyyp = " ";
     private boolean useSecondPricelist = false ;
     private String custType = " ";
     private String minOrdVol = "0";
+    public boolean useOptAmount = false;
     private double budget = 0;
     private double sold = 0;
     private double average = 0;

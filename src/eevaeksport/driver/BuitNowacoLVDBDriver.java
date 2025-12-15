@@ -1816,6 +1816,8 @@ System.out.println(cmd);
                          }
                     }
               }
+             
+             
              if ( ag != null && agent1.get( ag.trim()) != null){
                  Agent aa = (Agent) agent1.get( ag.trim());
                   Vector vec = aa.getDubbler();
@@ -1825,8 +1827,9 @@ System.out.println(cmd);
                             String ags = (String) en.nextElement();
                          customer.addAgent( new Agent(ags));
                       }
-                 }
-           }
+                   }
+                }
+             
              if(ag != null && ag.trim().length() > 0 && !ag.trim().equals("26")) {
             	   customer.addAgent(new Agent("171"));
                    customer.addAgent(new Agent("172"));	 
