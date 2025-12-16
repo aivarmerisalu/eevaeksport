@@ -106,7 +106,7 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
     
       System.out.println("Token " + token);
 
-      this.downloadData("salesPersons");
+     this.downloadData("salesPrices");
   //  this.downloadData(null);
     // this.getDebt(null);
     // this.getCustomerProductsList(null);
@@ -368,6 +368,9 @@ System.out.println("ProdGroup size :  " + tm.size());
    
    public TreeMap getAgents(){
 		  TreeMap tm = new TreeMap();
+		  
+		  
+	
 			try {
 			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPersons.json");
 	  	
@@ -379,8 +382,8 @@ System.out.println("ProdGroup size :  " + tm.size());
 				  
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
 
-	            String salesCode = (String)cob.get("code");
-	            String salesName = (String)cob.get("name");
+	            String salesCode = (String)cob.get("PersonnelNumber");
+	            String salesName = (String)cob.get("Name");
 	            if (salesCode != null && salesCode.trim().length() > 0) {
 	            	Agent agent = new Agent(salesCode);
 	            	agent.setName(salesName);
@@ -508,9 +511,16 @@ private void saveFile (String dataType , String uri) {
       if (dataType == null || dataType.equals("salesPersons")) {
     	 this.saveFile("salesPersons","AMGSalesAgents?$select=PersonnelNumber,Name");
     }
-
       
-      if (dataType == null || dataType.equals("salesPrices")) {
+      if (dataType == null || dataType.equals("getCustomers")) {
+     	 this.saveFile("getCustomers","CustomersV3?$select=OrganizationName,DeliveryAddressDescription,CustomerAccount,DeliveryAddressLocationId,"
+     	 		+ "AMGFullDeliveryAddress,InvoiceAccount,DeliveryAddressCountryRegionId,AMGPrimaryAddressSalesAgentName,AMGDeliveryAddressSalesAgentName,"
+     	 		+ "AMGEmployeeResponsible,OnHoldStatus,PaymentTerms,LineDiscountCode,AMGBlockingOverdueDays,AMGPrimaryAddressPrimaryContacts,"
+     	 		+ "AMGDeliveryAddressPrimaryContacts,DiscountPriceGroupId,SalesCurrencyCode,CreditLimit" 
+     	 		);
+     }
+
+    	  if (dataType == null || dataType.equals("salesPrices")) {
     	  this.saveFile("salesPrices","SalesPriceAgreements?$select=AccountRelation,ItemRelation,AMGItemGroupId,Price,AMGDiscountPercent,PriceApplicatiobleToDate,PriceApplicableFromDate,PriceCurrencyCode");
          }
       
@@ -602,7 +612,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
        
    public TreeMap getCustomers(Agent agent){
 	   
-	   downloadData(null);
+	//   downloadData(null);
 	   
 	   TreeMap<String, Double>volad = new TreeMap<String, Double>();
 		org.json.simple.JSONObject cc1 = 	Converter.readJSONFile("data//agedAccountsReceivables.json");
@@ -633,7 +643,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	   
 	   
 		  TreeMap tm = new TreeMap();
-			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//customers.json");
+			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//getCustomers.json");
 	  	
 			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 			
@@ -644,89 +654,54 @@ if (dataType == null || dataType.equals("itemCategories")) {
 				  
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
 
-	          	String number = (String)cob.get("number");
+	          	String number = (String)cob.get("CustomerAccount");
 	            Customer cust = new Customer(number);
 	            
-	       
+	       //OrganizationName,DeliveryAddressDescription,CustomerAccount,DeliveryAddressLocationId,AMGFullDeliveryAddress,InvoiceAccount,
+	            //DeliveryAddressCountryRegionId,AMGPrimaryAddressSalesAgentName,AMGDeliveryAddressSalesAgentName,AMGEmployeeResponsible,OnHoldStatus,
+	            //PaymentTerms,LineDiscountCode,AMGBlockingOverdueDays,AMGPrimaryAddressPrimaryContacts,AMGDeliveryAddressPrimaryContacts,
+	          //  DiscountPriceGroupId,SalesCurrencyCode,)","value":[
 	            
 	            
 	            
-	            String displayName = (String)cob.get("displayName");
+	            
+	            
+	            String displayName = (String)cob.get("OrganizationName");
 	            cust.setName(displayName);
 	            
-	            String billToCustomerNo = (String)cob.get("billToCustomerNo");
+	            String billToCustomerNo = (String)cob.get("InvoiceAccount");
 	            cust.setPayer(billToCustomerNo);
 	            
-	            String address1 = (String)cob.get("addressLine1");
-	            String address2 = (String)cob.get("addressLine2");
-	            if (address2 != null && address2.trim().length() > 1) {
-	            	address2 = ", " + address2.trim();
+	            String address1 = (String)cob.get("DeliveryAddressDescription");
 	            
-	            }else {
-	            	address2 = "";
-	            }
-	            if(address2.contains(address1)) {
-	            	address2 = "";
-	            }
 	            
-	            String city = (String)cob.get("city");
-	            if (city != null && city.trim().length() > 1) {
-	            	city = ", " + city.trim();
-	            
-	            }else {
-	            	city = "";
-	            }
-	            String state = (String)cob.get("state");
-	            if (state != null && state.trim().length() > 1) {
-	            	state = ", " + state.trim();
-	            
-	            }else {
-	            	state = "";
-	            }
-	            String country = (String)cob.get("country");
-	            if (country != null && country.trim().length() > 1) {
-	            	country = ", " + country.trim();
-	            
-	            }else {
-	            	country = "";
-	            }
-	            String postalCode = (String)cob.get("postalCode");
-	            if (postalCode != null && postalCode.trim().length() > 1) {
-	            	postalCode = ", " + postalCode.trim();
-	            
-	            }else {
-	            	postalCode = "";
-	            }
-	            if (city.contains(state)) {
-	            	state = "";
-	            }
 	        //    System.out.println("klinfo " + address1 + "'" +address2 + "'" + city  + "'" + state+ "'" + country+ "'" + postalCode);
-	            cust.setAddress((address1 +  address2 + city  + state + country + postalCode).trim());
+	            cust.setAddress(address1.trim());
 	            
 	            
-	            String phone = (String)cob.get("phoneNumber");
+	            String phone = (String)cob.get("AMGPrimaryAddressPrimaryContacts");
 	            cust.setPersonalData("Tel:" + phone);
 	            
 	            
 	            
-	            String email = (String)cob.get("email");
-	            cust.setInfoEmail(email);
+	          //  String email = (String)cob.get("email");
+	            //cust.setInfoEmail(email);
 	            
 	            
-	            String salesCode = (String)cob.get("salespersonCode");
+	            String salesCode = (String)cob.get("AMGPrimaryAddressSalesAgentName");
 	            cust.addAgent(new Agent (salesCode));
 
-	            String salesCode2 = (String)cob.get("salespersonCode2");
+	            String salesCode2 = (String)cob.get("AMGDeliveryAddressSalesAgentName");
 	            if(salesCode2 != null) {
 	              cust.addAgent(new Agent (salesCode2));
 	            }
 	            
 	           // String balanceDue = cob.get("balanceDue")+ "";
 	            
-	           // String creditLimit = cob.get("creditLimit")+"";
-	           // cust.setCredit(creditLimit);
+	            String creditLimit = cob.get("CreditLimit")+"";
+	            cust.setCredit(creditLimit);
 	            
-	            if(!nodebt.contains(cust.getPayer())) {
+	            if(nodebt != null && !nodebt.contains(cust.getPayer())) {
 	            if (volad.get(cust.getID() ) != null) {
 	            	cust.setDebt(volad.get(cust.getID()));
 	            }
@@ -746,7 +721,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
 				e.printStackTrace();
 			}
 			
-	System.out.println("Custsize " + tm.size());
+	System.out.println("Custsize " + tm.toString());
 		  
 		return tm;
    }
