@@ -100,7 +100,6 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
     	  }
       }
      
-    
   
       token = getMSToken();
     
@@ -126,38 +125,10 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	  String clientID =  null;
 	  String token =  null;
   
-		 
-		 
-		 
-		 
- 
-	  private void testConn() {
-		  String url = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/environments";
 
-		  url = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/LIVE/api/v2.0/"
-		  		+ "companies(3b92aaf0-963a-ef11-8409-000d3ab2813a)/items";
-		  
-		  try (CloseableHttpClient client = HttpClients.createDefault()) {
-			  HttpGet request = new HttpGet(url);
-			  request.setHeader("Authorization", "Bearer " + token);
-
-			  HttpResponse response = client.execute(request);
-			  HttpEntity entity = response.getEntity();
-			  if (entity != null) {
-			  String result = EntityUtils.toString(entity);
-			  Converter.saveFile("test.json", result);
-		
-			  }
-			  } catch (IOException e) {
-			  e.printStackTrace();
-			  }
-	  }
 	  
   private String  getMSToken() {
 		 String res = null;
-		 
-		
-		
 	  try {
 		return getAuthToken(tenantID,clientID,secret);
 	   } catch (ClientProtocolException e2) {
@@ -173,14 +144,9 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	 
 	 public String getAuthToken(String tanantId,String clientId,String client_secret) throws ClientProtocolException, IOException {
 		    CloseableHttpClient client = HttpClients.createDefault();
-		    
-		 //   POST https://login.microsoftonline.com/{tenant_id}/oauth2/token
 		    HttpPost loginPost = new HttpPost("https://login.microsoftonline.com/" + tanantId + "/oauth2/token");
-		   
-		//    String scopes = "https://api.businesscentral.dynamics.com/.default";
 		    String encodedBody = "client_id=" + clientId  + "&client_secret=" + client_secret
 		            + "&grant_type=client_credentials&resource=https://vic-2-uat.sandbox.operations.eu.dynamics.com";
-		    
 		    
 		    loginPost.setEntity(new StringEntity(encodedBody, ContentType.APPLICATION_FORM_URLENCODED));
 		    loginPost.addHeader(new BasicHeader("cache-control", "no-cache"));
@@ -207,7 +173,6 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
    }
 
 	public Vector getLastThreeData() {
-		// TODO Auto-generated method stub
 		return null;
 	}
    public Vector getPriceMatrixData() {
@@ -218,22 +183,11 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 
    }
 
- //  public Vector getFixedAssortmentData() {
-      // return fixedLines ;
- //}
-   
-   
    
    public Vector getFixedAssortmentData() {
 	return null;
 	}
 
-   
-   
-   
-  
-   
- 
 
    public String SortingData(){
    	return null;
@@ -254,13 +208,16 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 				  int lenn = values.size();
 				try {
 				  for (int i = 0; i < lenn; i++) {
+					  
+					  //  "":"000002603","":"000744","":"FS-000001","InvoiceDate":"2025-11-14T12:00:00Z","":"2025-11-14T12:00:00Z","":1230,"CurrencyCode":"PLN"
+					    	  
 						org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-		        		String number = (String) cob.get("number");
+		        		String number = (String) cob.get("InvoiceNumber");
 			        	String date =(String) cob.get("invoiceDate");
-			        	String duedate = (String) cob.get("dueDate");
-			        	Double volg = Double.parseDouble(cob.get("remainingAmount") + "");
-			        	String payer = (String) cob.get("billToCustomerNumber");
-			        	String custid = (String) cob.get("customerNumber");
+			        	String duedate = (String) cob.get("DueDate");
+			        	Double volg = Double.parseDouble(cob.get("InvoiceAmount") + "");
+			        	String payer = (String) cob.get("CustAccount");
+			        	String custid = (String) cob.get("DeliveryAddressId");
 
 
        		     Debt dd = new Debt();
@@ -329,22 +286,9 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 		}
 		
 System.out.println("ProdGroup size :  " + tm.size());
-	  
 	return tm;
-   
 
 }
-	   
-	   
-	   
-	   /*   {
-      "@odata.etag": "W/\"JzIwOzE0NTcxMzI1NDExNjY1NDUyMDYwMTswMDsn\"",
-      "id": "2a7525a9-b354-ef11-bfe2-000d3adbde7b",
-      "code": "AINEDISP",
-      "displayName": "puhastusaine dispenser",
-      "lastModifiedDateTime": "2024-08-07T11:53:31.527Z"
-    },
-    */
 	   
    
 
@@ -353,27 +297,18 @@ System.out.println("ProdGroup size :  " + tm.size());
         }
 
 
-
-   private String enCode(String res ){
-	 
-	   return Converter.enCodeEst(res);
-	  }
 	  
    
    public static String deCode(String res ){
-	   
  	return Converter.deCode(res);
  }
    
    
    public TreeMap getAgents(){
 		  TreeMap tm = new TreeMap();
-		  
-		  
 	
 			try {
 			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPersons.json");
-	  	
 			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 			
 			  int lenn = values.size();
@@ -388,54 +323,25 @@ System.out.println("ProdGroup size :  " + tm.size());
 	            	Agent agent = new Agent(salesCode);
 	            	agent.setName(salesName);
 	            	  tm.put(agent.getName(), agent);
-	            }
-
-	        
+	              }
 	          	}
 			  
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
-	System.out.println("Managersize " + tm.size());
-
-	  
+  	  System.out.println("Managersize " + tm.size());
 
      return tm;
    }
 
-   
-   
-  
-        	  private FileInputStream getCleanInputStream(File xmlFile)throws FileNotFoundException, IOException {
-        		FileInputStream in = new FileInputStream(xmlFile);
-        		int bomKount = getBOMCount(xmlFile);
-        		if (bomKount > 0) {
-        		byte[] buf = new byte[bomKount];
-        		in.read(buf);
-        		}
-        		return in;
-        		}
 
-        	  
-        	  private int getBOMCount(File xmlFile) throws FileNotFoundException,
-        	  IOException {
-        	  DataInputStream din = new DataInputStream(new FileInputStream(xmlFile));
-        	  int bomKount = 0;
-        	  byte b = din.readByte();
-        	  while (b < 0) {
-        	  bomKount++;
-        	  b = din.readByte();
-        	  }
-        	  din.close();
-        	//   System.out.println("Skipping BOM, " + bomKount + " bytes");
-        	  return bomKount;
-        	  } 
-        	  
         	  
        public String getDistribution() {
          return null;
        }
+       
+       
 private void saveFile (String dataType , String uri) {
 	  String folderPath = "Data"; // Update this path as needed
 
@@ -487,20 +393,15 @@ private void saveFile (String dataType , String uri) {
 }
 
   private void downloadData(String dataType) {
+	  
 	  if (token == null) {
 		  token = getMSToken();
 	  }
 
-	  //Folderi olemasolu kontroll-loomine
-	   // Specify the path where you want to create the folder
-      String folderPath = "Data"; // Update this path as needed
-
-      // Create a File object
+      String folderPath = "Data";
       File folder = new File(folderPath);
 
-      // Check if the folder already exists
       if (!folder.exists()) {
-          // Try to create the folder
           if (folder.mkdirs()) {
               System.out.println("Folder created successfully at: " + folderPath);
           } else {
@@ -508,83 +409,36 @@ private void saveFile (String dataType , String uri) {
           }
       } 
 
+      
       if (dataType == null || dataType.equals("salesPersons")) {
     	 this.saveFile("salesPersons","AMGSalesAgents?$select=PersonnelNumber,Name");
-    }
+      }
+      if (dataType == null || dataType.equals("salesPersonsSales")) {
+     	 this.saveFile("salesPersonsSales","AMGVICAgentMonthSales?$select=PersonnelNumber,TotalInvoiceAmount");
+      }
+      
       
       if (dataType == null || dataType.equals("getCustomers")) {
-     	 this.saveFile("getCustomers","CustomersV3?$select=OrganizationName,DeliveryAddressDescription,CustomerAccount,DeliveryAddressLocationId,"
-     	 		+ "AMGFullDeliveryAddress,InvoiceAccount,DeliveryAddressCountryRegionId,AMGPrimaryAddressSalesAgentName,AMGDeliveryAddressSalesAgentName,"
-     	 		+ "AMGEmployeeResponsible,OnHoldStatus,PaymentTerms,LineDiscountCode,AMGBlockingOverdueDays,AMGPrimaryAddressPrimaryContacts,"
-     	 		+ "AMGDeliveryAddressPrimaryContacts,DiscountPriceGroupId,SalesCurrencyCode,CreditLimit" 
+     	 this.saveFile("getCustomers","CustomersV3?$select=OrganizationName,DeliveryAddressDescription,"
+     	 		+ "CustomerAccount,DeliveryAddressLocationId,AMGFullDeliveryAddress,InvoiceAccount,DeliveryAddressCountryRegionId,AMGPrimaryAddressSalesAgentPersonnelNumber,"
+     	 		+ "AMGDeliveryAddressSalesAgentPersonnelNumber,AMGEmployeeResponsiblePersonnelNumber,OnHoldStatus,PaymentTerms,LineDiscountCode,AMGBlockingOverdueDays,"
+     	 		+ "AMGPrimaryAddressPrimaryContacts,AMGDeliveryAddressPrimaryContacts,DiscountPriceGroupId,SalesCurrencyCode,CreditLimit" 
      	 		);
      }
 
-    	  if (dataType == null || dataType.equals("salesPrices")) {
+      if (dataType == null || dataType.equals("salesPrices")) {
     	  this.saveFile("salesPrices","SalesPriceAgreements?$select=AccountRelation,ItemRelation,AMGItemGroupId,Price,AMGDiscountPercent,PriceApplicatiobleToDate,PriceApplicableFromDate,PriceCurrencyCode");
-         }
+       }
       
       
-      if (dataType == null || dataType.equals("salesInvoices")) {
-    	 // this.saveFile("salesInvoices");
-  		
-
-  		  File dir = new File("Data//lines");
-  		  if (!dir.exists()) {
-  			  dir.mkdir();
-  			  }
-
-			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
-		  	
-			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
-			
-			  int lenn = values.size();
-			try {
-			  for (int i = 0; i < lenn; i++) {
-					org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-	        		String number = (String) cob.get("number");
-		        	String id = (String) cob.get("id");
-		        	
-		        	
-		        	File f = new File("data//lines//"+number+".json");
-		        	if (!f.exists()) {
-		        		
-		        	
-		        	
-
-
-		        	      String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/LIVE/api/itera/kp/v2.0/"
-		        		          + "companies(" + companyID + ")/";
-  		  
-  		  
-	     String url = urlBase + "salesInvoices("+ id +")/salesInvoiceLines";
-	      
-	      
-	      try (CloseableHttpClient client = HttpClients.createDefault()) {
-	        HttpGet request = new HttpGet(url);
-	        request.setHeader("Authorization", "Bearer " + token);
-
-	        HttpResponse response = (HttpResponse) client.execute(request);
-	        HttpEntity entity = ((org.apache.http.HttpResponse) response).getEntity();
-	        if (entity != null) {
-	        String result = EntityUtils.toString(entity);
-	        Converter.saveFile("data//lines//"+number+".json", result);
-	        System.out.println("salesInvoiceLines tehtud");
-	        }} catch (IOException e) {
-	            e.printStackTrace();
-	            }
-		        	}
-	       // System.out.println("Query result " + result);
-}
-			} catch (Exception e) {
-	            e.printStackTrace();
-	            }
-      }
-      
-	  ///agedAccountsReceivables
-	  //toodete json
-	     
-      
+    	  if (dataType == null || dataType.equals("salesInvoices")) {
+    	    	  this.saveFile("salesInvoices","AMGSalesInvoiceJournalHeaders?$select=DeliveryAddressId,CustAccount,InvoiceNumber,InvoiceDate,DueDate,InvoiceAmount,CurrencyCode");
+    	  }
+    	  
+    	  
+    	  
+    	  
+         
 if (dataType == null || dataType.equals("agedAcc")) {
 	 // this.saveFile("agedAccountsReceivables");
 }
@@ -657,10 +511,8 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	          	String number = (String)cob.get("CustomerAccount");
 	            Customer cust = new Customer(number);
 	            
-	       //OrganizationName,DeliveryAddressDescription,CustomerAccount,DeliveryAddressLocationId,AMGFullDeliveryAddress,InvoiceAccount,
-	            //DeliveryAddressCountryRegionId,AMGPrimaryAddressSalesAgentName,AMGDeliveryAddressSalesAgentName,AMGEmployeeResponsible,OnHoldStatus,
-	            //PaymentTerms,LineDiscountCode,AMGBlockingOverdueDays,AMGPrimaryAddressPrimaryContacts,AMGDeliveryAddressPrimaryContacts,
-	          //  DiscountPriceGroupId,SalesCurrencyCode,)","value":[
+	       //AMGPrimaryAddressSalesAgentPersonnelNumber,"
+	 		//+ "AMGDeliveryAddressSalesAgentPersonnelNumber,AMGEmployeeResponsiblePersonnelNumber,
 	            
 	            
 	            
@@ -688,12 +540,16 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	            //cust.setInfoEmail(email);
 	            
 	            
-	            String salesCode = (String)cob.get("AMGPrimaryAddressSalesAgentName");
+	            String salesCode = (String)cob.get("AMGDeliveryAddressSalesAgentPersonnelNumber");
 	            cust.addAgent(new Agent (salesCode));
 
-	            String salesCode2 = (String)cob.get("AMGDeliveryAddressSalesAgentName");
+	            String salesCode2 = (String)cob.get("AMGPrimaryAddressSalesAgentPersonnelNumber");
 	            if(salesCode2 != null) {
 	              cust.addAgent(new Agent (salesCode2));
+	            }
+	            String salesCode3 = (String)cob.get("AMGEmployeeResponsiblePersonnelNumber");
+	            if(salesCode3 != null) {
+	              cust.addAgent(new Agent (salesCode3));
 	            }
 	            
 	           // String balanceDue = cob.get("balanceDue")+ "";
@@ -856,7 +712,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
   public void setBulkSales(Map agents) {
 	   TreeMap<String, Double> ags = new TreeMap<String, Double>();
 	   
-		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPersonsSales.json");
 	  	
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
@@ -865,28 +721,11 @@ if (dataType == null || dataType.equals("itemCategories")) {
 		  for (int i = 0; i < lenn; i++) {
 			  
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-      		String dateInv = (String) cob.get("invoiceDate");
-      		String salespers = (String) cob.get("salesperson");
-      		Double amnt = Double.parseDouble(cob.get("totalAmountExcludingTax")+"");
       		
-      		
-      		Date dateSInv = this.getDate(dateInv);
-      		Calendar cal = Calendar.getInstance();
-      		cal.set(Calendar.DAY_OF_MONTH, 1);
-      		cal.set(Calendar.HOUR_OF_DAY, 0);
-      		java.util.Date d = cal.getTime();
-      		
-      		//if (d.before(dateSInv)) {
-      			Double sum = ags.get(salespers);
-      			if (sum == null) {
-      				ags.put(salespers, amnt);
-      			}
-      			else {
-      				ags.put(salespers, sum+amnt);
-      			}
-      			
-      			
-     // 		}
+      		Double amnt = Double.parseDouble(cob.get("TotalInvoiceAmount")+"");
+      		if(amnt > 0) {
+      				ags.put((String) cob.get("PersonnelNumber"), amnt);
+      		}
 		  }
 		}catch(Exception E){
 	    	
@@ -899,17 +738,13 @@ if (dataType == null || dataType.equals("itemCategories")) {
 		  String agentID = (String) itera.next();
 		  Agent agent = (Agent)agents.get(agentID);
 	      if (agent != null){
-
 	        agent.setMonthSales(ags.get(agentID).intValue());
-	             		
 		     }
-		  
 	  }
-
-	  
-	  
 	  
   }
+  
+  
 
 @Override
 public String getSaveStockInfo() {
