@@ -179,6 +179,41 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 
    	Vector lines = new Vector();
   
+	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPrices.json");
+  	
+	org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+	
+	  int lenn = values.size();
+	try {
+	  for (int i = 0; i < lenn; i++) {
+		  
+		  MatrixLine ml = new MatrixLine();
+		  
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+    		String prodid = (String) cob.get("ItemNumber");
+    		String payer = (String) cob.get("CustomerAccountNumber");
+    		String prgroup =(String) cob.get("AMGItemGroupId");
+        	Double price = Double.parseDouble(cob.get("Price") + "");
+    		String fromdate =(String) cob.get("PriceApplicableFromDate");
+        	String todate = (String) cob.get("PriceApplicableToDate");
+        	
+        	ml.setCliGroup(payer);
+        	ml.setPrice(price);
+        	ml.setProdID(prodid);
+        	if(!fromdate.startsWith("1900")) {
+        		ml.setStartDate(fromdate.substring(0,10));
+        	}
+        
+        	if(!todate.startsWith("1900")) {
+        		ml.setEndDate(todate.substring(0,10));
+        	}
+        	lines.add(ml);
+	    }
+	
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+   	
 	return lines;
 
    }
@@ -427,7 +462,8 @@ private void saveFile (String dataType , String uri) {
      }
 
       if (dataType == null || dataType.equals("salesPrices")) {
-    	  this.saveFile("salesPrices","SalesPriceAgreements?$select=AccountRelation,ItemRelation,AMGItemGroupId,Price,AMGDiscountPercent,PriceApplicatiobleToDate,PriceApplicableFromDate,PriceCurrencyCode");
+    	  this.saveFile("salesPrices","SalesPriceAgreements?$select=CustomerAccountNumber,AMGCustLineDisc,ItemNumber"
+    	  		+ ",AMGItemGroupId,Price,AMGDiscountPercent,PriceApplicableToDate,PriceApplicableFromDate,PriceCurrencyCode");
        }
       
       

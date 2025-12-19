@@ -3396,7 +3396,7 @@ System.out.println(cmd);
                  		"                 		                 year ([Ending Date]) = 1753)  and [Sales Type] = 3 " + 
                  		"					union \r\n" + 
                  		"	select [Sales Code] AS action,[Code] AS prodid,  0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,[Currency code] as val ,[Minimum Quantity] as am\r\n" + 
-                 		"                 from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] = 0 and [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or \r\n" + 
+                 		"                 from [2015_Tobis$Sales Line Discount] where [Type] = 0 and [Sales Type] in (0,1) and [Starting Date] < getdate()+5  and ([Ending Date] > getdate()+1 or \r\n" + 
                  		"                   year ([Ending Date]) = 1753) and  [Minimum Quantity] > 1 union "
                  		+ "select [Sales Code] AS action,[Code] AS prodid,  0 AS price ,[Line Discount %] as disc , [Ending Date] as paev, [Starting Date] as startday ,\r\n" + 
                  		"							[Sales Type] as val ,[Minimum Quantity] as am\r\n" + 

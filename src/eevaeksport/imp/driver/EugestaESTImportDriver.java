@@ -1242,6 +1242,7 @@ if(text.indexOf("\"")!=-1){
 
 
   private String url = "jdbc:odbc:eugestaest";
+  private String url2 = "jdbc:odbc:importest";
   private ImportPanel parent;
   private boolean isAmount = false;
   private StringBuffer troubles= new StringBuffer();

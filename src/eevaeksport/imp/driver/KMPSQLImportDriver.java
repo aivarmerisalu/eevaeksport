@@ -252,7 +252,8 @@ public class KMPSQLImportDriver
 	         day = mcal.get(Calendar.DAY_OF_MONTH) + "";
 	        if (day.length() == 1) day = "0" + day;
 
-	         String mdateString = cal.get(Calendar.YEAR)+"-" + month +"-"+ day;
+	         String mdateString = mcal.get(Calendar.YEAR)+"-" + month +"-"+ day;
+	         System.out.println("ddate " + mdateString );
 	        Text mkuupaevVal = doc.createTextNode(mdateString);
 	        mkuupaev.appendChild(mkuupaevVal);
 	        header.appendChild(mkuupaev);

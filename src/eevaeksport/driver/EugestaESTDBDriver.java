@@ -867,7 +867,11 @@ if(grupp.equals("leib") ){
     
    TreeMap customers = new TreeMap();
     TreeMap custMap = new TreeMap();
+
+    TreeMap indeksT = new TreeMap();
     try {
+    	
+    	
     	
     	
     	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
@@ -896,7 +900,22 @@ if(grupp.equals("leib") ){
     	               }
     	              rs1.close();
     		
+    	              
+    	              aaa = "SELECT [ACCOUNTNUM] as klient ,[ZIPCODE] as indeks FROM [DWHEE].[dbo].[BID02_CUSTORDER]";
+    	              
     	
+    	            	rs1 = stmt.executeQuery(aaa);
+	       	               while(rs1.next()){
+	       	                 String cli = rs1.getString("klient").trim();
+	       	                 String indeks = rs1.getString("indeks");
+	       	                 if(indeks != null && indeks.length() > 0) {
+	       	                	indeksT.put(cli, indeks);
+	       	                 }
+	       	                  
+	       	                  }
+	       	              rs1.close();
+	       	            
+    	              
     	              aaa = "select clientBackOfficeId as klient,  a.promotionBackOfficeId as promo   from dbo.EPASAULE_PROMOTIONOBJECTS a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
     	              		"	where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91\r\n" + 
     	              		"	group by  a.promotionBackOfficeId , clientBackOfficeId \r\n" + 
@@ -937,13 +956,28 @@ if(grupp.equals("leib") ){
                     rs1.close();
                     stmt.close();
     	
-                    
+                    TreeMap<String,Double> debtsall = new TreeMap<String ,Double>();
+                	
+               	 String cmdall = "  SELECT sum(Amount) as tasumata , debetorBackOfficeId as maksja  FROM dbo.EPASAULE_DEBTS group by debetorBackOfficeId"; 
+               	 
+               	    stmt = con.createStatement();
+                       rs1 = stmt.executeQuery(cmdall);
+                                while(rs1.next()){
+                                  double volg = rs1.getDouble("tasumata");
+                                  String pay = rs1.getString("maksja").trim();
+                                  debtsall.put(pay, volg);
+                                }
+                               rs1.close();
+                               stmt.close();
+               	
+                               
               	  
-                    String cmd = "Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , minOrderSum as minsum, '' as linedisc\r\n" + 
-                       		" , pricelistBackOfficeId as pricegroup,address ,\r\n" + 
-                       		"  Status AS block , assortimentBackOfficeId as fixed, channel as chain , clientType as type, phone , contactPerson as pername, email as peremail,"
-                       		+ " contactPhone as perphone,  accountantemail as acco ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,"
-                       		+ " contractDate as cdate , segmentname as seg ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  from  dbo.EPASAULE_CLIENTS " ; 
+                    String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , minOrderSum as minsum, '' as linedisc \r\n" + 
+                    		"                       		, pricelistBackOfficeId as pricegroup,address ,\r\n" + 
+                    		"                       		  Status AS block , assortimentBackOfficeId as fixed, channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
+                    		"                       		 contactPhone as perphone,  accountantemail as acco ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
+                    		"                       		 contractDate as cdate , segmentname as seg ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 \r\n" + 
+                    		"                       		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID " ; 
                     
 
                      if (isDebug()) System.out.println(cmd);
@@ -992,6 +1026,13 @@ if(grupp.equals("leib") ){
         	}else if(debts.get(cust.getID()) != null) {
         		 cust.setDebt(debts.get(cust.getID()));
         	}
+        	
+        if(debtsall.get(cust.getPayer()) != null) {
+       		 cust.setUsedCredit(debtsall.get(cust.getPayer()));
+         	} else if(debtsall.get(cust.getID()) != null) {
+       		cust.setUsedCredit(debtsall.get(cust.getID()));
+       	    }
+        	
         }
         
 
@@ -1055,6 +1096,11 @@ if(grupp.equals("leib") ){
         name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
         name = name + " " + cust.getAddress() + " " + accountnum ;
         cust.setName(name);
+        
+        if(indeksT.get(cust.getID()) != null){
+        	cust.addCity("Postiindeks: " + indeksT.get(cust.getID()));
+        }
+        
         
       /*  String visit = rs.getString("visit");
         if (visit != null && visit.trim().length()>0) {
@@ -1183,6 +1229,7 @@ if(grupp.equals("leib") ){
         
         
         
+        
         String seg = rs.getString("seg");
         
         if(seg != null && seg.trim().length() > 0) {
@@ -1202,14 +1249,14 @@ if(grupp.equals("leib") ){
         String del1 = rs.getString("del1");
         String del2 = rs.getString("del2");
         if(via3l != null && via3l.trim().length() > 0) {
-        	cust.addCity("GKRTarne: '" + via3l.trim() + "'");
+        	cust.addCity("GKR Tarne: '" + via3l.trim() + "'");
         }
         
         if(del1 != null && del1.trim().length() > 0) {
-        	cust.addCity("Tarne 1: '" + del1.trim() + "'");
+        	cust.addCity("EUG Tarne: '" + del1.trim() + "'");
         }
         if(del2 != null && del2.trim().length() > 0) {
-        	cust.addCity("Tarne 2: '" + del2.trim()+ "'");
+        	//cust.addCity("Tarne 2: '" + del2.trim()+ "'");
         }
         
         if(goes) {
@@ -1350,10 +1397,10 @@ if(grupp.equals("leib") ){
 	  prodcodes = new Vector();
     String cmd = "   Select a.backOfficeId as itemid,a.Name AS nimetus, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini, \r\n" + 
     		"a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat  from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId"  ;
+    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId"  ;
 
-             String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail \r\n" + 
-             		"group by productBackofficeId,regionBackofficeId,bestBefore ";
+             String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  \r\n" + 
+             		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId, case when regionBackofficeId = '303_SHOP' then '03A' else regionBackofficeId end desc,bestBefore";
         
 
              
