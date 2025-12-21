@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,12 +36,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+import eevaeksport.Agent;
 import eevaeksport.Customer;
 import eevaeksport.Email;
 import eevaeksport.Product;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
@@ -65,18 +68,6 @@ public class EugestaESTImportDriver extends AbstractImportDriver{
     }
   }
   
-
-	 public static Object readObject(String s) throws IOException,
- ClassNotFoundException, IOException {
-Object obj = null;
-File f = new File(s);
-if (f.exists()){
- ObjectInputStream ois = new ObjectInputStream(new FileInputStream(s));
- obj = ois.readObject();
- ois.close();
-}
-return obj;
-}
   
   private void loadSignatures(){
 		
@@ -88,7 +79,7 @@ return obj;
 	  			f.delete();
 	  			signatures = new Vector();
 	  		} else {
-	  			signatures = (Vector) readObject("signatures.vec");
+	  			signatures = (Vector) Converter.readObject("signatures.vec");
 	  		}
 
 	  		
@@ -99,11 +90,14 @@ return obj;
 	  	}
   
   
-  private TreeMap names = null;
-  private TreeMap custwares = null;
 
   private Connection getNewConnection() throws SQLException{
 	    return DriverManager.getConnection(url, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+	  }
+
+
+  private Connection getNewConnection2() throws SQLException{
+	    return DriverManager.getConnection(url2, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
 	  }
   
   private String custName(String code){
@@ -141,11 +135,7 @@ return obj;
 	    return parent.getProps().getProperty("imp.read");
 	  }
 
-  
  
-  
-  
-  
   
   public String identifyCustomer(String id,String regnr)  {
     String acc = null;
@@ -253,30 +243,30 @@ private Vector signatures = new Vector();
 		    String signature = order.getSignature();
 			  if(signatures.contains(signature)){
 				  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
-			  }else{
+			  } else {
 				  
 				  
-				  if(repr) {
-					  
-				    	
-			    	    sendRepriceEmail(order, comment,order.getDokNr(),order.getCompany());
+			   if(repr) {
+				        sendRepriceEmail(order, comment,order.getDokNr(),order.getCompany());
 			    	    this.setNumAddedLines(order.getOrderLines().size());
-			         
 				  System.out.println("on ymberhindlus ");
-			  }else {
+			
+			   } else {
 				
-				  Vector splitted =  splitOrder(order);
+				/* Vector splitted =  splitOrder(order);
 			 	  Enumeration en = splitted.elements();
 			 	  while(en.hasMoreElements()){
 			 		  Order ord = (Order)en.nextElement();
-			 			  makeOutput(ord,tagastus);  
-				    }
+			 		 makeOutput(ord,tagastus);
+				    } */
+			 	  
+			 	 makeOutput(order,tagastus);
 			      		  signatures.add(signature);
 			      		  
-			  }
+			   }
 			     }
 			   try {
-					saveObject(signatures, "signatures.vec");
+					Converter.saveObject(signatures, "signatures.vec");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -369,21 +359,16 @@ private Vector signatures = new Vector();
   private Customer getCust(String code){
 	  Customer res = new Customer(code);
 	  
-	  String sql =  " SELECT cus.name as nimi, invoiceaccount as payer ,cus.COMPANYCHAINID as chain ,dimension7_ as region ,maincontactid as person FROM custtable cus \r\n" + 
-	  		"	  		 left join contactperson c on c.custaccount=cus.accountnum and cus.dataareaid = c.dataareaid WHERE  \r\n" + 
-	  		"	  			  		 cus.dataareaid in ('spil') and  accountnum ='" + code + "'" ;
-
-	  
       String cmd = "Select name as nimi , debitorBackOfficeId as payer, channel as chain , clientType as region,  contactPerson as person"
       		+ " from  dbo.EPASAULE_CLIENTS where   BackOfficeId ='" + code + "'" ;
 
 	  
-	   System.out.println(sql);
+	   System.out.println(cmd);
 	   try {
 		
 		    Connection con = getNewConnection();
 	        Statement stmt = con.createStatement();
-	        ResultSet rs = stmt.executeQuery(sql);
+	        ResultSet rs = stmt.executeQuery(cmd);
 	        
 	        while(rs.next()){
 	        	 res.setName(rs.getString("nimi").trim());
@@ -417,6 +402,35 @@ private Vector signatures = new Vector();
 	  return res ;
   }
   
+  
+  private int getNextSalesid() {
+      
+   String sql = "   Select max(id) as num from orders" ;
+
+ 	   Integer  res = 0;
+ 	   try {
+ 		   Connection con = getNewConnection2();
+ 	        Statement stmt = con.createStatement();
+ 	        ResultSet rs = stmt.executeQuery(sql);
+ 	        
+ 	        if(rs.next()){
+ 	        	res = rs.getInt("num");
+ 	        }
+ 	       
+ 	        if(res == null) {
+ 	        	res = 0;
+ 	        }
+ 	        rs.close();
+ 	        stmt.close();
+ 	        con.close();
+ 	        
+ 	   }catch(Exception e){
+ 		 e.printStackTrace();  
+ 	   }
+ 	   
+    return res + 1;
+
+  }
   
 private Product getProd(String toode){
 	  
@@ -544,644 +558,142 @@ private Product getProd(String toode){
 
 
 
-  
-  public static void saveObject(Object obj, String file) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
-		oos.writeObject(obj);
-		oos.close();
-	}
-	
   private String trouble = null;
 
-  public static  String escapeXML(String s){
-	    if (s == null) return s;
-	    StringBuffer sb = new StringBuffer();
-	    for (int i = 0 ; i < s.length() ; i++){
-	      char c = s.charAt(i);
-	      if (c == '&'){
-	        sb.append("&amp;");
-	      } else if (c == '<'){
-	        sb.append("&lt;");
-	      } else if (c == '>'){
-	        sb.append("&gt;");
-	      } else if (c == '\n'){
-	        sb.append(" ");
-	      } else {
-	        sb.append(c);
-	      }
-	    }
-	    return sb.toString();
-	  }
   
-  
- private void makeOutput(Order order , boolean ret ){
-	        
-	 boolean gift = (order.getDealer() != null && order.getDealer().equals("gift"));
-	 boolean brakis =  (order.getDealer() != null && order.getDealer().equals("GPP-VT-BR"));
-	 System.out.println("gift or brakis " + gift  + " " + brakis );
-	 	  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	    String reason = "100";
-	      try {
-	    	
-	        DocumentBuilder db = dbf.newDocumentBuilder();
-	        Document doc = db.newDocument();
-	        Element root = doc.createElement("Document-Order");
-	        doc.appendChild(root);
-
-	  //      String filiaalStr = null;
-	    //    String tarnijaKoodStr = null;
-
-	        Node docheader = doc.createElement("Document-Header");
-	        root.appendChild(docheader);
-	        
-	        Node un2 = doc.createElement("DocumentType");
-	        Text unVal2 = doc.createTextNode("MeriSoft");
-	        un2.appendChild(unVal2);
-	        docheader.appendChild(un2);
-	       
-	        
-	        Node un3 = doc.createElement("DocumentSource");
-	        Text unVal3 = doc.createTextNode("S");
-	        un3.appendChild(unVal3);
-	        docheader.appendChild(un3);
-	        try{
-
-		        long ll = Long.parseLong(order.getAgentCode());
-		        Node un4 = doc.createElement("DateCreated");
-		        
-		        Calendar cal = Calendar.getInstance();
-		        cal.setTime(new java.util.Date(ll));
-
-		        String month = (cal.get(Calendar.MONTH) + 1) + "";
-		        if (month.length() == 1) month = "0" + month;
-		        String day = cal.get(Calendar.DAY_OF_MONTH) + "";
-		        if (day.length() == 1) day = "0" + day;
-
-		        String hour = cal.get(Calendar.HOUR_OF_DAY) + "";
-		        if (hour.length() == 1) hour = "0" + hour;
-		        String minute = cal.get(Calendar.MINUTE) + "";
-		        if (minute.length() == 1) minute = "0" + minute;
-		        
-		        String second = cal.get(Calendar.SECOND) + "";
-		        if (second.length() == 1) second = "0" + second;
-		        
-		        //[ HH:MM:SS]
-		        
-		        String dateString = cal.get(Calendar.YEAR) +"-"+ month +"-"+ day + "[" + hour + ":" + minute + ":" + second + "]";
-		        
-		        Text unVal4 = doc.createTextNode(dateString);
-		        un4.appendChild(unVal4);
-		        docheader.appendChild(un4);
-		        
-	        }catch(Exception e){
-	        	
-	        }
-	        
-		
-
-	        String number = order.getDokNr();
-	       
-	        
-	        if(number == null || number.length() == 0){
-	        	number = (Calendar.getInstance().getTimeInMillis()+"");
-	        }else{
-	        	 String add = (Calendar.getInstance().getTimeInMillis()+"").substring(10);
-	        	 number = number+ add;
-	        }
-	        
-	        
-	        
-     long uni = Calendar.getInstance().getTimeInMillis();
-     Node header = doc.createElement("Order-Header");
-	        
-	        
-	        Node nr = doc.createElement("OrderNumber");
-	        Text nrVal = doc.createTextNode("MS-" +  number + "");
-	        nr.appendChild(nrVal);
-	        header.appendChild(nr);
-	        
-	        Node age = doc.createElement("SalesAgent");
-	        Text ageVal = doc.createTextNode(order.getAgent());
-	        age.appendChild(ageVal);
-	        header.appendChild(age);
-	        
-	        
-
-	        
-	       // "Adl PaymTerm Code '90D'"
-	        System.out.println("Paym term " + order.getPaymTerm());
-	        if(order.getPaymTerm() == -2){
-	        	
-	        	Node pt = doc.createElement("PaymentTerm");
-		        Text ptVal = doc.createTextNode("90D");
-		        pt.appendChild(ptVal);
-		        header.appendChild(pt);
-		        
-		        Node pl = doc.createElement("OrderType");
-		        Text plVal = doc.createTextNode("realizatsija");
-		        pl.appendChild(plVal);
-		        header.appendChild(pl);
-		    
-	        
-	        }
-	        
-	        
-	       System.out.println("is Gift Sampli jaoks " + gift + " " + ((OrderLine)order.getOrderLines().get(0)).docType); 
-	        
-	        if(gift){
-	        	String samtype = ((OrderLine)order.getOrderLines().get(0)).docType;
-	        	if(samtype == null || samtype.trim().length() == 0 || samtype.trim().equals("0")){
-	        		samtype = "PB_SALmerisoft";
-	        	}
-	        	Node samType = doc.createElement("SampleType");
-		        Text samTypeVal = doc.createTextNode(samtype);
-		        samType.appendChild(samTypeVal);
-		        header.appendChild(samType);	
-	        }
-	        
-	        
-	        
-         if(order.getPaymTerm() > 29){
-	        	
-	        	Node pt = doc.createElement("PaymentTerm");
-		        Text ptVal = doc.createTextNode(order.getPaymTerm() + "D");
-		        pt.appendChild(ptVal);
-		        header.appendChild(pt);
-		      
-	        }
-	        
-			String comm = "";
-System.out.println("info " + order.getInfo());
-System.out.println("teostaja " + order.getTeostaja());
-			if(order.getInfo() != null && order.getInfo().trim().length() >0 && order.getInfo().trim().indexOf("FQ") == -1){
-	 			Node com = doc.createElement("Remarks");
-		        Text comVal = doc.createTextNode(order.getInfo());
-		        com.appendChild(comVal);
-		        header.appendChild(com);
-		        comm = order.getInfo().replaceAll("\\r\\n|\\r|\\n", " ");
-		        if(ret){
-		        	Node Note1 = doc.createElement("Note1");
-   			     Text Note1Val = doc.createTextNode(comm);
-   			     Note1.appendChild(Note1Val);
-   			     header.appendChild(Note1);	
-		        }
-	 		}
-	 		 
-	 		 
-	 		if(ret){
-                String inff = order.getTeostaja();
-                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
-                	reason = inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
-    		    
-                }
-	 			
-		       
-	 			Node WebOrderRegion = doc.createElement("WebOrderRegion");
-		        Text WebOrderRegionVal = doc.createTextNode("-1");
-		        WebOrderRegion.appendChild(WebOrderRegionVal);
-		        header.appendChild(WebOrderRegion);
-	 			 
-		        
-		        Node WebOrderNote = doc.createElement("WebOrderNote");
-		        Text WebOrderNoteVal = doc.createTextNode(comm);
-		        WebOrderNote.appendChild(WebOrderNoteVal);
-		        header.appendChild(WebOrderNote);
-		        
-		        Node WebOrderDeliveryType = doc.createElement("WebOrderDeliveryType");
-		        Text WebOrderDeliveryTypeVal = doc.createTextNode("C");
-		        WebOrderNote.appendChild(WebOrderDeliveryTypeVal);
-		        header.appendChild(WebOrderDeliveryType);
-	 			 
-	 		 }
-		        
-		      //  <Remarks>preču atgriešana. jāaizbrauc ar loģistiku pakaļ!</Remarks>
-		       // <Note1>preču atgriešana. jāaizbrauc ar loģistiku pakaļ!</Note1>
-		       // <WebOrderRegion>-1</WebOrderRegion>
-		       // <WebOrderNote>preču atgriešana. jāaizbrauc ar loģistiku pakaļ!</WebOrderNote>
-		       // <WebOrderDeliveryType>C</WebOrderDeliveryType>
-		        
-		        
-		        
-		        
-	 		System.out.println("Remarks " + comm);
-	        
-	        
-	      
-
-	        Node kuupaev = doc.createElement("OrderDate");
-	        Calendar cal = Calendar.getInstance();
-	      
-
-	        String month = (cal.get(Calendar.MONTH) + 1) + "";
-	        if (month.length() == 1) month = "0" + month;
-	        String day = cal.get(Calendar.DAY_OF_MONTH) + "";
-	        if (day.length() == 1) day = "0" + day;
-  String year = cal.get(Calendar.YEAR) + "";
-  if(year.length() == 2){
-	  year = "20" + year;
-  }
-	        String dateString = year +"-"+ month +"-"+ day;
-	        Text kuupaevVal = doc.createTextNode(dateString);
-	        kuupaev.appendChild(kuupaevVal);
-	        header.appendChild(kuupaev);
-
-   if(brakis){
-	   Node ware = doc.createElement("Warehouse");
-	   Text wareVal = doc.createTextNode(order.getDealer());
-	   ware.appendChild(wareVal);
-	   header.appendChild(ware); 
-   }
-   
-   Node curr = doc.createElement("OrderCurrency");
-   Text currVal = doc.createTextNode("EUR");
-   curr.appendChild(currVal);
-   header.appendChild(curr);
-	        
-	        Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
-	        Calendar delcal = Calendar.getInstance();
-	        delcal.setTime(order.getShipCal().getTime());
-
-	         month = (delcal.get(Calendar.MONTH) + 1) + "";
-	        if (month.length() == 1) month = "0" + month;
-	         day = delcal.get(Calendar.DAY_OF_MONTH) + "";
-	        if (day.length() == 1) day = "0" + day;
-   year = delcal.get(Calendar.YEAR) + "";
-  if(year.length() == 2){
-	  year = "20" + year;
-  }
-	         dateString = year +"-"+ month +"-"+ day;
-	        Text delkuupaevVal = doc.createTextNode(dateString);
-	        delkuupaev.appendChild(delkuupaevVal);
-	        header.appendChild(delkuupaev);		        
-
-
-	        Node expectedDeliveryTime = doc.createElement("ExpectedDeliveryTime");
-	        Text expectedDeliveryTimeVal = doc.createTextNode("00:00");
-	        expectedDeliveryTime.appendChild(expectedDeliveryTimeVal);
-	        header.appendChild(expectedDeliveryTime);
-
-	        comment = null;   
-	        
-	        root.appendChild(header);
-
-String custname = this.custName(order.getCompany());
-	        Node parties = doc.createElement("Document-Parties");
-	        Node seller = doc.createElement("DeliveryPoint");
-
-	        Node ise = doc.createElement("CodeBySupplier");
-	        Text nimiVal = doc.createTextNode(order.getCompany());
-	        ise.appendChild(nimiVal);
-	        
-	        Node iseName = doc.createElement("Name");
-	        Text iseNameVal = doc.createTextNode(custname);
-	        iseName.appendChild(iseNameVal);
-	        
-	        
-	        Node ise2 = doc.createElement("ILN");
-	        Text nimiVal2 = doc.createTextNode(order.getCompany());
-	        ise2.appendChild(nimiVal2);
-	        
-	        seller.appendChild(ise2);
-	        seller.appendChild(iseName);
-	        seller.appendChild(ise);
-	     
-
-	        parties.appendChild(seller);
-
-	        
-	        
-	        Node sell = doc.createElement("Seller");
-
-	        Node sellX = doc.createElement("Name");
-	        Text sellXVal = doc.createTextNode("SPI");
-	        sellX.appendChild(sellXVal);
-	        
-	        Node iseX22 = doc.createElement("CodeByBuyer");
-	        Text nimiXVal22 = doc.createTextNode("AMBER");
-	        iseX22.appendChild(nimiXVal22);
-	        
-	        sell.appendChild(sellX);
-	        sell.appendChild(iseX22);
-
-	        
-	        parties.appendChild(sell);
-	        
-	        
-	        Node buyer = doc.createElement("Buyer");
-
-	        Node iseX2 = doc.createElement("Name");
-	        Text nimiXVal2 = doc.createTextNode(custname);
-	        iseX2.appendChild(nimiXVal2);
-	        
-	        Node iseX = doc.createElement("CodeByBuyer");
-	        Text nimiXVal = doc.createTextNode(order.getCompany());
-	        iseX.appendChild(nimiXVal);
-	        
-	        
-	        buyer.appendChild(iseX2);
-	        buyer.appendChild(iseX);
-
-	        parties.appendChild(buyer);
-
-	        
-	        
-	        root.appendChild(parties);
-
-
-
-	        //RIDADE LISAMINE
-	        Node read = doc.createElement("Order-Lines");
-
-	        int coun = 0;
-	        Iterator iter = order.getOrderLines().iterator();
-	         sum = 0 ;
-	        while (iter.hasNext()){
-	          OrderLine line = (OrderLine)iter.next();
-	          String toode  = line.getToode();
-	 	     if(toode!= null){
-	 	    	 toode = toode.trim();
-	 	     }else{
-	 	    	 toode = "";
-	 	     }
-	          if(line.getKogus()!= 0 && !toode.equals("")){
-	          	
-	        	  
-	        	  coun++;
-	        	  addLine(line, read, doc, coun , order, ret , reason , custname,gift);
-	          }
-	          }
-
-	        root.appendChild(read);
-
-	        
-	        Node summary = doc.createElement("Order-Summary");
-	        
-	      
-	        Node TotalLines = doc.createElement("TotalLines");
-	        Text TotalLinesVal = doc.createTextNode(coun + "");
-	        TotalLines.appendChild(TotalLinesVal);
-	        summary.appendChild(TotalLines);
-
-	        Node TotalOrderedAmount = doc.createElement("TotalOrderedAmount");
-	        Text TotalOrderedAmountVal = doc.createTextNode(order.getSum() + "");
-	        TotalOrderedAmount.appendChild(TotalOrderedAmountVal);
-	        summary.appendChild(TotalOrderedAmount);
-	        
-	        Node TotalNetAmount = doc.createElement("TotalNetAmount");
-	        Text TotalNetAmountVal = doc.createTextNode(order.getSum() + "");
-	        TotalNetAmount.appendChild(TotalNetAmountVal);
-	        summary.appendChild(TotalNetAmount);
-	       
-	        root.appendChild(summary);
-	 	
-	      String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim() +  ".xml";
-	      System.out.println(fileName);
-	      OutputFormat of = new OutputFormat();
-	        of.setIndenting(true);
-	        of.setLineSeparator(System.getProperty("line.separator"));
-	        of.setEncoding("Windows-1257");// ///ISO-8859-1
-	        XMLSerializer ser = new XMLSerializer(of);
-	        FileOutputStream fos = new FileOutputStream(fileName);
-	        PrintWriter out = new PrintWriter(fos);
-	        ser.setOutputCharStream(out);
-	        ser.serialize(doc);
-	        out.close();
-	      
-	        if(comment != null){
-	        	String chain = this.custChain(order.getCompany());
-	    	    sendCommentEmail( comment,order.getDokNr(),order.getCompany(),  " " + custname , " "+ chain);
-	         }
-		
-	      } catch (Exception e) {
-			e.printStackTrace();
-		}
-	 }
- private String custChain(String code){
-	  String res = "noname";
-	  String sql =  "  SELECT accountnum ,cus.COMPANYCHAINID as nimi FROM custtable cus WHERE  "
-	  		+ " cus.dataareaid in ('spil') and accountnum ='" + code + "'" ;
-
-	   System.out.println(sql);
-	   try {
-		
-		    Connection con = getNewConnection();
-	        Statement stmt = con.createStatement();
-	        ResultSet rs = stmt.executeQuery(sql);
-	        
-	        while(rs.next()){
-	        	 res = rs.getString("nimi").trim();
-		    }
-	       
-	        rs.close();
-	        stmt.close();
-	        con.close(); 
-	   
-	   }catch(Exception e){
-		  e.printStackTrace(); 
-	   }
-	      
-	        
-      System.out.println("customerChain " + res);
+  private void closeOrder(int salesid) {
 	  
-	  return res ;
- }
+		  String sql = " update  ORDERS set rec_completed = 1 where id = "+ salesid ;
 
-   private double sum = 0;
+     System.out.println(sql);
+     try{
+     	Connection con2 = this.getNewConnection2();
+     	 PreparedStatement stmt2 = con2.prepareStatement(sql);
+          stmt2.executeUpdate();
+          stmt2.close();
+          con2.close();
+	    }catch (Exception r){
+     	   r.printStackTrace();
+        }
+     System.out.println("Order closed " + salesid);
+      }
+
+ private void makeOutput(Order order , boolean ret ){
+	 
+	 
+	 int salesid =  getNextSalesid() ;
+	    try {
+			addInvoiceHeader(salesid,order);
+
+			    addInvoiceLines(salesid, order);
+			closeOrder(salesid);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}  
+	      
+	 }
+ 
+ 
+ private void addInvoiceLines(int salesid, Order order) throws SQLException{
+
+	    Enumeration enumr = order.getOrderLines().elements();
+
+        Connection con = getNewConnection2();
+        
+	    while (enumr.hasMoreElements()){
+	      
+	      OrderLine orderLine = (OrderLine)enumr.nextElement();
+	      
+	      String itemid = orderLine.getToode();
+	      double kogus = orderLine.getKogus();
+	      String unit = "0";//orderLine.getUnit();
+	      double price = orderLine.getPrice();
+	      double disc = orderLine.getDiscount();
+	      String choice = "NOT_AVAILABLE";
+	      String ware = "03N";
+	      String pobj = " ";
+	    		  
+	   //	  DEFAULT_APPLIED = applied promo;
+	    //  NOT_APPLIED = promo not applied;
+	    //  NOT_AVAILABLE = product without promo.
+
+	      
+	          String agent = order.getAgent();
+	          Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(agent);
+	          if(ag == null){
+	         	ag = new Agent(agent);
+	         }
+	          String sql =" INSERT into   ORDEREDITEMS (ORDER_ID,PRODUCT_ID,QUANTITY_IN_BASE_UNIT,BASE_UNIT_MEASURE," +
+	          		"PRODUCT_PRICE,REAL_PRICE,DISCOUNT,USER_PROMO_DISCOUNT_CHOICE," +
+	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID )  " +// DEPARTMEN,
+	             " values( " + salesid + ",'" + itemid + "'," + kogus + "," + unit + "," 
+	          		+ price + "," + price + "," + disc + ",'" + choice + "','" + pobj + "','" + ware + "'"
+	          		+ ")";
+
+	              log.info("SALES_LINE_SQL: " + sql);
+	              System.out.println(sql);
+	              PreparedStatement st2 = con.prepareStatement(sql);
+	              st2.executeUpdate();
+	              addNumLine();
+	              st2.close();
+	              }
+
+        con.close();
+        
+	  }
+ 
+ private void addInvoiceHeader(int salesid,Order order) throws SQLException{
+
+	      
+	      String ref = " ";
+	      if(order.getInfo() != null && order.getInfo().trim().length()>0 ){
+	      	ref = order.getInfo().trim();
+	      }
+
+	      if(order.getReference() != null && order.getReference().trim().length()>0 ){
+	      	ref = order.getReference().trim();
+	      }
+
+	  String deltype = "0";
+	  String ordtype = "0";
+	  int orderingTime = 0;
+	      
+	  String sql = " INSERT INTO  ORDERS (  " +
+	                     " ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ," +
+	            "DELIVERY_DATE , STATUS  ,AGENT_ID ,ORDERING_TIME ," +
+	            "ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE ) " +
+	            " VALUES (" + salesid + ", cast(getdate() as date),'" + order.getCompany()  +"',  " + deltype+ 
+	            ",cast(? as date),'V','" + order.getAgent() +"'," + orderingTime+
+	            ",'"+ ref + "'," + ordtype +",'',null,0,'','',getdate() )" ;
+	  
+	        System.out.println(sql);
+	        try{
+	        	Connection con2 = this.getNewConnection2();
+	        	 PreparedStatement stmt2 = con2.prepareStatement(sql);
+	             java.util.Date dat = new java.util.Date();
+	             long ship = order.getShipCal().getTimeInMillis() - 10800000 ;
+	            System.out.println(dat.toString() + "  sc " + order.getShipCal().getTime().toString() + " ref " + ref);
+	              dat.setTime(ship);
+	              dat.setSeconds(0);
+	              dat.setMinutes(0);
+	              dat.setHours(0);
+	               
+	             stmt2.setTimestamp(1, new java.sql.Timestamp(dat.getTime()));
+	             stmt2.executeUpdate();
+	             stmt2.close();
+	    
+	           }catch (Exception r){
+	        	   r.printStackTrace();
+	        	   System.exit(0);
+	           }
+	    
+     }
+
+
    private String comment = null;
    
-   private void addLine(OrderLine line, Node read, Document doc,int counter ,Order order , boolean ret 
-		   ,String reason,String custname, boolean gift) throws SQLException{
-	   
-
-	
-	     Node rida = doc.createElement("Line");
-	     read.appendChild(rida);
-
-	     Node ridaitem = doc.createElement("Line-Item");
-
-
-	     Node linenum = doc.createElement("LineNumber");
-	     Text linnum = doc.createTextNode(counter+"");
-	     linenum.appendChild(linnum);
-	     ridaitem.appendChild(linenum);
-
-	     String toode  = line.getToode();
-	     
-	     Node toote_ean = doc.createElement("EAN");
-	     Text toote_eanVal = doc.createTextNode(getEan(toode));
-	     toote_ean.appendChild(toote_eanVal);
-	     ridaitem.appendChild(toote_ean);
-
-	     
-	     
-	     Node btoote_kood = doc.createElement("BuyerItemCode");
-	     Text btoote_koodVal = doc.createTextNode(toode);
-	     btoote_kood.appendChild(btoote_koodVal);
-	     ridaitem.appendChild(btoote_kood);
-        
-
-	     
-	     Node toote_kood = doc.createElement("SupplierItemCode");
-	     Text toote_koodVal = doc.createTextNode(toode);
-	     toote_kood.appendChild(toote_koodVal);
-	     ridaitem.appendChild(toote_kood);
-        
-	     String nimi = this.getProdNimi(toode);
-	     if(nimi != null){
-	    	 Text nimetusVal = doc.createTextNode(nimi.replace('`',' ').replace('´',' '));
-		     Node nimetus = doc.createElement("ItemDescription");
-		     nimetus.appendChild(nimetusVal);
-		     ridaitem.appendChild(nimetus);
-	     }
-
-	    
-
-	     double kogus = line.getKogus();
-	     double price = line.getPrice();
-	     double disc = line.getDiscount();
-	     String unit = line.getUnit();
-	     
-	     Node koGus = doc.createElement("OrderedQuantity");
-	     
-	     Text kogusVal = doc.createTextNode(getNF().format(kogus));
-	     koGus.appendChild(kogusVal);
-	     ridaitem.appendChild(koGus);
-
-	     
-	     
-
-	    
-	     
-	   
-	     
-	    
-	    
-	    if(disc > 0 || disc == -3){
-	    	 Node yhikuale_hind = doc.createElement("SupplierUnitNetPrice");
-	         Text yhikuale_hindVla = doc.createTextNode(this.nf.format(price));
-	         yhikuale_hind.appendChild(yhikuale_hindVla);
-		     ridaitem.appendChild(yhikuale_hind);
-	    }
-	     
-	    sum = sum + (price * kogus);
-	    
-	    Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
-	    Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
-	     yhiku_hind.appendChild(yhiku_hindVal);
-	     ridaitem.appendChild(yhiku_hind);
-
-		    if(disc > 0 || disc == -3 ){
-		    
-
-	     Node yhiku_sum = doc.createElement("OrderedNetAmount");
-	      Text yhiku_sumVla = doc.createTextNode(this.nf.format(price * kogus));
-		     yhiku_sum.appendChild(yhiku_sumVla);
-		     ridaitem.appendChild(yhiku_sum);
-
-	 
-
-		     Node yhiku_vat = doc.createElement("OrderedTaxAmount");
-		      Text yhiku_vatVla = doc.createTextNode(this.nf.format(price * kogus * 0.21));
-			     yhiku_vat.appendChild(yhiku_vatVla);
-			     ridaitem.appendChild(yhiku_vat);
-			 	
-		    }
-
-			     Node yhiku_va = doc.createElement("TaxRate");
-			      Text yhiku_vaVla = doc.createTextNode("21");
-				     yhiku_va.appendChild(yhiku_vaVla);
-				     ridaitem.appendChild(yhiku_va);
-
-				     //<ItemType>CU</ItemType>
-				     Node ItemType = doc.createElement("ItemType");
-				      Text ItemTypeVla = doc.createTextNode("CU");
-				        ItemType.appendChild(ItemTypeVla);
-					     ridaitem.appendChild(ItemType);
-				
-					     
-					     if(disc > 0 || disc == -3){
-						     Node yhiku_vad = doc.createElement("Discount");
-						      Text yhiku_vadVla = doc.createTextNode("1");
-							     yhiku_vad.appendChild(yhiku_vadVla);
-						     ridaitem.appendChild(yhiku_vad);
-						     String hhh = disc + "";
-						     if(disc == -3){
-						    	 hhh = "0";
-						     }
-						     Node yhiku_vada = doc.createElement("DiscountVolume");
-						      Text yhiku_vadaVla = doc.createTextNode(hhh);
-							     yhiku_vada.appendChild(yhiku_vadaVla);
-						     ridaitem.appendChild(yhiku_vada);
-						
-	 
-					     }else{
-					    	 Node yhiku_vad = doc.createElement("Discount");
-						      Text yhiku_vadVla = doc.createTextNode("0");
-							     yhiku_vad.appendChild(yhiku_vadVla);
-						     ridaitem.appendChild(yhiku_vad);
-					     }
-							    	     
-		
-	     
-	     
-	     
-	     
-	     Node yhik = doc.createElement("UnitOfMeasure");
-	     Text yhikVal = doc.createTextNode(unit);
-	     yhik.appendChild(yhikVal);
-	     ridaitem.appendChild(yhik);
-String gg = "0";
-	     if(gift){
-	    	 gg = "1";  	
-	     }
-	     Node sample = doc.createElement("Sample");
-	     Text sampleVal = doc.createTextNode(gg);
-	     sample.appendChild(sampleVal);
-	     ridaitem.appendChild(sample);
-	     
-	     if (ret){
-	    	 System.out.println("Partii" + line.getPartii()+" " + reason);
-	    	 Node ReturnReason = doc.createElement("ReturnReason");
-		     Text ReturnReasonVal = doc.createTextNode(reason);
-		     ReturnReason.appendChild(ReturnReasonVal);
-		     ridaitem.appendChild(ReturnReason);
-		    
-if(line.getPartii() !=null && line.getPartii().length() >0){
-String text = line.getPartii();
-if(text.indexOf("\"")!=-1){
-	text = text.substring(text.indexOf("\""));
-	Node ExciseStamp = doc.createElement("ExciseStamp");
-    Text ExciseStampVal = doc.createTextNode(text.replace('"', ' ').replace('"', ' ').trim());
-    ExciseStamp.appendChild(ExciseStampVal);
-    ridaitem.appendChild(ExciseStamp);
-}
-		     
-		 	
-		 }		    
-	 
-	     }else  if(line.getPartii() != null && line.getPartii().trim().length() > 0 ){
- 		    Node toote_comm = doc.createElement("LineComment");
- 		   if(gift){
- 			  toote_comm = doc.createElement("Samples_comment"); 
- 		   }
- 		    Text toote_commVal = doc.createTextNode(line.getPartii().trim());
- 		    toote_comm.appendChild(toote_commVal);
- 		    ridaitem.appendChild(toote_comm);
- 		    
- 		   if(comment == null){
-		    	comment = "";
-		    }
- 		  comment = comment + " \n\nManager : "  +order.getAgent() +"\nProduct name : " + nimi + "\nRequested price : " +line.getPrice() 
-		    + " EUR\nRequested Discount : " + line.getDiscount() + "%\nOrdered amount : " +
-		    + line.getKogus() + "\nComment : " +  line.getPartii().trim() ;
-		}
-  
-	     
-	     
-	     
-	     rida.appendChild(ridaitem);
-	     addNumLine(); 
-	   }
+ 
    private void sendCommentEmail(String comment,String doknr,String custid, String nimi , String chain){
 	   	try{
 	   		

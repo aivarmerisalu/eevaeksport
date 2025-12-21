@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -1192,16 +1193,21 @@ if(grupp.equals("leib") ){
           
         
         String raam = rs.getString("acco");
+        
         if (raam != null && raam.trim().length()>0) {
            if(raam.contains(";")) {
         	   raam = raam.substring(0, raam.indexOf(";"));
            }
+        
+           
            if(raam.indexOf("@") != -1) {
-        	   if(!cust.getPersonalData().contains(raam.trim()) && !raam.contains("arvekontroll")) {
+        	   
+        	   if(!cust.getPersonalData().contains(raam.toLowerCase().trim()) && !raam.toLowerCase().contains("arvekontroll")) {
         	        cust.adPersonalData("RP:" + raam.trim().toLowerCase());
         	   }
            }
         }
+        
         
         if(cust.getPersonalData().endsWith("|")) {
         	cust.setPersonalData(cust.getPersonalData().substring(0,cust.getPersonalData().length()-1));
@@ -1310,24 +1316,76 @@ if(grupp.equals("leib") ){
    	  String phone = parent.make(rs1.getString("phone"));
  //	  String cell = parent.make(rs1.getString("cellularphone"));
    	  if(klient.length() > 0) {
-       sb2.append(klient+";"+ nimi + ";" + synna.getTime() + "; ;" + phone  + ";" + email +  "\n");
-   	  }
-      }
-     rs1.close();  
-              if(sb2.length() > 2){
+            sb2.append(klient+";"+ nimi + ";" + synna.getTime() + "; ;" + phone  + ";" + email +  "\n");
+   	      }
+        }
+       rs1.close();  
+
+     if(sb2.length() > 2){
         		 Converter.saveFileInUTF8( "custcontacts.txt", sb2);
         	}
-     
 
-              stmt.close();
-              con.close();
+              
+				 
+				  fff = " select promotionBackOfficeId as custgr ,productBackOfficeId as prodid, minqty, minPrice , max ([date to]) as paev from EPASAULE_PROMOTIONOBJECTS where minqty > 0  group by promotionBackOfficeId,productBackOfficeId, minqty, minPrice\r\n" + 
+				  		"				order by promotionBackOfficeId,productBackOfficeId, minqty, minPrice";
+				 
+
+				  StringBuffer   buf = new StringBuffer();
+				   
+					   rs1 = stmt.executeQuery(fff);
+				      while(rs1.next()){
+				   	  
+				   	  String gruppx = parent.make(rs1.getString("custgr"));
+				   	  String toodex = parent.make(rs1.getString("prodid"));
+				   	  Double kogus = rs1.getDouble("minqty");
+				   	  Double hind = rs1.getDouble("minPrice");
+                      java.sql.Date end = rs1.getDate("paev");
+				   	  
+				   	long ttt = 0;
+                    if(end.after(new Date())) {
+                   	 ttt = end.getTime();
+                    }
+				   	  
 
 
 
-  
-  
-  stmt.close();
-  con.close();
+                	      buf.append(toodex+ ";" + gruppx + ";" + " " + ";" + NF.format(hind).replace(',', '.') + ";" 
+                	      + " " + ";" + (int)(kogus+0.001) + "; ;" + ttt + "; ;" + gruppx);
+                        buf.append("\n");	
+				   	  
+				      }
+				     rs1.close();  
+				     stmt.close();
+				     con.close();
+   
+
+				        if(buf.length() > 2){
+				            File f = new File("prodactions.txt");
+				            if (f.exists())f.delete();
+				              try {
+				        		PrintWriter os = new PrintWriter(new FileWriter(
+				        				 "prodactions.txt", true));
+				        		os.write(buf.toString());
+				        		os.close();
+				        	  }catch (IOException ex) {
+				        		ex.printStackTrace();
+				        	  }
+				         }else{
+				            File f = new File("prodactions.txt");
+				            if (f.exists())f.delete();
+				              try {
+				        		PrintWriter os = new PrintWriter(new FileWriter(
+				        				 "prodactions.txt", true));
+				        		os.write("");
+				        		os.close();
+				        	  }catch (IOException ex) {
+				        		ex.printStackTrace();
+				        	  }
+				         }
+				        
+				     
+              
     } catch (Exception e){
       getParent().showError(e);
       System.exit(0);
@@ -1395,9 +1453,10 @@ if(grupp.equals("leib") ){
   
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
-    String cmd = "   Select a.backOfficeId as itemid,a.Name AS nimetus, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini, \r\n" + 
-    		"a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId"  ;
+    String cmd = "  Select a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini,  \r\n" + 
+    		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
+    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
+    		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
 
              String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  \r\n" + 
              		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId, case when regionBackofficeId = '303_SHOP' then '03A' else regionBackofficeId end desc,bestBefore";
@@ -1447,8 +1506,65 @@ if(grupp.equals("leib") ){
       while(rs.next()){
         String kood = rs.getString("itemid").trim();
         Product prod = new Product(kood);
-        String nimetus = Converter.enCodeEst((rs.getString("nimetus").trim())) + " " + kood;
-     
+        String nimetus = Converter.enCodeEst((rs.getString("nimetus").trim())) ;//+ " " + kood;
+       String nimibr = Converter.enCodeEst((rs.getString("namebr").trim()));
+       // teeme nime puhastuse kui on topelt brand mini
+        boolean cut = false;
+       if(nimetus.endsWith(nimibr)) {
+    	   String uu = nimetus.substring(0,nimetus.lastIndexOf(nimibr)-2);
+           String nn = nimibr.toLowerCase();
+    	   if(uu.toLowerCase().contains(nn)) {
+    		   cut = true;
+    	   }
+       }
+
+       if(cut) {
+    	   nimetus = nimetus.substring(0,nimetus.lastIndexOf(nimibr)-2);
+       }
+       
+       nimetus = nimetus.replaceAll("- BARILLA MEAL", " ").trim();
+       nimetus = nimetus.replaceAll("- BIC (MRC)", "- (MRC)").trim();
+       nimetus = nimetus.replaceAll("- HBC FA", "- HBC").trim();
+       nimetus = nimetus.replaceAll("- PURINA GROCERY", " ").trim();
+       nimetus = nimetus.replaceAll("- PURINA (MRC)", "- (MRC)").trim();
+       nimetus = nimetus.replaceAll("- NESTLE (MRC)", "- (MRC)").trim();
+
+       nimetus = nimetus.replaceAll("- HBC GLISS KUR", " ").trim();
+
+       nimetus = nimetus.replaceAll("- PHILIPS (MRC)", "- (MRC)").trim();
+
+       nimetus = nimetus.replaceAll("- KIMBERLY CLARK", " ").trim();
+       nimetus = nimetus.replaceAll("- COFFEE SUPPLEMENTS", " ").trim();
+       nimetus = nimetus.replaceAll("- NESTLE CONFECTIONERY", " ").trim();
+       nimetus = nimetus.replaceAll("- EH AIR WICK", " ").trim();
+       nimetus = nimetus.replaceAll("- HHC BREF", " ").trim();
+       nimetus = nimetus.replaceAll("- RCore DUREX", " ").trim();
+
+       nimetus = nimetus.replaceAll("- HHC PERWOLL", " ").trim();
+
+       nimetus = nimetus.replaceAll("- HBC SCHAUMA", " ").trim();
+       nimetus = nimetus.replaceAll("- SCHAR", " ").trim();
+       nimetus = nimetus.replaceAll("- HBC SCHWARZKOPF", " ").trim();       
+       
+
+       nimetus = nimetus.replaceAll("- NESTLE COFFEE CAPSULES", " ").trim();
+
+       nimetus = nimetus.replaceAll("- HALEON", " ").trim(); 
+       nimetus = nimetus.replaceAll("- HHC SILAN", " ").trim(); 
+       nimetus = nimetus.replaceAll("- HHC SOMAT", " ").trim(); 
+       nimetus = nimetus.replaceAll("- HBC PALETTE", " ").trim();
+
+       nimetus = nimetus.replaceAll("- HBC PERSIL", " ").trim();
+       nimetus = nimetus.replaceAll("- HBC PUR", " ").trim();
+       nimetus = nimetus.replaceAll("- HBC SYOSS", " ").trim();
+       nimetus = nimetus.replaceAll("- HBC PALETTE", " ").trim();
+       nimetus = nimetus.replaceAll("- NESTLE FOOD", " ").trim();
+       nimetus = nimetus.replaceAll("- SERVICES FOR SALES", " ").trim();
+       
+       
+       
+       
+       
         prod.setInCases(rs.getDouble("kastis"));
         Double pall = rs.getDouble("alusel");
         if(pall > 0) {
@@ -1478,7 +1594,7 @@ if(grupp.equals("leib") ){
          prod.setGroupSecond(grupp.trim());
        }
 
-      prod.setName(nimetus.trim());
+      prod.setName(nimetus.trim() + " " + kood);
 
      String grupp2 = rs.getString("grupp2");
           if(grupp2 != null && grupp2.trim().length()>0){ 
