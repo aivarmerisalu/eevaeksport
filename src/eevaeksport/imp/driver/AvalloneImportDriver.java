@@ -370,7 +370,7 @@ public class AvalloneImportDriver
 
     String sql = "INSERT INTO dok VALUES ('T',?, date(), 'LT1',?,1, 'EUR','" + ordernumber + "','', date(),'"+ ladu +"', '1', ?,?,0, .F., 'ADMIN','ADMIN', " +
          "'23 59', '', '1', 1,date(), 'Mobiilne Tellimus','', .F., '','', '', '', '', '','','','epoc','','', 0, .F.,0,0,0, '', '', .F., " +
-        "date(),?,.T., 0, '2000000000',0, '','" + ordernumber + "',date(),'','','','','',0,'',0)  ";
+        "date(),?,.T., 0, '2000000000',0, '','" + ordernumber + "',date(),'','','','','',0,'',0,date())  ";
     
     
   String sql2 = "Update rid set taitmata =0  where doktyyp = 'T' and reakuupaev > date()-10";

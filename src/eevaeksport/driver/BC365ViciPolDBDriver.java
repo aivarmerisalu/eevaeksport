@@ -15,6 +15,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -104,8 +105,9 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
       token = getMSToken();
     
       System.out.println("Token " + token);
-
-     this.downloadData("salesPrices");
+    //  getProducts(null);
+      
+     this.downloadData("invLines");
   //  this.downloadData(null);
     // this.getDebt(null);
     // this.getCustomerProductsList(null);
@@ -297,8 +299,10 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	   TreeMap tm = new TreeMap();
 	   
 	   
-		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
-	  	
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//itemgroups.json");
+	//	"ProductCategoryHierarchyName":"Intrastat RO","CategoryDescription":"","ParentProductCategoryCode":"7116"
+   
+   //},{
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
 		  int lenn = values.size();
@@ -444,6 +448,9 @@ private void saveFile (String dataType , String uri) {
           }
       } 
 
+      if (dataType == null || dataType.equals("items")) {
+     	 this.saveFile("items","ReleasedProductsV2?$select=ItemNumber,AMGDescription,AMGFactor,SalesPrice,ProductGroupId,SalesUnitSymbol,AMGEAN,AMGLayerUOM,SalesSalesTaxItemGroupCode,PurchaseLineDiscountProductGroupCode,FirstProductFilterCode");
+       }
       
       if (dataType == null || dataType.equals("salesPersons")) {
     	 this.saveFile("salesPersons","AMGSalesAgents?$select=PersonnelNumber,Name");
@@ -475,25 +482,27 @@ private void saveFile (String dataType , String uri) {
     	  
     	  
          
-if (dataType == null || dataType.equals("agedAcc")) {
-	 // this.saveFile("agedAccountsReceivables");
+if (dataType == null || dataType.equals("itemStocks")) {
+	  this.saveFile("itemStocks","AMGInventSumByWarehouses?$select=ItemId,PhysicalInvent,InventLocationId,expDate");
 }
       
-      
-if (dataType == null || dataType.equals("items")) {
-	// this.saveFile("items");
-}
-	  
-if (dataType == null || dataType.equals("customers")) {
-	//this.saveFile("customers");
-}
 
-if (dataType == null || dataType.equals("itemCategories")) {
-	//this.saveFile("itemCategories");
+if (dataType == null || dataType.equals("itemgroups")) {
+	 this.saveFile("itemgroups","ProductCategories?$select=ProductCategoryHierarchyName,CategoryDescription,ParentProductCategoryCode");
 }
 
 
-	  
+if (dataType == null || dataType.equals("invHeaders")) {
+	 this.saveFile("invHeaders","SalesInvoiceHeadersV4?$select=InvoiceNumber,InvoiceDate,InvoiceCustomerAccountNumber,TotalInvoiceAmount");    
+}
+
+
+if (dataType == null || dataType.equals("invLines")) {
+	 this.saveFile("invLines","SalesInvoiceV4Lines?$select=InvoiceNumber,ProductNumber,LineAmount,SalesPrice");    
+}
+
+
+
   }
        
        
@@ -780,13 +789,51 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	  
   }
   
-  
+  private HashMap<String,Double> stocks = null;
+  private HashMap<String,String> partii = null;
 
 @Override
 public String getSaveStockInfo() {
-
 	
-	return null;
+	  StringBuffer products = new StringBuffer();
+	if(stocks == null) {
+		stocks = new HashMap<String,Double>();
+	}
+	if(partii == null) {
+		partii = new HashMap<String,String>();
+	}
+	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//itemStocks.json");
+  	
+	org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+	
+	  int lenn = values.size();
+	try {
+	  for (int i = 0; i < lenn; i++) {
+		  
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+	//		"ItemId":"Z-SFP-0002","PhysicalInvent":150000,"InventLocationId":"3PL1-STD","expDate":"2026-07-02T12:00:00Z"	
+			String prodid = (String) cob.get("ItemId");
+			String ware = (String) cob.get("InventLocationId");
+			String part = (String) cob.get("expDate");
+     		Double amnt = Double.parseDouble(cob.get("PhysicalInvent")+"");
+  		
+  		if(amnt > 0) {
+  			
+  	         products.append(prodid +  ";");
+             products.append(" ;");
+             products.append(getParent().getNF().format(amnt) + "; "  +  "\n"); // + dealer +  "\n");
+  				stocks.put(prodid, amnt);
+  				partii.put(prodid, part.substring(0,10));
+  				
+  		}
+	  }
+	}catch(Exception E){
+    	
+    }
+        	
+  
+	
+	return products.toString();
 }
 
 @Override
@@ -797,8 +844,13 @@ public String getProductSortingData() {
 
 @Override
 public TreeMap getProducts(Agent agent) {
-	  TreeMap tm = new TreeMap();
-	  String weblink = parent.getProps().getProperty("weblink") ;
+	  
+	TreeMap tm = new TreeMap();
+	
+	if ( stocks == null) {
+		this.getSaveStockInfo();
+	}
+		
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
   	
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
@@ -808,20 +860,30 @@ public TreeMap getProducts(Agent agent) {
 		  for (int i = 0; i < lenn; i++) {
 			  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-
-          	String number = (String)cob.get("number");
+		//	"ItemNumber":"P FMMA 105","AMGDescription":"","AMGFactor":0,"SalesPrice":0,"ProductGroupId":"RSLVG",
+			//"SalesUnitSymbol":"Kg","AMGEAN":"","AMGLayerUOM":0,"SalesSalesTaxItemGroupCode":"G_23",
+			//"PurchaseLineDiscountProductGroupCode":"","FirstProductFilterCode":""
+		   
+          	String number = (String)cob.get("ItemNumber");
 			Product prod = new Product(number);
 		
 
-          	String itemCatCode = (String)cob.get("manufacturerCode");
+          	String itemCatCode = (String)cob.get("ProductGroupId");
         	if (itemCatCode != null && itemCatCode.length() > 0) {
         		prod.setGroup(itemCatCode);
         	}
         	
-          	Boolean blocked = (Boolean) cob.get("blocked");
+        	if(stocks.get(number) != null && stocks.get(number) > 0) {
+        		prod.setStock(stocks.get(number));
+        	}
+        	
+        	if(partii.get(number) != null) {
+        		prod.setPartii(partii.get(number));
+        	}
+          System.out.println(prod.getStock() + " " + prod.getPartii());
           	
           	String add = "";
-          	String gtin = (String)cob.get("barcode");
+          	String gtin = (String)cob.get("AMGEAN");
           	if (gtin != null && gtin.length() > 5) {
              	prod.setEAN(gtin);
              	add = " " + gtin.substring(gtin.length() -5);
@@ -833,46 +895,48 @@ public TreeMap getProducts(Agent agent) {
           	}
           	
 
-          	String kastis = cob.get("packageQty")+"";
+          	String kastis = cob.get("AMGLayerUOM")+"";
           	if(kastis != null) {
           		try {
-          		prod.setInCases(Double.parseDouble(kastis));
+          			double cas = Double.parseDouble(kastis);
+          			if(cas > 0) {
+          		prod.setInCases(cas);
+          			}
           		}catch(Exception e) {
           			
           		}
           	}
           	
-          	String name = (String)cob.get("displayName");
-          	String name2 = (String)cob.get("displayName2");
-          	prod.setName(name2.trim() + " " + number + add);
+          	String name = (String)cob.get("AMGDescription");
+          	
+          	prod.setName(name.trim() + " " + number + add);
           	
         
-        	String unit = (String)cob.get("baseUnitOfMeasureCode");
+        	String unit = (String)cob.get("SalesUnitSymbol");
         	if (unit != null) {
         		prod.setUnit(unit);
         	}
         	
-          	String price = cob.get("currentSalesPrice")+ "";
+          	String price = cob.get("SalesPrice")+ "";
           	if (price != null) {
           		prod.setPrice(Double.parseDouble(price));
           	}
           	
-          	String inventory = cob.get("inventory") +"";
+        /*  	String inventory = cob.get("inventory") +"";
           	if (inventory != null) {
           		prod.setStock(Double.parseDouble(inventory));
           	}
           	  	
           	if(weblink != null) {
           		prod.weblink = weblink + prod.getID();
-          	}
+          	}*/
              
           	
-          	prod.setVat("24");
+          	prod.setVat("21");
           	
-            if(!blocked) {
-            	  tm.put(prod.getName(), prod);	
-            }
           
+            	  tm.put(prod.getName(), prod);	
+            
           	}
 		  
 		} catch (Exception e) {

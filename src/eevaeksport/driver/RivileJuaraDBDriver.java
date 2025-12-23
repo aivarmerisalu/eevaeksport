@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -911,6 +912,21 @@ String picts = parent.getProps().getProperty("pict.dir");
     			okgr.add(st.nextToken());
     		}
     	}
+    	ArrayList<String> arr = new ArrayList<String>();
+    	try {
+			Converter.readFile(new File("allowedgroups.txt"), "utf-8", arr);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	for(String line : arr) {
+    		StringTokenizer st = new StringTokenizer(line,";");
+    		String asi = st.nextToken();
+    		if(!okgr.contains(asi)){
+    			okgr.add(asi);
+    		}
+    	}
+    	
     	
     	String groupsno =  getParent().getProps().getProperty("groups.no");
     	HashSet<String> nogr = new HashSet<String>();

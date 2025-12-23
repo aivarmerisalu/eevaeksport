@@ -264,7 +264,7 @@ try {
       
 	    String sql4a = "SELECT p.pricelistBackOfficeId as grupp, p.productBackOfficeId as toode, p.price as hind" + 
 	    		" FROM EPASAULE_PRICES p inner join EPASAULE_PRODUCTS a on a.backOfficeId = productBackOfficeId and p.price !=a.price where "
-	    		+ "p.price > 0 " ;	
+	    		+ "p.price > 0  " ;	
            rs = stmt.executeQuery(sql4a);
            while (rs.next()) {
 
@@ -285,7 +285,7 @@ try {
       
            String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, minPrice as price from dbo.EPASAULE_PROMOTIONOBJECTS a "
            		+ "inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId " + 
-           		" where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91 " + 
+           		" where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91  and minqty = 0" + 
            		" group by  a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice " + 
            		" order by a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice ";
            rs = stmt.executeQuery(sql2);
@@ -303,7 +303,7 @@ try {
            mline.setStartDate(sdate.substring(0,10));
            mline.setEndDate(edate.substring(0,10));
            mline.setPrice(price);
-   lines.add(mline);
+           lines.add(mline);
            
            }
            rs.close();
@@ -1351,7 +1351,7 @@ if(grupp.equals("leib") ){
 
 
                 	      buf.append(toodex+ ";" + gruppx + ";" + " " + ";" + NF.format(hind).replace(',', '.') + ";" 
-                	      + " " + ";" + (int)(kogus+0.001) + "; ;" + ttt + "; ;" + gruppx);
+                	      + gruppx + ";" + (int)(kogus+0.001) + "; ;" + ttt + "; ;");
                         buf.append("\n");	
 				   	  
 				      }
