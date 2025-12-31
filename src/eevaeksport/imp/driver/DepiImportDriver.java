@@ -233,8 +233,9 @@ private int getNextID() throws SQLException{
 	      Thread.currentThread().interrupt();
 	  }
 	    
-	  String agent = "TONY";
-	  String ordernumber = null;
+	  
+	  String agent = "E-POOD";
+	  String ordernumber = null;//teste
 	    if(order.getStatus() > 10){
 	    	ordernumber = order.getDokNr();
 	    }

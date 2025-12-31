@@ -15307,7 +15307,7 @@ shipdate = getCalXML(asi);
             				           || driver.getDriverVersion().equals("EugestaEST")
             				           || driver.getDriverVersion().equals("EugestaLAT")
             				           || driver.getDriverVersion().equals("EugestaLIT")
-            				           
+            				           || driver.getDriverVersion().equals("BC365ViciPol")
             				           
             						  )){
             	  dokNr = agordnum;         	  

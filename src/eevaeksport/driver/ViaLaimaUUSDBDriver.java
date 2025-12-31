@@ -2294,6 +2294,9 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 			makeShipModeFile("EE");
 		}
         
+        String turnAgents = getParent().getProps().getProperty("turnagents");
+		
+        
       TreeMap  oOrders = this.getOpenOrders();
         
         custAgendid = new HashMap();
@@ -2669,12 +2672,21 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		if (st.hasMoreTokens()) {
      		String visit = st.nextToken();
      		if (visit != null && visit.trim().length()>0){
-     			
-     			if(abi.hasAgent("KIR51")  || abi.hasAgent("TAL51") || abi.hasAgent("RAU51") || abi.hasAgent("LAA51") || abi.hasAgent("POH51") || abi.hasAgent("PAR51")) {
-         			abi.setVisit((visit));		
-     			}else {
-     				abi.setVisit(Converter.visitTurn(visit));	// 
+
+ 				//abi.setVisit(Converter.visitTurn(visit));
+ 				abi.setVisit((visit)); //2206 läheb nii
+ 				
+     			if(turnAgents != null) {
+     				StringTokenizer s1 = new StringTokenizer(turnAgents,",");
+     				while (s1.hasMoreTokens()) {
+     					String aa = st.nextToken().trim();
+     					if(abi.hasAgent(aa)) {
+     						//abi.setVisit((visit));
+     	         			abi.setVisit(Converter.visitTurn(visit));		
+     	     			}
+     				}
      			}
+     			//turnagents=KIR51,TAL51,RAU51,LAA51,POH51,PAR51,LOU51
      		 }
 		   }
 		  }

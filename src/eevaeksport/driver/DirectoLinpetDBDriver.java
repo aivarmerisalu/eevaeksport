@@ -1766,6 +1766,11 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 		 	         		try{
 		 	         	      maa =  rida.getAttributes().getNamedItem("send_address_country").getNodeValue().replaceAll(";", ","); 
 		 	         		  country = maa;
+
+		 	         		  if("true".equals(getParent().getProps().getProperty("use.country"))){
+		 	         			name = name + " " + maa;	  
+		 	         		  }
+		 	         		
 		 	         		} catch(Exception eed){
 			         		 
 		 	         		}

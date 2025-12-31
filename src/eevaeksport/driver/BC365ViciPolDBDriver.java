@@ -101,15 +101,18 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
     	  }
       }
      
-  
-      token = getMSToken();
+  //  this.getDebt(null);
+    //System.exit(0);
+     // token = getMSToken();
     
-      System.out.println("Token " + token);
+   //   System.out.println("Token " + token);
     //  getProducts(null);
-      
-     this.downloadData("invLines");
+     // getCustomers(null);
+  //  this.downloadData("invLines");
+   //  getCustomerProductsList(null);
+     //getPriceMatrixData();
   //  this.downloadData(null);
-    // this.getDebt(null);
+    
     // this.getCustomerProductsList(null);
      //this.setBulkSales(null);
    
@@ -127,7 +130,86 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	  String clientID =  null;
 	  String token =  null;
   
+	  private void downloadData(String dataType) {
+		  
+		  if (token == null) {
+			  token = getMSToken();
+		  }
 
+	      String folderPath = "Data";
+	      File folder = new File(folderPath);
+
+	      if (!folder.exists()) {
+	          if (folder.mkdirs()) {
+	              System.out.println("Folder created successfully at: " + folderPath);
+	          } else {
+	              System.out.println("Failed to create the folder at: " + folderPath);
+	          }
+	      } 
+	      
+	      if (dataType == null || dataType.equals("agedAccountsReceivables")) {
+		     	 this.saveFile("agedAccountsReceivables","AMGCustTransOpen?$select=DeliveryAddressId,AccountNum,Invoice,TransDate,DueDate,AmountCur,CurrencyCode");
+		       }
+
+	      if (dataType == null || dataType.equals("items")) {
+	     	 this.saveFile("items","ReleasedProductsV2?$select=ItemNumber,AMGDescription,AMGFactor,SalesPrice,AMGProductCategory,SalesUnitSymbol,AMGEAN,AMGLayerUOM,SalesSalesTaxItemGroupCode,PurchaseLineDiscountProductGroupCode,FirstProductFilterCode");
+	       }
+	      
+	      if (dataType == null || dataType.equals("salesPersons")) {
+	    	 this.saveFile("salesPersons","AMGSalesAgents?$select=PersonnelNumber,Name");
+	      }
+	      if (dataType == null || dataType.equals("salesPersonsSales")) {
+	     	 this.saveFile("salesPersonsSales","AMGVICAgentMonthSales?$select=PersonnelNumber,TotalInvoiceAmount");
+	      }
+	      
+	      
+	      if (dataType == null || dataType.equals("getCustomers")) {
+	     	 this.saveFile("getCustomers","CustomersV3?$select=OrganizationName,DeliveryAddressDescription,"
+	     	 		+ "CustomerAccount,DeliveryAddressLocationId,AMGFullDeliveryAddress,InvoiceAccount,DeliveryAddressCountryRegionId,AMGPrimaryAddressSalesAgentPersonnelNumber,"
+	     	 		+ "AMGDeliveryAddressSalesAgentPersonnelNumber,AMGEmployeeResponsiblePersonnelNumber,OnHoldStatus,PaymentTerms,LineDiscountCode,AMGBlockingOverdueDays,"
+	     	 		+ "AMGPrimaryAddressPrimaryContacts,AMGDeliveryAddressPrimaryContacts,DiscountPriceGroupId,SalesCurrencyCode,CreditLimit" 
+	     	 		);
+	     }
+
+	      if (dataType == null || dataType.equals("salesPrices")) {
+	    	  this.saveFile("salesPrices","SalesPriceDiscTables?$select=CustAccount,ItemId,UnitId,CurrencyCode,Price,CalculationDateTime");
+	       }
+	      
+	      
+	    	  if (dataType == null || dataType.equals("salesInvoices")) {
+	    	    	  this.saveFile("salesInvoices","AMGSalesInvoiceJournalHeaders?$select=DeliveryAddressId,CustAccount,InvoiceNumber,InvoiceDate,DueDate,InvoiceAmount,CurrencyCode");
+	    	  }
+	    	  
+	    	  
+	    	  
+	    	  
+	         
+	if (dataType == null || dataType.equals("itemStocks")) {
+		  this.saveFile("itemStocks","AMGInventSumByWarehouses?$select=ItemId,PhysicalInvent,InventLocationId,expDate");
+	}
+	      
+
+	if (dataType == null || dataType.equals("itemgroups")) {
+		 this.saveFile("itemgroups","AMGProductCategories?$select=CategoryCode,CategoryDescription,ParentProductCategoryCode");
+	}
+
+
+	if (dataType == null || dataType.equals("invHeaders")) {
+	//	 this.saveFile("invHeaders","SalesInvoiceHeadersV4?$select=InvoiceNumber,InvoiceDate,InvoiceCustomerAccountNumber,TotalInvoiceAmount");    
+	}
+
+
+	if (dataType == null || dataType.equals("invLines")) {
+		 this.saveFile("invLines","SalesInvoiceV4Lines?$select=AMGLineNum,InvoiceNumber,ProductNumber,InvoicedQuantity,SalesPrice,InvoiceDate,AMGInvoiceCustomerAccountNumber" +
+				 "&$filter=" + 
+			       URLEncoder.encode("InvoiceDate ge 2025-11-01 and InvoiceDate le 2025-11-30"));    
+	}
+
+
+
+	  }
+	       
+	       
 	  
   private String  getMSToken() {
 		 String res = null;
@@ -190,32 +272,33 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	  for (int i = 0; i < lenn; i++) {
 		  
 		  MatrixLine ml = new MatrixLine();
-		  
+	// "@odata.etag":"W/\"JzEsNTYzNzE0NDYyOSc=\"","CustAccount":"000022","ItemId":"C-LAP-0076","UnitId":"Kg","CurrencyCode":"PLN","Price":68.36,"CalculationDateTime":"2025-12-29T15:28:07Z"
+		  	  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-    		String prodid = (String) cob.get("ItemNumber");
-    		String payer = (String) cob.get("CustomerAccountNumber");
-    		String prgroup =(String) cob.get("AMGItemGroupId");
+    		String prodid = (String) cob.get("ItemId");
+    		String payer = (String) cob.get("CustomerAccount");
+    		
         	Double price = Double.parseDouble(cob.get("Price") + "");
-    		String fromdate =(String) cob.get("PriceApplicableFromDate");
-        	String todate = (String) cob.get("PriceApplicableToDate");
+    		//String fromdate =(String) cob.get("PriceApplicableFromDate");
+        	//String todate = (String) cob.get("PriceApplicableToDate");
         	
         	ml.setCliGroup(payer);
         	ml.setPrice(price);
         	ml.setProdID(prodid);
-        	if(!fromdate.startsWith("1900")) {
-        		ml.setStartDate(fromdate.substring(0,10));
-        	}
+        	//if(!fromdate.startsWith("1900")) {
+        		//ml.setStartDate(fromdate.substring(0,10));
+        	//}
         
-        	if(!todate.startsWith("1900")) {
-        		ml.setEndDate(todate.substring(0,10));
-        	}
+        	//if(!todate.startsWith("1900")) {
+        		//ml.setEndDate(todate.substring(0,10));
+        	//}
         	lines.add(ml);
 	    }
 	
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
-   	
+   	System.out.println("prm lines " + lines.size());
 	return lines;
 
    }
@@ -238,24 +321,21 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 
    public Vector getDebt(String agentCode){
 			  Vector tm = new Vector();
-				org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
+				org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//agedAccountsReceivables.json");
 		  	
 				org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 				
 				  int lenn = values.size();
 				try {
 				  for (int i = 0; i < lenn; i++) {
-					  
-					  //  "":"000002603","":"000744","":"FS-000001","InvoiceDate":"2025-11-14T12:00:00Z","":"2025-11-14T12:00:00Z","":1230,"CurrencyCode":"PLN"
 					    	  
 						org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-		        		String number = (String) cob.get("InvoiceNumber");
-			        	String date =(String) cob.get("invoiceDate");
+		        		String number = (String) cob.get("Invoice");
+			        	String date =(String) cob.get("TransDate");
 			        	String duedate = (String) cob.get("DueDate");
-			        	Double volg = Double.parseDouble(cob.get("InvoiceAmount") + "");
-			        	String payer = (String) cob.get("CustAccount");
+			        	Double volg = Double.parseDouble(cob.get("AmountCur") + "");
+			        	String payer = (String) cob.get("AccountNum");
 			        	String custid = (String) cob.get("DeliveryAddressId");
-
 
        		     Debt dd = new Debt();
 				  dd.setCustID(custid);
@@ -266,15 +346,17 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
 				  dd.setDue(ff + "");
 				  dd.setSum(volg);
-		            if(!nodebt.contains(payer)) { 
+		            if(nodebt != null && !nodebt.contains(payer)) { 
 				       tm.add(dd);
-		            }
+		             } else {
+		            	 tm.add(dd);	
+		             }
 		          	}
 				  
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				
+					
 		  System.out.println("Debtsize " + tm.size());
 	     return tm;
 	   }
@@ -311,11 +393,13 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 			  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
           
-           String code = (String)cob.get("manufacturerCode");
+           String code = (String)cob.get("CategoryCode");
            if(tm.get(code) == null) {
-           String name = (String)cob.get("manufacturerName");
+           String name = (String)cob.get("CategoryDescription");
            if (name != null && name.trim().length() > 0) {
         	    tm.put(code,name);
+        	     } else {
+        		tm.put(code, code);
         	   }
               }
          	}
@@ -406,9 +490,9 @@ private void saveFile (String dataType , String uri) {
 	      try (CloseableHttpClient client = HttpClients.createDefault()) {
 	    	  
 	    	  RequestConfig config = RequestConfig.custom()
-	    		        .setConnectTimeout(20000)
-	    		        .setConnectionRequestTimeout(20000)
-	    		        .setSocketTimeout(20000)
+	    		        .setConnectTimeout(30000)
+	    		        .setConnectionRequestTimeout(30000)
+	    		        .setSocketTimeout(30000)
 	    		        .build();
 	        HttpGet request = new HttpGet(url);
 	        request.setHeader("Authorization", "Bearer " + token);
@@ -431,90 +515,22 @@ private void saveFile (String dataType , String uri) {
       
 }
 
-  private void downloadData(String dataType) {
-	  
-	  if (token == null) {
-		  token = getMSToken();
-	  }
-
-      String folderPath = "Data";
-      File folder = new File(folderPath);
-
-      if (!folder.exists()) {
-          if (folder.mkdirs()) {
-              System.out.println("Folder created successfully at: " + folderPath);
-          } else {
-              System.out.println("Failed to create the folder at: " + folderPath);
-          }
-      } 
-
-      if (dataType == null || dataType.equals("items")) {
-     	 this.saveFile("items","ReleasedProductsV2?$select=ItemNumber,AMGDescription,AMGFactor,SalesPrice,ProductGroupId,SalesUnitSymbol,AMGEAN,AMGLayerUOM,SalesSalesTaxItemGroupCode,PurchaseLineDiscountProductGroupCode,FirstProductFilterCode");
-       }
-      
-      if (dataType == null || dataType.equals("salesPersons")) {
-    	 this.saveFile("salesPersons","AMGSalesAgents?$select=PersonnelNumber,Name");
-      }
-      if (dataType == null || dataType.equals("salesPersonsSales")) {
-     	 this.saveFile("salesPersonsSales","AMGVICAgentMonthSales?$select=PersonnelNumber,TotalInvoiceAmount");
-      }
-      
-      
-      if (dataType == null || dataType.equals("getCustomers")) {
-     	 this.saveFile("getCustomers","CustomersV3?$select=OrganizationName,DeliveryAddressDescription,"
-     	 		+ "CustomerAccount,DeliveryAddressLocationId,AMGFullDeliveryAddress,InvoiceAccount,DeliveryAddressCountryRegionId,AMGPrimaryAddressSalesAgentPersonnelNumber,"
-     	 		+ "AMGDeliveryAddressSalesAgentPersonnelNumber,AMGEmployeeResponsiblePersonnelNumber,OnHoldStatus,PaymentTerms,LineDiscountCode,AMGBlockingOverdueDays,"
-     	 		+ "AMGPrimaryAddressPrimaryContacts,AMGDeliveryAddressPrimaryContacts,DiscountPriceGroupId,SalesCurrencyCode,CreditLimit" 
-     	 		);
-     }
-
-      if (dataType == null || dataType.equals("salesPrices")) {
-    	  this.saveFile("salesPrices","SalesPriceAgreements?$select=CustomerAccountNumber,AMGCustLineDisc,ItemNumber"
-    	  		+ ",AMGItemGroupId,Price,AMGDiscountPercent,PriceApplicableToDate,PriceApplicableFromDate,PriceCurrencyCode");
-       }
-      
-      
-    	  if (dataType == null || dataType.equals("salesInvoices")) {
-    	    	  this.saveFile("salesInvoices","AMGSalesInvoiceJournalHeaders?$select=DeliveryAddressId,CustAccount,InvoiceNumber,InvoiceDate,DueDate,InvoiceAmount,CurrencyCode");
-    	  }
-    	  
-    	  
-    	  
-    	  
-         
-if (dataType == null || dataType.equals("itemStocks")) {
-	  this.saveFile("itemStocks","AMGInventSumByWarehouses?$select=ItemId,PhysicalInvent,InventLocationId,expDate");
-}
-      
-
-if (dataType == null || dataType.equals("itemgroups")) {
-	 this.saveFile("itemgroups","ProductCategories?$select=ProductCategoryHierarchyName,CategoryDescription,ParentProductCategoryCode");
-}
-
-
-if (dataType == null || dataType.equals("invHeaders")) {
-	 this.saveFile("invHeaders","SalesInvoiceHeadersV4?$select=InvoiceNumber,InvoiceDate,InvoiceCustomerAccountNumber,TotalInvoiceAmount");    
-}
-
-
-if (dataType == null || dataType.equals("invLines")) {
-	 this.saveFile("invLines","SalesInvoiceV4Lines?$select=InvoiceNumber,ProductNumber,LineAmount,SalesPrice");    
-}
-
-
-
-  }
-       
-       
+ 
        
        
        
    public TreeMap getCustomers(Agent agent){
 	   
-	//   downloadData(null);
+	   downloadData(null);
+	   
+	   
+	   Date today = new Date(Calendar.getInstance().getTimeInMillis());
 	   
 	   TreeMap<String, Double>volad = new TreeMap<String, Double>();
-		org.json.simple.JSONObject cc1 = 	Converter.readJSONFile("data//agedAccountsReceivables.json");
+	   TreeMap<String, Double>used = new TreeMap<String, Double>();
+		
+	   
+	   org.json.simple.JSONObject cc1 = 	Converter.readJSONFile("data//agedAccountsReceivables.json");
  	
 		org.json.simple.JSONArray values1 = (org.json.simple.JSONArray) cc1.get("value");
 		
@@ -523,11 +539,28 @@ if (dataType == null || dataType.equals("invLines")) {
 		  for (int i = 0; i < lenn1; i++) {
 			  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values1.get(i);
+			  
 
-         	String number = (String)cob.get("customerNumber");
-         	Double balDue = Double.parseDouble( cob.get("balanceDue")+"");
-         	if (balDue != 0 && number != null && number.trim().length() > 0) {
-             	volad.put(number, balDue+0.0);
+         	String payer = (String)cob.get("AccountNum");
+         	String custid = (String)cob.get("DeliveryAddressId");
+         	Double balDue = Double.parseDouble( cob.get("AmountCur")+"");
+        	String invdate = (String) cob.get("TransDate");
+        	String duedate = (String) cob.get("DueDate"); 
+        	String invnr = (String) cob.get("Invoice"); 
+        	
+         	if (balDue != 0 && payer != null && payer.trim().length() > 0) {
+         		if(used.get(payer) != null) {
+         			 used.put(payer, balDue + used.get(payer));	
+         		} else {
+             	     used.put(payer, balDue+0.0);
+         		}
+         	if(today.after(getDate(duedate)))	
+         		if(volad.get(payer) != null) {
+         			volad.put(payer, balDue + volad.get(payer));	
+        		} else {
+        			volad.put(payer, balDue+0.0);
+        		}
+         		
          	}
 
           
@@ -535,10 +568,10 @@ if (dataType == null || dataType.equals("invLines")) {
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Võlad"+ volad.toString());
+		System.out.println("Võlad "+ volad.size() + " " + used.size());
 	   
-	   
-	   
+	 
+	 //  System.exit(0);
 	   
 	   
 		  TreeMap tm = new TreeMap();
@@ -609,6 +642,13 @@ if (dataType == null || dataType.equals("invLines")) {
 	            if (volad.get(cust.getPayer() ) != null) {
 	            	cust.setDebt(volad.get(cust.getPayer()));
 	            }
+	            if (used.get(cust.getID() ) != null) {
+	            	cust.setDebt(used.get(cust.getID()));
+	            }
+	            if (used.get(cust.getPayer()) != null) {
+	            	cust.setUsedCredit(used.get(cust.getPayer()));
+	            }
+	            
 	            }
 	            
 	            
@@ -654,73 +694,44 @@ if (dataType == null || dataType.equals("invLines")) {
    public Vector getCustomerProductsList(String agentCode){
 	   Vector custProds = new Vector();
 	   
-		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//invLines.json");
 	  	
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
 		  int lenn = values.size();
 		try {
 		  for (int i = 0; i < lenn; i++) {
-				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-       		String number = (String) cob.get("number");
-	        	
-	        	String customerNumber = (String) cob.get("customerNumber");
-	        	
-	        	
-	        	
-	        	File f = new File("data//lines//"+number+".json");
-	        	if (f.exists()) {
-	        		org.json.simple.JSONObject ccL = 	Converter.readJSONFile("data//lines//"+number+".json");
-	        	  	
-	        		org.json.simple.JSONArray valuesL = (org.json.simple.JSONArray) ccL.get("value");
-	        		
-	      		  int lennL = valuesL.size();
-	      		  
-	    		  for (int ii = 0; ii < lennL; ii++) {
-	  				org.json.simple.JSONObject line = (org.json.simple.JSONObject) valuesL.get(ii);
-	         		String prodId = (String) line.get("lineObjectNumber");
-	         		String shipDate = (String) line.get("shipmentDate");
-	         		shipDate = shipDate.substring(5);
-	         		Double netAmnt = 0d;
+				org.json.simple.JSONObject line = (org.json.simple.JSONObject) values.get(i);
+       	
+				//   "@odata.etag":"W/\"JzYyMDg0NTU2MCw1NjM3MTU1MDg3OzEsNTYzNzE1NTA3NjswLDA7MTg4MDA5MjM0Niw1NjM3MTQ0NTc2OzEsNTYzNzE1MzYwNTswLDA7MCwwOzAsMDswLDA7MCwwJw==\"",
+				//"AMGLineNum":1,"InvoiceNumber":"FN-000002","ProductNumber":"","LineAmount":100,"SalesPrice":100,"InvoiceDate":"2024-11-01T12:00:00Z","AMGInvoiceCustomerAccountNumber":"000744"
+                    String number = (String) line.get("InvoiceNumber");
+	        	    String customerNumber = (String) line.get("AMGInvoiceCustomerAccountNumber");
+	        		String prodId = (String) line.get("ProductNumber");
+	         		String shipDate = ((String) line.get("InvoiceDate")).substring(5,10);
+	         		
+	         	 Double price = 0d;
 	         		try {
-	         			netAmnt = Double.parseDouble(line.get("netAmount")+"");
-	         			
-	         		}catch(Exception E) {
-	         			
-	         		}
+	         			price = Double.parseDouble(line.get("SalesPrice")+"");
+	         		  } catch(Exception E) {}
 	         		
-	         		Double qty = 0d;
-	         		
+	         	Double qty = 0d;
 	         		try {
-	         			qty = Double.parseDouble(line.get("quantity")+"");;
-	         			
-	         		}catch(Exception E) {
-	         			
-	         		}
+	         			qty = Double.parseDouble(line.get("InvoicedQuantity")+"");;
+	         		  } catch(Exception E) {}
 	         		
-	         				
-	         		Double price = 0d;
 	         		
-	         		try {
-	         			price = netAmnt / qty;;;
-	         			
-	         		}catch(Exception E) {
-	         			
-	         		}
-	         		  
 	         		  CustProd cp = new CustProd(customerNumber, prodId, qty ,0 ,0 ,shipDate,price,0,0," ");
 	         		  cp.setAbiKood(number);
 	         		  custProds.add(cp);
 	         		
 	    		  }
-
-	        	}
        
-}
+
 		} catch (Exception e) {
            e.printStackTrace();
            }
-		System.out.println("Query result " + custProds.size());
+		System.out.println("CustProd result size " + custProds.size());
  
 	   return custProds;
    }
