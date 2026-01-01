@@ -1173,7 +1173,40 @@ public class Converter {
 								}
 							}
 						}
-					
+
+						if(!found) {
+							 row = sheet.getRow(6);
+							
+							
+							boolean jarve = false;
+							for (int a = 0; a < row.getLastCellNum(); a++) {
+								try {
+								
+									//System.out.println(row.getCell((short)a).getStringCellValue());
+									String gg = row.getCell((short) a).getStringCellValue().trim();
+									if(gg.toLowerCase().indexOf("ean") != -1) {
+										ea = a;
+									}
+									if(gg.toLowerCase().indexOf("järve") != -1) {
+										jarve = true;
+									}
+									if(gg.toLowerCase().indexOf("kadaka") != -1) {
+										
+										r = a;
+										if(jarve) {
+											r=r-1 ; // kui järve on esimesena siis teeme kadaka -1
+										}
+										found = true;
+										addrow = 9; //laseme +2 rida alla sest sela on seletused mida pole vaja
+										break;
+									}
+								
+								} catch (Exception e) {
+									// System.out.println(row.getCell((short)a).getNumericCellValue());
+								}
+							}
+						}
+						
 						if(!found) {
 							 row = sheet.getRow(7);
 							
@@ -1256,7 +1289,7 @@ public class Converter {
 							}
 						}
 						
-						System.out.println("r "  + r + " "+ ea + " " + addrow );
+					//	System.out.println("r "  + r + " "+ ea + " " + addrow );
 						//System.exit(0);
 						
 						  
