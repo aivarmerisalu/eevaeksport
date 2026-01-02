@@ -2651,7 +2651,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 				}
 		
 		
-		
+		//System.out.println("CustVisit ");
 		String file2 = "custvisit.txt";
 	String	add = getParent().getProps().getProperty("add");
 
@@ -2668,7 +2668,8 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		String id = st.nextToken().trim();
 		Customer abi = (Customer)custMap.get(id);
 		if (abi != null){
-		
+
+		//	System.out.println("CustVisit1 ");
 		if (st.hasMoreTokens()) {
      		String visit = st.nextToken();
      		if (visit != null && visit.trim().length()>0){
@@ -2679,7 +2680,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
      			if(turnAgents != null) {
      				StringTokenizer s1 = new StringTokenizer(turnAgents,",");
      				while (s1.hasMoreTokens()) {
-     					String aa = st.nextToken().trim();
+     					String aa = s1.nextToken().trim();
      					if(abi.hasAgent(aa)) {
      						//abi.setVisit((visit));
      	         			abi.setVisit(Converter.visitTurn(visit));		
@@ -2693,7 +2694,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
          }
         }
 		}catch (Exception e){
-     	 // e.printStackTrace();
+     	  e.printStackTrace();
         }				
 		
    getDebt2(custMap);		
@@ -2761,7 +2762,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		TreeMap tm = new TreeMap();
 		
 		TreeMap groups = this.getGroups();
-		System.out.println(groups.toString());
+		//System.out.println(groups.toString());
 		
 		String laod = getParent().getProps().getProperty("laoseis.laod");
 		

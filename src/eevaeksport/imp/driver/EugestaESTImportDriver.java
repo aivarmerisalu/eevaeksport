@@ -583,12 +583,10 @@ private Product getProd(String toode){
 	 
 	 int salesid =  getNextSalesid() ;
 	    try {
-			addInvoiceHeader(salesid,order);
-
+	    		addInvoiceHeader(salesid,order);
 			    addInvoiceLines(salesid, order);
-			closeOrder(salesid);
+     			closeOrder(salesid);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}  
 	      
@@ -643,8 +641,9 @@ private Product getProd(String toode){
         
 	  }
  
+ 
+ 
  private void addInvoiceHeader(int salesid,Order order) throws SQLException{
-
 	      
 	      String ref = " ";
 	      if(order.getInfo() != null && order.getInfo().trim().length()>0 ){
