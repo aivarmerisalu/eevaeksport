@@ -607,16 +607,25 @@ private Product getProd(String toode){
 	      double kogus = orderLine.getKogus();
 	      String unit = "0";//orderLine.getUnit();
 	      double price = orderLine.getPrice();
-	      double disc = orderLine.getDiscount();
-	      String choice = "NOT_AVAILABLE";
-	      String ware = "03N";
-	      String pobj = " ";
+	      double disc = orderLine.getDiscount(); // aston ei loe seda kasutab hinda 
+	      String choice = "NOT_AVAILABLE"; // seda pole vaja 
+	      String ware = "";// kui kasutaja on ise valinud lao siis täidame muidu on tühi
+		  
+	      if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 1) {
+	    	  ware = order.getWarehouse();
+	      }
+	      
+	      String pobj = " "; // juhul kui on valitud promo siis peab see olema täidetud
 	    		  
+	      if(orderLine.selActCode != null) {
+	    	  pobj = orderLine.selActCode;
+	      }
 	   //	  DEFAULT_APPLIED = applied promo;
 	    //  NOT_APPLIED = promo not applied;
 	    //  NOT_AVAILABLE = product without promo.
 
-	      
+	      System.out.println("probo obj " + itemid + " " + pobj)
+	      ;
 	          String agent = order.getAgent();
 	          Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(agent);
 	          if(ag == null){
@@ -626,7 +635,7 @@ private Product getProd(String toode){
 	          		"PRODUCT_PRICE,REAL_PRICE,DISCOUNT,USER_PROMO_DISCOUNT_CHOICE," +
 	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID )  " +// DEPARTMEN,
 	             " values( " + salesid + ",'" + itemid + "'," + kogus + "," + unit + "," 
-	          		+ price + "," + price + "," + disc + ",'" + choice + "','" + pobj + "','" + ware + "'"
+	          		+ price + ",0," + disc + ",'" + choice + "','" + pobj + "','" + ware + "'"
 	          		+ ")";
 
 	              log.info("SALES_LINE_SQL: " + sql);
@@ -654,8 +663,10 @@ private Product getProd(String toode){
 	      	ref = order.getReference().trim();
 	      }
 
-	  String deltype = "0";
-	  String ordtype = "0";
+	  String deltype = "0"; // ei kasutatta eestis
+	  String ordtype = "0"; // Seda poel ka eestis vaja siin on määratud miskanalist tellimus tuelb
+	  String status = "V";
+	  
 	  int orderingTime = 0;
 	      
 	  String sql = " INSERT INTO  ORDERS (  " +
@@ -663,7 +674,7 @@ private Product getProd(String toode){
 	            "DELIVERY_DATE , STATUS  ,AGENT_ID ,ORDERING_TIME ," +
 	            "ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE ) " +
 	            " VALUES (" + salesid + ", cast(getdate() as date),'" + order.getCompany()  +"',  " + deltype+ 
-	            ",cast(? as date),'V','" + order.getAgent() +"'," + orderingTime+
+	            ",cast(? as date),'" + status + "','" + order.getAgent() +"'," + orderingTime +
 	            ",'"+ ref + "'," + ordtype +",'',null,0,'','',getdate() )" ;
 	  
 	        System.out.println(sql);

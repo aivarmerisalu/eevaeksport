@@ -443,11 +443,12 @@ System.out.println(sql);
         		"[Ship-To Address 2],[Ship-To City],[Ship-To Post Code],[Ship-To Country],[Ship-To VAT Reg_ No_],\r\n" + 
         		"[Ship-To Phone],[Ship-To e-mail],[Bill-To Name],[Bill-To Name 2],[Bill-To Address],\r\n" + 
         		"[Bill-To Address 2],[Bill-To City],[Bill-To Post Code],[Bill-To Country],[Bill-To Reg_ No_],\r\n" + 
-        		"[Bill-To VAT Reg_ No_],[Reply-To email],[Ship-To Info Modified],[Payer Info Modified],[StockMgt Order],[DeliveryDate],[Priority],[Customer No_],[Locker Owner], [Locker Code], [Prices From File]) " +
+        		"[Bill-To VAT Reg_ No_],[Reply-To email],[Ship-To Info Modified],[Payer Info Modified],[StockMgt Order],[DeliveryDate],"
+        		+ "[Priority],[Customer No_],[Locker Owner], [Locker Code], [Prices From File],[Shipping Agent Code]) " +
                 " VALUES ( " + salesid + ",'MS-" + agent + "','" + custid + "',cast(? as date),1,'"+ tekst.replaceAll("'", " ")+"','" +  
               ref + "','" + ladu  + "'," + status + ",'" + smode + "','" + order.getAgent() + "','MOB',(CAST('1753-01-01 00:00:00.000' AS DateTime)),"
               		+ "(CAST('1753-01-01 00:00:00.000' AS DateTime)),0,0,0,'','',(CAST('1753-01-01 00:00:00.000' AS DateTime)),(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',0,(CAST('1753-01-01 00:00:00.000' AS DateTime)),'',0,'','',0,0,0,"
-              		+ " '','','','','','','','','','','','','','','','','','','','','','',0,0,0,cast(? as date),0,'','','',0)";
+              		+ " '','','','','','','','','','','','','','','','','','','','','','',0,0,0,cast(? as date),0,'','','',0,'')";
 
      log.info("addInvoiceHeader2: " + sql);
      System.out.println("addInvoiceHeader2: " + sql);

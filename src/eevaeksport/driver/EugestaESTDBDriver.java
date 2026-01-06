@@ -1635,6 +1635,19 @@ if(grupp.equals("leib") ){
    	      sb.append( id+ ";" +Converter.enCodeEst(name.trim()) + "\n");	
    	}
    }
+   rs.close();
+
+   
+	StringBuffer sb2 = new StringBuffer();
+    rs = stmt.executeQuery("select inventlocationid  as id , name from EPASAULE_REGIONS");
+   while(rs.next()){
+   	String id = rs.getString("id");
+   	String name = rs.getString("name");
+   	if(name != null && name.trim().length() > 0){
+   	      sb2.append( id+ ";" +Converter.enCodeEst(name.trim()) + " " + id + "\n");	
+   	}
+   }
+   
    
   rs.close();
   stmt.close();
@@ -1643,7 +1656,10 @@ if(grupp.equals("leib") ){
   if(sb.length() > 0){
 	   Converter.saveFile("returnreason.txt", sb.toString());
   }
-
+  
+  if(sb2.length() > 0){
+	   Converter.saveFile("warehouse.txt", sb2.toString());
+   }
       
       
     } catch (Exception e){
@@ -1651,7 +1667,7 @@ if(grupp.equals("leib") ){
     }
 
     
-    
+    //Siia lisada Ladude select 
     
     
     

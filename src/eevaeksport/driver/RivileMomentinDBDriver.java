@@ -1021,11 +1021,11 @@ HashSet olemas = new HashSet();
     }
     
     
-    private void getPricesFromExcelOld(TreeMap tooted) {
+    private void getPricesFromExcelOld(TreeMap tooted, String year) {
     	try {
     		
     	
-    	 File f = new File ( "excel/pricelist2024.xlsx");
+    	 File f = new File ( "excel/pricelist" + year + ".xlsx");
   	   FileInputStream	 ff = new FileInputStream(f);
   	 int a = 0;
   		XSSFWorkbook workbook = new XSSFWorkbook((ff));
@@ -1341,8 +1341,11 @@ HashSet olemas = new HashSet();
     public Vector getCustomerProductsList(String agentCode) {
         connectionUp(url2);
         
+        String year =  (Calendar.getInstance().get(Calendar.YEAR)-1) + "";
+        System.out.println("YEAR " + year);
+        
         TreeMap oldPr = new TreeMap();
-        		getPricesFromExcelOld(oldPr);
+        		getPricesFromExcelOld(oldPr, year);
         		
         String cmd =" SELECT ltrim(I06_KODAS_KS)  AS klient,(case when (N33_kodas_ak) is null then '1' else ltrim((N33_kodas_ak)) end) as kood," +
         		"I07_KODAS AS toode,I07_KIEKIS AS kogus, " +
@@ -1380,7 +1383,7 @@ HashSet olemas = new HashSet();
              double lastprice = rs.getDouble("lastprice");
              
              double lastale = 0;
-             if( ( kuup.contains("2024") ) && oldPr.get(tootekood) != null) {
+             if( ( kuup.contains(year) ) && oldPr.get(tootekood) != null) {
             	 lastale = 100 -( lastprice/Double.parseDouble(oldPr.get(tootekood)+"") * 100 ); 
             	
              } else {

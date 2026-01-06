@@ -1127,7 +1127,7 @@ HashSet olemas = new HashSet();
       
         	
         String sql = "select I33_KODAS_PS AS toode, max(I33_KAINA) AS hind from I33_PKAI "
-    		+ " where I33_KODAS_iS in ('02','03','04')  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ;
+    		+ " where I33_KODAS_iS in ('02')  GROUP BY I33_KODAS_PS order by I33_KODAS_PS " ; //,'04'
             System.out.println("hind");
           if (isDebug()) System.out.println(sql);
           connectionUp(url);

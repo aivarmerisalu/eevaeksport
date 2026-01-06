@@ -1184,7 +1184,7 @@ public class Converter {
 								
 									//System.out.println(row.getCell((short)a).getStringCellValue());
 									String gg = row.getCell((short) a).getStringCellValue().trim();
-									if(gg.toLowerCase().indexOf("ean") != -1) {
+									if(gg.toLowerCase().startsWith("ean")) {
 										ea = a;
 									}
 									if(gg.toLowerCase().indexOf("järve") != -1) {
@@ -1197,7 +1197,7 @@ public class Converter {
 											r=r-1 ; // kui järve on esimesena siis teeme kadaka -1
 										}
 										found = true;
-										addrow = 9; //laseme +2 rida alla sest sela on seletused mida pole vaja
+										addrow = 6; //laseme +2 rida alla sest sela on seletused mida pole vaja
 										break;
 									}
 								
@@ -1217,7 +1217,7 @@ public class Converter {
 								
 									//System.out.println(row.getCell((short)a).getStringCellValue());
 									String gg = row.getCell((short) a).getStringCellValue().trim();
-									if(gg.toLowerCase().indexOf("ean") != -1) {
+									if(gg.toLowerCase().startsWith("ean")) {
 										ea = a;
 									}
 									if(gg.toLowerCase().indexOf("järve") != -1) {
@@ -1230,7 +1230,7 @@ public class Converter {
 											r=r-1 ; // kui järve on esimesena siis teeme kadaka -1
 										}
 										found = true;
-										addrow = 9; //laseme +2 rida alla sest sela on seletused mida pole vaja
+										addrow = 7; //laseme +2 rida alla sest sela on seletused mida pole vaja
 										break;
 									}
 								

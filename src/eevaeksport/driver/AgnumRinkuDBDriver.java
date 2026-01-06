@@ -56,7 +56,7 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
 
         // String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
         String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
-
+    	 hk_id = parent.getProps().getProperty("hk_id");
         try {
             Class.forName(databaseDriverName).newInstance();
 
@@ -338,6 +338,7 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
         }
 TreeMap photos = new TreeMap();
 
+String hk_id = null; 
     public TreeMap getProducts(Agent agent) {
         connectionUp();
 
@@ -345,12 +346,15 @@ TreeMap photos = new TreeMap();
 
 	try {
    
-                  
+                  // sellega saad vaadata hinnakirjade nimesid ja idsid ja muuda ka Pricematrixis
+		   //select * from RR_KN
+		
+	
        String  cmd = "  SELECT t.kod as toode , t.pavad as nimetus , ipak as tykke,KAINA1 as  myygihind, vnt as  yhik,g2.id_pgr AS grupp ,g.id_pgr  AS grupp2 ,bk.bkod   \r\n" + 
        		"       		      		       		      		AS ean, path as pilt ,t.pvm as vat , t.kiekis as laoseis,t.pogrupis, t.kateg, t.grupe   FROM prk t\r\n" + 
        		"       											 LEFT JOIN pgr g ON g.grupe=t.pogrupis and g.gr_type=2\r\n" + 
        		"       											 LEFT JOIN pgr g2 ON g2.grupe=t.posakis and g2.gr_type=3\r\n" + 
-       		"       		       								inner join RR_PRKKN h ON h. ID_PRK = t.ID_PRK and h.ID_KN = 151 and kaina1 != 0\r\n" +  // siin saab hinnakirja koodi muuta
+       		"       		       								inner join RR_PRKKN h ON h. ID_PRK = t.ID_PRK and h.ID_KN = " + hk_id + " and kaina1 != 0\r\n" +  // siin saab hinnakirja koodi muuta
        		"												LEFT JOIN prk_images i on i.id_prk=t.id_prk\r\n" + 
        		"       		       		                        left join BK bk on bk.id_prk=t.id_prk\r\n" + 
        		"       		       		       					where kod like '0000%' and ID_snd = 2948  and aktyvi ='Y' "; //and  g.grupe like '%pda%'
@@ -611,7 +615,7 @@ TreeMap photos = new TreeMap();
       String uus =  "select   '' as custid, hk.kod AS clgroup,bk.kod as prodid , ' ' AS prodgroup, \r\n" + 
       		"      		          0 as discount, kaina1  AS price ,'' as algus , '' as lopp \r\n" + 
       		"					   from RR_PRKKN h INNER JOIN RR_KN hk ON hk.id_kn=h.ID_KN LEFT JOIN  PRK bk on bk.id_prk=h.id_prk "
-      		+ " and bk.ID_snd = 2948 where h.ID_KN != 115 and kaina1 !=0 and bk.kod != '' ";
+      		+ " and bk.ID_snd = 2948 where h.ID_KN != " + hk_id + " and kaina1 !=0 and bk.kod != '' ";
 
       try {
     	  connectionUp();
