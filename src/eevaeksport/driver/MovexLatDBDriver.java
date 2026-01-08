@@ -2098,7 +2098,10 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 	Statement stt = con2.createStatement();
 	ResultSet rr = stt.executeQuery(sql2);
 	
-	HashSet loaded = (HashSet)Converter.readObject("tasklist.obj");
+	HashSet loaded = null;
+	try {
+	loaded = (HashSet)Converter.readObject("tasklist.obj");
+	}catch(Exception e) {};
 	if(loaded == null) {
 		loaded = new HashSet();
 	}

@@ -55,6 +55,8 @@ import org.json.simple.parser.JSONParser;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
+import eevaeksport.Dealer;
+import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
 import eevaeksport.EksportFrame;
 import eevaeksport.EksportPanel;
@@ -285,7 +287,7 @@ try {
       
            String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, minPrice as price from dbo.EPASAULE_PROMOTIONOBJECTS a "
            		+ "inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId " + 
-           		" where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91  and minqty = 0" + 
+           		" where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91  and minqty = 0 and b.regionbackofficeid = '03N'" + 
            		" group by  a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice " + 
            		" order by a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice ";
            rs = stmt.executeQuery(sql2);
@@ -335,9 +337,9 @@ try {
   public String getSaveStockInfo(){
 	  	  
 
-	  String cmd = " Select productBackofficeId as toode,sum(Inventory) as stock from "
-	  		+ " dbo.EPASAULE_INVENTORIES  where regionBackofficeId = '03N' group by productBackofficeId ";
-       
+	  String cmd = " Select productBackofficeId as toode,sum(Inventory) as stock , regionBackofficeId as ladu   from "
+	  		+ " dbo.EPASAULE_INVENTORIES   group by productBackofficeId,regionBackofficeId ";
+       //where regionBackofficeId in ('03N', '03D', '03C')
 
 	  
 	       if (isDebug()) System.out.println(cmd);
@@ -351,11 +353,15 @@ try {
 
 	           String kood = rs.getString("toode").trim();
 	           double seis = rs.getDouble("stock");
+	           String dealer = rs.getString("ladu");
 	           
 	           if(seis > 0){
 	        	       products.append(kood +  ";");
 	                   products.append(" ;");
-	                   products.append(getParent().getNF().format(seis)   +  "\n"); // + dealer +  "\n");
+	                   products.append(getParent().getNF().format(seis) + ";" + dealer +  "\n");
+	                   products.append(kood +  ";");
+	                   products.append(" ;");
+	                   products.append(getParent().getNF().format(seis) + ";" + dealer +  "\n");
 	            }
 	           }
 
@@ -370,6 +376,82 @@ try {
 	       return products.toString();
 	   }
 
+  
+  HashSet usedProds = null;
+  
+  public DealerProduct getDealerProductsList() {
+	  DealerProduct dealerProds = new DealerProduct();
+
+      try {
+
+    	  String  cmd = "Select productBackofficeId as toode,sum(Inventory) as stock ,regionBackofficeId as ladu from " + 
+    	  		"	  		 dbo.EPASAULE_INVENTORIES  group by productBackofficeId,regionBackofficeId";
+     // where regionBackofficeId in ('03N','03D','03C')
+   		  if(usedProds == null){
+   			  this.getProducts(null);
+   		  }
+           if (isDebug()) System.out.println(cmd);
+           Connection con = getNewConnection();
+              Statement stm = con.createStatement();
+              ResultSet rst = stm.executeQuery(cmd);
+                while (rst.next()) {
+                  String toode = rst.getString("toode");
+                  if (toode != null){
+                  toode = toode.trim();
+                  if(usedProds.contains(toode)){
+               	   double seis = rst.getDouble("stock");
+               	        String ladu  =  rst.getString("ladu").trim();
+	                    dealerProds.add(ladu, toode,((int)seis)+""," "," " );
+                     }
+               
+                   }
+                  }
+              rst.close();
+              stm.close();
+              con.close();
+
+      } catch (Exception e) {
+          e.printStackTrace();
+      }
+
+      
+        System.out.println( " dealerProds suurus " + dealerProds);
+       return dealerProds;
+     
+     }
+
+  
+  
+  public TreeMap getDealers() {
+
+      TreeMap dealers = new TreeMap();
+      try {
+
+    	  String cmd = " select inventlocationid  as ladu , name from EPASAULE_REGIONS";
+
+           if (isDebug()) System.out.println(cmd);
+           Connection con = getNewConnection();
+              Statement stm = con.createStatement();
+              ResultSet rst = stm.executeQuery(cmd);
+                while (rst.next()) {
+                  String kood = rst.getString("ladu").trim();
+                   Dealer dealer = new Dealer(kood);
+                   dealer.setName(Converter.enCodeEst(rst.getString("name").trim()));
+                   dealers.put(dealer.getID(), dealer);
+                  }
+              rst.close();
+              stm.close();
+              con.close();
+
+      } catch (Exception e) {
+          e.printStackTrace();
+      }
+
+      
+      System.out.println("Dealers size :" + dealers.size());
+      
+	  return dealers;
+	    }
 
 
 
@@ -976,7 +1058,7 @@ if(grupp.equals("leib") ){
                     String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , minOrderSum as minsum, '' as linedisc \r\n" + 
                     		"                       		, pricelistBackOfficeId as pricegroup,address ,\r\n" + 
                     		"                       		  Status AS block , assortimentBackOfficeId as fixed, channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
-                    		"                       		 contactPhone as perphone,  accountantemail as acco ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
+                    		"                       		 contactPhone as perphone,  accountantemail as acco,  '' as bill ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
                     		"                       		 contractDate as cdate , segmentname as seg ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 \r\n" + 
                     		"                       		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID " ; 
                     
@@ -1179,7 +1261,7 @@ if(grupp.equals("leib") ){
         if (peremail != null && peremail.trim().length()>0) {
             cust.restPerEmail = peremail.trim();
             if(!cust.getPersonalData().contains(peremail.trim())) {
-               cust.adPersonalData( peremail.trim().toLowerCase() + "|");
+               cust.adPersonalData( " " +peremail.trim().toLowerCase() + "|");
             }
                  
         }
@@ -1199,12 +1281,23 @@ if(grupp.equals("leib") ){
         	   raam = raam.substring(0, raam.indexOf(";"));
            }
         
-           
            if(raam.indexOf("@") != -1) {
-        	   
-        	   if(!cust.getPersonalData().contains(raam.toLowerCase().trim()) && !raam.toLowerCase().contains("arvekontroll")) {
-        	        cust.adPersonalData("RP:" + raam.trim().toLowerCase());
+        	   if(!raam.toLowerCase().contains("arvekontroll")) {
+        	        cust.adPersonalData("RP: " + raam.trim().toLowerCase() + "|");
         	   }
+           }
+        }
+        
+        
+String arve = rs.getString("bill");
+        
+        if (arve != null && arve.trim().length()>0) {
+           if(arve.contains(";")) {
+        	   arve = arve.substring(0, arve.indexOf(";"));
+           }
+           
+           if(arve.indexOf("@") != -1) {
+        	        cust.adPersonalData("Arve: " + arve.trim().toLowerCase());
            }
         }
         
@@ -1265,6 +1358,8 @@ if(grupp.equals("leib") ){
         	//cust.addCity("Tarne 2: '" + del2.trim()+ "'");
         }
         
+        cust.setDealer(new Dealer("03N"));
+        
         if(goes) {
             customers.put(name, cust);
             custMap.put(cust.getID(),cust);	
@@ -1322,7 +1417,7 @@ if(grupp.equals("leib") ){
        rs1.close();  
 
      if(sb2.length() > 2){
-        		 Converter.saveFileInUTF8( "custcontacts.txt", sb2);
+        		// Converter.saveFileInUTF8( "custcontacts.txt", sb2);
         	}
 
               
@@ -1462,7 +1557,7 @@ if(grupp.equals("leib") ){
              		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId, case when regionBackofficeId = '303_SHOP' then '03A' else regionBackofficeId end desc,bestBefore";
         
 
-             
+             usedProds = new HashSet();
     if (isDebug()) System.out.println(cmd);
        if (isDebug()) System.out.println(cmd2);
     TreeMap products = new TreeMap();
@@ -1621,6 +1716,7 @@ if(grupp.equals("leib") ){
        products.put(nimetus, prod);
        prodHash.put(prod.getID(), prod);
        prodcodes.add(prod.getID());
+       usedProds.add(prod.getID());
 
     
       }
@@ -1658,7 +1754,7 @@ if(grupp.equals("leib") ){
   }
   
   if(sb2.length() > 0){
-	   Converter.saveFile("warehouse.txt", sb2.toString());
+	 //  Converter.saveFile("warehouse.txt", sb2.toString());
    }
       
       

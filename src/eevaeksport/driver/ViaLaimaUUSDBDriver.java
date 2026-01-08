@@ -743,7 +743,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 				}
 			}
 
-			 System.out.println("groups " + groups.size());
+			 //System.out.println("groups " + groups.size());
 
 			for (int i = 3; i < sheet.getLastRowNum(); i++) {
 				row = sheet.getRow(i);

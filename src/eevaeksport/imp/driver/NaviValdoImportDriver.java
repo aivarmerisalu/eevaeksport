@@ -67,8 +67,6 @@ public class NaviValdoImportDriver extends AbstractImportDriver{
  
   
   
-  private TreeMap names = null;
-  private TreeMap custwares = null;
 
   private Connection getNewConnection() throws SQLException{
 	    return DriverManager.getConnection(url, parent.getProps().getProperty("dsna.user"), parent.getProps().getProperty("dsna.pass"));
