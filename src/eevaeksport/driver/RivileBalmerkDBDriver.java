@@ -1121,13 +1121,13 @@ HashSet olemas = new HashSet();
   		   	     } else  if(pant.equals("MED_PALIND")) {
   		   	    	 price = 2.8;
   		   	     } else  if(pant.equals("MED_PALPLA20")) {
-  		   	    	 price = 20.0;
+  		   	    	// price = 20.0;
   		   	     }else  if(pant.equals("MED_PALPLAST")) {
-  		   	    	 price = 20.0;
+  		   	    	// price = 20.0;
   		   	     }else  if(pant.equals("MED_STATE30L")) {
-  		   	    	 price = 30.0;
+  		   	    	// price = 30.0;
   		   	     }else  if(pant.equals("MED_STATI20L")) {
-  		   	    	 price = 20.0;
+  		   	    	// price = 20.0;
   		   	     }
   		   	     
   		   	     

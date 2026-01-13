@@ -200,7 +200,7 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 
 
 	if (dataType == null || dataType.equals("invLines")) {
-		 this.saveFile("invLines","SalesInvoiceV4Lines?$select=AMGLineNum,InvoiceNumber,ProductNumber,InvoicedQuantity,SalesPrice,InvoiceDate,AMGInvoiceCustomerAccountNumber" +
+		 this.saveFile("invLines","SalesInvoiceV4Lines?$select=AMGLineNum,InvoiceNumber,ProductNumber,InvoicedQuantity,SalesPrice,InvoiceDate,AMGInvoiceCustomerAccountNumber,AMGDeliveryCustomerAccount" +
 				 "&$filter=" + 
 			       URLEncoder.encode("InvoiceDate ge 2025-11-01 and InvoiceDate le 2025-11-30"));    
 	}
@@ -706,7 +706,9 @@ private void saveFile (String dataType , String uri) {
 				//   "@odata.etag":"W/\"JzYyMDg0NTU2MCw1NjM3MTU1MDg3OzEsNTYzNzE1NTA3NjswLDA7MTg4MDA5MjM0Niw1NjM3MTQ0NTc2OzEsNTYzNzE1MzYwNTswLDA7MCwwOzAsMDswLDA7MCwwJw==\"",
 				//"AMGLineNum":1,"InvoiceNumber":"FN-000002","ProductNumber":"","LineAmount":100,"SalesPrice":100,"InvoiceDate":"2024-11-01T12:00:00Z","AMGInvoiceCustomerAccountNumber":"000744"
                     String number = (String) line.get("InvoiceNumber");
-	        	    String customerNumber = (String) line.get("AMGInvoiceCustomerAccountNumber");
+	        	    String payerNumber = (String) line.get("AMGInvoiceCustomerAccountNumber");
+	        	    String customerNumber = (String) line.get("AMGDeliveryCustomerAccount");
+		    	     
 	        		String prodId = (String) line.get("ProductNumber");
 	         		String shipDate = ((String) line.get("InvoiceDate")).substring(5,10);
 	         		
