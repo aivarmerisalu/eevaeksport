@@ -527,19 +527,21 @@ try{
                   sb.append("         </ItemUnitRecord>" + ls);
                   
               // if(smarten)
-                  sb.append("          <ItemDescription>" + cleanLitLatEst(escape(getNimi(line.getToode()))) + "</ItemDescription>" + ls);               
+                  sb.append("          <ItemDescription>" + Converter.cleanLitLatEst(escape(getNimi(line.getToode()))) + "</ItemDescription>" + ls);               
                   sb.append("         <AmountOrdered>" + escape(getNF().format(line.getKogus())) + "</AmountOrdered>" + ls);
                 
                if(line.getDiscount() > 0){
              	  double discprice = line.getPrice() ;
              	 if(line.selActCode != null && line.selActCode.length() > 0) {
              		  sb.append("         <ItemPrice>" + escape(getNF().format(discprice)) + "</ItemPrice>" + ls); 
-             		  sb.append("         <Addition addCode=\"DSC\"><AddContent>DISCOUNT</AddContent><AddRate>" +
-                          	  escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
+             		//  sb.append("         <Addition addCode=\"DSC\"><AddContent>DISCOUNT</AddContent><AddRate>" +
+                      //    	  escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
                            
              	 } else {
-             		  sb.append("         <Addition addCode=\"DSC\"><AddContent>DISCOUNT</AddContent><AddRate>" +
-                          	  escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
+
+            		  sb.append("         <ItemPrice>" + escape(getNF().format(discprice)) + "</ItemPrice>" + ls); 
+             		 // sb.append("         <Addition addCode=\"DSC\"><AddContent>DISCOUNT</AddContent><AddRate>" +
+                       //   	  escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
                        } 
              	 }
                
@@ -741,71 +743,7 @@ try{
   
   private NumberFormat calNF = NumberFormat.getInstance();
 
-  public static final String cleanLitLatEst(String ret){
-	    if (ret != null){
-	      
-	        ret = ret.replaceAll("�","e");
-	        ret = ret.replace((char) 0x3f,' ');
-	        
-	        
-	       // ret = ret.replaceAll("?","s");
-	       // ret = ret.replaceAll("?","c");
-	     // ret = ret.replace('',' ');
-	        ret = ret.replaceAll("�","I");
-	        ret = ret.replaceAll("�","u");
-	        ret = ret.replaceAll("�","c");
-	        ret = ret.replaceAll("�","z");
-	        ret = ret.replaceAll("�","s");
-	        ret = ret.replaceAll("�","S");
-	        ret = ret.replaceAll("�","c");
-	        ret = ret.replaceAll("�","I");
-	        ret = ret.replaceAll("�","u");
-	        ret = ret.replaceAll("�","i");
-	        ret = ret.replaceAll("�","c");
-	        ret = ret.replaceAll("�","Z");
-	        ret = ret.replaceAll("�","E");
-	        ret = ret.replaceAll("�","U");
-	        ret = ret.replaceAll("�","U");
-	        ret = ret.replaceAll("�","Pg.");
-	        
-	        ret = ret.replaceAll("�","Z");
-	        ret = ret.replaceAll("�","A");
-	        ret = ret.replaceAll("�","a");
-	        ret = ret.replaceAll("�","C");
-
-	        ret = ret.replaceAll("�","c");
-	        ret = ret.replaceAll("�","E");
-	        ret = ret.replaceAll("�","e");
-	        ret = ret.replaceAll("�","G");
-	        ret = ret.replaceAll("�","g");
-	        ret = ret.replaceAll("�","I");
-	        ret = ret.replaceAll("�","i");
-	        ret = ret.replaceAll("�","K");
-	        ret = ret.replaceAll("�","k");
-	        ret = ret.replaceAll("�","L");
-	        ret = ret.replaceAll("�","l");
-	        ret = ret.replaceAll("�","N");
-	        ret = ret.replaceAll("�","n");
-	        
-	        ret = ret.replaceAll("�","o");
-	        ret = ret.replaceAll("�","a");
-	        ret = ret.replaceAll("�","o");
-	        ret = ret.replaceAll("�","u");
-	       
-	        ret = ret.replaceAll("�","O");
-	        ret = ret.replaceAll("�","A");
-	        ret = ret.replaceAll("�","O");
-	        ret = ret.replaceAll("�","U");
-	    }
-	        
-	        if(ret == null || ret.trim().length()==0){
-	        return " ";
-	        }else {
-	        	System.out.println(ret);
-	        return ret;
-	        }        
-	      }
-  
+   
   private String url = "jdbc:odbc:AXA";
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
 

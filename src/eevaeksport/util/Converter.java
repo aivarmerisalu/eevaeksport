@@ -6172,6 +6172,7 @@ try{
   }
 	
   public static void getManagersReplacements(TreeMap tm , String company, String user , String pass,boolean https){
+	  if(user != null && company != null && pass != null) {
 	  eevaeksport.util.ReportingService serv = new ReportingService();
 	  serv.https = https;
 	  serv.user =  user;
@@ -6289,7 +6290,7 @@ try{
 			}
 		}
 		serv.closeClient();
-		
+	  }
   }
   
   public static String getSVData(long from , long to , String company, String user , String pass, boolean week, String type , String subTypes, String nameadd){

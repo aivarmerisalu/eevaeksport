@@ -1422,8 +1422,9 @@ String arve = rs.getString("bill");
 
               
 				 
-				  fff = " select promotionBackOfficeId as custgr ,productBackOfficeId as prodid, minqty, minPrice , max ([date to]) as paev from EPASAULE_PROMOTIONOBJECTS where minqty > 0  group by promotionBackOfficeId,productBackOfficeId, minqty, minPrice\r\n" + 
-				  		"				order by promotionBackOfficeId,productBackOfficeId, minqty, minPrice";
+				  fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minqty, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
+				  		"EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty > 0  group by a.promotionBackOfficeId,a.productBackOfficeId, minqty, minPrice\r\n" + 
+				  		"				  				order by a.promotionBackOfficeId,productBackOfficeId, minqty, minPrice";
 				 
 
 				  StringBuffer   buf = new StringBuffer();
@@ -1435,7 +1436,15 @@ String arve = rs.getString("bill");
 				   	  String toodex = parent.make(rs1.getString("prodid"));
 				   	  Double kogus = rs1.getDouble("minqty");
 				   	  Double hind = rs1.getDouble("minPrice");
-                      java.sql.Date end = rs1.getDate("paev");
+				      java.sql.Date end = rs1.getDate("paev");
+				   	 String nimi = parent.make(rs1.getString("nimi"));
+				   	 if(nimi.contains("2030")) {
+				   		 nimi = nimi.substring(nimi.indexOf("2030")+ 11);
+				   		 if(nimi.contains("2030")) {
+					   		 nimi = nimi.substring(0,nimi.indexOf("2030") - 18);
+					   	 }
+				   	 }
+                   
 				   	  
 				   	long ttt = 0;
                     if(end.after(new Date())) {
@@ -1445,7 +1454,7 @@ String arve = rs.getString("bill");
 
 
 
-                	      buf.append(toodex+ ";" + gruppx + ";" + " " + ";" + NF.format(hind).replace(',', '.') + ";" 
+                	      buf.append(toodex+ ";" + gruppx + ";" + nimi + ";" + NF.format(hind).replace(',', '.') + ";" 
                 	      + gruppx + ";" + (int)(kogus+0.001) + "; ;" + ttt + "; ;");
                         buf.append("\n");	
 				   	  
@@ -1548,7 +1557,7 @@ String arve = rs.getString("bill");
   
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
-    String cmd = "  Select a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini,  \r\n" + 
+    String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini,  \r\n" + 
     		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
     		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
     		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
@@ -1589,7 +1598,7 @@ String arve = rs.getString("bill");
           if(stocks.get(id) != null) {
         	  sto = stocks.get(id) + sto; //summeerime laoseisu 
           }
-          stocks.put(id, sto);
+         // stocks.put(id, sto);
           }
        
     	rs1.close();
@@ -1599,10 +1608,14 @@ String arve = rs.getString("bill");
       HashMap prodHash = new HashMap();
       
       while(rs.next()){
+        String sorting = rs.getString("sorting");
+        while(sorting.length() < 7) {
+        	sorting = "0" + sorting;
+        }
         String kood = rs.getString("itemid").trim();
         Product prod = new Product(kood);
         String nimetus = Converter.enCodeEst((rs.getString("nimetus").trim())) ;//+ " " + kood;
-       String nimibr = Converter.enCodeEst((rs.getString("namebr").trim()));
+        String nimibr = Converter.enCodeEst((rs.getString("namebr").trim()));
        // teeme nime puhastuse kui on topelt brand mini
         boolean cut = false;
        if(nimetus.endsWith(nimibr)) {
@@ -1701,8 +1714,9 @@ String arve = rs.getString("bill");
                    prod.setUnit(unit);
                }
 
+               
                if(stocks.get(prod.getID()) != null){
-            	   prod.setStock(stocks.get(prod.getID()));
+            	  // prod.setStock(stocks.get(prod.getID()));
                }
                
                if(partii.get(prod.getID()) != null) {
@@ -1712,6 +1726,7 @@ String arve = rs.getString("bill");
 
                Double vat = rs.getDouble("vat");
                prod.setVat(vat + "");
+               prod.setNameSorting(sorting + nimetus);
                
        products.put(nimetus, prod);
        prodHash.put(prod.getID(), prod);

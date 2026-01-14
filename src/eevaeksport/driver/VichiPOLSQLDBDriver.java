@@ -635,9 +635,9 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	        aa.setName("office1");
 	        agents.put("office1", aa);
     
-        Agent aas = new Agent("LADU");
-        aas.setName("LADU");
-        agents.put("LADU", aas);
+        Agent aas = new Agent("OFI 01");
+        aas.setName("OFI 01");
+        agents.put("OFI 01", aas);
 
             rs.close();
 	        con.close();
@@ -684,6 +684,7 @@ private TreeMap agent1 = new TreeMap();
      try {
 
      try {
+    	 
 			   Converter.getManagersReplacements(agent1, rcompanyx, user, pass, false); 
 				
 		}catch(Exception e){
@@ -882,36 +883,18 @@ try{
              String ag = rs.getString("agent");
              if(ag != null){
                 customer.addAgent(new Agent(ag.trim()));
-                /*if(ag.trim().startsWith("PHD")) {
-                	 customer.addAgent(new Agent("PHD 01"));
-                	 customer.addAgent(new Agent("PHD 02"));
-                	 customer.addAgent(new Agent("PHD 03"));
-                	
-                	 customer.addAgent(new Agent("PHD 05"));
-                	 customer.addAgent(new Agent("PHD 06"));
-                	 customer.addAgent(new Agent("PHD 07"));
-                }*/
+                customer.addAgent(new Agent("OFI 01"));
                } 
               
                ag = rs.getString("agent2");
                  if(ag != null){
                     customer.addAgent(new Agent(ag.trim()));
-                  /*  if(ag.trim().startsWith("PHD")) {
-                   	 customer.addAgent(new Agent("PHD 01"));
-                   	 customer.addAgent(new Agent("PHD 02"));
-                   	 customer.addAgent(new Agent("PHD 03"));
-              
-                   	customer.addAgent(new Agent("PHD 05"));
-               	 customer.addAgent(new Agent("PHD 06"));
-               	 customer.addAgent(new Agent("PHD 07"));
-                   }*/
+                  	customer.addAgent(new Agent("OFI 01"));
                  }
              
-          
 				
 				  if (ag != null && agent1.get(ag.trim()) != null){
 						Agent aa = (Agent)agent1.get(ag.trim());
-					
 						Vector vec = aa.getDubbler();
 						if(vec!= null && vec.size() >0){
 							Enumeration en = vec.elements();
