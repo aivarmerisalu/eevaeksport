@@ -253,14 +253,13 @@ private Vector signatures = new Vector();
 			
 			   } else {
 				
-				/* Vector splitted =  splitOrder(order);
+				 Vector splitted =  splitOrder(order);
 			 	  Enumeration en = splitted.elements();
 			 	  while(en.hasMoreElements()){
 			 		  Order ord = (Order)en.nextElement();
 			 		 makeOutput(ord,tagastus);
-				    } */
+				    } 
 			 	  
-			 	 makeOutput(order,tagastus);
 			      		  signatures.add(signature);
 			      		  
 			   }
@@ -469,49 +468,72 @@ private Product getProd(String toode){
 	  Vector result = new Vector();
 	  
 	  String agcode = order.getAgent();
-	  if(agcode.startsWith("V0") && agcode.length() > 4) {
-		  agcode = "RETAIL";
-	  }
+	  
 
 	  if (order.getDokNr() == null || order.getDokNr().trim().length() == 0){
 		  order.setDokNr((Calendar.getInstance().getTimeInMillis() + "").substring(3));
 	  }
 	//  System.out.println("Infokene " + order.getInfo() + " " + order.getDokNr());
 
-	  Order ordS0 = new Order(order.getCompany(),agcode);
-	  Order ordSG = new Order(order.getCompany(),agcode);
-	  Order ordBR = new Order(order.getCompany(),agcode);
-		 
-	  ordS0.setAgentCode(order.getAgentCode());
-	  ordS0.setDokNr(order.getDokNr());
-	  ordS0.setCompName(order.getShipMode());
-	  ordS0.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ordS0.setStatus(order.getStatus());
-	  ordS0.setInfo(order.getInfo());
-	  ordS0.setPaymTerm(order.getPaymTerm());
-	  ordS0.setDealer("100");
-	  ordS0.setTeostaja(order.getTeostaja());
-		
+	  Order ord03N = new Order(order.getCompany(),agcode);
+	  Order ord03D = new Order(order.getCompany(),agcode);
+	  Order ord03C = new Order(order.getCompany(),agcode);
+	  Order ordNord = new Order(order.getCompany(),agcode);
+	  Order ordPood = new Order(order.getCompany(),agcode);
+	 
 	  
-	  ordSG.setAgentCode(order.getAgentCode());
-	  ordSG.setDokNr(order.getDokNr());
-	  ordSG.setCompName(order.getShipMode());
-	  ordSG.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ordSG.setStatus(order.getStatus());
-	  ordSG.setInfo(order.getInfo());
-	  ordSG.setPaymTerm(order.getPaymTerm());
-	  ordSG.setDealer("gift");
-	  ordSG.setTeostaja(order.getTeostaja());
+	  ordNord.setAgentCode(order.getAgentCode());
+	  ordNord.setDokNr(order.getDokNr());
+	  ordNord.setCompName(order.getShipMode());
+	  ordNord.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordNord.setStatus(order.getStatus());
+	  ordNord.setInfo(order.getInfo());
+	  ordNord.setPaymTerm(order.getPaymTerm());
+	  ordNord.setDealer("25_ESTTRAN");
+	  ordNord.setTeostaja(order.getTeostaja());
 	  
-	  ordBR.setAgentCode(order.getAgentCode());
-	  ordBR.setDokNr(order.getDokNr());
-	  ordBR.setCompName(order.getShipMode());
-	  ordBR.setShipCal(order.getShipCal().getTimeInMillis() +"");
-	  ordBR.setStatus(order.getStatus());
-	  ordBR.setInfo(order.getInfo());
-	  ordBR.setPaymTerm(order.getPaymTerm());
-	  ordBR.setDealer("GPP-VT-BR");
-	  ordBR.setTeostaja(order.getTeostaja());
+
+	  ordPood.setAgentCode(order.getAgentCode());
+	  ordPood.setDokNr(order.getDokNr());
+	  ordPood.setCompName(order.getShipMode());
+	  ordPood.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordPood.setStatus(order.getStatus());
+	  ordPood.setInfo(order.getInfo());
+	  ordPood.setPaymTerm(order.getPaymTerm());
+	  ordPood.setDealer("303_SHOP");
+	  ordPood.setTeostaja(order.getTeostaja());
+	 
+	  
+	  ord03N.setAgentCode(order.getAgentCode());
+	  ord03N.setDokNr(order.getDokNr());
+	  ord03N.setCompName(order.getShipMode());
+	  ord03N.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord03N.setStatus(order.getStatus());
+	  ord03N.setInfo(order.getInfo());
+	  ord03N.setPaymTerm(order.getPaymTerm());
+	  ord03N.setDealer("03N");
+	  ord03N.setTeostaja(order.getTeostaja());
+	  
+	  ord03D.setAgentCode(order.getAgentCode());
+	  ord03D.setDokNr(order.getDokNr());
+	  ord03D.setCompName(order.getShipMode());
+	  ord03D.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord03D.setStatus(order.getStatus());
+	  ord03D.setInfo(order.getInfo());
+	  ord03D.setPaymTerm(order.getPaymTerm());
+	  ord03D.setDealer("03D");
+	  ord03D.setTeostaja(order.getTeostaja());
+
+	  
+	  ord03C.setAgentCode(order.getAgentCode());
+	  ord03C.setDokNr(order.getDokNr());
+	  ord03C.setCompName(order.getShipMode());
+	  ord03C.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord03C.setStatus(order.getStatus());
+	  ord03C.setInfo(order.getInfo());
+	  ord03C.setPaymTerm(order.getPaymTerm());
+	  ord03C.setDealer("03C");
+	  ord03C.setTeostaja(order.getTeostaja());
 
 	  
 	  Vector lines = order.getOrderLines();
@@ -519,35 +541,59 @@ private Product getProd(String toode){
 	  while  (enumr.hasMoreElements()){
 		  OrderLine lin = (OrderLine)enumr.nextElement();
 		  
-		    if(lin.getDiscount() == -2){
-		     	ordSG.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+		    if(lin.getDealer().equals("03D")){
+		     	ord03D.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-		    	ordSG.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "G");
-			    ordSG.setReference(order.getReference());
-		     }else if(order.getWarehouse().equals("GPP-VT-BR")){
-		    	   ordBR.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+		    	ord03D.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "D");
+			    ord03D.setReference(order.getReference());
+			  
+		    } else if(lin.getDealer().equals("25_ESTTRAN")){
+		     	ordNord.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		     	ordNord.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "N");
+		     	ordNord.setReference(order.getReference());
+			  
+		    } else if(lin.getDealer().equals("303_SHOP")){
+		     	ordPood.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		     	ordPood.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "P");
+		     	ordPood.setReference(order.getReference());
+			  
+		    }  else if(lin.getDealer().equals("03C")){
+		    	   ord03C.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-			     	ordBR.setDokNr(order.getDokNr());
-			     	ordBR.setReference(order.getReference()); 
+			     	ord03C.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "C");
+			     	ord03C.setReference(order.getReference());
+			     	
 			 } else {
-		    	   ordS0.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+		    	   ord03N.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
-			     	ordS0.setDokNr(order.getDokNr());
-			     	ordS0.setReference(order.getReference()); 
+			     	ord03N.setDokNr(order.getDokNr());
+			     	ord03N.setReference(order.getReference()); 
 			 }
 		  
 	  }
 	  
 
-	  if(ordS0.getOrderLines() != null && ordS0.getOrderLines().size()>0){
-		  result.add(ordS0);  
+
+	  if(ordNord.getOrderLines() != null && ordNord.getOrderLines().size()>0){
+		  result.add(ordNord);  
 	  }
 
-	  if(ordSG.getOrderLines() != null && ordSG.getOrderLines().size()>0){
-		  result.add(ordSG);  
+	  if(ordPood.getOrderLines() != null && ordPood.getOrderLines().size()>0){
+		  result.add(ordPood);  
 	  }
-	  if(ordBR.getOrderLines() != null && ordBR.getOrderLines().size()>0){
-		  result.add(ordBR);  
+	  
+	  if(ord03N.getOrderLines() != null && ord03N.getOrderLines().size()>0){
+		  result.add(ord03N);  
+	  }
+
+	  if(ord03D.getOrderLines() != null && ord03D.getOrderLines().size()>0){
+		  result.add(ord03D);  
+	  }
+	  
+	  if(ord03C.getOrderLines() != null && ord03C.getOrderLines().size()>0){
+		  result.add(ord03C);  
 	  }
 	  
 	 System.out.println("Result =" +order.getDokNr()
@@ -611,8 +657,8 @@ private Product getProd(String toode){
 	      String choice = "NOT_AVAILABLE"; // seda pole vaja 
 	      String ware = "";// kui kasutaja on ise valinud lao siis täidame muidu on tühi
 		  
-	      if(order.getWarehouse() != null && order.getWarehouse().trim().length() > 1) {
-	    	  ware = order.getWarehouse();
+	      if(order.getDealer() != null && order.getDealer().trim().length() > 1) {
+	    	  ware = order.getDealer();
 	      }
 	      
 	      String pobj = " "; // juhul kui on valitud promo siis peab see olema täidetud
@@ -624,8 +670,7 @@ private Product getProd(String toode){
 	    //  NOT_APPLIED = promo not applied;
 	    //  NOT_AVAILABLE = product without promo.
 
-	      System.out.println("probo obj " + itemid + " " + pobj)
-	      ;
+	      
 	          String agent = order.getAgent();
 	          Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(agent);
 	          if(ag == null){

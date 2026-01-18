@@ -24,6 +24,7 @@ public class MatrixLine implements Serializable{
    public   String discGroup = null;
    public   String currency = null;
    public   String lineinfo = null;
+   public   String dealer = null;
 
    public String getLineinfo() {
 	return lineinfo;

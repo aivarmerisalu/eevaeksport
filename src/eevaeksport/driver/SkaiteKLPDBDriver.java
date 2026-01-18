@@ -101,13 +101,14 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
     
   
 	private Connection getNewConnection() throws SQLException {
-		return DriverManager.getConnection(url, getParent().getProps()
-				.getProperty("dsn.user"),
-				getParent().getProps().getProperty("dsn.pass"));
+		return DriverManager.getConnection(url + getParent().getProps().getProperty("dns.url") , getParent().getProps()
+				.getProperty("dns.user"),
+				getParent().getProps().getProperty("dns.pass"));
 	}
 	
 	  private Connection getNewConnection3() throws SQLException{
-		    return DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
+		  // report
+		    return DriverManager.getConnection(url + getParent().getProps().getProperty("dns.url") , getParent().getProps().getProperty("dns.user"), getParent().getProps().getProperty("dns.pass"));
 		  }
 
 	  private Connection getNewConnectionScan() throws SQLException{
@@ -269,7 +270,7 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 					if(cr1.equals("INVSCAN")){
 						makeCSV(sb , cr2 + "-"+ cal.get(Calendar.MILLISECOND) +""+ cou);
 					}else{
-						ps.executeUpdate();	
+					//	ps.executeUpdate();	
 					}
 					
 				}
@@ -512,8 +513,8 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
         if (con != null){
           con.close();
         }
-           con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
-           getParent().getProps().getProperty("dsn.pass"));
+           con = DriverManager.getConnection(url + getParent().getProps().getProperty("dns.url"), getParent().getProps().getProperty("dns.user"),
+           getParent().getProps().getProperty("dns.pass"));
       } catch (Exception e) {
 	    getParent().showError(e);
       }
@@ -785,8 +786,8 @@ public class SkaiteKLPDBDriver extends AbstractDBDriver implements BulkUpdater,M
 	    }
 
 	    
-	   Connection con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
-	            getParent().getProps().getProperty("dsn.pass"));
+	   Connection con = DriverManager.getConnection(url + getParent().getProps().getProperty("dns.url"), getParent().getProps().getProperty("dns.user"),
+	            getParent().getProps().getProperty("dns.pass"));
            PreparedStatement  stmt = con.prepareStatement(cmd);
 	    ResultSet	      rs = stmt.executeQuery();
 
@@ -892,8 +893,8 @@ String    sql = " select  '' AS custid,ltrim(str(sut.NuolaiduSutartysId)) AS clg
            try {
              
         	   
-             Connection con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
-                     getParent().getProps().getProperty("dsn.pass"));
+             Connection con = DriverManager.getConnection(url + getParent().getProps().getProperty("dns.url"), getParent().getProps().getProperty("dns.user"),
+                     getParent().getProps().getProperty("dns.pass"));
              Statement  st = con.createStatement();
              ResultSet  rs = st.executeQuery(sql);
 
@@ -1981,8 +1982,8 @@ try{
          try {
         	 
         	 HashMap<String ,Double> grsales = new HashMap<String ,Double>();
-        	Connection con = DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"),
-        	           getParent().getProps().getProperty("dsn.pass"));
+        	Connection con = DriverManager.getConnection(url + getParent().getProps().getProperty("dns.url"), getParent().getProps().getProperty("dns.user"),
+        	           getParent().getProps().getProperty("dns.pass"));
              PreparedStatement stmt = con.prepareStatement(cmd);
      
              ResultSet rs = stmt.executeQuery();
@@ -2203,7 +2204,7 @@ try{
      
 
     public static final String DRIVER_VERSION = "SkaiteKLP";
-    private String             url = "jdbc:odbc:skaita";
+    private String             url = "jdbc:odbc:";
     private String             url2 = "jdbc:odbc:report";
     private String             url3 = "jdbc:odbc:scan";
     private Connection	       con = null;

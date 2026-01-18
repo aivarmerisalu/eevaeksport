@@ -534,14 +534,14 @@ try{
              	  double discprice = line.getPrice() ;
              	 if(line.selActCode != null && line.selActCode.length() > 0) {
              		  sb.append("         <ItemPrice>" + escape(getNF().format(discprice)) + "</ItemPrice>" + ls); 
-             		//  sb.append("         <Addition addCode=\"DSC\"><AddContent>DISCOUNT</AddContent><AddRate>" +
-                      //    	  escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
+             		 sb.append("         <Addition addCode=\"DSC\"><AddContent>DISCOUNT</AddContent><AddRate>" +
+                          	  escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
                            
              	 } else {
 
             		  sb.append("         <ItemPrice>" + escape(getNF().format(discprice)) + "</ItemPrice>" + ls); 
-             		 // sb.append("         <Addition addCode=\"DSC\"><AddContent>DISCOUNT</AddContent><AddRate>" +
-                       //   	  escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
+             		  sb.append("         <Addition addCode=\"DSC\"><AddContent>DISCOUNT</AddContent><AddRate>" +
+                          	  escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
                        } 
              	 }
                

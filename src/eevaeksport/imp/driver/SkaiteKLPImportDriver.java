@@ -748,8 +748,9 @@ System.out.println(res);
 
 	private Connection getNewConnection() {
 		try {
-			return DriverManager.getConnection(url + "skaita"
-			        ,  "sa", "01234567");
+			return DriverManager.getConnection(url + parent.getProps().getProperty("dns.url") , 
+					parent.getProps().getProperty("dns.user"), parent.getProps().getProperty("dns.pass"));
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

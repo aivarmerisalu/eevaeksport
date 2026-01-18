@@ -11910,9 +11910,15 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 			     }
 		   
 		   if(matrixLine.minAm > 0){
-			   result = result + matrixLine.minAm   ;
+			   result = result + matrixLine.minAm + ";"  ;
 		   }else{
-			   result = result + "0";
+			   result = result + "0;";
+		   }
+		   if(matrixLine.dealer != null) {
+			   result = result + matrixLine.dealer ;
+		   }else{
+			   result = result + " ";
+		      
 		   }
 		     return result;
 	}

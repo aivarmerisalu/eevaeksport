@@ -226,23 +226,63 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  }
 	    
 
- 
-  private String toUpper(String asi ){
-	   
-	   asi = asi.replace('\\', '_');
-	   asi = asi.replace('\\', '_');
-	   asi = asi.replace('/', '_');
-	   asi = asi.replace('/', '_');
-	   asi = asi.substring(0,asi.indexOf('.'))+ asi.substring(asi.indexOf('.')).toLowerCase();
-	   return asi ;
-  }
-  
 
 
+  public Vector getFixedAssortmentData() {
+		Vector result = new Vector();
+		
+		try {
+			
+			String  cmd = " select * from CustomerFixedAssortments ";
+		
+		         if (isDebug()) System.out.println(cmd);
+		           Connection con = getNewConnection();
+		           Statement st = con.createStatement();
+		           ResultSet rs = st.executeQuery(cmd);
 
-   public Vector getFixedAssortmentData() {
-     return null;
-   }
+		           while (rs.next()) {
+
+		             String sortid = rs.getString("sortid").trim()+"x";
+		             String prodID = rs.getString("prodid").trim();
+		           //  int optio = rs.getInt("optionalitem");
+		             
+		   
+						MatrixLine mline = new MatrixLine();
+						
+
+								if (sortid != null
+										&& sortid.trim().length() > 1) {
+									mline.setCliGroup(Converter.cleanLitLatEst(sortid.trim()).replaceAll(";", ":"));
+								}
+
+								if (prodID != null
+										&& prodID.trim().length() > 0) {
+									mline.setProdID(prodID.trim());
+								}
+								
+							//	if(optio == 1) {
+									//mline.setLineinfo("CENTRAL"); // valikuline optional item
+								//}
+								
+								result.add(mline);
+							}
+						
+					 rs.close();
+					 st.close();
+					con.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
+		System.out.println("fix size " + result.size());
+		// System.exit(0);
+		return result;
+
+	
+}
+
 
    public Vector getPriceMatrixData() {
        Vector lines = new Vector();
@@ -285,9 +325,10 @@ try {
            
            rs.close();    	
       
-           String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, minPrice as price from dbo.EPASAULE_PROMOTIONOBJECTS a "
+           String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, "
+           		+ "minPrice as price ,b.regionbackofficeid as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a "
            		+ "inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId " + 
-           		" where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91  and minqty = 0 and b.regionbackofficeid = '03N'" + 
+           		" where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91  and minqty = 0 " + 
            		" group by  a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice " + 
            		" order by a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice ";
            rs = stmt.executeQuery(sql2);
@@ -298,6 +339,7 @@ try {
            String sdate = rs.getString("startday");
            String edate = rs.getString("endday");
            double price = rs.getDouble("price");
+           String dealer = rs.getString("dealer");
            
            MatrixLine mline = new MatrixLine();
            mline.setCliGroup(clGroup);
@@ -305,6 +347,9 @@ try {
            mline.setStartDate(sdate.substring(0,10));
            mline.setEndDate(edate.substring(0,10));
            mline.setPrice(price);
+            if(dealer != null && !dealer.trim().equals("03N")) {// kui ei ole pealadu siis paneme külge
+            	mline.dealer = dealer.trim();
+            }
            lines.add(mline);
            
            }
@@ -950,7 +995,8 @@ if(grupp.equals("leib") ){
     
    TreeMap customers = new TreeMap();
     TreeMap custMap = new TreeMap();
-
+    TreeMap fixCodes = new TreeMap();
+    
     TreeMap indeksT = new TreeMap();
     try {
     	
@@ -997,7 +1043,20 @@ if(grupp.equals("leib") ){
 	       	                  
 	       	                  }
 	       	              rs1.close();
-	       	            
+	       	              
+	    	              aaa = "SELECT [ACCOUNTNUM] as klient ,[ZIPCODE] as sorti FROM ";
+	    	              
+	    	
+	    	            	rs1 = stmt.executeQuery(aaa);
+		       	               while(rs1.next()){
+		       	                 String cli = rs1.getString("klient").trim();
+		       	                 String sort = rs1.getString("sorti");
+		       	                 if(sort != null && sort.length() > 0) {
+		       	                	fixCodes.put(cli, sort);
+		       	                 }
+		       	                  
+		       	                  }
+		       	              rs1.close();   	            
     	              
     	              aaa = "select clientBackOfficeId as klient,  a.promotionBackOfficeId as promo   from dbo.EPASAULE_PROMOTIONOBJECTS a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
     	              		"	where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91\r\n" + 
@@ -1090,6 +1149,9 @@ if(grupp.equals("leib") ){
         	cust.setMinsum(minsum);
         }
         
+        if(fixCodes.get(cust.getID()) != null) {
+        	cust.addFixSortCode(fixCodes.get(cust.getID())+"");
+        }
         
         boolean de = true;
         String regno  = cust.getPayer();
