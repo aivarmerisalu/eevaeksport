@@ -220,7 +220,7 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
 		e.printStackTrace();
 	}
    
-System.exit(0);
+//System.exit(0);
 	 }
   
   public String getDriverVersion(){

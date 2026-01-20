@@ -710,7 +710,7 @@ TreeMap res = new TreeMap();
         String cmd = "SELECT SL01002 AS nimi,SL01001 AS kood,(SL01003 + ' (' + SL01004 + ')') AS aadress, SC45004 AS ale,SL01036 AS ale2 , " +
          "  ' ' AS visit, ' ' AS info ,SL01035 as agent, SL01199 as agent2,SL22005 as paym , SL01029 as klgrupp, (SELECT SL01060 FROM SL010500 WHERE SL01001=k.SL01056) as block ,"
          + " SL01060 as block2 ,SL01056 as payer ,SL14007 as delday " +
-         ", (SELECT SL01037 from SL010500 where SL01001=k.SL01056) as limiit  FROM SL010500 k left JOIN SC450500  " +
+         ", (SELECT SL01037 from SL010500 where SL01001=k.SL01056) as limiit , SL01070  as hrc FROM SL010500 k left JOIN SC450500  " +
 		 "  ON SL01036=SC45003    LEFT OUTER JOIN SL140500 ON SL01001=SL14001 AND SL14002='00'" +
          " LEFT OUTER JOIN SY240500 ON SL01035=SY24002 AND SY24001='BK'" +
          " LEFT OUTER JOIN SL220500 ON SL01024=SL22002 AND SL22001='0' " +
@@ -718,8 +718,8 @@ TreeMap res = new TreeMap();
          + "union "
          + "SELECT SL01002 AS nimi,SL01001 AS kood,(SL01003 + ' (' + SL01004 + ')') AS aadress, SC45004 AS ale,SL01036 AS ale2 ,\r\n" + 
          "           ' ' AS visit, ' ' AS info ,SL01035 as agent, '' as agent2, 0 as paym , '' as klgrupp, 0 as block ,\r\n" + 
-         "           0 as block2 ,SL01056 as payer ,SL14007 as delday \r\n" + 
-         "         , 0 as limiit  FROM SL010500_MORE k left JOIN SC450500 \r\n" + 
+         "           0 as block2 ,SL01056 as payer ,SL14007 as delday  \r\n" + 
+         "         , 0 as limiit ,'' as hrc FROM SL010500_MORE k left JOIN SC450500 \r\n" + 
          "		   ON SL01036=SC45003    LEFT OUTER JOIN SL140500 ON SL01001=SL14001 AND SL14002='00'\r\n" + 
          "          LEFT OUTER JOIN SY240500 ON SL01035=SY24002 AND SY24001='BK'\r\n" + 
          "        \r\n" + 
@@ -1125,8 +1125,17 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
    			}
    	}
    
+
+   String hrc = rs.getString("hrc");
+
+   if(hrc != null && hrc.trim().length() != 0){
+	   if(hrc.trim().equals("ON")) {
+		   
+	   }
+	 // siis siis lisamine kui see OPT tuleb mängu  
+   }
    
-                
+   
    if(cust.getDebt()<0.02 && cust.getDebt() > 0 ){
    	   cust.setDebt(0);
      }    
