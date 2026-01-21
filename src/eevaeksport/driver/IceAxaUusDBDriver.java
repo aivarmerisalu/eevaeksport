@@ -1316,7 +1316,7 @@ String region = rs.getString("region");
   
   public TreeMap getProducts(Agent agent){
 	  
-	  TreeMap<String,Double> kastis = getKastis();
+	//  TreeMap<String,Double> kastis = getKastis();
 	  
 	  
 	  prodHash = new HashMap();
@@ -1360,15 +1360,92 @@ String region = rs.getString("region");
              "WHERE summ.DATAAREAID='dat'and dim.DATAAREAID='dat' and inv.DATAAREAID='dat' AND CLOSED = 0 AND  moduletype=0 and AVAILPHYSICAL > 0 " +
              " AND dim.inventlocationid IN ('KS') GROUP BY summ.itemid  ORDER BY summ.itemid ";
 
+    String cmdKastis = "SELECT\r\n" + 
+    		"    it.DISPLAYPRODUCTNUMBER,\r\n" + 
+    		"    umc.FACTOR,\r\n" + 
+    		"       umc.PRODUCT,\r\n" + 
+    		"    CASE umc.FROMUNITOFMEASURE\r\n" + 
+    		"        WHEN 5637144581 THEN 'alus'\r\n" + 
+    		"        WHEN 5637144580 THEN 'kast'\r\n" + 
+    		"        WHEN 5637145328 THEN 'karp'\r\n" + 
+    		"             WHEN 5637144579 THEN 'pk'\r\n" + 
+    		"             WHEN 5637144578 THEN 'tk'\r\n" + 
+    		"             WHEN 5637148326 THEN 'kiht'\r\n" + 
+    		"        ELSE CAST(umc.FROMUNITOFMEASURE AS nvarchar(10))\r\n" + 
+    		"    END AS FROMUNITOFMEASURE,\r\n" + 
+    		"    CASE umc.TOUNITOFMEASURE\r\n" + 
+    		"        WHEN 5637144581 THEN 'alus'\r\n" + 
+    		"        WHEN 5637144580 THEN 'kast'\r\n" + 
+    		"        WHEN 5637145328 THEN 'karp'\r\n" + 
+    		"             WHEN 5637144579 THEN 'pk'\r\n" + 
+    		"             WHEN 5637144578 THEN 'tk'\r\n" + 
+    		"             WHEN 5637148326 THEN 'kiht'\r\n" + 
+    		"        ELSE CAST(umc.TOUNITOFMEASURE AS nvarchar(10))\r\n" + 
+    		"    END AS TOUNITOFMEASURE\r\n" + 
+    		"FROM ECORESPRODUCT it\r\n" + 
+    		"INNER JOIN UNITOFMEASURECONVERSION umc\r\n" + 
+    		"    ON umc.PRODUCT = it.RECID\r\n" + 
+    		"WHERE FROMUNITOFMEASURE = 5637144580 \r\n" + 
+    		"ORDER BY 1,5 desc " ;
+    
+    String cmdAlusel = "SELECT\r\n" + 
+    		"    it.DISPLAYPRODUCTNUMBER,\r\n" + 
+    		"    umc.FACTOR,\r\n" + 
+    		"       umc.PRODUCT,\r\n" + 
+    		"    CASE umc.FROMUNITOFMEASURE\r\n" + 
+    		"        WHEN 5637144581 THEN 'alus'\r\n" + 
+    		"        WHEN 5637144580 THEN 'kast'\r\n" + 
+    		"        WHEN 5637145328 THEN 'karp'\r\n" + 
+    		"             WHEN 5637144579 THEN 'pk'\r\n" + 
+    		"             WHEN 5637144578 THEN 'tk'\r\n" + 
+    		"             WHEN 5637148326 THEN 'kiht'\r\n" + 
+    		"        ELSE CAST(umc.FROMUNITOFMEASURE AS nvarchar(10))\r\n" + 
+    		"    END AS FROMUNITOFMEASURE,\r\n" + 
+    		"    CASE umc.TOUNITOFMEASURE\r\n" + 
+    		"        WHEN 5637144581 THEN 'alus'\r\n" + 
+    		"        WHEN 5637144580 THEN 'kast'\r\n" + 
+    		"        WHEN 5637145328 THEN 'karp'\r\n" + 
+    		"             WHEN 5637144579 THEN 'pk'\r\n" + 
+    		"             WHEN 5637144578 THEN 'tk'\r\n" + 
+    		"             WHEN 5637148326 THEN 'kiht'\r\n" + 
+    		"        ELSE CAST(umc.TOUNITOFMEASURE AS nvarchar(10))\r\n" + 
+    		"    END AS TOUNITOFMEASURE\r\n" + 
+    		"FROM ECORESPRODUCT it\r\n" + 
+    		"INNER JOIN UNITOFMEASURECONVERSION umc\r\n" + 
+    		"    ON umc.PRODUCT = it.RECID\r\n" + 
+    		"WHERE FROMUNITOFMEASURE = 5637144581 and TOUNITOFMEASURE = 5637144580\r\n" + 
+    		"ORDER BY 1,5 desc";
+    
+    
     if (isDebug()) System.out.println(cmd);
        if (isDebug()) System.out.println(cmd2);
     TreeMap products = new TreeMap();
     TreeMap recids = new TreeMap();
+    TreeMap<String,Double> kastis = new TreeMap<String,Double>();
+    TreeMap<String,Double> alusel = new TreeMap<String,Double>();
     try {
       
+
+    	ResultSet rs = stmt.executeQuery(cmdKastis);
+      
+      while(rs.next()){
+    	  String toode = rs.getString("DISPLAYPRODUCTNUMBER").trim();
+          Double kogus = rs.getDouble("FACTOR");
+          kastis.put(toode, kogus);
+      }
+    	rs.close();
     	
     	
-    	ResultSet rs = stmt.executeQuery(cmd);
+    	rs = stmt.executeQuery(cmdAlusel);
+        
+        while(rs.next()){
+      	  String toode = rs.getString("DISPLAYPRODUCTNUMBER").trim();
+            Double kogus = rs.getDouble("FACTOR");
+            alusel.put(toode, kogus);
+        }
+      	rs.close();
+    	
+    	 rs = stmt.executeQuery(cmd);
       
       while(rs.next()){
         // if ( kood.length() > 2 ){
@@ -1424,63 +1501,18 @@ String region = rs.getString("region");
            }
         
         
-        Double kast = rs.getDouble("kastis");
-        Double kast2 = rs.getDouble("kastis2");
-        if(kast > 0 ) {
-        	 prod.setInCases(kast); 	
-          } else {
-        	 prod.setInCases(kast2);
-        }
-        
-        if(prod.getID().equals("RUU054") || prod.getID().equals("RUU055") || prod.getID().equals("RUU056")) {
-        	prod.setInCases(13);
-        }
-        
-        if(prod.getID().equals("LBC020") ) {
-        	prod.setInCases(14);
-        }
-        
-        if(prod.getID().equals("KRR102") ||  prod.getID().equals("JOL101") ||  
-        		prod.getID().equals("RMM132") ||  prod.getID().equals("RMM133") ||
-        		prod.getID().equals("RMM142") ||
-        		prod.getID().equals("RMM143") ||
-        		prod.getID().equals("LBC019") ||
-        		prod.getID().equals("OPP004")) {
-        	prod.setInCases(10);
-        }
-       
-        if(prod.getID().equals("OTH025") || prod.getID().equals("MSS181")
-        		|| prod.getID().equals("KKS108") ) {
-        	prod.setInCases(20);
-        }
-        
-        if(prod.getID().equals("JGA301")  ) {
-        	prod.setInCases(1);
-        }
-        
         
         if(kastis.get(prod.getID()) != null) {
         	prod.setInCases(kastis.get(prod.getID()));
-        //	System.out.println("kastis " + prod.getID() + " " + prod.getInCases());
+        }
+        
+        if(alusel.get(prod.getID()) != null) {
+        	prod.setOnPallet(alusel.get(prod.getID()));
         }
         
         prod.setUnit(rs.getString("unit"));
         
-        Double pallet = rs.getDouble("pallet");
-        if(pallet !=null && pallet > 0) {
-        	prod.setOnPallet(pallet);
-        	if(prod.getID().equals("PFS077")) {
-        		prod.setOnPallet(64);
-        	}
-        	
-        	if(prod.getID().equals("JES008")) {
-        		prod.setOnPallet(44);
-        	}
-        	
-        	if(prod.getID().equals("PFS084")) {
-        		prod.setOnPallet(360);
-        	}
-        }
+        
         
         if(goes){
         	 products.put(nimetus, prod);

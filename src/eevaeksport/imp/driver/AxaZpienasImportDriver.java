@@ -123,7 +123,7 @@ public class AxaZpienasImportDriver extends AbstractImportDriver{
 
 
   private Connection getNewConnectionSkaita() throws SQLException{
-	    return DriverManager.getConnection("jdbc:odbc:skaita", "sa", "01234567");
+	    return DriverManager.getConnection("jdbc:odbc:skaita", "merisoft", "1234567_Pr0t0");
 	  }
 
   

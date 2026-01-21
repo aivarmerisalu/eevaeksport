@@ -2307,7 +2307,7 @@ try{
 
   
   private Connection getNewConnectionSkaita() throws SQLException{
-	    return DriverManager.getConnection(url3, "sa", "01234567");
+	    return DriverManager.getConnection(url3, "merisoft", "1234567_Pr0t0");
 	  }
   
       public String getDistribution() {

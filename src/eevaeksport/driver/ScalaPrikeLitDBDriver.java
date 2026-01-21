@@ -1821,6 +1821,10 @@ return bomKount;
 	    }
             rs.close();
             st.close();
+            otpQtys();
+            
+            //optamounts.txt
+            
 	} catch (Exception e) {
 	    getParent().showError(e);
 	    System.exit(0);
@@ -1829,6 +1833,43 @@ return bomKount;
 	return products;
     }
 
+	private void otpQtys(){
+		  
+		  
+		  String rou = " select ItemCode, ObjectID, QtyLow  from OrderQtyCtrl where ObjectID != '100' "
+		  		+ " order by ItemCode,ObjectID,OPriority " ;
+	    	 StringBuffer sb = new StringBuffer();
+	    //	 sb.append(optqtys);
+	    	 System.out.println(rou);
+	    	 try {
+	    		 
+	 			Statement st = con.createStatement();
+	 			
+	 			
+	 			ResultSet rs = st.executeQuery(rou);
+	 			while (rs.next()) {
+	 				String kood = rs.getString("ItemCode").trim();
+	 				String muu =  rs.getString("ObjectID").trim();
+	 				String kog =  rs.getString("QtyLow").trim();
+	 				sb.append(kood+";"+muu+";"+kog+"\n");
+	 			}
+	 			rs.close();
+	 			st.close();
+	 			con.close();
+	 			  if(sb.length() > 2){
+					  	try{
+					  		 Converter.saveFileInUTF8( "optamounts.txt", Converter.enCodeEst(sb.toString()));
+					  	}catch (Exception e){	    		
+					  	}	      
+					   }
+			    
+			} catch (Exception e) {
+				getParent().showError(e);
+			}
+	 			
+	}
+
+    
     /**
      * Method declaration
      *
