@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -119,6 +120,33 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
   
   
     public void makeOrder(Order order) throws SQLException{
+    	
+    	
+    	 
+		  TreeMap tm = new TreeMap();
+		  this.delCodes = new HashMap<String,String>();
+			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//getCustomers.json");
+	  	
+			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+			
+			  int lenn = values.size();
+			  
+			try {
+			  for (int i = 0; i < lenn; i++) {
+				  
+				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+
+	          	String number = (String)cob.get("CustomerAccount");
+	            String delid = (String)cob.get("DeliveryAddressLocationId");
+	            delCodes.put(number, delid);
+	            
+			  }
+			  } catch( Exception e){
+				  e.printStackTrace();
+			  }
+    	
+    	
+    	
         makeOutput(order); 
   }
   
@@ -160,7 +188,13 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
 	  
   }
   
+  private HashMap<String,String> delCodes = null;
+  
   private void makeOutput(Order order){
+	  
+	  
+	  
+	  
 	  String comm = null;
 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 			comm = order.getInfo();
@@ -171,7 +205,7 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
 	      JSONObject ord = new JSONObject();
 	  
 	  ord.put("OrderNumber",order.getAgent() + "-" + order.getDokNr());
-	  ord.put("OrderCustomerDeliveryAddress", order.getCompany());
+	  ord.put("OrderCustomerDeliveryAddress", delCodes.get( order.getCompany()));
 	  ord.put("OrderDate", Converter.jsonDate(Calendar.getInstance().getTime()));
 	  ord.put("OrderSalesperson", order.getAgent());
 

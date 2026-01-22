@@ -1385,7 +1385,7 @@ String region = rs.getString("region");
     		"FROM ECORESPRODUCT it\r\n" + 
     		"INNER JOIN UNITOFMEASURECONVERSION umc\r\n" + 
     		"    ON umc.PRODUCT = it.RECID\r\n" + 
-    		"WHERE FROMUNITOFMEASURE = 5637144580 \r\n" + 
+    		" WHERE TOUNITOFMEASURE >= 5637144579 and FROMUNITOFMEASURE = 5637144580 \r\n" + 
     		"ORDER BY 1,5 desc " ;
     
     String cmdAlusel = "SELECT\r\n" + 

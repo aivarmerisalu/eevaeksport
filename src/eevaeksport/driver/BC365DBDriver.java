@@ -614,7 +614,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Võlad"+ volad.toString());
+		//System.out.println("Võlad"+ volad.toString());
 	   
 	   
 	   
@@ -905,7 +905,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	    	
 	    }
 	        	
-	  System.out.println(ags.toString());
+	 // System.out.println(ags.toString());
 	  
 	  Iterator itera = ags.keySet().iterator();
 	  while (itera.hasNext()) {
@@ -1210,9 +1210,9 @@ public void WebReporter() {
     	    		aadress = aadress + "," + zipcode ;
     	    	}
     	    	
-    	    	System.out.println(name + " " + contactemail + " " + contactename + " " + contactphone+ " " + street
-    	    			+ " " + location +" " + zipcode + " " + regnum + " " +timestamp+ " " + agentname + "\n"
-    	    			+ URLEncoder.encode("https://maps.google.com/maps?q=" + location, StandardCharsets.UTF_8.toString()));
+    	    //	System.out.println(name + " " + contactemail + " " + contactename + " " + contactphone+ " " + street
+    	    	//		+ " " + location +" " + zipcode + " " + regnum + " " +timestamp+ " " + agentname + "\n"
+    	    		//	+ URLEncoder.encode("https://maps.google.com/maps?q=" + location, StandardCharsets.UTF_8.toString()));
     	    	
     	    	Calendar cal1 = Calendar.getInstance();
   	  			
@@ -1322,7 +1322,7 @@ private TreeMap eanprods = null;
 			
 			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
 			
-			System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+		//	System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
 			if(contracts.size() > 0) {
 				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
 			}

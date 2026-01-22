@@ -152,7 +152,7 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 		       }
 
 	      if (dataType == null || dataType.equals("items")) {
-	     	 this.saveFile("items","ReleasedProductsV2?$select=ItemNumber,AMGDescription,AMGFactor,SalesPrice,AMGProductCategory,SalesUnitSymbol,AMGEAN,AMGLayerUOM,SalesSalesTaxItemGroupCode,PurchaseLineDiscountProductGroupCode,FirstProductFilterCode");
+	     	 this.saveFile("items","ReleasedProductsV2?$select=ItemNumber,AMGDescription,AMGFactor,SalesPrice,FourthProductFilterCode,SalesUnitSymbol,AMGEAN,AMGLayerUOM,SalesSalesTaxItemGroupCode,PurchaseLineDiscountProductGroupCode,FirstProductFilterCode");
 	       }
 	      
 	      if (dataType == null || dataType.equals("salesPersons")) {
@@ -587,13 +587,10 @@ private void saveFile (String dataType , String uri) {
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
 
 	          	String number = (String)cob.get("CustomerAccount");
+	            String delid = (String)cob.get("DeliveryAddressLocationId");
+	          
 	            Customer cust = new Customer(number);
-	            
-	       //AMGPrimaryAddressSalesAgentPersonnelNumber,"
-	 		//+ "AMGDeliveryAddressSalesAgentPersonnelNumber,AMGEmployeeResponsiblePersonnelNumber,
-	            
-	            
-	            
+	           
 	            
 	            
 	            String displayName = (String)cob.get("OrganizationName");
@@ -605,7 +602,7 @@ private void saveFile (String dataType , String uri) {
 	            String address1 = (String)cob.get("DeliveryAddressDescription");
 	            
 	            
-	        //    System.out.println("klinfo " + address1 + "'" +address2 + "'" + city  + "'" + state+ "'" + country+ "'" + postalCode);
+	           System.out.println("klinfo " + address1 + "'" +displayName + "'" + number + "'");
 	            cust.setAddress(address1.trim());
 	            
 	            
@@ -662,7 +659,7 @@ private void saveFile (String dataType , String uri) {
 				e.printStackTrace();
 			}
 			
-	System.out.println("Custsize " + tm.toString());
+	System.out.println("Custsize " + tm.keySet().toString().replaceAll(",", "\n"));
 		  
 		return tm;
    }
@@ -881,7 +878,7 @@ public TreeMap getProducts(Agent agent) {
 			Product prod = new Product(number);
 		
 
-          	String itemCatCode = (String)cob.get("ProductGroupId");
+          	String itemCatCode = (String)cob.get("FourthProductFilterCode");
         	if (itemCatCode != null && itemCatCode.length() > 0) {
         		prod.setGroup(itemCatCode);
         	}

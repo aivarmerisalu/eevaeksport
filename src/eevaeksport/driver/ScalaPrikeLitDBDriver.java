@@ -1130,9 +1130,8 @@ case when CAST(CONVERT(char(8), getdate(),112) AS datetime) BETWEEN SC39006 and 
 
    if(hrc != null && hrc.trim().length() != 0){
 	   if(hrc.trim().equals("ON")) {
-		   
+		 cust.setCustType(hrc.trim());  
 	   }
-	 // siis siis lisamine kui see OPT tuleb mängu  
    }
    
    
@@ -1634,33 +1633,7 @@ return bomKount;
 
     public TreeMap getProducts(Agent agent){
         connectionUp(url);
-        String opt = getParent().getProps().getProperty("optimumAmountProducts");
-        HashMap opts = new HashMap();
-        if(opt != null) {
-        	StringTokenizer st = new StringTokenizer(opt,",");
-        	while(st.hasMoreTokens()) {
-        	//	opts.add(st.nextToken());
-        	}
-        }
         
-        String sql = "SELECT  ProductCode  as prodid, QtyInBox AS jagaja  FROM QtyMultipliers0500 where  ClientCode = 'Any'";
-
-    	try {
-            Statement st = con.createStatement();
-  	    ResultSet	      rs = st.executeQuery(sql);
-
-  	    while (rs.next()) {
-  		String kood = rs.getString("prodid").trim();
-  		Double jagaja = rs.getDouble("jagaja");
-  		if(jagaja > 0) {
-  		 opts.put(kood, jagaja);
-  		}
-  	    }
-  	    st.close();
-  	    rs.close();
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
         
 		  if(poscomm == null) {
 			  poscomm =  readPosExcel() ;
@@ -1740,9 +1713,6 @@ return bomKount;
                 }
                 prod.setStock(0);
                 prod.setInCases(parseDouble(rs.getString("tykke").trim()));
-                if(opts.get(prod.getID()) != null) {
-                	prod.setOptAmountInUnits((Double)opts.get(prod.getID()));
-                }
                
                 if(girteka){
                   if( gir.get(prod.getID())!= null ){
@@ -1821,7 +1791,7 @@ return bomKount;
 	    }
             rs.close();
             st.close();
-            otpQtys();
+            
             
             //optamounts.txt
             
@@ -1830,14 +1800,14 @@ return bomKount;
 	    System.exit(0);
 	}
 
+	otpQtys();
 	return products;
     }
 
 	private void otpQtys(){
 		  
 		  
-		  String rou = " select ItemCode, ObjectID, QtyLow  from OrderQtyCtrl where ObjectID != '100' "
-		  		+ " order by ItemCode,ObjectID,OPriority " ;
+		  String   rou = "select ClientCode as tyyp, ProductCode as toode, QtyInBox as kogus from QtyMultipliers0500";
 	    	 StringBuffer sb = new StringBuffer();
 	    //	 sb.append(optqtys);
 	    	 System.out.println(rou);
@@ -1848,14 +1818,15 @@ return bomKount;
 	 			
 	 			ResultSet rs = st.executeQuery(rou);
 	 			while (rs.next()) {
-	 				String kood = rs.getString("ItemCode").trim();
-	 				String muu =  rs.getString("ObjectID").trim();
-	 				String kog =  rs.getString("QtyLow").trim();
+
+	 				String muu =  rs.getString("tyyp").trim();
+	 				String kood = rs.getString("toode").trim();
+	 				String kog =  rs.getString("kogus").trim();
 	 				sb.append(kood+";"+muu+";"+kog+"\n");
 	 			}
 	 			rs.close();
 	 			st.close();
-	 			con.close();
+	 			//con.close();
 	 			  if(sb.length() > 2){
 					  	try{
 					  		 Converter.saveFileInUTF8( "optamounts.txt", Converter.enCodeEst(sb.toString()));
@@ -1866,6 +1837,7 @@ return bomKount;
 			} catch (Exception e) {
 				getParent().showError(e);
 			}
+	    	 System.out.println("optam lõpetasin");
 	 			
 	}
 

@@ -986,7 +986,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
                 		mline.setProdID(prodID.trim());
                     } else {
                 	 //  mline.setProdGroup(prodID.trim());
-                	   mline.discGroup = prodID.trim();
+                	   mline.discGroup = prodID.trim()+"DG";
                 	   
                     }
                 }
@@ -2911,6 +2911,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		    	  Long stock = (Long)cob.get("Qty");
 			      String unit = (String)cob.get("UnitId");
 			      String gr = (String)cob.get("MmfItemProductGroupId");
+			      String grPr = (String)cob.get("DiscountGroup");
 			      
 			      Long onPallet = (Long)cob.get("OnPallet");
 		    	 
@@ -3122,6 +3123,10 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 													//System.out.println("TB grupp " + prod.getID() + " " + prod.getGroup());
 													}
 												}
+											}
+
+										if (grPr.length() > 0) {
+												prod.setDiscgrupp(grPr+"DG");
 											}
 										
 									
