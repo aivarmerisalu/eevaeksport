@@ -233,7 +233,8 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 		
 		try {
 			
-			String  cmd = " select * from CustomerFixedAssortments ";
+			String  cmd = " SELECT  assortimentBackOfficeId as ClientGR ,productBackOfficeId as ItemID ,NEWINASSORT as newin " + 
+					"FROM EPASAULE_ASSORTMENTS where EG_ASSORTITEMSTATUS = 1 ";
 		
 		         if (isDebug()) System.out.println(cmd);
 		           Connection con = getNewConnection();
@@ -242,9 +243,9 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 		           while (rs.next()) {
 
-		             String sortid = rs.getString("sortid").trim()+"x";
-		             String prodID = rs.getString("prodid").trim();
-		           //  int optio = rs.getInt("optionalitem");
+		             String sortid = rs.getString("ClientGR").trim()+"x";
+		             String prodID = rs.getString("ItemID").trim();
+		             int optio = rs.getInt("newin");
 		             
 		   
 						MatrixLine mline = new MatrixLine();
@@ -260,9 +261,9 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 									mline.setProdID(prodID.trim());
 								}
 								
-							//	if(optio == 1) {
-									//mline.setLineinfo("CENTRAL"); // valikuline optional item
-								//}
+								if(optio == 1) {
+								   mline.setLineinfo("NEW"); // valikuline optional item
+								}
 								
 								result.add(mline);
 							}
@@ -993,15 +994,11 @@ if(grupp.equals("leib") ){
     HashMap<String, Vector<Agent>> cliags = new HashMap<String, Vector<Agent>>();
   
     
-   TreeMap customers = new TreeMap();
+    TreeMap customers = new TreeMap();
     TreeMap custMap = new TreeMap();
-    TreeMap fixCodes = new TreeMap();
-    
     TreeMap indeksT = new TreeMap();
+    
     try {
-    	
-    	
-    	
     	
     	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
       		
@@ -1044,19 +1041,7 @@ if(grupp.equals("leib") ){
 	       	                  }
 	       	              rs1.close();
 	       	              
-	    	              aaa = "SELECT [ACCOUNTNUM] as klient ,[ZIPCODE] as sorti FROM ";
-	    	              
-	    	
-	    	            	rs1 = stmt.executeQuery(aaa);
-		       	               while(rs1.next()){
-		       	                 String cli = rs1.getString("klient").trim();
-		       	                 String sort = rs1.getString("sorti");
-		       	                 if(sort != null && sort.length() > 0) {
-		       	                	fixCodes.put(cli, sort);
-		       	                 }
-		       	                  
-		       	                  }
-		       	              rs1.close();   	            
+	    	  	            
     	              
     	              aaa = "select clientBackOfficeId as klient,  a.promotionBackOfficeId as promo   from dbo.EPASAULE_PROMOTIONOBJECTS a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
     	              		"	where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91\r\n" + 
@@ -1149,9 +1134,6 @@ if(grupp.equals("leib") ){
         	cust.setMinsum(minsum);
         }
         
-        if(fixCodes.get(cust.getID()) != null) {
-        	cust.addFixSortCode(fixCodes.get(cust.getID())+"");
-        }
         
         boolean de = true;
         String regno  = cust.getPayer();
@@ -1288,7 +1270,7 @@ if(grupp.equals("leib") ){
         
         String fixed = rs.getString("fixed");
         if(fixed != null && fixed.trim().length() > 0) {
-        	cust.addFixSortCode(fixed.trim());
+        	cust.addFixSortCode(fixed.trim()+"x");
         }
         
         String chain = rs.getString("chain");

@@ -1822,7 +1822,9 @@ return bomKount;
 	 				String muu =  rs.getString("tyyp").trim();
 	 				String kood = rs.getString("toode").trim();
 	 				String kog =  rs.getString("kogus").trim();
-	 				sb.append(kood+";"+muu+";"+kog+"\n");
+	 				if(muu.trim().length() > 0) {
+	 			     	sb.append(kood+";"+muu+";"+kog+"\n");
+	 				}
 	 			}
 	 			rs.close();
 	 			st.close();

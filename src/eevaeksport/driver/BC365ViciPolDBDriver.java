@@ -13,6 +13,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -190,19 +191,49 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	      
 
 	if (dataType == null || dataType.equals("itemgroups")) {
-		 this.saveFile("itemgroups","AMGProductCategories?$select=CategoryCode,CategoryDescription,ParentProductCategoryCode");
+		 this.saveFile("itemgroups","AMGVICProductGroupCodes?$select=FilterNum,Description,FilterTitle");
 	}
 
 
 	if (dataType == null || dataType.equals("invHeaders")) {
-	//	 this.saveFile("invHeaders","SalesInvoiceHeadersV4?$select=InvoiceNumber,InvoiceDate,InvoiceCustomerAccountNumber,TotalInvoiceAmount");    
+		// this.saveFile("invHeaders","SalesInvoiceHeadersV4?$select=InvoiceNumber,InvoiceDate,InvoiceCustomerAccountNumber,TotalInvoiceAmount");    
 	}
 
 
 	if (dataType == null || dataType.equals("invLines")) {
-		 this.saveFile("invLines","SalesInvoiceV4Lines?$select=AMGLineNum,InvoiceNumber,ProductNumber,InvoicedQuantity,SalesPrice,InvoiceDate,AMGInvoiceCustomerAccountNumber,AMGDeliveryCustomerAccount" +
+		
+		
+		
+
+	      
+	  	   int mm = 6;
+	  	   if(getParent().getProps().getProperty("months") != null){
+	  		   mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+	  	   }
+	  	   
+	  	   
+	  	   for(int x=mm; x>-1; x--) {
+	  	    Calendar dds = Calendar.getInstance();
+	  	    int day = dds.get(Calendar.DAY_OF_MONTH);
+	  	       dds.set(Calendar.DAY_OF_MONTH, 1);
+	      	   dds.add(Calendar.MONTH, - x);
+
+  	    Calendar dde = Calendar.getInstance();
+	      	   dde.set(Calendar.DAY_OF_MONTH, 1);
+	      	   dde.add(Calendar.MONTH, - x);
+	      	   dde.set(Calendar.DAY_OF_MONTH, dde.getActualMaximum(Calendar.DAY_OF_MONTH));
+	      	   SimpleDateFormat yymmFormat = new SimpleDateFormat("yy-MM");
+	       
+	          String fileName = yymmFormat.format(dds.getTime()) + "invLines";
+	          File filef = new File("data//"  + fileName + ".json");
+	          
+	          if(!filef.exists() || x == 0 || (x == 1 && day < 5)) { //jooksvat kuud teeb igastahes ja eelmist ka kuni 5 kuupäevani
+        		 this.saveFile(fileName,"SalesInvoiceV4Lines?$select=AMGLineNum,InvoiceNumber,ProductNumber,InvoicedQuantity,SalesPrice,InvoiceDate,AMGInvoiceCustomerAccountNumber,AMGDeliveryCustomerAccount" +
 				 "&$filter=" + 
-			       URLEncoder.encode("InvoiceDate ge 2025-11-01 and InvoiceDate le 2025-11-30"));    
+			       URLEncoder.encode("InvoiceDate ge " + Converter.getYYYYmMMmDDmString(dds.getTime()) + 
+			    		   " and InvoiceDate le " + Converter.getYYYYmMMmDDmString(dde.getTime()) ));    
+	           } 
+	          }
 	}
 
 
@@ -276,7 +307,7 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 		  	  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
     		String prodid = (String) cob.get("ItemId");
-    		String payer = (String) cob.get("CustomerAccount");
+    		String payer = (String) cob.get("CustAccount");
     		
         	Double price = Double.parseDouble(cob.get("Price") + "");
     		//String fromdate =(String) cob.get("PriceApplicableFromDate");
@@ -285,6 +316,7 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
         	ml.setCliGroup(payer);
         	ml.setPrice(price);
         	ml.setProdID(prodid);
+            ml.setCurrency("zł");
         	//if(!fromdate.startsWith("1900")) {
         		//ml.setStartDate(fromdate.substring(0,10));
         	//}
@@ -392,10 +424,10 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 		  for (int i = 0; i < lenn; i++) {
 			  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-          
-           String code = (String)cob.get("CategoryCode");
+		//	FilterNum,Description,FilterTitle
+           String code = (String)cob.get("FilterNum");
            if(tm.get(code) == null) {
-           String name = (String)cob.get("CategoryDescription");
+           String name = (String)cob.get("Description");
            if (name != null && name.trim().length() > 0) {
         	    tm.put(code,name);
         	     } else {
@@ -691,9 +723,20 @@ private void saveFile (String dataType , String uri) {
    public Vector getCustomerProductsList(String agentCode){
 	   Vector custProds = new Vector();
 	   
-		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//invLines.json");
-	  	
-		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+	    int mm = 6;
+	  	   if(getParent().getProps().getProperty("months") != null){
+	  		   mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+	  	   }
+	  	   
+		 for(int x=mm; x>-1; x--) {
+	  	    Calendar dds = Calendar.getInstance();
+	  	       dds.set(Calendar.DAY_OF_MONTH, 1);
+	      	   dds.add(Calendar.MONTH, - x);
+
+	      	   SimpleDateFormat yymmFormat = new SimpleDateFormat("yy-MM");
+	         		  
+		org.json.simple.JSONObject cc = Converter.readJSONFile("data//" + yymmFormat.format(dds.getTime()) + "invLines.json");
+	   org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
 		  int lenn = values.size();
 		try {
@@ -730,6 +773,7 @@ private void saveFile (String dataType , String uri) {
 		} catch (Exception e) {
            e.printStackTrace();
            }
+		 }
 		System.out.println("CustProd result size " + custProds.size());
  
 	   return custProds;
@@ -740,7 +784,7 @@ private void saveFile (String dataType , String uri) {
      return null;
    }
    public String getDriverVersion(){
-     return "Directo";
+     return "BC365ViciPol";
    }
    public String getSubjectFilesTo(){
      return this.subjectFilesTo;

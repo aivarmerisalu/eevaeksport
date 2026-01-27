@@ -1324,18 +1324,7 @@ String region = rs.getString("region");
     
     String cmd = "SELECT inv.recid, inv.itemid, erpt.name as nimetus,\r\n" + 
     		"              left(ItemBuyerGroupId,4) as abix , disc.amount AS price,\r\n" + 
-    		"              NAMEALIAS AS ean ,ItemBuyerGroupId AS grupp, inv.netweight as grr, inv.minprice as minprice, uomcv.factor as kastis ,"
-    		+ "case when bomunitid = 'pk' then (Select factor from unitofmeasureconversion  u where  u.FROMUNITOFMEASURE = 5637144580 AND u.TOUNITOFMEASURE = 5637144579 and \r\n" + 
-    		"    								  u.product = inv.recid)   when   bomunitid = 'kg' then (Select factor from unitofmeasureconversion  u where  u.FROMUNITOFMEASURE = 5637144580 AND u.TOUNITOFMEASURE = 5637144577 and \r\n" + 
-    		"    								  u.product = inv.recid) else  1 end as kastis2, bomunitid as unit , case when bomunitid = 'pk' then (Select factor from unitofmeasureconversion  u where  u.FROMUNITOFMEASURE = 5637144581 AND u.TOUNITOFMEASURE = 5637144580 and  \r\n" + 
-    		"    		  								  u.product = inv.recid)   when   bomunitid = 'kg' then (Select factor from unitofmeasureconversion  u where \r\n" + 
-    		"											   u.FROMUNITOFMEASURE = 5637144581 AND u.TOUNITOFMEASURE = 5637144577 and \r\n" + 
-    		"    		    								  u.product = inv.recid) when\r\n" + 
-    		"												  bomunitid = 'tk' then (Select factor from unitofmeasureconversion  u where \r\n" + 
-    		"											   u.FROMUNITOFMEASURE = 5637144581 AND u.TOUNITOFMEASURE = 5637144578 and \r\n" + 
-    		"    		    								  u.product = inv.recid)\r\n" + 
-    		"												   else  1 end as pallet " + 
-    	
+    		"              NAMEALIAS AS ean ,ItemBuyerGroupId AS grupp, inv.netweight as grr, inv.minprice as minprice, bomunitid as unit " +
     		" FROM inventtable inv  \r\n" + 
     		" INNER JOIN    inventtablemodule mod ON mod.itemid = inv.itemid AND mod.dataareaid=inv.dataareaid\r\n" + 
     		" LEFT JOIN     ecoresproducttranslation erpt ON inv.product = erpt.product \r\n" + 
@@ -1385,7 +1374,7 @@ String region = rs.getString("region");
     		"FROM ECORESPRODUCT it\r\n" + 
     		"INNER JOIN UNITOFMEASURECONVERSION umc\r\n" + 
     		"    ON umc.PRODUCT = it.RECID\r\n" + 
-    		" WHERE TOUNITOFMEASURE >= 5637144579 and FROMUNITOFMEASURE = 5637144580 \r\n" + 
+    		" WHERE TOUNITOFMEASURE <= 5637144579 and FROMUNITOFMEASURE = 5637144580 \r\n" + 
     		"ORDER BY 1,5 desc " ;
     
     String cmdAlusel = "SELECT\r\n" + 
@@ -1431,7 +1420,9 @@ String region = rs.getString("region");
       while(rs.next()){
     	  String toode = rs.getString("DISPLAYPRODUCTNUMBER").trim();
           Double kogus = rs.getDouble("FACTOR");
-          kastis.put(toode, kogus);
+          if(kastis.get(toode) == null) {
+            kastis.put(toode, kogus);
+          }
       }
     	rs.close();
     	
@@ -1485,18 +1476,15 @@ String region = rs.getString("region");
         prod.setStock(0);
         prod.setVat("24");
     
-        double wei =rs.getDouble("grr");
+        double wei = rs.getDouble("grr");
     
         if(wei >0.999){
         	prod.idabi = "1";
-        	//System.out.println("oh ja suur " +prod.getID() );
-            
         }
        
  double oh = rs.getDouble("minprice");
         
         if( oh > 0) {
-         	 // prod.setMinPrice(oh);
          	  prod.setPartii("Min.Hind : " + parent.getNF().format(oh) + "€");
            }
         
@@ -1512,7 +1500,9 @@ String region = rs.getString("region");
         
         prod.setUnit(rs.getString("unit"));
         
-        
+        if(prod.getUnit().toLowerCase().equals("kast")) {
+        	prod.setInCases(1);
+        }
         
         if(goes){
         	 products.put(nimetus, prod);

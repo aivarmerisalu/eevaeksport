@@ -13,6 +13,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -101,9 +102,11 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
      
     
   
-    //  token = getMSToken();
+   //  token = getMSToken();
     
       System.out.println("Token " + token);
+
+		//saveFileInvoices();
 
       //this.downloadData("salesPrices");
   //  this.downloadData(null);
@@ -239,8 +242,20 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 
    public Vector getDebt(String agentCode){
 			  Vector tm = new Vector();
-				org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
-		  	
+				 int mm = 6;
+			  	   if(getParent().getProps().getProperty("months") != null){
+			  		   mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+			  	   }
+			  	   
+		  		 for(int x=mm; x>-1; x--) {
+		 	  	    Calendar dds = Calendar.getInstance();
+		   	  	       dds.set(Calendar.DAY_OF_MONTH, 1);
+		 	      	   dds.add(Calendar.MONTH, - x);
+
+		 	      	   SimpleDateFormat yymmFormat = new SimpleDateFormat("yy-MM");
+		 	         		  
+					org.json.simple.JSONObject cc = Converter.readJSONFile("data//" + yymmFormat.format(dds.getTime()) + "salesInvoices.json");
+
 				org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 				
 				  int lenn = values.size();
@@ -272,6 +287,7 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+		  		 }
 				
 		  System.out.println("Debtsize " + tm.size());
 	     return tm;
@@ -362,15 +378,12 @@ System.out.println("ProdGroup size :  " + tm.size());
 		  TreeMap tm = new TreeMap();
 			try {
 			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPersons.json");
-	  	
-			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+	  		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 			
 			  int lenn = values.size();
-		
 			  for (int i = 0; i < lenn; i++) {
 				  
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-
 	            String salesCode = (String)cob.get("code");
 	            String salesName = (String)cob.get("name");
 	            if (salesCode != null && salesCode.trim().length() > 0) {
@@ -378,13 +391,12 @@ System.out.println("ProdGroup size :  " + tm.size());
 	            	agent.setName(salesName);
 	            	  tm.put(agent.getName(), agent);
 	            }
-
-	        
 	          	}
 			  
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
 			
 	System.out.println("Managersize " + tm.size());
 
@@ -394,64 +406,100 @@ System.out.println("ProdGroup size :  " + tm.size());
    }
 
    
-   
-  
-        	  private FileInputStream getCleanInputStream(File xmlFile)throws FileNotFoundException, IOException {
-        		FileInputStream in = new FileInputStream(xmlFile);
-        		int bomKount = getBOMCount(xmlFile);
-        		if (bomKount > 0) {
-        		byte[] buf = new byte[bomKount];
-        		in.read(buf);
-        		}
-        		return in;
-        		}
 
-        	  
-        	  private int getBOMCount(File xmlFile) throws FileNotFoundException,
-        	  IOException {
-        	  DataInputStream din = new DataInputStream(new FileInputStream(xmlFile));
-        	  int bomKount = 0;
-        	  byte b = din.readByte();
-        	  while (b < 0) {
-        	  bomKount++;
-        	  b = din.readByte();
-        	  }
-        	  din.close();
-        	//   System.out.println("Skipping BOM, " + bomKount + " bytes");
-        	  return bomKount;
-        	  } 
         	  
         	  
        public String getDistribution() {
          return null;
        }
+       
+       
+       
+
+        	  private void saveFileInvoices () {
+        		  String folderPath = "Data";
+        	      File folder = new File(folderPath);
+        	      if (!folder.exists()) {
+        	          if (folder.mkdirs()) {
+        	              System.out.println("Folder created successfully at: " + folderPath);
+        	          } else {
+        	              System.out.println("Failed to create the folder at: " + folderPath);
+        	          }
+        	      } 
+        	      String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/LIVE/api/itera/kp/v2.0/"
+        		          + "companies(" + companyID + ")/";
+        	 
+        	      
+        	  	   int mm = 6;
+        	  	   if(getParent().getProps().getProperty("months") != null){
+        	  		   mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+        	  	   }
+        	  	   
+        	  	   
+        	  	   for(int x=mm; x>-1; x--) {
+        	  	    Calendar dds = Calendar.getInstance();
+        	  	    int day = dds.get(Calendar.DAY_OF_MONTH);
+          	  	       dds.set(Calendar.DAY_OF_MONTH, 1);
+        	      	   dds.add(Calendar.MONTH, - x);
+
+             	    Calendar dde = Calendar.getInstance();
+        	      	   dde.set(Calendar.DAY_OF_MONTH, 1);
+        	      	   dde.add(Calendar.MONTH, - x);
+        	      	   dde.set(Calendar.DAY_OF_MONTH, dde.getActualMaximum(Calendar.DAY_OF_MONTH));
+        	      	   SimpleDateFormat yymmFormat = new SimpleDateFormat("yy-MM");
+        	       
+        	          String fileName = yymmFormat.format(dds.getTime()) + "salesInvoices.json";
+        	          File filef = new File("data//"  + fileName);
+        	          
+        	          if(!filef.exists() || x == 0 || (x == 1 && day < 5)) { //jooksvat kuud teeb igastahes ja eelmist ka kuni 5 kuupäevani
+        	          
+        		      String url = urlBase + "salesInvoices?$filter=" + URLEncoder.encode("postingDate ge " + Converter.getYYYYmMMmDDmString(dds.getTime()) +
+        		    		  " and postingDate le " +  Converter.getYYYYmMMmDDmString(dde.getTime())) ;
+        		      
+        		      System.out.println( "url " + url);
+        		      
+        		      try (CloseableHttpClient client = HttpClients.createDefault()) {
+        		        HttpGet request = new HttpGet(url);
+        		        request.setHeader("Authorization", "Bearer " + token);
+
+        		        HttpResponse response = (HttpResponse) client.execute(request);
+        		        HttpEntity entity = ((org.apache.http.HttpResponse) response).getEntity();
+        		        if (entity != null) {
+        		        String result = EntityUtils.toString(entity);
+        		        Converter.saveFile("data//" +  fileName, result);
+        		        System.out.println( "salesInvoices" + fileName + " tehtud");
+        		        }} catch (IOException e) {
+        		            e.printStackTrace();
+        		            }
+        		       // System.out.println("Query result " + result);
+        	          }
+        	  	   }
+        	}
+
+        	  
+       
+       
 private void saveFile (String dataType) {
-	  String folderPath = "Data"; // Update this path as needed
-
-      // Create a File object
+	  String folderPath = "Data"; 
+	  
       File folder = new File(folderPath);
-
-      // Check if the folder already exists
       if (!folder.exists()) {
-          // Try to create the folder
           if (folder.mkdirs()) {
               System.out.println("Folder created successfully at: " + folderPath);
           } else {
               System.out.println("Failed to create the folder at: " + folderPath);
           }
       } 
+      
       String urlBase = "https://api.businesscentral.dynamics.com/v2.0/" + tenantID + "/LIVE/api/itera/kp/v2.0/"
 	          + "companies(" + companyID + ")/";
       
-
 	      String url = urlBase + dataType;
-	      
 	      System.out.println( "url " + url);
 	      
 	      try (CloseableHttpClient client = HttpClients.createDefault()) {
 	        HttpGet request = new HttpGet(url);
 	        request.setHeader("Authorization", "Bearer " + token);
-
 	        HttpResponse response = (HttpResponse) client.execute(request);
 	        HttpEntity entity = ((org.apache.http.HttpResponse) response).getEntity();
 	        if (entity != null) {
@@ -461,9 +509,6 @@ private void saveFile (String dataType) {
 	        }} catch (IOException e) {
 	            e.printStackTrace();
 	            }
-	       // System.out.println("Query result " + result);
-
-      
       
 }
 
@@ -500,15 +545,25 @@ private void saveFile (String dataType) {
       
       
       if (dataType == null || dataType.equals("salesInvoices")) {
-    	  this.saveFile("salesInvoices");
+    	  this.saveFileInvoices();
   		
-
   		  File dir = new File("Data//lines");
   		  if (!dir.exists()) {
   			  dir.mkdir();
   			  }
+  		 int mm = 6;
+	  	   if(getParent().getProps().getProperty("months") != null){
+	  		   mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+	  	   }
+	  	   
+  		 for(int x=mm; x>-1; x--) {
+ 	  	    Calendar dds = Calendar.getInstance();
+   	  	       dds.set(Calendar.DAY_OF_MONTH, 1);
+ 	      	   dds.add(Calendar.MONTH, - x);
 
-			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
+ 	      	   SimpleDateFormat yymmFormat = new SimpleDateFormat("yy-MM");
+ 	         		  
+			org.json.simple.JSONObject cc = Converter.readJSONFile("data//" + yymmFormat.format(dds.getTime()) + "salesInvoices.json");
 		  	
 			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 			
@@ -553,6 +608,7 @@ private void saveFile (String dataType) {
 			} catch (Exception e) {
 	            e.printStackTrace();
 	            }
+  		 }
       }
       
 	  ///agedAccountsReceivables
@@ -766,8 +822,20 @@ if (dataType == null || dataType.equals("itemCategories")) {
    public Vector getCustomerProductsList(String agentCode){
 	   Vector custProds = new Vector();
 	   
-		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
-	  	
+		 int mm = 6;
+	  	   if(getParent().getProps().getProperty("months") != null){
+	  		   mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+	  	   }
+	  	   
+		 for(int x=mm; x>-1; x--) {
+	  	    Calendar dds = Calendar.getInstance();
+ 	  	       dds.set(Calendar.DAY_OF_MONTH, 1);
+	      	   dds.add(Calendar.MONTH, - x);
+
+	      	   SimpleDateFormat yymmFormat = new SimpleDateFormat("yy-MM");
+	         		  
+			org.json.simple.JSONObject cc = Converter.readJSONFile("data//" + yymmFormat.format(dds.getTime()) + "salesInvoices.json");
+
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
 		  int lenn = values.size();
@@ -832,6 +900,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
 		} catch (Exception e) {
            e.printStackTrace();
            }
+		 }
 		System.out.println("Query result " + custProds.size());
  
 	   return custProds;
@@ -869,7 +938,21 @@ if (dataType == null || dataType.equals("itemCategories")) {
   public void setBulkSales(Map agents) {
 	   TreeMap<String, Double> ags = new TreeMap<String, Double>();
 	   
-		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesInvoices.json");
+	   
+	   int mm = 6;
+  	   if(getParent().getProps().getProperty("months") != null){
+  		   mm = Integer.parseInt(getParent().getProps().getProperty("months"));
+  	   }
+  	   
+		 for(int x=mm; x>-1; x--) {
+	  	    Calendar dds = Calendar.getInstance();
+	  	       dds.set(Calendar.DAY_OF_MONTH, 1);
+	      	   dds.add(Calendar.MONTH, - x);
+
+	      	   SimpleDateFormat yymmFormat = new SimpleDateFormat("yy-MM");
+	         		  
+		org.json.simple.JSONObject cc = Converter.readJSONFile("data//" + yymmFormat.format(dds.getTime()) + "salesInvoices.json");
+
 	  	
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
@@ -904,7 +987,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
 		}catch(Exception E){
 	    	
 	    }
-	        	
+		 }	
 	 // System.out.println(ags.toString());
 	  
 	  Iterator itera = ags.keySet().iterator();

@@ -456,14 +456,14 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
      
         private HashMap<String, String> getProdNamesExcel() {
         	HashMap<String, String> res = new HashMap<String, String>();
-        	File f = new File(this.getExcelDir() + "sortiments.xls");
+        	File f = new File(this.getExcelDir() + "sortiments.xlsx");
 			
     		try {
     			
     			FileInputStream ff = new FileInputStream(f);
-    			HSSFWorkbook workbook = new HSSFWorkbook((ff));
-    			HSSFSheet sheet = workbook.getSheet("Assortment");
-    			HSSFRow row = null;
+    			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+    			XSSFSheet sheet = workbook.getSheet("Assortment");
+    			XSSFRow row = null;
 
     		    DataFormatter formatter = new DataFormatter();
 
@@ -912,7 +912,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	System.out.println("mined " + nim.toString());
+    	//System.out.println("mined " + nim.toString());
     	return nim;
     }
     
@@ -988,11 +988,11 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     	HashMap groups = new HashMap();
     	
 try {
-        File fff = new File(this.getExcelDir() + "sortiments.xls" );
+        File fff = new File(this.getExcelDir() + "sortiments.xlsx" );
         FileInputStream ff = new FileInputStream(fff);
-		HSSFWorkbook workbook = new HSSFWorkbook((ff));
-		HSSFSheet sheet = workbook.getSheet("customer");
-		HSSFRow row = null;
+		XSSFWorkbook workbook = new XSSFWorkbook((ff));
+		XSSFSheet sheet = workbook.getSheet("customer");
+		XSSFRow row = null;
 		
 		row = sheet.getRow(0);
 	    // teeme valmis gruppide Treemapi key grupp ja Vectoris koodid
@@ -1043,7 +1043,61 @@ try {
      }catch (Exception e){
 	}
 		
+try {
+    File fff = new File(this.getExcelDir() + "sortiments coop.xlsx" );
+    FileInputStream ff = new FileInputStream(fff);
+	XSSFWorkbook workbook = new XSSFWorkbook((ff));
+	XSSFSheet sheet = workbook.getSheet("customer");
+	XSSFRow row = null;
+	
+	row = sheet.getRow(0);
+    // teeme valmis gruppide Treemapi key grupp ja Vectoris koodid
+	
+//	System.out.println("rownum " + row.getLastCellNum());
+	
+	
+	for(int a = 1 ; a < sheet.getLastRowNum()+1;a++){
+		try{
+		//	Loeme sisse rea
+			row = sheet.getRow(a);
+			if (row.getCell((short) 0) != null) {
+			
 
+
+    			   String kood = null;
+    			  if(row.getCell((short)0) != null){
+    	    			  	try{
+    	    			  	  kood = row.getCell((short)0).getStringCellValue();  
+    	    			  	 }catch (Exception e){
+    	    			   	  kood = row.getCell((short)0).getNumericCellValue()+"";  
+    	    	    		} 
+    	    			  	 if(kood.indexOf(".")!= -1){
+    	    			  	 	 kood = (kood.substring(0,kood.indexOf(".")));	
+    	    			  	 }
+    	    			  //	 System.out.println("kood" + kood);
+    	    			  	 if(kood.trim().length() > 6){
+    	    			  		 kood = kood.trim().substring(0,6);
+    	    			  	 }
+    	    			  	 String sort = null;
+    	    			  	try{
+    	    			  		sort = row.getCell((short)1).getStringCellValue();  
+	    	    			  	 }catch (Exception e){
+	    	    			  		sort = row.getCell((short)1).getNumericCellValue()+"";  
+	    	    	    		} 
+	    	    			  	 if(sort.indexOf(".")!= -1){
+	    	    			  	 	 sort = (sort.substring(0,kood.indexOf(".")));	
+	    	    			  	 }
+    	    			  	 groups.put(kood.trim(),sort.trim());
+    	    			   sortimendid.put(kood.trim(),sort.trim());
+    			  
+    				
+			}	   
+			}
+		}catch (Exception e){
+		}
+	}
+ }catch (Exception e){
+}
 System.out.println(groups.toString());
 
 
@@ -1965,7 +2019,8 @@ System.out.println(groups.toString());
 
     private TreeMap getFixSortimentContracts() {
     	TreeMap res = new TreeMap();
-    	File f = new File(this.getExcelDir() + "sortiments.xls");
+    	try {
+    	File f = new File(this.getExcelDir() + "sortiments coop.xlsx");
     	//teeme seda kõike juhul kui faili oli muudetud.
     	String lasttime = null;
 		try {
@@ -1985,13 +2040,13 @@ System.out.println(groups.toString());
 		if(readdata) {	
 			
 			FileInputStream ff = new FileInputStream(f);
-			HSSFWorkbook workbook = new HSSFWorkbook((ff));
-			HSSFSheet sheet = workbook.getSheet("Assortment");
-			HSSFRow row = null;
+			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+			XSSFSheet sheet = workbook.getSheet("Assortment");
+			XSSFRow row = null;
 			
-			HSSFSheet sheetKood = workbook.getSheet("Code");
+			XSSFSheet sheetKood = workbook.getSheet("Code");
 			
-			HSSFSheet sheetKoodSort = workbook.getSheet("CodeSorts");
+			XSSFSheet sheetKoodSort = workbook.getSheet("CodeSorts");
 			
 			TreeMap omakoodid = new TreeMap();
 
@@ -2274,7 +2329,322 @@ System.out.println(groups.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+    	}catch(Exception e) {
+    		
+    	}
+    	try {
+    	File f = new File(this.getExcelDir() + "sortiments.xlsx");
+    	//teeme seda kõike juhul kui faili oli muudetud.
+    	String lasttime = null;
+		try {
+			boolean readdata = true;
+	    	if(f.exists()) {
+	          lasttime =  f.lastModified() + "";
+			 String olemasolev = null;
+			try {
+				File ff = new File("lastfixed.txt");
+				olemasolev = Converter.readFile(ff, "utf-8", null).substring(0,13);
+				readdata = !lasttime.equals(olemasolev);
+			} catch (IOException e1) {
+				//e1.printStackTrace();
+			}
+			}
+			
+		if(readdata) {	
+			
+			FileInputStream ff = new FileInputStream(f);
+			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+			XSSFSheet sheet = workbook.getSheet("Assortment");
+			XSSFRow row = null;
+			
+			XSSFSheet sheetKood = workbook.getSheet("Code");
+			
+			XSSFSheet sheetKoodSort = workbook.getSheet("CodeSorts");
+			
+			TreeMap omakoodid = new TreeMap();
+
+			TreeMap omagroups = new TreeMap();
+			
+			TreeMap omaTootegroups = new TreeMap();
+			
+			row = sheetKood.getRow(0);
+			// M��RAME �RA MIS V�LJAS ASUVAD TOOTEKOODIDE Sortimendi t�hised.
+
+			// System.out.println("rownum " + row.getLastCellNum());
+			for (int a = 1; a < row.getLastCellNum(); a++) {
+				try {
+					// System.out.println(row.getCell((short)a).getStringCellValue());
+					omagroups.put(a + "", row.getCell((short) a)
+							.getStringCellValue());
+				} catch (Exception e) {
+					// System.out.println(row.getCell((short)a).getNumericCellValue());
+				}
+			}
+
+		//	 System.out.println("omagroups " + omagroups.toString());
+
+			
+			//mis kood on sortimedi koodid ja tootekoodide sortimendi t�hised kokku 
+			for (int i = 0; i < sheetKoodSort.getLastRowNum() + 1; i++) {
+				row = sheetKoodSort.getRow(i);
+				String sortkood = "";
+				if (row.getCell((short) 0) != null) {
+                  try {
+						sortkood = (int) (row.getCell((short) 0)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						sortkood = (row.getCell((short) 0).getStringCellValue());
+					}
+			}
+				String omakood = "";
+
+				if (row.getCell((short) 1) != null) {
+
+					try {
+						omakood = (int) (row.getCell((short) 1)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						omakood = (row.getCell((short) 1).getStringCellValue());
+					}
+					//System.out.println("omakood" + omakood + " " + sortkood);
+
+			}
+				
+				if(!omakood.equals("") && !sortkood.equals("")){
+					
+						omaTootegroups.put(sortkood, omakood);
+					//	omaTootegroups.put(sortkood, i+"");
+				}
+			}
+				
+	//		 System.out.println("omaTootegroups " + omaTootegroups.toString());
+			
+			TreeMap tulemusKood = new TreeMap();
+
+			for (int i = 1; i < sheetKood.getLastRowNum(); i++) {
+				row = sheetKood.getRow(i);
+				
+				String prodID = "";
+               if (row.getCell((short) 0) != null) {
+                 try {
+						prodID = (int) (row.getCell((short) 0)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID = (row.getCell((short) 0).getStringCellValue());
+					}
+								}
+				
+
+				String prodID1 = "";
+               if (row.getCell((short) 1) != null) {
+                	try {
+						prodID1 = (int) (row.getCell((short) 1)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID1 = (row.getCell((short) 1).getStringCellValue());
+					}
+			     }
+
+               if(prodID.trim().length() > 0 && prodID1.trim().length() > 0){
+            	   String key = omagroups.get("1") + "";
+            	   if(tulemusKood.get(key) != null){
+            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
+            		   t1.put(prodID, key + ":" + prodID1);
+            		   tulemusKood.put(key, t1);
+            	   }else{
+            		   TreeMap t1 = new TreeMap();
+            		   t1.put(prodID,key + ":" +  prodID1);
+            		   tulemusKood.put(key, t1);
+            	    }
+                          
+               }
+				
+               
+				String prodID2 = "";
+               if (row.getCell((short) 2) != null) {
+                 try {
+						prodID2 = (int) (row.getCell((short) 2)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID2 = (row.getCell((short) 2).getStringCellValue());
+					}
+			       }
+				
+
+               if(prodID.trim().length() > 0 && prodID2.trim().length() > 0){
+             	  
+            	   String key = omagroups.get("2") + "";
+            	   if(tulemusKood.get(key) != null){
+            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
+            		   t1.put(prodID,key + ":" +  prodID2);
+            		   tulemusKood.put(key, t1);
+            	   }else{
+            		   TreeMap t1 = new TreeMap();
+            		   t1.put(prodID,key + ":" +  prodID2);
+            		   tulemusKood.put(key, t1);
+            	    }
+               }
+               
+               
+				String prodID3 = "";
+               if (row.getCell((short) 3) != null) {
+              	try {
+						prodID3 = (int) (row.getCell((short) 3)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID3 = (row.getCell((short) 3).getStringCellValue());
+					}
+			    }
+				
+
+               if(prodID.trim().length() > 0 && prodID3.trim().length() > 0){
+             	  
+            	   String key = omagroups.get("3") + "";
+            	   if(tulemusKood.get(key) != null){
+            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
+            		   t1.put(prodID,key + ":" +  prodID3);
+            		   tulemusKood.put(key, t1);
+            	   }else{
+            		   TreeMap t1 = new TreeMap();
+            		   t1.put(prodID, key + ":" + prodID3);
+            		   tulemusKood.put(key, t1);
+            	    }
+               }
+               
+				String prodID4 = "";
+               if (row.getCell((short) 4) != null) {
+             	try {
+						prodID4 = (int) (row.getCell((short) 4)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodID4 = (row.getCell((short) 4).getStringCellValue());
+					}
+			    }
+               
+
+
+               if(prodID.trim().length() > 0 && prodID4.trim().length() > 0){
+             	  
+            	   String key = omagroups.get("4") + "";
+            	   if(tulemusKood.get(key) != null){
+            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
+            		   t1.put(prodID,key + ":" +  prodID4);
+            		   tulemusKood.put(key, t1);
+            	   }else{
+            		   TreeMap t1 = new TreeMap();
+            		   t1.put(prodID, key + ":" + prodID4);
+            		   tulemusKood.put(key, t1);
+            	    }
+               }
+			}
+			
+		//	System.out.println("TulemusKood " + tulemusKood.toString());
+			
+			
+			
+			TreeMap groups = new TreeMap();
+			row = sheet.getRow(2);
+			// M��RAME �RA MIS V�LJAS ASUVAD Sortimendi t�hised.
+             
+			for (int a = 2; a < row.getLastCellNum(); a++) {
+				try {
+					groups.put(a + "", row.getCell((short) a)
+							.getStringCellValue());
+				} catch (Exception e) {
+				}
+			}
+
+			// System.out.println("groups" + groups.toString());
+
+			for (int d = 6; d < sheet.getLastRowNum(); d++) {
+				row = sheet.getRow(d);
+				String prodIDe = "";
+
+				if (row.getCell((short) 0) != null) {
+
+					try {
+						prodIDe = (int) (row.getCell((short) 0)
+								.getNumericCellValue()) + "";
+					} catch (Exception e) {
+						prodIDe = (row.getCell((short) 0).getStringCellValue());
+					}
+					
+                      if(!prodIDe.equals("0")){
+                   	
+					// Siin l�heme reasisse rokkima ja vaatama kas se toode
+					// l�heb kaasa
+					for (int a = 2; a < row.getLastCellNum(); a++) {
+
+						String group = (String) groups.get(a + "");
+						if (group != null && group.trim().length() > 0) {
+
+							String custID = " ";
+							String clGroup = " ";
+							String prodGroup = " ";
+							
+
+							String go = null;
+							clGroup = group;
+
+							if (row.getCell((short) a) != null) {
+
+								try {
+									go = (int) (row.getCell((short) a)
+											.getNumericCellValue()) + "";
+								} catch (Exception e) {
+									go = (row.getCell((short) a)
+											.getStringCellValue());
+								}
+
+							}
+
+							if (go != null && go.equals("1")) {
+
+						//	 System.out.println( a + " " + prodID + " " +
+							//	 clGroup + " " + go);
+                              
+								
+								if (clGroup != null
+										&& clGroup.trim().length() > 0) {
+									
+
+								
+								  String pood =  clGroup;
+			                         Contract con = new Contract(pood);
+									
+			                        	// System.out.println("Sees " +a + " " + pood + " " + prodIDe + " " + pood);
+			                        
+										if(res.get(pood) != null){
+			            	                 con = (Contract)res.get(pood);
+			            	                } 
+										  ContractLine ll = new ContractLine(prodIDe);
+			            	               if(con.lines == null){
+			            		                 con.lines = new Vector();
+			            	                  }
+			            	              con.lines.add(ll);
+			            	               res.put(pood, con);
+			            	              
+								 		
+							  }
+							}
+						  }
+					    }
+					  }
+				   }
+			    }
+			if(lasttime != null) {
+			  Converter.saveFile("lastfixed.txt", lasttime);
+			}
+			} else {
+				System.out.println("Sortimendi fail on sama mis enne ja ei lae midagi.");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	}catch(Exception e) {
+    		
+    	}
     	return res;
     }
 

@@ -1223,6 +1223,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 	            		|| driver.getDriverVersion().equals("EugestaLIT")
 	            		|| driver.getDriverVersion().equals("EugestaLAT")
 	            		|| driver.getDriverVersion().equals("EugestaEST")
+	            		|| driver.getDriverVersion().equals("BC365ViciPol")
 					    
                 		  )
                   
