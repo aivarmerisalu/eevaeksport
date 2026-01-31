@@ -2029,7 +2029,7 @@ System.out.println(groups.toString());
 	          lasttime =  f.lastModified() + "";
 			 String olemasolev = null;
 			try {
-				File ff = new File("lastfixed.txt");
+				File ff = new File("lastfixedcoop.txt");
 				olemasolev = Converter.readFile(ff, "utf-8", null).substring(0,13);
 				readdata = !lasttime.equals(olemasolev);
 			} catch (IOException e1) {
@@ -2044,194 +2044,10 @@ System.out.println(groups.toString());
 			XSSFSheet sheet = workbook.getSheet("Assortment");
 			XSSFRow row = null;
 			
-			XSSFSheet sheetKood = workbook.getSheet("Code");
-			
-			XSSFSheet sheetKoodSort = workbook.getSheet("CodeSorts");
-			
-			TreeMap omakoodid = new TreeMap();
-
-			TreeMap omagroups = new TreeMap();
-			
-			TreeMap omaTootegroups = new TreeMap();
-			
-			row = sheetKood.getRow(0);
-			// M��RAME �RA MIS V�LJAS ASUVAD TOOTEKOODIDE Sortimendi t�hised.
-
-			// System.out.println("rownum " + row.getLastCellNum());
-			for (int a = 1; a < row.getLastCellNum(); a++) {
-				try {
-					// System.out.println(row.getCell((short)a).getStringCellValue());
-					omagroups.put(a + "", row.getCell((short) a)
-							.getStringCellValue());
-				} catch (Exception e) {
-					// System.out.println(row.getCell((short)a).getNumericCellValue());
-				}
-			}
-
-		//	 System.out.println("omagroups " + omagroups.toString());
-
-			
-			//mis kood on sortimedi koodid ja tootekoodide sortimendi t�hised kokku 
-			for (int i = 0; i < sheetKoodSort.getLastRowNum() + 1; i++) {
-				row = sheetKoodSort.getRow(i);
-				String sortkood = "";
-				if (row.getCell((short) 0) != null) {
-                  try {
-						sortkood = (int) (row.getCell((short) 0)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						sortkood = (row.getCell((short) 0).getStringCellValue());
-					}
-			}
-				String omakood = "";
-
-				if (row.getCell((short) 1) != null) {
-
-					try {
-						omakood = (int) (row.getCell((short) 1)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						omakood = (row.getCell((short) 1).getStringCellValue());
-					}
-					//System.out.println("omakood" + omakood + " " + sortkood);
-
-			}
-				
-				if(!omakood.equals("") && !sortkood.equals("")){
-					
-						omaTootegroups.put(sortkood, omakood);
-					//	omaTootegroups.put(sortkood, i+"");
-				}
-			}
-				
-	//		 System.out.println("omaTootegroups " + omaTootegroups.toString());
-			
-			TreeMap tulemusKood = new TreeMap();
-
-			for (int i = 1; i < sheetKood.getLastRowNum(); i++) {
-				row = sheetKood.getRow(i);
-				
-				String prodID = "";
-               if (row.getCell((short) 0) != null) {
-                 try {
-						prodID = (int) (row.getCell((short) 0)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID = (row.getCell((short) 0).getStringCellValue());
-					}
-								}
-				
-
-				String prodID1 = "";
-               if (row.getCell((short) 1) != null) {
-                	try {
-						prodID1 = (int) (row.getCell((short) 1)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID1 = (row.getCell((short) 1).getStringCellValue());
-					}
-			     }
-
-               if(prodID.trim().length() > 0 && prodID1.trim().length() > 0){
-            	   String key = omagroups.get("1") + "";
-            	   if(tulemusKood.get(key) != null){
-            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
-            		   t1.put(prodID, key + ":" + prodID1);
-            		   tulemusKood.put(key, t1);
-            	   }else{
-            		   TreeMap t1 = new TreeMap();
-            		   t1.put(prodID,key + ":" +  prodID1);
-            		   tulemusKood.put(key, t1);
-            	    }
-                          
-               }
-				
-               
-				String prodID2 = "";
-               if (row.getCell((short) 2) != null) {
-                 try {
-						prodID2 = (int) (row.getCell((short) 2)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID2 = (row.getCell((short) 2).getStringCellValue());
-					}
-			       }
-				
-
-               if(prodID.trim().length() > 0 && prodID2.trim().length() > 0){
-             	  
-            	   String key = omagroups.get("2") + "";
-            	   if(tulemusKood.get(key) != null){
-            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
-            		   t1.put(prodID,key + ":" +  prodID2);
-            		   tulemusKood.put(key, t1);
-            	   }else{
-            		   TreeMap t1 = new TreeMap();
-            		   t1.put(prodID,key + ":" +  prodID2);
-            		   tulemusKood.put(key, t1);
-            	    }
-               }
-               
-               
-				String prodID3 = "";
-               if (row.getCell((short) 3) != null) {
-              	try {
-						prodID3 = (int) (row.getCell((short) 3)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID3 = (row.getCell((short) 3).getStringCellValue());
-					}
-			    }
-				
-
-               if(prodID.trim().length() > 0 && prodID3.trim().length() > 0){
-             	  
-            	   String key = omagroups.get("3") + "";
-            	   if(tulemusKood.get(key) != null){
-            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
-            		   t1.put(prodID,key + ":" +  prodID3);
-            		   tulemusKood.put(key, t1);
-            	   }else{
-            		   TreeMap t1 = new TreeMap();
-            		   t1.put(prodID, key + ":" + prodID3);
-            		   tulemusKood.put(key, t1);
-            	    }
-               }
-               
-				String prodID4 = "";
-               if (row.getCell((short) 4) != null) {
-             	try {
-						prodID4 = (int) (row.getCell((short) 4)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID4 = (row.getCell((short) 4).getStringCellValue());
-					}
-			    }
-               
-
-
-               if(prodID.trim().length() > 0 && prodID4.trim().length() > 0){
-             	  
-            	   String key = omagroups.get("4") + "";
-            	   if(tulemusKood.get(key) != null){
-            		   TreeMap t1 = (TreeMap) tulemusKood.get(key);
-            		   t1.put(prodID,key + ":" +  prodID4);
-            		   tulemusKood.put(key, t1);
-            	   }else{
-            		   TreeMap t1 = new TreeMap();
-            		   t1.put(prodID, key + ":" + prodID4);
-            		   tulemusKood.put(key, t1);
-            	    }
-               }
-			}
-			
-		//	System.out.println("TulemusKood " + tulemusKood.toString());
-			
 			
 			
 			TreeMap groups = new TreeMap();
 			row = sheet.getRow(2);
-			// M��RAME �RA MIS V�LJAS ASUVAD Sortimendi t�hised.
              
 			for (int a = 2; a < row.getLastCellNum(); a++) {
 				try {
@@ -2320,7 +2136,7 @@ System.out.println(groups.toString());
 				   }
 			    }
 			if(lasttime != null) {
-			  Converter.saveFile("lastfixed.txt", lasttime);
+			  Converter.saveFile("lastfixedcoop.txt", lasttime);
 			}
 			} else {
 				System.out.println("Sortimendi fail on sama mis enne ja ei lae midagi.");

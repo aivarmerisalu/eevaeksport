@@ -104,8 +104,10 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
      
   //  this.getDebt(null);
     //System.exit(0);
-     // token = getMSToken();
-    
+      //token = getMSToken();
+
+       //this.downloadData("unitConversions");
+   //   getUnitConversions();
    //   System.out.println("Token " + token);
     //  getProducts(null);
      // getCustomers(null);
@@ -152,8 +154,14 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 		     	 this.saveFile("agedAccountsReceivables","AMGCustTransOpen?$select=DeliveryAddressId,AccountNum,Invoice,TransDate,DueDate,AmountCur,CurrencyCode");
 		       }
 
+
+	      if (dataType == null || dataType.equals("unitConversions")) {
+		     	 this.saveFile("unitConversions","ProductSpecificUnitOfMeasureConversions?$select=ProductNumber,FromUnitSymbol,ToUnitSymbol,Factor");
+		       }
+	      
 	      if (dataType == null || dataType.equals("items")) {
-	     	 this.saveFile("items","ReleasedProductsV2?$select=ItemNumber,AMGDescription,AMGFactor,SalesPrice,FourthProductFilterCode,SalesUnitSymbol,AMGEAN,AMGLayerUOM,SalesSalesTaxItemGroupCode,PurchaseLineDiscountProductGroupCode,FirstProductFilterCode");
+	     	 this.saveFile("items","AMGReleasedProductsV2?$select=ItemNumber,AMGDescription,AMGFactor,SalesPrice,FourthProductFilterCode,SalesUnitSymbol,AMGEAN,AMGLayerUOM,SalesSalesTaxItemGroupCode"
+	     	 		+ ",PurchaseLineDiscountProductGroupCode,FirstProductFilterCode,BlockedForSales");
 	       }
 	      
 	      if (dataType == null || dataType.equals("salesPersons")) {
@@ -896,6 +904,57 @@ public String getProductSortingData() {
 	return null;
 }
 
+
+public HashMap<String,HashMap<String,Double>> getUnitConversions() {
+	
+	HashMap<String,HashMap<String,Double>> res = new HashMap<String,HashMap<String,Double>>();
+	
+	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//unitConversions.json");
+	org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+	
+	  int lenn = values.size();
+	try {
+	  for (int i = 0; i < lenn; i++) {
+		  
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+	//		"ItemId":"Z-SFP-0002","PhysicalInvent":150000,"InventLocationId":"3PL1-STD","expDate":"2026-07-02T12:00:00Z"	
+			String prodid = (String) cob.get("ProductNumber");
+			String typefrom = ((String) cob.get("FromUnitSymbol")).toLowerCase();
+			String typeto = ((String) cob.get("ToUnitSymbol")).toLowerCase();
+   		Double amnt = Double.parseDouble(cob.get("Factor")+"");
+		/*roductNumber":"A STI 430","FromUnitSymbol":"KARTON","ToUnitSymbol":"Kg","Factor":2.5
+      ,"ProductNumber":"A STI 430","FromUnitSymbol":"PALETA","ToUnitSymbol":"Kg","Factor":720
+      "ProductNumber":"A STI 430","FromUnitSymbol":"SZT","ToUnitSymbol":"Kg","Factor":0.25
+      "ProductNumber":"A STI 430","FromUnitSymbol":"WARSTWA","ToUnitSymbol":"Kg","Factor":90*/
+		if(typefrom.equals("karton") && amnt > 0) {
+			 HashMap<String,Double> aa = res.get(prodid);
+			 if(aa == null) {
+				 aa = new HashMap<String,Double>();
+			 }
+			 aa.put(typeto, amnt);
+			 res.put(prodid, aa);
+		}
+		
+		if(typefrom.equals("szt") && amnt > 0) {
+			 HashMap<String,Double> aa = res.get(prodid);
+			 if(aa == null) {
+				 aa = new HashMap<String,Double>();
+			 }
+			 aa.put(typeto+"X", amnt);
+			 res.put(prodid, aa);
+		}
+		
+	  }
+	}catch(Exception E){
+  	
+  }
+     // 	System.out.println("res.to "+ res.toString());
+
+	//System.exit(0);
+	return res;
+}
+
+
 @Override
 public TreeMap getProducts(Agent agent) {
 	  
@@ -904,10 +963,10 @@ public TreeMap getProducts(Agent agent) {
 	if ( stocks == null) {
 		this.getSaveStockInfo();
 	}
-		
+	HashMap<String, HashMap<String,Double>> unc = getUnitConversions();
+	
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
-  	
-		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+  		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
 		  int lenn = values.size();
 		try {
@@ -934,7 +993,7 @@ public TreeMap getProducts(Agent agent) {
         	if(partii.get(number) != null) {
         		prod.setPartii(partii.get(number));
         	}
-          System.out.println(prod.getStock() + " " + prod.getPartii());
+      //    System.out.println(prod.getStock() + " " + prod.getPartii());
           	
           	String add = "";
           	String gtin = (String)cob.get("AMGEAN");
@@ -947,18 +1006,29 @@ public TreeMap getProducts(Agent agent) {
                    eanprods.put(gtin.trim(), prod.getID());
                 
           	}
-          	
 
-          	String kastis = cob.get("AMGLayerUOM")+"";
+        	String unit = (String)cob.get("SalesUnitSymbol");
+        	if (unit != null) {
+        		prod.setUnit(unit);
+        	}  	
+
+          	HashMap<String, Double> kastis = unc.get(prod.getID());
+          	
           	if(kastis != null) {
-          		try {
-          			double cas = Double.parseDouble(kastis);
-          			if(cas > 0) {
-          		prod.setInCases(cas);
-          			}
-          		}catch(Exception e) {
-          			
-          		}
+          	
+          	 if( kastis.get(prod.getUnit().toLowerCase()) != null) {
+          	//	System.out.println("kastis " + prod.getID() + " " + kastis);
+          		prod.setInCases(kastis.get(prod.getUnit().toLowerCase()));
+          	 } else {
+           		Double a = kastis.get("kg");
+           		Double b = kastis.get("kgX");
+           		if(a != null && b != null) {
+           			prod.setInCases(a/b);
+           			//System.out.println("kastis3 " + a + " " + b + " " + a/b);
+               		
+           		}
+           	 }
+          	 
           	}
           	
           	String name = (String)cob.get("AMGDescription");
@@ -966,25 +1036,13 @@ public TreeMap getProducts(Agent agent) {
           	prod.setName(name.trim() + " " + number + add);
           	
         
-        	String unit = (String)cob.get("SalesUnitSymbol");
-        	if (unit != null) {
-        		prod.setUnit(unit);
-        	}
         	
           	String price = cob.get("SalesPrice")+ "";
           	if (price != null) {
           		prod.setPrice(Double.parseDouble(price));
           	}
           	
-        /*  	String inventory = cob.get("inventory") +"";
-          	if (inventory != null) {
-          		prod.setStock(Double.parseDouble(inventory));
-          	}
-          	  	
-          	if(weblink != null) {
-          		prod.weblink = weblink + prod.getID();
-          	}*/
-             
+
           	
           	prod.setVat("21");
           	

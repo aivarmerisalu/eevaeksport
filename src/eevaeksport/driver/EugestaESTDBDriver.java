@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +28,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -55,6 +57,7 @@ import org.json.simple.parser.JSONParser;
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
 import eevaeksport.Customer;
+import eevaeksport.CycleMatch;
 import eevaeksport.Dealer;
 import eevaeksport.DealerProduct;
 import eevaeksport.Debt;
@@ -326,12 +329,12 @@ try {
            
            rs.close();    	
       
-           String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, "
-           		+ "minPrice as price ,b.regionbackofficeid as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a "
-           		+ "inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId " + 
-           		" where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91  and minqty = 0 " + 
-           		" group by  a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice " + 
-           		" order by a.promotionBackOfficeId , productBackOfficeId, [date from] ,[date to], minPrice ";
+           String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, \r\n" + 
+           		"           		minPrice as price ,b.regionbackofficeid as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a \r\n" + 
+           		"           		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId  \r\n" + 
+           		"           		 where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91  and minqty = 0 \r\n" + 
+           		"           		 group by  a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid,  [date from] ,[date to], minPrice \r\n" + 
+           		"           		 order by a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid, [date from] ,[date to], minPrice";
            rs = stmt.executeQuery(sql2);
            while (rs.next()) {
 
@@ -533,7 +536,7 @@ try {
 	  		"            ORDER BY deliverydate DESC\r\n" + 
 	  		"        ) AS rn\r\n" + 
 	  		"    FROM EPASAULE_DELIVERIES\r\n" + 
-	  		"    WHERE deliveryDate > GETDATE() - 90\r\n" + 
+	  		"    WHERE deliveryDate > GETDATE() - 180\r\n" + 
 	  		"    GROUP BY \r\n" + 
 	  		"        clientBackOfficeId,\r\n" + 
 	  		"        productBackOfficeId,\r\n" + 
@@ -913,20 +916,19 @@ if(grupp.equals("leib") ){
 
   
   private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+  private static final LocalDate CYCLE_START =   LocalDate.parse("01.11.2021", FMT);
   
-
-  private static final DateTimeFormatter FM2 = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+  
+ 
   public static boolean matchesCycle( String pattern) {
-
-	  LocalDate cycleStart = LocalDate.parse("01.11.2021", FMT);
 
       LocalDate date = LocalDate.now();  // or any date to test
 	  
-      long days = Duration.between(cycleStart.atStartOfDay(), date.atStartOfDay()).toDays();
+      long days = Duration.between(CYCLE_START.atStartOfDay(), date.atStartOfDay()).toDays();
 
-      if (days < 0) {
+        if (days < 0) {
           return false; // before cycle start
-      }
+         }
 
       int weekInCycle = (int)((days / 7) % 8) + 1;  // 1–8
       int weekday = date.getDayOfWeek().getValue(); // 1=Mon…7=Sun
@@ -941,9 +943,41 @@ if(grupp.equals("leib") ){
   }
   
   
+  public static boolean matchesNextSevenDays(String pattern) {
+	    return !nextSevenDaysMatches(pattern).isEmpty();
+	}
+  
+  public static List<CycleMatch> nextSevenDaysMatches(String pattern) {
 
-	private static final LocalDate CYCLE_START =
-	        LocalDate.parse("01.11.2021", FMT);
+	    DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+	    LocalDate cycleStart = LocalDate.parse("01.11.2021", FMT);
+
+	    LocalDate today = LocalDate.now();
+	    List<CycleMatch> result = new ArrayList<>();
+
+	    for (int i = 0; i < 7; i++) {
+
+	        LocalDate date = today.plusDays(i);
+
+	        long days = ChronoUnit.DAYS.between(cycleStart, date);
+	        if (days < 0) continue;
+
+	        int weekInCycle = (int) ((days / 7) % 8);
+	        int weekday = date.getDayOfWeek().getValue();
+
+	        char cycleWeekLetter = (char) ('A' + weekInCycle);
+	        String expected = "" + cycleWeekLetter + weekday;
+
+	        if (pattern.contains(expected)) {
+	            result.add(new CycleMatch(date, expected));
+	        }
+	    }
+
+	    return result;
+	}
+
+
+	
 
 	public static LocalDate nextMatchingDate(String pattern) {
 
@@ -1003,8 +1037,7 @@ if(grupp.equals("leib") ){
     	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
       		
     	   Connection con = this.getNewConnection();
-    	   Calendar cal = Calendar.getInstance();
-
+    	 
     		 Statement stmt = con.createStatement();
     	     ResultSet rs1 = stmt.executeQuery(aaa);
     	               while(rs1.next()){
@@ -1012,9 +1045,40 @@ if(grupp.equals("leib") ){
     	                 String cli = rs1.getString("klient").trim();
     	                 String route = rs1.getString("route");
     	                 if(route != null && route.trim().length() > 0) {
-    	                	 if(matchesCycle(route)) {
-    	                		 ag.setVisit(Converter.getVisitDayLetter(cal)); 
+    	                	 List<CycleMatch> ll =  nextSevenDaysMatches(route);
+    	                	 if(ll.size() > 0){
+    	                		 String dd = "";
+    	                	   for(CycleMatch cc : ll) {
+    	                		 if( cc.dayOfWeek == DayOfWeek.MONDAY ) {
+    	                			 dd = dd + "E";
+    	                		 }
+    	                		 if( cc.dayOfWeek == DayOfWeek.TUESDAY ) {
+    	                			 dd = dd + "T";
+    	                		 }
+    	                		 if( cc.dayOfWeek == DayOfWeek.WEDNESDAY ) {
+    	                			 dd = dd + "K";
+    	                		 }
+    	                		 if( cc.dayOfWeek == DayOfWeek.THURSDAY ) {
+    	                			 dd = dd + "N";
+    	                		 }
+    	                		 if( cc.dayOfWeek == DayOfWeek.FRIDAY ) {
+    	                			 dd = dd + "R";
+    	                		 }
+    	                		 if( cc.dayOfWeek == DayOfWeek.SATURDAY ) {
+    	                			 dd = dd + "L";
+    	                		 }
+    	                		 if( cc.dayOfWeek == DayOfWeek.SUNDAY ) {
+    	                			 dd = dd + "P";
+    	                		 }
     	                	 }
+    	                	
+    	                	 if(dd.length() > 0) {
+    	                	   ag.setVisit(dd); 
+    	                	 }
+    	                		 
+    	                	 }
+    	                		
+    	                	 
     	                	ag.nextContact = nextMatchingDate(route);
     	                 }
     	                 Vector<Agent> vv = cliags.get(cli);
@@ -1240,7 +1304,7 @@ if(grupp.equals("leib") ){
          for(Agent agentL : vv) {
           cust.addAgent(agentL);
           if(agentL.nextContact != null) {
-              cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FM2)+ "'");  
+              cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT)+ "'");  
           }
         
          Agent aa1 = (Agent)agent1.get(agentL.getID());
@@ -2537,4 +2601,8 @@ String arve = rs.getString("bill");
 		  System.exit(0);
 		
 	}
+
+
 }
+
+

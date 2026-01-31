@@ -882,6 +882,10 @@ System.out.println("tooted " + products.size());
         double kogus = Double.parseDouble(rs.getString("kogus").trim());
         double hind = rs.getDouble("hind");
         String dok = rs.getString("dokk");
+        if("AABESTCARAUT".equals(kliendikood)) {
+        	System.out.println("AABESTCARAUT " + tootekood + " " + kogus + " " + kuupaev);
+        }
+        
             if (kliendikood.length() > 0 && kogus != 0) {
                   CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,kuupaev.substring(5,10),hind,0,0," ");
                 if(dok != null)

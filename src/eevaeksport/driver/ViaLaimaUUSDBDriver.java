@@ -2469,8 +2469,24 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		                     if( custAgsWeb != null && custAgsWeb.get(customer.getID()) != null) {
 		     	         		ArrayList arr =  (ArrayList) custAgsWeb.get(customer.getID());
 		     	         		for(int i = 0 ; i< arr.size();i++) {
-		     	         		   customer.addAgent(new Agent(arr.get(i)+""));
+		     	         			String ss = arr.get(i)+""; 
+		     	         		   customer.addAgent(new Agent(ss));
+		     	         		   if (ss != null && agent1.get(ss.trim()) != null){
+               						Agent aa = (Agent)agent1.get(ss.trim());
+               					
+               						Vector vec = aa.getDubbler();
+               						if(vec!= null && vec.size() >0){
+               							Enumeration en = vec.elements();
+               							while(en.hasMoreElements()){
+               								String ag = (String) en.nextElement();
+               								customer.addAgent(new Agent(ag));
+               							}
+               						}
+               					}
 		   	 			       	}
+		     	         		
+		     	         		
+		     	         		
 		     	         	}else if ("17".equals(getParent().getProps().getProperty("stockcode"))
 		                			 && custAgs != null) {
 		                		// if(customer.getName().startsWith("P"))
@@ -2570,7 +2586,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 				     			}
 								
 								
-								if(fid.equals("51")){
+								if(fid.equals("51") || fid.equals("TB")){
 									
 									
 									 if (age != null && agent1.get(age.getID().trim()) != null){
