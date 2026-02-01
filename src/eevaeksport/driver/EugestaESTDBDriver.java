@@ -591,7 +591,7 @@ try {
   public TreeMap getAgents(){
 	  
 	    
-    String cmd = "select backOfficeId as kood ,agentName as name from  dbo.EPASAULE_AGENTS";
+    String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr from  dbo.EPASAULE_AGENTS";
 
     String cmdg = "select Agent_BackofficeID as kood , group_backofficeID as grupp,forSale, forMerch from EPASAULE_AGENTS_EAGENTGROUPS";
     String cmdb = "select Agent_BackofficeID as kood , brand_backofficeID as brand,forSale, forMerch from EPASAULE_AGENTS_EAGENTBRANDS";
@@ -641,6 +641,10 @@ try {
         String agentID = rs.getString("kood").trim();
           Agent agent = new Agent(agentID);
           String name = rs.getString("name").trim();
+          Double reprLim = rs.getDouble("repr");
+          if(reprLim > 0) {
+        	  agent.repriceLimit = reprLim;
+          }
           agent.setName(name);
           agent.setIsPilot(true);
           

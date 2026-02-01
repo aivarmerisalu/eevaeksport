@@ -181,7 +181,26 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	     }
 
 	      if (dataType == null || dataType.equals("salesPrices")) {
-	    	  this.saveFile("salesPrices","SalesPriceDiscTables?$select=CustAccount,ItemId,UnitId,CurrencyCode,Price,CalculationDateTime");
+	    	  
+	    	  int PAGE_SIZE = 10000;
+	    	   int MAX_PAGES = 9;
+	    	  String SELECT = "CustAccount,ItemId,UnitId,CurrencyCode,Price,CalculationDateTime";
+
+	    	      for (int i = 1; i <= MAX_PAGES; i++) {
+	    	          String key = "salesPrices" + i;
+
+	    	          if (i == 1 || nextUrl("salesPrices" + (i - 1)) != null) {
+
+	    	              int skip = (i - 1) * PAGE_SIZE;
+	    	              String url = "SalesPriceDiscTables?$select=" + SELECT +
+	    	                           (skip > 0 ? "&$skip=" + skip + "&$top=" + PAGE_SIZE : "");
+	    	              this.saveFile(key, url);
+
+	    	          } else {
+	    	              deleteFile(key);
+	    	          }
+	    	      }
+	    	  	    	  
 	       }
 	      
 	      
@@ -248,7 +267,13 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 
 	  }
 	       
-	       
+	  private void deleteFile(String key) {
+	      File f = new File("data//" + key + ".json");
+	      if (f.exists()) {
+	          f.delete();
+	      }
+	  }
+	      
 	  
   private String  getMSToken() {
 		 String res = null;
@@ -298,45 +323,47 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	public Vector getLastThreeData() {
 		return null;
 	}
+	
+	private String nextUrl(String filename) {
+		try {
+	      return (String)Converter.readJSONFile("data//" + filename + ".json").get("@odata.nextLink");
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
    public Vector getPriceMatrixData() {
 
    	Vector lines = new Vector();
   
-	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPrices.json");
-  	
-	org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+   	try {
+   	for (int cou = 1; cou < 10; cou++) {
+
+	  org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPrices" + cou + ".json");
+ 	  org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 	
 	  int lenn = values.size();
-	try {
+	
 	  for (int i = 0; i < lenn; i++) {
 		  
 		  MatrixLine ml = new MatrixLine();
-	// "@odata.etag":"W/\"JzEsNTYzNzE0NDYyOSc=\"","CustAccount":"000022","ItemId":"C-LAP-0076","UnitId":"Kg","CurrencyCode":"PLN","Price":68.36,"CalculationDateTime":"2025-12-29T15:28:07Z"
 		  	  
 			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
     		String prodid = (String) cob.get("ItemId");
     		String payer = (String) cob.get("CustAccount");
+    	    Double price = Double.parseDouble(cob.get("Price") + "");
     		
-        	Double price = Double.parseDouble(cob.get("Price") + "");
-    		//String fromdate =(String) cob.get("PriceApplicableFromDate");
-        	//String todate = (String) cob.get("PriceApplicableToDate");
-        	
         	ml.setCliGroup(payer);
         	ml.setPrice(price);
         	ml.setProdID(prodid);
             ml.setCurrency("zł");
-        	//if(!fromdate.startsWith("1900")) {
-        		//ml.setStartDate(fromdate.substring(0,10));
-        	//}
         
-        	//if(!todate.startsWith("1900")) {
-        		//ml.setEndDate(todate.substring(0,10));
-        	//}
         	lines.add(ml);
 	    }
-	
+	  cou++;
+	  }
 	} catch (Exception e) {
-		e.printStackTrace();
+		//e.printStackTrace();
 	}
    	System.out.println("prm lines " + lines.size());
 	return lines;
@@ -642,7 +669,7 @@ private void saveFile (String dataType , String uri) {
 	            String address1 = (String)cob.get("DeliveryAddressDescription");
 	            
 	            
-	           System.out.println("klinfo " + address1 + "'" +displayName + "'" + number + "'");
+	        //   System.out.println("klinfo " + address1 + "'" +displayName + "'" + number + "'");
 	            cust.setAddress(address1.trim());
 	            
 	            
@@ -650,21 +677,22 @@ private void saveFile (String dataType , String uri) {
 	            cust.setPersonalData("Tel:" + phone);
 	            
 	            
-	            
-	          //  String email = (String)cob.get("email");
-	            //cust.setInfoEmail(email);
-	            
-	            
 	            String salesCode = (String)cob.get("AMGDeliveryAddressSalesAgentPersonnelNumber");
-	            cust.addAgent(new Agent (salesCode));
-
+	            if(salesCode != null) {
+	              cust.addAgent(new Agent (salesCode));
+	              cust.addAgent(new Agent("OFI 01"));
+	            }
+	            
 	            String salesCode2 = (String)cob.get("AMGPrimaryAddressSalesAgentPersonnelNumber");
 	            if(salesCode2 != null) {
 	              cust.addAgent(new Agent (salesCode2));
+	              cust.addAgent(new Agent("OFI 01"));
 	            }
+	            
 	            String salesCode3 = (String)cob.get("AMGEmployeeResponsiblePersonnelNumber");
 	            if(salesCode3 != null) {
 	              cust.addAgent(new Agent (salesCode3));
+	              cust.addAgent(new Agent("OFI 01"));
 	            }
 	            
 	           // String balanceDue = cob.get("balanceDue")+ "";
@@ -1024,30 +1052,27 @@ public TreeMap getProducts(Agent agent) {
            		Double b = kastis.get("kgX");
            		if(a != null && b != null) {
            			prod.setInCases(a/b);
-           			//System.out.println("kastis3 " + a + " " + b + " " + a/b);
-               		
            		}
-           	 }
-          	 
+           	  }
           	}
           	
           	String name = (String)cob.get("AMGDescription");
           	
           	prod.setName(name.trim() + " " + number + add);
-          	
         
-        	
           	String price = cob.get("SalesPrice")+ "";
           	if (price != null) {
           		prod.setPrice(Double.parseDouble(price));
           	}
-          	
-
+       
           	
           	prod.setVat("21");
           	
-          
+            String blocked = cob.get("SalesPrice")+ "";
+            if(blocked == null && blocked.equals("Yes") ) {
+               } else {
             	  tm.put(prod.getName(), prod);	
+             }
             
           	}
 		  

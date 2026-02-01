@@ -1390,6 +1390,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 
                 Properties values = new Properties();
                 int sales = agent.getMonthSales();
+                Double reprLim = agent.repriceLimit;
                 int foodsales = agent.getMonthFoodSales();
                 int alcosales = agent.getMonthAlkoSales();
                 int horeca = agent.getMonthHorecaSales();
@@ -1412,7 +1413,9 @@ public class EksportPanel extends JPanel implements ActionListener,
                 if (techdata.length() != 0){
                     values.setProperty("info3", techdata);
                   }
-               
+               if( reprLim > 0) {
+            	   values.setProperty("repriceinglimit", String.valueOf(reprLim));
+               }
                 
                 if (budget1 != 0){
                     values.setProperty("budget1", String.valueOf(budget1));

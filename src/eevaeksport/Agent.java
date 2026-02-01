@@ -77,6 +77,7 @@ public class Agent {
   private String days = null;
   private String prodGroup = null;
   public int buffer = 0;
+  public Double repriceLimit = null; 
   public LocalDate nextContact = null;
   public int buffer2 = 0;
   public String zipPass = null;
