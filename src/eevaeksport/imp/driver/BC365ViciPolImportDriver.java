@@ -100,7 +100,7 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
 		    CloseableHttpClient client = HttpClients.createDefault();
 		    HttpPost loginPost = new HttpPost("https://login.microsoftonline.com/" + tanantId + "/oauth2/token");
 		    String encodedBody = "client_id=" + clientId  + "&client_secret=" + client_secret
-		            + "&grant_type=client_credentials&resource=https://vic-2-uat.sandbox.operations.eu.dynamics.com";
+		            + "&grant_type=client_credentials&resource=https://vici1.operations.eu.dynamics.com";
 		    loginPost.setEntity(new StringEntity(encodedBody, ContentType.APPLICATION_FORM_URLENCODED));
 		    loginPost.addHeader(new BasicHeader("cache-control", "no-cache"));
 		    CloseableHttpResponse loginResponse = client.execute(loginPost);
@@ -122,31 +122,6 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
     public void makeOrder(Order order) throws SQLException{
     	
     	
-    	 
-		  TreeMap tm = new TreeMap();
-		  this.delCodes = new HashMap<String,String>();
-			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//getCustomers.json");
-	  	
-			org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
-			
-			  int lenn = values.size();
-			  
-			try {
-			  for (int i = 0; i < lenn; i++) {
-				  
-				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-
-	          	String number = (String)cob.get("CustomerAccount");
-	            String delid = (String)cob.get("DeliveryAddressLocationId");
-	            delCodes.put(number, delid);
-	            
-			  }
-			  } catch( Exception e){
-				  e.printStackTrace();
-			  }
-    	
-    	
-    	
         makeOutput(order); 
   }
   
@@ -161,7 +136,7 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
 	  }
 	    String res = null;
 	 // System.out.println("imp token " + token);
-	    String urlBase = "https://vic-2-uat.sandbox.operations.eu.dynamics.com//api/services/AMGVICMerisoftServiceGroup/AMGVICMerisoftImportSalesOrderServicePL/ImportSalesOrdersMerisoft";
+	    String urlBase = "https://vici1.operations.eu.dynamics.com//api/services/AMGVICMerisoftServiceGroup/AMGVICMerisoftImportSalesOrderServicePL/ImportSalesOrdersMerisoft";
 
 	    String url = urlBase ;
 	    
@@ -188,7 +163,6 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
 	  
   }
   
-  private HashMap<String,String> delCodes = null;
   
   private void makeOutput(Order order){
 	  
@@ -205,7 +179,7 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
 	      JSONObject ord = new JSONObject();
 	  
 	  ord.put("OrderNumber",order.getAgent() + "-" + order.getDokNr());
-	  ord.put("OrderCustomerDeliveryAddress", delCodes.get( order.getCompany()));
+	  ord.put("OrderCustomerDeliveryAddress",  order.getCompany());
 	  ord.put("OrderDate", Converter.jsonDate(Calendar.getInstance().getTime()));
 	  ord.put("OrderSalesperson", order.getAgent());
 

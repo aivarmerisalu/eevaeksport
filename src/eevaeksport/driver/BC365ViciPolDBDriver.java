@@ -106,7 +106,7 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
     //System.exit(0);
       //token = getMSToken();
 
-       //this.downloadData("unitConversions");
+    //   this.downloadData("getDelAddresses");
    //   getUnitConversions();
    //   System.out.println("Token " + token);
     //  getProducts(null);
@@ -179,6 +179,13 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	     	 		+ "AMGPrimaryAddressPrimaryContacts,AMGDeliveryAddressPrimaryContacts,DiscountPriceGroupId,SalesCurrencyCode,CreditLimit" 
 	     	 		);
 	     }
+	      
+	      if (dataType == null || dataType.equals("getDelAddresses")) {
+		     	 this.saveFile("delAddresses","AMGCustomerDeliveryAddresses?$select=CustomerAccount,"
+		     	 		+ "DeliveryAddressLocationId,DeliveryAddressPrimaryContacts,DeliveryAddressCountryRegionId,DeliveryAddressDescription,"
+		     	 		+ "DeliveryAddressSalesAgentPersonnelNumber,FullDeliveryAddress"  
+		     	 		);
+		     }
 
 	      if (dataType == null || dataType.equals("salesPrices")) {
 	    	  
@@ -255,7 +262,8 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	          File filef = new File("data//"  + fileName + ".json");
 	          
 	          if(!filef.exists() || x == 0 || (x == 1 && day < 5)) { //jooksvat kuud teeb igastahes ja eelmist ka kuni 5 kuupäevani
-        		 this.saveFile(fileName,"SalesInvoiceV4Lines?$select=AMGLineNum,InvoiceNumber,ProductNumber,InvoicedQuantity,SalesPrice,InvoiceDate,AMGInvoiceCustomerAccountNumber,AMGDeliveryCustomerAccount" +
+        		 this.saveFile(fileName,"SalesInvoiceV4Lines?$select=AMGLineNum,InvoiceNumber,ProductNumber,InvoicedQuantity,SalesPrice"
+        		 		+ ",InvoiceDate,AMGInvoiceCustomerAccountNumber,AMGDeliveryAddressLocationId" +
 				 "&$filter=" + 
 			       URLEncoder.encode("InvoiceDate ge " + Converter.getYYYYmMMmDDmString(dds.getTime()) + 
 			    		   " and InvoiceDate le " + Converter.getYYYYmMMmDDmString(dde.getTime()) ));    
@@ -294,7 +302,9 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 		    CloseableHttpClient client = HttpClients.createDefault();
 		    HttpPost loginPost = new HttpPost("https://login.microsoftonline.com/" + tanantId + "/oauth2/token");
 		    String encodedBody = "client_id=" + clientId  + "&client_secret=" + client_secret
-		            + "&grant_type=client_credentials&resource=https://vic-2-uat.sandbox.operations.eu.dynamics.com";
+		            + "&grant_type=client_credentials&resource=https://vici1.operations.eu.dynamics.com";
+		    // encodedBody = "client_id=" + clientId  + "&client_secret=" + client_secret
+		      //      + "&grant_type=client_credentials&resource=https://d365fotestbox152453574c5eff677devaos.cloudax.eu.dynamics.com";
 		    
 		    loginPost.setEntity(new StringEntity(encodedBody, ContentType.APPLICATION_FORM_URLENCODED));
 		    loginPost.addHeader(new BasicHeader("cache-control", "no-cache"));
@@ -326,7 +336,12 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	
 	private String nextUrl(String filename) {
 		try {
+			File f = new File("data//" + filename + ".json");
+			if(f.exists()) {
 	      return (String)Converter.readJSONFile("data//" + filename + ".json").get("@odata.nextLink");
+			} else {
+				return null;
+			}
 		} catch (Exception e) {
 			return null;
 		}
@@ -339,11 +354,14 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
    	try {
    	for (int cou = 1; cou < 10; cou++) {
 
+   		
+   		 File f = new File("data//salesPrices" + cou + ".json");
+   		 if(f.exists()) {
 	  org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPrices" + cou + ".json");
  	  org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 	
 	  int lenn = values.size();
-	
+	System.out.println("data//salesPrices" + cou + ".json");
 	  for (int i = 0; i < lenn; i++) {
 		  
 		  MatrixLine ml = new MatrixLine();
@@ -360,10 +378,11 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
         
         	lines.add(ml);
 	    }
-	  cou++;
+   		 }
+	 
 	  }
 	} catch (Exception e) {
-		//e.printStackTrace();
+		e.printStackTrace();
 	}
    	System.out.println("prm lines " + lines.size());
 	return lines;
@@ -547,9 +566,11 @@ private void saveFile (String dataType , String uri) {
               System.out.println("Failed to create the folder at: " + folderPath);
           }
       } 
-      String urlBase = "https://vic-2-uat.sandbox.operations.eu.dynamics.com/data/";
+      String urlBase = "https://vici1.operations.eu.dynamics.com/data/";
         //  urlBase = "https://d365fodevbox2426b8a301ff944f9devaos.cloudax.eu.dynamics.com/data/";
-
+   if(uri.startsWith("https")) {
+	   urlBase = "";
+   }
 	      String url =  urlBase + uri;
 	      	      
 	      System.out.println( "url " + url);
@@ -571,7 +592,7 @@ private void saveFile (String dataType , String uri) {
 	        int statusCode = response.getStatusLine().getStatusCode();
 	        System.out.println("HTTP Status Code: " + statusCode);
 
-	        System.out.println("Query result " + result);
+	      //  System.out.println("Query result " + result);
 	        Converter.saveFile("data//" + dataType + ".json", result);
 	        System.out.println(dataType + " tehtud " + result.length());
 	        }} catch (IOException e) {
@@ -588,7 +609,9 @@ private void saveFile (String dataType , String uri) {
        
    public TreeMap getCustomers(Agent agent){
 	   
-	   downloadData(null);
+	   if(!"true".equals(getParent().getProps().getProperty("useolddata"))){
+	      downloadData(null);
+	   }
 	   
 	   
 	   Date today = new Date(Calendar.getInstance().getTimeInMillis());
@@ -635,11 +658,48 @@ private void saveFile (String dataType , String uri) {
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Võlad "+ volad.size() + " " + used.size());
+	//	System.out.println("Võlad "+ volad.size() + " " + used.size());
 	   
 	 
-	 //  System.exit(0);
+		 TreeMap<String, ArrayList<Customer>> dels = new TreeMap<String, ArrayList<Customer>>();
 	   
+		// võtame välja kõik del aadressid 
+		try {
+		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//delAddresses.json");
+	  	
+		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+		
+		  int lenn = values.size();
+		 
+		  
+	
+		  for (int i = 0; i < lenn; i++) {
+			  
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+			//DeliveryAddressPrimaryContacts,DeliveryAddressCountryRegionId,,,
+          	String number = (String)cob.get("CustomerAccount");
+            String delid = (String)cob.get("DeliveryAddressLocationId");
+            String agen = (String)cob.get("DeliveryAddressSalesAgentPersonnelNumber");
+            String addr = (String)cob.get("FullDeliveryAddress");
+            String nimi = (String)cob.get("DeliveryAddressDescription");
+		
+            Customer c = new Customer(delid);
+            c.setPayer(number);
+            c.setName(nimi);
+            c.setAddress(addr);
+            if(agen != null && agen.trim().length() > 0) {
+            	c.addAgent(new Agent(agen));
+            }
+            ArrayList<Customer> carr = dels.get(number);
+            if(carr == null) {
+            	carr = new ArrayList<Customer>();
+            }
+            carr.add(c);
+            dels.put(number, carr);
+		  }
+		 } catch(Exception e) {e.printStackTrace();}
+		
+		
 	   
 		  TreeMap tm = new TreeMap();
 			org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//getCustomers.json");
@@ -654,23 +714,25 @@ private void saveFile (String dataType , String uri) {
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
 
 	          	String number = (String)cob.get("CustomerAccount");
-	            String delid = (String)cob.get("DeliveryAddressLocationId");
 	          
-	            Customer cust = new Customer(number);
+	          if(dels.get(number) != null) {
+	        	   
+	          for(Customer cust : dels.get(number)) {
+	            
 	           
 	            
 	            
 	            String displayName = (String)cob.get("OrganizationName");
-	            cust.setName(displayName);
+	           // cust.setName(displayName);
 	            
 	            String billToCustomerNo = (String)cob.get("InvoiceAccount");
-	            cust.setPayer(billToCustomerNo);
+	           // cust.setPayer(billToCustomerNo);
 	            
 	            String address1 = (String)cob.get("DeliveryAddressDescription");
 	            
 	            
 	        //   System.out.println("klinfo " + address1 + "'" +displayName + "'" + number + "'");
-	            cust.setAddress(address1.trim());
+	          //  cust.setAddress(address1.trim());
 	            
 	            
 	            String phone = (String)cob.get("AMGPrimaryAddressPrimaryContacts");
@@ -722,12 +784,82 @@ private void saveFile (String dataType , String uri) {
 	          	
 	          tm.put(cust.getName(), cust);
 	          	}
+	          }else {
+	        	  
+	          		Customer cust = new Customer((String)cob.get("DeliveryAddressLocationId"));
+		            
+		            String displayName = (String)cob.get("DeliveryAddressDescription");
+		            cust.setName(displayName);
+		            
+		            String billToCustomerNo = (String)cob.get("InvoiceAccount");
+		            cust.setPayer(number);
+		            
+		            String address1 = (String)cob.get("AMGFullDeliveryAddress");
+		            
+		            
+		        //   System.out.println("klinfo " + address1 + "'" +displayName + "'" + number + "'");
+		            cust.setAddress(address1.trim());
+		            
+		            
+		            String phone = (String)cob.get("AMGPrimaryAddressPrimaryContacts");
+		            cust.setPersonalData("Tel:" + phone);
+		            
+		            
+		            String salesCode = (String)cob.get("AMGDeliveryAddressSalesAgentPersonnelNumber");
+		            if(salesCode != null) {
+		              cust.addAgent(new Agent (salesCode));
+		              cust.addAgent(new Agent("OFI 01"));
+		            }
+		            
+		            String salesCode2 = (String)cob.get("AMGPrimaryAddressSalesAgentPersonnelNumber");
+		            if(salesCode2 != null) {
+		              cust.addAgent(new Agent (salesCode2));
+		              cust.addAgent(new Agent("OFI 01"));
+		            }
+		            
+		            String salesCode3 = (String)cob.get("AMGEmployeeResponsiblePersonnelNumber");
+		            if(salesCode3 != null) {
+		              cust.addAgent(new Agent (salesCode3));
+		              cust.addAgent(new Agent("OFI 01"));
+		            }
+		            
+		           // String balanceDue = cob.get("balanceDue")+ "";
+		            
+		            String creditLimit = cob.get("CreditLimit")+"";
+		            cust.setCredit(creditLimit);
+		            
+		            if(nodebt != null && !nodebt.contains(cust.getPayer())) {
+		            if (volad.get(cust.getID() ) != null) {
+		            	cust.setDebt(volad.get(cust.getID()));
+		            }
+		            if (volad.get(cust.getPayer() ) != null) {
+		            	cust.setDebt(volad.get(cust.getPayer()));
+		            }
+		            if (used.get(cust.getID() ) != null) {
+		            	cust.setDebt(used.get(cust.getID()));
+		            }
+		            if (used.get(cust.getPayer()) != null) {
+		            	cust.setUsedCredit(used.get(cust.getPayer()));
+		            }
+		            
+		            }
+		            
+		            
+		            //String blocked = (String)cob.get("blocked");
+		            
+		          	
+		          tm.put(cust.getName(), cust);
+	          	}
+	           
+	          }
+			  
+				  
 			  
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
-	System.out.println("Custsize " + tm.keySet().toString().replaceAll(",", "\n"));
+	//System.out.println("Custsize " + tm.keySet().toString().replaceAll(",", "\n"));
 		  
 		return tm;
    }
@@ -782,10 +914,8 @@ private void saveFile (String dataType , String uri) {
 				//   "@odata.etag":"W/\"JzYyMDg0NTU2MCw1NjM3MTU1MDg3OzEsNTYzNzE1NTA3NjswLDA7MTg4MDA5MjM0Niw1NjM3MTQ0NTc2OzEsNTYzNzE1MzYwNTswLDA7MCwwOzAsMDswLDA7MCwwJw==\"",
 				//"AMGLineNum":1,"InvoiceNumber":"FN-000002","ProductNumber":"","LineAmount":100,"SalesPrice":100,"InvoiceDate":"2024-11-01T12:00:00Z","AMGInvoiceCustomerAccountNumber":"000744"
                     String number = (String) line.get("InvoiceNumber");
-	        	    String payerNumber = (String) line.get("AMGInvoiceCustomerAccountNumber");
-	        	    String customerNumber = (String) line.get("AMGDeliveryCustomerAccount");
-		    	     
-	        		String prodId = (String) line.get("ProductNumber");
+	        	    String customerNumber = (String) line.get("AMGDeliveryAddressLocationId");
+		    	    String prodId = (String) line.get("ProductNumber");
 	         		String shipDate = ((String) line.get("InvoiceDate")).substring(5,10);
 	         		
 	         	 Double price = 0d;
@@ -846,13 +976,13 @@ private void saveFile (String dataType , String uri) {
    */
   public void setBulkSales(Map agents) {
 	   TreeMap<String, Double> ags = new TreeMap<String, Double>();
-	   
+	   try { 
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//salesPersonsSales.json");
 	  	
 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
 		  int lenn = values.size();
-		try {
+		
 		  for (int i = 0; i < lenn; i++) {
 			  
 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
@@ -866,7 +996,7 @@ private void saveFile (String dataType , String uri) {
 	    	
 	    }
 	        	
-	  System.out.println(ags.toString());
+	 // System.out.println(ags.toString());
 	  
 	  Iterator itera = ags.keySet().iterator();
 	  while (itera.hasNext()) {

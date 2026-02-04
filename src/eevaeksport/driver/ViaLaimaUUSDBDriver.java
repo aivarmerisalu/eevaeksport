@@ -2393,7 +2393,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
 		    	  String linedisc = (String)cob.get("LINEDISC") ;
 		    	  
 		    	  Agent age = null;
-					if (agd != null && agd.trim().length() > 0) {
+					if (agd != null && agd.trim().length() > 0 && custAgsWeb == null ) {
 						age = new Agent(agd);
 					}
 

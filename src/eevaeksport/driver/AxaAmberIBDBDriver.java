@@ -711,16 +711,10 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 //For LB products - SPIL's warehouse 'GPP-VT' and warehouse from LB AX file - Lb_l - 'GPP'.
 
 
-   String cmd = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  " +
-	        "  INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +  
-	        "  INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and inv.dataareaid=dim.dataareaid       " + 
-	     " WHERE  inv.DATAAREAID='itb' and CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('GPP-VT') " +
-		"	GROUP BY  summ.itemid  having sum(availphysical) > 0";
-   
-  cmd = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
+   String  cmd = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
 "   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +  
 " WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('GPP-VT') " +
-"	GROUP BY  summ.itemid  having sum(availphysical) >0 " ;
+"	GROUP BY  summ.itemid  having sum(availphysical) > 0 " ;
 
 
        if (isDebug()) System.out.println(cmd);
@@ -1753,7 +1747,7 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
     			"	GROUP BY  summ.itemid  having sum(availphysical) > 0";
     cmdx = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
     		"   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +  
-    		" WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('GPL-AK-LB') " +
+    		" WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('GPP-AK-LB') " + //GPP-AK-LB
     		"	GROUP BY  summ.itemid  having sum(availphysical) >0 " ;
 
     TreeMap<String,Double> brakis = new TreeMap<String,Double>();
@@ -1894,13 +1888,9 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
     	   }
       
       
-       //lisa kilo hind 
       if(brakis.get(prod.getID()) != null){
-    	// bre  =  " @AK "  + (int)brakis.get(prod.getID()).doubleValue() + "@";
     	 prod.setPartii("AK: "  +(int)brakis.get(prod.getID()).doubleValue());
       }
-      
-       
       
       String unit = rs.getString("unit");
       if(unit!=null && unit.trim().length()>0){

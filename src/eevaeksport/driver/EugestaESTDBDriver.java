@@ -1308,7 +1308,7 @@ if(grupp.equals("leib") ){
          for(Agent agentL : vv) {
           cust.addAgent(agentL);
           if(agentL.nextContact != null) {
-              cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT)+ "'");  
+              cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
           }
         
          Agent aa1 = (Agent)agent1.get(agentL.getID());

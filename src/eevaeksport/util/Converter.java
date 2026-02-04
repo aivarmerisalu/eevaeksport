@@ -1050,7 +1050,7 @@ public class Converter {
 							
 								//System.out.println(row.getCell((short)a).getStringCellValue());
 								String gg = row.getCell((short) a).getStringCellValue().trim();
-								if(gg.toLowerCase().indexOf("ean") != -1) {
+								if(gg.toLowerCase().equals("ean")) {
 									ea = a;
 								}
 								if(gg.toLowerCase().indexOf("järve") != -1) {
@@ -1084,7 +1084,7 @@ public class Converter {
 								
 									//System.out.println(row.getCell((short)a).getStringCellValue());
 									String gg = row.getCell((short) a).getStringCellValue().trim();
-									if(gg.toLowerCase().indexOf("ean") != -1) {
+									if(gg.toLowerCase().equals("ean")) {
 										ea = a;
 										}
 									
@@ -1118,7 +1118,7 @@ public class Converter {
 								
 									//System.out.println(row.getCell((short)a).getStringCellValue());
 									String gg = row.getCell((short) a).getStringCellValue().trim();
-									if(gg.toLowerCase().indexOf("ean") != -1) {
+									if(gg.toLowerCase().equals("ean") ) {
 										ea = a;
 									}
 									if(gg.toLowerCase().indexOf("järve") != -1) {
@@ -1151,7 +1151,7 @@ public class Converter {
 								
 									//System.out.println(row.getCell((short)a).getStringCellValue());
 									String gg = row.getCell((short) a).getStringCellValue().trim();
-									if(gg.toLowerCase().indexOf("ean") != -1) {
+									if(gg.toLowerCase().equals("ean") ) {
 										ea = a;
 									}
 									if(gg.toLowerCase().indexOf("järve") != -1) {
@@ -1217,7 +1217,7 @@ public class Converter {
 								
 									//System.out.println(row.getCell((short)a).getStringCellValue());
 									String gg = row.getCell((short) a).getStringCellValue().trim();
-									if(gg.toLowerCase().startsWith("ean")) {
+									if(gg.toLowerCase().equals("ean")) {
 										ea = a;
 									}
 									if(gg.toLowerCase().indexOf("järve") != -1) {
@@ -1250,7 +1250,7 @@ public class Converter {
 								
 									//System.out.println(row.getCell((short)a).getStringCellValue());
 									String gg = row.getCell((short) a).getStringCellValue().trim();
-									if(gg.toLowerCase().indexOf("ean") != -1) {
+									if(gg.toLowerCase().equals("ean")) {
 										ea = a;
 									}
 									if(gg.toLowerCase().indexOf("kadaka") != -1) {
@@ -1272,7 +1272,7 @@ public class Converter {
 							try {
 								// System.out.println(row.getCell((short)a).getStringCellValue() + " " + r);
 								String gg = row.getCell((short) a).getStringCellValue().trim();
-								if(gg.toLowerCase().indexOf("ean") != -1) {
+								if(gg.toLowerCase().equals("ean")) {
 									ea = a;
 								}
 								if(gg.indexOf("E-pood") != -1) {
@@ -1289,8 +1289,8 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("r "  + r + " "+ ea + " " + addrow );
-						//System.exit(0);
+						System.out.println("r "  + r + " "+ ea + " " + addrow );
+					//	System.exit(0);
 						
 						  
 						for(int i = 1+addrow ; i < sheet.getLastRowNum()+1;i++){
