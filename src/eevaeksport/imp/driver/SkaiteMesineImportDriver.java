@@ -465,7 +465,7 @@ try{
 
 
 	        
-	        Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
+	       /* Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
 	        Calendar delcal = Calendar.getInstance();
 	        delcal.setTime(order.getShipCal().getTime());
 	      
@@ -480,7 +480,7 @@ try{
 	          }*/
 	        
 	          
-	          if(isToday(delcal.getTimeInMillis())){
+	        /*  if(isToday(delcal.getTimeInMillis())){
 		        	delcal.setTimeInMillis(cal2.getTimeInMillis());
 		        }
 	          
@@ -498,7 +498,37 @@ try{
 			  }
 	         dateString = year +"-"+ month +"-"+ day;
 	        Text delkuupaevVal = doc.createTextNode(dateString);
+	        delkuupaev.appendChild(delkuupaevVal);*/
+	        
+	        Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
+	        Calendar delcal = Calendar.getInstance();
+	        delcal.setTime(order.getShipCal().getTime());
+	        
+	        //kui on täna reede ja on pandud esmaspäevaks siis paneme homseks
+	        Calendar cal2 = Calendar.getInstance();
+	        
+	          if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY  && 
+	        		  delcal.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY  ) {
+	            cal2.add(Calendar.DAY_OF_MONTH, 1);
+	            delcal.setTimeInMillis(cal2.getTimeInMillis());
+	          }
+	        
+	        if(order.getShipCal().getTimeInMillis() > delcal.getTimeInMillis() ){
+	        	delcal.setTimeInMillis(order.getShipCal().getTimeInMillis());
+	        }
+
+	         month = (delcal.get(Calendar.MONTH) + 1) + "";
+	        if (month.length() == 1) month = "0" + month;
+	         day = delcal.get(Calendar.DAY_OF_MONTH) + "";
+	        if (day.length() == 1) day = "0" + day;
+			   year = delcal.get(Calendar.YEAR) + "";
+			  if(year.length() == 2){
+				  year = "20" + year;
+			  }
+	         dateString = year +"-"+ month +"-"+ day;
+	        Text delkuupaevVal = doc.createTextNode(dateString);
 	        delkuupaev.appendChild(delkuupaevVal);
+	        
 	        header.appendChild(delkuupaev);		        
 
 	        root.appendChild(header);

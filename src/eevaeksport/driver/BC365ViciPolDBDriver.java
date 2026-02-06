@@ -403,48 +403,10 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
  return null;
    }
 
- 
+  private Vector debt = null;
 
    public Vector getDebt(String agentCode){
-			  Vector tm = new Vector();
-				org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//agedAccountsReceivables.json");
-		  	
-				org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
-				
-				  int lenn = values.size();
-				try {
-				  for (int i = 0; i < lenn; i++) {
-					    	  
-						org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-		        		String number = (String) cob.get("Invoice");
-			        	String date =(String) cob.get("TransDate");
-			        	String duedate = (String) cob.get("DueDate");
-			        	Double volg = Double.parseDouble(cob.get("AmountCur") + "");
-			        	String payer = (String) cob.get("AccountNum");
-			        	String custid = (String) cob.get("DeliveryAddressId");
-
-       		     Debt dd = new Debt();
-				  dd.setCustID(custid);
-				  dd.setPayerID(payer);
-				  dd.setDoknr(number);
-				  dd.setDate(getDate(date));
-				  dd.setDuedate(getDate(duedate));
-				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
-				  dd.setDue(ff + "");
-				  dd.setSum(volg);
-		            if(nodebt != null && !nodebt.contains(payer)) { 
-				       tm.add(dd);
-		             } else {
-		            	 tm.add(dd);	
-		             }
-		          	}
-				  
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-					
-		  System.out.println("Debtsize " + tm.size());
-	     return tm;
+			 return debt;
 	   }
 
    public void connectionDown(){
@@ -530,7 +492,7 @@ System.out.println("ProdGroup size :  " + tm.size());
 	            String salesName = (String)cob.get("Name");
 	            if (salesCode != null && salesCode.trim().length() > 0) {
 	            	Agent agent = new Agent(salesCode);
-	            	agent.setName(salesName);
+	            	agent.setName(salesName + " " + salesCode );
 	            	  tm.put(agent.getName(), agent);
 	              }
 	          	}
@@ -613,7 +575,8 @@ private void saveFile (String dataType , String uri) {
 	      downloadData(null);
 	   }
 	   
-	   
+	   debt = new Vector();
+	 
 	   Date today = new Date(Calendar.getInstance().getTimeInMillis());
 	   
 	   TreeMap<String, Double>volad = new TreeMap<String, Double>();
@@ -638,6 +601,22 @@ private void saveFile (String dataType , String uri) {
         	String duedate = (String) cob.get("DueDate"); 
         	String invnr = (String) cob.get("Invoice"); 
         	
+        	Debt dd = new Debt();
+    		  dd.setCustID(custid);
+    		  dd.setPayerID(payer);
+    		  dd.setDoknr(invnr);
+    		  dd.setDate(getDate(invdate));
+    		  dd.setDuedate(getDate(duedate));
+    		  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
+    		  dd.setDue(ff + "");
+    		  dd.setSum(balDue);
+               if(nodebt != null && !nodebt.contains(payer)) { 
+    		       debt.add(dd);
+                } else {
+               	 debt.add(dd);	
+                }
+        	
+               
          	if (balDue != 0 && payer != null && payer.trim().length() > 0) {
          		if(used.get(payer) != null) {
          			 used.put(payer, balDue + used.get(payer));	
@@ -736,8 +715,10 @@ private void saveFile (String dataType , String uri) {
 	            
 	            
 	            String phone = (String)cob.get("AMGPrimaryAddressPrimaryContacts");
-	            cust.setPersonalData("Tel:" + phone);
 	            
+	            if(phone != null && phone.trim().length() > 0) {
+		             cust.setPersonalData("Tel:" + phone);
+		            }
 	            
 	            String salesCode = (String)cob.get("AMGDeliveryAddressSalesAgentPersonnelNumber");
 	            if(salesCode != null) {
@@ -770,7 +751,7 @@ private void saveFile (String dataType , String uri) {
 	            	cust.setDebt(volad.get(cust.getPayer()));
 	            }
 	            if (used.get(cust.getID() ) != null) {
-	            	cust.setDebt(used.get(cust.getID()));
+	            	cust.setUsedCredit(used.get(cust.getID()));
 	            }
 	            if (used.get(cust.getPayer()) != null) {
 	            	cust.setUsedCredit(used.get(cust.getPayer()));
@@ -778,7 +759,7 @@ private void saveFile (String dataType , String uri) {
 	            
 	            }
 	            
-	            
+	            cust.setCity("Kod klienta: " +number);
 	            //String blocked = (String)cob.get("blocked");
 	            
 	          	
@@ -802,7 +783,9 @@ private void saveFile (String dataType , String uri) {
 		            
 		            
 		            String phone = (String)cob.get("AMGPrimaryAddressPrimaryContacts");
-		            cust.setPersonalData("Tel:" + phone);
+		            if(phone != null && phone.trim().length() > 0) {
+		             cust.setPersonalData("Tel:" + phone);
+		            }
 		            
 		            
 		            String salesCode = (String)cob.get("AMGDeliveryAddressSalesAgentPersonnelNumber");
@@ -1142,6 +1125,14 @@ public TreeMap getProducts(Agent agent) {
           	String itemCatCode = (String)cob.get("FourthProductFilterCode");
         	if (itemCatCode != null && itemCatCode.length() > 0) {
         		prod.setGroup(itemCatCode);
+        	}
+
+
+          	Double weight = Double.parseDouble(cob.get("AMGFactor")+"");
+        	if(weight != null && weight > 0) {
+       	      prod.setMeasure(weight);
+        	}else {
+        		prod.setMeasure(1);
         	}
         	
         	if(stocks.get(number) != null && stocks.get(number) > 0) {

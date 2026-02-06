@@ -1727,29 +1727,34 @@ public class EksportPanel extends JPanel implements ActionListener,
                 File mdfj = new File("customercrm.txt");
                 if(mdfj.exists()){
                     zip.addFile("customercrm.txt");
-                	
                 }
                 
                 File sl = new File("stocklocations.txt");
                 if(sl.exists()){
                     zip.addFile("stocklocations.txt");
-                	
                 }
+                
                 File s2 = new File("warestatic.txt");
                 if(s2.exists()){
                     zip.addFile("warestatic.txt");
                 	
                 }
                 
+                File pa3 = new File("reprgroups.txt");
+                if(pa3.exists()){
+                    zip.addFile("reprgroups.txt");
+                }
+                
                 File pa = new File("prodactions.txt");
                 if(pa.exists()){
                     zip.addFile("prodactions.txt");
-                	
                 }
+              
                 File wa = new File("tootedRev.has");
                 if(wa.exists()){
                     zip.addFile("tootedRev.has");
                 }
+                
                 File wx = new File("tootedRev.txt");
                 if(wx.exists()){
                     zip.addFile("tootedRev.txt");

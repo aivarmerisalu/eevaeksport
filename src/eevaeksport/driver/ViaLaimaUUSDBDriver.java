@@ -3036,25 +3036,28 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 							  name = name.replaceAll("Prism", " ");
 							  name = name.replaceAll("Pris.", " ");
 							  name = name.replaceAll("Pris", " ");
-
 							  name = name.replaceAll("pantc", " ");
 							  name = name.replaceAll("pantl D", " ");
-
 							  name = name.replaceAll("Klaaspudel\\+", "pdl");
 							  name = name.replaceAll("Purk\\+", "purk");
 							  name = name.replaceAll("Pet\\+", "pet");
 							  name = name.replaceAll("\\+ ", " ");
 							  name = name.replaceAll(" \\+", " ");
-
 							  name = name.replaceAll(" D ", " ");
                               name = name.replaceAll(" K ", " ");
-
 							  name = name.replaceAll("0.5l", "0,5l");
 							  name = name.replaceAll("Original", "Orig.");
 							  name = name.replaceAll("Tagastatav Taara K", " ");
 							  name = name.replaceAll("Klaaspudel", "Klaas K");
-							  
-							  //tyhikuts mitemkordsed maha
+							  name = name.replaceAll("Hartwall", "Hartw.");
+							  name = name.replaceAll("Strong", "Str.");
+							  name = name.replaceAll("Long Drink", "LongD.");
+							  name = name.replaceAll("Vaarikas", "Vaar.");
+							  name = name.replaceAll("Non-alco", "NonAl.");
+							  name = name.replaceAll("Apelsin", "Apel.");
+							  name = name.replaceAll("Cranberry", "Cran.");
+							  name = name.replaceAll("Lemonade", "Lem.");
+							   
 							  name = name.replaceAll("\\s+", " ");
 							  name = name.trim();
 							  
@@ -3063,9 +3066,9 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 						 
 
 							 if(prod.getName().contains("1/4") || 
-									 prod.getName().contains("1/2") || 
-									 prod.getName().contains("¼") ||
-									 prod.getName().contains("½")  ) {
+							     prod.getName().contains("1/2") || 
+								 prod.getName().contains("¼") ||
+								 prod.getName( ).contains("½")  ) {
 								 prod.setInCases(1);
 								 prod.setDiffColor(true);
 							 }
@@ -3081,7 +3084,6 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 							 
 							 if(prod.getID().equals("36048TB")) {
 								 prod.setDiffColor(true);
-											 
 							 }
 							 
 						 }else if ("17".equals(getParent().getProps().getProperty("stockcode"))) {
@@ -3092,7 +3094,6 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 							 name = name.replaceAll("kommikarp ", "karp ");
 							 name = name.replaceAll("küpsised ", "küps. ");
 							 name = name.replaceAll("virsiku", "virs.");
-							 
 							 name = name.replaceAll("täidisega", "täid.");
 							 name = name.replaceAll("maitselised", "maits.");
 							 name = name.replaceAll("kompvekid", "kompv.");
@@ -3101,20 +3102,20 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 							 if (inCases != null && inCases > 0) {
 								if(name.contains("/" + inCases)) {
 									name = name.substring(0,name.indexOf("/" + inCases));
-								}
+								  }
 						  		 }
 							 
 							 prod.setName(Converter.enCodeEst(name));	
-						 }else {
-						 	prod.setName(Converter.enCodeEst(name));								 	
+						  } else {
+						 	 prod.setName(Converter.enCodeEst(name));								 	
 						  } 
 						 
 						 
 						 if (u == 1 || u == 2){ // wita tooted ja Lamuu tooted
 							
 							 prod.setName( Converter.enCodeEst(id.substring(id.length()-2) + " " + name));
-							// System.out.println("u " + u + " " + prod.getName());
-					      }
+						
+						 }
 						 
 						
 						 prod.setPrice(price);

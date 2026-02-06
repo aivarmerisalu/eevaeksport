@@ -1497,11 +1497,11 @@ if(sb.length() >10){
 
 							}
 
-							if (go != null && go.trim().toLowerCase().equals("1")) {
-                                  if(a > 10){
-                                 //	 System.out.println( a + " " + prodID + " " +
-             						//		 clGroup + " " + go); 
-                                  }
+							if (go != null && (go.trim().toLowerCase().equals("1") || go.trim().toLowerCase().equals("2") )) {
+                                 /* if(go.equals("2")){
+                                  System.out.println( "GOO " + a + " " + prodID + " " +
+             								 clGroup + " " + go); 
+                                  }*/
 								 
 
 								if (custID != null
@@ -1519,14 +1519,12 @@ if(sb.length() >10){
 										String prodX = (String)prodCodes.get(prodID.trim());
 										if(prodX != null){
 											mline.setProdID(prodX.trim());		
-										}else{
-											//System.out.println("mingi jama toodet pole " + prodID );
 										}
-										
-										
 									}
-									
-									
+								}
+								
+								if(go.equals("2")) {
+									mline.setLineinfo("MULTI" );
 								}
 								
 								if (mline.getProdID() == null
@@ -1534,14 +1532,6 @@ if(sb.length() >10){
 										&& prodGroup.trim().length() > 0) {
 									mline.setProdGroup(prodGroup);
 								}
-								  if(insertassort){
-									  try{
-										  insertSortLine(mline); 
-									  }catch(Exception s){
-										  
-									  }
-								         
-		                           }
 								result.add(mline);
 							}
 						}

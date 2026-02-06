@@ -177,8 +177,8 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
 		  JSONObject ordMain = new JSONObject();
 		  JSONArray ordArray = new JSONArray();
 	      JSONObject ord = new JSONObject();
-	  
-	  ord.put("OrderNumber",order.getAgent() + "-" + order.getDokNr());
+	  String num = order.getAgent() + order.getDokNr();
+	  ord.put("OrderNumber",num.substring(num.length()-10));
 	  ord.put("OrderCustomerDeliveryAddress",  order.getCompany());
 	  ord.put("OrderDate", Converter.jsonDate(Calendar.getInstance().getTime()));
 	  ord.put("OrderSalesperson", order.getAgent());
@@ -218,10 +218,12 @@ public class BC365ViciPolImportDriver extends AbstractImportDriver{
 	  String res = postData( ordMain.toJSONString());
 	  System.out.println("res " + res);
 	  JSONParser parser = new JSONParser();
-	  String ordId = null;
+	  
 	  try {
 		JSONObject res2 = (JSONObject) parser.parse(res);
-		ordId = (String) res2.get("id");
+		if(res2.get("ExceptionType") != null) {
+			this.trouble = res;
+		}
 		System.out.println(res2.toJSONString());
 		  Converter.saveFile("orders/response/" + order.getDokNr() + "reply.json" , res2.toJSONString() );
 	} catch (ParseException e) {

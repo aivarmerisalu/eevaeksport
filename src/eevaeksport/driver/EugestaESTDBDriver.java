@@ -267,8 +267,9 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 								if(optio == 1) {
 								   mline.setLineinfo("NEW"); // valikuline optional item
 								}
-								
-								result.add(mline);
+								if(!inTT.contains(sortid)) {
+									result.add(mline);	
+								}
 							}
 						
 					 rs.close();
@@ -380,7 +381,42 @@ try {
 
 
   public String getAssortmentStr(Agent agent){
-  	return null;
+	  StringBuffer result = new StringBuffer();
+		
+		try {
+			
+			String  cmd = " SELECT  assortimentBackOfficeId as ClientGR ,productBackOfficeId as ItemID ,NEWINASSORT as newin " + 
+					"FROM EPASAULE_ASSORTMENTS where EG_ASSORTITEMSTATUS = 1 ";
+		
+		         if (isDebug()) System.out.println(cmd);
+		           Connection con = getNewConnection();
+		           Statement st = con.createStatement();
+		           ResultSet rs = st.executeQuery(cmd);
+
+		           while (rs.next()) {
+
+		             String sortid = rs.getString("ClientGR").trim();
+		             String prodID = rs.getString("ItemID").trim();
+		       
+								if(inTT.contains(sortid)) {
+									result.append( " ;" + Converter.cleanLitLatEst(sortid + "; ;" + prodID + "; ;")+ "\n");
+		 						}
+							}
+						
+					 rs.close();
+					 st.close();
+					con.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+             
+
+		System.out.println("ASSO size " + result.toString());
+	
+		return result.toString();
+
+
   }
 
   public String getSaveStockInfo(){
@@ -1022,12 +1058,11 @@ if(grupp.equals("leib") ){
     }
 	//  makeCustprod();
 	  
-   TreeMap deldays =  makeCustomerDeliveryDays();
+    TreeMap deldays =  makeCustomerDeliveryDays();
    
-
+     inTT = new HashSet<String>();
 	
 	HashMap<String, String> promos = new HashMap<String, String>();
-	  
 	
     HashMap<String, Vector<Agent>> cliags = new HashMap<String, Vector<Agent>>();
   
@@ -1169,9 +1204,9 @@ if(grupp.equals("leib") ){
               	  
                     String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , minOrderSum as minsum, '' as linedisc \r\n" + 
                     		"                       		, pricelistBackOfficeId as pricegroup,address ,\r\n" + 
-                    		"                       		  Status AS block , assortimentBackOfficeId as fixed, channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
+                    		"                       		  Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
                     		"                       		 contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-                    		"                       		 contractDate as cdate , segmentname as seg ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 \r\n" + 
+                    		"                       		 contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 \r\n" + 
                     		"                       		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID " ; 
                     
 
@@ -1336,10 +1371,7 @@ if(grupp.equals("leib") ){
         }
         }
         
-        String fixed = rs.getString("fixed");
-        if(fixed != null && fixed.trim().length() > 0) {
-        	cust.addFixSortCode(fixed.trim()+"x");
-        }
+        
         
         String chain = rs.getString("chain");
         if(chain != null && chain.trim().length() > 0) {
@@ -1445,8 +1477,20 @@ String arve = rs.getString("bill");
         
         if(seg != null && seg.trim().length() > 0) {
         	cust.addCity("Kett: " + seg.trim());
+        	
         }
 
+        
+        
+        String fixed = rs.getString("fixed");
+        if(fixed != null && fixed.trim().length() > 0) {
+        	if(seg != null && seg.trim().equals("TT")) {
+        		inTT.add(fixed.trim());
+        		cust.suggAssortCode = fixed.trim();
+        	 } else {
+        	  cust.addFixSortCode(fixed.trim()+"x");
+        	}
+        }
         String segsub = rs.getString("segsub");
         if(segsub != null && segsub.trim().length() > 0) {
         	cust.addCity("Segment: " + segsub.trim());
@@ -1600,6 +1644,33 @@ String arve = rs.getString("bill");
 				        	  }
 				         }
 				        
+				    StringBuffer reprBuff = new StringBuffer();    
+				        reprBuff.append("R101;20\nR212;30");
+				        
+				        
+				        if(reprBuff.length() > 2){
+				            File f = new File("reprgroups.txt");
+				            if (f.exists())f.delete();
+				              try {
+				        		PrintWriter os = new PrintWriter(new FileWriter(
+				        				 "reprgroups.txt", true));
+				        		os.write(reprBuff.toString());
+				        		os.close();
+				        	  }catch (IOException ex) {
+				        		ex.printStackTrace();
+				        	  }
+				         }else{
+				            File f = new File("reprgroups.txt");
+				            if (f.exists())f.delete();
+				              try {
+				        		PrintWriter os = new PrintWriter(new FileWriter(
+				        				 "reprgroups.txt", true));
+				        		os.write("");
+				        		os.close();
+				        	  }catch (IOException ex) {
+				        		ex.printStackTrace();
+				        	  }
+				         }
 				     
               
     } catch (Exception e){
@@ -1619,7 +1690,7 @@ String arve = rs.getString("bill");
       public String getDistribution() {
         return null;
       }
-
+private HashSet<String> inTT = null;
 
   public TreeMap getProdGroups() throws SQLException {
 
