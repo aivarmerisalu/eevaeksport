@@ -151,7 +151,7 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	      } 
 	      
 	      if (dataType == null || dataType.equals("agedAccountsReceivables")) {
-		     	 this.saveFile("agedAccountsReceivables","AMGCustTransOpen?$select=DeliveryAddressId,AccountNum,Invoice,TransDate,DueDate,AmountCur,CurrencyCode");
+		     	 this.saveFile("agedAccountsReceivables","AMGCustTransOpen?$select=DeliveryAddressId,AccountNum,Invoice,TransDate,InvoiceDate,DueDate,AmountCur,CurrencyCode");
 		       }
 
 
@@ -597,7 +597,7 @@ private void saveFile (String dataType , String uri) {
          	String payer = (String)cob.get("AccountNum");
          	String custid = (String)cob.get("DeliveryAddressId");
          	Double balDue = Double.parseDouble( cob.get("AmountCur")+"");
-        	String invdate = (String) cob.get("TransDate");
+        	String invdate = (String) cob.get("InvoiceDate");
         	String duedate = (String) cob.get("DueDate"); 
         	String invnr = (String) cob.get("Invoice"); 
         	

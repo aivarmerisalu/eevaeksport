@@ -908,7 +908,8 @@ Statement st = null;
     	   }
     	  custAgents = new HashMap(); // siin on siis kliendi kood ja agent vastavalt
     	  
-        String cmd = "SELECT CONVERT(Int, part.PartneriaiId) AS CustomerASId, part.regnr as regno , (select  oo.Kodas from Adresai uu " + 
+        String cmd = "SELECT  case when MES_KRED_ARLIMITAS = 1 then MES_KRED_LIMITAS  else 0 end as uselim,\r\n" + 
+        		"							 case when MES_KRED_ARTERMINAS = 1 then MES_KRED_TERMINAS  else 0 end  as useterm, CONVERT(Int, part.PartneriaiId) AS CustomerASId, part.regnr as regno , (select  oo.Kodas from Adresai uu " + 
 				" INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as pay, CONVERT(varchar(20), part.Kodas) AS kood,pl.MES_PAV_Trumpinys as nimi2, CONVERT(varchar(40), part.Pavad) AS nimi,   " +
                    "   SumokaPartneriaiID AS payer ,  rtrim(adr.Adresas)  + case when adr.Indeksas IS NULL then '' else ' ' + rtrim(adr.Indeksas)end + ' ' + " +
                    " case when adr.Miestas IS NULL then '' else ' ' + rtrim(adr.Miestas)end AS Address,part.pvmnr as vatno, " +
@@ -1012,6 +1013,9 @@ Statement st = null;
        	      rs = stmt.executeQuery();
 
 	   while (rs.next()) {
+		     
+		   Double uselim = rs.getDouble("uselim");
+		   Integer useterm = rs.getInt("useterm");
 		   
 		   
 		   String id = rs.getString("CustomerASId").trim();
@@ -1027,6 +1031,19 @@ Statement st = null;
 				  cust.setPayer(payid);
 				  cust.setGroup(payid);
 	          }
+		   
+		   if(uselim > 0 || useterm > 0) {
+			   cust.setSalesBlock(true);
+			   if(uselim > 0 && useterm == 0) {
+				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");
+			   }
+			   if(uselim == 0 && useterm > 0) {
+				   cust.setInfo("Klientas blokuotas dėl neapmokėtų sąskaitų (" + useterm + "+ d.).");
+			   }
+			   if(uselim > 0 && useterm > 0) {
+				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " € ir (" + useterm + "+ d.).");
+			   }
+		   }
 		   
 		   String nim = rs.getString("nimi2").replaceAll("\""," ").trim();
 		   String nims = rs.getString("nimi").replaceAll("\""," ").trim();
@@ -1051,7 +1068,7 @@ Statement st = null;
 		 
 		  String term = rs.getString("paym");
 		 
-		  
+	
 		  
                 
                 if(nimi.startsWith("UAB ")){
