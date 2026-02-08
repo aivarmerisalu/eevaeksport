@@ -223,6 +223,7 @@ try{
 	  ordS.setCompName(order.getShipMode());
 	  ordS.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordS.setStatus(order.getStatus()); 
+	  ordS.setShipDateUsed(order.isShipDateUsed());
 	  ordS.setInfo(order.getInfo());
 	  ordS.setDealer("order");
 
@@ -231,6 +232,7 @@ try{
 	  ordS0.setCompName(order.getShipMode());
 	  ordS0.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordS0.setStatus(order.getStatus());
+	  ordS0.setShipDateUsed(order.isShipDateUsed());
 	  ordS0.setInfo(order.getInfo());
 	  ordS0.setDealer("100");
 
@@ -241,6 +243,7 @@ try{
 	  ordSG.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordSG.setStatus(order.getStatus());
 	  ordSG.setInfo(order.getInfo());
+	  ordSG.setShipDateUsed(order.isShipDateUsed());
 	  ordSG.setDealer("gift");
 
 
@@ -465,57 +468,23 @@ try{
 
 
 	        
-	       /* Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
-	        Calendar delcal = Calendar.getInstance();
-	        delcal.setTime(order.getShipCal().getTime());
-	      
-	        
-	        //kui on täna reede ja on pandud esmaspäevaks siis paneme homseks
-	        Calendar cal2 = Calendar.getInstance();
-	        cal2.add(Calendar.DAY_OF_MONTH, 1);
-	       /*   if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY  && 
-	        		  delcal.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY  ) {
-	          
-	            delcal.setTimeInMillis(cal2.getTimeInMillis());
-	          }*/
-	        
-	          
-	        /*  if(isToday(delcal.getTimeInMillis())){
-		        	delcal.setTimeInMillis(cal2.getTimeInMillis());
-		        }
-	          
-	        if(order.getShipCal().getTimeInMillis() > delcal.getTimeInMillis() ){
-	        	delcal.setTimeInMillis(order.getShipCal().getTimeInMillis());
-	        }
-
-	         month = (delcal.get(Calendar.MONTH) + 1) + "";
-	        if (month.length() == 1) month = "0" + month;
-	         day = delcal.get(Calendar.DAY_OF_MONTH) + "";
-	        if (day.length() == 1) day = "0" + day;
-			   year = delcal.get(Calendar.YEAR) + "";
-			  if(year.length() == 2){
-				  year = "20" + year;
-			  }
-	         dateString = year +"-"+ month +"-"+ day;
-	        Text delkuupaevVal = doc.createTextNode(dateString);
-	        delkuupaev.appendChild(delkuupaevVal);*/
-	        
 	        Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
 	        Calendar delcal = Calendar.getInstance();
-	        delcal.setTime(order.getShipCal().getTime());
-	        
-	        //kui on täna reede ja on pandud esmaspäevaks siis paneme homseks
 	        Calendar cal2 = Calendar.getInstance();
 	        
-	          if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY  && 
-	        		  delcal.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY  ) {
-	            cal2.add(Calendar.DAY_OF_MONTH, 1);
-	            delcal.setTimeInMillis(cal2.getTimeInMillis());
+	          if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY   ) {
+	              cal2.add(Calendar.DAY_OF_MONTH, 3);
+	          }else  if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY  ) {
+	              cal2.add(Calendar.DAY_OF_MONTH, 2);
+	          }else {
+	        	  cal2.add(Calendar.DAY_OF_MONTH, 1);
 	          }
 	        
-	        if(order.getShipCal().getTimeInMillis() > delcal.getTimeInMillis() ){
-	        	delcal.setTimeInMillis(order.getShipCal().getTimeInMillis());
-	        }
+	          if(order.isShipDateUsed()){
+		        	delcal.setTimeInMillis(order.getShipCal().getTimeInMillis());
+		        }else {
+		        	delcal.setTimeInMillis(cal2.getTimeInMillis());
+		        }
 
 	         month = (delcal.get(Calendar.MONTH) + 1) + "";
 	        if (month.length() == 1) month = "0" + month;

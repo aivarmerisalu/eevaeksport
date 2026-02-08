@@ -212,6 +212,7 @@ try{
 	  ordS.setDokNr(order.getDokNr());
 	  ordS.setCompName(order.getShipMode());
 	  ordS.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordS.setShipDateUsed(order.isShipDateUsed());
 	  ordS.setStatus(order.getStatus()); 
 	  ordS.setInfo(order.getInfo());
 	  ordS.setDealer("order");
@@ -219,6 +220,7 @@ try{
 	  ordS0.setAgentCode(order.getAgentCode());
 	  ordS0.setDokNr(order.getDokNr());
 	  ordS0.setCompName(order.getShipMode());
+	  ordS0.setShipDateUsed(order.isShipDateUsed());
 	  ordS0.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordS0.setStatus(order.getStatus());
 	  ordS0.setInfo(order.getInfo());
@@ -228,6 +230,7 @@ try{
 	  ordSG.setAgentCode(order.getAgentCode());
 	  ordSG.setDokNr(order.getDokNr());
 	  ordSG.setCompName(order.getShipMode());
+	  ordSG.setShipDateUsed(order.isShipDateUsed());
 	  ordSG.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordSG.setStatus(order.getStatus());
 	  ordSG.setInfo(order.getInfo());
@@ -458,20 +461,21 @@ try{
 	        
 	        Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
 	        Calendar delcal = Calendar.getInstance();
-	        delcal.setTime(order.getShipCal().getTime());
-	        
-	        //kui on täna reede ja on pandud esmaspäevaks siis paneme homseks
 	        Calendar cal2 = Calendar.getInstance();
 	        
-	          if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY  && 
-	        		  delcal.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY  ) {
-	            cal2.add(Calendar.DAY_OF_MONTH, 1);
-	            delcal.setTimeInMillis(cal2.getTimeInMillis());
+	          if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY   ) {
+	              cal2.add(Calendar.DAY_OF_MONTH, 3);
+	          }else  if (cal2.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY  ) {
+	              cal2.add(Calendar.DAY_OF_MONTH, 2);
+	          }else {
+	        	  cal2.add(Calendar.DAY_OF_MONTH, 1);
 	          }
 	        
-	        if(order.getShipCal().getTimeInMillis() > delcal.getTimeInMillis() ){
-	        	delcal.setTimeInMillis(order.getShipCal().getTimeInMillis());
-	        }
+	          if(order.isShipDateUsed()){
+		        	delcal.setTimeInMillis(order.getShipCal().getTimeInMillis());
+		        }else {
+		        	delcal.setTimeInMillis(cal2.getTimeInMillis());
+		        }
 
 	         month = (delcal.get(Calendar.MONTH) + 1) + "";
 	        if (month.length() == 1) month = "0" + month;
