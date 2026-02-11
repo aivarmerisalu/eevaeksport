@@ -694,13 +694,17 @@ private void saveFile (String dataType , String uri) {
 
 	          	String number = (String)cob.get("CustomerAccount");
 	          
-	          	if(number.eq)
+	          	if(number.equals("000254")) {
+	          		System.out.println("ooo " + cob.toJSONString());
+	          	}
 	          	
 	          if(dels.get(number) != null) {
 	        	   
 	          for(Customer cust : dels.get(number)) {
 	            
-	           
+	        	  if(number.equals("000254")) {
+		          		System.out.println("www " + cust.getAgents().toString() );
+		          	}
 	            
 	            
 	            String displayName = (String)cob.get("OrganizationName");
@@ -765,7 +769,7 @@ private void saveFile (String dataType , String uri) {
 	            //String blocked = (String)cob.get("blocked");
 	            
 	          	
-	          tm.put(cust.getName(), cust);
+	          tm.put(cust.getName() + cust.getID(), cust);
 	          	}
 	          }else {
 	        	  
@@ -833,7 +837,7 @@ private void saveFile (String dataType , String uri) {
 		            //String blocked = (String)cob.get("blocked");
 		            
 		          	
-		          tm.put(cust.getName(), cust);
+		          tm.put(cust.getName()+cust.getID(), cust);
 	          	}
 	           
 	          }
