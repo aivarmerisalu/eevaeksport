@@ -82,7 +82,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 	     
   NF.setMinimumFractionDigits(2);
   NF.setMaximumFractionDigits(2);
-  
+    System.out.println("Tere ");
   }
 	  String user =  null;
 	  String pass = null;

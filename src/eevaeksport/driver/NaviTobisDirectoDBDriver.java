@@ -581,7 +581,11 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
                         	if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
                      			Converter.copyFile(in,inpda);
                      		}else {
+                     			try {
                      			Converter.shrinkAndCopyFile(in,inpda,600);
+                     			}catch(Exception e) {
+                     				e.printStackTrace();
+                     			}
                      		}
                        	 }
                      	buf.append(toode +".png;"  + inpda.length() + "\n");
@@ -593,7 +597,11 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
                 	if("true".equals(parent.getProps().getProperty("pict.noshrink"))) {
              			Converter.copyFile(in,inpda);
              		}else {
-             			Converter.shrinkAndCopyFile(in,inpda,600);
+             			try {
+                 			Converter.shrinkAndCopyFile(in,inpda,600);
+                 			}catch(Exception e) {
+                 				e.printStackTrace();
+                 			}
              		}
                	 }
              	buf.append(toode +".jpg;"  + inpda.length() + "\n");
@@ -609,6 +617,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
 		os.write(buf.toString());
 		os.close();
+		System.out.println("File saved list " + buf.length());
 	  }catch (Exception ex) {
 		ex.printStackTrace();
 	  }
@@ -616,7 +625,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
  	 } catch (Exception e) {
    	    getParent().showError(e);
    	}
-    
+    throw null;
  }
 
  
@@ -3826,9 +3835,9 @@ TreeMap sorting = new TreeMap();
 			     						if(cp.getCustID().equals(custid) && dirCustCodes.get(custid) != null) {
 			     							cp.custID = Converter.enCodeEst(dirCustCodes.get(custid)+"");
 			     						}
-			     						 if(sorting.get(custid +  cp.getProdID()) == null) {
+			     						// if(sorting.get(custid +  cp.getProdID()) == null) {
 			     							sorting.put(custid +  cp.getProdID()  , cp);
-			     						 }
+			     						 //}
 				     				   }	
 			     					}
 			     				 }

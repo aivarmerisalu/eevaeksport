@@ -111,7 +111,7 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
    //   System.out.println("Token " + token);
     //  getProducts(null);
      // getCustomers(null);
-  //  this.downloadData("invLines");
+  // this.downloadData("invLines");
    //  getCustomerProductsList(null);
      //getPriceMatrixData();
   //  this.downloadData(null);
@@ -694,6 +694,8 @@ private void saveFile (String dataType , String uri) {
 
 	          	String number = (String)cob.get("CustomerAccount");
 	          
+	          	if(number.eq)
+	          	
 	          if(dels.get(number) != null) {
 	        	   
 	          for(Customer cust : dels.get(number)) {

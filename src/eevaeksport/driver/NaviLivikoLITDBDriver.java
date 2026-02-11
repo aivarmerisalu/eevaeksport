@@ -1313,6 +1313,12 @@ con3.close();
 //         	double netto = rs.getDouble("netto");
          	String namesort = name;
         	name =   Converter.firstToUpperCase(name);
+        	if(name.contains("(")) {
+        		name= name.replace('(', ' ').trim();
+        	}
+        	if(name.contains(")")) {
+        		name= name.replace(')', ' ').trim();
+        	}
             name = name + " " + id ;
          	int namelen = name.length();
          	

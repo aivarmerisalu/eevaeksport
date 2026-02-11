@@ -247,7 +247,8 @@ private Vector signatures = new Vector();
 				  
 				  
 			   if(repr) {
-				        sendRepriceEmail(order, comment,order.getDokNr(),order.getCompany());
+				       // sendRepriceEmail(order, comment,order.getDokNr(),order.getCompany());
+				        makeOutput(order, false , true);
 			    	    this.setNumAddedLines(order.getOrderLines().size());
 				  System.out.println("on ymberhindlus ");
 			
@@ -257,7 +258,7 @@ private Vector signatures = new Vector();
 			 	  Enumeration en = splitted.elements();
 			 	  while(en.hasMoreElements()){
 			 		  Order ord = (Order)en.nextElement();
-			 		 makeOutput(ord,tagastus);
+			 		 makeOutput(ord,tagastus , false);
 				    } 
 			 	  
 			      		  signatures.add(signature);
@@ -624,13 +625,13 @@ private Product getProd(String toode){
      System.out.println("Order closed " + salesid);
       }
 
- private void makeOutput(Order order , boolean ret ){
+ private void makeOutput(Order order , boolean ret , boolean repr ){
 	 
 	 
 	 int salesid =  getNextSalesid() ;
 	    try {
-	    		addInvoiceHeader(salesid,order);
-			    addInvoiceLines(salesid, order);
+	    		addInvoiceHeader(salesid,order, ret, repr);
+			    addInvoiceLines(salesid, order,ret, repr);
      			closeOrder(salesid);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -639,7 +640,7 @@ private Product getProd(String toode){
 	 }
  
  
- private void addInvoiceLines(int salesid, Order order) throws SQLException{
+ private void addInvoiceLines(int salesid, Order order, boolean tagastus, boolean repr) throws SQLException{
 
 	    Enumeration enumr = order.getOrderLines().elements();
 
@@ -697,7 +698,7 @@ private Product getProd(String toode){
  
  
  
- private void addInvoiceHeader(int salesid,Order order) throws SQLException{
+ private void addInvoiceHeader(int salesid, Order order, boolean tagastus, boolean repr) throws SQLException{
 	      
 	      String ref = " ";
 	      if(order.getInfo() != null && order.getInfo().trim().length()>0 ){
@@ -710,6 +711,15 @@ private Product getProd(String toode){
 
 	  String deltype = "0"; // ei kasutatta eestis
 	  String ordtype = "0"; // Seda poel ka eestis vaja siin on määratud miskanalist tellimus tuelb
+	  
+	  if(repr) {
+		  ordtype = "4"; 
+	  }
+	  
+	  if(tagastus) {
+		  ordtype = "1"; 
+	  }
+	  
 	  String status = "V";
 	  
 	  int orderingTime = 0;
