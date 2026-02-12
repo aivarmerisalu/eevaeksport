@@ -2,6 +2,7 @@ package eevaeksport.util;
  
 import java.awt.Color;
 
+
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.color.ColorSpace;
@@ -12,8 +13,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import com.twelvemonkeys.imageio.plugins.jpeg.JPEGImageReaderSpi;
+
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -40,16 +40,16 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
