@@ -236,8 +236,9 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 		
 		try {
 			
-			String  cmd = " SELECT  assortimentBackOfficeId as ClientGR ,productBackOfficeId as ItemID ,NEWINASSORT as newin " + 
-					"FROM EPASAULE_ASSORTMENTS where EG_ASSORTITEMSTATUS = 1 ";
+			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
+					"					FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId  where s.EG_ASSORTITEMSTATUS = 1 order by str(a.posWeight) + a.Nam ";
+			
 		
 		         if (isDebug()) System.out.println(cmd);
 		           Connection con = getNewConnection();
@@ -333,7 +334,7 @@ try {
            String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, \r\n" + 
            		"           		minPrice as price ,b.regionbackofficeid as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a \r\n" + 
            		"           		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId  \r\n" + 
-           		"           		 where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91  and minqty = 0 \r\n" + 
+           		"           		 where getdate() between [date from] and [date to]  and minqty = 0 \r\n" +  //and datediff(day,[date from],[date to])< 91 
            		"           		 group by  a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid,  [date from] ,[date to], minPrice \r\n" + 
            		"           		 order by a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid, [date from] ,[date to], minPrice";
            rs = stmt.executeQuery(sql2);
@@ -385,8 +386,9 @@ try {
 		
 		try {
 			
-			String  cmd = " SELECT  assortimentBackOfficeId as ClientGR ,productBackOfficeId as ItemID ,NEWINASSORT as newin " + 
-					"FROM EPASAULE_ASSORTMENTS where EG_ASSORTITEMSTATUS = 1 ";
+			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
+					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId  where s.EG_ASSORTITEMSTATUS = 1 order by str(a.posWeight) + a.Name";
+			
 		
 		         if (isDebug()) System.out.println(cmd);
 		           Connection con = getNewConnection();
@@ -605,8 +607,9 @@ try {
 	        String tootekood = rs.getString("toode").trim();
 	        double kogus = rs.getDouble("sisse");
 	        
-	        String lastdate = rs.getString("lastdate").substring(0,10);
-	                 lastdate = lastdate.substring(5,10);
+	        String lastdate = Converter.turn(rs.getString("lastdate").substring(0,10)); // EESTI CASE
+	               //  lastdate = lastdate.substring(5,10);
+	                 lastdate = lastdate.substring(0,5);
 	                 double lastprice = rs.getDouble("lastprice");
 	         String lastdoc = rs.getString("lastdoc").trim();
 	      	               
@@ -1322,7 +1325,7 @@ if(grupp.equals("leib") ){
 
         
         cust.restName = name;
-        name = Converter.enCodeEst(name);
+       // name = Converter.enCodeEst(name);
         name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
         name = name + " " + cust.getAddress() + " " + accountnum ;
         cust.setName(name);
@@ -1906,7 +1909,6 @@ private HashSet<String> inTT = null;
             	  prod.setPartii(partii.get(prod.getID())); 
                }
                
-
                Double vat = rs.getDouble("vat");
                prod.setVat(vat + "");
                prod.setNameSorting(sorting + nimetus);
