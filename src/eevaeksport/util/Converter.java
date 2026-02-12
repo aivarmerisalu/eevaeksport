@@ -9883,7 +9883,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 	  }
 
 	  
-	  public static void shrinkAndCopyFile  (String in, String out , int size ) throws Exception {
+	  public static void shrinkAndCopyFileOLD  (String in, String out , int size ) throws Exception {
 		   if(in != null && in.toLowerCase().indexOf("thrumbs") == -1){
 			   if(size == 0){
 				   size = 301;
@@ -9965,6 +9965,52 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		       }
 		   }
 		            }
+	  public static void shrinkAndCopyFile(String in, String out, int size) throws Exception {
+
+		    if (in == null || in.toLowerCase().contains("thrumbs")) {
+		        return;
+		    }
+
+		    if (size == 0) {
+		        size = 301;
+		    }
+
+		    BufferedImage original = ImageIO.read(new File(in));
+
+		    if (original == null) {
+		        copyFile(new File(in), new File(out));
+		        return;
+		    }
+
+		    int width = original.getWidth();
+		    int height = original.getHeight();
+
+		    // Detect portrait
+		    if (height > width) {
+		        size = (size * 2) / 3;
+		    }
+
+		    // If already small, just copy
+		    if (width <= size) {
+		        ImageIO.write(original, "jpg", new File(out));
+		        original.flush();
+		        return;
+		    }
+
+		    // Calculate new dimensions (keep aspect ratio)
+		    int newWidth = size;
+		    int newHeight = (height * size) / width;
+
+		    BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+		    Graphics2D g = resized.createGraphics();
+		    g.drawImage(original, 0, 0, newWidth, newHeight, null);
+		    g.dispose();
+
+		    original.flush();
+
+		    ImageIO.write(resized, "jpg", new File(out));
+		    resized.flush();
+		}
 
 	  
 	  public static void copyFile(File in, File out) throws Exception {

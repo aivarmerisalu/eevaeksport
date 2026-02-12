@@ -40,6 +40,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+
+
 public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter{
 
     public BC365ValdoDBDriver(EksportPanel parent) {
@@ -94,11 +96,18 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
             System.err.println("Failed to download data for operation: " + operation);
             e.printStackTrace();
         }
-    }
-
-    /* =========================
-       PAGED FILE SAVE
-       ========================= */
+  
+	    user =  getParent().getProps().getProperty("rest.user");
+	    pass = getParent().getProps().getProperty("rest.pass");
+	    rcompany = getParent().getProps().getProperty("rest.companyx");
+	     
+  //  NF.setMinimumFractionDigits(2);
+   // NF.setMaximumFractionDigits(2);
+    System.out.println("Tere ");
+  }
+	  String user =  null;
+	  String pass = null;
+	  String rcompany = null;
 
 
     private void saveFilePaged(String baseName, String jsonContent, int maxObjectsPerFile) {

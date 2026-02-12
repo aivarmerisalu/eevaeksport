@@ -388,6 +388,8 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
           return isAmount;
   }
 
+  
+  
   /**
   *
   * @param aUseEAN - the new value for useEAN
