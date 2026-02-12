@@ -374,7 +374,8 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
 
 
 	   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
-
+  
+	   
 
  
   public String getDriverVersion(){
