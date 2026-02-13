@@ -408,7 +408,7 @@ public class Praline1SDBDriver extends AbstractDBDriver implements BulkUpdater,D
                if(old<dueint){
               this.debtDays.put(custID,dueint+"") ;
 
-           //   System.out.println(custID + " " + dueint + " " + old);
+              System.out.println(custID + " " + dueint + " " + old);
               //System.out.println("l�ks");
                }
                }
@@ -430,7 +430,7 @@ public class Praline1SDBDriver extends AbstractDBDriver implements BulkUpdater,D
       } catch (Exception e){
         e.printStackTrace();
       }
-
+System.out.println("debtList " +  debtList.size());
 
      TreeMap tm = new TreeMap();
      this.customers = new ArrayList();

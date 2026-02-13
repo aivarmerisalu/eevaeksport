@@ -1086,7 +1086,7 @@ try{
 
    
       String cmd = " select a.[Sell-to Customer No_] AS klient, a.[Customer No_] AS maksja,a.[External Document No_] AS number, a.[Due Date] AS kuupaev, sum(b.[Amount]) AS summa," +
-                            " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer FROM [Vičiunai Baltic$Cust_ Ledger Entry] a inner join " +
+                            " DATEDIFF(dd,a.[Due Date],GETDATE()) AS due ,a.[Customer No_] AS payer , a.[Posting Date] as dd FROM [Vičiunai Baltic$Cust_ Ledger Entry] a inner join " +
                             " [Vičiunai Baltic$Detailed Cust_ Ledg_ Entry] b on a.[Entry No_]=b.[Cust_ Ledger Entry No_] " +
                             " where " +
 							"  (a.[Document type] = 2 or a.[Document type]= 3) and a.[Due Date] < GETDATE()+7 AND a.[Posting Date] > getdate()-200 AND a.[Open]= 1 " +
@@ -1114,6 +1114,8 @@ try{
         debt.setDuedate(rs1.getDate("kuupaev"));
         debt.setSum(rs1.getDouble("summa"));
         int dueint = rs1.getInt("due");
+        debt.setPayerID(rs1.getString("payer"));
+        debt.setDate(rs1.getDate("dd"));
         debt.setDue(dueint + "");
         int old = 0;
         if(debtDays.get(custID) != null){
