@@ -43,6 +43,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -94,6 +95,8 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.companyx");
     country = getParent().getProps().getProperty("country");
+    
+    loadPlans();
     
      }
   
@@ -626,6 +629,101 @@ try {
 	      getParent().showError(e);
 	    }
   }
+  
+  
+  private Map<String, Map<String, Double>> manaPlans;
+  private Map<String, Map<String, Double>> custPlans;
+
+  private Map<String, Double> manaTotalPlans;
+  private Map<String, Double> custTotalPlans;
+  
+  
+  private void loadPlans () {
+	  custPlans = new HashMap<String, Map<String, Double>>();
+	  manaPlans = new HashMap<String, Map<String, Double>>();
+	  custTotalPlans = new HashMap<String, Double>();
+	  manaTotalPlans = new HashMap<String, Double>();
+  
+	
+	  try{
+		 	
+	 		Calendar cal = Calendar.getInstance();
+	 	     String month = (cal.get(Calendar.MONTH)+1)+ "";
+	 	     if(month.length() == 1){
+	 		   month = "0" + month;
+	 	      }
+	 	   String jooksev =  month + "" + cal.get(Calendar.YEAR) ; 
+	 	   int a = 0;
+	 	   File f = new File (getExcelDir() + "CustomerPlans.xlsx");
+	 	   FileInputStream	 ff = new FileInputStream(f);
+	 	
+
+			DataFormatter formatter = new DataFormatter();
+	 		XSSFWorkbook workbook = new XSSFWorkbook((ff));
+	 		XSSFSheet sheet = workbook.getSheet(jooksev);
+	 		System.out.println("jooksev " + jooksev + " " + sheet);
+	 		XSSFRow row = null; 
+	 				ff.close();	
+	 				if(sheet != null){
+	 					 System.out.println("paln " + sheet.getLastRowNum() + " " );
+	 						
+	 					for(int i = 1 ; i < sheet.getLastRowNum() + 1;i++){
+	 						 row = sheet.getRow(i);
+	 						// System.out.println("paln " + formatter.formatCellValue(row.getCell(0)));
+	 							
+
+	 						String mana = formatter.formatCellValue(row.getCell(0));
+	 						String cust = formatter.formatCellValue(row.getCell(1));
+	 						String gr = formatter.formatCellValue(row.getCell(2));
+	 					
+	 							 Double plan = null;
+	 							 try {
+	 							  plan = Double.parseDouble(formatter.formatCellValue(row.getCell(3)));
+	 							 }catch(Exception e) {
+	 								 
+	 							 }
+
+	 								   if(plan != null && plan > 0) {
+	 									   
+	 									  manaPlans
+	 						                .computeIfAbsent(mana, k -> new HashMap<String, Double>())
+	 						                .merge(gr, plan, Double::sum);
+
+	 						             custPlans
+	 						                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
+	 						                .merge(gr, plan, Double::sum);
+
+	 						             
+	 								   }
+	 								}
+	 					
+	 					
+	 					manaPlans.forEach((manager, groups) ->
+	 				    manaTotalPlans.put(manager,
+	 				        groups.values().stream().mapToDouble(Double::doubleValue).sum())
+	 				);
+
+	 				custPlans.forEach((customer, groups) ->
+	 				    custTotalPlans.put(customer,
+	 				        groups.values().stream().mapToDouble(Double::doubleValue).sum())
+	 				);
+
+	 				}
+	 
+	 				System.out.println("manaPlans " + manaPlans.size());
+	 				System.out.println("manaTotPlans " + manaTotalPlans.toString());
+
+	 				System.out.println("custPlans " + custPlans.size());
+	 				
+	 				//System.exit(0);
+	   }catch(Exception e) {
+		   e.printStackTrace();
+	   }
+	  
+  }
+  
+  
+  
   
   public TreeMap getAgents(){
 	  
