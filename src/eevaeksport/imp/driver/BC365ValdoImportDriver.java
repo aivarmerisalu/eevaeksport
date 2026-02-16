@@ -5,7 +5,10 @@ package eevaeksport.imp.driver;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,6 +30,15 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.NTCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.xml.serialize.OutputFormat;
@@ -36,6 +48,7 @@ import org.json.simple.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import eevaeksport.imp.ImportPanel;
@@ -66,6 +79,89 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
     }
   }
   
+  
+  
+
+  /* =========================
+     CORE NTLM SOAP CALL
+     ========================= */
+
+  public String callOperation(String operation, String json) throws Exception {
+
+      String serviceUrl = parent.getProps().getProperty("api.SERVICE_URL");
+      String namespace  = parent.getProps().getProperty("api.NAMESPACE");
+      String domain     = parent.getProps().getProperty("api.DOMAIN");
+      String username   = parent.getProps().getProperty("api.USERNAME");
+      String password   = parent.getProps().getProperty("api.PASSWORD");
+
+      URL url = new URL(serviceUrl);
+
+      CredentialsProvider credsProvider = new BasicCredentialsProvider();
+      credsProvider.setCredentials(
+              new AuthScope(url.getHost(), url.getPort()),
+              new NTCredentials(username, password, null, domain)
+      );
+
+      try (CloseableHttpClient client = HttpClients.custom()
+              .setDefaultCredentialsProvider(credsProvider)
+              .build()) {
+
+          HttpPost post = new HttpPost(serviceUrl);
+          post.setHeader("Content-Type", "text/xml; charset=utf-8");
+          post.setHeader("SOAPAction", namespace + ":" + operation);
+
+          String soapEnvelope = buildSoapEnvelope(namespace, operation, json);
+          post.setEntity(new StringEntity(soapEnvelope, StandardCharsets.UTF_8));
+
+          try (CloseableHttpResponse response = client.execute(post);
+               InputStream is = response.getEntity().getContent()) {
+
+              return extractReturnValue(is);
+          }
+      }
+  }
+
+  /* =========================
+     SOAP HELPERS
+     ========================= */
+  private String buildSoapEnvelope(String namespace, String operation, String json) {
+	    return 
+	        "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
+	        "xmlns:ns=\"" + namespace + "\">" +
+	        "<soapenv:Header/>" +
+	        "<soapenv:Body>" +
+	        "<ns:" + operation + ">" +
+	        "<ns:jsonPayload><![CDATA[" + json + "]]></ns:jsonPayload>" +
+	        "</ns:" + operation + ">" +
+	        "</soapenv:Body>" +
+	        "</soapenv:Envelope>";
+	}
+
+
+  private String extractReturnValue(InputStream xmlStream) throws Exception {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      Document document = builder.parse(xmlStream);
+
+      NodeList nodes = document.getElementsByTagName("return_value");
+
+      if (nodes.getLength() == 0) {
+          throw new RuntimeException("SOAP response does not contain <return_value>");
+      }
+
+      StringBuilder sb = new StringBuilder();
+      NodeList children = nodes.item(0).getChildNodes();
+
+      for (int i = 0; i < children.getLength(); i++) {
+          if (children.item(i).getNodeValue() != null) {
+              sb.append(children.item(i).getNodeValue());
+          }
+      }
+      return sb.toString().trim();
+  }
+
   
 
 
@@ -357,6 +453,8 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
        String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + "-" + (uni + "").trim() +  ".json";
 	      System.out.println(fileName);
 	     Converter.saveFile(fileName,orders.toJSONString() ); 
+	     
+	     callOperation("ImportOrder", orders.toJSONString());
 
 		} catch (Exception e) {
 			e.printStackTrace();
