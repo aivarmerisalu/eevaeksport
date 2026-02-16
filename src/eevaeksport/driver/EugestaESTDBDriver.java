@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     rcompany = getParent().getProps().getProperty("rest.companyx");
     country = getParent().getProps().getProperty("country");
     
-    loadPlans();
+    
     
      }
   
@@ -172,8 +173,6 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 
   
   private void makePictureCat(){
-	     
-	  	    
 	    	
 	    	String pictssou = parent.getProps().getProperty("pict.dir");
 	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
@@ -286,7 +285,6 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 
 		System.out.println("fix size " + result.size());
-		// System.exit(0);
 		return result;
 
 	
@@ -364,8 +362,7 @@ try {
            }
            rs.close();
            stmt.close();
-           
-
+      
        } catch (SQLException ex) {
           ex.printStackTrace();
        }
@@ -417,7 +414,7 @@ try {
 		}
              
 
-		System.out.println("ASSO size " + result.toString());
+	//	System.out.println("ASSO size " + result.toString());
 	
 		return result.toString();
 
@@ -562,7 +559,7 @@ try {
   }
 
   private void makeCustprod(){
-	  int counter = 1;
+	 
 	  
 	  String cmd2 = "WITH agg AS (\r\n" + 
 	  		"    SELECT  \r\n" + 
@@ -591,20 +588,15 @@ try {
 	  		"WHERE rn = 1\r\n" + 
 	  		"ORDER BY klient, toode;";
 	  
-	  
-
 
 	    if (isDebug()) System.out.println(cmd2);
 
 	    try {
 	    	
-	    	
 	    	Connection con = getNewConnection();
 	     	Statement stmt = con.createStatement();
 	        ResultSet rs = stmt.executeQuery(cmd2);
 	
-	
-	      counter++;
 	      while(rs.next()){
 	        String kliendikood = rs.getString("klient").trim();
 	        String tootekood = rs.getString("toode").trim();
@@ -638,7 +630,12 @@ try {
   private Map<String, Double> custTotalPlans;
   
   
+  
   private void loadPlans () {
+	  
+	  
+	  getCustomerPRGroupSales();
+	  
 	  custPlans = new HashMap<String, Map<String, Double>>();
 	  manaPlans = new HashMap<String, Map<String, Double>>();
 	  custTotalPlans = new HashMap<String, Double>();
@@ -1083,6 +1080,46 @@ if(grupp.equals("leib") ){
       return pattern.contains(expected);
   }
   
+  public static int[] countMonthlyDeliveries(String pattern) {
+
+	    LocalDate today = LocalDate.now();
+	    YearMonth currentMonth = YearMonth.from(today);
+
+	    LocalDate firstDay = currentMonth.atDay(1);
+	    LocalDate lastDay = currentMonth.atEndOfMonth();
+
+	    int totalDeliveries = 0;
+	    int passedDeliveries = 0;
+
+	    for (LocalDate date = firstDay; !date.isAfter(lastDay); date = date.plusDays(1)) {
+
+	        long days = Duration.between(
+	                CYCLE_START.atStartOfDay(),
+	                date.atStartOfDay()).toDays();
+
+	        if (days < 0) {
+	            continue; // before cycle start
+	        }
+
+	        int weekInCycle = (int)((days / 7) % 8) + 1; // 1–8
+	        int weekday = date.getDayOfWeek().getValue(); // 1=Mon…7=Sun
+	        char cycleWeekLetter = (char)('A' + (weekInCycle - 1)); // A–H
+
+	        String expected = "" + cycleWeekLetter + weekday;
+
+	        if (pattern.contains(expected)) {
+
+	            totalDeliveries++;
+
+	            if (date.isBefore(today)) {
+	                passedDeliveries++;
+	            }
+	        }
+	    }
+
+	    return new int[]{ totalDeliveries, passedDeliveries };
+	}
+
   
   public static boolean matchesNextSevenDays(String pattern) {
 	    return !nextSevenDaysMatches(pattern).isEmpty();
@@ -1161,6 +1198,8 @@ if(grupp.equals("leib") ){
 	  
     TreeMap deldays =  makeCustomerDeliveryDays();
    
+    loadPlans();
+    
      inTT = new HashSet<String>();
 	
 	HashMap<String, String> promos = new HashMap<String, String>();
@@ -1445,6 +1484,10 @@ if(grupp.equals("leib") ){
           cust.addAgent(agentL);
           if(agentL.nextContact != null) {
               cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
+          }
+          
+          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+        	  cust.setMainAgent(agentL.getID());
           }
         
          Agent aa1 = (Agent)agent1.get(agentL.getID());
@@ -2085,222 +2128,140 @@ private HashSet<String> inTT = null;
     }
 
   
-  private TreeMap brandplans = null; 
 
   
   
   public void setBulkSales(Map agents){
 	 
-  
-    /*
-    String cmd =" SELECT  cus.salesrep as agent,round(SUM(lineamount),0) AS summa  " +
-     "  FROM custinvoicetrans sal INNER JOIN inventtable inv ON sal.itemid=inv.itemid INNER JOIN custinvoicejour jou ON  " +
-     "  sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid  INNER JOIN custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid  WHERE " + 
-	  "	 inv.dataareaid='pre' AND sal.dataareaid='pre' AND cus.dataareaid='pre'  AND jou.dataareaid='pre' AND YEAR(sal.invoicedate) = YEAR(getdate())  " +
-    "    AND MONTH(sal.invoicedate) = MONTH(getdate())  and AssortmentGroup != 6 " +
-    "  GROUP BY cus.salesrep ";
+		String cmd =  " 		WITH AgentCount AS (\r\n" + 
+				"    SELECT \r\n" + 
+				"        ClientBackofficeID,\r\n" + 
+				"        COUNT(*) AS Cnt\r\n" + 
+				"    FROM EPASAULE_AGENTS_CLIENTS\r\n" + 
+				"    GROUP BY ClientBackofficeID\r\n" + 
+				")\r\n" + 
+				"\r\n" + 
+				"SELECT \r\n" + 
+				"    a.AgentBackofficeID as agent,\r\n" + 
+				"    SUM(d.lineamount / ac.Cnt) AS summa\r\n" + 
+				"FROM epasaule_deliveries d\r\n" + 
+				"JOIN AgentCount ac \r\n" + 
+				"    ON d.ClientBackofficeID = ac.ClientBackofficeID\r\n" + 
+				"JOIN EPASAULE_AGENTS_CLIENTS a \r\n" + 
+				"    ON d.ClientBackofficeID = a.ClientBackofficeID\r\n" + 
+				"WHERE d.deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+				"  AND d.deliverydate < DATEADD(MONTH, 1,\r\n" + 
+				"        DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))\r\n" + 
+				"GROUP BY a.AgentBackofficeID;" ; //k.objekt2
+	
+		
+		try {
+			
+			   Connection con = this.getNewConnection();
+		       Statement stmt = con.createStatement();
+		       ResultSet rs = stmt.executeQuery(cmd);
 
-       if (isDebug()) System.out.println(cmd);
-          try {
-        	  Connection con =   this.getNewConnection();
-              Statement stmt =  con.createStatement();
-              ResultSet	      rs = stmt.executeQuery(cmd);
-              while(rs.next()) {
-                String agentID = rs.getString("agent").trim();
-                Agent agent = (Agent)agents.get(agentID);
-                if (agent != null){
-                  agent.setMonthSales((int)rs.getDouble("summa"));
-                 // System.out.println(agent.getMonthSales());
-                }
-              }
-              rs.close();
-              stmt.close();
-              con.close();
-          } catch (Exception e) {
-              getParent().showError(e);
-           }*/
-	  
+               int yy = Calendar.getInstance().get(Calendar.YEAR);
+               int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+               int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+               double planprec = dd/d2;
+		
+			
+			while(rs.next()) {
+				
+				String agentID = rs.getString("agent").trim();
+				Agent agent = (Agent)agents.get(agentID);
+				
+				double msales = (int)rs.getDouble("summa");
+				if (agent != null){
+
+				if(this.manaTotalPlans.get(agentID) != null) {
+					String asi = "Sales: " + (int)msales + " €||";
+					
+                    if(dd > 6){
+                      double psales = manaTotalPlans.get(agentID);
+                  	  double  tehtudsalperc = msales/psales;
+                  	  double plaanitavMyykSal = d2 * msales/dd;
+                  	  double  prognosalperc = plaanitavMyykSal/psales;
+                  	
+                  	  if(tehtudsalperc > 10){
+                  		  tehtudsalperc = 0;  
+                  	  }
+                  	  
+                  	  if(prognosalperc > 10){
+                  		  prognosalperc = 0;  
+                  	  }
+                    	
+                  	  asi = asi + "Plan done/estimate :";
+                        asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
+                    }
+				  } else {
+					agent.setMonthSales((int)msales);
+				  }
+				
+				 }
+			}
+			
+			rs.close();
+			stmt.close();
+			con.close();
+		} catch (Exception e) {
+			getParent().showError(e);
+		}
+		
         }
   
+
+  //private Map<String, Map<String, Double>> manaSales;
+  private Map<String, Map<String, Double>> custSales;
   
-  
-  public void setBulkSalesOLD(Map agents){
-   this.connectionUp();
- 
-    brandplans = this.makePlans("Budget.xlsx");
- 
+  public void getCustomerPRGroupSales(){
+		 
 
- String cmd =" SELECT  cus.statisticsgroup as agent ,round(sum(inv.weightkg*sal.salesqty),2) AS summakg , \r\n" + 
- 		" 					 round(sum(lineamount * (case when b.percentmonth is not null then (100 -b.percentmonth)/100 else 1 end)),0) AS summa ,\r\n" + 
- 		" 					 round(sum(lineamount ),0) AS summa2 \r\n" + 
- 		" 					  FROM salesline sal INNER JOIN inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid INNER JOIN salestable jou with (nolock) ON  \r\n" + 
- 		" 		 		  sal.salesid=jou.salesid and jou.dataareaid= sal.dataareaid INNER JOIN custtable cus ON cus.accountnum = jou.custaccount and jou.dataareaid= cus.dataareaid \r\n" + 
- 		" 				   left join PJTURNOVERBONUS b on b.accountrelation = cus.custgroup and b.itemrelation = inv.itemgroupid and \r\n" + 
- 		" 				    periodid = substring(CONVERT(varchar, getdate(), 23),0,8)  and b.dataareaid = cus.dataareaid\r\n" + 
- 		" 				  WHERE inv.dataareaid='eee'  AND YEAR(jou.deliverydate) = YEAR(getdate())  \r\n" + 
- 		" 		 		   AND MONTH(jou.deliverydate) = MONTH(getdate()) AND DAY(jou.deliverydate) <= DAY(getdate())   and cus.statisticsgroup != ''  and inv.asttelemaitemgroupid not in ('290','400') \r\n" + 
- 		" 				    GROUP BY cus.statisticsgroup";
+	  custSales = new HashMap<String, Map<String, Double>>();
+	  
+		String cmd =  " select clientBackOfficeID as cust , groupBackOfficeId as gr , sum(lineamount) as summa  from epasaule_deliveries d INNER JOIN dbo.EPASAULE_PRODUCTS a ON d.productBackOfficeID = a.backOfficeId where \r\n" + 
+				"deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+				"  AND deliverydate <  DATEADD(MONTH, 1,\r\n" + 
+				"        DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))\r\n" + 
+				"		group by clientBackOfficeID,groupBackOfficeId" ; //k.objekt2
+		
+		try {
+			
+			   Connection con = this.getNewConnection();
+		       Statement stmt = con.createStatement();
+		       ResultSet rs = stmt.executeQuery(cmd);
 
+               int yy = Calendar.getInstance().get(Calendar.YEAR);
+               int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+               int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+               double planprec = dd/d2;
+		
+			
+			while(rs.next()) {
+				
+					String cust = rs.getString("cust");
+					String gr = rs.getString("gr");
+				    Double sales = rs.getDouble("summa");
+						 
 
-        if (isDebug()) System.out.println(cmd);
-           try {
-           	
-           	Connection con = this.getNewConnection();
-               Statement stmt =  con.createStatement();
-               ResultSet	      rs = stmt.executeQuery(cmd);
-               while(rs.next()) {
-                 String agentID = rs.getString("agent").trim();
-                 if(agentID.equals("Lääne-Eest")) {
-                	 agentID = "Laane-Eest";
-                 }
-                 if(agentID.equals("Lõuna-Eest")) {
-                	 agentID = "Louna-Eest";
-                 }
-                 Agent agent = (Agent)agents.get(agentID);
-                 
-                 int kgs = (int)rs.getDouble("summakg");
-                 int sum = (int)rs.getDouble("summa");
-                
-                 if (agent != null && brandplans.get(agentID) != null){
-                   Toode tt = (Toode)brandplans.get(agentID);
-                   tt.setDonecur(tt.getDonecur() + sum);
-                   tt.setDonevol(tt.getDonevol() + kgs);
-                   }
-               }
-               
-               rs.close();
-               stmt.close();
-               con.close();
-            
-                           
-                             int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-                             int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
-                          
-                       	 // Iterreerime Plaani mappi ja sealme asjad paika 
-                       	  
-                       	Iterator itera =   agents.keySet().iterator();
-                       	while(itera.hasNext()){
-                       		String agentID = itera.next() + "";
-                       		Agent aa = (Agent)agents.get(agentID);
-                       		
-                          String asi2 = "";
-                          
-                          if(brandplans.get(aa.getID()) != null){
-      	                	Toode tt =   (Toode)brandplans.get(aa.getID());
-      	                	
-      	                			int teh = (int)tt.getDonecur();
-      	                			int kgs = (int)tt.getDonevol();
-      	                	  		asi2 = asi2 + (((int)(teh/tt.getPlancur()*100))+ "% Plan.: " +(int) tt.getPlancur() + " €  Sales.: " + teh + " €||");
-      	                	  	   asi2 = asi2 + (((int)(kgs/tt.getPlanvol()*100))+ "% Plan.: " +(int) tt.getPlanvol() + " kg.  Sales.: " + kgs + " kg.||");
-      	                		   }
-      	                		  
-      	                	    
-                          
-                          aa.setStart( Converter.enCodeEst(asi2));
-                        
-                       	}
-           } catch (Exception e) {
-               getParent().showError(e);
-            }
-         }
+					if(sales != null && sales > 0) {
+								 custSales
+					                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
+					                .merge(gr, sales, Double::sum);
+					   }
+				 }
+			
+			rs.close();
+			stmt.close();
+			con.close();
+			
+		} catch (Exception e) {
+			getParent().showError(e);
+		}
+		  System.out.println("custSales " + custSales.size());
+        }
 
-
-   double totalPlanSum = 0;
-   
-   
-   
-   private TreeMap makePlans(String fname){
- 	   TreeMap res = new TreeMap();
- 	      totalPlanSum = 0;
- 	   try{
- 		
- 	   Calendar cal = Calendar.getInstance();
- 	   String month = (cal.get(Calendar.MONTH)+1)+ "";
- 	   if (month.length() == 1){
- 		   month = "0" + month;
- 	   }
- 	   String jooksev = cal.get(Calendar.YEAR) + "-" + month; 
- 	   int a = 0;
- 	   File f = new File (getExcelDir() + fname);
- 		  FileInputStream	 ff = new FileInputStream(f);
- 	
- 		XSSFWorkbook workbook = new XSSFWorkbook((ff));
- 		XSSFSheet sheet = workbook.getSheet(jooksev);
- 		System.out.println("jooksev " + jooksev + " " + sheet);
- 		XSSFRow row = null; 
- 				ff.close();	
- 				if(sheet != null){
- 				
- 					
- 					for(int i = 0 ; i < sheet.getLastRowNum();i++){
- 						 row = sheet.getRow(i);
- 						if(row == null && a == 0){
- 							a = i;
- 						}else{
- 							a = sheet.getLastRowNum();
- 						}
- 					}
- 					String gr1 = null;
- 					String gr1n = null;
- 					
- 					for(int i = 8 ; i < a + 1;i++){ // 9ndast reas hakkame scrollima nii kilosid kui ka summat
- 						 row = sheet.getRow(i);
- 						String agent = null;
- 						double g1 = 0;
- 						
- 						
- 						try {
- 							agent = (row.getCell((short) 1).getStringCellValue());
- 						
-    					      } catch (Exception e) {
-    					    	  System.out.println("agent ei  " + agent);
-    						 //  e.printStackTrace();
-    					      }
- 			    
- 						try {
- 						g1 = Double.parseDouble(row.getCell((short) 5).getNumericCellValue()+ "");
- 						
- 						} catch (Exception e) {
- 	   					 e.printStackTrace();	
-  					    }
- 						
- 					
- 						if(agent != null) {
- 							i++;
- 							 row = sheet.getRow(i);
- 							 double g2 = 0;
- 							
- 							 try {
- 		 						g2 = Double.parseDouble(row.getCell((short) 5).getNumericCellValue()+ "");
- 		 						} catch (Exception e) {
- 		 	   					 e.printStackTrace();	
- 		  					    }
- 							 
- 							 
- 						TreeMap asi= new TreeMap();
- 				        Toode t1 = new Toode(gr1);
-						       t1.setPlanvol(g2);
-						       t1.setPlancur(g1);
-						       System.out.println("agent " + agent + " " + g1 + " " + g2);
-					    res.put(agent, t1);
- 					  }
- 					}
- 						
- 					}
- 				
- 				
-         		   
- 	   }catch (Exception e){
- 		   e.printStackTrace();
- 	   }
- 	   
- 	//   System.out.println("totalPlanSum "+ totalPlanSum );
- 	   return res;
-    }
-    
-   
-   
-   
 
     public double getFoodSales(String agentCode) throws SQLException{
       return 0;
@@ -2311,7 +2272,6 @@ private HashSet<String> inTT = null;
     }
 
     public ManagerData getManagerData() throws SQLException{
-      
       return null;
     }
 
@@ -2320,15 +2280,6 @@ private HashSet<String> inTT = null;
       return 0;
     }
 
-
-  public String getStartingTime(){
-    Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.MONTH, - Integer.parseInt(getParent().getProps().getProperty("months")));
-    int month = cal.get(Calendar.MONTH) + 1;
-    String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-    String sqlDate = cal.get(Calendar.YEAR) + "-" + month + "-" + day;
-    return sqlDate;
-  }
 
   public String getDriverVersion(){
     return "EugestaEST";
@@ -2339,53 +2290,8 @@ private HashSet<String> inTT = null;
   }
 
   	 public String getPilotDayData(Agent agent){
-
-  	    String sql = "SELECT talinventstatistics1num as grupp, round(SUM(talnetweight),0) AS kogus,round(SUM(lineamount),0) AS summa " +
-       " FROM custinvoicetrans sal INNER JOIN inventtable inv ON sal.itemid=inv.itemid INNER JOIN custinvoicejour jou ON " +
-       " sal.invoiceid=jou.invoiceid  INNER JOIN custtable cus ON cus.accountnum = jou.orderaccount  WHERE len(talinventstatistics1num) >0 AND " +
-       " inv.dataareaid='tal' AND sal.dataareaid='tal' AND cus.dataareaid='tal' AND cus.talsalesman='" + agent.getID() + "' AND YEAR(sal.invoicedate) = YEAR(getdate()) AND MONTH(sal.invoicedate) = MONTH(getdate())" +
-       " GROUP BY talinventstatistics1num  ORDER BY talinventstatistics1num ";
-  	  StringBuffer sb = new StringBuffer();
-
-  	  System.out.println(sql);
-  	 try{
-       Connection con =  this.getNewConnection();
-    	Statement stmt = con.createStatement();
-  	    ResultSet	      rs = stmt.executeQuery(sql);
-
-  	          sb.append("GrupiNimi     kilodes ja EUR\n");
-  	          sb.append("---------------------------------------------------\n");
-
-  	          double totalKokku = 0d;
-                    double totalSumma = 0d;
-
-  	          while (rs.next()) {
-  	            sb.append(rs.getString("grupp").trim() + "\n");
-  	          	int kogus = rs.getInt("kogus");
-                            int summa = rs.getInt("summa");
-  	            totalSumma = round(totalSumma + summa, 2);
-  	            totalKokku = round(totalKokku + kogus, 2);
-  	            sb.append("\t" + kogus + "\t" + summa + " EUR\n\n");
-  	           }
-  	          rs.close();
-  	          stmt.close();
-  	          con.close();
-
-  	          sb.append("---------------------------------------------------\n");
-  	          sb.append("\tKuu m��k kokku: " + totalKokku + " Kg." + totalSumma + " EUR");
-
-
-  	                  } catch (Exception e) {
-  	                      getParent().showError(e);
-  	                  }
-
-
-  	      return sb.toString();
+  	      return null;
   	  }
-
-
-
-
 
 
        public NumberFormat getNF(){
@@ -2396,377 +2302,18 @@ private HashSet<String> inTT = null;
     	@Override
        	public void WebReporter() {
        		
-        	   ArrayList<String> filenames = new ArrayList<String>();
-         // teeme kataloogi salvestamiseks
-         		File f = new File("svdata");
-         		if(!f.exists()) {
-         			f.mkdir();
-         		}
-         		
-         		
-         		
-         		Calendar cal = Calendar.getInstance();
-         		String hh = cal.getTime().getHours()+"";
-         		if(hh.length() == 1) {
-         			hh = "0" + hh;
-         		}
-         		String mm = cal.getTime().getMinutes()+"";
-         		if(mm.length() == 1) {
-         			mm = "0" + mm;
-         		}
-         		String time2 = "_" + hh +"-" +mm;
-         	// loeme signatuurid sisse kui on olemas	
-         		HashSet done = null;
-         		try {
-         			done = (HashSet) Converter.readObject("signadone.obj");
-         		}catch(Exception e) {
-         			e.printStackTrace();
-         		}
-         		
-         		if(done == null) {
-         			 done = new HashSet();
-         		}
-         		
-         		
-         		
-         	
-         		Calendar algus = Calendar.getInstance();  
-         	  	Calendar lopp = Calendar.getInstance();  	
-         	  	Integer days = 8;
-         	  if(	parent.getProps().getProperty("webreport.days") != null) {
-         		  try {
-         			  days = Integer.parseInt(parent.getProps().getProperty("webreport.days"));
-         		  }catch(Exception e) {
-         			  
-         		  }
-         	
-         	  }
+    	}
 
-         	  System.out.println("days " + days);
-         	  	algus.add(Calendar.DATE, -1 * days);
-         	  	algus.set(Calendar.HOUR, 0);
-         	  	lopp.set(Calendar.HOUR, 23);
-         	  	lopp.set(Calendar.MINUTE, 59);
-         	  	lopp.add(Calendar.DATE, +2);
-         	 // Teeme SV listi 
-         	  
-         	  	try {
-         	  		String fnameBASE = this.getExcelDir() + "ReportBase.xlsx";
-         	  		FileInputStream excelifailBase = new FileInputStream(fnameBASE);
-         	  		XSSFWorkbook  wbBASE = new XSSFWorkbook(excelifailBase);
-         			
-         			XSSFSheet worksheetBASE = wbBASE.getSheetAt(0);
-         			
-         			
-         			
-         			CreationHelper createHelper = wbBASE.getCreationHelper();
-         			
-         			 XSSFCellStyle hlinkstyle = wbBASE.createCellStyle();
-         		      XSSFFont hlinkfont = wbBASE.createFont();
-         		      hlinkfont.setUnderline(XSSFFont.U_SINGLE);
-         		      hlinkfont.setColor(IndexedColors.BLUE.getIndex());
-         		      hlinkstyle.setFont(hlinkfont);
-
-         			
-         	  		
-         	  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass, true);
-         	  	//	System.out.println("files " + files.toString());
-       		
-          		org.json.JSONArray cc = Converter.getSVDataArray(algus.getTime(), lopp.getTime(), rcompany, user, pass, false, "PRODUCT", null, "test");
-          		
-          		Converter.saveFile(f.getPath() + "/currSVjson.json", cc.toString());
-          		int outofstocks = 1;
-        		for (int i = 0; i < cc.length(); i++) {
-          			org.json.JSONObject cob = (org.json.JSONObject) cc.get(i);
-          			
-          			String filterOutOfStock = (String)cob.get("resint3").toString();
-          			String dateAndTime = (String)cob.get("recetime");
-          		
-          			 cal = Calendar.getInstance();
-       	  			try {
-       	  				cal.setTimeInMillis(Long.parseLong(filterOutOfStock));
-       	  			}catch(Exception e) {
-       	  				cal.setTimeInMillis((Long)cob.get("sentdate"));
-       	  			}
-          			
-       	  			String dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
-       	  					//dateAndTime.split("T")[0];
-       	  			String time = "";
-       	  			String hour = cal.get(Calendar.HOUR_OF_DAY)+"";
-       	  			if(hour.length() == 1) {
-       	  				hour = "0"+hour;
-       	  			}
-
-       	  			String minute = cal.get(Calendar.MINUTE)+"";
-       	  			if(minute.length() == 1) {
-       	  				minute = "0"+minute;
-       	  			}
-       	  			String timeOnly = hour+":"+minute;
-          			
-          	    	String cagid = "";
-          	    	try{
-          	    		cagid =	(String)cob.get("custagent");
-          	    	}catch(Exception e) {
-          	    		
-          	    	}
-          			String cagname = "";
-          			try{
-          				cagname =	(String)cob.get("custagname");
-          	    	}catch(Exception e) {
-          	    		
-          	    	}
-          			String agid = (String)cob.get("agentid");
-          			
-          			String agname = "NoName Manager" ; 
-          			try {
-          			  agname = (String)cob.get("managerName");
-          			 } catch(Exception r) {
-          				
-          			 }
-          			String chain = (String)cob.get("custchain");
-          			
-          		
-          			//System.out.println("signa " + signa + " " + filterOutOfStock + " " + filterProblem);
-          			
-          			String res2 = "";
-       				try {
-       					if((String)cob.get("resstr2") != null) {
-       	  					res2 = (String)cob.get("resstr2");
-       	  				}
-       				}catch(Exception e) {
-       					
-       				}
-       				try {
-       				JSONParser parser = new JSONParser();
-       				JSONObject obj = (JSONObject) parser.parse(res2);
-       			    String segment = (String)obj.get("segment");
-       			    String brand = (String)obj.get("brand");
-       			    String type = (String)obj.get("type");
-       			    Long start = (Long)obj.get("start");
-       			    String startT = (String)obj.get("startT");
-       			    Double  wei =  0d;
-       			    try {
-       			       wei = Double.parseDouble(obj.get("weight")+"");
-       			     } catch(Exception e) {
-       			    	
-       			     }
-       			    Long end = (Long)obj.get("end");
-       			    String endT = (String)obj.get("endT");
-
-       				System.out.println(obj.toJSONString());
-       				
-       				String pricet = "1";
-       				String perct = "0";
-       				Boolean isPerc = (Boolean)cob.get("isgroup");
-       				if(isPerc) {
-       					pricet = "0";
-       					perct  = "1";
-       				}
-       				
-
-       	   			String signa = dateAndTime + "" +(String)cob.get("custid") + "" + (String)cob.get("prodid") + brand ;
-          		
-          			
-          			if( done != null && !done.contains(signa)){
-          				
-          				   				
-          				Double addi = 0d;
-          				
-          				try {
-          				  addi = Double.parseDouble(cob.get("grouptotal")+"");
-          				 } catch(Exception e) {}
-          				
-          				worksheetBASE.createRow(outofstocks);
-          				worksheetBASE.getRow(outofstocks).createCell(0).setCellValue(agid);
-          				// agname = new String(agname.getBytes(), "UTF-8");
-          				
-          				if(agid.equals("Klaip")) {
-          					agname = "Asta Razmienė";
-          				}
-          				
-          				if(agid.equals("Panev")) {
-          					agname = "Valentinas Jankevičius";
-          				}
-          				
-          				
-          				worksheetBASE.getRow(outofstocks).createCell(1).setCellValue(agname);
-          				String cuname = (String)cob.get("custname");
-          				String cuid = (String)cob.get("custid");
-          				if(cuname.endsWith(cuid)) {
-          					cuname = cuname.substring(0,cuname.indexOf(cuid)-1);
-          				}
-          				
-          				worksheetBASE.getRow(outofstocks).createCell(3).setCellValue(cuname);
-          				worksheetBASE.getRow(outofstocks).createCell(2).setCellValue(cuid);
-       				String prodid = (String)cob.get("prodid");
-          				
-       				if(brand.startsWith("R") && brand.endsWith("ta")) {
-       					brand = "Rīta";
-       				}
-       				if(brand.startsWith("Sp") && brand.endsWith("katota")) {
-       					brand = "Spēkatota";
-       				}
-       				if(brand.startsWith("Gard")) {
-       					brand = "Gardā";
-       				}
-       				if(brand.startsWith("M") && brand.endsWith("aize")) {
-       					brand = "Mākoņmaize";
-       				}
-       				if(brand.startsWith("Tost") && !brand.contains("maiz") ) {
-       					brand = "Tostē";
-       				}
-       				if(brand.startsWith("Kur")) {
-       					brand = "Kurši";
-       				}
-       				if(brand.startsWith("Maizi")) {
-       					brand = "Maiziņš";
-       				}
-       				
-       				if(brand.startsWith("Dz")) {
-       					brand = "Dzīvā";
-       				}
-       				
-       				if(brand.startsWith("Isten")) {
-       					brand = "Istenā";
-       				}
-          				worksheetBASE.getRow(outofstocks).createCell(4).setCellValue(brand);
-          				
-          				
-          				worksheetBASE.getRow(outofstocks).createCell(5).setCellValue(startT);
-          				worksheetBASE.getRow(outofstocks).createCell(6).setCellValue(endT);
-          				
-
-          				worksheetBASE.getRow(outofstocks).createCell(7).setCellValue(pricet);
-          				worksheetBASE.getRow(outofstocks).createCell(8).setCellValue(perct);
-       			   				
-       			try {
-       			    Double price = Double.parseDouble(cob.get("normalpr")+"");
-       			     if(price > 0) {
-       			   				worksheetBASE.getRow(outofstocks).createCell(9).setCellValue(price);
-       			     }
-       			     }catch(Exception e) {}
-       			
-       			try {
-       			     Double priceA = Double.parseDouble(cob.get("amoun")+"");
-       			     if(priceA > 0) {
-       			   				worksheetBASE.getRow(outofstocks).createCell(10).setCellValue(priceA);
-       			     }
-       			     }catch(Exception e) {}   
-       			
-       			try {          
-       			       if(wei > 0) {
-       					  worksheetBASE.getRow(outofstocks).createCell(11).setCellValue(wei);
-       					}
-       			    } catch (Exception e) {}
-       			
-
-          				if(segment != null) {
-          				  worksheetBASE.getRow(outofstocks).createCell(12).setCellValue(segment);
-          				}
-
-          				if(type != null) {
-          				  worksheetBASE.getRow(outofstocks).createCell(13).setCellValue(type);
-          				}
-          				   				
-
-          				if(addi > 0) {
-          				  worksheetBASE.getRow(outofstocks).createCell(14).setCellValue(addi);
-          				}
-          				
-
-          				try {
-          	  				worksheetBASE.getRow(outofstocks).createCell(15).setCellValue((String)cob.get("comment"));
-          	  				}catch(Exception e) {
-          	  					
-          	  				}
-          				worksheetBASE.getRow(outofstocks).createCell(17).setCellValue(dateOnly);
-          				worksheetBASE.getRow(outofstocks).createCell(18).setCellValue(timeOnly);
-          
-          				
-          				String foto = null;
-         				if(files != null && files.get(cuid) != null) {
-         					ArrayList arr = (ArrayList)files.get(cuid);
-         					for(int e = 0; e<arr.size(); e++) {
-         						Toode t = (Toode)arr.get(e);
-         						if(!t.getID().equals("prodid")) {
-         						//System.out.println(t.getID()+ " " +  (String)cob.get("prodid") +" " + agid+ " " + t.comment +" " + t.getGr1() + " "  + dateOnly );
-         						  if(t.comment.equals(agid) &&  t.getGr1().equals(dateOnly) && t.getID().equals((String)cob.get("prodid"))){
-         							foto = t.getLadu();
-         						   }
-         					}}
-         				}
-          				
-          				 //URL Link
-          				if(foto != null) {
-          		         Cell  cell = worksheetBASE.getRow(outofstocks).createCell(16);
-          		         cell.setCellValue("Photo Link");
-          		         XSSFHyperlink link = (XSSFHyperlink)createHelper.createHyperlink(Hyperlink.LINK_URL);
-          		         link.setAddress(URLEncoder.encode(foto, StandardCharsets.UTF_8.toString()));
-          		         cell.setHyperlink((XSSFHyperlink) link);
-          		         cell.setCellStyle(hlinkstyle);
-          				}
-          				//worksheetBASE.getRow(outofstocks).createCell(15).setCellValue(cagname);
-          				
-          				
-          				outofstocks++;
-          				done.add(signa);
-          			}
-                     }catch(Exception e) {
-                   	  
-                     }
-          			
-          	   			}
-        		
-       			if(outofstocks > 1) {
-       				String exceldir = this.getExcelDir()  +"reports/est/";
-    	   	   		File ff = new File( exceldir );
-       	   	   		if(!ff.exists()) {
-       	   	   			ff.mkdir();
-       	   	   		}
-       	   	   		excelifailBase.close();
-       	   	   		
-
-       	   	   		FileOutputStream output_file_oos =new FileOutputStream(exceldir +
-       	   	   				"productCamp-" + Converter.getYYYY_MM_DD_String(new java.util.Date()) + time2 + ".xlsx");
-       	   	   		filenames.add(exceldir + "productCamp-" + Converter.getYYYY_MM_DD_String(new java.util.Date())+ time2 + ".xlsx");
-       	   	   		wbBASE.write(output_file_oos); //write changes
-       	   	   		output_file_oos.close();  //close the stream
-       	   			}else {
-       	   				System.out.println("pole mida teha");
-       	   			}
-          		
-          		try {
-                Converter.saveObject(done,"signadone.obj");
-         		}catch(Exception e) {
-         			e.printStackTrace();
-         		}
-         	
-         	  	}catch(Exception e) {
-         	  		e.printStackTrace();
-         	  	}
-        	
-       		System.exit(0);
-       	}
-
- 
-
-
-       /**
-        *
-        * @param aNF - the new value for NF
-        */
        public void setNF(NumberFormat aNF){
          NF = aNF;
-    }
-  private String url = "jdbc:odbc:eugestaest";
+       }
 
-  private   Vector debt = new Vector();
-
-  private Vector custProds = new Vector();
-  private String subjectFilesTo = null;
-  private Vector prods = new Vector();
-    private NumberFormat NF = NumberFormat.getInstance();
-
+      private String url = "jdbc:odbc:eugestaest";
+      private Vector debt = new Vector();
+	  private Vector custProds = new Vector();
+	  private String subjectFilesTo = null;
+	  private Vector prods = new Vector();
+      private NumberFormat NF = NumberFormat.getInstance();
 
 
 
@@ -2775,6 +2322,12 @@ private HashSet<String> inTT = null;
 		  makePictureCat();
 		  System.exit(0);
 		
+	}
+
+	@Override
+	public String getStartingTime() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 
