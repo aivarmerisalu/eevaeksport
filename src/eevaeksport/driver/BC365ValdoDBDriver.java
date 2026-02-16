@@ -381,7 +381,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                 // ===== NEW FIELD MAPPING =====
 
                 String custid = clean((String) cob.get("customerShipToCode"));
-                String payer = custid; // no separate payer in new JSON
+                String payer = clean((String) cob.get("customerNo")); // no separate payer in new JSON
 
                 Double balDue = 0.0;
                 Object amountObj = cob.get("remainingAmount");
@@ -392,11 +392,13 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                 }
 
                 String postingDate = (String) cob.get("postingDate");
+
+                String dueDate = (String) cob.get("dueDate");
                 String invnr = clean((String) cob.get("externalDocumentNo"));
                 if (invnr.length() == 0) {
                 	invnr = "No Number";
                 }
-
+               // {"customerNo":"11971000","customerShipToCode":"1197100004","postingDate":"2025-12-19","dueDate":"2026-01-02","externalDocumentNo":"VLD25_140373","remainingAmount":28.74},
                 // ===== CREATE DEBT OBJECT =====
 
                 Debt dd = new Debt();
@@ -407,8 +409,8 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                 Date invDateObj = getDate(postingDate);
                 dd.setDate(invDateObj);
 
-                // No dueDate in new JSON → use postingDate as fallback
-                dd.setDuedate(invDateObj);
+                Date dueDateObj = getDate(dueDate);
+                dd.setDuedate(dueDateObj);
 
                 int ff = (int) ((Calendar.getInstance().getTimeInMillis()
                         - invDateObj.getTime()) / 86400000);
