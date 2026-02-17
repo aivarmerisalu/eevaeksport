@@ -1091,7 +1091,7 @@ try{
                             " where " +
 							"  (a.[Document type] = 2 or a.[Document type]= 3) and a.[Due Date] < GETDATE()+7 AND a.[Posting Date] > getdate()-200 AND a.[Open]= 1 " +
                             " group by a.[Sell-to Customer No_],a.[Customer No_] ,a.[External Document No_], " +
-                            " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_] having sum(b.[Amount])<> 0 order by  a.[Due Date]";
+                            " a.[Due Date] , DATEDIFF(dd,a.[Due Date],GETDATE()) ,a.[Customer No_],a.[Posting Date] having sum(b.[Amount])<> 0 order by  a.[Due Date]";
 
       ketid = new HashMap();
       sortimendid = new HashMap();
