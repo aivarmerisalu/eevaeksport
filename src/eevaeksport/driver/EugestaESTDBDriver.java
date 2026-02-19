@@ -207,11 +207,17 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	            	File in = new File ( pictssou + ff2[i]); 
 	              	if(in.isFile()){
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+	              	try {
 	                  	Converter.shrinkAndCopyFile(in,inpda,400);
 	            	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
 	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
 	                    	}
-	                   }
+	                   
+	              	} catch(Exception e) {
+	              		System.out.println("prod.getID() " + prod.getID());
+	              		e.printStackTrace();
+	              	}
+	             	}
 	                 }
 	               }
 	             }
@@ -239,7 +245,8 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 		try {
 			
 			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
-					"					FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId  where s.EG_ASSORTITEMSTATUS = 1 order by str(a.posWeight) + a.Nam ";
+					"					FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId"
+					+ "  where s.EG_ASSORTITEMSTATUS = 1 order by str(a.posWeight) + a.Name ";
 			
 		
 		         if (isDebug()) System.out.println(cmd);
@@ -628,6 +635,7 @@ try {
 
   private Map<String, Double> manaTotalPlans;
   private Map<String, Double> custTotalPlans;
+  private Map<String, String> groupGrouping;
   
   
   
@@ -640,7 +648,7 @@ try {
 	  manaPlans = new HashMap<String, Map<String, Double>>();
 	  custTotalPlans = new HashMap<String, Double>();
 	  manaTotalPlans = new HashMap<String, Double>();
-  
+	  groupGrouping = new HashMap<String, String>();
 	
 	  try{
 		 	
@@ -657,12 +665,25 @@ try {
 
 			DataFormatter formatter = new DataFormatter();
 	 		XSSFWorkbook workbook = new XSSFWorkbook((ff));
-	 		XSSFSheet sheet = workbook.getSheet(jooksev);
-	 		System.out.println("jooksev " + jooksev + " " + sheet);
+	 		XSSFSheet sheet = workbook.getSheet("Grouping");
 	 		XSSFRow row = null; 
+	 		
+	 		if(sheet != null) {
+	 			for(int i = 0 ; i < sheet.getLastRowNum() + 1;i++){
+					 row = sheet.getRow(i);
+					String prGR = formatter.formatCellValue(row.getCell(0));
+					String grGR = formatter.formatCellValue(row.getCell(1));
+					groupGrouping.put(prGR, grGR);
+	 		   }
+	 		}
+	 		
+	 		sheet = workbook.getSheet(jooksev);
+	 		
+	 		//System.out.println("jooksev " + jooksev + " " + sheet);
+	 	
 	 				ff.close();	
 	 				if(sheet != null){
-	 					 System.out.println("paln " + sheet.getLastRowNum() + " " );
+	 			//		 System.out.println("paln " + sheet.getLastRowNum() + " " );
 	 						
 	 					for(int i = 1 ; i < sheet.getLastRowNum() + 1;i++){
 	 						 row = sheet.getRow(i);
@@ -709,7 +730,6 @@ try {
 	 
 	 				System.out.println("manaPlans " + manaPlans.size());
 	 				System.out.println("manaTotPlans " + manaTotalPlans.toString());
-
 	 				System.out.println("custPlans " + custPlans.size());
 	 				
 	 				//System.exit(0);
@@ -1472,11 +1492,6 @@ if(grupp.equals("leib") ){
         }
         
         
-      /*  String visit = rs.getString("visit");
-        if (visit != null && visit.trim().length()>0) {
-          cust.setVisit(visit.trim());
-        }*/
-        
        if(cliags.get(cust.getID()) != null) {
          Vector<Agent> vv = cliags.get(cust.getID());
          
@@ -2132,6 +2147,153 @@ private HashSet<String> inTT = null;
   
   
   public void setBulkSales(Map agents){
+	  
+
+      int yy = Calendar.getInstance().get(Calendar.YEAR);
+      int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+      int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+      double planprec = dd/d2;
+	  
+	 // Teeme gruppide myygid valmis 
+	  String cmd0 = "	WITH AgentCount AS ( \r\n" + 
+	  		"				   SELECT  \r\n" + 
+	  		"				       ClientBackofficeID, \r\n" + 
+	  		"				       COUNT(*) AS Cnt \r\n" + 
+	  		"				   FROM EPASAULE_AGENTS_CLIENTS \r\n" + 
+	  		"				   GROUP BY ClientBackofficeID \r\n" + 
+	  		"				) \r\n" + 
+	  		"				\r\n" + 
+	  		"				SELECT  \r\n" + 
+	  		"				   a.AgentBackofficeID as agent, brandBackOfficeId as gr,\r\n" + 
+	  		"				   SUM(d.lineamount / ac.Cnt) AS summa \r\n" + 
+	  		"				FROM epasaule_deliveries d \r\n" + 
+	  		"				INNER JOIN dbo.EPASAULE_PRODUCTS b ON d.productBackOfficeID = b.backOfficeId\r\n" + 
+	  		"				JOIN AgentCount ac  \r\n" + 
+	  		"				   ON d.ClientBackofficeID = ac.ClientBackofficeID \r\n" + 
+	  		"				JOIN EPASAULE_AGENTS_CLIENTS a  \r\n" + 
+	  		"				   ON d.ClientBackofficeID = a.ClientBackofficeID \r\n" + 
+	  		"				WHERE d.deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1) \r\n" + 
+	  		"				 AND d.deliverydate < DATEADD(MONTH, 1, \r\n" + 
+	  		"				       DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) \r\n" + 
+	  		"				GROUP BY a.AgentBackofficeID, brandBackOfficeId\r\n" + 
+	  		"				order by 1,2\r\n" + 
+	  		"				"; 
+	try {	
+	   Connection con = this.getNewConnection();
+      Statement stmt = con.createStatement();
+      ResultSet rs = stmt.executeQuery(cmd0);
+
+
+	  manaSales = new HashMap<String, Map<String, Double>>();
+	
+	while(rs.next()) {
+		
+		    String agentID = rs.getString("agent").trim();
+			String gr = rs.getString("gr");
+		    Double sales = rs.getDouble("summa");
+				 
+
+			if(sales != null && sales > 0) {
+						 manaSales
+			                .computeIfAbsent(agentID, k -> new HashMap<String, Double>())
+			                .merge(gr, sales, Double::sum);
+			   }
+		
+	}
+	
+	rs.close();
+	stmt.close();
+	con.close();
+	
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+	//  System.out.println("manaSales " + manaSales.toString());
+	  
+	//Teeme igale managerile grupeeritud  grupeeritud Objekti 
+	
+	 HashMap<String, Map<String, Double>> manaSalesGrupped = new HashMap<String, Map<String, Double>>();
+	 HashMap<String, Map<String, Double>> manaPlanGrupped = new HashMap<String, Map<String, Double>>();
+
+	 Iterator<String> iterau = manaPlans.keySet().iterator();
+	 while (iterau.hasNext()) {
+		 String agID = iterau.next();
+
+		 Map<String, Double> osales = manaPlans.get(agID);
+		 
+		 Iterator<String>  itera2 = osales.keySet().iterator();
+			 while (itera2.hasNext()) {
+				 String grID = itera2.next();
+			double psales = osales.get(grID);
+		  
+		    if(this.groupGrouping.get(grID) != null) {
+		    	manaPlanGrupped 
+                .computeIfAbsent(agID, k -> new HashMap<String, Double>())
+                .merge(groupGrouping.get(grID), psales, Double::sum);
+		 
+		    }
+		 }
+	 }
+	 System.out.println("manaPlanGrupped " + manaPlanGrupped.toString());
+	 
+	 Iterator<String> iteraq = manaSales.keySet().iterator();
+	 while (iteraq.hasNext()) {
+		 String agID = iteraq.next();
+
+		 Map<String, Double> osales = manaSales.get(agID);
+		 
+		 Iterator<String>  itera2 = osales.keySet().iterator();
+			 while (itera2.hasNext()) {
+				 String grID = itera2.next();
+			double psales = osales.get(grID);
+		  
+		    if(this.groupGrouping.get(grID) != null) {
+		    	manaSalesGrupped 
+                .computeIfAbsent(agID, k -> new HashMap<String, Double>())
+                .merge(groupGrouping.get(grID), psales, Double::sum);
+		 
+		    }
+		 }
+	 }
+	 
+	 System.out.println("manaSalesGrupped " + manaSalesGrupped.toString());
+	 
+	// System.exit(0);
+	 
+	 Iterator<String> itera = manaPlanGrupped.keySet().iterator();
+	 while (itera.hasNext()) {
+		 String agID = itera.next();
+		 
+		  Map<String, Double> osales = manaPlanGrupped.get(agID);
+		  Map<String, Double> rsales = manaSalesGrupped.get(agID);
+
+		  Iterator<String>  itera2 = osales.keySet().iterator();
+			 while (itera2.hasNext()) {
+				 String grID = itera2.next();
+			double psales = osales.get(grID);
+		 if(rsales.get(grID) != null) {
+		  
+		  double msales = rsales.get(grID);
+		  double  tehtudsalperc = msales/psales;
+      	  double plaanitavMyykSal = d2 * msales/dd;
+      	  double  prognosalperc = plaanitavMyykSal/psales;
+      	
+      	  if(tehtudsalperc > 10){
+      		  tehtudsalperc = 0;  
+      	  }
+      	  
+      	  if(prognosalperc > 10){
+      		  prognosalperc = 0;  
+      	  }
+        	
+      	  String asi = grID +  " Plan done/estimate :";
+            asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
+            System.out.println("asi " + asi);
+		 
+		  }
+			 }
+	 }
+	 
 	 
 		String cmd =  " 		WITH AgentCount AS (\r\n" + 
 				"    SELECT \r\n" + 
@@ -2160,12 +2322,6 @@ private HashSet<String> inTT = null;
 			   Connection con = this.getNewConnection();
 		       Statement stmt = con.createStatement();
 		       ResultSet rs = stmt.executeQuery(cmd);
-
-               int yy = Calendar.getInstance().get(Calendar.YEAR);
-               int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-               int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
-               double planprec = dd/d2;
-		
 			
 			while(rs.next()) {
 				
@@ -2194,6 +2350,8 @@ private HashSet<String> inTT = null;
                     	
                   	  asi = asi + "Plan done/estimate :";
                         asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
+                        System.out.println("asi " + asi);
+                        agent.setStart(asi);
                     }
 				  } else {
 					agent.setMonthSales((int)msales);
@@ -2212,7 +2370,7 @@ private HashSet<String> inTT = null;
         }
   
 
-  //private Map<String, Map<String, Double>> manaSales;
+  private Map<String, Map<String, Double>> manaSales;
   private Map<String, Map<String, Double>> custSales;
   
   public void getCustomerPRGroupSales(){

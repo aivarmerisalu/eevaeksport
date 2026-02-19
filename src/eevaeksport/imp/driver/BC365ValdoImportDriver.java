@@ -121,18 +121,16 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
       }
   }
 
-  /* =========================
-     SOAP HELPERS
-     ========================= */
+  
   private String buildSoapEnvelope(String namespace, String operation, String json) {
 	    return 
 	        "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
-	        "xmlns:ns=\"" + namespace + "\">" +
+	        "xmlns:epas=\"" + namespace + "\">" +
 	        "<soapenv:Header/>" +
 	        "<soapenv:Body>" +
-	        "<ns:" + operation + ">" +
-	        "<ns:jsonPayload><![CDATA[" + json + "]]></ns:jsonPayload>" +
-	        "</ns:" + operation + ">" +
+	        "<epas:" + operation + ">" +
+	        "<epas:jsonRequest>" + json + "</epas:jsonRequest>" +
+	        "</epas:" + operation + ">" +
 	        "</soapenv:Body>" +
 	        "</soapenv:Envelope>";
 	}
@@ -221,9 +219,9 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
   
   private void makeOutput(Order order){
 	
-	  JSONArray orders = new JSONArray();
+	  //JSONArray orders = new JSONArray();
 	  JSONObject jOrder = new JSONObject();
-	  orders.add(jOrder);
+	 // orders.add(jOrder);
 	  
 	  JSONObject jHeader = new JSONObject();
 	
@@ -452,10 +450,12 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
 	        
        String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + "-" + (uni + "").trim() +  ".json";
 	      System.out.println(fileName);
-	     Converter.saveFile(fileName,orders.toJSONString() ); 
+	     Converter.saveFile(fileName,jOrder.toJSONString() ); 
 	     
-	     callOperation("ImportOrder", orders.toJSONString());
-
+	   String resp =   callOperation("ImportOrder", jOrder.toJSONString());
+	     fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + "-" + (uni + "").trim() +  "response.json";
+	     Converter.saveFile(fileName, resp); 
+	   
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

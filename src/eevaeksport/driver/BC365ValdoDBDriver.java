@@ -47,7 +47,6 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
     public BC365ValdoDBDriver(EksportPanel parent) {
         super(parent);
         this.parent = parent;
-        //getCustomers(null);
     }
 
     private final EksportPanel parent;
@@ -184,32 +183,6 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         }
     }
 
-    /**
-     * Splits a JSON array into individual object strings
-     * No external libraries, brace-counting only
-     */
-    private List<String> splitJsonArray(String jsonArray) {
-        List<String> result = new ArrayList<>();
-
-        int braceLevel = 0;
-        int start = -1;
-
-        for (int i = 0; i < jsonArray.length(); i++) {
-            char c = jsonArray.charAt(i);
-
-            if (c == '{') {
-                if (braceLevel == 0) start = i;
-                braceLevel++;
-            } else if (c == '}') {
-                braceLevel--;
-                if (braceLevel == 0 && start >= 0) {
-                    result.add(jsonArray.substring(start, i + 1));
-                    start = -1;
-                }
-            }
-        }
-        return result;
-    }
 
     /* =========================
        CORE NTLM SOAP CALL
@@ -296,7 +269,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 		  TreeMap tm = new TreeMap();
 	
 			try {
-			org.json.simple.JSONArray cc = 	Converter.readJSONArrFile("data//Agents1.json");
+			org.json.simple.JSONArray cc = 	Converter.readJSONArrFileUTF("data//Agents1.json");
 	
 			
 			  int lenn = cc.size();
@@ -367,7 +340,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
             if (!file.exists()) break;
         
         org.json.simple.JSONArray values1 =
-                (org.json.simple.JSONArray) Converter.readJSONArrFile("data/customerEntries" + debtPart + ".json");
+                (org.json.simple.JSONArray) Converter.readJSONArrFileUTF("data/customerEntries" + debtPart + ".json");
 
         int lenn1 = values1.size();
         debtPart++;
@@ -467,7 +440,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
             try {
                 org.json.simple.JSONArray values =
-                    (org.json.simple.JSONArray) Converter.readJSONArrFile(file.getPath());
+                    (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(file.getPath());
 
                 for (Object obj : values) {
                     org.json.simple.JSONObject json = (org.json.simple.JSONObject) obj;
@@ -505,7 +478,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
             try {
                 org.json.simple.JSONArray values =
-                    (org.json.simple.JSONArray) Converter.readJSONArrFile(file.getPath());
+                    (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(file.getPath());
 
                 for (Object obj : values) {
                     org.json.simple.JSONObject json = (org.json.simple.JSONObject) obj;
@@ -559,7 +532,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
             try {
                 org.json.simple.JSONArray values =
-                    (org.json.simple.JSONArray) Converter.readJSONArrFile(file.getPath());
+                    (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(file.getPath());
 
                 int len = values.size();
                 for (int i = 0; i < len; i++) {
@@ -581,9 +554,11 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     if (name != null) cust.setName(clean(name.trim()));
 
                     String address = (String) cob.get("address");
-                    if (address != null) {
-                        cust.setAddress(clean(address));
-                    }
+                    if (address != null) {  
+                     cust.setAddress(Converter.adressLink(address,"Latvia"));
+ 	                  name = name + " " + address;
+ 	                  cust.setName(name);
+ 	                }
 
                     String phone = (String) cob.get("phoneNo");
                     if (phone != null && phone.trim().length() > 0) {
@@ -645,7 +620,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                         }
                     }
 
-                    cust.addAgent(new Agent("0078"));
+                 //   cust.addAgent(new Agent("0078"));
                     
                     if (volad.get(cust.getID() ) != null) {
     	            	cust.setDebt(volad.get(cust.getID()));
@@ -695,7 +670,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
             try {
                 org.json.simple.JSONArray stockValues =
-                        (org.json.simple.JSONArray) Converter.readJSONArrFile(stockFile.getPath());
+                        (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(stockFile.getPath());
 
                 for (int i = 0; i < stockValues.size(); i++) {
                     org.json.simple.JSONObject stockObj =
@@ -724,7 +699,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
             try {
                 org.json.simple.JSONArray values =
-                        (org.json.simple.JSONArray) Converter.readJSONArrFile(itemFile.getPath());
+                        (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(itemFile.getPath());
 
                 for (int i = 0; i < values.size(); i++) {
                     org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
@@ -813,7 +788,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                 System.out.println("Loading salesPrices file: " + f.getName());
 
                 org.json.simple.JSONArray values =
-                        (org.json.simple.JSONArray) Converter.readJSONArrFile(f.getPath());
+                        (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(f.getPath());
 
                 for (Object obj : values) {
 

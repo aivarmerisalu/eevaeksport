@@ -735,6 +735,7 @@ HashSet olemas = new HashSet();
    
         TreeMap customers = new TreeMap();
         HashMap volad = new HashMap();
+        HashMap<String, Double> voladPlusDays = new HashMap<String, Double>();
         HashMap voladtaarata = new HashMap();
         HashMap used = new HashMap();
         HashMap salesres = new HashMap();
@@ -798,7 +799,35 @@ HashSet olemas = new HashSet();
             }
             rs1.close();
             stmt.close();
-        	
+   
+            
+            String aa1 = "7";
+            
+            if(getParent().getProps().getProperty("debtplusdays") != null ) {
+            	aa1 = getParent().getProps().getProperty("debtplusdays"); 
+            }
+            	
+            
+             sql =
+                    "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
+                   " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
+                   " exists(select i44_kodas_ks,i44_dok_nr,sum(i44_suma_db-i44_suma_cr) as suma from i44_skol i44 where i44.i44_kodas_ks=i44_skol.i44_kodas_ks " +
+                   " and i44.i44_dok_nr=i44_skol.i44_dok_nr and i44_tipas<>11 and i44.i44_data_mok <= getdate() - " + aa1 + " group by i44.i44_kodas_ks,i44.i44_dok_nr "+
+                     " having sum(i44.i44_suma_db-i44.i44_suma_cr)<>0) group by I44_KODAS_KS order by I44_KODAS_KS ";
+
+                   stmt = con.prepareStatement(sql);
+                   rs1 = stmt.executeQuery();
+
+                while (rs1.next()) {
+                  String id = rs1.getString("klient").trim();
+                  double debt = Double.parseDouble(rs1.getString("summa").trim());
+                  voladPlusDays.put(id, debt);
+                }
+                 rs1.close();
+                 stmt.close();
+            
+            
+            
             Calendar cal = Calendar.getInstance();
           String date =  Converter.getYYYYmMMmDDmString(cal.getTime());
             sql =
@@ -820,6 +849,8 @@ HashSet olemas = new HashSet();
                 rs1.close();
                 stmt.close();
 
+                
+                
             String sqlu =
                 "SELECT I44_KODAS_KS AS klient, sum(i44_suma_db-i44_suma_cr) AS summa  FROM i44_skol,n08_klij WHERE " +
                " i44_skol.i44_kodas_ks=n08_klij.n08_kodas_ks and " +
@@ -867,11 +898,29 @@ HashSet olemas = new HashSet();
             		  
               custNAMES.put(accountnum,name);
             	//name = name + " "  + accountnum;
-            
+              
+              double ov = 50;
+              if(getParent().getProps().getProperty("alloweddebt") != null ) {
+        		  try {
+        		     ov = Double.parseDouble(getParent().getProps().getProperty("alloweddebt"));
+        		  }catch (Exception e) {
+        			  e.printStackTrace();
+        		  }
+        	  }
+              
+              
+           
+                   
+              
             Customer cust = new Customer(accountnum);
-            //  System.out.println("Name " + name);
+            
               if(volad.get(maks) != null){
             	  cust.setDebt(Double.parseDouble("" +volad.get(maks)));
+              }
+              
+              
+              if(voladPlusDays.get(maks) != null && voladPlusDays.get(maks) > ov) {
+            	  cust.setSalesBlockT(true);
               }
               
               if(voladtaarata.get(maks) != null) {

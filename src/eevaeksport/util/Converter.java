@@ -25,6 +25,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URL;
@@ -34,6 +35,8 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -13161,6 +13164,24 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		}
 
 		return (org.json.simple.JSONArray) obj;
+	}
+	
+	
+	public static org.json.simple.JSONArray readJSONArrFileUTF(String path)  {
+		Object obj = null;
+		
+	    JSONParser parser = new JSONParser();
+
+	    try (Reader reader = Files.newBufferedReader(
+	            Paths.get(path),
+	            StandardCharsets.UTF_8)) {
+
+	        obj =  (org.json.simple.JSONArray) parser.parse(reader);
+	    } catch(Exception e) {
+	    	
+	    }
+	      return  (org.json.simple.JSONArray)  obj;
+		    
 	}
 	
 	public static JSONObject readJSONORDFile(String filename){
