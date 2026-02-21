@@ -188,7 +188,7 @@ try {
                  "INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and summ.dataareaid=dim.dataareaid " +
                  "INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and summ.dataareaid=inv.dataareaid " +
                  "WHERE summ.DATAAREAID='dat'and dim.DATAAREAID='dat' and inv.DATAAREAID='dat' AND CLOSED = 0 AND  moduletype=0 " +
-                 " AND dim.inventlocationid IN ('KM')   and  summ.inventstatusid  in ( 'MÜÜK') and AVAILPHYSICAL > 0 GROUP BY summ.itemid  ORDER BY summ.itemid ";
+                 " AND dim.inventlocationid IN ('NGL2')   and  summ.inventstatusid  in ( 'MÜÜK') and AVAILPHYSICAL > 0 GROUP BY summ.itemid  ORDER BY summ.itemid ";
 
 			if (isDebug())
 				System.out.println(cmd);
@@ -1619,7 +1619,7 @@ System.out.println(agent.getID() +" " + sb.toString());
        		"                 INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and summ.dataareaid=dim.dataareaid \r\n" + 
        		"                 INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and summ.dataareaid=inv.dataareaid \r\n" + 
        		"                 WHERE summ.DATAAREAID='dat'and dim.DATAAREAID='dat' and inv.DATAAREAID='dat' AND CLOSED = 0 AND  moduletype=0 \r\n" + 
-       		"                 and AVAILPHYSICAL > 0 and dim.inventlocationid IN ('KM') and summ.inventstatusid != '' and  summ.inventstatusid not in ( 'MÜÜK' , 'HANGUB' )\r\n" + 
+       		"                 and AVAILPHYSICAL > 0 and dim.inventlocationid IN ('NGL2') and summ.inventstatusid != '' and  summ.inventstatusid not in ( 'MÜÜK' , 'HANGUB' )\r\n" + 
        		"				  GROUP BY summ.inventstatusid, summ.itemid  ORDER BY summ.itemid";
     			     
         

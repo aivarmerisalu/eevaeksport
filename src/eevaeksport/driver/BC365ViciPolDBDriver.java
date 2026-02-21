@@ -102,23 +102,6 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
     	  }
       }
      
-  //  this.getDebt(null);
-    //System.exit(0);
-      //token = getMSToken();
-
-    //   this.downloadData("getDelAddresses");
-   //   getUnitConversions();
-   //   System.out.println("Token " + token);
-    //  getProducts(null);
-     // getCustomers(null);
-  // this.downloadData("invLines");
-   //  getCustomerProductsList(null);
-     //getPriceMatrixData();
-  //  this.downloadData(null);
-    
-    // this.getCustomerProductsList(null);
-     //this.setBulkSales(null);
-   
 
      }
   
@@ -176,7 +159,7 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	     	 this.saveFile("getCustomers","CustomersV3?$select=OrganizationName,DeliveryAddressDescription,"
 	     	 		+ "CustomerAccount,DeliveryAddressLocationId,AMGFullDeliveryAddress,InvoiceAccount,DeliveryAddressCountryRegionId,AMGPrimaryAddressSalesAgentPersonnelNumber,"
 	     	 		+ "AMGDeliveryAddressSalesAgentPersonnelNumber,AMGEmployeeResponsiblePersonnelNumber,OnHoldStatus,PaymentTerms,LineDiscountCode,AMGBlockingOverdueDays,"
-	     	 		+ "AMGPrimaryAddressPrimaryContacts,AMGDeliveryAddressPrimaryContacts,DiscountPriceGroupId,SalesCurrencyCode,CreditLimit" 
+	     	 		+ "AMGPrimaryAddressPrimaryContacts,AMGDeliveryAddressPrimaryContacts,DiscountPriceGroupId,SalesCurrencyCode,CreditLimit,TaxExemptNumber" 
 	     	 		);
 	     }
 	      
@@ -718,7 +701,11 @@ private void saveFile (String dataType , String uri) {
 	            
 	        //   System.out.println("klinfo " + address1 + "'" +displayName + "'" + number + "'");
 	          //  cust.setAddress(address1.trim());
-	            
+	            String taxInfo = (String)cob.get("TaxExemptNumber");
+	            if(taxInfo != null && taxInfo.trim().length() > 0) {
+		             cust.setRegnr(taxInfo);
+		            }
+	             
 	            
 	            String phone = (String)cob.get("AMGPrimaryAddressPrimaryContacts");
 	            
@@ -787,6 +774,11 @@ private void saveFile (String dataType , String uri) {
 		        //   System.out.println("klinfo " + address1 + "'" +displayName + "'" + number + "'");
 		            cust.setAddress(address1.trim());
 		            
+		            
+		            String taxInfo = (String)cob.get("TaxExemptNumber");
+		            if(taxInfo != null && taxInfo.trim().length() > 0) {
+			             cust.setRegnr(taxInfo);
+			            }
 		            
 		            String phone = (String)cob.get("AMGPrimaryAddressPrimaryContacts");
 		            if(phone != null && phone.trim().length() > 0) {

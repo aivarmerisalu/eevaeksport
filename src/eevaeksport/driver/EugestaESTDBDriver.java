@@ -202,7 +202,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	              ff2 = res2.list();
 	             
 	         	 for(int i = 0;ff2.length>i;i++){
-	             	if( ff2[i].startsWith(toode)){
+	             	if( ff2[i].startsWith(toode+".")){
 	               // System.out.println("pilt olemas " + ff2[i]);
 	            	File in = new File ( pictssou + ff2[i]); 
 	              	if(in.isFile()){
@@ -1164,16 +1164,29 @@ if(grupp.equals("leib") ){
 	        int weekday = date.getDayOfWeek().getValue();
 
 	        char cycleWeekLetter = (char) ('A' + weekInCycle);
-	        String expected = "" + cycleWeekLetter + weekday;
 
-	        if (pattern.contains(expected)) {
-	            result.add(new CycleMatch(date, expected));
+	        // find that week block in pattern
+	        int index = pattern.indexOf(cycleWeekLetter);
+
+	        if (index != -1 && index + 1 < pattern.length()) {
+
+	            // read digits after letter until next letter
+	            StringBuilder daysPart = new StringBuilder();
+
+	            for (int j = index + 1; j < pattern.length(); j++) {
+	                char c = pattern.charAt(j);
+	                if (Character.isLetter(c)) break;
+	                daysPart.append(c);
+	            }
+
+	            if (daysPart.toString().contains(String.valueOf(weekday))) {
+	                result.add(new CycleMatch(date, cycleWeekLetter + String.valueOf(weekday)));
+	            }
 	        }
 	    }
 
 	    return result;
 	}
-
 
 	
 
@@ -1307,7 +1320,7 @@ if(grupp.equals("leib") ){
 	    	  	            
     	              
     	              aaa = "select clientBackOfficeId as klient,  a.promotionBackOfficeId as promo   from dbo.EPASAULE_PROMOTIONOBJECTS a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
-    	              		"	where getdate() between [date from] and [date to] and datediff(day,[date from],[date to])< 91\r\n" + 
+    	              		"	where getdate() between [date from] and [date to] \r\n" + 
     	              		"	group by  a.promotionBackOfficeId , clientBackOfficeId \r\n" + 
     	              		"	order by  clientBackOfficeId  " ;
     	        		
@@ -1318,7 +1331,7 @@ if(grupp.equals("leib") ){
     	       	                 String aa = promos.get(cli);
     	       	                 if(aa == null) {
     	       	                	 promos.put(cli, route);
-    	       	                 }else {
+    	       	                  } else {
     	       	                	promos.put(cli, aa + "|" + route);
     	       	                 }
     	       	                  
@@ -1333,7 +1346,7 @@ if(grupp.equals("leib") ){
     	TreeMap<String,Double> debts = new TreeMap<String ,Double>();
     	
     	 String cmd2 = "  SELECT sum(Amount) as tasumata , debetorBackOfficeId as maksja  FROM dbo.EPASAULE_DEBTS where \r\n" + 
-    	 		" payDate<getdate() group by debetorBackOfficeId"; 
+    	 		" payDate < getdate()-1 group by debetorBackOfficeId"; 
     	 		
     	 
     	  stmt = con.createStatement();
@@ -1451,8 +1464,9 @@ if(grupp.equals("leib") ){
         } 
         
         if(promos.get(cust.getID()) != null) {
+        	System.out.println();
         	 if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
-            	 cust.setGroup(cust.getGroup() + "|" +promos.get(cust.getID()));
+            	 cust.setGroup(cust.getGroup() + "|" + promos.get(cust.getID()));
              } else {
             	 cust.setGroup(promos.get(cust.getID()));
              }
@@ -1862,7 +1876,10 @@ private HashSet<String> inTT = null;
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
 	      String nimi = rs.getString("nimetus").trim();
-	   
+	      nimi = nimi.replaceAll("NESTLE", "NES");
+	      nimi = nimi.replaceAll("BARILLA", "BAR");
+	      nimi = nimi.replaceAll("IMPERIAL", "IMP");
+		  
 	        tm.put(liik, Converter.enCodeEst(nimi));
 	    }
 	    rs.close();
@@ -1946,7 +1963,23 @@ private HashSet<String> inTT = null;
     	rs1.close();
     	
     	
-      ResultSet rs = stmt.executeQuery(cmd);
+    	String minP = " SELECT [productBackOfficeId] AS toode,\r\n" + 
+    			"    CAST(ROUND(100 - [minPrice] * 100.0 / [maxPrice] + 0.2, 0) AS INT) AS pr\r\n" + 
+    			"FROM [DWHEE].[dbo].[EPASAULE_PROMOTIONOBJECTS]\r\n" + 
+    			"WHERE minPrice != maxPrice GROUP BY productBackOfficeId, minPrice, maxPrice\r\n" + 
+    			"HAVING minPrice > 0 order by productBackOfficeId ";
+    	
+    	 ResultSet rs = stmt.executeQuery(minP);
+         HashMap<String, Double> prodMaxDisc = new HashMap<String, Double>();
+         
+         while(rs.next()){
+        	 prodMaxDisc.put(rs.getString("toode").trim(),rs.getDouble("pr"));
+         }
+        rs.close();
+        System.out.println("prodMaxDisc " + prodMaxDisc.toString());
+    	
+    	
+       rs = stmt.executeQuery(cmd);
       HashMap prodHash = new HashMap();
       
       while(rs.next()){
@@ -2027,6 +2060,12 @@ private HashSet<String> inTT = null;
         Double pack = rs.getDouble("pakk");
         if(layer > 0) {
         	prod.pack = pack;
+        }
+        
+        if(prodMaxDisc.get(prod.getID()) != null) {
+        	prod.setMaxDiscount(prodMaxDisc.get(prod.getID()));
+        }else {
+        	prod.setMaxDiscount(0);
         }
         
         prod.setOptAmountInUnits(rs.getDouble("opt"));
@@ -2234,7 +2273,7 @@ private HashSet<String> inTT = null;
 		    }
 		 }
 	 }
-	 System.out.println("manaPlanGrupped " + manaPlanGrupped.toString());
+	// System.out.println("manaPlanGrupped " + manaPlanGrupped.toString());
 	 
 	 Iterator<String> iteraq = manaSales.keySet().iterator();
 	 while (iteraq.hasNext()) {
@@ -2256,9 +2295,12 @@ private HashSet<String> inTT = null;
 		 }
 	 }
 	 
-	 System.out.println("manaSalesGrupped " + manaSalesGrupped.toString());
+	// System.out.println("manaSalesGrupped " + manaSalesGrupped.toString());
 	 
 	// System.exit(0);
+	 System.out.println("grupped " + manaPlanGrupped.toString() );
+	 
+	 HashMap <String, String> manaCategoryTotals = new HashMap<String, String>();
 	 
 	 Iterator<String> itera = manaPlanGrupped.keySet().iterator();
 	 while (itera.hasNext()) {
@@ -2285,13 +2327,18 @@ private HashSet<String> inTT = null;
       	  if(prognosalperc > 10){
       		  prognosalperc = 0;  
       	  }
+      	  
         	
-      	  String asi = grID +  " Plan done/estimate :";
+      	  String asi = "Category : " + grID + "|Sales : " + (int) msales +  " € - Plan : " + (int) psales +  " €|Missing : " + (int)(psales - msales)+ " €|done/esti. :";
             asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
-            System.out.println("asi " + asi);
-		 
+            
+            if(manaCategoryTotals.get(agID) != null) {
+                manaCategoryTotals.put(agID, manaCategoryTotals.get(agID) + asi);
+             } else {
+                manaCategoryTotals.put(agID, asi);	
+            }
 		  }
-			 }
+		}
 	 }
 	 
 	 
@@ -2332,7 +2379,7 @@ private HashSet<String> inTT = null;
 				if (agent != null){
 
 				if(this.manaTotalPlans.get(agentID) != null) {
-					String asi = "Sales: " + (int)msales + " €||";
+					String asi = "Sales: " + (int)msales + " €|";
 					
                     if(dd > 6){
                       double psales = manaTotalPlans.get(agentID);
@@ -2347,11 +2394,23 @@ private HashSet<String> inTT = null;
                   	  if(prognosalperc > 10){
                   		  prognosalperc = 0;  
                   	  }
-                    	
-                  	  asi = asi + "Plan done/estimate :";
+
+  					asi = "Sales: " + (int)msales + " €|";
+  					asi = asi + " Plan: " + (int)psales + " €|";
+  					asi = asi + " Missing: " + (int)(psales-msales) + " €|";
+                  	  
+                  	    asi = asi + "done/esti. :";
                         asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
-                        System.out.println("asi " + asi);
+                        
+                        if(manaCategoryTotals.get(agentID) != null) {
+                        	asi = asi + manaCategoryTotals.get(agentID); 
+                        }
+                        
                         agent.setStart(asi);
+                        
+                        
+                        
+                        
                     }
 				  } else {
 					agent.setMonthSales((int)msales);

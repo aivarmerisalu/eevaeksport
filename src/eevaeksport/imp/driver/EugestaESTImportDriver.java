@@ -99,42 +99,10 @@ public class EugestaESTImportDriver extends AbstractImportDriver{
   private Connection getNewConnection2() throws SQLException{
 	    return DriverManager.getConnection(url2, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
 	  }
-  
-  private String custName(String code){
-	  String res = "noname";
-	  
-      String cmd = "Select name as nimi  from  dbo.EPASAULE_CLIENTS where BackOfficeId='" + code + "'" ; 
-      
-
-	   System.out.println(cmd);
-	   try {
-		
-		    Connection con = getNewConnection();
-	        Statement stmt = con.createStatement();
-	        ResultSet rs = stmt.executeQuery(cmd);
-	        
-	        while(rs.next()){
-	        	 res = rs.getString("nimi").trim();
-		    }
-	       
-	        rs.close();
-	        stmt.close();
-	        con.close(); 
-	   
-	   }catch(Exception e){
-		  e.printStackTrace(); 
-	   }
-	      
-	        
-       System.out.println("customerName " + res);
-	  
-	  return res ;
-  }
 
   public String getImportFile(){
 	    return parent.getProps().getProperty("imp.read");
 	  }
-
  
   
   public String identifyCustomer(String id,String regnr)  {
@@ -147,60 +115,6 @@ public class EugestaESTImportDriver extends AbstractImportDriver{
     return null;  
 }
   
-  
-private String getProdNimi(String toode){
-	  
-	  
-	    String sql = "   Select a.backOfficeId as itemid,a.Name AS name, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini, \r\n" + 
-	    		"a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-	    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat  from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId"
-	    		+ "where backOfficeId = '" +toode + "'" ;
-
-	  	   System.out.println(sql);
-	  	   String res = "<No Name>";
-	  	   try {
-	  		   Connection con = getNewConnection();
-	  	        Statement stmt = con.createStatement();
-	  	        ResultSet rs = stmt.executeQuery(sql);
-	  	        
-	  	        if(rs.next()){
-	  	        	res = rs.getString("name").trim();
-	  	        }
-	  	        
-	  	        rs.close();
-	  	        stmt.close();
-	  	        con.close();
-	  	        
-	  	   }catch(Exception e){
-	  		 e.printStackTrace();  
-	  	   }
-     return res;
-  }
-
-private String getEan(String toode){
-	  
-
-    String sql = "   Select  a.barCode AS ean  from  dbo.EPASAULE_PRODUCTS a where backOfficeId = '" +toode + "'" ;
-	  	   System.out.println(sql);
-	  	   String res = "00000000000";
-	  	   try {
-	  		   Connection con = getNewConnection();
-	  	        Statement stmt = con.createStatement();
-	  	        ResultSet rs = stmt.executeQuery(sql);
-	  	        
-	  	        if(rs.next()){
-	  	        	res = rs.getString("ean").trim();
-	  	        }
-	  	        
-	  	        rs.close();
-	  	        stmt.close();
-	  	        con.close();
-	  	        
-	  	   }catch(Exception e){
-	  		 e.printStackTrace();  
-	  	   }
-   return res;
-}
 
 
 private Vector signatures = new Vector();
@@ -260,9 +174,7 @@ private Vector signatures = new Vector();
 			 		  Order ord = (Order)en.nextElement();
 			 		 makeOutput(ord,tagastus , false);
 				    } 
-			 	  
-			      		  signatures.add(signature);
-			      		  
+			 	  		  signatures.add(signature);
 			   }
 			     }
 			   try {
@@ -625,13 +537,13 @@ private Product getProd(String toode){
      System.out.println("Order closed " + salesid);
       }
 
- private void makeOutput(Order order , boolean ret , boolean repr ){
+ private void makeOutput(Order orde , boolean ret , boolean repr ){
 	 
 	 
 	 int salesid =  getNextSalesid() ;
 	    try {
-	    		addInvoiceHeader(salesid,order, ret, repr);
-			    addInvoiceLines(salesid, order,ret, repr);
+	    		addInvoiceHeader(salesid,orde, ret, repr);
+			    addInvoiceLines(salesid, orde,ret, repr);
      			closeOrder(salesid);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -640,9 +552,9 @@ private Product getProd(String toode){
 	 }
  
  
- private void addInvoiceLines(int salesid, Order order, boolean tagastus, boolean repr) throws SQLException{
+ private void addInvoiceLines(int salesid, Order orde, boolean tagastus, boolean repr) throws SQLException{
 
-	    Enumeration enumr = order.getOrderLines().elements();
+	    Enumeration enumr = orde.getOrderLines().elements();
 
         Connection con = getNewConnection2();
         
@@ -654,12 +566,16 @@ private Product getProd(String toode){
 	      double kogus = orderLine.getKogus();
 	      String unit = "0";//orderLine.getUnit();
 	      double price = orderLine.getPrice();
-	      double disc = orderLine.getDiscount(); // aston ei loe seda kasutab hinda 
+	      double disc = 0; 
+	      
+	      if(orderLine.getDiscount() > 0 ) {
+	    	 disc = orderLine.getDiscount(); 
+	      } // aston ei loe seda kasutab hinda 
 	      String choice = "NOT_AVAILABLE"; // seda pole vaja 
 	      String ware = "";// kui kasutaja on ise valinud lao siis täidame muidu on tühi
 		  
-	      if(order.getDealer() != null && order.getDealer().trim().length() > 1) {
-	    	  ware = order.getDealer();
+	      if(orde.getDealer() != null && orde.getDealer().trim().length() > 1) {
+	    	  ware = orde.getDealer();
 	      }
 	      
 	      String pobj = " "; // juhul kui on valitud promo siis peab see olema täidetud
@@ -672,11 +588,13 @@ private Product getProd(String toode){
 	    //  NOT_AVAILABLE = product without promo.
 
 	      
-	          String agent = order.getAgent();
-	          Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(agent);
+	         String agent = orde.getAgent();
+	         
+	         Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(agent);
 	          if(ag == null){
 	         	ag = new Agent(agent);
-	         }
+	          }
+	          
 	          String sql =" INSERT into   ORDEREDITEMS (ORDER_ID,PRODUCT_ID,QUANTITY_IN_BASE_UNIT,BASE_UNIT_MEASURE," +
 	          		"PRODUCT_PRICE,REAL_PRICE,DISCOUNT,USER_PROMO_DISCOUNT_CHOICE," +
 	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID )  " +// DEPARTMEN,
