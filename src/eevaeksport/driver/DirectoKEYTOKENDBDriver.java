@@ -1,6 +1,5 @@
 package eevaeksport.driver;
 
-import java.awt.print.PrinterJob;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -18,8 +17,11 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -34,33 +36,19 @@ import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.print.DocFlavor;
-import javax.print.DocPrintJob;
-import javax.print.PrintService;
-import javax.print.PrintServiceLookup;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.standard.Copies;
-import javax.print.attribute.standard.Sides;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageable;
-
-import org.apache.poi.hssf.eventusermodel.dummyrecord.LastCellOfRowDummyRecord;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import ee.mobilejava.earve.GenericDOM;
 import eevaeksport.Agent;
@@ -105,12 +93,15 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
     	stockConn = parent.getProps().getProperty("stock.dir");
     }
     
+    if( parent.getProps().getProperty("weeks") != null){
+    	WEEKS = Integer.parseInt(parent.getProps().getProperty("weeks"));
+    }
     if("true".equals(getParent().getProps().getProperty("use.olddata"))){
 		  useold = true;
 		  }
   }
     
-
+ private int WEEKS = 24;
   
   private String stockConn = null;
   String user =  null;
@@ -127,32 +118,29 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	     if(stockConn != null){
 	    	
 	     try {
-	 
-	    	   FileReader fr = new FileReader(stockConn + "tooted.xml");
-	           BufferedReader reader = new BufferedReader(fr);
-	         String line = null;
-
-	          while((line = reader.readLine()) != null  ){
-	        	 
-		        	
-	        	  if((line.trim().length()) > 50){
-	        		 // System.out.println(line);
-	        		  int len = line.indexOf("code=");
-		        	  String id   = line.substring(len + 6);
-		      	      Product prod = new Product(id.substring(0,id.indexOf("\"")).trim());
-		      	      len = line.indexOf("default_name=");
-		      	     String name   = line.substring(len + 14);
-		      	      len = line.indexOf("stock_level_total=");
-		      	 	 if(len != -1){
-		      	 	     String stock   = line.substring(len + 19);  
-		     	          prod.setStock((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
-		     	         tm.put(prod.getID(), prod.getStock());  
-		      	 	 }
-		      	
-	        	  }
-	        	
-	          }	    	 
-	    
+	    	 File f = new File (stockConn + "laoseis.xml");
+	  		  if(f.exists()) {
+	  			
+	  	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	  	     DocumentBuilder db;
+	  		db = dbf.newDocumentBuilder();      	
+	      	FileInputStream in = getCleanInputStream(f);
+	      	String handler = null;
+	        Document doc = db.parse(in,handler);
+	         Node root = getNode(doc, "transport");      
+	      	  Node read = getNode(root, "stocklevels");
+	          for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	          	  Node rida = read.getChildNodes().item(i);
+	          	  try{
+	          		  if(rida.getNodeName().equals("stocklevel")){
+	               		 String prodid  = rida.getAttributes().getNamedItem("code").getNodeValue();
+	               		 double kog = Double.parseDouble(rida.getAttributes().getNamedItem("freequantity").getNodeValue());
+	               		 tm.put(prodid, kog);  
+	               	  } 
+	          	  }catch(Exception e){}
+	            }
+	          }
+	    	
 	     } catch (Exception e){
 	       e.printStackTrace();
 	     }
@@ -391,10 +379,13 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
                       }
                       
                       if(start != " " && end != " "){
-                     	 mline.setStartDate(start);
-                     	 mline.setEndDate(end);
-                          Date alg = getCalXML(start); 
+                    	  Date alg = getCalXML(start); 
                           Date lopp = getCalXML(end); 
+                          
+                    	  start = start.substring(0,10).substring(5);
+                    	  end = end.substring(0,10).substring(5);
+                    	  mline.setStartDate(start);
+                     	  mline.setEndDate(end);
                           
                           long diff = lopp.getTime() - alg.getTime();
                           float days = (diff / (1000*60*60*24));
@@ -847,11 +838,11 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
            Document doc = db.parse(in,handler);
            Node root = getNode(doc, "transport");      
       
-       	Node read = getNode(root, "priceformulas");
+       	Node read = getNode(root, "priceformularows");
            for (int i = 0; i < read.getChildNodes().getLength(); i++){
            	  Node rida = read.getChildNodes().item(i);
            	  try{
-           		  if(rida.getNodeName().equals("priceformula")){
+           		  if(rida.getNodeName().equals("priceformularow")){
            			 String custID = " ";
                      String clGroup = " ";
                      String prodID = null;
@@ -866,14 +857,13 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
                     	  }catch(Exception rr) {
                     		 // System.out.println("jama " + i + " " + clGroup);
                     	  }
-                    	  
-                        
+                         
                         try { 
-                         start =  rida.getAttributes().getNamedItem("start_date").getNodeValue();
+                         start =  rida.getAttributes().getNamedItem("date1").getNodeValue();
               	           }catch(Exception aa){ }
               	        
                         try{
-                           end =  rida.getAttributes().getNamedItem("end_date").getNodeValue();
+                           end =  rida.getAttributes().getNamedItem("date2").getNodeValue();
                   	      }catch(Exception aa){ }
                          
                     
@@ -1223,7 +1213,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
  
-     makeData();
+   
     // System.out.println( getPricelists("1").toString());
    //  this.getProducts(null);
      //File ff = new File(this.getExcelDir() + "graafikud.xlsx");
@@ -1233,8 +1223,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
      agent1 = new TreeMap();
  	try {
  		  File f = new File (getDir() + "kliendid.xml");
- 	     
- 	       // System.out.println(f.getAbsolutePath());
+ 	      
  	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
  	     DocumentBuilder db;
  		db = dbf.newDocumentBuilder();      	
@@ -1242,13 +1231,16 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
      	String handler = null;
          Document doc = db.parse(in,handler);
          Node root = getNode(doc, "transport"); 
-     	Node read = getNode(root, "customers");
-     	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
+     	 Node read = getNode(root, "customers");
+     	
          for (int i = 0; i < read.getChildNodes().getLength(); i++){
          	  Node rida = read.getChildNodes().item(i);
+         	 if(rida.getNodeName().equals("customer")){
          	  try{	
          		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
+         		// System.out.println("sm " + salesman);
          		 salesman = Converter.deCode(salesman);
+         		 if(salesman.length() > 0) {
          		 Agent sm = new Agent (salesman);
          		 sm.setName(salesman);
                   tm.put(salesman, sm); 
@@ -1264,12 +1256,12 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	         			//System.out.println("balance " + debt);
 	         		   }
       		      }
-	         			 String price_list = ensureLen(rida.getAttributes().getNamedItem("price_list").getNodeValue());         	
+	         			 String price_list = ensureLen(rida.getAttributes().getNamedItem("priceformula").getNodeValue());         	
 		         	
 		         	      if(!parent.getEmail(salesman).equals("") &&  !pricelists.contains(price_list)){
 	 	         		     pricelists.add(price_list.trim()); 
 	 	         		   }
-		         	      price_list =  rida.getAttributes().getNamedItem("price_list_special").getNodeValue() ;         	
+		         	      price_list =  rida.getAttributes().getNamedItem("specialpriceformula").getNodeValue() ;         	
 				         	
 		         	      StringTokenizer st  = new StringTokenizer(price_list,",");
 		         	      if(st.hasMoreTokens()){
@@ -1280,10 +1272,11 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		 	         		   }
 			         	      
 		         	      }
-	         	  
+         		 }
          	  }catch(Exception e){
          		 // e.printStackTrace();
          	  }
+         	 }
          }
          
  	}catch(Exception e){
@@ -1301,12 +1294,9 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
      if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
     	  fixedLines = getFixedAssortmentData1();
     	     }
-   
-     
-     Agent aaa = new Agent ("LADU");
-     aaa.setName("LADu");
-     tm.put("LADU", aaa);
-
+    // loadInvoices(WEEKS);
+    // makeData();
+     makeDebtlist();
     // setBulkSales(tm);
      return tm;
    }
@@ -1356,7 +1346,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
            }
 
            System.out.println("Response Body:");
-           System.out.println(response.toString());
+          //.out.println(response.toString());
        }
 
        connection.disconnect();
@@ -1383,172 +1373,71 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 
 
    
+   public void downloadLastWeeks(int weeks) {
+
+	    DateTimeFormatter apiFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	    WeekFields weekFields = WeekFields.ISO;
+
+	    LocalDate today = LocalDate.now();
+
+	    for (int i = 0; i < weeks; i++) {
    
+	        LocalDate targetWeek = today.minusWeeks(i);
+        LocalDate start = targetWeek.with(weekFields.dayOfWeek(), 1);
+        LocalDate end = targetWeek.with(weekFields.dayOfWeek(), 7);
+        String startStr = start.format(apiFormat);
+	        String endStr = end.format(apiFormat);
+        int year = targetWeek.get(weekFields.weekBasedYear());
+	        int week = targetWeek.get(weekFields.weekOfWeekBasedYear());
+
+	        String yyyyww = String.format("%d%02d", year, week);
+
+	        File f = new File(this.getDir() + "invoice" + yyyyww + ".xml");
+	        System.out.println(this.getDir() + "invoice" + yyyyww + ".xml" + " " + f.exists());
+	        
+	       // if(!f.exists() || i < WEEKS) {
+	         getUrlData( "&get=1&what=invoice&date1=" + startStr + "&date2=" + endStr,
+	            "invoice" + yyyyww + ".xml" );
+	        //}
+	        
+	    }
+	}
+   
+   
+
    
    private void makeData(){
 
 	     
        try{
+    	   
     	   boolean aaa = false;
     	   
+    	   downloadLastWeeks(WEEKS);
     	 
-    	   this.getProducts(null);
-    	   
-           System.exit(0);
+    	  
+    	   aaa = getUrlData("&get=1&what=customer" , "kliendid.xml");
+           System.out.println("Kliendid tehtud " + aaa);
            
            aaa = getUrlData("&get=1&what=stocklevel" , "laoseis.xml");
            System.out.println("laoseis tehtud " + aaa);
-	   
-
-    	   String tt = "&get=1&what=item";
-    	   if(getParent().getProps().getProperty("stockcode") != null){
-              	tt = tt + "&stock=" +  getParent().getProps().getProperty("stockcode");
-    		  }
     	   
-    		aaa = getUrlData(tt , "tooted.xml");
-            System.out.println("tooted tehtud " + aaa);
- 	   
-    	   
-    	   if(getParent().getProps().getProperty("stockcode1") != null){
-        	   tt = "&get=1&what=item&stock=" +  getParent().getProps().getProperty("stockcode1");
-    	   	aaa = getUrlData(tt ,  "tooted" + getParent().getProps().getProperty("stockcode1") + ".xml");
-    	    System.out.println("tooted teine ladu tehtud " + aaa + " " + getParent().getProps().getProperty("stockcode1"));
-    	   }
-       	   
-   	       
-           
+    		aaa = getUrlData("&get=1&what=item" , "tooted.xml");
+             System.out.println("tooted tehtud " + aaa);
+ 	      
         	aaa = getUrlData("&get=1&what=priceformularow" , "hinnakiri.xml");
-            System.out.println("priceformularow tehtud " + aaa);
+             System.out.println("priceformularow tehtud " + aaa);
             	   
-       	 aaa = getUrlData("&get=1&what=itemclass" , "tootegrupid.xml");
-       	   System.out.println("Tootegrupid tehtud " + aaa);
+       	    aaa = getUrlData("&get=1&what=itemclass" , "tootegrupid.xml");
+       	     System.out.println("Tootegrupid tehtud " + aaa);
            
-       	aaa = getUrlData("&get=1&what=supplier" , "supplier.xml");
-           System.out.println("Supplier tehtud " + aaa);
-       	   
-
-           StringBuffer  inputLineBuf = new StringBuffer();
-          try {
-        	  
-        
-
-         String  httpsURL = logurl + "/xmlcore.asp?get=1&what=priceformula";
-        URL   myurl = new URL(httpsURL);
-        
-        HttpsURLConnection   con = (HttpsURLConnection)myurl.openConnection();
-           con.setConnectTimeout(200000); // 10 seconds
-           con.setReadTimeout(200000);
-           InputStream  ins = con.getInputStream();
-           InputStreamReader  isr = new InputStreamReader(ins,"UTF-8");
-           BufferedReader in = new BufferedReader(isr);
-
-         String  inputLine = "";
-
-
-
-
-// kui on olemas ka teine ladu siis teeme selle seisu ka.
-           if(getParent().getProps().getProperty("stockcode1") != null){
-        	   httpsURL = logurl  +  "/xmlcore.asp?get=1&what=item&stock=" +  getParent().getProps().getProperty("stockcode1");
-        	   
-        	   System.out.println(httpsURL);
-               myurl = new URL(httpsURL);
-               con = (HttpsURLConnection)myurl.openConnection();
-               ins = con.getInputStream();
-               isr = new InputStreamReader(ins,"UTF-8");
-               in = new BufferedReader(isr);
-
-               inputLine = "";
-              inputLineBuf = new StringBuffer();
-              while ((inputLine = in.readLine()) != null){
-              	inputLine = Converter.enCodeEst(inputLine);
-              	inputLineBuf.append(inputLine.replaceAll("<item","\n<item" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
-              }
-
-              in.close();
-              
-              if(inputLineBuf.length() > 2){
-            	  String str = inputLineBuf.toString();
-                  if(str.startsWith("True")) {
-                 	 str = str.substring(4);
-                  }
-                    try {
-                  	  File f = new File (getDir() + "tooted" + getParent().getProps().getProperty("stockcode1") +".xml");
-                  	  if(f.exists())f.delete();
-                  	Converter.saveFileInUTF8(getDir() + "tooted" + getParent().getProps().getProperty("stockcode1") + ".xml", str);
-                 	
-              	  }catch (Exception ex) {
-              		ex.printStackTrace();
-              	  }
-               }
-        	   
- 		  }
-
-           //lõpeb toodetega tegelemine 
-
-           System.out.println("Tooted tehtud" );
-           //algab kliendi faili moodustamine
-           
-           httpsURL = logurl  +  "/xmlcore.asp?get=1&what=customer";
-           myurl = new URL(httpsURL);
-           con = (HttpsURLConnection)myurl.openConnection();
-           ins = con.getInputStream();
-           isr = new InputStreamReader(ins,"UTF-8");
-           in = new BufferedReader(isr);
-
-           inputLine = "";
-          inputLineBuf = new StringBuffer();
-          while ((inputLine = in.readLine()) != null){
-          	inputLine = Converter.enCodeEst(inputLine);
-           	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ));	
-          	
-       //3977eraisik, lv3979, 3978leedu       System.out.println(inputLine);	
-          }
-
-          in.close();
-          
-          if(inputLineBuf.length() > 2){
+       	    aaa = getUrlData("&get=1&what=supplier" , "supplier.xml");
+             System.out.println("Supplier tehtud " + aaa);
              
-                 try {
-                    String res = "";
-                    String str = inputLineBuf.toString();
-                    if(str.startsWith("True")) {
-                   	 str = str.substring(4);
-                    }
-               	  StringTokenizer st = new StringTokenizer(str,"\n");
-               	  while(st.hasMoreTokens()){
-               		String line = st.nextToken();
-               		//if(line.indexOf("\"10173\"") == -1 && line.indexOf("\"13543\"") == -1 && line.indexOf("<contact code=\"2575\"") == -1 ){
-               			res = res + line + "\n";
-               		//}
-               	  }
-               	  File f = new File (getDir() + "kliendid.xml");
-               	  if(f.exists())f.delete();
-               	 
-               	Converter.saveFileInUTF8(getDir() + "kliendid.xml", str);
-              	
-           	  }catch (Exception ex) {
-           		ex.printStackTrace();
-           	  }
-            }
-          
-       }catch(Exception e){
-       	e.printStackTrace();
-       }
-       
-       }catch(Exception e){
-          	e.printStackTrace();
-          }
-          
+       } catch (Exception ee){
+   		 ee.printStackTrace();
+		}
 
-   	
-
-       System.out.println("kliendid tehtud" );
-       
-       
-       
-	   
-	   
    }
 
         	  private Node getNode(Node rt, String s){
@@ -1592,18 +1481,14 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	   TreeMap tm = new TreeMap();
 	 
 	  if(!useold) {
-		  makeData();
+		 // makeData();
 	  }
-	//   System.out.println("kliendid a");
-		
+			
 		 
 	     this.customers = new ArrayList();
-	   
-	     
 	     this.debtList = makeDebtlist();
 	     
-	   //  System.out.println("kliendid b");  
-	     
+	 //    System.exit(0);
 	   try {
 	 		  File f = new File (getDir() + "kliendid.xml");
 	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -1611,10 +1496,57 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	 		db = dbf.newDocumentBuilder();      	
 	     	FileInputStream in = getCleanInputStream(f);
 	     	String handler = null;
-	         Document doc = db.parse(in,handler);
-	         Node root = getNode(doc, "transport");      
-	      //   System.out.println(root);
+	        Document doc = db.parse(in,handler);
+	        Node root = getNode(doc, "transport");      
 	     	Node read = getNode(root, "customers");
+	     	
+	     	HashMap<String, Customer> payersDebt = new HashMap<String, Customer>();
+	     	
+	     	  for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	         	  Node rida = read.getChildNodes().item(i);
+	         	  if(rida.getNodeName().equals("customer")){
+	         		 String name = null;
+	         		boolean addaadr = true;
+		         	  try{
+		         		
+		         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
+		         		  Customer cust = new Customer(id);
+		         		 String vatregno = "";
+			         		try{ 
+			         			vatregno =  rida.getAttributes().getNamedItem("vatregno").getNodeValue(); 
+			 	         		cust.setVatnr(vatregno);
+			 	         		cust.setPayer(vatregno);
+			 	         		
+
+				         		Double limit = 0.0;
+				         		try{ 
+				         			limit =  Double.parseDouble(rida.getAttributes().getNamedItem("creditlimit").getNodeValue()); 
+				         			if(limit > 0)
+				 	         		cust.setCredit(limit+"");
+				 	         	 }catch(Exception ee){
+				         		 }
+		                         
+				         	
+				         		Double debt = null;
+				         		try{ 
+				         			debt =  Double.parseDouble(rida.getAttributes().getNamedItem("balance").getNodeValue()); 
+				         			if(debt > 0) {
+				 	         		cust.setUsedCredit(debt);
+				         			payersDebt.put(vatregno, cust);
+				         			}
+				 	         	 }catch(Exception ee){
+				         		 }
+			 	         		
+			 	         	 }catch(Exception ee){
+			         		 }
+	                         
+		         	  }catch(Exception e) {
+		         		  
+		         	  }
+	         	  }
+	     	  }
+	     	  
+	     	 read = getNode(root, "customers");
 	     	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
 	         for (int i = 0; i < read.getChildNodes().getLength(); i++){
 	         	  Node rida = read.getChildNodes().item(i);
@@ -1640,27 +1572,21 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		         			  
 		         		  }
 		         		
-		         		if(this.usedCredit.get(id) != null){
-		         			customer.setUsedCredit(Double.parseDouble(usedCredit.get(id)+ ""));
-		         		}
-		         		
-		         		if(this.dueSums.get(id) != null){
-		         			customer.setDebt(Double.parseDouble(dueSums.get(id)+ ""));
-		         		}
+		         	
 		         		
 		         		 String country = "Estonia";
 		       		  if(getParent().getProps().getProperty("country") != null){
 		       			  country = getParent().getProps().getProperty("country");
 		       		  }
-		         		
+		       		//deliveryaddress1="Klonėnų vs. 1" deliveryaddress2="19156 Širvintų r" deliveryaddress3="Leedu" country="LT"
 		         		 String kname = name;
 		         		 String sendaadr = ""; 
 		         		 
 		         		try { 
-		 	         		  sendaadr =  rida.getAttributes().getNamedItem("send_address_street").getNodeValue();
+		 	         		  sendaadr =  rida.getAttributes().getNamedItem("deliveryaddress1").getNodeValue();
 		 	         		  String linn = "";
 		 	         		try {
-				 	         	    linn =  rida.getAttributes().getNamedItem("send_address_county").getNodeValue().replaceAll(";", ","); 
+				 	         	    linn =  rida.getAttributes().getNamedItem("deliveryaddress2").getNodeValue().replaceAll(";", ","); 
 				 	         	    sendaadr = sendaadr + " " + linn;
 				 	         		customer.restCity = linn;
 				 	         		}catch(Exception eed){
@@ -1671,7 +1597,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		 	         		
 		 	         		String maa = "";
 		 	         		try{
-		 	         	      maa =  rida.getAttributes().getNamedItem("send_address_country").getNodeValue().replaceAll(";", ","); 
+		 	         	      maa =  rida.getAttributes().getNamedItem("deliveryaddress3").getNodeValue().replaceAll(";", ","); 
 		 	         		  country = maa;
 
 		 	         		  if("true".equals(getParent().getProps().getProperty("use.country"))){
@@ -1692,13 +1618,13 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		         		
 		         		String asula = "";
 		         		try{ 
-		 	         		  asula =  rida.getAttributes().getNamedItem("send_address_county").getNodeValue().replaceAll(";", ","); 
+		 	         		  asula =  rida.getAttributes().getNamedItem("deliveryaddress2").getNodeValue().replaceAll(";", ","); 
 		 	         		sendaadr = sendaadr + " " + asula;
 		 	         		customer.restCity = asula; 
 		 	         	
 		 	         		String maa = "";
 		 	         		try{
-		 	         	  maa =  rida.getAttributes().getNamedItem("send_address_country").getNodeValue().replaceAll(";", ","); 
+		 	         	  maa =  rida.getAttributes().getNamedItem("deliveryaddress3").getNodeValue().replaceAll(";", ","); 
 		 	         		country = maa;
 		 	         		}catch(Exception eed){
 			         		 }
@@ -1716,17 +1642,48 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		 	         	 }catch(Exception ee){
 		         		 }
                          
-		         		
-
-		         		String limit = "";
+		         		String vatregno = "";
 		         		try{ 
-		         			limit =  rida.getAttributes().getNamedItem("limit").getNodeValue(); 
-		 	         		customer.setCredit(limit);
+		         			vatregno =  rida.getAttributes().getNamedItem("vatregno").getNodeValue(); 
+		 	         		customer.setVatnr(vatregno);
+		 	         		customer.setPayer(vatregno);
 		 	         	 }catch(Exception ee){
 		         		 }
                          
 		         		
+
+		         		String limit = "";
+		         		try{ 
+		         			limit =  rida.getAttributes().getNamedItem("creditlimit").getNodeValue(); 
+		 	         		customer.setCredit(limit);
+		 	         	 }catch(Exception ee){
+		         		 }
+                         
+		         		Double used = null;
+		         		try{ 
+		         			used =  Double.parseDouble(rida.getAttributes().getNamedItem("balance").getNodeValue()); 
+		 	         		customer.setUsedCredit(used);
+		 	         	 }catch(Exception ee){
+		         		 }
 		         		
+		         		
+		         		
+		         		Customer cust = payersDebt.get(customer.getPayer()); 
+		         		if( cust != null) {
+		         			if(cust.getUsedCredit() != 0) {
+		         				customer.setUsedCredit(cust.getUsedCredit());
+		         			}
+		         			if(cust.getCredit().trim().length() > 0) {
+		         				customer.setCredit(cust.getCredit());
+		         			}
+		         		}
+		         
+		         		if(this.dueSums.get(id) != null){
+		         			customer.setDebt(Double.parseDouble(dueSums.get(id)+ ""));
+		         		}
+		         		if(this.dueSums.get(customer.getPayer()) != null){
+		         			customer.setDebt(Double.parseDouble(dueSums.get(customer.getPayer())+ ""));
+		         		}
 
 		         		try{ 
 		         			double discount  =  Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
@@ -1737,35 +1694,16 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		         		 }
 		         		
 		         		
-		         		 String aadr = "";
-		         		 String aadr2 = "";
-		         		 try{ 
-		 	         		  aadr =  rida.getAttributes().getNamedItem("address_street").getNodeValue(); 
-		 	         		  aadr2 =  rida.getAttributes().getNamedItem("address_county").getNodeValue(); 
-			 	         	  customer.restStreet = aadr;
-			 	         	  customer.restCity = aadr2;
-		 	         		  customer.setAddress(Converter.adressLink(aadr, country));
-		 	         		  
-		 	         		  if("true".equals(getParent().getProps().getProperty("use.county")) && addaadr){
-		 	         			 name = name + " " + aadr;
-		 	         		  }
-		 	         			 
-		 	         		  
-		         		 }catch(Exception ee){ }
+		         		
 		         		 
 		         		 
 		         		  customer.setName(name);
 		         		 
-		         		try{ 
-		         			country =  rida.getAttributes().getNamedItem("address_country").getNodeValue(); 
-		 	         		  customer.setCountry(country);
-			 	         	  customer.setAddress(Converter.adressLink(aadr, country));
-		         		 }catch(Exception ee){
-			 		         		 }
-		         		 
+		         		
+		         		 //contact="Justyna Marciniak-Ashtiani" phone="+358503235307" email="justyna.marciniak-ashtiani@edenred.com"
 		         		
 		         		 try{ 
-		 	         		 String yldphone =  rida.getAttributes().getNamedItem("telephone").getNodeValue();
+		 	         		 String yldphone =  rida.getAttributes().getNamedItem("phone").getNodeValue();
 		 	         		 if(yldphone.trim().length() > 0){
 		 	            		customer.setPersonalData((yldphone).replaceAll(";", ","));
 		 	            		customer.restPhone = yldphone;
@@ -1773,51 +1711,32 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		 	     		 }catch(Exception ee){
                         	 customer.setAddress(""); 
 		         		 }
-
-		         		  
-		         		  try{
-		         			  
-		         			 for (int r = 0; r < rida.getChildNodes().getLength(); r++){
-		         			  Node nn = rida.getChildNodes().item(r);
-		       	    		 if(nn.getNodeName().equals("contact")){
-		         				 String cname =  nn.getAttributes().getNamedItem("name").getNodeValue();
-		         				String ctel =  nn.getAttributes().getNamedItem("telephone").getNodeValue();
-		         				customer.restPerson = cname;
-		         				customer.restPerPhone = ctel;
-		         				if(customer.getPersonalData().trim().length() < 1){
-		         					customer.setPersonalData((cname + " " + ctel).replaceAll(";", ","));
-			         			}else{
-			         				String lisa = (cname + " " + ctel).replaceAll(";", ",");
-			         				if(customer.getPersonalData().indexOf(ctel) != -1){
-			         					lisa = (cname ).replaceAll(";", ",");
-			         				}
-		         				    customer.setPersonalData(customer.getPersonalData() + "|" + lisa);
-		         				}
-		         				String cemail =  nn.getAttributes().getNamedItem("email").getNodeValue();
-		         				customer.restPerEmail = cemail;
-		         				
-		  	         		
-		  	         		 }}
-		         		  }catch(Exception r){
-		         			  
-		         		  }
-		         		      		  
-		         		  try{
-			         			 String city =  rida.getAttributes().getNamedItem("send_address_county").getNodeValue().replaceAll(";", ",") ;         	
-				         		  customer.setCity(city);
-			         		  }catch(Exception e){
-			         			 try{
-				         			 String city =  rida.getAttributes().getNamedItem("address_county").getNodeValue().replaceAll(";", ",") ;         	
-					         		  customer.setCity(city);
-			         			}catch(Exception es){
-
-				         			  customer.setCity(" ");	
-			         			}
-			         		  }
 		         		 
+		         		try{ 
+		 	         		 String kont =  rida.getAttributes().getNamedItem("contact").getNodeValue();
+		 	         		 if(kont.trim().length() > 0){
+		 	         			customer.restPerson = kont;
+		 	         			
+		 	         			if(customer.getPersonalData().trim().length() < 1){
+		         					customer.setPersonalData((kont).replaceAll(";", ","));
+			         			}else{
+			         				String lisa = (kont).replaceAll(";", ",");
+			         			    customer.setPersonalData(customer.getPersonalData() + "|" + lisa);
+		         				}
+		 	         			
+		 	         			String cemail =  rida.getAttributes().getNamedItem("email").getNodeValue();
+		         				customer.restPerEmail = cemail;
+		 	  		         }
+		 	     		 }catch(Exception ee){
+                       	 customer.setAddress(""); 
+		         		 }
+
+		         		  
+		         		
+		         		
 		         		  
 		         		  try{
-		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("price_list").getNodeValue());         	
+		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("priceformula").getNodeValue());         	
 			         		   customer.setGroup(Converter.deCode(price_list));
 			         		  if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
 			       			   customer.addFixSortCode(Converter.deCode(price_list)); 
@@ -1827,7 +1746,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		         		  
 		
 		         		  try{
-		         			  String	 price_list =  rida.getAttributes().getNamedItem("price_list_special").getNodeValue() ;
+		         			  String	 price_list =  rida.getAttributes().getNamedItem("specialpriceformula").getNodeValue() ;
 		         			  
 		         			  StringTokenizer ss = new StringTokenizer(price_list,",");
 		         			  while (ss.hasMoreTokens()){
@@ -1848,26 +1767,18 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 			         		  }catch(Exception e){
 			         		  }
 		         		  
-     		
+     		try {
 	         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
 	         		      customer.addAgent(new Agent(Converter.deCode(salesman)));
-	         		      if(salesman.equals("KATRIN.S")) {
-	         		    	   customer.addAgent(new Agent(Converter.deCode("KATRIN")));
-	         		      }
-	         		      
-	         		      if(salesman.equals("ANNELI.S")) {
-	         		    	   customer.addAgent(new Agent(Converter.deCode("ANNELI_L")));
-	         		      }
-	         		      customer.setMainAgent(Converter.deCode(salesman));
+	         		     
 	         		      String sm = parent.getEmail(salesman);
-	         		      
 	         		    
 	                  if(sm != null && sm.length() > 1){
 	                	//  System.out.println(sm);
 	            	      tm.put(customer.getName(), customer);
 	                      this.customers.add(customer.getID());
 	                  }
-	         	
+     		  }catch(Exception e){}
 		         	  }catch(Exception e){
 	         		
 	         		  e.printStackTrace();
@@ -1877,16 +1788,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	 	}catch(Exception e){
 	 		e.printStackTrace();
 	 	}
-	    
-	   if(rcompany != null){
-	//    	  Converter.sendCustomerJson(tm, rcompany, false, null, null);
-		    }
-	     Customer cc = new Customer("1777");
-	     cc.setName("Ladu tagastus");
-	     cc.addAgent(new Agent("LADU"));
-	   tm.put("Ladu tagastus", cc);
-	   
-	   System.out.println("kliendid b");
+	
 	   
 	   if(tm.size()< 2) {
 		   System.exit(0);
@@ -1955,92 +1857,6 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		
 	  }
 
-   private Vector getCP(String custid , String number, String date ){
-
-	   Vector result = new Vector();
-	   try{
-		   File cpdata = new File("cpdata/" + number+".vec");
-		   if(cpdata.exists()) {
-			   Vector vec = (Vector)Converter.readObject("cpdata/" + number+".vec");
-			   for(int i = 0; i < vec.size(); i++) {
-				   CustProd cp = (CustProd)vec.elementAt(i);
-				   if(!prodCodes.contains(cp.getProdID())){
-				        prodCodes.add(cp.getProdID());	
-			        }
-			   }
-			   return vec ;
-		   }else {
-			   
-		 
-			String httpsURL = logurl  +  "/xmlcore.asp?what=invoice_row&get=1&number=" + number;
-		       // System.out.println("httpsURL " + httpsURL);
-				URL myurl = new URL(httpsURL);
-		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-		        InputStream ins = con.getInputStream();
-		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-		        BufferedReader in = new BufferedReader(isr);
-		        
-		        String inputLine;
-		        StringBuffer inputLineBuf = new StringBuffer();
-		        while ((inputLine = in.readLine()) != null){
-		        	inputLine =Converter.enCodeEst(inputLine);
-		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ));
-		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
-		        	while (st.hasMoreTokens()){
-		        		
-		        		String line = st.nextToken();
-		        		int ind =  line.indexOf("item=") ;
-		        		String toode = "";
-			        	if(ind != -1){
-			        		toode = line.substring(ind + 6);
-			        		toode = toode.substring(0,toode.indexOf("\""));
-			        	
-			        	}
-		        
-			        	
-			        	ind =  line.indexOf("quantity=") ;
-		        		double kogus = 0;
-		        		String kkk = "";
-			        	if(ind != -1){
-			        		kkk = line.substring(ind + 10);
-			        		kkk = kkk.substring(0,kkk.indexOf("\""));
-			        		 kogus = Double.parseDouble(kkk);
-			        	}
-			        	
-			        	ind =  line.indexOf("total=") ;
-			        	double hind = 0;
-		        		 kkk = "";
-			        	if(ind != -1){
-			        		kkk = line.substring(ind + 7);
-			        		kkk = kkk.substring(0,kkk.indexOf("\""));
-			        		
-			        		 hind = Double.parseDouble(kkk)/kogus;
-			        		// System.out.println("toode "  + line + " "+ toode + " " + hind);
-			        	}
-			        	
-		        if(toode != null && toode.trim().length() > 0){
-			        result.add(new CustProd(custid, toode, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
-			        if(!prodCodes.contains(toode)){
-				        prodCodes.add(toode);	
-			        }
-		        }
-		         }
-		        	
-		        }
-		        in.close();
-		      //  System.out.println("buffer " + result);
-		        Converter.saveObject(result, "cpdata/" + number + ".vec");
-		   }
-		   
-		   
-		   
-		   
-	   }catch(Exception e){
-		   e.printStackTrace();
-		   return null;
-	   }
-	   return result;
-   }
 
    HashSet prodCodes = null;
    
@@ -2109,7 +1925,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
    private HashMap eanProds = null;
    
    public TreeMap getProducts(Agent agent){
-	   System.out.println("tooted a");
+	 
 	   TreeMap otherStocks = this.getProductsOther();
 	   eanProds = new HashMap();
 	   
@@ -2380,8 +2196,13 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
        	 
        	 try{
 			 url = (rida.getAttributes().getNamedItem("url").getNodeValue());
+			 if(url.contains("?")) {
+				 url = url.substring(0,url.lastIndexOf("?"));
+			 }
      	     } catch(Exception aa){}	   
 		 
+       	// System.out.println(url);
+       	 
        	  if(fixedurl != null) {
        		 prod.setPhotoid("phurl:" +fixedurl + id + ".jpg" ); 
   	      } else {
@@ -2398,8 +2219,8 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
        	   }
        		     
        	  
-       		        	  System.out.println(prod.getID() + " " + prod.getName() + " " +  prod.getStock() + " " + prod.getUnit() + " " + prod.getEAN() + " " +  prod.getPrice() + " " + prod.getInCases() + " " +prod.getGroup()
-       		        	  + " " + prod.getPhotoid());
+       		        	//  System.out.println(prod.getID() + " " + prod.getName() + " " +  prod.getStock() + " " + prod.getUnit() + " " + prod.getEAN() + " " +  prod.getPrice() + " " + prod.getInCases() + " " +prod.getGroup()
+       		        	  //+ " " + prod.getPhotoid());
        		        	  
        		        	
        		         	if(prodCodes != null && !prodCodes.contains(prod.getID())){
@@ -2772,127 +2593,107 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
    private Hashtable usedCredit = new Hashtable();
 
    public Vector makeDebtlist(){
-	   //1.teeme klientide arvete nimekirja .
+	   
+	   
 	   Vector debts = new Vector();
-	   Enumeration enums = this.custDebtUsed.elements();
-	   while(enums.hasMoreElements()){
-		String custid = (String)enums.nextElement();
-		
-		   try{
-			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
-				
-			 	String httpsURL = logurl  +  "/xmlcore.asp?what=invoice&get=1&orderer=" + cuurl;
-		     //  System.out.println(httpsURL);
-			 	Converter.doTrustToCertificates();
-			 	URL myurl = new URL(httpsURL);
-		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-		        InputStream ins = con.getInputStream();
-		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-		        BufferedReader in = new BufferedReader(isr);
+	   
+		    DateTimeFormatter apiFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		    WeekFields weekFields = WeekFields.ISO;
+		    LocalDate today = LocalDate.now();
 
-		        String inputLine;
-		        StringBuffer inputLineBuf = new StringBuffer();
-		        while ((inputLine = in.readLine()) != null){
-		        	inputLine = Converter.enCodeEst(inputLine);
-		        //	System.out.println(inputLine);
-		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\"l\"","\"L\""));
-		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
-		        	while (st.hasMoreTokens()){
-		        		
-		        		String line = st.nextToken();
-		        		String number = "";
-			        	String date = "";
-			        	String duedate = "";
-			        	String volg = "";
-			        	String payer = "";
-		        		
-			        	int ind =  line.indexOf("invoice number=") ;
-		        		if(ind != -1){
-			        		 number = line.substring(ind + 16);
-			        		 number = number.substring(0,number.indexOf("\""));
-			        	}
-			        	
-			        	ind =  line.indexOf("date=") ;
-				        	if(ind != -1){
-				        		 date = line.substring(ind + 6);
-				        		 date = date.substring(0,date.indexOf("\""));
-				        	}
-				        		
-				        	
-			        	 ind =  line.indexOf("due_date=") ;
-			        	if(ind != -1){
-			        		 duedate = line.substring(ind + 10);
-			        		duedate = duedate.substring(0,duedate.indexOf("\""));
-			        	 }
-			        	
-			        	 ind =  line.indexOf("regno=") ;
-				        	if(ind != -1){
-				        		 payer = line.substring(ind + 7);
-				        		 payer = payer.substring(0,payer.indexOf("\""));
-				        	 }
-				        	
-			        	
-			        	ind =  line.indexOf("balance=") ;
-				        	if(ind != -1){
-				        		 volg = line.substring(ind + 9);
-				        		 volg = volg.substring(0,volg.indexOf("\""));
-				        	 }
-				        //	System.out.println(custid  + " " + number + " " + date  + " " + duedate  + " " + volg );	
-				       
-			        	try{
-			        		 double vv = Double.parseDouble(volg);
-			        		 if(vv != 0){
-			        			 if(isDueDate(duedate)){
-						        		     Debt dd = new Debt();
-						     				  dd.setCustID(custid);
-						     				  
-						     				  dd.setDoknr(number);
-						     				  dd.setDate(getDate(date));
-						     				  dd.setDuedate(getDate(duedate));
-						     				  
-						     				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
-						     				  dd.setDue(ff + "");
-						     				  dd.setSum(vv);
-						     				//	System.out.println("aaa" + date + " " + duedate + " " + number + " " + custid + " " +ff);	
-								        			  
-						     				  if(dueSums.get(custid) != null){
-						     					  double ss = Double.parseDouble(dueSums.get(custid) + "")+ vv ;
-						     					 dueSums.put(custid, ss);    
-						     				  }else{
-						     					 dueSums.put(custid, volg); 
-						     				  }
-						     				 debts.add(dd);
+		    for (int i = 0; i < WEEKS; i++) {
+	  
+		   LocalDate targetWeek = today.minusWeeks(i);
+	       LocalDate start = targetWeek.with(weekFields.dayOfWeek(), 1);
+	       LocalDate end = targetWeek.with(weekFields.dayOfWeek(), 7);
+	       String startStr = start.format(apiFormat);
+		        String endStr = end.format(apiFormat);
+	            int year = targetWeek.get(weekFields.weekBasedYear());
+		        int week = targetWeek.get(weekFields.weekOfWeekBasedYear());
 
-									        		
-						        	 }
-			        			 
+		        String yyyyww = String.format("%d%02d", year, week);
 
-			     				  if(usedCredit.get(custid) != null){
-			     					  double ss = Double.parseDouble(usedCredit.get(custid) + "")+ vv ;
-			     					 usedCredit.put(custid, ss);    
-			     				  }else{
-			     					 usedCredit.put(custid, volg); 
-			     				  }
-			        			 
-			        		 }
-				        	
-				        	  
-			        	}catch(Exception e){
-			        		//e.printStackTrace();
-			        	}
-				        
-			        	 
-		        	}           	
-		        }
-		      //  System.out.println(inputLineBuf);
-		        in.close();
+		        File f = new File(this.getDir() + "invoice" + yyyyww + ".xml");
+		        System.out.println("invoices cp " + f.getName() + " " + f.exists());
+		 	   
 		        
-		       
-		   } catch (Exception a){
-			 //  a.printStackTrace();
-		   }
-		   
-	   }
+		        if(f.exists()) {
+		        	try {
+		        		
+		        		
+		        		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		        		DocumentBuilder db = dbf.newDocumentBuilder();
+
+		        		try (FileInputStream in = getCleanInputStream(f)) {
+		        		    Document doc = db.parse(in);
+		        		    doc.getDocumentElement().normalize();
+
+		        		    NodeList invoiceList = doc.getElementsByTagName("invoice");
+
+		        		    for (int iu = 0; iu < invoiceList.getLength(); iu++) {
+		        		        Node inv = invoiceList.item(iu);
+
+		        		        if (inv.getNodeType() == Node.ELEMENT_NODE) {
+
+		        		            Element invoiceElement = (Element) inv;
+
+		        		            String number = invoiceElement.getAttribute("number");
+		        		            String date = invoiceElement.getAttribute("date");
+		        		            String duedate = invoiceElement.getAttribute("duedate");
+		        		            String custid = invoiceElement.getAttribute("customercode");
+		        		            String payer = invoiceElement.getAttribute("vatregno");
+		        		            Double volg = 0.0;
+		        		            try {
+		        		              volg = Double.parseDouble(invoiceElement.getAttribute("balance"));
+		        		            } catch(Exception r) {}
+		        		          //  if(payer.equals("EE101795531"))
+		    		        		//	 System.out.println("arve " + number + " " + payer+ " " + volg + " " + isDueDate(duedate));
+		    	                   
+		    	               	try{
+		    		        		 double vv = volg;
+		    		        		 if(vv != 0){
+		    		        			
+		    		        			 if(isDueDate(duedate)){
+		    					        		     Debt dd = new Debt();
+		    					     				  dd.setCustID(custid);
+		    					     				  
+		    					     				  dd.setDoknr(number);
+		    					     				  dd.setDate(getDate(date));
+		    					     				  dd.setDuedate(getDate(duedate));
+		    					     				  if(payer != null) {
+		    					     				   dd.setPayerID(payer);
+		    					     				  }
+		    					     				  
+		    					     				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
+		    					     				  dd.setDue(ff + "");
+		    					     				  dd.setSum(vv);
+		    					     				  
+		    					     				  
+								     				  if(dueSums.get(payer) != null){
+								     					  double ss = Double.parseDouble(dueSums.get(payer) + "")+ vv ;
+								     					 dueSums.put(payer, ss);    
+								     				  }else{
+								     					 dueSums.put(payer, volg); 
+								     				  }
+		    					     				 debts.add(dd);
+				        		
+		    					        	 }
+		    		        		 }
+		    			         	  
+		    		        	}catch(Exception e){
+		    		        		//e.printStackTrace();
+		    		        	}
+		        		   }
+		        		 }	
+		        		}
+		        		        	
+		        	} catch(Exception e) {
+		        		e.printStackTrace();
+		        	}
+		        }
+		        }
+	
+	 
 	   
 	     System.out.println("debts size" + debts.size());
 	   
@@ -2906,114 +2707,105 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	   return custProds;
    }
    
-   public Vector getCustomerProductsList2(){
-	   //1.teeme klientide arvete nimekirja .
+   private  Vector<CustProd> loadInvoices(int weeks) {
+        if(prodCodes == null) {
+        	prodCodes = new HashSet();
+        }
+	   HashSet<String> olemas = new HashSet<String>();
 	   
-	   File cpdatadir = new File("cpdata");
-	   if(!cpdatadir.exists()) {
-		   cpdatadir.mkdir();
-	   }
-	    custProds = new Vector();
-	
-	   Calendar cal = Calendar.getInstance();
-	   String d = cal.get(Calendar.DAY_OF_MONTH)+ "";
-	   if(d.length() == 1){
-		   d = "0" + d;
-	   }
-	   String m = (cal.get(Calendar.MONTH) +1)+ "";
-	   if(m.length() == 1){
-		   m = "0" + m;
-	   }
-	   
-	   int days = 30 ;
-	   if(getParent().getProps().getProperty("sortdays") != null){
-		   try{
-			   days = Integer.parseInt(getParent().getProps().getProperty("sortdays"));
-		   }catch(Exception e){
-		   }
-	   }
-	   String end = d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
-	   cal.add(Calendar.DATE, - days);
-	   
-	    d = cal.get(Calendar.DAY_OF_MONTH)+ "";
-	   if(d.length() == 1){
-		   d = "0" + d;
-	   }
-	    m = (cal.get(Calendar.MONTH) +1)+ "";
-	   if(m.length() == 1){
-		   m = "0" + m;
-	   }
-		   String start =  d + "-" +m + "-" + cal.get(Calendar.YEAR)+ "";
-		//   System.out.println(start + " uhuu " + end);
-		   
-		   Enumeration enums = this.custtsUsed.elements();
-	   while(enums.hasMoreElements()){
-		String custid = (String)enums.nextElement();
-		   try{
-			   Converter.doTrustToCertificates();
-			   custid = Converter.deCode(custid);
-			   String cuurl =  URLEncoder.encode(custid, "UTF-8");
-				String httpsURL = logurl  +  "/xmlcore.asp?what=invoice&get=1&orderer=" + cuurl 
-				+ "&invoicedate1=" + start + "&invoicedate2=" + end;
-		  //     System.out.println(httpsURL);
-				URL myurl = new URL(httpsURL);
-		        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-		        InputStream ins = con.getInputStream();
-		        InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-		        BufferedReader in = new BufferedReader(isr);
+         Vector<CustProd> res = new Vector<CustProd>();
+	    DateTimeFormatter apiFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	    WeekFields weekFields = WeekFields.ISO;
+	    LocalDate today = LocalDate.now();
 
-		        String inputLine;
-		        StringBuffer inputLineBuf = new StringBuffer();
-		        while ((inputLine = in.readLine()) != null){
-		        	inputLine = Converter.enCodeEst(inputLine);
-		        	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\"l\"","\"L\""));
-		        	StringTokenizer st = new StringTokenizer(inputLineBuf.toString(),"\n");
-		        	while (st.hasMoreTokens()){
-		        		
-		        		String line = st.nextToken();
-		        	//	System.out.println(" line " + line);
-		        		int ind =  line.indexOf("invoice number=") ;
-		        		String number = "";
-			        	if(ind != -1){
-			        		 number = line.substring(ind + 16);
-			        		number = number.substring(0,number.indexOf("\""));
-			        		// System.out.println(number);
-			        	}
-			        	 ind =  line.indexOf("date=") ;
-			        	if(ind != -1){
-			        		String date = line.substring(ind + 6);
-			        		date = date.substring(0,date.indexOf("\""));
-			        		// System.out.println(date + " " + number + " " + custid);	
-				        		
-			        		 if(isOkDate(date)){
-			        			// System.out.println(date + "  222 " + number + " " + custid);	
-					        		
-			     					Vector cps = this.getCP(Converter.deCode(custid),number,date);
-			     					if(cps != null){
-			     						Enumeration eee = cps.elements();
-			     						while( eee.hasMoreElements()){
-				     						custProds.add(eee.nextElement());
-				     					//	System.out.println(date + " " + number + " " + custid);
-			     						}			     				
-					        			 	
-			     					}
-			     				}
-			        	  }		
-		        	}           	
-		        }
-		      //  System.out.println(inputLineBuf);
-		        in.close();
-		        isr.close();
-		        ins.close();
-		        con.disconnect();
-		        
-		       
-		   } catch (Exception a){
-			  // a.printStackTrace();
-			  
-		   }
+	    for (int i = 0; i < weeks; i++) {
+  
+	   LocalDate targetWeek = today.minusWeeks(i);
+       LocalDate start = targetWeek.with(weekFields.dayOfWeek(), 1);
+       LocalDate end = targetWeek.with(weekFields.dayOfWeek(), 7);
+       String startStr = start.format(apiFormat);
+	        String endStr = end.format(apiFormat);
+            int year = targetWeek.get(weekFields.weekBasedYear());
+	        int week = targetWeek.get(weekFields.weekOfWeekBasedYear());
+
+	        String yyyyww = String.format("%d%02d", year, week);
+
+	        File f = new File(this.getDir() + "invoice" + yyyyww + ".xml");
+	        System.out.println("invoices cp " + f.getName() + " " + f.exists());
+	 	   
+	        
+	        if(f.exists()) {
+	        	try {
+	        		
+	        		
+	        		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	        		DocumentBuilder db = dbf.newDocumentBuilder();
+
+	        		try (FileInputStream in = getCleanInputStream(f)) {
+	        		    Document doc = db.parse(in);
+	        		    doc.getDocumentElement().normalize();
+
+	        		    NodeList invoiceList = doc.getElementsByTagName("invoice");
+
+	        		    for (int iu = 0; iu < invoiceList.getLength(); iu++) {
+	        		        Node inv = invoiceList.item(iu);
+
+	        		        if (inv.getNodeType() == Node.ELEMENT_NODE) {
+
+	        		            Element invoiceElement = (Element) inv;
+
+	        		            String number = invoiceElement.getAttribute("number");
+	        		            String date = invoiceElement.getAttribute("date");
+	        		            String customerID = invoiceElement.getAttribute("customercode");
+	        		            String totalAmount = invoiceElement.getAttribute("totalamount");
+	        		          //  System.out.println("invoices cp yyy " + customerID);
+	        		     	   
+	        		            NodeList rows = invoiceElement.getElementsByTagName("row");
+
+	        		            for (int r = 0; r < rows.getLength(); r++) {
+	        		                Element row = (Element) rows.item(r);
+
+	        		                String item = row.getAttribute("item");
+	        		                String description = row.getAttribute("description");
+	        		                Double hind = Double.parseDouble(row.getAttribute("price"));
+	        		                
+	        		                Double kogus =  0.0;
+	        		                try {
+	        		                	kogus =  Double.parseDouble(row.getAttribute("quantity"));
+	        		                }catch (Exception e) {}
+	        		                String sum = row.getAttribute("sum");
+	        		            	
+	        		   		        if(item != null && item.trim().length() > 0 && !olemas.contains(item + "_" + customerID)){
+	        		   		        	
+	        		   			    res.add( new CustProd(customerID, item, kogus ,0 ,0,date.substring(5,10),hind,0,0," "));
+	        		   			    
+
+	        		   			        if(!prodCodes.contains(item)){
+	        		   				        prodCodes.add(item);	
+	        		   			        }
+	        		   			     olemas.add(item + "_" + customerID);
+	        		               }
+
+	        		        }
+	        		   }
+	        		}	
+	        		}
+	        		        	
+	        	} catch(Exception e) {
+	        		e.printStackTrace();
+	        	}
+	        }
+	        }
+	    System.out.println("invoices cp size " + res.size());
 		   
-	   }
+	    
+	    return res;
+	}
+   
+   public Vector getCustomerProductsList2(){
+	  
+	    custProds =  loadInvoices(WEEKS);
+
 	   return custProds;
    }
 
@@ -3108,109 +2900,27 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 @Override
 public String getSaveStockInfo() {
 
+	boolean ok =  getUrlData("&get=1&what=stocklevel" , "laoseis.xml");
+     System.out.println("laoseis tehtud " + ok);
+	
 	   StringBuffer products = new StringBuffer();
-  	 
-      
- try{
-	 Converter.doTrustToCertificates();
-   String httpsURL = logurl  + "/xmlcore.asp?get=1&what=item";
-    if(getParent().getProps().getProperty("stockcode") != null){
-    	httpsURL = httpsURL + "&stock=" +  getParent().getProps().getProperty("stockcode");
-	  }
-  System.out.println(httpsURL);
-  URL  myurl = new URL(httpsURL);
-  HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-   InputStream ins = con.getInputStream();
-   InputStreamReader isr = new InputStreamReader(ins,"UTF-8");
-   BufferedReader in = new BufferedReader(isr);
+	   
+	   try {
+		   String scode = null;
+		   if(getParent().getProps().getProperty("stockcode") != null ){
+			   scode = getParent().getProps().getProperty("stockcode");
+		   }
+		   TreeMap<String,Double> seisud =  getLaoSeisud(scode);
+		  for(String id : seisud.keySet()) {
+			  Double seisx = seisud.get(id);
+			  if(seisx > 0) {
+					products.append(id +  "; ;");
+					products.append(getParent().getNF().format(seisx) + "; "  +  "\n"); 
+				}  
+		  }
+		   
+	   }catch(Exception e) {  }
 
-    String inputLine = "";
-    StringBuffer inputLineBuf = new StringBuffer();
-   while ((inputLine = in.readLine()) != null){
-   	inputLine = Converter.enCodeEst(inputLine);
-   	inputLineBuf.append(inputLine.replaceAll("<item","\n<item" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
-   }
-
-   in.close();
-   
-   if(inputLineBuf.length() > 2){
-         try {
-       	  File f = new File (getDir() + "tooted.xml");
-       	  if(f.exists())f.delete();
-       	Converter.saveFileInUTF8(getDir() + "tooted.xml", inputLineBuf.toString());
-      	
-   	  }catch (Exception ex) {
-   		ex.printStackTrace();
-   	  }
-    }
-   
-
-   //lõpeb toodetega tegelemine 
-
-   System.out.println("Tooted tehtud" );
-
-}catch(Exception e){
-	e.printStackTrace();
-}
- 
- 
- 
-
- try {
-	 
-
-	   FileReader fr = new FileReader(getDir() + "tooted.xml");
-       BufferedReader reader = new BufferedReader(fr);
-     String line = null;
-
-     //line = reader.readLine();
-     
-  //   System.out.println("suurus " +prodsInUse.size());
-      while((line = reader.readLine()) != null  ){
-    	  
-    	  if((line.trim().length()) > 40 ){
-    	  int len = line.indexOf("code=");
-    	  String id   = line.substring(len +6);
-    	  id = id.substring(0,id.indexOf("\""));
- 	 len = line.indexOf("<stocklevels>");
- 	 double seisx = 0; 
-if(len != -1){
-    String stock   = line.substring(len + 13); 
-    stock = stock.substring(0,stock.indexOf("stocklevels"));
-if( getParent().getProps().getProperty("stockcode") != null){
-	 int ladu = stock.indexOf("stock=\"" + getParent().getProps().getProperty("stockcode") + "\"");
-	 if(ladu != -1){
-		 String seis = stock.substring(ladu+5);
-				 seis = seis.substring(seis.indexOf("level=") + 7);
-				 seis = seis.substring(0, seis.indexOf("\""));
-				 try{
-					seisx = ( Double.parseDouble(seis)); 
-				 }catch (Exception e){
-					e.printStackTrace(); 
-				 }
-	 }
-     }
-}else{
-	len = line.indexOf("stock_level_total=");
-	 if(len != -1){
-	     String stock   = line.substring(len + 19);  
-      seisx = ((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
-	 }
-}
-if(seisx > 0) {
-	products.append(id +  "; ;");
-	products.append(getParent().getNF().format(seisx) + "; "  +  "\n"); 
-}
-
-       	  }}
-      reader.close();
-    	  }catch(Exception tt){
-    			 
-    	  }
-
- 
- 
- 
  return products.toString();
  
 }
