@@ -135,7 +135,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 					while (rs3.next()) {
 						MatrixLine ml = new MatrixLine();
 						ml.setCustID(rs3.getString("klient").trim());
-						ml.setStartDate(rs3.getString("kuup").substring(5,10));
+						ml.setStartDate(Converter.turn(rs3.getString("kuup")).substring(0,5));
 						ml.setProdID(rs3.getString("toode").trim());
 						ml.setPrice(rs3.getDouble("kogus"));
 						double kmin = rs3.getDouble("kogusmin");
@@ -214,7 +214,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	                    	}
 	                   
 	              	} catch(Exception e) {
-	              		System.out.println("prod.getID() " + prod.getID());
+	              		//System.out.println("prod.getID() " + prod.getID());
 	              		e.printStackTrace();
 	              	}
 	             	}
@@ -291,7 +291,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 		}
 
 
-		System.out.println("fix size " + result.size());
+		//System.out.println("fix size " + result.size());
 		return result;
 
 	
@@ -509,7 +509,6 @@ try {
       }
 
       
-        System.out.println( " dealerProds suurus " + dealerProds);
        return dealerProds;
      
      }
@@ -729,7 +728,7 @@ try {
 	 				}
 	 
 	 				System.out.println("manaPlans " + manaPlans.size());
-	 				System.out.println("manaTotPlans " + manaTotalPlans.toString());
+	 				System.out.println("manaTotPlans " + manaTotalPlans.size());
 	 				System.out.println("custPlans " + custPlans.size());
 	 				
 	 				//System.exit(0);
@@ -851,7 +850,7 @@ try {
 	
 		XSSFWorkbook workbook = new XSSFWorkbook((ff));
 		XSSFSheet sheet = workbook.getSheet(jooksev);
-		System.out.println("jooksev " + jooksev + " " + sheet);
+	//	System.out.println("jooksev " + jooksev + " " + sheet);
 		XSSFRow row = null; 
 				ff.close();	
 				if(sheet != null){
@@ -1464,7 +1463,7 @@ if(grupp.equals("leib") ){
         } 
         
         if(promos.get(cust.getID()) != null) {
-        	System.out.println();
+        
         	 if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
             	 cust.setGroup(cust.getGroup() + "|" + promos.get(cust.getID()));
              } else {
@@ -1891,9 +1890,10 @@ private HashSet<String> inTT = null;
 
   public TreeMap getProdGroupsSecond() throws SQLException {
 	  
-	  Connection con = getNewConnection();
 	    TreeMap   tm = new TreeMap();
-	    String    sql = "  SELECT backOfficeId as liik, Name as nimetus FROM dbo.EPASAULE_GROUPS  ";
+	  /*  String    sql = "  SELECT backOfficeId as liik, Name as nimetus FROM dbo.EPASAULE_GROUPS  ";
+	    Connection con = getNewConnection();
+		
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
@@ -1904,7 +1904,7 @@ private HashSet<String> inTT = null;
 	    
 	    rs.close();
 	    st.close();
-	    con.close();
+	    con.close();*/
 
 	    return tm;
 
@@ -1976,7 +1976,7 @@ private HashSet<String> inTT = null;
         	 prodMaxDisc.put(rs.getString("toode").trim(),rs.getDouble("pr"));
          }
         rs.close();
-        System.out.println("prodMaxDisc " + prodMaxDisc.toString());
+      //  System.out.println("prodMaxDisc " + prodMaxDisc.toString());
     	
     	
        rs = stmt.executeQuery(cmd);
@@ -2080,10 +2080,11 @@ private HashSet<String> inTT = null;
 
       String grupp = rs.getString("grupp");
        if(grupp!=null && grupp.trim().length()>0){
-         prod.setGroupSecond(grupp.trim());
+         prod.setAgentGroup(grupp.trim());
        }
 
       prod.setName(nimetus.trim() + " " + kood);
+      
 
      String grupp2 = rs.getString("grupp2");
           if(grupp2 != null && grupp2.trim().length()>0){ 
@@ -2094,12 +2095,15 @@ private HashSet<String> inTT = null;
                if(unit!=null && unit.trim().length()>0){
                    prod.setUnit(unit);
                }
-
                
-               if(stocks.get(prod.getID()) != null){
-            	  // prod.setStock(stocks.get(prod.getID()));
-               }
-               
+       if(startsWithDigitDash(nimetus)) {
+    	   prod.setStatusTop("1");
+       }
+       
+       if(nimetus.startsWith("LÕP - ")) {
+    	   prod.setStatusSellout("1");
+       }
+       
                if(partii.get(prod.getID()) != null) {
             	  prod.setPartii(partii.get(prod.getID())); 
                }
@@ -2108,11 +2112,11 @@ private HashSet<String> inTT = null;
                prod.setVat(vat + "");
                prod.setNameSorting(sorting + nimetus);
                
-       products.put(nimetus, prod);
+       products.put(nimetus + prod.getID(), prod);
        prodHash.put(prod.getID(), prod);
        prodcodes.add(prod.getID());
        usedProds.add(prod.getID());
-
+System.out.println("toode " + nimetus + " " + prod.getID());
     
       }
       rs.close();
@@ -2166,7 +2170,9 @@ private HashSet<String> inTT = null;
   }
 
 
-
+  public static boolean startsWithDigitDash(String input) {
+      return input.matches("^\\d{1,2} - .*");
+  }
 
   public Vector getCustomerProductsList(String agentCode){
 	  makeCustprod();

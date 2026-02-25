@@ -917,15 +917,18 @@ HashSet olemas = new HashSet();
               if(volad.get(maks) != null){
             	  cust.setDebt(Double.parseDouble("" +volad.get(maks)));
               }
+
+              Double taaravolg = 0.0;
               
+              if(voladtaarata.get(maks) != null) {
+            	  taaravolg = Double.parseDouble(voladtaarata.get(maks)+"");
+                  cust.debtnotara = cust.getDebt() - taaravolg ;
+                }
               
-              if(voladPlusDays.get(maks) != null && voladPlusDays.get(maks) > ov) {
+              if(voladPlusDays.get(maks) != null && voladPlusDays.get(maks)-taaravolg > ov) {
             	  cust.setSalesBlockT(true);
               }
               
-              if(voladtaarata.get(maks) != null) {
-                  cust.debtnotara = cust.getDebt() - Double.parseDouble(voladtaarata.get(maks) + "");
-                }
                
               if(used.get(maks) != null){
             	  cust.setUsedCredit(Double.parseDouble("" +used.get(maks)));

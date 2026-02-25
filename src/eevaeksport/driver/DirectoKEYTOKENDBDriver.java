@@ -1296,7 +1296,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
     	     }
     // loadInvoices(WEEKS);
     // makeData();
-     makeDebtlist();
+   //  makeDebtlist();
     // setBulkSales(tm);
      return tm;
    }
@@ -1481,14 +1481,13 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	   TreeMap tm = new TreeMap();
 	 
 	  if(!useold) {
-		 // makeData();
+		  makeData();
 	  }
 			
 		 
 	     this.customers = new ArrayList();
 	     this.debtList = makeDebtlist();
 	     
-	 //    System.exit(0);
 	   try {
 	 		  File f = new File (getDir() + "kliendid.xml");
 	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -1774,7 +1773,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	         		      String sm = parent.getEmail(salesman);
 	         		    
 	                  if(sm != null && sm.length() > 1){
-	                	//  System.out.println(sm);
+	                	  System.out.println(salesman+","+customer.getID()+ " " + customer.getName());
 	            	      tm.put(customer.getName(), customer);
 	                      this.customers.add(customer.getID());
 	                  }
