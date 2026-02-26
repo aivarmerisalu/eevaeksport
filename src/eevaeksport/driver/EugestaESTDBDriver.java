@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -97,7 +98,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     rcompany = getParent().getProps().getProperty("rest.companyx");
     country = getParent().getProps().getProperty("country");
     
-    
+
     
      }
   
@@ -342,7 +343,7 @@ try {
            String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, \r\n" + 
            		"           		minPrice as price ,b.regionbackofficeid as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a \r\n" + 
            		"           		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId  \r\n" + 
-           		"           		 where getdate() between [date from] and [date to]  and minqty = 0 \r\n" +  //and datediff(day,[date from],[date to])< 91 
+           		"           		 where getdate() between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice   \r\n" +  //and datediff(day,[date from],[date to])< 91 
            		"           		 group by  a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid,  [date from] ,[date to], minPrice \r\n" + 
            		"           		 order by a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid, [date from] ,[date to], minPrice";
            rs = stmt.executeQuery(sql2);
@@ -827,6 +828,8 @@ try {
     } catch (Exception e){
         getParent().showError(e);
       }
+    
+  
     
     return agents;
   }
@@ -1750,7 +1753,7 @@ String arve = rs.getString("bill");
 
               
 				 
-				  fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minqty, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
+				  fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minqty, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , max(b.regionbackofficeid) as ladu from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
 				  		"EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty > 0  group by a.promotionBackOfficeId,a.productBackOfficeId, minqty, minPrice\r\n" + 
 				  		"				  				order by a.promotionBackOfficeId,productBackOfficeId, minqty, minPrice";
 				 
@@ -1766,6 +1769,11 @@ String arve = rs.getString("bill");
 				   	  Double hind = rs1.getDouble("minPrice");
 				      java.sql.Date end = rs1.getDate("paev");
 				   	 String nimi = parent.make(rs1.getString("nimi"));
+				   	 String ladu = rs1.getString("ladu");
+				   	if(ladu.equals("03N")) {
+				   		 ladu = "";
+				   	 }
+						
 				   	 if(nimi.contains("2030")) {
 				   		 nimi = nimi.substring(nimi.indexOf("2030")+ 11);
 				   		 if(nimi.contains("2030")) {
@@ -1782,12 +1790,54 @@ String arve = rs.getString("bill");
 
 
 
-                	      buf.append(toodex+ ";" + gruppx + ";" + nimi + ";" + NF.format(hind).replace(',', '.') + ";" 
-                	      + gruppx + ";" + (int)(kogus+0.001) + "; ;" + ttt + "; ;");
+                	      buf.append(toodex+ ";" + gruppx + ";" + Converter.enCodeEst(nimi) + ";" + NF.format(hind).replace(',', '.') + ";" 
+                	      + gruppx + ";" + (int)(kogus+0.001) + "; ;" + ttt + "; ;" + ladu);
                         buf.append("\n");	
 				   	  
 				      }
+				     rs1.close(); 
+				     
+				     
+				     fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , max(b.regionbackofficeid) as ladu from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
+						  		"EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice = maxPrice  group by a.promotionBackOfficeId,a.productBackOfficeId, minqty, minPrice\r\n" + 
+						  		"				  				order by a.promotionBackOfficeId,productBackOfficeId, minPrice";
+				     rs1 = stmt.executeQuery(fff);
+				      while(rs1.next()){
+				   	  
+				   	  String gruppx = parent.make(rs1.getString("custgr"));
+				   	  String toodex = parent.make(rs1.getString("prodid"));
+				   	 
+				   	  Double hind = rs1.getDouble("minPrice");
+				      java.sql.Date end = rs1.getDate("paev");
+				   	 String nimi = parent.make(rs1.getString("nimi"));
+				   	 String ladu = parent.make(rs1.getString("ladu"));
+				   	 if(ladu.equals("03N")) {
+				   		 ladu = "";
+				   	 }
+						
+				   	 if(nimi.contains("2030")) {
+				   		 nimi = nimi.substring(nimi.indexOf("2030")+ 11);
+				   		 if(nimi.contains("2030")) {
+					   		 nimi = nimi.substring(0,nimi.indexOf("2030") - 18);
+					   	 }
+				   	 }
+                  
+				   	  
+				   	long ttt = 0;
+                   if(end.after(new Date())) {
+                  	 ttt = end.getTime();
+                   }
+				   	  
+
+
+
+               	      buf.append(toodex+ ";" + gruppx + ";" + Converter.enCodeEst(nimi) + ";" + NF.format(hind).replace(',', '.') + ";" 
+               	      + gruppx + "; ; ;" + ttt + "; ;" + ladu);
+                       buf.append("\n");	
+				   	  
+				      }
 				     rs1.close();  
+				     
 				     stmt.close();
 				     con.close();
    
@@ -2100,7 +2150,7 @@ private HashSet<String> inTT = null;
     	   prod.setStatusTop("1");
        }
        
-       if(nimetus.startsWith("LÕP - ")) {
+       if(nimetus.startsWith("L") && nimetus.contains("P - ")) {
     	   prod.setStatusSellout("1");
        }
        
@@ -2116,7 +2166,7 @@ private HashSet<String> inTT = null;
        prodHash.put(prod.getID(), prod);
        prodcodes.add(prod.getID());
        usedProds.add(prod.getID());
-System.out.println("toode " + nimetus + " " + prod.getID());
+//System.out.println("toode " + nimetus + " " + prod.getID());
     
       }
       rs.close();
@@ -2188,7 +2238,15 @@ System.out.println("toode " + nimetus + " " + prod.getID());
     }
 
   
+  class GroupResult {
+	    String name;
+	    double missing;
 
+	    GroupResult(String name, double missing) {
+	        this.name = name;
+	        this.missing = missing;
+	    }
+	}
   
   
   public void setBulkSales(Map agents){
@@ -2198,7 +2256,7 @@ System.out.println("toode " + nimetus + " " + prod.getID());
       int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
       int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
       double planprec = dd/d2;
-	  
+	  HashMap<String,String> grnames = new HashMap<String,String>();
 	 // Teeme gruppide myygid valmis 
 	  String cmd0 = "	WITH AgentCount AS ( \r\n" + 
 	  		"				   SELECT  \r\n" + 
@@ -2247,7 +2305,18 @@ System.out.println("toode " + nimetus + " " + prod.getID());
 	}
 	
 	rs.close();
-	stmt.close();
+	
+	
+	  String    sql = "  SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_BRANDS ";
+  
+	  rs = stmt.executeQuery(sql);
+    while (rs.next()) {
+      String liik = rs.getString("liik").trim();
+        grnames.put(liik, rs.getString("nimetus").trim());
+    }
+    
+    rs.close();
+    stmt.close();
 	con.close();
 	
 	}catch(Exception e) {
@@ -2279,29 +2348,74 @@ System.out.println("toode " + nimetus + " " + prod.getID());
 		    }
 		 }
 	 }
-	// System.out.println("manaPlanGrupped " + manaPlanGrupped.toString());
+	// System.out.println("grNames " + grnames.toString());
 	 
+	 HashMap<String, List<GroupResult>> managerResults = new HashMap<>();
+
 	 Iterator<String> iteraq = manaSales.keySet().iterator();
 	 while (iteraq.hasNext()) {
-		 String agID = iteraq.next();
+	     String agID = iteraq.next();
 
-		 Map<String, Double> osales = manaSales.get(agID);
-		 
-		 Iterator<String>  itera2 = osales.keySet().iterator();
-			 while (itera2.hasNext()) {
-				 String grID = itera2.next();
-			double psales = osales.get(grID);
-		  
-		    if(this.groupGrouping.get(grID) != null) {
-		    	manaSalesGrupped 
-                .computeIfAbsent(agID, k -> new HashMap<String, Double>())
-                .merge(groupGrouping.get(grID), psales, Double::sum);
-		 
-		    }
-		 }
+	     Map<String, Double> osales = manaSales.get(agID);
+	     Map<String, Double> oplan = manaPlans.get(agID);
+
+	     Iterator<String> itera2 = osales.keySet().iterator();
+	     while (itera2.hasNext()) {
+	         String grID = itera2.next();
+	         double psales = osales.get(grID);
+
+	         if (oplan != null && oplan.get(grID) != null) {
+	             double pplan = oplan.get(grID);
+	             double missing = pplan - psales;
+
+	             String grnimi = grnames.get(grID);
+	             if (grnimi == null) {
+	                 grnimi = grID;
+	             }
+
+	             managerResults
+	                 .computeIfAbsent(agID, k -> new ArrayList<>())
+	                 .add(new GroupResult(grnimi, missing));
+	         }
+
+	         if (this.groupGrouping.get(grID) != null) {
+	             manaSalesGrupped
+	                 .computeIfAbsent(agID, k -> new HashMap<String, Double>())
+	                 .merge(groupGrouping.get(grID), psales, Double::sum);
+	         }
+	     }
 	 }
 	 
-	// System.out.println("manaSalesGrupped " + manaSalesGrupped.toString());
+	 
+	 HashMap <String, String> manaGrpouTotals = new HashMap<String, String>();
+	 
+	 
+	 for (String agID : managerResults.keySet()) {
+
+	     List<GroupResult> results = managerResults.get(agID);
+
+	     // sort by smallest missing first
+	     results.sort(Comparator.comparingDouble(r -> r.missing));
+
+	     StringBuilder sb = new StringBuilder();
+
+	     for (GroupResult r : results) {
+	         if (r.missing < 0) {
+	             sb.append(r.name)
+	               .append(" Missing : ")
+	               .append((int) r.missing)
+	               .append(" €|");
+	         } else {
+	             sb.append(r.name)
+	               .append(" Over : ")
+	               .append((int) r.missing)
+	               .append(" €|");
+	         }
+	     }
+
+	     manaGrpouTotals.put(agID, sb.toString());
+	 }	 
+	 System.out.println("manaGrpouTotals " + manaGrpouTotals.toString());
 	 
 	// System.exit(0);
 	 System.out.println("grupped " + manaPlanGrupped.toString() );
@@ -2346,6 +2460,11 @@ System.out.println("toode " + nimetus + " " + prod.getID());
 		  }
 		}
 	 }
+	 
+	 // teeme siin gruppidele eraldi missingu
+	 // 1  selgitame välja top 10 grupi plaani
+	 
+	 
 	 
 	 
 		String cmd =  " 		WITH AgentCount AS (\r\n" + 
@@ -2411,6 +2530,10 @@ System.out.println("toode " + nimetus + " " + prod.getID());
                         if(manaCategoryTotals.get(agentID) != null) {
                         	asi = asi + manaCategoryTotals.get(agentID); 
                         }
+                        if(manaGrpouTotals.get(agentID) != null) {
+                        	asi = asi + manaGrpouTotals.get(agentID); 
+                        }
+                        
                         
                         agent.setStart(asi);
                         

@@ -314,7 +314,8 @@ private Vector signatures = new Vector();
 				  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
 				    		  
 			  }else{
-			
+
+	      		  signatures.add(signature);
 				  if(repr) {
 					  
 					    	try {
@@ -336,7 +337,6 @@ private Vector signatures = new Vector();
 					    }	  
 				  }
 				 
-			      		  signatures.add(signature);
 			     } 	    
 			      		  
 			  
