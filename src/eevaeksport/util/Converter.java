@@ -7336,14 +7336,15 @@ public static void loadVisitLines(String status,String company, String user , St
   }
 	
 	
-	public static void sendCustomerJson(TreeMap tm , String company,boolean addRoutes, String user , String pass, boolean sendpartner,boolean https){
-		sendCustomerJson( tm ,company,addRoutes, user ,  pass, false,sendpartner,https); 
+	public static void sendCustomerJson(TreeMap tm , String company,boolean addRoutes, String user , String pass, boolean sendpartner,boolean https, Properties props){
+		sendCustomerJson( tm ,company,addRoutes, user ,  pass, false,sendpartner,https,props); 
 	}
 		
 	
 	
 	
-	public static void sendCustomerJson(TreeMap tm , String company,boolean addRoutes, String user , String pass, boolean duplicates , boolean sendpartner, boolean https){
+	public static void sendCustomerJson(TreeMap tm , String company,boolean addRoutes, String user , String pass, boolean duplicates , 
+			boolean sendpartner, boolean https, Properties props){
 		Vector<MyJSON> json = new Vector<MyJSON> ();
 		
 	  if(company == null){
@@ -7499,9 +7500,10 @@ try{
 	}
 	
 	
-	
+	if(!"true".equals(props.getProperty("rest.noagents"))) {
 	if(false){
-		//true sellega saab managerid maha võtta 
+		//true sellega saab managerid maha võtta propsprops
+		
 		JSONArray arrayx = new JSONArray();
 		 value.put("managers", arrayx);
 	}else{
@@ -7592,7 +7594,7 @@ try{
 		
 		value.put("managers", arrayx);
 	}
-	
+	}
 	}
 	
 	

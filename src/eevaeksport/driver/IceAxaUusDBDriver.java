@@ -1752,7 +1752,7 @@ Converter.saveFile(parent.getProps().getProperty("stockrefdir") + "stockbronn.tx
        		"       		 (SELECT sum (lineamount) from salesline s where s.dataareaid = 'dat' and  s.salesid = cus.salesid group by s.salesid) as summa\r\n" + 
        		"       		 FROM  SALESTABLE cus  INNER JOIN  custtable cu on cu.accountnum = cus.custaccount and cus.dataareaid=cu.dataareaid\r\n" + 
        		"       		LEFT OUTER JOIN DEFAULTDIMENSIONVIEW dim ON cus.PARTITION = dim.PARTITION AND cus.DEFAULTDIMENSION = dim.DEFAULTDIMENSION AND dim.NAME = N'Agent'\r\n" + 
-       		"			 WHERE cus.dataareaid='dat'  AND   cus.deliverydate >= cast(getdate() as datetime) and dim.DISPLAYVALUE = ? \r\n" + 
+       		"			 WHERE cus.dataareaid='dat'  AND cus.deliverydate >= CAST(GETDATE() AS DATE) and dim.DISPLAYVALUE = ? \r\n" + 
        		"       		     ORDER BY cus.createddatetime";
     			     
         

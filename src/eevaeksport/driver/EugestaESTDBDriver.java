@@ -636,7 +636,7 @@ try {
   private Map<String, Double> manaTotalPlans;
   private Map<String, Double> custTotalPlans;
   private Map<String, String> groupGrouping;
-  
+  private ArrayList<String> noSalesGroups;
   
   
   private void loadPlans () {
@@ -649,6 +649,7 @@ try {
 	  custTotalPlans = new HashMap<String, Double>();
 	  manaTotalPlans = new HashMap<String, Double>();
 	  groupGrouping = new HashMap<String, String>();
+	  noSalesGroups = new  ArrayList<String>();
 	
 	  try{
 		 	
@@ -658,7 +659,7 @@ try {
 	 		   month = "0" + month;
 	 	      }
 	 	   String jooksev =  month + "" + cal.get(Calendar.YEAR) ; 
-	 	   int a = 0;
+	 	   
 	 	   File f = new File (getExcelDir() + "CustomerPlans.xlsx");
 	 	   FileInputStream	 ff = new FileInputStream(f);
 	 	
@@ -677,19 +678,26 @@ try {
 	 		   }
 	 		}
 	 		
-	 		sheet = workbook.getSheet(jooksev);
 	 		
-	 		//System.out.println("jooksev " + jooksev + " " + sheet);
+	 		 sheet = workbook.getSheet("GroupsNoSale");
+	 		 row = null; 
+	 		
+	 		if(sheet != null) {
+	 			for(int i = 0 ; i < sheet.getLastRowNum() + 1;i++){
+					 row = sheet.getRow(i);
+					String prGR = formatter.formatCellValue(row.getCell(0));
+					noSalesGroups.add(prGR);
+	 		   }
+	 		}
+	 		
+	 		sheet = workbook.getSheet(jooksev);
 	 	
 	 				ff.close();	
+	 	
 	 				if(sheet != null){
-	 			//		 System.out.println("paln " + sheet.getLastRowNum() + " " );
-	 						
 	 					for(int i = 1 ; i < sheet.getLastRowNum() + 1;i++){
 	 						 row = sheet.getRow(i);
-	 						// System.out.println("paln " + formatter.formatCellValue(row.getCell(0)));
-	 							
-
+	 	
 	 						String mana = formatter.formatCellValue(row.getCell(0));
 	 						String cust = formatter.formatCellValue(row.getCell(1));
 	 						String gr = formatter.formatCellValue(row.getCell(2));
@@ -697,12 +705,9 @@ try {
 	 							 Double plan = null;
 	 							 try {
 	 							  plan = Double.parseDouble(formatter.formatCellValue(row.getCell(3)));
-	 							 }catch(Exception e) {
-	 								 
-	 							 }
+	 							 }catch(Exception e) {}
 
 	 								   if(plan != null && plan > 0) {
-	 									   
 	 									  manaPlans
 	 						                .computeIfAbsent(mana, k -> new HashMap<String, Double>())
 	 						                .merge(gr, plan, Double::sum);
@@ -710,8 +715,6 @@ try {
 	 						             custPlans
 	 						                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
 	 						                .merge(gr, plan, Double::sum);
-
-	 						             
 	 								   }
 	 								}
 	 					
@@ -1798,7 +1801,7 @@ String arve = rs.getString("bill");
 				     rs1.close(); 
 				     
 				     
-				     fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , max(b.regionbackofficeid) as ladu from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
+				    /* fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , max(b.regionbackofficeid) as ladu from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
 						  		"EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice = maxPrice  group by a.promotionBackOfficeId,a.productBackOfficeId, minqty, minPrice\r\n" + 
 						  		"				  				order by a.promotionBackOfficeId,productBackOfficeId, minPrice";
 				     rs1 = stmt.executeQuery(fff);
@@ -1836,7 +1839,7 @@ String arve = rs.getString("bill");
                        buf.append("\n");	
 				   	  
 				      }
-				     rs1.close();  
+				     rs1.close();  */
 				     
 				     stmt.close();
 				     con.close();
@@ -2012,20 +2015,33 @@ private HashSet<String> inTT = null;
        
     	rs1.close();
     	
+    	StringBuffer sb0 = new StringBuffer();
     	
-    	String minP = " SELECT [productBackOfficeId] AS toode,\r\n" + 
-    			"    CAST(ROUND(100 - [minPrice] * 100.0 / [maxPrice] + 0.2, 0) AS INT) AS pr\r\n" + 
-    			"FROM [DWHEE].[dbo].[EPASAULE_PROMOTIONOBJECTS]\r\n" + 
-    			"WHERE minPrice != maxPrice GROUP BY productBackOfficeId, minPrice, maxPrice\r\n" + 
-    			"HAVING minPrice > 0 order by productBackOfficeId ";
+    	String minP = " select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  b.regionbackofficeid as ladu,ROUND(100 - [minPrice] * 100.0 / [maxPrice] + 0.2, 0) AS disc   \r\n" + 
+    			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice != 0\r\n" + 
+    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid, ROUND(100 - [minPrice] * 100.0 / [maxPrice] + 0.2, 0) \r\n" + 
+    			"    											union all\r\n" + 
+    			"    											select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid , b.regionbackofficeid as ladu , 100 AS disc \r\n" + 
+    			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice = 0\r\n" + 
+    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid \r\n" + 
+    			"    											order by 1,2";
     	
     	 ResultSet rs = stmt.executeQuery(minP);
-         HashMap<String, Double> prodMaxDisc = new HashMap<String, Double>();
+        
          
          while(rs.next()){
-        	 prodMaxDisc.put(rs.getString("toode").trim(),rs.getDouble("pr"));
+        	String gr = rs.getString("grupp").trim();
+        	String toode = rs.getString("toode").trim();
+        	String ladu = rs.getString("ladu").trim();
+        	Double disc = rs.getDouble("disc");
+
+        	
+        	sb0.append(gr+ ";" + toode + ";" + disc + ";" + ladu +"\n");
          }
         rs.close();
+        if(sb0.length() > 0) {
+        	Converter.saveFile("maxdiscounts.txt", sb0.toString());
+        }
       //  System.out.println("prodMaxDisc " + prodMaxDisc.toString());
     	
     	
@@ -2112,11 +2128,9 @@ private HashSet<String> inTT = null;
         	prod.pack = pack;
         }
         
-        if(prodMaxDisc.get(prod.getID()) != null) {
-        	prod.setMaxDiscount(prodMaxDisc.get(prod.getID()));
-        }else {
+        
         	prod.setMaxDiscount(0);
-        }
+        
         
         prod.setOptAmountInUnits(rs.getDouble("opt"));
         prod.setMinAmountInUnits(rs.getDouble("mini"));
@@ -2257,30 +2271,31 @@ private HashSet<String> inTT = null;
       int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
       double planprec = dd/d2;
 	  HashMap<String,String> grnames = new HashMap<String,String>();
+	  String grSqlAdd = "";
+	  if( noSalesGroups != null && noSalesGroups.size() > 0 ) {
+		  grSqlAdd = "and brandBackOfficeId not in (";
+		  for (String gr : noSalesGroups) {
+			  grSqlAdd = grSqlAdd + "'" + gr + "' ,";
+		  }
+		  grSqlAdd = grSqlAdd.substring(0,grSqlAdd.length()-1); // võtame viimase koma maha
+		  grSqlAdd = grSqlAdd + ") ";
+	  }
 	 // Teeme gruppide myygid valmis 
-	  String cmd0 = "	WITH AgentCount AS ( \r\n" + 
-	  		"				   SELECT  \r\n" + 
-	  		"				       ClientBackofficeID, \r\n" + 
-	  		"				       COUNT(*) AS Cnt \r\n" + 
-	  		"				   FROM EPASAULE_AGENTS_CLIENTS \r\n" + 
-	  		"				   GROUP BY ClientBackofficeID \r\n" + 
-	  		"				) \r\n" + 
-	  		"				\r\n" + 
-	  		"				SELECT  \r\n" + 
-	  		"				   a.AgentBackofficeID as agent, brandBackOfficeId as gr,\r\n" + 
-	  		"				   SUM(d.lineamount / ac.Cnt) AS summa \r\n" + 
-	  		"				FROM epasaule_deliveries d \r\n" + 
+	  String cmd0 = "	WITH AgentCusts AS (\r\n" + 
+	  		"		SELECT [BID02_CUSTORDER].ACCOUNTNUM, [BID07_AGENT].AGENTID\r\n" + 
+	  		"FROM [DWHEE].[dbo].[BID02_CUSTORDER]\r\n" + 
+	  		"LEFT JOIN[DWHEE].[dbo].[BID27_EMPLOYEE] ON [BID27_EMPLOYEE].PERSONNELNUMBER = [BID02_CUSTORDER].RESPONSIBLEEMPLID\r\n" + 
+	  		"LEFT JOIN[DWHEE].[dbo].[BID07_AGENT]\r\n" + 
+	  		"  ON [BID27_EMPLOYEE].NAME = CASE  WHEN CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) > 0\r\n" + 
+	  		"        THEN SUBSTRING([BID07_AGENT].PERSONNAME, CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) + 3, LEN([BID07_AGENT].PERSONNAME))\r\n" + 
+	  		"      ELSE [BID07_AGENT].PERSONNAME  END WHERE [BID27_EMPLOYEE].TITLE LIKE '%Müügiesindaja%'\r\n" + 
+	  		"				)\r\n" + 
+	  		"				SELECT ac.AgentID as agent,brandBackOfficeId as gr,SUM(d.lineamount ) AS summa \r\n" + 
+	  		"				FROM epasaule_deliveries d JOIN AgentCusts ac ON d.ClientBackofficeID = ac.ACCOUNTNUM\r\n" + 
 	  		"				INNER JOIN dbo.EPASAULE_PRODUCTS b ON d.productBackOfficeID = b.backOfficeId\r\n" + 
-	  		"				JOIN AgentCount ac  \r\n" + 
-	  		"				   ON d.ClientBackofficeID = ac.ClientBackofficeID \r\n" + 
-	  		"				JOIN EPASAULE_AGENTS_CLIENTS a  \r\n" + 
-	  		"				   ON d.ClientBackofficeID = a.ClientBackofficeID \r\n" + 
-	  		"				WHERE d.deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1) \r\n" + 
-	  		"				 AND d.deliverydate < DATEADD(MONTH, 1, \r\n" + 
-	  		"				       DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) \r\n" + 
-	  		"				GROUP BY a.AgentBackofficeID, brandBackOfficeId\r\n" + 
-	  		"				order by 1,2\r\n" + 
-	  		"				"; 
+	  		"				WHERE d.deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+	  		"				  AND d.deliverydate < DATEADD(MONTH, 1,\r\n" + 
+	  		"				        DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) " + grSqlAdd + "  GROUP BY ac.AgentID,brandBackOfficeId"; 
 	try {	
 	   Connection con = this.getNewConnection();
       Statement stmt = con.createStatement();
@@ -2366,7 +2381,7 @@ private HashSet<String> inTT = null;
 
 	         if (oplan != null && oplan.get(grID) != null) {
 	             double pplan = oplan.get(grID);
-	             double missing = pplan - psales;
+	             double missing =  psales - pplan;
 
 	             String grnimi = grnames.get(grID);
 	             if (grnimi == null) {
@@ -2402,12 +2417,12 @@ private HashSet<String> inTT = null;
 	     for (GroupResult r : results) {
 	         if (r.missing < 0) {
 	             sb.append(r.name)
-	               .append(" Missing : ")
+	               .append(" Diff : ")
 	               .append((int) r.missing)
 	               .append(" €|");
 	         } else {
 	             sb.append(r.name)
-	               .append(" Over : ")
+	               .append(" Diff : +")
 	               .append((int) r.missing)
 	               .append(" €|");
 	         }
@@ -2415,10 +2430,10 @@ private HashSet<String> inTT = null;
 
 	     manaGrpouTotals.put(agID, sb.toString());
 	 }	 
-	 System.out.println("manaGrpouTotals " + manaGrpouTotals.toString());
+	// System.out.println("manaGrpouTotals " + manaGrpouTotals.toString());
 	 
 	// System.exit(0);
-	 System.out.println("grupped " + manaPlanGrupped.toString() );
+	// System.out.println("grupped " + manaPlanGrupped.toString() );
 	 
 	 HashMap <String, String> manaCategoryTotals = new HashMap<String, String>();
 	 
@@ -2433,7 +2448,7 @@ private HashSet<String> inTT = null;
 			 while (itera2.hasNext()) {
 				 String grID = itera2.next();
 			double psales = osales.get(grID);
-		 if(rsales.get(grID) != null) {
+		 if(rsales != null && rsales.get(grID) != null) {
 		  
 		  double msales = rsales.get(grID);
 		  double  tehtudsalperc = msales/psales;
@@ -2448,8 +2463,12 @@ private HashSet<String> inTT = null;
       		  prognosalperc = 0;  
       	  }
       	  
+      	  String done = (int)(msales - psales)+"";
+      	  if(!done.startsWith("-")) {
+      		  done = "+" + done;
+      	  }
         	
-      	  String asi = "Category : " + grID + "|Sales : " + (int) msales +  " € - Plan : " + (int) psales +  " €|Missing : " + (int)(psales - msales)+ " €|done/esti. :";
+      	  String asi = "Category : " + grID + "|Done : " + (int) msales +  " € - Plan : " + (int) psales +  " €|Diff. : " + done + " €|done/esti. :";
             asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
             
             if(manaCategoryTotals.get(agID) != null) {
@@ -2467,26 +2486,21 @@ private HashSet<String> inTT = null;
 	 
 	 
 	 
-		String cmd =  " 		WITH AgentCount AS (\r\n" + 
-				"    SELECT \r\n" + 
-				"        ClientBackofficeID,\r\n" + 
-				"        COUNT(*) AS Cnt\r\n" + 
-				"    FROM EPASAULE_AGENTS_CLIENTS\r\n" + 
-				"    GROUP BY ClientBackofficeID\r\n" + 
-				")\r\n" + 
-				"\r\n" + 
-				"SELECT \r\n" + 
-				"    a.AgentBackofficeID as agent,\r\n" + 
-				"    SUM(d.lineamount / ac.Cnt) AS summa\r\n" + 
-				"FROM epasaule_deliveries d\r\n" + 
-				"JOIN AgentCount ac \r\n" + 
-				"    ON d.ClientBackofficeID = ac.ClientBackofficeID\r\n" + 
-				"JOIN EPASAULE_AGENTS_CLIENTS a \r\n" + 
-				"    ON d.ClientBackofficeID = a.ClientBackofficeID\r\n" + 
-				"WHERE d.deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
-				"  AND d.deliverydate < DATEADD(MONTH, 1,\r\n" + 
-				"        DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))\r\n" + 
-				"GROUP BY a.AgentBackofficeID;" ; //k.objekt2
+		String cmd =  " WITH AgentCusts AS (\r\n" + 
+				"		SELECT [BID02_CUSTORDER].ACCOUNTNUM, [BID07_AGENT].AGENTID\r\n" + 
+				"FROM [DWHEE].[dbo].[BID02_CUSTORDER]\r\n" + 
+				"LEFT JOIN[DWHEE].[dbo].[BID27_EMPLOYEE] ON [BID27_EMPLOYEE].PERSONNELNUMBER = [BID02_CUSTORDER].RESPONSIBLEEMPLID\r\n" + 
+				"LEFT JOIN[DWHEE].[dbo].[BID07_AGENT]\r\n" + 
+				"  ON [BID27_EMPLOYEE].NAME = CASE  WHEN CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) > 0\r\n" + 
+				"        THEN SUBSTRING([BID07_AGENT].PERSONNAME, CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) + 3, LEN([BID07_AGENT].PERSONNAME))\r\n" + 
+				"      ELSE [BID07_AGENT].PERSONNAME  END WHERE [BID27_EMPLOYEE].TITLE LIKE '%Müügiesindaja%'\r\n" + 
+				"				)\r\n" + 
+				"				SELECT ac.AgentID as agent,SUM(d.lineamount ) AS summa \r\n" + 
+				"				FROM epasaule_deliveries d JOIN AgentCusts ac ON d.ClientBackofficeID = ac.ACCOUNTNUM\r\n" + 
+				"				INNER JOIN dbo.EPASAULE_PRODUCTS b ON d.productBackOfficeID = b.backOfficeId\r\n" +
+				"				WHERE d.deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+				"				  AND d.deliverydate < DATEADD(MONTH, 1,\r\n" + 
+				"				        DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) " + grSqlAdd + " GROUP BY ac.AgentID" ; //k.objekt2
 	
 		
 		try {
@@ -2504,7 +2518,7 @@ private HashSet<String> inTT = null;
 				if (agent != null){
 
 				if(this.manaTotalPlans.get(agentID) != null) {
-					String asi = "Sales: " + (int)msales + " €|";
+					String asi = "Done: " + (int)msales + " €|";
 					
                     if(dd > 6){
                       double psales = manaTotalPlans.get(agentID);
@@ -2520,9 +2534,14 @@ private HashSet<String> inTT = null;
                   		  prognosalperc = 0;  
                   	  }
 
-  					asi = "Sales: " + (int)msales + " €|";
+  					asi = "Done: " + (int)msales + " €|";
   					asi = asi + " Plan: " + (int)psales + " €|";
-  					asi = asi + " Missing: " + (int)(psales-msales) + " €|";
+
+  		      	  String done = (int)(msales - psales)+"";
+  		      	  if(!done.startsWith("-")) {
+  		      		  done = "+" + done;
+  		      	  }
+  					asi = asi + " Diff: " + done + " €|";
                   	  
                   	    asi = asi + "done/esti. :";
                         asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  

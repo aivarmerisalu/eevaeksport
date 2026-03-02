@@ -1,5 +1,6 @@
 package eevaeksport.imp.driver;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -14,6 +15,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,6 +32,7 @@ import org.w3c.dom.Text;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
@@ -55,12 +58,34 @@ public class VichiLITSQLUUSImportDriver extends AbstractImportDriver{
     }
     try {
       Class.forName(databaseDriverName).newInstance();
-      
-     
     } catch (Exception e){
        parent.showError(e);
     }
+    loadSignatures();
   }
+  
+  private Vector signatures = new Vector();
+  
+  private void loadSignatures(){
+		
+	  try{		
+	  		File f = new File("signatures.vec");
+	  		Calendar ss = Calendar.getInstance();
+	  		
+	  		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 3600000) {// kui on yle tunni vana siis maha 
+	  			f.delete();
+	  			signatures = new Vector();
+	  		} else {
+	  			signatures = (Vector) Converter.readObject("signatures.vec");
+	  		}
+
+	  		
+	  	} catch (Exception e) {
+	  		signatures = new Vector();
+	  	}
+
+	  	}
+  
 
   
   public String getImportFile(){
@@ -502,9 +527,16 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
   
   public void makeOrder(Order order) throws SQLException{
 
-    
+	  if (signatures == null){
+	   	   signatures = new Vector();
+	      }
+	  String signature = order.getSignature();
+	  if(signatures.contains(signature)){
+		  log.error( "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany()) ;
+	  } else {
         setOrder(order);
         makeOutput(order);
+	  }
      
   }
 

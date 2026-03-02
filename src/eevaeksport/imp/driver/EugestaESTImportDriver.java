@@ -66,6 +66,7 @@ public class EugestaESTImportDriver extends AbstractImportDriver{
     if("true".equals( parent.getProps().getProperty("testing"))){
     	testing = true;
     }
+    loadSignatures();
   }
   
   
