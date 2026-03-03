@@ -1484,6 +1484,11 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		  makeData();
 	  }
 			
+	  try{
+   	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
+   } catch (Exception e){
+   	e.printStackTrace();
+   }
 		 
 	     this.customers = new ArrayList();
 	     this.debtList = makeDebtlist();
@@ -1810,14 +1815,29 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	         		      customer.addAgent(new Agent(Converter.deCode(salesman)));
 	         		     
 	         		      String sm = parent.getEmail(salesman);
+	         		      
+	         		     Agent aa1 = (Agent)agent1.get(salesman);
+	                     if(aa1 != null) {
+	                		Vector vec = aa1.getDubbler();
+	            		      if(vec!= null && vec.size() >0){
+	            			   Enumeration en = vec.elements();
+	            			   while(en.hasMoreElements()){
+	            				 String age = (String) en.nextElement();
+	            				 cust.addAgent(new Agent(age));
+	            			   }
+	            	       }
+	                    }
+	        		      
 	         		    
 	                  if(sm != null && sm.length() > 1){
-	                	  System.out.println(salesman+","+customer.getID()+ " " + customer.getName());
+	                	//  System.out.println(salesman+","+customer.getID()+ " " + customer.getName());
 	            	      tm.put(customer.getName(), customer);
 	                      this.customers.add(customer.getID());
 	                  }
      		  }catch(Exception e){}
-		         	  }catch(Exception e){
+     		
+     		
+     		   	  }catch(Exception e){
 	         		
 	         		  e.printStackTrace();
 	         	  }
@@ -1975,8 +1995,9 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		   }
 		   stocksfile = getLaoSeisud(scode); 
 	   }catch(Exception e) {
-		   
 	   }
+	
+	   
 	   System.out.println("stockLisaXXXXX " + stocksfile.size());
 	   
 	   boolean addShelf = false ;
@@ -1989,28 +2010,12 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
      TreeMap tm = new TreeMap();
      HashMap prodHash = new HashMap();
      HashSet usedGroups = new HashSet();
-     
-   //  TreeMap stockLisa = new TreeMap();
-     //if(getParent().getProps().getProperty("stockcode1") != null ){
-    	// stockLisa = this.getProducts4();
-    //	System.out.println("stockLisaXXXXX " + stockLisa.size());
-     
-   //}
         
      
      if(custProds.size() == 0 && !useold){
          prodCodes = new HashSet();
     	getCustomerProductsList2();
      }
- /* TreeMap stockAlter = new TreeMap();
-     if(getParent().getProps().getProperty("stockdir") != null ){
-    	
-    	 stockAlter = this.getProducts3();
-    	System.out.println("stockalter " + stockAlter.size());
-     }*/
-
-   
-     
      
      Vector noGrups = new Vector();
      Vector codeEnds = new Vector();
@@ -2121,6 +2126,12 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
      		noBrands.addElement(st.nextToken());
      	}
      }
+
+     String allowedDataField = null;
+     if(getParent().getProps().getProperty("ARTICLE_GROUP") != null){
+    	 allowedDataField =  getParent().getProps().getProperty("ARTICLE_GROUP");
+     }
+         
      
      StringBuffer sb = new StringBuffer();
      
@@ -2255,11 +2266,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
  				 prod.setStock((int)Double.parseDouble(stocksfile.get(prod.getID())+""));  
  	      		}catch(Exception t){} 
        	   }
-       		     
-       	  
-       		        	//  System.out.println(prod.getID() + " " + prod.getName() + " " +  prod.getStock() + " " + prod.getUnit() + " " + prod.getEAN() + " " +  prod.getPrice() + " " + prod.getInCases() + " " +prod.getGroup()
-       		        	  //+ " " + prod.getPhotoid());
-       		        	  
+       		
        		        	
        		         	if(prodCodes != null && !prodCodes.contains(prod.getID())){
        		         	  goes = false;
@@ -2274,7 +2281,40 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
        					 }
        		     	     } catch(Exception aa){}	   
        				 
-       		        
+       		// vaatame kas data fields sees on olemas selline väli 
+       		      
+       		      if(allowedDataField != null) {
+       		    	goes = false;
+       		   NodeList dataList = rida.getChildNodes();//("data");
+
+       		   String articleGroup = null;
+
+       		   for (int is = 0; is < dataList.getLength(); is++) {
+
+       		       Node dataElement = (Node) dataList.item(is);
+       		    
+
+		       if(dataElement.getNodeName().equals("datafields")) {
+		    	   
+		    	   for (int is0 = 0; is0 < dataElement.getChildNodes().getLength(); is0++) {
+
+	       		       Node dataElement2 = (Node) dataElement.getChildNodes().item(is0);
+		    	   
+		    	   if(dataElement2.getNodeName().equals("data")) {
+          		   	 String codeAttr = dataElement2.getAttributes().getNamedItem("code").getNodeValue();
+       		         articleGroup = dataElement2.getAttributes().getNamedItem("content").getNodeValue();
+       		       if (articleGroup.equals(allowedDataField)) {
+       		    	   goes = true;
+       		           break;
+       		       }
+       		       }
+		    	   }
+       		   }}
+       		   
+       		  
+       		     
+       		      }
+       		         
        		         	    if(goes ){
        		         	    	if(!usedGroups.contains(prod.getGroup())){
        		         	    		usedGroups.add(prod.getGroup());

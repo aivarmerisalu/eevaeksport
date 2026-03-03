@@ -4971,10 +4971,22 @@ public class Converter {
 									 if(row != null) {
 										 
 											cellx = row.getCell((short)3);
-											String a4 = formatter.formatCellValue(cellx);
+											String a4 = formatter.formatCellValue(cellx).trim();
 
 											cellx = row.getCell((short)4);
 											String a5 = formatter.formatCellValue(cellx);
+											
+											
+											if(a4 != null && a4.equals("Kohtla-Järve") && a5 != null && a5.equals("Maardu")) {
+												return "a1000";
+											}
+											cellx = row.getCell((short)4);
+											 a4 = formatter.formatCellValue(cellx).trim();
+
+											cellx = row.getCell((short)5);
+											 a5 = formatter.formatCellValue(cellx);
+											
+											
 											if(a4 != null && a4.equals("Kohtla-Järve") && a5 != null && a5.equals("Maardu")) {
 												return "a1000";
 											}
