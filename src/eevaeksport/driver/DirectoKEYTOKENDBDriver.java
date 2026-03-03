@@ -1500,6 +1500,8 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	     	Node read = getNode(root, "customers");
 	     	
 	     	HashMap<String, Customer> payersDebt = new HashMap<String, Customer>();
+
+	     	HashMap<String, String> payersPRLists = new HashMap<String, String>();
 	     	
 	     	  for (int i = 0; i < read.getChildNodes().getLength(); i++){
 	         	  Node rida = read.getChildNodes().item(i);
@@ -1516,7 +1518,19 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 			 	         		cust.setVatnr(vatregno);
 			 	         		cust.setPayer(vatregno);
 			 	         		
+			 	         		if(rida.getAttributes().getNamedItem("specialpriceformula") != null) {
+			 	         	      String price_list =  rida.getAttributes().getNamedItem("specialpriceformula").getNodeValue();
 
+		 	         	    	  String old = payersPRLists.get(vatregno);
+			 	         	      if(old != null) {
+			 	         	    	  if(!old.contains(price_list+ ",")) {
+			 	         	    	     payersPRLists.put(vatregno, old +  price_list + "," );
+			 	         	    	  }
+			 	         	       }else {
+			 	         	         payersPRLists.put(vatregno, price_list + ",");
+			 	         	      }
+			 	         		}
+			 	         		
 				         		Double limit = 0.0;
 				         		try{ 
 				         			limit =  Double.parseDouble(rida.getAttributes().getNamedItem("creditlimit").getNodeValue()); 
@@ -1743,6 +1757,8 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		         		  }catch(Exception e){
 		         		  }
 		         		  
+		         		  
+		         		  
 		
 		         		  try{
 		         			  String	 price_list =  rida.getAttributes().getNamedItem("specialpriceformula").getNodeValue() ;
@@ -1753,7 +1769,9 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
                                    String as = ensureLen(ss.nextToken());
 			         			  
                                   if(customer.getGroup() != null && customer.getGroup().trim().length() > 0){
-			         				 customer.setGroup(customer.getGroup() + "|" + Converter.deCode(as));
+                                	  if(!customer.getGroup().contains(as+"|")) {
+			         				    customer.setGroup(customer.getGroup() + "|" + Converter.deCode(as));
+                                	  }
 					         	    }else{
 			         				 customer.setGroup(Converter.deCode(as));
 					         	   }
@@ -1765,6 +1783,27 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		         			  
 			         		  }catch(Exception e){
 			         		  }
+		         		  
+		         		if( vatregno != null &&  payersPRLists.get(vatregno) != null) {
+		         			String price_list = payersPRLists.get(vatregno);
+		         			StringTokenizer ss = new StringTokenizer(price_list,",");
+		         			  while (ss.hasMoreTokens()){
+		         			     String as = ensureLen(ss.nextToken());
+			         		      if(customer.getGroup() != null && customer.getGroup().trim().length() > 0){
+			         		    	 if(!customer.getGroup().contains(as+"|")) {
+				         			 customer.setGroup(customer.getGroup() + "|" + Converter.deCode(as));
+			         		    	 }
+			         		    	 } else {
+			         				 customer.setGroup(Converter.deCode(as));
+					         	    }
+					         		
+                                 if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
+					       			   customer.addFixSortCode(Converter.deCode(as)); 
+					       		   }  
+		         			  }
+		         		}
+		 	         		
+		         		  
 		         		  
      		try {
 	         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
