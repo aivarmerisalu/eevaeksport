@@ -1292,8 +1292,8 @@ public class Converter {
 							}
 						}
 						
-						System.out.println("r "  + r + " "+ ea + " " + addrow );
-					//	System.exit(0);
+					//	System.out.println("r "  + r + " "+ ea + " " + addrow );
+						//System.exit(0);
 						
 						  
 						for(int i = 1+addrow ; i < sheet.getLastRowNum()+1;i++){
@@ -1309,12 +1309,15 @@ public class Converter {
 									}else {
 										ean = ean.substring(1);
 									}
-									
 								}
+								
 								String toode = getToode(prods,ean.trim());
+							//	System.out.println("toode " + toode + " " + ean);
+								//System.exit(0);
+								
 							 if(!"Nimetus".equals(tnimi)) {
 								 
-							 
+							 if(!"true".equals(parent.getProps().getProperty("eaniscode"))) {
 							  if(toode.equals(ean.trim()) && ean.trim().length() > 3) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Selver formaat\n fail : "
@@ -1323,8 +1326,8 @@ public class Converter {
 								  if(!errors.contains(ean)) {
 									  errors = errors + "'" + ean + "'   " + tnimi + "\n";
 								  }
-								
-							  }
+								}
+							 }
 							 
 							 for (int a = r; a < row.getLastCellNum(); a++) {
 
@@ -1357,7 +1360,7 @@ public class Converter {
 					 }
 					
 					
-					//System.out.println("sorts size " + res.toString() );
+				//	System.out.println("sorts size " + res.toString() );
 					//System.exit(0);
 						
 					 }catch(Exception e) {
@@ -5866,7 +5869,7 @@ try{
 	}
 	value.put("code",pre + ag.code);
 	value.put("name", ag.name);
-	System.out.println("Type " + type + " " + ag.code + " " + ag.name);
+	//System.out.println("Type " + type + " " + ag.code + " " + ag.name);
 	value.put("contractType", type);
 	
 	JSONArray arr = new JSONArray();

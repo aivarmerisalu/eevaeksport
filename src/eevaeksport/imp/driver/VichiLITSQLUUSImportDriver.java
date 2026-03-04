@@ -2,6 +2,7 @@ package eevaeksport.imp.driver;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -536,7 +537,16 @@ System.out.println("prod" + prod +" "+ ean+ " " + prodID);
 	  } else {
         setOrder(order);
         makeOutput(order);
+        
+        signatures.add(signature);
 	  }
+	  
+	  
+	  try {
+			Converter.saveObject(signatures, "signatures.vec");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
      
   }
 

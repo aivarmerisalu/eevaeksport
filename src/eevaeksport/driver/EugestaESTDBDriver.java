@@ -1324,10 +1324,12 @@ if(grupp.equals("leib") ){
 	       	              
 	    	  	            
     	              
-    	              aaa = "select clientBackOfficeId as klient,  a.promotionBackOfficeId as promo   from dbo.EPASAULE_PROMOTIONOBJECTS a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
-    	              		"	where getdate() between [date from] and [date to] \r\n" + 
-    	              		"	group by  a.promotionBackOfficeId , clientBackOfficeId \r\n" + 
-    	              		"	order by  clientBackOfficeId  " ;
+    	              aaa = " select a.clientBackOfficeId as klient,  a.promotionBackOfficeId as promom, c.nextdelivery , max([date from]), min([date to])\r\n" + 
+    	              		"  from dbo.EPASAULE_PROMOTIONOBJECTS a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
+    	              		"inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
+    	              		"    	              			where c.nextdelivery between [date from] and [date to]  \r\n" + 
+    	              		"    	              			group by  a.promotionBackOfficeId , clientBackOfficeId ,c.nextdelivery\r\n" + 
+    	              		"    	              			 order by 1,2 " ;
     	        		
     	              	rs1 = stmt.executeQuery(aaa);
     	       	               while(rs1.next()){
@@ -2273,7 +2275,7 @@ private HashSet<String> inTT = null;
 	  HashMap<String,String> grnames = new HashMap<String,String>();
 	  String grSqlAdd = "";
 	  if( noSalesGroups != null && noSalesGroups.size() > 0 ) {
-		  grSqlAdd = "and brandBackOfficeId not in (";
+		  grSqlAdd = "and EG_PRODUCTGROUPID not in (";
 		  for (String gr : noSalesGroups) {
 			  grSqlAdd = grSqlAdd + "'" + gr + "' ,";
 		  }
@@ -2281,21 +2283,19 @@ private HashSet<String> inTT = null;
 		  grSqlAdd = grSqlAdd + ") ";
 	  }
 	 // Teeme gruppide myygid valmis 
-	  String cmd0 = "	WITH AgentCusts AS (\r\n" + 
-	  		"		SELECT [BID02_CUSTORDER].ACCOUNTNUM, [BID07_AGENT].AGENTID\r\n" + 
-	  		"FROM [DWHEE].[dbo].[BID02_CUSTORDER]\r\n" + 
-	  		"LEFT JOIN[DWHEE].[dbo].[BID27_EMPLOYEE] ON [BID27_EMPLOYEE].PERSONNELNUMBER = [BID02_CUSTORDER].RESPONSIBLEEMPLID\r\n" + 
-	  		"LEFT JOIN[DWHEE].[dbo].[BID07_AGENT]\r\n" + 
-	  		"  ON [BID27_EMPLOYEE].NAME = CASE  WHEN CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) > 0\r\n" + 
-	  		"        THEN SUBSTRING([BID07_AGENT].PERSONNAME, CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) + 3, LEN([BID07_AGENT].PERSONNAME))\r\n" + 
-	  		"      ELSE [BID07_AGENT].PERSONNAME  END WHERE [BID27_EMPLOYEE].TITLE LIKE '%Müügiesindaja%'\r\n" + 
-	  		"				)\r\n" + 
-	  		"				SELECT ac.AgentID as agent,brandBackOfficeId as gr,SUM(d.lineamount ) AS summa \r\n" + 
-	  		"				FROM epasaule_deliveries d JOIN AgentCusts ac ON d.ClientBackofficeID = ac.ACCOUNTNUM\r\n" + 
-	  		"				INNER JOIN dbo.EPASAULE_PRODUCTS b ON d.productBackOfficeID = b.backOfficeId\r\n" + 
-	  		"				WHERE d.deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
-	  		"				  AND d.deliverydate < DATEADD(MONTH, 1,\r\n" + 
-	  		"				        DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) " + grSqlAdd + "  GROUP BY ac.AgentID,brandBackOfficeId"; 
+	  String cmd0 =  "WITH AgentCusts AS (SELECT [BID02_CUSTORDER].ACCOUNTNUM, [BID07_AGENT].AGENTID\r\n" + 
+	  		" FROM [DWHEE].[dbo].[BID02_CUSTORDER] LEFT JOIN[DWHEE].[dbo].[BID27_EMPLOYEE] ON [BID27_EMPLOYEE].PERSONNELNUMBER = [BID02_CUSTORDER].RESPONSIBLEEMPLID\r\n" + 
+	  		" LEFT JOIN[DWHEE].[dbo].[BID07_AGENT] ON [BID27_EMPLOYEE].NAME = CASE WHEN CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) > 0\r\n" + 
+	  		"THEN SUBSTRING([BID07_AGENT].PERSONNAME, CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) + 3, LEN([BID07_AGENT].PERSONNAME))\r\n" + 
+	  		"ELSE [BID07_AGENT].PERSONNAME END WHERE [BID27_EMPLOYEE].TITLE LIKE '%Müügiesindaja%')\r\n" + 
+	  		"SELECT ac.AgentID as agent,EG_PRODUCTGROUPID as gr,SUM(d.LINEAMOUNTMST ) AS summa\r\n" + 
+	  		" FROM [DWHEE].[dbo].[BIF01_CUSTINVOICETRANS] d JOIN AgentCusts ac ON d.[ORDERACCOUNT] = ac.ACCOUNTNUM\r\n" + 
+	  		" INNER JOIN [DWHEE].[dbo].BID01_ITEM b ON d.ITEMID = b.ITEMID\r\n" + 
+	  		" WHERE d.INVOICEDATE >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+	  		"AND d.INVOICEDATE < DATEADD(MONTH, 1,DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) \r\n" 
+	  		 + grSqlAdd + 
+	  		" GROUP BY ac.AgentID,EG_PRODUCTGROUPID" ;
+	  
 	try {	
 	   Connection con = this.getNewConnection();
       Statement stmt = con.createStatement();
@@ -2484,24 +2484,18 @@ private HashSet<String> inTT = null;
 	 // 1  selgitame välja top 10 grupi plaani
 	 
 	 
-	 
-	 
-		String cmd =  " WITH AgentCusts AS (\r\n" + 
-				"		SELECT [BID02_CUSTORDER].ACCOUNTNUM, [BID07_AGENT].AGENTID\r\n" + 
-				"FROM [DWHEE].[dbo].[BID02_CUSTORDER]\r\n" + 
-				"LEFT JOIN[DWHEE].[dbo].[BID27_EMPLOYEE] ON [BID27_EMPLOYEE].PERSONNELNUMBER = [BID02_CUSTORDER].RESPONSIBLEEMPLID\r\n" + 
-				"LEFT JOIN[DWHEE].[dbo].[BID07_AGENT]\r\n" + 
-				"  ON [BID27_EMPLOYEE].NAME = CASE  WHEN CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) > 0\r\n" + 
-				"        THEN SUBSTRING([BID07_AGENT].PERSONNAME, CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) + 3, LEN([BID07_AGENT].PERSONNAME))\r\n" + 
-				"      ELSE [BID07_AGENT].PERSONNAME  END WHERE [BID27_EMPLOYEE].TITLE LIKE '%Müügiesindaja%'\r\n" + 
-				"				)\r\n" + 
-				"				SELECT ac.AgentID as agent,SUM(d.lineamount ) AS summa \r\n" + 
-				"				FROM epasaule_deliveries d JOIN AgentCusts ac ON d.ClientBackofficeID = ac.ACCOUNTNUM\r\n" + 
-				"				INNER JOIN dbo.EPASAULE_PRODUCTS b ON d.productBackOfficeID = b.backOfficeId\r\n" +
-				"				WHERE d.deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
-				"				  AND d.deliverydate < DATEADD(MONTH, 1,\r\n" + 
-				"				        DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) " + grSqlAdd + " GROUP BY ac.AgentID" ; //k.objekt2
-	
+		String cmd = "WITH AgentCusts AS (SELECT [BID02_CUSTORDER].ACCOUNTNUM, [BID07_AGENT].AGENTID\r\n" + 
+	 		" FROM [DWHEE].[dbo].[BID02_CUSTORDER] LEFT JOIN[DWHEE].[dbo].[BID27_EMPLOYEE] ON [BID27_EMPLOYEE].PERSONNELNUMBER = [BID02_CUSTORDER].RESPONSIBLEEMPLID\r\n" + 
+	 		" LEFT JOIN[DWHEE].[dbo].[BID07_AGENT] ON [BID27_EMPLOYEE].NAME = CASE WHEN CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) > 0\r\n" + 
+	 		"THEN SUBSTRING([BID07_AGENT].PERSONNAME, CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) + 3, LEN([BID07_AGENT].PERSONNAME))\r\n" + 
+	 		"ELSE [BID07_AGENT].PERSONNAME END WHERE [BID27_EMPLOYEE].TITLE LIKE '%Müügiesindaja%')\r\n" + 
+	 		"SELECT ac.AgentID as agent,SUM(d.LINEAMOUNTMST ) AS summa\r\n" + 
+	 		" FROM [DWHEE].[dbo].[BIF01_CUSTINVOICETRANS] d JOIN AgentCusts ac ON d.[ORDERACCOUNT] = ac.ACCOUNTNUM\r\n" + 
+	 		" INNER JOIN [DWHEE].[dbo].BID01_ITEM b ON d.ITEMID = b.ITEMID\r\n" + 
+	 		" WHERE d.INVOICEDATE >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+	 		"AND d.INVOICEDATE < DATEADD(MONTH, 1,DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))\r\n " 
+	 		+ grSqlAdd + 
+	 		" GROUP BY ac.AgentID";
 		
 		try {
 			

@@ -77,7 +77,7 @@ import eevaeksport.util.WebShopPiguLT;
  * @version 1.0
  */
 
-public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,WebShopper,WebShopper2 {
+public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker,FixLoader {
 
   public DirectoKEYTOKENDBDriver(EksportPanel parent) {
     super(parent);
@@ -2054,10 +2054,15 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
       }
      
      String fixedurl = null;
-     
      if(getParent().getProps().getProperty("fixedurl") != null){
     	 fixedurl = getParent().getProps().getProperty("fixedurl");
       }
+   
+     String weblinkurl = null;
+     if(getParent().getProps().getProperty("weblinkurl") != null){
+    	 weblinkurl = getParent().getProps().getProperty("weblinkurl");
+      }
+     
      
      boolean proddatafile = false;
      
@@ -2131,7 +2136,11 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
      if(getParent().getProps().getProperty("ARTICLE_GROUP") != null){
     	 allowedDataField =  getParent().getProps().getProperty("ARTICLE_GROUP");
      }
-         
+     
+     String weblinkCode = null;
+     if(getParent().getProps().getProperty("web.link.code") != null){
+    	 weblinkCode =  getParent().getProps().getProperty("web.link.code");
+     }
      
      StringBuffer sb = new StringBuffer();
      
@@ -2183,6 +2192,8 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	        			 String ean = rida.getAttributes().getNamedItem("barcode").getNodeValue();
 	                 	     prod.setEAN(ean);
 	               			 eanProds.put(ean, id);
+	               		//	System.out.print("ean " + ean);
+	                           eanprods.put(ean.trim(), id);
 	                  	     
 	                    	   if("true".equals(getParent().getProps().getProperty("add.ean"))){
 	                    		   try{ add = ean.substring(ean.length()-4); 
@@ -2283,12 +2294,47 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
        				 
        		// vaatame kas data fields sees on olemas selline väli 
        		      
+       		         if(weblinkCode != null) {
+       	       		   NodeList dataList = rida.getChildNodes();//("data");
+
+       	       		   String link = null;
+       	       		   
+       	       		   for (int is = 0; is < dataList.getLength(); is++) {
+
+       	       		       Node dataElement = (Node) dataList.item(is);
+       	       		
+       			       if(dataElement.getNodeName().equals("datafields")) {
+       			    	   
+       			    	   for (int is0 = 0; is0 < dataElement.getChildNodes().getLength(); is0++) {
+
+       		       		       Node dataElement2 = (Node) dataElement.getChildNodes().item(is0);
+       			    	   
+       			    	   if(dataElement2.getNodeName().equals("data")) {
+       	          		   	 String codeAttr = dataElement2.getAttributes().getNamedItem("code").getNodeValue();
+       	          		 //  System.out.println("weblink00 "  + " " + codeAttr + " '" + weblinkCode);
+      	       		        
+       	          		   	 try {
+       	       		       if (codeAttr.equals(weblinkCode)) {
+         	       		         link = dataElement2.getAttributes().getNamedItem("content").getNodeValue();
+         	       		         if(weblinkurl != null && link.startsWith(weblinkurl)) {
+         	       		        	 link = link.substring(weblinkurl.length());
+         	       		         }
+       	       		    	   prod.weblink = link;
+       	       		    	   System.out.println("weblink " + link + " " + codeAttr);
+       	       		           break;
+       	       		         }
+       	          		   	 }catch(Exception e) {}
+       	       		        }
+       			    	   }
+       	       		   } }
+       		         }
+       		         
        		      if(allowedDataField != null) {
        		    	goes = false;
        		   NodeList dataList = rida.getChildNodes();//("data");
 
        		   String articleGroup = null;
-
+       		   
        		   for (int is = 0; is < dataList.getLength(); is++) {
 
        		       Node dataElement = (Node) dataList.item(is);
@@ -2329,303 +2375,12 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
        		         	        } 
 	               
        		        	  
-       		        	  
-       		        	  
 	        }}
 	        	  }catch (Exception e) {
 	        		  e.printStackTrace();
 	        	  }
 	        }
-       /*   
-      	
-    	   
-           	 
-           	 String kast = "package2=";
-           	 if(getParent().getProps().getProperty("kastis") != null){
-           		kast =  getParent().getProps().getProperty("kastis");
-           	 }
-       
-           	 
-      	  boolean goes = true;
-  
-	 	  
-  	
-      		 len = line.indexOf("class=");
-      	 	 if(len != -1){
-      	 	     String grupp   = line.substring(len + 7);
-      	 	     grupp =   grupp.substring(0,grupp.indexOf("\""));
-      	 	    // System.out.println("grupp" + grupp + " " + yesClasses.toString());
-      	 	     if(yesClasses.size() > 0 && !yesClasses.contains(grupp)){
-      	 	    	goes = false; 
-      	 	     }
-      	 
-      	    //  	log.info("33 " + goes + " " + grupp);
-      	 	  prod.setGroup(Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
 
-          	  len = line.indexOf("supplier_code=");
-        	    if(len != -1 && hasSupplier){
-        	    	 String gr1  = line.substring(len + 15);
-        	   	    gr1 = gr1.substring(0,gr1.indexOf("\""));
-            	     prod.setGroup(Converter.cleanLitLatEst(gr1.replaceAll(";",":").replaceAll("&amp;", "&")));
-            	     prod.setGroupSecond(Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
-            	   //  System.out.println("Grupid " +  prod.getGroup() + "*" + prod.getGroupSecond() + "*" + gr1);
-        	         
-         	    	  
-               }
-      	 	  
-      	 	    
-        	 if( typeIndent !=  null){
-            		
-              		 len = line.indexOf("<data code=\"" +typeIndent + "\"");
-              		 int lll = ("<data code=\"" +typeIndent + "\"").length();
-               	    if(len != -1){
-               	    	 String  gr   = line.substring(len + lll + 10);
-               	    	 gr = gr.substring(0,gr.indexOf("\""));
-               	    	 prod.setType(gr.replaceAll("&amp;", "&")); 
-                   	 }
-              	}
-        	    
-      	 	  if( groupIndent !=  null){
-            		
-           		 len = line.indexOf("<data code=\"" +groupIndent + "\"");
-           		 int lll = ("<data code=\"" +groupIndent + "\"").length();
-            	    if(len != -1){
-            	    	 String  gr   = line.substring(len + lll + 10);
-            	    	 
-            	    	 gr = gr.substring(0,gr.indexOf("\""));
-            	    	 prod.setGroup(gr.replaceAll(";",":").replaceAll("&amp;", "&"));
-                	   this.prGroups.put(gr.replaceAll(";",":").replaceAll("&amp;", "&"), gr.replaceAll(";",":").replaceAll("&amp;", "&")); 
-                	   prod.setGroupSecond(Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
-                	 }
-           	     }
-      	 	 }
-
-      	 	 len = line.indexOf("data code=\"GENERAL\""); 
-      	 	 if(len != -1){
-      	 		 try {
-      	 		   String    areto =  line.substring(len + 29); 
-       	 	      areto = areto.substring(0,areto.indexOf("\""));
-                 // System.out.println("areto " + areto );
-       	 	      prod.addBarcode(areto); 
-      	 		 }catch(Exception e) {
-      	 			 
-      	 		 }
-      	 	      	 	 }
-      	 
-      	 	 if(lang2 != null && line.indexOf("param=\"" + lang2 + "\"") != -1) {
-           	 	
-          	 	 len = line.indexOf("data code=\"ART_LANG\""); 
-          	 	 if(len != -1){
-          	 		 try {
-          	 		   String   vahe =  line.substring(len + 30); 
-           	 	    String  areto = vahe.substring(0,vahe.indexOf(">"));
-                      //System.out.println("areto " + areto  + "\n vahe: " + vahe);
-                      if(areto.contains("param=\"" + lang2 + "\"")) {
-                    	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\"")) + " " +  add + shelf); 
-                      } else {
-                    	  len = vahe.indexOf("data code=\"ART_LANG\""); 
-                    	//  System.out.println("len2 " + len);
-                    	  if(len != -1){
-                   	 		
-                   	 		    vahe =  vahe.substring(len + 30); 
-                    	 	     areto = vahe.substring(0,vahe.indexOf(">"));
-                    	 	     
-                    	 	   // System.out.println("areto2 " + areto );
-                                if(areto.contains("param=\"" + lang2 + "\"")) {
-                              	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                                }else {
-                                	len = vahe.indexOf("data code=\"ART_LANG\""); 
-                              	  
-                              	  if(len != -1){
-                             	 		 try {
-                             	 		    vahe =  vahe.substring(len + 30); 
-                              	 	     areto = vahe.substring(0,vahe.indexOf(">"));
-                              	 	     
-                              	 	    //System.out.println("areto3 " + areto );
-                                          if(areto.contains("param=\"" + lang2 + "\"")) {
-                                        	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                                          }	
-                                
-                   	 	 }catch(Exception ee) {
-              	 			 
-              	 		 }
-                    	  
-                              	  }  
-                      }
-                    	  }
-           	 	  
-          	 	      	 	 
-                    	  }
-          	 	 }catch(Exception ee) {
-      	 			 
-      	 		 }
-          	 	 }
-          	 //	 System.out.println(prod.getName());
-          	 //System.exit(0);	 
-          	  } 
-      	 	 
-      	 	 
-      	  if(lang != null && line.indexOf("param=\"" + lang + "\"") != -1) {
-      	 	
-      	 	 len = line.indexOf("data code=\"ART_LANG\""); 
-      	 	 if(len != -1){
-      	 		 try {
-      	 		   String   vahe =  line.substring(len + 30); 
-       	 	    String  areto = vahe.substring(0,vahe.indexOf(">"));
-                  //System.out.println("areto " + areto  + "\n vahe: " + vahe);
-                  if(areto.contains("param=\"" + lang + "\"")) {
-                	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                  } else {
-                	  len = vahe.indexOf("data code=\"ART_LANG\""); 
-                	//  System.out.println("len2 " + len);
-                	  if(len != -1){
-               	 		
-               	 		    vahe =  vahe.substring(len + 30); 
-                	 	     areto = vahe.substring(0,vahe.indexOf(">"));
-                	 	     
-                	 	   // System.out.println("areto2 " + areto );
-                            if(areto.contains("param=\"" + lang + "\"")) {
-                          	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                            }else {
-                            	len = vahe.indexOf("data code=\"ART_LANG\""); 
-                          	  
-                          	  if(len != -1){
-                         	 		 try {
-                         	 		    vahe =  vahe.substring(len + 30); 
-                          	 	     areto = vahe.substring(0,vahe.indexOf(">"));
-                          	 	     
-                          	 	    //System.out.println("areto3 " + areto );
-                                      if(areto.contains("param=\"" + lang + "\"")) {
-                                    	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                                      }	
-                            
-               	 	 }catch(Exception ee) {
-          	 			 
-          	 		 }
-                	  
-                          	  }  
-                  }
-                	  }
-       	 	  
-      	 	      	 	 
-                	  }
-      	 	 }catch(Exception ee) {
-  	 			 
-  	 		 }
-      	 	 }
-      	 //	 System.out.println(prod.getName());
-      	 //System.exit(0);	 
-      	  }
-      	  
-      	  
-      	  
-      	 String  areto = "";
-      	 	 len = line.indexOf("data code=\"ALK_REG\""); 
-      	 	 if(len != -1){
-      	 	      areto =  line.substring(len + 29); 
-      	 	      areto = areto.substring(0,areto.indexOf("\""));
-                // System.out.println("areto " + areto );
-
-      	 	 }
-
-      	 	 len = line.indexOf("data code=\"TELEMA_EXP\""); 
-      	 	 if(len != -1){
-      	 	     goes = true;
-
-      	 	 }      	 	
-      	 	 
-      	 	 double mahto = 0;
-      	 	 String maht = "";
-      	 	 len = line.indexOf("data code=\"KOGUS\""); 
-      	 	 if(len != -1){
-      	 		 try{ 
-      	 		 maht =  line.substring(len + 18); 
-      	 	      maht = maht.substring(0,maht.indexOf("\""));
-                 //  System.out.println("maht " + maht );
-                  
-                	   mahto = Double.parseDouble(maht.replace(',', '.'));
-                   }catch(Exception e){
-                	   
-                   }
-      	 	 }
-      	 	 
-      	 	 
-      	 	if("true".equals(getParent().getProps().getProperty("stocktozero"))){
-      	 		prod.setStock(0);
-           	 }
-      	 	 
-      	 	 
-      	 	  	 len = line.indexOf("<stocklevels>");
-      	 	 if(len != -1){
-      	 	     String stock   = line.substring(len + 13); 
-      	 	     //System.out.println(stock.substring(0,stock.indexOf("stocklevels")));
-      	 	     stock = stock.substring(0,stock.indexOf("stocklevels"));
-      	 	 if( getParent().getProps().getProperty("stockcode") != null){
-      	 		 
-      	 		 int ladu = stock.indexOf("stock=\"" + getParent().getProps().getProperty("stockcode") + "\"");
-      	 		// System.out.println(ladu);
-      	 		 if(ladu != -1){
-      	 			 String seis = stock.substring(ladu+5);
-      	 			// System.out.println("seis " + seis);
-      	 					 seis = seis.substring(seis.indexOf("level=") + 7);
-      	 					 seis = seis.substring(0, seis.indexOf("\""));
-      	 					 try{
-      	 						prod.setStock( Double.parseDouble(seis)); 
-      	 					 }catch (Exception e){
-      	 						e.printStackTrace(); 
-      	 					 }
-         		 }
-      	 	 }
-     	         // prod.setStock((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
-     	 	 }else{
-     	 		len = line.indexOf("stock_level_total=");
-         	 	 if(len != -1){
-         	 	     String stock   = line.substring(len + 19);  
-        	          prod.setStock((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));
-        	 	 }
-         	
-     	 	 }
-      	 	len = line.indexOf("stock_level=");
-    	 	 if(len != -1){
-    	 	     String stock   = line.substring(len + 13);  
-    	 	     int st = (int)Double.parseDouble(stock.substring(0,stock.indexOf("\"")));
-    	 	     if(st > 0) {
-    	 	    	 prod.setStock(st);
-    	 	     }
-   	         
-   	 	 }
-      	 	 
-      	 	 if(stockAlter.get(prod.getID()) != null){
-      	 		 prod.setStock((Double)stockAlter.get(prod.getID()));
-      	 	//  System.out.println("olemas "+ prod.getID() +" ");
-        	  
-      	 	 }
-      	 	 
-      	   if(otherStocks.get(prod.getID()) != null){
-        		 try{
-    				 prod.setStock((int)Double.parseDouble(otherStocks.get(prod.getID())+""));  
-    	      		}catch(Exception t){
-    				} 
-        	   }
-      	   
-      	 
-      	 	 
-      	 
-      	 	 
-      	 
-      	 if(stockLisa.get(prod.getID()) != null) {
-      		 
-      		// System.out.println("Lisan " +  stockLisa.get(prod.getID())  + " " + prod.getID());
-      		 try{
-				 prod.setPartii( getParent().getProps().getProperty("stockcode1") + ":" + (int)Double.parseDouble(stockLisa.get(prod.getID())+""));  
-	      		}catch(Exception t){
-				} 
-      	   }
-      	  if(line.indexOf("ARTIKKEL_KAMP") != -1){
-      	    	prod.setStatusDiscount("1");
-      	    }
-     
-    */
     
      } catch (Exception e){
        e.printStackTrace();
@@ -2644,8 +2399,6 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
     
     prGroups = grups;
     
-    
-    
        if(sb.length() > 0) {
     	   Converter.saveFileInUTF8("texts.txt", sb);
        }
@@ -2658,8 +2411,6 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
    
    
   
-   
-   
 
 
    
@@ -3250,95 +3001,32 @@ public ArrayList loadOpenOrders() {
   }
 
 
+
+
+private TreeMap eanprods = null;
+
 @Override
-public void WebShopper()  {
-	
-	
-	
-	
-	
-	getProducts2();
-	WebShopPiguLT vp = new WebShopPiguLT(eanProds);
-	
-	vp.login(parent);
-	vp.getSellerID();
-	
-	
-	
-
-	
-	HashSet orderHistory = null;
-	try {
-		orderHistory = (HashSet)Converter.readObject("orderHistory.hash");
-	} catch (ClassNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (IOException e) {
-		e.printStackTrace();
-	}
-	if (orderHistory == null) {
-		orderHistory = new HashSet();
-	}
-	ImportPanel importPanel = null;
-	try {
-		 importPanel = new ImportPanel(parent.getParentFrame());
-	} catch (ClassNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	AbstractImportDriver driver = importPanel.driver;
-	
-
-	
-	ArrayList orders = vp.getOrderList();
-	System.out.println(orders.toString());
-	for (int i = 0; i < orders.size(); i++) {
-		Order ord = (Order) orders.get(i);
-		if (!orderHistory.contains(ord.getDokNr())) {
-			System.out.println(ord.getDokNr());
-			  try {
-				driver.makeOrder(ord);
-				  vp.saveOrderIDs(ord);
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+public void FixLoader() {
+	   
+	  boolean hasFile = Converter.hasFixFromExcels("excelsort",parent);
+	   if(hasFile) {
+	   eanprods =  Converter.loadMore();
+		  if(eanprods == null) {
+			  eanprods = new TreeMap();
+		  }
+		this.getProducts(null);
+		System.out.println("eanprods " + eanprods.size());
 		
-			
-			orderHistory.add(ord.getDokNr());
+		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+		
+	System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+		if(contracts.size() > 0) {
+			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
 		}
-	}   
-	try {
-		Converter.saveObject(orderHistory, "orderHistory.hash");
-	} catch (Exception e) {
-		e.printStackTrace();
+		
+	     } else {
+		   System.out.println("No sortiments to read");
+	   }
+		System.exit(0);
 	}
-	
-	
-	
-	System.exit(0);
-}
-
-
-
-
-@Override
-public void WebShopper2() {
-	
-	getProducts2();
-	WebShopPiguLT vp = new WebShopPiguLT(eanProds);
-	
-	vp.login(parent);
-
-	vp.getSellerID();
-	
-	
-	ArrayList confOrders = loadOpenOrders();
-	System.out.println("confOrders " + confOrders.size());
-     vp.confirmLinesGetSlip(confOrders);
-	
-	
-	
-	System.exit(0);
-}
 }

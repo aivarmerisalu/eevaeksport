@@ -6,7 +6,9 @@
 package eevaeksport.imp.driver;
 
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -24,6 +26,7 @@ import org.apache.log4j.PropertyConfigurator;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
+import eevaeksport.util.Converter;
 
 /**
  * Title:        Eeva eksport
@@ -53,7 +56,31 @@ public class RivileArktisImportDriver
   }catch (Exception e) {
       parent.showError(e);
     }
+    loadSignatures();
   }
+  
+  
+  private void loadSignatures(){
+		
+	  try{		
+	  		File f = new File("signatures.vec");
+	  		Calendar ss = Calendar.getInstance();
+	  		
+	  		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 3600000) {// kui on yle tunni vana siis maha 
+	  			f.delete();
+	  			signatures = new Vector();
+	  		} else {
+	  			signatures = (Vector) Converter.readObject("signatures.vec");
+	  		}
+
+	  		
+	  	} catch (Exception e) {
+	  		signatures = new Vector();
+	  	}
+
+	  	}
+  private Vector signatures = new Vector();
+
   public String getImportFile(){
 	    return parent.getProps().getProperty("imp.read");
 	  }
@@ -298,7 +325,23 @@ st1.close();
   public void makeOrder(Order order) throws SQLException{
  
 	  setOrder(order);
-      makeOutput(order);
+	  
+	  
+	  String signature = order.getSignature();
+	    if(signatures == null){
+	    	signatures = new Vector();
+	    }
+		  if(signatures.contains(signature)){
+		   } else {
+		    makeOutput(order);
+            signatures.add(signature);
+		  }
+		  
+		  try {
+				Converter.saveObject(signatures, "signatures.vec");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
   }
   
  
