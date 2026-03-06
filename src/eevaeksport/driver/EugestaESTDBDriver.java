@@ -2135,7 +2135,7 @@ private HashSet<String> inTT = null;
         }
         
         
-        	prod.setMaxDiscount(0);
+        	prod.setMaxDiscount(-1);
         
         
         prod.setOptAmountInUnits(rs.getDouble("opt"));
