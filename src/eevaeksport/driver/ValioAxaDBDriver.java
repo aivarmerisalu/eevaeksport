@@ -435,10 +435,11 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 									sb.append(kett+";"+prodid + ";"+ lop.getTime()+ "\n");
 								}
 						
-								
+						System.out.println("AAA " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
+									
 							if(alg != null && lop != null && dd.after(alg) && dd.before(lop) && !sisu.equals("UUS")){
 
-					    	//	System.out.println("AAA " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
+					    		System.out.println("AAA000 " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
 								MatrixLine mm = new MatrixLine();
 								mm.setCliGroup(kett);
 								mm.setProdID(prodid);
@@ -460,7 +461,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
     if(sb.toString().length() > 2) {
     	Converter.saveFile("fixsortnew.txt", sb.toString());
     }
-
+System.out.println("PriceMatrix " + lines.size());
 	
 		return lines;
 	}

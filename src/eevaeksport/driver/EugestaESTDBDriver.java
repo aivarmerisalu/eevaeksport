@@ -127,7 +127,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 			"			 sum(case when jou.Quantity < 0 then jou.Quantity else 0 end) as kogusmin, max (jou.invoiceNumber) as doknr ,\r\n" + 
 			"			 case when  jou.deliverydate > CAST(GETDATE() AS DATE)then 1 else 0 end as color FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >=   \r\n" + 
 			"						(select top 1 kuupaev  from ( 	 SELECT top 10 jou2.deliverydate as kuupaev FROM  EPASAULE_DELIVERIES jou2  where ltrim(jou2.clientBackOfficeId) = ltrim(jou.clientBackOfficeId)   \r\n" + 
-			"						 and jou2.deliverydate > getdate()-14 and jou2.deliverydate < getdate()+4 group by jou2.clientBackOfficeId , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)   \r\n" + 
+			"						 and jou2.deliverydate > getdate()-90 and jou2.deliverydate < getdate()+4 group by jou2.clientBackOfficeId , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)   \r\n" + 
 			"				 GROUP BY jou.clientBackOfficeId,jou.deliverydate , jou.productBackOfficeId ORDER BY jou.clientBackOfficeId,jou.deliverydate desc, max(jou.invoiceNumber) desc, jou.productBackOfficeId" ;
 					
 					Connection con3 = getNewConnection();
@@ -341,11 +341,12 @@ try {
            rs.close();    	
       
            String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, \r\n" + 
-           		"           		minPrice as price ,b.regionbackofficeid as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a \r\n" + 
-           		"           		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId  \r\n" + 
-           		"           		 where getdate() between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice   \r\n" +  //and datediff(day,[date from],[date to])< 91 
-           		"           		 group by  a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid,  [date from] ,[date to], minPrice \r\n" + 
-           		"           		 order by a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid, [date from] ,[date to], minPrice";
+           		"           	          		minPrice as price ,b.regionbackofficeid as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a \r\n" + 
+           		"           		           		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId  \r\n" + 
+           		"								inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
+           		"    	              		 	 where c.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice   \r\n" + 
+           		"           		           		 group by  a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid,  [date from] ,[date to], minPrice \r\n" + 
+           		"           		           		 order by a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid, [date from] ,[date to], minPrice";
            rs = stmt.executeQuery(sql2);
            while (rs.next()) {
 
@@ -608,14 +609,17 @@ try {
 	        String kliendikood = rs.getString("klient").trim();
 	        String tootekood = rs.getString("toode").trim();
 	        double kogus = rs.getDouble("sisse");
-	        
+	        double kogei = 0;
+	       //kogei =  rs.getDouble("sisse");
 	        String lastdate = Converter.turn(rs.getString("lastdate").substring(0,10)); // EESTI CASE
 	               //  lastdate = lastdate.substring(5,10);
 	                 lastdate = lastdate.substring(0,5);
 	                 double lastprice = rs.getDouble("lastprice");
-	         String lastdoc = rs.getString("lastdoc").trim();
+	         String lastdoc = "a:" + rs.getString("lastdoc").trim();
+	        // String lastdoc2 = " t:" + rs.getString("lastdoc2").trim();
+	         //lastdoc = lastdoc + " "+ lastdoc2;
 	      	               
-	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , 0,0,lastdate,lastprice,0,0," ");
+	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , 0,0,lastdate,lastprice,kogei,0," ");
                 cp.setAbiKood(lastdoc);
 	        //cp.setRedline(rs.getString("date"));
 	        custProds.add(cp);
@@ -1324,7 +1328,7 @@ if(grupp.equals("leib") ){
 	       	              
 	    	  	            
     	              
-    	              aaa = " select a.clientBackOfficeId as klient,  a.promotionBackOfficeId as promom, c.nextdelivery , max([date from]), min([date to])\r\n" + 
+    	              aaa = " select a.clientBackOfficeId as klient,  a.promotionBackOfficeId as promo, c.nextdelivery , max([date from]), min([date to])\r\n" + 
     	              		"  from dbo.EPASAULE_PROMOTIONOBJECTS a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
     	              		"inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
     	              		"    	              			where c.nextdelivery between [date from] and [date to]  \r\n" + 
@@ -2019,9 +2023,9 @@ private HashSet<String> inTT = null;
     	
     	StringBuffer sb0 = new StringBuffer();
     	
-    	String minP = " select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  b.regionbackofficeid as ladu,ROUND(100 - [minPrice] * 100.0 / [maxPrice] + 0.2, 0) AS disc   \r\n" + 
+    	String minP = " select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  b.regionbackofficeid as ladu,ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) AS disc   \r\n" + 
     			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice != 0\r\n" + 
-    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid, ROUND(100 - [minPrice] * 100.0 / [maxPrice] + 0.2, 0) \r\n" + 
+    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid, ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) \r\n" + 
     			"    											union all\r\n" + 
     			"    											select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid , b.regionbackofficeid as ladu , 100 AS disc \r\n" + 
     			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice = 0\r\n" + 
