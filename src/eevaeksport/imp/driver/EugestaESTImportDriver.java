@@ -457,31 +457,31 @@ private Product getProd(String toode){
 		  
 		    if(lin.getDealer().equals("03D")){
 		     	ord03D.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
 		    	ord03D.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "D");
 			    ord03D.setReference(order.getReference());
 			  
 		    } else if(lin.getDealer().equals("25_ESTTRAN")){
 		     	ordNord.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
 		     	ordNord.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "N");
 		     	ordNord.setReference(order.getReference());
 			  
 		    } else if(lin.getDealer().equals("303_SHOP")){
 		     	ordPood.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
 		     	ordPood.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "P");
 		     	ordPood.setReference(order.getReference());
 			  
 		    }  else if(lin.getDealer().equals("03C")){
 		    	   ord03C.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
 			     	ord03C.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "C");
 			     	ord03C.setReference(order.getReference());
 			     	
 			 } else {
 		    	   ord03N.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
-			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
 			     	ord03N.setDokNr(order.getDokNr());
 			     	ord03N.setReference(order.getReference()); 
 			 }
@@ -584,6 +584,7 @@ private Product getProd(String toode){
 	      if(orderLine.selActCode != null) {
 	    	  pobj = orderLine.selActCode;
 	      }
+	      System.out.println("promo code " + itemid + " " + pobj);
 	   //	  DEFAULT_APPLIED = applied promo;
 	    //  NOT_APPLIED = promo not applied;
 	    //  NOT_AVAILABLE = product without promo.
