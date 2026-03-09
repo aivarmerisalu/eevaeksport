@@ -3367,7 +3367,7 @@ public class Converter {
 							 String value =  formatter.formatCellValue(row.getCell(a));
                        
                         
-                        if(value.trim().length() > 0 && value.trim().toLowerCase().equals("1")) {
+                        if(value.trim().length() > 0 && (value.trim().toLowerCase().equals("1") ||  value.trim().toLowerCase().equals("x"))) {
                         	// System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
                         
 							if(res.get(pood) != null){
@@ -4814,7 +4814,8 @@ public class Converter {
 					 sheet = workbook.getSheetAt(0); 
 			  }
 					
-			  
+
+				System.out.println("Formaadi sheetname " + sheet.getSheetName());
 			  if(sheet.getSheetName().equals("mjsortiment")) {
 				  return "mjsortiment";
 			  }

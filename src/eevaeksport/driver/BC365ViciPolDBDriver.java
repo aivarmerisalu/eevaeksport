@@ -205,6 +205,9 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	if (dataType == null || dataType.equals("itemStocks")) {
 		  this.saveFile("itemStocks","AMGInventSumByWarehouses?$select=ItemId,PhysicalInvent,InventLocationId,expDate");
 	}
+	if (dataType == null || dataType.equals("itemStocks2")) {
+		  this.saveFile("itemStocks2","AMGVICInventSumByWarehouses?$select=ItemId,PhysicalInvent,InventLocationId,expDate,OnOrder");
+	}
 	      
 
 	if (dataType == null || dataType.equals("itemgroups")) {
