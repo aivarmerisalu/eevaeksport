@@ -326,7 +326,7 @@ try {
 
 
   public String getAssortmentStr(Agent agent){
-	  StringBuffer result = new StringBuffer();
+	/*  StringBuffer result = new StringBuffer();
 		
 		try {
 			
@@ -360,8 +360,9 @@ try {
 
 	//	System.out.println("ASSO size " + result.toString());
 	
-		return result.toString();
+		return result.toString();*/
 
+	  return null;
 
   }
 
