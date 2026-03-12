@@ -138,7 +138,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
 				
 				FileInputStream ff = new FileInputStream(f);
 				XSSFWorkbook workbook = new XSSFWorkbook((ff));
-				XSSFSheet sheet = workbook.getSheet("Tooted");
+				XSSFSheet sheet = workbook.getSheetAt(0);
 				XSSFRow row = null;
 	  	        DataFormatter formatter = new DataFormatter();
 
@@ -169,7 +169,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
  				
  				FileInputStream ff = new FileInputStream(f);
  				XSSFWorkbook workbook = new XSSFWorkbook((ff));
- 				XSSFSheet sheet = workbook.getSheet("Tooted");
+ 				XSSFSheet sheet = workbook.getSheetAt(0);
  				XSSFRow row = null;
  	  	        DataFormatter formatter = new DataFormatter();
 

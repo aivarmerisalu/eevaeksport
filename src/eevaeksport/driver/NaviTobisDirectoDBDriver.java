@@ -2416,7 +2416,7 @@ System.out.println(cmd);
     	        	   		"   Suma: " + (int)summa + " €." ));
     	           }
     	           
-    	           if(sales5m.contains(customer.getID()) || lastDealNo) {
+    	           if(!sales5m.contains(customer.getID()) || lastDealNo) {
     	        	   if(customer.getInfo().trim().length() > 10) {
       	        	     customer.setInfo(customer.getInfo() + "|Pirko seniau nei prieš 5 mėn. – Reikia atlikti rizikos vertinimą.Kreiptis į skolų valdymo specialistę");
     	        	   } else {

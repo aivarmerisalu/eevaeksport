@@ -20,6 +20,7 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -596,10 +597,46 @@ try {
 	  		"WHERE rn = 1\r\n" + 
 	  		"ORDER BY klient, toode;";
 	  
+	  cmd2 = "			   WITH cte AS (\r\n" + 
+	  		"    SELECT  \r\n" + 
+	  		"        a.CUSTACCOUNT AS klient,\r\n" + 
+	  		"        a.ITEMID AS toode,\r\n" + 
+	  		"        a.SALESQTY AS tellitud,\r\n" + 
+	  		"        a.INVOICEQTY AS sisse,\r\n" + 
+	  		"        (a.SALESQTY - a.INVOICEQTY) AS tarnimata,\r\n" + 
+	  		"        c.NAME AS CANCELREASON,\r\n" + 
+	  		"        a.SALESDATE AS lastdate,\r\n" + 
+	  		"        (a.INVOICEAMOUNT / CASE WHEN a.INVOICEQTY <> 0 THEN a.INVOICEQTY ELSE 1 END) AS lastprice,\r\n" + 
+	  		"        a.SALESID AS ordernr,\r\n" + 
+	  		"        b.INVOICEID AS invoicenr,\r\n" + 
+	  		"        ROW_NUMBER() OVER (\r\n" + 
+	  		"            PARTITION BY a.CUSTACCOUNT, a.ITEMID\r\n" + 
+	  		"            ORDER BY a.SALESDATE DESC\r\n" + 
+	  		"        ) AS rn\r\n" + 
+	  		"    FROM BIF03_SALESLINE a\r\n" + 
+	  		"    LEFT JOIN BIF01_CUSTINVOICETRANS b\r\n" + 
+	  		"        ON LEFT(a.SALESID,9) = LEFT(b.SALESID,9)\r\n" + 
+	  		"    LEFT JOIN BID44_SALESCANCELREASONS c\r\n" + 
+	  		"        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID\r\n" + 
+	  		"    WHERE a.SALESDATE > GETDATE() - 90\r\n" + 
+	  		"      AND a.EG_SALESCANCELREASONID <> 'GKR'\r\n" + 
+	  		"      AND a.INVENTLOCATIONID != 'STORNO'\r\n" + 
+	  		"      AND a.SALESSTATUS <> 1\r\n" + 
+	  		")\r\n" + 
+	  		"\r\n" + 
+	  		"SELECT *\r\n" + 
+	  		"FROM cte\r\n" + 
+	  		"WHERE rn = 1";
+	  
 
 	    if (isDebug()) System.out.println(cmd2);
 
 	    try {
+	    	
+	    	Calendar cal = Calendar.getInstance();
+	    	cal.add(Calendar.DAY_OF_MONTH, -15);
+	    	
+	    	
 	    	
 	    	Connection con = getNewConnection();
 	     	Statement stmt = con.createStatement();
@@ -609,17 +646,50 @@ try {
 	        String kliendikood = rs.getString("klient").trim();
 	        String tootekood = rs.getString("toode").trim();
 	        double kogus = rs.getDouble("sisse");
-	        double kogei = 0;
-	       //kogei =  rs.getDouble("sisse");
-	        String lastdate = Converter.turn(rs.getString("lastdate").substring(0,10)); // EESTI CASE
+	        double mata = rs.getDouble("tarnimata");
+		    String reason =  rs.getString("CANCELREASON");
+		    if(reason != null && reason.trim().length() > 0) {
+		    	reason = reason.trim();
+		    } else {
+		    	reason = " ";
+		    }
+	        
+		    String dateStr = rs.getString("lastdate").substring(0,10);
+		    LocalDate date = LocalDate.parse(dateStr,
+	                 java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+	         long millis = date.atStartOfDay(ZoneId.systemDefault())
+	                           .toInstant()
+	                           .toEpochMilli();
+	         if(millis < cal.getTimeInMillis()) {
+	        	 mata = 0;
+	        	 reason = " ";
+	         }
+		    
+		    
+		    String lastdate = Converter.turn(dateStr); // EESTI CASE
 	               //  lastdate = lastdate.substring(5,10);
 	                 lastdate = lastdate.substring(0,5);
 	                 double lastprice = rs.getDouble("lastprice");
-	         String lastdoc = "a:" + rs.getString("lastdoc").trim();
+	                 String ord = rs.getString("ordernr");
+	                 if(ord != null && ord.trim().length() > 0 ) {
+	                	 ord = "t: " + ord.trim();
+	                 }else {
+	                	 ord = "";
+	                 }
+	                 
+	                 String arv = rs.getString("invoicenr");
+	                 if(arv != null && arv.trim().length() > 0 ) {
+	                	 arv = "a: " + arv.trim();
+	                 }else {
+	                	 arv = "";
+	                 }
+	                 
+	         String lastdoc = ord + " " + arv;
 	        // String lastdoc2 = " t:" + rs.getString("lastdoc2").trim();
 	         //lastdoc = lastdoc + " "+ lastdoc2;
 	      	               
-	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , 0,0,lastdate,lastprice,kogei,0," ");
+	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , 0,0,lastdate,lastprice,mata,0,reason);
                 cp.setAbiKood(lastdoc);
 	        //cp.setRedline(rs.getString("date"));
 	        custProds.add(cp);

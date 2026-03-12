@@ -322,7 +322,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
     public TreeMap<String, Customer> getCustomers(Agent agent) {
 
         if (!"true".equals(getParent().getProps().getProperty("useolddata"))) {
-           // downloadData(null);
+            downloadData(null);
         }
         //DEBT
         

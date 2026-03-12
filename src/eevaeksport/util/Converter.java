@@ -2189,21 +2189,35 @@ public class Converter {
 			       FileInputStream	 ff = new FileInputStream(file);
 					XSSFWorkbook workbook = new XSSFWorkbook(ff); 
 					XSSFSheet sheet = workbook.getSheetAt(0); 
-					System.out.println("Aldari lugemine " + file.getName());
 					ff.close();	
 					 DataFormatter formatter = new DataFormatter();
 					if(sheet != null){
 
-						XSSFRow row = sheet.getRow(2);
+						XSSFRow row = sheet.getRow(0);
+						boolean olemas = false;
 						int data = 3;
-						if(formatter.formatCellValue(row.getCell(0)).equals("Ribakood")) {
-							data = 2;
+						if(formatter.formatCellValue(row.getCell(1)).equals("Ribakood")) {
+							data = 1;
+							olemas = true;
 						}
-							
 						
-						 row = sheet.getRow(data);
+                       if(!olemas) {
+						 row = sheet.getRow(2);
+						 if(formatter.formatCellValue(row.getCell(0)).equals("Ribakood")) {
+								data = 2;
+							}
+                       }
+						 row = sheet.getRow(data-1);
 						TreeMap groups = new TreeMap();
-						for (int a = 3; a < row.getLastCellNum(); a++) {
+						int y1 = 3;
+						if(olemas) {
+							y1 = 2;
+						}
+						
+
+					//	System.out.println("Aldari lugemine " + file.getName() + " " + y1);
+						
+						for (int a = y1; a < row.getLastCellNum(); a++) {
 							try {
 								String gg = row.getCell((short) a).getStringCellValue().trim();
 								if(gg.length()>1){
@@ -2215,22 +2229,42 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("Groups " +  groups.toString());
-						 row = sheet.getRow(data);
+					//	System.out.println("Groups " + data + " " + groups.toString());
+					
+						
+						row = sheet.getRow(data-1);
 						 int y = 1;
 						 if(formatter.formatCellValue(row.getCell(0)).equals("Ribakood")) {
 							 y = 0;
 						 }
+						 if(formatter.formatCellValue(row.getCell(1)).equals("Ribakood")) {
+							 y = 1;
+						 }
+						 
 						 
 						 int z = 2;
-						 if(formatter.formatCellValue(row.getCell(0)).equals("Ribakood")) {
-							 z = 2;
+						 if(formatter.formatCellValue(row.getCell(0)).equals("Nimetus")) {
+							 z = 0;
 						 }
 						 
-						 if(formatter.formatCellValue(row.getCell(1)).equals("Ribakood")) {
+						 if(formatter.formatCellValue(row.getCell(1)).equals("Nimetus")) {
+							 z = 1;
+						 }
+
+						 if(formatter.formatCellValue(row.getCell(2)).equals("Nimetus")) {
+							 z = 2;
+						 }
+
+						 if(formatter.formatCellValue(row.getCell(3)).equals("Nimetus")) {
 							 z = 3;
 						 }
-						for(int i = 4 ; i < sheet.getLastRowNum()+1;i++){
+						 
+						// System.out.println("Groups " + y + " " + z + " " + formatter.formatCellValue(row.getCell(0)) + " " + 
+							//	 formatter.formatCellValue(row.getCell(1)));
+							
+						 // System.exit(0);
+						 
+						for(int i = data ; i < sheet.getLastRowNum()+1; i++){
 							 row = sheet.getRow(i);
 							 
 							
@@ -4546,6 +4580,10 @@ public class Converter {
 						    //nüüd lööme koodi tykkideks ja lisame 
 						    String sort = (String)sisu.get(ean);
 						    ArrayList<String> sorts = new ArrayList<String>();
+						    if(sort.indexOf("A++") != -1) {
+						    	sorts.add("A++");
+						      sort = sort.substring(sort.indexOf("A++")+3);
+						    }
 						    if(sort.indexOf("A+") != -1) {
 						    	sorts.add("A+");
 						      sort = sort.substring(sort.indexOf("A+")+2);
@@ -5091,12 +5129,12 @@ public class Converter {
 								
 								
 								
-								if(i == 3 || i == 2) { 
-									for(int y = 3 ; y < 15 ;y++) {
+								if(i == 3 || i == 2 || i == 0) { 
+									for(int y = 1 ; y < 15 ;y++) {
 										cellx = row.getCell((short)y);
 										if(cellx != null) {
 											try {
-										//	System.out.println("Aldar " + cellx.getStringCellValue());
+											//System.out.println("Aldar " + formatter.formatCellValue(cellx));
 											if(formatter.formatCellValue(cellx).indexOf("13.Laekvere") != -1 ) {
 												return "aldar";
 											}

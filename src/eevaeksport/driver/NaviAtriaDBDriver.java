@@ -1027,6 +1027,14 @@ con3.close();
 	"		  FROM [ATRIA EESTI$Item] t   " +
 	"		  WHERE t.[Blocked]=0 and  t.[Inventory Posting Group] = 'VALMIS'   ORDER BY t.[No_]"; 
      	
+     	cmd = "SELECT t.[Inventory Posting Group], t.[No_] AS toode,t.[Description] AS nimi, 0 AS myygihind, \r\n" + 
+     			"     		 t.[Product Group] AS grupp   \r\n" + 
+     			"	 ,t.[Base Unit of Measure] AS unit,[Barcode] AS ean,'' AS status ,0 AS maxdiscount,\r\n" + 
+     			"			 '' AS type, [Units per Parcel] AS kastis,  [Net Weight]   AS kaal, [VAT Prod_ Posting Group] AS vat,[Item Disc_ Group] as grd ,\r\n" + 
+     			"	[Pricing Preservation] as maxdays  FROM [ATRIA EESTI$Item] t \r\n" + 
+     			"			  WHERE t.[Blocked]=0 and [Product Master Group] != '' and\r\n" + 
+     			"			   t.[Inventory Posting Group] in ('VALMIS','LIHA')   ORDER BY t.[No_]";
+     	
       System.out.println(cmd);
       
      	Connection con = getNewConnection2();

@@ -492,7 +492,9 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
             		if(ff2[i].toLowerCase().endsWith(".png")) {
             			File inpda = new File ( pictspda + prod.getID()+ ".png");
                     	if(!inpda.exists()){
-                        	Converter.shrinkAndCopyFile(in,inpda,400);
+                    		 try {
+                         		Converter.shrinkAndCopyFile(in,inpda,400);
+                            }catch(Exception e) {}
                 	    if(buf.toString().indexOf(prod.getID()+".png;"  + inpda.length()) == -1){
                           		buf.append(prod.getID()+".png;"  + inpda.length() + "\n");
                           	}
@@ -500,7 +502,9 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
             		}else {
             			File inpda = new File ( pictspda + prod.getID()+ ".jpg");
                     	if(!inpda.exists()){
-                        	Converter.shrinkAndCopyFile(in,inpda,400);
+                       try {
+                    		Converter.shrinkAndCopyFile(in,inpda,400);
+                       }catch(Exception e) {}
                 	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
                           		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
                           	}
@@ -531,7 +535,9 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                    		if(ff2[i].toLowerCase().endsWith(".png")) {
                    			File inpda = new File ( pictspda + prod.getID()+ ".png");
                            	if(!inpda.exists()){
-                               	Converter.shrinkAndCopyFile(in,inpda,400);
+                           	 try {
+                         		Converter.shrinkAndCopyFile(in,inpda,400);
+                            }catch(Exception e) {}
                        	    if(buf.toString().indexOf(prod.getID()+".png;"  + inpda.length()) == -1){
                                  		buf.append(prod.getID()+".png;"  + inpda.length() + "\n");
                                  	}
@@ -539,7 +545,9 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
                    		}else {
                    			File inpda = new File ( pictspda + prod.getID()+ ".jpg");
                            	if(!inpda.exists()){
-                               	Converter.shrinkAndCopyFile(in,inpda,400);
+                           	 try {
+                         		Converter.shrinkAndCopyFile(in,inpda,400);
+                            }catch(Exception e) {}
                        	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
                                  		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
                                  	}
