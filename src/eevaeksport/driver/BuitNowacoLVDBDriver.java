@@ -592,16 +592,16 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 		    if(cus != null){
 		    	cus.setSalesBlock(true);
 		    	if( blokk != null && blokk.trim().equals("1")){
-		        	//cus.setSalesBlockT(true);
-		        	cus.noOrder = true;
+		        	cus.setSalesBlockT(true);
+		        	//cus.noOrder = true;
 		        }
 		    }else{
 		    	Customer cusnew = new Customer(kood);
 		    	cusnew.setSalesBlock(true);
 		       
 		    	if( blokk != null && blokk.trim().equals("1")){
-		        	//cusnew.setSalesBlockT(true);
-		        	cusnew.noOrder = true;
+		        	cusnew.setSalesBlockT(true);
+		        	//cusnew.noOrder = true;
 			        
 		        }
 		             
@@ -613,15 +613,15 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 			    	cus.setSalesBlock(true);
 			    	if( blokk != null && blokk.trim().equals("1")){
 			        	cus.setSalesBlockT(true);
-			        	cus.noOrder = true;
+			        	//cus.noOrder = true;
 				        
 			        }
 			    }else{
 			    	Customer cusnew = new Customer(payer.trim());
 			    	cusnew.setSalesBlock(true);
 			    	if( blokk != null && blokk.trim().equals("1")){
-			        //	cusnew.setSalesBlockT(true);
-			        	cusnew.noOrder = true;
+			        	cusnew.setSalesBlockT(true);
+			        //	cusnew.noOrder = true;
 				        
 			        }
 			    	custs.put(payer.trim(),cusnew);
@@ -1886,55 +1886,55 @@ System.out.println(cmd);
             if(mood != null && mood.trim().startsWith("R") ){  
             	 
             	 if( blocked30custs.contains(customer.getID())){
-                 	 //customer.setSalesBlockT(true);
-                 	 customer.setSalesBlock(true);
-                		customer.noOrder = true;
+                 	 customer.setSalesBlockT(true);
+                 	 //customer.setSalesBlock(true);
+                		//customer.noOrder = true;
         	     }
             	 
              }else if(mood != null && mood.trim().startsWith("A") ){ 
             	 
             	 if( blocked11custs.contains(customer.getID())){
-            		//customer.setSalesBlockT(true);
-                 	 customer.setSalesBlock(true);
-                		customer.noOrder = true;
+            		customer.setSalesBlockT(true);
+                 	// customer.setSalesBlock(true);
+                		//customer.noOrder = true;
                  }
              }else if(mood != null && mood.trim().startsWith("N") ){ 
             	 
             	 if( blocked6custs.contains(customer.getID())){
-            		//customer.setSalesBlockT(true);
-                 	 customer.setSalesBlock(true);
-                		customer.noOrder = true;
+            		customer.setSalesBlockT(true);
+                 	// customer.setSalesBlock(true);
+                		//customer.noOrder = true;
                  }
              }else if(mood != null && mood.trim().startsWith("P") ){ 
             	 
             	 if( blocked1custs.contains(customer.getID())){
-            		//customer.setSalesBlockT(true);
-                 	 customer.setSalesBlock(true);
-                		customer.noOrder = true;
+            		customer.setSalesBlockT(true);
+                 	// customer.setSalesBlock(true);
+                		//customer.noOrder = true;
                  }
             	 
              }else if(mood != null && mood.trim().startsWith("B") ){ 
             	 
             	 if( blockedBBcusts.contains(customer.getID())){
-            		//customer.setSalesBlockT(true);
-                 	 customer.setSalesBlock(true);
-                		customer.noOrder = true;
+            		customer.setSalesBlockT(true);
+                 	// customer.setSalesBlock(true);
+                		//customer.noOrder = true;
                  }
             	 
              } else {
             	 if( blockedcusts.contains(customer.getID())){
-            		//customer.setSalesBlockT(true);
-                 	 customer.setSalesBlock(true);
-                		customer.noOrder = true;
+            		customer.setSalesBlockT(true);
+                 	// customer.setSalesBlock(true);
+                		//customer.noOrder = true;
                  }
              }
             
              
              String blokk = rs.getString("blokk");
              if( blokk != null && blokk.trim().equals("1")){
-            	//customer.setSalesBlockT(true);
-             	 customer.setSalesBlock(true);
-            		customer.noOrder = true;
+            	customer.setSalesBlockT(true);
+             	// customer.setSalesBlock(true);
+            		//customer.noOrder = true;
                blockedcusts.add(customer.getID());
              }
 
@@ -2003,9 +2003,9 @@ System.out.println(cmd);
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getPayer())));
           if(credit > 0 && (credit - Double.parseDouble((String)totaldebts.get(customer.getPayer()))) < -1){
             	
-            	//customer.setSalesBlockT(true);
-            	customer.setSalesBlock(true);
-           		customer.noOrder = true;
+            	customer.setSalesBlockT(true);
+            	//customer.setSalesBlock(true);
+           		//customer.noOrder = true;
             	blockedcusts.add(customer.getID());
             	blocked1custs.add(customer.getID());
             	blockedcusts.add(customer.getPayer());
@@ -2017,9 +2017,9 @@ System.out.println(cmd);
            }else if( this.totaldebts.get(customer.getID()) != null){
            	customer.setUsedCredit(Double.parseDouble((String)totaldebts.get(customer.getID())));
             if(credit > 0 && (credit - Double.parseDouble((String)totaldebts.get(customer.getID()))) < -1){
-            	//customer.setSalesBlockT(true);
-            	customer.setSalesBlock(true);
-           		customer.noOrder = true;
+            	customer.setSalesBlockT(true);
+            	//customer.setSalesBlock(true);
+           		//customer.noOrder = true;
             	blockedcusts.add(customer.getID());
             	blocked1custs.add(customer.getID());
             //	System.out.println("kliendiBlokki " + customer.getID());

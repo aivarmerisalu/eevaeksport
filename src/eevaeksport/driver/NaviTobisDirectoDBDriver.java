@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -2395,25 +2396,25 @@ System.out.println(cmd);
     	          
     	           boolean lastDealNo = false;
     	           String lines  = rs.getString("lines");
+    	           
     	           if(lines != null && lines.trim().length()>0){
     	        	   double summa   = rs.getDouble("summa");
-    	        	   String ldate  = rs.getString("lastdeal");
-    	        	   Calendar cc = Calendar.getInstance();
-    	        	   int y = Integer.parseInt(ldate.substring(0,4));
-    	        	   int m = Integer.parseInt(ldate.substring(6,7));
-    	        	  int d =  Integer.parseInt(ldate.substring(9,10));
-    	        	  cc.set(Calendar.YEAR, y);
-    	        	  cc.set(Calendar.MONTH, m);
-    	        	  cc.set(Calendar.DAY_OF_MONTH, d);
-    	        	  cc.add(Calendar.MONTH, 5);
-    	        	  
-    	        	  if(cc.getTime().before(new Date())) {
-    	        		  lastDealNo = true;
-    	        	  }
+    	        	   String ldate = rs.getString("lastdeal").substring(0,10);
+
+    	        	   LocalDate dealDate = LocalDate.parse(ldate);
+    	        	   LocalDate checkDate = dealDate.plusMonths(5);
+
+    	        	   if (checkDate.isBefore(LocalDate.now())) {
+    	        	       lastDealNo = true;
+    	        	   }
     	        	  
     	        	   customer.setInfo(Converter.enCodeEst("Paskutinė SF data: " + ldate.substring(0,10) + "|Vidutinė SF (iš 4 paskutinių):|" 
                    +  "*  Eilučių sk.:" + lines +"|  " +
     	        	   		"   Suma: " + (int)summa + " €." ));
+    	           }
+    	           
+    	           if(customer.getID().equals("AKTO")) {
+    	        	   System.out.println("M5 " + !sales5m.contains(customer.getID()) + "   " + lastDealNo);
     	           }
     	           
     	           if(!sales5m.contains(customer.getID()) || lastDealNo) {

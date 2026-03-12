@@ -525,7 +525,7 @@ private Product getProd(String toode){
 	  
 		  String sql = " update  ORDERS set rec_completed = 1 where id = "+ salesid ;
 
-     System.out.println(sql);
+  //   System.out.println(sql);
      try{
      	Connection con2 = this.getNewConnection2();
      	 PreparedStatement stmt2 = con2.prepareStatement(sql);
@@ -537,6 +537,8 @@ private Product getProd(String toode){
         }
      System.out.println("Order closed " + salesid);
       }
+  
+  
 
  private void makeOutput(Order orde , boolean ret , boolean repr ){
 	 
@@ -628,6 +630,13 @@ private Product getProd(String toode){
 	      if(order.getReference() != null && order.getReference().trim().length()>0 ){
 	      	ref = order.getReference().trim();
 	      }
+	      
+	      
+	      String ref2 = " ";
+	      if(order.getTeostaja() != null && order.getTeostaja().trim().length()>0 ){
+	      	ref2 = order.getTeostaja().trim();
+	      }
+	    
 
 	  String deltype = "0"; // ei kasutatta eestis
 	  String ordtype = "0"; // Seda poel ka eestis vaja siin on määratud miskanalist tellimus tuelb
@@ -647,10 +656,10 @@ private Product getProd(String toode){
 	  String sql = " INSERT INTO  ORDERS (  " +
 	                     " ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ," +
 	            "DELIVERY_DATE , STATUS  ,AGENT_ID ,ORDERING_TIME ," +
-	            "ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE ) " +
+	            "ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE,Cust_Ref ) " +
 	            " VALUES (" + salesid + ", cast(getdate() as date),'" + order.getCompany()  +"',  " + deltype+ 
 	            ",cast(? as date),'" + status + "','" + order.getAgent() +"'," + orderingTime +
-	            ",'"+ ref + "'," + ordtype +",'',null,0,'','',getdate() )" ;
+	            ",'"+ ref + "'," + ordtype +",'',null,0,'','',getdate(),'" + ref2 + "' )" ;
 	  
 	        System.out.println(sql);
 	        try{

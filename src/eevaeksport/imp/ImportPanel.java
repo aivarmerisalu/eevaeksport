@@ -10048,7 +10048,7 @@ System.out.println("token" + token);
             if(fline != null) {
             	
             
-            if(fline.trim().startsWith("45") && fline.trim().length() == 10  ){
+            if(( fline.trim().startsWith("47")  || fline.trim().startsWith("45")) && fline.trim().length() == 10  ){
 	        	   in.close();
 	        	   return "SAP";	        	   
 	           } 
