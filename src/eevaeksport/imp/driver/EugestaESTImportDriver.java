@@ -573,6 +573,9 @@ private Product getProd(String toode){
 	      
 	      if(orderLine.getDiscount() > 0 ) {
 	    	 disc = orderLine.getDiscount(); 
+	    	 if(disc == 100) {
+	    		 price = 0;
+	    	 }
 	      } // aston ei loe seda kasutab hinda 
 	      String choice = "NOT_AVAILABLE"; // seda pole vaja 
 	      String ware = "";// kui kasutaja on ise valinud lao siis täidame muidu on tühi
@@ -586,7 +589,7 @@ private Product getProd(String toode){
 	      if(orderLine.selActCode != null) {
 	    	  pobj = orderLine.selActCode;
 	      }
-	      System.out.println("promo code " + itemid + " " + pobj);
+	      System.out.println("promo code " + itemid + " " + pobj + " " + price + " " + disc);
 	   //	  DEFAULT_APPLIED = applied promo;
 	    //  NOT_APPLIED = promo not applied;
 	    //  NOT_AVAILABLE = product without promo.
