@@ -1016,7 +1016,7 @@ con3.close();
    }
       
    //  getFixedAssortmentData();
- 
+    long tana = new java.util.Date().getTime();
   
      try {
      	String cmd = " SELECT t.[No_] AS toode,t.[Description] AS nimi, 0 AS myygihind, " +
@@ -1031,7 +1031,7 @@ con3.close();
      			"     		 t.[Product Group] AS grupp   \r\n" + 
      			"	 ,t.[Base Unit of Measure] AS unit,[Barcode] AS ean,'' AS status ,0 AS maxdiscount,\r\n" + 
      			"			 '' AS type, [Units per Parcel] AS kastis,  [Net Weight]   AS kaal, [VAT Prod_ Posting Group] AS vat,[Item Disc_ Group] as grd ,\r\n" + 
-     			"	[Pricing Preservation] as maxdays  FROM [ATRIA EESTI$Item] t \r\n" + 
+     			"	[Pricing Preservation] as maxdays , [Novelty Product Until] as uus FROM [ATRIA EESTI$Item] t \r\n" + 
      			"			  WHERE t.[Blocked]=0 and [Product Master Group] != '' and\r\n" + 
      			"			   t.[Inventory Posting Group] in ('VALMIS','LIHA')   ORDER BY t.[No_]";
      	
@@ -1115,25 +1115,23 @@ con3.close();
                  	 prod.setVat("24");
                            
 
-                 	     String grd = rs.getString("grd");
+                 	 String grd = rs.getString("grd");
                 	      if(grd != null && grd.trim().length()>0){
                            	prod.setDiscgrupp(Converter.cleanLitLatEst(grd.trim()));
                           }
-                	      String maxdays = (rs.getString("maxdays"));
+                	   String maxdays = (rs.getString("maxdays"));
                 	      
                 	      if(maxdays != null && maxdays.trim().length()>0 && !maxdays.trim().equals("0") ){
        			        	prod.setPartii("MaxDays " + maxdays.trim());
        			        }
-                          	
-                   String add = "";
-                   if(id.length() > 5){
-                	   add = id.substring(0,5);
-                   }
-                   
-                	 String ee = "";
-                	 if (ean != null &&ean.trim().length()>3){
-                        // ee = " " + ean.substring(ean.trim().length()-3);
-                       }
+                          
+                	     java.sql.Date uus = rs.getDate("uus");
+                	     
+                	     if(uus != null && uus.after(new java.sql.Date(tana))) {
+                	    	 prod.setStatusNew("1");
+                	     }
+                	      
+                
                 	 
                 	 if(grupp.indexOf(" ") != -1){
                 	 	 prod.setName(Converter.enCodeEst( grupp.substring(0,grupp.indexOf(" "))+ " " + name.trim() ));

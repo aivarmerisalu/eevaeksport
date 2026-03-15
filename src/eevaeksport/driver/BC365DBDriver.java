@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -623,7 +624,11 @@ if (dataType == null || dataType.equals("agedAcc")) {
 if (dataType == null || dataType.equals("items")) {
 	 this.saveFile("items");
 }
-	  
+
+if (dataType == null || dataType.equals("stock")) {
+	 this.saveFile("itemInventories");
+}
+
 if (dataType == null || dataType.equals("customers")) {
 	this.saveFile("customers");
 }
@@ -1007,12 +1012,49 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	  
   }
 
+  
+  private HashMap<String,Double> stocks = null;
+  
 @Override
 public String getSaveStockInfo() {
-
 	
-	return null;
+	  StringBuffer products = new StringBuffer();
+	if(stocks == null) {
+		stocks = new HashMap<String,Double>();
+	}
+	
+	org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//itemInventories.json");
+  	org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+	
+	  int lenn = values.size();
+	try {
+	  for (int i = 0; i < lenn; i++) {
+		  
+			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+	//		"ItemId":"Z-SFP-0002","PhysicalInvent":150000,"InventLocationId":"3PL1-STD","expDate":"2026-07-02T12:00:00Z"	
+			String prodid = (String) cob.get("itemNo");
+			String ware = (String) cob.get("location");
+     		Double amnt = Double.parseDouble(cob.get("inventory")+"");
+  		
+  		if(amnt > 0 && ware.equals("PL")) {
+  			
+  	         products.append(prodid +  ";");
+             products.append(" ;");
+             products.append(getParent().getNF().format(amnt) + "; "  +  "\n"); // + dealer +  "\n");
+  				stocks.put(prodid, amnt);
+  				//partii.put(prodid, part.substring(0,10));
+  				
+  		}
+	  }
+	}catch(Exception E){
+    	
+    }
+        	
+  
+	
+	return products.toString();
 }
+
 
 @Override
 public String getProductSortingData() {
@@ -1023,10 +1065,13 @@ public String getProductSortingData() {
 @Override
 public TreeMap getProducts(Agent agent) {
 	  TreeMap tm = new TreeMap();
+	  
+	  
+      this.getSaveStockInfo();	  
+	  
 	  String weblink = parent.getProps().getProperty("weblink") ;
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//items.json");
-  	
-		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
+  		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("value");
 		
 		  int lenn = values.size();
 		try {
@@ -1085,6 +1130,10 @@ public TreeMap getProducts(Agent agent) {
           	String inventory = cob.get("inventory") +"";
           	if (inventory != null) {
           		prod.setStock(Double.parseDouble(inventory));
+          	}
+          	
+          	if(stocks != null && stocks.get(prod.getID()) != null) {
+          		prod.setStock(stocks.get(prod.getID()));
           	}
           	  	
           	if(weblink != null) {

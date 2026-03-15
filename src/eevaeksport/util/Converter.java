@@ -187,6 +187,144 @@ public class Converter {
 	}
 	
 	
+	 public static TreeMap<String,String> getDisplayInfoFromExcel(String exceldir, TreeMap<String,ArrayList <String>> customers) {
+		  TreeMap<String,String> res = new TreeMap<String,String>();
+		  // see on päis
+		  //Customer ID	Customer name	Customer Chain	Customer Cha	Display type	Product name	Start to show	Period start	Period end
+
+		   try{
+
+			   int a = 0;
+		   File f = new File (exceldir + "DisplayInfo.xlsx");
+		   FileInputStream	 ff = new FileInputStream(f);
+		
+			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+			XSSFSheet sheet = workbook.getSheetAt(0);
+			
+			XSSFRow row = null; 
+					ff.close();	
+						
+								for(int i = 0 ; i < sheet.getLastRowNum();i++){
+									 row = sheet.getRow(i);
+									if(row == null && a == 0){
+										a = i;
+									}else{
+										a = sheet.getLastRowNum();
+									}
+								}
+				
+								
+								for(int i = 1 ; i < a + 1;i++){
+								
+									 row = sheet.getRow(i);
+									String cust = null;
+									try {
+										cust = (row.getCell((short) 0).getStringCellValue()).toUpperCase();
+			 					      } catch (Exception e) {
+			 					    	 cust =(( (int)(row.getCell((short) 0).getNumericCellValue()))+"").toUpperCase();
+			 						  }
+									
+									String chain = null;
+									try {
+										chain = (row.getCell((short) 2).getStringCellValue()).toUpperCase();
+			 					      } catch (Exception e) {
+			 					    	 chain =(( (int)(row.getCell((short) 2).getNumericCellValue()))+"").toUpperCase();
+			 						  }
+									
+
+									String channel = null;
+									try {
+										channel = (row.getCell((short) 3).getStringCellValue()).toUpperCase();
+			 					      } catch (Exception e) {
+			 					    	 channel =(( (int)(row.getCell((short) 3).getNumericCellValue()))+"").toUpperCase();
+			 						  }
+									
+									String type = null;
+									try {
+										type = Converter.enCodeEst((row.getCell((short) 4).getStringCellValue()));
+			 					      } catch (Exception e) {
+			 					    	 type =( (int)(row.getCell((short) 4).getNumericCellValue()))+"";
+			 						  }
+
+									String text = null;
+									try {
+										text = Converter.enCodeEst((row.getCell((short) 5).getStringCellValue()));
+			 					      } catch (Exception e) {
+			 					    	 text = Converter.enCodeEst(( (int)(row.getCell((short) 5).getNumericCellValue()))+"");
+			 						  }
+									
+
+									Date naita = null;
+									try {
+										naita = (row.getCell((short) 6).getDateCellValue());
+			 					      } catch (Exception e) {
+			 					    	 
+			 						  }
+									Date algus = null;
+									try {
+										algus = (row.getCell((short) 7).getDateCellValue());
+			 					      } catch (Exception e) {
+			 					    	 
+			 						  }
+									Date lopp = null;
+									try {
+										lopp = (row.getCell((short) 8).getDateCellValue());
+			 					      } catch (Exception e) {
+			 					    	 
+			 						  }
+									
+									Calendar cc = Calendar.getInstance();
+									boolean goes= false;
+									if(naita != null) {
+										if(cc.getTimeInMillis() > naita.getTime() && cc.getTimeInMillis() < lopp.getTime()) {
+										  goes = true;
+										}
+									 } else {
+									if(cc.getTimeInMillis() > algus.getTime() && cc.getTimeInMillis() < lopp.getTime()) {
+									  goes = true;	
+									}
+									}
+								if(goes) {
+									if(cust == null) {
+										String asi = chain;
+										if(asi == null) {
+											asi = channel;
+										}
+										if(asi != null) {
+									       ArrayList<String> cucodes = customers.get(asi);
+									       for(String cuid : cucodes) {
+
+												if(res.get(cuid) != null) {
+												res.put(cuid, res.get(cuid) + "|" + type + ":" + text);
+											     } else {
+												res.put(cuid,  type + ":" + text);
+											     }
+									       }
+							       
+										}
+									}else {
+									
+									
+									if(res.get(cust) != null) {
+									res.put(cust, res.get(cust) + "|" + type + ":" + text);
+								     } else {
+									res.put(cust,  type + ":" + text);
+								     }
+								}
+									
+								}
+								
+								}
+								
+								
+	         }catch(Exception r) {
+			 r.printStackTrace();  
+		     }			
+				//System.out.println("oioi " + res.toString());	
+					return res;
+	  }
+
+	
 	 public static void uploadQuestsAndAnswers(String companyx, String user, String pass, Properties props, String excelDir) {
 	
 		 // Algus - vaatame mis küsimused on juba olemas

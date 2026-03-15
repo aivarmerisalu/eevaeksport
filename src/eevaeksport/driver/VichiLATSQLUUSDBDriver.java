@@ -1116,9 +1116,9 @@ cn.close();
 			String cmd = "";
 
 			if(view) {
-				cmd  = "select d.* , c.aadress, c.agent , a.nimi as animi from MobileJavaLAT.v_LAT_GetDebtsList d left join MobileJavaLAT.v_LAT_Customers c "
-						+ "on d.klient = c.kood and d.kl2 = c.[Ship-to-address code] left join \r\n" + 
-						"MobileJavaLAT.v_LAT_GetAgents a on a.kood = c.agent";
+				cmd  = "select d.* , c.aadress, c.agent , a.nimi as animi, c.payment from MobileJavaLAT.v_LAT_GetDebtsList d left join MobileJavaLAT.v_LAT_Customers c \r\n" + 
+						"						on d.klient = c.kood and d.kl2 = c.[Ship-to-address code] left join \r\n" + 
+						"						MobileJavaLAT.v_LAT_GetAgents a on a.kood = c.agent";
 				con = this.getNewConnectionView();
 			} else {
 				con =  getNewConnection2();
@@ -1166,6 +1166,22 @@ cn.close();
 				String ag2 = rs1.getString("animi");
 				if(ag2 != null && ag2.trim().length() > 0) {
 					text = text + " " + ag2 ;
+				}
+				String pay = rs1.getString("payment");
+				if(pay != null && pay.trim().length() > 0) {
+					pay = pay.substring(0,pay.length()-1);
+					try {
+					int days = Integer.parseInt(pay);
+					 Calendar cal = Calendar.getInstance();
+					  cal.setTime(debt.getDuedate());
+					  cal.add(Calendar.DATE, -days);
+					  debt.setDate(cal.getTime());
+						
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+					
+				
 				}
 				
 				debt.extraInfo = text;

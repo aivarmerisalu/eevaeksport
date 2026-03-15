@@ -1296,6 +1296,11 @@ if(grupp.equals("leib") ){
 	    }
 	}
 
+	  public TreeMap<String,ArrayList <String>> getCustCategories(){
+		  TreeMap<String,ArrayList <String>> res = new TreeMap<String,ArrayList <String>>();
+		  
+		  return res;
+	  }
   
   
   public TreeMap getCustomers(Agent agent){
@@ -1309,6 +1314,9 @@ if(grupp.equals("leib") ){
 	//  makeCustprod();
 	  
     TreeMap deldays =  makeCustomerDeliveryDays();
+    
+    TreeMap<String,ArrayList <String>> custCategories = getCustCategories();
+   TreeMap<String,String> displays  =   Converter.getDisplayInfoFromExcel(this.getExcelDir(), custCategories);
    
     loadPlans();
     
@@ -1769,6 +1777,12 @@ String arve = rs.getString("bill");
         }
         
         cust.setDealer(new Dealer("03N"));
+        
+        if(displays != null && displays.get(cust.getID()) != null) {
+        	cust.setInfo(displays.get(cust.getID()));
+        }
+        
+        
         
         if(goes) {
             customers.put(name, cust);
