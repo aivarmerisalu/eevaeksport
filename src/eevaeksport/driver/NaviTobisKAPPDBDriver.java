@@ -104,15 +104,6 @@ public class NaviTobisKAPPDBDriver extends AbstractDBDriver implements BulkUpdat
 	   	return null;
 	   }
 
-   private String ensureLen(String str, String replace){
-    if (str == null) str = "";
-    else str = str.trim().replace('\'', ' ').replace('\"', ' ').replace(';',' ');
-    if (str.length() == 0){
-      return replace;
-    } else {
-      return str;
-    }
-  }
 
    public ManagerData getManagerData() throws SQLException{
 

@@ -700,6 +700,8 @@ try {
     } catch (Exception e){
         getParent().showError(e);
       }
+    
+    getCustCategories();
     return agents;
   }
 
@@ -899,6 +901,60 @@ try {
 	    }
 	}
 
+	
+	  public TreeMap<String,ArrayList <String>> getCustCategories(){
+		
+		  
+		  TreeMap<String,ArrayList <String>> res = new TreeMap<String,ArrayList <String>>();
+		  // custcode - channel - segment -
+		
+          String cmd = " Select BackOfficeId as accountnum, channel,segmentName from  dbo.EPASAULE_CLIENTS a  " ; 
+          
+
+           if (isDebug()) System.out.println(cmd);
+          
+         try {
+           Connection con = this.getNewConnection();
+      	   Statement stmt = con.createStatement();
+  	       ResultSet rs = stmt.executeQuery(cmd);
+			
+			while(rs.next()){
+			
+				   String accountnum = rs.getString("accountnum").trim();
+		            String channel = rs.getString("channel");
+		            String segment = rs.getString("segmentName");
+		            
+		            String key = channel;  
+                       
+		            if(key != null && key.length() > 0) {
+			            if (!res.containsKey(key)) {
+			                res.put(key, new ArrayList<>());
+			            }
+			            res.get(key).add(accountnum);		            	
+		            }
+
+		             key = segment;  
+                    
+		            if(key != null && key.length() > 0) {
+			            if (!res.containsKey(key)) {
+			                res.put(key, new ArrayList<>());
+			            }
+			            res.get(key).add(accountnum);		            	
+		            }
+
+			
+			}
+			rs.close();
+			stmt.close();
+			con.close();
+          
+          } catch (Exception e) {e.printStackTrace();} 
+		  
+         
+         System.out.println("ress " + res.toString());
+		  return res;
+	  }
+  
   
   
   public TreeMap getCustomers(Agent agent){
@@ -909,7 +965,11 @@ try {
     } catch (Exception e){
     	e.printStackTrace();
     }
-	//  makeCustprod();
+   
+   
+   TreeMap<String,ArrayList <String>> custCategories = getCustCategories();
+   TreeMap<String,String> displays  =   Converter.getDisplayInfoFromExcel(this.getExcelDir(), custCategories);
+   
 	  
     TreeMap deldays =  makeCustomerDeliveryDays();
    
@@ -917,7 +977,6 @@ try {
      inTT = new HashSet<String>();
 	
 	HashMap<String, String> promos = new HashMap<String, String>();
-	
     HashMap<String, Vector<Agent>> cliags = new HashMap<String, Vector<Agent>>();
   
     
@@ -1277,6 +1336,11 @@ try {
         }
         
         cust.setDealer(new Dealer("03N"));
+        
+        if(displays != null && displays.get(cust.getID()) != null) {
+        	cust.setInfo(displays.get(cust.getID()));
+        }
+      
         
         if(goes) {
             customers.put(name, cust);

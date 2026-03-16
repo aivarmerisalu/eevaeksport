@@ -1008,15 +1008,7 @@ String  cmd2 = "select  summ.itemid AS toode ,' ' as ladu ,SUM(AVAILPHYSICAL) AS
     		"      FROM bmssa.custinvoicetrans sal  with (nolock) INNER JOIN bmssa.custinvoicejour jou  with (nolock) ON  sal.invoiceid = jou.invoiceid  and  \r\n" + 
     		"      jou.DATAAREAID=sal.DATAAREAID WHERE   \r\n" + 
     		"	  sal.dataareaid='ost' AND sal.invoicedate > getdate() -488 \r\n" + 
-    		"	  GROUP BY jou.orderaccount,str(datepart(YYYY,sal.invoicedate))+' '+str(datepart(mm,sal.invoicedate))\r\n" + 
-    		"	  union all\r\n" + 
-    		" SELECT  jou.orderaccount  as klient, sum(  round((lineamount),0)) AS summa, \r\n" + 
-    		"      str(datepart(YYYY,sal.invoicedate))+' '+str(datepart(mm,sal.invoicedate)) as kuu  \r\n" + 
-    		"      FROM  Axdb_O.bmssa.custinvoicetrans sal  with (nolock) INNER JOIN Axdb_O.bmssa.custinvoicejour jou  with (nolock) ON  sal.invoiceid = jou.invoiceid  and  \r\n" + 
-    		"      jou.DATAAREAID=sal.DATAAREAID WHERE   \r\n" + 
-    		"	  sal.dataareaid='ork' AND sal.invoicedate > getdate() -488  \r\n" + 
-    		"	   GROUP BY jou.orderaccount,str(datepart(YYYY,sal.invoicedate))+' '+str(datepart(mm,sal.invoicedate)) "; 
-	
+    		"	  GROUP BY jou.orderaccount,str(datepart(YYYY,sal.invoicedate))+' '+str(datepart(mm,sal.invoicedate))\r\n" ;
     
     
     
