@@ -128,6 +128,9 @@ private HashMap pants = null;
 
   public String getPandiPakend(String toode) {
 	
+	  if(toode.equals("405340094252")) {
+		  return "087";
+	  }
 	  
 	  if(pants == null) {
 		  pants = new HashMap();
@@ -528,6 +531,9 @@ private HashSet stats = null;
 	         String pant = getPandiPakend(toode);
 	          if(pant != null ){
 	        	  double aaa = line.getKogus();
+	        	  if(toode.equals("405340094252")) {
+	        		  aaa = aaa * 5;
+	        	  }
 	         	  if(pandikas.get(pant) == null){
 	         		  pandikas.put(pant,aaa+"");
 	               } else {
