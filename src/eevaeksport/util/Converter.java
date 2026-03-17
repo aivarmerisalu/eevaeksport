@@ -195,7 +195,9 @@ public class Converter {
 		   try{
 
 			   int a = 0;
-		   File f = new File (exceldir + "DisplayInfo.xlsx");
+			   DataFormatter formatter = new DataFormatter();
+				
+		   File f = new File (exceldir + "displayinfo.xlsx");
 		   FileInputStream	 ff = new FileInputStream(f);
 		
 			XSSFWorkbook workbook = new XSSFWorkbook((ff));
@@ -219,56 +221,63 @@ public class Converter {
 									 row = sheet.getRow(i);
 									String cust = null;
 									try {
-										cust = (row.getCell((short) 0).getStringCellValue()).toUpperCase();
+										 cust = formatter.formatCellValue(row.getCell((short) 0));
 			 					      } catch (Exception e) {
-			 					    	 cust =(( (int)(row.getCell((short) 0).getNumericCellValue()))+"").toUpperCase();
+			 					    	 cust =(((int)(row.getCell((short) 0).getNumericCellValue()))+"");
 			 						  }
 									
 									String chain = null;
 									try {
-										chain = (row.getCell((short) 2).getStringCellValue()).toUpperCase();
+										 chain = formatter.formatCellValue(row.getCell((short) 2));
 			 					      } catch (Exception e) {
 			 					    	 chain =(( (int)(row.getCell((short) 2).getNumericCellValue()))+"").toUpperCase();
 			 						  }
+									 
 									
-
-									String channel = null;
+									String prod = null;
 									try {
-										channel = (row.getCell((short) 3).getStringCellValue()).toUpperCase();
+										 prod = Converter.enCodeEst(formatter.formatCellValue((row.getCell((short) 3))));
 			 					      } catch (Exception e) {
-			 					    	 channel =(( (int)(row.getCell((short) 3).getNumericCellValue()))+"").toUpperCase();
+			 					    	 prod =( (int)(row.getCell((short) 3).getNumericCellValue()))+"";
 			 						  }
-									
+
+									String prodnimi = null;
+									try {
+										 prodnimi = Converter.enCodeEst(formatter.formatCellValue((row.getCell((short) 4))));
+			 					      } catch (Exception e) {
+			 					    	 prodnimi =( (int)(row.getCell((short) 4).getNumericCellValue()))+"";
+			 						  }
+
+									String campName = null;
+									try {
+										campName = Converter.enCodeEst(formatter.formatCellValue((row.getCell((short) 5))));
+			 					      } catch (Exception e) {
+			 					    	 campName = Converter.enCodeEst(( (int)(row.getCell((short) 5).getNumericCellValue()))+"");
+			 						  }
+
 									String type = null;
 									try {
-										type = Converter.enCodeEst((row.getCell((short) 4).getStringCellValue()));
+										type = Converter.enCodeEst(formatter.formatCellValue((row.getCell((short) 6))));
 			 					      } catch (Exception e) {
-			 					    	 type =( (int)(row.getCell((short) 4).getNumericCellValue()))+"";
+			 					    	 type = Converter.enCodeEst(( (int)(row.getCell((short) 6).getNumericCellValue()))+"");
 			 						  }
-
-									String text = null;
-									try {
-										text = Converter.enCodeEst((row.getCell((short) 5).getStringCellValue()));
-			 					      } catch (Exception e) {
-			 					    	 text = Converter.enCodeEst(( (int)(row.getCell((short) 5).getNumericCellValue()))+"");
-			 						  }
-									
+																		
 
 									Date naita = null;
 									try {
-										naita = (row.getCell((short) 6).getDateCellValue());
+										naita = (row.getCell((short) 7).getDateCellValue());
 			 					      } catch (Exception e) {
 			 					    	 
 			 						  }
 									Date algus = null;
 									try {
-										algus = (row.getCell((short) 7).getDateCellValue());
+										algus = (row.getCell((short) 8).getDateCellValue());
 			 					      } catch (Exception e) {
 			 					    	 
 			 						  }
 									Date lopp = null;
 									try {
-										lopp = (row.getCell((short) 8).getDateCellValue());
+										lopp = (row.getCell((short) 9).getDateCellValue());
 			 					      } catch (Exception e) {
 			 					    	 
 			 						  }
@@ -280,35 +289,33 @@ public class Converter {
 										  goes = true;
 										}
 									 } else {
-									if(cc.getTimeInMillis() > algus.getTime() && cc.getTimeInMillis() < lopp.getTime()) {
+									if(algus != null && lopp != null && cc.getTimeInMillis() > algus.getTime() && cc.getTimeInMillis() < lopp.getTime()) {
 									  goes = true;	
 									}
 									}
 								if(goes) {
+				String text ="|  type: "+ type + " - " + prod + " " + prodnimi + "|      (" + campName + ") " + Converter.getDDsMMMsYYYYString(algus)
+				+ " -> " + Converter.getDDsMMMsYYYYString(lopp)  ;
 									if(cust == null) {
 										String asi = chain;
-										if(asi == null) {
-											asi = channel;
-										}
+										
 										if(asi != null) {
 									       ArrayList<String> cucodes = customers.get(asi);
 									       for(String cuid : cucodes) {
 
 												if(res.get(cuid) != null) {
-												res.put(cuid, res.get(cuid) + "|" + type + ":" + text);
+												res.put(cuid, res.get(cuid) + "|"  + text);
 											     } else {
-												res.put(cuid,  type + ":" + text);
+												res.put(cuid, text);
 											     }
 									       }
 							       
 										}
 									}else {
-									
-									
 									if(res.get(cust) != null) {
-									res.put(cust, res.get(cust) + "|" + type + ":" + text);
+									   res.put(cust, res.get(cust) + "|" + text);
 								     } else {
-									res.put(cust,  type + ":" + text);
+								    	res.put(cust, text);
 								     }
 								}
 									

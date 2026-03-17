@@ -301,7 +301,7 @@ public class NaviTobisKAPPDBDriver extends AbstractDBDriver implements BulkUpdat
               if (ean != null && ean.trim().length()>0){
                 prod.setEAN(ean);
               }
-              prod.setPrice(rs.getDouble("hind"));
+              prod.setPrice(1);
               prod.setUnit(rs.getString("unit").replaceAll("²", "x2"));
                 	
                        tm.put(prod.getName(), prod);  

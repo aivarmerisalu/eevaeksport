@@ -233,19 +233,208 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 	
 }
 
+  
+  private HashMap<String,List<String>> activeXLSPromos = null;
+  
+  private void getCampExcelLines(Vector lines) {
+	  try {
+		  
+		  if(this.eancodes == null) {
+			  this.getProducts(null);
+		  }
+		  
+	   File f = new File (this.getExcelDir() + "campaigninfo.xlsx");
+	   FileInputStream	 ff = new FileInputStream(f);
+	
+		XSSFWorkbook workbook = new XSSFWorkbook((ff));
+		XSSFSheet sheet = workbook.getSheetAt(0);
+
+		 DataFormatter formatter = new DataFormatter();
+		
+		XSSFRow row = null; 
+				ff.close();	
+				 int a = 0;
+							for(int i = 0 ; i < sheet.getLastRowNum();i++){
+								 row = sheet.getRow(i);
+								if(row == null && a == 0){
+									a = i;
+								}else{
+									a = sheet.getLastRowNum();
+								}
+							}
+			
+							
+							for(int i = 1 ; i < a + 1;i++){
+							
+								 row = sheet.getRow(i);
+
+
+								 String cust = null;
+								try {
+									cust = formatter.formatCellValue(row.getCell((short) 0));
+		 					      } catch (Exception e) {
+		 					    	  e.printStackTrace();
+		 						  }
+								
+								String segment = null;
+								if(cust == null  || cust.trim().length() == 0) {
+								try {
+									segment = formatter.formatCellValue(row.getCell((short) 2));
+		 					      } catch (Exception e) {
+                                    e.printStackTrace();
+		 						  }
+								}
+								 
+								System.out.println("segment " + segment + " " + cust + " " + i);
+								 String prod = null;
+									try {
+										prod = formatter.formatCellValue(row.getCell((short) 3));
+			 					      } catch (Exception e) {
+			 					       e.printStackTrace();
+			 					      }
+									 String ean = null;
+										try {
+											ean = formatter.formatCellValue(row.getCell((short) 4));
+											if(ean != null && ean.trim().length() >0 ) {
+											if(prod == null || prod.trim().length() == 0) {
+												prod = this.eancodes.get(ean.trim());
+											}
+											}
+										} catch (Exception e) {
+				 					       e.printStackTrace();
+				 					      }	
+										
+										
+									
+									Double price = null;
+									try {
+										price = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 6)));
+			 					      } catch (Exception e) {
+			 					    	  e.printStackTrace();
+			 					      }
+
+									String text = null;
+									try {
+										text =  Converter.enCodeEst(formatter.formatCellValue(row.getCell((short) 7)));
+			 					      } catch (Exception e) {
+	                                   e.printStackTrace();
+			 						  }
+
+									String text2 = null;
+									try {
+										text2 =  Converter.enCodeEst(formatter.formatCellValue(row.getCell((short) 8)));
+			 					      } catch (Exception e) {
+	                                   e.printStackTrace();
+			 						  }								
+
+									Date naita = null;
+									try {
+										naita = (row.getCell((short) 9).getDateCellValue());
+			 					      } catch (Exception e) {
+			 					    	 
+			 						  }
+									Date algus = null;
+									try {
+										algus = (row.getCell((short) 10).getDateCellValue());
+			 					      } catch (Exception e) {
+			 					    	 
+			 						  }
+									Date lopp = null;
+									try {
+										lopp = (row.getCell((short) 11).getDateCellValue());
+			 					      } catch (Exception e) {
+			 					    	 
+			 						  }
+									
+								
+
+
+								
+								Calendar cc = Calendar.getInstance();
+								boolean goes= false;
+								if(naita != null) {
+									if(cc.getTimeInMillis() > naita.getTime() && cc.getTimeInMillis() < lopp.getTime()) {
+									  goes = true;
+									}
+								 } else {
+								if(cc.getTimeInMillis() > algus.getTime() && cc.getTimeInMillis() < lopp.getTime()) {
+								  goes = true;	
+								}
+								}
+								
+								
+							if(goes) {
+								if(activeXLSPromos == null) {
+									activeXLSPromos = new HashMap<String,List<String>>();
+								}
+								
+								if(cust != null && cust.trim().length() > 0) {
+									  MatrixLine mline = new MatrixLine();
+							           mline.setCustID(cust);
+							           mline.setProdID(prod);
+							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
+							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
+							           mline.setPrice(price);
+							           if(text != null && text.trim().length() > 0) {
+							        	   mline.setLineinfo(text + " " + text2);
+							           }
+							           lines.add(mline);
+							  	
+								}else {
+									if(segment != null) {
+										
+									String asi = segment;
+									
+									List<String> ll = activeXLSPromos.get(asi);
+									if(ll == null) {
+									  ll = new ArrayList<String>(); 
+									}
+									ll.add(asi + "xls");
+									activeXLSPromos.put(asi + "xls", ll);
+									
+									  MatrixLine mline = new MatrixLine();
+							           mline.setCliGroup(asi + "xls");
+							           mline.setProdID(prod);
+							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
+							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
+							           mline.setPrice(price);
+							           if(text != null && text.trim().length() > 0) {
+							        	   mline.setLineinfo(text + " " + text2);
+							           }
+							           lines.add(mline);
+									}
+								
+							}
+								
+							}
+							
+							}
+							
+							
+         }catch(Exception r) {
+		 r.printStackTrace();  
+	     }	
+	//  System.out.println("Active Promos "  + activeXLSPromos.toString());
+
+  }
 
    public Vector getPriceMatrixData() {
        Vector lines = new Vector();
-try {
+       
+       if(custCategories == null) {
+    	   custCategories = this.getCustCategories();
+       }
+       
+       getCampExcelLines(lines);
+
+       try {
 
 	String sss = "Select c.pricelistBackOfficeId as pricegroup\r\n" + 
 			"                       				 from  dbo.EPASAULE_CLIENTS c inner join EPASAULE_AGENTS_CLIENTS a on a.ClientBackofficeID = c.BackOfficeId group  by c.pricelistBackOfficeId";
-	
-                         
+                     
     Connection con = getNewConnection();
  	Statement stmt = con.createStatement();
-    
- 	 ResultSet  rs = stmt.executeQuery(sss);
+     ResultSet  rs = stmt.executeQuery(sss);
  	 HashSet<String> prs = new HashSet<String>();
 
      while (rs.next()) {
@@ -310,6 +499,8 @@ try {
        } catch (SQLException ex) {
           ex.printStackTrace();
        }
+
+    
 
        return lines;
        
@@ -701,7 +892,6 @@ try {
         getParent().showError(e);
       }
     
-    getCustCategories();
     return agents;
   }
 
@@ -908,7 +1098,7 @@ try {
 		  TreeMap<String,ArrayList <String>> res = new TreeMap<String,ArrayList <String>>();
 		  // custcode - channel - segment -
 		
-          String cmd = " Select BackOfficeId as accountnum, channel,segmentName from  dbo.EPASAULE_CLIENTS a  " ; 
+          String cmd = " Select BackOfficeId as accountnum, segmentName from  dbo.EPASAULE_CLIENTS a  " ; 
           
 
            if (isDebug()) System.out.println(cmd);
@@ -921,21 +1111,10 @@ try {
 			while(rs.next()){
 			
 				   String accountnum = rs.getString("accountnum").trim();
-		            String channel = rs.getString("channel");
-		            String segment = rs.getString("segmentName");
-		            
-		            String key = channel;  
-                       
+		           String key = rs.getString("segmentName");
+		           
 		            if(key != null && key.length() > 0) {
-			            if (!res.containsKey(key)) {
-			                res.put(key, new ArrayList<>());
-			            }
-			            res.get(key).add(accountnum);		            	
-		            }
-
-		             key = segment;  
-                    
-		            if(key != null && key.length() > 0) {
+		            	key = key.trim();
 			            if (!res.containsKey(key)) {
 			                res.put(key, new ArrayList<>());
 			            }
@@ -951,11 +1130,11 @@ try {
           } catch (Exception e) {e.printStackTrace();} 
 		  
          
-         System.out.println("ress " + res.toString());
+        // System.out.println("ress " + res.toString());
 		  return res;
 	  }
   
-  
+	private  TreeMap<String,ArrayList <String>> custCategories = null;
   
   public TreeMap getCustomers(Agent agent){
 	  nf.setMinimumFractionDigits(2);
@@ -967,10 +1146,19 @@ try {
     }
    
    
-   TreeMap<String,ArrayList <String>> custCategories = getCustCategories();
+    custCategories  = getCustCategories();
+    if(activeXLSPromos == null) {
+		activeXLSPromos = new HashMap<String,List<String>>();
+	    getCampExcelLines(new Vector());
+    }
+    
+
+	 // System.out.println("custCategories " +  custCategories.toString());
    TreeMap<String,String> displays  =   Converter.getDisplayInfoFromExcel(this.getExcelDir(), custCategories);
    
+	 // System.out.println("displays " +  displays.toString());
 	  
+	 /// System.exit(0);
     TreeMap deldays =  makeCustomerDeliveryDays();
    
     
@@ -1149,6 +1337,17 @@ try {
              }
         }
         
+        
+        if(activeXLSPromos.get(cust.getID()+"xls") != null) {
+           for (String cc :  activeXLSPromos.get(cust.getID()+"xls")) {
+        	   if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
+              	 cust.setGroup(cust.getGroup() + "|" + cc);
+               } else {
+              	 cust.setGroup(cc);
+               }
+           }
+        }
+        
         String aadr = rs.getString("address");
         if (aadr != null) {
         	if(aadr.endsWith(", %1")) {
@@ -1214,8 +1413,18 @@ try {
         
         String chain = rs.getString("chain");
         if(chain != null && chain.trim().length() > 0) {
-        	cust.setChain(chain);
+        	cust.setChain(chain.trim());
+        	if(activeXLSPromos.get(chain.trim()+"xls") != null) {
+                for (String cc :  activeXLSPromos.get(chain.trim()+"xls")) {
+             	   if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
+                   	 cust.setGroup(cust.getGroup() + "|" + cc);
+                    } else {
+                   	 cust.setGroup(cc);
+                    }
+                }
+             }
         }
+        
         
         
         String info = rs.getString("phone");
@@ -1523,6 +1732,7 @@ private HashSet<String> inTT = null;
   private Vector prodcodes = null;
 
   private HashMap<String,Double> prodprices = null;
+  private HashMap<String,String> eancodes = null;
   
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
@@ -1541,7 +1751,8 @@ private HashSet<String> inTT = null;
     TreeMap products = new TreeMap();
     TreeMap<String, Double> stocks = new TreeMap<String, Double>();
      prodprices = new HashMap<String,Double>();
-    
+     eancodes = new HashMap<String,String>();
+     
     try {
         Connection con =   this.getNewConnection();
         Statement stmt = con.createStatement();
@@ -1656,7 +1867,8 @@ private HashSet<String> inTT = null;
 
         String ean = rs.getString("ean");
         if(ean!=null && ean.trim().length()>0){
-          prod.setEAN(ean);
+          prod.setEAN(ean.trim());
+          eancodes.put( ean.trim(), prod.getID());
         }
 
       String grupp = rs.getString("grupp");
