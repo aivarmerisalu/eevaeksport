@@ -100,20 +100,10 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
     this.subjectFilesTo = parent.getString("filemsg");
     this.lang = parent.getProps().getProperty("language");
 	teamx = getParent().getProps().getProperty("salesteam");
-	//custgroups();
 	  user =  getParent().getProps().getProperty("rest.user");
       pass = getParent().getProps().getProperty("rest.pass");
       companyx = getParent().getProps().getProperty("rest.companyx");
-     
-      
-      this.getCustomers(null);
-      try {
-		getProdGroups();
-	} catch (SQLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-   
+    
        }
     
     String user =  null;
@@ -146,6 +136,8 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 	       	
 	       
 	       	  for (String cell : row) {
+
+             	 cell = cell.replaceAll("\"", " ").trim();
 	       		   
 	           	 if(cou == 0) {
 	           		customer = cell.trim().replace(':', '_');
@@ -233,53 +225,44 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    }
    
    
-   private HashMap clGroups = null;
-   private HashSet tnams200 = new HashSet();
    
    public Vector getPriceMatrixData(){
 	  	
    HashSet check = new HashSet();
 	       Vector result = new Vector();
 
-	       // teeme kampaaniad kõigepealt
-	       
-	       //peame korduvaid ridu mitte saatma systeemi. 
-	       //kliendi gruppide objekt peab olema 
-
-	       for (String[] row : readCSVData("actions.csv")) {
+	       for (String[] row : readCSVData("Merisoft_MasterData_PriceMatrix.csv")) {
   	       	 int cou = 0;
+  	     //  "prodid","custid","price","algus","lopp"
   	         String klient = null;
   	         String klientGR = null;
   	      	 String toode = null;
   	       	 double hind = 0 ;
   	       	 String start = null;
   	       	 String end = null;
-  	       	 String lisa = null;
-  	       	 //"";"";"Papīra dvieļi 'Ruta' MAX 1r. 2sl.";"1.79";"01.01.0001 00:00:00";"17.03.2025 00:00:00";
   	       
   	       	   for (String cell : row) {
-  	           	 if(cou == 0) {
-  	                     klient = cell.trim().replace(':', '_');;
-  	                }
+
+              	 cell = cell.replaceAll("\"", " ").trim();
+  	           //	 if(cou == 0) {
+  	                    // klient = cell.trim().replace(':', '_');;
+  	             //   }
   	           if(cou == 1) {
   	        	 klientGR = cell.trim();
 	                }
-  	           	 if(cou == 3) {
+  	           	 if(cou == 0) {
   	                    toode = cell.trim();
   	                }
-  	           	 if(cou == 4) {
+  	           	 if(cou == 2) {
   	                    hind = Double.parseDouble(cell.trim());
   	                }
-  	           if(cou == 5) {
+  	           if(cou == 3) {
   	        	   start = cell.trim();
 	                }
-  	            if(cou == 6) {
+  	            if(cou == 4) {
                    end = cell.trim();
                    }
   	            
-  	            if(cou == 7) {
-                   lisa = cell.trim();
-                   }
   	           	 cou++;
   	       	   }
   	              MatrixLine mline = new MatrixLine();
@@ -290,10 +273,7 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 
  	             if (klientGR != null && klientGR.length() > 0) {
  	               mline.setCliGroup(klientGR);
- 	              } else if (lisa != null && lisa.trim().length() > 0){
- 	               mline.setCliGroup(lisa);
- 	 	         }
-
+ 	              }
  	             
  	             
  	              if (toode != null && toode.length() > 0) {
@@ -311,139 +291,9 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
  	             if (end != null && end.length() > 0) {
  	               mline.setEndDate(end.substring(0,10));
  	             }
- 	             if(!tnams200.contains(klient)) {
- 	               result.add(mline); 
- 	             }
-	       }
+ 	       }
 	    
-	       Calendar cal = Calendar.getInstance();
-	       YearMonth yearMonth = YearMonth.of(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1);
-	         LocalDate firstDay = yearMonth.atDay(1);
-	         LocalDate lastDay = yearMonth.atEndOfMonth();
-	       
-	       
-	       for (String[] row : readCSVData("ClientsProductsDiscounts.csv")) {
-  	       	 int cou = 0;
-  	         String klient = null; 
-  	      	 String toode = null;
-  	       	 double hind = 0 ;
-  	  	     double disc = 0 ;
-  	       	 String hh = null;
-  	       
-  	       	   for (String cell : row) {
-  	           	 if(cou == 0) {
-  	                     klient = cell.trim().replace(':', '_');
-  	                }
-  	           	 if(cou == 1) {
-  	                    toode = cell.trim();
-  	                }
-  	           	 if(cou == 2) {
-  	                    hind = Double.parseDouble(cell.trim());
-  	                  hh = cell.trim();
-  	                  }
-  	           if(cou == 3) {
-	                    disc = Double.parseDouble(cell.trim());
-	                  }
-  	                cou++;
-  	       	   }
-  	              MatrixLine mline = new MatrixLine();
-
- 	             if (klient != null && klient.length() > 0) {
- 	               mline.setCustID(klient);
- 	             }
- 	             
-
- 	              if (toode != null && toode.length() > 0) {
- 	               mline.setProdID(toode);
- 	             }
- 	              
- 	             if (hind > 0) {
- 	 	               mline.setPrice(hind);
- 	 	             }
- 	            if (disc > 0) {
-	 	               mline.setDiscount(disc);
-	 	             }
- 	             mline.setStartDate(firstDay.toString());
- 	             mline.setEndDate(lastDay.toString());
- 	             boolean goes = true;
- 	            if(prodPrices.get(toode) != null) {
- 	            	String pr  = (String) prodPrices.get(toode);
- 	            	if(pr.equals(hh)) {
- 	            	   goes = false;
- 	            	}
- 	            }
- 	             
- 	             String signa = klient+toode+hh;
- 	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
- 	            	 if(!check.contains(signa) && goes) {
- 	            		    result.add(mline); 
- 	            		 }
- 	 	                 check.add(signa);
- 	            	 }    
- 	               }
-  	            
-	       
-	       
-	       for (String[] row : readCSVData("priceslists.csv")) {
-  	       	 int cou = 0;
-  	         String klient = null; 
-  	      	 String toode = null;
-  	       	 double hind = 0 ;
-  	       	 String hh = null;
-  	       
-  	       	   for (String cell : row) {
-  	           	 if(cou == 0) {
-  	                     klient = cell.trim().replace(':', '_');
-  	                }
-  	           	 if(cou == 1) {
-  	                    toode = cell.trim();
-  	                }
-  	           	 if(cou == 2) {
-  	                    hind = Double.parseDouble(cell.trim());
-  	                    hh = cell.trim();
-  	                }
-  	                cou++;
-  	       	   }
-  	              MatrixLine mline = new MatrixLine();
-
- 	             if (klient != null && klient.length() > 0) {
- 	               mline.setCustID(klient);
- 	             }
- 	             
-
- 	              if (toode != null && toode.length() > 0) {
- 	               mline.setProdID(toode);
- 	             }
- 	              
- 	             if (hind > 0) {
- 	 	               mline.setPrice(hind);
- 	 	             }
- 	             
- 	             boolean goes = true;
- 	            if(prodPrices.get(toode) != null) {
- 	            	String pr  = (String) prodPrices.get(toode);
- 	            	if(pr.equals(hh)) {
- 	            	   goes = false;
- 	            	}
- 	            }
-
-	              if(toode.equals("00000002681")) {
-	            	  System.out.println(klient + " iii " + toode + " " + hind );
-	              }
- 	             
- 	             String signa = klient+toode+hh;
- 	             if(mline.getPrice() > 0 || mline.getDiscount() > 0){
- 	            	 if(!check.contains(signa) && goes) {
- 	            		 mline.setProdLevel("pr");
- 	            		 if(!tnams200.contains(klient)) {
- 	            		    result.add(mline); 
- 	            		 }
- 	            		 }
- 	 	                 check.add(signa);
- 	            	 }    
- 	               }
-  	            
-	        		
+	   	        		
 	    return result;
 	      }
 
@@ -592,7 +442,7 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
 		Calendar c = Calendar.getInstance();
    		c.add(Calendar.MONTH, -3);
    		Date start = new Date(c.getTimeInMillis());   
-        for (String[] row : readCSVData("deliveries.csv")) {
+        for (String[] row : readCSVData("Merisoft_MasterData_Products.csv")) {
        	   
  	   int cou = 0;
       String custID = null;
@@ -601,27 +451,30 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    	 String lastdate = null;
       double price = 0;
       double amount = 0;
-     
-
+     //"orderaccount","itemid","qty","lastdate","hind","dok"
+      if(cou != 0)
   	   for (String cell : row) {
-  		if(cou == 0) {
-           doc = cell.trim();
-        }
+
+      	 cell = cell.replaceAll("\"", " ").trim();
+  		
   		if(cou == 1) {
            prodID = cell.trim();
         }
-  		if(cou == 2) {
+  		if(cou == 0) {
            custID = cell.trim().replace(':', '_');;
         }
-  		if(cou == 3) {
+  		if(cou == 2) {
            amount = Double.parseDouble(cell.trim());
         }
-  		if(cou == 5) {
+  		if(cou == 3) {
            lastdate = cell.trim();
         }
-  		if(cou == 6) {
+  		if(cou == 4) {
            price = Double.parseDouble(cell.trim());
         }
+  		if(cou == 5) {
+            doc = cell.trim();
+         }
 
   		cou++;
   	   }
@@ -661,6 +514,8 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
     	       	 double seis = 0 ;
     	       
     	       	   for (String cell : row) {
+
+                  	 cell = cell.replaceAll("\"", " ").trim();
     	           	 if(cou == 0) {
     	                     toode = cell.trim();
     	                }
@@ -732,6 +587,8 @@ if(seis > 0) {
     	 String name = null;
          
     	 for (String cell : row) {
+
+        	 cell = cell.replaceAll("\"", " ").trim();
         	 if(cou == 0) {
                   id = cell.trim();
              }
@@ -762,6 +619,7 @@ if(seis > 0) {
        List<String[]> data = new ArrayList<>();
 
        try (CSVReader reader = new CSVReaderBuilder(new FileReader(csvFile))
+    		   
                .withCSVParser(parser)
                .build()) {
            String[] nextLine = reader.readNext();// esimest rida ei loe
@@ -787,6 +645,7 @@ if(seis > 0) {
                 	 String id = null;
                 	 String name = null;
                      for (String cell : row) {
+                    	 cell = cell.replaceAll("\"", " ").trim();
                     	 if(cou == 0) {
                               id = cell.trim();
                          }
@@ -796,7 +655,7 @@ if(seis > 0) {
                          cou++;
                      }
                      Agent agent = new Agent(id);
-                     agent.setName(Converter.enCodeEst(name + " " + id));
+                     agent.setName(Converter.enCodeEst(name.trim() + " " + id));
                      tm.put(agent.getName(), agent);	
                      
                  }
@@ -827,6 +686,9 @@ if(seis > 0) {
               	 String agent = null;
               	 
                    for (String cell : row) {
+
+                  	 cell = cell.replaceAll("\"", " ").trim();
+                	   
                   	 if(cou == 1) {
                             custid = cell.trim().replace(':', '_');
                        }
@@ -857,7 +719,6 @@ if(seis > 0) {
    public TreeMap getCustomers(Agent agent){
 
           Hashtable custAgents = new Hashtable();// readCustAgents();
-          clGroups = new HashMap();
        
 	    try {
 	        
@@ -960,7 +821,8 @@ if(seis > 0) {
         	 Integer term = null;
         	 
              for (String cell : row) {
-            	 
+
+            	 cell = cell.replaceAll("\"", " ").trim();
             	 
             	 if(cou == 0) {
                      name = cell.trim();
@@ -1044,7 +906,7 @@ if(seis > 0) {
                  cou++;
              }
              Customer  cust = new Customer(id);
-             cust.setName( Converter.enCodeEst(name) + " " + Converter.enCodeEst(address));
+             cust.setName( Converter.enCodeEst(name).trim() + " " + Converter.enCodeEst(address));
              cust.setAddress( Converter.adressLink(Converter.enCodeEst(address), ""));
              cust.restStreet = address;
              cust.restPerson = contact;
@@ -1135,20 +997,22 @@ private HashMap prodPrices = null;
         TreeMap prods = new TreeMap(); 
         prodPrices = new HashMap();
         
-        for (String[] row : readCSVData("inventories.csv")) {
+        for (String[] row : readCSVData("Merisoft_MasterData_Stocks.csv")) {
        	 int cou = 0;
-         String ladu = null; // hetkel ladude p�hist ei teinud 
+         String ladu = null;  
       	 String toode = null;
        	 double seis = 0 ;
        
        	   for (String cell : row) {
+
+          	 cell = cell.replaceAll("\"", " ").trim();
            	 if(cou == 0) {
                      toode = cell.trim();
                 }
-           	 if(cou == 1) {
+           	 if(cou == 2) {
                     seis = Double.parseDouble(cell.trim());
                 }
-           	 if(cou == 2) {
+           	 if(cou == 1) {
                     ladu = cell.trim();
                 }
                 cou++;
@@ -1162,100 +1026,86 @@ private HashMap prodPrices = null;
            	  
         }
             
-        HashSet yesGroups = new HashSet();
-        if(getParent().getProps().getProperty("yesgroups") != null){
-        	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("yesgroups"),",");
-        	while (st.hasMoreElements()){
-        		String aa = st.nextToken();
-        		yesGroups.add(aa);
-        	}
-        }
-        
-        HashSet noSubGroups = new HashSet();
-        if(getParent().getProps().getProperty("noSubGroups") != null){
-        	StringTokenizer st = new StringTokenizer(getParent().getProps().getProperty("noSubGroups"),",");
-        	while (st.hasMoreElements()){
-        		String aa = st.nextToken();
-        		noSubGroups.add(aa);
-        	}
-        }
-        
     
-System.out.println(yesGroups.size() + " yesGroups");
-           for (String[] row : readCSVData("products.csv")) {
+           for (String[] row : readCSVData("Merisoft_MasterData_Products.csv")) {
         	   
     	   int cou = 0;
          String id = null;
       	 String name = null;
       	 String unit = null;
       	 String ean = null;
-      	 String artikkel = null;
       	 String gr2 = null;
       	 String gr1 = null;
+      	 String vat = null;
          double price = 0;
          double inCase = 0;
-        
-         //"00000000510";"00000000311";"Plāksteri Medrull 'Natural care' N1";"0";"A";"0";"0.1";"12";"162";"0";"0";"NO";"0";"1.1221";"0";"gab.";"4742225004543";"510236";
+         double onPallet = 0;
+         
+     
 
      	   for (String cell : row) {
+
+          	 cell = cell.replaceAll("\"", " ").trim();
          	 if(cou == 0) {
                    id = cell.trim();
              }
          	 if(cou == 1) {
-                  gr2 = cell.trim();
-                  if(gr2.trim().length() > 4) {
-                	  gr2 = gr2.substring(gr2.length()-4);
-                  }
+                name = cell.trim().replaceAll("'", " ").trim().replaceAll("  ", " ");
              }
          	 if(cou == 2) {
-                  name = cell.trim().replaceAll("'", " ").trim().replaceAll("  ", " ");
-             }
-         	 if(cou == 13) {
-                price = Double.parseDouble(cell.trim());
-                prodPrices.put(id, cell.trim());
-             }
-         	 if(cou == 7) {
                 inCase = Double.parseDouble(cell.trim());
              }
-         	 
-         	if(cou == 15) {
-                unit = cell.trim();
+         	 if(cou == 3) {
+         		onPallet = Double.parseDouble(cell.trim());
+         	  }
+         	 if(cou == 4) {
+                price = Double.parseDouble(cell.trim());
              }
-         	if(cou == 16) {
+         	if(cou == 5) {
                 ean = cell.trim();
              }
-         	if(cou == 17) {
-                artikkel = cell.trim();
+         	  //"itemid","nimetus","kastis","alusel","price","ean","grupp","grupp2","unit","vat","alegr","type","mini","opti","uus","out","tops","gift","nocount"
+         	 
+         	if(cou == 6) {
+                gr1 = cell.trim();
+            }
+         	 if(cou == 7) {
+                  gr2 = cell.trim();
+             }
+         	 
+         	if(cou == 8) {
+                unit = cell.trim();
+             }
+         	
+         	if(cou == 9) {
+                vat = cell.trim();
              }
               cou++;
           }
          
          
          Product prod = new Product(id);
-         boolean goes = false;
-         
+         boolean goes = true;
 
-         if(gr2 != null && treeGr.get(gr2) != null) {
-        	  prod.setGroup((treeGr.get(gr2)+"").substring(0,4));
-        	  prod.setGroupSecond(treeGr.get(gr2)+"");
-        	  
+         if(gr2 != null) {
+        	  prod.setGroupSecond(gr2);
+         }
+
+         if(gr1 != null ) {
+        	  prod.setGroup(gr1);
          }
          
          if(prods.get(id)!= null){
-         	prod.setStock( Double.parseDouble((String)prods.get(id)));
-         	 if(yesGroups.contains(prod.getGroup())) {
-      		   goes = true;
-      	    }
-         	
-         }else {
+         	 prod.setStock( Double.parseDouble((String)prods.get(id)));
+           } else {
         	 prod.setStock(0);
          }
          
-         if(noSubGroups.contains(prod.getGroupSecond())) {
-     		   goes = false;
-     	    }
+         if(inCase > 0) {prod.setInCases(inCase);}
+         if(onPallet > 0) {prod.setOnPallet(onPallet);}
+         
              prod.setPrice(price);
-             prod.setVat("21");
+             prod.setVat(vat);
              
               if(unit != null) {
             	 prod.setUnit(unit);	 
@@ -1264,62 +1114,21 @@ System.out.println(yesGroups.size() + " yesGroups");
             
 
               String e4 = "";
-             if(ean != null && ean.trim().length() > 6) {
+             if(ean != null && ean.trim().length() > 4) {
                prod.setEAN(ean);
-               e4 = " " +ean.substring(ean.length()-6);
+               e4 = " " +ean.substring(ean.length()-4);
              }
              
              if(inCase > 0) {
          	   prod.setInCases(inCase);
              }
              
-             String name2 = Converter.cleanLitLatEst(name.replace('Ø', ' '));
-             prod.setName(Converter.enCodeEst(name) + " " + artikkel + e4);
-           //  
-          
-             prod.artikkel = artikkel;
+             prod.setName(Converter.enCodeEst(name).trim() + " " + e4.trim());
             
-             if(usedProds.contains(id) || prods.get(id) != null) {
-            	 if(yesGroups.contains(prod.getGroup())) {
-            		   goes = true;
-            	   }
-             }
-             
-           /* if(prod.getID().equals("TR0019433")) {
-         	 System.out.println(prod.getID() + " " + prod.getName() + " " + prod.getGroup() +"|"+ prod.getGroupSecond() 
-         	 + " " + gr2+ " " + treeGr.get(gr2) +" " + goes);
-             }*/
-             // producti 0126
-             String sorting = "aa";
-
-             //alkogol 0007
-             if(prod.getGroup().equals("0007")) {
-            	 sorting = "bb";
-             }
-             //nonfood 0327
-
-             if(prod.getGroup().equals("0327")) {
-            	 sorting = "cc";
-             }
-             //tabaka 0060
-
-             if(prod.getGroup().equals("0060")) {
-            	 sorting = "dd";
-             }
-             //e.actise 6040
-
-             if(prod.getGroup().equals("6040")) {
-            	 sorting = "ee";
-             }
-             if(prod.getGroup().equals("0076")) {
-            	 sorting = "ff";
-             } 
-             prod.setNameSorting(sorting + name);
-             
-
+            
              if(goes) {
-            	 //  System.out.println( prod.getGroup() +" "+ sorting + name);
-            	   tm.put(sorting+name2, prod); 
+            	   System.out.println( prod.getGroup() +" " + name);
+            	   tm.put(Converter.enCodeEst(name), prod); 
                }
                
            }
@@ -1328,9 +1137,6 @@ System.out.println(yesGroups.size() + " yesGroups");
         		u.printStackTrace();
         	}
            
-
-    // System.exit(0);
-      
      return tm;
    }
 
@@ -1372,6 +1178,8 @@ System.out.println(yesGroups.size() + " yesGroups");
       
 
    	   for (String cell : row) {
+
+      	 cell = cell.replaceAll("\"", " ").trim();
    		
    		if(cou == 0) {
             custID = cell.trim().replace(':', '_');

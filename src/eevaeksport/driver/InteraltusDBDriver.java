@@ -287,17 +287,19 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 		              ff2 = res2.list();
 		             
 		         	 for(int i = 0;ff2.length>i;i++){
-		             	if( ff2[i].startsWith(toode)){
+		             	if( ff2[i].startsWith(toode+".")){
 		               // System.out.println("pilt olemas " + ff2[i]);
 		            	File in = new File ( pictssou + ff2[i]); 
 		              	if(in.isFile()){
-		              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
+		              		
+		              	File inpda = new File ( pictspda + ff2[i]);
 		              	if(!inpda.exists()){
+		              		try {
 		                  	Converter.shrinkAndCopyFile(in,inpda,400);
-	              	   
+		              		}catch(Exception e) {}
 	              	     }
-		              	 if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+		              	 if(buf.toString().indexOf(ff2[i]+";"  + inpda.length()) == -1){
+	                    		buf.append(ff2[i]+";"  + inpda.length() + "\n");
 	                    	}
 		              	}
 		                 }

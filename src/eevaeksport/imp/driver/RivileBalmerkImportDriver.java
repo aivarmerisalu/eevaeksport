@@ -106,7 +106,7 @@ public class RivileBalmerkImportDriver
     String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
     try {
       Class.forName(databaseDriverName).newInstance();
-      con = DriverManager.getConnection(url + "rivile","","");
+      con = DriverManager.getConnection(url + "rivilelt","","");
 
     }
     catch (Exception e) {

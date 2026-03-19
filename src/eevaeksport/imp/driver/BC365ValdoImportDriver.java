@@ -39,6 +39,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.xml.serialize.OutputFormat;
@@ -113,11 +114,10 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
           String soapEnvelope = buildSoapEnvelope(namespace, operation, json);
           post.setEntity(new StringEntity(soapEnvelope, StandardCharsets.UTF_8));
 
-          try (CloseableHttpResponse response = client.execute(post);
-               InputStream is = response.getEntity().getContent()) {
 
-              return extractReturnValue(is);
-          }
+try (CloseableHttpResponse response = client.execute(post)) {
+    return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+}
       }
   }
 

@@ -1,15 +1,22 @@
 package eevaeksport.mailagent;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -63,6 +70,7 @@ public class FileSender {
 	public boolean sendMaster = false;
 	public boolean sendStock = false;
 	public boolean getOrders = false;
+	public boolean consolidate = false;
 	public boolean sendPicts = false;
 	public boolean sendKeygen = false;
 	public boolean sendDash = false;
@@ -631,6 +639,9 @@ public class FileSender {
 		      if (args[i].trim().equalsIgnoreCase("/keygen")){
 			        this.sendKeygen = true;
 			      }
+		      if (args[i].trim().equalsIgnoreCase("/consolidate")){
+			        this.consolidate = true;
+			      }
 		      }
 		  } 
 		
@@ -648,6 +659,56 @@ public class FileSender {
 			getAWS(props);
 	        System.exit(0);
 	    }
+		if(consolidate) {
+
+			        String sourceDir = props.getProperty("consol.input");  
+			        String outputDir = props.getProperty("consol.output");   // folder with txt files
+			        String archiveDir = "consol.remove";    // folder to move processed files
+
+			        try {
+			            // Create archive folder if it doesn't exist
+			            Files.createDirectories(Paths.get(archiveDir));
+
+			            // Create output file name with today's date
+			            String today = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+			            Path outputFile = Paths.get(outputDir, "order(" + today + ").txt");
+
+			            // Open writer in append mode
+			            try (BufferedWriter writer = Files.newBufferedWriter(outputFile,
+			                    StandardOpenOption.CREATE,
+			                    StandardOpenOption.APPEND)) {
+
+			                // Loop through all .txt files
+			                DirectoryStream<Path> stream = Files.newDirectoryStream(
+			                        Paths.get(sourceDir), "*.txt");
+
+			                for (Path filex : stream) {
+
+			                    // Skip the output file itself if re-run
+			                    if (filex.equals(outputFile)) continue;
+
+			                    // Read each file and append content
+			                    try (BufferedReader reader = Files.newBufferedReader(filex)) {
+			                        String line;
+			                        while ((line = reader.readLine()) != null) {
+			                            writer.write(line);
+			                            writer.newLine();
+			                        }
+			                    }
+
+			                    // Move file to archive folder
+			                    Path target = Paths.get(archiveDir, filex.getFileName().toString());
+			                    Files.move(filex, target, StandardCopyOption.REPLACE_EXISTING);
+			                }
+			            }
+
+			            System.out.println("Files consolidated successfully!");
+
+			        } catch (IOException e) {
+			            e.printStackTrace();
+			        }
+			    }
+		
 		
 		
 		

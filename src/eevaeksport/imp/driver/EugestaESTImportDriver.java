@@ -573,7 +573,7 @@ private Product getProd(String toode){
 	      
 	      if(orderLine.getDiscount() > 0 ) {
 	    	 disc = orderLine.getDiscount(); 
-	    	 if(disc == 100) {
+	    	 if((int)disc == 100) {
 	    		 price = 0;
 	    	 }
 	      } // aston ei loe seda kasutab hinda 

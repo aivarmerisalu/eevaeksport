@@ -682,7 +682,7 @@ HashSet olemas = new HashSet();
           con.close();
         }
 
-           con = DriverManager.getConnection(url,"dba","sql");
+           con = DriverManager.getConnection(url,"","");
       } catch (Exception e) {
             getParent().showError(e);
       }
@@ -1743,8 +1743,8 @@ HashSet olemas = new HashSet();
     }
 
     public static final String DRIVER_VERSION = "RivileBalmerk";
-    private String             url = "jdbc:odbc:Rivile";
-    private String	       url2 = "jdbc:odbc:Rivile";
+    private String             url = "jdbc:odbc:Rivilelt";
+    private String	       url2 = "jdbc:odbc:Rivilelt";
     private Connection	       con = null;
     private PreparedStatement  stmt = null;
     private String	       subjectFilesTo = null;
