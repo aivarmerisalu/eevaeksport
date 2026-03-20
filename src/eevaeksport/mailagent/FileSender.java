@@ -28,7 +28,6 @@ import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.HttpMethod;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -37,15 +36,12 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.ListVersionsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.amazonaws.services.s3.model.S3VersionSummary;
-import com.amazonaws.services.s3.model.VersionListing;
 
 import eevaeksport.Email;
 import eevaeksport.util.Converter;
@@ -663,7 +659,7 @@ public class FileSender {
 
 			        String sourceDir = props.getProperty("consol.input");  
 			        String outputDir = props.getProperty("consol.output");   // folder with txt files
-			        String archiveDir = "consol.remove";    // folder to move processed files
+			        String archiveDir = props.getProperty("consol.remove");    // folder to move processed files
 
 			        try {
 			            // Create archive folder if it doesn't exist
@@ -707,6 +703,8 @@ public class FileSender {
 			        } catch (IOException e) {
 			            e.printStackTrace();
 			        }
+			        System.exit(0);
+			 	   
 			    }
 		
 		
