@@ -1111,6 +1111,7 @@ deliveryterm="CFR" language="eng" deliverymethodcomment="Testing field" text1="T
 	 		
 	 	    
 	        URL url = new URL("https://login.directo.ee/xmlcore/cap_xml_direct/xmlcore.asp?");
+	        Converter.trustAllHttpsURLConnection();
 	        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 	        connection.setRequestMethod("POST");
 	        connection.setDoOutput(true);

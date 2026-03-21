@@ -201,7 +201,7 @@ Connection ccc = DriverManager.getConnection(url + "saf"
 	   
 	   String signature = order.getSignature();
 		  if(signatures.contains(signature)){
-			  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
+			 // this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
 			    		  
 		  }else{
 			   
@@ -215,7 +215,7 @@ Connection ccc = DriverManager.getConnection(url + "saf"
 			     System.out.println("out3");
 			     addInvoiceLines(salesid);
 			     signatures.add(signature);
-				  this.trouble = null;			  
+				//  this.trouble = null;			  
 			  
 		  }
 		  

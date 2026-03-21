@@ -327,7 +327,7 @@ public class MantingaCSVImportDriver
 	  		 	 			tagastus = false;
 	  		 	 		}
 	  		 	 	 } 
-	      		    
+	      		    System.out.println("comp " + ord.getCompany());
 	 		 makeOutputTelema(ord,tagastus, repr);
 	    
 	    

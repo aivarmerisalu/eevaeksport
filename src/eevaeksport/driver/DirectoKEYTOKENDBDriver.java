@@ -332,7 +332,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		                    	  }catch(Exception aa){ }
 	                    	  String mode = null;  
 	                    	  try{  	  
-                       mode = rida.getAttributes().getNamedItem("what").getNodeValue();
+                       mode = rida.getAttributes().getNamedItem("type").getNodeValue();
 	                    	  }catch(Exception aa){ }
                       try{
                      double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
@@ -2320,7 +2320,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
          	       		        	 link = link.substring(weblinkurl.length());
          	       		         }
        	       		    	   prod.weblink = link;
-       	       		    	   System.out.println("weblink " + link + " " + codeAttr);
+       	       		    	//   System.out.println("weblink " + link + " " + codeAttr);
        	       		           break;
        	       		         }
        	          		   	 }catch(Exception e) {}

@@ -14935,6 +14935,10 @@ shipdate = getCalXML(asi);
     String fileName = dokFile.getName();
      File file = new File(fileName);
       file = dokFile;
+      boolean errs = true;
+      if("true".equals(parent.getProps().getProperty("nolinecount"))){
+    	 errs = false;
+        }
     try {
       setEmailBody(orders,fileName);
 
@@ -15402,11 +15406,9 @@ shipdate = getCalXML(asi);
         }
       }
       System.out.println("in order " + linesonorder + " on order " + count   );
-      if(linesonorder > 0 && linesonorder != count){
+      if(errs && linesonorder > 0 && linesonorder != count){
     	  troubles.append("ORDER PROBLEM 'not all lines received ' \n"+ "CustomerCode: " + firma + "\n" 
  				 + "\t\tAgent:" + agcode + "\nIN DROID lines :" + linesonorder + "\nON ORDER lines :" + count + " \n");
-    	
-    	  
       }
       
       in.close();
