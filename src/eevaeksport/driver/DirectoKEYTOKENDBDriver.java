@@ -43,7 +43,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -1208,18 +1212,10 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
         }
 
 
-
      
    public TreeMap getAgents(){
      TreeMap tm = new TreeMap();
- 
-   
-    // System.out.println( getPricelists("1").toString());
-   //  this.getProducts(null);
-     //File ff = new File(this.getExcelDir() + "graafikud.xlsx");
-   //  Converter.sendExcelVisits(ff,rcompany,user,pass);
-     
-     // loene võimalikud agendid sisse 
+    
      agent1 = new TreeMap();
  	try {
  		  File f = new File (getDir() + "kliendid.xml");

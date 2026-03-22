@@ -602,99 +602,6 @@ rs.close();
 
   public String getAssortmentStr(Agent agent) {
 		StringBuffer sb = new StringBuffer();
-/*
-File f = new File(this.getExcelDir() + "/listing.xlsx");
-		
-		try {
-			
-			FileInputStream ff = new FileInputStream(f);
-			XSSFWorkbook workbook = new XSSFWorkbook((ff));
-			XSSFSheet sheet = workbook.getSheetAt(0);
-			XSSFRow row = null;
-			TreeMap groups = new TreeMap();
-			row = sheet.getRow(6);
-			XSSFRow row2 = null;
-			row2 = sheet.getRow(2);
-			HashSet done = new HashSet();
-			// MÄÄRAME ÄRA MIS VÄLJAS ASUVAD Sortimendi tähised.
-
-			// System.out.println("rownum " + row.getLastCellNum());
-			for (int a = 8; a < row.getLastCellNum(); a++) {
-				try {
-					// System.out.println(row.getCell((short)a).getStringCellValue());
-					String asi = row.getCell((short) a).getStringCellValue();
-					if(asi != null && asi.trim().length() > 0){
-						if(asi.trim().equals("Agrees")){
-							asi = asi + row2.getCell((short) a).getStringCellValue().trim();
-						}
-						
-						groups.put(a + "",asi );
-					}
-					
-				} catch (Exception e) {
-					// System.out.println(row.getCell((short)a).getNumericCellValue());
-				}
-			}
-
-			 System.out.println(groups.toString());
-
-			for (int i = 8 ; i < sheet.getLastRowNum()+1 ; i++) {
-				row = sheet.getRow(i);
-				String prodID = "";
-
-				if (row != null && row.getCell((short) 1) != null) {
-
-					try {
-						prodID = (int) (row.getCell((short) 1)
-								.getNumericCellValue()) + "";
-					} catch (Exception e) {
-						prodID = (row.getCell((short) 1).getStringCellValue());
-					}
-					
-                       if(!prodID.equals("0")){
-                    	 // System.out.println("prodId " + prodID);
-					// Siin läheme reasisse rokkima ja vaatama kas se toode
-					// läheb kaasa
-					for (int a = 8; a < row.getLastCellNum(); a++) {
-
-						String group = (String) groups.get(a + "");
-						if (group != null && group.trim().length() > 0) {
-							String go = null;
-
-							if (row.getCell((short) a) != null) {
-								try {
-									go = (int) (row.getCell((short) a)
-											.getNumericCellValue()) + "";
-								} catch (Exception e) {
-									try {
-									go = (row.getCell((short) a)
-											.getStringCellValue());
-									} catch (Exception w) {
-										w.printStackTrace();
-									}
-								}
-							}
-
-							if (go != null && (go.equals("1") || go.equals("TRUE"))) { //  || go.equals("2")
-								String ju = " ; ;" + group + ";" + prodID + ";TOP";
-								if(!done.contains(ju)){
-									sb.append(ju + "\n");// 100 oli siin 
-									done.add(ju);
-								}
-								
-							}
-						}
-					 }
-                  }
-			  }
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-
-	//	System.out.println (sb.toString());
-*/
 		return null;
 	}
 
@@ -705,11 +612,6 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
  public String getSaveStockInfo(){
 	  
    kogused = new TreeMap();
-	  
-
-//For IMPORT (including RED BULL) products - only SPIL ('GPP-VT','GPP-AK-LB') warehouses must be taken;
-//For LB products - SPIL's warehouse 'GPP-VT' and warehouse from LB AX file - Lb_l - 'GPP'.
-
 
    String  cmd = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
 "   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +  
@@ -1134,8 +1036,7 @@ e.printStackTrace();
        stmr.close();
     
        stmr = con.createStatement();
-   	
-       rs1 = stmr.executeQuery(tra);
+   	   rs1 = stmr.executeQuery(tra);
       while(rs1.next()){
     	  String cuid = rs1.getString("cuid");
     	  int mon = rs1.getInt("mon");
@@ -1274,7 +1175,6 @@ int i = 0;
    Statement stm = getNewConnection().createStatement();
    
    stmr = con.createStatement();
-	
    rs1 = stmr.executeQuery(promo);
  
    while(rs1.next()){
@@ -2137,16 +2037,7 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
 	    Vector custProds = new Vector();
 
 	 int counter = 1;
-	   String cmd = "SELECT jou.orderaccount,tra.itemid ,tra.qty,jou.invoicedate AS lastdate ,max(tra.lineamount/tra.qty) as hind ,max(jou.salesid) as dok , jou.payment as pay " +
-	   "    FROM custinvoicetrans  tra INNER JOIN custinvoicejour jou ON   tra.invoiceid=jou.invoiceid and jou.dataareaid =tra.dataareaid   " + 
-	   "    WHERE  jou.invoicedate > getdate()-120 AND tra.dataareaid ='itb'  AND jou.dataareaid = 'itb'   " +
-	   "    and tra.qty !=0 and tra.itemid != '' " +
-	   "    GROUP BY jou.orderaccount,tra.itemid ,jou.invoicedate, jou.payment ,tra.qty " +
-	    "   ORDER BY jou.orderaccount,tra.itemid ,jou.invoicedate , jou.payment,tra.qty" ;
-
-	   
-
-	      cmd = " SELECT jou.orderaccount,tra.itemid ,tra.qty,jou.invoicedate AS lastdate ,max(tra.lineamount/tra.qty) as hind ,max(jou.salesid) as dok  , jou.payment as pay, max (co.amountmst) as tasu " +
+	   String  cmd = " SELECT jou.orderaccount,tra.itemid ,tra.qty,jou.invoicedate AS lastdate ,max(tra.lineamount/tra.qty) as hind ,max(jou.salesid) as dok  , jou.payment as pay, max (co.amountmst) as tasu " +
 		     " FROM custinvoicetrans  tra with(nolock) INNER JOIN custinvoicejour jou with(nolock) ON   tra.invoiceid=jou.invoiceid and jou.dataareaid =tra.dataareaid    " +
 			 " left JOIN custtrans a with(nolock) ON jou.invoiceid =a.invoice and a.dataareaid=jou.dataareaid LEFT JOIN  custtransopen co with(nolock) ON co.REFRECID=a.recid and a.dataareaid=co.dataareaid " +
 			 "  WHERE  jou.invoicedate > getdate()-120 AND tra.dataareaid ='itb'  AND jou.dataareaid = 'itb'   " +

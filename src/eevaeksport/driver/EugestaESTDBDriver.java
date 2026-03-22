@@ -304,14 +304,10 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   
   private void getCampExcelLines(Vector lines) {
 	  try {
-		  
-		  
 	   File f = new File (this.getExcelDir() + "campaigninfo.xlsx");
 	   FileInputStream	 ff = new FileInputStream(f);
-	
 		XSSFWorkbook workbook = new XSSFWorkbook((ff));
 		XSSFSheet sheet = workbook.getSheetAt(0);
-
 		 DataFormatter formatter = new DataFormatter();
 		
 		XSSFRow row = null; 
