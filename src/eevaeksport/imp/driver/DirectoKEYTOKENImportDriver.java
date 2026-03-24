@@ -380,73 +380,54 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	         for (int i = 0; i < read.getChildNodes().getLength(); i++){
 	         	  Node rida = read.getChildNodes().item(i);
 	         	  try{
-	         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
-	         		  Customer customer = new Customer(id);
-
-	         		  String name =  rida.getAttributes().getNamedItem("name").getNodeValue();
-	         		  customer.setName(deCode(name));
-	         		  try{ 
-	         		 String aadr =  rida.getAttributes().getNamedItem("send_address_street").getNodeValue(); 
-	         		  customer.setAddress(deCode(aadr));
-	         	  }catch(Exception e){
+	         		  Customer customer = new Customer(rida.getAttributes().getNamedItem("code").getNodeValue());
+	         		  customer.setName(deCode(rida.getAttributes().getNamedItem("name").getNodeValue()));
+	         		 
 	         		  
-	         		  try{ 
-	 	         		 String aadr =  rida.getAttributes().getNamedItem("address_street").getNodeValue(); 
-	 	         		  customer.setAddress(deCode(aadr));
-	         		 }catch(Exception ee){
-
-		         		 customer.setAddress(""); 
-	         		 }
-         		  }
-	         		  try{
-		         			 String city =  rida.getAttributes().getNamedItem("send_address_county").getNodeValue() ;         	
-			         		  customer.setCity(city);
-		         		  }catch(Exception e){
-		         			 try{
-			         			 String city =  rida.getAttributes().getNamedItem("address_county").getNodeValue() ;         	
-				         		  customer.setCity(city);
-		         			}catch(Exception es){
-
-			         			  customer.setCity("");	
-		         			}
-		         		  }
-	         		
-	         		 try{
-	         			 String country =  rida.getAttributes().getNamedItem("country_id").getNodeValue() ;         	
-		         		 if(country.equals("1")) { 
-	         			     customer.setVAT(0);
-		         		  } else {
-		         			 customer.setVAT(1); 
-		         		  }
-	         			  
-	         		  }catch(Exception e){
-	         			 try{
-		         			 String city =  rida.getAttributes().getNamedItem("address_county").getNodeValue() ;         	
-			         		  customer.setCity(city);
-	         			}catch(Exception es){
-
-		         			  customer.setCity("");	
-	         			}
-	         		  }
-         		
 	         		  
-	         		  try{
-	         			 String price_list =  rida.getAttributes().getNamedItem("pricelist").getNodeValue() ;         	
-		         		  customer.setGroup(deCode(price_list));
-	         	  
-	         		  }catch(Exception e){
-	         			  
-	         		  }
+			         	boolean addaadr = true;
+		         		
+		         		 String country = "Estonia";
+		       		  if(parent.getProps().getProperty("country") != null){
+		       			  country =  parent.getProps().getProperty("country");
+		       		  }
+		         		
+		       		  String sendaadr = ""; 
+		         		 
+		         		try { 
+		 	         		  sendaadr =  rida.getAttributes().getNamedItem("deliveryaddress1").getNodeValue();
+		 	         		  customer.restStreet = sendaadr.replaceAll(";", ",");
+		 	         		} catch (Exception ee){
+		         		 
+		         		    }
+			         	
+		         		
+		         		String asula = "";
+		         		try{ 
+		 	         	  asula =  rida.getAttributes().getNamedItem("deliveryaddress2").getNodeValue().replaceAll(";", ","); 
+		 	         		customer.restCity = asula; 
+		 	         	
+		 	         		String maa = "";
+		 	         		try{
+		 	         	  maa =  rida.getAttributes().getNamedItem("deliveryaddress3").getNodeValue().replaceAll(";", ","); 
+		 	         		country = maa;
+		 	         		customer.restZipCode = maa;
+		 	         		}catch(Exception eed){
+			         		 }
+		 	         		
+		 	         	 }catch(Exception ee){
+		         		 }
+		         		
+	         		  
+	         		  try{     	
+		         		  customer.setGroup(deCode(rida.getAttributes().getNamedItem("pricelist").getNodeValue()));
+	         	         } catch (Exception e) {}
 	         		
-	         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
-	         		      customer.addAgent(new Agent(deCode(salesman)));
-	                 //System.out.println(rida.getChildNodes().getLength());
-	                 
-	         		      
-	         		     tm.put(customer.getID(), customer);
+	         		        customer.addAgent(new Agent(deCode(rida.getAttributes().getNamedItem("salesman").getNodeValue())));
+	                      
+	         		    tm.put(customer.getID(), customer);
 	                      
 	         	  }catch(Exception e){
-	         		  
 	         	  }
 	              
 	         }
@@ -975,15 +956,19 @@ hind =   Converter.Round((float)hind, 2);
 	 			gr = ccc.getGroup();
 	 		}
 	 		String adr = "";
-	 		if(ccc != null && ccc.getAddress()!= null){
-	 			adr = deCode(ccc.getAddress());
+	 		if(ccc != null && ccc.restStreet!= null){
+	 			adr = deCode(ccc.restStreet);
 	 		} 
 	 		
 	 		String city = "";
-	 		if(ccc != null && ccc.getCity()!= null){
-	 			city = deCode(ccc.getCity());
+	 		if(ccc != null && ccc.restCity!= null){
+	 			city = deCode(ccc.restCity);
 	 		}
 	 		
+	 		String maa = "";
+	 		if(ccc != null && ccc.restZipCode!= null){
+	 			maa = deCode(ccc.restZipCode);
+	 		}
 	 		String nam = "";
 	 		if(ccc != null && ccc.getInfo()!= null){
 	 			nam = deCode(ccc.getInfo());
@@ -998,10 +983,7 @@ hind =   Converter.Round((float)hind, 2);
 	 			lan = "LT";
 	 		}
 	 		
-	 		String coun = "0";
-	 		if(vat == 0 ) {
-	 			coun = "1";
-	 		}
+	 		
 	 		System.out.println("Comment " + comm);
 	 		order.setSum(0);
 	 		
@@ -1039,7 +1021,7 @@ deliveryterm="CFR" language="eng" deliverymethodcomment="Testing field" text1="T
 	         "customercode=\"" +deCode( order.getCompany()) + "\" " +
 	         "deliveryaddress1=\"" + adr + "\" " +
 	         "deliveryaddress2=\"" + city + "\" " +
-	         "deliveryaddress3=\"" + coun + "\" " +
+	         "deliveryaddress3=\"" + maa + "\" " +
 	          comm + 
               ladu +
 	         "currency=\"EUR\" language=\"" + lan 
@@ -1101,7 +1083,7 @@ deliveryterm="CFR" language="eng" deliverymethodcomment="Testing field" text1="T
 	    System.out.println("output " + order_xml); 
 	 	
 	    
-	    //System.exit(0);
+	  //  System.exit(0);
 	    StringBuilder response = new StringBuilder();
 		  
 	 		

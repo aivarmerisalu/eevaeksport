@@ -299,8 +299,12 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
     	FileInputStream in = getCleanInputStream(f);
     	String handler = null;
         Document doc = db.parse(in,handler);
-        Node root = getNode(doc, "transport");      
-   
+        Node root = getNode(doc, "transport");    
+     
+        Calendar cc = Calendar.getInstance();
+        cc.add(Calendar.DATE, 1);
+        Date all = cc.getTime();
+       
     	Node read = getNode(root, "priceformularows");
         for (int i = 0; i < read.getChildNodes().getLength(); i++){
         	  Node rida = read.getChildNodes().item(i);
@@ -408,7 +412,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
                               }
                           }
                           
-                          if(alg.before(new Date()) && lopp.after(new Date())){
+                          if(alg.before(all) && lopp.after(new Date())){
                          	 lines.add(mline);	
                           }
                         
