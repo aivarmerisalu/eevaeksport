@@ -1066,7 +1066,7 @@ deliveryterm="CFR" language="eng" deliverymethodcomment="Testing field" text1="T
 		    		  hind =  this.getPriceAction(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
 				  }catch(Exception e){
 		    	  }
-				 // System.out.println("HindAction " + line.getToode() + " " + hind);
+				//  System.out.println("HindAction " + line.getToode() + " " + hind);
 			    	
 				  if(hind < 0.0006){
                       try{
@@ -1075,10 +1075,10 @@ deliveryterm="CFR" language="eng" deliverymethodcomment="Testing field" text1="T
 			    	  }
 			     }
 		    	  
-		    	System.out.println("Hind " + line.getToode() + " " + hind);
-		    	  
-                  if(line.getDiscount() > 0 || order.getStatus() == 1000) {
-                	  hind = line.getPrice();
+		    //	System.out.println("Hind " + line.getToode() + " " + hind);
+				  hind = line.getPrice();
+            	  
+                  if(line.getDiscount() > 0 ) {
                 	  if (order.getStatus() != 1000) {
                 		  order_xml = order_xml +"discount=\""+ line.getDiscount() +"\" ";
                 	  }else {
@@ -1086,12 +1086,11 @@ deliveryterm="CFR" language="eng" deliverymethodcomment="Testing field" text1="T
                 	  }
                   }
                 
-                  if (line.getDiscount() > 0 && order.getStatus() == 0) {
+                 // if(line.getDiscount() > 0 && order.getStatus() == 0) {
     			      order_xml = order_xml +"price=\""+ Converter.Round((float)hind, 2) +"\" ";  
-                   } else if(order.getStatus() == 1000) {
-    			      order_xml = order_xml +"price=\""+ Converter.Round((float)hind, 2) +"\" ";  
-                  }
-		    	  order_xml = order_xml + "/>";
+                   //}
+		    	 
+                  order_xml = order_xml + "/>";
 			 counter++;
 	      }
 	 

@@ -719,19 +719,19 @@ private void saveFile (String dataType , String uri) {
 	            String salesCode = (String)cob.get("AMGDeliveryAddressSalesAgentPersonnelNumber");
 	            if(salesCode != null) {
 	              cust.addAgent(new Agent (salesCode));
-	              cust.addAgent(new Agent("OFI 01"));
+	              cust.addAgent(new Agent("OFI01"));
 	            }
 	            
 	            String salesCode2 = (String)cob.get("AMGPrimaryAddressSalesAgentPersonnelNumber");
 	            if(salesCode2 != null) {
 	              cust.addAgent(new Agent (salesCode2));
-	              cust.addAgent(new Agent("OFI 01"));
+	              cust.addAgent(new Agent("OFI01"));
 	            }
 	            
 	            String salesCode3 = (String)cob.get("AMGEmployeeResponsiblePersonnelNumber");
 	            if(salesCode3 != null) {
 	              cust.addAgent(new Agent (salesCode3));
-	              cust.addAgent(new Agent("OFI 01"));
+	              cust.addAgent(new Agent("OFI01"));
 	            }
 	            
 	           // String balanceDue = cob.get("balanceDue")+ "";
@@ -792,23 +792,22 @@ private void saveFile (String dataType , String uri) {
 		            String salesCode = (String)cob.get("AMGDeliveryAddressSalesAgentPersonnelNumber");
 		            if(salesCode != null) {
 		              cust.addAgent(new Agent (salesCode));
-		              cust.addAgent(new Agent("OFI 01"));
+		              cust.addAgent(new Agent("OFI01"));
 		            }
 		            
 		            String salesCode2 = (String)cob.get("AMGPrimaryAddressSalesAgentPersonnelNumber");
 		            if(salesCode2 != null) {
 		              cust.addAgent(new Agent (salesCode2));
-		              cust.addAgent(new Agent("OFI 01"));
+		              cust.addAgent(new Agent("OFI01"));
 		            }
 		            
 		            String salesCode3 = (String)cob.get("AMGEmployeeResponsiblePersonnelNumber");
 		            if(salesCode3 != null) {
 		              cust.addAgent(new Agent (salesCode3));
-		              cust.addAgent(new Agent("OFI 01"));
+		              cust.addAgent(new Agent("OFI01"));
 		            }
 		            
-		           // String balanceDue = cob.get("balanceDue")+ "";
-		            
+		           
 		            String creditLimit = cob.get("CreditLimit")+"";
 		            cust.setCredit(creditLimit);
 		            

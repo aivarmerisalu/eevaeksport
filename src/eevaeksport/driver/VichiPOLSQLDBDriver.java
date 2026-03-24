@@ -62,6 +62,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	} catch (Exception e) {
 	    parent.showError(e);
 	}
+	
   		    user =  getParent().getProps().getProperty("rest.user");
 		    pass = getParent().getProps().getProperty("rest.pass");
 		    rcompany = getParent().getProps().getProperty("rest.company");
@@ -635,9 +636,7 @@ public class VichiPOLSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 	        aa.setName("office1");
 	        agents.put("office1", aa);
     
-        Agent aas = new Agent("OFI 01");
-        aas.setName("OFI 01");
-        agents.put("OFI 01", aas);
+
 
             rs.close();
 	        con.close();
@@ -883,13 +882,14 @@ try{
              String ag = rs.getString("agent");
              if(ag != null){
                 customer.addAgent(new Agent(ag.trim()));
-                customer.addAgent(new Agent("OFI 01"));
+                customer.addAgent(new Agent("OFI01"));
                } 
               
+             
                ag = rs.getString("agent2");
                  if(ag != null){
                     customer.addAgent(new Agent(ag.trim()));
-                  	customer.addAgent(new Agent("OFI 01"));
+                  	customer.addAgent(new Agent("OFI01"));
                  }
              
 				
@@ -904,6 +904,7 @@ try{
 							}
 						}
 					}
+				  
              
              if (ag != null && ag.trim().length()>0){
  				Agent agg = ((Agent)this.getAgents1().get(ag.trim()));

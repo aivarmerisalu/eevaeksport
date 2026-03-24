@@ -655,6 +655,13 @@ String picts = parent.getProps().getProperty("pict.dir");
              
               if(!ag.equals("DDD"))
               cust.addAgent(new Agent("DDD"));
+
+              if(!ag.equals("AAA"))
+              cust.addAgent(new Agent("AAA"));
+
+              if(!ag.equals("CCC"))
+              cust.addAgent(new Agent("CCC"));
+
               
               String ag2 = rs.getString("agent2");
               if(ag2 != null && ag2.trim().length() > 0 ) {

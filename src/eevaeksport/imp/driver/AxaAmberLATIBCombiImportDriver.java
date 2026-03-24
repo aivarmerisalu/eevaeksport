@@ -18,6 +18,8 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -28,6 +30,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Document;
@@ -344,7 +351,12 @@ private Vector signatures = new Vector();
 				  System.out.println("on ymberhindlus ");
 			  }else {
 				
-				  Vector splitted =  splitOrder(order);
+		Vector spADLIB = splitOrderIBADL(order);
+	   Enumeration enu = spADLIB.elements();
+			 while(enu.hasMoreElements()){
+
+			  Order orde = (Order)enu.nextElement();
+				  Vector splitted =  splitOrder(orde);
 			 	  Enumeration en = splitted.elements();
 			 	  while(en.hasMoreElements()){
 			 		  Order ord = (Order)en.nextElement();
@@ -352,7 +364,7 @@ private Vector signatures = new Vector();
 				    }
 			      		  signatures.add(signature);
 			      		  
-			  }
+			  }}
 			     }
 			   try {
 					saveObject(signatures, "signatures.vec");
@@ -620,8 +632,156 @@ private Product getProd(String toode){
 	 //System.exit(0);
 	  return result ;
   }
+ 
+ 
+ public  String getExcelDir(){
+     String dir = parent.getProps().getProperty("excel.dir");
+     if(dir != null){
+   	   if (!(dir.endsWith("/") || (dir.endsWith("\\")))) dir = dir + "/";  
+     }else{
+   	    dir =  "excel/"; 
+     }
+  
+     
+     return dir;
+   }
+
+ private void getCustTies() {
+
+	  ibCustCodes = new HashMap<String, String>(); 
+	  
+		File f = new File(getExcelDir() + "/custties.xlsx");
+		try {
+			FileInputStream ff = new FileInputStream(f);
+			Workbook workbook = new XSSFWorkbook((ff));
+			Sheet sheet = workbook.getSheetAt(0);
+			DataFormatter formatter = new DataFormatter();
+			XSSFRow row = null;
+			 int a = 0;
+				for(int i = 0 ; i < sheet.getLastRowNum();i++){
+					 row = (XSSFRow) sheet.getRow(i);
+					if(row == null && a == 0){
+						a = i;
+					}else{
+						a = sheet.getLastRowNum();
+					}
+				}
+
+		for(int i = 1 ; i < a + 1;i++){
+			 row = (XSSFRow) sheet.getRow(i);
+			
+			for (int u = 1; u < row.getLastCellNum(); u++) {
+				
+				 String custADL = null;
+					try {
+						custADL = formatter.formatCellValue(row.getCell((short) 1));
+				      } catch (Exception e) {
+				       e.printStackTrace();
+				      }
+
+					 String custIB = null;
+						try {
+							custIB = formatter.formatCellValue(row.getCell((short) 2));
+					      } catch (Exception e) {
+					       e.printStackTrace();
+					      }
+						  ibCustCodes.put(custADL,custIB); 
+			   	      }
+				}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+  // System.out.println(ibCustCodes.toString());
+ }
 
 
+ private  HashMap<String, String> ibCustCodes = null; 
+
+ private Vector splitOrderIBADL (Order order){
+	 
+	 if(ibCustCodes == null) {
+		 getCustTies();
+	 }
+	  
+	  Vector result = new Vector();
+	  
+	  String agcode = order.getAgent();
+	  if(agcode.startsWith("V0") && agcode.length() > 4) {
+		  agcode = "RETAIL";
+	  }
+
+	  if (order.getDokNr() == null || order.getDokNr().trim().length() == 0){
+		  order.setDokNr((Calendar.getInstance().getTimeInMillis() + "").substring(3));
+	  }
+
+	  Order ordSADL = new Order(order.getCompany(),agcode);
+	  String ibcode = ibCustCodes.get(order.getCompany());
+			  if(ibcode == null) {
+				  ibcode = "NOCODE" + order.getCompany();
+			  }
+	  Order ordSIB = new Order(ibcode,agcode);
+	 	 
+	  ordSADL.setAgentCode(order.getAgentCode());
+	  ordSADL.setDokNr(order.getDokNr());
+	  ordSADL.setCompName(order.getShipMode());
+	  ordSADL.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordSADL.setStatus(order.getStatus());
+	  ordSADL.setInfo(order.getInfo());
+	  ordSADL.setPaymTerm(order.getPaymTerm());
+	  ordSADL.setDealer(order.getDealer());
+	  ordSADL.setAgentFirstName("ADL");
+	  ordSADL.setTeostaja(order.getTeostaja());
+	  ordSADL.setWarehouse(order.getWarehouse());
+		
+	  
+	  ordSIB.setAgentCode(order.getAgentCode());
+	  ordSIB.setDokNr(order.getDokNr());
+	  ordSIB.setCompName(order.getShipMode());
+	  ordSIB.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordSIB.setStatus(order.getStatus());
+	  ordSIB.setInfo(order.getInfo());
+	  ordSIB.setPaymTerm(order.getPaymTerm());
+	  ordSIB.setAgentFirstName("IB");
+	  ordSIB.setDealer(order.getDealer());
+	  ordSIB.setTeostaja(order.getTeostaja());
+	  ordSIB.setWarehouse(order.getWarehouse());
+		  
+	  Vector lines = order.getOrderLines();
+	  Enumeration enumr = lines.elements();
+	  while  (enumr.hasMoreElements()){
+		  OrderLine lin = (OrderLine)enumr.nextElement();
+		  
+		    if(lin.getToode().startsWith("ib_")){
+		    	ordSIB.add(lin.getToode().substring(3), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		    	ordSIB.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "G");
+		    	ordSIB.setReference(order.getReference());
+		     }else {
+		    	 ordSADL.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
+			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,null,lin.docType);
+		    	 ordSADL.setDokNr(order.getDokNr());
+		    	 ordSADL.setReference(order.getReference()); 
+			 }
+		  
+	  }
+	  
+
+	  if(ordSADL.getOrderLines() != null && ordSADL.getOrderLines().size()>0){
+		  result.add(ordSADL);  
+	  }
+
+	  if(ordSIB.getOrderLines() != null && ordSIB.getOrderLines().size()>0){
+		  result.add(ordSIB);  
+	  }
+	  
+	 System.out.println("Result =" +order.getDokNr()
+			 + " "+ result.size());
+	 //System.exit(0);
+	  return result ;
+ }
+
+
+ 
 
   
   public static void saveObject(Object obj, String file) throws IOException {
@@ -659,6 +819,13 @@ private Product getProd(String toode){
 	 boolean brakis =  (order.getDealer() != null && order.getDealer().equals("GPP-VT-BR"));
 	 System.out.println("gift or brakis " + gift  + " " + brakis );
 	 	  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	 	  
+	 	  boolean isIB = false;
+	 	  
+	 	  if(order.getAgentFirstName().equals("IB")) {
+	 		  isIB = true;
+	 	  }
+	 	  
 	    String reason = "100";
 	      try {
 	    	
@@ -666,9 +833,6 @@ private Product getProd(String toode){
 	        Document doc = db.newDocument();
 	        Element root = doc.createElement("Document-Order");
 	        doc.appendChild(root);
-
-	  //      String filiaalStr = null;
-	    //    String tarnijaKoodStr = null;
 
 	        Node docheader = doc.createElement("Document-Header");
 	        root.appendChild(docheader);
@@ -903,7 +1067,14 @@ System.out.println("teostaja " + order.getTeostaja());
 	        
 	        root.appendChild(header);
 
-String custname = this.custName(order.getCompany());
+String custname = null;
+if(!isIB) {
+   custname = this.custName(order.getCompany());
+}else {
+	custname = this.custNameIB(order.getCompany());
+}
+
+
 	        Node parties = doc.createElement("Document-Parties");
 	        Node seller = doc.createElement("DeliveryPoint");
 
@@ -961,11 +1132,8 @@ String custname = this.custName(order.getCompany());
 	        buyer.appendChild(iseX);
 
 	        parties.appendChild(buyer);
-
-	        
 	        
 	        root.appendChild(parties);
-
 
 
 	        //RIDADE LISAMINE
@@ -982,11 +1150,10 @@ String custname = this.custName(order.getCompany());
 	 	     }else{
 	 	    	 toode = "";
 	 	     }
+	 	     
 	          if(line.getKogus()!= 0 && !toode.equals("")){
-	          	
-	        	  
-	        	  coun++;
-	        	  addLine(line, read, doc, coun , order, ret , reason , custname,gift);
+	          	  coun++;
+	        	  addLine(line, read, doc, coun , order, ret , reason , custname, gift, isIB);
 	          }
 	          }
 
@@ -1012,8 +1179,13 @@ String custname = this.custName(order.getCompany());
 	        summary.appendChild(TotalNetAmount);
 	       
 	        root.appendChild(summary);
+	        
+	        String ddd = parent.getProps().getProperty("conv.dir");
+	        if(isIB) {
+	        	ddd = parent.getProps().getProperty("conv.dir2");
+	        }
 	 	
-	      String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim() +  ".xml";
+	      String fileName = ddd + order.getDokNr().trim() + (uni + "").trim() +  ".xml";
 	      System.out.println(fileName);
 	      OutputFormat of = new OutputFormat();
 	        of.setIndenting(true);
@@ -1027,7 +1199,13 @@ String custname = this.custName(order.getCompany());
 	        out.close();
 	      
 	        if(comment != null){
-	        	String chain = this.custChain(order.getCompany());
+	        	String chain = null ;
+	        	if(isIB) {
+	        		chain = this.custChainIB(order.getCompany());
+	        	 } else {
+	        		chain = this.custChain(order.getCompany());
+		    	}
+	        
 	    	    sendCommentEmail( comment,order.getDokNr(),order.getCompany(),  " " + custname , " "+ chain);
 	         }
 		
@@ -1035,6 +1213,41 @@ String custname = this.custName(order.getCompany());
 			e.printStackTrace();
 		}
 	 }
+ 
+ 
+
+ 
+ private String custChainIB(String code){
+	  String res = "noname";
+	  String sql =  "  SELECT accountnum ,cus.COMPANYCHAINID as nimi FROM custtable cus WHERE  "
+	  		+ " cus.dataareaid in ('itb') and accountnum ='" + code + "'" ;
+
+	   System.out.println(sql);
+	   try {
+		
+		    Connection con = getNewConnection();
+	        Statement stmt = con.createStatement();
+	        ResultSet rs = stmt.executeQuery(sql);
+	        
+	        while(rs.next()){
+	        	 res = rs.getString("nimi").trim();
+		    }
+	       
+	        rs.close();
+	        stmt.close();
+	        con.close(); 
+	   
+	   }catch(Exception e){
+		  e.printStackTrace(); 
+	   }
+	      
+	        
+      System.out.println("customerChain " + res);
+	  
+	  return res ;
+ }
+
+ 
  private String custChain(String code){
 	  String res = "noname";
 	  String sql =  "  SELECT accountnum ,cus.COMPANYCHAINID as nimi FROM custtable cus WHERE  "
@@ -1069,7 +1282,7 @@ String custname = this.custName(order.getCompany());
    private String comment = null;
    
    private void addLine(OrderLine line, Node read, Document doc,int counter ,Order order , boolean ret 
-		   ,String reason,String custname, boolean gift) throws SQLException{
+		   ,String reason,String custname, boolean gift, boolean isIB) throws SQLException{
 	   
 
 	
@@ -1086,8 +1299,15 @@ String custname = this.custName(order.getCompany());
 
 	     String toode  = line.getToode();
 	     
+	     String eann = null;
+	     if(!isIB) {
+	    	eann =  getEan(toode);
+	     }else {
+	    	 eann =  getEanIB(toode);
+	     }
+	     
 	     Node toote_ean = doc.createElement("EAN");
-	     Text toote_eanVal = doc.createTextNode(getEan(toode));
+	     Text toote_eanVal = doc.createTextNode(eann);
 	     toote_ean.appendChild(toote_eanVal);
 	     ridaitem.appendChild(toote_ean);
 
@@ -1105,7 +1325,15 @@ String custname = this.custName(order.getCompany());
 	     toote_kood.appendChild(toote_koodVal);
 	     ridaitem.appendChild(toote_kood);
         
-	     String nimi = this.getProdNimi(toode);
+	     String nimi = null ;
+	     
+
+	     if(!isIB) {
+	    	 this.getProdNimi(toode);
+		 } else {
+			 this.getProdNimiIB(toode);
+		 }
+	     
 	     if(nimi != null){
 	    	 Text nimetusVal = doc.createTextNode(nimi.replace('`',' ').replace('´',' '));
 		     Node nimetus = doc.createElement("ItemDescription");
@@ -1126,11 +1354,7 @@ String custname = this.custName(order.getCompany());
 	     koGus.appendChild(kogusVal);
 	     ridaitem.appendChild(koGus);
 
-	     
-	     
 
-	    
-	     
 	   
 	     
 	    

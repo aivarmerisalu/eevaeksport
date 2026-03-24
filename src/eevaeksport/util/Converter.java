@@ -5024,14 +5024,14 @@ public class Converter {
 								Cell cellx = row.getCell((short)0);
 							
 								
-								if(i == 0 || i == 1 || i == 2 || i == 3 || i == 4) {
+								if(i == 0 || i == 1 || i == 2 || i == 3 || i == 4 || i == 5) {
 									for(int y = 4 ; y < 15 ;y++) {
 									
 									cellx = row.getCell((short)y);
 									if(cellx != null) {
 									//	System.out.println("RIMI " + y + " " + i + " " + cellx.getStringCellValue());
 										try {
-											if(formatter.formatCellValue(cellx).indexOf("ER47") != -1 || formatter.formatCellValue(cellx).indexOf("ER11") != -1  ) { // || formatter.formatCellValue(cellx).indexOf("") != -1 
+											if(formatter.formatCellValue(cellx).indexOf("ER06") != -1 || formatter.formatCellValue(cellx).indexOf("ER11") != -1  ) { // || formatter.formatCellValue(cellx).indexOf("") != -1 
 												return "rimi";
 											}		
 										}catch(Exception e) {

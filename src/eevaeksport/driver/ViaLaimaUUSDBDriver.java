@@ -399,7 +399,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 								}
 		         		
 	            	  }catch (Exception e){
-	                   e.printStackTrace();	
+	                  // e.printStackTrace();	
 		         	  }
     if(sb.toString().length() > 2) {
     	Converter.saveFile("fixsortnew.txt", sb.toString());
@@ -2710,7 +2710,7 @@ File f = new File(this.getExcelDir() + "Partnerid.xls");
          }
         }
 		}catch (Exception e){
-     	  e.printStackTrace();
+     	//  e.printStackTrace();
         }				
 		
    getDebt2(custMap);		

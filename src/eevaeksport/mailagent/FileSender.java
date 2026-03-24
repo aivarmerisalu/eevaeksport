@@ -212,24 +212,7 @@ public class FileSender {
 	        if(this.getOrders) {
 	            ObjectListing objects = s3Client.listObjects(bucketName, stringObjKeyName);
 	            log(time + " Starting session download file from AWS" );
-	    	       /* for (S3ObjectSummary objectSummary : objects.getObjectSummaries())  {
-	    	        	 if(!objectSummary.getKey().equals(stringObjKeyName)) {
-	    	            String keyy = objectSummary.getKey();
-	    	        		 String filen = dirIn + keyy.substring(keyy.lastIndexOf("/")+1);
-	    	            FileUtils.copyInputStreamToFile(s3Client.getObject(bucketName, keyy)
-	    	            		.getObjectContent(), new File(filen));
-	    	            
-	    	            log(time + " Downloaded file from AWS : " + filen);
-	    	            System.out.println(time + " downing " + filen);
-	    	            
-	    	            s3Client.deleteObject(bucketName, objectSummary.getKey() );
-	    	            datee.setTime(Calendar.getInstance().getTimeInMillis());
-	    	       	    time = datee.toString();
-	    	            log(time + " Deleting file from AWS : " + objectSummary.getKey());
-	    	            System.out.println(time + " Deleting " + objectSummary.getKey());
-	    	            }	 
-		           } */
-	            
+	    	    
 	            for (S3ObjectSummary objectSummary : objects.getObjectSummaries()) {
 	                if (!objectSummary.getKey().equals(stringObjKeyName)) {
 	                    String key = objectSummary.getKey();

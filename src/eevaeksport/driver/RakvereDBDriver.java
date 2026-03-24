@@ -2139,7 +2139,7 @@ System.out.println(groups.toString());
 			  Converter.saveFile("lastfixedcoop.txt", lasttime);
 			}
 			} else {
-				System.out.println("Sortimendi fail on sama mis enne ja ei lae midagi.");
+				System.out.println("Sortimendi fail coop on sama mis enne ja ei lae midagi.");
 			}
 			
 		} catch (Exception e) {

@@ -112,6 +112,7 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
           post.setHeader("SOAPAction", namespace + ":" + operation);
 
           String soapEnvelope = buildSoapEnvelope(namespace, operation, json);
+          System.out.println("soapEnvelope " +soapEnvelope + " \n" + serviceUrl);
           post.setEntity(new StringEntity(soapEnvelope, StandardCharsets.UTF_8));
 
 
@@ -125,12 +126,12 @@ try (CloseableHttpResponse response = client.execute(post)) {
   private String buildSoapEnvelope(String namespace, String operation, String json) {
 	    return 
 	        "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
-	        "xmlns:epas=\"" + namespace + "\">" +
+	        "xmlns:mer=\"" + namespace + "\">" +
 	        "<soapenv:Header/>" +
 	        "<soapenv:Body>" +
-	        "<epas:" + operation + ">" +
-	        "<epas:jsonRequest>" + json + "</epas:jsonRequest>" +
-	        "</epas:" + operation + ">" +
+	        "<mer:ImportOrder>" +
+	        "<mer:jsonRequest>" + json + "</mer:jsonRequest>" +
+	        "</mer:ImportOrder>" +
 	        "</soapenv:Body>" +
 	        "</soapenv:Envelope>";
 	}
@@ -450,12 +451,15 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	        
        String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + "-" + (uni + "").trim() +  ".json";
 	      System.out.println(fileName);
-	     Converter.saveFile(fileName,jOrder.toJSONString() ); 
-	     
+
+		     Converter.saveFile(fileName,jOrder.toJSONString()); 
+		     
 	   String resp =   callOperation("ImportOrder", jOrder.toJSONString());
 	     fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + "-" + (uni + "").trim() +  "response.json";
 	     Converter.saveFile(fileName, resp); 
 	   
+	     
+	     
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

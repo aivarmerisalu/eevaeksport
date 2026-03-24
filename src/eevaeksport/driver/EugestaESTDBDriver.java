@@ -304,10 +304,17 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   
   private void getCampExcelLines(Vector lines) {
 	  try {
+		  
+		  if(this.eancodes == null) {
+			  this.getProducts(null);
+		  }
+		  
 	   File f = new File (this.getExcelDir() + "campaigninfo.xlsx");
 	   FileInputStream	 ff = new FileInputStream(f);
+	
 		XSSFWorkbook workbook = new XSSFWorkbook((ff));
 		XSSFSheet sheet = workbook.getSheetAt(0);
+
 		 DataFormatter formatter = new DataFormatter();
 		
 		XSSFRow row = null; 
@@ -326,72 +333,87 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 							for(int i = 1 ; i < a + 1;i++){
 							
 								 row = sheet.getRow(i);
+
+
+								 String cust = null;
+								try {
+									cust = formatter.formatCellValue(row.getCell((short) 0));
+		 					      } catch (Exception e) {
+		 					    	  e.printStackTrace();
+		 						  }
 								
+								String segment = null;
+								if(cust == null  || cust.trim().length() == 0) {
+								try {
+									segment = formatter.formatCellValue(row.getCell((short) 2));
+		 					      } catch (Exception e) {
+                                    e.printStackTrace();
+		 						  }
+								}
+								 
+								System.out.println("segment " + segment + " " + cust + " " + i);
 								 String prod = null;
 									try {
-										prod = formatter.formatCellValue(row.getCell((short) 0));
+										prod = formatter.formatCellValue(row.getCell((short) 3));
 			 					      } catch (Exception e) {
 			 					       e.printStackTrace();
 			 					      }
-									
+									 String ean = null;
+										try {
+											ean = formatter.formatCellValue(row.getCell((short) 4));
+											if(ean != null && ean.trim().length() >0 ) {
+											if(prod == null || prod.trim().length() == 0) {
+												prod = this.eancodes.get(ean.trim());
+											}
+											}
+										} catch (Exception e) {
+				 					       e.printStackTrace();
+				 					      }	
+										
+										
 									
 									Double price = null;
 									try {
-										price = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 2)));
+										price = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 6)));
 			 					      } catch (Exception e) {
 			 					    	  e.printStackTrace();
 			 					      }
 
 									String text = null;
 									try {
-										text =  Converter.enCodeEst(formatter.formatCellValue(row.getCell((short) 3)));
+										text =  Converter.enCodeEst(formatter.formatCellValue(row.getCell((short) 7)));
 			 					      } catch (Exception e) {
 	                                   e.printStackTrace();
 			 						  }
-																		
+
+									String text2 = null;
+									try {
+										text2 =  Converter.enCodeEst(formatter.formatCellValue(row.getCell((short) 8)));
+			 					      } catch (Exception e) {
+	                                   e.printStackTrace();
+			 						  }								
 
 									Date naita = null;
 									try {
-										naita = (row.getCell((short) 4).getDateCellValue());
+										naita = (row.getCell((short) 9).getDateCellValue());
 			 					      } catch (Exception e) {
 			 					    	 
 			 						  }
 									Date algus = null;
 									try {
-										algus = (row.getCell((short) 5).getDateCellValue());
+										algus = (row.getCell((short) 10).getDateCellValue());
 			 					      } catch (Exception e) {
 			 					    	 
 			 						  }
 									Date lopp = null;
 									try {
-										lopp = (row.getCell((short) 6).getDateCellValue());
+										lopp = (row.getCell((short) 11).getDateCellValue());
 			 					      } catch (Exception e) {
 			 					    	 
 			 						  }
 									
-
-								 String cust = null;
-								try {
-									cust = formatter.formatCellValue(row.getCell((short) 7));
-		 					      } catch (Exception e) {
-		 					    	  e.printStackTrace();
-		 						  }
-								
-								String segment = null;
-								try {
-									segment = formatter.formatCellValue(row.getCell((short) 9));
-		 					      } catch (Exception e) {
-                                    e.printStackTrace();
-		 						  }
 								
 
-								String channel = null;
-								try {
-									channel = formatter.formatCellValue(row.getCell((short) 10));
-		 					      } catch (Exception e) {
-		 					    	e.printStackTrace();
-		 						  }
-								
 
 								
 								Calendar cc = Calendar.getInstance();
@@ -412,30 +434,23 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 									activeXLSPromos = new HashMap<String,List<String>>();
 								}
 								
-								if(cust == null) {
-									List<String> ll = activeXLSPromos.get(cust);
-									if(ll == null) {
-									  ll = new ArrayList<String>(); 
-									}
-									ll.add(cust + "xls");
-									activeXLSPromos.put(cust + "xls", ll);
+								if(cust != null && cust.trim().length() > 0) {
 									  MatrixLine mline = new MatrixLine();
-							           mline.setCustID(cust + "xls");
+							           mline.setCustID(cust);
 							           mline.setProdID(prod);
 							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
 							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
 							           mline.setPrice(price);
 							           if(text != null && text.trim().length() > 0) {
-							        	   mline.setLineinfo(text);
+							        	   mline.setLineinfo(text + " " + text2);
 							           }
 							           lines.add(mline);
 							  	
 								}else {
-
+									if(segment != null) {
+										
 									String asi = segment;
-									if(segment == null || segment.trim().length() == 0) {
-										asi = channel;
-									}
+									
 									List<String> ll = activeXLSPromos.get(asi);
 									if(ll == null) {
 									  ll = new ArrayList<String>(); 
@@ -450,10 +465,10 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
 							           mline.setPrice(price);
 							           if(text != null && text.trim().length() > 0) {
-							        	   mline.setLineinfo(text);
+							        	   mline.setLineinfo(text + " " + text2);
 							           }
 							           lines.add(mline);
-							  
+									}
 								
 							}
 								
@@ -465,7 +480,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
          }catch(Exception r) {
 		 r.printStackTrace();  
 	     }	
-	  System.out.println("Active Promos "  + activeXLSPromos.toString());
+	//  System.out.println("Active Promos "  + activeXLSPromos.toString());
 
   }
 

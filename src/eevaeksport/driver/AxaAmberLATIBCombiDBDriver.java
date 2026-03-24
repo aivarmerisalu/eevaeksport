@@ -1284,15 +1284,16 @@ rs.close();
   private TreeMap agentDim = new TreeMap();
   private TreeMap agent1 = new TreeMap();
   private  HashMap<String, String> ibCustCodes = null; 
+  private  HashMap<String, String> adlCustCodes = null; 
   private HashSet <String> custtsUsed = null;
 
   
   private void getCustTies() {
 
 	  ibCustCodes = new HashMap<String, String>(); 
-	  custtsUsed =  new HashSet <String>();
-	  
- 		File f = new File(this.getExcelDir() + "/custties.xlsx");
+	  adlCustCodes = new HashMap<String, String>(); 
+
+	  File f = new File(this.getExcelDir() + "/custties.xlsx");
  		try {
  			FileInputStream ff = new FileInputStream(f);
  			Workbook workbook = new XSSFWorkbook((ff));
@@ -1328,13 +1329,12 @@ rs.close();
  					       e.printStackTrace();
  					      }
  						  ibCustCodes.put(custIB, custADL); 
- 			   	           custtsUsed.add(custIB);
+ 						  adlCustCodes.put(custADL, custIB); 
  			          }
  				}
  		} catch(Exception e) {
  			e.printStackTrace();
  		}
-   // System.out.println(ibCustCodes.toString());
   }
   
   public TreeMap getAgents(){
@@ -2011,8 +2011,8 @@ int i = 0;
         }
     
 
-       	if(this.ibCustCodes.get(cust.getID()) != null) {
-       		cust.addCity("InterBaltija Kodas: " + ibCustCodes.get(cust.getID()));
+       	if(this.adlCustCodes.get(cust.getID()) != null) {
+       		cust.setCity("InterBaltija Kodas: " + adlCustCodes.get(cust.getID()));
        	}
         
         
