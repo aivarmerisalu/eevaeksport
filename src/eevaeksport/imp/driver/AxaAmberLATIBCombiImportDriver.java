@@ -86,11 +86,7 @@ public class AxaAmberLATIBCombiImportDriver extends AbstractImportDriver{
 	      String line;
 
 	      while ((line = reader.readLine()) != null) {
-
-	          if (line.trim().isEmpty()) continue;
-
 	          String[] parts = line.split(";");
-
 	          if (parts.length >= 2) {
 	              String key = parts[0].trim();
 	              String value = parts[1].trim();
@@ -100,11 +96,12 @@ public class AxaAmberLATIBCombiImportDriver extends AbstractImportDriver{
 
 	  } catch (IOException e) {
 	      e.printStackTrace();
-	  } finally {
 	      try {
 	          if (reader != null) reader.close();
 	      } catch (IOException ignored) {}
 	  }
+	  System.out.println("map " + map.toString());
+	  
 	  return map;
   }
   
@@ -603,6 +600,7 @@ private Product getProd(String toode){
 	  ordS0.setStatus(order.getStatus());
 	  ordS0.setInfo(order.getInfo());
 	  ordS0.setPaymTerm(order.getPaymTerm());
+	  ordS0.setContactID(order.getContactID());
 	  ordS0.setDealer("100");
 	  ordS0.setTeostaja(order.getTeostaja());
 		
@@ -615,6 +613,7 @@ private Product getProd(String toode){
 	  ordSG.setInfo(order.getInfo());
 	  ordSG.setPaymTerm(order.getPaymTerm());
 	  ordSG.setDealer("gift");
+	  ordSG.setContactID(order.getContactID());
 	  ordSG.setTeostaja(order.getTeostaja());
 	  
 	  ordBR.setAgentCode(order.getAgentCode());
@@ -623,6 +622,7 @@ private Product getProd(String toode){
 	  ordBR.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordBR.setStatus(order.getStatus());
 	  ordBR.setInfo(order.getInfo());
+	  ordBR.setContactID(order.getContactID());
 	  ordBR.setPaymTerm(order.getPaymTerm());
 	  ordBR.setDealer("GPP-VT-BR");
 	  ordBR.setTeostaja(order.getTeostaja());
@@ -766,7 +766,7 @@ private Product getProd(String toode){
 	  ordSADL.setInfo(order.getInfo());
 	  ordSADL.setPaymTerm(order.getPaymTerm());
 	  ordSADL.setDealer(order.getDealer());
-	  ordSADL.setAgentFirstName("ADL");
+	  ordSADL.setContactID("ADL");
 	  ordSADL.setTeostaja(order.getTeostaja());
 	  ordSADL.setWarehouse(order.getWarehouse());
 		
@@ -778,7 +778,7 @@ private Product getProd(String toode){
 	  ordSIB.setStatus(order.getStatus());
 	  ordSIB.setInfo(order.getInfo());
 	  ordSIB.setPaymTerm(order.getPaymTerm());
-	  ordSIB.setAgentFirstName("IB");
+	  ordSIB.setContactID("IB");
 	  ordSIB.setDealer(order.getDealer());
 	  ordSIB.setTeostaja(order.getTeostaja());
 	  ordSIB.setWarehouse(order.getWarehouse());
@@ -859,7 +859,7 @@ private Product getProd(String toode){
 	 	  
 	 	  boolean isIB = false;
 	 	  
-	 	  if(order.getAgentFirstName().equals("IB")) {
+	 	  if(order.getContactID().equals("IB")) {
 	 		  isIB = true;
 	 	  }
 	 	  
