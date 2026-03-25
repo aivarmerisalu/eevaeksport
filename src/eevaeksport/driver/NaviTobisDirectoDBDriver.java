@@ -527,8 +527,10 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 
    @Override
 	public void PictureMaker() {
+	   try {
 		makePictureCat();
-		 System.exit(0);
+	   }catch(Exception e) {}
+	   System.exit(0);
 		
 	}
    

@@ -3,9 +3,11 @@ package eevaeksport.imp.driver;
 
 
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -70,9 +73,43 @@ public class AxaAmberLATIBCombiImportDriver extends AbstractImportDriver{
     if("true".equals( parent.getProps().getProperty("testing"))){
     	testing = true;
     }
+    ibAgents = loadAgents();
+    
   }
   
 
+  private HashMap loadAgents() {
+	  HashMap<String, String> map = new HashMap<>();
+	  BufferedReader reader = null;
+	  try {
+	      reader = new BufferedReader(new FileReader("ibagents.txt"));
+	      String line;
+
+	      while ((line = reader.readLine()) != null) {
+
+	          if (line.trim().isEmpty()) continue;
+
+	          String[] parts = line.split(";");
+
+	          if (parts.length >= 2) {
+	              String key = parts[0].trim();
+	              String value = parts[1].trim();
+	              map.put(key, value);
+	          }
+	      }
+
+	  } catch (IOException e) {
+	      e.printStackTrace();
+	  } finally {
+	      try {
+	          if (reader != null) reader.close();
+	      } catch (IOException ignored) {}
+	  }
+	  return map;
+  }
+  
+  private HashMap ibAgents = null; 
+  
 	 public static Object readObject(String s) throws IOException,
  ClassNotFoundException, IOException {
 Object obj = null;
@@ -903,8 +940,12 @@ private Product getProd(String toode){
 	        nr.appendChild(nrVal);
 	        header.appendChild(nr);
 	        
+	        String aa1 = order.getAgent();
+	        if(isIB && ibAgents.get(order.getAgent()) != null) {
+	        	aa1 = (String)ibAgents.get(order.getAgent());
+	        }
 	        Node age = doc.createElement("SalesAgent");
-	        Text ageVal = doc.createTextNode(order.getAgent());
+	        Text ageVal = doc.createTextNode(aa1);
 	        age.appendChild(ageVal);
 	        header.appendChild(age);
 	        

@@ -385,12 +385,6 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	         		 
 	         		  
 	         		  
-			         	boolean addaadr = true;
-		         		
-		         		 String country = "Estonia";
-		       		  if(parent.getProps().getProperty("country") != null){
-		       			  country =  parent.getProps().getProperty("country");
-		       		  }
 		         		
 		       		  String sendaadr = ""; 
 		         		 
@@ -409,8 +403,7 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 		 	         	
 		 	         		String maa = "";
 		 	         		try{
-		 	         	  maa =  rida.getAttributes().getNamedItem("deliveryaddress3").getNodeValue().replaceAll(";", ","); 
-		 	         		country = maa;
+		 	         	    maa =  rida.getAttributes().getNamedItem("deliveryaddress3").getNodeValue().replaceAll(";", ","); 
 		 	         		customer.restZipCode = maa;
 		 	         		}catch(Exception eed){
 			         		 }
@@ -825,35 +818,7 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	  return 0;
   }
   
-  private double getSum(Order order){
-	  double res = 0;
-	  
-	  Vector lines = order.getOrderLines();
-      for (int i = 0; i < lines.size(); i++) {
 
-    	  OrderLine line = (OrderLine) lines.elementAt(i);
-    	  Product ppp = (Product)tooted.get(line.getToode());
-    	  double hind = 0;
-    	  
-    	  try{
-    		  hind =  this.getPriceAction(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
-		  }catch(Exception e){
-    	  }
-    	  if(hind <  0.0006){
-              try{
-	    		  hind =  getPrice(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
-			  }catch(Exception e){
-	    	  }
-	     }
-    		    	
-
-hind =   Converter.Round((float)hind, 2);
-    	  res = res + line.getKogus()* hind;
-      }
-	  
-	  return res ;
-  }
-  
   
   public static String protectSpecialCharacters(String originalUnprotectedString) {
 	    if (originalUnprotectedString == null) {
@@ -970,8 +935,8 @@ hind =   Converter.Round((float)hind, 2);
 	 			maa = deCode(ccc.restZipCode);
 	 		}
 	 		String nam = "";
-	 		if(ccc != null && ccc.getInfo()!= null){
-	 			nam = deCode(ccc.getInfo());
+	 		if(ccc != null && ccc.getName()!= null){
+	 			nam = deCode(ccc.getName());
 	 		}
 	 		
 	 		double vat = 1;
@@ -1001,17 +966,7 @@ hind =   Converter.Round((float)hind, 2);
 	 		 }
 	 		 
 	 		 
-	 		 /*<orders>
-    <order number="100034" date="2024-07-11T00:00:00" vatzone="0" paymentterm="K" object="xx,WEB,XML,WEBSHOP" 
-currency="EUR" currate="1.000000000" customercode="TEST1" customername="Test klient OÜ" salesman="XML"
- deliverymethod="KULLER" customerordernumber="#1" email="xx.yyy@directo.ee" stock="PL" 
-country="EE" phone="+372xxxxxx" address1="Mõisa tee 4" address2="10101, 
-Tallinn" address3="Eesti" deliveryaddress1="Mõisa 4" deliveryaddress2="10101, 
-Tallinn" deliveryaddress3="Eesti" deliveryname="deliveryname3" factoring="001" 
-deliveryterm="CFR" language="eng" deliverymethodcomment="Testing field" text1="Testing field 2" text2="Testing field 3">
-        
-    </order>*/
-	 		 
+	 	
 	 		 
 	 	    String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
 	          "<orders>" +
@@ -1019,9 +974,11 @@ deliveryterm="CFR" language="eng" deliverymethodcomment="Testing field" text1="T
 	         "number=\"" + ordnum + "\" " + //order.getDokNr()+
 	         "date=\"" + getDateNiceString(Calendar.getInstance())+ "\" " +
 	         "customercode=\"" +deCode( order.getCompany()) + "\" " +
+	         "deliveryname=\"" + nam + "\" " +
 	         "deliveryaddress1=\"" + adr + "\" " +
 	         "deliveryaddress2=\"" + city + "\" " +
 	         "deliveryaddress3=\"" + maa + "\" " +
+	         
 	          comm + 
               ladu +
 	         "currency=\"EUR\" language=\"" + lan 
@@ -1083,7 +1040,7 @@ deliveryterm="CFR" language="eng" deliverymethodcomment="Testing field" text1="T
 	    System.out.println("output " + order_xml); 
 	 	
 	    
-	  //  System.exit(0);
+	   // System.exit(0);
 	    StringBuilder response = new StringBuilder();
 		  
 	 		
