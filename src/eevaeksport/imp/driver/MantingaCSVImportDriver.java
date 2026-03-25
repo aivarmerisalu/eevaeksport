@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,8 +35,17 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -327,17 +337,12 @@ public class MantingaCSVImportDriver
 	  		 	 			tagastus = false;
 	  		 	 		}
 	  		 	 	 } 
-	      		    System.out.println("comp " + ord.getCompany());
-	 		 makeOutputTelema(ord,tagastus, repr);
-	    
-	    
-	  }else{
+	 		 makeOutput(ord,tagastus, repr);
+	   } else {
 		  counter = order.getOrderLines().size();
 	  }
 		
 	 
-    //  makeOutput(order);
-      setNumAddedLines(counter);
   }
   
     private HashMap eans = null;
@@ -384,278 +389,373 @@ public class MantingaCSVImportDriver
   
 
     
-  
-  private void makeOutputTelema(Order order , boolean tagastus, boolean ymber){	
-	 StringBuffer sb = new StringBuffer();
-	 nf.setGroupingUsed(false);
+    private void makeOutput(Order order, boolean tagastus, boolean repr) {
 
-	try {
 		
-	  String ref = order.getTeostaja();
-		if ( ref == null ){
-			ref =  " ";
+if(prods == null) {
+	this.getProducts();
+}
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+
+		try {
+
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.newDocument();
+			Element root = doc.createElement("Document-Order");
+			doc.appendChild(root);
+
+			// String filiaalStr = null;
+			// String tarnijaKoodStr = null;
+
+			Node docheader = doc.createElement("Document-Header");
+			root.appendChild(docheader);
+
+			Node un2 = doc.createElement("DocumentType");
+			Text unVal2 = doc.createTextNode("MeriSoft");
+			un2.appendChild(unVal2);
+			docheader.appendChild(un2);
+
+			Node un3 = doc.createElement("DocumentSource");
+			Text unVal3 = doc.createTextNode("S");
+			un3.appendChild(unVal3);
+			docheader.appendChild(un3);
+			try {
+
+				long ll = Long.parseLong(order.getAgentCode());
+				Node un4 = doc.createElement("DateCreated");
+
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new java.util.Date(ll));
+
+				String month = (cal.get(Calendar.MONTH) + 1) + "";
+				if (month.length() == 1)
+					month = "0" + month;
+				String day = cal.get(Calendar.DAY_OF_MONTH) + "";
+				if (day.length() == 1)
+					day = "0" + day;
+
+				String hour = cal.get(Calendar.HOUR_OF_DAY) + "";
+				if (hour.length() == 1)
+					hour = "0" + hour;
+				String minute = cal.get(Calendar.MINUTE) + "";
+				if (minute.length() == 1)
+					minute = "0" + minute;
+
+				String second = cal.get(Calendar.SECOND) + "";
+				if (second.length() == 1)
+					second = "0" + second;
+
+				// [ HH:MM:SS]
+
+				String dateString = cal.get(Calendar.YEAR) + "-" + month + "-" + day + "[" + hour + ":" + minute + ":"
+						+ second + "]";
+
+				Text unVal4 = doc.createTextNode(dateString);
+				un4.appendChild(unVal4);
+				docheader.appendChild(un4);
+
+			} catch (Exception e) {
+
+			}
+
+			String number = order.getDokNr();
+			if (number == null || number.length() == 0) {
+				number = (Calendar.getInstance().getTimeInMillis() + "").substring(5);
+			}
+
+			long uni = Calendar.getInstance().getTimeInMillis();
+			Node header = doc.createElement("Order-Header");
+
+			Node nr = doc.createElement("OrderNumber");
+			Text nrVal = doc.createTextNode("MS-" + number + "");
+			nr.appendChild(nrVal);
+			header.appendChild(nr);
+
+			Node age = doc.createElement("SalesAgent");
+			Text ageVal = doc.createTextNode(order.getAgent());
+			age.appendChild(ageVal);
+			header.appendChild(age);
+
+			String comm = "";
+			if (order.getInfo() != null && order.getInfo().trim().length() > 0) {
+
+				Node com = doc.createElement("Remarks");
+				Text comVal = doc.createTextNode(order.getInfo());
+				com.appendChild(comVal);
+				header.appendChild(com);
+				comm = order.getInfo();
+
+				Node com2 = doc.createElement("comment");
+				Text comVal2 = doc.createTextNode(order.getInfo());
+				com2.appendChild(comVal2);
+				header.appendChild(com2);
+
+			}
+			System.out.println("Remarks " + comm);
+
+			Node kuupaev = doc.createElement("OrderDate");
+			Calendar cal = Calendar.getInstance();
+
+			String month = (cal.get(Calendar.MONTH) + 1) + "";
+			if (month.length() == 1)
+				month = "0" + month;
+			String day = cal.get(Calendar.DAY_OF_MONTH) + "";
+			if (day.length() == 1)
+				day = "0" + day;
+			String year = cal.get(Calendar.YEAR) + "";
+			if (year.length() == 2) {
+				year = "20" + year;
+			}
+			String dateString = year + "-" + month + "-" + day;
+			Text kuupaevVal = doc.createTextNode(dateString);
+			kuupaev.appendChild(kuupaevVal);
+			header.appendChild(kuupaev);
+
+			Node curr = doc.createElement("OrderCurrency");
+			Text currVal = doc.createTextNode("EUR");
+			curr.appendChild(currVal);
+			header.appendChild(curr);
+
+			Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
+			Calendar delcal = Calendar.getInstance();
+			delcal.setTime(order.getShipCal().getTime());
+
+			month = (delcal.get(Calendar.MONTH) + 1) + "";
+			if (month.length() == 1)
+				month = "0" + month;
+			day = delcal.get(Calendar.DAY_OF_MONTH) + "";
+			if (day.length() == 1)
+				day = "0" + day;
+			year = delcal.get(Calendar.YEAR) + "";
+			if (year.length() == 2) {
+				year = "20" + year;
+			}
+			dateString = year + "-" + month + "-" + day;
+			Text delkuupaevVal = doc.createTextNode(dateString);
+			delkuupaev.appendChild(delkuupaevVal);
+			header.appendChild(delkuupaev);
+
+			Node expectedDeliveryTime = doc.createElement("ExpectedDeliveryTime");
+			Text expectedDeliveryTimeVal = doc.createTextNode("00:00");
+			expectedDeliveryTime.appendChild(expectedDeliveryTimeVal);
+			header.appendChild(expectedDeliveryTime);
+
+			root.appendChild(header);
+
+			Node parties = doc.createElement("Document-Parties");
+			Node seller = doc.createElement("DeliveryPoint");
+
+			Node ise = doc.createElement("CodeBySupplier");
+			Text nimiVal = doc.createTextNode(order.getCompany());
+			ise.appendChild(nimiVal);
+			Node ise2 = doc.createElement("ILN");
+			Text nimiVal2 = doc.createTextNode(order.getCompany());
+			ise2.appendChild(nimiVal2);
+
+			seller.appendChild(ise);
+			seller.appendChild(ise2);
+
+			parties.appendChild(seller);
+
+			Node receiver = doc.createElement("Receiver");
+
+			Node iseR = doc.createElement("CodeBySupplier");
+			Text nimiRVal = doc.createTextNode(order.getCompany());
+			iseR.appendChild(nimiRVal);
+			Node ise2R = doc.createElement("ILN");
+			Text nimiVal2R = doc.createTextNode(order.getCompany());
+			ise2R.appendChild(nimiVal2R);
+
+			receiver.appendChild(iseR);
+			receiver.appendChild(ise2R);
+
+			parties.appendChild(receiver);
+
+			Node buyer = doc.createElement("Buyer");
+
+			Node iseX2 = doc.createElement("ILN");
+			Text nimiXVal2 = doc.createTextNode(order.getCompany());
+			iseX2.appendChild(nimiXVal2);
+
+			Node iseX = doc.createElement("CodeByBuyer");
+			Text nimiXVal = doc.createTextNode(order.getCompany());
+			iseX.appendChild(nimiXVal);
+
+			buyer.appendChild(iseX2);
+			buyer.appendChild(iseX);
+
+			parties.appendChild(seller);
+
+			root.appendChild(parties);
+
+			// RIDADE LISAMINE
+			Node read = doc.createElement("Order-Lines");
+
+			int coun = 0;
+			Iterator iter = order.getOrderLines().iterator();
+			while (iter.hasNext()) {
+				OrderLine line = (OrderLine) iter.next();
+				String toode = line.getToode();
+				if (toode != null) {
+					toode = toode.trim();
+				} else {
+					toode = "";
+				}
+				if (line.getKogus() != 0 && !toode.equals("")) {
+
+					coun++;
+					addLine(line, read, doc, coun, order);
+				}
+			}
+
+			root.appendChild(read);
+
+			String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + (uni + "").trim()
+					+ ".xml";
+			System.out.println(fileName);
+			OutputFormat of = new OutputFormat();
+			of.setIndenting(true);
+			of.setLineSeparator(System.getProperty("line.separator"));
+			of.setEncoding("ISO-8859-1");
+			XMLSerializer ser = new XMLSerializer(of);
+			FileOutputStream fos = new FileOutputStream(fileName);
+			PrintWriter out = new PrintWriter(fos);
+			ser.setOutputCharStream(out);
+			ser.serialize(doc);
+			out.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+    private TreeMap prods = null;
+    
+    
+    public void getProducts(){
+ 	   
+        prods = new TreeMap(); 
+ 	  try {
+            for (String[] row : readCSVData("Merisoft_MasterData_Products.csv")) {
+     	int cou = 0;
+         String id = null;
+       	 String name = null;
+       	 String ean = null;
+       	 
+      
+
+      	   for (String cell : row) {
+
+           	 cell = cell.replaceAll("\"", " ").trim();
+          	 if(cou == 0) {
+                    id = cell.trim();
+              }
+          	 if(cou == 1) {
+                 name = cell.trim().replaceAll("'", " ").trim().replaceAll("  ", " ");
+              }
+          	if(cou == 5) {
+                 ean = cell.trim();
+              }
+          	   cou++;
+           }
+          
+          
+          Product prod = new Product(id);
+
+              if(ean != null && ean.trim().length() > 4) {
+                prod.setEAN(ean);
+              }
+              
+              prod.setName(name);
+             	   prods.put(prod.getID(), prod); 
+            }
+            
+             }catch (Exception u){
+         		u.printStackTrace();
+         	}
+            
+    }
+
+
+    
+	private void addLine(OrderLine line, Node read, Document doc, int counter, Order order) throws SQLException {
+
+		Node rida = doc.createElement("Line");
+		read.appendChild(rida);
+
+		Node ridaitem = doc.createElement("Line-Item");
+
+		Node linenum = doc.createElement("LineNumber");
+		Text linnum = doc.createTextNode(counter + "");
+		linenum.appendChild(linnum);
+		ridaitem.appendChild(linenum);
+
+
+		
+		Product pr = (Product)prods.get(line.getToode());
+		String toode = line.getToode();
+
+		Node btoote_kood = doc.createElement("BuyerItemCode");
+		Text btoote_koodVal = doc.createTextNode(toode);
+		btoote_kood.appendChild(btoote_koodVal);
+		ridaitem.appendChild(btoote_kood);
+
+		Node toote_kood = doc.createElement("SupplierItemCode");
+		Text toote_koodVal = doc.createTextNode(toode);
+		toote_kood.appendChild(toote_koodVal);
+		ridaitem.appendChild(toote_kood);
+		String ean = pr.getEAN();
+		if(ean != null) {
+			Node ean_kood = doc.createElement("EAN");
+			Text ean_koodVal = doc.createTextNode(ean);
+			ean_kood.appendChild(ean_koodVal);
+			ridaitem.appendChild(ean_kood);		
 		}
 	
-		String com = order.getEmailBody();
-		if ( com == null ){
-			com =  " ";
-		}		
-		
-		String ware = order.getWarehouse();
-		System.out.println("ladu tellimusel " + ware);
-		
-		 String doknr = order.getDokNr();
-      String ls = System.getProperty("line.separator");
-      String fixagent = order.getAgent(); 
-  
-      String custID = order.getCompany();
-      String ladu = null;
-          Calendar  shipDate = order.getShipCal();
-          
-          String code = order.getWarehouse();        
-          if (code != null){
-            ladu = code;
-          }
-        
-        if (ladu == null) {
-          ladu = "";
-        }
 
-   
-    
-        Calendar cal = Calendar.getInstance();
-       
-        if (shipDate != null) {
-              cal = shipDate;
-            }
-      
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" + ls);
-        sb.append("<E-Document>" + ls);
-   
-        sb.append("<Header>" + ls);
-        sb.append("<DateIssued>" + escape(getDateString(Calendar.getInstance())) + "</DateIssued>" + ls);
-        sb.append("<SenderID>Balmerk</SenderID>" + ls);
-        sb.append("<ReceiverID>" + order.getCompany() + "</ReceiverID>" + ls); 	
-        sb.append("</Header>" + ls);
-        sb.append("<Document>" + ls);
-        
-        String type = "order";
-        if(tagastus) {
-     	   type = "retann";
-        }
-        if(ymber) {
-      	   type = "reprice";
-         }
-   
-        sb.append("<DocumentType>" + type + "</DocumentType> " + ls);
-        sb.append("<DocumentParties>" + ls);
-    //    String regnr = getRegKood(custID);
-      	   sb.append("<BuyerParty>" + ls);
-           sb.append( "<PartyCode>" +  escape((custID)) + "</PartyCode>" + ls); 
-           sb.append("</BuyerParty>" + ls);
-        
-           sb.append("<OrderParty>" + ls);
-           sb.append( "<PartyCode>" +  escape(custID) + "</PartyCode>" + ls);
-           sb.append("</OrderParty>" + ls);
-        
-           sb.append("<DeliveryParty>" + ls);
-           sb.append("<PartyCode>" +  escape(custID) + "</PartyCode>" + ls); 
-           try {
-           String cuname = ((Customer)custs.get(custID)).getName();
-           if(cuname != null) {
-         	  sb.append( "<Name>" + escape(cuname)  + "</Name>" + ls); 	  
-           }
-           }catch(Exception e) {
-        	   e.printStackTrace();
-           }
-      
-      String agent = order.getAgent();
-        if(fixagent != null){
-      	  agent = fixagent;
-        }
-        
-        sb.append("<UserId>" +  agent + "</UserId>" + ls);
-        sb.append("</DeliveryParty>" + ls);
-        sb.append("</DocumentParties>" + ls);
-        sb.append("<DocumentInfo>" + ls);
-        sb.append("<DocumentSubType>MERISOFT</DocumentSubType>" + ls);
-        sb.append("<DocumentName>MERISOFT-ORDER</DocumentName>" + ls );
-               
-      	  sb.append("<RefInfo>" + ls);
-      	  if(ref != null && ref.trim().length() > 0){
-      		  if(tagastus) {
-      			  if(ref.trim().indexOf(" ") != -1) {
-      				  ref = ref.substring(0,ref.indexOf(" "));
-      			  }
-      		  }
-      		  
-            sb.append("<SourceDocument type=\"order\">" + ls);
-            sb.append("    <SourceDocumentNum>" + escape(ref) + "</SourceDocumentNum>" + ls );
-            sb.append("</SourceDocument>" + ls);
-      	  }
-            sb.append("</RefInfo>" + ls); 
+		String nimi = pr.getName();
+		if (nimi != null) {
+			Text nimetusVal = doc.createTextNode(nimi.replace('`', ' ').replace('´', ' '));
+			Node nimetus = doc.createElement("ItemDescription");
+			nimetus.appendChild(nimetusVal);
+			ridaitem.appendChild(nimetus);
+		}
 
-    String    sss = (Calendar.getInstance().getTime().getTime()+ "").substring(4) ;
-    
-    if(ref != null && ref.trim().length() > 0){
- 	   sb.append("<DocumentNum>" + escape(ref)+ "</DocumentNum>" + ls); 
-    } else {
- 	   sb.append("<DocumentNum>" + escape(agent + "-" + sss )+ "</DocumentNum>" + ls);   
-    }
-       
-        sb.append("<CreatedBy>" + escape(agent)+ "</CreatedBy>" + ls); 
-        
-        sb.append("<DateInfo>" + ls);
-        sb.append("<OrderDate>" +escape(getDateString(Calendar.getInstance())) + "</OrderDate>" + ls);
-        sb.append("<DeliveryDateRequested>" +  escape(getDateString(cal)) + "</DeliveryDateRequested>" + ls); //aeg taha panna  T10:00:00
-        sb.append("</DateInfo>" + ls);
-        sb.append("</DocumentInfo>" + ls);
-        sb.append("   <DocumentItem>" + ls);
+		double kogus = line.getKogus();
+		double price = line.getPrice();
+		double disc = line.getDiscount();
+		String unit = line.getUnit();
 
-        
-        Vector sortedLines = Converter.joinLines(order.getOrderLines());
-        for (int i = 0; i < sortedLines.size(); i++) {
-            OrderLine line = (OrderLine)sortedLines.elementAt(i);
-            double ale = line.getDiscount();     
-          
-            if (ale == -1 ){
-                ale = 0 ;
-                }
-            sb.append("      <ItemEntry>" + ls);
-            sb.append("      <LineItemNum>"  + (i+1) + "</LineItemNum>" + ls);
-          
-           
-            String toode = line.getToode() ;
-            
-            sb.append("         <SellerItemCode>" + toode+ "</SellerItemCode>" + ls);
-            try{
+		Node koGus = doc.createElement("OrderedQuantity");
 
-                String ean = eans.get(toode)+"";
-                if(ean != null && !ean.trim().equals("null")){
-          	      sb.append("         <GTIN>" + ean + "</GTIN>" + ls);
-                }else {
-             	   log.error(" File Saved " + "EAN-i pole " + agent + " " + order.getCompany() + " " + toode + " " + line.getKogus() );
-             	   sb.append("         <GTIN>" + toode + "</GTIN>" + ls);
-                }
-                     
-            }catch(Exception e){
-         	   
-            }
-            
-           sb.append("         <BaseUnit>tk</BaseUnit>" + ls);
-          	  sb.append("         <ItemUnitRecord>" + ls);
-               sb.append("                <ItemUnit>tk</ItemUnit>" + ls);
-               sb.append("         </ItemUnitRecord>" + ls);
-               
-            if(prodnames.get(toode) != null) {
-         	    sb.append("          <ItemDescription>" + (escape(prodnames.get(toode)+"")) + "</ItemDescription>" + ls);               
-            }
-               
-               if(tagastus) {
-             	  sb.append("         <AmountToReturn>" + escape(getNF().format(line.getKogus()*-1)) + "</AmountToReturn>" + ls);
-             	  
-               }else {
-             	  sb.append("         <AmountOrdered>" + escape(getNF().format(line.getKogus())) + "</AmountOrdered>" + ls);
-	  
-               }
-             
+		Text kogusVal = doc.createTextNode(getNF().format(kogus));
+		koGus.appendChild(kogusVal);
+		ridaitem.appendChild(koGus);
 
-               String ccc = "";
-            if(line.getDiscount() > 0){
-              sb.append("         <Addition addCode=\"DSC\"><AddRate>" +
-          	   escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 
-              ccc =  "-" + nf.format(line.getDiscount()) + "% ";
-            }
-           
-          
-            if(line.getPartii() != null && line.getPartii().trim().length() > 0 ){
-         	   ccc = ccc + line.getPartii();
-            }
-            if(ccc.length() > 0) {
-                sb.append("   <AdditionalInfo>" +ls);
-                sb.append("       <Extension extensionId=\"remarks\">" + ls);
-                sb.append("       <InfoName>Notes</InfoName>");
-                sb.append("            <InfoContent>" + Converter.escapeXML(ccc) + "</InfoContent>" + ls );
-                sb.append("       </Extension>");
-                sb.append("   </AdditionalInfo>" + ls);	
-            }
-     
-            sb.append("      </ItemEntry>" + ls);
+		if (disc > 0) {
+			// price = price * (100-disc)/100;
+			Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
+			Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
+			yhiku_hind.appendChild(yhiku_hindVal);
+			ridaitem.appendChild(yhiku_hind);
+		}
 
-             counter++; 
-        }
-        
+		Node yhiku_va = doc.createElement("TaxRate");
+		Text yhiku_vaVla = doc.createTextNode("21");
+		yhiku_va.appendChild(yhiku_vaVla);
+		ridaitem.appendChild(yhiku_va);
 
-        sb.append("   </DocumentItem>" + ls);
-        
-  	    String comm = order.getInfo();
-        /*  if(comm != null && comm.length()>100){
-          	comm = comm.substring(0,100);
-          }*/
-          
-          if(comm != null && comm.trim().length() > 0 ){
-          	  sb.append("   <AdditionalInfo>" +ls);
-                sb.append("       <Extension extensionId=\"remarks\">" + ls);
-                sb.append("       <InfoName>Notes</InfoName>");
-                sb.append("            <InfoContent>" + escape(comm) + "</InfoContent>" + ls );
-                sb.append("       </Extension>");
-                  //-<Extension extensionId="externalremarks"><InfoContent>K�esoleva arve aluseks olev n�ue on loovutatud AS-ile SEB Liising ja k�ik arvel toodud summad tuleb maksta AS-i SEB Liising arvelduskontole 10052045861006 SEB Pangas (kood 401). Kogu k�esoleva arvega seotud info tuleb teatavaks teha AS-ile SEB Liisingule.</InfoContent></Extension>
-                sb.append("   </AdditionalInfo>" + ls);	
-          }
-        
-          
-        sb.append("</Document>" + ls);
-        sb.append("</E-Document>" + ls);
+		Node yhik = doc.createElement("UnitOfMeasure");
+		Text yhikVal = doc.createTextNode(unit);
+		yhik.appendChild(yhikVal);
+		ridaitem.appendChild(yhik);
 
- 	//
-   try{
- 	  Thread.sleep(10); 
-   }catch(Exception e){
- 	 e.printStackTrace(); 
-   }
-   
-   
-  String  fileName = escape(parent.getProps().getProperty("conv.dirxml") + agent) + "-" + counter + "." + sss  +  ".xml";
-  
-  System.out.println(fileName + " " + System.getProperty("file.encoding"));
-   
-           Converter.saveFileInUTF8(fileName, sb.toString());
-   		   //log.error(" File Saved " + fileName );
-   		 
-			 fileName = escape(parent.getProps().getProperty("conv.dircxml") + agent) + "-" + counter + "." + sss  +  ".xml";
-			 Converter.saveFileInUTF8(fileName, sb.toString());
-			//log.error(" copy Saved " + fileName );
-					 
-	} catch (Exception e) {
-		 log.error(" Output error 1 " + order.getCompany() );
-		 log.error(e);
-		e.printStackTrace();
+		rida.appendChild(ridaitem);
+		addNumLine();
 	}
-}
 
- 
   
-  private String getDateString(Calendar cal){
-	    StringBuffer sb = new StringBuffer();
-	    sb.append(cal.get(Calendar.YEAR) + "");
-	    String month = String.valueOf(cal.get(Calendar.MONTH) + 1);
-	    if (month.length() == 1){
-	      sb.append("0");
-	    }
-	    sb.append(month + "");
-
-	    String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-	    if (day.length() == 1){
-	      sb.append("0");
-	    }
-	    sb.append(day);
-
-	    return sb.toString();
-	  }
-	  
-  
-  
-  private Vector splitOrder (Order order){
+	private Vector splitOrder (Order order){
 			  
 		  Vector result = new Vector();
 
@@ -724,28 +824,6 @@ public class MantingaCSVImportDriver
 		  return result ;
 	  }
 
-
- 	  
-
-private String escape(String s){
-  if (s == null) return s;
-  StringBuffer sb = new StringBuffer();
-  for (int i = 0 ; i < s.length() ; i++){
-    char c = s.charAt(i);
-    if (c == '&'){
-      sb.append("&amp;");
-    } else if (c == '<'){
-      sb.append("&lt;");
-    } else if (c == '>'){
-      sb.append("&gt;");
-    } else if (c == '\n'){
-      sb.append(" ");
-    } else {
-      sb.append(c);
-    }
-  }
-  return sb.toString();
-}
 
 
 	public NumberFormat getNF() {
