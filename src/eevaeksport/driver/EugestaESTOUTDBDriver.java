@@ -1388,11 +1388,11 @@ public class EugestaESTOUTDBDriver extends AbstractDBDriver  implements Manager,
          for(Agent agentL : vv) {
           cust.addAgent(agentL);
           if(agentL.nextContact != null) {
-              cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
+              //cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
           }
           
           if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-        	  cust.setMainAgent(agentL.getID());
+        	 // cust.setMainAgent(agentL.getID());
           }
         
          Agent aa1 = (Agent)agent1.get(agentL.getID());

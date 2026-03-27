@@ -217,7 +217,7 @@ HashMap pants = null;
 	  	
 	    System.out.println(sql1);
 	    String acc = null;
-	    con = DriverManager.getConnection(url + "rivile","","");
+	    con = DriverManager.getConnection(url + "rivilelt","","");
 	    Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -262,7 +262,7 @@ HashMap pants = null;
 	 	
 	   System.out.println(sql1);
 	   String acc = null;
-	   con = DriverManager.getConnection(url + "rivile","","");
+	   con = DriverManager.getConnection(url + "rivilelt","","");
 	   Statement st1 = con.createStatement();
 	   ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -289,7 +289,7 @@ HashMap pants = null;
    	"  WHERE  N17_KODAS_PS = '" + prodID.trim() + "'";
 
     String prod = null;
-    con = DriverManager.getConnection(url + "rivile","","");
+    con = DriverManager.getConnection(url + "rivilelt","","");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -328,7 +328,7 @@ HashMap pants = null;
 	            System.out.println("hind");
 	       try {
 	    	   
-	    	   con = DriverManager.getConnection(url + "rivile","","");
+	    	   con = DriverManager.getConnection(url + "rivilelt","","");
 	            Statement st1 = con.createStatement();
 	            ResultSet rst = st1.executeQuery(sql);
 	            
@@ -372,7 +372,7 @@ public Vector getDebt() throws SQLException{
 
  
  String sql2 = "select l11_kodas1 as klient , dbo.pap(l11_laukas,11,1) as paevi from l11_pap1 where l11_kodas_nr='KSN08' ";
- Connection con = DriverManager.getConnection(url + "rivile","","");
+ Connection con = DriverManager.getConnection(url + "rivilelt","","");
   
   PreparedStatement st = con.prepareStatement(sql2);
   ResultSet rs = st.executeQuery();
@@ -458,7 +458,7 @@ public Vector getDebt() throws SQLException{
 
    
 
-    	  con = DriverManager.getConnection(url + "rivile","","");
+    	  con = DriverManager.getConnection(url + "rivilelt","","");
            PreparedStatement   stmt = con.prepareStatement(cmd);
            ResultSet	      rs = stmt.executeQuery();
 
@@ -560,7 +560,7 @@ public Vector getDebt() throws SQLException{
       	   String cmd = " SELECT N17_KODAS_PS AS toode  FROM n17_prod a  LEFT JOIN  n27_pak ON n27_kodas_ps=n17_kodas_ps left join L11_PAP1 b on b.L11_KODAS_NR = 'PSN17' and N17_KODAS_PS = L11_KODAS1\r\n" + 
       	   		"   left join L02_FILD on L02_kodas_fil = N17_KODAS_PS left join N35_LGST on N35_KODAS_LS= N17_KODAS_LS_5   where  N17_POZ_DATE !=1 and "
       	   		+ "(L02_KODAS_FS is null or L02_KODAS_FS!='NP_O') and N17_MEN_PAV !='IG' and len(ltrim(N17_PAV_K1))  >0 and N17_kodas_gs = 'STAT'";
-      		 con = DriverManager.getConnection(url + "rivile","","");
+      		 con = DriverManager.getConnection(url + "rivilelt","","");
              PreparedStatement   stmt = con.prepareStatement(cmd);
              ResultSet	      rs = stmt.executeQuery();
 
@@ -630,7 +630,7 @@ public Vector getDebt() throws SQLException{
 	  }
 	  boolean yle = false;
 	  
-	  if(cc.getCredit() != null && cc.getCredit().trim().length() > 0) {
+	  if(cc != null && cc.getCredit() != null && cc.getCredit().trim().length() > 0) {
 		  try {
 			  double lim = Double.parseDouble(cc.getCredit());
 			  double used = cc.getUsedCredit();
@@ -753,7 +753,7 @@ public Vector getDebt() throws SQLException{
     System.out.println(cmd);
   
    
-    	          Connection con = DriverManager.getConnection(url + "rivile","","");
+    	          Connection con = DriverManager.getConnection(url + "rivilelt","","");
 	  		      Statement stmt =con.createStatement();
 	  		      ResultSet rs = stmt.executeQuery(cmd);
 	  		      String days = null;
@@ -1310,7 +1310,7 @@ if(ladu.trim().length()!=0){
           System.out.println(cmd);
 
       try {
-    	  con = DriverManager.getConnection(url + "rivile","","");
+    	  con = DriverManager.getConnection(url + "rivilelt","","");
     	  Statement st1 = con.createStatement();
     	    ResultSet rs = st1.executeQuery(cmd);
 
