@@ -105,6 +105,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		  }
   }
     
+  
  private int WEEKS = 24;
   
   private String stockConn = null;
@@ -1241,19 +1242,17 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
          		// System.out.println("sm " + salesman);
          		 salesman = Converter.deCode(salesman);
          		 if(salesman.length() > 0) {
-         		 Agent sm = new Agent (salesman);
-         		 sm.setName(salesman);
+         		  Agent sm = new Agent (salesman);
+         		    sm.setName(salesman);
                   tm.put(salesman, sm); 
-                 
+                  agent1.put(salesman,sm);
+	         		
                   String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
                   if(!parent.getEmail(salesman).equals("") &&  !custtsUsed.contains(id)){
-                	  agent1.put(salesman,sm);
-	         		   custtsUsed.add(id);
+                	   custtsUsed.add(id);
 	         		  String debt  = rida.getAttributes().getNamedItem("balance").getNodeValue(); 
-	           		
-	         		   if(!debt.equals("0")){
+	           		   if(!debt.equals("0")){
 	         			custDebtUsed.add(id);
-	         			//System.out.println("balance " + debt);
 	         		   }
       		      }
 	         			 String price_list = ensureLen(rida.getAttributes().getNamedItem("priceformula").getNodeValue());         	
@@ -1821,9 +1820,13 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	                		Vector vec = aa1.getDubbler();
 	            		      if(vec!= null && vec.size() >0){
 	            			   Enumeration en = vec.elements();
+
+		                    	// System.out.println("aaa " +  aa1.toString() + " " + aa1.getDubbler().toString());
 	            			   while(en.hasMoreElements()){
 	            				 String age = (String) en.nextElement();
-	            				 cust.addAgent(new Agent(age));
+	            				 customer.addAgent(new Agent(age.trim()));
+
+		                    	 System.out.println("aaa1 " +  cust.getAgents());
 	            			   }
 	            	       }
 	                    }

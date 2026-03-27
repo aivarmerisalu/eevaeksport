@@ -92,6 +92,7 @@ public class RivileTridensImportDriver
 
 	static Category log = Category.getRoot();
 
+	
 
   public RivileTridensImportDriver(ImportPanel parent) {
     this.parent = parent;
@@ -178,7 +179,7 @@ HashMap pants = null;
 
   public String identifyCustomerName(String id) throws SQLException {
 	  	 String	sql1 = "SELECT N08_PAV AS aadress FROM n08_klij  left JOIN N33_KBAN ON N33_KODAS_KS = N08_KODAS_KS WHERE" +
-	  	 		"  rtrim(rtrim(N08_KODAS_KS))+'-'+ rtrim(ltrim(N33_kodas_ak)) = '" + id +"'"; 
+	  	 		"  ltrim(rtrim(N08_KODAS_KS))+'-'+ ltrim(rtrim(ltrim(N33_kodas_ak))) = '" + id +"'"; 
 	  	
 	    System.out.println(sql1);
 	    String acc = null;

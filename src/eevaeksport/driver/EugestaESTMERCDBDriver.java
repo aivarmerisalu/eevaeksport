@@ -192,6 +192,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 
 		           while (rs.next()) {
 
+		        	   
 		             String sortid = rs.getString("ClientGR").trim()+"x";
 		             String prodID = rs.getString("ItemID").trim();
 		             int optio = rs.getInt("newin");
@@ -1736,10 +1737,14 @@ private HashSet<String> inTT = null;
   
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
-    String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini,  \r\n" + 
-    		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
-    		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
+
+	  String noOPT = getParent().getProps().getProperty("nostepgroup");
+	  
+	    String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
+	    		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
+	    		"    		a.brandBackofficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
+	    		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
+
 
              String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  \r\n" + 
              		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId, case when regionBackofficeId = '303_SHOP' then '03A' else regionBackofficeId end desc,bestBefore";
@@ -1860,8 +1865,6 @@ private HashSet<String> inTT = null;
         	prod.setMaxDiscount(-1);
         
         
-        prod.setOptAmountInUnits(rs.getDouble("opt"));
-        prod.setMinAmountInUnits(rs.getDouble("mini"));
         prod.setPrice(rs.getDouble("price"));
         prodprices.put(prod.getID(), prod.getPrice());
 
@@ -1870,21 +1873,34 @@ private HashSet<String> inTT = null;
           prod.setEAN(ean.trim());
           eancodes.put( ean.trim(), prod.getID());
         }
-
-      String grupp = rs.getString("grupp");
-       if(grupp!=null && grupp.trim().length()>0){
-         prod.setAgentGroup(grupp.trim());
-       }
-
-      prod.setName(nimetus.trim() + " " + kood);
-      
-
-     String grupp2 = rs.getString("grupp2");
-          if(grupp2 != null && grupp2.trim().length()>0){ 
-              prod.setGroup(grupp2);
+        boolean noopt = false;
+        String grupp = rs.getString("grupp");
+         if(grupp!=null && grupp.trim().length()>0){
+           prod.setAgentGroup(grupp.trim());
+           if(grupp.trim().equals(noOPT)) {
+          	 noopt = true;
            }
+         }
 
-          String unit = rs.getString("unit");
+   
+        prod.setName(nimetus.trim() + " " + kood);
+        
+
+       String grupp2 = rs.getString("grupp2");
+            if(grupp2 != null && grupp2.trim().length()>0){ 
+                prod.setGroup(grupp2);
+                if(grupp2.trim().equals(noOPT)) {
+               	 noopt = true;
+                }
+             }
+            
+            
+            
+            if(!noopt) {
+                   prod.setOptAmountInUnits(rs.getDouble("opt"));
+                   prod.setMinAmountInUnits(rs.getDouble("mini"));
+            }
+            String unit = rs.getString("unit");
                if(unit!=null && unit.trim().length()>0){
                    prod.setUnit(unit);
                }
