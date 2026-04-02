@@ -1154,7 +1154,7 @@ public class EugestaESTOUTDBDriver extends AbstractDBDriver  implements Manager,
     
 
 	 // System.out.println("custCategories " +  custCategories.toString());
-   TreeMap<String,String> displays  =   Converter.getDisplayInfoFromExcel(this.getExcelDir(), custCategories);
+  // TreeMap<String,String> displays  =   Converter.getDisplayInfoFromExcel(this.getExcelDir(), custCategories);
    
 	 // System.out.println("displays " +  displays.toString());
 	  
@@ -1274,12 +1274,12 @@ public class EugestaESTOUTDBDriver extends AbstractDBDriver  implements Manager,
     	
       	
               	  
-                    String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , minOrderSum as minsum, '' as linedisc \r\n" + 
-                    		"                       		, pricelistBackOfficeId as pricegroup,address ,\r\n" + 
-                    		"                       		  Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
-                    		"                       		 contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-                    		"                       		 contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 \r\n" + 
-                    		"                       		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID " ; 
+                    String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , (case when EG_IGNOREMINORDER = 0 then minOrderSum else 0 end) as minsum, '' as linedisc  \r\n" + 
+                    		"                    		                   , pricelistBackOfficeId as pricegroup,address ,\r\n" + 
+                    		"                Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail, \r\n" + 
+                    		"                    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
+                    		"                contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+                    		"               		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID" ; 
                     
 
                      if (isDebug()) System.out.println(cmd);
@@ -1546,9 +1546,9 @@ public class EugestaESTOUTDBDriver extends AbstractDBDriver  implements Manager,
         
         cust.setDealer(new Dealer("03N"));
         
-        if(displays != null && displays.get(cust.getID()) != null) {
-        	cust.setInfo(displays.get(cust.getID()));
-        }
+   //     if(displays != null && displays.get(cust.getID()) != null) {
+     //   	cust.setInfo(displays.get(cust.getID()));
+      //  }
       
         
         if(goes) {
@@ -1687,7 +1687,7 @@ private HashSet<String> inTT = null;
 
 	   Connection con = getNewConnection();
 	    TreeMap   tm = new TreeMap();
-	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_BRANDS  ";
+	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_GROUPS ";
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
@@ -1738,7 +1738,7 @@ private HashSet<String> inTT = null;
 	  prodcodes = new Vector();
     String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini,  \r\n" + 
     		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
+    		"    		a.groupBackOfficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
     		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
 
              String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  \r\n" + 
@@ -1771,9 +1771,36 @@ private HashSet<String> inTT = null;
        
     	rs1.close();
     	
+StringBuffer sb0 = new StringBuffer();
+    	
+    	String minP = " select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  b.regionbackofficeid as ladu,ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) AS disc   \r\n" + 
+    			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice != 0\r\n" + 
+    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid, ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) \r\n" + 
+    			"    											union all\r\n" + 
+    			"    											select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid , b.regionbackofficeid as ladu , 100 AS disc \r\n" + 
+    			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice = 0\r\n" + 
+    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid \r\n" + 
+    			"    											order by 1,2";
+    	
+    	 ResultSet rs = stmt.executeQuery(minP);
+        
+         
+         while(rs.next()){
+        	String gr = rs.getString("grupp").trim();
+        	String toode = rs.getString("toode").trim();
+        	String ladu = rs.getString("ladu").trim();
+        	Double disc = rs.getDouble("disc");
+
+        	
+        	sb0.append(gr+ ";" + toode + ";" + disc + ";" + ladu +"\n");
+         }
+        rs.close();
+        if(sb0.length() > 0) {
+        	Converter.saveFile("maxdiscounts.txt", sb0.toString());
+        }
 
     	
-     ResultSet  rs = stmt.executeQuery(cmd);
+       rs = stmt.executeQuery(cmd);
       HashMap prodHash = new HashMap();
       
       while(rs.next()){

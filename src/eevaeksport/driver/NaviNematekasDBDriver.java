@@ -575,7 +575,7 @@ con3.close();
 	         }
 	         
 	      }
- System.out.println("R7011 " + blokk.get("R7011"));
+// System.out.println("R7011 " + blokk.get("R7011"));
 	      
 rs3.close();
 stmt3.close();

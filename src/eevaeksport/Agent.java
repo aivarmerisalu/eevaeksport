@@ -92,7 +92,7 @@ public class Agent {
   private String phone = null;
   private String call = null;
   private boolean  active = false;
- 
+  public String todayCycleCode = null;
   public Vector klienteKokku = null;
   public Vector klienteAkt30 = null;
   public Vector klienteAkt60 = null;

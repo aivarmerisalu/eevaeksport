@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -159,17 +160,17 @@ try{
 	  
 	   String signature = order.getSignature();
 	   
-
+System.out.println("Sys 1 " + Calendar.getInstance().getTime().toGMTString());
 	   if(reasons == null)
 	   reasons = getReturnReasons();
-	   
+	   System.out.println("Sys 2 " + Calendar.getInstance().getTime().toGMTString());
 		  if(signatures.contains(signature)){
 			  this.trouble = "REPRETEATING ORDER agent :" + order.getAgent() + " customer :" 
 		  + Converter.deCode(order.getCompany()) ;
 			  log.error(trouble);
 		  }else{
 			  makeEans();
-			  
+			  System.out.println("Sys 3 " + Calendar.getInstance().getTime().toGMTString());
 			  boolean salvesta = true;
 	      	 	 Vector lin = order.getOrderLines();
 	      	 	 
@@ -191,9 +192,9 @@ try{
 	      		    	salvesta = false;
 	      		    }		 
 
-	      			System.out.println("XXXXX salvesta " + order.getStatus() + " " + salvesta + " "+ tagastus);
+	      		//	System.out.println("XXXXX salvesta " + order.getStatus() + " " + salvesta + " "+ tagastus);
 	      		  log.error("sisenen tellimust tegeama " + order.getCompany() + order.getOrderLines().size());
-	      		    
+	      		System.out.println("Sys 3 " + Calendar.getInstance().getTime().toGMTString());    
 	      		if(salvesta){
 	      			this.trouble = null;
 	  			  counter = 0;
@@ -207,7 +208,7 @@ try{
 	  		      
 	  		    }
 			  
-			  
+	      		System.out.println("Sys 4 " + Calendar.getInstance().getTime().toGMTString());
 			  
 			  
 			  signatures.add(signature);
@@ -235,7 +236,7 @@ public static void saveObject(Object obj, String file) throws IOException {
 private HashMap eans = null;
 private HashMap prodnames = null;
   
-  private HashMap makeEans() throws SQLException{
+  private HashMap makeEansold() throws SQLException{
 	 
 	  	
 	  	if(eans == null){
@@ -268,6 +269,84 @@ private HashMap prodnames = null;
 	  	return eans ;
 	  }
 
+  private boolean isFileOlderThanOneDay(File file) {
+	    long oneDayMillis = 24 * 60 * 60 * 1000;
+	    return System.currentTimeMillis() - file.lastModified() > oneDayMillis;
+	}
+  
+  
+  private HashMap<String, String> makeEans() throws SQLException {
+
+	    if (eans == null) {
+
+	        File cacheFile = new File("eans_cache.dat");
+
+	        // 1. Try loading from cache
+	        if (cacheFile.exists() && !isFileOlderThanOneDay(cacheFile)) {
+	            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
+
+	                CacheData data = (CacheData) ois.readObject();
+
+	                eans = data.eans;
+	                prodnames = data.prodnames;
+
+	                System.out.println("Loaded BOTH maps from cache");
+	                return eans;
+
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	            }
+	        }
+
+	        // 2. Load from DB
+	        eans = new HashMap<>();
+	        prodnames = new HashMap<>();
+
+	        String sql2 = "select * from barcode";
+	        Statement st1 = con.createStatement();
+	        ResultSet rs1 = st1.executeQuery(sql2);
+
+	        while (rs1.next()) {
+	            String id = rs1.getString("toode").trim();
+	            String name = rs1.getString("nimi").trim();
+	            String ean = rs1.getString("ean");
+
+	            if (ean != null && ean.trim().length() > 3) {
+	                eans.put(id, ean);
+	            }
+
+	            prodnames.put(id, name);
+	        }
+
+	        rs1.close();
+	        st1.close();
+
+	        // 3. Save BOTH maps to cache
+	        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+
+	            CacheData data = new CacheData();
+	            data.eans = eans;
+	            data.prodnames = prodnames;
+
+	            oos.writeObject(data);
+
+	            System.out.println("Saved BOTH maps to cache");
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    System.out.println("oioi " + eans.size());
+	    return eans;
+	}
+  
+  
+  public static class CacheData implements Serializable {
+	    public HashMap<String, String> eans;
+	    public HashMap<String, String> prodnames;
+	}
+  
   private String getCustName(String cuid) throws SQLException{
 		 
 	

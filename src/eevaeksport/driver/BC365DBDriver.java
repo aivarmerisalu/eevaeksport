@@ -1129,7 +1129,7 @@ public TreeMap getProducts(Agent agent) {
           	
           	String inventory = cob.get("inventory") +"";
           	if (inventory != null) {
-          		prod.setStock(Double.parseDouble(inventory));
+          	//	prod.setStock(Double.parseDouble(inventory));
           	}
           	
           	if(stocks != null && stocks.get(prod.getID()) != null) {

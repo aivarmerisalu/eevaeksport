@@ -30,11 +30,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -146,8 +148,6 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
   
   
   
-	
-  
 	  String user =  null;
 	  String pass = null;
 	  String rcompany = null;
@@ -166,12 +166,12 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 		  }
 			this.getProducts(null);
 			TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
-			System.out.println("Contracts Fixx " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			//System.out.println("Contracts Fixx " + contracts.keySet().size() + " " + contracts.keySet().toString());
 			if(contracts.size() > 0) {
 				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass, "FIXED");
 			}
 			contracts = Converter.loadSuggFromExcels("excelsugg",eanprods,parent);
-			System.out.println("Contracts Sugg " + contracts.keySet().size() + " " + contracts.keySet().toString());
+			//System.out.println("Contracts Sugg " + contracts.keySet().size() + " " + contracts.keySet().toString());
 			if(contracts.size() > 0) {
 				Converter.sendContractJson(contracts ,  rcompany,  user ,  pass, "SUGGESTED");
 			}
@@ -243,16 +243,29 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 	          
       	 FileReader fr = new FileReader(getDir() + "D365GetPriceMatrix_CustomerPrices.csv");
            BufferedReader reader = new BufferedReader(fr);
-         String line = null;
-         reader.readLine();
-          while((line = reader.readLine()) != null ){
+           List<String> lines = new ArrayList<>();
+           String line;
 
-               line = line.replaceAll(","," | ");
-          	StringTokenizer st = new StringTokenizer(line, "|");
+           // skip header
+           reader.readLine();
 
+           // read all lines first
+           while ((line = reader.readLine()) != null) {
+               lines.add(line);
+           }
+
+           // sort alphabetically
+           Collections.sort(lines);
+
+           // now process sorted lines
+           for (String sortedLine : lines) {
+
+
+        	   sortedLine = sortedLine.replaceAll(","," | ");
+          	StringTokenizer st = new StringTokenizer(sortedLine, "|");
+          	try {
             if (st.hasMoreTokens()) {
-         //	System.out.println( line );
-
+          
               String prodID = st.nextToken().trim();
                String client = st.nextToken().trim();
                double price = Double.parseDouble(st.nextToken().trim());
@@ -264,7 +277,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 	             
 	             MatrixLine mline = new MatrixLine();
 	             mline.setCustID(client);
-           
+        //   mline.setCliGroup(client);
            
            if(sdate != null  && !sdate.startsWith("1753") && sdate.trim().length() > 0 ){
           	 mline.setStartDate(sdate.substring(0,10));
@@ -280,8 +293,13 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
            if (price > 0) {
                mline.setPrice(price);
                prlists.add(mline);
+           
            }
             }
+          }catch(Exception e){
+              e.printStackTrace();
+              }
+            
           }
           
           reader.close();
@@ -540,7 +558,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
 
 
 	 Converter.saveFile(parent.getProps().getProperty("stockrefdir") + "stockbronn.txt", sb.toString());
-	 System.out.println(sb.toString());
+	// System.out.println(sb.toString());
 	 			  
 
 	   }
@@ -727,7 +745,7 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
      e.printStackTrace();	
     }
     
-    System.out.println("payers " + payers.size());   
+  //  System.out.println("payers " + payers.size());   
     
      try {
      FileReader fr = new FileReader(getDir() + "D365GetDebtList.csv");
@@ -878,7 +896,10 @@ public class BalmerkCSVDBDriver extends AbstractDBDriver implements
            String abipaev = st.nextToken().trim();
            String crlimit = st.nextToken().trim();
            String chain = st.nextToken().trim();
-
+           if(id.equals("TIMETOWINE")) {
+              	System.out.println( id + "' " + name);
+                             	
+              }
   
            Customer customer = new Customer(id);
            if(grupp.length() > 0) {
@@ -1168,7 +1189,7 @@ if(stocks == null) {
 					 prod.setEAN(ean);
 				        int ll  = ean.trim().length();
 				        add = " " +  ean.trim().substring(ll-3);
-				        System.out.println(add);
+				     //   System.out.println(add);
 				        eanprods.put(ean.trim(), prod.getID());
 				   }
 				 
@@ -1349,7 +1370,7 @@ public void PictureMaker() {
 	    	String asi = (String)enume.next();
 	    	Product prod = (Product)prods.get(asi);
 	    	String toode = prod.getID().trim();  
-	    	System.out.println("pildid" + toode);
+	    //	System.out.println("pildid" + toode);
            if(toode.length() > 0){
             	
 	   	  res2 = new File (pictssou);
@@ -1447,10 +1468,10 @@ public void WebReporter() {
 			      hlinkfont.setColor(IndexedColors.BLUE.getIndex());
 			      hlinkstyle.setFont(hlinkfont);
 
-			      System.out.println("files alustan" );
+			   //   System.out.println("files alustan" );
 			  		
 			  		TreeMap files = Converter.makeWebFilesTree(algus.getTime(), lopp.getTime(), rcompany, user, pass,false);
-			  		System.out.println("files " + files.toString());
+			  		//System.out.println("files " + files.toString());
 			 
 			  		 JSONParser parser = new JSONParser();
 			  		org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(new FileReader( "svdata/currSVjson.json"));

@@ -1275,12 +1275,12 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
     	
       	
               	  
-                    String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , minOrderSum as minsum, '' as linedisc \r\n" + 
-                    		"                       		, pricelistBackOfficeId as pricegroup,address ,\r\n" + 
-                    		"                       		  Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
-                    		"                       		 contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-                    		"                       		 contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 \r\n" + 
-                    		"                       		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID " ; 
+                    String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , (case when EG_IGNOREMINORDER = 0 then minOrderSum else 0 end) as minsum, '' as linedisc  \r\n" + 
+                    		"                    		                   , pricelistBackOfficeId as pricegroup,address ,\r\n" + 
+                    		"                Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail, \r\n" + 
+                    		"                    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
+                    		"                contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+                    		"               		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID " ; 
                     
 
                      if (isDebug()) System.out.println(cmd);
@@ -1403,6 +1403,10 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
   			   Enumeration en = vec.elements();
   			   while(en.hasMoreElements()){
   				 String age = (String) en.nextElement();
+  				 Agent ee = new Agent(age);
+ 		          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+ 				     ee.setVisit(agentL.getVisit());// panene ka asendatava päeva plaani juurde
+ 		          }
   				 cust.addAgent(new Agent(age));
   			   }
   	       }
@@ -1688,7 +1692,8 @@ private HashSet<String> inTT = null;
 
 	   Connection con = getNewConnection();
 	    TreeMap   tm = new TreeMap();
-	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_BRANDS  ";
+
+	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_GROUPS ";
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
@@ -1742,7 +1747,7 @@ private HashSet<String> inTT = null;
 	  
 	    String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
 	    		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-	    		"    		a.brandBackofficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
+	    		"    		a.groupBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
 	    		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
 
 

@@ -1405,8 +1405,12 @@ public class EksportPanel extends JPanel implements ActionListener,
                 int budget2 = agent.getMonthBudget1();
                 String startinff = agent.getStart();
                 String techdata = agent.techdata;
+                String todayCycleCode = agent.todayCycleCode;
                
-                
+
+                if (todayCycleCode != null && todayCycleCode.length() != 0){
+                    values.setProperty("todayCycleCode", todayCycleCode);
+                  }
                 if (startinff.length() != 0){
                     values.setProperty("info2", startinff);
                   }
@@ -3172,12 +3176,12 @@ File svm33 = new File("customerslogin.txt");
         String fileName = "pricematrix.txt";
         String nomx = null;
       
-        System.out.println("PMFILE date " + agentCode + " " +  getProps().getProperty("no.matrixagent"));
-System.out.println("Matrix Size " + pricematrix.size());
+  //      System.out.println("PMFILE date " + agentCode + " " +  getProps().getProperty("no.matrixagent"));
+//System.out.println("Matrix Size " + pricematrix.size());
 boolean prods = false;
 if(agprods != null && agprods.size() >0){
 	prods = true;
-	System.out.println("Size agprods " + agprods.size());
+//	System.out.println("Size agprods " + agprods.size());
 }
 
 if (getProps().getProperty("no.matrixagent") != null) {
@@ -3193,13 +3197,14 @@ if (getProps().getProperty("no.matrixagent") != null) {
           StringBuffer buf = new StringBuffer();
           int count = 0;
 
-          System.out.println("PMFILE date " + dostuff);    
+      //    System.out.println("PMFILE date " + dostuff);    
          if(dostuff) { 
           HashSet done = new HashSet();
        
           Iterator codes = customers.values().iterator();
           while(codes.hasNext()){
             Customer cust = (Customer)codes.next();
+            
             if (cust.hasAgent(agentCode)){
              Enumeration enume= pricematrix.elements();
              while (enume.hasMoreElements()) {
@@ -3212,9 +3217,12 @@ if (getProps().getProperty("no.matrixagent") != null) {
                if(mline.getProdID() != null && mline.getProdID().length()>0 && prods && !agprods.contains(mline.getProdID())){
             	   prodok = false; 
                }
+               
                if(mline.getCustID()!= null && (cust.getID().equals(mline.getCustID()) || cust.getPayer().equals(mline.getCustID()))){
             	 //  System.out.println("system linesxxx" + mline.getCustID() + " "  + cust.getID() +" "+  cust.getPayer()+ " " 
             		//	   + done.contains(cust.getID()) + " " +  done.contains(cust.getPayer()));
+            	   
+
               boolean payer = cust.getPayer().equals(mline.getCustID());
             	   if(!done.contains(cust.getID())  && !payer ){
             		if(prodok){
@@ -3227,7 +3235,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
             			buf.append(mline.getString() + lineSeparator);   
             		   }
                	     }
-               	   }   		
+               	   }
                 }
              
              done.add(cust.getID());
@@ -3235,24 +3243,24 @@ if (getProps().getProperty("no.matrixagent") != null) {
              	done.add(cust.getPayer());
              }
              
-             if(cust.getGroup()!= null && cust.getGroup().trim().length()>0 && !done.contains(cust.getGroup())){
-            	 done.add(cust.getGroup());
+             if(cust.getGroup()!= null && cust.getGroup().trim().length()>0 && !done.contains(cust.getGroup()+"gr")){
+            	 done.add(cust.getGroup()+ "gr");
             	 StringTokenizer st = new StringTokenizer(cust.getGroup(),"|");
             	 while (st.hasMoreTokens()){
             		 String token = st.nextToken();
-            		 if(!done.contains(token)){
-            			 done.add(token);	 
+            		 if(!done.contains(token+"gr")){
+            			 done.add(token+"gr");	 
             		 }          		
             	 }
              }
              
-             if(cust.getCustType()!= null && cust.getCustType().trim().length()>0 && !done.contains(cust.getCustType())){
-             	done.add(cust.getCustType());
+             if(cust.getCustType()!= null && cust.getCustType().trim().length()>0 && !done.contains(cust.getCustType()+"ty")){
+             	done.add(cust.getCustType()+"ty");
              	 StringTokenizer st = new StringTokenizer(cust.getCustType(),"|");
             	 while (st.hasMoreTokens()){
             		 String token = st.nextToken();
-            		 if(!done.contains(token)){
-            			 done.add(token);	 
+            		 if(!done.contains(token+"ty")){
+            			 done.add(token+"ty");	 
             		 }          		
             	   }
                  }          

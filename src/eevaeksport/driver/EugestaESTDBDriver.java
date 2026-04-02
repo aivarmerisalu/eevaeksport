@@ -1688,12 +1688,12 @@ if(grupp.equals("leib") ){
                	
                                
               	  
-                    String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , minOrderSum as minsum, '' as linedisc \r\n" + 
-                    		"                       		, pricelistBackOfficeId as pricegroup,address ,\r\n" + 
-                    		"                       		  Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
-                    		"                       		 contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-                    		"                       		 contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 \r\n" + 
-                    		"                       		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID " ; 
+                    String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , (case when EG_IGNOREMINORDER = 0 then minOrderSum else 0 end) as minsum, '' as linedisc  \r\n" + 
+                    		"                    		                   , pricelistBackOfficeId as pricegroup,address ,\r\n" + 
+                    		"                Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail, \r\n" + 
+                    		"                    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
+                    		"                contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+                    		"               		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID " ; 
                     
 
                      if (isDebug()) System.out.println(cmd);
@@ -1839,6 +1839,12 @@ if(grupp.equals("leib") ){
   			   Enumeration en = vec.elements();
   			   while(en.hasMoreElements()){
   				 String age = (String) en.nextElement();
+  				 Agent ee = new Agent(age);
+
+  		          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+  				     ee.setVisit(agentL.getVisit());// panene ka asendatava päeva plaani juurde
+  		          }
+  		          
   				 cust.addAgent(new Agent(age));
   			   }
   	       }
@@ -2235,7 +2241,7 @@ private HashSet<String> inTT = null;
 
 	   Connection con = getNewConnection();
 	    TreeMap   tm = new TreeMap();
-	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_BRANDS  ";
+	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_GROUPS ";
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
@@ -2291,7 +2297,7 @@ private HashSet<String> inTT = null;
 	  
     String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
     		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-    		"    		a.brandBackofficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
+    		"    		a.groupBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
     		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
 
              String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  \r\n" + 
@@ -2597,8 +2603,35 @@ boolean noopt = false;
 	}
   
   
+
+  public static String getCycleDay(LocalDate startDate, LocalDate targetDate) {
+      long daysBetween = ChronoUnit.DAYS.between(startDate, targetDate);
+
+      int cycleDayIndex = (int) (daysBetween % 56);
+      if (cycleDayIndex < 0) {
+          cycleDayIndex += 56; 
+      }
+
+      int weekIndex = cycleDayIndex / 7;
+      int dayIndex = cycleDayIndex % 7;
+
+      char weekLetter = (char) ('A' + weekIndex);
+      int dayNumber = dayIndex + 1;
+
+      return weekLetter + String.valueOf(dayNumber);
+  }
+
+  
+  
   public void setBulkSales(Map agents){
 	  
+	  
+      LocalDate start = LocalDate.of(2021, 11, 1); // A1
+      LocalDate today = LocalDate.now();
+
+      String todayCycleCode = getCycleDay(start, today);
+      System.out.println("Today is: " + todayCycleCode);
+
 
       int yy = Calendar.getInstance().get(Calendar.YEAR);
       int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
@@ -2843,6 +2876,8 @@ boolean noopt = false;
 				double msales = (int)rs.getDouble("summa");
 				if (agent != null){
 
+					agent.todayCycleCode = todayCycleCode;
+					
 				if(this.manaTotalPlans.get(agentID) != null) {
 					String asi = "Done: " + (int)msales + " €|";
 					

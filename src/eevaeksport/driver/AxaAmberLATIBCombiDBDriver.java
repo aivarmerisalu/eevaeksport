@@ -2012,7 +2012,7 @@ int i = 0;
     
 
        	if(this.adlCustCodes.get(cust.getID()) != null) {
-       		cust.setCity("InterBaltija Kodas: " + adlCustCodes.get(cust.getID()));
+       		cust.setCity("InterBaltija Kodas: '" + adlCustCodes.get(cust.getID())+"'");
        	}
         
         
@@ -2728,7 +2728,7 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
       
       String type = rs.getString("type");
       if(type!=null && type.trim().length()>0){
-       prod.setType(type);
+      // prod.setType(type);
        
        if(oldcode != null && grupp != null && (grupp.trim().startsWith("POS") || grupp.trim().startsWith("OTHE"))){
     	    bre = " "+ oldcode.trim();   
@@ -3132,7 +3132,7 @@ stmt.close();
    
       String type = rs.getString("type");
       if(type!=null && type.trim().length()>0){
-       prod.setType(type);
+     //  prod.setType(type);
     }
       prod.setType2("ADL");
 

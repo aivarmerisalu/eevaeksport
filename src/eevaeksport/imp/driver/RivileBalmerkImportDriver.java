@@ -195,7 +195,7 @@ HashMap pants = null;
 	
     System.out.println(sql1);
     String acc = null;
-    con = DriverManager.getConnection(url + "rivile","","");
+    con = DriverManager.getConnection(url + "rivilelt","","");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -237,7 +237,7 @@ HashMap pants = null;
   	 		"  rtrim(rtrim(N08_KODAS_KS))+'-'+ rtrim(ltrim(N33_kodas_ak)) = '" + id +"'"; 
     System.out.println(sql1);
     String acc = null;
-    con = DriverManager.getConnection(url + "rivile","","");
+    con = DriverManager.getConnection(url + "rivilelt","","");
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
     while (rs1.next()) {
