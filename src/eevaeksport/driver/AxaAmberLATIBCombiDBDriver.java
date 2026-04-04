@@ -2013,6 +2013,8 @@ int i = 0;
 
        	if(this.adlCustCodes.get(cust.getID()) != null) {
        		cust.setCity("InterBaltija Kodas: '" + adlCustCodes.get(cust.getID())+"'");
+       	}else {
+       		cust.setInfo("Nevar pārdot no Interbalijas — kods nav pieejams");
        	}
         
         
@@ -2076,7 +2078,7 @@ int i = 0;
           cust.setPersonalData(info.trim());
         }
         if(salesres.get(accountnum) != null){
-        	cust.setInfo(Converter.enCodeEst("CHART Pārdošana :|Mēnesis un gads|pārdošana |" )+ salesres.get(accountnum) );
+        	//cust.setInfo(Converter.enCodeEst("CHART Pārdošana :|Mēnesis un gads|pārdošana |" )+ salesres.get(accountnum) );
         }
         
         if(openOrders.get(cust.getID()) != null){
