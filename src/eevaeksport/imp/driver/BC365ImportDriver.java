@@ -290,7 +290,10 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	      JSONObject lin = new JSONObject();
 	   	  OrderLine line = (OrderLine) lines2.elementAt(i);
 	   	  String toode = line.getToode();
+	   	  
 	   	  Product prod = ((Product) products.get(toode));
+	   	if(prod != null) {
+	   		
 	   	  String tID = prod.getAgentGroup();
 	   	  
 	   	  if (tID != null) {	  
@@ -330,6 +333,7 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	 	  if (unitMeasureId != null) {
 	 	  lin.put("unitOfMeasureId", unitMeasureId );
 	   }
+	   	
 	 	
 	 	
 	 	lin.put("quantity", line.getKogus());
@@ -352,7 +356,11 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	    
 	    lin.put("lineObjectNumber", toode);
 	    linesA.add(lin);
-	    this.addNumLine();;
+	    this.addNumLine();
+	   	}else {
+		   	  System.out.println("puudu " + toode);
+		   	  this.trouble = "puudu " + toode;
+		   	}  
 	     }
 	  ord.put("salesOrderLines", linesA);
 	  
@@ -363,8 +371,12 @@ public class BC365ImportDriver extends AbstractImportDriver{
 	  try {
 		JSONObject res2 = (JSONObject) parser.parse(res);
 		ordId = (String) res2.get("id");
+		String tr = "";
+		if(trouble != null) {
+			tr = trouble;
+		}
 		System.out.println(res2.toJSONString());
-		  Converter.saveFile("orders/response/" + order.getDokNr() + "reply.json" , res2.toJSONString() );
+		  Converter.saveFile("orders/response/" + order.getDokNr() + "reply.json" , res2.toJSONString() + "\n PROBLEEM : "+ tr );
 	} catch (ParseException e) {
 		e.printStackTrace();
 	}

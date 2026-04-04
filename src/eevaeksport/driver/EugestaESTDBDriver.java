@@ -1063,6 +1063,8 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
           Double reprLim = rs.getDouble("repr");
           if(reprLim > 0) {
         	  agent.repriceLimit = reprLim;
+          }else {
+         	  agent.repriceLimit = 0.0;
           }
           agent.setName(name);
           agent.setIsPilot(true);

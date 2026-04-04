@@ -615,7 +615,11 @@ if(seis > 0) {
    
    public List<String[]> readCSVData(String fname) {
        String csvFile = getDir() + fname; // Adjust getDir() accordingly
-       CSVParser parser = new CSVParserBuilder().withSeparator(',').build();
+      // CSVParser parser = new CSVParserBuilder().withSeparator(',').build();
+       CSVParser parser = new CSVParserBuilder()
+    	        .withSeparator(',')
+    	        .withIgnoreQuotations(false)
+    	        .build();
        List<String[]> data = new ArrayList<>();
 
        try (CSVReader reader = new CSVReaderBuilder(new FileReader(csvFile))
@@ -624,6 +628,8 @@ if(seis > 0) {
                .build()) {
            String[] nextLine = reader.readNext();// esimest rida ei loe
            while ((nextLine = reader.readNext()) != null) {
+        	   
+        	   
                data.add(nextLine); // Process each line without loading everything at once
            }
        } catch (IOException | CsvException e) {
@@ -631,7 +637,6 @@ if(seis > 0) {
        }
        return data;
    }
-
 
     
    private Hashtable custagents = new Hashtable();
@@ -838,10 +843,11 @@ if(seis > 0) {
             	 if(cou == 2) {
                      payer = cell.trim();
                  }
-            	 
+            	 try {
             	 if(cou == 3) {
                      debt = Double.parseDouble(cell.trim());
                  }
+            	
             	 
             	 if(cou == 4) {
                      debta = Double.parseDouble(cell.trim());
@@ -872,7 +878,11 @@ if(seis > 0) {
                  }
 
             	 if(cou == 11) {
+            		 try {
                      term = Integer.parseInt(cell.trim());
+            		 }catch(Exception e) {
+            			 System.out.println("error " + id);
+            		 }
                  }
             	 
             	 if(cou == 12) {
@@ -900,7 +910,9 @@ if(seis > 0) {
             	 if(cou == 17) {
                    //  group = cell.trim();
                  }
-
+            	 }catch(Exception e) {
+            		 System.out.println("error0 " + id);
+                } 
             
             	 
                  cou++;
@@ -911,11 +923,11 @@ if(seis > 0) {
              cust.restStreet = address;
              cust.restPerson = contact;
              
-             if(block == 1) {
+             if(block != null && block == 1) {
             	 cust.setSalesBlock(true);
              }
              
-             if(payerblock == 1) {
+             if(payerblock != null &&  payerblock == 1) {
             	 cust.setSalesBlock(true);
              }
              
@@ -1123,11 +1135,11 @@ private HashMap prodPrices = null;
          	   prod.setInCases(inCase);
              }
              
-             prod.setName(Converter.enCodeEst(name).trim() + " " + e4.trim());
+             prod.setName(Converter.enCodeEst(name).trim() + " " + prod.getID());
             
             
              if(goes) {
-            	   System.out.println( prod.getGroup() +" " + name);
+            	 //  System.out.println( prod.getGroup() +" " + name);
             	   tm.put(Converter.enCodeEst(name), prod); 
                }
                
@@ -1164,6 +1176,7 @@ private HashMap prodPrices = null;
    		usedProds = new HashSet();
 
 //"orderaccount","itemid","qty","lastdate","hind","dok"
+   		//"40003040166","13438 SB",9000,"",0.6,"SOV001846"
      Vector vec = new Vector();
     
          for (String[] row : readCSVData("Merisoft_MasterData_CustomerProducts.csv")) {
@@ -1204,7 +1217,7 @@ private HashMap prodPrices = null;
    		cou++;
    	   }      
    		// paneme kaasa siis kui on kuni 6 kuud
-   		if(lastdate != null) {
+   		if(lastdate != null && lastdate.length() > 0) {
    		Date dd = this.getDate(lastdate);
    
 

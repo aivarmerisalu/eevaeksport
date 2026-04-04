@@ -154,7 +154,10 @@ private Vector signatures = new Vector();
 	 	 			tagastus = false;
 	 	 		}
 	 	 	 } 
+	 	 	 
+	 	 //	 System.out.println("repr " + repr + " taga "+ tagastus);
 	 	 
+	 	 	 
 		    String signature = order.getSignature();
 			  if(signatures.contains(signature)){
 				  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
@@ -348,10 +351,8 @@ private Vector signatures = new Vector();
 private Product getProd(String toode){
 	  
 			       
-	    String sql = "   Select a.backOfficeId as itemid,a.Name AS nimetus, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini, \r\n" + 
-	    		"a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-	    		"    		a.brandBackofficeId AS grupp2,a.unitName AS unit, a.vatPercent as vat  from  dbo.EPASAULE_PRODUCTS a "
-	    		+ "LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId where a.backOfficeId = '" +  toode + "'" ;
+	    String sql = "   Select a.backOfficeId as itemid,a.Name AS nimetus, a.quantityBox AS kastis,a.quantityPallete as alusel , a.quantityPack as pakk,a.increasestep as opt, a.minimalOrderQuantity as mini, " + 
+	    		"a.Price AS price, a.barCode AS eanvfrom  dbo.EPASAULE_PRODUCTS a where a.backOfficeId = '" +  toode + "'" ;
 
 	  
 	  	 //  System.out.println(sql);
@@ -589,7 +590,7 @@ private Product getProd(String toode){
 	      if(orderLine.selActCode != null) {
 	    	  pobj = orderLine.selActCode;
 	      }
-	      System.out.println("promo code " + itemid + " " + pobj + " " + price + " " + disc);
+	   
 	   //	  DEFAULT_APPLIED = applied promo;
 	    //  NOT_APPLIED = promo not applied;
 	    //  NOT_AVAILABLE = product without promo.
@@ -602,11 +603,25 @@ private Product getProd(String toode){
 	         	ag = new Agent(agent);
 	          }
 	          
+	          double rp = 0;
+	          
+	          if(repr) {
+	        		  rp =  price * ((100-disc)/100);
+	        	      disc = 0;
+	        	  String inff = orde.getTeostaja();
+	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
+	    		    }
+	        	  
+	        	   System.out.println("promo code " + itemid + " " + pobj + " " + price + " " + rp   );
+	        	 
+	          }
+	          
 	          String sql =" INSERT into   ORDEREDITEMS (ORDER_ID,PRODUCT_ID,QUANTITY_IN_BASE_UNIT,BASE_UNIT_MEASURE," +
 	          		"PRODUCT_PRICE,REAL_PRICE,DISCOUNT,USER_PROMO_DISCOUNT_CHOICE," +
 	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID )  " +// DEPARTMEN,
 	             " values( " + salesid + ",'" + itemid + "'," + kogus + "," + unit + "," 
-	          		+ price + ",0," + disc + ",'" + choice + "','" + pobj + "','" + ware + "'"
+	          		+ price + "," + rp + "," + disc + ",'" + choice + "','" + pobj + "','" + ware + "'"
 	          		+ ")";
 
 	              log.info("SALES_LINE_SQL: " + sql);
@@ -637,7 +652,14 @@ private Product getProd(String toode){
 	      
 	      String ref2 = " ";
 	      if(order.getTeostaja() != null && order.getTeostaja().trim().length()>0 ){
-	      	ref2 = order.getTeostaja().trim();
+	    	  if(!repr) {
+	         	ref2 = order.getTeostaja().trim();
+	    	  }else {
+	    		  String inff = order.getTeostaja();
+	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+	                	ref = inff.substring(0,inff.indexOf("["));
+	    		    }
+	    	  }
 	      }
 	    
 
