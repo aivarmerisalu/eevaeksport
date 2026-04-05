@@ -390,10 +390,13 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 									if(ll == null) {
 									  ll = new ArrayList<String>(); 
 									}
-									ll.add(asi + "xls");
+									if(!ll.contains(asi + "xls")) {
+									   ll.add(asi + "xls");
+									}
 									activeXLSPromos.put(asi + "xls", ll);
+								
 									
-									  MatrixLine mline = new MatrixLine();
+ 									  MatrixLine mline = new MatrixLine();
 							           mline.setCliGroup(asi + "xls");
 							           mline.setProdID(prod);
 							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
@@ -401,8 +404,11 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 							           mline.setPrice(price);
 							           if(text != null && text.trim().length() > 0) {
 							        	   mline.setLineinfo(text + " " + text2);
+							           }else if(text2 != null && text2.trim().length() > 0){
+							        	   mline.setLineinfo(text2);
 							           }
 							           lines.add(mline);
+							       	System.out.println("line " + mline.getString());
 									}
 								
 							}
@@ -415,7 +421,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
          }catch(Exception r) {
 		 r.printStackTrace();  
 	     }	
-	//  System.out.println("Active Promos "  + activeXLSPromos.toString());
+	System.out.println("Active Promos "  + activeXLSPromos.toString());
 
   }
 
@@ -427,8 +433,8 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
        }
        
        getCampExcelLines(lines);
-
-       try {
+     
+    try {
 
 	String sss = "Select c.pricelistBackOfficeId as pricegroup\r\n" + 
 			"                       				 from  dbo.EPASAULE_CLIENTS c inner join EPASAULE_AGENTS_CLIENTS a on a.ClientBackofficeID = c.BackOfficeId group  by c.pricelistBackOfficeId";
@@ -504,7 +510,6 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
     
 
        return lines;
-       
    }
    
    
@@ -1341,15 +1346,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
         }
         
         
-        if(activeXLSPromos.get(cust.getID()+"xls") != null) {
-           for (String cc :  activeXLSPromos.get(cust.getID()+"xls")) {
-        	   if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
-              	 cust.setGroup(cust.getGroup() + "|" + cc);
-               } else {
-              	 cust.setGroup(cc);
-               }
-           }
-        }
+       
         
         String aadr = rs.getString("address");
         if (aadr != null) {
@@ -1427,6 +1424,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
                    	 cust.setGroup(cust.getGroup() + "|" + cc);
                     } else {
                    	 cust.setGroup(cc);
+                    
                     }
                 }
              }
@@ -1537,7 +1535,17 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
         String segsub = rs.getString("segsub");
         if(segsub != null && segsub.trim().length() > 0) {
         	cust.addCity("Segment: " + segsub.trim());
+        	if(activeXLSPromos.get(segsub.trim()+"xls") != null) {
+                for (String cc :  activeXLSPromos.get(segsub.trim()+"xls")) {
+             	   if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
+                   	 cust.setGroup(cust.getGroup() + "|" + cc);
+                    } else {
+                   	 cust.setGroup(cc);
+                    }
+                }
+             }
         }
+        
         
       
         
@@ -1555,6 +1563,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
         
         if(displays != null && displays.get(cust.getID()) != null) {
         	cust.setInfo(displays.get(cust.getID()));
+        	cust.addCity("|" +displays.get(cust.getID())+"|");
         }
       
         

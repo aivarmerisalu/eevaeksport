@@ -455,7 +455,9 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 									if(ll == null) {
 									  ll = new ArrayList<String>(); 
 									}
-									ll.add(asi + "xls");
+									 if(!ll.contains(asi + "xls")) {
+										   ll.add(asi + "xls");
+										}
 									activeXLSPromos.put(asi + "xls", ll);
 									
 									  MatrixLine mline = new MatrixLine();
@@ -1542,6 +1544,13 @@ if(grupp.equals("leib") ){
     TreeMap deldays =  makeCustomerDeliveryDays();
     
     custCategories = getCustCategories();
+    
+    if(activeXLSPromos == null) {
+  		activeXLSPromos = new HashMap<String,List<String>>();
+  	    getCampExcelLines(new Vector());
+      }
+    
+    
    TreeMap<String,String> displays  =   Converter.getDisplayInfoFromExcel(this.getExcelDir(), custCategories);
    
     loadPlans();
@@ -1870,6 +1879,15 @@ if(grupp.equals("leib") ){
         String chain = rs.getString("chain");
         if(chain != null && chain.trim().length() > 0) {
         	cust.setChain(chain);
+        	if(activeXLSPromos.get(chain.trim()+"xls") != null) {
+                for (String cc :  activeXLSPromos.get(chain.trim()+"xls")) {
+             	   if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
+                   	 cust.setGroup(cust.getGroup() + "|" + cc);
+                    } else {
+                   	 cust.setGroup(cc);
+                    }
+                }
+             }
         }
         
         String type = rs.getString("type");
@@ -1988,6 +2006,17 @@ String arve = rs.getString("bill");
         String segsub = rs.getString("segsub");
         if(segsub != null && segsub.trim().length() > 0) {
         	cust.addCity("Segment: " + segsub.trim());
+        	  
+               	cust.addCity("Segment: " + segsub.trim());
+               	if(activeXLSPromos.get(segsub.trim()+"xls") != null) {
+                       for (String cc :  activeXLSPromos.get(segsub.trim()+"xls")) {
+                    	   if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
+                          	 cust.setGroup(cust.getGroup() + "|" + cc);
+                           } else {
+                          	 cust.setGroup(cc);
+                           }
+                       }
+               	}
         }
         
         if(type != null && type.trim().length() > 0) {
@@ -2012,6 +2041,7 @@ String arve = rs.getString("bill");
         
         if(displays != null && displays.get(cust.getID()) != null) {
         	cust.setInfo(displays.get(cust.getID()));
+        	cust.addCity("|" +displays.get(cust.getID())+"|");
         }
         
         

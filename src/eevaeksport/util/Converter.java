@@ -295,7 +295,7 @@ public class Converter {
 									}
 								if(goes) {
 				String text ="|  type: "+ type + " - " + prod + " " + prodnimi + "|      (" + campName + ") " + Converter.getDDsMMMsYYYYString(algus)
-				+ " -> " + Converter.getDDsMMMsYYYYString(lopp)  ;
+				+ " - " + Converter.getDDsMMMsYYYYString(lopp)  ;
 									if(cust == null) {
 										String asi = chain;
 										

@@ -3304,8 +3304,8 @@ if (getProps().getProperty("no.matrixagent") != null) {
         	if(mline.getCliGroup() != null && mline.getCliGroup().trim().length() >= 0  
         			){
               //   System.out.println("system lines" + mline.getCustID() + cust.getID() + "'");
-                //System.out.println("system lin '" + mline.getCliGroup() + "'");
-        		if(done.contains(mline.getCliGroup().trim()) && !done.contains(mline.getString())){
+                System.out.println("system lin '" + mline.getCliGroup() + "'" + done.contains(mline.getCliGroup().trim()+"gr"));
+        		if(done.contains(mline.getCliGroup().trim()+"gr") && !done.contains(mline.getString())){
         		//	 System.out.println("system lin2 '" + mline.getCliGroup() + "'" + prodok);
         			if(prodok){
               			buf.append(mline.getString() + lineSeparator);	
