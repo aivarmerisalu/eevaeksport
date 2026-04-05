@@ -1642,7 +1642,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 				        	  }
 				         }
 				        
-				    StringBuffer reprBuff = new StringBuffer();    
+				  /*  StringBuffer reprBuff = new StringBuffer();    
 				        reprBuff.append("R101;20\nR212;30");
 				        
 				        
@@ -1668,7 +1668,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 				        	  }catch (IOException ex) {
 				        		ex.printStackTrace();
 				        	  }
-				         }
+				         }*/
 				     
               
     } catch (Exception e){

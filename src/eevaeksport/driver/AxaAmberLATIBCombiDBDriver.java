@@ -2204,7 +2204,7 @@ int i = 0;
                                
                                double minam = rs.getDouble("minam");
                                if(minam > 0 ){
-                            	   cust.setMinsum(minam);
+                            	  // cust.setMinsum(minam);
                                }
                     
                                

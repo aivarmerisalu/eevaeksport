@@ -2191,8 +2191,8 @@ String arve = rs.getString("bill");
 				        	  }
 				         }
 				        
-				    StringBuffer reprBuff = new StringBuffer();    
-				        reprBuff.append("R101;20\nR212;30");
+				/*    StringBuffer reprBuff = new StringBuffer();    
+				        reprBuff.append("ALL;50");
 				        
 				        
 				        if(reprBuff.length() > 2){
@@ -2217,7 +2217,7 @@ String arve = rs.getString("bill");
 				        	  }catch (IOException ex) {
 				        		ex.printStackTrace();
 				        	  }
-				         }
+				         }*/
 				     
               
     } catch (Exception e){
