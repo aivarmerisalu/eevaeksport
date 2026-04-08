@@ -835,7 +835,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"\r\n" + 
 	  		"SELECT *\r\n" + 
 	  		"FROM cte\r\n" + 
-	  		"WHERE rn = 1";
+	  		"WHERE rn = 1 order by klient, toode ";
 	  
 
 	    if (isDebug()) System.out.println(cmd2);

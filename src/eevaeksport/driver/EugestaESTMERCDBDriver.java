@@ -746,7 +746,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 	  		"\r\n" + 
 	  		"SELECT *\r\n" + 
 	  		"FROM cte\r\n" + 
-	  		"WHERE rn = 1";
+	  		"WHERE rn = 1 order by klient, toode ";
 	  
 
 	    if (isDebug()) System.out.println(cmd2);
