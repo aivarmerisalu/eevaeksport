@@ -211,9 +211,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
 	              	try {
 	                  	Converter.shrinkAndCopyFile(in,inpda,400);
-	            	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-	                    	}
+	                    	buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
 	                   
 	              	} catch(Exception e) {
 	              		//System.out.println("prod.getID() " + prod.getID());
@@ -351,7 +349,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 		 						  }
 								}
 								 
-								System.out.println("segment " + segment + " " + cust + " " + i);
+								//System.out.println("segment " + segment + " " + cust + " " + i);
 								 String prod = null;
 									try {
 										prod = formatter.formatCellValue(row.getCell((short) 3));
@@ -434,15 +432,26 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 									activeXLSPromos = new HashMap<String,List<String>>();
 								}
 								
+								 if(price == null || price == 1) {
+						        	   try {
+						        	    price = this.prodprices.get(prod);
+						        	   }catch(Exception e) {}
+						           }
+								 
 								if(cust != null && cust.trim().length() > 0) {
 									  MatrixLine mline = new MatrixLine();
 							           mline.setCustID(cust);
 							           mline.setProdID(prod);
 							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
 							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
-							           mline.setPrice(price);
+							           if(price == null) {
+							        	 //  Sytln("prod " + prod + " " + prod);
+							        	   price = 1.0;
+							           }
+							          
+							           mline.setPrice(price-0.001);
 							           if(text != null && text.trim().length() > 0) {
-							        	   mline.setLineinfo(text + " " + text2);
+							        	   mline.setLineinfo((text + " " + text2).trim().replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
 							           }
 							           lines.add(mline);
 							  	
@@ -455,21 +464,29 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 									if(ll == null) {
 									  ll = new ArrayList<String>(); 
 									}
-									 if(!ll.contains(asi + "xls")) {
-										   ll.add(asi + "xls");
-										}
+									if(!ll.contains(asi + "xls")) {
+									   ll.add(asi + "xls");
+									}
 									activeXLSPromos.put(asi + "xls", ll);
+								
 									
-									  MatrixLine mline = new MatrixLine();
+ 									  MatrixLine mline = new MatrixLine();
 							           mline.setCliGroup(asi + "xls");
 							           mline.setProdID(prod);
 							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
 							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
-							           mline.setPrice(price);
+							           if(price == null) {
+							        	  // System.out.println("asi " + asi + " " + prod);
+							        	   price = 1.0;
+							           }
+							           mline.setPrice(price - 0.001);
 							           if(text != null && text.trim().length() > 0) {
-							        	   mline.setLineinfo(text + " " + text2);
+							        	   mline.setLineinfo((text + " " + text2).replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
+							           }else if(text2 != null && text2.trim().length() > 0){
+							        	   mline.setLineinfo((text2).replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
 							           }
 							           lines.add(mline);
+							      // 	System.out.println("line " + mline.getString());
 									}
 								
 							}
@@ -482,10 +499,12 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
          }catch(Exception r) {
 		 r.printStackTrace();  
 	     }	
-	//  System.out.println("Active Promos "  + activeXLSPromos.toString());
+	System.out.println("Active Promos "  + activeXLSPromos.toString());
 
   }
-
+  
+  
+  
    public Vector getPriceMatrixData() {
        Vector lines = new Vector();
        
@@ -808,7 +827,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"        ON LEFT(a.SALESID,9) = LEFT(b.SALESID,9)\r\n" + 
 	  		"    LEFT JOIN BID44_SALESCANCELREASONS c\r\n" + 
 	  		"        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID\r\n" + 
-	  		"    WHERE a.SALESDATE > GETDATE() - 90\r\n" + 
+	  		"    WHERE a.SALESDATE > GETDATE() - 180\r\n" + 
 	  		"      AND a.EG_SALESCANCELREASONID <> 'GKR'\r\n" + 
 	  		"      AND a.INVENTLOCATIONID != 'STORNO'\r\n" + 
 	  		"      AND a.SALESSTATUS <> 1\r\n" + 
@@ -1821,7 +1840,8 @@ if(grupp.equals("leib") ){
         
         cust.restName = name;
        // name = Converter.enCodeEst(name);
-        name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
+       // name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
+        name = name.replaceAll("\\s*\\([^()]*\\)\\s*$", "").trim();
         name = name + " " + cust.getAddress() + " " + accountnum ;
         cust.setName(name);
         
@@ -2003,11 +2023,12 @@ String arve = rs.getString("bill");
         	  cust.addFixSortCode(fixed.trim()+"x");
         	}
         }
+        
         String segsub = rs.getString("segsub");
         if(segsub != null && segsub.trim().length() > 0) {
         	cust.addCity("Segment: " + segsub.trim());
         	  
-               	cust.addCity("Segment: " + segsub.trim());
+              // 	cust.addCity("Segment: " + segsub.trim());
                	if(activeXLSPromos.get(segsub.trim()+"xls") != null) {
                        for (String cc :  activeXLSPromos.get(segsub.trim()+"xls")) {
                     	   if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
@@ -2041,7 +2062,7 @@ String arve = rs.getString("bill");
         
         if(displays != null && displays.get(cust.getID()) != null) {
         	cust.setInfo(displays.get(cust.getID()));
-        	cust.addCity("|" +displays.get(cust.getID())+"|");
+        	//cust.addCity("|" +displays.get(cust.getID())+"|");
         }
         
         

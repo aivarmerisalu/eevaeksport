@@ -248,7 +248,7 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
   	                    // klient = cell.trim().replace(':', '_');;
   	             //   }
   	           if(cou == 1) {
-  	        	 klientGR = cell.trim();
+  	        	 klient = cell.trim();
 	                }
   	           	 if(cou == 0) {
   	                    toode = cell.trim();
@@ -284,13 +284,15 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
  	 	               mline.setPrice(hind);
  	 	             }
 
- 	             if (start != null && start.length() > 0) {
- 	               mline.setStartDate(start.substring(0,10));
- 	             }
+ 	           
 
  	             if (end != null && end.length() > 0) {
- 	               mline.setEndDate(end.substring(0,10));
+ 	               mline.setEndDate(end);
+ 	              if (start != null && start.length() > 0) {
+ 	 	               mline.setStartDate(start);
+ 	 	             }
  	             }
+ 	             result.add(mline);
  	       }
 	    
 	   	        		
@@ -540,9 +542,9 @@ if(seis > 0) {
        
        
 
-  private java.util.Date getDate(String mmddyy){//2008-12-31 00:00:00
+  private java.util.Date getDate(String mmddyy){//2008-12-31 00:00:00 "2026 04 01"
 	  java.util.Date date = null;
-	    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+	    SimpleDateFormat formatter = new SimpleDateFormat("yyyy MM dd");
 
 		          try {
 					date = formatter.parse(mmddyy);
@@ -1175,8 +1177,6 @@ private HashMap prodPrices = null;
    		cps = new Vector();
    		usedProds = new HashSet();
 
-//"orderaccount","itemid","qty","lastdate","hind","dok"
-   		//"40003040166","13438 SB",9000,"",0.6,"SOV001846"
      Vector vec = new Vector();
     
          for (String[] row : readCSVData("Merisoft_MasterData_CustomerProducts.csv")) {
@@ -1216,6 +1216,8 @@ private HashMap prodPrices = null;
          }
    		cou++;
    	   }      
+
+       System.out.println("cp loeme " +custID + " " + prodID + " " + amount );
    		// paneme kaasa siis kui on kuni 6 kuud
    		if(lastdate != null && lastdate.length() > 0) {
    		Date dd = this.getDate(lastdate);
@@ -1229,7 +1231,6 @@ private HashMap prodPrices = null;
                     
                  CustProd cp = new CustProd(custID, prodID,amount , 0, 0,lastdate.substring(5),price,0,0," ");
                  cp.setAbiKood(Converter.cleanLitLatEst(doc));
-          
                  cps.addElement(cp);
                  if(!usedProds.contains(prodID)) {
                 	 usedProds.add(prodID);

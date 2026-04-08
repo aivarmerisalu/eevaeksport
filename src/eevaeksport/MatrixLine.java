@@ -31,7 +31,7 @@ public class MatrixLine implements Serializable{
 }
 
 public void setLineinfo(String lineinfo) {
-	this.lineinfo = lineinfo;
+	this.lineinfo = lineinfo.replaceAll(";", ",");
 }
 
 public String getCurrency() {

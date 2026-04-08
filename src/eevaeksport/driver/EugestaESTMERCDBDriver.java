@@ -286,7 +286,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 		 						  }
 								}
 								 
-								System.out.println("segment " + segment + " " + cust + " " + i);
+								//System.out.println("segment " + segment + " " + cust + " " + i);
 								 String prod = null;
 									try {
 										prod = formatter.formatCellValue(row.getCell((short) 3));
@@ -369,15 +369,26 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 									activeXLSPromos = new HashMap<String,List<String>>();
 								}
 								
+								 if(price == null || price == 1) {
+						        	   try {
+						        	    price = this.prodprices.get(prod);
+						        	   }catch(Exception e) {}
+						           }
+								 
 								if(cust != null && cust.trim().length() > 0) {
 									  MatrixLine mline = new MatrixLine();
 							           mline.setCustID(cust);
 							           mline.setProdID(prod);
 							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
 							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
-							           mline.setPrice(price);
+							           if(price == null) {
+							        	 //  System.out.println("acust " + cust + " " + prod);
+							        	   price = 1.0;
+							           }
+							          
+							           mline.setPrice(price-0.001);
 							           if(text != null && text.trim().length() > 0) {
-							        	   mline.setLineinfo(text + " " + text2);
+							        	   mline.setLineinfo((text + " " + text2).trim().replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
 							           }
 							           lines.add(mline);
 							  	
@@ -401,14 +412,18 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 							           mline.setProdID(prod);
 							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
 							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
-							           mline.setPrice(price);
+							           if(price == null) {
+							        	//   System.out.println("asi " + asi + " " + prod);
+							        	   price = 1.0;
+							           }
+							           mline.setPrice(price - 0.001);
 							           if(text != null && text.trim().length() > 0) {
-							        	   mline.setLineinfo(text + " " + text2);
+							        	   mline.setLineinfo((text + " " + text2).replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
 							           }else if(text2 != null && text2.trim().length() > 0){
-							        	   mline.setLineinfo(text2);
+							        	   mline.setLineinfo(text2.replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
 							           }
 							           lines.add(mline);
-							       	System.out.println("line " + mline.getString());
+							      // 	System.out.println("line " + mline.getString());
 									}
 								
 							}
@@ -723,7 +738,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 	  		"        ON LEFT(a.SALESID,9) = LEFT(b.SALESID,9)\r\n" + 
 	  		"    LEFT JOIN BID44_SALESCANCELREASONS c\r\n" + 
 	  		"        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID\r\n" + 
-	  		"    WHERE a.SALESDATE > GETDATE() - 90\r\n" + 
+	  		"    WHERE a.SALESDATE > GETDATE() - 180\r\n" + 
 	  		"      AND a.EG_SALESCANCELREASONID <> 'GKR'\r\n" + 
 	  		"      AND a.INVENTLOCATIONID != 'STORNO'\r\n" + 
 	  		"      AND a.SALESSTATUS <> 1\r\n" + 
@@ -1373,7 +1388,8 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
         
         cust.restName = name;
        // name = Converter.enCodeEst(name);
-        name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
+      //  name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
+        name = name.replaceAll("\\s*\\([^()]*\\)\\s*$", "").trim();
         name = name + " " + cust.getAddress() + " " + accountnum ;
         cust.setName(name);
         
@@ -1563,7 +1579,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
         
         if(displays != null && displays.get(cust.getID()) != null) {
         	cust.setInfo(displays.get(cust.getID()));
-        	cust.addCity("|" +displays.get(cust.getID())+"|");
+        //	cust.addCity("|" +displays.get(cust.getID())+"|");
         }
       
         

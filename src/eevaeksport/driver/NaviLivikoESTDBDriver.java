@@ -196,7 +196,7 @@ public class NaviLivikoESTDBDriver extends AbstractDBDriver implements BulkUpdat
              Date sdate = rs.getDate("startday");
              int type = rs.getInt("salestype");
 
-             String lineinfo = Converter.cleanLitLatEst(rs.getString("notes"));
+             String lineinfo = Converter.cleanLitLatEst(rs.getString("notes")).replaceAll(";", ",");
           boolean goes = true;
            //  int paevi = rs.getInt("paevi");
              

@@ -60,6 +60,8 @@ public class WebShopPiguLT {
 	private String kaup24Klient = null;
 	private String piguLTKlient = null;
 	private String lati220Klient = null;
+
+	private String soomeHHKlient = null;
 	private String printingBat = null;
 	
 	
@@ -96,6 +98,7 @@ public class WebShopPiguLT {
 		kaup24Klient = parent.getProps().getProperty("kaup24");
 		 piguLTKlient = parent.getProps().getProperty("piguLT");
 		 lati220Klient = parent.getProps().getProperty("220LV");
+		 soomeHHKlient = parent.getProps().getProperty("hhFIN");
 		 printingBat = parent.getProps().getProperty("printing.bat");
 		
 		File fileToFind = new File("WebShopper");
@@ -380,8 +383,11 @@ public static String getCurrentDateTimeMinusTwoWeeks() {
 	                    			}
 	                    			else if (orderSite.equals("pigu.lt")){
 	                    				orderSiteCode = this.piguLTKlient;
-	                    				
 	                    			}
+	                    			else if (orderSite.equals("hobyhall.fi")){
+	                    				orderSiteCode = this.soomeHHKlient;
+	                    			}
+	                    			
 	                    			Order ord = new Order(orderSiteCode, "WebiPood");
 	                    			ord.obj = shippingAddress;
 	                    			ord.setDokNr(orderNum);

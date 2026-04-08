@@ -3646,7 +3646,8 @@ public ArrayList loadOpenOrders() {
 	   
 	 String  kaup24Klient = parent.getProps().getProperty("kaup24");
      String piguLTKlient = parent.getProps().getProperty("piguLT");
-		String lati220Klient = parent.getProps().getProperty("220LV");
+	 String lati220Klient = parent.getProps().getProperty("220LV");
+	 String soomeHHKlient = parent.getProps().getProperty("hhFIN");
 	   
  
 	
@@ -3670,10 +3671,8 @@ public ArrayList loadOpenOrders() {
 	         		
 		         	
 		         	  String id = rida.getAttributes().getNamedItem("ccode").getNodeValue();
-		         	  if (id.equals(kaup24Klient) || id.equals(piguLTKlient) || id.equals(lati220Klient)) {
+		         	  if (id.equals(kaup24Klient) || id.equals(piguLTKlient) || id.equals(lati220Klient) || id.equals(soomeHHKlient) ) {
 		         	  
-		         	  
-		      
 			    	  String arve = rida.getAttributes().getNamedItem("webid").getNodeValue();
 			    	  
 			    	  String number = null ;

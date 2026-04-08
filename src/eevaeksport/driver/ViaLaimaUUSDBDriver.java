@@ -76,13 +76,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 	public ViaLaimaUUSDBDriver(EksportPanel parent) {
 		super(parent);
         this.subjectFilesTo = parent.getString("filemsg");
-        String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
-        try {
-         //   Class.forName(databaseDriverName).newInstance();
 
-        } catch (Exception e) {
-            parent.showError(e);
-        }
         user =  getParent().getProps().getProperty("rest.user");
         pass = getParent().getProps().getProperty("rest.pass");
         rcompany = getParent().getProps().getProperty("rest.company");
