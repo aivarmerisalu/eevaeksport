@@ -228,9 +228,8 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
    
    public Vector getPriceMatrixData(){
 	  	
-   HashSet check = new HashSet();
 	       Vector result = new Vector();
-
+          HashSet<String> done = new HashSet<String>();
 	       for (String[] row : readCSVData("Merisoft_MasterData_PriceMatrix.csv")) {
   	       	 int cou = 0;
   	     //  "prodid","custid","price","algus","lopp"
@@ -292,7 +291,10 @@ public class MantingaCSVDBDriver extends AbstractDBDriver implements BulkUpdater
  	 	               mline.setStartDate(start);
  	 	             }
  	             }
+ 	          if(!done.contains(mline.getString())) {
  	             result.add(mline);
+ 	            done.add(mline.getString());
+ 	          }
  	       }
 	    
 	   	        		
@@ -955,7 +957,7 @@ if(seis > 0) {
             	  cust.setChain(chain);
              }
              if(payer != null && payer.trim().length() > 0 ) {
-           	  cust.setPayer(payer);
+           	  cust.setPayer(payer+"P");
             }
              
              if(visit != null && visit.trim().length() > 0 ) {

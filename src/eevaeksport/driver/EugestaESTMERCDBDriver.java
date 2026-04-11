@@ -436,7 +436,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
          }catch(Exception r) {
 		 r.printStackTrace();  
 	     }	
-	System.out.println("Active Promos "  + activeXLSPromos.toString());
+	//System.out.println("Active Promos "  + activeXLSPromos.toString());
 
   }
 

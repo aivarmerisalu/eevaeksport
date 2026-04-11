@@ -407,11 +407,13 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	        		  JSONObject jsonline = new JSONObject();
 	        		  jsonline.put("orderline", coun);
 	        		  jsonline.put("ProductCode", toode);
+	        		  if(!repr && !tagastus) {
 	        		  jsonline.put("OrderedAmount", line.getKogus());
+	        		  }
 	        		  jsonline.put("UnitCode", line.getUnit());
 	        		  
 	        		  
-	        		   if(disc > 0 || repr){
+	        		   if(disc > 0  && !repr){
 	        			   jsonline.put("PriceGiven", this.nf.format(price));
 	  	        	  
 	  	        		     String par = line.getPartii();
@@ -422,23 +424,26 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	  	        		    	  jsonline.put("OriginalDocNumber", par);
 	  	        		     }
 	  	        	    }
-	  	        	
-	        		  
-	        		    
+
 		        	    
 	  	        	 
 		        	    if(repr){
-		        	    	 	double compsum = (price - (price * (100-disc)/100)) * kogus  ;
+		        	    	 jsonline.put("Qty", kogus);
+		        	    	 jsonline.put("PriceOld", price);
+		        	    	 jsonline.put("PriceNew", (price * (100-disc)/100));
+		        	    	 String par = line.getPartii();
+	  	        		     if(par != null && par.trim().length() >0) {
+	  	        		    	    if(par.contains("++")) {
+	  	        			    		  par = par.substring(0,par.indexOf("++"));
+	  	        			    	  }
+	  	        		    	  jsonline.put("OriginalDocNumber", par);
+	  	        		     } 
+		        	        double compsum = (price - (price * (100-disc)/100)) * kogus  ;
 		        		         jsonline.put("CompensationSum", this.nf.format(compsum));
-		        		    }
-		        		
-		        		     
-		   
-		        				     
-		        				     if(disc > 0 ){
+		        		         
+		        		    }else if(disc > 0 ){
 		        						   jsonline.put("Discount", this.nf.format(disc));
-		        		    		    	 
-		        				     }
+		        		    	     }
 		        				     orderLines.add(jsonline);
 	        		  
 	        		  addNumLine(); 

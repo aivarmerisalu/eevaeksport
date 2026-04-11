@@ -1870,13 +1870,20 @@ if(grupp.equals("leib") ){
   			   Enumeration en = vec.elements();
   			   while(en.hasMoreElements()){
   				 String age = (String) en.nextElement();
+  				
   				 Agent ee = new Agent(age);
 
   		          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
   				     ee.setVisit(agentL.getVisit());// panene ka asendatava päeva plaani juurde
   		          }
-  		          
-  				 cust.addAgent(new Agent(age));
+  		         if( cust.hasAgent(age) ) {
+  		        	if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+  		        	   Agent aa = cust.getAgent(age);
+  		        	   aa.setVisit(agentL.getVisit());
+  		        	}
+  		         }else {
+  	  				 cust.addAgent(ee); 
+  		         }
   			   }
   	       }
           }

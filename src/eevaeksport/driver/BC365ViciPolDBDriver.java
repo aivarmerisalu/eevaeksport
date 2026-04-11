@@ -133,10 +133,11 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	          }
 	      } 
 	      
+	      
+	      
 	      if (dataType == null || dataType.equals("agedAccountsReceivables")) {
 		     	 this.saveFile("agedAccountsReceivables","AMGCustTransOpen?$select=DeliveryAddressId,AccountNum,Invoice,TransDate,InvoiceDate,DueDate,AmountCur,CurrencyCode");
 		       }
-
 
 	      if (dataType == null || dataType.equals("unitConversions")) {
 		     	 this.saveFile("unitConversions","ProductSpecificUnitOfMeasureConversions?$select=ProductNumber,FromUnitSymbol,ToUnitSymbol,Factor");
@@ -203,11 +204,9 @@ public class BC365ViciPolDBDriver extends AbstractDBDriver implements BulkUpdate
 	    	  
 	         
 	if (dataType == null || dataType.equals("itemStocks")) {
-		  this.saveFile("itemStocks","AMGInventSumByWarehouses?$select=ItemId,PhysicalInvent,InventLocationId,expDate");
+		  this.saveFile("itemStocks","AMGInventSumByWarehouses?$select=ItemId,PhysicalInvent,InventLocationId,expDate,OnOrder");
 	}
-	if (dataType == null || dataType.equals("itemStocks2")) {
-		  this.saveFile("itemStocks2","AMGVICInventSumByWarehouses?$select=ItemId,PhysicalInvent,InventLocationId,expDate,OnOrder");
-	}
+	
 	      
 
 	if (dataType == null || dataType.equals("itemgroups")) {
@@ -1019,13 +1018,17 @@ public String getSaveStockInfo() {
 			String ware = (String) cob.get("InventLocationId");
 			String part = (String) cob.get("expDate");
      		Double amnt = Double.parseDouble(cob.get("PhysicalInvent")+"");
+     		Double onOrder = Double.parseDouble(cob.get("OnOrder")+"");
   		
   		if(amnt > 0) {
-  			
+  			double ono = 0;
+  			if(onOrder > 0) {
+  				ono = onOrder;
+  			}
   	         products.append(prodid +  ";");
              products.append(" ;");
-             products.append(getParent().getNF().format(amnt) + "; "  +  "\n"); // + dealer +  "\n");
-  				stocks.put(prodid, amnt);
+             products.append(getParent().getNF().format(amnt-ono) + "; "  +  "\n"); // + dealer +  "\n");
+  				stocks.put(prodid, amnt-ono);
   				partii.put(prodid, part.substring(0,10));
   				
   		}

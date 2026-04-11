@@ -1689,7 +1689,7 @@ HashMap aleprods = new HashMap();
 	   		"	   			   		 (case when jou.invoicedate+bestbeforedays>getdate() then 0 else 1 end)as dat,max(case when jou.invoicedate > getdate()-4 then talsalesinitialqty else 0 end) as lastamount  " + 
 	   		"	   			   			      FROM NLTCustInvoiceTrans  tra with(nolock) INNER JOIN custinvoicejour jou with(nolock) ON   tra.invoiceid=jou.invoiceid and jou.dataareaid =tra.dataareaid    " + 
 	   		"	   			   				  INNER JOIN  INVENTTABLE inv ON inv.itemid = tra.itemid and inv.dataareaid = tra.dataareaid " + 
-	   		"	   							   WHERE  jou.invoicedate > getdate()-45 AND tra.dataareaid ='nlt'  AND jou.dataareaid = 'nlt'  " + 
+	   		"	   							   WHERE  jou.invoicedate > getdate()-30 AND tra.dataareaid ='nlt'  AND jou.dataareaid = 'nlt'  " + 
 	   		"	   			   			        and tra.itemid != ''  " + 
 	   		"	   			   			       GROUP BY jou.orderaccount,tra.itemid,bestbeforedays ,jou.invoicedate ,tra.qty ,(tra.lineamount/case when tra.qty = 0 then 1 else tra.qty end) " + 
 	   		"	   			   			          ORDER BY jou.orderaccount,tra.itemid ,bestbeforedays,jou.invoicedate desc,tra.qty " ;

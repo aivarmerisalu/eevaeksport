@@ -281,6 +281,13 @@ public class Customer {
 	    return false;
 	  }
   
+  public Agent getAgent(String agentCode) {
+	  	if (agents != null && agentCode != null ){
+	  		return (Agent)agents.get(agentCode); 		  		
+	  	}
+	    return null;
+	  }
+  
   public boolean hasAgent(String agentCode) {
   	if (agents != null && agentCode != null ){
   		return agents.keySet().contains(agentCode); 		  		

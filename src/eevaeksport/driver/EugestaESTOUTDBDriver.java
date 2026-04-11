@@ -285,7 +285,7 @@ public class EugestaESTOUTDBDriver extends AbstractDBDriver  implements Manager,
 		 						  }
 								}
 								 
-								System.out.println("segment " + segment + " " + cust + " " + i);
+								//System.out.println("segment " + segment + " " + cust + " " + i);
 								 String prod = null;
 									try {
 										prod = formatter.formatCellValue(row.getCell((short) 3));
@@ -368,15 +368,26 @@ public class EugestaESTOUTDBDriver extends AbstractDBDriver  implements Manager,
 									activeXLSPromos = new HashMap<String,List<String>>();
 								}
 								
+								 if(price == null || price == 1) {
+						        	   try {
+						        	    price = this.prodprices.get(prod);
+						        	   }catch(Exception e) {}
+						           }
+								 
 								if(cust != null && cust.trim().length() > 0) {
 									  MatrixLine mline = new MatrixLine();
 							           mline.setCustID(cust);
 							           mline.setProdID(prod);
 							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
 							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
-							           mline.setPrice(price);
+							           if(price == null) {
+							        	 //  System.out.println("acust " + cust + " " + prod);
+							        	   price = 1.0;
+							           }
+							          
+							           mline.setPrice(price-0.001);
 							           if(text != null && text.trim().length() > 0) {
-							        	   mline.setLineinfo(text + " " + text2);
+							        	   mline.setLineinfo((text + " " + text2).trim().replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
 							           }
 							           lines.add(mline);
 							  	
@@ -389,19 +400,29 @@ public class EugestaESTOUTDBDriver extends AbstractDBDriver  implements Manager,
 									if(ll == null) {
 									  ll = new ArrayList<String>(); 
 									}
-									ll.add(asi + "xls");
+									if(!ll.contains(asi + "xls")) {
+									   ll.add(asi + "xls");
+									}
 									activeXLSPromos.put(asi + "xls", ll);
+								
 									
-									  MatrixLine mline = new MatrixLine();
+ 									  MatrixLine mline = new MatrixLine();
 							           mline.setCliGroup(asi + "xls");
 							           mline.setProdID(prod);
 							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
 							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
-							           mline.setPrice(price);
+							           if(price == null) {
+							        	//   System.out.println("asi " + asi + " " + prod);
+							        	   price = 1.0;
+							           }
+							           mline.setPrice(price - 0.001);
 							           if(text != null && text.trim().length() > 0) {
-							        	   mline.setLineinfo(text + " " + text2);
+							        	   mline.setLineinfo((text + " " + text2).replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
+							           }else if(text2 != null && text2.trim().length() > 0){
+							        	   mline.setLineinfo(text2.replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
 							           }
 							           lines.add(mline);
+							      // 	System.out.println("line " + mline.getString());
 									}
 								
 							}
@@ -414,7 +435,7 @@ public class EugestaESTOUTDBDriver extends AbstractDBDriver  implements Manager,
          }catch(Exception r) {
 		 r.printStackTrace();  
 	     }	
-	//  System.out.println("Active Promos "  + activeXLSPromos.toString());
+	System.out.println("Active Promos "  + activeXLSPromos.toString());
 
   }
 
