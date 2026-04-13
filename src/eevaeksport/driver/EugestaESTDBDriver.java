@@ -31,10 +31,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -337,7 +339,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 								try {
 									cust = formatter.formatCellValue(row.getCell((short) 0));
 		 					      } catch (Exception e) {
-		 					    	  e.printStackTrace();
+		 					    	  //e.printStackTrace();
 		 						  }
 								
 								String segment = null;
@@ -345,7 +347,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 								try {
 									segment = formatter.formatCellValue(row.getCell((short) 2));
 		 					      } catch (Exception e) {
-                                    e.printStackTrace();
+                                    //e.printStackTrace();
 		 						  }
 								}
 								 
@@ -365,7 +367,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 											}
 											}
 										} catch (Exception e) {
-				 					       e.printStackTrace();
+				 					     //  e.printStackTrace();
 				 					      }	
 										
 										
@@ -374,21 +376,21 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 									try {
 										price = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 6)));
 			 					      } catch (Exception e) {
-			 					    	  e.printStackTrace();
+			 					    	 // e.printStackTrace();
 			 					      }
 
 									String text = null;
 									try {
 										text =  Converter.enCodeEst(formatter.formatCellValue(row.getCell((short) 7)));
 			 					      } catch (Exception e) {
-	                                   e.printStackTrace();
+	                                   //e.printStackTrace();
 			 						  }
 
 									String text2 = null;
 									try {
 										text2 =  Converter.enCodeEst(formatter.formatCellValue(row.getCell((short) 8)));
 			 					      } catch (Exception e) {
-	                                   e.printStackTrace();
+	                                   //e.printStackTrace();
 			 						  }								
 
 									Date naita = null;
@@ -915,7 +917,6 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   
   private Map<String, Map<String, Double>> manaPlans;
   private Map<String, Map<String, Double>> custPlans;
-
   private Map<String, Double> manaTotalPlans;
   private Map<String, Double> custTotalPlans;
   private Map<String, String> groupGrouping;
@@ -1124,196 +1125,8 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 
   private TreeMap agent1 = new TreeMap();
   
-  private TreeMap makePlansByCustomers(String fname){
-	   TreeMap res = new TreeMap();
-	  
-	   try{
-	
-		Calendar cal = Calendar.getInstance();
-	     String month = (cal.get(Calendar.MONTH)+1)+ "";
-	     if(month.length() == 1){
-		   month = "0" + month;
-	      }
-	   String jooksev = cal.get(Calendar.YEAR) + "" + month; 
-	   int a = 0;
-	   File f = new File (getExcelDir() + fname);
-	   FileInputStream	 ff = new FileInputStream(f);
-	
-		XSSFWorkbook workbook = new XSSFWorkbook((ff));
-		XSSFSheet sheet = workbook.getSheet(jooksev);
-	//	System.out.println("jooksev " + jooksev + " " + sheet);
-		XSSFRow row = null; 
-				ff.close();	
-				if(sheet != null){
-				
-					
-					for(int i = 0 ; i < sheet.getLastRowNum();i++){
-						 row = sheet.getRow(i);
-						if(row == null && a == 0){
-							a = i;
-						}else{
-							a = sheet.getLastRowNum();
-						}
-					}
-					String gr1 = null;
-					String gr1n = null;
-				
-					
-					for(int i = 0 ; i < a + 1;i++){
-						 row = sheet.getRow(i);
-						String cust = null;
-						double g1 = 0;
-					
-						
-					if(i == 0){
-						gr1 = "1";//(row.getCell((short) 1).getStringCellValue());
-						gr1n = "salds";
-						
-						if(fname.equals("Budget.xlsx")) {
-							gr1n = "maize";
-						}
-					}else{
-						
-						try {
-							cust = (row.getCell((short) 0).getStringCellValue());
- 					      } catch (Exception e) {
- 					    	 cust =( (int)(row.getCell((short) 0).getNumericCellValue()))+"";
- 						  // e.printStackTrace();
- 					      }
-		
-						try {
-						g1 = Double.parseDouble(row.getCell((short) 5).getNumericCellValue()+ "");
-						} catch (Exception e) {
-	 	   					 e.printStackTrace();	
-	  					      }
-					
-					
-						
-						TreeMap asi= new TreeMap();
-						       Toode t1 = new Toode(gr1);
-						       t1.setBrand(gr1n);
-						       t1.setPlancur(g1);
-				          asi.put(gr1, t1);
-						
-						if(cust != null){
-				         res.put(cust,asi );
-						}
- 					  }
-					}
-				}
-      		   
-	   }catch (Exception e){
-		   e.printStackTrace();
-	   }
-	//  System.out.println("kleindi plaanid " + res.toString());
-	//  System.exit(0);
-	   return res;
- }
-  
- TreeMap custplans = null;
-  
-  
-  public TreeMap getCustPlans(){
-	  int counter = 1;
-	TreeMap res = new TreeMap();
-	if(custplans == null) {
-		 custplans = this.makePlansByCustomers("Budget.xlsx");	
-	}
-     
-
-
-String sqlo = "   SELECT  jou.orderaccount as agent,case when itemgroupid = 'SALD' then 'magus' else 'leib' end as grupp ,round(SUM(lineamount),0) AS summa , "
-		+ "round(sum(inv.weightkg*sal.qty),2) AS summakg \r\n" + 
-		"   FROM custinvoicetrans sal INNER JOIN inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid INNER JOIN custinvoicejour jou with (nolock) ON  \r\n" + 
-		"   sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid INNER JOIN custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid WHERE \r\n" + 
-		"   inv.dataareaid='eee'  AND YEAR(sal.invoicedate) = YEAR(getdate())  \r\n" + 
-		"   AND MONTH(sal.invoicedate) = MONTH(getdate()) and jou.orderaccount != '' \r\n" + 
-		"   GROUP BY jou.orderaccount,case when itemgroupid = 'SALD' then 'magus' else 'leib' end";
-
- sqlo = "   SELECT  jou.orderaccount as agent,case when itemgroupid = 'SALD' then 'magus' else 'leib' end  as grupp ,round(sum(inv.weightkg*sal.qty),2) AS summakg , "
-		+ "  round(sum(lineamount * (case when b.percentmonth is not null then (100 -b.percentmonth)/100 else 1 end)),0) AS summa  \r\n" + 
-		"  FROM custinvoicetrans sal INNER JOIN inventtable inv with (nolock) ON sal.itemid=inv.itemid and inv.dataareaid= sal.dataareaid INNER JOIN custinvoicejour jou with (nolock) ON \r\n" + 
-		"  sal.invoiceid=jou.invoiceid and jou.dataareaid= sal.dataareaid INNER JOIN custtable cus ON cus.accountnum = jou.orderaccount and jou.dataareaid= cus.dataareaid "
-		+ "left join PJTURNOVERBONUS b on b.accountrelation = cus.custgroup and b.itemrelation = inv.itemgroupid and " + 
-		"    periodid = substring(CONVERT(varchar, getdate(), 23),0,8)  and b.dataareaid = cus.dataareaid   WHERE " + 
-		" inv.dataareaid='eee'  AND YEAR(sal.invoicedate) = YEAR(getdate())  \r\n" + 
-		"   AND MONTH(sal.invoicedate) = MONTH(getdate())   GROUP BY jou.orderaccount,case when itemgroupid = 'SALD' then 'magus' else 'leib' end";
- 
-
-
-
-          try {
-          	
-          	Connection con = this.getNewConnection();
-              Statement stmt =  con.createStatement();
-              ResultSet	      rs = stmt.executeQuery(sqlo);
-              while(rs.next()) {
-                String custID = rs.getString("agent").trim();
-                String grupp = rs.getString("grupp").trim();
-                
-                int sum = (int)rs.getDouble("summa");
-                if (custplans.get(custID) != null){
-                  TreeMap tr = (TreeMap) custplans.get(custID);
-if(grupp.equals("leib") ){
-                  Toode tt = (Toode)tr.get("1");
-                  tt.setDonecur(tt.getDonecur() + sum);
-                  }
-
-                }
-              }
-              rs.close();
-              stmt.close();
-              con.close();
-
-              
-                          
-                            int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-                            int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
-                      	  
-                      	 // Iterreerime Plaani mappi ja sealme asjad paika 
-                      	  
-                            
-                            
-                      	Iterator itera =   custplans.keySet().iterator();
-                      	while(itera.hasNext()){
-                      		String custID = itera.next() + "";
-                      		TreeMap tr = (TreeMap) custplans.get(custID);
-                      		
-                            if (tr != null){
-                      	  
-
-                        
-                         String asi2 = "";
-                         
-                      	  Iterator enume = tr.keySet().iterator();
-     	                	 while(enume.hasNext()){
-     	                		 String brand = enume.next()+"";
-     	                		 if(!brand.equals("allx")){
-     	                			Toode tt = (Toode)tr.get(brand);
-     	                			int teh = (int)tt.getDonecur();
-     	                			if(tt.getPlancur() > 0){
-     	                				asi2 = asi2 + ("Gr. " + tt.getBrand() + "    " +
-         	                					((int)(teh/tt.getPlancur()*100))
-         	                					+ "% Plan.: " +(int) tt.getPlancur() + " €.  Sales.: " + teh + " €.||");	
-     	                			}
-        	                		;
-     	                		   }
-     	                		 }
-                         res.put(custID, asi2 );
-                      	}
-                            }
-          } catch (Exception e) {
-              getParent().showError(e);
-              if(counter < 3 ) {
-            	  counter++;
-            	  getCustPlans();
-              }
-           }
-          
-          return res;
-        }
-
-  
+   
+   
   
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
   
@@ -1548,7 +1361,130 @@ if(grupp.equals("leib") ){
 
     private TreeMap<String,ArrayList <String>> custCategories = null;
   
+    
 
+
+    
+    private static Map<Character, Set<Integer>> parse(String input) {
+        Map<Character, Set<Integer>> map = new HashMap<>();
+
+        char current = 0;
+
+        for (char c : input.toCharArray()) {
+            if (Character.isLetter(c)) {
+                current = c;
+                map.put(current, new HashSet<>());
+            } else if (Character.isDigit(c)) {
+                map.get(current).add(Character.getNumericValue(c));
+            }
+        }
+        return map;
+    }
+    
+    
+    
+    
+    
+  private HashMap makeCustBudgetMap() {
+	  
+
+	        LocalDate start = LocalDate.of(2021, 11, 1);
+	        LocalDate today = LocalDate.now();
+
+	        HashMap<String, Integer> customerDeliveries = new HashMap<String, Integer>();
+	        String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
+      		try {
+	    	   Connection con = this.getNewConnection();
+	    	 
+	    		 Statement stmt = con.createStatement();
+	    	     ResultSet rs1 = stmt.executeQuery(aaa);
+	    	               while(rs1.next()){
+	    	                 String ag = rs1.getString("kood").trim();
+	    	                 String name = rs1.getString("klient").trim();
+	    	                 String pattern = rs1.getString("route");
+	        
+
+	            Map<Character, Set<Integer>> schedule = parse(pattern);
+
+	            int done = 0;
+	            int remaining = 0;
+
+	            YearMonth currentMonth = YearMonth.from(today);
+	            LocalDate date = currentMonth.atDay(1);
+	            LocalDate end = currentMonth.atEndOfMonth();
+
+	            while (!date.isAfter(end)) {
+
+	                if (!date.isBefore(start)) {
+
+	                    long weeksBetween = ChronoUnit.WEEKS.between(start, date);
+	                    int cycleIndex = (int) (weeksBetween % 8);
+	                    char weekKey = (char) ('A' + cycleIndex);
+	                    int dayOfWeek = date.getDayOfWeek().getValue();
+	                    if (schedule.containsKey(weekKey) &&
+	                        schedule.get(weekKey).contains(dayOfWeek)) {
+	                        if (!date.isAfter(today)) {
+	                            done++;
+	                        } else {
+	                            remaining++;
+	                        }
+	                    }
+	                }
+	                date = date.plusDays(1);
+	            }
+	            customerDeliveries.put(name, done + remaining);
+	            customerDeliveries.put(name+"rem", remaining);
+	            
+	            System.out.println(name + " -> done: " + done + ", remaining: " + remaining);
+	        }
+	    	  
+      		} catch(Exception e) {e.printStackTrace();}
+	    	               
+	    	               
+	  HashMap<String,String> res = new HashMap<String,String>();
+	  
+      
+      int yy = Calendar.getInstance().get(Calendar.YEAR);
+      int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+      int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+      double planprec = dd/d2;
+
+      String asi = "";
+      if (customerDeliveries.get("1010917501") != null) {
+    	  asi = "Kopa piegades: " + customerDeliveries.get("1010917501") + "|";
+      }
+      if (customerDeliveries.get("1010917501rem") != null) {
+    	  asi = asi + "Atlicis piegades: " + customerDeliveries.get("1010917501rem")+ "|";
+      }
+      
+       asi = asi + "Sales: " + 200 + " €||";
+      
+    //  if(dd > 6 && tehtudsalperc > 0 && prognosalperc > 0){
+    	  asi = asi + "Plan done/estimate :";
+          asi = asi + "     " +(int)(0.25*100) + "% / " + (int)(0.8*100)  + " %||";  
+      //   }
+        asi = asi + "Sales plan: " + (int)800 + " €||";    
+   	
+       
+   	
+       String asi2 = "";
+		asi2 = asi2 + ("Gr. " + "brand 1" + "    " +
+					((int)(0.2*100))
+					+ "% Plan.: " +(int) 100 + " €  Sales.: " + 20 + " €||");	
+	
+
+		asi2 = asi2 + ("Gr. " + "brand 2" + "    " +
+					((int)(0.24*100))
+					+ "% Plan.: " +(int) 50 + " €  Sales.: " + 10 + " €||");
+
+		asi2 = asi2 + ("Gr. " + "brand 2" + "    " +
+					((int)(0.25*100))
+					+ "% Plan.: " +(int) 25 + " €  Sales.: " + 5 + " €||");
+   
+	  
+	  res.put("1010917501", asi + asi2);
+	  return res ;
+  }
 	
 	public TreeMap getCustomers(Agent agent){
 	  nf.setMinimumFractionDigits(2);
@@ -1573,6 +1509,8 @@ if(grupp.equals("leib") ){
    TreeMap<String,String> displays  =   Converter.getDisplayInfoFromExcel(this.getExcelDir(), custCategories);
    
     loadPlans();
+    
+    Map budgets = makeCustBudgetMap();
     
      inTT = new HashSet<String>();
 	
@@ -2072,7 +2010,10 @@ String arve = rs.getString("bill");
         	//cust.addCity("|" +displays.get(cust.getID())+"|");
         }
         
-        
+        if(budgets.get(accountnum) != null){
+        	System.out.println("budget " + budgets.get(accountnum));
+        //	cust.addToCustDataVec(accountnum+ ";custbudget; ;" + budgets.get(accountnum));
+        }
         
         if(goes) {
             customers.put(name, cust);

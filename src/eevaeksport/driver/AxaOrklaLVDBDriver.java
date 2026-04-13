@@ -2403,9 +2403,8 @@ String cmd ="  SELECT  jou.orderaccount as agent,round(SUM(lineamount),0) AS sum
                       	Iterator itera =   custplans.keySet().iterator();
                       	while(itera.hasNext()){
                       		String custID = itera.next() + "";
+                   
                       		TreeMap tr = (TreeMap) custplans.get(custID);
-                      		
-                      		
                       		double psales = 0;
                       		double msales = 0;
                             if (tr != null){
