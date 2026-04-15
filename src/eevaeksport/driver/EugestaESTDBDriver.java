@@ -1656,12 +1656,14 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
                	
                                
               	  
-                    String cmd = " Select name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , (case when EG_IGNOREMINORDER = 0 then minOrderSum else 0 end) as minsum, '' as linedisc  \r\n" + 
-                    		"                    		                   , pricelistBackOfficeId as pricegroup,address ,\r\n" + 
-                    		"                Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail, \r\n" + 
-                    		"                    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-                    		"                contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub , gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
-                    		"               		 from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID " ; 
+                    String cmd = "Select a.name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , (case when EG_IGNOREMINORDER = 0 then minOrderSum else 0 end) as minsum, '' as linedisc\r\n" + 
+                    		"                                                                                                             , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
+                    		"                                                             Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
+                    		"                                                                 contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
+                    		"                                                             contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+                    		"                                                                                           from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
+                    		"                                                                                           LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
+                    		"" ; 
                     
 
                      if (isDebug()) System.out.println(cmd);
@@ -1951,10 +1953,8 @@ String arve = rs.getString("bill");
         
         
         String seg = rs.getString("seg");
-        
         if(seg != null && seg.trim().length() > 0) {
         	cust.addCity("Kett: " + seg.trim());
-        	
         }
 
         
@@ -1984,6 +1984,12 @@ String arve = rs.getString("bill");
                        }
                	}
         }
+        
+        String type2 = rs.getString("type2");
+        if(type2 != null && type2.trim().length() > 0) {
+        	cust.addCity("Tunnus: " + type2.trim());
+        }
+
         
         if(type != null && type.trim().length() > 0) {
         	cust.addCity("Tüüp: " + type.trim());
@@ -2537,6 +2543,16 @@ boolean noopt = false;
    }
    rs.close();
 
+	StringBuffer sb3 = new StringBuffer();
+    rs = stmt.executeQuery("select BACKOFFICEID as id, NAME as nimi from  dbo.EPASAULE_REP_REASONS");
+   while(rs.next()){
+   	String id = rs.getString("id");
+   	String name = rs.getString("nimi");
+   	if(name != null && name.trim().length() > 0){
+   	      sb3.append( id+ ";" +Converter.enCodeEst(name.trim()) + "\n");	
+   	}
+   }
+   rs.close();
    
 	StringBuffer sb2 = new StringBuffer();
     rs = stmt.executeQuery("select inventlocationid  as id , name from EPASAULE_REGIONS");
@@ -2555,6 +2571,10 @@ boolean noopt = false;
  // System.out.println("REASON " + sb.toString());
   if(sb.length() > 0){
 	   Converter.saveFile("returnreason.txt", sb.toString());
+  }
+  
+  if(sb3.length() > 0){
+	   Converter.saveFile("repricereason.txt", sb3.toString());
   }
   
   if(sb2.length() > 0){

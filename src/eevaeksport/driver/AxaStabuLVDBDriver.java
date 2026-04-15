@@ -247,7 +247,6 @@ public class AxaStabuLVDBDriver extends AbstractDBDriver  implements Manager,Pro
 		try {
 			Converter.saveObject(result, "fix.vec");
 		} catch (IOException e) {
-		
 			e.printStackTrace();
 		}
 		

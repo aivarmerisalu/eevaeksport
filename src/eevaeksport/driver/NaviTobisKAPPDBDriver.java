@@ -286,7 +286,7 @@ public class NaviTobisKAPPDBDriver extends AbstractDBDriver implements BulkUpdat
     
      try {
            
-    	 String cmd = "select item_code as kood , Description as name, [No_ 2] as ean,[Unit Price] as hind,[Base unit of Measure] as unit from [dbo].[_MERISOFT$Tobis_Cust_Items]";
+    	 String cmd = "select item_code as kood , Description as name, [No_ 2] as ean,[Unit Price] as hind,[Base unit of Measure] as unit ,max_buffer as buff from [dbo].[_MERISOFT$Tobis_Cust_Items]";
       
     	 System.out.println(cmd);
      	 con = getNewConnection2();
@@ -303,10 +303,15 @@ public class NaviTobisKAPPDBDriver extends AbstractDBDriver implements BulkUpdat
               }
               prod.setPrice(0);
               prod.setUnit(rs.getString("unit").replaceAll("²", "x2"));
-                	
-                       tm.put(prod.getName(), prod);  
+              double buffer = 100.0;
+              double mb = rs.getDouble("buff");
+              if(mb > 0) {
+            	  mb = buffer;
+              }
+               prod.setMeasure(buffer);
+               tm.put(prod.getName(), prod);  
                       
-                   }
+              }
           
       
         rs.close();

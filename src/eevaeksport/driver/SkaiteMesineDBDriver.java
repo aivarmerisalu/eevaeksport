@@ -78,6 +78,7 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
 	
     @Override
 	public void PictureMaker() {
+    	this.getPriceMatrixDataVec();
 		 makePictureCat();
 		  System.exit(0);
 		
@@ -269,6 +270,7 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
     }
     public String getSaveDebtInfo() {
     	 makePictureCatO();
+    	 getPriceMatrixDataVec();
 		  System.exit(0);
        	return null;
        }
@@ -721,56 +723,71 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
 
     
 
+    public void getPriceMatrixDataVec()  {
+    	   Vector lines = new Vector();
+    	    
+    	     
+    	   String    sql = "select Partneriai_Kodas as clgroup, Prekes_Kodas as prodid,KainaBePVM as price  from [MES_Kainos]  " ; 
+    			
 
+    	           try {
+    	             TreeMap prior = new TreeMap(); 
+    	        	   
+    	             Connection con = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
+    	                     getParent().getProps().getProperty("dsn.pass"));
+    	             Statement  st = con.createStatement();
+    	             ResultSet rs = st.executeQuery(sql);
+
+    	             while (rs.next()) {
+
+    	               String clGroup = rs.getString("clgroup");
+    	               String prodID = rs.getString("prodid").trim();
+    	               double price = rs.getDouble("price");
+    	             
+    	               if(clGroup.trim().length() > 0) {
+    	            	   MatrixLine mline = new MatrixLine();
+    	               mline.setCliGroup(clGroup.trim());
+
+    	               if (prodID != null && prodID.trim().length() > 1) {
+    	                 mline.setProdID(prodID.trim());
+    	               }
+    	             
+    	               if (price != 0) {
+    	                 mline.setPrice(price);
+    	               }
+    	              
+    	                   lines.add(mline);   
+    	             }
+    	             }
+    	             rs.close();
+    	             st.close();
+    	             con.close();
+    	            	   
+    	           }
+    	           catch (SQLException ex) {
+    	             ex.printStackTrace();
+    	           }
+    	           System.out.println("Maatrix suurus " + lines.size());
+    	        try {   
+    	        	Converter.saveObject(lines, "pm.vec");
+    	         } catch(Exception e) {
+    	        	
+    	        }
+    	
+    }
 
 
     public Vector getPriceMatrixData()  {
+
         Vector lines = new Vector();
-    
-     
-   String    sql = "select Partneriai_Kodas as clgroup, Prekes_Kodas as prodid,KainaBePVM as price  from [MES_Kainos]  " ; 
-		
-
-           try {
-             TreeMap prior = new TreeMap(); 
-        	   
-             Connection con = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
-                     getParent().getProps().getProperty("dsn.pass"));
-             Statement  st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql);
-
-             while (rs.next()) {
-
-               String clGroup = rs.getString("clgroup");
-               String prodID = rs.getString("prodid").trim();
-               double price = rs.getDouble("price");
-             
-               if(clGroup.trim().length() > 0) {
-            	   MatrixLine mline = new MatrixLine();
-               mline.setCliGroup(clGroup.trim());
-
-               if (prodID != null && prodID.trim().length() > 1) {
-                 mline.setProdID(prodID.trim());
-               }
-             
-               if (price != 0) {
-                 mline.setPrice(price);
-               }
-              
-                   lines.add(mline);   
-             }
-             }
-             rs.close();
-             st.close();
-             con.close();
-            	   
-           }
-           catch (SQLException ex) {
-             ex.printStackTrace();
-           }
-           System.out.println("Maatrix suurus " + lines.size());
-         return lines;
-    	
+    	try {
+			lines =  (Vector) Converter.readObject("pm.vec");
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+           return lines;
        }
   
     

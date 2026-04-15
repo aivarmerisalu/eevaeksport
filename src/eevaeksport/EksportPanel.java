@@ -1934,6 +1934,12 @@ File svm33 = new File("customerslogin.txt");
                     zip.addFile("returnreason.txt");
                 }
                 
+                File shiw = new File("repricereason.txt");
+                if(shiw.exists()){
+                    zip.addFile("repricereason.txt");
+                }
+            
+                
                 File shg = new File("custdetch.txt");
                 if(shg.exists()){
                     zip.addFile("custdetch.txt");               	

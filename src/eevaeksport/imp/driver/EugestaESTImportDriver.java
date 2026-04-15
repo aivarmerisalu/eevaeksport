@@ -613,7 +613,8 @@ private Product getProd(String toode){
 	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
 	    		    }
 	        	  
-	        	   System.out.println("promo code " + itemid + " " + pobj + " " + price + " " + rp   );
+	                kogus = -1 * kogus;
+	        	   System.out.println("promo code " + itemid + " " + pobj + " " + price + " " + rp + " " + kogus  );
 	        	 
 	          }
 	          
