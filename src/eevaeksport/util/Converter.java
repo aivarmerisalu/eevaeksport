@@ -5280,7 +5280,7 @@ public class Converter {
 										if(cellx != null) {
 											try {
 											//System.out.println("Aldar " + formatter.formatCellValue(cellx));
-											if(formatter.formatCellValue(cellx).indexOf("13.Laekvere") != -1 ) {
+											if(formatter.formatCellValue(cellx).indexOf("13.Laekvere") != -1  || formatter.formatCellValue(cellx).indexOf("12.Viru-Jaagupi") != -1) {
 												return "aldar";
 											}
                                       }catch(Exception e) {

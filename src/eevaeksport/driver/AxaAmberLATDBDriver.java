@@ -3131,6 +3131,7 @@ try {
 	              	if(in.isFile()){
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
 	              	if(!inpda.exists()){
+	              		try {
 	                  	Converter.shrinkAndCopyFile(in,inpda,400);
               	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
 	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
@@ -3139,7 +3140,7 @@ try {
               	  	File out = new File ( pictsean + prod.getEAN()+ ".jpg"); 
               	    	Converter.copyFile(inpda, out);
      	            }
-              	    	
+	              		}catch(Exception e) {e.printStackTrace();}
               	  	 }  
 	              	
 	              	

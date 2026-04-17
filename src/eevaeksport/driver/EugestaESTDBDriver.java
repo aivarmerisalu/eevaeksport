@@ -647,9 +647,13 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 	  String cmd = " Select productBackofficeId as toode,sum(Inventory) as stock , regionBackofficeId as ladu   from "
 	  		+ " dbo.EPASAULE_INVENTORIES   group by productBackofficeId,regionBackofficeId ";
+	  cmd = "Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  " + 
+       		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId, case when regionBackofficeId = '303_SHOP' then '03A' else regionBackofficeId end desc,bestBefore " ;
        //where regionBackofficeId in ('03N', '03D', '03C')
 
-	  
+	  if(usedProds == null){
+			  this.getProducts(null);
+		  }
 	       if (isDebug()) System.out.println(cmd);
 	       StringBuffer products = new StringBuffer();
 	       try {
@@ -662,15 +666,18 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	           String kood = rs.getString("toode").trim();
 	           double seis = rs.getDouble("stock");
 	           String dealer = rs.getString("ladu");
+	           String part = rs.getString("partii");
+	           String gg = " ";
+	           if(part != null && !part.startsWith("1900")) {
+	               gg =  part.substring(0,10);
+	           }
 	           
-	           if(seis > 0){
+	           
+	           if(seis > 0 && usedProds.contains(kood)){
 	        	       products.append(kood +  ";");
 	                   products.append(" ;");
-	                   products.append(getParent().getNF().format(seis) + ";" + dealer +  "\n");
-	                   products.append(kood +  ";");
-	                   products.append(" ;");
-	                   products.append(getParent().getNF().format(seis) + ";" + dealer +  "\n");
-	            }
+	                   products.append(getParent().getNF().format(seis) + ";" + dealer + "; ;" + gg + "\n");
+	                }
 	           }
 
 	         
@@ -1030,7 +1037,11 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   
   
   public TreeMap getAgents(){
-	  
+	  LocalDate start = LocalDate.of(2021, 11, 1); // A1
+      LocalDate today = LocalDate.now();
+
+      String todayCycleCode = getCycleDay(start, today);
+      System.out.println("Today is: " + todayCycleCode);
 	    
     String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr from  dbo.EPASAULE_AGENTS";
 
@@ -1090,6 +1101,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
           }
           agent.setName(name);
           agent.setIsPilot(true);
+          agent.todayCycleCode = todayCycleCode;
           
           if(grs.size() > 0 && grs.get(agentID) != null) {
         	  agent.setProdGroupList((ArrayList)grs.get(agentID));
@@ -2647,11 +2659,7 @@ boolean noopt = false;
   public void setBulkSales(Map agents){
 	  
 	  
-      LocalDate start = LocalDate.of(2021, 11, 1); // A1
-      LocalDate today = LocalDate.now();
-
-      String todayCycleCode = getCycleDay(start, today);
-      System.out.println("Today is: " + todayCycleCode);
+    
 
 
       int yy = Calendar.getInstance().get(Calendar.YEAR);
@@ -2897,7 +2905,7 @@ boolean noopt = false;
 				double msales = (int)rs.getDouble("summa");
 				if (agent != null){
 
-					agent.todayCycleCode = todayCycleCode;
+					//agent.todayCycleCode = todayCycleCode;
 					
 				if(this.manaTotalPlans.get(agentID) != null) {
 					String asi = "Done: " + (int)msales + " €|";

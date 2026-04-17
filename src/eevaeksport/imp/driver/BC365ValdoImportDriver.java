@@ -421,6 +421,9 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	  	        		    	    if(par.contains("++")) {
 	  	        			    		  par = par.substring(0,par.indexOf("++"));
 	  	        			    	  }
+	  	        		    	  if(par.length() > 20) {
+	  	        		        	par = par.substring(0,20);
+	  	        		        }  
 	  	        		    	  jsonline.put("OriginalDocNumber", par);
 	  	        		     }
 	  	        	    }
@@ -436,14 +439,31 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	  	        		    	    if(par.contains("++")) {
 	  	        			    		  par = par.substring(0,par.indexOf("++"));
 	  	        			    	  }
+	  	        		    	  if(par.length() > 20) {
+		  	        		        	par = par.substring(0,20);
+		  	        		        }  
 	  	        		    	  jsonline.put("OriginalDocNumber", par);
 	  	        		     } 
 		        	        double compsum = (price - (price * (100-disc)/100)) * kogus  ;
 		        		         jsonline.put("CompensationSum", this.nf.format(compsum));
 		        		         
-		        		    }else if(disc > 0 ){
+		        		    } else if(tagastus){
+			        	    	 jsonline.put("Qty", kogus);
+			        	    	 jsonline.put("Price", (price * (100-disc)/100));
+			        	    	 String par = line.getPartii();
+		  	        		     if(par != null && par.trim().length() >0) {
+		  	        		    	    if(par.contains("++")) {
+		  	        			    		  par = par.substring(0,par.indexOf("++"));
+		  	        			    	  }
+		  	        		    	  if(par.length() > 20) {
+			  	        		        	par = par.substring(0,20);
+			  	        		        }  
+		  	        		    	  jsonline.put("OriginalDocNumber", par);
+		  	        		     } 
+		  	        		     
+			        		    } else if(disc > 0 ){
 		        						   jsonline.put("Discount", this.nf.format(disc));
-		        		    	     }
+		        		        }
 		        				     orderLines.add(jsonline);
 	        		  
 	        		  addNumLine(); 

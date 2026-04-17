@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -830,10 +831,13 @@ String picts = parent.getProps().getProperty("pict.dir");
              
              cust.setGroup(maks);
 
+             boolean goes = false;
+             
              String ag = rs.getString("agent").trim();
               cust.addAgent(new Agent(ag));
-              if(ag.equals("00026") || ag.equals("00028") ){
-            	// cust.addAgent(new Agent("00024"));  
+              if(ag.equals("00026") || ag.equals("00028") || ag.equals("00027") || ag.equals("00025") || ag.equals("00024")){
+            	// cust.addAgent(new Agent("00024")); 
+            	  goes = true;
               }
            
               if(ag.equals("00028")){
@@ -880,9 +884,11 @@ String picts = parent.getProps().getProperty("pict.dir");
             	  }
             	 
               }
+              if(goes ) {
               
               customers.put(name, cust);
               custMap.put(cust.getPayer(), cust);
+              }
        
             }
             rs.close();
@@ -893,6 +899,15 @@ String picts = parent.getProps().getProperty("pict.dir");
           catch (Exception e) {
             getParent().showError(e);
           }
+        String name = "New Customer";
+        Customer cust = new Customer("999999");
+        cust.setName(name);
+       Iterator itera = agents1.keySet().iterator();
+       while(itera.hasNext()) {
+    	   cust.addAgent(new Agent((String) itera.next()));
+       }
+        customers.put(name, cust);
+        custMap.put(cust.getPayer(), cust);
 
           return customers;
     }
