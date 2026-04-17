@@ -1862,7 +1862,7 @@ public class Converter {
 								if(gg.length()>1){
 							      groups.put(a + "", gg);
 							    }
-								if(gg.equals("Võru")) {
+								if(gg.equals("A1M Võru")) {
 									break;
 								}
 							
@@ -1871,17 +1871,16 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("Groups " +  r + " " + ea +" "+ ni);
 						
 						
-						for(int i = 1 ; i < sheet.getLastRowNum()+1;i++){
+						
+						for(int i = 3 ; i < sheet.getLastRowNum()+1;i++){
 							 row = sheet.getRow(i);
 							 
 							 DataFormatter formatter = new DataFormatter();
 								String ean = getNumeric(formatter.formatCellValue(row.getCell(ea)));
 								String tnimi = formatter.formatCellValue(row.getCell(ni));
 								String toode = getToode(prods,ean);
-							 
 							  if(toode.equals(ean)) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n A1000 formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
@@ -1901,10 +1900,9 @@ public class Converter {
                             Contract con = new Contract(pood);
 							
                           String value =  formatter.formatCellValue(row.getCell(a));
-                          
-                           
-                           if(value.trim().length() > 0 && value.trim().equals("x")) {
-                           //	 System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
+                       
+                           if(value.trim().length() > 0 && value.trim().equals("1")) {
+                       //    System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
                            
 							if(res.get(pood) != null){
                	  con = (Contract)res.get(pood);
@@ -1922,7 +1920,7 @@ public class Converter {
 					 }
 					
 					
-					//System.out.println("sorts size " + res.toString() );
+					System.out.println("sorts size " + res.toString() );
 				//System.exit(0);
 						
 					 }catch(Exception e) {
@@ -4862,7 +4860,7 @@ public class Converter {
 		          if(format.equals("kaupmees2")) {
 		        	  loadFixKaup2(res, file , prods, parent);
 		          }
-		          
+		       
 		          if(format.equals("selver")) {
 		        	  loadFixSelver(res, file , prods, parent);
 		          }
@@ -5161,23 +5159,23 @@ public class Converter {
 											String a4 = formatter.formatCellValue(cellx).trim();
 
 											cellx = row.getCell((short)4);
-											String a5 = formatter.formatCellValue(cellx);
+											String a5 = formatter.formatCellValue(cellx).trim();
 											
 											
-											if(a4 != null && a4.equals("Kohtla-Järve") && a5 != null && a5.equals("Maardu")) {
+											if(a4 != null && ((a4.equals("Kohtla-Järve") && a5 != null && a5.equals("Maardu")) || 
+													(a4.equals("A1M Kohtla-Järve") && a5 != null && a5.equals("A1M Maardu"))) ) {
 												return "a1000";
 											}
 											cellx = row.getCell((short)4);
 											 a4 = formatter.formatCellValue(cellx).trim();
 
 											cellx = row.getCell((short)5);
-											 a5 = formatter.formatCellValue(cellx);
+											 a5 = formatter.formatCellValue(cellx).trim();
 											
-											
-											if(a4 != null && a4.equals("Kohtla-Järve") && a5 != null && a5.equals("Maardu")) {
-												return "a1000";
-											}
-										 
+											 if(a4 != null && ((a4.equals("Kohtla-Järve") && a5 != null && a5.equals("Maardu")) || 
+														(a4.equals("A1M Kohtla-Järve") && a5 != null && a5.equals("A1M Maardu"))) ) {
+													return "a1000";
+												}
 								 }
 								
 								
@@ -5193,7 +5191,7 @@ public class Converter {
 												return "kaupmees";
 											}
 											
-											if(aa.equals("Kad") || aa.equals("Kadaka") ) {
+											if(aa.equals("Mustamäe") || aa.equals("Kadaka") ) {
 												return "kaupmees2";
 											}
 										}catch(Exception k) {
@@ -5203,6 +5201,24 @@ public class Converter {
 									}	
 								}
 								
+	                      for(int y = 3 ; y < 12 ;y++) {
+								
+								cellx = row.getCell((short)y);
+								if(cellx != null) {
+									
+									try {
+										String aa = formatter.formatCellValue(cellx);
+										//System.out.println("aa");
+										if(aa.indexOf("A1M") != -1 ) {
+											return "a1000";
+										}
+										
+									}catch(Exception k) {
+										k.printStackTrace();
+									}
+									
+								}	
+							}
 
 								if(i < 16) {
 									//kui on kolmas rida 

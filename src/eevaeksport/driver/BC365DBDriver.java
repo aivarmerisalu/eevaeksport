@@ -1134,6 +1134,8 @@ public TreeMap getProducts(Agent agent) {
           	
           	if(stocks != null && stocks.get(prod.getID()) != null) {
           		prod.setStock(stocks.get(prod.getID()));
+          	}else {
+          		prod.setStock(0);
           	}
           	  	
           	if(weblink != null) {
