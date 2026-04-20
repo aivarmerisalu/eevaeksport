@@ -717,37 +717,54 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
   private void makeCustprod(){
 	 
 	  
-	  String cmd2 = "			   WITH cte AS (\r\n" + 
-	  		"    SELECT  \r\n" + 
-	  		"        a.CUSTACCOUNT AS klient,\r\n" + 
-	  		"        a.ITEMID AS toode,\r\n" + 
-	  		"        a.SALESQTY AS tellitud,\r\n" + 
-	  		"        a.INVOICEQTY AS sisse,\r\n" + 
-	  		"        (a.SALESQTY - a.INVOICEQTY) AS tarnimata,\r\n" + 
-	  		"        c.NAME AS CANCELREASON,\r\n" + 
-	  		"        a.SALESDATE AS lastdate,\r\n" + 
-	  		"        (a.INVOICEAMOUNT / CASE WHEN a.INVOICEQTY <> 0 THEN a.INVOICEQTY ELSE 1 END) AS lastprice,\r\n" + 
-	  		"        a.SALESID AS ordernr,\r\n" + 
-	  		"        b.INVOICEID AS invoicenr,\r\n" + 
-	  		"        ROW_NUMBER() OVER (\r\n" + 
-	  		"            PARTITION BY a.CUSTACCOUNT, a.ITEMID\r\n" + 
-	  		"            ORDER BY a.SALESDATE DESC\r\n" + 
-	  		"        ) AS rn\r\n" + 
-	  		"    FROM BIF03_SALESLINE a\r\n" + 
-	  		"    LEFT JOIN BIF01_CUSTINVOICETRANS b\r\n" + 
-	  		"        ON LEFT(a.SALESID,9) = LEFT(b.SALESID,9)\r\n" + 
-	  		"    LEFT JOIN BID44_SALESCANCELREASONS c\r\n" + 
-	  		"        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID\r\n" + 
-	  		"    WHERE a.SALESDATE > GETDATE() - 180\r\n" + 
-	  		"      AND a.EG_SALESCANCELREASONID <> 'GKR'\r\n" + 
-	  		"      AND a.INVENTLOCATIONID != 'STORNO'\r\n" + 
-	  		"      AND a.SALESSTATUS <> 1\r\n" + 
-	  		")\r\n" + 
-	  		"\r\n" + 
-	  		"SELECT *\r\n" + 
-	  		"FROM cte\r\n" + 
-	  		"WHERE rn = 1 order by klient, toode ";
-	  
+	  String cmd2 = "	   WITH cte AS ( \r\n" + 
+	  		"	  		    SELECT   \r\n" + 
+	  		"	  		        a.CUSTACCOUNT AS klient, \r\n" + 
+	  		"	  		        a.ITEMID AS toode, \r\n" + 
+	  		"	  		        a.SALESQTY AS tellitud, \r\n" + 
+	  		"	  		        a.INVOICEQTY AS sisse, \r\n" + 
+	  		"	  		        (a.SALESQTY - a.INVOICEQTY) AS tarnimata, \r\n" + 
+	  		"	  		        c.NAME AS CANCELREASON, \r\n" + 
+	  		"	  		        a.SALESDATE AS lastdate, \r\n" + 
+	  		"	  		        (a.INVOICEAMOUNT / CASE WHEN a.INVOICEQTY <> 0 THEN a.INVOICEQTY ELSE 1 END) AS lastprice, \r\n" + 
+	  		"	  		        a.SALESID AS ordernr, \r\n" + 
+	  		"	  		        b.INVOICEID AS invoicenr, \r\n" + 
+	  		"	  		        ROW_NUMBER() OVER ( \r\n" + 
+	  		"	  		            PARTITION BY a.CUSTACCOUNT, a.ITEMID \r\n" + 
+	  		"	  		            ORDER BY a.SALESDATE DESC \r\n" + 
+	  		"	  		        ) AS rn \r\n" + 
+	  		"	  		    FROM BIF03_SALESLINE a \r\n" + 
+	  		"	  		    LEFT JOIN BIF01_CUSTINVOICETRANS b \r\n" + 
+	  		"	  		        ON LEFT(a.SALESID,9) = LEFT(b.SALESID,9) \r\n" + 
+	  		"	  		    LEFT JOIN BID44_SALESCANCELREASONS c \r\n" + 
+	  		"	  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID \r\n" + 
+	  		"	  		    WHERE a.SALESDATE > GETDATE() - 180 \r\n" + 
+	  		"	  		      AND a.EG_SALESCANCELREASONID <> 'GKR' \r\n" + 
+	  		"	  		      AND a.INVENTLOCATIONID != 'STORNO' \r\n" + 
+	  		"	  		      AND a.SALESSTATUS <> 1 \r\n" + 
+	  		"				  union \r\n" + 
+	  		"				   SELECT   \r\n" + 
+	  		"	  		        a.CUSTACCOUNT AS klient, \r\n" + 
+	  		"	  		        a.SellerItemCode AS toode, \r\n" + 
+	  		"	  		        0 AS tellitud, \r\n" + 
+	  		"	  		        a.AmountDespatched AS sisse, \r\n" + 
+	  		"	  		        0 AS tarnimata, \r\n" + 
+	  		"	  		        '' AS CANCELREASON, \r\n" + 
+	  		"	  		        a.DELIVERYDATEACTUAL AS lastdate, \r\n" + 
+	  		"	  		        (a.ItemPrice * (100 - a.DiscountPercent)/100 ) AS lastprice, \r\n" + 
+	  		"	  		        a.orderno AS ordernr, \r\n" + 
+	  		"	  		        '' AS invoicenr, \r\n" + 
+	  		"	  		        ROW_NUMBER() OVER ( \r\n" + 
+	  		"	  		            PARTITION BY a.CUSTACCOUNT, a.SellerItemCode \r\n" + 
+	  		"	  		            ORDER BY a.DELIVERYDATEACTUAL DESC \r\n" + 
+	  		"	  		        ) AS rn \r\n" + 
+	  		"	  		    FROM [MJ_EE].[dbo].[Sales_GKR] a  \r\n" + 
+	  		"	  		) \r\n" + 
+	  		"	  		 \r\n" + 
+	  		"	  		SELECT * \r\n" + 
+	  		"	  		FROM cte \r\n" + 
+	  		"	  		WHERE rn = 1 order by klient, toode ";
+
 
 	    if (isDebug()) System.out.println(cmd2);
 

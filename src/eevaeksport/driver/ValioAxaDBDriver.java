@@ -619,7 +619,7 @@ System.out.println("PriceMatrix " + lines.size());
 			     "   street+ ' '  + city as address, visitingdays AS visit , cus.salesmanager AS agent ,paymtermid AS term,  blocked AS block , custinventsort as grupp  , " +
 					"  (select rtrim(cp.name) + ' ' + rtrim (cp.phone) + ' ' + rtrim(cus.phone) from contactperson cp where cp.contactpersonid=cus.contactpersonid and cp.dataareaid ='liv'   ) as kontakt " + 
 				   " FROM custtable cus WHERE  cus.dataareaid='liv'  and cus.salesmanager != '' " +
-			    " AND blocked != 2  order by cus.name";
+			    " AND (blocked != 2 or invoiceaccount='100') order by cus.name";
 
 		String sql = "SELECT  a.accountnum AS maksja,a.orderaccount as klient,a.invoice AS number,co.duedate AS maksepaev,\r\n" + 
 				"				co.amountmst AS tasumata,co.transdate AS kuupaev , datediff(day,co.duedate,getdate()) AS yle  FROM custtransopen co\r\n" + 
