@@ -605,7 +605,7 @@ public class AxaZpienasMilkDBDriver extends AbstractDBDriver  implements Manager
 	        res = res.replaceAll("ų","11146xx");      
 	        res = res.replaceAll("Ū","11147xx");
 	        res = res.replaceAll("ū","11148xx");
-	        res = res.replaceAll("é","11148xx");
+	        res = res.replaceAll("é","11149xx");
 	        
 		 
 	   }

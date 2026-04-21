@@ -11095,6 +11095,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
        	   	int aa = res.indexOf("11148xx");
        	   	res = res.substring(0,aa) + "ū" + res.substring(aa+7,res.length()); 	    
        	   }    
+   
      	   while(res.indexOf("11125xx") != -1){
           	   	int aa = res.indexOf("11125xx");
           	   	res = res.substring(0,aa) + "ą" + res.substring(aa+7,res.length()); 	    
@@ -11104,8 +11105,8 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
           	   	res = res.substring(0,aa) + "Ą" + res.substring(aa+7,res.length()); 	    
           	   }  
      
-        	   while(res.indexOf("11150xx") != -1){
-             	   	int aa = res.indexOf("11150xx");
+        	   while(res.indexOf("11149xx") != -1){
+             	   	int aa = res.indexOf("11149xx");
              	   	res = res.substring(0,aa) + "é" + res.substring(aa+7,res.length()); 	    
              	   }  
     
@@ -11746,7 +11747,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		        res = res.replaceAll("ų","11146xx");      
 		        res = res.replaceAll("Ū","11147xx");
 		        res = res.replaceAll("ū","11148xx");
-		        res = res.replaceAll("é","11148xx");
+		        res = res.replaceAll("é","11149xx");
 		        
 			 
 		   }
