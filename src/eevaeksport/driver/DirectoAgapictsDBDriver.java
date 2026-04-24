@@ -56,6 +56,7 @@ import eevaeksport.EksportPanel;
 import eevaeksport.Email;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.Quest;
 import eevaeksport.imp.Order;
 import eevaeksport.util.Converter;
 
@@ -157,10 +158,53 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
   
 	@Override
 	public void PictureMaker() {
+		makePictureCatTEST();
+		System.exit(0);
 		makePictureCat();
 		 System.exit(0);
 		
 	}
+
+	
+	  private void makePictureCatTEST(){
+	  	    
+	    	
+	    	String pictssou = parent.getProps().getProperty("pict.dir");
+	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+	  	   
+	  	 try {
+   	  
+       
+      	 	 File res2 = new File (pictspda);
+	             String[] ff2 = res2.list();
+	         	 for(int i = 0;ff2.length>i;i++){
+	             	(new File ( pictspda + ff2[i])).delete(); 
+	             }
+	         	 
+    	   	    res2 = new File (pictssou);
+	              ff2 = res2.list();
+	             
+	         	 for(int i = 0;ff2.length>i;i++){
+	           
+	            	File in = new File ( pictssou + ff2[i]); 
+	              	if(in.isFile()){
+	              	File inpda = new File ( pictspda + ff2[i]);
+	              
+	                  	Converter.shrinkAndCopyFile(in,inpda,400);
+          	  	
+	              	}
+	               
+	             }
+	       
+	  
+	  	 
+	  	 } catch (Exception e) {
+	    	    getParent().showError(e);
+	    	}
+	     
+	  }
+
+
 	
 	  private void makePictureCat(){
 	  	    
@@ -2561,8 +2605,16 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    @Override
 	public void FixLoader() {
 	
+	 /*  ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", parent);
+	   for(Quest qq : quests) {
+		
+		   //Converter.addNewQuest(qq, rcompanyx, user, pass);
+	   }
 	   
-	
+	   System.out.println("quests " + quests.size() + " " +  quests.toString());
+		*/
+	 //  System.exit(0);
+	   
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort" , prods, parent);
 		System.out.println("Contracts " + contracts.size() + " " +  contracts.toString());
 		System.exit(0);

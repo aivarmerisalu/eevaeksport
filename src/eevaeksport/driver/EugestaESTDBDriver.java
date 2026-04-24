@@ -71,6 +71,7 @@ import eevaeksport.EksportFrame;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.Quest;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.util.Converter;
 
@@ -83,7 +84,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Promo, BulkUpdater,Discounter,WebReporter,PictureMaker {
+public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Promo,FixLoader, BulkUpdater,Discounter,WebReporter,PictureMaker {
   public EugestaESTDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -792,6 +793,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"	  		    SELECT   \r\n" + 
 	  		"	  		        a.CUSTACCOUNT AS klient, \r\n" + 
 	  		"	  		        a.ITEMID AS toode, \r\n" + 
+	  		"                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting, " +
 	  		"	  		        a.SALESQTY AS tellitud, \r\n" + 
 	  		"	  		        a.INVOICEQTY AS sisse, \r\n" + 
 	  		"	  		        (a.SALESQTY - a.INVOICEQTY) AS tarnimata, \r\n" + 
@@ -804,7 +806,8 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"	  		            PARTITION BY a.CUSTACCOUNT, a.ITEMID \r\n" + 
 	  		"	  		            ORDER BY a.SALESDATE DESC \r\n" + 
 	  		"	  		        ) AS rn \r\n" + 
-	  		"	  		    FROM BIF03_SALESLINE a \r\n" + 
+	  		"	  		    FROM BIF03_SALESLINE a \r\n" +
+	  		" Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID " +
 	  		"	  		    LEFT JOIN BIF01_CUSTINVOICETRANS b \r\n" + 
 	  		"	  		        ON LEFT(a.SALESID,9) = LEFT(b.SALESID,9) \r\n" + 
 	  		"	  		    LEFT JOIN BID44_SALESCANCELREASONS c \r\n" + 
@@ -817,6 +820,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"				   SELECT   \r\n" + 
 	  		"	  		        a.CUSTACCOUNT AS klient, \r\n" + 
 	  		"	  		        a.SellerItemCode AS toode, \r\n" + 
+	  		"                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting, " +
 	  		"	  		        0 AS tellitud, \r\n" + 
 	  		"	  		        a.AmountDespatched AS sisse, \r\n" + 
 	  		"	  		        0 AS tarnimata, \r\n" + 
@@ -830,11 +834,12 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"	  		            ORDER BY a.DELIVERYDATEACTUAL DESC \r\n" + 
 	  		"	  		        ) AS rn \r\n" + 
 	  		"	  		    FROM [MJ_EE].[dbo].[Sales_GKR] a  \r\n" + 
+	  		" Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.SellerItemCode " +
 	  		"	  		) \r\n" + 
 	  		"	  		 \r\n" + 
 	  		"	  		SELECT * \r\n" + 
 	  		"	  		FROM cte \r\n" + 
-	  		"	  		WHERE rn = 1 order by klient, toode ";
+	  		"	  		WHERE rn = 1 order by klient, sorting ,toode ";
 	  
 
 	    if (isDebug()) System.out.println(cmd2);
@@ -1086,6 +1091,8 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
           Double reprLim = rs.getDouble("repr");
           if(reprLim > 0) {
         	  agent.repriceLimit = reprLim;
+          } else if(reprLim < 0) {
+        	  agent.repriceLimit = -1.0;
           }else {
          	  agent.repriceLimit = 0.0;
           }
@@ -3073,6 +3080,13 @@ boolean noopt = false;
 	public String getStartingTime() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void FixLoader() {
+		   ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", parent);
+		   System.exit(0);
+	
 	}
 
 

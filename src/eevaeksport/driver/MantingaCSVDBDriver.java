@@ -825,6 +825,7 @@ if(seis > 0) {
         	 String visit = null;
         	 String age = null;
         	 String age2 = null;
+        	 String cuinfo = null;
         	 Integer block = null;
         	 Integer payerblock = null;
         	 Integer term = null;
@@ -914,6 +915,13 @@ if(seis > 0) {
             	 if(cou == 17) {
                    //  group = cell.trim();
                  }
+            	 
+
+            	 if(cou == 19) {
+                     cuinfo = cell.trim();
+                 }
+            	 
+            	 
             	 }catch(Exception e) {
             		 System.out.println("error0 " + id);
                 } 
@@ -970,6 +978,9 @@ if(seis > 0) {
             	 }
              }
             
+             if(cuinfo != null && cuinfo.trim().length() > 0) {
+            	 cust.setCity(cuinfo);
+             }
              
              if(debt != null && debt > 0) {
              	 cust.setDebt(debt);

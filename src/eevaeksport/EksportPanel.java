@@ -1417,7 +1417,7 @@ public class EksportPanel extends JPanel implements ActionListener,
                 if (techdata.length() != 0){
                     values.setProperty("info3", techdata);
                   }
-               if( reprLim != null && reprLim > 0) {
+               if( reprLim != null && reprLim != 0) {
             	   values.setProperty("repriceinglimit", String.valueOf(reprLim));
                }
                 

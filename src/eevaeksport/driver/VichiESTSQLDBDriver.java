@@ -216,7 +216,7 @@ public class VichiESTSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 		   	 File res2 = new File (pictspda);
 	            String[] ff2 = res2.list();
 	        	 for(int i = 0;ff2.length>i;i++){
-	            	(new File ( pictspda + ff2[i])).delete(); 
+	            	//(new File ( pictspda + ff2[i])).delete(); 
 	              }
 		   		
 		   		
@@ -251,10 +251,16 @@ public class VichiESTSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 		                 File f = new File(picts + toode+".jpg");
 		                 String len = "0";
 		                 if(f.exists()){
-		                   len = f.length() + "";
+		                 
 		                   if(f.isFile()){            	
 		 		             	File inpda = new File ( pictspda + toode + ".jpg"); 
-		 		             	Converter.shrinkAndCopyFile(f,inpda);
+		 		             	if(!inpda.exists()) {
+		 		             		try {
+				 		             	Converter.shrinkAndCopyFile(f,inpda);
+				 		             
+				 		             	} catch(Exception e) {e.printStackTrace();}
+		 		             	}
+		 		           	len = inpda.length() + "";
 		 		               }
 		                 }else{
 		                	 String[] gg = new File(picts).list();
@@ -266,11 +272,17 @@ public class VichiESTSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 				            		 
 				            		System.out.println("gg " + gg[0] + " " + gg.length);
 				            		 File in = new File ( picts + gg[i]); 
-				            		 len = in.length() + "";
+				            		
 				            		
 				            		 if(in.isFile()){            	
 				 		             	File inpda = new File ( pictspda + toode + ".jpg"); 
+				 		           	if(!inpda.exists()) {
+				 		           		try {
 				 		             	Converter.shrinkAndCopyFile(in,inpda);
+				 		             	
+				 		           		} catch(Exception e) {e.printStackTrace();}
+				 		           	}
+				 		           len = inpda.length() + "";
 				 		               }
 				            		 
 				            	    }
@@ -292,31 +304,18 @@ public class VichiESTSQLDBDriver extends AbstractDBDriver implements BulkUpdater
 		   	
 		   	    //oleasoleva kataloogi kustutamine
 		   	  System.out.println("Kataloogi kustutamine "  + a);	    
-		               File f = new File("list.txt");
+		               File f = new File(pictspda + "list.txt");
 		               if (f.exists())f.delete();
 		                 try {
-		           		PrintWriter os = new PrintWriter(new FileWriter(
+		           		PrintWriter os = new PrintWriter(new FileWriter(pictspda +
 		           				  "list.txt", true));
 		           		os.write(buf.toString());
 		           		os.close();
 		           	  }catch (Exception ex) {
 		           		ex.printStackTrace();
 		           	  }
-		           	  File f0 = new File("list0.txt");
-		           	   if (f0.exists())f0.delete();
-		                   try {
-		             		PrintWriter os1 = new PrintWriter(new FileWriter(
-		             				  "list0.txt", true));
-		             		os1.write(buf0.toString());
-		             		os1.close();
-		             	  }catch (Exception ex) {
-		             		ex.printStackTrace();
-		             	  }
-
-		             File fff =  new File (pictspda +  "list.txt");
-		       	  Converter.copyFile(f,fff);  	
-		       	  File fff0 =  new File (pictspda +  "list0.txt");
-		       	Converter.copyFile(f0,fff0);  	
+		          	
+		     	
 		   	} catch (Exception e) {
 		   	    getParent().showError(e);
 		   	}

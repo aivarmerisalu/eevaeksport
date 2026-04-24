@@ -610,12 +610,20 @@ String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().t
 	    if(disc > 0 || repr){
 	    	
 	     Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
-	    	//price = price * (100-disc)/100;
-	        Text yhiku_hindVal = doc.createTextNode(this.nf.format(price));
+	     String par = line.getPartii();
+	     
+	     double matrix = price;
+	     try {
+	     if(par != null && par.trim().length() >0) {
+	    	 matrix = Double.parseDouble( par.substring(par.indexOf(":")+1));
+	     }
+	     }catch(Exception e) {}
+	        Text yhiku_hindVal = doc.createTextNode(this.nf.format(matrix));
 		     yhiku_hind.appendChild(yhiku_hindVal);
 		     ridaitem.appendChild(yhiku_hind);
-		     String par = line.getPartii();
+		     
 		     if(par != null && par.trim().length() >0) {
+		    	 
 		    	    Node origDoc = doc.createElement("OriginalDocNumber");
 		    	   
 		    	    if(par.contains("++")) {
@@ -631,7 +639,28 @@ String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().t
 	    if(repr){
 	    	
 		     Node yhiku_hind = doc.createElement("CompensationSum");
-		    	double compsum = (price - (price * (100-disc)/100)) * kogus  ;
+		     
+		     // meil on vaja arvutada mis hinnani oli antud 
+		     
+              String par = line.getPartii();
+		     double matrix = 0;
+		     try {
+		     if(par != null && par.trim().length() >0) {
+		    	 matrix = Double.parseDouble( par.substring(par.indexOf(":")+1));
+		     }
+		     }catch(Exception e) {}
+		     
+
+		     System.out.println("partii " + par + " " + matrix);
+		    double discPrice = line.getPrice() * (100 - line.getDiscount()) / 100;
+		    
+		    price = discPrice;
+		    disc = 100 - (discPrice / matrix * 100) ;
+		    
+		    double diff = matrix-discPrice;
+		     
+		    
+		    	double compsum = diff * kogus  ;
 		        Text yhiku_hindVal = doc.createTextNode(this.nf.format(compsum));
 			     yhiku_hind.appendChild(yhiku_hindVal);
 			     ridaitem.appendChild(yhiku_hind);

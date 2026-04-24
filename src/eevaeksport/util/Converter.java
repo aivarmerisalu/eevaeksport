@@ -1,6 +1,8 @@
 package eevaeksport.util;
  
+import java.awt.AlphaComposite;
 import java.awt.Color;
+
 
 
 import java.awt.Graphics2D;
@@ -4000,6 +4002,7 @@ public class Converter {
 						 int poo = 0;
 						 XSSFRow rowu = sheet.getRow(0);
 						 String pais = formatter.formatCellValue(rowu.getCell(0));
+						 System.out.println("pais " + pais);
 						 if (pais.equals("Kauplus")) {
 							 u = 1;
 							 pais = formatter.formatCellValue(rowu.getCell(1));
@@ -4017,10 +4020,25 @@ public class Converter {
 								 eanp = 3;
 							 }
 							 
+
+							 pais = formatter.formatCellValue(rowu.getCell(11));
+							 if(pais.equals("EAN")) {
+								 eanp = 11;
+							 }
+							 
+
+							 pais = formatter.formatCellValue(rowu.getCell(13));
+							 if(pais.equals("Toote nimetus")) {
+								 tnim = 13;
+							 }
+							 
+							 
 							 pais = formatter.formatCellValue(rowu.getCell(4));
 							 if(pais.equals("Nimetus")) {
 								 tnim = 4;
 							 }
+							 
+							 
 							 pais = formatter.formatCellValue(rowu.getCell(3));
 							 if(pais.equals("Nimetus")) {
 								 tnim = 3;
@@ -4033,6 +4051,12 @@ public class Converter {
 							 pais = formatter.formatCellValue(rowu.getCell(7));
 							 if(pais.equals("Seisund")) {
 								 seis = 7;
+							 }
+							 
+
+							 pais = formatter.formatCellValue(rowu.getCell(18));
+							 if(pais.equals("Seisund")) {
+								 seis = 18;
 							 }
 							 pais = formatter.formatCellValue(rowu.getCell(13));
 							
@@ -4156,7 +4180,7 @@ public class Converter {
 								 if(pais.equals("Seisund")) {
 									 seis = 15;
 								 }
-						 }
+						    }
 							 }
 						 
 						 }catch(Exception e) {
@@ -4256,7 +4280,7 @@ public class Converter {
 									+" tnimi:" + tnim+ " ean:"+ eanp + " " + poo);
 										
 						 
-						 
+						 //Sees 0 tnimi:8 ean:6 0
 				
 					
 						for(int i = u ; i < sheet.getLastRowNum()+1;i++){
@@ -4300,7 +4324,7 @@ public class Converter {
 							Contract con = new Contract(pood);
 							String toode = getToode(prods,ean);
 							// if(ean.equals("4744136010477"))
-						System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
+				//		System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
 							  if(toode.equals(ean) && !toode.equals("EAN")) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Coop formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
@@ -4807,7 +4831,161 @@ public class Converter {
 			    return res;
 			    
 	 }
+
 	 
+		public static ArrayList<Quest> loadPriceTrackerFromExcels(String dirx, EksportPanel parent) {
+			ArrayList<Quest> res = new ArrayList<Quest>();
+		
+			 File dir = new File(dirx);
+			 File[] files = dir.listFiles();
+			   
+
+			    for (int u = 0; u < files.length ; u++){
+			      File file = files[u];
+
+			   if (file.isFile() && !file.getName().contains("Thumbs")) {
+			    String nn = file.getName();
+			    System.out.println(nn);
+			  	int a = 0;
+			    try {
+			      FileInputStream ff = new FileInputStream(file);
+					
+					XSSFWorkbook workbook = new XSSFWorkbook((ff));
+					XSSFSheet sheet = workbook.getSheetAt(0);
+					XSSFRow row = null; 
+			
+					        ff.close();	
+								
+									for(int i = 0 ; i < sheet.getLastRowNum();i++){
+											 row = sheet.getRow(i);
+											if(row == null && a == 0){
+												a = i;
+											} else {
+												a = sheet.getLastRowNum();
+											}
+										}
+									 row = sheet.getRow(1);
+							
+						Quest quest = new Quest();
+											 
+							   String name = getExcelCell(sheet.getRow(1),1);
+								   quest.title = name;	
+								   quest.frequency = "ONCE";
+									 
+									
+								     String period = getExcelCell(sheet.getRow(2),1);
+									    String[] parts = period.split("-");
+								        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+								        LocalDate startDate = LocalDate.parse(parts[0], formatter);
+								        LocalDate endDate = LocalDate.parse(parts[1], formatter);
+								        LocalDate checkDate = LocalDate.now();
+
+								        boolean isInRange =  (!checkDate.isBefore(startDate) && !checkDate.isAfter(endDate));
+								        if(isInRange) {
+								 
+								   quest.qEnd = endDate
+								                .atTime(23, 59, 59)
+								                .atZone(ZoneId.systemDefault())
+								                .toInstant()
+								                .toEpochMilli();
+								   quest.qStart = startDate
+								                .atTime(23, 59, 59)
+								                .atZone(ZoneId.systemDefault())
+								                .toInstant()
+								                .toEpochMilli();
+								   
+								   
+								     ArrayList<QuestLine> qus = new ArrayList<QuestLine>();   
+								     ArrayList<String> manas = new ArrayList<String>();
+								     ArrayList<String> custs = new ArrayList<String>();
+								     
+								    
+										for(int i = 4 ; i < a + 1;i++){
+											//loene tooted sisse 
+											String ean =   getExcelCell(sheet.getRow(i),0);
+											String pnimi = getExcelCell(sheet.getRow(i),1);
+											String brand = getExcelCell(sheet.getRow(i),2);
+										//	System.out.println("oio " + ean +" "+ pnimi+ " "+ brand );
+											if(ean != null) {
+												QuestLine ql = new QuestLine();
+												String n = "";
+												if(brand != null && brand.trim().length() > 0) {
+													n = brand ;
+												}
+												if(pnimi != null && pnimi.trim().length() > 0) {
+													if(pnimi.startsWith(n)) {
+														n = pnimi  ; // kui toote nimi algab brändiga siis ei lisa ette
+													}else {
+														n = n + " " + pnimi  ;	
+													}
+													
+												}
+												
+												ql.qname = n + " |" + ean; 
+												ql.qtype = "PRODUCT";
+												qus.add(ql);
+											}
+											
+											String custid = getExcelCell(sheet.getRow(i),4);
+
+											if(custid != null && custid.trim().length() > 0) {
+												custs.add(custid);
+											}
+											
+											String manaid = getExcelCell(sheet.getRow(i),7);
+											if(manaid != null && manaid.trim().length() > 0) {
+												manas.add(manaid);
+											}
+											
+										}
+									//	System.out.println("oio " + manas.toString() + " " + custs.toString() + " " + qus.size());
+										if(qus.size() > 0) {
+										quest.questLines = qus;
+										  if(manas.size() > 0) {
+											quest.managers = manas;
+										   }
+										
+										 if(custs.size() > 0) {
+											quest.customers = custs;
+										   }
+										 res.add(quest);
+										}
+								        }
+			    } catch(Exception e) {
+			    	e.printStackTrace();
+			    }
+			  					
+			      }
+
+			      String nn = file.getName();
+			    if(!file.isDirectory()) {
+			    	/*File ii = new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn);
+			    	if(ii.exists()) {
+			    		ii.delete();
+			    	}*/
+			    //	System.out.println("renamed " +   file.renameTo(new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn)));
+			      
+			    }
+			      }
+			    
+			
+		 
+			
+			return res;
+		}
+	
+		
+	public static String getExcelCell(Row row, int place) {
+		String res = null;
+	    DataFormatter formatter = new DataFormatter();
+		try {
+			res = formatter.formatCellValue(row.getCell((short) place));
+		      } catch (Exception e) {
+		    	 res =(((int)(row.getCell((short) place).getNumericCellValue()))+"");
+			  }
+		return res;
+	}
+	
 	
 	public static TreeMap loadFixFromExcels(String dirx , TreeMap prods, EksportPanel parent) {
 		TreeMap res = new TreeMap();
@@ -5179,27 +5357,7 @@ public class Converter {
 								 }
 								
 								
-	                      for(int y = 3 ; y < 12 ;y++) {
-									
-									cellx = row.getCell((short)y);
-									if(cellx != null) {
-										
-										try {
-											String aa = formatter.formatCellValue(cellx);
-											//System.out.println("aa");
-											if(aa.indexOf("1ka") != -1 ) {
-												return "kaupmees";
-											}
-											
-											if(aa.equals("Mustamäe") || aa.equals("Kadaka") ) {
-												return "kaupmees2";
-											}
-										}catch(Exception k) {
-											k.printStackTrace();
-										}
-										
-									}	
-								}
+	                     
 								
 	                      for(int y = 3 ; y < 12 ;y++) {
 								
@@ -5255,7 +5413,7 @@ public class Converter {
 										cellx = row.getCell((short)y);
 										if(cellx != null) {
 											try {
-										//	System.out.println("selver " + cellx.getStringCellValue());
+										
 											if(formatter.formatCellValue(cellx).indexOf("Sikupilli") != -1 ) {
 												return "prisma";
 											}
@@ -5269,7 +5427,27 @@ public class Converter {
 									}
 								}
 								
+								 for(int y = 3 ; y < 12 ;y++) {
+										
+										cellx = row.getCell((short)y);
+										if(cellx != null) {
+											
+											try {
+												String aa = formatter.formatCellValue(cellx);
+												//System.out.println("aa");
+												if(aa.indexOf("1ka") != -1 ) {
+													return "kaupmees";
+												}
 												
+												if(aa.equals("Mustamäe") || aa.equals("Kadaka") ) {
+													return "kaupmees2";
+												}
+											}catch(Exception k) {
+												k.printStackTrace();
+											}
+											
+										}	
+									}			
 										//if(i == 5) {
 											//kui on kolmas rida 
 											for(int y = 2 ; y < 15 ;y++) {
@@ -6573,12 +6751,39 @@ try{
 	//	json.put("company", company);
 		json.put("title", qq.title);
 
-		
+		//System.out.println(qq.custID + " " + qq.customers);
 		JSONArray custs = new JSONArray();
-		JSONObject cust = new JSONObject();
-		    cust.put("code", qq.custID);
-		  custs.put(cust);
-		json.put("customers", custs);
+		if(qq.custID != null) {
+			JSONObject cust = new JSONObject();
+			    cust.put("code", qq.custID);
+			  custs.put(cust);
+			json.put("customers", custs);	
+		}else{
+			for(String cuid : qq.customers) {
+				JSONObject cust = new JSONObject();
+			    cust.put("code", cuid);
+			    custs.put(cust);
+			}
+			json.put("customers", custs);
+		}
+		//System.out.println(qq.manager + " " + qq.managers);
+		
+		JSONArray manas = new JSONArray();
+		if(qq.manager != null) {
+			JSONObject mana = new JSONObject();
+			    mana.put("code", qq.manager);
+			  manas.put(mana);
+			json.put("managers", manas);	
+		}else if(qq.managers != null){
+			for(String mana : qq.managers) {
+				JSONObject ma = new JSONObject();
+			    ma.put("code", mana);
+			    manas.put(ma);
+			}
+			json.put("managers", manas);
+		}
+		
+		
 		
 		JSONArray lines = new JSONArray();
 		int n = 1;
@@ -6593,7 +6798,7 @@ try{
 		}
 		json.put("questions", lines);
 		
-		//System.out.println(json.toString());
+	//	System.out.println(json.toString());
 		
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -9952,7 +10157,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		  }
 			  
 		  
-		  public static void shrinkAndCopyFiles(String inputPath, String outputPath, int size) throws IOException {
+		  public static void shrinkAndCopyFiles333(String inputPath, String outputPath, int size) throws IOException {
 		        // Ensure TwelveMonkeys plugins are loaded
 			  
 			  if (size == 0) {
@@ -10191,29 +10396,34 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		        return;
 		    }
 
-		    if (size == 0) {
+		    if (size <= 0) {
 		        size = 301;
 		    }
 
 		    BufferedImage original = ImageIO.read(new File(in));
 
 		    if (original == null) {
-		        copyFile(new File(in), new File(out));
+		        try {
+					copyFile(new File(in), new File(out));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		        return;
 		    }
 
 		    int width = original.getWidth();
 		    int height = original.getHeight();
 
-		    // Detect portrait
+		    // Adjust size for portrait
 		    if (height > width) {
 		        size = (size * 2) / 3;
 		    }
 
-		    // If already small, just copy
+		    // If already small → just convert safely to JPG
 		    if (width <= size) {
-		        ImageIO.write(original, "jpg", new File(out));
-		        original.flush();
+		        BufferedImage safe = flattenToRGB(original);
+		        ImageIO.write(safe, "jpg", new File(out));
 		        return;
 		    }
 
@@ -10221,15 +10431,46 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		    int newWidth = size;
 		    int newHeight = (height * size) / width;
 
-		    BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+		    // 🔑 Step 1: normalize image to ARGB (safe base)
+		    BufferedImage normalized = new BufferedImage(
+		            width, height, BufferedImage.TYPE_INT_ARGB);
+
+		    Graphics2D g0 = normalized.createGraphics();
+		    g0.setComposite(AlphaComposite.Src);
+		    g0.drawImage(original, 0, 0, null);
+		    g0.dispose();
+
+		    // 🔑 Step 2: clean transparent pixels (prevents purple artifacts)
+		    for (int y = 0; y < height; y++) {
+		        for (int x = 0; x < width; x++) {
+		            int argb = normalized.getRGB(x, y);
+		            int alpha = (argb >>> 24);
+
+		            if (alpha == 0) {
+		                normalized.setRGB(x, y, 0x00FFFFFF); // transparent white
+		            }
+		        }
+		    }
+
+		    // 🔑 Step 3: resize + flatten to RGB
+		    BufferedImage resized = new BufferedImage(
+		            newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+
 		    Graphics2D g = resized.createGraphics();
-		    g.drawImage(original, 0, 0, newWidth, newHeight, null);
+
+		    // white background (important for JPG)
+		    g.setColor(Color.WHITE);
+		    g.fillRect(0, 0, newWidth, newHeight);
+
+		    // high quality scaling
+		    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+		    g.drawImage(normalized, 0, 0, newWidth, newHeight, null);
 		    g.dispose();
 
-		    original.flush();
-
 		    ImageIO.write(resized, "jpg", new File(out));
-		    resized.flush();
 		}
 
 	  
@@ -10245,6 +10486,21 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 	      fos.close();
 	      } 
 	  
+	  
+	  private static BufferedImage flattenToRGB(BufferedImage src) {
+		    BufferedImage rgb = new BufferedImage(
+		            src.getWidth(),
+		            src.getHeight(),
+		            BufferedImage.TYPE_INT_RGB);
+
+		    Graphics2D g = rgb.createGraphics();
+		    g.setColor(Color.WHITE);
+		    g.fillRect(0, 0, src.getWidth(), src.getHeight());
+		    g.drawImage(src, 0, 0, null);
+		    g.dispose();
+
+		    return rgb;
+		}
 	  
     public  static String firstToUpperCase(String aaa){
    	 if(aaa == null || aaa.equals("")){

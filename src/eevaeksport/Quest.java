@@ -24,6 +24,8 @@ public class Quest implements Serializable {
   public String frequency = "DAILY";
   public String title = null;
   public String manager = null;
+  public ArrayList<String> customers = null;
+  public ArrayList<String> managers = null;
   public String appearance = "ON_CUSTOMER_SELECTION";
   public ArrayList<QuestLine> questLines = null;
  
