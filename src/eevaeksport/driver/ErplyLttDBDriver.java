@@ -703,7 +703,8 @@ String jwttoken = null;
     	      con.disconnect();
       }
       
-     // System.out.println("suurus " + pildid.size());
+      System.out.println("suurus " + pildid.size());
+      Converter.saveFile("pildid.txt", pildid.toString());
     //  System.exit(0);
       return pildid;
 	  }
