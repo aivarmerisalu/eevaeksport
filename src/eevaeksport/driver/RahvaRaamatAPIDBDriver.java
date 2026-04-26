@@ -334,10 +334,13 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 			  Iterator iterax =  sisu.keySet().iterator();
 			  while(iterax.hasNext()) {
 				  String prodid = (String) iterax.next();
+				  if(prodid.contains("|")) {
+					 prodid = prodid.substring(prodid.indexOf("|")+1);  
 				  MatrixLine mline = new MatrixLine();
 				  mline.setProdID(prodid);
 				  mline.setCliGroup(custID);
 				  res.add(mline);
+				  }
 			  }
 			
 			  
@@ -353,9 +356,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 			  String prodid = ((String) iterax.next());
 			//  Paneme ainult sorditud kaasa 
 			  if(prodid.contains("|")) {
-				 // System.out.println(custID + " " + prodid);
 				  prodid = prodid.substring(prodid.indexOf("|")+1);  
-
 				  MatrixLine mline = new MatrixLine();
 				  mline.setProdID(prodid);
 				  mline.setCliGroup(custID);
@@ -1000,6 +1001,13 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
         	 gg = true;
         	 }
      }
+
+     if(cob.get("last_arrival") != null) {
+    	 String dateSort = cob.get("last_arrival")+"" ; 
+    	
+     }
+     
+     
     // if(cuCode.equals("K802755")) { //10ETKKOKOS
 		// System.out.println("ABCD välja " + prodId + " " + cuCode + " " + gg ); 
 	 //}
@@ -1015,32 +1023,28 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     	 String inSort = (String) cob.get("in_sortiment");
     	 
     	 boolean seis = false;
-    	 boolean myyk = false;
     	 String stat = tt.comment;
     	 
     	 if(tt.getKogus() > 0) {
     		 seis = true;
     	 }
     	 
-    	 if(tt.getDonecur() > 0 || tt.getDonevol() > 0 || tt.getPlancur() > 0 ) {
-    		 myyk = true;
-    	 }
     	 
 
     	 if(cuCode.equals("K800393") && prodId.equals("R844011")) {
     	        System.out.println("Seisev välja0 " + customerNumber + " " + prodId + " "+ tt.getKogus() + " " + stat + " " + gg + " " + aa);
     		 }
     	 if((stat.startsWith("A") || stat.equals("B") || stat.equals("C") || stat.equals("D")) && inSort.equals("0") && gg) {
-    		 
+
+	        	String date  = (String) cob.get("last_arrival");
     		 HashMap sisu = new HashMap();
        		if(returnList2.get(cuCode) != null) {
        			sisu = (HashMap)returnList2.get(cuCode);
        			}
-      		sisu.put(prodId, tt);
+      		sisu.put(date + "|" + prodId, tt);
       		returnList2.put(cuCode, sisu);
       		
       		
-       // } else  if((stat.equals("C") || stat.equals("D")) && seis && !myyk) {
 
         } else  if(stat.equals("D") && seis ) {
     		
@@ -1332,16 +1336,32 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
        		
        		  if(returnList != null && returnList.get(cuCode) != null) {
        			  TreeMap hh = (TreeMap)returnList.get(cuCode);
-       			  if(hh.get(prodId) != null) {
-  	         		  cp.setAbiKood("|v");
-  	         	  }
+       			 Iterator iterx =  hh.keySet().iterator();
+       			 while(iterx.hasNext()) {
+       				String prodid = (String) iterx.next();
+  				  if(prodid.contains("|")) {
+  					 prodid = prodid.substring(prodid.indexOf("|")+1);
+          			  if(prodid.equals(prodId)) {
+     	         		  cp.setAbiKood("|v");
+     	         	  } 
+  				  }
+       			 }
+       			  
        		  }
        		  
        		  if(returnList2 != null && returnList2.get(cuCode) != null) {
        			  HashMap hh = (HashMap)returnList2.get(cuCode);
-       			  if(hh.get(prodId) != null) {
-  	         		  cp.setAbiKood("|z");
-  	         	  }
+       			 Iterator iterx =  hh.keySet().iterator();
+       			 while(iterx.hasNext()) {
+       				String prodid = (String) iterx.next();
+  				  if(prodid.contains("|")) {
+  					 prodid = prodid.substring(prodid.indexOf("|")+1);
+          			  if(prodid.equals(prodId)) {
+     	         		  cp.setAbiKood("|z");
+     	         	  } 
+  				  }
+       			 }
+       			
        		  }
        		  
        		  custProds.add(cp);
