@@ -431,10 +431,24 @@ try (CloseableHttpResponse response = client.execute(post)) {
 		        	    
 	  	        	 
 		        	    if(repr){
-		        	    	 jsonline.put("Qty", kogus);
-		        	    	 jsonline.put("PriceOld", price);
-		        	    	 jsonline.put("PriceNew", (price * (100-disc)/100));
 		        	    	 String par = line.getPartii();
+		        	    	 jsonline.put("Qty", kogus);
+		        	    	 
+		        	    	 double matrix = price;
+		        		     try {
+		        		     if(par != null && par.trim().length() >0) {
+		        		    	 String mat = par.substring(par.indexOf(":")+1);
+		        		    	    if(mat.contains("++")) {
+		        			    		  mat = mat.substring(0,mat.indexOf("++"));
+		        			    	  }	    	 
+		        		    	 matrix = Double.parseDouble( mat);
+		        		        }
+		        		      } catch(Exception e) {}
+		        		     
+		        	    	 
+		        	    	 jsonline.put("PriceOld", matrix);
+		        	    	 jsonline.put("PriceNew", (price * (100-disc)/100));
+		        	    	
 	  	        		     if(par != null && par.trim().length() >0) {
 	  	        		    	    if(par.contains("++")) {
 	  	        			    		  par = par.substring(0,par.indexOf("++"));

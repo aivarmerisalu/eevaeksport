@@ -615,9 +615,14 @@ String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().t
 	     double matrix = price;
 	     try {
 	     if(par != null && par.trim().length() >0) {
-	    	 matrix = Double.parseDouble( par.substring(par.indexOf(":")+1));
-	     }
-	     }catch(Exception e) {}
+	    	 String mat = par.substring(par.indexOf(":")+1);
+	    	    if(mat.contains("++")) {
+		    		  mat = mat.substring(0,mat.indexOf("++"));
+		    	  }	    	 
+	    	 matrix = Double.parseDouble( mat);
+	        }
+	      } catch(Exception e) {}
+	     
 	        Text yhiku_hindVal = doc.createTextNode(this.nf.format(matrix));
 		     yhiku_hind.appendChild(yhiku_hindVal);
 		     ridaitem.appendChild(yhiku_hind);
