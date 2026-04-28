@@ -9969,7 +9969,9 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 	  }
 	  
 	  public static void shrinkAndCopyFile (File in, File out) throws Exception {
+		  try {
 		  shrinkAndCopyFile (in.getAbsolutePath(), out.getAbsolutePath(),0);
+		  } catch(Exception e) {e.printStackTrace();}
 	  }
 	  public static float Round(float Rval, int Rpl) {
 		   float p = (float)Math.pow(10,Rpl);

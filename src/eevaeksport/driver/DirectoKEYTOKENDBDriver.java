@@ -1812,7 +1812,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
      		try {
 	         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
 	         		      customer.addAgent(new Agent(Converter.deCode(salesman)));
-	         		     
+	         		     System.out.println("aaa " +  customer.getName() + " " + salesman);
 	         		      String sm = parent.getEmail(salesman);
 	         		      
 	         		     Agent aa1 = (Agent)agent1.get(salesman);
@@ -1826,7 +1826,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	            				 String age = (String) en.nextElement();
 	            				 customer.addAgent(new Agent(age.trim()));
 
-		                    	 System.out.println("aaa1 " +  cust.getAgents());
+		                    	// System.out.println("aaa1 " +  cust.getAgents());
 	            			   }
 	            	       }
 	                    }
@@ -2446,7 +2446,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 		        String yyyyww = String.format("%d%02d", year, week);
 
 		        File f = new File(this.getDir() + "invoice" + yyyyww + ".xml");
-		        System.out.println("invoices cp " + f.getName() + " " + f.exists());
+		       // System.out.println("invoices cp " + f.getName() + " " + f.exists());
 		 	   
 		        
 		        if(f.exists()) {
@@ -2716,9 +2716,9 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 			                Agent agent = (Agent)agents.get(agentID);
 			                 if (agent != null){
 			                   agent.setMonthSales((int)Double.parseDouble(summa));
-			        	   System.out.println("agsales0 " + agentID +" "+ summa);     	
+			        //	   System.out.println("agsales0 " + agentID +" "+ summa);     	
 			        	}
-			                 System.out.println("agsales1 " + agentID +" "+ summa);     
+			          //       System.out.println("agsales1 " + agentID +" "+ summa);     
 		        	}
 		        }}  
 	  }catch(Exception e){
