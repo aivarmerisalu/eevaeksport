@@ -376,6 +376,7 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 								String ean = null;
 								try {
 									ean = formatter.formatCellValue(row.getCell((short) 4));
+									ean = ean.substring(0,13);
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
@@ -435,11 +436,11 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 									sb.append(kett+";"+prodid + ";"+ lop.getTime()+ "\n");
 								}
 						
-						System.out.println("AAA " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
+					//	System.out.println("AAA " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
 									
 							if(alg != null && lop != null && dd.after(alg) && dd.before(lop) && !sisu.equals("UUS")){
 
-					    		System.out.println("AAA000 " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
+					    	//	System.out.println("AAA000 " + kett + " " + sisu + " " + price + "|  " + algus + "->" + lopp + "|");
 								MatrixLine mm = new MatrixLine();
 								mm.setCliGroup(kett);
 								mm.setProdID(prodid);
@@ -450,7 +451,10 @@ public class ValioAxaDBDriver extends AbstractDBDriver implements Manager,
 							    lines.add(mm);
 							 }
 							
+								}else {
+									System.out.println("toodet pole " + ean );
 								}
+								
 							}
 					
 								}

@@ -1,6 +1,7 @@
 package eevaeksport;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -142,8 +143,11 @@ public class Customer {
     return this.products;
   }
 
-  public TreeMap getSortedProducts(boolean ware , boolean ekstra) {
+  public TreeMap getSortedProducts(boolean ware , boolean ekstra , boolean lastdate) {
     TreeMap sorted = new TreeMap();
+    if(lastdate) {
+    	sorted = new TreeMap(Collections.reverseOrder());
+    }
    // System.out.println("Prdoctys Size " + products.size());
     for (Iterator iter = products.values().iterator(); iter.hasNext(); ) {
       ArrayList al = (ArrayList) iter.next();
@@ -158,6 +162,14 @@ public class Customer {
     	 }
       }
   
+      if(lastdate){
+     	 if(cp.lastAmountDate != null && cp.lastAmountDate.trim().length() > 0) {
+     		 add = cp.lastAmountDate;
+     	 }else{
+     		 add = "0000-00-00";
+     	 }
+       }
+      
       if(ware && prod.getSorting()!= null && prod.getSorting().trim().length() >0){
     	  add = add + prod.getSorting();
       }

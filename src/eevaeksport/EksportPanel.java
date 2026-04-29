@@ -3246,7 +3246,9 @@ if (getProps().getProperty("no.matrixagent") != null) {
              
              done.add(cust.getID());
              if(!cust.getPayer().equals(cust.getID())){
-             	done.add(cust.getPayer());
+            	 if(!done.contains(cust.getPayer())) {
+             	   done.add(cust.getPayer());
+            	 }
              }
              
              if(cust.getGroup()!= null && cust.getGroup().trim().length()>0 && !done.contains(cust.getGroup()+"gr")){
@@ -3273,6 +3275,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
                }
              }
           
+        //  System.out.println("Done " + done.toString());
           // kui on ainult toodete case
           
           Enumeration enume = pricematrix.elements();
@@ -3309,9 +3312,9 @@ if (getProps().getProperty("no.matrixagent") != null) {
            if((mline.getCustID()== null || mline.getCustID().trim().length() == 0) ){
         	if(mline.getCliGroup() != null && mline.getCliGroup().trim().length() >= 0  
         			){
-              //   System.out.println("system lines" + mline.getCustID() + cust.getID() + "'");
+               // System.out.println("system lines" + mline.getCustID() + cust.getID() + "'");
               //  System.out.println("system lin '" + mline.getCliGroup() + "'" + done.contains(mline.getCliGroup().trim()+"gr"));
-        		if(done.contains(mline.getCliGroup().trim()+"gr") && !done.contains(mline.getString())){
+        		if((done.contains(mline.getCliGroup().trim()+"gr") || done.contains(mline.getCliGroup().trim())) && !done.contains(mline.getString())){
         		//	 System.out.println("system lin2 '" + mline.getCliGroup() + "'" + prodok);
         			if(prodok){
               			buf.append(mline.getString() + lineSeparator);	
@@ -5989,7 +5992,7 @@ while (itra.hasNext()){
         while (iter.hasNext()){
           Customer sortedCust = (Customer)iter.next();
           
-          Iterator sortedProds = sortedCust.getSortedProducts(isWare(),isAbiKood()).values().iterator();
+          Iterator sortedProds = sortedCust.getSortedProducts(isWare(),isAbiKood(),isLastDate()).values().iterator();
           while (sortedProds.hasNext()){
             ArrayList al = (ArrayList)sortedProds.next();
             Product sortedProd = (Product)al.get(0);
@@ -6219,7 +6222,7 @@ System.out.println("cp ending");
         Iterator iter = custome.values().iterator();
         while (iter.hasNext()){
           Customer sortedCust = (Customer)iter.next();
-          Iterator sortedProds = sortedCust.getSortedProducts(isWare(),isAbiKood()).values().iterator();
+          Iterator sortedProds = sortedCust.getSortedProducts(isWare(),isAbiKood(),isLastDate()).values().iterator();
           while (sortedProds.hasNext()){
             ArrayList al = (ArrayList)sortedProds.next();
             Product sortedProd = (Product)al.get(0);
@@ -6305,7 +6308,7 @@ System.out.println("cp ending");
         Iterator iter = customers.values().iterator();
         while (iter.hasNext()){
           Customer sortedCust = (Customer)iter.next();
-          Iterator sortedProds = sortedCust.getSortedProducts(isWare(),isAbiKood()).values().iterator();
+          Iterator sortedProds = sortedCust.getSortedProducts(isWare(),isAbiKood(),isLastDate()).values().iterator();
           while (sortedProds.hasNext()){
             ArrayList al = (ArrayList)sortedProds.next();
             Product sortedProd = (Product)al.get(0);
@@ -6635,6 +6638,16 @@ System.out.println("cp ending");
 	}
 
 
+	 private boolean lastDateX = false;
+	  
+     public boolean isLastDate() {
+			return lastDateX;
+		}
+	    
+	  
+		public void setIsLastDate(boolean lastDateX) {
+			this.lastDateX = lastDateX;
+		}
 
 	   private NumberFormat NN3 = NumberFormat.getInstance(Locale.ENGLISH);
 	private NumberFormat NF = NumberFormat.getInstance(Locale.ENGLISH);

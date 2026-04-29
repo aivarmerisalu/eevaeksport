@@ -472,7 +472,7 @@ double kordaja = 1;
 	          	
 	        	  kog = kog + line.getKogus();
 	        	  sum = sum + (line.getKogus()* line.getPrice());
-	        	  System.out.println("rida " + line.getToode() + " " + line.getKogus() + " " + line.getPrice() + " " + line.getKogus()* line.getPrice() + " " + sum);
+	        	//  System.out.println("rida " + line.getToode() + " " + line.getKogus() + " " + line.getPrice() + " " + line.getKogus()* line.getPrice() + " " + sum);
 	        	 
 	        	  if(signas.contains(toode+ " " + line.getKogus())) {
 	        		  coun++;
@@ -606,13 +606,16 @@ String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().t
 	     ridaitem.appendChild(koGus);
 
 	    
-	    
-	    if(disc > 0 || repr){
+
+	     double matrix = price;
+	     boolean wasPriceWithData = false;
+
+	     
+	     if(disc > 0 || repr){
 	    	
 	     Node yhiku_hind = doc.createElement("OrderedUnitNetPrice");
 	     String par = line.getPartii();
 	     
-	     double matrix = price;
 	     try {
 	     if(par != null && par.trim().length() >0) {
 	    	 String mat = par.substring(par.indexOf(":")+1);
@@ -620,8 +623,13 @@ String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().t
 		    		  mat = mat.substring(0,mat.indexOf("++"));
 		    	  }	    	 
 	    	 matrix = Double.parseDouble( mat);
+	    	 wasPriceWithData = true;
 	        }
-	      } catch(Exception e) {}
+	      } catch(Exception e) {
+	    	 // e.printStackTrace();
+	      }
+	 //    System.out.println("matrix " + matrix);
+	     
 	     
 	        Text yhiku_hindVal = doc.createTextNode(this.nf.format(matrix));
 		     yhiku_hind.appendChild(yhiku_hindVal);
@@ -644,24 +652,13 @@ String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().t
 	    if(repr){
 	    	
 		     Node yhiku_hind = doc.createElement("CompensationSum");
-		     
-		     // meil on vaja arvutada mis hinnani oli antud 
-		     
-              String par = line.getPartii();
-		     double matrix = 0;
-		     try {
-		     if(par != null && par.trim().length() >0) {
-		    	 matrix = Double.parseDouble( par.substring(par.indexOf(":")+1));
-		     }
-		     }catch(Exception e) {}
-		     
 
-		     System.out.println("partii " + par + " " + matrix);
 		    double discPrice = line.getPrice() * (100 - line.getDiscount()) / 100;
 		    
 		    price = discPrice;
+		    if( wasPriceWithData) {
 		    disc = 100 - (discPrice / matrix * 100) ;
-		    
+		    }
 		    double diff = matrix-discPrice;
 		     
 		    

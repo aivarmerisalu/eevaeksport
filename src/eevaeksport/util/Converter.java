@@ -2341,15 +2341,26 @@ public class Converter {
 						XSSFRow row = sheet.getRow(0);
 						boolean olemas = false;
 						int data = 3;
-						if(formatter.formatCellValue(row.getCell(1)).equals("Ribakood")) {
+						if(row != null && row.getCell(1) != null 
+								&& formatter.formatCellValue(row.getCell(1)).equals("Ribakood")) {
 							data = 1;
 							olemas = true;
 						}
 						
                        if(!olemas) {
 						 row = sheet.getRow(2);
-						 if(formatter.formatCellValue(row.getCell(0)).equals("Ribakood")) {
-								data = 2;
+						 if(row != null && row.getCell(0) != null 
+								 && formatter.formatCellValue(row.getCell(0)).equals("Ribakood")) {
+								data = 3;
+								olemas = true;
+							}
+                       }
+
+                       if(!olemas) {
+						 row = sheet.getRow(3);
+						 if(row != null && row.getCell(1) != null 
+								 && formatter.formatCellValue(row.getCell(1)).equals("Ribakood")) {
+								data = 4;
 							}
                        }
 						 row = sheet.getRow(data-1);
@@ -2360,7 +2371,7 @@ public class Converter {
 						}
 						
 
-					//	System.out.println("Aldari lugemine " + file.getName() + " " + y1);
+						System.out.println("Aldari lugemine " + file.getName() + " " + y1 + " " + data);
 						
 						for (int a = y1; a < row.getLastCellNum(); a++) {
 							try {
@@ -2374,7 +2385,7 @@ public class Converter {
 							}
 						}
 						
-					//	System.out.println("Groups " + data + " " + groups.toString());
+						//System.out.println("Groups " + data + " " + groups.toString());
 					
 						
 						row = sheet.getRow(data-1);
@@ -2455,7 +2466,7 @@ public class Converter {
 					 }
 					
 					
-			//	System.out.println("Aldarsorts size " + res.toString() );
+				System.out.println("Aldarsorts size " + res.toString() );
 				//	System.exit(0);
 						
 					 }catch(Exception e) {

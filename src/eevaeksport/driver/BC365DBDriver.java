@@ -1090,6 +1090,9 @@ public TreeMap getProducts(Agent agent) {
         	
           	Boolean blocked = (Boolean) cob.get("blocked");
           	
+
+          	Boolean mjprod = (Boolean) cob.get("mobelJava");
+          	
           	String add = "";
           	String gtin = (String)cob.get("barcode");
           	if (gtin != null && gtin.length() > 5) {
@@ -1145,7 +1148,7 @@ public TreeMap getProducts(Agent agent) {
           	
           	prod.setVat("24");
           	
-            if(!blocked) {
+            if(!blocked && mjprod) {
             	  tm.put(prod.getName(), prod);	
             }
           

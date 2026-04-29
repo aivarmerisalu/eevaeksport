@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,7 +91,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
       pass = getParent().getProps().getProperty("rest.pass");
       rcompany = getParent().getProps().getProperty("rest.companyx");
      
-
+      getParent().setIsLastDate(true);
 	  nodebt = new HashSet();
       String node = getParent().getProps().getProperty("nodebt");
       if(node != null) {
@@ -1001,10 +1002,10 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
         	 gg = true;
         	 }
      }
-
+     String dateSort = "";
+   
      if(cob.get("last_arrival") != null) {
-    	 String dateSort = cob.get("last_arrival")+"" ; 
-    	
+    	 dateSort = cob.get("last_arrival")+"" ; 
      }
      
      
@@ -1031,9 +1032,9 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     	 
     	 
 
-    	 if(cuCode.equals("K800393") && prodId.equals("R844011")) {
-    	        System.out.println("Seisev välja0 " + customerNumber + " " + prodId + " "+ tt.getKogus() + " " + stat + " " + gg + " " + aa);
-    		 }
+    	// if(cuCode.equals("K800393") && prodId.equals("R844011")) {
+    	  //      System.out.println("Seisev välja0 " + customerNumber + " " + prodId + " "+ tt.getKogus() + " " + stat + " " + gg + " " + aa);
+    		// }
     	 if((stat.startsWith("A") || stat.equals("B") || stat.equals("C") || stat.equals("D")) && inSort.equals("0") && gg) {
 
 	        	String date  = (String) cob.get("last_arrival");
@@ -1049,7 +1050,6 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
         } else  if(stat.equals("D") && seis ) {
     		
 	        	String date  = (String) cob.get("first_arrival");
-
 	        	 if(cuCode.equals("K800393") && prodId.equals("R844011")) {
 	        	        System.out.println("Seisev välja " + customerNumber + " " + prodId + " "+ tt.getKogus() + " ");
 	        		 }
@@ -1062,22 +1062,20 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
      		if(date != null && date.trim().length() > 2) {
      			sisu.put(date + "|" + prodId, tt);
          	}
-     		
      		returnList.put(cuCode, sisu);
-     		
-   	 } 
-    	 
-    	 
+       } 
      }
      
-     
- 	         		
- 	         		HashMap sisu = new HashMap();
- 	         		if(res.get(cuCode) != null) {
+             		HashMap sisu = new HashMap();
+ 	         		 if(res.get(cuCode) != null) {
  	         			sisu = (HashMap)res.get(cuCode);
- 	         		}
+ 	         		 } 
  	         		
- 	         		sisu.put(prodId, tt);
+ 	         		 if(dateSort.length() > 0) {
+ 	         			 tt.comment2 = dateSort;
+ 	         		 }
+ 	         		sisu.put( prodId, tt);
+ 	         		
  	         		res.put(cuCode, sisu);
          			}catch(Exception e) {
          			System.out.println(cob.toJSONString());
@@ -1283,6 +1281,8 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
   	   
   	   
   	   Vector custProds = new Vector();
+  	   TreeMap<String, TreeMap<String, CustProd>> sortedCP = new TreeMap<String, TreeMap<String, CustProd>>();
+  	   
   	   HashMap stock = getStockAndSales();
 
   	   HashMap lastd = getLastDates();
@@ -1364,10 +1364,33 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
        			
        		  }
        		  
-       		  custProds.add(cp);
+       		TreeMap<String, CustProd> tr = sortedCP.get(cuCode);
+       		if(tr == null ) {
+       			 tr = new TreeMap<String, CustProd>();
+       		}
+       		tr.put(last_date + prodId, cp);
+       		  sortedCP.put(cuCode, tr);
+       		 
       }
   	   
       }
+      
+     Iterator iterax =  sortedCP.keySet().iterator();
+     while(iterax.hasNext()) {
+    	 String cuid = (String) iterax.next();
+    	 TreeMap<String, CustProd> tr = sortedCP.get(cuid);
+    	 Iterator ite =  tr.keySet().iterator();
+         while(ite.hasNext()) {
+        	 CustProd ccp = tr.get(ite.next());
+        	 System.out.println(cuid +" "+ ccp.getProdID() + " " + ccp.getLastAmountDate());
+        	  custProds.add(ccp);    	 
+         }
+        	 
+     }
+      
+
+	    Collections.reverse(custProds);
+      System.out.println("custProds Size " + custProds.size());
   	   
   	   return custProds;
      }
