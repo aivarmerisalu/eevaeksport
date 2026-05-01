@@ -2337,7 +2337,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
        		   NodeList dataList = rida.getChildNodes();//("data");
 
        		   String articleGroup = null;
-       		   
+       		 try {  
        		   for (int is = 0; is < dataList.getLength(); is++) {
 
        		       Node dataElement = (Node) dataList.item(is);
@@ -2359,7 +2359,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
        		       }
 		    	   }
        		   }}
-       		   
+       		 } catch(Exception e) {}
        		  
        		     
        		      }
