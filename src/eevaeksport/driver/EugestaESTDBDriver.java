@@ -3084,7 +3084,8 @@ boolean noopt = false;
 
 	@Override
 	public void FixLoader() {
-		   ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", parent);
+
+		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent);
 		   System.exit(0);
 	
 	}

@@ -380,6 +380,15 @@ public class Converter {
 		   
 	 // Lõpp - vaatame mis küsimused on juba olemas
 		   
+			  HashSet answersDone = null;
+				try {
+					answersDone = (HashSet)Converter.readObject("answersdone.obj");
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}		
+		if(answersDone == null) {
+		  answersDone = new HashSet();
+		}
 		   
 		   
 		   
@@ -396,19 +405,9 @@ public class Converter {
 					 done.mkdir();
 				 }
 
-			  HashSet answersDone = null;
-				try {
-					answersDone = (HashSet)Converter.readObject("answersdone.obj");
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}		
-		if(answersDone == null) {
-		  answersDone = new HashSet();
-		}
 
 
 		TreeMap<String, org.json.simple.JSONObject> answBuffer = new TreeMap<String, org.json.simple.JSONObject>();
-
 	
 		      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
 		 Calendar from = Calendar.getInstance();
@@ -4844,7 +4843,65 @@ public class Converter {
 	 }
 
 	 
-		public static ArrayList<Quest> loadPriceTrackerFromExcels(String dirx, EksportPanel parent) {
+		public static ArrayList<Quest> loadPriceTrackerFromExcels(String dirx,String companyx, String user, String pass, EksportPanel parent) {
+			
+			
+			 // Algus - vaatame mis küsimused on juba olemas
+			  HashSet qutitles = new HashSet();
+
+				 File svdata = new File( "svdata");
+					 if(!svdata.exists()) {
+						 svdata.mkdir();
+					 }	  
+			      	  
+			   String sisu = Converter.getQuestData(companyx, user, pass);
+			   Converter.saveFile("svdata/Questionnaire.json", sisu);
+			   
+			   JSONParser parser = new JSONParser();
+			   org.json.simple.JSONArray arrs = null;
+			   try {
+				  arrs = (org.json.simple.JSONArray)parser.parse(sisu);
+		     	} catch (ParseException e) {
+				   e.printStackTrace();
+			    } 
+
+			   
+			   if(arrs != null) {
+				   for(int y = 0;  y < arrs.size(); y++) {
+					
+					try {
+					
+						org.json.simple.JSONObject ob = (org.json.simple.JSONObject) arrs.get(y) ;
+						String nimi = (String)ob.get("title");
+						
+						if(!qutitles.contains(nimi)) {
+					    	qutitles.add(nimi);
+					    	//System.out.println(nimi);
+						}
+					
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+				   }
+			   }
+			   
+			   System.out.println("qutitles " + qutitles.toString());
+		 // Lõpp - vaatame mis küsimused on juba olemas
+			   
+				  HashSet answersDone = null;
+					try {
+						answersDone = (HashSet)Converter.readObject("answersdone.obj");
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}		
+			if(answersDone == null) {
+			  answersDone = new HashSet();
+			}
+			   
+			   
+
+			
 			ArrayList<Quest> res = new ArrayList<Quest>();
 		
 			 File dir = new File(dirx);
@@ -4880,9 +4937,11 @@ public class Converter {
 						Quest quest = new Quest();
 											 
 							   String name = getExcelCell(sheet.getRow(1),1);
-								   quest.title = name;	
+								   quest.title = "Pricetracker - " + name;	
+								   
+								   if(!qutitles.contains(quest.title)) {
+								   
 								   quest.frequency = "ONCE";
-									 
 									
 								     String period = getExcelCell(sheet.getRow(2),1);
 									    String[] parts = period.split("-");
@@ -4891,7 +4950,7 @@ public class Converter {
 								        LocalDate endDate = LocalDate.parse(parts[1], formatter);
 								        LocalDate checkDate = LocalDate.now();
 
-								        boolean isInRange =  (!checkDate.isBefore(startDate) && !checkDate.isAfter(endDate));
+								        boolean isInRange =  (!checkDate.isAfter(endDate));
 								        if(isInRange) {
 								 
 								   quest.qEnd = endDate
@@ -4962,6 +5021,9 @@ public class Converter {
 										 res.add(quest);
 										}
 								        }
+								        }else {
+								        	System.out.println(quest.title + " exists , no import to Mobitrek");
+								        }
 			    } catch(Exception e) {
 			    	e.printStackTrace();
 			    }
@@ -4970,17 +5032,21 @@ public class Converter {
 
 			      String nn = file.getName();
 			    if(!file.isDirectory()) {
-			    	/*File ii = new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn);
+			    	File ii = new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn);
 			    	if(ii.exists()) {
 			    		ii.delete();
-			    	}*/
-			    //	System.out.println("renamed " +   file.renameTo(new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn)));
+			    	}
+			    	System.out.println("renamed " +   file.renameTo(new File(dirx + "/done/" + Converter.getYYYYmMMmDDmString(Calendar.getInstance().getTime()) + " " + nn)));
 			      
 			    }
 			      }
 			    
-			
+			    for(Quest qq : res) {
+					   Converter.addNewQuest(qq, companyx, user, pass);
+				   }
 		 
+			    //Küsimuste lisamine lõppes 
+			    
 			
 			return res;
 		}

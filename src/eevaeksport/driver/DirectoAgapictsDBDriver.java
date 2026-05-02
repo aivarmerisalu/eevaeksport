@@ -2605,15 +2605,12 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
    @Override
 	public void FixLoader() {
 	
-	 /*  ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", parent);
-	   for(Quest qq : quests) {
-		
-		   //Converter.addNewQuest(qq, rcompanyx, user, pass);
-	   }
+	   ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker",rcompanyx, user, pass, parent);
+	   
 	   
 	   System.out.println("quests " + quests.size() + " " +  quests.toString());
-		*/
-	 //  System.exit(0);
+		
+	   System.exit(0);
 	   
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort" , prods, parent);
 		System.out.println("Contracts " + contracts.size() + " " +  contracts.toString());
