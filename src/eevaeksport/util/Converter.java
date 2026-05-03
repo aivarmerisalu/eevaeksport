@@ -5047,6 +5047,260 @@ public class Converter {
 		 
 			    //Küsimuste lisamine lõppes 
 			    
+			    // nüüd loeme alla vastused ja parsime sisse.
+			    
+				TreeMap<String, org.json.simple.JSONObject> answBuffer = new TreeMap<String, org.json.simple.JSONObject>();
+				
+			      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
+			 Calendar from = Calendar.getInstance();
+			 from.add(Calendar.DAY_OF_YEAR, -4);
+			 Calendar to = Calendar.getInstance();    
+			 to.add(Calendar.DAY_OF_YEAR, 2);
+
+			    
+			 // SV kaudu info kogumine. 
+			    String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "PRODUCT", null, "SV-");
+				 
+			 // failide kaudu info salvestamine vaata teisest meetodist
+			
+			     parser = new JSONParser();
+			     
+					try {
+				
+						if(filename.length() > 1) {
+							 
+					   InputStreamReader reader = new InputStreamReader(new FileInputStream(filename), "UTF-8");
+							org.json.simple.JSONArray cc =  (org.json.simple.JSONArray)parser.parse(reader);
+
+			  		for (int i = 0; i < cc.size(); i++) {
+			  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+			  			//System.out.println("cob sees " + cob.toJSONString());
+			  			String dateAndTime = (String)cob.get("recetime");
+			  			String dateOnly = dateAndTime.split("T")[0];
+			  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
+			  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
+			  		   
+			  			String custID = (String)cob.get("custid");
+			  			String agid = (String)cob.get("agentid");
+			  			String qname = (String)cob.get("prodname");
+			  			String ean = "";
+			  			int d = qname.indexOf("|");
+			  			if(d != -1) {
+			  				ean = qname.substring(d+1).trim();
+			  			
+			  			String title = (String)cob.get("extData");
+			  			String created = (String)cob.get("resstr3"); // see on tegelt Long
+			  			
+			  			Number normalprNum = (Number) cob.get("normalpr");
+			  			Double normalpr = normalprNum != null ? normalprNum.doubleValue() : null;
+
+			  			Number actionprNum = (Number) cob.get("priceCamp");
+			  			Double actionpr = actionprNum != null ? actionprNum.doubleValue() : null;
+			  	
+			  			String comment = (String)cob.get("custcomme");
+			  			
+			  			Calendar cal = Calendar.getInstance();
+			  			cal.setTimeInMillis(Long.parseLong(created));
+			  			dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
+			  			
+			  			   // System.out.println(normalpr + " " + actionpr + " " + custID + "-" + ean);
+							answBuffer.put(custID + "-" + ean, cob);
+			  			}
+			  			
+			  		    }	
+						}
+					} catch (Exception e) {
+					e.printStackTrace();
+				}
+					
+					//System.out.println("buffer " + answBuffer.toString());
+					
+
+         			DataFormatter formatter = new DataFormatter();					
+					
+					File answfolder = new File("excelpricetracker/answers");
+					
+			          if (answfolder.exists() && answfolder.isDirectory()) {
+			              File[] filed = answfolder.listFiles();
+
+			              for (File file : filed) {
+			                  if (file.isFile() && file.getName().contains("PriceTracker") && !file.getName().contains("$")) { // pallets example
+			                      System.out.println("Found: " + file.getAbsolutePath());
+			      				boolean changesMade = false;
+
+			                 		try {
+			                 			
+			                 			FileInputStream ff = new FileInputStream(file);
+			                 			XSSFWorkbook workbook = new XSSFWorkbook((ff));
+			                 			XSSFSheet sheet = workbook.getSheetAt(0);
+			                 			
+			                 			for(int u = 1 ; u < 10 ;u++) {
+			                 			
+			                 			XSSFRow row = sheet.getRow(u);
+			                 			 try {
+			    	                 	String custid  = formatter.formatCellValue(row.getCell((short) 6));
+			    	                 	String prodean  = formatter.formatCellValue(row.getCell((short) 16));
+			    	                 	String key = custid + "-" + prodean;
+			    	                 	
+			    	                 	if(answBuffer.get(key) != null) {
+				    	                 	System.out.println("read " + u +" "+ custid + " " + prodean);	
+
+				    	                 	
+				    	                 	org.json.simple.JSONObject ob = answBuffer.get(key);
+                                            
+				    			  			//System.out.println("cob sees " + cob.toJSONString());
+				    			  			String dateAndTime = (String)ob.get("recetime");
+				    			  			String dateOnly = dateAndTime.split("T")[0];
+				    			  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
+				    			  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
+				    			  		   
+				    			  			String custID = (String)ob.get("custid");
+				    			  			String agid = (String)ob.get("agentid");
+				    			  			String qname = (String)ob.get("prodname");
+				    			  			String title = (String)ob.get("extData");
+				    			  			Number normalprNum = (Number) ob.get("normalpr");
+				    			  			Double normalpr = normalprNum != null ? normalprNum.doubleValue() : null;
+				    			  			Number actionprNum = (Number) ob.get("priceCamp");
+				    			  			Double actionpr = actionprNum != null ? actionprNum.doubleValue() : null;
+				    			  			String comm = (String)ob.get("custcomme");
+				    			  		
+				    			  			Calendar cal = Calendar.getInstance();
+				    			  			String created = (String)ob.get("resstr3"); // see on tegelt Long
+				    			  			cal.setTimeInMillis(Long.parseLong(created));
+				    			  			dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
+				    			  			
+				    			  			XSSFCell cell = row.getCell((short) 17); // normaalhinna  cell
+                                                cell.setCellValue(normalpr);
+
+                                                if(actionpr > 0) {
+                                                cell = row.getCell((short) 18); // action price cell
+                                                cell.setCellValue(actionpr);
+                                                }
+
+                                                changesMade = true;
+                                                
+                                                if(comm != null) {
+				    	                 	
+				               				    cell = row.getCell((short) 21); // kommentaari cell
+
+				    	                 	
+	    	                 				//	System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
+	    	                 					
+	    	                 					CellStyle originalStyle = cell.getCellStyle();
+
+		    	                 				CellStyle newStyle = workbook.createCellStyle();
+		    	                 				newStyle.cloneStyleFrom(originalStyle);
+                                                   
+                                                   String cobComm = (String)ob.get("comment");
+                                                   
+		    	                 				if((ob.get("resint1")+ "").equals("0")) {
+		    	                 			       newStyle.setFillForegroundColor(IndexedColors.LIME.getIndex());
+		    	                 			       
+		    	                 				 } else {
+		    	                 				   newStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+		    	                 				  if(cobComm != null && cobComm.trim().length() > 0) {
+		    	                 			    	  newStyle.setFillForegroundColor(IndexedColors.GOLD.getIndex());
+		    	                 			       }
+		    	                 				}
+		    	                 			      newStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		    	                 			     cell.setCellStyle(newStyle);
+		    	                 			     
+		    	                 			     
+	    	                 					XSSFDrawing drawing = sheet.createDrawingPatriarch();
+	    	                 			        XSSFComment comment = cell.getCellComment();
+
+
+	    	                 			        if(cobComm == null) {
+	    	                 			        	cobComm = "";
+	    	                 			        }
+	    	                 			        
+	    	                  String newComm = (cobComm +  " " 
+			    	                   + (String)ob.get("agentname") + " " + ((String)ob.get("recetime")).replace('T', ' ').replace('Z', ' ')).trim();
+	    	                 			            
+
+	    	                 			        if (comment == null) {
+
+			    	                 				CreationHelper helper = workbook.getCreationHelper();
+	    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+	    	                 			            anchor.setCol1(cell.getColumnIndex());
+	    	                 			            anchor.setCol2(cell.getColumnIndex() + 3);
+	    	                 			            anchor.setRow1(row.getRowNum());
+	    	                 			            anchor.setRow2(row.getRowNum() + 3);
+	    	                 			            comment = drawing.createCellComment(anchor);
+
+                                                     XSSFRichTextString commentText = new XSSFRichTextString(newComm);
+		    	                 			        comment.setString(commentText);
+		    	                 			        comment.setAuthor("Merisoft-Mobitrek");
+		    	                 			        cell.setCellComment(comment);
+	    	                 			        } else {
+	    	                 			        	
+	    	                 			        	
+		    	                 			        // Set comment text
+		    	                 			        if(comment.getString() != null) {
+
+		    	                 			  //    System.out.println("comm " + comment.getString().getString()+ "\n" + newComm);
+		    	                 			        	if( !comment.getString().getString().contains(newComm)) {
+		    	                 			        		String oldText = comment != null ? comment.getString().getString() : "";
+		    	                 			        		cell.removeCellComment();
+
+					    	                 				CreationHelper helper = workbook.getCreationHelper();
+			    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+			    	                 			            anchor.setCol1(cell.getColumnIndex());
+			    	                 			            anchor.setCol2(cell.getColumnIndex() + 5);
+			    	                 			            anchor.setRow1(row.getRowNum());
+			    	                 			            anchor.setRow2(row.getRowNum() + 5);
+			    	                 			          Comment  commentNew = drawing.createCellComment(anchor);
+		    	             XSSFRichTextString commentText = new XSSFRichTextString(oldText+ "\n" + newComm);
+		    	             commentNew.setString(commentText);
+		    	             commentNew.setAuthor("Merisoft-Mobitrek");
+					    	                 			        cell.setCellComment(commentNew);
+			    	                 			       	
+		    	                 			        		
+		    	                 			            }
+		    	                 			        }
+                                                     	 }
+	    	                 			        	
+	    	                 			        
+
+                                                }
+				    	                 	
+				    	                 	
+				    	                 	
+				    	                 	
+				    	                 	
+			    	                 	}
+
+			    	                 //	System.out.println("read0 " + u +" "+ custid + " " + prodean );	
+
+			                 			 } catch(Exception e) {}	
+			    	                 			
+			                 			}	
+			                 			
+			                 			
+			                 			
+			                 			
+			                 			
+		                 			ff.close();
+			                 			
+			                 			if(changesMade) {
+                                    System.out.println("Salvestan faili");
+			                 			       FileOutputStream fos = new FileOutputStream(file.getAbsolutePath()); // Same file name
+			                 			      workbook.write(fos);
+			                 			      fos.close();
+			                 			      
+			                 			}
+			                 			
+			                 			
+			                 			
+			                 		} catch (Exception e) {
+			                 			e.printStackTrace();
+			                 		}
+			                  }
+			               }
+			          }
+
+			    
+			    
 			
 			return res;
 		}
