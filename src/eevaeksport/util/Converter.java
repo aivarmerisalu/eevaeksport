@@ -4941,7 +4941,7 @@ public class Converter {
 								   
 								   if(!qutitles.contains(quest.title)) {
 								   
-								   quest.frequency = "ONCE";
+								   quest.frequency = "DAILY";
 									
 								     String period = getExcelCell(sheet.getRow(2),1);
 									    String[] parts = period.split("-");
@@ -5027,8 +5027,7 @@ public class Converter {
 			    } catch(Exception e) {
 			    	e.printStackTrace();
 			    }
-			  					
-			      }
+			  	  }
 
 			      String nn = file.getName();
 			    if(!file.isDirectory()) {
@@ -5045,6 +5044,11 @@ public class Converter {
 					   Converter.addNewQuest(qq, companyx, user, pass);
 				   }
 		 
+			    
+			    
+			    
+			    
+			    
 			    //Küsimuste lisamine lõppes 
 			    
 			    // nüüd loeme alla vastused ja parsime sisse.
@@ -5074,49 +5078,23 @@ public class Converter {
 
 			  		for (int i = 0; i < cc.size(); i++) {
 			  			org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
-			  			//System.out.println("cob sees " + cob.toJSONString());
-			  			String dateAndTime = (String)cob.get("recetime");
-			  			String dateOnly = dateAndTime.split("T")[0];
-			  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
-			  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
-			  		   
 			  			String custID = (String)cob.get("custid");
-			  			String agid = (String)cob.get("agentid");
 			  			String qname = (String)cob.get("prodname");
 			  			String ean = "";
 			  			int d = qname.indexOf("|");
 			  			if(d != -1) {
 			  				ean = qname.substring(d+1).trim();
-			  			
-			  			String title = (String)cob.get("extData");
-			  			String created = (String)cob.get("resstr3"); // see on tegelt Long
-			  			
-			  			Number normalprNum = (Number) cob.get("normalpr");
-			  			Double normalpr = normalprNum != null ? normalprNum.doubleValue() : null;
-
-			  			Number actionprNum = (Number) cob.get("priceCamp");
-			  			Double actionpr = actionprNum != null ? actionprNum.doubleValue() : null;
-			  	
-			  			String comment = (String)cob.get("custcomme");
-			  			
-			  			Calendar cal = Calendar.getInstance();
-			  			cal.setTimeInMillis(Long.parseLong(created));
-			  			dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
-			  			
-			  			   // System.out.println(normalpr + " " + actionpr + " " + custID + "-" + ean);
 							answBuffer.put(custID + "-" + ean, cob);
 			  			}
-			  			
 			  		    }	
 						}
 					} catch (Exception e) {
 					e.printStackTrace();
 				}
 					
-					//System.out.println("buffer " + answBuffer.toString());
-					
-
-         			DataFormatter formatter = new DataFormatter();					
+				System.out.println("buffer " + answBuffer.toString());
+				
+         			DataFormatter formatter = new DataFormatter();		
 					
 					File answfolder = new File("excelpricetracker/answers");
 					
@@ -5133,8 +5111,11 @@ public class Converter {
 			                 			FileInputStream ff = new FileInputStream(file);
 			                 			XSSFWorkbook workbook = new XSSFWorkbook((ff));
 			                 			XSSFSheet sheet = workbook.getSheetAt(0);
+
+			                 			XSSFDrawing drawing = sheet.createDrawingPatriarch();
+			                 			CreationHelper helper = workbook.getCreationHelper();
 			                 			
-			                 			for(int u = 1 ; u < 10 ;u++) {
+			                 			for(int u = 1 ; u < sheet.getLastRowNum() ;u++) {
 			                 			
 			                 			XSSFRow row = sheet.getRow(u);
 			                 			 try {
@@ -5143,132 +5124,89 @@ public class Converter {
 			    	                 	String key = custid + "-" + prodean;
 			    	                 	
 			    	                 	if(answBuffer.get(key) != null) {
-				    	                 	System.out.println("read " + u +" "+ custid + " " + prodean);	
 
 				    	                 	
 				    	                 	org.json.simple.JSONObject ob = answBuffer.get(key);
                                             
-				    			  			//System.out.println("cob sees " + cob.toJSONString());
-				    			  			String dateAndTime = (String)ob.get("recetime");
-				    			  			String dateOnly = dateAndTime.split("T")[0];
-				    			  			String timeOnly = dateAndTime.split("T")[1].split("Z")[0];
-				    			  			timeOnly = timeOnly.split(":")[0] + ":" + timeOnly.split(":")[1];
-				    			  		   
-				    			  			String custID = (String)ob.get("custid");
-				    			  			String agid = (String)ob.get("agentid");
-				    			  			String qname = (String)ob.get("prodname");
-				    			  			String title = (String)ob.get("extData");
+				    			  		
+				    			  			String created = (String)ob.get("resstr3"); // see on tegelt Long
+				    			  			
+				    			  			if(!answersDone.contains(key + created)) {
+				    			  			
+                                            String custID = (String)ob.get("custid");
 				    			  			Number normalprNum = (Number) ob.get("normalpr");
 				    			  			Double normalpr = normalprNum != null ? normalprNum.doubleValue() : null;
 				    			  			Number actionprNum = (Number) ob.get("priceCamp");
 				    			  			Double actionpr = actionprNum != null ? actionprNum.doubleValue() : null;
-				    			  			String comm = (String)ob.get("custcomme");
-				    			  		
+				    			  			String comm = (String)ob.get("comment");
+				    			  			
+				    			  			if(comm != null && comm.contains("Missing")) {
+                                        		comm = comm.substring(0,comm.indexOf("Missing")).trim();
+                                        	 }
+				    			  			
 				    			  			Calendar cal = Calendar.getInstance();
-				    			  			String created = (String)ob.get("resstr3"); // see on tegelt Long
+					    			  			
 				    			  			cal.setTimeInMillis(Long.parseLong(created));
-				    			  			dateOnly = Converter.getYYYYmMMmDDmString(cal.getTime());
+				    			 
+				    	                 	System.out.println("read " + u +" "+ custid + " " + prodean + " " + comm);	
 				    			  			
 				    			  			XSSFCell cell = row.getCell((short) 17); // normaalhinna  cell
                                                 cell.setCellValue(normalpr);
 
+                  	    	               String newComm = ( (String)ob.get("agentname") + " " + ((String)ob.get("recetime")).replace('T', ' ').replace('Z', ' ')).trim();
+               	    	                 			            
+ 	                 			                              XSSFComment comment = cell.getCellComment();
+ 	                 			                            if (comment != null) {
+ 	                 			                              cell.removeCellComment();
+ 	                 			                          }
+
+               	    	                 			            ClientAnchor anchor = helper.createClientAnchor();
+               	    	                 			            anchor.setCol1(cell.getColumnIndex());
+               	    	                 			            anchor.setCol2(cell.getColumnIndex() + 3);
+               	    	                 			            anchor.setRow1(row.getRowNum());
+               	    	                 			            anchor.setRow2(row.getRowNum() + 3);
+               	    	                 			            comment = drawing.createCellComment(anchor);
+
+                                                                    XSSFRichTextString commentText = new XSSFRichTextString(newComm);
+               		    	                 			        comment.setString(commentText);
+               		    	                 			        comment.setAuthor("Merisoft-Mobitrek");
+               		    	                 			        cell.setCellComment(comment);
+                                              			       
+                                                               
+            		    	                 				if(!(ob.get("resint1")+ "").equals("0")) {
+            		    	                 					CellStyle originalStyle = cell.getCellStyle();
+                		    	                 				CellStyle newStyle = workbook.createCellStyle();
+                		    	                 				newStyle.cloneStyleFrom(originalStyle);
+                                                                newStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+            		    	                 				  if(comm != null && comm.trim().length() > 0) {
+            		    	                 			    	 newStyle.setFillForegroundColor(IndexedColors.GOLD.getIndex());
+            		    	                 			       }
+             		    	                 			          newStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+             		    	                 			        cell.setCellStyle(newStyle);
+
+             	                                                cell = row.getCell((short) 19); // action price cell
+             	                                                cell.setCellValue("OOS");
+             		    	                 			   }
+            		    	                 				
+               		    	                 			        
+               		    	                 			        
                                                 if(actionpr > 0) {
                                                 cell = row.getCell((short) 18); // action price cell
                                                 cell.setCellValue(actionpr);
                                                 }
 
                                                 changesMade = true;
+                                                answersDone.add(key+created);
                                                 
-                                                if(comm != null) {
-				    	                 	
-				               				    cell = row.getCell((short) 21); // kommentaari cell
-
-				    	                 	
-	    	                 				//	System.out.println("oioioi " + key + " " + answBuffer.get(key).toJSONString());	
-	    	                 					
-	    	                 					CellStyle originalStyle = cell.getCellStyle();
-
-		    	                 				CellStyle newStyle = workbook.createCellStyle();
-		    	                 				newStyle.cloneStyleFrom(originalStyle);
-                                                   
-                                                   String cobComm = (String)ob.get("comment");
-                                                   
-		    	                 				if((ob.get("resint1")+ "").equals("0")) {
-		    	                 			       newStyle.setFillForegroundColor(IndexedColors.LIME.getIndex());
-		    	                 			       
-		    	                 				 } else {
-		    	                 				   newStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
-		    	                 				  if(cobComm != null && cobComm.trim().length() > 0) {
-		    	                 			    	  newStyle.setFillForegroundColor(IndexedColors.GOLD.getIndex());
-		    	                 			       }
-		    	                 				}
-		    	                 			      newStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		    	                 			     cell.setCellStyle(newStyle);
-		    	                 			     
-		    	                 			     
-	    	                 					XSSFDrawing drawing = sheet.createDrawingPatriarch();
-	    	                 			        XSSFComment comment = cell.getCellComment();
-
-
-	    	                 			        if(cobComm == null) {
-	    	                 			        	cobComm = "";
-	    	                 			        }
-	    	                 			        
-	    	                  String newComm = (cobComm +  " " 
-			    	                   + (String)ob.get("agentname") + " " + ((String)ob.get("recetime")).replace('T', ' ').replace('Z', ' ')).trim();
-	    	                 			            
-
-	    	                 			        if (comment == null) {
-
-			    	                 				CreationHelper helper = workbook.getCreationHelper();
-	    	                 			            ClientAnchor anchor = helper.createClientAnchor();
-	    	                 			            anchor.setCol1(cell.getColumnIndex());
-	    	                 			            anchor.setCol2(cell.getColumnIndex() + 3);
-	    	                 			            anchor.setRow1(row.getRowNum());
-	    	                 			            anchor.setRow2(row.getRowNum() + 3);
-	    	                 			            comment = drawing.createCellComment(anchor);
-
-                                                     XSSFRichTextString commentText = new XSSFRichTextString(newComm);
-		    	                 			        comment.setString(commentText);
-		    	                 			        comment.setAuthor("Merisoft-Mobitrek");
-		    	                 			        cell.setCellComment(comment);
-	    	                 			        } else {
-	    	                 			        	
-	    	                 			        	
-		    	                 			        // Set comment text
-		    	                 			        if(comment.getString() != null) {
-
-		    	                 			  //    System.out.println("comm " + comment.getString().getString()+ "\n" + newComm);
-		    	                 			        	if( !comment.getString().getString().contains(newComm)) {
-		    	                 			        		String oldText = comment != null ? comment.getString().getString() : "";
-		    	                 			        		cell.removeCellComment();
-
-					    	                 				CreationHelper helper = workbook.getCreationHelper();
-			    	                 			            ClientAnchor anchor = helper.createClientAnchor();
-			    	                 			            anchor.setCol1(cell.getColumnIndex());
-			    	                 			            anchor.setCol2(cell.getColumnIndex() + 5);
-			    	                 			            anchor.setRow1(row.getRowNum());
-			    	                 			            anchor.setRow2(row.getRowNum() + 5);
-			    	                 			          Comment  commentNew = drawing.createCellComment(anchor);
-		    	             XSSFRichTextString commentText = new XSSFRichTextString(oldText+ "\n" + newComm);
-		    	             commentNew.setString(commentText);
-		    	             commentNew.setAuthor("Merisoft-Mobitrek");
-					    	                 			        cell.setCellComment(commentNew);
-			    	                 			       	
-		    	                 			        		
-		    	                 			            }
-		    	                 			        }
-                                                     	 }
-	    	                 			        	
-	    	                 			        
-
+                                                if(comm != null && comm.trim().length() > 0) {
+                                                	 cell = row.getCell((short) 21); // kommentaari cell
+		    	                 			         cell.setCellValue(comm);
+		    	                 			      }
+                                                
+                                                } else {
+                                                	System.out.println("vastus olemas, ei lisa " + key);
                                                 }
-				    	                 	
-				    	                 	
-				    	                 	
-				    	                 	
-				    	                 	
-			    	                 	}
+				    	               }
 
 			    	                 //	System.out.println("read0 " + u +" "+ custid + " " + prodean );	
 
@@ -5290,6 +5228,7 @@ public class Converter {
 			                 			      
 			                 			}
 			                 			
+
 			                 			
 			                 			
 			                 		} catch (Exception e) {
@@ -5299,7 +5238,12 @@ public class Converter {
 			               }
 			          }
 
-			    
+
+  					  try {
+  							Converter.saveObject(answersDone, "answersdone.obj");
+  						} catch (IOException e) {
+  							e.printStackTrace();
+  						}			    
 			    
 			
 			return res;
