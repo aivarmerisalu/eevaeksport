@@ -178,67 +178,65 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
   
   private void makePictureCat(){
-	    	
-	    	String pictssou = parent.getProps().getProperty("pict.dir");
-	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
-	       
-	  	 try {
-	     	  
-	          File f = new File(pictspda +"list.txt");
-	          if (f.exists())f.delete();
-	         
-	          File res2 = new File (pictspda);
-	             String[] ff2 = res2.list();
-	         	 for(int i = 0;ff2.length>i;i++){
-	             	(new File ( pictspda + ff2[i])).delete(); 
-	             }
+  	
+  	String pictssou = parent.getProps().getProperty("pict.dir");
+	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+     this.getProducts(null);
+	 try {
+   	  
+        File f = new File(pictspda +"list.txt");
+        if (f.exists())f.delete();
+       
+        File res2 = new File (pictspda);
+           String[] ff2 = res2.list();
+       	 for(int i = 0;ff2.length>i;i++){
+           	(new File ( pictspda + ff2[i])).delete(); 
+           }
 
-	  		 TreeMap prods = this.getProducts(null);
-	         StringBuffer buf = new StringBuffer();
-	         Iterator enume = prods.keySet().iterator();
-	    
-	         while (enume.hasNext()) {
-	    	    	String asi = (String)enume.next();
-	    	    	Product prod = (Product)prods.get(asi);
-	    	    	String toode = prod.getID().trim();  
-	               if(toode.length() > 0){
-	                	
-	    	   	  res2 = new File (pictssou);
-	              ff2 = res2.list();
-	             
-	         	 for(int i = 0;ff2.length>i;i++){
-	             	if( ff2[i].startsWith(toode+".")){
-	               // System.out.println("pilt olemas " + ff2[i]);
-	            	File in = new File ( pictssou + ff2[i]); 
-	              	if(in.isFile()){
-	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
-	              	try {
-	                  	Converter.shrinkAndCopyFile(in,inpda,400);
-	                    	buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-	                   
-	              	} catch(Exception e) {
-	              		//System.out.println("prod.getID() " + prod.getID());
-	              		e.printStackTrace();
-	              	}
-	             	}
-	                 }
-	               }
-	             }
-	    	 }
-	         try {
-	     		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
-	     		os.write(buf.toString());
-	     		os.close();
-	     	  }catch (Exception ex) {
-	     		ex.printStackTrace();
-	     	  }
-	  	 
-	  	 } catch (Exception e) {
-	    	    getParent().showError(e);
-	    	}
-	     
-	  }
-	    
+       StringBuffer buf = new StringBuffer();
+       Iterator enume = prodcodes.iterator();
+  
+       while (enume.hasNext()) {
+  	   
+  	    	String toode = (String)enume.next();
+  	    	
+           if(toode.length() > 0){
+              	
+  	   	  res2 = new File (pictssou);
+            ff2 = res2.list();
+           
+       	 for(int i = 0;ff2.length>i;i++){
+           	if( ff2[i].startsWith(toode+".")){
+           		
+          	File in = new File ( pictssou + ff2[i]); 
+            	if(in.isFile()){
+            	File inpda = new File ( pictspda + toode+ ".jpg"); 
+            	try {
+                	Converter.shrinkAndCopyFile(in,inpda,400);
+                  	buf.append(toode+".jpg;"  + inpda.length() + "\n");
+                 
+            	} catch(Exception e) {
+            		System.out.println("pahasti prod.getID() " + toode);
+            		e.printStackTrace();
+            	}
+           	}
+               }
+             }
+           }
+  	 }
+       try {
+   		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+   		os.write(buf.toString());
+   		os.close();
+   	  }catch (Exception ex) {
+   		ex.printStackTrace();
+   	  }
+	 
+	 } catch (Exception e) {
+  	    getParent().showError(e);
+  	}
+   
+}
 
 
 
@@ -502,7 +500,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
          }catch(Exception r) {
 		 r.printStackTrace();  
 	     }	
-	System.out.println("Active Promos "  + activeXLSPromos.toString());
+	//System.out.println("Active Promos "  + activeXLSPromos.toString());
 
   }
   
@@ -784,99 +782,180 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   }
 
   private void makeCustprod(){
-	 
+		 
 	  
-	  String cmd2 = "	   WITH cte AS ( \r\n" + 
-	  		"	  		    SELECT    \r\n" + 
-	  		"	  			  		        a.CUSTACCOUNT AS klient,  \r\n" + 
-	  		"	  			  		        a.ITEMID AS toode,  \r\n" + 
-	  		"	  		                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting,  \r\n" + 
-	  		"	  			  		        a.SALESQTY AS tellitud,  \r\n" + 
-	  		"	  			  		        a.INVOICEQTY AS sisse,  \r\n" + 
-	  		"	  			  		        (a.SALESQTY - a.INVOICEQTY) AS tarnimata,  \r\n" + 
-	  		"	  			  		        c.Name AS CANCELREASON,  \r\n" + 
-	  		"	  			  		        a.SALESDATE AS lastdate,  \r\n" + 
-	  		"	  			  		        (a.INVOICEAMOUNT / CASE WHEN a.INVOICEQTY <> 0 THEN a.INVOICEQTY ELSE 1 END) AS lastprice,  \r\n" + 
-	  		"	  			  		        a.SALESID AS ordernr,   \r\n" + 
-	  		"	  			  		        ROW_NUMBER() OVER (  \r\n" + 
-	  		"	  			  		            PARTITION BY a.CUSTACCOUNT, a.ITEMID  \r\n" + 
-	  		"	  			  		            ORDER BY a.SALESDATE DESC  \r\n" + 
-	  		"	  			  		        ) AS rn  \r\n" + 
-	  		"	  			  		    FROM BIF03_SALESLINE a \r\n" + 
-	  		"			 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID  \r\n" + 
-	  		"				  		    LEFT JOIN BID44_SALESCANCELREASONS c  \r\n" + 
-	  		"	  			  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID  \r\n" + 
-	  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 120   \r\n" + 
-	  		"	  			  		      AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
-	  		"	  			  		      AND a.SALESSTATUS <> 1" + 
-	  		"	  		) \r\n" + 
-	  		"	  		SELECT * \r\n" + 
-	  		"	  		FROM cte \r\n" + 
-	  		"	  		WHERE rn = 1 order by klient, sorting ,toode ";
-	  
+		//  1. teeme tellimus ja arve listi 
+		  
+		  String cmd = "select SALESID as tell,  INVOICEID as arve from BIF01_CUSTINVOICETRANS b where invoicedate > getdate()-120 group by SALESID,INVOICEID " ;
 
-	    if (isDebug()) System.out.println(cmd2);
+		  String cmd1 = "	 SELECT    a.CUSTACCOUNT AS klient,   a.ITEMID AS toode,    sum(a.INVOICEQTY) AS kogus   FROM BIF03_SALESLINE a  \r\n" + 
+		  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 180 AND a.EG_SALESCANCELREASONID <> 'GKR'   AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
+		  		"	  			  		      AND a.SALESSTATUS <> 1 group by CUSTACCOUNT, ITEMID  \r\n" + 
+		  		"	  						  union  \r\n" + 
+		  		"	  						   SELECT   a.CUSTACCOUNT AS klient, a.SellerItemCode AS toode, sum( a.AmountDespatched) AS kogus \r\n" + 
+		  		"	  			  		    FROM [MJ_EE].[dbo].[Sales_GKR] a  group by CUSTACCOUNT, SellerItemCode " ;
+		  
+			  
+		  
+		  String cmd2 = "   WITH cte AS (  \r\n" + 
+		  		"	  			  		    SELECT    \r\n" + 
+		  		"	  			  		        a.CUSTACCOUNT AS klient,  \r\n" + 
+		  		"	  			  		        a.ITEMID AS toode,  \r\n" + 
+		  		"	  		                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting,  \r\n" + 
+		  		"	  			  		        a.SALESQTY AS tellitud,  \r\n" + 
+		  		"	  			  		        a.INVOICEQTY AS sisse,  \r\n" + 
+		  		"	  			  		        (a.SALESQTY - a.INVOICEQTY) AS tarnimata,  \r\n" + 
+		  		"	  			  		        c.NAME AS CANCELREASON,  \r\n" + 
+		  		"	  			  		        a.SALESDATE AS lastdate,  \r\n" + 
+		  		"	  			  		        (a.INVOICEAMOUNT / CASE WHEN a.INVOICEQTY <> 0 THEN a.INVOICEQTY ELSE 1 END) AS lastprice,  \r\n" + 
+		  		"	  			  		        a.SALESID AS ordernr,  \r\n" + 
+		  		"	  			  		        ROW_NUMBER() OVER (  \r\n" + 
+		  		"	  			  		            PARTITION BY a.CUSTACCOUNT, a.ITEMID  \r\n" + 
+		  		"	  			  		            ORDER BY a.SALESDATE DESC  \r\n" + 
+		  		"	  			  		        ) AS rn  \r\n" + 
+		  		"	  			  		    FROM BIF03_SALESLINE a \r\n" + 
+		  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID  \r\n" + 
+		  		"	  			  		    LEFT JOIN BID44_SALESCANCELREASONS c  \r\n" + 
+		  		"	  			  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID  \r\n" + 
+		  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 180  \r\n" + 
+		  		"	  			  		      AND a.EG_SALESCANCELREASONID <> 'GKR'  \r\n" + 
+		  		"	  			  		      AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
+		  		"	  			  		      AND a.SALESSTATUS <> 1  \r\n" + 
+		  		"	  						  union  \r\n" + 
+		  		"	  						   SELECT    \r\n" + 
+		  		"	  			  		        a.CUSTACCOUNT AS klient,  \r\n" + 
+		  		"	  			  		        a.SellerItemCode AS toode,  \r\n" + 
+		  		"	  		                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting,  \r\n" + 
+		  		"	  			  		        0 AS tellitud,  \r\n" + 
+		  		"	  			  		        a.AmountDespatched AS sisse,  \r\n" + 
+		  		"	  			  		        0 AS tarnimata,  \r\n" + 
+		  		"	  			  		        '' AS CANCELREASON,  \r\n" + 
+		  		"	  			  		        a.DELIVERYDATEACTUAL AS lastdate,  \r\n" + 
+		  		"	  			  		        (a.ItemPrice * (100 - a.DiscountPercent)/100 ) AS lastprice,  \r\n" + 
+		  		"	  			  		        a.orderno AS ordernr, \r\n" + 
+		  		"	  			  		        ROW_NUMBER() OVER (  \r\n" + 
+		  		"	  			  		            PARTITION BY a.CUSTACCOUNT, a.SellerItemCode  \r\n" + 
+		  		"	  			  		            ORDER BY a.DELIVERYDATEACTUAL DESC  \r\n" + 
+		  		"	  			  		        ) AS rn  \r\n" + 
+		  		"	  			  		    FROM [MJ_EE].[dbo].[Sales_GKR] a   \r\n" + 
+		  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.SellerItemCode  \r\n" + 
+		  		"	  			  		)  \r\n" + 
+		  		"	  			  		  \r\n" + 
+		  		"	  			  		SELECT *  \r\n" + 
+		  		"	  			  		FROM cte  \r\n" + 
+		  		"	  			  		WHERE rn = 1 order by klient, sorting ,toode ";
+		  
 
-	    try {
-	    	
-	    	Calendar cal = Calendar.getInstance();
-	    	cal.add(Calendar.DAY_OF_MONTH, -15);
-	    	
-	    	
-	    	
-	    	Connection con = getNewConnection();
-	     	Statement stmt = con.createStatement();
-	        ResultSet rs = stmt.executeQuery(cmd2);
-	
-	      while(rs.next()){
-	        String kliendikood = rs.getString("klient").trim();
-	        String tootekood = rs.getString("toode").trim();
-	        double kogus = rs.getDouble("sisse");
-	        double mata = rs.getDouble("tarnimata");
-		    String reason =  rs.getString("CANCELREASON");
-		    if(reason != null && reason.trim().length() > 0) {
-		    	reason = reason.trim();
-		    } else {
-		    	reason = " ";
+		   // if (isDebug()) System.out.println(cmd2);
+
+		    try {
+		    	
+		    	Calendar cal = Calendar.getInstance();
+		    	cal.add(Calendar.DAY_OF_MONTH, -15);
+		    	
+		    	HashMap<String, String> arveNRid = new HashMap<String,String>();
+
+		    	HashMap<String, Double> last180d = new HashMap<String,Double>();
+		    	
+		    	Connection con = getNewConnection();
+		     	Statement stmt = con.createStatement();
+		
+		    	
+		     	ResultSet rs = stmt.executeQuery(cmd);
+		
+		      while(rs.next()){
+		    	  String tell = rs.getString("tell").trim();
+		    	  
+		    	  if(tell.length() > 9) {
+		    		  tell = tell.substring(0,9);
+		    	  }
+		        arveNRid.put(tell, rs.getString("arve").trim());
+		      }
+		        rs.close();
+		     	
+		        rs = stmt.executeQuery(cmd1);
+		    	
+			      while(rs.next()){
+			    	  last180d.put(rs.getString("klient").trim() + "-" +  rs.getString("toode").trim(), rs.getDouble("kogus"));
+			      }
+			        rs.close();
+		     	
+		     	System.out.println("last180d size " + last180d.size());
+		     	
+		     	 rs = stmt.executeQuery(cmd2);
+		
+		      while(rs.next()){
+		        String kliendikood = rs.getString("klient").trim();
+		        String tootekood = rs.getString("toode").trim();
+		        double kogus = rs.getDouble("sisse");
+		        double mata = rs.getDouble("tarnimata");
+			    String reason =  rs.getString("CANCELREASON");
+			    if(reason != null && reason.trim().length() > 0) {
+			    	reason = reason.trim();
+			    } else {
+			    	reason = " ";
+			    }
+		        
+			    String dateStr = rs.getString("lastdate").substring(0,10);
+			    LocalDate date = LocalDate.parse(dateStr,
+		                 java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+		         long millis = date.atStartOfDay(ZoneId.systemDefault())
+		                           .toInstant()
+		                           .toEpochMilli();
+		         if(millis < cal.getTimeInMillis()) {
+		        	 mata = 0;
+		        	 reason = " ";
+		         }
+			    
+			    
+			    String lastdate = Converter.turn(dateStr); // EESTI CASE
+		               //  lastdate = lastdate.substring(5,10);
+		                 lastdate = lastdate.substring(0,5);
+		                 double lastprice = rs.getDouble("lastprice");
+		                 String ord = rs.getString("ordernr");
+		                 String tell = ord.trim();
+		   	    	  
+		   	    	  if(tell.length() > 9) {
+		   	    		  tell = tell.substring(0,9);
+		   	    	  }
+		                 String arv = arveNRid.get(tell);
+
+		                 if(ord != null && ord.trim().length() > 0 ) {
+		                	 ord = "t: " + ord.trim();
+		                 }else {
+		                	 ord = "";
+		                 }
+		                 
+		                 if(arv != null && arv.trim().length() > 0 ) {
+		                	 arv = "a: " + arv.trim();
+		                 }else {
+		                	 arv = "";
+		                 }
+		                 
+		         String lastdoc = (ord + " " + arv).trim();
+		         
+		         double sold180 = 0;
+		         Double aaa = last180d.get(kliendikood + "-" + tootekood);
+		         if(aaa > 0) {
+		        	 sold180 = aaa;
+		         }
+		        
+		        CustProd cp = new CustProd(kliendikood, tootekood, kogus , sold180 , 0,lastdate,lastprice,mata,0,reason);
+		        if(lastdoc.length() > 0) {
+	                cp.setAbiKood(lastdoc);
+		        }
+		        custProds.add(cp);
+		        prods.addElement(tootekood);
+		      }
+		      rs.close();
+		      stmt.close();
+		      con.close();
+		    } catch (Exception e){
+		      getParent().showError(e);
 		    }
-	        
-		    String dateStr = rs.getString("lastdate").substring(0,10);
-		    LocalDate date = LocalDate.parse(dateStr,
-	                 java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-	         long millis = date.atStartOfDay(ZoneId.systemDefault())
-	                           .toInstant()
-	                           .toEpochMilli();
-	         if(millis < cal.getTimeInMillis()) {
-	        	 mata = 0;
-	        	 reason = " ";
-	         }
-		    
-		    
-		    String lastdate = Converter.turn(dateStr); // EESTI CASE
-	             
-		         lastdate = lastdate.substring(0,5);
-	                 double lastprice = rs.getDouble("lastprice");
-	                 String lastdoc = rs.getString("ordernr");
-	                 if(lastdoc != null && lastdoc.trim().length() > 0 ) {
-	                	 lastdoc = "t: " + lastdoc.trim();
-	                 }else {
-	                	 lastdoc = "";
-	                 }
-	                 
-	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , 0,0,lastdate,lastprice,mata,0,reason);
-                cp.setAbiKood(lastdoc);
-                
-	        custProds.add(cp);
-	        prods.addElement(tootekood);
-	      }
-	      rs.close();
-	      stmt.close();
-	      con.close();
-	    } catch (Exception e){
-	      getParent().showError(e);
-	    }
-  }
+	  }
+	  
   
   
   private Map<String, Map<String, Double>> manaPlans;
@@ -2183,7 +2262,7 @@ private HashSet<String> inTT = null;
 
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
-	      String nimi = rs.getString("nimetus").trim();
+	      String nimi = Converter.cleanLitLatEst(rs.getString("nimetus").trim());
 	      nimi = nimi.replaceAll("NESTLE", "NES");
 	      nimi = nimi.replaceAll("BARILLA", "BAR");
 	      nimi = nimi.replaceAll("IMPERIAL", "IMP");

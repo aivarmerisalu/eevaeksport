@@ -1714,7 +1714,7 @@ private HashSet<String> inTT = null;
 
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
-	      String nimi = rs.getString("nimetus").trim();
+	      String nimi = Converter.cleanLitLatEst(rs.getString("nimetus").trim());
 	      nimi = nimi.replaceAll("NESTLE", "NES");
 	      nimi = nimi.replaceAll("BARILLA", "BAR");
 	      nimi = nimi.replaceAll("IMPERIAL", "IMP");

@@ -1576,7 +1576,7 @@ try{
         String agen = ags.elementAt(o) + "";
         if (agen != null) {
           cust.addAgent(new Agent(agen.trim())); 
-          if( agen.trim().equals("146")) {
+          if( agen.trim().equals("146") || agen.trim().equals("165") || agen.trim().equals("167")) {
         	  laks = false;
           }
          

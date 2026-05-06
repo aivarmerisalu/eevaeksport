@@ -1034,7 +1034,7 @@ public class EksportPanel extends JPanel implements ActionListener,
             
                   HashSet agprods =  ProductFile(agentCode, products, stocks);
 
-                  	System.out.println("Siin on asi 2");
+                 // 	System.out.println("Siin on asi 2");
                   	
                 //}
                     if(!parent.isSendHalf()){
@@ -1050,9 +1050,9 @@ public class EksportPanel extends JPanel implements ActionListener,
                 }
                 
                 try {
-                	System.out.println("enne " );
+                	//System.out.println("enne " );
                   DealerFiles(customers, agentCode);
-                  System.out.println("p�rast " );
+                  //System.out.println("p�rast " );
                 
                   
                   
@@ -1341,9 +1341,9 @@ public class EksportPanel extends JPanel implements ActionListener,
 	            		|| driver.getDriverVersion().equals("EugestaEST")
 					  ){
                 	 
-                	  System.out.println("Teen Fixi " + jsonDate(Calendar.getInstance().getTime()) );
+                	//  System.out.println("Teen Fixi " + jsonDate(Calendar.getInstance().getTime()) );
                    FixedAssortmentFile(agentCode, customers,fixed,agprods);
-                   System.out.println("Teen Fixi lõpp " + jsonDate(Calendar.getInstance().getTime()) );
+                  // System.out.println("Teen Fixi lõpp " + jsonDate(Calendar.getInstance().getTime()) );
                  }
                   if(driver.getDriverVersion().equals("LeiburLat") || driver.getDriverVersion().equals("LeiburLIT") 
                 		  || driver.getDriverVersion().equals("Leibur") || driver.getDriverVersion().equals("SAFSaaremaa")
@@ -3428,7 +3428,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
        //teeme HasMapi valmis koodidega 
        
        HashMap sordid = new HashMap();
-       System.out.println("Sordid alustame ");
+    //   System.out.println("Sordid alustame ");
       for(int e = 0 ; e < asi.size(); e++){
     	  MatrixLine mline = (MatrixLine) asi.elementAt(e);
     	  String key = mline.getCliGroup();
@@ -3664,7 +3664,11 @@ if (getProps().getProperty("no.matrixagent") != null) {
           
           if (cust.hasAgent(agentCode)){
             Agent age = (Agent) cust.getAgents().get(agentCode);
-            //	System.out.println(cust.getName() +" agent " + age.getID() + " visit " + age.getVisit()); 
+            
+            if(cust.getID().equals("5902315560")) {
+
+                System.out.println(cust.getName() +" agent " + age.getID() + " visit " + age.getVisit()); 	
+            }
             if( age!=null && age.getVisit() != null && age.getVisit().trim().length()>0){
               cust.setVisitabi(clearVis(age.getVisit()));
             }
@@ -4455,7 +4459,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
       Iterator custs = customers.values().iterator();
       StringBuffer sb = new StringBuffer();
       TreeMap dealers = driver.getDealers();
-      System.out.println("dealers" + dealers);
+     // System.out.println("dealers" + dealers);
       if (dealers != null){
         while(custs.hasNext()){
           Customer cust = (Customer)custs.next();
@@ -4482,7 +4486,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
           }
 
           DealerProduct dr = driver.getDealerProductsList();
-          System.out.println("driver.getDealerProductsList() " + dr);
+         // System.out.println("driver.getDealerProductsList() " + dr);
           
           zip.addFile(FILE_DEALER_PRODUCTS, dr.getCSVData());
 
@@ -4549,7 +4553,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
 
     private void DebtFile(String agentCode, Vector debts, HashMap custHash,HashMap custPayer) throws SQLException{
         String       fileName = "debt.txt";
-        System.out.println("Debt Start " + agentCode);
+      //  System.out.println("Debt Start " + agentCode);
   
 
         StringBuffer buf = new StringBuffer();
@@ -4607,7 +4611,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
         } catch (Exception e) {
             EksportFrame.showError(e);
         }
-        System.out.println("Debt end");
+     //   System.out.println("Debt end");
     }
 
 
@@ -6039,7 +6043,7 @@ while (itra.hasNext()){
         } catch (Exception e) {
             EksportFrame.showError(e);
         }
-System.out.println("cp ending");
+// System.out.println("cp ending");
         // hideStatus();
     }
 

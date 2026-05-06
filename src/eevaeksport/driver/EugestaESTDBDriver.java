@@ -181,7 +181,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	    	
 	    	String pictssou = parent.getProps().getProperty("pict.dir");
 	  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
-	       
+	       this.getProducts(null);
 	  	 try {
 	     	  
 	          File f = new File(pictspda +"list.txt");
@@ -193,31 +193,30 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	             	(new File ( pictspda + ff2[i])).delete(); 
 	             }
 
-	  		 TreeMap prods = this.getProducts(null);
 	         StringBuffer buf = new StringBuffer();
-	         Iterator enume = prods.keySet().iterator();
+	         Iterator enume = prodcodes.iterator();
 	    
 	         while (enume.hasNext()) {
-	    	    	String asi = (String)enume.next();
-	    	    	Product prod = (Product)prods.get(asi);
-	    	    	String toode = prod.getID().trim();  
-	               if(toode.length() > 0){
+	    	   
+	    	    	String toode = (String)enume.next();
+	    	    	
+	    	    	
+	             if(toode.length() > 0){
 	                	
 	    	   	  res2 = new File (pictssou);
 	              ff2 = res2.list();
 	             
 	         	 for(int i = 0;ff2.length>i;i++){
 	             	if( ff2[i].startsWith(toode+".")){
-	               // System.out.println("pilt olemas " + ff2[i]);
-	            	File in = new File ( pictssou + ff2[i]); 
+	             	File in = new File ( pictssou + ff2[i]); 
 	              	if(in.isFile()){
-	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+	              	File inpda = new File ( pictspda + toode+ ".jpg"); 
 	              	try {
 	                  	Converter.shrinkAndCopyFile(in,inpda,400);
-	                    	buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+	                    	buf.append(toode+".jpg;"  + inpda.length() + "\n");
 	                   
 	              	} catch(Exception e) {
-	              		//System.out.println("prod.getID() " + prod.getID());
+	              		System.out.println("pahasti prod.getID() " + toode);
 	              		e.printStackTrace();
 	              	}
 	             	}
@@ -502,7 +501,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
          }catch(Exception r) {
 		 r.printStackTrace();  
 	     }	
-	System.out.println("Active Promos "  + activeXLSPromos.toString());
+	//System.out.println("Active Promos "  + activeXLSPromos.toString());
 
   }
   
@@ -706,7 +705,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
    		  if(usedProds == null){
    			  this.getProducts(null);
    		  }
-           if (isDebug()) System.out.println(cmd);
+          // if (isDebug()) System.out.println(cmd);
            Connection con = getNewConnection();
               Statement stm = con.createStatement();
               ResultSet rst = stm.executeQuery(cmd);
@@ -744,7 +743,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 
     	  String cmd = " select inventlocationid  as ladu , name from EPASAULE_REGIONS";
 
-           if (isDebug()) System.out.println(cmd);
+         //  if (isDebug()) System.out.println(cmd);
            Connection con = getNewConnection();
               Statement stm = con.createStatement();
               ResultSet rst = stm.executeQuery(cmd);
@@ -763,7 +762,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
       }
 
       
-      System.out.println("Dealers size :" + dealers.size());
+     // System.out.println("Dealers size :" + dealers.size());
       
 	  return dealers;
 	    }
@@ -789,71 +788,105 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   private void makeCustprod(){
 	 
 	  
-	  String cmd2 = "	   WITH cte AS ( \r\n" + 
-	  		"	  		    SELECT   \r\n" + 
-	  		"	  		        a.CUSTACCOUNT AS klient, \r\n" + 
-	  		"	  		        a.ITEMID AS toode, \r\n" + 
-	  		"                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting, " +
-	  		"	  		        a.SALESQTY AS tellitud, \r\n" + 
-	  		"	  		        a.INVOICEQTY AS sisse, \r\n" + 
-	  		"	  		        (a.SALESQTY - a.INVOICEQTY) AS tarnimata, \r\n" + 
-	  		"	  		        c.NAME AS CANCELREASON, \r\n" + 
-	  		"	  		        a.SALESDATE AS lastdate, \r\n" + 
-	  		"	  		        (a.INVOICEAMOUNT / CASE WHEN a.INVOICEQTY <> 0 THEN a.INVOICEQTY ELSE 1 END) AS lastprice, \r\n" + 
-	  		"	  		        a.SALESID AS ordernr, \r\n" + 
-	  		"	  		        b.INVOICEID AS invoicenr, \r\n" + 
-	  		"	  		        ROW_NUMBER() OVER ( \r\n" + 
-	  		"	  		            PARTITION BY a.CUSTACCOUNT, a.ITEMID \r\n" + 
-	  		"	  		            ORDER BY a.SALESDATE DESC \r\n" + 
-	  		"	  		        ) AS rn \r\n" + 
-	  		"	  		    FROM BIF03_SALESLINE a \r\n" +
-	  		" Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID " +
-	  		"	  		    LEFT JOIN BIF01_CUSTINVOICETRANS b \r\n" + 
-	  		"	  		        ON LEFT(a.SALESID,9) = LEFT(b.SALESID,9) \r\n" + 
-	  		"	  		    LEFT JOIN BID44_SALESCANCELREASONS c \r\n" + 
-	  		"	  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID \r\n" + 
-	  		"	  		    WHERE a.SALESDATE > GETDATE() - 180 \r\n" + 
-	  		"	  		      AND a.EG_SALESCANCELREASONID <> 'GKR' \r\n" + 
-	  		"	  		      AND a.INVENTLOCATIONID != 'STORNO' \r\n" + 
-	  		"	  		      AND a.SALESSTATUS <> 1 \r\n" + 
-	  		"				  union \r\n" + 
-	  		"				   SELECT   \r\n" + 
-	  		"	  		        a.CUSTACCOUNT AS klient, \r\n" + 
-	  		"	  		        a.SellerItemCode AS toode, \r\n" + 
-	  		"                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting, " +
-	  		"	  		        0 AS tellitud, \r\n" + 
-	  		"	  		        a.AmountDespatched AS sisse, \r\n" + 
-	  		"	  		        0 AS tarnimata, \r\n" + 
-	  		"	  		        '' AS CANCELREASON, \r\n" + 
-	  		"	  		        a.DELIVERYDATEACTUAL AS lastdate, \r\n" + 
-	  		"	  		        (a.ItemPrice * (100 - a.DiscountPercent)/100 ) AS lastprice, \r\n" + 
-	  		"	  		        a.orderno AS ordernr, \r\n" + 
-	  		"	  		        '' AS invoicenr, \r\n" + 
-	  		"	  		        ROW_NUMBER() OVER ( \r\n" + 
-	  		"	  		            PARTITION BY a.CUSTACCOUNT, a.SellerItemCode \r\n" + 
-	  		"	  		            ORDER BY a.DELIVERYDATEACTUAL DESC \r\n" + 
-	  		"	  		        ) AS rn \r\n" + 
-	  		"	  		    FROM [MJ_EE].[dbo].[Sales_GKR] a  \r\n" + 
-	  		" Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.SellerItemCode " +
-	  		"	  		) \r\n" + 
-	  		"	  		 \r\n" + 
-	  		"	  		SELECT * \r\n" + 
-	  		"	  		FROM cte \r\n" + 
-	  		"	  		WHERE rn = 1 order by klient, sorting ,toode ";
+	//  1. teeme tellimus ja arve listi 
+	  
+	  String cmd = "select SALESID as tell,  INVOICEID as arve from BIF01_CUSTINVOICETRANS b where invoicedate > getdate()-120 group by SALESID,INVOICEID " ;
+
+	  String cmd1 = "	 SELECT    a.CUSTACCOUNT AS klient,   a.ITEMID AS toode,    sum(a.INVOICEQTY) AS kogus   FROM BIF03_SALESLINE a  \r\n" + 
+	  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 180 AND a.EG_SALESCANCELREASONID <> 'GKR'   AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
+	  		"	  			  		      AND a.SALESSTATUS <> 1 group by CUSTACCOUNT, ITEMID  \r\n" + 
+	  		"	  						  union  \r\n" + 
+	  		"	  						   SELECT   a.CUSTACCOUNT AS klient, a.SellerItemCode AS toode, sum( a.AmountDespatched) AS kogus \r\n" + 
+	  		"	  			  		    FROM [MJ_EE].[dbo].[Sales_GKR] a  group by CUSTACCOUNT, SellerItemCode " ;
+	  
+		  
+	  
+	  String cmd2 = "   WITH cte AS (  \r\n" + 
+	  		"	  			  		    SELECT    \r\n" + 
+	  		"	  			  		        a.CUSTACCOUNT AS klient,  \r\n" + 
+	  		"	  			  		        a.ITEMID AS toode,  \r\n" + 
+	  		"	  		                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting,  \r\n" + 
+	  		"	  			  		        a.SALESQTY AS tellitud,  \r\n" + 
+	  		"	  			  		        a.INVOICEQTY AS sisse,  \r\n" + 
+	  		"	  			  		        (a.SALESQTY - a.INVOICEQTY) AS tarnimata,  \r\n" + 
+	  		"	  			  		        c.NAME AS CANCELREASON,  \r\n" + 
+	  		"	  			  		        a.SALESDATE AS lastdate,  \r\n" + 
+	  		"	  			  		        (a.INVOICEAMOUNT / CASE WHEN a.INVOICEQTY <> 0 THEN a.INVOICEQTY ELSE 1 END) AS lastprice,  \r\n" + 
+	  		"	  			  		        a.SALESID AS ordernr,  \r\n" + 
+	  		"	  			  		        ROW_NUMBER() OVER (  \r\n" + 
+	  		"	  			  		            PARTITION BY a.CUSTACCOUNT, a.ITEMID  \r\n" + 
+	  		"	  			  		            ORDER BY a.SALESDATE DESC  \r\n" + 
+	  		"	  			  		        ) AS rn  \r\n" + 
+	  		"	  			  		    FROM BIF03_SALESLINE a \r\n" + 
+	  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID  \r\n" + 
+	  		"	  			  		    LEFT JOIN BID44_SALESCANCELREASONS c  \r\n" + 
+	  		"	  			  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID  \r\n" + 
+	  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 180  \r\n" + 
+	  		"	  			  		      AND a.EG_SALESCANCELREASONID <> 'GKR'  \r\n" + 
+	  		"	  			  		      AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
+	  		"	  			  		      AND a.SALESSTATUS <> 1  \r\n" + 
+	  		"	  						  union  \r\n" + 
+	  		"	  						   SELECT    \r\n" + 
+	  		"	  			  		        a.CUSTACCOUNT AS klient,  \r\n" + 
+	  		"	  			  		        a.SellerItemCode AS toode,  \r\n" + 
+	  		"	  		                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting,  \r\n" + 
+	  		"	  			  		        0 AS tellitud,  \r\n" + 
+	  		"	  			  		        a.AmountDespatched AS sisse,  \r\n" + 
+	  		"	  			  		        0 AS tarnimata,  \r\n" + 
+	  		"	  			  		        '' AS CANCELREASON,  \r\n" + 
+	  		"	  			  		        a.DELIVERYDATEACTUAL AS lastdate,  \r\n" + 
+	  		"	  			  		        (a.ItemPrice * (100 - a.DiscountPercent)/100 ) AS lastprice,  \r\n" + 
+	  		"	  			  		        a.orderno AS ordernr, \r\n" + 
+	  		"	  			  		        ROW_NUMBER() OVER (  \r\n" + 
+	  		"	  			  		            PARTITION BY a.CUSTACCOUNT, a.SellerItemCode  \r\n" + 
+	  		"	  			  		            ORDER BY a.DELIVERYDATEACTUAL DESC  \r\n" + 
+	  		"	  			  		        ) AS rn  \r\n" + 
+	  		"	  			  		    FROM [MJ_EE].[dbo].[Sales_GKR] a   \r\n" + 
+	  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.SellerItemCode  \r\n" + 
+	  		"	  			  		)  \r\n" + 
+	  		"	  			  		  \r\n" + 
+	  		"	  			  		SELECT *  \r\n" + 
+	  		"	  			  		FROM cte  \r\n" + 
+	  		"	  			  		WHERE rn = 1 order by klient, sorting ,toode ";
 	  
 
-	    if (isDebug()) System.out.println(cmd2);
+	   // if (isDebug()) System.out.println(cmd2);
 
 	    try {
 	    	
 	    	Calendar cal = Calendar.getInstance();
 	    	cal.add(Calendar.DAY_OF_MONTH, -15);
 	    	
-	    	
+	    	HashMap<String, String> arveNRid = new HashMap<String,String>();
+
+	    	HashMap<String, Double> last180d = new HashMap<String,Double>();
 	    	
 	    	Connection con = getNewConnection();
 	     	Statement stmt = con.createStatement();
-	        ResultSet rs = stmt.executeQuery(cmd2);
+	
+	    	
+	     	ResultSet rs = stmt.executeQuery(cmd);
+	
+	      while(rs.next()){
+	    	  String tell = rs.getString("tell").trim();
+	    	  
+	    	  if(tell.length() > 9) {
+	    		  tell = tell.substring(0,9);
+	    	  }
+	        arveNRid.put(tell, rs.getString("arve").trim());
+	      }
+	        rs.close();
+	     	
+	        rs = stmt.executeQuery(cmd1);
+	    	
+		      while(rs.next()){
+		    	  last180d.put(rs.getString("klient").trim() + "-" +  rs.getString("toode").trim(), rs.getDouble("kogus"));
+		      }
+		        rs.close();
+	     	
+	     	System.out.println("last180d size " + last180d.size());
+	     	
+	     	 rs = stmt.executeQuery(cmd2);
 	
 	      while(rs.next()){
 	        String kliendikood = rs.getString("klient").trim();
@@ -885,26 +918,37 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	                 lastdate = lastdate.substring(0,5);
 	                 double lastprice = rs.getDouble("lastprice");
 	                 String ord = rs.getString("ordernr");
+	                 String tell = ord.trim();
+	   	    	  
+	   	    	  if(tell.length() > 9) {
+	   	    		  tell = tell.substring(0,9);
+	   	    	  }
+	                 String arv = arveNRid.get(tell);
+
 	                 if(ord != null && ord.trim().length() > 0 ) {
 	                	 ord = "t: " + ord.trim();
 	                 }else {
 	                	 ord = "";
 	                 }
 	                 
-	                 String arv = rs.getString("invoicenr");
 	                 if(arv != null && arv.trim().length() > 0 ) {
 	                	 arv = "a: " + arv.trim();
 	                 }else {
 	                	 arv = "";
 	                 }
 	                 
-	         String lastdoc = ord + " " + arv;
-	        // String lastdoc2 = " t:" + rs.getString("lastdoc2").trim();
-	         //lastdoc = lastdoc + " "+ lastdoc2;
-	      	               
-	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , 0,0,lastdate,lastprice,mata,0,reason);
+	         String lastdoc = (ord + " " + arv).trim();
+	         
+	         double sold180 = 0;
+	         Double aaa = last180d.get(kliendikood + "-" + tootekood);
+	         if(aaa > 0) {
+	        	 sold180 = aaa;
+	         }
+	        
+	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , sold180 , 0,lastdate,lastprice,mata,0,reason);
+	        if(lastdoc.length() > 0) {
                 cp.setAbiKood(lastdoc);
-	        //cp.setRedline(rs.getString("date"));
+	        }
 	        custProds.add(cp);
 	        prods.addElement(tootekood);
 	      }
@@ -1444,7 +1488,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	            customerDeliveries.put(name, done + remaining);
 	            customerDeliveries.put(name+"rem", remaining);
 	            
-	            System.out.println(name + " -> done: " + done + ", remaining: " + remaining);
+	         //   System.out.println(name + " -> done: " + done + ", remaining: " + remaining);
 	        }
 	    	  
       		} catch(Exception e) {e.printStackTrace();}
@@ -1491,7 +1535,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 					+ "% Plan.: " +(int) 25 + " €  Sales.: " + 5 + " €||");
    
 	  
-	  res.put("1010917501", asi + asi2);
+	 // res.put("1010917501", asi + asi2);
 	  return res ;
   }
 	
@@ -1803,6 +1847,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
          Vector<Agent> vv = cliags.get(cust.getID());
          
          for(Agent agentL : vv) {
+        	 if(!cust.hasAgent(agentL.getID())) { // kui on olemas juba siis ei kirjuta yle
           cust.addAgent(agentL);
           if(agentL.nextContact != null) {
               cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
@@ -1820,27 +1865,29 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   			   while(en.hasMoreElements()){
   				 String age = (String) en.nextElement();
   				
+  				// if(cust.getID().equals("5902315560")) {
+  					// System.out.println("age " + age + " " + agentL.getVisit());
+  				 //}
+  				 
   				 Agent ee = new Agent(age);
 
   		          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
   				     ee.setVisit(agentL.getVisit());// panene ka asendatava päeva plaani juurde
   		          }
-  		         if( cust.hasAgent(age) ) {
-  		        	if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-  		        	   Agent aa = cust.getAgent(age);
-  		        	   aa.setVisit(agentL.getVisit());
-  		        	}
-  		         }else {
-  	  				 cust.addAgent(ee); 
-  		         }
+  		         	 cust.addAgent(ee); 
+  		         
   			   }
   	       }
           }
+         }
          }
      	}
       
 
 
+		// if(cust.getID().equals("1171065007")) {
+			// System.out.println("age " + cust.getAgents());
+		// }
         
        
         if(de) {
@@ -2019,6 +2066,7 @@ String arve = rs.getString("bill");
         }
         
         cust.setDealer(new Dealer("03N"));
+        
         
         if(displays != null && displays.get(cust.getID()) != null) {
         	cust.setInfo(displays.get(cust.getID()));
@@ -2263,7 +2311,7 @@ private HashSet<String> inTT = null;
 
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
-	      String nimi = rs.getString("nimetus").trim();
+	      String nimi = Converter.cleanLitLatEst(rs.getString("nimetus").trim());
 	      nimi = nimi.replaceAll("NESTLE", "NES");
 	      nimi = nimi.replaceAll("BARILLA", "BAR");
 	      nimi = nimi.replaceAll("IMPERIAL", "IMP");

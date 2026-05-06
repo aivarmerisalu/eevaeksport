@@ -1853,7 +1853,7 @@ public class Converter {
 							}
 						}
 					
-					//	System.out.println("ea" + ea + "ni "+ ni);
+						System.out.println("ea" + ea + "ni "+ ni);
 						
 						
 						for (int a = r; a < row.getLastCellNum(); a++) {
@@ -1866,7 +1866,9 @@ public class Converter {
 								if(gg.equals("A1M Võru")) {
 									break;
 								}
-							
+								if(gg.equals("Võru")) {
+									break;
+								}
 							} catch (Exception e) {
 								// System.out.println(row.getCell((short)a).getNumericCellValue());
 							}
@@ -1902,7 +1904,7 @@ public class Converter {
 							
                           String value =  formatter.formatCellValue(row.getCell(a));
                        
-                           if(value.trim().length() > 0 && value.trim().equals("1")) {
+                           if(value.trim().length() > 0 && (value.trim().equals("1") ||  value.toLowerCase().trim().equals("x"))) {
                        //    System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
                            
 							if(res.get(pood) != null){
