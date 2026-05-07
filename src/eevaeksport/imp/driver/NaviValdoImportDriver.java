@@ -479,7 +479,9 @@ double kordaja = 1;
 	        		  addLine(line, read, doc, coun, order, repr, kordaja); 
 	        		  addNumLine(); 
 	        	  }
-	          	  signas.remove(toode+ " " + line.getKogus()); // topelt ridade vastu tehtud ...
+	        	  if(line.getKogus() > 0) {
+	          	  signas.remove(toode+ " " + line.getKogus()); // topelt ridade vastu tehtud tellimuste puhul  ...
+	        	  }
 	          }
 	          }
 

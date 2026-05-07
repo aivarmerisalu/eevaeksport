@@ -482,7 +482,9 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	        		  
 	        		  addNumLine(); 
 	        	  }
-	          	  signas.remove(toode+ " " + line.getKogus()); // topelt ridade vastu tehtud ...
+	        	  if(line.getKogus() > 0) {
+		          	  signas.remove(toode+ " " + line.getKogus()); // topelt ridade vastu tehtud tellimuste puhul  ...
+		        	  }
 	          }
 	          }
 

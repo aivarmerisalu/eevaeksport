@@ -1,6 +1,7 @@
 package eevaeksport.driver;
 
 import eevaeksport.Agent;
+import eevaeksport.CustProd;
 import eevaeksport.Customer;
 import eevaeksport.Debt;
 import eevaeksport.EksportPanel;
@@ -17,6 +18,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.json.simple.JSONObject;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,18 +26,28 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -62,20 +74,18 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
             "GetItems",
             "GetPriceList",
             "GetPromotions",
+            "GetSalesHistory",
             "GetShipToAddress",
             "GetShipToAddressRoute"
     };
 
     /** Paging rule */
-    private static final int MAX_OBJECTS_PER_FILE = 250;
+    private static final int MAX_OBJECTS_PER_FILE = 5000;
 
     /* =========================
        Public API
        ========================= */
 
-    public void runAllExports() {
-        downloadData(null);
-    }
 
     public void downloadData(String operation) {
         if (operation == null) {
@@ -86,10 +96,67 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         }
 
         try {
-            String json = callOperation(operation);
+        	
+        	if(operation.equals("GetSalesHistory")) {
+        		
 
-            // 🔴 CHANGED LINE (paging-aware save)
-            saveFilePaged(operation, json, MAX_OBJECTS_PER_FILE);
+        		        DateTimeFormatter apiFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        		        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+
+        		        // Current week start (Monday)
+        		        LocalDate currentWeekStart =
+        		                LocalDate.now().with(DayOfWeek.MONDAY);
+
+        		        // Last 20 weeks including current week
+        		        for (int i = 0; i < 20; i++) {
+
+        		            LocalDate fromDate = currentWeekStart.minusWeeks(i);
+        		            LocalDate toDate = fromDate.plusDays(6);
+
+        		            int weekNumber = fromDate.get(weekFields.weekOfWeekBasedYear());
+        		            int weekYear = fromDate.get(weekFields.weekBasedYear());
+
+        		            // WWYYYY
+        		            String filename = String.format(
+        		                    "%s%02d%d",
+        		                    operation,
+        		                    weekNumber,
+        		                    weekYear
+        		            );
+
+        		            JSONObject js = new JSONObject();
+        		            js.put("FromEntryNo", 0);
+        		            js.put("FromDate", fromDate.format(apiFormatter));
+        		            js.put("ToDate", toDate.format(apiFormatter));
+        		            js.put("ItemNo", "");
+        		            js.put("Limit", 10000);
+
+
+        		            File file = new File("data" + File.separator + filename + ".json");
+        		            if(i > 1) {
+        		            	if(!file.exists()) {
+
+                		            String json = callOperation(operation, js.toJSONString());
+                              // al üleeelmiseid nädalaid üle ei kirjuta
+                		            saveSingleFile(filename, json);
+        		            	}
+        		            }else {
+
+            		            String json = callOperation(operation, js.toJSONString());
+            		            saveSingleFile(filename, json);
+        		            }
+
+        		            System.out.println("Saved: " + filename + ".json");
+        		        }
+        		    
+        		    
+
+
+        	 } else {
+		        String json = callOperation(operation, null);
+		         saveFilePaged(operation, json, MAX_OBJECTS_PER_FILE);
+        	}
 
         } catch (Exception e) {
             System.err.println("Failed to download data for operation: " + operation);
@@ -100,9 +167,6 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 	    pass = getParent().getProps().getProperty("rest.pass");
 	    rcompany = getParent().getProps().getProperty("rest.companyx");
 	     
-  //  NF.setMinimumFractionDigits(2);
-   // NF.setMaximumFractionDigits(2);
-    System.out.println("Tere ");
   }
 	  String user =  null;
 	  String pass = null;
@@ -188,7 +252,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
        CORE NTLM SOAP CALL
        ========================= */
 
-    public String callOperation(String operation) throws Exception {
+    public String callOperation(String operation, String json) throws Exception {
 
         String serviceUrl = parent.getProps().getProperty("api.SERVICE_URL");
         String namespace  = parent.getProps().getProperty("api.NAMESPACE");
@@ -213,6 +277,10 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
             post.setHeader("SOAPAction", namespace + ":" + operation);
 
             String soapEnvelope = buildSoapEnvelope(namespace, operation);
+            if(json != null) {
+            	soapEnvelope = buildSoapEnvelope(namespace, operation, json);
+            }
+            
             post.setEntity(new StringEntity(soapEnvelope, StandardCharsets.UTF_8));
 
             try (CloseableHttpResponse response = client.execute(post);
@@ -223,6 +291,18 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         }
     }
 
+    public static void printInputStream(InputStream inputStream) throws Exception {
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        }
+    }
     /* =========================
        SOAP HELPERS
        ========================= */
@@ -237,6 +317,24 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                "</soapenv:Envelope>";
     }
 
+    private String buildSoapEnvelope(
+            String namespace,
+            String operation,
+            String jsonParams
+    ) {
+
+        return
+            "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
+            "xmlns:ep=\"" + namespace + "\">" +
+            "<soapenv:Header/>" +
+            "<soapenv:Body>" +
+                "<ep:" + operation + ">" +
+                    "<ep:jsonRequest>" + (jsonParams) + "</ep:jsonRequest>" +
+                "</ep:" + operation + ">" +
+            "</soapenv:Body>" +
+            "</soapenv:Envelope>";
+    }
+    
     private String extractReturnValue(InputStream xmlStream) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -247,7 +345,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         NodeList nodes = document.getElementsByTagName("return_value");
 
         if (nodes.getLength() == 0) {
-            throw new RuntimeException("SOAP response does not contain <return_value>");
+            throw new RuntimeException("SOAP response does not contain <return_value>" );
         }
 
         StringBuilder sb = new StringBuilder();
@@ -292,7 +390,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 			}
 			
 	  //System.out.println("Managersize " + tm.size());
-	
+			
 	   return tm;
 	 }
     
@@ -594,7 +692,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
                     // ===== ASSIGN SALESPERSONS BASED ON customerShipToCode =====
                     List<String> salespersons = shipToMap.get(number);
-                    System.out.println("Agent " + salespersons);
+                 //   System.out.println("Agent " + salespersons);
                     
                     
                     List<Agent> salespersonsRoute = shipToRouteMap.get(number);
@@ -771,6 +869,81 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         return tm;
     }
 
+
+    public Vector getCustomerProductsList(String agentCode) {
+    	
+
+    	Vector res = new Vector();
+
+                String operation = "GetSalesHistory";
+
+                WeekFields weekFields = WeekFields.ISO;
+
+                LocalDate currentWeekStart =
+                        LocalDate.now().with(DayOfWeek.MONDAY);
+
+                for (int r = 0; r < 20; r++) {
+
+                    LocalDate weekDate = currentWeekStart.minusWeeks(r);
+
+                    int weekNumber =
+                            weekDate.get(weekFields.weekOfWeekBasedYear());
+
+                    int weekYear =
+                            weekDate.get(weekFields.weekBasedYear());
+
+                    String filename = String.format(
+                            "%s%02d%d.json",
+                            operation,
+                            weekNumber,
+                            weekYear
+                    );
+
+
+                    File fil = new File("data/GetSalesHistory" + weekNumber + weekYear + ".json");
+
+                    try {
+                    	
+                    //	{"header":{"requestedLimit":10000,"processedRecordCount":13,"allRecordsExported":true,"fromDate":"2
+                    	//026-04-06","toDate":"2026-04-12","toEntryNo":9105},
+                    	//"data":[{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0203117",
+                    	//"quantity":-2.00,"postingDate":"2026-02-04","entryNo":9093},{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0203427","quantity":-2.00,"postingDate":"2026-02-04","entryNo":9094},{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0203221","quantity":-4.00,"postingDate":"2026-02-04","entryNo":9095},{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0203217","quantity":-8.00,"postingDate":"2026-02-04","entryNo":9096},{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0104003","quantity":-2.00,"postingDate":"2026-02-04","entryNo":9097},{"customerShipToCode":"16141952_88","orderNo":"D3861729","shipmentNo":"DR25185806","itemNo":"1105004","quantity":-10.00,"postingDate":"2026-04-01","entryNo":9098},{"customerShipToCode":"16141952_88","orderNo":"D3861729","shipmentNo":"DR25185806","itemNo":"0206791","quantity":-16.00,"postingDate":"2026-04-01","entryNo":9099},{"customerShipToCode":"16141952_88","orderNo":"D3861729","shipmentNo":"DR25185806","itemNo":"0206792","quantity":-16.00,"postingDate":"2026-04-01","entryNo":9100},{"customerShipToCode":"16141952_88","orderNo":"D3861729","shipmentNo":"DR25185806","itemNo":"0206793","quantity":-16.00,"postingDate":"2026-04-01","entryNo":9101},{"customerShipToCode":"16141952_88","orderNo":"DAG923307","shipmentNo":"DAG923307","itemNo":"1105004","quantity":5.00,"postingDate":"2026-04-01","entryNo":9102},{"customerShipToCode":"16141952_88","orderNo":"DAG923307","shipmentNo":"DAG923307","itemNo":"0206791","quantity":16.00,"postingDate":"2026-04-01","entryNo":9103},{"customerShipToCode":"16141952_88","orderNo":"DAG923307","shipmentNo":"DAG923307","itemNo":"0206792","quantity":16.00,"postingDate":"2026-04-01","entryNo":9104},{"customerShipToCode":"16141952_88","orderNo":"DAG923307","shipmentNo":"DAG923307","itemNo":"0206793","quantity":16.00,"postingDate":"2026-04-01","entryNo":9105}]}
+                    	 org.json.simple.JSONObject hisData =
+                                 (org.json.simple.JSONObject) Converter.readJSONFile(fil.getPath());
+
+                    	
+                        org.json.simple.JSONArray hisValues =
+                                (org.json.simple.JSONArray) hisData.get("data") ;
+
+                        for (int i = 0; i < hisValues.size(); i++) {
+                            org.json.simple.JSONObject hisObj =
+                                    (org.json.simple.JSONObject) hisValues.get(i);
+
+                            String cuid = (String) hisObj.get("customerShipToCode");
+                            String shipmentNo = (String) hisObj.get("shipmentNo");
+                            String postingDate = (String) hisObj.get("postingDate");
+                            String prid = (String) hisObj.get("itemNo");
+                            Object qtyObj = hisObj.get("quantity");
+                            Object price = hisObj.get("price");
+                            if (prid != null && qtyObj != null) {
+                                double qty = Double.parseDouble(qtyObj.toString());
+                                double hind = Double.parseDouble(price.toString());
+                                CustProd cp = new CustProd(cuid, prid, qty ,0 ,0,postingDate,hind,0,0," ");
+                          	  
+                    	        res.add(cp); 
+                    	     
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            
+        
+    	
+    	return res; 
+    }
     
     public Vector getPriceMatrixData() {
 
@@ -847,7 +1020,6 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
     
     @Override public String getCustProdDiscounts(Agent agent) { return ""; }
     @Override public String getAssortmentStr(Agent agent) { return ""; }
-    @Override public Vector getCustomerProductsList(String agentCode) { return new Vector(); }
     @Override public String getStartingTime() { return ""; }
     @Override public String getDealerCustomerCSV(String agentCode) { return ""; }
     @Override public String getDriverVersion() { return "BC365ValdoDBDriver"; }
