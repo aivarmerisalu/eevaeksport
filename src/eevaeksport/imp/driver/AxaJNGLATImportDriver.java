@@ -464,8 +464,8 @@ JSONObject ord = new JSONObject();
 	       		 ll.put("SumBeforeVAT", line.getPrice() * line.getKogus());
 		     }
 	       	if(line.getDiscount() == -2) {
-	       		 ll.put("Price", line.getPrice());
-	       		 ll.put("Discount", 100);
+	       		 ll.put("Price", 0.01);
+	       		// ll.put("Discount", 100);
 	       		 ll.put("SumBeforeVAT", line.getPrice() * line.getKogus());
 		     }
 	       	 

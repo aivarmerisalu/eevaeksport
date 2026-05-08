@@ -3136,7 +3136,7 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 												}
 											}
 
-										if (grPr.length() > 0) {
+										if (grPr != null && grPr.length() > 0) {
 												prod.setDiscgrupp(grPr+"DG");
 											}
 										
@@ -3281,8 +3281,12 @@ name = name.replaceAll("apelsinimahlaga ", " ");
 		if(lisatooted != null) {
 			for(Product pr : lisatooted) {
 				pr.setVat("24");
+				try {
 				tm.put(pr.getName(), pr);
 				koodiga.put(pr.getID(), pr);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
