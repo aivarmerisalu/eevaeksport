@@ -679,7 +679,7 @@ private void saveFile (String dataType , String uri) {
 
 	          	String number = (String)cob.get("CustomerAccount");
 	          
-	          	if(number.equals("000254")) {
+	          	if(number.equals("000638")) {
 	          		System.out.println("ooo " + cob.toJSONString());
 	          	}
 	          	
@@ -687,7 +687,7 @@ private void saveFile (String dataType , String uri) {
 	        	   
 	          for(Customer cust : dels.get(number)) {
 	            
-	        	  if(number.equals("000254")) {
+	        	  if(number.equals("000638")) {
 		          		System.out.println("www " + cust.getAgents().toString() );
 		          	}
 	            
@@ -766,8 +766,6 @@ private void saveFile (String dataType , String uri) {
 		            
 		            String displayName = (String)cob.get("DeliveryAddressDescription");
 		            cust.setName(displayName);
-		            
-		            String billToCustomerNo = (String)cob.get("InvoiceAccount");
 		            cust.setPayer(number);
 		            
 		            String address1 = (String)cob.get("AMGFullDeliveryAddress");
@@ -829,7 +827,9 @@ private void saveFile (String dataType , String uri) {
 		            
 		            //String blocked = (String)cob.get("blocked");
 		            
-		          	
+		            if(number.equals("000638")) {
+		          		System.out.println("ooo " + cust.getAgents().toString());
+		          	}
 		          tm.put(cust.getName()+cust.getID(), cust);
 	          	}
 	           

@@ -1612,7 +1612,7 @@ System.out.println("Assets serveris " + assets.length());
 	               " AND co.accountnum = (case when len(cus.invoiceaccount)=0 then cus.accountnum else  " + 
 	  	         " cus.invoiceaccount end )) AS debta, " + 
 	 			  "(select max (creditmax) from custtable cc where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = 'itb') " + 
-	 			  "  as limit ,cus.linedisc , cus.address, '' AS visit ,  SPIEAGENTACCOUNTID as agent , SPITELESALESAGENTGROUPID as teles,  (select top 1 numofdays from paymterm pt where pt.paymtermid=	" +
+	 			  "  as limit ,cus.linedisc , cus.address, '' AS visit ,  cus.SPIEAGENTACCOUNTID as agent , cus.SPITELESALESAGENTGROUPID as teles,  (select top 1 numofdays from paymterm pt where pt.paymtermid=	" +
 	 			  " (select top 1 paymtermid from custtable where accountnum = cus.invoiceaccount and dataareaid in ('itb')  ) and pt.dataareaid in ('v02')) AS term, " +
 	 			  " blocked AS block , " +
 	 			  " (select max (blocked) from custtable cc where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = 'itb') " +
@@ -1622,7 +1622,7 @@ System.out.println("Assets serveris " + assets.length());
 	 			  + " , cus.StatisticsGroup as fixed, a.city as city , a.street as street, a.zipcode as ind  , agreementdisc as leping, "
 	 				+"  (select spiminorderamount from smmBusRelChainGroup e where e.dataareaid= cus.dataareaid and e.chainid = COMPANYCHAINID ) as minam"
 	 			  + " FROM custtable cus  LEFT JOIN dirpartytable dp ON dp.partyid=cus.partyid  inner join address a on a.ADDRRECID = dp.RECID left outer JOIN paymterm  pay on cus.paymtermid=pay.paymtermid and  pay.dataareaid='itb'  " +
-	 			  "	 WHERE   cus.dataareaid in ('itb')   and (SPIEAGENTACCOUNTID != '' or SPITELESALESAGENTGROUPID != '')  "
+	 			  "	 WHERE   cus.dataareaid in ('itb')   and (cus.SPIEAGENTACCOUNTID != '' or cus.SPITELESALESAGENTGROUPID != '')  "
 	 			  + " and erpactive = 1   " ; 
 	  
 	  
@@ -1666,20 +1666,20 @@ System.out.println("Assets serveris " + assets.length());
 	"			 co.accountnum = (case when len(cus.invoiceaccount)=0 then cus.accountnum else " +
 	"			cus.invoiceaccount end )) AS debta,(case when len(cus.INVOICEACCOUNT)=0 then cus.CREDITMAX else (select max (creditmax)  " +
 	"		from custtable cc where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = N'spil') end) as limit, " +
-	"	cus.linedisc ,cus.address, '' AS visit,  SPIEAGENTACCOUNTID as agent, SPITELESALESAGENTGROUPID as teles, " +
+	"	cus.linedisc ,cus.address, '' AS visit,  cus.SPIEAGENTACCOUNTID as agent, cus.SPITELESALESAGENTGROUPID as teles, " +
 	"	(select top 1 numofdays from paymterm pt where pt.paymtermid=(select top 1 paymtermid from custtable  " +
 	"			where accountnum = cus.invoiceaccount and dataareaid = N'spil'  ) and pt.dataareaid = N'v02') AS term, " +
-	"	blocked AS block,(case when len(cus.INVOICEACCOUNT)=0 then cus.BLOCKED else  " +
+	"	cus.blocked AS block,(case when len(cus.INVOICEACCOUNT)=0 then cus.BLOCKED else  " +
 	"		(select max (blocked) from custtable cc where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = N'spil') end) as payerblock, " +
-	"	cus.phone  + ' , ' +  cus.cellularphone as info, PriceGroup as grupp , COMPANYCHAINID as chain, " +
+	"	cus.phone  + ' , ' +  cus.cellularphone as info, cus.PriceGroup as grupp , cus.COMPANYCHAINID as chain, " +
 	"	(case when len(cus.INVOICEACCOUNT)=0 then cus.creditrating else (select max (creditrating ) from custtable cc  " +
-	"			where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = N'spil') end) as rating,subsegmentid as sugg ,  " +
-	"	erpagentdiscedit as maxallow , custclassificationid as ette , subsegmentid as cate,cus.memo as cuinfo, " +
+	"			where  cc.accountnum=cus.invoiceaccount and cc.dataareaid = N'spil') end) as rating,cus.subsegmentid as sugg ,  " +
+	"	cus.erpagentdiscedit as maxallow , cus.custclassificationid as ette , cus.subsegmentid as cate,cus.memo as cuinfo, " +
 	"	cus.StatisticsGroup as fixed, a.city as city , a.street as street,a.zipcode as ind ,(select spiminorderamount  " +
-	"		from smmBusRelChainGroup e where e.dataareaid= cus.dataareaid and e.chainid = COMPANYCHAINID ) as minam , cus.exportformssamples  as sample " +
+	"		from smmBusRelChainGroup e where e.dataareaid= cus.dataareaid and e.chainid = cus.COMPANYCHAINID ) as minam , cus.exportformssamples  as sample , cc.address as addr2" +
     " FROM custtable cus  inner JOIN dirpartytable dp ON dp.partyid=cus.partyid and dp.DATAAREAID = N'v02'	 " +
-    " inner join address a on a.ADDRRECID = dp.RECID and a.DATAAREAID = N'v02' " +
-    " WHERE   cus.dataareaid = N'spil'   and (SPIEAGENTACCOUNTID != '' or SPITELESALESAGENTGROUPID != '') and erpactive = 1 " ; //and blocked != 2
+    " left join address a on a.ADDRRECID = dp.RECID and a.DATAAREAID = N'v02'  left join custtable cc on cc.dataareaid = N'itb' and cc.accountnum = cus.accountnum " +
+    " WHERE   cus.dataareaid = N'spil'   and (cus.SPIEAGENTACCOUNTID != '' or cus.SPITELESALESAGENTGROUPID != '')  and (cus.erpactive = 1 or cus.accountnum like 'DIB%') " ; //and blocked != 2
  
  String tra = "select  accountnum as cuid , monday as mon , tuesday as tue , wednesday as wed, thursday as thu , friday as fri , saturday as sat, sunday as sun " +
 " from custtable cus inner join TRDDeliveryPlaces tr on tr.dataareaid = cus.dataareaid and  cus.trdoutletid = tr.outletid where cus.dataareaid = 'spil'";
@@ -2217,6 +2217,13 @@ int i = 0;
                             	   cust.addAgent(new Agent("X3"));
                             	   cust.addAgent(new Agent("X4"));
                                }
+                               String addr2  = rs.getString("addr2");
+                               if(cust.getAddress().trim().length()  < 5){
+                            	   if(addr2 != null && addr2.trim().length() > 0) {
+                            		 cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',',')),"Latvia"));
+                                   }
+                               }
+                                
                     
                     if(goes){
                         customers.put(name, cust);

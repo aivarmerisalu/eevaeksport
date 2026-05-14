@@ -1107,6 +1107,51 @@ Statement st = null;
     	}
     	  custAgents = new HashMap(); // siin on siis kliendi kood ja agent vastavalt
     	  
+    	  HashMap<String , Double> odebt = new HashMap<String ,Double>();
+    	  
+    	  String dsql = "\r\n" + 
+    	  		"\r\n" + 
+    	  		"							  SELECT \r\n" + 
+    	  		"    oo.Kodas,\r\n" + 
+    	  		"    SUM(\r\n" + 
+    	  		"        ROUND((op.Suma - op.ApmoketaSuma) * op.Kursas, 2) *\r\n" + 
+    	  		"        CASE pot.PartOperacijosTipas \r\n" + 
+    	  		"            WHEN 1 THEN 1 \r\n" + 
+    	  		"            ELSE -1 \r\n" + 
+    	  		"        END\r\n" + 
+    	  		"    ) AS odue\r\n" + 
+    	  		"FROM dbo.Operacijos op\r\n" + 
+    	  		"INNER JOIN dbo.PirkimuOpTipai pot \r\n" + 
+    	  		"    ON op.OperacijosTipoId = pot.OperacijosTipoId\r\n" + 
+    	  		"\r\n" + 
+    	  		"INNER JOIN dbo.OperacijosPartneriai opp \r\n" + 
+    	  		"    ON op.OperacijosId = opp.OperacijosId\r\n" + 
+    	  		"\r\n" + 
+    	  		"INNER JOIN dbo.Partneriai part \r\n" + 
+    	  		"    ON opp.PartneriaiId = part.PartneriaiId\r\n" + 
+    	  		"\r\n" + 
+    	  		"INNER JOIN dbo.PartneriaiPa partpa \r\n" + 
+    	  		"    ON part.PartneriaiId = partpa.PartneriaiId\r\n" + 
+    	  		"\r\n" + 
+    	  		"INNER JOIN dbo.MokejimoSalygos msal \r\n" + 
+    	  		"    ON partpa.MokejimoSalygosID = msal.MokejimoSalygosID\r\n" + 
+    	  		"\r\n" + 
+    	  		"INNER JOIN dbo.Partneriai oo \r\n" + 
+    	  		"    ON oo.PartneriaiId = partpa.SumokaPartneriaiID\r\n" + 
+    	  		"\r\n" + 
+    	  		"INNER JOIN dbo.Adresai uu \r\n" + 
+    	  		"    ON oo.AdresoId = uu.AdresoId\r\n" + 
+    	  		"\r\n" + 
+    	  		"WHERE \r\n" + 
+    	  		"    pot.PartOperacijosTipas IN (1, 3, 12)\r\n" + 
+    	  		"    AND opp.spec = 0\r\n" + 
+    	  		"    AND op.Data + CONVERT(SMALLINT, msal.Terminas) < GETDATE()\r\n" + 
+    	  		"    AND op.Suma > op.ApmoketaSuma\r\n" + 
+    	  		"\r\n" + 
+    	  		"GROUP BY \r\n" + 
+    	  		"    oo.Kodas";
+    	  
+    	  
     	   String cmd = "SELECT CONVERT(Int, part.PartneriaiId) AS CustomerASId, part.regnr as regno , (select  oo.Kodas from Adresai uu " + 
    				" INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as pay, CONVERT(varchar(20), part.Kodas) AS kood,pl.MES_PAV_Trumpinys as nimi2, CONVERT(varchar(40), part.Pavad) AS nimi,   " +
                       "   SumokaPartneriaiID AS payer ,  rtrim(adr.Adresas)  + case when adr.Indeksas IS NULL then '' else ' ' + rtrim(adr.Indeksas)end + ' ' + " +
@@ -1174,7 +1219,25 @@ Statement st = null;
 	   }
 		 rs.close();
 		 stmt.close();
-		try {
+
+			try {
+				 
+				 stmt = con2.prepareStatement(dsql);
+			       rs = stmt.executeQuery();
+
+				   while (rs.next()) {
+					 String klient = (rs.getString("Kodas").trim());
+					 Double ring = rs.getDouble("odue");
+					   odebt.put(klient,ring); 
+				     }
+
+				   rs.close();
+				   stmt.close();
+				}catch(Exception e) {
+					
+				}
+		 
+		 try {
 		 
 		 String logi = "Select Partnerio_Kodas as klient ,Marsruto_Pavad as ring , SavaitesDienos as paev from MES_PartneriuMarsrutai ";
 		 Connection con = DriverManager.getConnection(url2, getParent().getProps().getProperty("dsn.user"),
@@ -1338,9 +1401,14 @@ Statement st = null;
               
                 cust.setPaymTerm(parent.make(term));
               
-                double debti = rs.getDouble("debt");
                
-                	cust.setDebt(debti);
+                if(odebt.get(cust.getPayer()) != null) {
+                	cust.setDebt(odebt.get(cust.getPayer()));
+                }
+                
+                if(odebt.get(cust.getID()) != null) {
+                	cust.setDebt(odebt.get(cust.getID()));
+                }
                 //cust.setVisit(rs.getString("visit"));
                 
                 //String info = rs.getString("info");

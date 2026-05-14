@@ -189,9 +189,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
        
         File res2 = new File (pictspda);
            String[] ff2 = res2.list();
-       	 for(int i = 0;ff2.length>i;i++){
+       	 /*for(int i = 0;ff2.length>i;i++){
            	(new File ( pictspda + ff2[i])).delete(); 
-           }
+           }*/
 
        StringBuffer buf = new StringBuffer();
        Iterator enume = prodcodes.iterator();
@@ -200,6 +200,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   	   
   	    	String toode = (String)enume.next();
   	    	
+  	    	
            if(toode.length() > 0){
               	
   	   	  res2 = new File (pictssou);
@@ -207,19 +208,20 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            
        	 for(int i = 0;ff2.length>i;i++){
            	if( ff2[i].startsWith(toode+".")){
-           		
-          	File in = new File ( pictssou + ff2[i]); 
+           	File in = new File ( pictssou + ff2[i]); 
             	if(in.isFile()){
             	File inpda = new File ( pictspda + toode+ ".jpg"); 
+            	if(!inpda.exists()) {
             	try {
                 	Converter.shrinkAndCopyFile(in,inpda,400);
-                  	buf.append(toode+".jpg;"  + inpda.length() + "\n");
-                 
-            	} catch(Exception e) {
+                } catch(Exception e) {
             		System.out.println("pahasti prod.getID() " + toode);
             		e.printStackTrace();
             	}
-           	}
+           	   }
+             	buf.append(toode+".jpg;"  + inpda.length() + "\n");
+                
+            	}
                }
              }
            }
@@ -237,7 +239,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   	}
    
 }
-
+  
 
 
   public Vector getFixedAssortmentData() {
@@ -1301,7 +1303,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   public static List<CycleMatch> nextSevenDaysMatches(String pattern) {
 
 	    DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-	    LocalDate cycleStart = LocalDate.parse("01.11.2021", FMT);
+	    LocalDate cycleStart = LocalDate.parse("03.11.2025", FMT);
 
 	    LocalDate today = LocalDate.now();
 	    List<CycleMatch> result = new ArrayList<>();
@@ -1434,11 +1436,42 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     
     
     
+    private Map<String, String> groupNames = null;
+    
+    
+    private void getGroupNames() {
+	try {	
+		  groupNames = new HashMap<String, String>();
+		  
+		  Connection con = this.getNewConnection();
+	      Statement stmt = con.createStatement();
+
+		
+		  String    sql = "  SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_BRANDS ";
+	  
+		  ResultSet  rs = stmt.executeQuery(sql);
+	    while (rs.next()) {
+	      String liik = rs.getString("liik").trim();
+	      groupNames.put(liik, rs.getString("nimetus").trim());
+	    }
+	    
+	    rs.close();
+	    stmt.close();
+		con.close();
+		
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+    }
     
   private HashMap makeCustBudgetMap() {
 	  
-
-	        LocalDate start = LocalDate.of(2021, 11, 1);
+	  if(groupNames == null) {
+		  getGroupNames();
+	  }
+	  
+	 
+	        LocalDate start = LocalDate.of(2025, 11, 3);
 	        LocalDate today = LocalDate.now();
 
 	        HashMap<String, Integer> customerDeliveries = new HashMap<String, Integer>();
@@ -1450,7 +1483,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	    	     ResultSet rs1 = stmt.executeQuery(aaa);
 	    	               while(rs1.next()){
 	    	                 String ag = rs1.getString("kood").trim();
-	    	                 String name = rs1.getString("klient").trim();
+	    	                 String klient = rs1.getString("klient").trim();
 	    	                 String pattern = rs1.getString("route");
 	        
 
@@ -1482,10 +1515,10 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	                }
 	                date = date.plusDays(1);
 	            }
-	            customerDeliveries.put(name, done + remaining);
-	            customerDeliveries.put(name+"rem", remaining);
+	            customerDeliveries.put(klient, done + remaining);
+	            customerDeliveries.put(klient+"rem", remaining);
 	            
-	            System.out.println(name + " -> done: " + done + ", remaining: " + remaining);
+	          //  System.out.println(name + " -> done: " + done + ", remaining: " + remaining);
 	        }
 	    	  
       		} catch(Exception e) {e.printStackTrace();}
@@ -1499,42 +1532,121 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
       double planprec = dd/d2;
 
+      
+      
+      // siin itereerime plaani läbi 
+      
+     for(String custID : custPlans.keySet()) {
+    	
+      
+      
       String asi = "";
-      if (customerDeliveries.get("1010917501") != null) {
-    	  asi = "Kopa piegades: " + customerDeliveries.get("1010917501") + "|";
-      }
-      if (customerDeliveries.get("1010917501rem") != null) {
-    	  asi = asi + "Atlicis piegades: " + customerDeliveries.get("1010917501rem")+ "|";
+      if (customerDeliveries.get(custID) != null) {
+    	  asi = "Kopa piegades: " + customerDeliveries.get(custID) + "|";
       }
       
-       asi = asi + "Sales: " + 200 + " €||";
+      if (customerDeliveries.get(custID + "rem") != null) {
+    	  asi = asi + "Atlicis piegades: " + customerDeliveries.get(custID + "rem")+ "|";
+      }
       
-    //  if(dd > 6 && tehtudsalperc > 0 && prognosalperc > 0){
-    	  asi = asi + "Plan done/estimate :";
-          asi = asi + "     " +(int)(0.25*100) + "% / " + (int)(0.8*100)  + " %||";  
-      //   }
-        asi = asi + "Sales plan: " + (int)800 + " €||";    
-   	
+        double cSales = 0 ;
+        if(custTotalSales.get(custID) != null) {
+        	cSales = custTotalSales.get(custID).doubleValue();
+        }
+        double cpSales = 0 ;
+        if(custTotalPlans.get(custID) != null) {
+        	cpSales = custTotalPlans.get(custID).doubleValue();
+        }
        
+        /*
+         *   Map<String, Double> osales = manaPlanGrupped.get(agID);
+		  Map<String, Double> rsales = manaSalesGrupped.get(agID);
+
+		  Iterator<String>  itera2 = osales.keySet().iterator();
+			 while (itera2.hasNext()) {
+				 String grID = itera2.next();
+			double psales = osales.get(grID);
+		 if(rsales != null && rsales.get(grID) != null) {
+		  
+		  double msales = rsales.get(grID);
+		  double  tehtudsalperc = msales/psales;
+      	  double plaanitavMyykSal = d2 * msales/dd;
+      	  
+      	  String done = (int)(msales - psales)+"";
+      	  if(!done.startsWith("-")) {
+      		  done = "+" + done;
+      	  }
+        	
+      	  String asi = "Category : " + grID + "|Done : " + (int) msales +  " € - Plan : " + (int) psales +  " €|Diff. : " + done + " €|done/esti. :";
+            asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
+            
+         * */
+        double plaanitavMyykSal = d2 * cSales/dd;
+        double  tehtudsalperc = cSales/cpSales;
+        double  prognosalperc = plaanitavMyykSal/cpSales;
+        if(tehtudsalperc > 10){
+    		  tehtudsalperc = 0;  
+    	  }
+    	  
+    	  if(prognosalperc > 10){
+    		  prognosalperc = 0;  
+    	  }
+    	  
+    	
+        
+       asi = asi + "Sales: " + (int)cSales + " €||";
+      
+      if(dd > 6 && tehtudsalperc > 0 && prognosalperc > 0){
+    	  asi = asi + "Plan done/esti :";
+          asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100) + " %||";  
+        }
+        asi = asi + "Sales plan: " + (int)cpSales + " €||";    
+   	
+      Map<String,Double> ch = custPlans.get(custID);
    	
        String asi2 = "";
-		asi2 = asi2 + ("Gr. " + "brand 1" + "    " +
-					((int)(0.2*100))
-					+ "% Plan.: " +(int) 100 + " €  Sales.: " + 20 + " €||");	
-	
-
-		asi2 = asi2 + ("Gr. " + "brand 2" + "    " +
-					((int)(0.24*100))
-					+ "% Plan.: " +(int) 50 + " €  Sales.: " + 10 + " €||");
-
-		asi2 = asi2 + ("Gr. " + "brand 2" + "    " +
-					((int)(0.25*100))
-					+ "% Plan.: " +(int) 25 + " €  Sales.: " + 5 + " €||");
-   
+    
+       for (String group : ch.keySet()) {
+         String grName = groupNames.get(group);
+         Double gpSales = ch.get(group);
+         Double gSales = 0.0;
+         if( custSales.get(custID) != null && custSales.get(custID).get(group) != null) {
+        	 gSales = custSales.get(custID).get(group);
+         }
+         
+       //  System.out.println("custID " + custID + " " + grName + " " + gpSales + " " + gSales);
+         if(gpSales != null && gpSales >0) {
+        	 plaanitavMyykSal = 0;
+        	 tehtudsalperc = 0;
+        	 prognosalperc = 0;
+        	 
+        	 if(gSales != null && gSales > 0) {
+               plaanitavMyykSal = d2 * gSales/dd;
+               tehtudsalperc = gSales/gpSales;
+               prognosalperc = plaanitavMyykSal/gpSales;
+        	 }
+         if(tehtudsalperc > 10){
+     		  tehtudsalperc = 0;  
+     	  }
+     	  
+     	  if(prognosalperc > 10){
+     		  prognosalperc = 0;  
+     	  }
+     		
+      	  asi2 = "GR : " + grName + "|Done : " + (int) gSales.doubleValue() +  " € - Plan : " + (int) gpSales.doubleValue() +  " €|Diff. : " + 100 + " €|done/esti. :";
+          asi2 = asi2 + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
+            
+	     res.put(custID, asi + asi2);
+         }
+       }
+     }
 	  
-	  res.put("1010917501", asi + asi2);
 	  return res ;
   }
+  
+  
+  
+  
 	
 	public TreeMap getCustomers(Agent agent){
 	  nf.setMinimumFractionDigits(2);
@@ -1747,12 +1859,12 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         boolean de = true;
         String regno  = cust.getPayer();
         
-        if(regno != null && regno.trim().length() > 0 && 
+      /*  if(regno != null && regno.trim().length() > 0 && 
         		(regno.trim().equals("10714195") || regno.trim().equals("10180925") // abc + circle
         				|| regno.trim().equals("10765896") || regno.trim().equals("10263574") // maxima + rimi
         				|| regno.trim().equals("10379733")  )) { // selver + 
         	//de = false;
-        }
+        }*/
         
       
         	
@@ -1833,7 +1945,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
        // name = name.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim();
         name = name.replaceAll("\\s*\\([^()]*\\)\\s*$", "").trim();
         name = name + " " + cust.getAddress() + " " + accountnum ;
-        cust.setName(name);
+        cust.setName(Converter.enCodeEst(name));
         
         if(indeksT.get(cust.getID()) != null){
         	cust.addCity("Pasta indekss: " + indeksT.get(cust.getID()));
@@ -1846,7 +1958,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
          for(Agent agentL : vv) {
           cust.addAgent(agentL);
           if(agentL.nextContact != null) {
-              cust.addCity("Nākamais: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
+        	  cust.addCity(Converter.enCodeEst("Nākamais: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'"));  
           }
           
           if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
@@ -1970,7 +2082,7 @@ String arve = rs.getString("bill");
            }
            
            if(arve.indexOf("@") != -1) {
-        	        cust.adPersonalData("Arve: " + arve.trim().toLowerCase());
+        	        cust.adPersonalData(Converter.enCodeEst("Rēķini: " + arve.trim().toLowerCase()));
            }
         }
         
@@ -1994,17 +2106,11 @@ String arve = rs.getString("bill");
         	//cust.setPaymTerm(term + "");
         }
         
-        java.sql.Date cdate = rs.getDate("cdate");
-        if(cdate.getYear() > 1900) {
-        	
-        }
-        
-        
         
         
         String seg = rs.getString("seg");
         if(seg != null && seg.trim().length() > 0) {
-        	cust.addCity("Chain: " + seg.trim());
+        	cust.addCity("Chain: " + Converter.enCodeEst(seg.trim()));
         }
 
         
@@ -2015,13 +2121,13 @@ String arve = rs.getString("bill");
         		inTT.add(fixed.trim());
         		cust.suggAssortCode = fixed.trim();
         	 } else {
-        	  cust.addFixSortCode(fixed.trim()+"x");
+        	  cust.addFixSortCode(Converter.cleanLitLatEst(fixed.trim())+"x");
         	}
         }
         
         String segsub = rs.getString("segsub");
         if(segsub != null && segsub.trim().length() > 0) {
-        	cust.addCity("Segment: " + segsub.trim());
+        	cust.addCity("Segment: " + Converter.enCodeEst(segsub.trim()));
         	  
               // 	cust.addCity("Segment: " + segsub.trim());
                	if(activeXLSPromos.get(segsub.trim()+"xls") != null) {
@@ -2037,26 +2143,23 @@ String arve = rs.getString("bill");
         
         String type2 = rs.getString("type2");
         if(type2 != null && type2.trim().length() > 0) {
-        	cust.addCity("SubSegment: " + type2.trim());
+        	cust.addCity("SubSegment: " + Converter.enCodeEst(type2.trim()));
         }
 
         
         if(type != null && type.trim().length() > 0) {
-        	cust.addCity("Type: " + type.trim());
+        	cust.addCity("Type: " + Converter.enCodeEst(type.trim()));
         }
         
         String via3l = rs.getString("via3l");
         String del1 = rs.getString("del1");
         String del2 = rs.getString("del2");
         if(via3l != null && via3l.trim().length() > 0) {
-        	cust.addCity("GKR Tarne: '" + via3l.trim() + "'");
+        	//cust.addCity("GKR Tarne: '" + via3l.trim() + "'");
         }
         
         if(del1 != null && del1.trim().length() > 0) {
-        	cust.addCity("EUG Tarne: '" + del1.trim() + "'");
-        }
-        if(del2 != null && del2.trim().length() > 0) {
-        	//cust.addCity("Tarne 2: '" + del2.trim()+ "'");
+        	cust.addCity(Converter.enCodeEst("EUG Piegāde: '" + del1.trim() + "'"));
         }
         
         cust.setDealer(new Dealer("24N"));
@@ -2068,7 +2171,7 @@ String arve = rs.getString("bill");
         
         if(budgets.get(accountnum) != null){
         	System.out.println("budget " + budgets.get(accountnum));
-        //	cust.addToCustDataVec(accountnum+ ";custbudget; ;" + budgets.get(accountnum));
+        	cust.addToCustDataVec(accountnum+ ";custbudget; ;" + budgets.get(accountnum));
         }
         
         if(goes) {
@@ -2262,12 +2365,12 @@ private HashSet<String> inTT = null;
 
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
-	      String nimi = Converter.cleanLitLatEst(rs.getString("nimetus").trim());
+	      String nimi = rs.getString("nimetus").trim();
 	      nimi = nimi.replaceAll("NESTLE", "NES");
 	      nimi = nimi.replaceAll("BARILLA", "BAR");
 	      nimi = nimi.replaceAll("IMPERIAL", "IMP");
 		  
-	        tm.put(liik, Converter.enCodeEst(nimi));
+	        tm.put(liik,Converter.cleanLitLatEst(nimi) + "_" + Converter.enCodeEst(nimi));
 	    }
 	    rs.close();
 	    st.close();
@@ -2313,7 +2416,7 @@ private HashSet<String> inTT = null;
     String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
     		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
     		"    		a.groupBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
-    		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId where a. backOfficeId not like 'i%' "  ;
+    		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId where a.backOfficeId not like 'i%' and a.backOfficeId not like 'R%' "  ;
 
              String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  \r\n" + 
              		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId,  regionBackofficeId desc,bestBefore";
@@ -2965,12 +3068,14 @@ boolean noopt = false;
 
   private Map<String, Map<String, Double>> manaSales;
   private Map<String, Map<String, Double>> custSales;
+
+  private Map<String,  Double> custTotalSales;
   
   public void getCustomerPRGroupSales(){
 		 
 
 	  custSales = new HashMap<String, Map<String, Double>>();
-	  
+	  custTotalSales = new HashMap<String, Double>(); 
 		String cmd =  " select clientBackOfficeID as cust , groupBackOfficeId as gr , sum(lineamount) as summa  from epasaule_deliveries d INNER JOIN dbo.EPASAULE_PRODUCTS a ON d.productBackOfficeID = a.backOfficeId where \r\n" + 
 				"deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
 				"  AND deliverydate <  DATEADD(MONTH, 1,\r\n" + 
@@ -3000,6 +3105,7 @@ boolean noopt = false;
 								 custSales
 					                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
 					                .merge(gr, sales, Double::sum);
+								 custTotalSales.merge(cust, sales, Double::sum);
 					   }
 				 }
 			
@@ -3011,6 +3117,8 @@ boolean noopt = false;
 			getParent().showError(e);
 		}
 		  System.out.println("custSales " + custSales.size());
+
+		  System.out.println("custTotalSales " + custTotalSales.size());
         }
 
 

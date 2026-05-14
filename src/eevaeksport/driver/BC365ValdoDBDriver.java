@@ -51,6 +51,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 
 
@@ -155,6 +156,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
         	 } else {
 		        String json = callOperation(operation, null);
+		        System.out.println("result " + json);
 		         saveFilePaged(operation, json, MAX_OBJECTS_PER_FILE);
         	}
 
@@ -338,6 +340,12 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
     private String extractReturnValue(InputStream xmlStream) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
+        
+        String text = new BufferedReader(
+                new InputStreamReader(xmlStream, StandardCharsets.UTF_8))
+            .lines()
+            .collect(Collectors.joining("\n"));
+        System.out.println(text);
 
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(xmlStream);
@@ -892,23 +900,16 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     int weekYear =
                             weekDate.get(weekFields.weekBasedYear());
 
-                    String filename = String.format(
-                            "%s%02d%d.json",
-                            operation,
-                            weekNumber,
-                            weekYear
-                    );
+               
 
 
                     File fil = new File("data/GetSalesHistory" + weekNumber + weekYear + ".json");
 
                     try {
                     	
-                    //	{"header":{"requestedLimit":10000,"processedRecordCount":13,"allRecordsExported":true,"fromDate":"2
-                    	//026-04-06","toDate":"2026-04-12","toEntryNo":9105},
-                    	//"data":[{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0203117",
-                    	//"quantity":-2.00,"postingDate":"2026-02-04","entryNo":9093},{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0203427","quantity":-2.00,"postingDate":"2026-02-04","entryNo":9094},{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0203221","quantity":-4.00,"postingDate":"2026-02-04","entryNo":9095},{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0203217","quantity":-8.00,"postingDate":"2026-02-04","entryNo":9096},{"customerShipToCode":"19024500_29","orderNo":"D3861235","shipmentNo":"DR25185805","itemNo":"0104003","quantity":-2.00,"postingDate":"2026-02-04","entryNo":9097},{"customerShipToCode":"16141952_88","orderNo":"D3861729","shipmentNo":"DR25185806","itemNo":"1105004","quantity":-10.00,"postingDate":"2026-04-01","entryNo":9098},{"customerShipToCode":"16141952_88","orderNo":"D3861729","shipmentNo":"DR25185806","itemNo":"0206791","quantity":-16.00,"postingDate":"2026-04-01","entryNo":9099},{"customerShipToCode":"16141952_88","orderNo":"D3861729","shipmentNo":"DR25185806","itemNo":"0206792","quantity":-16.00,"postingDate":"2026-04-01","entryNo":9100},{"customerShipToCode":"16141952_88","orderNo":"D3861729","shipmentNo":"DR25185806","itemNo":"0206793","quantity":-16.00,"postingDate":"2026-04-01","entryNo":9101},{"customerShipToCode":"16141952_88","orderNo":"DAG923307","shipmentNo":"DAG923307","itemNo":"1105004","quantity":5.00,"postingDate":"2026-04-01","entryNo":9102},{"customerShipToCode":"16141952_88","orderNo":"DAG923307","shipmentNo":"DAG923307","itemNo":"0206791","quantity":16.00,"postingDate":"2026-04-01","entryNo":9103},{"customerShipToCode":"16141952_88","orderNo":"DAG923307","shipmentNo":"DAG923307","itemNo":"0206792","quantity":16.00,"postingDate":"2026-04-01","entryNo":9104},{"customerShipToCode":"16141952_88","orderNo":"DAG923307","shipmentNo":"DAG923307","itemNo":"0206793","quantity":16.00,"postingDate":"2026-04-01","entryNo":9105}]}
-                    	 org.json.simple.JSONObject hisData =
+                 
+                    	if(fil.exists()) {
+                    	org.json.simple.JSONObject hisData =
                                  (org.json.simple.JSONObject) Converter.readJSONFile(fil.getPath());
 
                     	
@@ -923,17 +924,18 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                             String shipmentNo = (String) hisObj.get("shipmentNo");
                             String postingDate = (String) hisObj.get("postingDate");
                             String prid = (String) hisObj.get("itemNo");
-                            Object qtyObj = hisObj.get("quantity");
-                            Object price = hisObj.get("price");
+                            Object qtyObj = hisObj.get("salesAmount");
+                            Object price = hisObj.get("salesPrice");
                             if (prid != null && qtyObj != null) {
                                 double qty = Double.parseDouble(qtyObj.toString());
                                 double hind = Double.parseDouble(price.toString());
                                 CustProd cp = new CustProd(cuid, prid, qty ,0 ,0,postingDate,hind,0,0," ");
-                          	  
-                    	        res.add(cp); 
+                                cp.setAbiKood(shipmentNo);
+                          	    res.add(cp); 
                     	     
                             }
-                        }
+                          }
+                    	}
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

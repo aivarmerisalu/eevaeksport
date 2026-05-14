@@ -1110,13 +1110,13 @@ while (rs2.next()){
           }
           String  blokk = rs.getString("blok2") ;
 
-          if(!blokk.trim().equals("0")){
-          cust.setSalesBlock(true);
+          if(blokk != null && !blokk.trim().equals("0")){
+             cust.setSalesBlock(true);
           }
           
           String  ettem = rs.getString("blok3") ;
 
-          if(ettem.trim().equals("100")){
+          if(ettem != null && ettem.trim().equals("100")){
           cust.setSalesBlockPrepay(true);
           }
 

@@ -463,19 +463,46 @@ JSONObject ord = new JSONObject();
 	       		 ll.put("Discount", line.getDiscount());
 	       		 ll.put("SumBeforeVAT", line.getPrice() * line.getKogus());
 		     }
-	       	if(line.getDiscount() == -2) {
+	       	 
+	       	 // version 1
+	     /*  	if(line.getDiscount() == -2) {
 	       		 ll.put("Price", 0.01);
 	       		// ll.put("Discount", 100);
 	       		 ll.put("SumBeforeVAT", line.getPrice() * line.getKogus());
+		     }*/
+	       	 
+	       	 // version 2
+	    	/*if(line.getDiscount() == -2) {
+	       		 ll.put("Price", line.getPrice());
+	       		 ll.put("Discount", 99.99);
+	       		 ll.put("SumBeforeVAT", line.getPrice() * line.getKogus());
+		     }*/
+	       	 
+	    	//version 3
+	    	if(line.getDiscount() == -2) {
+	       		// ll.put("Price", 1);
+	    		//leiame hinnast ale mis annab hinnaks 1 sent
+	    		
+	    		double original = line.getPrice();
+	    		double finalPrice = 0.01;
+
+	    		double discountPercent =
+	    		        ((original - finalPrice) / original) * 100;
+
+	    		System.out.println(discountPercent + "%");
+	    		
+	       		 ll.put("Discount", discountPercent);
+	       		 ll.put("SumBeforeVAT", line.getPrice() * line.getKogus());
 		     }
-	       	 
-	       	 
+	    	
+	    	
 	      // 	 if(order.getWarehouse() != null && order.getWarehouse().trim().equals("L6") ) {
 	       	//	 JSONObject la = new JSONObject();
 	       		// la.put("InventLocation", order.getWarehouse());
 	  		   //ll.put( "Detail", la);
 	  	   //}
 	       	 
+	       	
 	       	    linex.add(ll);
 	       	 
 	          }

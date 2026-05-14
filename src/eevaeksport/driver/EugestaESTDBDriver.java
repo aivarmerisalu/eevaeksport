@@ -2601,12 +2601,23 @@ boolean noopt = false;
    rs.close();
 
 	StringBuffer sb3 = new StringBuffer();
+
+	    String prop = getParent().getProps().getProperty("reprice.reason");
     rs = stmt.executeQuery("select BACKOFFICEID as id, NAME as nimi from  dbo.EPASAULE_REP_REASONS");
    while(rs.next()){
    	String id = rs.getString("id");
    	String name = rs.getString("nimi");
    	if(name != null && name.trim().length() > 0){
-   	      sb3.append( id+ ";" +Converter.enCodeEst(name.trim()) + "\n");	
+   		boolean goes = true;
+   	    if(prop != null) {
+   	    	goes = false;
+   	    	if(id.equals(prop)) {
+   	    		goes = true;
+   	    	}
+   	    }
+   	    	if(goes) {
+   	            sb3.append( id+ ";" +Converter.enCodeEst(name.trim()) + "\n");	
+   	    	}
    	}
    }
    rs.close();

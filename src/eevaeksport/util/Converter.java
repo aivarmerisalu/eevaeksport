@@ -5059,7 +5059,7 @@ public class Converter {
 				
 			      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
 			 Calendar from = Calendar.getInstance();
-			 from.add(Calendar.DAY_OF_YEAR, -4);
+			 from.add(Calendar.DAY_OF_YEAR, -14);
 			 Calendar to = Calendar.getInstance();    
 			 to.add(Calendar.DAY_OF_YEAR, 2);
 
@@ -5094,7 +5094,7 @@ public class Converter {
 					e.printStackTrace();
 				}
 					
-				System.out.println("buffer " + answBuffer.toString());
+			//	System.out.println("buffer " + answBuffer.toString());
 				
          			DataFormatter formatter = new DataFormatter();		
 					
@@ -5104,7 +5104,7 @@ public class Converter {
 			              File[] filed = answfolder.listFiles();
 
 			              for (File file : filed) {
-			                  if (file.isFile() && file.getName().contains("PriceTracker") && !file.getName().contains("$")) { // pallets example
+			                  if (file.isFile() && (file.getName().contains("PriceTracker") || file.getName().contains("Vastused")) && !file.getName().contains("$")) { // pallets example
 			                      System.out.println("Found: " + file.getAbsolutePath());
 			      				boolean changesMade = false;
 
@@ -5117,7 +5117,7 @@ public class Converter {
 			                 			XSSFDrawing drawing = sheet.createDrawingPatriarch();
 			                 			CreationHelper helper = workbook.getCreationHelper();
 			                 			
-			                 			for(int u = 1 ; u < sheet.getLastRowNum() ;u++) {
+			                 			for(int u = 1 ; u < sheet.getLastRowNum()+1 ;u++) {
 			                 			
 			                 			XSSFRow row = sheet.getRow(u);
 			                 			 try {
@@ -7177,7 +7177,10 @@ try{
 			
 				org.json.JSONArray array = serv.getSVdata(from, to , type , subTypes);
 				
-				if(array.length() == 1000) {
+				if(array.length() == 2000) {
+					
+					Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + tt  + ww + mm  + yyyy + ".json" , array.toString());
+		         	
 					//teeme tundideks aja vahe
 					for(int i = 0; i<6;i++) {
 						Date fr = new Date(from.getTime() + (7200000*i));
@@ -7186,6 +7189,7 @@ try{
 						array = serv.getSVdata(fr, t , type , subTypes);
 						if(array.length() > 0) {
 							Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + tt  + i + ww + mm  + yyyy + ".json" , array.toString());
+							res = "svdata/svdata-" + nameadd + tt  + i + ww + mm  + yyyy + ".json";
 						}
 						
 					}

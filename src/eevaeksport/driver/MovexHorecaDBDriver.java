@@ -936,13 +936,13 @@ while (rs2.next()){
           }
           String  blokk = rs.getString("blok2") ;
 
-          if(!blokk.trim().equals("0")){
+          if(blokk != null && !blokk.trim().equals("0")){
           cust.setSalesBlock(true);
           }
           
           String  ettem = rs.getString("blok3") ;
 
-          if(ettem.trim().equals("100")){
+          if(ettem != null && ettem.trim().equals("100")){
           cust.setSalesBlockPrepay(true);
           }
 
@@ -1007,12 +1007,8 @@ while (rs2.next()){
           custMap.put(cust.getID(), cust);
     }
 
-      if(rcompany != null){
-    //  Converter.sendCustomerJson(customers, company, false, null, null);
-	    }
      
-      
-      Converter.prepareDocCatalogue(inP,outP,codes,true);
+    //  Converter.prepareDocCatalogue(inP,outP,codes,true);
 
     String  cmd3 ="SELECT * FROM alc.mj_overdue_sum_view";
      if (isDebug()) System.out.println(cmd3);
@@ -1023,9 +1019,8 @@ while (rs2.next()){
            Customer cust = (Customer) custMap.get(id);
            if (cust != null && debt != -1 && debt != -2) {
              cust.setDebt(cust.getDebt() + debt);
-             
-             if(cust.getDebt() != -1 && cust.getDebt() != -2 && cust.getDebt() != -3){
-            	 cust.setDebt(0);
+             if(cust.getID().equals("20010022")) {
+            	 System.out.println("VÕLGGG " + cust.getDebt());
              }
            }
          }
