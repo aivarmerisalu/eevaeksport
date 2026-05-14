@@ -1037,6 +1037,7 @@ HashSet olemas = new HashSet();
             	  cust.addAgent(new Agent("34"));
             	  cust.addAgent(new Agent("33"));
             	  cust.addAgent(new Agent("13"));
+            	  cust.addAgent(new Agent("10"));
               }
              
            //   cust.setMainAgent(ag);
