@@ -2695,7 +2695,7 @@ return "";
         	 	 File res2 = new File (pictspda);
 	             String[] ff2 = res2.list();
 	         	 for(int i = 0;ff2.length>i;i++){
-	             	(new File ( pictspda + ff2[i])).delete(); 
+	             //	(new File ( pictspda + ff2[i])).delete(); 
 	             }
 //	         	 Lõppes kustutamine 
 	  		 
@@ -2721,16 +2721,17 @@ System.out.println("prods " + prods.size());
 	              	if(in.isFile()){
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg");
 	              	if(!inpda.exists()){
+	              		try {
 	                  	Converter.shrinkAndCopyFile(in,inpda,550);
-              	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-	                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-	                    	}
+	              		}catch(Exception e) {}
               	    if(prod.getEAN() != null && prod.getEAN().length() > 5 && inpda.exists()){
               	  	File out = new File ( pictsean + prod.getEAN()+ ".jpg"); 
               	    	Converter.copyFile(inpda, out);
      	            }
-              	    	
-              	  	 }  
+              	     }
+	              	if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
+                		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
+                	}
 	              	
 	              	
 	              	}

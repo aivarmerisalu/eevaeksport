@@ -1541,12 +1541,16 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       
       
       String asi = "";
-      if (customerDeliveries.get(custID) != null) {
-    	  asi = "Kopa piegades: " + customerDeliveries.get(custID) + "|";
+   /*   if (customerDeliveries.get(custID) != null) {
+    	  asi = "|Kopa piegades: " + customerDeliveries.get(custID) + "|";
       }
       
       if (customerDeliveries.get(custID + "rem") != null) {
     	  asi = asi + "Atlicis piegades: " + customerDeliveries.get(custID + "rem")+ "|";
+      }*/
+      
+      if (customerDeliveries.get(custID) != null) {
+    	  asi = "Kopa/Atlicis piegades :  " + customerDeliveries.get(custID)+" / "+ customerDeliveries.get(custID + "rem") + "||";
       }
       
         double cSales = 0 ;
@@ -1557,30 +1561,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         if(custTotalPlans.get(custID) != null) {
         	cpSales = custTotalPlans.get(custID).doubleValue();
         }
-       
-        /*
-         *   Map<String, Double> osales = manaPlanGrupped.get(agID);
-		  Map<String, Double> rsales = manaSalesGrupped.get(agID);
 
-		  Iterator<String>  itera2 = osales.keySet().iterator();
-			 while (itera2.hasNext()) {
-				 String grID = itera2.next();
-			double psales = osales.get(grID);
-		 if(rsales != null && rsales.get(grID) != null) {
-		  
-		  double msales = rsales.get(grID);
-		  double  tehtudsalperc = msales/psales;
-      	  double plaanitavMyykSal = d2 * msales/dd;
-      	  
-      	  String done = (int)(msales - psales)+"";
-      	  if(!done.startsWith("-")) {
-      		  done = "+" + done;
-      	  }
-        	
-      	  String asi = "Category : " + grID + "|Done : " + (int) msales +  " € - Plan : " + (int) psales +  " €|Diff. : " + done + " €|done/esti. :";
-            asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
-            
-         * */
         double plaanitavMyykSal = d2 * cSales/dd;
         double  tehtudsalperc = cSales/cpSales;
         double  prognosalperc = plaanitavMyykSal/cpSales;
@@ -1594,18 +1575,22 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     	  
     	
         
-       asi = asi + "Sales: " + (int)cSales + " €||";
+       asi = asi + "Sales/Plan :   " + (int)cSales + " € / " + (int)cpSales+ " €|";
       
       if(dd > 6 && tehtudsalperc > 0 && prognosalperc > 0){
     	  asi = asi + "Plan done/esti :";
-          asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100) + " %||";  
+          asi = asi + " " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100) + " %| |";  
         }
-        asi = asi + "Sales plan: " + (int)cpSales + " €||";    
+       // asi = asi + "Sales plan: " + (int)cpSales + " €||";    
    	
       Map<String,Double> ch = custPlans.get(custID);
    	
        String asi2 = "";
     
+       if(custID.equals("33194P")) {
+           System.out.println("custsales " + custID + " " +   custSales.get(custID).toString()); 
+       }
+       
        for (String group : ch.keySet()) {
          String grName = groupNames.get(group);
          Double gpSales = ch.get(group);
@@ -1613,8 +1598,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
          if( custSales.get(custID) != null && custSales.get(custID).get(group) != null) {
         	 gSales = custSales.get(custID).get(group);
          }
-         
-       //  System.out.println("custID " + custID + " " + grName + " " + gpSales + " " + gSales);
+         if(custID.equals("33194P")) {
+             System.out.println("custID " + custID + " " + group +" "+ grName + " " + gpSales + " " + gSales); 
+         }
          if(gpSales != null && gpSales >0) {
         	 plaanitavMyykSal = 0;
         	 tehtudsalperc = 0;
@@ -1633,12 +1619,13 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
      		  prognosalperc = 0;  
      	  }
      		
-      	  asi2 = "GR : " + grName + "|Done : " + (int) gSales.doubleValue() +  " € - Plan : " + (int) gpSales.doubleValue() +  " €|Diff. : " + 100 + " €|done/esti. :";
-          asi2 = asi2 + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
+      	  asi2 = asi2 + "GR : " + grName + "|Done : " + (int) gSales.doubleValue() +  " € - Plan : " + (int) gpSales.doubleValue() +  " €|Diff. : " + 100 + " €|done/esti. :";
+          asi2 = asi2 + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  
             
-	     res.put(custID, asi + asi2);
          }
        }
+
+	     res.put(custID, asi + asi2);
      }
 	  
 	  return res ;
@@ -2068,7 +2055,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         
            if(raam.indexOf("@") != -1) {
         	   if(!raam.toLowerCase().contains("arvekontroll")) {
-        	        cust.adPersonalData("RP: " + raam.trim().toLowerCase() + "|");
+        	        cust.adPersonalData("GV: " + raam.trim().toLowerCase() + "|");
         	   }
            }
         }
@@ -2082,7 +2069,7 @@ String arve = rs.getString("bill");
            }
            
            if(arve.indexOf("@") != -1) {
-        	        cust.adPersonalData(Converter.enCodeEst("Rēķini: " + arve.trim().toLowerCase()));
+        	        cust.adPersonalData(Converter.enCodeEst("Parādi: " + arve.trim().toLowerCase()));
            }
         }
         
@@ -2110,7 +2097,7 @@ String arve = rs.getString("bill");
         
         String seg = rs.getString("seg");
         if(seg != null && seg.trim().length() > 0) {
-        	cust.addCity("Chain: " + Converter.enCodeEst(seg.trim()));
+        	cust.addCity("Segments: " + Converter.enCodeEst(seg.trim()));
         }
 
         
@@ -2127,7 +2114,7 @@ String arve = rs.getString("bill");
         
         String segsub = rs.getString("segsub");
         if(segsub != null && segsub.trim().length() > 0) {
-        	cust.addCity("Segment: " + Converter.enCodeEst(segsub.trim()));
+        	cust.addCity("Subsegments: " + Converter.enCodeEst(segsub.trim()));
         	  
               // 	cust.addCity("Segment: " + segsub.trim());
                	if(activeXLSPromos.get(segsub.trim()+"xls") != null) {
@@ -2143,12 +2130,12 @@ String arve = rs.getString("bill");
         
         String type2 = rs.getString("type2");
         if(type2 != null && type2.trim().length() > 0) {
-        	cust.addCity("SubSegment: " + Converter.enCodeEst(type2.trim()));
+        	//cust.addCity("SubSegment: " + Converter.enCodeEst(type2.trim()));
         }
 
         
         if(type != null && type.trim().length() > 0) {
-        	cust.addCity("Type: " + Converter.enCodeEst(type.trim()));
+        	cust.addCity("Tips: " + Converter.enCodeEst(type.trim()));
         }
         
         String via3l = rs.getString("via3l");
@@ -3076,11 +3063,11 @@ boolean noopt = false;
 
 	  custSales = new HashMap<String, Map<String, Double>>();
 	  custTotalSales = new HashMap<String, Double>(); 
-		String cmd =  " select clientBackOfficeID as cust , groupBackOfficeId as gr , sum(lineamount) as summa  from epasaule_deliveries d INNER JOIN dbo.EPASAULE_PRODUCTS a ON d.productBackOfficeID = a.backOfficeId where \r\n" + 
+		String cmd =  " select clientBackOfficeID as cust , brandBackOfficeId as gr , sum(lineamount) as summa  from epasaule_deliveries d INNER JOIN dbo.EPASAULE_PRODUCTS a ON d.productBackOfficeID = a.backOfficeId where \r\n" + 
 				"deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
 				"  AND deliverydate <  DATEADD(MONTH, 1,\r\n" + 
 				"        DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))\r\n" + 
-				"		group by clientBackOfficeID,groupBackOfficeId" ; //k.objekt2
+				"		group by clientBackOfficeID,brandBackOfficeId" ; //k.objekt2
 		
 		try {
 			

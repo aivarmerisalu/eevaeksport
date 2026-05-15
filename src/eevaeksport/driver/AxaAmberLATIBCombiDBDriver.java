@@ -110,7 +110,7 @@ BulkUpdater, Discounter,PictureMaker,RestSalesSender,FixLoader {
 		  }
 		this.getProducts(null);
 		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
-		System.out.println("Contracts " + contracts.toString());
+		//System.out.println("Contracts " + contracts.toString());
 		Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
 		System.exit(0);
 	}
@@ -1136,7 +1136,7 @@ rs.close();
 "GROUP BY summ.itemid,s.itemid having sum(summ.availphysical) >0";
 
 
-       if (isDebug()) System.out.println(cmd);
+    //   if (isDebug()) System.out.println(cmd);
        StringBuffer products = new StringBuffer();
        try {
     	   Connection con = this.getNewConnection();
@@ -1225,7 +1225,7 @@ rs.close();
     "	GROUP BY  summ.itemid  having sum(availphysical) > 0 " ;
 
 
-           if (isDebug()) System.out.println(cmd);
+        //   if (isDebug()) System.out.println(cmd);
            try {
         	 Connection con = this.getNewConnection();
              Statement st = con.createStatement();
@@ -1347,7 +1347,7 @@ rs.close();
                        "  DIRPARTYTABLE AS d ON d.DATAAREAID = 'v02' AND e.PARTYID = d.PARTYID " +
                " WHERE   (e.DATAAREAID = 'spil') ";
     
-    if (isDebug()) System.out.println(cmd);
+//    if (isDebug()) System.out.println(cmd);
     TreeMap agents = new TreeMap();
    
     try {
@@ -1411,7 +1411,7 @@ rs.close();
 		servu.company = rcompany;   
 		JSONArray assets = servu.getAssets(null);
 		servu.closeClient();
-System.out.println("Assets serveris " + assets.length());
+//System.out.println("Assets serveris " + assets.length());
 		
 		HashMap asscusts = new HashMap();
 	     HashSet cuus = new HashSet();	
@@ -1437,7 +1437,7 @@ System.out.println("Assets serveris " + assets.length());
 	
   	  
   	  
-  	  System.out.println("Asses size enne  " + asscusts.size());
+  	//  System.out.println("Asses size enne  " + asscusts.size());
   	  Vector vec = new Vector(); 
   	  String cmd3 = "select a.ASSETID as code ,a.name  ,' (' + l.name + ')' as name1, '' as ean ,'' as nfcTag, a.serialnum as factoryID ,'' as description , "+
   	  		" '' as born , '' as contract ,a.LOCATION as custcode " +
@@ -1530,7 +1530,7 @@ System.out.println("Assets serveris " + assets.length());
                     }
                    rs1.close();
   	  
-                   System.out.println("Counter " + counter + " Asses " + asses.size());
+                //   System.out.println("Counter " + counter + " Asses " + asses.size());
                    
                    Converter.sendAssetsJson(vec,this.user,this.pass,this.rcompany);     
   	   
@@ -1575,7 +1575,7 @@ System.out.println("Assets serveris " + assets.length());
                 
                     rs1.close();
                     stm.close();
-  	   System.out.println("assets cou " +  cou + " "+ coua);
+  	//   System.out.println("assets cou " +  cou + " "+ coua);
                     
                     // siis peaks tegema vahele kontrolli et kui on muudatus siis ainult laksad ylesse
   	   
@@ -2222,9 +2222,15 @@ int i = 0;
                             	   if(addr2 != null && addr2.trim().length() > 0) {
                             		 cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',',')),"Latvia"));
                                    }
-                               }
-                                
+                               }               
                     
+                        //  goes = false;     
+                    if(this.adlCustCodes.get(cust.getID()) != null && this.ibCustCodes.get(cust.getID()) != null) {
+                    	// on sealt tulnud 
+                    	  
+                    	//goes = true;              	
+                    }
+                               
                     if(goes){
                         customers.put(name, cust);
                         custMap.put(cust.getID(),cust);	
@@ -3410,7 +3416,7 @@ try {
 		     "  GROUP BY jou.orderaccount,tra.itemid ,jou.invoicedate ,jou.payment,tra.qty " + 
 		     "  ORDER BY jou.orderaccount,tra.itemid ,jou.invoicedate ,jou.payment,tra.qty";
 	//   and blocked = 0 
-	    if (isDebug()) System.out.println(cmd);
+	  //  if (isDebug()) System.out.println(cmd);
 
 	    try {
 	    	Connection con = this.getNewConnection();
@@ -3418,8 +3424,11 @@ try {
 	      ResultSet rs = stmt.executeQuery(cmd);
 	      counter++;
 	      while(rs.next()){
-	        
-	    	String kliendikood = this.ibCustCodes.get(rs.getString("orderaccount").trim());
+	        String ibkl = rs.getString("orderaccount").trim();
+	        if(ibkl.equals("DIB0005512")) {
+	        	System.out.println("22222 " + this.ibCustCodes.get(ibkl) + " " + ibkl);
+	        }
+	    	String kliendikood = this.ibCustCodes.get(ibkl);
 	        String tootekood = "ib_" + rs.getString("itemid").trim();
 	        
 	        double kogus = rs.getDouble("qty");
@@ -3493,6 +3502,7 @@ try {
   public Vector getCustomerProductsList(String agentCode){
 	    Vector custProds = new Vector();
 	    getIBCustProds(custProds);
+	    System.out.println("IB cust prods size " + custProds.size());
 
 	 int counter = 1;
 	   String   cmd = " SELECT jou.orderaccount,tra.itemid ,tra.qty,jou.invoicedate AS lastdate ,max(tra.lineamount/tra.qty) as hind ,max(jou.salesid) as dok  , jou.payment as pay, max (co.amountmst) as tasu " +
@@ -3503,7 +3513,7 @@ try {
 		     "  GROUP BY jou.orderaccount,tra.itemid ,jou.invoicedate ,jou.payment,tra.qty " + 
 		     "  ORDER BY jou.orderaccount,tra.itemid ,jou.invoicedate ,jou.payment,tra.qty";
 	//   and blocked = 0 
-	    if (isDebug()) System.out.println(cmd);
+	   // if (isDebug()) System.out.println(cmd);
 
 	    try {
 	    	Connection con = this.getNewConnection();
@@ -3596,7 +3606,7 @@ try {
 			  + " from ASTSalesAgentForecast where year(transdate)=year(getdate())"
 			   + " and  month(transdate) = month(getdate()) and dataareaid = 'spil' and modelid = 'B_2023' ";
 
-			       if (isDebug()) System.out.println(cmd);
+			     //  if (isDebug()) System.out.println(cmd);
 			          try {
 			            	Connection con = this.getNewConnection();
 				              Statement stmt =  con.createStatement();
@@ -3638,7 +3648,7 @@ try {
 			        	  e.printStackTrace();
 			          }
 			
-		   		System.out.println("jooksevplaan " + res.toString());
+		   	//	System.out.println("jooksevplaan " + res.toString());
 		
 	   return res;
 }
@@ -3665,7 +3675,7 @@ try {
 	
      "      and  cus.inventlocation != '' and inv.ITEMGROUPID not in  ('TARA','POS') and cus.SPIEAGENTACCOUNTID != '' GROUP BY cus.SPIEAGENTACCOUNTID ";
 
-         if (isDebug()) System.out.println(cmd);
+       //  if (isDebug()) System.out.println(cmd);
             try {
             	Connection con = this.getNewConnection();
                 Statement stmt =  con.createStatement();
@@ -3782,7 +3792,7 @@ try {
                    	 + " MONTH(sal.invoicedate) = MONTH(getdate()) and YEAR(sal.invoicedate) = YEAR(getdate()) " +
                        "      and  cus.inventlocation != '' and inv.ITEMGROUPID not in  ('TARA','POS') and cus.SPIEAGENTACCOUNTID != '' GROUP BY cus.SPIEAGENTACCOUNTID ,ITEMSUBGROUPID";
 
-                            if (isDebug()) System.out.println(cmd);
+                         //   if (isDebug()) System.out.println(cmd);
                                
                                	        stmt =  con.createStatement();
                                    	      rs = stmt.executeQuery(cmd);
@@ -3847,7 +3857,7 @@ try {
                                 			
                                 		     "      and  cus.inventlocation != '' and inv.ITEMGROUPID not in  ('TARA','POS') and cus.SPIEAGENTACCOUNTID != '' GROUP BY cus.SPIEAGENTACCOUNTID ";
 
-                                		         if (isDebug()) System.out.println(cmd);
+                                		      //   if (isDebug()) System.out.println(cmd);
                                 		            
                                 		                	      rs = stmt.executeQuery(cmd);
                                 		                while(rs.next()) {
@@ -4065,7 +4075,7 @@ try {
 		 "	 WHERE inv.dataareaid='spil' AND sal.dataareaid='spil' AND cus.dataareaid='spil'  AND jou.dataareaid='spil' AND sal.invoicedate > getdate()-400 " +
 	     "      and  cus.inventlocation != '' and inv.ITEMGROUPID not in  ('TARA','POS') and cus.SPIEAGENTACCOUNTID != '' GROUP BY cus.SPIEAGENTACCOUNTID ";
 
-	         if (isDebug()) System.out.println(cmd);
+	      //   if (isDebug()) System.out.println(cmd);
 	            try {
 	            	Connection con = this.getNewConnection();
 	                Statement stmt =  con.createStatement();
@@ -4122,7 +4132,7 @@ try {
 	          	 + " MONTH(sal.invoicedate) = MONTH(getdate()) and YEAR(sal.invoicedate) = YEAR(getdate()) " +
 	              "      and  cus.inventlocation != '' and inv.ITEMGROUPID not in  ('TARA','POS') and cus.SPIEAGENTACCOUNTID != '' GROUP BY cus.SPIEAGENTACCOUNTID ,ITEMSUBGROUPID,ITEMGROUPID";
 
-	                   if (isDebug()) System.out.println(cmd);
+	                 //  if (isDebug()) System.out.println(cmd);
 	                      
 	                      	        stmt =  con.createStatement();
 	                          	      rs = stmt.executeQuery(cmd);
@@ -4181,7 +4191,7 @@ try {
 	                   	 + " MONTH(sal.invoicedate) = MONTH(getdate()) and YEAR(sal.invoicedate) = YEAR(getdate()) " +
 	                       "      and  cus.inventlocation != '' and inv.ITEMGROUPID not in  ('TARA','POS') and cus.SPIEAGENTACCOUNTID != '' GROUP BY cus.SPIEAGENTACCOUNTID ,ITEMSUBGROUPID";
 
-	                            if (isDebug()) System.out.println(cmd);
+	                          //  if (isDebug()) System.out.println(cmd);
 	                               
 	                               	        stmt =  con.createStatement();
 	                                   	      rs = stmt.executeQuery(cmd);
