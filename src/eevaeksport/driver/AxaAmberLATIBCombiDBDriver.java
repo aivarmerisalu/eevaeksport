@@ -1284,6 +1284,8 @@ rs.close();
   private TreeMap agentDim = new TreeMap();
   private TreeMap agent1 = new TreeMap();
   private  HashMap<String, String> ibCustCodes = null; 
+
+  private  HashSet<String> ibCodesOnly = null; 
   private  HashMap<String, String> adlCustCodes = null; 
   private HashSet <String> custtsUsed = null;
 
@@ -1292,6 +1294,7 @@ rs.close();
 
 	  ibCustCodes = new HashMap<String, String>(); 
 	  adlCustCodes = new HashMap<String, String>(); 
+	  ibCodesOnly = new HashSet<String>();
 
 	  File f = new File(this.getExcelDir() + "/custties.xlsx");
  		try {
@@ -1330,6 +1333,9 @@ rs.close();
  					      }
  						  ibCustCodes.put(custIB, custADL); 
  						  adlCustCodes.put(custADL, custIB); 
+ 						  if(custADL.equals(custIB)) {
+ 							 ibCodesOnly.add(custIB); 
+ 						  }
  			          }
  				}
  		} catch(Exception e) {
@@ -1970,8 +1976,23 @@ int i = 0;
           cust.setCredit(limit);
         }
     	}
+        
+        
+        String licen = "ADL";
+
+    	if( this.adlCustCodes.get(cust.getID()) != null) {
+    		licen = "ADL|IB";
+    	}
+    	
+    	if(this.ibCodesOnly.contains(cust.getID())) {
+    		licen = "IB";
+    	}
+    	
+    	
         if(licences.get(cust.getID()) != null){
-        	cust.setLicence(licences.get(cust.getID())+""); //see ka tagasi kommentida
+        	cust.setLicence(licences.get(cust.getID())+"|"+licen); //see ka tagasi kommentida
+        }else {
+         	cust.setLicence(licen); //see ka tagasi kommentida
         }
         
         String aleke = rs.getString("linedisc");
@@ -2013,10 +2034,14 @@ int i = 0;
 
        	if(this.adlCustCodes.get(cust.getID()) != null) {
        		cust.setCity("InterBaltija Kodas: '" + adlCustCodes.get(cust.getID())+"'");
-       	}else {
+       	} else {
        		cust.setInfo("Nevar pārdot no Interbalijas — kods nav pieejams");
        	}
         
+        if(this.adlCustCodes.get(cust.getID()) != null && this.ibCustCodes.get(cust.getID()) != null) {
+        	    // on tegemist ainult IB kliendiga
+    		cust.setInfo("Nevar pārdot no ADL — kods nav pieejams");
+    	}
         
         if(ibdebts.get(cust.getID()) != null) {
            	    cust.addCity("IB DEBT :: " + nf.format(ibdebts.get(cust.getID())) + "€");
@@ -2224,12 +2249,7 @@ int i = 0;
                                    }
                                }               
                     
-                        //  goes = false;     
-                    if(this.adlCustCodes.get(cust.getID()) != null && this.ibCustCodes.get(cust.getID()) != null) {
-                    	// on sealt tulnud 
-                    	  
-                    	//goes = true;              	
-                    }
+                    
                                
                     if(goes){
                         customers.put(name, cust);
@@ -2618,7 +2638,9 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
         Product prod = new Product(kood);
         String nimetus =  " " +rs.getString("nimetus").trim() ;
          if(licence.get(kood) != null){
-        	 prod.licence = licence.get(kood)+""; //see tagasi kommentida 
+        	 prod.licence = licence.get(kood)+"|IB" ; //see tagasi kommentida 
+         } else {
+        	 prod.licence = "IB";  
          }
          String oldcode = rs.getString("oldcode");
          nimetus =  Converter.enCodeEst(nimetus);
@@ -3008,7 +3030,9 @@ stmt.close();
         Product prod = new Product(kood);
         String nimetus =  " " +rs.getString("nimetus").trim() + " " + kood ;
          if(licence.get(kood) != null){
-        	 prod.licence = licence.get(kood)+""; //see tagasi kommentida 
+        	 prod.licence = licence.get(kood)+"|ADL"; //see tagasi kommentida 
+         }else {
+        	 prod.licence = "ADL";  
          }
      nimetus =  Converter.enCodeEst(nimetus.replaceAll("bottle", "bot.").replaceAll("Reserve", "Res.")
      		.replaceAll("Premium", "Prem.")
