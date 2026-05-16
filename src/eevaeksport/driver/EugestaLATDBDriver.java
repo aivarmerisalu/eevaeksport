@@ -553,13 +553,15 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            
            rs.close();    	
       
-           String sql2 = "select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday, \r\n" + 
-           		"           	          		minPrice as price ,b.regionbackofficeid as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a \r\n" + 
-           		"           		           		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId  \r\n" + 
-           		"								inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
-           		"    	              		 	 where c.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice   \r\n" + 
-           		"           		           		 group by  a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid,  [date from] ,[date to], minPrice \r\n" + 
-           		"           		           		 order by a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid, [date from] ,[date to], minPrice";
+           String sql2 = " 		 select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday,\r\n" + 
+           		"			  max([beginsinstoredate]) as store,max(datediff(day,beginsinstoredate, c.nextdelivery)) as vahe,\r\n" + 
+           		"              		minPrice as price ,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
+           		"              		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
+           		"        		inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
+           		"         		 	 where c.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
+           		"         		  group by  a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end),  [date from] ,[date to], minPrice \r\n" + 
+           		"                  order by a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), [date from] ,[date to], minPrice\r\n" + 
+           		"					 ";
            rs = stmt.executeQuery(sql2);
            while (rs.next()) {
 
@@ -567,14 +569,19 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            String prodID = rs.getString("prodid").trim();
            String sdate = rs.getString("startday");
            String edate = rs.getString("endday");
+           String store = rs.getString("store");
+           Integer vahe = rs.getInt("vahe");
            double price = rs.getDouble("price");
            String dealer = rs.getString("dealer");
            
            MatrixLine mline = new MatrixLine();
            mline.setCliGroup(clGroup);
            mline.setProdID(prodID);
-           mline.setStartDate(sdate.substring(0,10));
+           mline.setStartDate(sdate.substring(0,10) + "/" +store.substring(0,10));
            mline.setEndDate(edate.substring(0,10));
+           if(vahe < 100) {
+             mline.setLineinfo("SOON");
+           }
            mline.setPrice(price);
             if(dealer != null && !dealer.trim().equals("24N")) {// kui ei ole pealadu siis paneme külge
             	mline.dealer = dealer.trim();
@@ -664,6 +671,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	           String kood = rs.getString("toode").trim();
 	           double seis = rs.getDouble("stock");
 	           String dealer = rs.getString("ladu");
+	           if(dealer.equals("24EWC")) {
+	        	   dealer = "24N";
+	           }
 	           String part = rs.getString("partii");
 	           String gg = " ";
 	           if(part != null && !part.startsWith("1900")) {
@@ -697,8 +707,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
       try {
 
-    	  String  cmd = "Select productBackofficeId as toode,sum(Inventory) as stock ,regionBackofficeId as ladu from " + 
-    	  		"	  		 dbo.EPASAULE_INVENTORIES  group by productBackofficeId,regionBackofficeId";
+    	  String  cmd = "Select productBackofficeId as toode,sum(Inventory) as stock ,(case when regionBackofficeId = '24EWC' then '24N' else regionBackofficeId end) as ladu from \r\n" + 
+    	  		"    	  			  		 dbo.EPASAULE_INVENTORIES  group by productBackofficeId,(case when regionBackofficeId = '24EWC' then '24N' else regionBackofficeId end)";
     
     	  if(usedProds == null){
    			  this.getProducts(null);
@@ -714,6 +724,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
                   if(usedProds.contains(toode)){
                	   double seis = rst.getDouble("stock");
                	        String ladu  =  rst.getString("ladu").trim();
+               	     if(ladu.equals("24EWC")) {
+      	        	       ladu = "24N";
+      	               }
 	                    dealerProds.add(ladu, toode,((int)seis)+""," "," " );
                      }
                
@@ -747,9 +760,11 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
               ResultSet rst = stm.executeQuery(cmd);
                 while (rst.next()) {
                   String kood = rst.getString("ladu").trim();
-                   Dealer dealer = new Dealer(kood);
-                   dealer.setName(Converter.enCodeEst(rst.getString("name").trim()));
-                   dealers.put(dealer.getID(), dealer);
+                  if(!kood.equals("24EWC")) {
+                     Dealer dealer = new Dealer(kood);
+                     dealer.setName(Converter.enCodeEst(rst.getString("name").trim()));
+                     dealers.put(dealer.getID(), dealer);
+                   }
                   }
               rst.close();
               stm.close();
@@ -971,15 +986,20 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   private void loadPlans () {
 	  
 	  
-	  getCustomerPRGroupSales();
 	  
 	  custPlans = new HashMap<String, Map<String, Double>>();
 	  manaPlans = new HashMap<String, Map<String, Double>>();
+	  custPlanGrupped = new HashMap<String, Map<String, Double>>();
 	  custTotalPlans = new HashMap<String, Double>();
 	  manaTotalPlans = new HashMap<String, Double>();
 	  groupGrouping = new HashMap<String, String>();
 	  noSalesGroups = new  ArrayList<String>();
 	
+
+		
+	  
+	  
+	  
 	  try{
 		 	
 	 		Calendar cal = Calendar.getInstance();
@@ -1003,7 +1023,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 					 row = sheet.getRow(i);
 					String prGR = formatter.formatCellValue(row.getCell(0));
 					String grGR = formatter.formatCellValue(row.getCell(1));
-					groupGrouping.put(prGR, grGR);
+					//groupGrouping.put(prGR, grGR);
 	 		   }
 	 		}
 	 		
@@ -1018,6 +1038,55 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 					noSalesGroups.add(prGR);
 	 		   }
 	 		}
+	 		
+	 		 String year = Calendar.getInstance().get(Calendar.YEAR)+"";
+	 		 sheet = workbook.getSheet("Motivation " + year);
+	 		 row = null; 
+	 		
+	 		if(sheet != null) {
+	 			
+	 			String currentMonth =
+	 			        java.time.Month.of(Calendar.getInstance().get(Calendar.MONTH) + 1)
+	 			                .getDisplayName(
+	 			                        java.time.format.TextStyle.FULL,
+	 			                        Locale.ENGLISH);
+
+	 			 row = sheet.getRow(6);
+
+	 			int monthCellIndex = -1;
+
+	 			for (int c = 0; c < row.getLastCellNum(); c++) {
+
+	 			    Cell cell = row.getCell(c);
+
+	 			    String value = formatter.formatCellValue(cell).trim();
+
+	 			    if (value.equalsIgnoreCase(currentMonth)) {
+	 			        monthCellIndex = c ;
+	 			        break;
+	 			    }
+	 			}
+
+	 			System.out.println("Month = " + currentMonth);
+	 			System.out.println("Found in column = " + monthCellIndex);
+	 			
+	 			if(monthCellIndex != -1) {
+	 			for(int i = 7 ; i < sheet.getLastRowNum() + 1;i++){
+					 row = sheet.getRow(i);
+					 
+					String prGR = formatter.formatCellValue(row.getCell(0));
+					String grGR = formatter.formatCellValue(row.getCell(monthCellIndex));
+					if(grGR!= null && grGR.length() > 0) {
+
+						groupGrouping.put(prGR, grGR);	
+					}
+					
+	 		     }
+	 		   }
+	 		 }
+	 		
+	 		System.out.println("groupGrouping " + groupGrouping.toString());	
+	 		
 	 		
 	 		sheet = workbook.getSheet(jooksev);
 	 	
@@ -1044,6 +1113,11 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	 						             custPlans
 	 						                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
 	 						                .merge(gr, plan, Double::sum);
+	 						            if (this.groupGrouping.get(gr) != null) {
+	 						  			 custPlanGrupped
+	 						                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
+	 						                .merge(groupGrouping.get(gr), plan, Double::sum);
+	 						            }
 	 								   }
 	 								}
 	 					
@@ -1068,7 +1142,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	   }catch(Exception e) {
 		   e.printStackTrace();
 	   }
-	  
+
+	  getCustomerPRGroupSales(); 
   }
   
   
@@ -1531,26 +1606,16 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
       int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
       double planprec = dd/d2;
-
-      
-      
+   
       // siin itereerime plaani läbi 
       
      for(String custID : custPlans.keySet()) {
-    	
-      
       
       String asi = "";
-   /*   if (customerDeliveries.get(custID) != null) {
-    	  asi = "|Kopa piegades: " + customerDeliveries.get(custID) + "|";
-      }
-      
-      if (customerDeliveries.get(custID + "rem") != null) {
-    	  asi = asi + "Atlicis piegades: " + customerDeliveries.get(custID + "rem")+ "|";
-      }*/
+   
       
       if (customerDeliveries.get(custID) != null) {
-    	  asi = "Kopa/Atlicis piegades :  " + customerDeliveries.get(custID)+" / "+ customerDeliveries.get(custID + "rem") + "||";
+    	  asi = " |Kopa/Atlicis piegades :  " + customerDeliveries.get(custID)+" / "+ customerDeliveries.get(custID + "rem") + "||";
       }
       
         double cSales = 0 ;
@@ -1578,29 +1643,76 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
        asi = asi + "Sales/Plan :   " + (int)cSales + " € / " + (int)cpSales+ " €|";
       
       if(dd > 6 && tehtudsalperc > 0 && prognosalperc > 0){
-    	  asi = asi + "Plan done/esti :";
-          asi = asi + " " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100) + " %| |";  
+    	  asi = asi + "done/esti. :  ";
+          asi = asi +(int)(tehtudsalperc*100) + " % / " + (int)(prognosalperc*100) + " %| ";  
         }
-       // asi = asi + "Sales plan: " + (int)cpSales + " €||";    
-   	
+   
+      
+      
+ 	String asi3 = "";
+ 	 if(custPlanGrupped != null && custSalesGrupped != null) {
+ 		 
+ 		  Map<String, Double> osales = custPlanGrupped.get(custID);
+ 		  Map<String, Double> rsales = custSalesGrupped.get(custID);
+ 		 
+ 		  if(osales != null) {
+ 		  Iterator<String>  itera2 = osales.keySet().iterator();
+ 			 while (itera2.hasNext()) {
+ 				 String grID = itera2.next();
+ 			double psales = osales.get(grID);
+ 		 if(rsales != null && rsales.get(grID) != null) {
+ 		  
+ 		  double msales = rsales.get(grID);
+ 		  double  tehtudsalpercC = msales/psales;
+       	  double plaanitavMyykSalC = d2 * msales/dd;
+       	  double  prognosalpercC = plaanitavMyykSalC/psales;
+       	
+       	  if(tehtudsalpercC > 10){
+       		  tehtudsalpercC = 0;  
+       	  }
+       	  
+       	  if(prognosalpercC > 10){
+       		  prognosalpercC = 0;  
+       	  }
+       	  
+       	  String done = (int)(msales - psales)+"";
+       	  if(!done.startsWith("-")) {
+       		  done = "+" + done;
+       	  }
+         	
+       	   asi3 = asi3  + " |Cat. : " + grID + "|Sales/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Diff. : " + done + " €|done/esti. :";
+             asi3 = asi3 + "   " +(int)(tehtudsalpercC*100) + "% / " + (int)(prognosalpercC*100)  + " %| |";  
+ 		 } else {
+ 			   asi3 = asi3  + " |Cat. : " + grID + "|Sales/Plan : " + 0 +  " € / " + (int) psales +  " €|Diff. : " + (int) psales + " €|done/esti. :";
+ 	             asi3 = asi3 + "   0 % / 0 %| |";  
+ 	 			 
+ 		 }
+ 		  }
+ 		}
+ 	 }
+ 	 
+      
+      
+      
+      
+      
+      
       Map<String,Double> ch = custPlans.get(custID);
    	
        String asi2 = "";
-    
-       if(custID.equals("33194P")) {
-           System.out.println("custsales " + custID + " " +   custSales.get(custID).toString()); 
-       }
        
        for (String group : ch.keySet()) {
+    	   if(this.groupGrouping.get(group) != null) {
+    		   
          String grName = groupNames.get(group);
+         String catName = this.groupGrouping.get(group);
+         
          Double gpSales = ch.get(group);
          Double gSales = 0.0;
          if( custSales.get(custID) != null && custSales.get(custID).get(group) != null) {
         	 gSales = custSales.get(custID).get(group);
          }
-         if(custID.equals("33194P")) {
-             System.out.println("custID " + custID + " " + group +" "+ grName + " " + gpSales + " " + gSales); 
-         }
+         
          if(gpSales != null && gpSales >0) {
         	 plaanitavMyykSal = 0;
         	 tehtudsalperc = 0;
@@ -1618,14 +1730,19 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
      	  if(prognosalperc > 10){
      		  prognosalperc = 0;  
      	  }
-     		
-      	  asi2 = asi2 + "GR : " + grName + "|Done : " + (int) gSales.doubleValue() +  " € - Plan : " + (int) gpSales.doubleValue() +  " €|Diff. : " + 100 + " €|done/esti. :";
-          asi2 = asi2 + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  
+     	 String done = (int)(gSales - gpSales)+"";
+      	  if(!done.startsWith("-")) {
+      		  done = "+" + done;
+      	  }
+      	  asi2 = asi2 + "GR : " + grName + " (" + catName + ")"  + "|Sales/Plan : " + (int) gSales.doubleValue() + 
+      			  " € / " + (int) gpSales.doubleValue() +  " €|Diff. : " + done + " €|done/esti. :";
+          asi2 = asi2 + "  " +(int)(tehtudsalperc*100) + " % / " + (int)(prognosalperc*100)  + " %| |";  
             
          }
        }
+       }
 
-	     res.put(custID, asi + asi2);
+	     res.put(custID, asi  +asi3 + asi2);
      }
 	  
 	  return res ;
@@ -2061,7 +2178,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         }
         
         
-String arve = rs.getString("bill");
+      String arve = rs.getString("bill");
         
         if (arve != null && arve.trim().length()>0) {
            if(arve.contains(";")) {
@@ -2069,7 +2186,9 @@ String arve = rs.getString("bill");
            }
            
            if(arve.indexOf("@") != -1) {
+        	   if(!cust.getPersonalData().contains(arve.trim().toLowerCase())) {
         	        cust.adPersonalData(Converter.enCodeEst("Parādi: " + arve.trim().toLowerCase()));
+        	   }
            }
         }
         
@@ -2157,7 +2276,7 @@ String arve = rs.getString("bill");
         }
         
         if(budgets.get(accountnum) != null){
-        	System.out.println("budget " + budgets.get(accountnum));
+        //	System.out.println("budget " + budgets.get(accountnum));
         	cust.addToCustDataVec(accountnum+ ";custbudget; ;" + budgets.get(accountnum));
         }
         
@@ -2223,9 +2342,9 @@ String arve = rs.getString("bill");
 
               
 				 
-				  fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minqty, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , max(b.regionbackofficeid) as ladu from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
-				  		"EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty > 0  group by a.promotionBackOfficeId,a.productBackOfficeId, minqty, minPrice\r\n" + 
-				  		"				  				order by a.promotionBackOfficeId,productBackOfficeId, minqty, minPrice";
+				  fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minqty, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , max(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
+				  		"				  		EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty > 0  group by a.promotionBackOfficeId,a.productBackOfficeId, minqty, minPrice\r\n" + 
+				  		"				  						  				order by a.promotionBackOfficeId,productBackOfficeId, minqty, minPrice";
 				 
 
 				  StringBuffer   buf = new StringBuffer();
@@ -2293,35 +2412,55 @@ String arve = rs.getString("bill");
 				        		ex.printStackTrace();
 				        	  }
 				         }
-				        
-				/*    StringBuffer reprBuff = new StringBuffer();    
-				        reprBuff.append("ALL;50");
+
 				        
 				        
-				        if(reprBuff.length() > 2){
-				            File f = new File("reprgroups.txt");
-				            if (f.exists())f.delete();
-				              try {
-				        		PrintWriter os = new PrintWriter(new FileWriter(
-				        				 "reprgroups.txt", true));
-				        		os.write(reprBuff.toString());
-				        		os.close();
-				        	  }catch (IOException ex) {
-				        		ex.printStackTrace();
-				        	  }
-				         }else{
-				            File f = new File("reprgroups.txt");
-				            if (f.exists())f.delete();
-				              try {
-				        		PrintWriter os = new PrintWriter(new FileWriter(
-				        				 "reprgroups.txt", true));
-				        		os.write("");
-				        		os.close();
-				        	  }catch (IOException ex) {
-				        		ex.printStackTrace();
-				        	  }
-				         }*/
-				     
+				   	 
+				/*		  fff = " shipmode select";
+						 
+
+						     buf = new StringBuffer();
+						   
+							   rs1 = stmt.executeQuery(fff);
+						      while(rs1.next()){
+						   	  
+						   	  String kood = parent.make(rs1.getString("kood"));
+						   	  String nimi = parent.make(rs1.getString("nimi"));
+						   	 
+		                	    buf.append(kood + ";" + nimi +"\n");	
+						   	  
+						      }
+						     rs1.close(); 
+						     stmt.close();
+						     con.close();
+		   
+
+						        if(buf.length() > 2){
+						            File f = new File("shipmode.txt");
+						            if (f.exists())f.delete();
+						              try {
+						        		PrintWriter os = new PrintWriter(new FileWriter(
+						        				 "shipmode.txt", true));
+						        		os.write(buf.toString());
+						        		os.close();
+						        	  }catch (IOException ex) {
+						        		ex.printStackTrace();
+						        	  }
+						         }else{
+						            File f = new File("shipmode.txt");
+						            if (f.exists())f.delete();
+						              try {
+						        		PrintWriter os = new PrintWriter(new FileWriter(
+						        				 "shipmode.txt", true));
+						        		os.write("");
+						        		os.close();
+						        	  }catch (IOException ex) {
+						        		ex.printStackTrace();
+						        	  }
+						         }*/
+				        
+				        
+							     
               
     } catch (Exception e){
       getParent().showError(e);
@@ -2343,21 +2482,25 @@ String arve = rs.getString("bill");
 private HashSet<String> inTT = null;
 
   public TreeMap getProdGroups() throws SQLException {
-
+      this.setTreeGroup(true);
 	   Connection con = getNewConnection();
 	    TreeMap   tm = new TreeMap();
-	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_GROUPS ";
+	    String    sql = " SELECT backOfficeId as liik,Name as nimetus , posWeight as sort  FROM dbo.EPASAULE_GROUPS\r\n" + 
+	    		" where parentbackofficeid ='' ";
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
 	      String nimi = rs.getString("nimetus").trim();
-	      nimi = nimi.replaceAll("NESTLE", "NES");
-	      nimi = nimi.replaceAll("BARILLA", "BAR");
-	      nimi = nimi.replaceAll("IMPERIAL", "IMP");
+	      Integer sort = rs.getInt("sort");
+	      sort = -100000 + sort;
+	      String sortt = -sort + "";
+	      while(sortt.length()<8) {
+	    	  sortt = "0" + sortt;
+	      }
 		  
-	        tm.put(liik,Converter.cleanLitLatEst(nimi) + "_" + Converter.enCodeEst(nimi));
+	        tm.put(liik,sortt  + "_" + Converter.enCodeEst(nimi));
 	    }
 	    rs.close();
 	    st.close();
@@ -2365,27 +2508,39 @@ private HashSet<String> inTT = null;
   return tm;	   
 }
 
+ private HashMap<String,String> grps = null; 
 
   public TreeMap getProdGroupsSecond() throws SQLException {
-	  
+	   Connection con = getNewConnection();
+	   
+	   grps = new HashMap<String,String>(); 
 	    TreeMap   tm = new TreeMap();
-	  /*  String    sql = "  SELECT backOfficeId as liik, Name as nimetus FROM dbo.EPASAULE_GROUPS  ";
-	    Connection con = getNewConnection();
-		
+	    String    sql = " SELECT backOfficeId as liik, parentbackofficeid as liikparent ,Name as nimetus , posWeight as sort  FROM dbo.EPASAULE_GROUPS\r\n" + 
+	    		" where parentbackofficeid !='' ";
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
-	        tm.put(liik, Converter.enCodeEst(rs.getString("nimetus").trim()));
+	      String liikparent = rs.getString("liikparent").trim();
+	      String nimi = rs.getString("nimetus").trim();
+	      
+	      grps.put(liik, liikparent);
+	      Integer sort = rs.getInt("sort");
+	      sort = -100000 + sort;
+	      
+	      String sortt = -sort + "";
+	      
+	      while(sortt.length()<8) {
+	    	  sortt = "0" + sortt;
+	      }
+		  
+	        tm.put(liikparent + "" +liik,sortt  + "_" + Converter.enCodeEst(nimi));
 	    }
-	    
 	    rs.close();
 	    st.close();
-	    con.close();*/
-
-	    return tm;
-
+	    con.close();
+ return tm;	
   }
 
   private Vector prodcodes = null;
@@ -2398,6 +2553,13 @@ private HashSet<String> inTT = null;
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
 	  
+	  if(grps == null) {
+		 try {
+			this.getProdGroupsSecond();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	  }
 	  String noOPT = getParent().getProps().getProperty("nostepgroup");
 	  
     String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
@@ -2405,8 +2567,8 @@ private HashSet<String> inTT = null;
     		"    		a.groupBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
     		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId where a.backOfficeId not like 'i%' and a.backOfficeId not like 'R%' "  ;
 
-             String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  \r\n" + 
-             		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId,  regionBackofficeId desc,bestBefore";
+             String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, (case when regionBackofficeId = '24EWC' then '24N' else regionBackofficeId end) as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  " + 
+             		"  group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId,  (case when regionBackofficeId = '24EWC' then '24N' else regionBackofficeId end) desc,bestBefore";
         
 
              usedProds = new HashSet();
@@ -2449,14 +2611,14 @@ private HashSet<String> inTT = null;
     	
     	StringBuffer sb0 = new StringBuffer();
     	
-    	String minP = " select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  b.regionbackofficeid as ladu,ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) AS disc   \r\n" + 
-    			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice != 0\r\n" + 
-    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid, ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) \r\n" + 
-    			"    											union all\r\n" + 
-    			"    											select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid , b.regionbackofficeid as ladu , 100 AS disc \r\n" + 
-    			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice = 0\r\n" + 
-    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid \r\n" + 
-    			"    											order by 1,2";
+    	String minP = "select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu,ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) AS disc   \r\n" + 
+    			"    						from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice != 0 \r\n" + 
+    			"    			    											group by a.promotionBackOfficeId,a.productBackOfficeId,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) \r\n" + 
+    			"    			    											union all\r\n" + 
+    			"    			    											select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid , (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu , 100 AS disc \r\n" + 
+    			"    			    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice = 0\r\n" + 
+    			"    			    											group by a.promotionBackOfficeId,a.productBackOfficeId,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) \r\n" + 
+    			"    			    											order by 1,2";
     	
     	 ResultSet rs = stmt.executeQuery(minP);
         
@@ -2574,25 +2736,26 @@ private HashSet<String> inTT = null;
         }
 boolean noopt = false;
       String grupp = rs.getString("grupp");
+      
+      
        if(grupp!=null && grupp.trim().length()>0){
+    	   
          prod.setAgentGroup(grupp.trim());
+         
+         if(grps.get(grupp.trim()) != null) {
+        	 String parent = grps.get(grupp.trim());
+        	 prod.setGroup(parent);
+        	 prod.setGroupSecond(parent + grupp.trim());
+         }
+         
          if(grupp.trim().equals(noOPT)) {
         	 noopt = true;
          }
        }
 
  
-      prod.setName(nimetus.trim() + " " + kood);
+        prod.setName(nimetus.trim() + " " + kood);
       
-
-     String grupp2 = rs.getString("grupp2");
-          if(grupp2 != null && grupp2.trim().length()>0){ 
-              prod.setGroup(grupp2);
-              if(grupp2.trim().equals(noOPT)) {
-             	 noopt = true;
-              }
-           }
-          
           
           
           if(!noopt) {
@@ -2733,7 +2896,6 @@ boolean noopt = false;
 
       int weekIndex = cycleDayIndex / 7;
       int dayIndex = cycleDayIndex % 7;
-
       char weekLetter = (char) ('A' + weekIndex);
       int dayNumber = dayIndex + 1;
 
@@ -2741,10 +2903,13 @@ boolean noopt = false;
   }
 
   
+     HashMap<String, Map<String, Double>> custSalesGrupped = null;
+	 HashMap<String, Map<String, Double>> custPlanGrupped = null;
+
+	 
   
   public void setBulkSales(Map agents){
-	  
-	  
+	   
     
 
 
@@ -2763,18 +2928,12 @@ boolean noopt = false;
 		  grSqlAdd = grSqlAdd + ") ";
 	  }
 	 // Teeme gruppide myygid valmis 
-	  String cmd0 =  "WITH AgentCusts AS (SELECT [BID02_CUSTORDER].ACCOUNTNUM, [BID07_AGENT].AGENTID\r\n" + 
-	  		" FROM [DWHEE].[dbo].[BID02_CUSTORDER] LEFT JOIN[DWHEE].[dbo].[BID27_EMPLOYEE] ON [BID27_EMPLOYEE].PERSONNELNUMBER = [BID02_CUSTORDER].RESPONSIBLEEMPLID\r\n" + 
-	  		" LEFT JOIN[DWHEE].[dbo].[BID07_AGENT] ON [BID27_EMPLOYEE].NAME = CASE WHEN CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) > 0\r\n" + 
-	  		"THEN SUBSTRING([BID07_AGENT].PERSONNAME, CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) + 3, LEN([BID07_AGENT].PERSONNAME))\r\n" + 
-	  		"ELSE [BID07_AGENT].PERSONNAME END WHERE [BID27_EMPLOYEE].TITLE LIKE '%Müügiesindaja%')\r\n" + 
-	  		"SELECT ac.AgentID as agent,EG_PRODUCTGROUPID as gr,SUM(d.LINEAMOUNTMST ) AS summa\r\n" + 
-	  		" FROM [DWHEE].[dbo].[BIF01_CUSTINVOICETRANS] d JOIN AgentCusts ac ON d.[ORDERACCOUNT] = ac.ACCOUNTNUM\r\n" + 
-	  		" INNER JOIN [DWHEE].[dbo].BID01_ITEM b ON d.ITEMID = b.ITEMID\r\n" + 
-	  		" WHERE d.INVOICEDATE >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
-	  		"AND d.INVOICEDATE < DATEADD(MONTH, 1,DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) \r\n" 
-	  		 + grSqlAdd + 
-	  		" GROUP BY ac.AgentID,EG_PRODUCTGROUPID" ;
+	  String cmd0 =  "SELECT EG_AGENTID as agent, EG_PRODUCTGROUPID as gr,SUM(d.LINEAMOUNTMST ) AS summa\r\n" + 
+	  		"	  		 FROM [BIF01_CUSTINVOICETRANS] d \r\n" + 
+	  		"	  		 INNER JOIN BID01_ITEM b ON d.ITEMID = b.ITEMID \r\n" + 
+	  		"	  		 WHERE d.INVOICEDATE >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+	  		"	  		AND d.INVOICEDATE < DATEADD(MONTH, 1,DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) \r\n" + 
+	  		"			group by EG_AGENTID, EG_PRODUCTGROUPID having eg_agentid != ''" ;
 	  
 	try {	
 	   Connection con = this.getNewConnection();
@@ -2857,6 +3016,10 @@ boolean noopt = false;
 	     Iterator<String> itera2 = osales.keySet().iterator();
 	     while (itera2.hasNext()) {
 	         String grID = itera2.next();
+	         
+
+			 if(this.groupGrouping.get(grID) != null) {
+				String cat = this.groupGrouping.get(grID); 
 	         double psales = osales.get(grID);
 
 	         if (oplan != null && oplan.get(grID) != null) {
@@ -2870,7 +3033,7 @@ boolean noopt = false;
 
 	             managerResults
 	                 .computeIfAbsent(agID, k -> new ArrayList<>())
-	                 .add(new GroupResult(grnimi, missing));
+	                 .add(new GroupResult(grnimi + " (" + cat + ")", missing));
 	         }
 
 	         if (this.groupGrouping.get(grID) != null) {
@@ -2879,6 +3042,7 @@ boolean noopt = false;
 	                 .merge(groupGrouping.get(grID), psales, Double::sum);
 	         }
 	     }
+			 }
 	 }
 	 
 	 
@@ -2927,6 +3091,8 @@ boolean noopt = false;
 		  Iterator<String>  itera2 = osales.keySet().iterator();
 			 while (itera2.hasNext()) {
 				 String grID = itera2.next();
+				 
+				 
 			double psales = osales.get(grID);
 		 if(rsales != null && rsales.get(grID) != null) {
 		  
@@ -2948,8 +3114,8 @@ boolean noopt = false;
       		  done = "+" + done;
       	  }
         	
-      	  String asi = "Category : " + grID + "|Done : " + (int) msales +  " € - Plan : " + (int) psales +  " €|Diff. : " + done + " €|done/esti. :";
-            asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
+      	  String asi = "Category : " + grID + "|Sales/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Diff. : " + done + " €|done/esti. :";
+            asi = asi + " " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  
             
             if(manaCategoryTotals.get(agID) != null) {
                 manaCategoryTotals.put(agID, manaCategoryTotals.get(agID) + asi);
@@ -2957,6 +3123,7 @@ boolean noopt = false;
                 manaCategoryTotals.put(agID, asi);	
             }
 		  }
+		 
 		}
 	 }
 	 
@@ -2964,18 +3131,12 @@ boolean noopt = false;
 	 // 1  selgitame välja top 10 grupi plaani
 	 
 	 
-		String cmd = "WITH AgentCusts AS (SELECT [BID02_CUSTORDER].ACCOUNTNUM, [BID07_AGENT].AGENTID\r\n" + 
-	 		" FROM [DWHEE].[dbo].[BID02_CUSTORDER] LEFT JOIN[DWHEE].[dbo].[BID27_EMPLOYEE] ON [BID27_EMPLOYEE].PERSONNELNUMBER = [BID02_CUSTORDER].RESPONSIBLEEMPLID\r\n" + 
-	 		" LEFT JOIN[DWHEE].[dbo].[BID07_AGENT] ON [BID27_EMPLOYEE].NAME = CASE WHEN CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) > 0\r\n" + 
-	 		"THEN SUBSTRING([BID07_AGENT].PERSONNAME, CHARINDEX(' - ', [BID07_AGENT].PERSONNAME) + 3, LEN([BID07_AGENT].PERSONNAME))\r\n" + 
-	 		"ELSE [BID07_AGENT].PERSONNAME END WHERE [BID27_EMPLOYEE].TITLE LIKE '%Müügiesindaja%')\r\n" + 
-	 		"SELECT ac.AgentID as agent,SUM(d.LINEAMOUNTMST ) AS summa\r\n" + 
-	 		" FROM [DWHEE].[dbo].[BIF01_CUSTINVOICETRANS] d JOIN AgentCusts ac ON d.[ORDERACCOUNT] = ac.ACCOUNTNUM\r\n" + 
-	 		" INNER JOIN [DWHEE].[dbo].BID01_ITEM b ON d.ITEMID = b.ITEMID\r\n" + 
-	 		" WHERE d.INVOICEDATE >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
-	 		"AND d.INVOICEDATE < DATEADD(MONTH, 1,DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))\r\n " 
-	 		+ grSqlAdd + 
-	 		" GROUP BY ac.AgentID";
+		String cmd = "SELECT EG_AGENTID as agent, SUM(d.LINEAMOUNTMST ) AS summa\r\n" + 
+				"	  		 FROM [BIF01_CUSTINVOICETRANS] d \r\n" + 
+				"	  		 INNER JOIN BID01_ITEM b ON d.ITEMID = b.ITEMID \r\n" + 
+				"	  		 WHERE d.INVOICEDATE >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+				"	  		AND d.INVOICEDATE < DATEADD(MONTH, 1,DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) \r\n" + 
+				"			group by EG_AGENTID having eg_agentid != ''";
 		
 		try {
 			
@@ -3062,6 +3223,7 @@ boolean noopt = false;
 		 
 
 	  custSales = new HashMap<String, Map<String, Double>>();
+	  custSalesGrupped = new HashMap<String, Map<String, Double>>();
 	  custTotalSales = new HashMap<String, Double>(); 
 		String cmd =  " select clientBackOfficeID as cust , brandBackOfficeId as gr , sum(lineamount) as summa  from epasaule_deliveries d INNER JOIN dbo.EPASAULE_PRODUCTS a ON d.productBackOfficeID = a.backOfficeId where \r\n" + 
 				"deliverydate >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
@@ -3093,7 +3255,14 @@ boolean noopt = false;
 					                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
 					                .merge(gr, sales, Double::sum);
 								 custTotalSales.merge(cust, sales, Double::sum);
-					   }
+					   
+								 if (this.groupGrouping.get(gr) != null) {
+						             custSalesGrupped
+						                 .computeIfAbsent(cust, k -> new HashMap<String, Double>())
+						                 .merge(groupGrouping.get(gr), sales, Double::sum);
+						         }
+					
+					}
 				 }
 			
 			rs.close();

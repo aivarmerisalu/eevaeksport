@@ -403,7 +403,7 @@ private Product getProd(String toode){
 
 	  ord24B.setAgentCode(order.getAgentCode());
 	  ord24B.setDokNr(order.getDokNr());
-	  ord24B.setCompName(order.getShipMode());
+	  ord24B.setShipMode(order.getShipMode());
 	  ord24B.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ord24B.setStatus(order.getStatus());
 	  ord24B.setInfo(order.getInfo());
@@ -414,7 +414,7 @@ private Product getProd(String toode){
 	  
 	  ord208_MRC.setAgentCode(order.getAgentCode());
 	  ord208_MRC.setDokNr(order.getDokNr());
-	  ord208_MRC.setCompName(order.getShipMode());
+	  ord208_MRC.setShipMode(order.getShipMode());
 	  ord208_MRC.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ord208_MRC.setStatus(order.getStatus());
 	  ord208_MRC.setInfo(order.getInfo());
@@ -424,7 +424,7 @@ private Product getProd(String toode){
 	  
 	  ord24N.setAgentCode(order.getAgentCode());
 	  ord24N.setDokNr(order.getDokNr());
-	  ord24N.setCompName(order.getShipMode());
+	  ord24N.setShipMode(order.getShipMode());
 	  ord24N.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ord24N.setStatus(order.getStatus());
 	  ord24N.setInfo(order.getInfo());
@@ -435,7 +435,7 @@ private Product getProd(String toode){
 	  
 	  ord24EWC.setAgentCode(order.getAgentCode());
 	  ord24EWC.setDokNr(order.getDokNr());
-	  ord24EWC.setCompName(order.getShipMode());
+	  ord24EWC.setShipMode(order.getShipMode());
 	  ord24EWC.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ord24EWC.setStatus(order.getStatus());
 	  ord24EWC.setInfo(order.getInfo());
@@ -650,6 +650,10 @@ private Product getProd(String toode){
 
 	  String deltype = "0"; // ei kasutatta eestis
 	  String ordtype = "0"; // Seda poel ka eestis vaja siin on määratud miskanalist tellimus tuelb
+	  
+	  if(order.getShipMode() != null && order.getShipMode().trim().length() > 0) {
+		  System.out.println("shipmode " + order.getShipMode());
+	  }
 	  
 	  if(repr) {
 		  ordtype = "4"; 
