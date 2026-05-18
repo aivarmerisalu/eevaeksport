@@ -337,11 +337,6 @@ public class ScalaPrikeEstDBDriver extends AbstractDBDriver implements BulkUpdat
     			
     				
     				int week = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
-    				
-    				if(custid.indexOf("T19251") != -1)
-    				System.out.println(week + " " + custid + " " + paev + " " + agent);
-    				
-    				//boolean goes = false;
     				boolean goes = true;
     				StringTokenizer st = new StringTokenizer(nadalad,",");
     				while(st.hasMoreTokens()){
@@ -361,11 +356,7 @@ public class ScalaPrikeEstDBDriver extends AbstractDBDriver implements BulkUpdat
         					if(num.equals(week+"")){
         						if(cc.getBrand() == null){
         							cc.setBrand(paev.trim());
-            						if(custid.indexOf("T19251") != -1){
-                						System.out.println("ohoobrand " + num + " " + week + " " + custid.trim() + " " +paev);
-                					}
-            							
-        						}
+            					}
         					}
         				}
     					
@@ -381,7 +372,7 @@ public class ScalaPrikeEstDBDriver extends AbstractDBDriver implements BulkUpdat
     		
 
         	
-    		//System.out.println("ekstra kliendid suurus " + res.size() + " kiendid kellel on " + this.longKliendid);
+    		System.out.println("ekstra kliendid suurus " + res.size() + " kiendid kellel on " + this.longKliendid);
         	
         	
         	return res ;

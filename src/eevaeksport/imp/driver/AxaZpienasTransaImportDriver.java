@@ -179,17 +179,13 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
    }catch(Exception j) {
 	j.printStackTrace();
    }
-
      
 	  return res;
   }
 
 
   public void makeOrder(Order order) throws SQLException{
-	 
- 
     makeMilkTransportOrder(order);  
-  //  updateCustNFC();
   }
 
   
@@ -266,14 +262,15 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 	     }else{
 		 	    	 toode = "";
 		 	     }
-		 	 
 		 	   
 		 	     
 		 	     if(line.getPartii() != null && line.getPartii().trim().length() > 0){
+		 	    	
 		 	    	 if(line.getPartii().equals("22")){
 		 	    		 type = "A2"; 
 		 	    	 }
-		 	    	if(line.getPartii().equals("33")){
+		 	    	 
+		 	    	 if(line.getPartii().equals("33")){
 		 	    		 type = "DZ"; 
 		 	    	 }
 		 	     }
@@ -295,7 +292,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 			   String clean = " ";
 			   String sample = " ";
 			  
-			   System.out.println("UNIT " + line.getUnit());
+			//   System.out.println("UNIT " + line.getUnit());
 		 	   if(line.getUnit() != null ) {
 		 		  if(line.getUnit().indexOf("ss:") != -1) {
 		 			   section = line.getUnit().substring(line.getUnit().indexOf("ss:")+3, line.getUnit().indexOf("ss:") + 4);
@@ -330,9 +327,7 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 	   }
 		 	     
 		 	     String company = order.getCompany();
-		 	    //  waybill = " ";
 		 	     if(company.indexOf("--") != -1) {
-		 	    	// waybill = company.substring(company.indexOf("--") + 2, company.length());
 		 	    	 company = company.substring(0, company.indexOf("--"));
 		 	     }
 		 	     
@@ -355,22 +350,11 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 	    	}
 		 	    	
 		 	    	String time = hour + ":"+ minutes;
-		 	    	
 		 	    	String vendType = this.getVendType(company);
-		 	    	
 		 	    	String station = getStation(company);
-		 	    	
 		 	    	 desttype = " ";
-		 	    	String cycle = " ";
 		 	    	String tripFrom = "1";
-		 	    	String sectionFrom = " ";
-		 	    	
-		 	    	
-		 	    //	3.desttype	место из – esli Vendor , togda  nicego
-		 	      //  esli stac  tocka  togda  0
-		 	//esli driver to iz barkoda седьмой символ
-
-		 	    System.out.println("Scan " + scan);	
+		 	  
 		 	    	if(scan != null && scan.indexOf("000000")== -1) {
 		 	    		
 		 	    		if(scan.startsWith("1")) {
@@ -389,21 +373,12 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
 		 	    			desttype = "0";
 		 	    		}
 		 	    	}
-		 	    	//4.	цикл из - последний (восьмой) символ из barкода поставщика
-                  
+		 	       
 		        sb.append(dateString + ";" + extDoc + ";" + extDoc.substring(3) + ";" + time + ";P;" +  type + ";ZP;"+ vendType + ";" +  company + ";" +
 		        
 		        desttype + ";" + tripFrom  +  ";" + driverStock + ";" +  section + ";" + trip +  ";"+ Converter.Round((float)line.getKogus(), 1) + ";" + days + ";" + station +";" + signa + ";" + photo
 		           + ";" + comment + ";" + temp + ";" +  ";" +  ";" + ";" + ";;;;;;TIE\n"); 
-		        	  
-		
-		//        Data +“;“+ путевой лист.+“;“+ грузовoй лист.+ “;“+ начало сбора +“;“+ Item +“;“+ тип молока + “;“+ место расследования + “;“+ тип (поставщик(0), склад(1))+ “;“+ код из +“;“+ место из +“;“+
-		  //      цикл из + “;“+ код то+ “;“+ место то +“;“+ цикл то +“;“+ Количество кг.+“;“+ Количество дней.+“;“+ код точки +“;“+подпись+“;“+ Фото +“;“+Комментарий+“;“+Температура+“;“+ 
-
-		    //    PH+ “;“+ кислотность +“;“+INH1 +“;“+ INH +“;“+ Количество образцов +“;“+ Плохой чувственный показатель + “;“+ Группа чистоты +“;“+ Исследование выполнил(кодID) +“;“+ Исследование подтвердил (кодID)
-
-		      //  +“;“+Признак (лаборатория или нет)
-
+		     
 		        	  coun++;
 		          }
 		        }
@@ -415,38 +390,30 @@ public class AxaZpienasTransaImportDriver extends AbstractImportDriver{
             long uni = Calendar.getInstance().getTimeInMillis();
             
                String loca = parent.getProps().getProperty("conv.dir");
-              
-               fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() +  ".csv";
-               
-               
-               //date_ путевой лист_ код из_ Признак.csv
+                //date_ путевой лист_ код из_ Признак.csv
                fileName =  loca + dateString2 +  "_" + extDoc + "_" +  driverStock + "_" + trip +  "_TIE.csv";
  		      
                if(refe){
             	   loca = parent.getProps().getProperty("conv2.dir");
-
-            	   
+   
     		 	   fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() + "_" + trip +   ".csv";
-    		 	   System.out.println("tagastus" + fileName);
+    		 	  
     		 	  writeToFile(sb.toString(),fileName);
                }else {
             	   File ff = new File (loca);
             	   FileNameFilter filter = new FileNameFilter();
-            	     filter.setAgent(extDoc); //order.getAgent() ja meetod tee ka ymner strrt in peale
-            	  
+            	     filter.setAgent(extDoc); 
             	     
             	     File[] aa = ff.listFiles(filter);
             	   if(aa.length >0) {
             		   for(File f : aa) {
 
                 			   writeToFile(sb.toString(),f.getPath());
-                			   System.out.println("vana fail" + fileName);   
-            			   
+                		   
         	           }
             	   }else {
-            	 	  // fileName = loca + order.getAgent()+ "-" + order.getCompany() + "-" + (uni + "").trim() +  ".csv";
-            	          fileName =  loca + dateString2 +  "_" + extDoc + "_" +  driverStock +  "_" + trip +  "_TIE.csv";
-        		 	   System.out.println("uus fail" + fileName);
+            	 	      fileName =  loca + dateString2 +  "_" + extDoc + "_" +  driverStock +  "_" + trip +  "_TIE.csv";
+        		 	
         		 	  writeToFile(sb.toString(),fileName);
             	   }
                }
