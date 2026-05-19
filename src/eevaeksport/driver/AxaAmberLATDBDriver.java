@@ -939,13 +939,13 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 //For LB products - SPIL's warehouse 'GPP-VT' and warehouse from LB AX file - Lb_l - 'GPP'.
 
 
-   String cmd = " select summ.itemid AS toode ,s.itemid as toode2 ,SUM(case when t.itemgroupid ='LB' and dim.inventlocationid in ('GPP-AK-LB')then 0 else summ.AVAILPHYSICAL end) AS stock " +
-"FROM INVENTSUM summ with(nolock) " +
-"INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +
-"INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid " +
-"left JOIN inventtablecompany s ON s.itemid=t.itemidcompany " +
-"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('GPP-VT','GPP-AK-CIG') " + //,'GPP-AK-LB'
-"GROUP BY summ.itemid,s.itemid having sum(summ.availphysical) >0";
+   String cmd = " select summ.itemid AS toode ,s.itemid as toode2 ,SUM(case when t.itemgroupid ='LB' and dim.inventlocationid in ('GPP-AK-LB')then 0 else summ.AVAILPHYSICAL end) AS stock \r\n" + 
+   		"FROM INVENTSUM summ with(nolock) \r\n" + 
+   		"INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid\r\n" + 
+   		"INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid \r\n" + 
+   		"left JOIN inventtablecompany s ON s.itemid=t.itemidcompany \r\n" + 
+   		"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT','PLG-AK-Z','PLG-AK-U')  \r\n" + 
+   		"GROUP BY summ.itemid,s.itemid having sum(summ.availphysical) >0";
 
 
        if (isDebug()) System.out.println(cmd);
@@ -975,14 +975,6 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
            }
            }
 
-         cmd = "select  s.itemid as toode2 ,sum(AVAILPHYSICAL) AS stock  , t2.itemgroupid   FROM INVENTSUM summ  " +
-   	          "INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid  " +
-   	          "INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and inv.dataareaid=dim.dataareaid    " +
-   			  " INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=dim.dataareaid " +
-   			  "  INNER  JOIN inventtablecompany s ON s.itemid=t.itemidcompany   INNER  JOIN inventtable t2 ON"
-   			   + "  t2.itemidcompany=s.itemid and t2.dataareaid = 'spil'  " +
-   	          " WHERE  inv.DATAAREAID='lb_l' and dim.inventlocationid in ('GPP') and t2.itemgroupid ='LB'" +
-   			  " GROUP BY  s.itemid, t2.itemgroupid   having sum(availphysical) >0 ";
   
          cmd= "select  s.itemid as toode2 ,sum(AVAILPHYSICAL) AS stock FROM INVENTSUM summ with(nolock) " +
 "INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +

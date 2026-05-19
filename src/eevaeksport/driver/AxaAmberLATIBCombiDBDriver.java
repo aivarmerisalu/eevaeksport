@@ -1132,7 +1132,7 @@ rs.close();
 "INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +
 "INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid " +
 "left JOIN inventtablecompany s ON s.itemid=t.itemidcompany " +
-"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('GPP-VT','GPP-AK-CIG') " + //,'GPP-AK-LB'
+"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT','PLG-AK-Z','PLG-AK-U') " + 
 "GROUP BY summ.itemid,s.itemid having sum(summ.availphysical) >0";
 
 
@@ -1163,14 +1163,6 @@ rs.close();
            }
            }
 
-         cmd = "select  s.itemid as toode2 ,sum(AVAILPHYSICAL) AS stock  , t2.itemgroupid   FROM INVENTSUM summ  " +
-   	          "INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid  " +
-   	          "INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and inv.dataareaid=dim.dataareaid    " +
-   			  " INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=dim.dataareaid " +
-   			  "  INNER  JOIN inventtablecompany s ON s.itemid=t.itemidcompany   INNER  JOIN inventtable t2 ON"
-   			   + "  t2.itemidcompany=s.itemid and t2.dataareaid = 'spil'  " +
-   	          " WHERE  inv.DATAAREAID='lb_l' and dim.inventlocationid in ('GPP') and t2.itemgroupid ='LB'" +
-   			  " GROUP BY  s.itemid, t2.itemgroupid   having sum(availphysical) >0 ";
   
          cmd= "select  s.itemid as toode2 ,sum(AVAILPHYSICAL) AS stock FROM INVENTSUM summ with(nolock) " +
 "INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +
@@ -1221,7 +1213,7 @@ rs.close();
 
          cmd = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
     "   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +  
-    " WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('GPP-VT') " +
+    " WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('PLG-VT') " + //('PLG-VT','PLG-AK-Z','PLG-AK-U')
     "	GROUP BY  summ.itemid  having sum(availphysical) > 0 " ;
 
 
@@ -2576,15 +2568,9 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
     TreeMap products = new TreeMap();
     
     
-    String cmdx = " select  summ.itemid  AS toode ,SUM(  AVAILPHYSICAL )   AS stock    FROM INVENTSUM summ " + 
-    			     "     INNER JOIN INVENTDIM dim ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " + 
-    		        " INNER JOIN inventtablemodule inv ON inv.itemid=summ.itemid and inv.dataareaid=dim.dataareaid   " +
-    			"		   INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=dim.dataareaid " +
-    			 "     WHERE  inv.DATAAREAID='itb' and CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('GPL-AK-LB') " +
-    			"	GROUP BY  summ.itemid  having sum(availphysical) > 0";
-    cmdx = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
+    String   cmdx = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
     		"   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +  
-    		" WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('GPP-AK-LB') " + //GPP-AK-LB
+    		" WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('PLG-AK-LB') " + //GPP-AK-LB
     		"	GROUP BY  summ.itemid  having sum(availphysical) >0 " ;
 
     TreeMap<String,Double> brakis = new TreeMap<String,Double>();

@@ -3141,10 +3141,154 @@ boolean noopt = false;
 		return null;
 	}
 
+	private HashMap<String, Product> getProds() {
+		
+		HashMap<String, Product> prodMap = new HashMap<String, Product>();
+		  
+		String cmd = "   Select  a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr,baseUnitWeight as kaal,vendname as tootja, a.quantityBox AS kastis,a.quantityPallete as alusel \r\n" + 
+				"  , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
+				"	    		    	 a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
+				"	    		    		a.brandBackOfficeId AS grupp2 ,a.unitName AS unit " + 
+				"							 from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
+				"	    					 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId"  ;
+
+         if (isDebug()) System.out.println(cmd);
+	        
+	       try { 
+	Connection con =  getNewConnection();       
+	Statement stmt = con.createStatement();
+	ResultSet rs = stmt.executeQuery(cmd);
+	
+	while(rs.next()){
+	String prodid = rs.getString("itemid").trim();
+	Product prod = new Product(prodid);
+
+	String name = rs.getString("nimetus").trim();
+			
+			prod.setName(name);
+			
+			String brandname = rs.getString("namebr");
+			if(brandname != null && brandname.trim().length() > 0) {
+			  prod.setGroup(brandname.trim());
+			}
+			Double kaal = rs.getDouble("kaal");
+			if(kaal > 0) {
+				prod.setMeasure(kaal);
+			}
+			
+			String tootja = rs.getString("tootja");
+			if(tootja != null && tootja.trim().length() > 0) {
+			  prod.setNameSorting(tootja.trim());
+			}
+
+			String ean = rs.getString("tootja");
+			if(ean != null && ean.trim().length() > 0) {
+			  prod.setEAN(ean.trim());
+			  prodMap.put(ean,prod);	
+			}
+			
+			}
+		     rs.close();
+		     stmt.close();
+		     con.close();
+		   }catch(Exception e) {e.printStackTrace();}
+	       
+	     return prodMap;
+		}
+	
+	
+	private HashMap<String, Customer> getCust() {
+		
+		HashMap<String, Customer> custMap = new HashMap<String, Customer>();
+		  
+        String cmd = "Select a.name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , (case when EG_IGNOREMINORDER = 0 then minOrderSum else 0 end) as minsum, '' as linedisc\r\n" + 
+        		"                                                                                                             , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
+        		"                                                             Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
+        		"                                                                 contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
+        		"                                                             contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+        		"                                                                                           from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
+        		"                                                                                           LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
+        		"" ; 
+        
+
+         if (isDebug()) System.out.println(cmd);
+	        
+	       try { 
+	Connection con =  getNewConnection();       
+	Statement stmt = con.createStatement();
+	ResultSet rs = stmt.executeQuery(cmd);
+	
+	while(rs.next()){
+	String name = rs.getString("name").trim();
+	String accountnum = rs.getString("accountnum").trim();
+	Customer cust = new Customer(accountnum);
+	  cust.setPayer(rs.getString("payer"));
+	String aadr = rs.getString("address");
+
+	if (aadr != null) {
+			if(aadr.endsWith(", %1")) {
+			    aadr = aadr.substring(0,aadr.indexOf(", %1")).trim();
+			}
+	      aadr = aadr.replaceAll("\\s+", " ").trim();
+	
+	       cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll(country, " ").replaceAll("\\s+", " ").trim()), country));
+	
+			}
+			
+			name = name.replaceAll("\\s*\\([^()]*\\)\\s*$", "").trim();
+			cust.setName(name);
+			
+			String chain = rs.getString("chain");
+			if(chain != null && chain.trim().length() > 0) {
+			 cust.setChain(chain);
+			}
+			
+			String type = rs.getString("type");
+			if(type != null && type.trim().length() > 0) {
+			 cust.setCustType(type);
+			}
+			
+			
+			String seg = rs.getString("seg");
+			if(seg != null && seg.trim().length() > 0) {
+			cust.addCity("Kett: " + seg.trim());
+			}
+			
+			
+			String segsub = rs.getString("segsub");
+			if(segsub != null && segsub.trim().length() > 0) {
+			 cust.addCity("Segment: " + segsub.trim());
+			}
+			
+			String type2 = rs.getString("type2");
+			if(type2 != null && type2.trim().length() > 0) {
+			cust.addCity("Tunnus: " + type2.trim());
+			}
+			
+			
+			if(type != null && type.trim().length() > 0) {
+			cust.addCity("Tüüp: " + type.trim());
+			}
+			
+			custMap.put(cust.getID(),cust);	
+			}
+		     rs.close();
+		     stmt.close();
+		     con.close();
+		   }catch(Exception e) {e.printStackTrace();}
+	       
+	     return custMap;
+		}
+
+	
+	
 	@Override
 	public void FixLoader() {
 
-		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent);
+		HashMap<String, Customer> customers = getCust();
+		HashMap<String, Product> products = getProds();
+
+		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent, customers, products);
 		   System.exit(0);
 	
 	}

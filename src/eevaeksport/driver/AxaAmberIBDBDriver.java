@@ -615,7 +615,7 @@ rs.close();
 
    String  cmd = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
 "   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +  
-" WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('GPP-VT') " +
+" WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('PLG-VT') " +
 "	GROUP BY  summ.itemid  having sum(availphysical) > 0 " ;
 
 

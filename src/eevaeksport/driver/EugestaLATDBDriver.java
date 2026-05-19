@@ -3347,8 +3347,10 @@ boolean noopt = false;
 
 	@Override
 	public void FixLoader() {
+		HashMap<String, Customer> customers = new HashMap<String, Customer>();
+		HashMap<String, Product> products = new HashMap<String, Product>();
 
-		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent);
+		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent, customers, products);
 		   System.exit(0);
 	
 	}
