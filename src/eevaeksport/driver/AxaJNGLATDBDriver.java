@@ -84,7 +84,6 @@ public class AxaJNGLATDBDriver extends AbstractDBDriver  implements Manager, Pro
       } catch (Exception e){
         parent.showError(e);
       }
-    user =  getParent().getProps().getProperty("rest.user");
     pass = getParent().getProps().getProperty("rest.pass");
     companyx = getParent().getProps().getProperty("rest.company");
     instance = getParent().getProps().getProperty("company");

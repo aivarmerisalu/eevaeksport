@@ -5339,8 +5339,8 @@ public class Converter {
 			                                    	  if(prod.getGroup().trim().length() > 0) {
 			                                    		  grupp = prod.getGroup();
 			                                    	  }
-			                                    	  if(prod.getType().trim().length() > 0) {
-			                                    		  brand = prod.getType();
+			                                    	  if(prod.getGroupSecond().trim().length() > 0) {
+			                                    		  brand = prod.getGroupSecond();
 			                                    	  }
 			                                    	  if(prod.getMeasure() > 0) {
 			                                    		  kaal = prod.getMeasure();
@@ -5362,8 +5362,8 @@ public class Converter {
 			                                      int weekNumber = dateTime.get(WeekFields.of(Locale.ENGLISH).weekOfYear());
 
 			                                      
-			                                      System.out.println("Lisatakse rida: " + custid + " " + prodean + " " + comm + " " +  questLineID  + " " +
-			                                    		  questInfo.get(questLineID)); 
+			                                  //    System.out.println("Lisatakse rida: " + custid + " " + prodean + " " + comm + " " +  questLineID  + " " +
+			                                    //		  questInfo.get(questLineID)); 
 
 			                                      XSSFCell cell = row.createCell(0);
 			                                      cell.setCellValue((String)ob.get("extData"));
@@ -5429,9 +5429,9 @@ public class Converter {
 				                                          cell.setCellValue(prodname);
 				                                      }
 				                                      
-				                                      if(kaal > 0 ) {
+				                                      if(kaal != null && kaal > 0 ) {
 				                                    	  cell = row.createCell(16);
-					                                      cell.setCellValue(kaal*100);
+					                                    //  cell.setCellValue(kaal*100);
 				                                    	}
 			                                      
 				                                      cell = row.createCell(18); // normaalhinna cell
@@ -5468,22 +5468,22 @@ public class Converter {
 			                                          newStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
 			                                          cell.setCellStyle(newStyle);
 
-			                                          XSSFCell actionCellOOS = row.createCell(19); // action price cell "OOS" jaoks
+			                                          XSSFCell actionCellOOS = row.createCell(21); // action price cell "OOS" jaoks
 			                                          actionCellOOS.setCellValue("OOS");
 			                                      }
 
 			                                      if (actionpr != null && actionpr > 0) {
-			                                          XSSFCell actionCell = row.createCell(18); // action price cell
+			                                          XSSFCell actionCell = row.createCell(20); // action price cell
 			                                          actionCell.setCellValue(actionpr);
 			                                      }
 
 			                                      if (comm != null && comm.trim().length() > 0) {
-			                                          XSSFCell commCell = row.createCell(21); // kommentaari cell
+			                                          XSSFCell commCell = row.createCell(23); // kommentaari cell
 			                                          commCell.setCellValue(comm);
 			                                      }
 
 			                                      changesMade = true;
-			                                   //   answersDone.add("master" + key + created);
+			                                     answersDone.add("master" + key + created);
 
 			                                  } else {
 			                                      System.out.println("vastus olemas, ei lisa " + key);

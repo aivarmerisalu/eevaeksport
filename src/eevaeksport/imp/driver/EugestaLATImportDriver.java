@@ -637,12 +637,20 @@ private Product getProd(String toode){
 	      
 	      String ref2 = " ";
 	      if(order.getTeostaja() != null && order.getTeostaja().trim().length()>0 ){
-	    	  if(!repr) {
+	    	  if(!repr && !tagastus) {
 	         	ref2 = order.getTeostaja().trim();
 	    	  }else {
 	    		  String inff = order.getTeostaja();
 	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
 	                	ref = inff.substring(0,inff.indexOf("["));
+
+
+int start = inff.lastIndexOf(' ');
+int end = inff.indexOf('[');
+
+if (start != -1 && end != -1 && start < end - 1) {
+    ref2 = inff.substring(start + 1, end);
+}
 	    		    }
 	    	  }
 	      }
@@ -655,6 +663,9 @@ private Product getProd(String toode){
 		  System.out.println("shipmode " + order.getShipMode());
 		  
 	  }
+	
+	  System.out.println("ref " + ref + " ' " + ref2);
+		
 	  
 	  if(repr) {
 		  ordtype = "4"; 
@@ -668,6 +679,13 @@ private Product getProd(String toode){
 	  
 	  int orderingTime = 0;
 	      
+	  /*INSERT INTO  ORDERS (   ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ,DELIVERY_DATE , 
+	   * STATUS  ,AGENT_ID ,ORDERING_TIME ,ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID 
+	   *  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE,Cust_Ref )  VALUES 
+	   *  (9, cast(getdate() as date),'2133P',  0,cast(? as date),'V','568',0,' ',1,''
+	   *  ,null,0,'','',getdate(),'568-05.200 09_46_47-51-2133 abc123[CLOSED]' )
+Wed May 20 11:07:37 EEST 2026  sc Thu May 21 09:48:16 EEST 2026 ref*/
+	  
 	  String sql = " INSERT INTO  ORDERS (  " +
 	                     " ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ," +
 	            "DELIVERY_DATE , STATUS  ,AGENT_ID ,ORDERING_TIME ," +

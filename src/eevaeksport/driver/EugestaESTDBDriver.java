@@ -3213,8 +3213,8 @@ boolean noopt = false;
         String cmd = "Select a.name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , (case when EG_IGNOREMINORDER = 0 then minOrderSum else 0 end) as minsum, '' as linedisc\r\n" + 
         		"     , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
         		"    Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
-        		"    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-        		"   contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+        		"    contactPhone as perphone,   segmentname as seg  ,accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
+        		"   contractDate as cdate , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
         		"   from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
         		"   LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
         		"" ; 
@@ -3247,37 +3247,22 @@ boolean noopt = false;
 			name = name.replaceAll("\\s*\\([^()]*\\)\\s*$", "").trim();
 			cust.setName(name);
 			
-			String chain = rs.getString("chain");
-			if(chain != null && chain.trim().length() > 0) {
-			 cust.setChain(chain);
-			}
-			
-			String type = rs.getString("type");
-			if(type != null && type.trim().length() > 0) {
-			 cust.setCustType(type);
-			}
 			
 			
 			String seg = rs.getString("seg");
 			if(seg != null && seg.trim().length() > 0) {
-			cust.addCity("Kett: " + seg.trim());
+			    //cust.addCity(seg.trim());
+				 cust.setChain(seg);
 			}
 			
 			
-			String segsub = rs.getString("segsub");
-			if(segsub != null && segsub.trim().length() > 0) {
-			 cust.addCity("Segment: " + segsub.trim());
-			}
 			
-			String type2 = rs.getString("type2");
-			if(type2 != null && type2.trim().length() > 0) {
-			cust.addCity("Tunnus: " + type2.trim());
+			String city = rs.getString("city");
+			if(city != null && city.trim().length() > 0) {
+			  cust.addCity( city.trim());
 			}
 			
 			
-			if(type != null && type.trim().length() > 0) {
-			cust.addCity("Tüüp: " + type.trim());
-			}
 			
 			custMap.put(cust.getID(),cust);	
 			}
