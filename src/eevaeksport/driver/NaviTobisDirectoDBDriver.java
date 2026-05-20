@@ -3189,7 +3189,7 @@ System.out.println(cmd);
 			" ,t.[Base Unit of Measure] AS unit,[No_ 2] AS ean,'' AS status , [Max discount]  AS maxdiscount, " +
 			 " '' AS type, [Units per Parcel] AS kastis, [Sell only in parcels]  as optam ,[Item Disc_ Group] as alegr ,  '' AS kaal, "
 			 + "[VAT Prod_ Posting Group] AS vat ,[Units per Pallet] as pallet " +
-			 " ,[Unit List Price] as listprice,[New until] as newprod ,[Nelikvidas]  as status2 , [Minimum Unit Price]  as jaeh, "
+			 " ,[Unit List Price] as listprice,[New until] as newprod ,[Nelikvidas]  as status2, [Sell out]  as status3 , [Minimum Unit Price]  as jaeh, "
 			 + " [Home Page] as webpage FROM [2015_Tobis$Item] t  WHERE t.[Blocked]=0    ORDER BY t.[No_] ";
       
     	 System.out.println(cmd);
@@ -3310,6 +3310,15 @@ System.out.println(cmd);
                    }
                    try {
                 	   int status = rs.getInt("status2");
+                       if(status > 0) {
+                    	   prod.setStatusSellout("1");
+                       }   
+                   }catch(Exception e) {
+                	   
+                   }
+                   
+                   try {
+                	   int status = rs.getInt("status3");
                        if(status > 0) {
                     	   prod.setStatusSellout("1");
                        }   

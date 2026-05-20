@@ -4891,11 +4891,12 @@ public class Converter {
 						org.json.simple.JSONArray rows  = (org.json.simple.JSONArray) ob.get("questions") ;
 						for(int r = 0 ;r < rows.size(); r++) {
 							org.json.simple.JSONObject ob0 = (org.json.simple.JSONObject) rows.get(r);
-						 questInfo.put(ob0.get("id"), startDate + " - " +endDate);
+						 questInfo.put(ob0.get("id")+"", startDate + " - " +endDate);
+						 System.out.println(ob0);
 						}
 						if(!qutitles.contains(nimi)) {
 					    	qutitles.add(nimi);
-					    	//System.out.println(nimi);
+					    	System.out.println(nimi);
 						}
 					
 					} catch (Exception e) {
@@ -4905,7 +4906,7 @@ public class Converter {
 				   }
 			   }
 			   
-			   System.out.println("qutitles " + qutitles.toString());
+			//   System.out.println("qutitles " + qutitles.toString() + " " + questInfo.toString());
 		 // Lõpp - vaatame mis küsimused on juba olemas
 			   
 				  HashSet answersDone = null;
@@ -5285,8 +5286,22 @@ public class Converter {
 
 			                          for (String key : answBuffer.keySet()) {
 			                              try {
-			                                  String custid = key.substring(key.indexOf("-") + 1);
-			                                  String prodean = key.substring(0, key.indexOf("-"));
+			                                  String prodean = key.substring(key.indexOf("-") + 1);
+			                                  String custid = key.substring(0, key.indexOf("-"));
+			                                  
+			                                  String city = null;
+			                                  String chain = null;
+			                                  
+			                                  if(customers != null && customers.get(custid) != null) {
+			                                	  Customer cust = (Customer)customers.get(custid);
+			                                	  if(cust.getCity().trim().length() > 0) {
+			                                	    city = cust.getCity();
+			                                	  }
+			                                	  if(cust.getChain().trim().length() > 0) {
+				                                	    chain = cust.getChain();
+				                                	  }
+			                                  }
+			                              
 
 			                                  org.json.simple.JSONObject ob = answBuffer.get(key);
 			                                  String created = (String) ob.get("resstr3"); 
@@ -5299,11 +5314,38 @@ public class Converter {
 			                                      String questLineID = (String)ob.get("prodid");
 			                                      
 			                                      String custID = (String) ob.get("custid");
+			                                      String prodname = (String) ob.get("prodname");
+			                                      if(prodname.contains("|")) {
+			                                    	  prodean = prodname.substring(prodname.indexOf("|")+1);
+			                                    	  prodname = prodname.substring(0,prodname.indexOf("|"));
+			                                       }
+			                                      
+			                                      String custname = (String) ob.get("custname");
 			                                      Number normalprNum = (Number) ob.get("normalpr");
 			                                      Double normalpr = normalprNum != null ? normalprNum.doubleValue() : null;
 			                                      Number actionprNum = (Number) ob.get("priceCamp");
 			                                      Double actionpr = actionprNum != null ? actionprNum.doubleValue() : null;
 			                                      String comm = (String) ob.get("comment");
+			                                     
+			                                      String tootja = null;
+				                                  String grupp = null;
+				                                  String brand = null;
+				                                  Double kaal = null;
+			                                      if(products != null && products.get(prodean) != null) {
+			                                    	  Product prod = (Product) products.get(prodean);
+			                                    	  if(prod.getNameSorting().trim().length() > 0) {
+			                                    		  tootja = prod.getNameSorting();
+			                                    	  }
+			                                    	  if(prod.getGroup().trim().length() > 0) {
+			                                    		  grupp = prod.getGroup();
+			                                    	  }
+			                                    	  if(prod.getType().trim().length() > 0) {
+			                                    		  brand = prod.getType();
+			                                    	  }
+			                                    	  if(prod.getMeasure() > 0) {
+			                                    		  kaal = prod.getMeasure();
+			                                    	  }
+			                                      }
 			                                      
 
 			                                      if (comm != null && comm.contains("Missing")) {
@@ -5320,23 +5362,20 @@ public class Converter {
 			                                      int weekNumber = dateTime.get(WeekFields.of(Locale.ENGLISH).weekOfYear());
 
 			                                      
-			                                      System.out.println("Lisatakse rida: " + custid + " " + prodean + " " + comm); 
+			                                      System.out.println("Lisatakse rida: " + custid + " " + prodean + " " + comm + " " +  questLineID  + " " +
+			                                    		  questInfo.get(questLineID)); 
 
 			                                      XSSFCell cell = row.createCell(0);
 			                                      cell.setCellValue((String)ob.get("extData"));
 			                                      
 			                                      
 			                                      if(questInfo != null && questInfo.get(questLineID) != null) {
-                                              // lisame perioodi
-				                                      cell = row.createCell(1);
+                                                      cell = row.createCell(1);
 				                                      cell.setCellValue(questInfo.get(questLineID)+"");  
 			                                      }
 			                                      
-			                                      
-			                                      
 			                                      cell = row.createCell(2);
 			                                      cell.setCellValue(country);
-			                                      
 			                                      
 			                                      cell = row.createCell(3);
 			                                      cell.setCellValue(month);
@@ -5348,15 +5387,59 @@ public class Converter {
 			                                      cell.setCellValue(year);
 
 			                                      cell = row.createCell(6);
-			                                      Date date = Date.from(
+			                                        Date date = Date.from(
 			                                    	        dateTime.atZone(ZoneId.systemDefault()).toInstant()
 			                                    	);
 			                                    	cell.setCellValue(date);
-			                                    	cell.setCellStyle(dateTimeStyle);			                                     // meet.google.com/soq-kmtz-yzi
-					                                 
+			                                    	cell.setCellStyle(dateTimeStyle);			                                   
+					                            	
+			                                    	if(city != null) {
+			                                    	  cell = row.createCell(7);
+				                                      cell.setCellValue(city);
+			                                    	}
+			                                    	
+				                                      cell = row.createCell(8);
+				                                      cell.setCellValue(custid);
+				                                      
+				                                      cell = row.createCell(9);
+				                                      cell.setCellValue(custname);
+				                                      
+				                                      if(chain != null) {
+				                                    	  cell = row.createCell(10);
+					                                      cell.setCellValue(chain);
+				                                    	}
+				                                      
+				                                      if(tootja != null) {
+				                                    	  cell = row.createCell(12);
+					                                      cell.setCellValue(tootja);
+				                                    	}
+				                                      
+				                                      if(grupp != null) {
+				                                    	  cell = row.createCell(13);
+					                                      cell.setCellValue(grupp);
+				                                    	}
+				                                      
+				                                      if(brand != null) {
+				                                    	  cell = row.createCell(14);
+					                                      cell.setCellValue(brand);
+				                                    	}
 			                                      
-			                                      // Luuakse uus lahter (createCell), mitte ei küsita vana (getCell)
-			                                       cell = row.createCell(19); // normaalhinna cell
+			                                    	 cell = row.createCell(15); // normaalhinna cell
+				                                      if (prodname != null) {
+				                                          cell.setCellValue(prodname);
+				                                      }
+				                                      
+				                                      if(kaal > 0 ) {
+				                                    	  cell = row.createCell(16);
+					                                      cell.setCellValue(kaal*100);
+				                                    	}
+			                                      
+				                                      cell = row.createCell(18); // normaalhinna cell
+				                                      if (prodean != null) {
+				                                          cell.setCellValue(prodean);
+				                                      }
+			                                    	
+			                                       cell = row.createCell(19); 
 			                                      if (normalpr != null) {
 			                                          cell.setCellValue(normalpr);
 			                                      }
@@ -5400,7 +5483,7 @@ public class Converter {
 			                                      }
 
 			                                      changesMade = true;
-			                                      answersDone.add("master" + key + created);
+			                                   //   answersDone.add("master" + key + created);
 
 			                                  } else {
 			                                      System.out.println("vastus olemas, ei lisa " + key);

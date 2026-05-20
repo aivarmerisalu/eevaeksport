@@ -1476,7 +1476,7 @@ System.out.println(cmd);
 			" ,t.[Base Unit of Measure] AS unit,[No_ 2] AS ean,'' AS status ,0 AS maxdiscount, " +
 			 " '' AS type, [Units per Parcel] AS kastis,[Item Disc_ Group] as alegr ,  '' AS kaal, "
 			 + "[VAT Prod_ Posting Group] AS vat ,[Units per Pallet] as pallet " +
-			 " ,[Unit List Price] as listprice,[New until] as newprod ,[Nelikvidas]  as status2 , [Minimum Unit Price]  as jaeh FROM [2015_Tobis$Item] t  WHERE t.[Blocked]=0    ORDER BY t.[No_] ";
+			 " ,[Unit List Price] as listprice,[New until] as newprod ,[Nelikvidas]  as status2 , [Sell out]  as status3 , [Minimum Unit Price]  as jaeh FROM [2015_Tobis$Item] t  WHERE t.[Blocked]=0    ORDER BY t.[No_] ";
       
     	 System.out.println(cmd);
      	 con = getNewConnection2();
@@ -1573,8 +1573,15 @@ System.out.println(cmd);
                     	   prod.setStatusSellout("1");
                        }   
                    }catch(Exception e) {
-                	   
                    }
+                   
+                   try {
+                	   int status = rs.getInt("status3");
+                       if(status > 0) {
+                    	   prod.setStatusSellout("1");
+                       }   
+                   }catch(Exception e) {
+                  }
                  
                    try {
                 	   double status = rs.getDouble("jaeh");

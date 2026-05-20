@@ -653,6 +653,7 @@ private Product getProd(String toode){
 	  
 	  if(order.getShipMode() != null && order.getShipMode().trim().length() > 0) {
 		  System.out.println("shipmode " + order.getShipMode());
+		  
 	  }
 	  
 	  if(repr) {

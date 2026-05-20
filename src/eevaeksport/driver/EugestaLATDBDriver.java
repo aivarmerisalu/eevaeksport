@@ -806,7 +806,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		  String cmd = "select SALESID as tell,  INVOICEID as arve from BIF01_CUSTINVOICETRANS b where invoicedate > getdate()-120 group by SALESID,INVOICEID " ;
 
 		  String cmd1 = "	 SELECT    a.CUSTACCOUNT AS klient,   a.ITEMID AS toode,    sum(a.INVOICEQTY) AS kogus   FROM BIF03_SALESLINE a  \r\n" + 
-		  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 180 AND a.EG_SALESCANCELREASONID <> 'GKR'   AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
+		  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 300 AND a.EG_SALESCANCELREASONID <> 'GKR'   AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
 		  		"	  			  		      AND a.SALESSTATUS <> 1 group by CUSTACCOUNT, ITEMID  \r\n" + 
 		  		"	  						  union  \r\n" + 
 		  		"	  						   SELECT   a.CUSTACCOUNT AS klient, a.SellerItemCode AS toode, sum( a.AmountDespatched) AS kogus \r\n" + 
@@ -834,7 +834,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID  \r\n" + 
 		  		"	  			  		    LEFT JOIN BID44_SALESCANCELREASONS c  \r\n" + 
 		  		"	  			  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID  \r\n" + 
-		  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 180  \r\n" + 
+		  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 300  \r\n" + 
 		  		"	  			  		      AND a.EG_SALESCANCELREASONID <> 'GKR'  \r\n" + 
 		  		"	  			  		      AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
 		  		"	  			  		      AND a.SALESSTATUS <> 1  \r\n" + 

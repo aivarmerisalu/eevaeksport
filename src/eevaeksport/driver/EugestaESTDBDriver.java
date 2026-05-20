@@ -3147,10 +3147,11 @@ boolean noopt = false;
 		  
 		String cmd = "   Select  a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr,baseUnitWeight as kaal,vendname as tootja, a.quantityBox AS kastis,a.quantityPallete as alusel \r\n" + 
 				"  , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
-				"	    		    	 a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
+				"	    		    	 a.barCode AS ean,g.name AS grupp,  \r\n" + 
 				"	    		    		a.brandBackOfficeId AS grupp2 ,a.unitName AS unit " + 
 				"							 from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
-				"	    					 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId"  ;
+				"	    					 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId " +
+				" left join  dbo.EPASAULE_GROUPS g on g.backOfficeId = a.groupBackofficeId"  ;
 
          if (isDebug()) System.out.println(cmd);
 	        
@@ -3169,8 +3170,9 @@ boolean noopt = false;
 			
 			String brandname = rs.getString("namebr");
 			if(brandname != null && brandname.trim().length() > 0) {
-			  prod.setGroup(brandname.trim());
+			  prod.setGroupSecond(brandname.trim());
 			}
+			
 			Double kaal = rs.getDouble("kaal");
 			if(kaal > 0) {
 				prod.setMeasure(kaal);
@@ -3181,11 +3183,18 @@ boolean noopt = false;
 			  prod.setNameSorting(tootja.trim());
 			}
 
-			String ean = rs.getString("tootja");
+			String ean = rs.getString("ean");
 			if(ean != null && ean.trim().length() > 0) {
+				
+				String grupp = rs.getString("grupp");
+				if(grupp != null && grupp.trim().length() > 0) {
+				  prod.setGroup(grupp.trim());
+				}
+
+				
 			  prod.setEAN(ean.trim());
 			  prodMap.put(ean,prod);	
-			}
+			 }
 			
 			}
 		     rs.close();
@@ -3202,12 +3211,12 @@ boolean noopt = false;
 		HashMap<String, Customer> custMap = new HashMap<String, Customer>();
 		  
         String cmd = "Select a.name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , (case when EG_IGNOREMINORDER = 0 then minOrderSum else 0 end) as minsum, '' as linedisc\r\n" + 
-        		"                                                                                                             , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
-        		"                                                             Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
-        		"                                                                 contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-        		"                                                             contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
-        		"                                                                                           from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
-        		"                                                                                           LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
+        		"     , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
+        		"    Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
+        		"    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
+        		"   contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+        		"   from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
+        		"   LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
         		"" ; 
         
 
