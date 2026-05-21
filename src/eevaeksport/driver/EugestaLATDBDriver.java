@@ -126,13 +126,13 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		try {
 		
 
-	String sq3 = "   SELECT jou.clientBackOfficeId as klient, jou.deliverydate  as kuup , jou.productBackOfficeId as toode ,\r\n" + 
-			"			 sum(case when jou.Quantity > 0 then jou.Quantity else 0 end) as kogus,\r\n" + 
-			"			 sum(case when jou.Quantity < 0 then jou.Quantity else 0 end) as kogusmin, max (jou.invoiceNumber) as doknr ,\r\n" + 
-			"			 case when  jou.deliverydate > CAST(GETDATE() AS DATE)then 1 else 0 end as color FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >=   \r\n" + 
-			"						(select top 1 kuupaev  from ( 	 SELECT top 10 jou2.deliverydate as kuupaev FROM  EPASAULE_DELIVERIES jou2  where ltrim(jou2.clientBackOfficeId) = ltrim(jou.clientBackOfficeId)   \r\n" + 
-			"						 and jou2.deliverydate > getdate()-90 and jou2.deliverydate < getdate()+4 group by jou2.clientBackOfficeId , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)   \r\n" + 
-			"				 GROUP BY jou.clientBackOfficeId,jou.deliverydate , jou.productBackOfficeId ORDER BY jou.clientBackOfficeId,jou.deliverydate desc, max(jou.invoiceNumber) desc, jou.productBackOfficeId" ;
+	String sq3 = "    SELECT jou.clientBackOfficeId as klient, jou.deliverydate  as kuup , jou.productBackOfficeId as toode ,\r\n" + 
+			"					 sum(case when jou.Quantity > 0 then jou.Quantity else 0 end) as kogus, jou.Price as hind,\r\n" + 
+			"						 sum(case when jou.Quantity < 0 then jou.Quantity else 0 end) as kogusmin, max (jou.invoiceNumber) as doknr ,\r\n" + 
+			"						 case when  jou.deliverydate > CAST(GETDATE() AS DATE)then 1 else 0 end as color FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >=  \r\n" + 
+			"									(select top 1 kuupaev  from ( 	 SELECT top 10 jou2.deliverydate as kuupaev FROM  EPASAULE_DELIVERIES jou2  where ltrim(jou2.clientBackOfficeId) = ltrim(jou.clientBackOfficeId)    \r\n" + 
+			"									 and jou2.deliverydate > getdate()-90 and jou2.deliverydate < getdate()+4 group by jou2.clientBackOfficeId , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)   \r\n" + 
+			"							 GROUP BY jou.clientBackOfficeId,jou.deliverydate , jou.productBackOfficeId , jou.Price ORDER BY jou.clientBackOfficeId,jou.deliverydate desc, max(jou.invoiceNumber) desc, jou.productBackOfficeId" ;
 					
 					Connection con3 = getNewConnection();
 					Statement st3 = con3.createStatement();
@@ -142,7 +142,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 						ml.setCustID(rs3.getString("klient").trim());
 						ml.setStartDate(Converter.turn(rs3.getString("kuup")).substring(0,5));
 						ml.setProdID(rs3.getString("toode").trim());
-						ml.setPrice(rs3.getDouble("kogus"));
+						ml.setPrice(rs3.getDouble("kogus"));// see on sassis ja vajab erilähenemist
+						ml.setDiscount(rs3.getDouble("hind"));
 						double kmin = rs3.getDouble("kogusmin");
 						
 						ml.setMinAm(kmin);
