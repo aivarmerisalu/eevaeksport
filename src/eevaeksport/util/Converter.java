@@ -3656,6 +3656,10 @@ public class Converter {
 								if(ean.contains("EAN")) {
 									rida = i;
 								 }
+								if(ean.contains("Rõõmu") || ean.contains("Jaama") || ean.contains("Turba")) {
+									alg = a;
+									break;
+								 }
 							   }
 							 }
 						}	
@@ -3687,7 +3691,7 @@ public class Converter {
 						}
 						
 						}
-					//	System.out.println("Groups " +  groups.toString());
+						System.out.println("Groups " +  groups.toString());
 						
 						
 						for(int i = rida+1 ; i < sheet.getLastRowNum()+1;i++){
@@ -3721,7 +3725,7 @@ public class Converter {
                           
                            
                            if(value.trim().length() > 0 && value.trim().toLowerCase().equals("x")) {
-                           //	 System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
+                           	 System.out.println("Sees " +a + " " + value + " " + ean + " " + pood);
                            
 							if(res.get(pood) != null){
                	                 con = (Contract)res.get(pood);

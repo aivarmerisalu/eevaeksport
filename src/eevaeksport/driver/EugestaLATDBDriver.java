@@ -248,9 +248,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		
 		try {
 			
-			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
-					"					FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId"
-					+ "  where s.EG_ASSORTITEMSTATUS = 1 order by str(a.posWeight) + a.Name ";
+			String  cmd = "SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin ,s.EG_ASSORTITEMSTATUS as status\r\n" + 
+					"										FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId\r\n" + 
+					"					  order by str(a.posWeight) + a.Name ";
 			
 		
 		         if (isDebug()) System.out.println(cmd);
@@ -263,6 +263,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		             String sortid = rs.getString("ClientGR").trim()+"x";
 		             String prodID = rs.getString("ItemID").trim();
 		             int optio = rs.getInt("newin");
+		             int status = rs.getInt("status"); 
 		             
 		   
 						MatrixLine mline = new MatrixLine();
@@ -280,10 +281,12 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 								
 								if(optio == 1) {
 								   mline.setLineinfo("NEW"); // valikuline optional item
+								}else if (status == 0) {
+								   mline.setLineinfo("CENTRAL");
 								}
-								if(!inTT.contains(sortid)) {
+							//	if(!inTT.contains(sortid)) {
 									result.add(mline);	
-								}
+								//}
 							}
 						
 					 rs.close();
@@ -617,7 +620,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		try {
 			
 			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
-					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId  where s.EG_ASSORTITEMSTATUS = 1 order by str(a.posWeight) + a.Name";
+					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId  where s.EG_ASSORTITEMSTATUS = 0 order by str(a.posWeight) + a.Name";
 			
 		
 		         if (isDebug()) System.out.println(cmd);
@@ -630,9 +633,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		             String sortid = rs.getString("ClientGR").trim();
 		             String prodID = rs.getString("ItemID").trim();
 		       
-								if(inTT.contains(sortid)) {
+								//if(inTT.contains(sortid)) {
 									result.append( " ;" + Converter.cleanLitLatEst(sortid + "; ;" + prodID + "; ;")+ "\n");
-		 						}
+		 						//}
 							}
 						
 					 rs.close();
@@ -1731,7 +1734,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
      	  if(prognosalperc > 10){
      		  prognosalperc = 0;  
      	  }
-     	 String done = (int)(gSales - gpSales)+"";
+     	 String done = (int)(gpSales - gSales)+"";
       	  if(!done.startsWith("-")) {
       		  done = "+" + done;
       	  }

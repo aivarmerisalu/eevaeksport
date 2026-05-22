@@ -316,6 +316,8 @@ public class DunkerLATImportDriver
    "  VALUES (" + salesid + ", " + counter + ", '" + itemid + "', " + kogus + ", " + hind + ", 'Standard', " + 
        "    " + ale + ", 1000, '', '" + unit + "', '" + order.getAgent() + "-" + order.getDokNr() + "')";
           Connection cc = this.getNewConnection(url);
+
+          
           log.info("SALES_LINE_SQL: " + sql);
           System.out.println(sql);
           PreparedStatement st2 = cc.prepareStatement(sql);
@@ -323,10 +325,61 @@ public class DunkerLATImportDriver
         
           addNumLine();
           st2.close();
-          cc.close();
-        
-        
-        
+          cc.close(); 
+          
+
+       /* 		try {
+        		    cc = this.getNewConnection(url);
+
+        		    // Start transaction
+        		    cc.setAutoCommit(false);
+
+        		    st2 = cc.prepareStatement(sql);
+
+
+        		    log.info("Executing insert into OrderLines_Android");
+
+        		    st2.executeUpdate();
+
+        		    addNumLine();
+
+        		    // Commit transaction
+        		    cc.commit();
+
+        		} catch (Exception e) {
+
+        		    // Rollback if something fails
+        		    if (cc != null) {
+        		        try {
+        		            cc.rollback();
+        		        } catch (Exception rollbackEx) {
+        		            rollbackEx.printStackTrace();
+        		        }
+        		    }
+
+        		    e.printStackTrace();
+
+        		} finally {
+
+        		    // Close resources
+        		    if (st2 != null) {
+        		        try {
+        		            st2.close();
+        		        } catch (Exception e) {
+        		            e.printStackTrace();
+        		        }
+        		    }
+
+        		    if (cc != null) {
+        		        try {
+        		            cc.setAutoCommit(true);
+        		            cc.close();
+        		        } catch (Exception e) {
+        		            e.printStackTrace();
+        		        }
+        		    }
+        		}
+        */
        }
     }
 
@@ -424,6 +477,53 @@ public class DunkerLATImportDriver
         stmt2.executeUpdate();
         stmt2.close();
         ccg.close();
+        
+
+
+        /*	try {
+        	    // Start transaction
+        	    ccg.setAutoCommit(false);
+        	    stmt2 = ccg.prepareStatement(sql);
+        	    stmt2.setTimestamp(1, new java.sql.Timestamp(order.getShipCal().getTimeInMillis()));
+        	     log.info("Executing OrderHeaders_Android insert");
+        	    stmt2.executeUpdate();
+
+        	    // Commit transaction
+        	    ccg.commit();
+
+        	} catch (Exception e) {
+
+        	    // Rollback on failure
+        	    if (ccg != null) {
+        	        try {
+        	            ccg.rollback();
+        	        } catch (Exception ex) {
+        	            ex.printStackTrace();
+        	        }
+        	    }
+
+        	    e.printStackTrace();
+
+        	} finally {
+
+        	    if (stmt2 != null) {
+        	        try {
+        	            stmt2.close();
+        	        } catch (Exception e) {
+        	            e.printStackTrace();
+        	        }
+        	    }
+
+        	    if (ccg != null) {
+        	        try {
+        	            ccg.setAutoCommit(true);
+        	            ccg.close();
+        	        } catch (Exception e) {
+        	            e.printStackTrace();
+        	        }
+        	    }
+        	}*/
+        
      
     
   }
