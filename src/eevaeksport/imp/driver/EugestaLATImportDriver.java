@@ -575,11 +575,7 @@ private Product getProd(String toode){
 	    	  pobj = orderLine.selActCode;
 	      }
 	   
-	   //	  DEFAULT_APPLIED = applied promo;
-	    //  NOT_APPLIED = promo not applied;
-	    //  NOT_AVAILABLE = product without promo.
 
-	      
 	         String agent = orde.getAgent();
 	         
 	         Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(agent);
@@ -596,15 +592,21 @@ private Product getProd(String toode){
 	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
 	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
 	    		    }
-	        	  
 	                kogus = -1 * kogus;
-	        	   System.out.println("promo code " + itemid + " " + pobj + " " + price + " " + rp + " " + kogus  );
-	        	 
 	          }
+	          
+	          if(tagastus) {
+	        	  String inff = orde.getTeostaja();
+	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
+	    		    }
+	        	    kogus = -1 * kogus;
+		        	   System.out.println("tagastus code " + itemid + " " + pobj + " " + price + " " + rp + " " + kogus  );
+	           }
 	          
 	          String sql =" INSERT into   ORDEREDITEMS (ORDER_ID,PRODUCT_ID,QUANTITY_IN_BASE_UNIT,BASE_UNIT_MEASURE," +
 	          		"PRODUCT_PRICE,REAL_PRICE,DISCOUNT,USER_PROMO_DISCOUNT_CHOICE," +
-	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID )  " +// DEPARTMEN,
+	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID )  " +
 	             " values( " + salesid + ",'" + itemid + "'," + kogus + "," + unit + "," 
 	          		+ price + "," + rp + "," + disc + ",'" + choice + "','" + pobj + "','" + ware + "'"
 	          		+ ")";
@@ -679,12 +681,6 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  
 	  int orderingTime = 0;
 	      
-	  /*INSERT INTO  ORDERS (   ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ,DELIVERY_DATE , 
-	   * STATUS  ,AGENT_ID ,ORDERING_TIME ,ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID 
-	   *  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE,Cust_Ref )  VALUES 
-	   *  (9, cast(getdate() as date),'2133P',  0,cast(? as date),'V','568',0,' ',1,''
-	   *  ,null,0,'','',getdate(),'568-05.200 09_46_47-51-2133 abc123[CLOSED]' )
-Wed May 20 11:07:37 EEST 2026  sc Thu May 21 09:48:16 EEST 2026 ref*/
 	  
 	  String sql = " INSERT INTO  ORDERS (  " +
 	                     " ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ," +
@@ -698,9 +694,9 @@ Wed May 20 11:07:37 EEST 2026  sc Thu May 21 09:48:16 EEST 2026 ref*/
 	        try{
 	        	Connection con2 = this.getNewConnection2();
 	        	 PreparedStatement stmt2 = con2.prepareStatement(sql);
+	        	 
 	             java.util.Date dat = new java.util.Date();
 	             long ship = order.getShipCal().getTimeInMillis() - 10800000 ;
-	            System.out.println(dat.toString() + "  sc " + order.getShipCal().getTime().toString() + " ref " + ref);
 	              dat.setTime(ship);
 	              dat.setSeconds(0);
 	              dat.setMinutes(0);

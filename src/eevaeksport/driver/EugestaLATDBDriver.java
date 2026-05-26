@@ -953,7 +953,6 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		   	    	  if(tell.length() > 9) {
 		   	    		  tell = tell.substring(0,9);
 		   	    	  }
-		                 String arv = arveNRid.get(tell);
 
 		                 if(ord != null && ord.trim().length() > 0 ) {
 		                	 ord = "t: " + ord.trim();
@@ -961,13 +960,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		                	 ord = "";
 		                 }
 		                 
-		                 if(arv != null && arv.trim().length() > 0 ) {
-		                	 arv = "a: " + arv.trim();
-		                 }else {
-		                	 arv = "";
-		                 }
 		                 
-		         String lastdoc = (ord + " " + arv).trim();
+		         String lastdoc = ord.trim();
 		         
 		         double sold180 = 0;
 		         Double aaa = last180d.get(kliendikood + "-" + tootekood);
