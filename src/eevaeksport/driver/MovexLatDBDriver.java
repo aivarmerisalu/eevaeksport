@@ -88,6 +88,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
       con = getNewConnection();
       stmt = con.createStatement();
      
+      
     } catch (Exception e){
       parent.showError(e);
     }

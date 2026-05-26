@@ -95,6 +95,7 @@ public class ErplyLttDBDriver extends AbstractDBDriver implements BulkUpdater,Di
     
 
     
+    
     this.subjectFilesTo = parent.getString("filemsg");
    String url = getParent().getProps().getProperty("erply.url");
    ownGLN = getParent().getProps().getProperty("owngln");
@@ -637,7 +638,7 @@ String jwttoken = null;
   private HashMap getImagesCDN(String apikey) throws Exception {
 	  HashMap pildid = new HashMap();
 	  
-   	String httpsURL = "https://cdn.erply.com/images?page=1";
+   	String httpsURL = "https://cdn.erply.com/images?page=1&isDeleted=false&context=erply-product";
       URL myurl1 = new URL(httpsURL);
       
       HttpsURLConnection con = (HttpsURLConnection)myurl1.openConnection();
@@ -673,7 +674,7 @@ String jwttoken = null;
       
    
       for(int w = 2; w < pages + 2; w++) {
-    		 httpsURL = "https://cdn.erply.com/images?page=" + (w);
+    		 httpsURL = "https://cdn.erply.com/images?isDeleted=false&context=erply-product&page=" + (w);
     	       myurl1 = new URL(httpsURL);
     	      
     	     con = (HttpsURLConnection)myurl1.openConnection();

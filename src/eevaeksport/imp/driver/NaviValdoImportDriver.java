@@ -664,6 +664,7 @@ String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().t
 		    double diff = matrix-discPrice;
 		     
 		    
+		    
 		    	double compsum = diff * kogus  ;
 		        Text yhiku_hindVal = doc.createTextNode(this.nf.format(compsum));
 			     yhiku_hind.appendChild(yhiku_hindVal);

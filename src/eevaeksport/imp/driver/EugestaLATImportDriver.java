@@ -593,6 +593,34 @@ private Product getProd(String toode){
 	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
 	    		    }
 	                kogus = -1 * kogus;
+	       	     double matrix = price;
+	    	     boolean wasPriceWithData = false;
+
+	    	     
+	    	     String par = orderLine.getPartii();
+	                
+	                try {
+	           	     if(par != null && par.trim().length() >0) {
+	           	    	 String mat = par.substring(par.indexOf(":")+1);
+	           	    	    if(mat.contains("++")) {
+	           		    		  mat = mat.substring(0,mat.indexOf("++"));
+	           		    	  }	    	 
+	           	    	 matrix = Double.parseDouble( mat);
+	           	    	 wasPriceWithData = true;
+	           	        }
+	           	      } catch(Exception e) {
+	           	    	 // e.printStackTrace();
+	           	      }
+	           	     System.out.println("matrix " + matrix + " " + price);
+	    		    
+	    		    price = rp;
+	    		    if( wasPriceWithData) {
+	    		    disc = 100 - (rp / matrix * 100) ;
+	    		    }
+	    		    
+	                
+	                
+	                
 	          }
 	          
 	          if(tagastus) {

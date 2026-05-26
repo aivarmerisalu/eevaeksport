@@ -2395,21 +2395,22 @@ System.out.println(cmd);
                      	prod.setVat(vat);
                    }
                
-                   
                    double opt = rs.getDouble("opt");
                    if (opt > 0){
                 	   prod.setOptAmountInUnits(opt);
+                   }else {
+                	   prod.setOptAmountInUnits(1);
                    }
+                 
              String info = rs.getString("info");
-                 if(info != null && info.trim().length()>0){ 
+               
+             if(info != null && info.trim().length()>0){ 
                 	 if(prod.getPartii() != null && prod.getPartii().trim().length() > 0){
                 		 prod.setPartii(prod.getPartii() + "Pirkimai: " +info.trim()); 
                 	 }else{
                 		 prod.setPartii("Pirkimai: " +info.trim()); 
                 	 }
-                	
                  }
-                 
                  
                  
                  String topprod = rs.getString("topprod");

@@ -1082,7 +1082,7 @@ if(stocks == null) {
      try {
 
      	//laoseisude lugemine ja liitmine algab
-          
+    	 TreeMap<String, Double> eanMinIncase = new TreeMap<>();
     	
          String line = null;
          
@@ -1121,6 +1121,7 @@ if(stocks == null) {
     	   
        //    WIN10108,Guigal Crozes-Hermitage Rouge 75cl 12.5%,12.5,12,576,30.66,3536650801003,11,pudel,22%,All,
          //  String alko = st.nextToken().trim();
+           
            
            String incase = st.nextToken().trim();
            String onPallet = st.nextToken().trim();
@@ -1185,13 +1186,21 @@ if(stocks == null) {
 				 }
 				 
 				 String add = "";
-				 if(ean.length() > 4) {
-					 prod.setEAN(ean);
-				        int ll  = ean.trim().length();
-				        add = " " +  ean.trim().substring(ll-3);
-				     //   System.out.println(add);
-				        eanprods.put(ean.trim(), prod.getID());
-				   }
+				 
+				 if (ean.length() > 4) {
+					    prod.setEAN(ean);
+					    String cleanEan = ean.trim();
+					    int ll = cleanEan.length();
+					    add = " " + cleanEan.substring(ll - 3);
+
+					    double currentInCase = prod.getInCases(); 
+
+					    // Check if we haven't seen this EAN, or if the new incase is smaller
+					    if (!eanMinIncase.containsKey(cleanEan) || currentInCase < eanMinIncase.get(cleanEan)) {
+					        eanMinIncase.put(cleanEan, currentInCase);
+					        eanprods.put(cleanEan, prod.getID()); // Keeps only the smallest ID
+					    }
+					}
 				 
 				 prod.setName(Converter.enCodeEst(description) + " "+ id + add );
 				 prod.restName = description;
