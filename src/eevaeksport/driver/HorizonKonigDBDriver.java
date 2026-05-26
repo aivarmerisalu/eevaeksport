@@ -1182,7 +1182,7 @@ try{
                 	String  group  = rs1.getString("agent");
                 	
                 	String  group2  = rs1.getString("agent2");
-                	if(group2 != null && group2.trim().equals("146")) {
+                	if(group2 != null && (group2.trim().equals("146") || group2.trim().equals("165") || group2.trim().equals("167"))) {
                 		custBL.add(custID);
                 		//System.out.println("Lisan " + group2.trim());
                 	}

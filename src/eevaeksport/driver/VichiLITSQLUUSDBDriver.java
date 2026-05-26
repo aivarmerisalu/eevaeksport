@@ -208,7 +208,9 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		             	if(in.isFile() && olemas.contains((gg[i]))){            	
 		             	File inpda = new File ( pictspda + toUpper(gg[i])); 
 		             	if(!inpda.exists()) {
-		             	 	Converter.shrinkAndCopyFile(in,inpda);
+		             		try {
+		             	 	  Converter.shrinkAndCopyFile(in,inpda);
+		             		}catch(Exception ee) {}
 		             	}
 		            
 		             	}

@@ -1683,13 +1683,11 @@ public class EksportPanel extends JPanel implements ActionListener,
                 	
                 }
                 File svm = new File("photogroups.txt");
-                
                 if(svm.exists()){
                     zip.addFile("photogroups.txt");                	
                 }
                 
-File svm33 = new File("customerslogin.txt");
-                
+                File svm33 = new File("customerslogin.txt");
                 if(svm33.exists()){
                     zip.addFile("customerslogin.txt");                	
                 }
@@ -1697,30 +1695,27 @@ File svm33 = new File("customerslogin.txt");
                 File svcl = new File("clientagent.txt");
                 if(svcl.exists()){
                     zip.addFile("clientagent.txt");
-                	
                 }
                 
                 File svclss = new File("optamounts.txt");
                 if(svclss.exists()){
                     zip.addFile("optamounts.txt");
-                	
                 }
                 
                 
-                File lt = new File("lastthree.txt");
+                File lt = new File("custagentvisit.txt");
                 if(lt.exists()){
-                   // zip.addFile("lastthree.txt");
-                	
+                    zip.addFile("custagentvisit.txt");
                 }
+               
                 File com = new File("company.txt");
                 if(com.exists()){
                     zip.addFile("company.txt");
-                	
                 }
+                
                 sv = new File("supervisor2.txt");
                 if(sv.exists()){
                     zip.addFile("supervisor2.txt");
-                	
                 }
                 
                 File mdf = new File("maxdiscounts.txt");

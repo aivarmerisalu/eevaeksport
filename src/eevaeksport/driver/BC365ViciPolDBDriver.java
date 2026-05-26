@@ -602,22 +602,38 @@ private void saveFile (String dataType , String uri) {
                 }
         	
                
-         	if (balDue != 0 && payer != null && payer.trim().length() > 0) {
+         	if (balDue != 0 && payer != null ) {
+         		if( payer.trim().length() > 0) {
          		if(used.get(payer) != null) {
          			 used.put(payer, balDue + used.get(payer));	
          		} else {
              	     used.put(payer, balDue+0.0);
-         		}
-         	if(today.after(getDate(duedate)))	
+         	}
+         	if(today.after(getDate(duedate))) {	
          		if(volad.get(payer) != null) {
          			volad.put(payer, balDue + volad.get(payer));	
         		} else {
         			volad.put(payer, balDue+0.0);
         		}
-         		
+         	    }
          	}
+         	
+         		if( custid.trim().length() > 0) {
+             		if(used.get(custid) != null) {
+             			 used.put(custid, balDue + used.get(custid));	
+             		} else {
+                 	     used.put(custid, balDue+0.0);
+             		}
+             	if(today.after(getDate(duedate))) {	
+             		if(volad.get(custid) != null) {
+             			volad.put(custid, balDue + volad.get(custid));	
+            		 } else {
+            			volad.put(custid, balDue+0.0);
+            		}
+             	}
+             }
+            }
 
-          
 		  }
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -738,21 +754,21 @@ private void saveFile (String dataType , String uri) {
 	            String creditLimit = cob.get("CreditLimit")+"";
 	            cust.setCredit(creditLimit);
 	            
-	            if(nodebt != null && !nodebt.contains(cust.getPayer())) {
+	          //  if(nodebt != null && !nodebt.contains(cust.getPayer())) {
 	            if (volad.get(cust.getID() ) != null) {
 	            	cust.setDebt(volad.get(cust.getID()));
 	            }
-	            if (volad.get(cust.getPayer() ) != null) {
+	            if (volad.get(cust.getPayer() ) != null && volad.get(cust.getPayer()) != 0) {
 	            	cust.setDebt(volad.get(cust.getPayer()));
 	            }
 	            if (used.get(cust.getID() ) != null) {
 	            	cust.setUsedCredit(used.get(cust.getID()));
 	            }
-	            if (used.get(cust.getPayer()) != null) {
+	            if (used.get(cust.getPayer()) != null && used.get(cust.getPayer()) != 0) {
 	            	cust.setUsedCredit(used.get(cust.getPayer()));
 	            }
 	            
-	            }
+	          //  }
 	            
 	            cust.setCity("Kod klienta: " +number);
 	            //String blocked = (String)cob.get("blocked");

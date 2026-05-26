@@ -889,8 +889,9 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 		    }
 	  }
 	  
-    
 
+
+  private HashSet<String> agsActive = null;
   
   public TreeMap getAgents(){
 	  
@@ -898,9 +899,12 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
     String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr from  dbo.EPASAULE_AGENTS";
     String cmdg = "select Agent_BackofficeID as kood , group_backofficeID as grupp,forSale, forMerch from EPASAULE_AGENTS_EAGENTGROUPS";
     String cmdb = "select Agent_BackofficeID as kood , brand_backofficeID as brand,forSale, forMerch from EPASAULE_AGENTS_EAGENTBRANDS";
-    
+
+    Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
     if (isDebug()) System.out.println(cmd);
     TreeMap agents = new TreeMap();
+
+    agsActive = new HashSet<String>();
     
     try {
     	Connection con = getNewConnection();
@@ -964,9 +968,10 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
           agent.setLanguage("EST");
           agent.setCountry("et");
           agent.setPassWord("0000");
-        if(grs.size() > 0) {
-        	
-        }
+          String agentAGENTS = props.getProperty(agent.getID());
+   		if(agentAGENTS != null){
+   			agsActive.add(agent.getID());
+   		}
           
           agents.put(name, agent);
           agent1.put(agent.getID(), agent);
@@ -1263,7 +1268,8 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
     try {
     	
     	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
-      		
+
+       	StringBuffer sb0 = new StringBuffer();
     	   Connection con = this.getNewConnection();
     	 
     		 Statement stmt = con.createStatement();
@@ -1273,6 +1279,11 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
     	                 String cli = rs1.getString("klient").trim();
     	                 String route = rs1.getString("route");
     	                 if(route != null && route.trim().length() > 0) {
+
+                             if(agsActive.contains(ag.getID())) {
+     	                	   sb0.append(cli + ";" + ag.getID() + ";" + route + "\n");
+                             }
+                             
     	                	 List<CycleMatch> ll =  nextSevenDaysMatches(route);
     	                	 if(ll.size() > 0){
     	                		 String dd = "";
@@ -1317,7 +1328,9 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
     	                 cliags.put(cli, vv);
     	               }
     	              rs1.close();
-    		
+    	              if(sb0.length() > 0) {
+     		        	 Converter.saveFileInUTF8( "custagentvisit.txt", sb0);
+     		        }
     	              
     	              aaa = "SELECT [ACCOUNTNUM] as klient ,[ZIPCODE] as indeks FROM [DWHEE].[dbo].[BID02_CUSTORDER]";
     	              

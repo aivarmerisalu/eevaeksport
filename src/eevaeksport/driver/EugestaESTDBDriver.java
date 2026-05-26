@@ -1073,12 +1073,14 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   }
   
   
-  
+
+  private HashSet<String> agsActive = null;
   
   public TreeMap getAgents(){
 	  LocalDate start = LocalDate.of(2021, 11, 1); // A1
       LocalDate today = LocalDate.now();
 
+      Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
       String todayCycleCode = getCycleDay(start, today);
       System.out.println("Today is: " + todayCycleCode);
 	    
@@ -1089,6 +1091,8 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     
     if (isDebug()) System.out.println(cmd);
     TreeMap agents = new TreeMap();
+
+    agsActive = new HashSet<String>();
     
     try {
     	Connection con = getNewConnection();
@@ -1155,9 +1159,10 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
           agent.setLanguage("EST");
           agent.setCountry("et");
           agent.setPassWord("0000");
-        if(grs.size() > 0) {
-        	
-        }
+          String agentAGENTS = props.getProperty(agent.getID());
+   		if(agentAGENTS != null){
+   			agsActive.add(agent.getID());
+   		}
           
           agents.put(name, agent);
           agent1.put(agent.getID(), agent);
@@ -1578,6 +1583,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     
     try {
     	
+    	StringBuffer sb0 = new StringBuffer();
     	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
       		
     	   Connection con = this.getNewConnection();
@@ -1589,6 +1595,11 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     	                 String cli = rs1.getString("klient").trim();
     	                 String route = rs1.getString("route");
     	                 if(route != null && route.trim().length() > 0) {
+
+                             if(agsActive.contains(ag.getID())) {
+     	                	 sb0.append(cli + ";" + ag.getID() + ";" + route + "\n");
+                             }
+                             
     	                	 List<CycleMatch> ll =  nextSevenDaysMatches(route);
     	                	 if(ll.size() > 0){
     	                		 String dd = "";
@@ -1633,7 +1644,9 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     	                 cliags.put(cli, vv);
     	               }
     	              rs1.close();
-    		
+    		        if(sb0.length() > 0) {
+    		        	 Converter.saveFileInUTF8( "custagentvisit.txt", sb0);
+    		        }
     	              
     	              aaa = "SELECT [ACCOUNTNUM] as klient ,[ZIPCODE] as indeks FROM [DWHEE].[dbo].[BID02_CUSTORDER]";
     	              
@@ -2312,10 +2325,11 @@ private HashSet<String> inTT = null;
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
 	      String nimi = Converter.cleanLitLatEst(rs.getString("nimetus").trim());
-	   //   nimi = nimi.replaceAll("NESTLE", "NES");
-	     // nimi = nimi.replaceAll("BARILLA", "BAR");
-	     //7 nimi = nimi.replaceAll("IMPERIAL", "IMP");
-		  
+	      nimi = nimi.replaceAll("NESTLE", "NES");
+	      nimi = nimi.replaceAll("BARILLA", "BAR");
+	      nimi = nimi.replaceAll("IMPERIAL", "IMP");
+	      nimi = nimi.replaceAll("COFFEE", "COF");
+			  
 	        tm.put(liik, Converter.enCodeEst(nimi));
 	    }
 	    rs.close();
