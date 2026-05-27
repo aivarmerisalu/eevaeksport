@@ -1039,6 +1039,7 @@ String ex = parent.getProps().getProperty("products");
 
     	ex  = "";
     }
+    
 
     String keg = parent.getProps().getProperty("kegs");
         if (keg == null){

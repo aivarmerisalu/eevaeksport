@@ -877,16 +877,23 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         return tm;
     }
 
+    
 
     public Vector getCustomerProductsList(String agentCode) {
     	
 
     	Vector res = new Vector();
+    	
+    	if("true".equals(getParent().getProps().getProperty("load.oldvec"))) {
+    		try {
+            		res = (Vector)Converter.readObject("navicustprods.vec");
+    		}catch(Exception e) {e.printStackTrace();}
+    		}
 
-                String operation = "GetSalesHistory";
-
+    	
+    	// siia tuleb teha laadimine et saaks tagastus dokumentte toimetada.
+    	
                 WeekFields weekFields = WeekFields.ISO;
-
                 LocalDate currentWeekStart =
                         LocalDate.now().with(DayOfWeek.MONDAY);
 

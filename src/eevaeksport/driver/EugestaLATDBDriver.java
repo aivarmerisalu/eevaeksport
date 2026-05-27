@@ -140,7 +140,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 					while (rs3.next()) {
 						MatrixLine ml = new MatrixLine();
 						ml.setCustID(rs3.getString("klient").trim());
-						ml.setStartDate(Converter.turn(rs3.getString("kuup")).substring(0,5));
+						ml.setStartDate(Converter.turn(rs3.getString("kuup")).substring(0,10));
 						ml.setProdID(rs3.getString("toode").trim());
 						ml.setPrice(rs3.getDouble("kogus"));// see on sassis ja vajab erilähenemist
 						ml.setDiscount(rs3.getDouble("hind"));
@@ -831,6 +831,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		  
 			  
 		  
+		  
 		  String cmd2 = "   WITH cte AS (  \r\n" + 
 		  		"	  			  		    SELECT    \r\n" + 
 		  		"	  			  		        a.CUSTACCOUNT AS klient,  \r\n" + 
@@ -914,13 +915,15 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 			      }
 			        rs.close();
 		     	
-		     	System.out.println("last180d size " + last180d.size());
+		     	//System.out.println("last180d size " + last180d.size());
 		     	
 		     	 rs = stmt.executeQuery(cmd2);
 		
 		      while(rs.next()){
 		        String kliendikood = rs.getString("klient").trim();
 		        String tootekood = rs.getString("toode").trim();
+
+		        if(usedProds.contains(tootekood)){
 		        double kogus = rs.getDouble("sisse");
 		        double mata = rs.getDouble("tarnimata");
 			    String reason =  rs.getString("CANCELREASON");
@@ -947,36 +950,30 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		               //  lastdate = lastdate.substring(5,10);
 		                 lastdate = lastdate.substring(0,5);
 		                 double lastprice = rs.getDouble("lastprice");
-		                 String ord = rs.getString("ordernr");
-		                 String tell = ord.trim();
-		   	    	  
-		   	    	  if(tell.length() > 9) {
-		   	    		  tell = tell.substring(0,9);
-		   	    	  }
-
+		           /*      String ord = rs.getString("ordernr");
+		              
 		                 if(ord != null && ord.trim().length() > 0 ) {
-		                	 ord = "t: " + ord.trim();
-		                 }else {
+		                	 ord = ord.trim();
+		                  } else {
 		                	 ord = "";
-		                 }
+		                  }
+		                 */
 		                 
-		                 
-		         String lastdoc = ord.trim();
-		         
+		       //  String lastdoc = ord.trim();
+		         // LAT puhul on 300 päeva
 		         double sold180 = 0;
 		         Double aaa = last180d.get(kliendikood + "-" + tootekood);
 		         if(aaa > 0) {
 		        	 sold180 = aaa;
 		         }
-		         if(usedProds.contains(tootekood)){
 						
 		        CustProd cp = new CustProd(kliendikood, tootekood, kogus , sold180 , 0,lastdate,lastprice,mata,0,reason);
-		        if(lastdoc.length() > 0) {
+		        /*if(lastdoc.length() > 0) {
 	                cp.setAbiKood(lastdoc);
-		        }
+		        }*/
 		         custProds.add(cp);
-		         prods.addElement(tootekood);
-		         }
+		         
+		        }
 		      }
 		      rs.close();
 		      stmt.close();
@@ -984,6 +981,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		    } catch (Exception e){
 		      getParent().showError(e);
 		    }
+		    System.out.println("CustProds size " + custProds.size() );
 	  }
 	  
   
@@ -1761,12 +1759,12 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         	
       	   asi3 = asi3  + " Cat. : " + grID + "|Sales/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Diff. : " + done + " € |";
       	   if(msales > 0) {
-            asi3 = asi3 + "done/esti. :   " +(int)(tehtudsalpercC*100) + "% / " + (int)(prognosalpercC*100)  + " % | |";  
-      	   }else {
+               asi3 = asi3 + "done/esti. :   " +(int)(tehtudsalpercC*100) + "% / " + (int)(prognosalpercC*100)  + " % | |";  
+      	   } else {
       		   asi3 = asi3 + "|";
       	   }
 		 } else {
-			   asi3 = asi3  + " Cat. : " + grID + "|Sales/Plan : " + 0 +  " € / " + (int) psales +  " €|Diff. : " + (int) psales + " € | ";
+			   asi3 = asi3  + " Cat. : " + grID + "|Sales/Plan : " + 0 +  " € / " + (int) psales +  " €|Diff. : -" + (int) psales + " € | ";
 	             asi3 = asi3 + "|";  
 	 			 
 		 }
@@ -2282,7 +2280,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         
         if (pername != null && pername.trim().length()>0 && !cust.restName.contains(pername)) {
             cust.restPerson = pername.trim(); 
-            cust.adPersonalData( pername.trim() + "|");
+            cust.adPersonalData(Converter.enCodeEst( pername.trim()) + "|");
         }
         
 
@@ -2400,7 +2398,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
         
         if(type != null && type.trim().length() > 0) {
-        	cust.addCity("Tips: " + Converter.enCodeEst(type.trim()));
+        	//cust.addCity("Tips: " + Converter.enCodeEst(type.trim()));
         }
         
         String via3l = rs.getString("via3l");
@@ -2717,6 +2715,7 @@ private HashSet<String> inTT = null;
              		"  group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId,  (case when regionBackofficeId = '24EWC' then '24N' else regionBackofficeId end) desc,bestBefore";
         
 
+             
              usedProds = new HashSet();
     if (isDebug()) System.out.println(cmd);
        if (isDebug()) System.out.println(cmd2);
@@ -2742,10 +2741,11 @@ private HashSet<String> inTT = null;
           }
           gg = (int)sto + " - " +ladu  + gg;
           
-    	  if(partii.get(id) != null) {
-        	 gg = partii.get(id)+ "|" + gg;
-           }  
-    	  partii.put(id, gg);
+    	  if(partii.get(id) == null) {
+        	// gg = partii.get(id)+ "|" + gg;
+    		  // paneme kaasa ainult esimese real
+       	    partii.put(id, gg); 
+    	  }  
           
           if(stocks.get(id) != null) {
         	  sto = stocks.get(id) + sto; //summeerime laoseisu 
@@ -2796,20 +2796,22 @@ private HashSet<String> inTT = null;
         String kood = rs.getString("itemid").trim();
         Product prod = new Product(kood);
         String nimetus = Converter.enCodeEst((rs.getString("nimetus").trim())) ;//+ " " + kood;
-        String nimibr = Converter.enCodeEst((rs.getString("namebr").trim()));
+        
        // teeme nime puhastuse kui on topelt brand mini
         boolean cut = false;
-       if(nimetus.endsWith(nimibr)) {
+        try {
+
+        String nimibr = Converter.enCodeEst((rs.getString("namebr")));
+        if(nimetus.endsWith(nimibr)) {
     	   String uu = nimetus.substring(0,nimetus.lastIndexOf(nimibr)-2);
            String nn = nimibr.toLowerCase();
     	   if(uu.toLowerCase().contains(nn)) {
     		   cut = true;
+        	   nimetus = nimetus.substring(0,nimetus.lastIndexOf(nimibr)-2);
     	   }
        }
 
-       if(cut) {
-    	   nimetus = nimetus.substring(0,nimetus.lastIndexOf(nimibr)-2);
-       }
+        }catch(Exception e) {}
        
        nimetus = nimetus.replaceAll("- BARILLA MEAL", " ").trim();
        nimetus = nimetus.replaceAll("- BIC (MRC)", "- (MRC)").trim();
@@ -3612,7 +3614,6 @@ boolean noopt = false;
       private Vector debt = new Vector();
 	  private Vector custProds = new Vector();
 	  private String subjectFilesTo = null;
-	  private Vector prods = new Vector();
       private NumberFormat NF = NumberFormat.getInstance();
 
 

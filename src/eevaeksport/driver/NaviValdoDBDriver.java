@@ -1648,6 +1648,11 @@ con3.close();
      } catch (Exception e){
        e.printStackTrace();
      }
+     try {
+        Converter.saveObject(vec, "navicustprods.vec");
+     }catch(Exception e) {
+    	 e.printStackTrace();
+     }
      return vec;
    }
 

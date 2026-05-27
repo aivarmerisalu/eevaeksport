@@ -72,6 +72,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		this.lang = parent.getProps().getProperty("language");
 		String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 
+		
 		try {
 			Class.forName(databaseDriverName).newInstance();
 
@@ -107,9 +108,9 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		 
 
 		 String 		 cmd2 = " select * from  MobilejavaVIK.v_VIK_GetProducts ";
-		     	String picts = parent.getProps().getProperty("pict.dir");
 
-		     	String pictspda = parent.getProps().getProperty("pictpda.dir");
+		 String picts = parent.getProps().getProperty("pict.dir");
+		 String pictspda = parent.getProps().getProperty("pictpda.dir");
 
 		   	try {
 		 	   Connection con = getNewConnectionView();
@@ -119,75 +120,30 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 
                 HashSet olemas = new HashSet();
 		        StringBuffer buf = new StringBuffer();
-		        int a = 0;
-		        int c = 0;
-		        
-		        // leiame kataloogid ja peame meeles 
-		        
+		        ArrayList arr = new ArrayList();
 		        while (rs.next()) {
-		   	    	a++;
-		   	    	c++;
 		   	     String toode = rs.getString("toode").trim();  
 		         toode = toode.replace('/', '_');
 		         toode = toode.replace('/', '_');
+		         
 		         olemas.add(toode + ".jpg");
 		         olemas.add(toode + ".JPG");
 		         olemas.add(toode + ".png");
 		         olemas.add(toode + ".PNG");
-		   	    	if(c == 500){
-		   	    		  c = 0;
-		   	    		  System.out.println("Piltide leidmine "  + a);	
-		   	    	}
-		   	     
-		   	    	     File f = new File(picts + toode+".jpg");
-		                 String len = "0";
-		                 if(f.exists()){
-		                       len =	f.length() + "";
-		                     	buf.append(toode+".jpg;"  + len + "\n");
-		                  
-			             } else {
-			            	  f = new File(picts + toode+".png");
-			                     len = "0";
-				                 if(f.exists()){
-				                   len =	f.length() + "";
-				                   buf.append(toode+".png;"  + len + "\n");
-				           	    	
-				                 }  else {
-				                	 f = new File(picts + toode+".PNG");
-				                     if(f.exists()){
-					                   len =	f.length() + "";
-					                   buf.append(toode+".PNG;"  + len + "\n");
-					                 }	
-				                 }
-		                 }
-		                 
-		                 }
-		   	    rs.close();
+		         
+		         arr.add(toode);
+		   	             }
+		   	    
+		        rs.close();
 		   	    stmt.close();
 		   	    con.close();
 		   	
-		   	    //oleasoleva kataloogi kustutamine
-		   	  System.out.println("Kataloogi kustutamine "  + a);	    
+		   	    
 		               File f = new File(pictspda +  "list.txt");
 		               if (f.exists())f.delete();
-		               
-		                 try {
-		           		PrintWriter os = new PrintWriter(new FileWriter(pictspda + 
-		           				  "list.txt", true));
-		           		os.write(buf.toString());
-		           		os.close();
-		           	
-		           	  }catch (Exception ex) {
-		           		ex.printStackTrace();
-		           	  }
-		           	//  System.out.println("buf 0 " + a  + " " +  b + " "+ buf0.toString());
-
-
-
+		         
+		        
 		   //Kataloogi sisude kustutamine
-		             	  
-		  
-		          	 
 		          	 
 		        	 File res2 = new File (pictspda);
 		            String[] ff2 = res2.list();
@@ -210,17 +166,29 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		             	if(!inpda.exists()) {
 		             		try {
 		             	 	  Converter.shrinkAndCopyFile(in,inpda);
-		             		}catch(Exception ee) {}
+			                }catch(Exception ee) {}
 		             	}
+		             	
+		             	
+		             	if(inpda.exists() && inpda.length() > 0){
+		                     	buf.append(inpda.getName() + ";"  + inpda.length() + "\n");
+		                 } 
 		            
 		             	}
 		             }
 		             
 		             
-		           //  File fff =  new File (pictspda +  "list.txt");
-		       	 // Converter.copyFile(f,fff);  	
-		       	 // File fff0 =  new File (pictspda +  "list0.txt");
-		       //	Converter.copyFile(f0,fff0);  	
+		             
+	                 try {
+	           		PrintWriter os = new PrintWriter(new FileWriter(pictspda + 
+	           				  "list.txt", true));
+	           		os.write(buf.toString());
+	           		os.close();
+	           	
+	           	  }catch (Exception ex) {
+	           		ex.printStackTrace();
+	           	  }
+	         
 		   	} catch (Exception e) {
 		   	    getParent().showError(e);
 		   	}

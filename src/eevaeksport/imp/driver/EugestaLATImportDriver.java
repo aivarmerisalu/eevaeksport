@@ -17,12 +17,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -68,6 +72,7 @@ public class EugestaLATImportDriver extends AbstractImportDriver{
     }
     loadSignatures();
   }
+  
   
   
   private void loadSignatures(){
@@ -448,7 +453,7 @@ private Product getProd(String toode){
 	  Enumeration enumr = lines.elements();
 	  while  (enumr.hasMoreElements()){
 		  OrderLine lin = (OrderLine)enumr.nextElement();
-		  
+		  System.out.println("partii split " + lin.getPartii() + " ");
 		    if(lin.getDealer().equals("208_MRC")){
 		    	ord208_MRC.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
@@ -540,12 +545,41 @@ private Product getProd(String toode){
 	 }
  
  
+ public static String annaVaartusIndeksiga(String tekst, int järjekorranumber) {
+     if (tekst == null || järjekorranumber < 1) {
+         return null;
+     }
+
+     // Regex otsib koolonit, millele järgneb suvaline arv numbreid/punkte (väärtus)
+     // \\s* lubab vajadusel ka tühikuid kooloni järel
+     Pattern muster = Pattern.compile(":\\s*([^\\s]+)");
+     Matcher leidja = muster.matcher(tekst);
+     
+     List<String> tulemused = new ArrayList<>();
+     
+     // Kogume kõik leitud väärtused listi
+     while (leidja.find()) {
+         tulemused.add(leidja.group(1));
+     }
+     
+     // Kuna kasutaja küsib alates 1-st, aga list algab 0-st, lahutame 1
+     int listiIndeks = järjekorranumber - 1;
+     
+     // Kontrollime, kas soovitud indeksiga väärtus on üldse olemas
+     if (listiIndeks < tulemused.size()) {
+         return tulemused.get(listiIndeks);
+     }
+     
+     return null; // Kui nii mitmendat väärtust tekstis polnud
+ }
+ 
+ 
  private void addInvoiceLines(int salesid, Order orde, boolean tagastus, boolean repr) throws SQLException{
 
 	    Enumeration enumr = orde.getOrderLines().elements();
 
         Connection con = getNewConnection2();
-        
+        int linenum = 1;
 	    while (enumr.hasMoreElements()){
 	      
 	      OrderLine orderLine = (OrderLine)enumr.nextElement();
@@ -589,36 +623,19 @@ private Product getProd(String toode){
 	        		  rp =  price * ((100-disc)/100);
 	        	      disc = 0;
 	        	  String inff = orde.getTeostaja();
+	        	  
 	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
 	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
 	    		    }
 	                kogus = -1 * kogus;
-	       	     double matrix = price;
-	    	     boolean wasPriceWithData = false;
-
-	    	     
-	    	     String par = orderLine.getPartii();
 	                
-	                try {
-	           	     if(par != null && par.trim().length() >0) {
-	           	    	 String mat = par.substring(par.indexOf(":")+1);
-	           	    	    if(mat.contains("++")) {
-	           		    		  mat = mat.substring(0,mat.indexOf("++"));
-	           		    	  }	    	 
-	           	    	 matrix = Double.parseDouble( mat);
-	           	    	 wasPriceWithData = true;
-	           	        }
-	           	      } catch(Exception e) {
-	           	    	 // e.printStackTrace();
-	           	      }
-	           	     System.out.println("matrix " + matrix + " " + price);
-	    		    
-	    		    price = rp;
-	    		    if( wasPriceWithData) {
-	    		    disc = 100 - (rp / matrix * 100) ;
-	    		    }
-	    		    
-	                
+	               String priceorig = annaVaartusIndeksiga(inff,linenum);
+	               if(priceorig != null) {
+	            	   try {
+	            	   price = Double.parseDouble(priceorig);
+	            	   }catch(Exception e) {}
+	               }
+	           	   //  System.out.println("inff reference " + pobj + " " + price + " " + linenum);
 	                
 	                
 	          }
@@ -629,14 +646,14 @@ private Product getProd(String toode){
 	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
 	    		    }
 	        	    kogus = -1 * kogus;
-		        	   System.out.println("tagastus code " + itemid + " " + pobj + " " + price + " " + rp + " " + kogus  );
+		        	//   System.out.println("tagastus code " + itemid + " " + pobj + " " + price + " " + rp + " " + kogus  );
 	           }
 	          
 	          String sql =" INSERT into   ORDEREDITEMS (ORDER_ID,PRODUCT_ID,QUANTITY_IN_BASE_UNIT,BASE_UNIT_MEASURE," +
 	          		"PRODUCT_PRICE,REAL_PRICE,DISCOUNT,USER_PROMO_DISCOUNT_CHOICE," +
 	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID )  " +
 	             " values( " + salesid + ",'" + itemid + "'," + kogus + "," + unit + "," 
-	          		+ price + "," + rp + "," + disc + ",'" + choice + "','" + pobj + "','" + ware + "'"
+	          		+ getNF().format(price) + "," + getNF().format(rp) + "," + disc + ",'" + choice + "','" + pobj + "','" + ware + "'"
 	          		+ ")";
 
 	              log.info("SALES_LINE_SQL: " + sql);
@@ -645,6 +662,7 @@ private Product getProd(String toode){
 	              st2.executeUpdate();
 	              addNumLine();
 	              st2.close();
+	              linenum++;
 	              }
 
         con.close();
@@ -776,6 +794,7 @@ if (start != -1 && end != -1 && start < end - 1) {
 
    public NumberFormat getNF() {
 		nf.setGroupingUsed(false);
+		nf.setMaximumFractionDigits(3);
 		return this.nf;
 	}
   
