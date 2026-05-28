@@ -653,100 +653,53 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
   
   private TreeMap kogused = null;
 
- public String getSaveStockInfo(){
+  public String getSaveStockInfo(){
 	  
-   kogused = new TreeMap();
-	  
+	   kogused = new TreeMap();
+		  
 
-//For IMPORT (including RED BULL) products - only SPIL ('GPP-VT','GPP-AK-LB') warehouses must be taken;
-//For LB products - SPIL's warehouse 'GPP-VT' and warehouse from LB AX file - Lb_l - 'GPP'.
-
-
-   String cmd = " select  summ.itemid  AS toode ,s.itemid as toode2 ,SUM( " +
- " case when itemgroupid ='LB' and dim.inventlocationid in ('GPP-AK-LB')then 0 else AVAILPHYSICAL   end ) AS stock    FROM INVENTSUM summ with(nolock) " +
-	"          INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid  " +
-	 "         INNER JOIN inventtablemodule inv with(nolock) ON inv.itemid=summ.itemid and inv.dataareaid=dim.dataareaid   " + 
-		"	   INNER JOIN inventtable t with(nolock) ON t.itemid=summ.itemid and t.dataareaid=dim.dataareaid " +
-		"	     left  JOIN inventtablecompany s ON s.itemid=t.itemidcompany    " +
-	    "  WHERE  inv.DATAAREAID='spil' and CLOSED = 0 AND moduletype=0 and dim.inventlocationid in ('GPP-VT','GPP-AK-CIG') " + //,'GPP-AK-LB'
-	"		GROUP BY  summ.itemid,s.itemid  having sum(availphysical) >0";
+	//For IMPORT (including RED BULL) products - only SPIL ('GPP-VT','GPP-AK-LB') warehouses must be taken;
+	//For LB products - SPIL's warehouse 'GPP-VT' and warehouse from LB AX file - Lb_l - 'GPP'.
 
 
-       if (isDebug()) System.out.println(cmd);
-       StringBuffer products = new StringBuffer();
-       try {
-    	   Connection con = this.getNewConnection();
-         Statement st = con.createStatement();
-         ResultSet rs = st.executeQuery(cmd);
-      TreeMap koodid = new TreeMap ();
-         while (rs.next()) {
+	   String cmd = " select summ.itemid AS toode ,s.itemid as toode2 ,SUM( summ.AVAILPHYSICAL ) AS stock \r\n" + 
+	   		"FROM INVENTSUM summ with(nolock) \r\n" + 
+	   		"INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid\r\n" + 
+	   		"INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid \r\n" + 
+	   		"left JOIN inventtablecompany s ON s.itemid=t.itemidcompany \r\n" + 
+	   		"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT','PLG-AK-Z','PLG-AK-U')  \r\n" + 
+	   		"GROUP BY summ.itemid,s.itemid having sum(summ.availphysical) >0";
 
-           String kood = rs.getString("toode").trim();
-           String kood2 = rs.getString("toode2");
-           double seis = rs.getDouble("stock");
-           
-           if(seis > 0){
-        	   if(kood2 !=null){
-        		   kood2 = kood2.trim();
-        		   koodid.put(kood2, kood);
-        	   }else{
-        		   products.append(kood +  ";");
-                   products.append(" ;");
-                   products.append(getParent().getNF().format(seis)   +  "\n"); // + dealer +  "\n");
-               }
-        	   
-             kogused.put(kood, seis + "");
-           }
-           }
 
-         cmd = "select  s.itemid as toode2 ,sum(AVAILPHYSICAL) AS stock  , t2.itemgroupid   FROM INVENTSUM summ with(nolock) " +
-   	          "INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid  " +
-   	          "INNER JOIN inventtablemodule inv with(nolock) ON inv.itemid=summ.itemid and inv.dataareaid=dim.dataareaid    " +
-   			  " INNER JOIN inventtable t with(nolock) ON t.itemid=summ.itemid and t.dataareaid=dim.dataareaid " +
-   			  "  INNER  JOIN inventtablecompany s with(nolock) ON s.itemid=t.itemidcompany   INNER  JOIN inventtable t2 ON"
-   			   + "  t2.itemidcompany=s.itemid and t2.dataareaid = 'spil'  " +
-   	          " WHERE  inv.DATAAREAID='lb_l' and dim.inventlocationid in ('GPP') and t2.itemgroupid ='LB'" +
-   			  " GROUP BY  s.itemid, t2.itemgroupid   having sum(availphysical) >0 ";
-         
-     rs = st.executeQuery(cmd);
+	       if (isDebug()) System.out.println(cmd);
+	       StringBuffer products = new StringBuffer();
+	       try {
+	    	   Connection con = this.getNewConnection();
+	         Statement st = con.createStatement();
+	         ResultSet rs = st.executeQuery(cmd);
+	      
+	         while (rs.next()) {
 
-         while (rs.next()) {
-
-           String kood2 = rs.getString("toode2").trim();
-           double seis = rs.getDouble("stock");
-           if(seis > 0){
-        	   String kood = (String)koodid.get(kood2);
-        	   if(kood != null){
-        		   if(kogused.get(kood)!= null){
-                	     kogused.put(kood,(Double.parseDouble(kogused.get(kood)+"")+ seis) + ""); 
-                     	   
-                   }else{
-                	     kogused.put(kood, seis + ""); 
-                   }
-               }
-               
-           }
-           }
-         
-      Iterator itera =   kogused.keySet().iterator();
-      while(itera.hasNext()){
-    	  String kood = (String)itera.next();
-    	  double seis = Double.parseDouble(kogused.get(kood)+"");
-    	  products.append(kood +  ";");
-          products.append(" ;");
-          products.append(getParent().getNF().format(seis)   +  "\n"); // + dealer +  "\n");
-         
-      }
-        
-         
-         rs.close();
-           st.close();
-           con.close();
-       } catch (Exception e) {
-           getParent().showError(e);
-       }
-       return products.toString();
-   }
+	           String kood = rs.getString("toode").trim();
+	           String kood2 = rs.getString("toode2");
+	           double seis = rs.getDouble("stock");
+	           
+	           if(seis > 0){
+	        	      products.append(kood +  ";");
+	                   products.append(" ;");
+	                    products.append(getParent().getNF().format(seis)   +  "\n"); // + dealer +  "\n");
+	                   kogused.put(kood, seis + "");
+	           }
+	           }
+	         
+	           rs.close();
+	           st.close();
+	           con.close();
+	       } catch (Exception e) {
+	           getParent().showError(e);
+	       }
+	       return products.toString();
+	   }
 
 
 

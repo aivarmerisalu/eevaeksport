@@ -939,7 +939,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 //For LB products - SPIL's warehouse 'GPP-VT' and warehouse from LB AX file - Lb_l - 'GPP'.
 
 
-   String cmd = " select summ.itemid AS toode ,s.itemid as toode2 ,SUM(case when t.itemgroupid ='LB' and dim.inventlocationid in ('GPP-AK-LB')then 0 else summ.AVAILPHYSICAL end) AS stock \r\n" + 
+   String cmd = " select summ.itemid AS toode ,s.itemid as toode2 ,SUM( summ.AVAILPHYSICAL ) AS stock \r\n" + 
    		"FROM INVENTSUM summ with(nolock) \r\n" + 
    		"INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid\r\n" + 
    		"INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid \r\n" + 
@@ -954,7 +954,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
     	   Connection con = this.getNewConnection();
          Statement st = con.createStatement();
          ResultSet rs = st.executeQuery(cmd);
-      TreeMap koodid = new TreeMap ();
+      
          while (rs.next()) {
 
            String kood = rs.getString("toode").trim();
@@ -962,60 +962,14 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
            double seis = rs.getDouble("stock");
            
            if(seis > 0){
-        	   if(kood2 !=null){
-        		   kood2 = kood2.trim();
-        		   koodid.put(kood2, kood);
-        	   }else{
-        		   products.append(kood +  ";");
+        	      products.append(kood +  ";");
                    products.append(" ;");
-                   products.append(getParent().getNF().format(seis)   +  "\n"); // + dealer +  "\n");
-               }
-        	   
-             kogused.put(kood, seis + "");
-           }
-           }
-
-  
-         cmd= "select  s.itemid as toode2 ,sum(AVAILPHYSICAL) AS stock FROM INVENTSUM summ with(nolock) " +
-"INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +
-"INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid " +
-"INNER JOIN inventtablecompany s ON s.itemid=t.itemidcompany   " +
-"INNER JOIN inventtable t2 ON t2.itemidcompany=s.itemid and t2.dataareaid = N'spil' " +
-"WHERE  summ.DATAAREAID= N'lb_l' and dim.inventlocationid = N'GPP' and t2.itemgroupid =N'LB' " +
-"GROUP BY  s.itemid having sum(availphysical) >0";
-         
-     rs = st.executeQuery(cmd);
-
-         while (rs.next()) {
-
-           String kood2 = rs.getString("toode2").trim();
-           double seis = rs.getDouble("stock");
-           if(seis > 0){
-        	   String kood = (String)koodid.get(kood2);
-        	   if(kood != null){
-        		   if(kogused.get(kood)!= null){
-                	     kogused.put(kood,(Double.parseDouble(kogused.get(kood)+"")+ seis) + ""); 
-                     	   
-                   }else{
-                	     kogused.put(kood, seis + ""); 
-                   }
-               }
-               
+                    products.append(getParent().getNF().format(seis)   +  "\n"); // + dealer +  "\n");
+                   kogused.put(kood, seis + "");
            }
            }
          
-      Iterator itera =   kogused.keySet().iterator();
-      while(itera.hasNext()){
-    	  String kood = (String)itera.next();
-    	  double seis = Double.parseDouble(kogused.get(kood)+"");
-    	  products.append(kood +  ";");
-          products.append(" ;");
-          products.append(getParent().getNF().format(seis)   +  "\n"); // + dealer +  "\n");
-         
-      }
-        
-         
-         rs.close();
+           rs.close();
            st.close();
            con.close();
        } catch (Exception e) {
@@ -2094,6 +2048,7 @@ String lice = " select itemid as toode,LICENCETYPEID as lic from SPIAlcoholLicen
     
     try { 
 
+    	
     	
 	      
   	   Connection con = this.getNewConnection();

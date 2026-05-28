@@ -59,6 +59,7 @@ public class DunkerLATImportDriver
       calNF.setMinimumIntegerDigits(2);
       calNF.setGroupingUsed(false);
     
+      
     }
     catch (Exception e) {
       parent.showError(e);
@@ -321,21 +322,22 @@ public class DunkerLATImportDriver
           log.info("SALES_LINE_SQL: " + sql);
           System.out.println(sql);
           PreparedStatement st2 = cc.prepareStatement(sql);
-          st2.executeUpdate();
+        //  st2.executeUpdate();
         
-          addNumLine();
-          st2.close();
-          cc.close(); 
+          //addNumLine();
+          //st2.close();
+          //cc.close(); 
           
 
-       /* 		try {
+       		try {
+
         		    cc = this.getNewConnection(url);
 
         		    // Start transaction
         		    cc.setAutoCommit(false);
 
-        		    st2 = cc.prepareStatement(sql);
 
+                     st2 = cc.prepareStatement(sql);
 
         		    log.info("Executing insert into OrderLines_Android");
 
@@ -379,7 +381,7 @@ public class DunkerLATImportDriver
         		        }
         		    }
         		}
-        */
+        
        }
     }
 
@@ -473,14 +475,14 @@ public class DunkerLATImportDriver
     System.out.println(sql);
       Connection ccg = this.getNewConnection(url);
         PreparedStatement stmt2 = ccg.prepareStatement(sql);
-        stmt2.setTimestamp(1, new java.sql.Timestamp(order.getShipCal().getTimeInMillis()));
+     /*   stmt2.setTimestamp(1, new java.sql.Timestamp(order.getShipCal().getTimeInMillis()));
         stmt2.executeUpdate();
         stmt2.close();
         ccg.close();
-        
+       */ 
 
 
-        /*	try {
+        	try {
         	    // Start transaction
         	    ccg.setAutoCommit(false);
         	    stmt2 = ccg.prepareStatement(sql);
@@ -522,7 +524,7 @@ public class DunkerLATImportDriver
         	            e.printStackTrace();
         	        }
         	    }
-        	}*/
+        	}
         
      
     
