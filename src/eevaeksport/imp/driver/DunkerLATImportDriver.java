@@ -263,8 +263,19 @@ public class DunkerLATImportDriver
 		     st2.close();
 		     con9.close();
 	     
+		     
 	     addInvoiceHeader(salesid,order);
 	     addInvoiceLines(salesid,order);
+	     
+	     
+	     String sql = "UPDATE \"OrderHeaders_Android\" set  " +
+	             " \"StatusID\" = 1000 where \"GlobalOrderID\"=" + salesid ;
+	        
+	      log.info("addInvoiceHeader2: " + sql);
+	      System.out.println(sql);
+	        Connection ccg = this.getNewConnection(url);
+	          Statement stmt2 = ccg.createStatement();
+	          stmt2.executeUpdate(sql);
 	     signatures.add(signature);
 	  
       setNumAddedLines(counter);
@@ -322,14 +333,13 @@ public class DunkerLATImportDriver
           log.info("SALES_LINE_SQL: " + sql);
           System.out.println(sql);
           PreparedStatement st2 = cc.prepareStatement(sql);
-        //  st2.executeUpdate();
-        
-          //addNumLine();
-          //st2.close();
-          //cc.close(); 
+          st2.executeUpdate();
+          addNumLine();
+          st2.close();
+          cc.close(); 
           
 
-       		try {
+      /* 		try {
 
         		    cc = this.getNewConnection(url);
 
@@ -380,7 +390,7 @@ public class DunkerLATImportDriver
         		            e.printStackTrace();
         		        }
         		    }
-        		}
+        		}*/
         
        }
     }
@@ -467,7 +477,7 @@ public class DunkerLATImportDriver
            " \"ExternalOrderNo\")" +
    " VALUES (" + salesid + ", " + (Calendar.getInstance().getTimeInMillis() + "").substring(4) + ",'" + type +"','" + klient + "', " +
     "        '" + saaja + "', current_date, ?, '" + order.getAgent() + "', " +
-     "      '" + text2 + "', 1000, '', current_timestamp, " +
+     "      '" + text2 + "', 999, '', current_timestamp, " +
       "      '', null, false, null,  " +
        "     '" + order.getAgent() + "-" + order.getDokNr() + "');";
       
@@ -475,14 +485,14 @@ public class DunkerLATImportDriver
     System.out.println(sql);
       Connection ccg = this.getNewConnection(url);
         PreparedStatement stmt2 = ccg.prepareStatement(sql);
-     /*   stmt2.setTimestamp(1, new java.sql.Timestamp(order.getShipCal().getTimeInMillis()));
+        stmt2.setTimestamp(1, new java.sql.Timestamp(order.getShipCal().getTimeInMillis()));
         stmt2.executeUpdate();
         stmt2.close();
         ccg.close();
-       */ 
+        
 
 
-        	try {
+        	/*try {
         	    // Start transaction
         	    ccg.setAutoCommit(false);
         	    stmt2 = ccg.prepareStatement(sql);
@@ -525,7 +535,7 @@ public class DunkerLATImportDriver
         	        }
         	    }
         	}
-        
+        */
      
     
   }

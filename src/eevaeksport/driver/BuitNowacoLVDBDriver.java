@@ -813,7 +813,7 @@ String  cmd3 = " select b.kodas AS maksja, b.klient_id AS klient, sum(skola_w) A
 	        while(rs.next()){
 	            String id = rs.getString("sistema");
 	            if(id != null && id.trim().length() > 0){
-		            hinnakirjad.add(id.trim());	
+		            hinnakirjad.add(Converter.cleanLitLatEst(id.trim()));	
 	            }
 	        }
 	         rs.close();
@@ -906,7 +906,7 @@ if (disc != 0) {
 
 
 if( mline.getPrice() > 0 ){
- if(!hinnakirjad.contains(clGroup.trim())){
+ if(!hinnakirjad.contains(Converter.cleanLitLatEst(clGroup.trim()))){
 	 result.add(mline);   
  }
 }
@@ -960,7 +960,7 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
 
 
 	if( mline.getPrice() > 0 || mline.getDiscount() > 0){
-	 if(!hinnakirjad.contains(clGroup.trim())){
+	 if(!hinnakirjad.contains(Converter.cleanLitLatEst(clGroup.trim()))){
 		 result.add(mline);   
 	 }
 	}
@@ -1190,7 +1190,7 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
     	        while(rs.next()){
     	            String id = rs.getString("sistema");
     	            if(id != null && id.trim().length() > 0){
-    		            hinnakirjad.add(id.trim());	
+    		            hinnakirjad.add(Converter.cleanLitLatEst(id.trim()));	
     	            }
     	        }
     	         rs.close();
@@ -1235,7 +1235,7 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
                                 && prodGroup.trim().length() > 0) {
                               mline.setProdGroup(prodGroup);
                             }
-                            if(hinnakirjad.contains(clGroup.trim())){
+                            if(hinnakirjad.contains(Converter.cleanLitLatEst(clGroup.trim()))){
                             	  lines.add(mline);
                             }
                           }
@@ -1731,7 +1731,7 @@ System.out.println(cmd);
       while(rs.next()){
           String id = rs.getString("sistema");
           if(id != null && id.trim().length() > 0){
-	            hinnakirjad.add(id.trim());	
+	            hinnakirjad.add(Converter.cleanLitLatEst(id.trim()));	
           }
       }
        rs.close();
@@ -1952,7 +1952,7 @@ System.out.println(cmd);
             if(type != null && type.trim().length()>0){
             		customer.setCustType(Converter.cleanLitLatEst(type.trim()));
 //kui on fix sort nimekirjas siis lisame juurde muidu on 
-                    if(hinnakirjad.contains(type.trim())){
+                    if(hinnakirjad.contains(Converter.cleanLitLatEst(type.trim()))){
                      customer.addFixSortCode("ss" + Converter.cleanLitLatEst(type.trim()));
                   }
             }

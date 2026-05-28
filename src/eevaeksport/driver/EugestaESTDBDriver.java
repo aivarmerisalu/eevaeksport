@@ -1877,13 +1877,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   			   Enumeration en = vec.elements();
   			   while(en.hasMoreElements()){
   				 String age = (String) en.nextElement();
-  				
-  				// if(cust.getID().equals("5902315560")) {
-  					// System.out.println("age " + age + " " + agentL.getVisit());
-  				 //}
-  				 
   				 Agent ee = new Agent(age);
-
   		          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
   				     ee.setVisit(agentL.getVisit());// panene ka asendatava päeva plaani juurde
   		          }

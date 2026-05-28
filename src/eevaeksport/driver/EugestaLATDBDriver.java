@@ -671,7 +671,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  
 
 	  String  cmd = "Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  " + 
-       		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId,  regionBackofficeId end desc,bestBefore " ;
+       		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId,  regionBackofficeId desc,bestBefore " ;
     
 	  if(usedProds == null){
 			  this.getProducts(null);
@@ -818,10 +818,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   private void makeCustprod(){
 		 
 	  
-		//  1. teeme tellimus ja arve listi 
 		  
-		  String cmd = "select SALESID as tell,  INVOICEID as arve from BIF01_CUSTINVOICETRANS b where invoicedate > getdate()-120 group by SALESID,INVOICEID " ;
-
+		
 		  String cmd1 = "	 SELECT    a.CUSTACCOUNT AS klient,   a.ITEMID AS toode,    sum(a.INVOICEQTY) AS kogus   FROM BIF03_SALESLINE a  \r\n" + 
 		  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 300 AND a.EG_SALESCANCELREASONID <> 'GKR'   AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
 		  		"	  			  		      AND a.SALESSTATUS <> 1 group by CUSTACCOUNT, ITEMID  \r\n" + 
@@ -888,27 +886,12 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		    	Calendar cal = Calendar.getInstance();
 		    	cal.add(Calendar.DAY_OF_MONTH, -15);
 		    	
-		    	HashMap<String, String> arveNRid = new HashMap<String,String>();
-
+		
 		    	HashMap<String, Double> last180d = new HashMap<String,Double>();
 		    	
 		    	Connection con = getNewConnection();
 		     	Statement stmt = con.createStatement();
-		
-		    	
-		     	ResultSet rs = stmt.executeQuery(cmd);
-		
-		      while(rs.next()){
-		    	  String tell = rs.getString("tell").trim();
-		    	  
-		    	  if(tell.length() > 9) {
-		    		  tell = tell.substring(0,9);
-		    	  }
-		        arveNRid.put(tell, rs.getString("arve").trim());
-		      }
-		        rs.close();
-		     	
-		        rs = stmt.executeQuery(cmd1);
+		     	ResultSet rs = stmt.executeQuery(cmd1);
 		    	
 			      while(rs.next()){
 			    	  last180d.put(rs.getString("klient").trim() + "-" +  rs.getString("toode").trim(), rs.getDouble("kogus"));
@@ -945,21 +928,10 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		        	 reason = " ";
 		         }
 			    
-			    
 			    String lastdate = Converter.turn(dateStr); // EESTI CASE
-		               //  lastdate = lastdate.substring(5,10);
 		                 lastdate = lastdate.substring(0,5);
 		                 double lastprice = rs.getDouble("lastprice");
-		           /*      String ord = rs.getString("ordernr");
-		              
-		                 if(ord != null && ord.trim().length() > 0 ) {
-		                	 ord = ord.trim();
-		                  } else {
-		                	 ord = "";
-		                  }
-		                 */
-		                 
-		       //  String lastdoc = ord.trim();
+		          
 		         // LAT puhul on 300 päeva
 		         double sold180 = 0;
 		         Double aaa = last180d.get(kliendikood + "-" + tootekood);
@@ -968,9 +940,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		         }
 						
 		        CustProd cp = new CustProd(kliendikood, tootekood, kogus , sold180 , 0,lastdate,lastprice,mata,0,reason);
-		        /*if(lastdoc.length() > 0) {
-	                cp.setAbiKood(lastdoc);
-		        }*/
+		        
 		         custProds.add(cp);
 		         
 		        }
@@ -1336,7 +1306,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
   
   private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-  private static final LocalDate CYCLE_START =   LocalDate.parse("01.11.2021", FMT);
+  private static final LocalDate CYCLE_START =   LocalDate.parse("03.11.2025", FMT);
   
   
  
@@ -1402,11 +1372,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	    return new int[]{ totalDeliveries, passedDeliveries };
 	}
 
-  
-  public static boolean matchesNextSevenDays(String pattern) {
-	    return !nextSevenDaysMatches(pattern).isEmpty();
-	}
-  
+
   public static List<CycleMatch> nextSevenDaysMatches(String pattern) {
 
 	    DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -1420,29 +1386,46 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	        LocalDate date = today.plusDays(i);
 
 	        long days = ChronoUnit.DAYS.between(cycleStart, date);
-	        if (days < 0) continue;
 
-	        int weekInCycle = (int) ((days / 7) % 8);
+	        if (days < 0) {
+	            continue;
+	        }
+
+	        // 4-week cycle
+	        int weekInCycle = (int) ((days / 7) % 4);
+
+	        // Monday=1 ... Sunday=7
 	        int weekday = date.getDayOfWeek().getValue();
 
+	        // A, B, C, D
 	        char cycleWeekLetter = (char) ('A' + weekInCycle);
 
-	        // find that week block in pattern
+	        // Find corresponding block
 	        int index = pattern.indexOf(cycleWeekLetter);
 
 	        if (index != -1 && index + 1 < pattern.length()) {
 
-	            // read digits after letter until next letter
 	            StringBuilder daysPart = new StringBuilder();
 
 	            for (int j = index + 1; j < pattern.length(); j++) {
+
 	                char c = pattern.charAt(j);
-	                if (Character.isLetter(c)) break;
+
+	                // Stop at next week letter
+	                if (Character.isLetter(c)) {
+	                    break;
+	                }
+
 	                daysPart.append(c);
 	            }
 
+	            // Check if weekday exists in block
 	            if (daysPart.toString().contains(String.valueOf(weekday))) {
-	                result.add(new CycleMatch(date, cycleWeekLetter + String.valueOf(weekday)));
+
+	                result.add(new CycleMatch(
+	                        date,
+	                        cycleWeekLetter + String.valueOf(weekday)
+	                ));
 	            }
 	        }
 	    }
@@ -1450,7 +1433,6 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	    return result;
 	}
 
-	
 
 	public static LocalDate nextMatchingDate(String pattern) {
 
@@ -1937,14 +1919,18 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     	     ResultSet rs1 = stmt.executeQuery(aaa);
     	               while(rs1.next()){
     	                 Agent ag = new Agent(rs1.getString("kood").trim());
+    	                 if(agsActive.contains(ag.getID())) {
     	                 String cli = rs1.getString("klient").trim();
     	                 String route = rs1.getString("route");
     	                 if(route != null && route.trim().length() > 0) {
     	                	 
-                            if(agsActive.contains(ag.getID())) {
-    	                	 sb0.append(cli + ";" + ag.getID() + ";" + route + "\n");
-                            } 
+                          
+    	                	 sb0.append(cli + ";" + ag.getID() + ";" + route.trim() + "\n");
+                            
     	                	 List<CycleMatch> ll =  nextSevenDaysMatches(route);
+    	                	//   System.out.println("ag.getVisit() " + ag.getID() +" "+ cli + " " + ag.getVisit() + " " + route + " " + ll);
+       	                	
+    	                	 
     	                	 if(ll.size() > 0){
     	                		 String dd = "";
     	                	   for(CycleMatch cc : ll) {
@@ -1974,23 +1960,27 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     	                	 if(dd.length() > 0) {
     	                	   ag.setVisit(dd); 
     	                	 }
-    	                		 
-    	                	 }
+
+    	    	          	 }
     	                		
     	                	 
     	                	ag.nextContact = nextMatchingDate(route);
-    	                 }
+    	                  }
+    	                 
     	                 Vector<Agent> vv = cliags.get(cli);
     	                 if(vv == null) {
     	                	 vv = new Vector<Agent>();
     	                 }
     	                 vv.add(ag);
+    	               
     	                 cliags.put(cli, vv);
     	               }
+    }
     	              rs1.close();
-    	              if(sb0.length() > 0) {
-     		        	 Converter.saveFileInUTF8( "custagentvisit.txt", sb0);
-     		        }
+  
+    	               if(sb0.length() > 0) {
+     		        	  Converter.saveFileInUTF8( "custagentvisit.txt", sb0);
+     		           }
     	              
     	              aaa = "SELECT [ACCOUNTNUM] as klient ,[ZIPCODE] as indeks FROM [DWHEE].[dbo].[BID02_CUSTORDER]";
     	              
@@ -2103,18 +2093,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         	cust.setMinsum(minsum);
         }
         
-        
         boolean de = true;
-        String regno  = cust.getPayer();
-        
-      /*  if(regno != null && regno.trim().length() > 0 && 
-        		(regno.trim().equals("10714195") || regno.trim().equals("10180925") // abc + circle
-        				|| regno.trim().equals("10765896") || regno.trim().equals("10263574") // maxima + rimi
-        				|| regno.trim().equals("10379733")  )) { // selver + 
-        	//de = false;
-        }*/
-        
-      
         	
         if(de) {
         	if(debts.get(cust.getPayer()) != null) {
@@ -2128,10 +2107,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
          	} else if(debtsall.get(cust.getID()) != null) {
        		cust.setUsedCredit(debtsall.get(cust.getID()));
        	    }
-        	
         }
         
-
        
         
         String aleke = rs.getString("linedisc");
@@ -2199,50 +2176,43 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         	cust.addCity("Pasta indekss: " + indeksT.get(cust.getID()));
         }
         
-        
-       if(cliags.get(cust.getID()) != null) {
-         Vector<Agent> vv = cliags.get(cust.getID());
-         
-         for(Agent agentL : vv) {
-          cust.addAgent(agentL);
-          if(agentL.nextContact != null) {
-        	  cust.addCity(Converter.enCodeEst("Nākamais: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'"));  
-          }
+        if(cliags.get(cust.getID()) != null) {
+          Vector<Agent> vv = cliags.get(cust.getID());
           
-          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-        	  cust.setMainAgent(agentL.getID());
+          for(Agent agentL : vv) {
+        	  
+        	  if(agsActive.contains(agentL.getID())) {
+         	 if(!cust.hasAgent(agentL.getID())) { // kui on olemas juba siis ei kirjuta yle
+           cust.addAgent(agentL);
+           if(agentL.nextContact != null) {
+        	 //  System.out.println("agentL.getVisit() " + agentL.getID() +" "+ cust.getID() + " " + agentL.getVisit());
+               cust.addCity(Converter.enCodeEst("Nākamais: ") + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
+           }
+           
+           if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+         	  cust.setMainAgent(agentL.getID());
+           }
+         
+          Agent aa1 = (Agent)agent1.get(agentL.getID());
+            if(aa1 != null) {
+       		Vector vec = aa1.getDubbler();
+   		      if(vec!= null && vec.size() >0){
+   			   Enumeration en = vec.elements();
+   			   while(en.hasMoreElements()){
+   				 String age = (String) en.nextElement();
+   				 Agent ee = new Agent(age);
+   		          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+   				     ee.setVisit(agentL.getVisit());// panene ka asendatava päeva plaani juurde
+   		          }
+   		         	 cust.addAgent(ee); 
+   		         
+   			   }
+   	       }
+           }
           }
-        
-         Agent aa1 = (Agent)agent1.get(agentL.getID());
-           if(aa1 != null) {
-      		Vector vec = aa1.getDubbler();
-  		      if(vec!= null && vec.size() >0){
-  			   Enumeration en = vec.elements();
-  			   while(en.hasMoreElements()){
-  				 String age = (String) en.nextElement();
-  				
-  				 Agent ee = new Agent(age);
-
-  		          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-  				     ee.setVisit(agentL.getVisit());// panene ka asendatava päeva plaani juurde
-  		          }
-  		         if( cust.hasAgent(age) ) {
-  		        	if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-  		        	   Agent aa = cust.getAgent(age);
-  		        	   aa.setVisit(agentL.getVisit());
-  		        	}
-  		         }else {
-  	  				 cust.addAgent(ee); 
-  		         }
-  			   }
-  	       }
           }
-         }
-     	}
-      
-
-
-        
+      	}
+        }    
        
         if(de) {
         String block = rs.getString("block");
@@ -2742,9 +2712,7 @@ private HashSet<String> inTT = null;
           gg = (int)sto + " - " +ladu  + gg;
           
     	  if(partii.get(id) == null) {
-        	// gg = partii.get(id)+ "|" + gg;
-    		  // paneme kaasa ainult esimese real
-       	    partii.put(id, gg); 
+              partii.put(id, gg); 
     	  }  
           
           if(stocks.get(id) != null) {

@@ -960,13 +960,12 @@ private void  insertSortLine(MatrixLine mline){
 
             while (rs.next()) {
               Agent agent = new Agent(rs.getString("kood").trim());
-
               String nimi = rs.getString("nimi").trim();
-              agent.setName(nimi);
+              agent.setName(nimi + " " + agent.getID());
               agent.setIsPilot(true);
-
-              agents.put(nimi, agent);
+              agents.put(agent.getName(), agent);
             }
+
             rs.close();
             stmt.close();
             con.close();
@@ -974,6 +973,7 @@ private void  insertSortLine(MatrixLine mline){
         } catch (Exception e) {
             getParent().showError(e);
         }
+        System.out.println("agents " + agents);
         return agents;
     }
 
