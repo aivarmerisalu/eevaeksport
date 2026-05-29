@@ -652,6 +652,15 @@ private Customer getCust(String code){
 	        header.appendChild(age);
 
 	        
+	          String smode = order.getCompName();
+	          if(smode != null && smode.trim().length() > 0) {
+
+		        	Node pt = doc.createElement("DlvMode");
+			        Text ptVal = doc.createTextNode(smode.trim());
+			        pt.appendChild(ptVal);
+			        header.appendChild(pt);
+	          }
+	        
 	       // "Adl PaymTerm Code '90D'"
 	        System.out.println("Paym term " + order.getPaymTerm());
 	        if(order.getPaymTerm() == -2){

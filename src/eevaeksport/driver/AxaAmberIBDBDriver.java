@@ -609,48 +609,48 @@ rs.close();
   
   private TreeMap kogused = null;
 
- public String getSaveStockInfo(){
+  public String getSaveStockInfo(){
 	  
-   kogused = new TreeMap();
+	   kogused = new TreeMap();
 
-   String  cmd = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
-"   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +  
-" WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('PLG-VT') " +
-"	GROUP BY  summ.itemid  having sum(availphysical) > 0 " ;
+	   String cmd = " select summ.itemid AS toode ,s.itemid as toode2 ,SUM( summ.AVAILPHYSICAL ) AS stock \r\n" + 
+	   		"FROM INVENTSUM summ with(nolock) \r\n" + 
+	   		"INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid\r\n" + 
+	   		"INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid \r\n" + 
+	   		"left JOIN inventtablecompany s ON s.itemid=t.itemidcompany \r\n" + 
+	   		"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT')  \r\n" + 
+	   		"GROUP BY summ.itemid,s.itemid having sum(summ.availphysical) >0";
 
 
-       if (isDebug()) System.out.println(cmd);
-       StringBuffer products = new StringBuffer();
-       try {
-    	   Connection con = this.getNewConnection();
-         Statement st = con.createStatement();
-         ResultSet rs = st.executeQuery(cmd);
-      TreeMap koodid = new TreeMap ();
-         while (rs.next()) {
+	       if (isDebug()) System.out.println(cmd);
+	       StringBuffer products = new StringBuffer();
+	       try {
+	    	   Connection con = this.getNewConnection();
+	         Statement st = con.createStatement();
+	         ResultSet rs = st.executeQuery(cmd);
+	      
+	         while (rs.next()) {
 
-           String kood = rs.getString("toode").trim();
-           double seis = rs.getDouble("stock");
-           
-           if(seis > 0){
-        	   
-        		   products.append(kood +  ";");
-                   products.append(" ;");
-                   products.append(getParent().getNF().format(seis)   +  "\n"); // + dealer +  "\n");
-             kogused.put(kood, seis + "");
-            
-            }
-           }
-
-         
-           rs.close();
-           st.close();
-           con.close();
-           
-       } catch (Exception e) {
-           getParent().showError(e);
-       }
-       return products.toString();
-   }
+	           String kood = rs.getString("toode").trim();
+	           String kood2 = rs.getString("toode2");
+	           double seis = rs.getDouble("stock");
+	           
+	           if(seis > 0){
+	        	      products.append(kood +  ";");
+	                   products.append(" ;");
+	                    products.append(getParent().getNF().format(seis)   +  "\n"); // + dealer +  "\n");
+	                   kogused.put(kood, seis + "");
+	           }
+	           }
+	         
+	           rs.close();
+	           st.close();
+	           con.close();
+	       } catch (Exception e) {
+	           getParent().showError(e);
+	       }
+	       return products.toString();
+	   }
 
 
 

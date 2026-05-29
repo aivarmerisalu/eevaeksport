@@ -469,6 +469,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
     TreeMap customers = new TreeMap();
     makeTaskFile(null);
 
+    StringBuffer sbinvest = null;
     String horecaGrs = getParent().getProps().getProperty("horeca.sortiment.groups");
     
     try {
@@ -490,11 +491,11 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
 
        String cmdk = "SELECT PYNO as kood,agrnr as agrno,fvdt as startD,lvdt as endD,current_fulfill as sold,agr_end_fullfill as estimate " + 
        		", current_fulfill_coll as coloursold, agr_end_fullfill_coll as coloursesti FROM cesu.mjhorecainvest ";
-       
+       try {  
        Statement    st = con.createStatement();
      ResultSet   rs1 = st.executeQuery(cmdk);
-        StringBuffer sbinvest = new StringBuffer();
-        try {    
+         sbinvest = new StringBuffer();
+         
         while(rs1.next()){
                         	 // CustomerCode: startdate; endddate;fulfilment; estimation; color (G or R)
 
@@ -527,8 +528,8 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
         StringBuffer sbcompa = new StringBuffer();
        cmdk = "SELECT * FROM cesu.mjcustomervol  ";
       try {
-          st = con.createStatement();
-       rs1 = st.executeQuery(cmdk);
+    	  Statement  st = con.createStatement();
+    	  ResultSet rs1 = st.executeQuery(cmdk);
                         while(rs1.next()){
                        	 // CustomerCode: startdate; endddate;fulfilment; estimation; color (G or R)
 
@@ -586,7 +587,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
        
     if (isDebug()) System.out.println(cmd31);
       
-        rs1 = st1.executeQuery(cmd31);
+    ResultSet rs1 = st1.executeQuery(cmd31);
         while (rs1.next()) {
        	 String cus = rs1.getString("saaja");
           int days = Integer.parseInt(rs1.getString("days").trim());          
@@ -716,7 +717,7 @@ String    cmd2 = " select  KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VIS
 Calendar cal = Calendar.getInstance();
 	 
       if (isDebug()) System.out.println(cmd2);
-       st = con.createStatement();
+       Statement st = con.createStatement();
        
        ResultSet rs = st.executeQuery(sss);
        
@@ -815,8 +816,10 @@ Calendar cal = Calendar.getInstance();
           cust.setPayer(rs.getString("payer").trim());
           
           if(invest.get(cust.getPayer()) != null) {
-        	  sbinvest.append(cust.getID()+ ";" + invest.get(cust.getPayer()));
-        	  cust.investstatus = true;
+        	  if(sbinvest != null) {
+        	     sbinvest.append(cust.getID()+ ";" + invest.get(cust.getPayer()));
+        	     cust.investstatus = true;
+        	  }
         	//  System.out.println("Payer " + cust.getPayer() + invest.get(cust.getPayer())  );
           }
           
@@ -966,7 +969,7 @@ Calendar cal = Calendar.getInstance();
          st.close();
          con.close();
 
-         if(sbinvest.toString().length() > 0) {
+         if(sbinvest != null && sbinvest.toString().length() > 0) {
            	Converter.saveFile("salescontracts.txt", sbinvest.toString());
            }else {
            	Converter.saveFile("salescontracts.txt", "");
