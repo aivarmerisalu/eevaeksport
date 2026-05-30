@@ -632,7 +632,6 @@ rs.close();
 	         while (rs.next()) {
 
 	           String kood = rs.getString("toode").trim();
-	           String kood2 = rs.getString("toode2");
 	           double seis = rs.getDouble("stock");
 	           
 	           if(seis > 0){

@@ -1719,6 +1719,7 @@ System.out.println(cmd);
  
 
  
+ 
  try {
    	 
 	   String cmd = "   select k.sistema , sum(nuol_suma) , sum(kaina) from nuolaid ale inner join klientai k  ON ale.klientas=k.sistema " +
@@ -1950,7 +1951,7 @@ System.out.println(cmd);
 
             String type = rs.getString("type");
             if(type != null && type.trim().length()>0){
-            		customer.setCustType(Converter.cleanLitLatEst(type.trim()));
+            		customer.setGroup(Converter.cleanLitLatEst(type.trim()));
 //kui on fix sort nimekirjas siis lisame juurde muidu on 
                     if(hinnakirjad.contains(Converter.cleanLitLatEst(type.trim()))){
                      customer.addFixSortCode("ss" + Converter.cleanLitLatEst(type.trim()));

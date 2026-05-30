@@ -140,7 +140,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 					while (rs3.next()) {
 						MatrixLine ml = new MatrixLine();
 						ml.setCustID(rs3.getString("klient").trim());
-						ml.setStartDate(Converter.turn(rs3.getString("kuup")).substring(0,10));
+						ml.setStartDate(Converter.turn(rs3.getString("kuup")).substring(0,5));
 						ml.setProdID(rs3.getString("toode").trim());
 						ml.setPrice(rs3.getDouble("kogus"));// see on sassis ja vajab erilähenemist
 						ml.setDiscount(rs3.getDouble("hind"));
@@ -1590,7 +1590,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	                if (!date.isBefore(start)) {
 
 	                    long weeksBetween = ChronoUnit.WEEKS.between(start, date);
-	                    int cycleIndex = (int) (weeksBetween % 8);
+	                    int cycleIndex = (int) (weeksBetween % 4);
 	                    char weekKey = (char) ('A' + cycleIndex);
 	                    int dayOfWeek = date.getDayOfWeek().getValue();
 	                    if (schedule.containsKey(weekKey) &&
@@ -1652,12 +1652,12 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     		  prognosalperc = 0;  
     	  }
     	  
-    	
+
         
-       asi = asi + "Sales/Plan :   " + (int)cSales + " € / " + (int)cpSales+ " €|";
+       asi = asi + "Izpilde/Plan :   " + (int)cSales + " € / " + (int)cpSales+ " €|";
       
       if(dd > 6 && tehtudsalperc > 0 && prognosalperc > 0){
-    	  asi = asi + "done/esti. :  ";
+    	  asi = asi + "Izpilde/Projekcija :  ";
           asi = asi +(int)(tehtudsalperc*100) + " % / " + (int)(prognosalperc*100) + " %| | ";  
         }
    
@@ -1693,15 +1693,15 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
        	  if(!done.startsWith("-")) {
        		  done = "+" + done;
        	  }
-         	
-       	   asi3 = asi3  + "Focus Cat. : " + grID + "|Sales/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Diff. : " + done + " € |";
+
+       	   asi3 = asi3  + "Fokus Cat. : " + grID + "|Izpilde/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Starpība : " + done + " € |";
        	   if(msales > 0) {
-               asi3 = asi3 + "|done/esti. :   " +(int)(tehtudsalpercC*100) + "% / " + (int)(prognosalpercC*100)  + " %| |";  
+               asi3 = asi3 + "|Izpilde/Projekcija :   " +(int)(tehtudsalpercC*100) + "% / " + (int)(prognosalpercC*100)  + " %| |";  
        	    } else {
        		   asi3 = asi3 + " | |";
        	    }
  		 } else {
- 			   asi3 = asi3  + "Focus Cat. : " + grID + "|Sales/Plan : " + 0 +  " € / " + (int) psales +  " €|Diff. : " + (int) psales + " € |";
+ 			   asi3 = asi3  + "Focus Cat. : " + grID + "|Izpilde/Plāns : " + 0 +  " € / " + (int) psales +  " €|Starpība : " + (int) psales + " € |";
  	           asi3 = asi3 + " | |";  
  	 	 }
  		  }
@@ -1738,15 +1738,15 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       	  if(!done.startsWith("-")) {
       		  done = "+" + done;
       	  }
-        	
-      	   asi3 = asi3  + " Cat. : " + grID + "|Sales/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Diff. : " + done + " € |";
+
+      	   asi3 = asi3  + " Cat. : " + grID + "|Izpilde/Plāns : " + (int) msales +  " € / " + (int) psales +  " €|Starpība : " + done + " € |";
       	   if(msales > 0) {
-               asi3 = asi3 + "done/esti. :   " +(int)(tehtudsalpercC*100) + "% / " + (int)(prognosalpercC*100)  + " % | |";  
+               asi3 = asi3 + "Izpilde/Projekcija :   " +(int)(tehtudsalpercC*100) + "% / " + (int)(prognosalpercC*100)  + " % | |";  
       	   } else {
       		   asi3 = asi3 + "|";
       	   }
 		 } else {
-			   asi3 = asi3  + " Cat. : " + grID + "|Sales/Plan : " + 0 +  " € / " + (int) psales +  " €|Diff. : -" + (int) psales + " € | ";
+			   asi3 = asi3  + " Cat. : " + grID + "|Izpilde/Plāns : " + 0 +  " € / " + (int) psales +  " €|Starpība : -" + (int) psales + " € | ";
 	             asi3 = asi3 + "|";  
 	 			 
 		 }
@@ -1795,12 +1795,13 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       	  }else {
       		  done = done.substring(1);
       	  }
-      	  
-      	  asi2 = asi2 + "Focus GR : " + grName + " (" + catName + ")"  + "|Sales/Plan : " + (int) gSales.doubleValue() + 
-      			  " € / " + (int) gpSales.doubleValue() +  " €|Diff. : " + done + " € |";
+
+      	//Plan- Plāns; Done- Izpilde; Diff- Starpība, esti- Projekcija
+      	  asi2 = asi2 + "Fokus GR : " + grName + " (" + catName + ")"  + "|Izpilde/Plāns : " + (int) gSales.doubleValue() + 
+      			  " € / " + (int) gpSales.doubleValue() +  " €|Starpība : " + done + " € |";
       	
       	  if(tehtudsalperc > 0) {
-               asi2 = asi2 + "done/esti. :  " + (int)(tehtudsalperc*100) + " % / " + (int)(prognosalperc*100)  + " % | |";  
+               asi2 = asi2 + "Izpilde/Projekcija :  " + (int)(tehtudsalperc*100) + " % / " + (int)(prognosalperc*100)  + " % | |";  
            } else {
         	   asi2 = asi2 + "| |";
            }
@@ -2186,7 +2187,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            cust.addAgent(agentL);
            if(agentL.nextContact != null) {
         	 //  System.out.println("agentL.getVisit() " + agentL.getID() +" "+ cust.getID() + " " + agentL.getVisit());
-               cust.addCity(Converter.enCodeEst("Nākamais: ") + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
+               cust.addCity(("N11124xxkamais: ") + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
            }
            
            if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
@@ -2619,6 +2620,7 @@ private HashSet<String> inTT = null;
 	    rs.close();
 	    st.close();
 	    con.close();
+	    
   return tm;	   
 }
 
@@ -3299,11 +3301,12 @@ boolean noopt = false;
       	  if(!done.startsWith("-")) {
       		  done = "+" + done;
       	  }
+      //	Plan- Plāns; Done- Izpilde; Diff- Starpība, esti- Projekcija
         	
-      	  String asi = "Focus Cat. : " + grID + "|Sales/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Diff. : " + done + " €";
+      	  String asi = "Fokus Cat. : " + grID + "|Izpilde/Plāns : " + (int) msales +  " € / " + (int) psales +  " €|Starpība. : " + done + " €";
 
       	  if(tehtudsalperc > 0) {
-      		  asi = asi + "|done/esti. : " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  
+      		  asi = asi + "|Izpilde/Projekcija : " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  
                }
             
             if(manaCategoryFocusTotals.get(agID) != null) {
@@ -3350,11 +3353,12 @@ boolean noopt = false;
       	  if(!done.startsWith("-")) {
       		  done = "+" + done;
       	  }
-        	
-      	  String asi = " Cat. : " + grID + "|Sales/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Diff. : " + done + " €";
+      	
+        	//Plan- Plāns; Done- Izpilde; Diff- Starpība, esti- Projekcija
+      	  String asi = " Kat. : " + grID + "|Izpilde/Plāns : " + (int) msales +  " € / " + (int) psales +  " €|Starpība : " + done + " €";
 
       	  if(tehtudsalperc > 0) {
-      		  asi = asi + "|done/esti. : " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  
+      		  asi = asi + "|Izpilde/Projekcija : " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  
                }
             
             if(manaCategoryTotals.get(agID) != null) {
@@ -3412,17 +3416,17 @@ boolean noopt = false;
                   	  if(prognosalperc > 10){
                   		  prognosalperc = 0;  
                   	  }
-
-  					asi = "Done: " + (int)msales + " €|";
-  					asi = asi + " Plan: " + (int)psales + " €|";
+//Plan- Plāns; Done- Izpilde; Diff- Starpība, esti- Projekcija
+  					asi = "Izpilde: " + (int)msales + " €|";
+  					asi = asi + " Plāns: " + (int)psales + " €|";
 
   		      	  String done = (int)(msales - psales)+"";
   		      	  if(!done.startsWith("-")) {
   		      		  done = "+" + done;
   		      	  }
-  					asi = asi + " Diff: " + done + " €|";
+  					asi = asi + " Starpība: " + done + " €|";
                   	  
-                  	    asi = asi + "done/esti. :";
+                  	    asi = asi + "Izpilde/Projekcija. :";
                         asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
                         
                         if(manaCategoryFocusTotals.get(agentID) != null) {
