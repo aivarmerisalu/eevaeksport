@@ -2676,11 +2676,12 @@ private HashSet<String> inTT = null;
 			e.printStackTrace();
 		}
 	  }
+	  
 	  String noOPT = getParent().getProps().getProperty("nostepgroup");
 	  
     String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
     		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-    		"    		a.groupBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
+    		"    		a.brandBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
     		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId where a.backOfficeId not like 'i%' and a.backOfficeId not like 'R%' "  ;
 
              String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, (case when regionBackofficeId = '24EWC' then '24N' else regionBackofficeId end) as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  " + 
@@ -2854,7 +2855,8 @@ private HashSet<String> inTT = null;
         }
 boolean noopt = false;
       String grupp = rs.getString("grupp");
-      
+
+      String grupp2 = rs.getString("grupp2");
       
        if(grupp!=null && grupp.trim().length()>0){
     	   
@@ -2871,7 +2873,10 @@ boolean noopt = false;
          }
        }
 
- 
+       if(grupp2!=null && grupp2.trim().length()>0){
+    	   prod.setType2(grupp2.trim());
+       }
+       
         prod.setName(nimetus.trim() + " " + kood);
       
           
@@ -2943,6 +2948,17 @@ boolean noopt = false;
    	}
    }
    
+   StringBuffer sb30 = new StringBuffer();
+   rs = stmt.executeQuery("select backofficeid as id , MaxRepricingPercent as perc from epasaule_brands where MaxRepricingPercent > 0");
+  while(rs.next()){
+  	String id = rs.getString("id");
+  	Double name = rs.getDouble("perc");
+  	if(name != null && name > 0){
+  	      sb30.append( id+ ";" + name  + "\n");	
+  	}
+  }
+   
+   
    
   rs.close();
   stmt.close();
@@ -2959,14 +2975,16 @@ boolean noopt = false;
   if(sb2.length() > 0){
 	 //  Converter.saveFile("warehouse.txt", sb2.toString());
    }
-      
+    
+  
+  if(sb30.length() > 0){
+	   Converter.saveFile("reprgroups.txt", sb30.toString());
+   }
       
     } catch (Exception e){
       getParent().showError(e);
     }
 
-    
-    //Siia lisada Ladude select 
     
     
     

@@ -603,6 +603,7 @@ private Product getProd(String toode){
 	    	  ware = orde.getDealer();
 	      }
 	      
+	      
 	      String pobj = " "; // juhul kui on valitud promo siis peab see olema täidetud
 	    		  
 	      if(orderLine.selActCode != null) {
@@ -635,6 +636,9 @@ private Product getProd(String toode){
 	            	   price = Double.parseDouble(priceorig);
 	            	   }catch(Exception e) {}
 	               }
+	               // arvutame hinna ümber kliendi hinna peale - sellest alla tuleb anda
+	               rp =  price * ((100-disc)/100);
+	        	      
 	           	   //  System.out.println("inff reference " + pobj + " " + price + " " + linenum);
 	                
 	                
@@ -646,6 +650,12 @@ private Product getProd(String toode){
 	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
 	    		    }
 	        	    kogus = -1 * kogus;
+	        	    String priceorig = annaVaartusIndeksiga(inff,linenum);
+		               if(priceorig != null) {
+		            	   try {
+		            	   price = Double.parseDouble(priceorig);
+		            	   }catch(Exception e) {}
+		               }
 		        	//   System.out.println("tagastus code " + itemid + " " + pobj + " " + price + " " + rp + " " + kogus  );
 	           }
 	          

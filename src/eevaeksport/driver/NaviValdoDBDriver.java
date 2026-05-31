@@ -1509,6 +1509,8 @@ con3.close();
 
    public Vector getCustomerProductsList(String agentCode){
      Vector vec = new Vector();
+     
+     HashMap<String, CustProd> tobeSaved = new HashMap<String, CustProd>();
  
      try {
     	 
@@ -1635,10 +1637,10 @@ con3.close();
               if(!loetud.contains(key)) {
             	  vec.addElement(cp);
             	  loetud.add(key);
-              }
-                
-
-           }
+            	  tobeSaved.put(key, cp);
+                }
+             }
+    
          rs.close();
          stmt.close();
          con.close();
@@ -1649,7 +1651,9 @@ con3.close();
        e.printStackTrace();
      }
      try {
-        Converter.saveObject(vec, "navicustprods.vec");
+    	 String path = 	getParent().getProps().getProperty("oldvec.savepath");
+    		    
+        Converter.saveObject(tobeSaved, path +  "navicustprods.vec");
      }catch(Exception e) {
     	 e.printStackTrace();
      }

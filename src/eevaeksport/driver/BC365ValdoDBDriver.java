@@ -156,7 +156,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
         	 } else {
 		        String json = callOperation(operation, null);
-		        System.out.println("result " + json);
+		        System.out.println("result " + operation+ " " + json.length());
 		         saveFilePaged(operation, json, MAX_OBJECTS_PER_FILE);
         	}
 
@@ -293,18 +293,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         }
     }
 
-    public static void printInputStream(InputStream inputStream) throws Exception {
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-        }
-    }
     /* =========================
        SOAP HELPERS
        ========================= */
@@ -341,11 +330,11 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         
-        String text = new BufferedReader(
+     /*   String text = new BufferedReader(
                 new InputStreamReader(xmlStream, StandardCharsets.UTF_8))
             .lines()
             .collect(Collectors.joining("\n"));
-        System.out.println(text);
+        System.out.println(text);*/
 
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(xmlStream);
@@ -373,7 +362,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
     public TreeMap getAgents(){
 		  TreeMap tm = new TreeMap();
-	
+		  
 			try {
 			org.json.simple.JSONArray cc = 	Converter.readJSONArrFileUTF("data//Agents1.json");
 	
@@ -398,7 +387,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 			}
 			
 	  //System.out.println("Managersize " + tm.size());
-			
+		//	getCustomerProductsList(null);
 	   return tm;
 	 }
     
@@ -884,9 +873,11 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
     	Vector res = new Vector();
     	
+    	HashMap<String, CustProd> oldData = null;
+    	
     	if("true".equals(getParent().getProps().getProperty("load.oldvec"))) {
     		try {
-            		res = (Vector)Converter.readObject("navicustprods.vec");
+    			oldData = (HashMap<String, CustProd>)Converter.readObject("data/navicustprods.vec");
     		}catch(Exception e) {e.printStackTrace();}
     		}
 
@@ -913,7 +904,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     File fil = new File("data/GetSalesHistory" + weekNumber + weekYear + ".json");
 
                     try {
-                    	
+                    	System.out.println("oldata enne " + oldData.size());
                  
                     	if(fil.exists()) {
                     	org.json.simple.JSONObject hisData =
@@ -940,6 +931,11 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                                 cp.setAbiKood(shipmentNo);
                           	    res.add(cp); 
                     	     
+                          	    // võtame maha vanast kui on juba müüdud
+                          	    if(oldData != null && oldData.get(cuid + prid) != null) {
+                          	    	oldData.remove(cuid + prid);
+                          	    }
+                          	    
                             }
                           }
                     	}
@@ -949,7 +945,13 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
                 }
             
-        
+                if(oldData != null && oldData.size() > 0) {
+                	for(CustProd cp : oldData.values()) {
+                		res.add(cp);
+                	}
+                }
+
+            	System.out.println("oldata pärast " + oldData.size());
     	
     	return res; 
     }
