@@ -667,7 +667,7 @@ File f = new File(this.getExcelDir() + "/listing.xlsx");
 	   		"INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid\r\n" + 
 	   		"INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid \r\n" + 
 	   		"left JOIN inventtablecompany s ON s.itemid=t.itemidcompany \r\n" + 
-	   		"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT','PLG-AK-Z','PLG-AK-U')  \r\n" + 
+	   		"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT','PLG-AK-Z')  \r\n" + 
 	   		"GROUP BY summ.itemid,s.itemid having sum(summ.availphysical) >0";
 
 
