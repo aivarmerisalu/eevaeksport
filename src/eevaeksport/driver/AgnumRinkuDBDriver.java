@@ -14,10 +14,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -183,19 +185,55 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
     }
 
     public TreeMap getCustomers(Agent agent) {
+    	NumberFormat euroFormat = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    
         connectionUp();
         // String cmd = "SELECT k.kood, k.nimi FROM (klient k INNER JOIN omrid ON k.kood = omrid.klient INNER JOIN rid ON rid.dokumnr = omrid.tasudjrk) WHERE omrid.rid2obj='" + agentCode + "' AND (len(rid.toode) > 2) GROUP BY k.kood";
+        TreeMap lastBill = new TreeMap();
+        String sql = " SELECT d.id_kl as payer , d.id_subkl as saaja  ,doknr AS number,d.data+ d.term AS maksepaev,d.skola -apmsum as tasumata, d.data as kuupaev ,((current_timestamp-d.data)-d.term)\r\n" + 
+          		"      		      		AS yle, d.snd_kod  FROM  dok d  WHERE  (d.skola -apmsum > 0.1  or d.skola -apmsum < -0.1) and d.snd_kod = 'ps' and \r\n" + 
+          		"						doknr like 'RAD%'  and ((current_timestamp-d.data)-d.term) < 200 ORDER BY d.id_kl , d.data desc ";
+
+        
+
+        TreeMap customers = new TreeMap();
+        TreeMap custMap2 = new TreeMap();
+        
+        try {
+        	
+          ResultSet rs = stmt.executeQuery(sql);
+          while(rs.next()){
+        	  
+            Debt debt = new Debt();
+            debt.setPayerID(rs.getString("payer").trim());
+            debt.setCustID(debt.getPayerID() + "-" + rs.getString("saaja").trim());
+            debt.setDoknr(rs.getString("number").trim());
+            debt.setDuedate(rs.getDate("maksepaev"));
+            debt.setSum(rs.getDouble("tasumata"));
+            debt.setDate(rs.getDate("kuupaev"));
+           if( lastBill.get(debt.getCustID()) == null) {
+               lastBill.put(debt.getPayerID(), debt);
+               lastBill.put(debt.getCustID(), debt);
+             }
+          }
+        
+        rs.close();
+        
+        
+        
+        
         String cmd =
             "SELECT  k.id_kl as klid,s.id_subkl as sid, k.kod as kood , k.pavad as nimi, s.kod as skood , s.adr as subnimi,k.adr AS aadress,' ' AS ale, ' ' AS visit ,s.id_agent   " + 
           "  AS agent,'' as maksja , k.tlf as telefon ,k.term_p as term , k.f1 as grupp   " +
 		  " FROM kl k  left join subkl s on s.id_kl=k.id_kl where   k.deb='Y' and k.color!=255  and s.f2 != '' ORDER BY k.pavad ";
 
         log(cmd);
+        
+        
+        
 
-        TreeMap customers = new TreeMap();
-        TreeMap custMap2 = new TreeMap();
-        try {
-            ResultSet	      rs = stmt.executeQuery(cmd);
+     
+            	      rs = stmt.executeQuery(cmd);
 
             while (rs.next()) {
             	
@@ -233,8 +271,15 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
             if (aadress != null){
               cust.setAddress(aadress.trim());
             }
-            
-            
+            if(lastBill.get(cust.getID()) != null) {
+            	Debt dd = (Debt)lastBill.get(cust.getID());
+            	cust.setCity("'Paskutinė Sask. : " + dd.getDoknr() + " - " + Converter.getDDsMMMsYYYYString(dd.getDate()) 
+            	+ " ("+ euroFormat.format(dd.getSum()) + ")'");
+             } else if(lastBill.get(cust.getPayer()) != null){
+            	Debt dd = (Debt)lastBill.get(cust.getPayer());
+            	cust.setCity("'Paskutinė Sask. : " + dd.getDoknr() + " - " + Converter.getDDsMMMsYYYYString(dd.getDate()) 
+            	+ " ("+ euroFormat.format(dd.getSum()) + ")'");
+             } 
             String visit = rs.getString("visit");
             if (visit != null){
               cust.setVisit(visit.trim());
@@ -276,7 +321,7 @@ public class AgnumRinkuDBDriver extends AbstractDBDriver implements BulkUpdater,
             }
 
             
-            String sql = " SELECT id_kl as klient,sum(skola -apmsum) as summa FROM  \r\n" + 
+             sql = " SELECT id_kl as klient,sum(skola -apmsum) as summa FROM  \r\n" + 
             		"                    dok WHERE (skola -apmsum > 0.1  or skola -apmsum < -0.1) and snd_kod = 'ps' and doknr like 'RAD%' and ((current_timestamp-data)-term) > 0\r\n" + 
             		"                     group by id_kl ORDER BY id_kl";
             

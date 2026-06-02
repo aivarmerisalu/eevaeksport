@@ -1033,7 +1033,7 @@ Statement st = null;
 	          }
 		   
 		   if(uselim > 0 || useterm > 0) {
-			   cust.setSalesBlock(true);
+			 //  cust.setSalesBlock(true);
 			   if(uselim > 0 && useterm == 0) {
 				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");
 			   }

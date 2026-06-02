@@ -1727,6 +1727,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 						    	w.printStackTrace();	
 						       }
 						
+					    
 						}
 						System.out.println("stockJson lopp ");
 				    	String laodq = getParent().getProps().getProperty("laoseis.laod");

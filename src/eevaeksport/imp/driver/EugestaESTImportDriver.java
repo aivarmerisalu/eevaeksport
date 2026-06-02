@@ -662,6 +662,9 @@ private Product getProd(String toode){
 	    		    }
 	    	  }
 	      }
+	      if(ref2.length() > 20) {
+	    	  ref2 = ref2.substring(0,20).trim();
+	      }
 	    
 
 	  String deltype = "0"; // ei kasutatta eestis

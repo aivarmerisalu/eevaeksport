@@ -712,6 +712,9 @@ if (start != -1 && end != -1 && start < end - 1) {
 	    		    }
 	    	  }
 	      }
+	      if(ref2.length() > 20) {
+	    	  ref2 = ref2.substring(0,20).trim();
+	      }
 	    
 
 	  String deltype = "0"; // ei kasutatta eestis
