@@ -1132,7 +1132,7 @@ rs.close();
 "INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +
 "INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid " +
 "left JOIN inventtablecompany s ON s.itemid=t.itemidcompany " +
-"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT','PLG-AK-Z') " + 
+"WHERE summ.DATAAREAID='spil' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT') " + // ,'PLG-AK-Z'
 "GROUP BY summ.itemid,s.itemid having sum(summ.availphysical) >0";
 
 
@@ -1213,7 +1213,7 @@ rs.close();
 
          cmd = " select   summ.itemid  AS toode ,SUM(AVAILPHYSICAL) AS stock    FROM INVENTSUM summ  with(nolock) " +
     "   INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid " +  
-    " WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('PLG-VT','PLG-AK-Z') " + //('PLG-VT','PLG-AK-Z','PLG-AK-U')
+    " WHERE  summ.DATAAREAID='itb' and CLOSED = 0  and dim.inventlocationid in ('PLG-VT') " + //,'PLG-AK-Z'
     "	GROUP BY  summ.itemid  having sum(availphysical) > 0 " ;
 
 

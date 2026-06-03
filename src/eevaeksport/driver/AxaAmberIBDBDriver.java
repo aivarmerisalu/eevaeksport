@@ -618,7 +618,7 @@ rs.close();
 	   		"INNER JOIN INVENTDIM dim with(nolock) ON summ.inventdimid=dim.inventdimid and dim.dataareaid=summ.dataareaid\r\n" + 
 	   		"INNER JOIN inventtable t ON t.itemid=summ.itemid and t.dataareaid=summ.dataareaid \r\n" + 
 	   		"left JOIN inventtablecompany s ON s.itemid=t.itemidcompany \r\n" + 
-	   		"WHERE summ.DATAAREAID='itb' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT','PLG-AK-Z')  \r\n" + 
+	   		"WHERE summ.DATAAREAID='itb' and summ.CLOSED = 0 AND dim.inventlocationid in ('PLG-VT')  \r\n" + // ,'PLG-AK-Z'
 	   		"GROUP BY summ.itemid,s.itemid having sum(summ.availphysical) >0";
 
 
