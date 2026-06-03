@@ -457,19 +457,19 @@ private Product getProd(String toode){
 		    if(lin.getDealer().equals("208_MRC")){
 		    	ord208_MRC.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
-		    	ord208_MRC.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "M");
+		   // 	ord208_MRC.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) );
 		    	ord208_MRC.setReference(order.getReference());
 			  
 		    } else if(lin.getDealer().equals("24EWC")){
 		    	ord24EWC.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
 		    	ord24EWC.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "E");
-		    	ord24EWC.setReference(order.getReference());
+		    //	ord24EWC.setReference(order.getReference());
 			  
 		    } else if(lin.getDealer().equals("24B")){
 		    	ord24B.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 			     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
-		    	ord24B.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "B");
+		    	//ord24B.setDokNr(order.getDokNr().substring( 0,order.getDokNr().length()-1) + "B");
 		    	ord24B.setReference(order.getReference());
 			     	
 			 } else {
@@ -725,6 +725,10 @@ if (start != -1 && end != -1 && start < end - 1) {
 		  
 	  }
 	
+	  if(ref2.trim().length() == 0) { //kui on tava tellimus siis paneme sisemise tellimuse numbri 
+		  ref2 = order.getDokNr();
+	  }
+	  
 	  System.out.println("ref " + ref + " ' " + ref2);
 		
 	  
@@ -818,7 +822,7 @@ if (start != -1 && end != -1 && start < end - 1) {
 
  
   public String getDriverVersion(){
-    return "EugestaLATImport";
+    return "EugestaLAT";
   }
  
  

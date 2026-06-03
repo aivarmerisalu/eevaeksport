@@ -752,13 +752,12 @@ private Product getProd(String toode){
 	}
   
 
-
 	   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
 
 
  
   public String getDriverVersion(){
-    return "EugestaESTImport";
+    return "EugestaEST";
   }
  
  

@@ -674,8 +674,10 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
        		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId,  regionBackofficeId desc,bestBefore " ;
     
 	  if(usedProds == null){
-			  this.getProducts(null);
+		    this.getProducts(null);
 		  }
+	  HashSet olemas  = new HashSet(); 
+	  
 	       if (isDebug()) System.out.println(cmd);
 	       StringBuffer products = new StringBuffer();
 	       try {
@@ -697,11 +699,13 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	               gg =  part.substring(0,10);
 	           }
 	           
+	           String key = kood+dealer;
 	           
-	           if(seis > 0 && usedProds.contains(kood)){
+	           if(seis > 0 && usedProds.contains(kood) && !olemas.contains(key)){
 	        	       products.append(kood +  ";");
 	                   products.append(" ;");
 	                   products.append(getParent().getNF().format(seis) + ";" + dealer + "; ;" + gg + "\n");
+	                   olemas.add(key);
 	                }
 	           }
 
@@ -2663,11 +2667,43 @@ private HashSet<String> inTT = null;
 
   private HashMap<String,Double> prodprices = null;
   private HashMap<String,String> eancodes = null;
+
+  
+  public HashSet getUsedProds() {
+	   HashSet   tm = new HashSet();
+		 
+	  try {
+	   Connection con = getNewConnection();
+	   
+	    String    sql = " select kood from(\r\n" + 
+	    		"select  productBackOfficeId as kood from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
+	    		"group by  productBackOfficeId  \r\n" + 
+	    		"union all\r\n" + 
+	    		"select productBackOfficeId as kood from EPASAULE_ASSORTMENTS\r\n" + 
+	    		"group by productBackOfficeId  union all select productBackOfficeId as kood  from EPASAULE_PRODUCTS_ADVERTISING group by productBackOfficeId\r\n" + 
+	    		") as asi group by kood ";
+	    Statement st = con.createStatement();
+	    ResultSet rs = st.executeQuery(sql);
+
+	    while (rs.next()) {
+	      tm.add(rs.getString("kood").trim());
+	    }
+	    
+	    rs.close();
+	    st.close();
+	    con.close();
+	    
+	  }catch(Exception e) {e.printStackTrace();}  
+    return tm;	
+ }
   
   
   
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
+	  
+
+      usedProds = getUsedProds();
 	  
 	  if(grps == null) {
 		 try {
@@ -2682,14 +2718,13 @@ private HashSet<String> inTT = null;
     String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
     		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
     		"    		a.brandBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
-    		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId where a.backOfficeId not like 'i%' and a.backOfficeId not like 'R%' "  ;
+    		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
 
              String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, (case when regionBackofficeId = '24EWC' then '24N' else regionBackofficeId end) as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  " + 
              		"  group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId,  (case when regionBackofficeId = '24EWC' then '24N' else regionBackofficeId end) desc,bestBefore";
         
 
              
-             usedProds = new HashSet();
     if (isDebug()) System.out.println(cmd);
        if (isDebug()) System.out.println(cmd2);
     TreeMap products = new TreeMap();
@@ -2720,6 +2755,11 @@ private HashSet<String> inTT = null;
           
           if(stocks.get(id) != null) {
         	  sto = stocks.get(id) + sto; //summeerime laoseisu 
+          }
+          if(sto > 0) {
+        	  if(!usedProds.contains(id)) {
+          	    usedProds.add(id);
+          	  }
           }
          // stocks.put(id, sto);
           }
@@ -2901,16 +2941,20 @@ boolean noopt = false;
        
                if(partii.get(prod.getID()) != null) {
             	  prod.setPartii(partii.get(prod.getID())); 
+            	  if(!usedProds.contains(prod.getID())) {
+            	    usedProds.add(prod.getID());
+            	  }
                }
                
                Double vat = rs.getDouble("vat");
                prod.setVat(vat + "");
                prod.setNameSorting(sorting + nimetus);
-               
-       products.put(nimetus + prod.getID(), prod);
-       prodHash.put(prod.getID(), prod);
-       prodcodes.add(prod.getID());
-       usedProds.add(prod.getID());
+           if(usedProds.contains(prod.getID())) {    
+              products.put(nimetus + prod.getID(), prod);
+              prodHash.put(prod.getID(), prod);
+              prodcodes.add(prod.getID());
+           }
+       
 //System.out.println("toode " + nimetus + " " + prod.getID());
     
       }

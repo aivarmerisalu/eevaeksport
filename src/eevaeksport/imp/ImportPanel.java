@@ -15150,31 +15150,6 @@ shipdate = getCalXML(asi);
             	  dokNr = agordnum;         	  
               }
               
-              if(driver.getDriverVersion().equals("SkaiteAG")){
-            	  String ddd = firma;
-            	  ddd =  driver.identifyCustomer(firma, null)  ;
-            	if(ddd== null){
-            		ddd =  driver.identifyCustomer(firma.substring(1), null)  ;          		
-            		if(ddd== null){
-            			ddd =  driver.identifyCustomer(firma.substring(2), null)  ;	
-                		if(ddd == null){
-                			ddd =  driver.identifyCustomer(firma.substring(3), null)  ;	
-                			if(ddd != null){
-                				firma = ddd;
-                			}else{
-                			}
-                			
-                    	}else{
-                    		firma = ddd;
-                    	}
-            		}else{
-                		firma = ddd;
-                	}
-            		
-            	}else{
-            		firma = ddd;
-            	}
-              }
            
           //   System.out.println("SIIN OLEMA OMA LUGEMISEGA " +  driver.getDriverVersion() + " " +firma +" " + toode + " text2'" + text2+ "' " +warehouse 
             //		  + " text'" + text +  " shipmode'" + shipmode + "'reference'" + reference + "' dealer:" + dealer);
@@ -15247,12 +15222,9 @@ shipdate = getCalXML(asi);
       in.close();
       //ff.close();     
 
-    } catch (IOException e){
+    } catch (Exception e){
       EksportFrame.showError(e);
-    } catch (SQLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+    }
     
    // System.exit(0);
   }
