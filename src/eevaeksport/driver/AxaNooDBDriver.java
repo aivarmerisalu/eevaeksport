@@ -737,6 +737,8 @@ Connection con = this.getNewConnection();
     	}
     }
     
+    
+    
     try {
  
     	
@@ -1190,7 +1192,37 @@ Connection con = this.getNewConnection();
                         debt.setDue(rs.getString("yle"));
                         this.debt.addElement(debt);
                       }
-  rs.close();
+  
+                      rs.close();
+                      
+              // ekstra klientide leidmine 
+                      String sq = "select accountnum as kood , name as nimi,address, custgroup as agent from NLTAssortmentCustTable";
+                      
+                      rs = stmt.executeQuery(sq);
+                      while(rs.next()){
+                        
+                        String id = rs.getString("kood").trim();
+                        String nimi = "x " +rs.getString("nimi");
+                        String aadr = rs.getString("address");
+                        String ag = rs.getString("agent");
+                      Customer cc = new Customer(id);
+                      cc.setName(nimi);
+                      if (aadr != null) {
+                        cc.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',',')),"Estonia"));
+                      }
+                      cc.addAgent(new Agent(ag.trim()));
+                      cc.noOrder = true;
+                      cc.restdirect = "indirect";
+                      
+                      customers.put(nimi+ id, cc);
+                      custMap.put(cc.getID(),cc);	
+                  
+                       
+                      }
+  
+                      rs.close();
+                      
+                      
   stmt.close();
   con.close();
   

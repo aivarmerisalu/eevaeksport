@@ -1392,9 +1392,11 @@ public void PictureMaker() {
           	if(in.isFile()){
           	
           		File inpda = new File ( pictspda + prod.getID()+ ".jpg");
-          	if(!inpda.exists()){
+     //     	if(!inpda.exists()){
+          		try {
               	Converter.shrinkAndCopyFile(in,inpda,400);
-          	}
+          		}catch(Exception e) {}
+       //   	}
           	
       		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
             

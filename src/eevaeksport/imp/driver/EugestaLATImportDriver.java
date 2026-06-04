@@ -590,6 +590,7 @@ private Product getProd(String toode){
 	      double price = orderLine.getPrice();
 	      double disc = 0; 
 	      
+	      
 	      if(orderLine.getDiscount() > 0 ) {
 	    	 disc = orderLine.getDiscount(); 
 	    	 if((int)disc == 100) {
@@ -622,7 +623,7 @@ private Product getProd(String toode){
 	          
 	          if(repr) {
 	        		  rp =  price * ((100-disc)/100);
-	        	      disc = 0;
+	        	     
 	        	  String inff = orde.getTeostaja();
 	        	  
 	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
@@ -639,8 +640,8 @@ private Product getProd(String toode){
 	               // arvutame hinna ümber kliendi hinna peale - sellest alla tuleb anda
 	               rp =  price * ((100-disc)/100);
 	        	      
-	           	   //  System.out.println("inff reference " + pobj + " " + price + " " + linenum);
-	                
+	           //	     System.out.println("inff reference " + pobj + " " + price + " " + rp +  " " + linenum + " " + priceorig);
+	           	  disc = 0;
 	                
 	          }
 	          
@@ -753,16 +754,16 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  }
 	  
 	  System.out.println("ref " + ref + " ' " + ref2);
-		
+		String inff = order.getTeostaja();
 	  
 	  if(repr) {
 		  ordtype = "4"; 
-		  ref = this.annaKoodIndeksiga(order.getTeostaja(), 1);
+		  ref = this.annaKoodIndeksiga(inff, 1);
 	  }
 	  
 	  if(tagastus) {
 		  ordtype = "1"; 
-		  ref = this.annaKoodIndeksiga(order.getTeostaja(), 1);
+		  ref = this.annaKoodIndeksiga(inff, 1);
 	  }
 	  
 	  String status = "V";

@@ -172,10 +172,67 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	}
 
 
-  public String getSaveDebtInfo() {
-	
-   	return null;
-   }
+	 public String getSaveDebtInfo() {
+	 	  
+		  String cmd2 = "  SELECT sum(Amount) as tasumata , debetorBackOfficeId as maksja  FROM dbo.EPASAULE_DEBTS where \r\n" + 
+	  	 		" payDate < getdate()-1 group by debetorBackOfficeId"; 
+		  
+		  String cmd = " select debitorBackOfficeId as payer ,  Status AS block  from  dbo.EPASAULE_CLIENTS  where status = 'B' "; 
+	      		
+
+			HashSet<String> hh = new HashSet<String>();
+			TreeMap custs = new TreeMap();
+
+			StringBuffer products = new StringBuffer();
+			try {
+			Connection con = getNewConnection();
+			Statement st = con.createStatement();
+			ResultSet rs = st.executeQuery(cmd);
+			while (rs.next()) {
+				hh.add(rs.getString("payer"));
+			}
+	        
+			rs.close();
+			rs = st.executeQuery(cmd2);
+			
+			while (rs.next()) {
+
+				   double volg = rs.getDouble("tasumata");
+				String maks = rs.getString("maksja");
+			   Customer custw = null;
+			if(maks != null){
+				 custw = new Customer (maks.trim());
+				custw.setDebt(volg);
+				if(volg>0){
+					custs.put(maks.trim(),custw);
+				}
+			}
+			
+			}
+
+			rs.close();
+			st.close();
+			con.close();
+			
+			} catch (Exception e) {
+			getParent().showError(e);
+			}
+	      
+	      Iterator     codes = custs.values().iterator();
+			while (codes.hasNext()){
+			Customer cust = (Customer)codes.next();
+			String bl = "0";
+			if(hh.contains(cust.getID())){
+				bl = "1";
+				}
+			
+			 products.append(cust.getID() + ";" + getParent().getNF().format(cust.getDebt()) + ";" + bl + "\n");
+			}
+	      
+			return products.toString();
+
+	     }
+
 
   
   private void makePictureCat(){
@@ -2591,6 +2648,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 
   private Connection getNewConnection() throws SQLException{
+	//  url = "jdbc:sqlserver://10.40.40.51:1433;databaseName=dbo;integratedSecurity=true;encrypt=true;trustServerCertificate=true;";
     return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
   }
 

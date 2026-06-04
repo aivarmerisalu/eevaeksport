@@ -74,6 +74,7 @@ public class AxaDunkerDBDriver extends AbstractDBDriver  implements Manager,Prom
   String rcompany = null;
 
   
+  
 
 	 public void insertSuperVisorSQL(SupervisorInfoWrapper wr){
 	  
@@ -1435,10 +1436,12 @@ System.out.println(sb.toString());
 	        	File in = new File ( pictssou + ff2[i]); 
 	          	if(in.isFile()){
 	          	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+	          	try {
 	              	Converter.shrinkAndCopyFile(in,inpda,400);
 	        	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
 	                		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
 	                	}
+	          	}catch(Exception e) {}
 	               }
 	             }
 	           }
