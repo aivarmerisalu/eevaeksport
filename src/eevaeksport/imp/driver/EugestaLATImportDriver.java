@@ -679,7 +679,28 @@ private Product getProd(String toode){
         
 	  }
  
- 
+ public static String annaKoodIndeksiga(String tekst, int mitmes) {
+     // Kui sisestati 0 või negatiivne arv, eeldame, et mõeldi esimest elementi
+     if (mitmes <= 0) {
+         mitmes = 1; 
+     }
+
+     Pattern pattern = Pattern.compile("(\\w+):");
+     Matcher matcher = pattern.matcher(tekst);
+     
+     int loendur = 0;
+     
+     while (matcher.find()) {
+         loendur++;
+         // Kui jõuame soovitud järjekorranumbrini, tagastame tulemuse
+         if (loendur == mitmes) {
+             return matcher.group(1);
+         }
+     }
+     
+     // Kui tekstis oli vähem koode kui küsitud indeks, tagastame nulli (või tühja stringi)
+     return null; 
+ }
  
  private void addInvoiceHeader(int salesid, Order order, boolean tagastus, boolean repr) throws SQLException{
 	      
@@ -726,7 +747,9 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  }
 	
 	  if(ref2.trim().length() == 0) { //kui on tava tellimus siis paneme sisemise tellimuse numbri 
-		  ref2 = order.getDokNr();
+		  if(!repr && !tagastus) {
+		    ref2 = order.getDokNr();
+		  }
 	  }
 	  
 	  System.out.println("ref " + ref + " ' " + ref2);
@@ -734,16 +757,19 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  
 	  if(repr) {
 		  ordtype = "4"; 
+		  ref = this.annaKoodIndeksiga(order.getTeostaja(), 1);
 	  }
 	  
 	  if(tagastus) {
 		  ordtype = "1"; 
+		  ref = this.annaKoodIndeksiga(order.getTeostaja(), 1);
 	  }
 	  
 	  String status = "V";
 	  
 	  int orderingTime = 0;
 	      
+	  
 	  
 	  String sql = " INSERT INTO  ORDERS (  " +
 	                     " ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ," +
