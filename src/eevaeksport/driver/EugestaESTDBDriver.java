@@ -856,6 +856,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  
 		  
 	  
+	  
 	  String cmd2 = "   WITH cte AS (  \r\n" + 
 	  		"	  			  		    SELECT    \r\n" + 
 	  		"	  			  		        a.CUSTACCOUNT AS klient,  \r\n" + 
@@ -999,13 +1000,14 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	         if(aaa > 0) {
 	        	 sold180 = aaa;
 	         }
-	        
+	        if(kogus != 0) {
 	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , sold180 , 0,lastdate,lastprice,mata,0,reason);
 	        if(lastdoc.length() > 0) {
                 cp.setAbiKood(lastdoc);
 	        }
 	        custProds.add(cp);
 	        prods.addElement(tootekood);
+	        }
 	      }
 	      rs.close();
 	      stmt.close();

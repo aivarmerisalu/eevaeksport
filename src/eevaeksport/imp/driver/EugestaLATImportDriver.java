@@ -741,10 +741,10 @@ if (start != -1 && end != -1 && start < end - 1) {
 
 	  String deltype = "0"; // ei kasutatta eestis
 	  String ordtype = "0"; // Seda poel ka eestis vaja siin on määratud miskanalist tellimus tuelb
-	  
+	  String shipm = "";
 	  if(order.getShipMode() != null && order.getShipMode().trim().length() > 0) {
 		  System.out.println("shipmode " + order.getShipMode());
-		  
+		  shipm = order.getShipMode();
 	  }
 	
 	  if(ref2.trim().length() == 0) { //kui on tava tellimus siis paneme sisemise tellimuse numbri 
@@ -778,7 +778,7 @@ if (start != -1 && end != -1 && start < end - 1) {
 	            "ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE,Cust_Ref ) " +
 	            " VALUES (" + salesid + ", cast(getdate() as date),'" + order.getCompany()  +"',  " + deltype+ 
 	            ",cast(? as date),'" + status + "','" + order.getAgent() +"'," + orderingTime +
-	            ",'"+ ref + "'," + ordtype +",'',null,0,'','',getdate(),'" + ref2 + "' )" ;
+	            ",'"+ ref + "'," + ordtype +",'',null,0,'','',getdate(),'" + ref2 + "' )" ; // + shipm
 	  
 	        System.out.println(sql);
 	        try{
@@ -792,6 +792,8 @@ if (start != -1 && end != -1 && start < end - 1) {
 	              dat.setMinutes(0);
 	              dat.setHours(0);
 	               
+	              
+	              
 	             stmt2.setTimestamp(1, new java.sql.Timestamp(dat.getTime()));
 	             stmt2.executeUpdate();
 	             stmt2.close();

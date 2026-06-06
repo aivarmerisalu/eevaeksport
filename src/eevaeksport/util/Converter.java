@@ -5081,7 +5081,7 @@ public class Converter {
 				
 			      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
 			 Calendar from = Calendar.getInstance();
-			 from.add(Calendar.DAY_OF_YEAR, -14);
+			 from.add(Calendar.DAY_OF_YEAR, -1);
 			 Calendar to = Calendar.getInstance();    
 			 to.add(Calendar.DAY_OF_YEAR, 2);
 

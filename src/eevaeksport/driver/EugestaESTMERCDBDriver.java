@@ -873,13 +873,15 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 		         if(aaa > 0) {
 		        	 sold180 = aaa;
 		         }
-		        
+		         if(kogus != 0) {
+		  	       
 		        CustProd cp = new CustProd(kliendikood, tootekood, kogus , sold180 , 0,lastdate,lastprice,mata,0,reason);
 		        if(lastdoc.length() > 0) {
 	                cp.setAbiKood(lastdoc);
 		        }
 		        custProds.add(cp);
 		        prods.addElement(tootekood);
+		      }
 		      }
 		      rs.close();
 		      stmt.close();

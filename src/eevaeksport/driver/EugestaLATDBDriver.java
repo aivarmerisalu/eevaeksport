@@ -999,11 +999,10 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		         if(aaa > 0) {
 		        	 sold180 = aaa;
 		         }
-						
-		        CustProd cp = new CustProd(kliendikood, tootekood, kogus , sold180 , 0,lastdate,lastprice,mata,0,reason);
-		        
-		         custProds.add(cp);
-		         
+		         if(kogus != 0) {
+		  	       CustProd cp = new CustProd(kliendikood, tootekood, kogus , sold180 , 0,lastdate,lastprice,mata,0,reason);
+		             custProds.add(cp);
+		         }
 		        }
 		      }
 		      rs.close();
@@ -1943,7 +1942,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     }
 	//  makeCustprod();
 	  
-    TreeMap deldays =  makeCustomerDeliveryDays();
+   // TreeMap deldays =  makeCustomerDeliveryDays();
     
     custCategories = getCustCategories();
     
@@ -2222,9 +2221,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            	cust.setCountry(country);
           }
         
-        if(deldays.get(cust.getID())  != null){
-        	cust.setDelDays((String)deldays.get(cust.getID()));
-        }    
+        //if(deldays.get(cust.getID())  != null){
+        	//cust.setDelDays((String)deldays.get(cust.getID()));
+        //}    
 
         
         cust.restName = name;
@@ -2591,51 +2590,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 				        
 				        
-				   	 
-				/*		  fff = " shipmode select";
-						 
-
-						     buf = new StringBuffer();
-						   
-							   rs1 = stmt.executeQuery(fff);
-						      while(rs1.next()){
-						   	  
-						   	  String kood = parent.make(rs1.getString("kood"));
-						   	  String nimi = parent.make(rs1.getString("nimi"));
-						   	 
-		                	    buf.append(kood + ";" + nimi +"\n");	
-						   	  
-						      }
-						     rs1.close(); 
-						     stmt.close();
-						     con.close();
-		   
-
-						        if(buf.length() > 2){
-						            File f = new File("shipmode.txt");
-						            if (f.exists())f.delete();
-						              try {
-						        		PrintWriter os = new PrintWriter(new FileWriter(
-						        				 "shipmode.txt", true));
-						        		os.write(buf.toString());
-						        		os.close();
-						        	  }catch (IOException ex) {
-						        		ex.printStackTrace();
-						        	  }
-						         }else{
-						            File f = new File("shipmode.txt");
-						            if (f.exists())f.delete();
-						              try {
-						        		PrintWriter os = new PrintWriter(new FileWriter(
-						        				 "shipmode.txt", true));
-						        		os.write("");
-						        		os.close();
-						        	  }catch (IOException ex) {
-						        		ex.printStackTrace();
-						        	  }
-						         }*/
-				        
-				        
+								        
 							     
               
     } catch (Exception e){
