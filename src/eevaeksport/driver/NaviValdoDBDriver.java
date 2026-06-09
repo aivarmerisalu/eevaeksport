@@ -1572,8 +1572,10 @@ con3.close();
                 
                oldkey = key;
                count++;
-
       }
+
+    rs.close();
+    
     Calendar cal = Calendar.getInstance();
     cal.add(Calendar.DATE, -30);
     java.sql.Date now = new java.sql.Date(cal.getTimeInMillis());

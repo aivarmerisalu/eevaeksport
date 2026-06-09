@@ -589,6 +589,7 @@ private Product getProd(String toode){
 	      String unit = "0";//orderLine.getUnit();
 	      double price = orderLine.getPrice();
 	      double disc = 0; 
+	     
 	      
 	      
 	      if(orderLine.getDiscount() > 0 ) {
@@ -620,46 +621,69 @@ private Product getProd(String toode){
 	          }
 	          
 	          double rp = 0;
-	          
+	          String returnReason = "";
+	        	 
 	          if(repr) {
 	        		  rp =  price * ((100-disc)/100);
-	        	     
 	        	  String inff = orde.getTeostaja();
+	        	  if(inff.contains("*")) {
+	        		  inff = inff.substring(0,inff.indexOf("*"));
+	        	  }
 	        	  
 	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
 	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
 	    		    }
+	                
+
+	    	          String par = orderLine.getPartii();
+	    	          if(par != null && par.trim().length() > 0) {
+	    	        	  pobj = par.substring(par.indexOf("*")+1, par.indexOf("|"));
+	    	          }
+	                
+	                
 	                kogus = -1 * kogus;
 	                
 	               String priceorig = annaVaartusIndeksiga(inff,linenum);
 	               if(priceorig != null) {
 	            	   try {
-	            	   price = Double.parseDouble(priceorig);
+	            	     price = Double.parseDouble(priceorig);
 	            	   }catch(Exception e) {}
 	               }
-	               // arvutame hinna ümber kliendi hinna peale - sellest alla tuleb anda
+	              
 	               rp =  price * ((100-disc)/100);
-	        	      
-	           //	     System.out.println("inff reference " + pobj + " " + price + " " + rp +  " " + linenum + " " + priceorig);
-	           	  disc = 0;
-	                
+	        	  disc = 0;
 	          }
 	          
 	          if(tagastus) {
 	        	  String inff = orde.getTeostaja();
-	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+
+
+	        	  if(inff.contains("*")) {
+	        		  inff = inff.substring(0,inff.indexOf("*"));
+	        	  }
+	        
+	        	  if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
 	                	pobj =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
 	    		    }
-	        	    kogus = -1 * kogus;
+	        	  
+	        	  String par = orderLine.getPartii();
+    	          if(par != null && par.trim().length() > 0) {
+    	        	  pobj = par.substring(par.indexOf("*")+1, par.indexOf("|"));
+    	          }
+                
+	        
+	        	   kogus = -1 * kogus;
 	        	    String priceorig = annaVaartusIndeksiga(inff,linenum);
 		               if(priceorig != null) {
 		            	   try {
 		            	   price = Double.parseDouble(priceorig);
 		            	   }catch(Exception e) {}
 		               }
-		        	//   System.out.println("tagastus code " + itemid + " " + pobj + " " + price + " " + rp + " " + kogus  );
-	           }
+		       }
 	          
+      		
+	 	     System.out.println("inff reference " + returnReason);
+           	    
 	          String sql =" INSERT into   ORDEREDITEMS (ORDER_ID,PRODUCT_ID,QUANTITY_IN_BASE_UNIT,BASE_UNIT_MEASURE," +
 	          		"PRODUCT_PRICE,REAL_PRICE,DISCOUNT,USER_PROMO_DISCOUNT_CHOICE," +
 	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID )  " +

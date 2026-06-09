@@ -3586,7 +3586,8 @@ if (getProps().getProperty("no.matrixagent") != null) {
         String fileName = "assortment.txt";
         
         if (driver.getDriverVersion().equals("Movex") || driver.getDriverVersion().equals("AxaBuraLat") 
-        		|| driver.getDriverVersion().equals("KMAHorti")  || driver.getDriverVersion().equals("DirectoAgapics")){
+        		|| driver.getDriverVersion().equals("KMAHorti")  || driver.getDriverVersion().equals("DirectoAgapics")
+        		 || driver.getDriverVersion().equals("EugestaLAT")  || driver.getDriverVersion().equals("EugestaLIT")){
         	
            System.out.println("Bufri0 suurus " + buf.length());
            

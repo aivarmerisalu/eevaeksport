@@ -14775,6 +14775,7 @@ shipdate = getCalXML(asi);
     try {
       setEmailBody(orders,fileName);
 
+      
       try{
         File unzipped = null;
         ZipFile zipFile = new ZipFile(file);
