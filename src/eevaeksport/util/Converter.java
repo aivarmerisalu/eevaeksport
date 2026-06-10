@@ -4853,6 +4853,7 @@ public class Converter {
 		public static ArrayList<Quest> loadPriceTrackerFromExcels(String dirx,String companyx, String user, String pass, EksportPanel parent,
 				HashMap<String,Customer> customers, HashMap <String, Product> products) {
 			
+			
 			String country = parent.getProps().getProperty("rep.country");
 			 // Algus - vaatame mis küsimused on juba olemas
 			  HashSet qutitles = new HashSet();
@@ -4896,7 +4897,7 @@ public class Converter {
 						for(int r = 0 ;r < rows.size(); r++) {
 							org.json.simple.JSONObject ob0 = (org.json.simple.JSONObject) rows.get(r);
 						 questInfo.put(ob0.get("id")+"", startDate + " - " +endDate);
-						 System.out.println(ob0);
+					//	 System.out.println(ob0);
 						}
 						if(!qutitles.contains(nimi)) {
 					    	qutitles.add(nimi);
@@ -5081,13 +5082,14 @@ public class Converter {
 				
 			      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
 			 Calendar from = Calendar.getInstance();
-			 from.add(Calendar.DAY_OF_YEAR, -1);
+			// from.set(Calendar.HOUR, 15);
+			 from.add(Calendar.DAY_OF_YEAR, -3);
 			 Calendar to = Calendar.getInstance();    
 			 to.add(Calendar.DAY_OF_YEAR, 2);
 
 			    
 			 // SV kaudu info kogumine. 
-			    String filename =  Converter.getSVData(from.getTime(), to.getTime(), companyx, user, pass, false, "PRODUCT", null, "SV-");
+			    String filename =  Converter.getSVDataFull(from.getTime(), to.getTime(), companyx, user, pass, false, "PRODUCT", null, "SV-",null,true);
 				 
 			 // failide kaudu info salvestamine vaata teisest meetodist
 			
@@ -7405,6 +7407,82 @@ try{
 		  } catch (Exception t) {
 			t.printStackTrace();
 		  }
+		
+		return res;
+		
+  }
+
+  public static String getSVDataFull(Date from , Date to , String company, String user , String pass, boolean week , String type ,
+		  String subTypes , String nameadd, Integer resint3 , boolean onlyprices){
+	  eevaeksport.util.ReportingService serv = new ReportingService();
+	  serv.user =  user;
+		serv.pass = pass;
+		serv.company = company;
+		String res = "";
+ 
+			try {
+				String mm = (from.getMonth()+1)+ "";
+				if(mm.length() == 1)
+					mm = "0"+ mm;
+				
+				String yyyy = (from.getYear()+1900)+ "";
+				String ww = "";
+				Calendar cc = Calendar.getInstance();
+				cc.setTime(from);
+				if(week) {
+					ww = cc.get(Calendar.WEEK_OF_YEAR)+"";
+				 }else {
+					ww = cc.get(Calendar.DAY_OF_MONTH)+"";
+				}
+				if(ww.length() == 1) {
+					ww = "0"+ww;
+				}
+				
+				String tt = "";
+				if(type != null) {
+					tt = type + "-";
+				}
+				if(subTypes != null) {
+					tt = subTypes.replaceAll(",", "-") + "-";
+				}
+				res = "svdata/svdata-" + nameadd + tt + ww + mm  + yyyy + ".json" ;
+				
+				File ff = new File("svdata/svdata-" + nameadd + tt + ww + mm  + yyyy + ".json" );
+			
+				org.json.JSONArray array = serv.getSVdataFull(from, to , type , subTypes , resint3 , onlyprices );
+				
+				if(array.length() == 2000) {
+					
+					Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + tt  + ww + mm  + yyyy + ".json" , array.toString());
+		         	
+					//teeme tundideks aja vahe
+					for(int i = 0; i<6;i++) {
+						Date fr = new Date(from.getTime() + (7200000*i));
+						
+						Date t = new Date(from.getTime()+(7200000*i)+7200000);
+						array = serv.getSVdataFull(fr, t , type , subTypes , resint3 , onlyprices );
+						if(array.length() > 0) {
+							Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + tt  + i + ww + mm  + yyyy + ".json" , array.toString());
+							res = "svdata/svdata-" + nameadd + tt  + i + ww + mm  + yyyy + ".json";
+						}
+						
+					}
+					
+					
+				}else if(array.length() > 0) {
+					Converter.saveFileInUTF8(  "svdata/svdata-" + nameadd + tt  + ww + mm  + yyyy + ".json" , array.toString());
+         		}else{
+         			res = "";
+         		}
+					
+					
+			
+					
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		 
+		
 		
 		return res;
 		

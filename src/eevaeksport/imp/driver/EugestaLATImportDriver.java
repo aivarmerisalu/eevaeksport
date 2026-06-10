@@ -98,12 +98,12 @@ public class EugestaLATImportDriver extends AbstractImportDriver{
   
 
   private Connection getNewConnection() throws SQLException{
-	    return DriverManager.getConnection(url, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+	    return DriverManager.getConnection(parent.getProps().getProperty("dsn.url"), parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
 	  }
 
 
   private Connection getNewConnection2() throws SQLException{
-	    return DriverManager.getConnection(url2, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+	    return DriverManager.getConnection(parent.getProps().getProperty("dsn.urlimport"), parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
 	  }
 
   public String getImportFile(){
@@ -893,8 +893,6 @@ if (start != -1 && end != -1 && start < end - 1) {
   }
 
 
-  private String url = "jdbc:odbc:eugestalat";
-  private String url2 = "jdbc:odbc:importlat";
   private ImportPanel parent;
   private boolean isAmount = false;
   private StringBuffer troubles= new StringBuffer();

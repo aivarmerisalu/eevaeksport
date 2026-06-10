@@ -2647,8 +2647,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 
   private Connection getNewConnection() throws SQLException{
-	//  url = "jdbc:sqlserver://10.40.40.51:1433;databaseName=dbo;integratedSecurity=true;encrypt=true;trustServerCertificate=true;";
-    return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
+	return DriverManager.getConnection(getParent().getProps().getProperty("dsn.url"), getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
   }
 
 
@@ -3701,7 +3700,6 @@ boolean noopt = false;
          NF = aNF;
        }
 
-      private String url = "jdbc:odbc:eugestalat";
       private Vector debt = new Vector();
 	  private Vector custProds = new Vector();
 	  private String subjectFilesTo = null;

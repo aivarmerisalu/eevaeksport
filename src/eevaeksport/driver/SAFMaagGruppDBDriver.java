@@ -68,6 +68,7 @@ public class SAFMaagGruppDBDriver extends AbstractDBDriver implements Manager,Pr
   String user =  null;
   String pass = null;
   String rcompany = null;
+  
 
   
   public String getProductSortingData(){
@@ -967,7 +968,7 @@ String cmd = "SELECT kl.id FROM grcompany kl " +
     		"         FROM grarticle pr LEFT JOIN grarticleCatrel cat ON cat.idgrarticle=pr.id LEFT JOIN grpricelistrel hi ON \r\n" + 
     		"         hi.idgrarticle=pr.id LEFT JOIN grpricelist pl ON pl.id=hi.idgrpricelist LEFT JOIN   grarticlecat arca ON arca.id = cat.idgrarticlecat   \r\n" + 
     		"         LEFT JOIN grunit y ON y.id=pr.idgrunit  WHERE  \r\n" + 
-    		"        ( left(pr.code,1)!='9' and pl.id in (1227,1224,1301,1449) and  (left(arca.code,1)= '0' or arca.id = 895) ) OR pr.code = 'T'  order by pr.code  " ;
+    		"        ( left(pr.code,1)!='9' and pl.id in (1227,1224,1301,1449,1223,1,1233,1251) and  (left(arca.code,1)= '0' or arca.id = 895) ) OR pr.code = 'T'  order by pr.code  " ;
     
   	 String cmd2 = " SELECT pr.code AS toode , SUM(quantity) as ladu  FROM dcurbalancestore ss \r\n" + 
   	 		" INNER JOIN grarticle pr ON idgrarticle = pr.id WHERE ss.iddrstore in (37,36,47,54) AND quantity > 0 \r\n" + 

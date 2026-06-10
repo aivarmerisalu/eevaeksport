@@ -159,6 +159,42 @@ public JSONArray getSVdata(Date from , Date to , String type , String subTypes) 
 		
 	}
 
+public JSONArray getSVdataFull(Date from , Date to , String type , String subTypes, Integer resint3 , boolean priceonly) throws Exception{
+	
+	String web = "https://api.mobitrek.eu/rest/supervisor?from=" + from.getTime() + "&to=" + to.getTime() ;
+	
+	if(type != null) {
+		web = web + "&type=" + type;
+	}
+	
+	if(subTypes != null) {
+		StringTokenizer st = new StringTokenizer(subTypes , ",");
+		while(st.hasMoreTokens()) {
+			web = web + "&subType=" + st.nextToken();	
+		}
+	}
+
+	if(resint3 != null) {
+		web = web + "&resint3=" + resint3;
+	}
+	
+	if(priceonly) {
+		web = web + "&hasNormalpr=true" ;
+	}
+	
+	
+	HttpClient cli = getClient();
+	HttpGet aa = new HttpGet(web);
+	//aa.setHeader (HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
+	HttpResponse resp = cli.execute(aa);
+	String aaa = EntityUtils.toString(resp.getEntity());
+//	System.out.println("ahaaa SV data " + aaa);
+	JSONArray json = new JSONArray(aaa);
+	return json;
+	
+}
+
+
 
 public JSONArray getQuestdata() throws Exception{
 	
