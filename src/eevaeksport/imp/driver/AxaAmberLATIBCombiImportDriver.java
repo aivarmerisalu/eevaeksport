@@ -949,7 +949,14 @@ private Product getProd(String toode){
 	        age.appendChild(ageVal);
 	        header.appendChild(age);
 	        
-	        
+	          String smode = order.getCompName();
+	          if(smode != null && smode.trim().length() > 0) {
+
+		        	Node pt = doc.createElement("DlvMode");
+			        Text ptVal = doc.createTextNode(smode.trim());
+			        pt.appendChild(ptVal);
+			        header.appendChild(pt);
+	          }
 
 	        
 	       // "Adl PaymTerm Code '90D'"
