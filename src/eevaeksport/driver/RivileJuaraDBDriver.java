@@ -835,7 +835,8 @@ String picts = parent.getProps().getProperty("pict.dir");
              
              String ag = rs.getString("agent").trim();
               cust.addAgent(new Agent(ag));
-              if(ag.equals("00033") || ag.equals("00026") || ag.equals("00028") || ag.equals("00027") || ag.equals("00025") || ag.equals("00024")){
+              if(ag.equals("00033") || ag.equals("00026") || ag.equals("00028") || ag.equals("00027") || 
+            		  ag.equals("00025") || ag.equals("00024") || ag.equals("00021")){
             	// cust.addAgent(new Agent("00024")); 
             	  goes = true;
               }
@@ -844,6 +845,11 @@ String picts = parent.getProps().getProperty("pict.dir");
             	  cust.addAgent(new Agent("00026"));  
               }
            
+
+              if(ag.equals("00021")){
+            	  cust.addAgent(new Agent("00024"));  
+              }
+              
               if(ag.equals("00033")){
             	  cust.addAgent(new Agent("00027"));  
               }
