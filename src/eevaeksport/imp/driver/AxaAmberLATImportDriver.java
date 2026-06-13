@@ -468,12 +468,13 @@ private Product getProd(String toode){
 	  ordS0.setCompName(order.getShipMode());
 	  ordS0.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordS0.setStatus(order.getStatus());
+	  ordS0.setShipTime(order.getShipTime());
 	  ordS0.setInfo(order.getInfo());
 	  ordS0.setPaymTerm(order.getPaymTerm());
 	  ordS0.setDealer("100");
 	  ordS0.setTeostaja(order.getTeostaja());
 		
-	  
+	  ordSG.setShipTime(order.getShipTime());
 	  ordSG.setAgentCode(order.getAgentCode());
 	  ordSG.setDokNr(order.getDokNr());
 	  ordSG.setCompName(order.getShipMode());
@@ -484,6 +485,7 @@ private Product getProd(String toode){
 	  ordSG.setDealer("gift");
 	  ordSG.setTeostaja(order.getTeostaja());
 	  
+	  ordBR.setShipTime(order.getShipTime());
 	  ordBR.setAgentCode(order.getAgentCode());
 	  ordBR.setDokNr(order.getDokNr());
 	  ordBR.setCompName(order.getShipMode());
@@ -671,6 +673,13 @@ private Product getProd(String toode){
 		        header.appendChild(pt);
           }
 	        
+          String dtime = order.getShipTime();
+          if(dtime != null && dtime.trim().length() > 0) {
+	        	Node pt = doc.createElement("DlvTime");
+		        Text ptVal = doc.createTextNode(dtime.trim());
+		        pt.appendChild(ptVal);
+		        header.appendChild(pt);
+          }
 	       // "Adl PaymTerm Code '90D'"
 	        System.out.println("Paym term " + order.getPaymTerm());
 	        if(order.getPaymTerm() == -2){

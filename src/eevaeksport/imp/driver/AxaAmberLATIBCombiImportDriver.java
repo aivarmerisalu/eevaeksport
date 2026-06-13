@@ -598,6 +598,7 @@ private Product getProd(String toode){
 	  ordS0.setCompName(order.getShipMode());
 	  ordS0.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordS0.setStatus(order.getStatus());
+	  ordS0.setShipTime(order.getShipTime());
 	  ordS0.setInfo(order.getInfo());
 	  ordS0.setPaymTerm(order.getPaymTerm());
 	  ordS0.setContactID(order.getContactID());
@@ -610,6 +611,7 @@ private Product getProd(String toode){
 	  ordSG.setCompName(order.getShipMode());
 	  ordSG.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordSG.setStatus(order.getStatus());
+	  ordSG.setShipTime(order.getShipTime());
 	  ordSG.setInfo(order.getInfo());
 	  ordSG.setPaymTerm(order.getPaymTerm());
 	  ordSG.setDealer("gift");
@@ -622,6 +624,7 @@ private Product getProd(String toode){
 	  ordBR.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordBR.setStatus(order.getStatus());
 	  ordBR.setInfo(order.getInfo());
+	  ordBR.setShipTime(order.getShipTime());
 	  ordBR.setContactID(order.getContactID());
 	  ordBR.setPaymTerm(order.getPaymTerm());
 	  ordBR.setDealer("GPP-VT-BR");
@@ -769,6 +772,8 @@ private Product getProd(String toode){
 	  ordSADL.setContactID("ADL");
 	  ordSADL.setTeostaja(order.getTeostaja());
 	  ordSADL.setWarehouse(order.getWarehouse());
+	  ordSADL.setShipTime(order.getShipTime());
+		
 		
 	  
 	  ordSIB.setAgentCode(order.getAgentCode());
@@ -782,6 +787,8 @@ private Product getProd(String toode){
 	  ordSIB.setDealer(order.getDealer());
 	  ordSIB.setTeostaja(order.getTeostaja());
 	  ordSIB.setWarehouse(order.getWarehouse());
+	  ordSIB.setShipTime(order.getShipTime());
+		
 		  
 	  Vector lines = order.getOrderLines();
 	  Enumeration enumr = lines.elements();
@@ -951,13 +958,19 @@ private Product getProd(String toode){
 	        
 	          String smode = order.getCompName();
 	          if(smode != null && smode.trim().length() > 0) {
-
 		        	Node pt = doc.createElement("DlvMode");
 			        Text ptVal = doc.createTextNode(smode.trim());
 			        pt.appendChild(ptVal);
 			        header.appendChild(pt);
 	          }
 
+	          String dtime = order.getShipTime();
+	          if(dtime != null && dtime.trim().length() > 0) {
+		        	Node pt = doc.createElement("DlvTime");
+			        Text ptVal = doc.createTextNode(dtime.trim());
+			        pt.appendChild(ptVal);
+			        header.appendChild(pt);
+	          }
 	        
 	       // "Adl PaymTerm Code '90D'"
 	        System.out.println("Paym term " + order.getPaymTerm());

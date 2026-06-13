@@ -464,6 +464,7 @@ private Customer getCust(String code){
 	  ordS0.setCompName(order.getShipMode());
 	  ordS0.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ordS0.setStatus(order.getStatus());
+	  ordS0.setShipTime(order.getShipTime());
 	  ordS0.setInfo(order.getInfo());
 	  ordS0.setPaymTerm(order.getPaymTerm());
 	  ordS0.setDealer("100");
@@ -477,6 +478,7 @@ private Customer getCust(String code){
 	  ordSG.setStatus(order.getStatus());
 	  ordSG.setInfo(order.getInfo());
 	  ordSG.setPaymTerm(order.getPaymTerm());
+	  ordSG.setShipTime(order.getShipTime());
 	  ordSG.setDealer("gift");
 	  ordSG.setTeostaja(order.getTeostaja());
 	  
@@ -487,6 +489,7 @@ private Customer getCust(String code){
 	  ordBR.setStatus(order.getStatus());
 	  ordBR.setInfo(order.getInfo());
 	  ordBR.setPaymTerm(order.getPaymTerm());
+	  ordBR.setShipTime(order.getShipTime());
 	  ordBR.setDealer("GPP-VT-BR");
 	  ordBR.setTeostaja(order.getTeostaja());
 
@@ -661,6 +664,13 @@ private Customer getCust(String code){
 			        header.appendChild(pt);
 	          }
 	        
+	          String dtime = order.getShipTime();
+	          if(dtime != null && dtime.trim().length() > 0) {
+		        	Node pt = doc.createElement("DlvTime");
+			        Text ptVal = doc.createTextNode(dtime.trim());
+			        pt.appendChild(ptVal);
+			        header.appendChild(pt);
+	          }
 	       // "Adl PaymTerm Code '90D'"
 	        System.out.println("Paym term " + order.getPaymTerm());
 	        if(order.getPaymTerm() == -2){
