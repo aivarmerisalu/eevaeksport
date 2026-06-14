@@ -23,6 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -698,46 +701,34 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
       
       private void getFixedAssortmentDataVec() {
     	    
-		Vector result = new Vector();
-		File f = new File(this.getExcelDir() + "Sortiments.xlsx");
+    	   java.util.Date date = new java.util.Date();
+           SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+           
+           Vector result = new Vector();
+	File f = new File(this.getExcelDir() + "Sortiments.xlsx");
 		 StringBuffer sb  = new StringBuffer();
 		try {
-			// System.out.println("rownum exists" + f.exists() );
 			
-	 if(f.exists()){
-				
+	      if(f.exists()){
 			
 			FileInputStream ff = new FileInputStream(f);
 			XSSFWorkbook workbook = new XSSFWorkbook((ff));
 			XSSFSheet sheet = workbook.getSheetAt(0);
 			XSSFRow row = null;
-			
-			
-			
-			
-			
-			
-			
-			
-			//this.getProducts(new Agent("xxx"));
 				
 			TreeMap groups = new TreeMap();
 			
 			row = sheet.getRow(1);
 			// MÄÄRAME ÄRA MIS VÄLJAS ASUVAD Sortimendi tähised.
 
-		//	 System.out.println("rownum " + row.getLastCellNum());
 			for (int a = 2; a < row.getLastCellNum(); a++) {
 				try {
-					// System.out.println(row.getCell((short)a).getStringCellValue());
 					groups.put(a + "", Converter.cleanLitLatEst(row.getCell((short) a)
 							.getStringCellValue()));
 				} catch (Exception e) {
-					// System.out.println(row.getCell((short)a).getNumericCellValue());
 				}
 			}
 
-			 //System.out.println("groups " + groups.size());
 
 			for (int i = 3; i < sheet.getLastRowNum(); i++) {
 				row = sheet.getRow(i);
@@ -788,7 +779,8 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 
 							}
 
-							if (go != null && (go.equals("1") || go.equals("2")) ) {
+							if (go != null && (go.equals("1") || go.equals("2") 
+									|| go.startsWith("a")  || go.startsWith("k")) ) {
 
 						// System.out.println( a + " " + prodID + " " +
 							//	 clGroup + " " + go);
@@ -815,6 +807,42 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 									mline.setLineinfo("MULTI" );
 									sb.append(" ;" +clGroup + "; ;" + prodID + "\n" );
 								}
+								
+
+//3.	Sortimendi 3 staatust – sisse , välja , uus teie olemasoleva exceli põhjal 7h tööd
+//                              alates-16.06.2026
+//								kuni-20.06.2026
+
+								if(go.startsWith("alates-")) {
+
+                                    String dateStr = go.substring(7);
+                                     java.util.Date dd = sdf.parse(dateStr);
+                                    
+                                     long diffMillis = dd.getTime() - date.getTime();
+                                     long diffDays = diffMillis / (1000 * 60 * 60 * 24);
+
+                                     if (diffDays <= 7 && diffDays >= 0) {
+                                         System.out.println("Today is within 7 days before the start date");
+                                         mline.setLineinfo("SOON");
+                                     } else if (diffDays >= -7 && diffDays <= 0) {
+                                    	    mline.setLineinfo("NEW");
+                                    	}
+                                     
+								 } else if (go.startsWith("kuni-")) {
+
+	                                    String dateStr = go.substring(5);
+	                                     java.util.Date endDate = sdf.parse(dateStr);
+	                                     long diffMillis = endDate.getTime() - date.getTime();
+	                                     long diffDays = diffMillis / (1000L * 60 * 60 * 24);
+
+	                                     if (diffDays >= 0 && diffDays <= 7) {
+	                                         System.out.println("End date is within the next 7 days");
+	                                         mline.setLineinfo("ENDING");
+	                                         
+	                                     } 
+	                                    
+								}
+								
 								 /*if(insertassort){
 		                               insertSortLine(mline);   
 		                           }*/
