@@ -410,6 +410,7 @@ private Product getProd(String toode){
 	  ord24B.setDokNr(order.getDokNr());
 	  ord24B.setShipMode(order.getShipMode());
 	  ord24B.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ord24B.setShipDateUsed(order.isShipDateUsed());
 	  ord24B.setStatus(order.getStatus());
 	  ord24B.setInfo(order.getInfo());
 	  ord24B.setPaymTerm(order.getPaymTerm());
@@ -423,11 +424,14 @@ private Product getProd(String toode){
 	  ord208_MRC.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ord208_MRC.setStatus(order.getStatus());
 	  ord208_MRC.setInfo(order.getInfo());
+	  ord208_MRC.setShipDateUsed(order.isShipDateUsed());
 	  ord208_MRC.setPaymTerm(order.getPaymTerm());
 	  ord208_MRC.setDealer("208_MRC");
 	  ord208_MRC.setTeostaja(order.getTeostaja());
 	  
+	  
 	  ord24N.setAgentCode(order.getAgentCode());
+	  ord24N.setShipDateUsed(order.isShipDateUsed());
 	  ord24N.setDokNr(order.getDokNr());
 	  ord24N.setShipMode(order.getShipMode());
 	  ord24N.setShipCal(order.getShipCal().getTimeInMillis() +"");
@@ -441,6 +445,7 @@ private Product getProd(String toode){
 	  ord24EWC.setAgentCode(order.getAgentCode());
 	  ord24EWC.setDokNr(order.getDokNr());
 	  ord24EWC.setShipMode(order.getShipMode());
+	  ord24EWC.setShipDateUsed(order.isShipDateUsed());
 	  ord24EWC.setShipCal(order.getShipCal().getTimeInMillis() +"");
 	  ord24EWC.setStatus(order.getStatus());
 	  ord24EWC.setInfo(order.getInfo());
@@ -573,6 +578,32 @@ private Product getProd(String toode){
      return null; // Kui nii mitmendat väärtust tekstis polnud
  }
  
+ 
+ private String getAgentSHM(String ag) {
+	 String out = null;
+	  String cmd = "Select dlvmodeid as mode from  dbo.EPASAULE_AGENTS where   BackOfficeId ='" + ag + "'" ;
+
+		  
+		   System.out.println(cmd);
+		   try {
+			
+			    Connection con = getNewConnection();
+		        Statement stmt = con.createStatement();
+		        ResultSet rs = stmt.executeQuery(cmd);
+		        
+		        while(rs.next()){
+		        	 out = rs.getString("mode");
+		        	 if(out != null) {
+		        		 out = out.trim();
+		        	 }
+		        }
+		        rs.close();
+		        stmt.close();
+		        con.close();
+		   }catch(Exception e) {e.printStackTrace();}
+		   
+	 return out;
+ }
  
  private void addInvoiceLines(int salesid, Order orde, boolean tagastus, boolean repr) throws SQLException{
 
@@ -767,10 +798,10 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  String ordtype = "0"; // Seda poel ka eestis vaja siin on määratud miskanalist tellimus tuelb
 	  String shipm = "";
 	  if(order.getShipMode() != null && order.getShipMode().trim().length() > 0) {
-		  System.out.println("shipmode " + order.getShipMode());
-		  shipm = order.getShipMode();
+		  shipm = getAgentSHM(order.getAgent());
+		  System.out.println("shipmode " + shipm);
 	  }
-	
+		
 	  if(ref2.trim().length() == 0) { //kui on tava tellimus siis paneme sisemise tellimuse numbri 
 		  if(!repr && !tagastus) {
 		    ref2 = order.getDokNr();
@@ -810,8 +841,11 @@ if (start != -1 && end != -1 && start < end - 1) {
 	        	 PreparedStatement stmt2 = con2.prepareStatement(sql);
 	        	 
 	             java.util.Date dat = new java.util.Date();
-	             long ship = order.getShipCal().getTimeInMillis() - 10800000 ;
-	              dat.setTime(ship);
+	             if(shipm.length() > 0 && order.isShipDateUsed()) {
+	               // lisame päeva juhul kui shipmode on valitud , muidu jääb tänane päev
+		             long ship = order.getShipCal().getTimeInMillis();
+	            	 dat.setTime(ship);
+	             }
 	              dat.setSeconds(0);
 	              dat.setMinutes(0);
 	              dat.setHours(0);

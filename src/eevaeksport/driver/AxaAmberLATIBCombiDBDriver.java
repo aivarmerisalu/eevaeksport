@@ -2,8 +2,10 @@ package eevaeksport.driver;
 
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -1588,12 +1590,44 @@ rs.close();
   }
   
   
+  private HashMap loadAgents() {
+	  HashMap<String, String> map = new HashMap<>();
+	  BufferedReader reader = null;
+	  try {
+	      reader = new BufferedReader(new FileReader("ibagents.txt"));
+	      String line;
+
+	      while ((line = reader.readLine()) != null) {
+	          String[] parts = line.split(";");
+	          if (parts.length >= 2) {
+	              String key = parts[0].trim();
+	              String value = parts[1].trim();
+	              map.put(value, key);
+	          }
+	      }
+
+	  } catch (IOException e) {
+	      e.printStackTrace();
+	      try {
+	          if (reader != null) reader.close();
+	      } catch (IOException ignored) {}
+	  }
+	  System.out.println("map " + map.toString());
+	  
+	  return map;
+  }
+  
+  private HashMap ibAgents = null; 
+  
   
   public TreeMap getCustomers(Agent agent){
 	  
 	  if(this.ibCustCodes == null){
 	      getCustTies();
 	  }
+	  
+
+	    ibAgents = loadAgents();
 	  //______________________________________________________________________
 	  
 	  HashMap <String,Double> ibdebts = new HashMap<String,Double>();
@@ -2006,6 +2040,12 @@ int i = 0;
         String age = rs.getString("agent");
         if (age != null) {
          cust.addAgent(new Agent(age.trim()));
+         
+         if(ibAgents.get(age.trim()) != null) {
+        	  cust.addAgent(new Agent((String)ibAgents.get(age.trim())));
+               	 
+         }
+         
          cust.addAgent(new Agent("WARE"));
      
          cust.setMainAgent(age.trim());

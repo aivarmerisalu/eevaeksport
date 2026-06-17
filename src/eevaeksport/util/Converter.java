@@ -4114,6 +4114,35 @@ public class Converter {
 						 
 						 
 						 
+						 pais = formatter.formatCellValue(rowu.getCell(1));
+						 if (pais.equals("Kauplus")) {
+							 u = 1;
+							 poo = 1;
+							 pais = formatter.formatCellValue(rowu.getCell(2));
+							 if(pais.equals("EAN")) {
+								 eanp = 2;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(3));
+							 if(pais.equals("EAN")) {
+								 eanp = 3;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(3));
+							 if(pais.equals("Nimetus")) {
+								 tnim = 3;
+							 }
+							 pais = formatter.formatCellValue(rowu.getCell(4));
+							 if(pais.equals("Toote nimetus")) {
+								 tnim = 4;
+							 }
+							  seis = 0;
+							  pais = formatter.formatCellValue(rowu.getCell(13));
+							//  System.out.println("pais " + pais + " "+pais.equals("Sortimendi muudatus"));
+								 if(pais.equals("Sortimendi muudatus")) {
+									 seis = 13;
+								 }
+							 
+						 }						 
 						 
 						 rowu = sheet.getRow(6);
 						  pais = formatter.formatCellValue(rowu.getCell(3));
@@ -4135,6 +4164,26 @@ public class Converter {
 							 }
 						 }
 						
+						 
+						 
+						 rowu = sheet.getRow(2);
+						  pais = formatter.formatCellValue(rowu.getCell(1));
+						 if (pais.equals("Kauplus")) {
+							 u = 2;
+							 poo = 1;
+							 pais = formatter.formatCellValue(rowu.getCell(8));
+							 if(pais.equals("EAN")) {
+								 eanp = 8;
+							 }
+							 
+							 pais = formatter.formatCellValue(rowu.getCell(9));
+							 if(pais.equals("Toote nimetus")) {
+								 tnim = 9;
+							 }
+						 }
+						
+						 
+						 
 						 try {
 						 rowu = sheet.getRow(3);
 						  pais = formatter.formatCellValue(rowu.getCell(0));
@@ -4293,7 +4342,7 @@ public class Converter {
 						 }
 						 
 
-							System.out.println("Sees " + seis  
+							System.out.println("Sees " + seis + " " + u 
 									+" tnimi:" + tnim+ " ean:"+ eanp + " " + poo);
 										
 						 
@@ -4307,6 +4356,9 @@ public class Converter {
 		                          if(u == 6) {
 		                        	  poo = 3;
 		                          }
+		                        	  if(u == 2) {
+			                        	  poo = 1;
+			                          }
 		                          if(seis == 15) {
 		                        	  poo = 2;
 		                          }
@@ -4326,6 +4378,8 @@ public class Converter {
                             String pood = "COOP-" +nnn.getStringCellValue().trim();
 							String ean = getNumeric(formatter.formatCellValue(row.getCell(eanp)));
 							String tnimi = formatter.formatCellValue(row.getCell(tnim));
+							//System.out.println("rida " + pood + " " + ean + " "+ tnimi);
+							
 							Boolean seisund = true;
 							if(seis != 0 ) {
 								String snimi = formatter.formatCellValue(row.getCell(seis));
@@ -4341,8 +4395,9 @@ public class Converter {
 							Contract con = new Contract(pood);
 							String toode = getToode(prods,ean);
 							// if(ean.equals("4744136010477"))
-				//		System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
-							  if(toode.equals(ean) && !toode.equals("EAN")) {
+						//System.out.println("Sees " + i +" "+ seisund + " " + nnn + " " + ean + " " + pood + " " + toode + " " + eanp);
+							  if(toode.equals(ean) && !toode.equals("EAN") 
+									  && !"true".equals(parent.getProps().getProperty("fix.noprodcheck"))) {
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Coop formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";
 								  }

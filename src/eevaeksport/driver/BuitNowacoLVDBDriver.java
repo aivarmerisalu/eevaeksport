@@ -1055,7 +1055,9 @@ sql = "select klient_id AS clgroup,preke AS prodid, " + //custid paneme
    }
 
    private Connection getNewConnection() throws SQLException{
-    return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
+	   return DriverManager.getConnection(url, "mobilejava", "m0bilejava");
+	   
+//	   return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
   }
    
 

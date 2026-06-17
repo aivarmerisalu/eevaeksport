@@ -94,6 +94,7 @@ public class RivileBalmerkDBDriver extends AbstractDBDriver implements  BulkUpda
     
     private void makePictureCat(){
 
+    	
 
     	  String cmd = " SELECT N17_KODAS_PS AS toode,ltrim(N17_PAV)  AS nimetus,dbo.papn(L11_LAUKAS , 8, 'c')  AS tykke,dbo.papn(L11_LAUKAS , 9, 'c')  AS alusel, 0 AS myygihind," +
     		   		"N17_KODAS_PS AS ean, "+

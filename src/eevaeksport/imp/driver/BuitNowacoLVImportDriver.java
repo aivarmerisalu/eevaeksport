@@ -55,8 +55,10 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 	private TreeMap custwares = null;
 
 	private Connection getNewConnection() throws SQLException {
-		return DriverManager.getConnection(url, parent.getProps().getProperty("dsn.user"),
-				parent.getProps().getProperty("dsn.pass"));
+		//return DriverManager.getConnection(url, parent.getProps().getProperty("dsn.user"),
+			//	parent.getProps().getProperty("dsn.pass"));
+		  return DriverManager.getConnection(url, "mobilejava", "m0bilejava");
+			 
 	}
 
 

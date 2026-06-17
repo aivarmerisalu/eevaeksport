@@ -546,6 +546,7 @@ public void setShowfullpricelist(boolean showfullpricelist) {
 	public double bonusAvailable = 0;
 	public boolean needsToBeVisited = false;
 	public Double debtnotara = 0.0;
+	public boolean repriceallowed = true;
 	    public boolean isMakeAmountRounding() {
 			return makeAmountRounding;
 		}

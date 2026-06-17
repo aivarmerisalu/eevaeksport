@@ -76,6 +76,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 	
 	
 	
+	
 	public ViaLaimaUUSDBDriver(EksportPanel parent) {
 		super(parent);
         this.subjectFilesTo = parent.getString("filemsg");
@@ -734,7 +735,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 				row = sheet.getRow(i);
 				String prodID = "";
 
-				if (row.getCell((short) 0) != null) {
+				if (row != null && row.getCell((short) 0) != null) {
 
 					try {
 						prodID = (int) (row.getCell((short) 0)

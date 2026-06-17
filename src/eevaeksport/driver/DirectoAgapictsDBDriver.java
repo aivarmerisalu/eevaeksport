@@ -1183,6 +1183,7 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
     	    NF.setMaximumFractionDigits(4);
     	    NF.setGroupingUsed(false);
       
+    	    
     	    try {
     	    	  konverter = EksportFrame.loadProps("abifailid/konverter.txt");
     	    	 // System.out.println("konverter " + konverter.toString());
@@ -1239,9 +1240,10 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
   	  			    	boolean goes = false; 
   	  			    	
   	  			    	try {
+  	  			    		String avaTellid = parent.getProps().getProperty("openorder.customers");
   	  			    	String status =  (rida.getAttributes().getNamedItem("status").getNodeValue());
 			    			 if(status != null && status.equals("MUUTA") && ( number.startsWith("45") || number.startsWith("46") 
-			    					 || id.equals("10183") )) { // coop
+			    					 || id.equals("10183") || avaTellid.contains("'"+ id +"'") )) { // coop
 			    				 goes = true;
 			    			 }
   	  			    	}catch(Exception e) {

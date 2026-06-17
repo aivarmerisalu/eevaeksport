@@ -3660,11 +3660,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
           
           if (cust.hasAgent(agentCode)){
             Agent age = (Agent) cust.getAgents().get(agentCode);
-            
-            if(cust.getID().equals("5902315560")) {
 
-                System.out.println(cust.getName() +" agent " + age.getID() + " visit " + age.getVisit()); 	
-            }
             if( age!=null && age.getVisit() != null && age.getVisit().trim().length()>0){
               cust.setVisitabi(clearVis(age.getVisit()));
             }
@@ -4293,6 +4289,14 @@ if (getProps().getProperty("no.matrixagent") != null) {
            bb = "0";
            if(cust.useOptAmount){
         	   bb =  "1";
+           }
+           buf.append(bb); 
+           
+
+           buf.append(EksportPanel.separator);
+           bb = "1";
+           if(!cust.repriceallowed){
+        	   bb =  "0";
            }
            buf.append(bb); 
            

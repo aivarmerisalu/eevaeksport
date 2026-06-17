@@ -2161,7 +2161,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
                     		"                                                        , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
                     		"                                   Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
                     		"                                    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-                    		"                                    contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+                    		"                                    contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2,"
+                    		+ " gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 , EG_AGENTREPRICINGALLOWED as reprice \r\n" + 
                     		"                                    from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
                     		"                                LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
                     		"" ; 
@@ -2487,15 +2488,22 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         	cust.addCity(Converter.enCodeEst("EUG Piegāde: '" + del1.trim() + "'"));
         }
         
+        
+        Integer reprice = rs.getInt("reprice"); 
+        cust.repriceallowed = false;
+        if(reprice == 1) {
+        	  cust.repriceallowed = true;
+        	 // System.out.println(cust.getID() + " allowed " + cust.getAgents());
+        }
+        
+        
         cust.setDealer(new Dealer("24N"));
         
         if(displays != null && displays.get(cust.getID()) != null) {
         	cust.setInfo(displays.get(cust.getID()));
-        	//cust.addCity("|" +displays.get(cust.getID())+"|");
         }
         
         if(budgets.get(accountnum) != null){
-        //	System.out.println("budget " + budgets.get(accountnum));
         	cust.addToCustDataVec(accountnum+ ";custbudget; ;" + budgets.get(accountnum));
         }
         
