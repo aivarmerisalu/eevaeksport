@@ -822,10 +822,10 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
                                      long diffMillis = dd.getTime() - date.getTime();
                                      long diffDays = diffMillis / (1000 * 60 * 60 * 24);
 
-                                     if (diffDays <= 7 && diffDays >= 0) {
+                                     if (diffDays <= 14 && diffDays >= 0) {
                                          System.out.println("Today is within 7 days before the start date");
                                          mline.setLineinfo("SOON");
-                                     } else if (diffDays >= -7 && diffDays <= 0) {
+                                     } else if (diffDays >= -14 && diffDays <= 0) {
                                     	    mline.setLineinfo("NEW");
                                     	}
                                      
@@ -836,7 +836,7 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 	                                     long diffMillis = endDate.getTime() - date.getTime();
 	                                     long diffDays = diffMillis / (1000L * 60 * 60 * 24);
 
-	                                     if (diffDays >= 0 && diffDays <= 7) {
+	                                     if (diffDays >= 0 && diffDays <= 14) {
 	                                         System.out.println("End date is within the next 7 days");
 	                                         mline.setLineinfo("ENDING");
 	                                         
@@ -1777,7 +1777,7 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 					    		}
 				    	}
 				    	
-        	
+        	System.out.println("ladu 1 " + ladu1);
         	JSONParser parser = new JSONParser();
 		       Object obj = parser.parse(new FileReader("stockjson" + u + ".txt"));
 	           org.json.simple.JSONObject company = (org.json.simple.JSONObject) obj;
@@ -1843,7 +1843,9 @@ TreeMap<String,Double> salesbyinv = new TreeMap<String, Double>();
 				    	e.printStackTrace();
 				    }
 				    
-				    System.out.println("laduBR " + laduBR.toString());
+				    System.out.println("laduBR " + laduBR.size());
+				    System.out.println("laduParimEnne " + laduParimEnne.size());
+				    
 			   return products.toString();
 		   }
 

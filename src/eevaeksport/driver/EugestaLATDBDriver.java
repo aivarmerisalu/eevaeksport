@@ -689,6 +689,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		
 		try {
 			
+			String cmd2 = "select productBackOfficeId as ItemID from EPASAULE_PRODUCTS_ADVERTISING";
 			
 			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
 					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId "
@@ -698,14 +699,27 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		         if (isDebug()) System.out.println(cmd);
 		           Connection con = getNewConnection();
 		           Statement st = con.createStatement();
-		           ResultSet rs = st.executeQuery(cmd);
+		           ResultSet rs = st.executeQuery(cmd2);
 
+		           String ags =   sortags.get("SUGGED");
+		           while (rs.next()) {
+
+			             String prodID = rs.getString("ItemID").trim();
+			             if(usedProds.contains(prodID)){
+								result.append( " ;" + Converter.cleanLitLatEst("SUGGED; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
+			 				}
+						
+		           }
+		           rs.close();
+
+				    rs = st.executeQuery(cmd);
+		           
 		           while (rs.next()) {
 
 		             String sortid = rs.getString("ClientGR").trim();
 		             String prodID = rs.getString("ItemID").trim();
 		       
-		           String ags =   sortags.get(sortid);
+		            ags =   sortags.get(sortid);
 		           if(ags == null) {
 		        	   ags = "";
 		           }
@@ -2438,23 +2452,43 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         
         String fixed = rs.getString("fixed");
         if(fixed != null && fixed.trim().length() > 0) {
-        	cust.suggAssortCode = fixed.trim();
+        	cust.suggAssortCode = fixed.trim() + "|" + "SUGGED";
             cust.addFixSortCode(Converter.cleanLitLatEst(fixed.trim())+"x");
             String ags = sortags.get(fixed.trim()); 
             if(ags == null){
             	ags = "";
             }
-          Iterator itera =   cust.getAgents().keySet().iterator();
+          
+
+            String   agsS = sortags.get("SUGGED"); 
+              if(agsS == null){
+              	agsS = "";
+              }
+              
+            
+            Iterator itera =   cust.getAgents().keySet().iterator();
           while(itera.hasNext()) { 
           String aa = (String)itera.next();
             if(!ags.contains(aa)) {
             	ags = ags + "," + aa;
             }
+            if(!agsS.contains(aa)) {
+              	agsS = agsS + "," + aa;
+              }
           }
+          
+
+          if(agsS.length() > 0) {
+           sortags.put("SUGGED", agsS+",");
+          }
+          
           if(ags.length() > 0) {
             sortags.put(fixed.trim(), ags+",");
            }
+        
+          
         }
+        
         
         String segsub = rs.getString("segsub");
         if(segsub != null && segsub.trim().length() > 0) {
