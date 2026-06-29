@@ -7,6 +7,7 @@ package eevaeksport.imp.driver;
 
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -75,8 +76,32 @@ public class SamsonasCSVImportDriver
     catch (Exception e) {
       parent.showError(e);
     }
+    loadSignatures();
   }
+  
+  private Vector signatures = new Vector();
 
+
+  private void loadSignatures(){
+		
+	  try{		
+	  		File f = new File("signatures.vec");
+	  		Calendar ss = Calendar.getInstance();
+	  		
+	  		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 3600000) {// kui on yle tunni vana siis maha 
+	  			f.delete();
+	  			signatures = new Vector();
+	  		} else {
+	  			signatures = (Vector) Converter.readObject("signatures.vec");
+	  		}
+
+	  		
+	  	} catch (Exception e) {
+	  		signatures = new Vector();
+	  	}
+
+	  	}
+  
   
   private Vector splitOrder (Order order){
 	  Vector result = new Vector();
@@ -174,33 +199,43 @@ public class SamsonasCSVImportDriver
   public void makeOrder(Order order) throws SQLException{
 
 	  counter = 0;
-	//  makeOutput(order,true); 	    
+	//  makeOutput(order,true); 	   
+	  
+	    String signature = order.getSignature();
+	    if(signatures == null){
+	    	signatures = new Vector();
+	    }
+		  if(signatures.contains(signature)){
+			  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
+			    		  
+		  }else{
+	
 	
 	  Vector splitted =  splitOrder(order);
       
 	  Enumeration en = splitted.elements();
 	  while(en.hasMoreElements()){
 		  Order ord = (Order)en.nextElement();
-		  
-	   /*    boolean tagastus = false;
-	         Vector lin = order.getOrderLines();
-	         for (int i = 0; i < lin.size(); i++) {
-	        	 OrderLine line = (OrderLine)lin.elementAt(i);
-	        	 if(line.getKogus() < 0 ) {
-	        		 tagastus = true;
-	        	 }
-	         }*/
-	
 	    if(ord.getCurrency().equals("MEAT")){
                   makeOutput(ord,true);  
                } else {
    				  makeOutput(ord,false);  
    			  }
           } 
-	  
+	  		  signatures.add(signature); 
+		  }
+		  
+
+		   try {
+				Converter.saveObject(signatures, "signatures.vec");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	  setNumAddedLines(counter);
   }
 
+  private String trouble = null;
+  
   
   public void getCustomers(){
 	  customers = new TreeMap();

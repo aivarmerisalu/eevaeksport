@@ -693,7 +693,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 			
 			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
 					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId "
-					+ " where s.EG_ASSORTITEMSTATUS = 2 order by str(a.posWeight) + a.Name ";
+					+ " where s.EG_ASSORTITEMSTATUS in (0,1,2) order by str(a.posWeight) + a.Name ";
 			
 		
 		         if (isDebug()) System.out.println(cmd);
@@ -723,6 +723,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		           if(ags == null) {
 		        	   ags = "";
 		           }
+		           
 		           
 		             if(usedProds.contains(prodID)){
 							result.append( " ;" + Converter.cleanLitLatEst(sortid + "; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
@@ -3043,6 +3044,7 @@ boolean noopt = false;
             	    usedProds.add(prod.getID());
             	  }
                }
+               
                
                Double vat = rs.getDouble("vat");
                prod.setVat(vat + "");

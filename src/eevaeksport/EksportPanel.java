@@ -3603,7 +3603,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
         			System.out.println(  " " + cou + " " + line);
         		}
             	if(line.indexOf("," + agent.getID() + ",") != -1){
-            		 res.append(line.substring(0,line.indexOf(",")) + " \n");
+            		 res.append(line.substring(0,line.lastIndexOf(";")) + " \n");
             		cou++;
             		if(cou == 5000){
             			iii++;

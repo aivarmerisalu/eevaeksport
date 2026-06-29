@@ -501,6 +501,9 @@ public class RahvaRaamatAPIImportDriver extends AbstractImportDriver {
   private Integer getPagination(String method) {
 	     
       org.json.simple.JSONObject cc0 = Converter.readJSONFile("data//" + method + ".json");
+      if(cc0 == null) {
+    	  System.exit(0);
+      }
 	    org.json.simple.JSONObject cc1 = (org.json.simple.JSONObject)cc0.get("pagination");
 	 if(cc1 == null) {
 		 return 1;
