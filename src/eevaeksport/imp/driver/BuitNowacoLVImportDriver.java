@@ -26,6 +26,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 import eevaeksport.Agent;
+import eevaeksport.Product;
+import eevaeksport.driver.Toode;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -174,18 +176,24 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 		}
 		return res;
 	}
-	private String getProdNimi(String toode) {
+	private Toode getProdNimi(String toode) {
 
-		String sql = " SELECT t.sertifikat , t.pavad FROM prekes t where t.preke =  " + toode;
+		String sql = " SELECT t.sertifikat , t.pavad , t.pvm_proc as vat FROM prekes t where t.preke =  " + toode;
 		System.out.println(sql);
-		String res = "<No Name>";
+		Toode res = new Toode("<No Name>");
 		try {
 			Connection con = getNewConnection();
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 
 			if (rs.next()) {
-				res = rs.getString("pavad").trim();
+			  res.comment =  rs.getString("pavad").trim();
+			  Double vat = rs.getDouble("vat");
+					if(vat == null || vat == 0) {
+						  res.setDonecur(21);
+					 } else {
+						  res.setDonecur(vat);
+					 }
 			}
 
 			rs.close();
@@ -195,9 +203,13 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("vat " + res.getDonecur());
+		
 		return res;
 	}
 
+	
+	
 	private String getCustNimi(String custid) {
 
 		String sql = " SELECT k.klientas  AS nimi FROM klientai k  where  k.klient_id =  " + custid ;
@@ -550,8 +562,8 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 		Text toote_koodVal = doc.createTextNode(toode);
 		toote_kood.appendChild(toote_koodVal);
 		ridaitem.appendChild(toote_kood);
-
-		String nimi = this.getProdNimi(toode);
+Toode prod = this.getProdNimi(toode);
+		String nimi = prod.comment;
 		if (nimi != null) {
 			Text nimetusVal = doc.createTextNode(nimi.replace('`', ' ').replace('´', ' '));
 			Node nimetus = doc.createElement("ItemDescription");
@@ -579,7 +591,7 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 		}
 
 		Node yhiku_va = doc.createElement("TaxRate");
-		Text yhiku_vaVla = doc.createTextNode("21");
+		Text yhiku_vaVla = doc.createTextNode(prod.getDonecur()+"");
 		yhiku_va.appendChild(yhiku_vaVla);
 		ridaitem.appendChild(yhiku_va);
 

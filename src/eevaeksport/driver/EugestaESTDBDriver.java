@@ -1136,11 +1136,9 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   private HashSet<String> agsActive = null;
   
   public TreeMap getAgents(){
-	  LocalDate start = LocalDate.of(2021, 11, 1); // A1
-      LocalDate today = LocalDate.now();
 
       Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
-      String todayCycleCode = getCycleDay(start, today);
+      String todayCycleCode = getCycleDay();
       System.out.println("Today is: " + todayCycleCode);
 	    
     String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr from  dbo.EPASAULE_AGENTS";
@@ -2760,7 +2758,10 @@ boolean noopt = false;
   
   
 
-  public static String getCycleDay(LocalDate startDate, LocalDate targetDate) {
+  public static String getCycleDay() {
+	  
+	  LocalDate startDate =   LocalDate.of(2021, 11, 1);
+	  LocalDate targetDate =    LocalDate.now();  
       long daysBetween = ChronoUnit.DAYS.between(startDate, targetDate);
 
       int cycleDayIndex = (int) (daysBetween % 56);

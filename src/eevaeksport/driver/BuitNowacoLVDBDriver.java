@@ -2288,7 +2288,7 @@ System.out.println(cmd);
      	String cmd = " SELECT t.preke AS toode,t.prek_id as id,t.pavad AS nimi, laik_salyg as lisa , t.pard_kaina AS myygihind , kaina_1 as hind1, kaina_2 as hind2,  kaina_3 as hind3, kaina_4 as hind4, " +
  " kaina_5 as hind5, kaina_6 as hind6, kaina_7 as hind7, kaina_8 as hind8, kaina_9 as hind9, kaina_10 as hind10,grup_id AS grupp ,tip_id AS tupe ,t.tipas  " +
 	"		 , t.mato_vien AS unit, t.bar_kodas AS ean,0 AS status ,t.max_nuol AS maxdiscount,  " +
-	"		  t.tipas AS type, t.orig_pak AS kastis,  t.prek_neto AS kaal,21 AS vat,  pak_kiek as opt ,prek_mode as info ,t.vieta as staatus "
+	"		  t.tipas AS type, t.orig_pak AS kastis,  t.prek_neto AS kaal,t.pvm_proc AS vat,  pak_kiek as opt ,prek_mode as info ,t.vieta as staatus "
 	+ ",sertifikat as topprod , t.savik_3 as oma , naujiena as newprod " +
 	"		  FROM prekes t inner join grupes g on g.grupe=t.grupe inner join tipai ty on ty.tipas=t.tipas " +
 	"		  where kaina_1 > 0 ";
@@ -2394,9 +2394,20 @@ System.out.println(cmd);
                                }
 
           	 String vat = rs.getString("vat");
+          	 System.out.println("vat " + vat);
                    if(vat != null && vat.trim().length()>0){
-                     	prod.setVat(vat);
+                	   try {
+                	      Double.parseDouble(vat.trim());
+                     	  prod.setVat(vat);
+                      	 System.out.println("vat0 " + vat);
+                         
+                	    } catch(Exception e) {}
+                    
+                   } else {
+                	   prod.setVat("21");
                    }
+                   
+                   
                
                    double opt = rs.getDouble("opt");
                    if (opt > 0){

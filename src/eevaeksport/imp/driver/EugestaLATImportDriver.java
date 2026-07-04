@@ -550,6 +550,29 @@ private Product getProd(String toode){
 	 }
  
  
+ public static String annaVaartusEnneKoolonit(String tekst, int järjekorranumber) {
+	    if (tekst == null || järjekorranumber < 1) {
+	        return null;
+	    }
+
+	    Pattern muster = Pattern.compile("([^:\\s]+):");
+	    Matcher leidja = muster.matcher(tekst);
+
+	    List<String> tulemused = new ArrayList<>();
+
+	    while (leidja.find()) {
+	        tulemused.add(leidja.group(1));
+	    }
+
+	    int listiIndeks = järjekorranumber - 1;
+
+	    if (listiIndeks < tulemused.size()) {
+	        return tulemused.get(listiIndeks);
+	    }
+
+	    return null;
+	}
+ 
  public static String annaVaartusIndeksiga(String tekst, int järjekorranumber) {
      if (tekst == null || järjekorranumber < 1) {
          return null;
@@ -645,6 +668,9 @@ private Product getProd(String toode){
 	   
 
 	         String agent = orde.getAgent();
+	         String originalInvoiceNumber  = "";
+	         String eanReturn = "";
+	         String prodname = "";
 	         
 	         Agent ag = (Agent)parent.getEksportFrame().getEksportPanel().getAgentsHash().get(agent);
 	          if(ag == null){
@@ -667,14 +693,16 @@ private Product getProd(String toode){
 	                
 
 	    	          String par = orderLine.getPartii();
-	    	          if(par != null && par.trim().length() > 0) {
+	    	          if(par != null && par.trim().length() > 0 && par.indexOf("*") > 0) {
 	    	        	  pobj = par.substring(par.indexOf("*")+1, par.indexOf("|"));
 	    	          }
 	                
 	                
 	                kogus = -1 * kogus;
 	                
-	               String priceorig = annaVaartusIndeksiga(inff,linenum);
+	                originalInvoiceNumber = annaVaartusEnneKoolonit(inff,linenum);
+	                
+	                String priceorig = annaVaartusIndeksiga(inff,linenum);
 	               if(priceorig != null) {
 	            	   try {
 	            	     price = Double.parseDouble(priceorig);
@@ -685,9 +713,10 @@ private Product getProd(String toode){
 	        	  disc = 0;
 	          }
 	          
+	           
 	          if(tagastus) {
 	        	  String inff = orde.getTeostaja();
-
+               if(inff != null) {
 
 	        	  if(inff.contains("*")) {
 	        		  inff = inff.substring(0,inff.indexOf("*"));
@@ -698,7 +727,10 @@ private Product getProd(String toode){
 	    		    }
 	        	  
 	        	  String par = orderLine.getPartii();
-    	          if(par != null && par.trim().length() > 0) {
+    	       
+	        	  //  System.out.println("tagastus " + par);
+	      	      
+	        	  if(par != null && par.trim().length() > 0 && par.indexOf("*") > 0) {
     	        	  pobj = par.substring(par.indexOf("*")+1, par.indexOf("|"));
     	          }
                 
@@ -710,16 +742,30 @@ private Product getProd(String toode){
 		            	   price = Double.parseDouble(priceorig);
 		            	   }catch(Exception e) {}
 		               }
+                   }
+               
+                 String partii = orderLine.docType;
+                // System.out.println("partii " + partii);
+             	
+                 if(partii != null && partii.trim().length() > 0 ) {
+                	 int ind = partii.indexOf("|");
+                	 if(ind != -1) {
+                	         eanReturn = partii.substring(ind+1); 
+                			 itemid = "nocode";
+                			 prodname = partii.substring(0,ind);
+                	 }
+                  }
 		       }
 	          
       		
-	 	     System.out.println("inff reference " + returnReason);
+	 	     System.out.println("inff originalInvoiceNumber " + originalInvoiceNumber);
            	    
 	          String sql =" INSERT into   ORDEREDITEMS (ORDER_ID,PRODUCT_ID,QUANTITY_IN_BASE_UNIT,BASE_UNIT_MEASURE," +
 	          		"PRODUCT_PRICE,REAL_PRICE,DISCOUNT,USER_PROMO_DISCOUNT_CHOICE," +
-	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID )  " +
+	          		"PROMOTION_OBJECT_ID, WAREHOUSE_ID,OriginalInvoiceNumber, BarCode , ProductName )  " +
 	             " values( " + salesid + ",'" + itemid + "'," + kogus + "," + unit + "," 
-	          		+ getNF().format(price) + "," + getNF().format(rp) + "," + disc + ",'" + choice + "','" + pobj + "','" + ware + "'"
+	          		+ getNF().format(price) + "," + getNF().format(rp) + "," + disc + ",'" + choice + "','" + pobj + "','" + ware + "','"
+	          		+ originalInvoiceNumber + "','" + eanReturn + "','" + prodname + "'"
 	          		+ ")";
 
 	              log.info("SALES_LINE_SQL: " + sql);
@@ -799,7 +845,7 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  String shipm = "";
 	  if(order.getShipMode() != null && order.getShipMode().trim().length() > 0) {
 		  shipm = getAgentSHM(order.getAgent());
-		  System.out.println("shipmode " + shipm);
+		  System.out.println("shipmode " + order.getAgent() + " " + shipm);
 	  }
 		
 	  if(ref2.trim().length() == 0) { //kui on tava tellimus siis paneme sisemise tellimuse numbri 
@@ -810,15 +856,25 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  
 	  System.out.println("ref " + ref + " ' " + ref2);
 		String inff = order.getTeostaja();
+
+		  System.out.println("inff " + inff);
 	  
 	  if(repr) {
-		  ordtype = "4"; 
+		  ordtype = "4";
+		  try {
 		  ref = this.annaKoodIndeksiga(inff, 1);
+		  }catch(Exception e) {
+			  e.printStackTrace();
+		  }
 	  }
 	  
 	  if(tagastus) {
 		  ordtype = "1"; 
-		  ref = this.annaKoodIndeksiga(inff, 1);
+		  try {
+	    	  ref = this.annaKoodIndeksiga(inff, 1);
+	      }catch(Exception e) {
+		  e.printStackTrace();
+	     }
 	  }
 	  
 	  String status = "V";
@@ -830,10 +886,10 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  String sql = " INSERT INTO  ORDERS (  " +
 	                     " ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ," +
 	            "DELIVERY_DATE , STATUS  ,AGENT_ID ,ORDERING_TIME ," +
-	            "ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE,Cust_Ref ) " +
+	            "ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE,Cust_Ref, ModeOfDelivery  ) " +
 	            " VALUES (" + salesid + ", cast(getdate() as date),'" + order.getCompany()  +"',  " + deltype+ 
 	            ",cast(? as date),'" + status + "','" + order.getAgent() +"'," + orderingTime +
-	            ",'"+ ref + "'," + ordtype +",'',null,0,'','',getdate(),'" + ref2 + "' )" ; // + shipm
+	            ",'"+ ref + "'," + ordtype +",'',null,0,'','',getdate(),'" + ref2 + "', '" + shipm + "')" ; // + shipm
 	  
 	        System.out.println(sql);
 	        try{

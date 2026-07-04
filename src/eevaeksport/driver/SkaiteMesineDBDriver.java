@@ -137,7 +137,9 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
 	              	if(in.isFile()){
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
 	              	if(!inpda.exists()) {
+	              		try {
 	              		Converter.shrinkAndCopyFile(in,inpda,400);
+	              		}catch(Exception e) {}
 	              	}
 	                  	
 	                  	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
@@ -170,7 +172,9 @@ public class SkaiteMesineDBDriver extends AbstractDBDriver implements BulkUpdate
 	              	if(in.isFile()){
 	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
 	              	if(!inpda.exists()) {
+	              		try {
 	              		Converter.shrinkAndCopyFile(in,inpda,400);
+	              	}catch(Exception e) {}
 	              	}
 	                  	
 	                  	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 

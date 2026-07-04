@@ -15166,6 +15166,7 @@ shipdate = getCalXML(asi);
               }
            
               if("true".equals(parent.getProps().getProperty("reference.topartii"))){
+            	  docType = partii;
             	  partii = reference;
                 }
 

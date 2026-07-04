@@ -1257,10 +1257,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   private HashSet<String> agsActive = null;
   
   public TreeMap getAgents(){
-	  LocalDate start = LocalDate.of(2021, 11, 1); // A1
-      LocalDate today = LocalDate.now();
+	
       agsActive = new HashSet<String>();
-      String todayCycleCode = getCycleDay(start, today);
+      String todayCycleCode = getCycleDay();
       System.out.println("Today is: " + todayCycleCode);
 
       Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
@@ -3166,8 +3165,10 @@ boolean noopt = false;
   
   
 
-  public static String getCycleDay(LocalDate startDate, LocalDate targetDate) {
-      long daysBetween = ChronoUnit.DAYS.between(startDate, targetDate);
+  public static String getCycleDay() {
+	  LocalDate start = CYCLE_START; 
+      LocalDate today = LocalDate.now();
+      long daysBetween = ChronoUnit.DAYS.between(start, today);
 
       int cycleDayIndex = (int) (daysBetween % 56);
       if (cycleDayIndex < 0) {
