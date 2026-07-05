@@ -5062,7 +5062,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
     		 e.printStackTrace();
     	 }
     	 String what =  getProps().getProperty("rest.what");
-    	 System.out.println("restalla duplicates " + duplicates);
+    	 System.out.println("restalla duplicates " + driver.getAgents().size());
     	 if(rcompany != null){
     		if(what == null){
     			 Converter.sendAgentJson(driver.getAgents(),user,pass, rcompany, false, https);

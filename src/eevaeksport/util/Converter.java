@@ -8528,10 +8528,13 @@ try{
 		value.put("partner", aaa);	
 	}
 
+    boolean sendgroup = false;
+	if("true".equals(props.getProperty("rest.sendgroups"))) {
+		sendgroup = true;		
+	}
 	
 	
-	
-	if(ccc.getGroup()!= null && ccc.getGroup().trim().length() > 0 && ccc.getGroup().trim().length() < 200){
+	if(ccc.getGroup()!= null && ccc.getGroup().trim().length() > 0 && ccc.getGroup().trim().length() < 200 && sendgroup){
 		
 	   JSONArray arrayx = new JSONArray();
 	   StringTokenizer st = new StringTokenizer(ccc.getGroup(),"|");
@@ -10119,7 +10122,7 @@ try{
 
 		myson.setJson(deCode(array.toString()));
 		json.add(myson);
-//		System.out.println("MYJSON " + array.toString());
+	//System.out.println("MYJSON agents  " + array.toString());
 		
 		if(json.size() > 0){
 		 try {

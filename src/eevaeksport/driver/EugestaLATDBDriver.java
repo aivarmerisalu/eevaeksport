@@ -1316,6 +1316,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         while(rs.next()){
         String agentID = rs.getString("kood").trim();
           Agent agent = new Agent(agentID);
+          
           String name = rs.getString("name").trim();
           Double reprLim = rs.getDouble("repr");
           if(reprLim > 0) {
@@ -1345,9 +1346,10 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
    		String agentAGENTS = props.getProperty(agent.getID());
  		if(agentAGENTS != null){
  			agsActive.add(agent.getID());
+ 			agent.setActive(true);
  		}
           
-          agents.put(name, agent);
+          agents.put(name + " " + agent.getID(), agent);
           agent1.put(agent.getID(), agent);
         }
      rs.close();
@@ -2341,7 +2343,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         
         String chain = rs.getString("chain");
         if(chain != null && chain.trim().length() > 0) {
-        	cust.setChain(chain);
+        	//cust.setChain(chain);
         	if(activeXLSPromos.get(chain.trim()+"xls") != null) {
                 for (String cc :  activeXLSPromos.get(chain.trim()+"xls")) {
              	   if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
@@ -2447,6 +2449,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         String seg = rs.getString("seg");
         if(seg != null && seg.trim().length() > 0) {
         	cust.addCity("Segments: " + Converter.enCodeEst(seg.trim()));
+        	cust.setChain(seg.trim());
+        	
         }
         
         
@@ -2492,8 +2496,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         
         String segsub = rs.getString("segsub");
         if(segsub != null && segsub.trim().length() > 0) {
-        	cust.addCity("Subsegments: " + Converter.enCodeEst(segsub.trim()));
-        	  
+        	  cust.addCity("Subsegments: " + Converter.enCodeEst(segsub.trim()));
+        	  cust.category = segsub.trim();
               // 	cust.addCity("Segment: " + segsub.trim());
                	if(activeXLSPromos.get(segsub.trim()+"xls") != null) {
                        for (String cc :  activeXLSPromos.get(segsub.trim()+"xls")) {
