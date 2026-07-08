@@ -22,8 +22,10 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -49,6 +51,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -355,6 +358,26 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 }
 
   
+  private static Date parseDate(String text) {
+	    List<DateTimeFormatter> formats = Arrays.asList(
+	        DateTimeFormatter.ofPattern("dd.MM.yyyy"),
+	        DateTimeFormatter.ofPattern("d.M.yyyy"),
+	        DateTimeFormatter.ISO_LOCAL_DATE,
+	        DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+	        DateTimeFormatter.ofPattern("MM/dd/yyyy")
+	    );
+
+	    for (DateTimeFormatter f : formats) {
+	        try {
+	            LocalDate ld = LocalDate.parse(text, f);
+	            return Date.from(ld.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	        } catch (DateTimeParseException ignored) {
+	        }
+	    }
+
+	    return null;
+	}
+  
   private HashMap<String,List<String>> activeXLSPromos = null;
   
   private void getCampExcelLines(Vector lines) {
@@ -449,30 +472,65 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 			 						  }								
 
 									Date naita = null;
-									try {
-										naita = (row.getCell((short) 9).getDateCellValue());
-			 					      } catch (Exception e) {
-			 					    	 
-			 						  }
+
+									Cell cell = row.getCell((short)9);
+									// naita = (row.getCell((short) 9).getDateCellValue());
+										if (cell != null) {
+										    if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+										        naita = cell.getDateCellValue();
+										    } else {
+										        DataFormatter formatte = new DataFormatter();
+										        String value = formatte.formatCellValue(cell).trim();
+										        naita = parseDate(value);
+
+										        if (naita == null) {
+										            System.out.println("Invalid naita date: " + value);
+										        }
+										    }
+										}
+										
+										
 									Date algus = null;
-									try {
-										algus = (row.getCell((short) 10).getDateCellValue());
-			 					      } catch (Exception e) {
-			 					    	 
-			 						  }
-									Date lopp = null;
-									try {
-										lopp = (row.getCell((short) 11).getDateCellValue());
-			 					      } catch (Exception e) {
-			 					    	 
-			 						  }
-									
+
+									 cell = row.getCell((short)10);
+										if (cell != null) {
+										    if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+										        algus = cell.getDateCellValue();
+										    } else {
+										        DataFormatter formatte = new DataFormatter();
+										        String value = formatte.formatCellValue(cell).trim();
+										        algus = parseDate(value);
+
+										        if (algus == null) {
+										            System.out.println("Invalid algus date: " + value);
+										        }
+										    }
+										}
+										
+										
+			 						Date lopp = null;
+			 						 cell = row.getCell((short)11);
+										if (cell != null) {
+										    if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+										        lopp = cell.getDateCellValue();
+										    } else {
+										        DataFormatter formatte = new DataFormatter();
+										        String value = formatte.formatCellValue(cell).trim();
+										        lopp = parseDate(value);
+
+										        if (lopp == null) {
+										            System.out.println("Invalid lopp date: " + value);
+										        }
+										    }
+										}
+
 								
 
 
 								
 								Calendar cc = Calendar.getInstance();
 								boolean goes= false;
+								try {
 								if(naita != null) {
 									if(cc.getTimeInMillis() > naita.getTime() && cc.getTimeInMillis() < lopp.getTime()) {
 									  goes = true;
@@ -483,6 +541,10 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 								}
 								}
 								
+								}catch(Exception e) {
+									e.printStackTrace();
+									System.out.println("oioi " + cust + " "+ prod + " " + segment + " '" + lopp + "'" );
+								}
 								
 							if(goes) {
 								if(activeXLSPromos == null) {
@@ -530,6 +592,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
  									  MatrixLine mline = new MatrixLine();
 							           mline.setCliGroup(asi + "xls");
 							           mline.setProdID(prod);
+							           try {
 							           mline.setStartDate(Converter.getDDsMMMsYYYYString(algus));
 							           mline.setEndDate(Converter.getDDsMMMsYYYYString(lopp));
 							           if(price == null) {
@@ -543,8 +606,10 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 							        	   mline.setLineinfo((text2).replaceAll("\\r?\\n|\\r", "|").replaceAll(";", ","));
 							           }
 							           lines.add(mline);
-							      // 	System.out.println("line " + mline.getString());
-									}
+							           }catch(Exception e) {e.printStackTrace();
+							           System.out.println("oooo '" + algus + "' " + lopp);
+							           }
+							           }
 								
 							}
 								

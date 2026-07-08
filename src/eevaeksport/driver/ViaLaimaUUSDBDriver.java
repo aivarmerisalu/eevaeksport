@@ -836,11 +836,10 @@ public class ViaLaimaUUSDBDriver extends AbstractDBDriver implements BulkUpdater
 	                                     long diffMillis = endDate.getTime() - date.getTime();
 	                                     long diffDays = diffMillis / (1000L * 60 * 60 * 24);
 
-	                                     if (diffDays >= 0 && diffDays <= 14) {
-	                                         System.out.println("End date is within the next 7 days");
+	                                     if (diffDays < 0 && diffDays >= -14) {
+	                                         System.out.println("End date expired within the last 14 days");
 	                                         mline.setLineinfo("ENDING");
-	                                         
-	                                     } 
+	                                     }
 	                                    
 								}
 								

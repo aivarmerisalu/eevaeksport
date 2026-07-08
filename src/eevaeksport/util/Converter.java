@@ -1165,6 +1165,8 @@ public class Converter {
 	
 	 public static TreeMap loadFixSelver(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+
+			 HashMap numOfStores = new HashMap();
 		 try{
 			 
 			 Workbook workbook = null;
@@ -1499,6 +1501,7 @@ public class Converter {
                         	  }
                         	  con.lines.add(ll);
                         	  res.put(pood, con);
+                        	  numOfStores.put(pood, pood);
                                     }
 						   }
 							 }
@@ -1517,13 +1520,15 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "selver",true);
 		 }
-		 sendFixLoadErrorEmail("\n Selver imported " + res.keySet().size() + " shops fixed sortiments", parent, "selver",false);
+		 sendFixLoadErrorEmail("\n Selver imported " + numOfStores.size() + " shops fixed sortiments", parent, "selver",false);
 
  	return res;
  }
 	 
 	 public static TreeMap loadFixKaup(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+
+			 HashMap numOfStores = new HashMap();
 		 try{
 			 
 			 Workbook workbook = null;
@@ -1640,6 +1645,7 @@ public class Converter {
                      	  }
                      	  con.lines.add(ll);
                      	  res.put(pood, con);
+                     	 numOfStores.put(pood, pood);
                                  }
 						   }
 							 }
@@ -1659,7 +1665,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "kaupmees",true);
 		 }
-		 sendFixLoadErrorEmail("\n Kaupmees imported " + res.keySet().size() + " shops fixed sortiments", parent, "kaupmees",false);
+		 sendFixLoadErrorEmail("\n Kaupmees imported " + numOfStores.size() + " shops fixed sortiments", parent, "kaupmees",false);
 
 	return res;
 }
@@ -1667,8 +1673,9 @@ public class Converter {
 
 	 public static TreeMap loadFixKaup2(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
-		 try{
-			 
+			 HashMap numOfStores = new HashMap();
+	
+		try{
 			 Workbook workbook = null;
 			 Sheet sheet = null;
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -1781,6 +1788,8 @@ public class Converter {
                   	  }
                   	  con.lines.add(ll);
                   	  res.put(pood, con);
+
+         			  numOfStores.put(pood,pood);
                               }
 						   }
 							 }
@@ -1798,13 +1807,16 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "kaupmees",true);
 		 }
-		 sendFixLoadErrorEmail("\n Kaupmees imported " + res.keySet().size() + " shops fixed sortiments", parent, "kaupmees",false);
+		 sendFixLoadErrorEmail("\n Kaupmees imported " + 
+				 numOfStores.size() + " shops fixed sortiments", parent, "kaupmees",false);
 
 	return res;
 }
 	 
 	 public static TreeMap loadFixA1000(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			 HashMap numOfStores = new HashMap();
+
 		 try{
 			 
 			 Workbook workbook = null;
@@ -1917,6 +1929,8 @@ public class Converter {
                	  }
                	  con.lines.add(ll);
                	  res.put(pood, con);
+
+     			 numOfStores.put(pood,pood);
                            }
 						   }
 							 }
@@ -1934,7 +1948,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "a1000",true);
 		 }
-		 sendFixLoadErrorEmail("\n A1000 imported " + res.keySet().size() + " shops fixed sortiments", parent, "a1000",false);
+		 sendFixLoadErrorEmail("\n A1000 imported " + numOfStores.size() + " shops fixed sortiments", parent, "a1000",false);
 
 	return res;
 }
@@ -1944,6 +1958,8 @@ public class Converter {
 
 	 public static TreeMap loadFixcoopRist(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			 HashMap numOfStores = new HashMap();
+
 		 try{
 			 
 			 Workbook workbook = null;
@@ -2094,6 +2110,9 @@ public class Converter {
                      	  }
                      	  con.lines.add(ll);
                      	  res.put(pood, con);
+
+              			 numOfStores.put(pood,pood);
+                     	  
                                  }
 						   }
 							 }
@@ -2111,7 +2130,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "coop",true);
 		 }
-		 sendFixLoadErrorEmail("\n Coop imported " + res.keySet().size() + " shops fixed sortiments", parent, "coop",false);
+		 sendFixLoadErrorEmail("\n Coop imported " + numOfStores.size()  + " shops fixed sortiments", parent, "coop",false);
 
 	return res;
 }
@@ -2119,8 +2138,8 @@ public class Converter {
 
 	 public static TreeMap loadFixMaxima(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+			 HashMap numOfStores = new HashMap();
 		 try{
-			 
 			       FileInputStream	 ff = new FileInputStream(file);
 					XSSFWorkbook workbook = new XSSFWorkbook(ff); 
 					XSSFSheet sheet = workbook.getSheetAt(0); 
@@ -2297,7 +2316,7 @@ public class Converter {
 										//	System.out.println("Toode  " + tt.getID()  + " " + tt.comment + " "
 											//	+ level + " " + loe2 + " " + tt.comment + " " + gr + " "+ level);
 										//}
-						       	          
+						      			 numOfStores.put(pood,pood);
 						       	         res.put(pood, con);
 									}
 									
@@ -2322,7 +2341,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "maxima",true);
 		 }
-		 sendFixLoadErrorEmail("\n Maxima imported " + res.keySet().size() + " shops fixed sortiments", parent, "maxima",false);
+		 sendFixLoadErrorEmail("\n Maxima imported " + numOfStores.size() + " shops fixed sortiments", parent, "maxima",false);
 		// System.exit(0);
 	return res;
 }
@@ -2331,6 +2350,8 @@ public class Converter {
 	 
 	 public static TreeMap loadFixAldar(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+
+			 HashMap numOfStores = new HashMap();
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -2461,6 +2482,8 @@ public class Converter {
                      	  }
                      	  con.lines.add(ll);
                      	  res.put(pood, con);
+
+             			numOfStores.put(pood, pood);
                                  }
 						   }
 							 }
@@ -2478,7 +2501,8 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "aldar", false);
 		 }
-		 sendFixLoadErrorEmail("\n Aldar imported " + res.keySet().size() + " shops fixed sortiments", parent, "aldar",false);
+		 sendFixLoadErrorEmail("\n Aldar imported " + 
+				 numOfStores.size() + " shops fixed sortiments", parent, "aldar",false);
 	return res;
 }
 	
@@ -2626,7 +2650,9 @@ public class Converter {
 }
 	 public static TreeMap loadFixPrisma(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
-			System.out.println("Prisma lugemine 00 " );
+
+
+			 HashMap numOfStores = new HashMap();
 		 try{
 			 
 			       FileInputStream	 ff = new FileInputStream(file);
@@ -2739,6 +2765,8 @@ public class Converter {
                   	  }
                   	  con.lines.add(ll);
                   	  res.put(pood, con);
+
+         			 numOfStores.put(pood,pood);
                               }
 						   }
 							 }
@@ -2756,7 +2784,8 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "Prisma",true);
 		 }
-		 sendFixLoadErrorEmail("\n Prisma imported " + res.keySet().size() + " shops fixed sortiments", parent, "prisma",false);
+		 sendFixLoadErrorEmail("\n Prisma imported " + 
+				 numOfStores.size() + " shops fixed sortiments", parent, "prisma",false);
 	return res;
 }
 	
@@ -2764,6 +2793,8 @@ public class Converter {
 	 
 	 public static TreeMap loadFixRimi(TreeMap res, File file , TreeMap prods , EksportPanel parent) {
 			String errors = null;
+
+			 HashMap numOfStores = new HashMap();
 		
 		 try{
 			 
@@ -2882,6 +2913,7 @@ public class Converter {
                   	  }
                   	  con.lines.add(ll);
                   	  res.put(pood, con);
+                  	numOfStores.put(pood, pood);
                               }
 						   }
 							 }
@@ -2899,7 +2931,7 @@ public class Converter {
 		 if(errors != null) {
 			 sendFixLoadErrorEmail(errors, parent, "rimi", true);
 		 }
-		 sendFixLoadErrorEmail("\n Rimi imported " + res.keySet().size() + " shops fixed sortiments", parent, "rimi",false);
+		 sendFixLoadErrorEmail("\n Rimi imported " + numOfStores.size() + " shops fixed sortiments", parent, "rimi",false);
 			 
 	return res;
 }
@@ -5866,6 +5898,15 @@ public class Converter {
 										if(formatter.formatCellValue(cellx).indexOf("Tartu Tarbijate Kooperatiiv") != -1 ) {
 											return "coop";
 										}
+									
+										
+										if(formatter.formatCellValue(cellx).indexOf("SAP") != -1 || formatter.formatCellValue(cellx).indexOf("Material de") != -1
+												 || formatter.formatCellValue(cellx).indexOf("Kauba koodde") != -1 ) {
+
+											System.out.println("xx00 " +formatter.formatCellValue(cellx));	
+											return "maxima";
+										}	
+									
 									}
 								}catch(Exception k) {
 									k.printStackTrace();
@@ -8597,9 +8638,7 @@ try{
 	
 	if(ccc.getZipcode()!= null && ccc.getZipcode().trim().length() > 0){
 		value.put("zipcode", ccc.getZipcode());
-	}
-	
-	if(ccc.restZipCode!= null && ccc.restZipCode.trim().length() > 0){
+	}else if(ccc.restZipCode!= null && ccc.restZipCode.trim().length() > 0){
 		value.put("zipcode", ccc.restZipCode);
 	}
 	
@@ -8609,7 +8648,7 @@ try{
 	
 	
 	if(!"true".equals(props.getProperty("rest.noagents"))) {
-	if(false){
+	if("true".equals(props.getProperty("rest.deleteagents"))){
 		//true sellega saab managerid maha võtta propsprops
 		
 		JSONArray arrayx = new JSONArray();

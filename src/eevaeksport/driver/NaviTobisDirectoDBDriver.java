@@ -4690,8 +4690,7 @@ HashMap prodHash = new HashMap();
     					/*if(prod.getID().equals("MOT090513OD")) {
     			      		System.out.println("MOT090513OD 0000" + goes );
     			      	}*/	
-    					
-if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+    					if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
     						String grupp3 = nn2.getAttributes().getNamedItem("content").getNodeValue();
                            if(this.cateFullGroup.get(grupp3) != null) {
                         	   String g1 = cateFullGroup.get(grupp3);
@@ -4707,6 +4706,19 @@ if("BRAND".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
                         	   prod.setGroupSecond(g1+grupp3);
                            }
     					}
+
+    					
+if("SELL_IN_PACKAGES_ONLY".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+    						String grupp3 = nn2.getAttributes().getNamedItem("content").getNodeValue();
+                           if(grupp3.equals("TAIP")) {
+                           	if(prod.getInCases() > 0 ){
+                                  prod.setOptAmountInUnits(prod.getInCases());
+                           	}                
+                       	
+                               }
+    					}
+
+
     				 }
 	         		
 	         		 }
