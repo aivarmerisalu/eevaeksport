@@ -305,6 +305,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
   public Vector getFixedAssortmentData() {
 		Vector result = new Vector();
+		/*
 		
 		try {
 			
@@ -358,7 +359,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+*/
 
 		//System.out.println("fix size " + result.size());
 		return result;
@@ -682,12 +683,12 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       
            String sql2 = " 		 select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday,\r\n" + 
            		"			  max([beginsinstoredate]) as store,max(datediff(day,beginsinstoredate, c.nextdelivery)) as vahe,\r\n" + 
-           		"              		minPrice as price ,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as dealer, max(isPaper) as ispaper from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
+           		"              		minPrice as price ,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as dealer, max(isPaper) as ispaper , MANDATORY from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
            		"              		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
            		"        		inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
            		"         		 	 where c.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
-           		"         		  group by  a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end),  [date from] ,[date to], minPrice \r\n" + 
-           		"                  order by a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), [date from] ,[date to], minPrice\r\n" + 
+           		"         		  group by  a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end),  [date from] ,[date to], minPrice,MANDATORY \r\n" + 
+           		"                  order by a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), [date from] ,[date to], minPrice,MANDATORY\r\n" + 
            		"					 ";
            rs = stmt.executeQuery(sql2);
            while (rs.next()) {
@@ -701,6 +702,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            double price = rs.getDouble("price");
            String dealer = rs.getString("dealer");
            Integer isPaper =  rs.getInt("isPaper");
+           String manda = rs.getString("MANDATORY"); // Y või N kui N siis peaks värvima.
+            
            
            MatrixLine mline = new MatrixLine();
            mline.setCliGroup(clGroup);
@@ -711,6 +714,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            if(vahe < 1) {
              lisa = "SOON ";
            }
+           
            // ;AKC1000032775
            if(isPaper != null && isPaper == 1) {
         	   lisa = lisa  + Converter.enCodeEst("AVĪZE") ;
@@ -755,7 +759,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 			
 			String cmd2 = "select productBackOfficeId as ItemID from EPASAULE_PRODUCTS_ADVERTISING";
 			
-			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
+			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin, EG_ASSORTITEMSTATUS as status " + 
 					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId "
 					+ " where s.EG_ASSORTITEMSTATUS in (0,1,2) order by str(a.posWeight) + a.Name ";
 			
@@ -782,21 +786,21 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 		             String sortid = rs.getString("ClientGR").trim();
 		             String prodID = rs.getString("ItemID").trim();
+		             int status = rs.getInt("status");
 		       
 		            ags =   sortags.get(sortid);
 		           if(ags == null) {
 		        	   ags = "";
 		           }
-		           
+		           String must = " ";
+		           if(status == 2) {
+		        	   must = "TOP";
+		           }
 		           
 		             if(usedProds.contains(prodID)){
-							result.append( " ;" + Converter.cleanLitLatEst(sortid + "; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
+							result.append( " ;" + Converter.cleanLitLatEst(sortid + "; ;" + prodID + ";" + must+ "; ; ; ;"+ags)+ "\n");
 		 				}
-					
-
-		 		//	sb.append(custid + ";" + Converter.cleanLitLatEst(type + "; ;" + id + "; ;" + prgrupp + ";" + abi + ";" + color + ";," + ag + ",")
-		 			//			+ "\n");
-		           }
+				      }
 						
 					 rs.close();
 					 st.close();
