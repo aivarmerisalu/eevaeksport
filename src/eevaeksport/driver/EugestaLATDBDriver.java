@@ -206,7 +206,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 			if(maks != null){
 				 custw = new Customer (maks.trim());
 				custw.setDebt(volg);
-				if(volg>0){
+				if(volg > 0.09 || volg < -0.09){
 					custs.put(maks.trim(),custw);
 				}
 			}
@@ -1086,7 +1086,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		        double mata = rs.getDouble("tarnimata");
 			    String reason =  rs.getString("CANCELREASON");
 			    if(reason != null && reason.trim().length() > 0) {
-			    	reason = reason.trim();
+			    	reason = Converter.enCodeEst(reason.trim());
 			    } else {
 			    	reason = " ";
 			    }
@@ -2524,9 +2524,14 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         
         String fixed = rs.getString("fixed");
         if(fixed != null && fixed.trim().length() > 0) {
-        	cust.suggAssortCode = fixed.trim() + "|" + "SUGGED";
-            cust.addFixSortCode(Converter.cleanLitLatEst(fixed.trim())+"x");
-            String ags = sortags.get(fixed.trim()); 
+        	String sugg = fixed.trim();
+        	if(!cust.getID().startsWith("MRC")) {
+        		sugg = sugg + "|" + "SUGGED";
+        	}
+        	cust.suggAssortCode = sugg ;
+          //  cust.addFixSortCode(Converter.cleanLitLatEst(fixed.trim())+"x");
+       
+        	String ags = sortags.get(fixed.trim()); 
             if(ags == null){
             	ags = "";
             }
@@ -2640,7 +2645,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     debt.setDate(rs.getDate("kuupaev"));
     debt.setDue(rs.getString("yle"));
     debt.setPayerID(rs.getString("maksja").trim());
-    this.debt.addElement(debt);
+    if(debt.getSum() > 0.09 || debt.getSum() < -0.09) {
+     this.debt.addElement(debt);
+    }
   }
   
   
@@ -2871,9 +2878,8 @@ private HashSet<String> inTT = null;
   
   public TreeMap getProducts(Agent agent){
 	  prodcodes = new Vector();
-	  
 
-      usedProds = getUsedProds();
+	  usedProds = getUsedProds();
 	  
 	  if(grps == null) {
 		 try {
@@ -3089,7 +3095,9 @@ boolean noopt = false;
        
         prod.setName(nimetus.trim() + " " + kood);
       
-          
+          if(prod.getID().startsWith("MRC")) {
+        	  prod.setStock(-1);
+          }
           
           if(!noopt) {
                  prod.setOptAmountInUnits(rs.getDouble("opt"));

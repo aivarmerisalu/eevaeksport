@@ -5047,15 +5047,16 @@ public class Converter {
 									 row = sheet.getRow(1);
 							
 						Quest quest = new Quest();
+
+					     String period = getExcelCell(sheet.getRow(2),1);
 											 
 							   String name = getExcelCell(sheet.getRow(1),1);
-								   quest.title = "Pricetracker - " + name;	
+								   quest.title = "Pricetracker - " + name + " " + period;	
 								   
 								   if(!qutitles.contains(quest.title)) {
 								   
 								   quest.frequency = "DAILY";
 									
-								     String period = getExcelCell(sheet.getRow(2),1);
 									    String[] parts = period.split("-");
 								        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 								        LocalDate startDate = LocalDate.parse(parts[0], formatter);

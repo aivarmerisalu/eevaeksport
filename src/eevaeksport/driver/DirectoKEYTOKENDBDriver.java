@@ -398,7 +398,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
                           
                           long diff = lopp.getTime() - alg.getTime();
                           float days = (diff / (1000*60*60*24));
-                          if(days > 100) {
+                          if(days > 150) {
                         	  mline.setStartDate(" ");
                         	  mline.setEndDate(" ");
                         	  
