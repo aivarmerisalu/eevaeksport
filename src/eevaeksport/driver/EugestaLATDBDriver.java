@@ -3246,6 +3246,25 @@ boolean noopt = false;
   
 
   public static String getCycleDay() {
+	    LocalDate start = CYCLE_START;
+
+	    LocalDate today = LocalDate.now();
+	    long daysBetween = ChronoUnit.DAYS.between(start, today);
+
+	    int cycleDayIndex = (int) (daysBetween % 28);
+	    if (cycleDayIndex < 0) {
+	        cycleDayIndex += 28;
+	    }
+
+	    int weekIndex = cycleDayIndex / 7;
+	    int dayIndex = cycleDayIndex % 7;
+	    char weekLetter = (char) ('A' + weekIndex);
+	    int dayNumber = dayIndex + 1;
+
+	    return weekLetter + String.valueOf(dayNumber);
+	}
+  
+ /* public static String getCycleDayOld() { 8 nädalat on see
 	  LocalDate start = CYCLE_START; 
       LocalDate today = LocalDate.now();
       long daysBetween = ChronoUnit.DAYS.between(start, today);
@@ -3261,7 +3280,7 @@ boolean noopt = false;
       int dayNumber = dayIndex + 1;
 
       return weekLetter + String.valueOf(dayNumber);
-  }
+  }*/
 
   
      HashMap<String, Map<String, Double>> custSalesGruppedFocus = null;

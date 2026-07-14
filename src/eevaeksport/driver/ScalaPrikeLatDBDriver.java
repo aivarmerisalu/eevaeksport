@@ -493,6 +493,28 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
      * @see
      */
 
+
+    public TreeMap getProdGroupsSecond() throws SQLException {
+  	  
+  		connectionUp(url);
+        TreeMap   tm = new TreeMap();
+        String    sql = " SELECT SY24002 AS liik ,SY24003 AS nimetus FROM SY240400 WHERE RTRIM(SY24003)<>'' AND SY24001 = 'IB' ORDER BY SY24003";
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+
+        while (rs.next()) {
+          String kood=  rs.getString("liik").trim();
+            tm.put(kood,
+                   rs.getString("nimetus").trim() +" " + kood);
+        }
+        rs.close();
+        st.close();
+        con.close();
+        this.connectionDown();
+        return tm;
+
+    }
+    
     public TreeMap getProdGroups() throws SQLException {
     	connectionUp(url);
         TreeMap   tm = new TreeMap();
@@ -1005,7 +1027,7 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
 
         String cmd =" SELECT    RTRIM(SC01001) AS toode,(RTRIM(SC01002)+' '  " +
              "   +rtrim(SC01003)) + ' ' +RTRIM(SC01001) AS nimi,(SC39004) AS myygihind ,SC01009 AS tykke , SC01011 AS maxale,'KE' +RTRIM(SC01150) AS pandikas ,   " +
-             " case when  SC01031 = 1 then 1 else 0 end AS out ,SC01128 AS grupp,SC01132 AS ean , SC01016 as letter , SC01071 /100 as maht  " +
+             " case when  SC01031 = 1 then 1 else 0 end AS out ,SC01128 AS grupp, SC01037 AS grupp2,SC01132 AS ean , SC01016 as letter , SC01071 /100 as maht  " +
              ", SC03003-SC03004 AS stock , SC01097 as separate , SC03055 as bestb FROM SC010400 left outer JOIN SC390400 ON SC01001 " +
              "  = SC39001 and SC39002='00' left outer JOIN SC030400 on SC03001=SC01001 and SC03002='07' AND SC03003!=0 WHERE  "
              + " LEN((SC01128))>0 and SC39004 > 0 and rtrim(ltrim(SC01016)) not in  ('S','U') " +
@@ -1041,6 +1063,12 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
                 if(gr != null && gr.trim().length()>0){
                   prod.setGroup(gr.trim());
                 }
+                
+                 gr = rs.getString("grupp2");
+                if(gr != null && gr.trim().length()>0){
+                  prod.setGroupSecond(gr.trim());
+                }
+                
                  gr = rs.getString("ean");
                  String aaa = "";
                 if(gr != null && gr.trim().length()>0){
