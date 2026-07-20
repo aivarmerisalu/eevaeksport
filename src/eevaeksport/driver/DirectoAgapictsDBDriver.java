@@ -3447,7 +3447,7 @@ if( getParent().getProps().getProperty("stockcode") != null){
 	 }
 }
 
-if(seisx > 0) {
+if(seisx > 0 || seisx < 0) {
 //	System.out.println("Seisx "+ id +" " + seisx);
  products.append(id +  "; ;");
  products.append(getParent().getNF().format(seisx) + "; "  +  "\n");

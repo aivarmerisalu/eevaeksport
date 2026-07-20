@@ -535,6 +535,41 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
 	}
    
    
+   
+   private TreeMap makeGetzLVStock() {
+	   TreeMap res = new TreeMap();
+	     try {
+	    	 
+	    	 
+	    	   FileReader fr = new FileReader(getParent().getProps().getProperty("getzlv.stock.dir") + "tooted.xml");
+	    	   
+	           BufferedReader reader = new BufferedReader(fr);
+	         String line = null;
+
+	          while((line = reader.readLine()) != null  ){
+	        	 
+		        	
+	        	  if((line.trim().length()) > 50){
+	        		  int len = line.indexOf("code=");
+		        	  String id   = line.substring(len + 6);
+		        	  id = id.substring(0,id.indexOf("\""));
+		        	 // System.out.println(id);
+		      	 	  		len = line.indexOf("stock_level=");
+		             	 	 if(len != -1){
+		             	 	     String stock   = line.substring(len + 13);
+		             	 	     res.put(id, Double.parseDouble(stock.substring(0,stock.indexOf("\"")))); 
+		            	 	 }
+		             	 
+		      	  }
+	          }	 
+	          reader.close();
+	     } catch (Exception e){
+	       e.printStackTrace();
+	     }
+	     System.out.println("GETZLV STOCK "+ res.size());
+	   return res;
+   }
+   
    private void makePictureCat(){
  	    
    	
@@ -3093,6 +3128,7 @@ System.out.println(cmd);
      
      TreeMap  ladutr = new TreeMap();
       TreeMap  ladulah = new TreeMap();
+      TreeMap laduGETZLV = this.makeGetzLVStock();
      
      try {
    	  String cmd = "select [Item No_] as kood, inventory as kogus,PickupQty from [_MERISOFT$Tobis_ProdStock]" ;
@@ -3217,6 +3253,10 @@ System.out.println(cmd);
               
               if(ladulah.get(id) != null ){
             	  prod.setPartii("PickedQty: " + (String)ladulah.get(id));
+              }
+              
+              if(laduGETZLV.get(id) != null) {
+            	prod.addPartii("Getz LV stock: " + laduGETZLV.get(id));  
               }
              //   String grupp2 = cleardots(rs.getString("grupp2"));          
           	
@@ -4366,7 +4406,8 @@ HashMap prodHash = new HashMap();
 	   if(seisud == null) {
 		    getSaveStockInfoDirecto(null);
 	   }
-	   
+
+	      TreeMap laduGETZLV = this.makeGetzLVStock();
 	 
 	   try {
 		//   stocksfile = getLaoSeisud(null); 
@@ -4771,6 +4812,10 @@ if("SELL_IN_PACKAGES_ONLY".equals(nn2.getAttributes().getNamedItem("code").getNo
       	}
 
       	
+
+        if(laduGETZLV.get(id) != null) {
+      	  prod.addPartii("Getz LV stock: " + laduGETZLV.get(id));  
+        }
       	/*if(prod.getID().equals("MOT090513OD")) {
       		System.out.println("MOT090513OD " + goes );
       	}*/

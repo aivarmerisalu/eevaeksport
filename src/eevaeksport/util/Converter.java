@@ -10122,8 +10122,8 @@ try{
 		value.put("groupcode", ag.getGroup());
 	}
 	
-	if(ag.getEmail()!= null){
-		value.put("email", ag.getEmail());
+	if(ag.restEmail != null){
+		value.put("email", ag.restEmail);
 	}
 	
 	if(ag.getPhone()!= null){

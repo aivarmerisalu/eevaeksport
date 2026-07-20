@@ -3668,15 +3668,18 @@ public ArrayList loadOpenOrders() {
 	         	  
 	         	 // System.out.println("node name " + rida.getNodeName());
 	         	 // if(rida.getNodeName().equals("order")){
-	         		
-		         	
-		         	  String id = rida.getAttributes().getNamedItem("ccode").getNodeValue();
-		         	  if (id.equals(kaup24Klient) || id.equals(piguLTKlient) || id.equals(lati220Klient) || id.equals(soomeHHKlient) ) {
+	         		String id = null;
+	         	 try {
+		         	   id = rida.getAttributes().getNamedItem("ccode").getNodeValue();
+	         	     } catch(Exception e) {
+		    		  
+		    	     }
+		         	  if (id != null && (id.equals(kaup24Klient) || id.equals(piguLTKlient) || id.equals(lati220Klient) || id.equals(soomeHHKlient))) {
 		         	  
 			    	  String arve = rida.getAttributes().getNamedItem("webid").getNodeValue();
 			    	  
 			    	  String number = null ;
-			    	  try {
+			    		 try {
 			    		  number = rida.getAttributes().getNamedItem("cutomer_orderno").getNodeValue();
 			    	  }catch(Exception e) {
 			    		  

@@ -14,8 +14,11 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -187,7 +190,99 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
    }
 
 	public Vector getLastThreeData() {
-		return null;
+		Vector result = new Vector();
+		try {
+		
+			 Integer total = getPagination("getCustomerOrders");
+	         
+		 	 	for (int a = 0 ; a < total; a++) {
+		 	 		String aa = "";
+		 	 	    if(a > 0) {
+		 	 	    	aa = a + "";
+		 	 	    }
+		 	 	  try {	
+		     	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getCustomerOrders" + aa +".json");
+		 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
+		 		
+		 		  int lenn = values.size();
+		 		
+		 		  for (int i = 0; i < lenn; i++) {
+		 			  
+		 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+		         		String customerNumber = (String) cob.get("location");
+		         		String cuCode = locations.get(customerNumber);
+		         		if(cuCode != null) {
+		         			try {
+
+		         	        	String prodId = ((String) cob.get("product_id"));
+		         				if(prodId == null) {
+		         					prodId = ((String) cob.get("item_id"));
+		         				}
+		         				prodId = prodId.trim();
+		 	        	
+		         				
+		         				boolean gg = false;		
+		         				
+			         		Toode tt = new Toode(prodId);
+							     if(cob.get("quantity") != null) {
+							    	 tt.addKogus(Double.parseDouble(cob.get("quantity") + "")); 
+							    	 if(tt.getKogus() > 0) {
+							    	   gg = true;
+							    	 }
+							     }
+		         			}catch(Exception e) {}
+		         			
+		         		}
+		 		  }
+		 	 	  }catch(Exception e) {}
+		 	 	}
+
+			
+
+	String sq3 = "    SELECT jou.clientBackOfficeId as klient, jou.deliverydate  as kuup , jou.productBackOfficeId as toode ,\r\n" + 
+			"					 sum(case when jou.Quantity > 0 then jou.Quantity else 0 end) as kogus, jou.Price as hind,\r\n" + 
+			"						 sum(case when jou.Quantity < 0 then jou.Quantity else 0 end) as kogusmin, max (jou.invoiceNumber) as doknr ,\r\n" + 
+			"						 case when  jou.deliverydate > CAST(GETDATE() AS DATE)then 1 else 0 end as color FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >=  \r\n" + 
+			"									(select top 1 kuupaev  from ( 	 SELECT top 10 jou2.deliverydate as kuupaev FROM  EPASAULE_DELIVERIES jou2  where ltrim(jou2.clientBackOfficeId) = ltrim(jou.clientBackOfficeId)    \r\n" + 
+			"									 and jou2.deliverydate > getdate()-90 and jou2.deliverydate < getdate()+4 group by jou2.clientBackOfficeId , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)   \r\n" + 
+			"							 GROUP BY jou.clientBackOfficeId,jou.deliverydate , jou.productBackOfficeId , jou.Price ORDER BY jou.clientBackOfficeId,jou.deliverydate desc, max(jou.invoiceNumber) desc, jou.productBackOfficeId" ;
+					
+					Connection con3 = getNewConnection();
+					Statement st3 = con3.createStatement();
+					ResultSet rs3 = st3.executeQuery(sq3);
+					while (rs3.next()) {
+						MatrixLine ml = new MatrixLine();
+						ml.setCustID(rs3.getString("klient").trim());
+						ml.setStartDate(Converter.turn(rs3.getString("kuup")).substring(0,5));
+						ml.setProdID(rs3.getString("toode").trim());
+						ml.setPrice(rs3.getDouble("kogus"));// see on sassis ja vajab erilähenemist
+						ml.setDiscount(rs3.getDouble("hind"));
+						double kmin = rs3.getDouble("kogusmin");
+						
+						ml.setMinAm(kmin);
+						ml.setLineinfo(rs3.getString("doknr").trim());
+						
+						int color = rs3.getInt("color");
+						if(color == 1) {
+							ml.setCliGroup("green");
+						}
+                      
+						if(kmin < 0) {
+							ml.setCliGroup("red");
+						}
+					    
+						result.add(ml);
+					}
+					rs3.close();
+					st3.close();
+					con3.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return result;
+
 	}
 	
 	private String getDateX(String input) {
@@ -692,6 +787,10 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
   		this.saveFile("getCustomerStockAndSales",true);
   	 }
       
+
+      if (dataType == null || dataType.equals("getCustomerOrders")) {
+  		this.saveFile("getCustomerOrders",true);
+  	 }
 	  
   }
        

@@ -657,6 +657,10 @@ private Product getProd(String toode){
 		  
 	      if(orde.getDealer() != null && orde.getDealer().trim().length() > 1) {
 	    	  ware = orde.getDealer();
+	    	  if(ware.equals("24N")) {
+	    		  ware = "";
+	    	  }
+	    	  // kui on 24N sii ladu kaasa ei pane 
 	      }
 	      
 	      

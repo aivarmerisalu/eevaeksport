@@ -1812,7 +1812,7 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
      		try {
 	         		 String salesman  = rida.getAttributes().getNamedItem("salesman").getNodeValue(); 
 	         		      customer.addAgent(new Agent(Converter.deCode(salesman)));
-	         		     System.out.println("aaa " +  customer.getName() + " " + salesman);
+	         		   //  System.out.println("aaa " +  customer.getName() + " " + salesman);
 	         		      String sm = parent.getEmail(salesman);
 	         		      
 	         		     Agent aa1 = (Agent)agent1.get(salesman);
@@ -1825,8 +1825,6 @@ public class DirectoKEYTOKENDBDriver extends AbstractDBDriver implements BulkUpd
 	            			   while(en.hasMoreElements()){
 	            				 String age = (String) en.nextElement();
 	            				 customer.addAgent(new Agent(age.trim()));
-
-		                    	// System.out.println("aaa1 " +  cust.getAgents());
 	            			   }
 	            	       }
 	                    }

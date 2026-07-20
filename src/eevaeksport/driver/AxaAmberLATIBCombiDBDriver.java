@@ -2043,7 +2043,6 @@ int i = 0;
          
          if(ibAgents.get(age.trim()) != null) {
         	  cust.addAgent(new Agent((String)ibAgents.get(age.trim())));
-               	 
          }
          
          cust.addAgent(new Agent("WARE"));

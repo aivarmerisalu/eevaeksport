@@ -100,7 +100,8 @@ public class Agent {
   public Vector klienteEelm = null;
   public Vector klienteEile = null;
   public Vector klienteViim7 = null;
- 
+  public String restEmail = null;
+  public String restPhone = null;
   
   public ArrayList prodGroupList = new ArrayList();
   public ArrayList prodGroupListSec = new ArrayList();

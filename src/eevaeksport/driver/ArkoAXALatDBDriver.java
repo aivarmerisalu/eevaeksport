@@ -177,10 +177,12 @@ System.out.println("prdcodes suurus "  + prodcodes.size() + " " + prodcodes.cont
               	String fn = gg[i];
               	File in = new File ( picts + fn); 
               	if(in.isFile() && tooted.contains(fn.toLowerCase()) && !names.contains(fn.toLowerCase())){
-              	
+              	try {
               	File inpda = new File ( pictspda +  toUpper( fn )); 
                     	Converter.shrinkAndCopyFile(in,inpda);
-              	}
+              	
+              	}catch(Exception ee) {}
+              }
               }
               File fff =  new File (pictspda +  "list.txt");
               Converter.copyFile(f,fff);  	

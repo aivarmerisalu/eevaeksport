@@ -308,6 +308,16 @@ public class Customer {
     return false;
   }
 
+  public boolean removeAgent(String agentCode) {
+	  	if (agents != null && agentCode != null ){
+	  		if(agents.keySet().contains(agentCode)) {
+	  			agents.remove(agentCode);
+	  			return true;
+	  		}
+	  	}
+	    return false;
+	  }
+  
   private String id = null;
   private int delExtraDays = -1;
   private TreeMap products = new TreeMap();

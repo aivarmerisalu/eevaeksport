@@ -193,7 +193,7 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 			  }
 				this.getProducts(null);
 				TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
-				System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+				//System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
 				if(contracts.size() > 0) {
 					Converter.sendContractJson(contracts ,  rcompanyx,  user ,  pass);
 				}
@@ -224,7 +224,7 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 	                      String id = rs.getString("id");
 	                      String laiend = rs.getString("pildityyp").trim().toLowerCase();
 	                      
-	                      System.out.println(toode + " " + bufbyte.length);
+	                      //System.out.println(toode + " " + bufbyte.length);
 	                      
 	                      if(bufbyte != null){
 	                          String filename = picts + toode+"."+laiend; // Function for generating temporary filenames basing on GUID 
@@ -567,7 +567,7 @@ public class InteraltusDBDriver extends AbstractDBDriver implements BulkUpdater,
 	    	     }
 	    	     
 	    	     this.getAgents();
-	    	     System.out.println("Prods Size " + prods.size());
+	    	   //  System.out.println("Prods Size " + prods.size());
  		Converter.makeVeresFiles(this.getOutDir2(), prods, this.custMap2, sales,"136", agent1, smas);
 	}
     
@@ -967,7 +967,7 @@ conv2.close();
         		  String sql2 ="select sum(s.kogus) as kogus, s.toode from (\r\n" + 
          		"select * from crlaosei6())as  s where s.objekt = '3' or s.toode like 'FLi%' group by s.toode ";
          if (isDebug()) {
-             System.out.println(sql);
+           //  System.out.println(sql);
          }
 
          try {
@@ -1259,13 +1259,16 @@ private Hashtable custCodes = null;
             ResultSet	      rs = stmt.executeQuery(cmd);
 
             while (rs.next()) {
+            
               Customer cust = new Customer(rs.getString("kood").trim());
+          	try {
               String maks = rs.getString("maksja");
               if(maks != null && maks.trim().length() >0){
             	  cust.setPayer(maks.trim());
               }
             String nimi = Converter.enCodeEst(rs.getString("nimi").trim());
             cust.setName(Converter.enCodeEst(nimi));
+           
             
             String addr = rs.getString("aadress");
             if(addr != null){
@@ -1315,6 +1318,10 @@ private Hashtable custCodes = null;
            
                 customers.put(nimi, cust);
                 custMap2.put(cust.getID(), cust);
+            	}catch(Exception e) {
+            		 System.out.println("vigane klient " + cust.getID());
+            		 e.printStackTrace();
+            	}
             }
             
 
@@ -2050,7 +2057,7 @@ Statement stmtw = conw.createStatement();
 						}
 					}
 					
-					System.out.println(prodID + " " + i);
+				//	System.out.println(prodID + " " + i);
 					  if(!prodID.equals("0") && !prodID.equals("")){
                   	
 					// Siin l�heme reasisse rokkima ja vaatama kas se toode
@@ -2116,15 +2123,10 @@ Statement stmtw = conw.createStatement();
 							
 							
 								result.add(mline);
-								if(clGroup.equals("A02") && "CUM009".equals(prodID.trim())) {
-									System.out.println(go + " ss " + a +" " +mline.getStringForFixedAssortment() + " " + sheet.getLastRowNum());
-								}
 							}
 							
 							
-							if(clGroup.equals("A02") && "CUM009".equals(prodID.trim())) {
-								System.out.println(go + " " + a +" " +mline.getStringForFixedAssortment()+ " " + sheet.getLastRowNum());
-							}
+							
 						}
 					}
 					   

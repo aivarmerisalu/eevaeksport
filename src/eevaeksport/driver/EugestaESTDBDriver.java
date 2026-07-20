@@ -1977,46 +1977,93 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
         	cust.addCity("Postiindeks: " + indeksT.get(cust.getID()));
         }
         
+
+        List<Agent> agentsExists = new ArrayList<>();
         
        if(cliags.get(cust.getID()) != null) {
          Vector<Agent> vv = cliags.get(cust.getID());
          
+         HashMap agvisit = new HashMap();
+         
+         //Paneme agendid külge kõik ja nopime välja kellel on Routing ka
          for(Agent agentL : vv) {
-        	 if(!cust.hasAgent(agentL.getID())) { // kui on olemas juba siis ei kirjuta yle
-          cust.addAgent(agentL);
-          if(agentL.nextContact != null) {
-              cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
-          }
-          
-          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-        	  cust.setMainAgent(agentL.getID());
-          }
-        
-         Agent aa1 = (Agent)agent1.get(agentL.getID());
-           if(aa1 != null) {
-      		Vector vec = aa1.getDubbler();
-  		      if(vec!= null && vec.size() >0){
-  			   Enumeration en = vec.elements();
-  			   while(en.hasMoreElements()){
-  				 String age = (String) en.nextElement();
-  				 Agent ee = new Agent(age);
-  		          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-  				     ee.setVisit(agentL.getVisit());// panene ka asendatava päeva plaani juurde
-  		          }
-  		         	 cust.addAgent(ee); 
-  		         
-  			   }
-  	       }
-          }
-         }
-         }
+
+               cust.addAgent(agentL);
+               
+	          if(agentL.nextContact != null) {
+	              cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
+	          }
+		          
+	          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+	        	  cust.setMainAgent(agentL.getID());
+	        	  agvisit.put(agentL.getID(), agentL.getVisit());
+	          }
+	          agentsExists.add(agentL);
+        	 
+         }	 
+         
+        // nyyd kammime läbi kõik, kes on kliendil küljes ja lisama asendajatele ka samad routingud
+        	 // kui on asendamine sii speame külge panema visit day ka 
+       
+       
+       
+       List<Agent> agentsToAdd = new ArrayList<>();
+
+   	//Vaatame ainult pea agendi asendajaid
+       
+        if(cust.getMainAgent() != null && cust.getMainAgent().trim().length() > 0) {
+           String idd = cust.getMainAgent();
+           Agent aa1 = (Agent) agent1.get(idd);
+
+           if (aa1 != null) {
+               Vector vec = aa1.getDubbler();
+
+               if (vec != null && !vec.isEmpty()) {
+                   Enumeration en = vec.elements();
+
+                   while (en.hasMoreElements()) {
+                       String age = (String) en.nextElement();
+                       Agent ee = new Agent(age);
+                          
+                           ee.setVisit((String)agvisit.get(idd));
+
+                       agentsToAdd.add(ee);
+                   }
+               }
+           }
+       }
+
+       for (Agent age : agentsToAdd) {
+           cust.addAgent(age);
+       }
+         
+       // paneme nüüd muud ka külge aga ilma visitita.
+       
+       for (Agent age : agentsExists) {
+    	   
+    	    // vaatame asendajaid 
+
+               Agent aa1 = (Agent) agent1.get(age.getID());
+               if (aa1 != null) {
+                   Vector vec = aa1.getDubbler();
+
+                   if (vec != null && !vec.isEmpty()) {
+                       Enumeration en = vec.elements();
+                       while (en.hasMoreElements()) {
+                           Agent ee = new Agent((String) en.nextElement());
+                           if(!cust.hasAgent(ee.getID())) {
+                               cust.addAgent(ee);
+                 	       } 
+                       }
+                   }
+               }
+               
+       }
+       
+         
      	}
       
 
-
-		// if(cust.getID().equals("1171065007")) {
-			// System.out.println("age " + cust.getAgents());
-		// }
         
        
         if(de) {

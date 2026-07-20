@@ -793,7 +793,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		        	   ags = "";
 		           }
 		           String must = " ";
-		           if(status == 2) {
+		           if(status == 1) {
 		        	   must = "TOP";
 		           }
 		           
@@ -1332,7 +1332,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
       Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
 	    
-    String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr from  dbo.EPASAULE_AGENTS";
+    String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr , email , phone from  dbo.EPASAULE_AGENTS";
 
     String cmdg = "select Agent_BackofficeID as kood , group_backofficeID as grupp,forSale, forMerch from EPASAULE_AGENTS_EAGENTGROUPS";
     String cmdb = "select Agent_BackofficeID as kood , brand_backofficeID as brand,forSale, forMerch from EPASAULE_AGENTS_EAGENTBRANDS";
@@ -1389,11 +1389,23 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
           Double reprLim = rs.getDouble("repr");
           if(reprLim > 0) {
         	  agent.repriceLimit = reprLim;
-          } else if(reprLim < 0) {
+           } else if(reprLim < 0) {
         	  agent.repriceLimit = -1.0;
-          }else {
+           } else {
          	  agent.repriceLimit = 0.0;
+           }
+
+          String email = rs.getString("email");
+          if(email != null && email.trim().length() > 0) {
+        	  agent.restEmail = email.trim();
           }
+          
+          String phone = rs.getString("phone");
+          if(phone != null && phone.trim().length() > 0) {
+        	  agent.restPhone = phone.trim();
+        	  agent.setPhone(phone.trim());
+          }
+          
           agent.setName(name);
           agent.setIsPilot(true);
           agent.todayCycleCode = todayCycleCode;
@@ -2246,7 +2258,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
                     		"                                   Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
                     		"                                    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
                     		"                                    contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2,"
-                    		+ " gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 , EG_AGENTREPRICINGALLOWED as reprice \r\n" + 
+                    		+ " gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 , EG_AGENTREPRICINGALLOWED as reprice, DeliveryComment as del3 \r\n" + 
                     		"                                    from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
                     		"                                LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
                     		"" ; 
@@ -2362,43 +2374,69 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         	cust.addCity("Pasta indekss: " + indeksT.get(cust.getID()));
         }
         
+        
+        
         if(cliags.get(cust.getID()) != null) {
-          Vector<Agent> vv = cliags.get(cust.getID());
+            Vector<Agent> vv = cliags.get(cust.getID());
+            
+            HashMap agvisit = new HashMap();
+            
+            //Paneme agendid külge kõik ja nopime välja kellel on Routing ka
+            for(Agent agentL : vv) {
+
+                  cust.addAgent(agentL);
+                  
+   	          if(agentL.nextContact != null) {
+   	              cust.addCity("N11124xxkamais: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
+   	          }
+   		          
+   	          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+   	        	  cust.setMainAgent(agentL.getID());
+   	        	  agvisit.put(agentL.getID(), agentL.getVisit());
+   	          }
+           	 
+            }	 
+            
+           // nyyd kammime läbi kõik, kes on kliendil küljes ja lisama asendajatele ka samad routingud
+           	 // kui on asendamine sii speame külge panema visit day ka 
           
-          for(Agent agentL : vv) {
-        	  
-        	  if(agsActive.contains(agentL.getID())) {
-         	 if(!cust.hasAgent(agentL.getID())) { // kui on olemas juba siis ei kirjuta yle
-           cust.addAgent(agentL);
-           if(agentL.nextContact != null) {
-        	 //  System.out.println("agentL.getVisit() " + agentL.getID() +" "+ cust.getID() + " " + agentL.getVisit());
-               cust.addCity(("N11124xxkamais: ") + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
-           }
-           
-           if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-         	  cust.setMainAgent(agentL.getID());
-           }
+          
+          
+          List<Agent> agentsToAdd = new ArrayList<>();
+
+      	//Vaatame ainult pea agendi asendajaid
+          
+           if(cust.getMainAgent() != null && cust.getMainAgent().trim().length() > 0) {
+              String idd = cust.getMainAgent();
+              Agent aa1 = (Agent) agent1.get(idd);
+
+              if (aa1 != null) {
+                  Vector vec = aa1.getDubbler();
+
+                  if (vec != null && !vec.isEmpty()) {
+                      Enumeration en = vec.elements();
+
+                      while (en.hasMoreElements()) {
+                          String age = (String) en.nextElement();
+                          Agent ee = new Agent(age);
+                             
+                              ee.setVisit((String)agvisit.get(idd));
+
+                          agentsToAdd.add(ee);
+                      }
+                  }
+              }
+          }
+
+          for (Agent age : agentsToAdd) {
+              cust.addAgent(age);
+          }
+            
+            
+        	}
          
-          Agent aa1 = (Agent)agent1.get(agentL.getID());
-            if(aa1 != null) {
-       		Vector vec = aa1.getDubbler();
-   		      if(vec!= null && vec.size() >0){
-   			   Enumeration en = vec.elements();
-   			   while(en.hasMoreElements()){
-   				 String age = (String) en.nextElement();
-   				 Agent ee = new Agent(age);
-   		          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-   				     ee.setVisit(agentL.getVisit());// panene ka asendatava päeva plaani juurde
-   		          }
-   		         	 cust.addAgent(ee); 
-   		         
-   			   }
-   	       }
-           }
-          }
-          }
-      	}
-        }    
+
+        
        
         if(de) {
         String block = rs.getString("block");
@@ -2605,6 +2643,12 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         if(reprice == 1) {
         	  cust.repriceallowed = true;
         	 // System.out.println(cust.getID() + " allowed " + cust.getAgents());
+        }
+        
+String del3 = rs.getString("del3");
+        
+        if(del3 != null && del3.trim().length() > 0) {
+        	cust.addCity(Converter.enCodeEst("Info piegādei: '" + del3.trim() + "'"));
         }
         
         
