@@ -719,7 +719,7 @@ con.close();
           String liik = rs.getString("kood").trim();
           String nimetus = rs.getString("nimi").trim();
           if (liik != "") {
-            tm.put(liik, Converter.enCodeEst(nimetus.replaceAll("'", "ä").replaceAll("", "Ä").replaceAll("å", "Õ").replaceAll("", "Ö")));
+            tm.put(liik, Converter.enCodeEst(nimetus.replace('\'', 'ö').replace('\'', 'ö')));
           }
         }
       }
@@ -737,17 +737,23 @@ con.close();
 
        TreeMap tm = new TreeMap();
 
-       String cmd = "SELECT  left(kood,2) AS kood,(left(trim(kood),1)+ ' ' + right(lisa,59)) AS nimi " +
+       String cmd = "SELECT  left(kood,2) AS kood,left(trim(kood),1) as abi, right(lisa,59) AS nimi " +
             " FROM osmy/klassif WHERE grupp ='GT' and lisa like '%*%'  ORDER BY nimi ";
        try {
          stmt = con.prepareStatement(cmd);
          ResultSet rs = stmt.executeQuery();
 
          while (rs.next()) {
+
+           String abi = rs.getString("abi").trim();
            String liik = rs.getString("kood").trim();
            String nimetus = rs.getString("nimi").trim();
+           nimetus = nimetus.replaceAll("Puurid", "Puur");
+           nimetus = nimetus.replaceAll("NoviPro", "NoviPr");
+           nimetus = nimetus.replaceAll("Kruvika ", "Kruv ");
+            
            if (liik != "") {
-             tm.put(liik, Converter.enCodeEst(nimetus));
+             tm.put(liik, abi + "_" + Converter.enCodeEst(nimetus));
            }
          }
        }

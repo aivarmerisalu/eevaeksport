@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -2985,38 +2987,8 @@ private HashSet<String> inTT = null;
           }
        
     	rs1.close();
-    	
-    	StringBuffer sb0 = new StringBuffer();
-    	
-    	String minP = "select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu,ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) AS disc   \r\n" + 
-    			"    						from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice != 0 \r\n" + 
-    			"    			    											group by a.promotionBackOfficeId,a.productBackOfficeId,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) \r\n" + 
-    			"    			    											union all\r\n" + 
-    			"    			    											select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid , (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu , 100 AS disc \r\n" + 
-    			"    			    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice = 0\r\n" + 
-    			"    			    											group by a.promotionBackOfficeId,a.productBackOfficeId,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) \r\n" + 
-    			"    			    											order by 1,2";
-    	
-    	 ResultSet rs = stmt.executeQuery(minP);
-        
-         
-         while(rs.next()){
-        	String gr = rs.getString("grupp").trim();
-        	String toode = rs.getString("toode").trim();
-        	String ladu = rs.getString("ladu").trim();
-        	Double disc = rs.getDouble("disc");
-
-        	
-        	sb0.append(gr+ ";" + toode + ";" + disc + ";" + ladu +"\n");
-         }
-        rs.close();
-        if(sb0.length() > 0) {
-        	Converter.saveFile("maxdiscounts.txt", sb0.toString());
-        }
-      //  System.out.println("prodMaxDisc " + prodMaxDisc.toString());
-    	
-    	
-       rs = stmt.executeQuery(cmd);
+    	    	
+       ResultSet rs = stmt.executeQuery(cmd);
       HashMap prodHash = new HashMap();
       
       while(rs.next()){
@@ -3228,6 +3200,56 @@ boolean noopt = false;
    
    
   rs.close();
+  
+  StringBuffer sb0 = new StringBuffer();
+	
+  //sIIN TYLEB LÄBI HINNA MaxDisc arvutada ja edastada
+	String minP = "select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu,ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) AS disc   \r\n" + 
+			"    						from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice != 0 \r\n" + 
+			"    			    											group by a.promotionBackOfficeId,a.productBackOfficeId,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) \r\n" + 
+			"    			    											union all\r\n" + 
+			"    			    											select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid , (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu , 100 AS disc \r\n" + 
+			"    			    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice = 0\r\n" + 
+			"    			    											group by a.promotionBackOfficeId,a.productBackOfficeId,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) \r\n" + 
+			"    			    											order by 1,2";
+	
+	minP = " select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu," + 
+					" [maxPrice]  AS price from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId " + 
+			"	where minqty = 0 AND maxqty = 0  and minPrice != 0  and mandatory = 'N'" + 
+			"			group by a.promotionBackOfficeId,a.productBackOfficeId,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), [maxPrice] ";
+	
+	 rs = stmt.executeQuery(minP);
+
+ 
+ while(rs.next()){
+	String gr = rs.getString("grupp").trim();
+	String toode = rs.getString("toode").trim();
+	String ladu = rs.getString("ladu").trim();
+	Double discprice = rs.getDouble("price");
+
+	if(usedProds.contains(toode) && (Product)prodHash.get(toode) != null && discprice > 0) { 
+    Double priceNormal = ((Product)prodHash.get(toode)).getPrice();
+	try {
+    Double disc = 100 -( discprice / priceNormal )*100;
+    disc = BigDecimal.valueOf(disc)
+            .setScale(4, RoundingMode.HALF_UP)
+            .doubleValue();
+	sb0.append(gr+ ";" + toode + ";" + disc + ";" + ladu +"\n");
+	}catch(Exception e) {
+		System.out.println(toode + " " + priceNormal + " " + discprice );
+		e.printStackTrace();
+	}
+	}
+ }
+rs.close();
+if(sb0.length() > 0) {
+	Converter.saveFile("maxdiscounts.txt", sb0.toString());
+}
+//System.out.println("prodMaxDisc " + prodMaxDisc.toString());
+	
+
+
+  
   stmt.close();
   con.close();
  // System.out.println("REASON " + sb.toString());
@@ -3248,6 +3270,10 @@ boolean noopt = false;
 	   Converter.saveFile("reprgroups.txt", sb30.toString());
    }
       
+  
+
+	  
+  
     } catch (Exception e){
       getParent().showError(e);
     }

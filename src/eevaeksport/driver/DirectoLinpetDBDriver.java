@@ -2222,11 +2222,57 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
    }
    
    
+   
+   private TreeMap makeGetzLTStock() {
+	   TreeMap res = new TreeMap();
+	     	   
+	    	   try {
+	    	    			 File f = new File (getParent().getProps().getProperty("getzlt.stock.dir") + "laoseis.xml");
+	    			     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	    			     DocumentBuilder db;
+	    				db = dbf.newDocumentBuilder();      	
+	    		 	FileInputStream in = getCleanInputStream(f);
+	    		 	String handler = null;
+	    		     Document doc = db.parse(in,handler);
+	    		     Node root = getNode(doc, "transport");      
+	    		  //   System.out.println(root);
+	    		 	Node read = getNode(root, "stocklevels");
+	    		 	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
+	    		     for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	    		     	  Node rida = read.getChildNodes().item(i);
+	    		     	  
+	    		     
+	    		     if(rida.getNodeName().equals("stocklevel")){
+	    		     
+	    		        double  seisx = 0;
+	    		        String stock = rida.getAttributes().getNamedItem("stock_level").getNodeValue();
+	    		        String id = rida.getAttributes().getNamedItem("code").getNodeValue();
+	    		     
+	    					seisx = Double.parseDouble(stock); 
+	    				
+	    				  if(seisx > 0) {
+	    			 	     res.put(id, seisx); 
+	    			       }
+
+	    		       	  }}
+	    		          in.close();
+	    		          
+	    		    	  }catch(Exception tt){
+	    		    		tt.printStackTrace();	 
+	    		    	  }
+
+	    	   
+	     System.out.println("GETZLT STOCK "+ res.size());
+	   return res;
+   }
+   
    private HashMap eanProds = null;
    
    public TreeMap getProducts(Agent agent){
 	   System.out.println("tooted a");
 	   TreeMap otherStocks = this.getProductsOther();
+
+	   TreeMap laduGETZLT = this.makeGetzLTStock();
 	   eanProds = new HashMap();
 	   
 	   TreeMap stocksfile = null;
@@ -2858,6 +2904,11 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
 	      		}catch(Exception t){
 				} 
       	   }
+      	 
+      	if(laduGETZLT != null && laduGETZLT.get(id) != null) {
+        	prod.addPartii("Getz LT stock: " + laduGETZLT.get(id));  
+          }
+      	 
       	  if(line.indexOf("ARTIKKEL_KAMP") != -1){
       	    	prod.setStatusDiscount("1");
       	    }

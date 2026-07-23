@@ -791,7 +791,7 @@ public class AxaZpienasMilkManaDBDriver extends AbstractDBDriver  implements Man
 	"		 as rieb ,(Select top 1  pdsbatchattribvalue  from PdsBatchAttributes pa where pa.InventBatchId = ost.InventBatchTo " +
 	"		   and pa.analysisplace_bbs  = 'ZP' and pa.pdsbatchattribid = 'BP')" +
 "			  as balt   from  BBsMilkJournalTrans ost where ost.dataareaid ='zp' and ost.transdate > getdate() -15 " +
-"	         and purchqty  != 0 and len(ost.stationid) > 0) as tt where ISNUMERIC(tt.rieb)= 1" +
+"	         and purchqty  != 0 and len(ost.stationid) > 0) as tt where ISNUMERIC(tt.rieb)= 1 and tt.balt != '' " +
 "			 group by tt.klient,tt.kuup order by 1,2 desc,3  ";       //OK
 	       	       
 	       

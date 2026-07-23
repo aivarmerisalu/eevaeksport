@@ -87,8 +87,9 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
   public RahvaRaamatAPIDBDriver(EksportPanel parent) {
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
-      secret = parent.getProps().getProperty("api.secret"); //"I~c8Q~fgLOHhFnFcIe2RHUSX6HWlPHXN8fon9b4Q"; 
-	  clientID =  parent.getProps().getProperty("api.clientID"); //"075984fb-65fc-45e1-9a26-168935061542";
+    
+      secret = parent.getProps().getProperty("api.secret");  
+	  clientID =  parent.getProps().getProperty("api.clientID"); 
 	  
 	  user =  getParent().getProps().getProperty("rest.user");
       pass = getParent().getProps().getProperty("rest.pass");
@@ -112,7 +113,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
    
    //   getPriceMatrixData();
      // getCustomerNewProducts();
-    // this.downloadData("getStockAndSales");
+    // this.downloadData("getCustomerOrders");
      // getCustomers(null);
         //downloadData(null);
     // this.getDebt(null);
@@ -200,6 +201,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 		 	 	    if(a > 0) {
 		 	 	    	aa = a + "";
 		 	 	    }
+		 	 	    
 		 	 	  try {	
 		     	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getCustomerOrders" + aa +".json");
 		 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
@@ -209,77 +211,64 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 		 		  for (int i = 0; i < lenn; i++) {
 		 			  
 		 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-		         		String customerNumber = (String) cob.get("location");
+		         		String customerNumber = (String) cob.get("location_code");
 		         		String cuCode = locations.get(customerNumber);
+		         		
 		         		if(cuCode != null) {
 		         			try {
 
+		         				/*
+		         			      "location_code": "10ETKTIK",
+		         			      "product_id": "R822691",
+		         			      "quantity": "2",
+		         			      "date": "2026-07-20T00:00:00.000Z"
+		         			     */
+		         				
 		         	        	String prodId = ((String) cob.get("product_id"));
-		         				if(prodId == null) {
-		         					prodId = ((String) cob.get("item_id"));
-		         				}
-		         				prodId = prodId.trim();
-		 	        	
-		         				
-		         				boolean gg = false;		
-		         				
-			         		Toode tt = new Toode(prodId);
+		         	            String startDate = (String)cob.get("date");		
+
+							 	MatrixLine ml = new MatrixLine();
+								 ml.setCustID(cuCode);
+								 ml.setProdID(prodId);
+								
 							     if(cob.get("quantity") != null) {
-							    	 tt.addKogus(Double.parseDouble(cob.get("quantity") + "")); 
-							    	 if(tt.getKogus() > 0) {
-							    	   gg = true;
-							    	 }
+									ml.setPrice(Double.parseDouble((String)cob.get("quantity")));// see on sassis ja vajab erilähenemist	
 							     }
-		         			}catch(Exception e) {}
-		         			
+							     
+							     ml.setStartDate(startDate.substring(5,10));
+							    
+							    
+							     /*ml.setDiscount(rs3.getDouble("hind"));
+								
+								double kmin = rs3.getDouble("kogusmin");
+								
+								ml.setMinAm(kmin);
+								ml.setLineinfo(rs3.getString("doknr").trim());
+								
+								int color = rs3.getInt("color");
+								if(color == 1) {
+									ml.setCliGroup("green");
+								}
+		                      
+								if(kmin < 0) {
+									ml.setCliGroup("red");
+								}
+							    */
+								result.add(ml);
+	     
+		         			}catch(Exception e) {e.printStackTrace();}
 		         		}
-		 		  }
-		 	 	  }catch(Exception e) {}
+		 		     }
+		 	 	  }catch(Exception e) {e.printStackTrace();}
 		 	 	}
 
 			
 
-	String sq3 = "    SELECT jou.clientBackOfficeId as klient, jou.deliverydate  as kuup , jou.productBackOfficeId as toode ,\r\n" + 
-			"					 sum(case when jou.Quantity > 0 then jou.Quantity else 0 end) as kogus, jou.Price as hind,\r\n" + 
-			"						 sum(case when jou.Quantity < 0 then jou.Quantity else 0 end) as kogusmin, max (jou.invoiceNumber) as doknr ,\r\n" + 
-			"						 case when  jou.deliverydate > CAST(GETDATE() AS DATE)then 1 else 0 end as color FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >=  \r\n" + 
-			"									(select top 1 kuupaev  from ( 	 SELECT top 10 jou2.deliverydate as kuupaev FROM  EPASAULE_DELIVERIES jou2  where ltrim(jou2.clientBackOfficeId) = ltrim(jou.clientBackOfficeId)    \r\n" + 
-			"									 and jou2.deliverydate > getdate()-90 and jou2.deliverydate < getdate()+4 group by jou2.clientBackOfficeId , jou2.deliverydate order by jou2.deliverydate desc) as dd order by kuupaev)   \r\n" + 
-			"							 GROUP BY jou.clientBackOfficeId,jou.deliverydate , jou.productBackOfficeId , jou.Price ORDER BY jou.clientBackOfficeId,jou.deliverydate desc, max(jou.invoiceNumber) desc, jou.productBackOfficeId" ;
-					
-					Connection con3 = getNewConnection();
-					Statement st3 = con3.createStatement();
-					ResultSet rs3 = st3.executeQuery(sq3);
-					while (rs3.next()) {
-						MatrixLine ml = new MatrixLine();
-						ml.setCustID(rs3.getString("klient").trim());
-						ml.setStartDate(Converter.turn(rs3.getString("kuup")).substring(0,5));
-						ml.setProdID(rs3.getString("toode").trim());
-						ml.setPrice(rs3.getDouble("kogus"));// see on sassis ja vajab erilähenemist
-						ml.setDiscount(rs3.getDouble("hind"));
-						double kmin = rs3.getDouble("kogusmin");
-						
-						ml.setMinAm(kmin);
-						ml.setLineinfo(rs3.getString("doknr").trim());
-						
-						int color = rs3.getInt("color");
-						if(color == 1) {
-							ml.setCliGroup("green");
-						}
-                      
-						if(kmin < 0) {
-							ml.setCliGroup("red");
-						}
-					    
-						result.add(ml);
-					}
-					rs3.close();
-					st3.close();
-					con3.close();
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		System.out.println("LastThree " + result.size());
 
 		return result;
 
@@ -420,7 +409,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	   if(returnList == null) {
 		   this.getStockAndSales();
 	   }
-	   System.out.println("Fix listis " + this.returnList.size());
+	  // System.out.println("Fix listis " + this.returnList.size());
 	
 	   Iterator itera =  returnList2.keySet().iterator();
 		  while(itera.hasNext()) {
@@ -710,7 +699,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	        		        if (entity != null) {
 	        		        String result = EntityUtils.toString(entity);
 	        		        Converter.saveFile("data//" + dataType +"" + i+ ".json", result);
-	        		        System.out.println(dataType + " tehtud");
+	        		      //  System.out.println(dataType + " tehtud");
 	        		        
 	        		        
 	        		        }} catch (IOException e) {
@@ -803,14 +792,14 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	   
 	   
 	   if(this.loadData ) {
-	     downloadData(null);
+	   //  downloadData(null);
 	   }
 	   
 	//   TreeMap routes = getRouting();
 	   
 	 //  System.exit(0);
 	   HashMap lastDeliveries = getLastDeliveryDates();
-	   System.out.println("ld : " + lastDeliveries.toString());
+	 //  System.out.println("ld : " + lastDeliveries.toString());
 	   
 		 TreeMap custagents =  Converter.getWebCustomersAgents(rcompany, user, pass);
 	   
@@ -948,7 +937,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 				}
 	          }
 	            }catch(Exception e) {
-	            	System.out.println("ags " + ags.toString());
+	            	//System.out.println("ags " + ags.toString());
 	            	e.printStackTrace();
 	            }
 	            custInUse.add(cust.getID());
@@ -994,7 +983,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 				e.printStackTrace();
 			}
 		 	}
-	System.out.println("Custsize " + tm.size());
+	//System.out.println("Custsize " + tm.size());
 	//System.exit(0);
 		  
 		return tm;
@@ -1149,9 +1138,9 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
         } else  if(stat.equals("D") && seis ) {
     		
 	        	String date  = (String) cob.get("first_arrival");
-	        	 if(cuCode.equals("K800393") && prodId.equals("R844011")) {
+	        	/* if(cuCode.equals("K800393") && prodId.equals("R844011")) {
 	        	        System.out.println("Seisev välja " + customerNumber + " " + prodId + " "+ tt.getKogus() + " ");
-	        		 }
+	        		 }*/
    		 TreeMap sisu = new TreeMap();
       		if(returnList.get(cuCode) != null) {
       			sisu = (TreeMap)returnList.get(cuCode);
@@ -1177,7 +1166,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
  	         		
  	         		res.put(cuCode, sisu);
          			}catch(Exception e) {
-         			System.out.println(cob.toJSONString());
+         			//System.out.println(cob.toJSONString());
          				e.printStackTrace();
          			}
  	         		
@@ -1481,7 +1470,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
     	 Iterator ite =  tr.keySet().iterator();
          while(ite.hasNext()) {
         	 CustProd ccp = tr.get(ite.next());
-        	 System.out.println(cuid +" "+ ccp.getProdID() + " " + ccp.getLastAmountDate());
+        	// System.out.println(cuid +" "+ ccp.getProdID() + " " + ccp.getLastAmountDate());
         	  custProds.add(ccp);    	 
          }
         	 
@@ -1641,7 +1630,7 @@ public TreeMap getProducts(Agent agent) {
           	}
 		  }
 		} catch (Exception e) {
-			System.out.println("cob "+  cob.toString());
+			//System.out.println("cob "+  cob.toString());
 			e.printStackTrace();
 		}
 	 	}
@@ -1716,7 +1705,7 @@ public void PictureMaker() {
 	   	      // siin on otsesysteemi pildid laetud alla.
 	   	      //nüüd lisame webipoets puuduvad.
 	   	      
-	      System.out.println("allProdIds " + allProdIds.size());
+	      //System.out.println("allProdIds " + allProdIds.size());
       	
 	      
 	   	   Iterator itera = allProdIds.iterator();
@@ -1732,7 +1721,7 @@ public void PictureMaker() {
         			 String xml = fetchXml(url);
         			 String ur = parseImagesXml(xml);
         			 
-        			 System.out.println("ur " + ur);
+        			// System.out.println("ur " + ur);
         			 if(ur != null) {
         			  Converter.downloadFile(ur, pictssou + prodID+ ".jpg");
         			 

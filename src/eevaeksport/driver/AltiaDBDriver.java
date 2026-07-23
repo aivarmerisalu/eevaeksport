@@ -1505,7 +1505,18 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
        	   	 }
           		      		   
           		 String eans = "";
-       	      try{
+       	      
+
+    	         try{  
+       	    		 String ean   = getNode(getNode(rida,"ItemUnitRecord"),"ItemUnitGTIN").getFirstChild().getNodeValue();
+            	     prod.setEAN(ean);
+            	     if(ean.length()>4){
+            	    	 eans = ean.substring(ean.length()-4);
+            	     }
+        	      }catch(Exception e ){}
+        	      
+    	         
+          		 try{
           		 String ean   = getNode(rida,"GTIN").getFirstChild().getNodeValue();
           	     prod.setEAN(ean);
           	     if(ean.length()>4){
@@ -1513,14 +1524,6 @@ public static String getYYYYpMMpDDpTimeNiceString(Date dd){
           	     }
       	      }catch(Exception e ){}
       	      
-	         try{  
-   	    		 String ean   = getNode(getNode(rida,"ItemUnitRecord"),"ItemUnitGTIN").getFirstChild().getNodeValue();
-        	     prod.setEAN(ean);
-        	     if(ean.length()>4){
-        	    	 eans = ean.substring(ean.length()-4);
-        	     }
-    	      }catch(Exception e ){}
-    	      
        	   
         	      try{
         	    	  String name   = getNodeAttr(rida,"ItemDescription","ID").getFirstChild().getNodeValue();

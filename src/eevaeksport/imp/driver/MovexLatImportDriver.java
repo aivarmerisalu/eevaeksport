@@ -61,7 +61,6 @@ public class MovexLatImportDriver
     String databaseDriverName = "oracle.jdbc.driver.OracleDriver";
     try {
       Class.forName(databaseDriverName).newInstance();
-      con = DriverManager.getConnection("jdbc:oracle:thin:@10.10.100.97:1521:GM3REP1", parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
       tooted = this.getProducts(null);
    System.out.println("Products size " + tooted.size());
       calNF.setMaximumFractionDigits(0);
@@ -101,6 +100,8 @@ public class MovexLatImportDriver
 
 	      HashMap products = new HashMap();
 	      try {
+	    	   Connection  con = DriverManager.getConnection("jdbc:oracle:thin:@10.10.100.97:1521:GM3REP1", parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+	    	   
 	        Statement st = con.createStatement();
 	        ResultSet rs = st.executeQuery(cmd);
 
@@ -127,6 +128,7 @@ public class MovexLatImportDriver
 	        }
 	        rs.close();
 	        st.close();
+	        con.close();
 	      } catch (Exception e){
 	        parent.showError(e);
 	      }
@@ -193,7 +195,8 @@ public class MovexLatImportDriver
 	
     System.out.println(sql1);
     String acc = null;
-
+    Connection  con = DriverManager.getConnection("jdbc:oracle:thin:@10.10.100.97:1521:GM3REP1", parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+    
     Statement st1 = con.createStatement();
     ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -203,6 +206,7 @@ public class MovexLatImportDriver
     
     rs1.close();
     st1.close();
+    con.close();
 
     System.out.println("Klient: " + acc + " " + id);
     return acc;
@@ -219,6 +223,8 @@ public class MovexLatImportDriver
 	    System.out.println(sql1);
 	    String acc = "";
 try{
+	   Connection  con = DriverManager.getConnection("jdbc:oracle:thin:@10.10.100.97:1521:GM3REP1", parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+	   
 	  Statement st1 = con.createStatement();
 	    ResultSet rs1 = st1.executeQuery(sql1);
 
@@ -228,6 +234,7 @@ try{
 	    
 	    rs1.close();
 	    st1.close();
+	    con.close();
 }catch(Exception e){
 	e.printStackTrace();
 }
@@ -716,7 +723,7 @@ try{
   }
 
   private NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
-  private Connection con;
+ 
   private   int cou = 0;
   private ImportPanel parent;
   private HashMap tooted = null;

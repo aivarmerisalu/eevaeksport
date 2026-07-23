@@ -85,9 +85,6 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
     String databaseDriverName = "oracle.jdbc.driver.OracleDriver";
     try {
       Class.forName(databaseDriverName).newInstance();
-      con = getNewConnection();
-      stmt = con.createStatement();
-     
       
     } catch (Exception e){
       parent.showError(e);
@@ -157,8 +154,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
     		          ps.close();
     		          con.close();
     		      } catch (SQLException e) {
-    		    	  con.close();
-    		          e.printStackTrace();
+    		    	  e.printStackTrace();
     		      }    
     		    
     		}
@@ -203,6 +199,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
 			custs.put(kood,custw);
 		}
 		}
+		rs.close();
 
 		//siin pannakse peale PLOKKID
 
@@ -220,6 +217,9 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
 		 }
 
 		rs.close();
+		st.close();
+		con1.close();
+		
 		} catch (Exception e) {
 		getParent().showError(e);
 		}
@@ -473,7 +473,6 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
     String horecaGrs = getParent().getProps().getProperty("horeca.sortiment.groups");
     
     try {
-      Connection con = getNewConnection();
        
         
         Hashtable debts = new Hashtable();
@@ -492,6 +491,8 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
        String cmdk = "SELECT PYNO as kood,agrnr as agrno,fvdt as startD,lvdt as endD,current_fulfill as sold,agr_end_fullfill as estimate " + 
        		", current_fulfill_coll as coloursold, agr_end_fullfill_coll as coloursesti FROM cesu.mjhorecainvest ";
        try {  
+
+    	      Connection con = getNewConnection();
        Statement    st = con.createStatement();
      ResultSet   rs1 = st.executeQuery(cmdk);
          sbinvest = new StringBuffer();
@@ -519,6 +520,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                     }
       rs1.close();
       st.close();
+      con.close();
         }catch(Exception e) {
       	  e.printStackTrace();
         }
@@ -528,6 +530,8 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
         StringBuffer sbcompa = new StringBuffer();
        cmdk = "SELECT * FROM cesu.mjcustomervol  ";
       try {
+
+          Connection con = getNewConnection();
     	  Statement  st = con.createStatement();
     	  ResultSet rs1 = st.executeQuery(cmdk);
                         while(rs1.next()){
@@ -567,6 +571,7 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
                    }
      rs1.close();
      st.close();
+     con.close();
       }catch(Exception e) {
     	  e.printStackTrace();
       }
@@ -580,7 +585,8 @@ public class MovexLatDBDriver extends AbstractDBDriver implements MustDister,Dis
        // tarne p�evade lisamine 
        String cmd31 = "SELECT ddsmcd, ddcuno as saaja , dddays as days FROM cesu.MJDELDAY ";
        String sss = "ALTER SESSION SET NLS_TERRITORY = 'LATVIA'";
-       
+
+       Connection con = getNewConnection();
        Statement st1 = con.createStatement();
        st1.executeQuery(sss);
        
@@ -714,7 +720,6 @@ String    cmd2 = " select  KLGRUPP, LICENCE, KOOD, NIMI, AADRESS1, VISIT, SQ_VIS
 
 
 
-Calendar cal = Calendar.getInstance();
 	 
       if (isDebug()) System.out.println(cmd2);
        Statement st = con.createStatement();
@@ -965,7 +970,7 @@ Calendar cal = Calendar.getInstance();
           custMap.put(cust.getID(), cust);
     }
 
-         
+         rs.close();
          st.close();
          con.close();
 
@@ -1455,7 +1460,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 
      if (isDebug()) System.out.println(sql);
        Connection con = getNewConnection();
-       stmt = con.createStatement();
+       Statement stmt = con.createStatement();
        ResultSet rs = stmt.executeQuery(sql);
 
        while(rs.next()){
@@ -1527,6 +1532,8 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
            nn.setGroupingUsed(false);
            try {
              Connection con = getNewConnection();
+             Statement stmt = con.createStatement();
+             
              stmt = con.createStatement();
              ResultSet rs2 = stmt.executeQuery(sql);
              while (rs2.next()) {
@@ -1535,6 +1542,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
                          " EUR\n-------------------------------------\n");
              }
              rs2.close();
+             stmt.close();
              con.close();
              sb.append("\n\n" + getParent().getString ("string3") + "\n\n");
              sb.append(getParent().getString("string2") + "\n\n");
@@ -1573,12 +1581,13 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
          sb.append("\n " + getParent().getString("todaysbills") + "\n\n");
 
          Connection con4 = getNewConnection();
-         stmt = con4.createStatement();
+         Statement stmt = con4.createStatement();
          ResultSet rs5 = stmt.executeQuery(sql4);
          while (rs5.next()) {
            sb.append(rs5.getString("nr") + " " + rs5.getString("nimi") + "\n\n");
          }
          rs5.close();
+         stmt.close();
          con4.close();
 
          sb.append("\n\n " + getParent().getString("string5") + "\n\t" +
@@ -1598,7 +1607,10 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
                       " EUR.\n-------------------------------------\n");
           }
       //    System.out.println(sb.toString());
+          rs2.close();
+          stmt.close();
           con.close();
+          
           sb.append("\n\n" + getParent().getString("string3") + "\n\n");
           sb.append(getParent().getString("string2") + "\n\n");
           Connection con2 = getNewConnection();
@@ -1614,8 +1626,11 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
            sb.append(nimetus + "\n");
            sb.append("\t\t" + ale + " %\t" + kogus + "\n\n");
           }
+          rs3.close();
+          st.close();
+          con2.close();
 
-        Connection con3 = getNewConnection();
+          Connection con3 = getNewConnection();
         Statement stv = con3.createStatement();
         ResultSet rs4 = st.executeQuery(sql3);
         while (rs4.next()) {
@@ -1625,8 +1640,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
           sb.append(nimetus + "\n");
           sb.append("\t\t" + ale + " %\t" + kogus + "\n\n");
         }
-        st.close();
-        con2.close();
+        rs4.close();
         stv.close();
         con3.close();
      
@@ -2060,9 +2074,6 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
     }
 
 
-//  private String url = "jdbc:odbc:M3LVPROD";
-  private Connection con;
-  private Statement stmt;
   private String url2 = "jdbc:odbc:report";
   private String subjectFilesTo = null;
   private NumberFormat NF = NumberFormat.getInstance();
@@ -2955,7 +2966,7 @@ private HashSet getHrcProds() {
 	                   }
 
 	  	       rs.close();
-	  	       con.close();
+	  	       stmt.close();
 	  	       cc.close();
 	               
 	                 } catch (Exception e) {
@@ -3002,7 +3013,7 @@ public Vector getFixedAssortmentData() {
                    }
 
   	       rs.close();
-  	       con.close();
+  	       stmt.close();
   	       cc.close();
                   } catch (Exception e) {
                       getParent().showError(e);

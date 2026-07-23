@@ -942,9 +942,12 @@ public class EksportPanel extends JPanel implements ActionListener,
             		|| driver.getDriverVersion().equals("EugestaLIT")
             		|| driver.getDriverVersion().equals("EugestaLAT")
             		|| driver.getDriverVersion().equals("EugestaEST")
-            		|| driver.getDriverVersion().equals("NaviLivikoLIT")){
+            		|| driver.getDriverVersion().equals("NaviLivikoLIT")
+            		|| driver.getDriverVersion().equals("RahvaRaamat")
+            		){
             	lastThree = ((Discounter) driver).getLastThreeData();
             }
+            
             Vector debts = null;
           
             System.out.println("parent. costructfiles debt  ");
@@ -1361,11 +1364,11 @@ public class EksportPanel extends JPanel implements ActionListener,
                 		  || driver.getDriverVersion().equals("Kalev")
                 		  || driver.getDriverVersion().equals("SmartenR")
                 		  || driver.getDriverVersion().equals("AxaFazerEE")
-
                   		|| driver.getDriverVersion().equals("EugestaLIT")
                   		|| driver.getDriverVersion().equals("EugestaLAT")
                   		|| driver.getDriverVersion().equals("EugestaEST")
-                		  || driver.getDriverVersion().equals("S1Tabak")){
+                		  || driver.getDriverVersion().equals("S1Tabak")
+                		  || driver.getDriverVersion().equals("RahvaRaamat")){
                      LastThreeFile(agentCode, customers,  lastThree);
                    }
                  
