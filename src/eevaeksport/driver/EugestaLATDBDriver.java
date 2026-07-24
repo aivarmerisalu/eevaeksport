@@ -2349,7 +2349,17 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         	}
         	aadr = aadr.replaceAll("\\s+", " ").trim();
         	
-          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll(country, " ").replaceAll("\\s+", " ").trim()), country));
+        	if(aadr.contains("LV-")) {
+        		if(aadr.indexOf(",LV-") != -1) {
+        			aadr = aadr.substring(0,aadr.indexOf(",LV-"));
+        		}
+        		if(aadr.indexOf(", LV-") != -1) {
+        			aadr = aadr.substring(0,aadr.indexOf(", LV-"));
+        		}
+        	}
+        	// viskame aadressist välja lõpust Latvija ja indeksi
+        	
+          cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll(country, " ").replaceAll("\\s+", " ").trim()), " "));
        
           if(aadr.contains(",")) {
           		cust.restStreet = aadr.trim().substring(0,aadr.trim().indexOf(","));
@@ -2363,7 +2373,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         //if(deldays.get(cust.getID())  != null){
         	//cust.setDelDays((String)deldays.get(cust.getID()));
         //}    
-
+        
         
         cust.restName = name;
        // name = Converter.enCodeEst(name);

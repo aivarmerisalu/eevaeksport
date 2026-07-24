@@ -681,6 +681,10 @@ private Product getProd(String toode){
 	  String status = "V";
 	  
 	  int orderingTime = 0;
+	  
+	  if(ref.length() > 299) {
+		  ref = ref.substring(0,299);
+	  }
 	      
 	  String sql = " INSERT INTO  ORDERS (  " +
 	                     " ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ," +
