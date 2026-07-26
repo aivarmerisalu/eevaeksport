@@ -792,7 +792,7 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
 	   
 	   
 	   if(this.loadData ) {
-	   //  downloadData(null);
+	    downloadData(null);
 	   }
 	   
 	//   TreeMap routes = getRouting();

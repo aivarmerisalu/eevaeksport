@@ -681,10 +681,41 @@ private Product getProd(String toode){
      }else{
    	    dir =  "excel/"; 
      }
-  
-     
      return dir;
    }
+ 
+ private void getCustTiesNew() {
+
+	  ibCustCodes = new HashMap<String, String>(); 
+	 
+	  String cmd = " SELECT c.ACCOUNTNUM as kood,  ecv.EXTCODEVALUE kood2 FROM EXTCODEVALUETABLE ecv " + 
+	  		"INNER JOIN CUSTTABLE c " + 
+	  		"ON ecv.EXTCODERELATIONRECID = c.RECID and c.dataareaid = ecv.dataareaid " + 
+	  		"where  ecv.EXTCODEID = 'ITB' and c.dataareaid = 'spil' ";
+
+  try {
+   Connection con = null;
+  try {
+	con = getNewConnection();
+   } catch(Exception e){
+	System.out.println("OutBabe no connection");
+	System.exit(0);
+   }
+  
+  Statement stmt = con.createStatement();
+  ResultSet rs = stmt.executeQuery(cmd);
+	while(rs.next()){
+		String custADL  = rs.getString("kood").trim(); 
+		String custIB  = rs.getString("kood2").trim(); 
+		ibCustCodes.put(custIB, custADL); 
+   }
+	rs.close();
+	stmt.close();
+	con.close();
+	
+  }catch(Exception e) {e.printStackTrace();}
+	  
+ }
 
  private void getCustTies() {
 

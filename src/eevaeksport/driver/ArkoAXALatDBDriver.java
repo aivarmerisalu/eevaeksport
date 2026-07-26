@@ -434,7 +434,7 @@ System.out.println("prdcodes suurus "  + prodcodes.size() + " " + prodcodes.cont
  String cmd = " SELECT cus.name,cus.namealias,cus.accountnum,(case when len(cus.invoiceaccount)=0 then cus.accountnum else cus.invoiceaccount end )AS payer,  " +
               "(SELECT sum(amountmst) FROM custtransopen co WHERE co.duedate<getdate()  " +
               "  AND co.accountnum = cus.accountnum) AS debt, cus.linedisc ,   " +
-               "   aad.address, '' AS visit ,salesgroup AS agent ,  numofdays AS term, blocked AS block , " +
+               "   aad.address,cus.address as add2,'' AS visit ,salesgroup AS agent ,  numofdays AS term, blocked AS block , " +
 			  " (select max (blocked) from custtable cc where  cc.invoiceaccount=cus.invoiceaccount)  "+
 			  " as payerblock ,aad.phone + ' '  + aad.telefax as info  FROM custtable cus LEFT JOIN paymterm  pay on cus.paymtermid=pay.paymtermid and  cus.dataareaid= pay.dataareaid  " +
 			  " LEFT JOIN ADDRESS aad ON aad.addrrecid=cus.recid and aad.dataareaid= 'lv'   and  cus.dataareaid= aad.dataareaid" +
@@ -482,9 +482,15 @@ System.out.println("prdcodes suurus "  + prodcodes.size() + " " + prodcodes.cont
         }
 
         String aadr = rs.getString("address");
-        if (aadr != null) {
+        if (aadr != null && aadr.trim().length() > 0) {
           cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ')), "Latvia"));
          // System.out.println(aleke +aadr.replace('\n',' '));
+        }else {
+        	aadr = rs.getString("add2");
+        	if (aadr != null && aadr.trim().length() > 0) {
+                cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ')), "Latvia"));
+               // System.out.println(aleke +aadr.replace('\n',' '));
+              }
         }
         String visit = rs.getString("visit");
         if (visit != null && visit.trim().length()>0) {
