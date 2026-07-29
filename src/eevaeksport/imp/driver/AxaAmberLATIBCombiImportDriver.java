@@ -684,7 +684,7 @@ private Product getProd(String toode){
      return dir;
    }
  
- private void getCustTiesNew() {
+ private void getCustTies() {
 
 	  ibCustCodes = new HashMap<String, String>(); 
 	 
@@ -717,7 +717,7 @@ private Product getProd(String toode){
 	  
  }
 
- private void getCustTies() {
+ private void getCustTiesOLD() {
 
 	  ibCustCodes = new HashMap<String, String>(); 
 	  
@@ -762,7 +762,7 @@ private Product getProd(String toode){
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-  // System.out.println(ibCustCodes.toString());
+   System.out.println("ibCustCodesIMP " + ibCustCodes.size());
  }
 
 

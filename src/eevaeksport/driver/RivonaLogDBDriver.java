@@ -415,7 +415,7 @@ private void sendDocs(Vector uploadedXML){
 		     	          while (iterax.hasNext()){
 		     	        	  String did = iterax.next()+ "";
 		     	            if(children[i].indexOf(key) != -1 && children[i].endsWith("pdf")){
-		     	        if( serv.uploadFile("https://reporting-files.mobitrek.eu/rest/fileUpload/uploadFile/" , ff.getAbsolutePath(), did, "shipit") ){
+		     	        if( serv.uploadFile("https://api.mobitrek.eu/rest/fileUpload/uploadFile/" , ff.getAbsolutePath(), did, "shipit") ){
 		     	        	System.out.println("Uploaded " + ff.getName() + " " + ff.getAbsolutePath());
 		     	        	uploaded.add(ff.getName());
 		     	        }else{

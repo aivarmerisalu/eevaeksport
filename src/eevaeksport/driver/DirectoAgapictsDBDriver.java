@@ -1276,13 +1276,11 @@ public class DirectoAgapictsDBDriver extends AbstractDBDriver implements BulkUpd
 				    		 
 	  		    	  }
 	  			    	  
-	  			    	  if((toode.startsWith("UT") || toode.startsWith("UI")) && prods.get(toode) != null) {
+	  			    	  if((toode.startsWith("UT") || toode.startsWith("UI"))) {
+	  			    		  if( prods.get(toode) != null) {
 	  			    		  toode = ((Product)prods.get(toode)).getEAN();
-	  			    		  //System.out.println("muutsin koodi 00" + toode);
-
-	  			    		  if(konverter != null && konverter.getProperty(toode) != null) {
+	  			    		  } else if(konverter != null && konverter.getProperty(toode) != null) {
 	  			    			  toode = (String)konverter.getProperty(toode);
-	  			    			//  System.out.println("muutsin koodi 22  " + toode);
 	  			    		  }
 	  			    	  }
 	  			    	  

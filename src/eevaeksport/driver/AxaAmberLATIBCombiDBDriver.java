@@ -1284,7 +1284,7 @@ rs.close();
   private HashSet <String> custtsUsed = null;
 
   
-  private void getCustTies() {
+  private void getCustTiesold() {
 
 	  ibCustCodes = new HashMap<String, String>(); 
 	  adlCustCodes = new HashMap<String, String>(); 
@@ -1338,7 +1338,7 @@ rs.close();
   }
 
   
-  private void getCustTiesNew() {
+  private void getCustTies() {
 
 	  ibCustCodes = new HashMap<String, String>(); 
 	  adlCustCodes = new HashMap<String, String>(); 
@@ -1374,7 +1374,10 @@ rs.close();
 stmt.close();
 con.close();
 }catch(Exception e) {e.printStackTrace();}
-	  
+
+System.out.println("adlCustCodes " + adlCustCodes.size());
+
+
   }
 
   

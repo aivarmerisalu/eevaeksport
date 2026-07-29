@@ -2172,7 +2172,7 @@ public void WebReporter() {
       		
       		
 
-            String url = "https://reporting-files.mobitrek.eu/gallery/klp/";
+            String url = "https://api.mobitrek.eu/gallery/klp/";
       		
       		TreeMap newCusts = new TreeMap();
       		

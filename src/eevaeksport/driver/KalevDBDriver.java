@@ -3649,7 +3649,7 @@ try{
 							
 							if(cfoto != null && filterProblem.contains("YESNO")) {
 								
-	  							 sbYesNo.append(cfoto + ";https://reporting-files.mobitrek.eu/gallery/kalevmerc/" + cfoto +";" );	
+	  							 sbYesNo.append(cfoto + ";https://api.mobitrek.eu/gallery/kalevmerc/" + cfoto +";" );	
 	  							
 							}else {
 								try {
@@ -3685,7 +3685,7 @@ try{
 					  					}
 					  					
 					  					if(!olem) {
-					  						 sbYesNo.append(fname + ";https://reporting-files.mobitrek.eu/gallery/kalevmerc/" + fname +";" );
+					  						 sbYesNo.append(fname + ";https://api.mobitrek.eu/gallery/kalevmerc/" + fname +";" );
 					  						 olem = true;
 					  					}
 					  					

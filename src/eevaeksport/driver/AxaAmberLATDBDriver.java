@@ -1281,11 +1281,11 @@ System.out.println("Assets serveris " + assets.length());
   HashSet fixedSortiments = null;
   
   public TreeMap getCustomers(Agent agent){
-try{
+    try{
 	   Converter.getManagersReplacements(agent1, rcompany, user, pass, true); 
-}catch(Exception e){
+      }catch(Exception e){
 
-}
+      }
 	   this.getFixedAssortmentData();
 	   
 	   TreeMap openOrders = this.getOpenOrders();
