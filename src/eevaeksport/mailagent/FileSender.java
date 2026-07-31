@@ -66,6 +66,7 @@ public class FileSender {
 	static Category log = Category.getRoot();
 	public boolean sendMaster = false;
 	public boolean sendStock = false;
+	public boolean sendFiles = false;
 	public boolean getOrders = false;
 	public boolean consolidate = false;
 	public boolean sendPicts = false;
@@ -421,6 +422,55 @@ public class FileSender {
 	    	            }
 	    	        }
 	    	     }  
+
+	        
+	        
+	        if (this.sendFiles) {
+	            File outDir = new File(dirOutLoc);
+	            File doneDir = new File(dirOutLoc, "done");
+
+	            // Create /done if it doesn't exist
+	            if (!doneDir.exists()) {
+	                doneDir.mkdirs();
+	            }
+
+	            for (File f : outDir.listFiles()) {
+	                System.out.println(time + " Sees " + f.getName());
+
+	                try {
+	                    if (f.isFile()) {
+	                        PutObjectRequest request = new PutObjectRequest(bucketName, dirOut + f.getName(), f);
+	                        ObjectMetadata metadata = new ObjectMetadata();
+	                        metadata.setContentType("plain/text");
+	                        metadata.addUserMetadata("title", "someTitle");
+	                        request.setMetadata(metadata);
+
+	                        // Upload to S3
+	                        s3Client.putObject(request);
+
+	                        log(time + " Uploaded stock file to AWS : " + f.getName());
+	                        System.out.println(time + " Uploaded " + f.getName());
+
+	                        // Move to /done only after successful upload
+	                        Path source = f.toPath();
+	                        Path target = doneDir.toPath().resolve(f.getName());
+
+	                        Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+
+	                        System.out.println(time + " Moved to done: " + f.getName());
+	                    }
+	                    
+    	            } catch (AmazonServiceException e) {
+    	                // The call was transmitted successfully, but Amazon S3 couldn't process 
+    	                // it, so it returned an error response.
+    	                e.printStackTrace();
+    	            } catch (SdkClientException e) {
+    	                // Amazon S3 couldn't be contacted for a response, or the client
+    	                // couldn't parse the response from Amazon S3.
+    	                e.printStackTrace();
+    	            }
+	            }
+	        }
 	        
 	        if(this.sendDash) {
 	        	 System.out.println(time + " Sees Dash " + new File(dirDashLoc).listFiles() + " " + dirDashLoc);
@@ -619,6 +669,9 @@ public class FileSender {
 		      if (args[i].trim().equalsIgnoreCase("/keygen")){
 			        this.sendKeygen = true;
 			      }
+		      if (args[i].trim().equalsIgnoreCase("/files")){
+			        this.sendFiles = true;
+			      }
 		      if (args[i].trim().equalsIgnoreCase("/consolidate")){
 			        this.consolidate = true;
 			      }
@@ -635,7 +688,7 @@ public class FileSender {
 			in.close();
 		}
 		
-		if(getOrders || sendMaster || sendStock || sendPicts || sendDash || this.sendKeygen) {
+		if(getOrders || sendMaster || sendStock || sendPicts || sendDash || this.sendKeygen || this.sendFiles) {
 			getAWS(props);
 	        System.exit(0);
 	    }
@@ -707,7 +760,7 @@ public class FileSender {
 		String srcDir = props.getProperty("sourcedir");
 		String arcdir = props.getProperty("archivedir");
 		String sep = System.getProperty("file.separator");
-		if (!(arcdir.endsWith("/") || arcdir.endsWith("\\"))){
+		if (arcdir != null && !(arcdir.endsWith("/") || arcdir.endsWith("\\"))){
 			arcdir = arcdir + sep;
 		}
 		String toEmail = props.getProperty("filesemail");
