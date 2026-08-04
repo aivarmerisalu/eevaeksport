@@ -1064,12 +1064,19 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 			                 		if(lisainfo.get(key) != null) {
 			                 			value = lisainfo.get(key) + "|" + value;
 			                 		}
-			                 		
-			                 	   lisainfo.put(key, value);
+			                 	if(ldoc.startsWith("KR") && amount < 0) {
+			                 		 lisainfo.put(key, value);
+			                 		 count++;
+			                 	  }else if(!ldoc.startsWith("KR")){
+			                 		 lisainfo.put(key, value);
+			                 		 count++;
+				                 }
+			                 			
+			                 	 
 			                 	}
 			                  
 			                 oldkey = key;
-			                 count++;
+			                
 			        }
 
 			      rs.close();
@@ -2284,8 +2291,13 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         cust.setPayer(rs.getString("payer"));
       
         Double limit = rs.getDouble("limit");
-        if(limit != null) {
-        	cust.setCredit(limit+"");
+        if(limit != null ) {
+        	if(limit > 0) {
+            	cust.setCredit(limit+"");	
+        	}else {
+        		cust.setSalesBlockPrepay(true);
+        		//System.out.println("Ettemakse klient " + cust.getID());
+        	}
         }
         
         Double minsum = rs.getDouble("minsum");

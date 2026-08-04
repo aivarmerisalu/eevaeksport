@@ -109,6 +109,7 @@ public class DirectoLinpetDBDriver extends AbstractDBDriver implements BulkUpdat
     
 
   
+  
   private String stockConn = null;
   String user =  null;
   String pass = null;

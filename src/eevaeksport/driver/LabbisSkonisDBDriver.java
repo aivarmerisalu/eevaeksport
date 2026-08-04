@@ -592,7 +592,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
 	          Agent agent = new Agent(rs.getString("kood").trim());
 	          String name = rs.getString("nimi").trim();
 	          agent.setObject(rs.getString("objekt"));
-	          agent.setName(name);
+	          agent.setName(name + " "+ agent.getID());
 	          if(pilot){
 	        	  agent.setIsPilot(true);
 	          }
@@ -614,7 +614,7 @@ public class LabbisSkonisDBDriver extends AbstractDBDriver implements BulkUpdate
                 	}
                 }
 			    sb2.append(agent.getID() + ";" + name + "\n");  
-	          agents.put(name, agent);
+	          agents.put(agent.getName(), agent);
 	          agents1.put(agent.getID(), agent);
 	        }
 

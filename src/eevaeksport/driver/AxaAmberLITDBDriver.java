@@ -1239,6 +1239,7 @@ payers = new TreeMap();
         }
         
         
+        
         String accountnum = rs.getString("accountnum").trim();
         Customer cust = new Customer(accountnum);
 

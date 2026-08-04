@@ -89,6 +89,7 @@ public class BC365DBDriver extends AbstractDBDriver implements BulkUpdater,Disco
      
       
       
+      
       String node = getParent().getProps().getProperty("nodebt");
       if(node != null) {
     	  nodebt = new HashSet();
@@ -788,7 +789,7 @@ if (dataType == null || dataType.equals("itemCategories")) {
 	            //String blocked = (String)cob.get("blocked");
 	            
 	          	
-	          tm.put(cust.getName(), cust);
+	          tm.put(cust.getName() + cust.getID(), cust);
 	          	}
 			  
 			} catch (Exception e) {
