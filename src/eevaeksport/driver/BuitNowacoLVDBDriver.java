@@ -1763,7 +1763,7 @@ System.out.println(cmd);
     String sql =  "   SELECT k.klientas  AS nimi,k.kl_mode as mood,k.klient_id AS kood,k.kodas AS payer,k.Adresas AS aadress, prek_adres as aadr2 ,a.tab_nr AS agent ,k.dienos as paymterm,  " +
  	" filialas AS blokk, 0 AS yle,'' AS visit,sistema AS type," +
  	"  atstovas as kontakt , k.kl_grupe as kett , max_skola as credit, kainos_nr as hinnak ,telefonai as phone , e_mail as email , nuolaida as maxdisc , ma.dienos as mars " +
- 	"  FROM klientai k  INNER JOIN " +
+ 	"   , k.atsiskait as prep FROM klientai k  INNER JOIN " +
 	"	 ( select klientas, tab_nr from(\r\n" + 
 		"	   select klientas, tab_nr from (select * from manager order by klientas,data desc,tab_nr )as man \r\n" + 
 		"	  group by klientas,data order by klientas,data desc) as mm group by klientas ) \r\n" + 
@@ -2091,6 +2091,14 @@ System.out.println(cmd);
             	   }
                }
         	   
+        	     String prep = rs.getString("prep");
+                 if(prep  != null && prep.trim().length() > 0){
+                	 System.out.println("prep " + prep);
+                   if(prep.toLowerCase().startsWith("priek")) {
+                	   customer.setSalesBlockPrepay(true);
+                   }
+        	   
+                 }
         	   
         	   if (asi != null){
         		   customer.setInfo("Piegādes dienas " + asi );  
@@ -2394,12 +2402,12 @@ System.out.println(cmd);
                                }
 
           	 String vat = rs.getString("vat");
-          	 System.out.println("vat " + vat);
+          	 //System.out.println("vat " + vat);
                    if(vat != null && vat.trim().length()>0){
                 	   try {
                 	      Double.parseDouble(vat.trim());
                      	  prod.setVat(vat);
-                      	 System.out.println("vat0 " + vat);
+                      	 //System.out.println("vat0 " + vat);
                          
                 	    } catch(Exception e) {}
                     
@@ -2443,9 +2451,9 @@ System.out.println(cmd);
                  if(oma > 0){
                 	 prod.setMargin(nf.format((100-(oma/prod.getPrice()*100))) + "");
                 	 if(prod.getPartii() != null && prod.getPartii().trim().length() > 0){
-                		 prod.setPartii(prod.getPartii() + "Cost: " + nf.format(oma) + " €"); 
+                		// prod.setPartii(prod.getPartii() + "Cost: " + nf.format(oma) + " €"); 
                 	 }else{
-                		 prod.setPartii("Cost: " + nf.format(oma) + " €"); 
+                		// prod.setPartii("Cost: " + nf.format(oma) + " €"); 
                 	 }
                  }
                  

@@ -856,11 +856,26 @@ System.out.println("fixed size " + result.size());
     public Vector getPriceMatrixData()  {
     	    	
     	
-      	   String    sql = "SELECT  SL01001 AS custid,'' AS clgroup,SCP6001 AS prodid,'' AS prodgroup,SCP6009, \r\n" + 
-      	   		"      	  SCP6008 AS price ,SCP6011  as lpaev , SCP6010  as spaev \r\n" + 
-      	   		"		   FROM SCP60100 WITH (NOLOCK) INNER JOIN SL010100 ON  SCP6002= SL01001 LEFT JOIN SY240100 on SCP6009=SY24002 and SY24001='BG' WHERE \r\n" + 
-      	   		"                getdate() BETWEEN  SCP6010 AND SCP6011  \r\n" + 
-      	   		"                order by SL01001";
+      	   String sql = " SELECT  SL01001 AS custid,'' AS clgroup,SCP6001 AS prodid,'' AS prodgroup,SCP6009 as ale,\r\n" + 
+      	   		"      	   		      	  SCP6008 AS price ,SCP6011  as lpaev , SCP6010  as spaev \r\n" + 
+      	   		"      	   				   FROM SCP60100  WITH (NOLOCK) INNER JOIN SL010100 ON  SCP6002= SL01001 LEFT JOIN SY240100 on SCP6009=SY24002 and SY24001='BG' WHERE  \r\n" + 
+      	   		"      	   		                getdate() BETWEEN  SCP6010 AND SCP6011 \r\n" + 
+      	   		"			union \r\n" + 
+      	   		" SELECT  SL01001 AS custid,'' AS clgroup,SCP6001 AS prodid,'' AS prodgroup,SCP6042 as ale,\r\n" + 
+      	   		"      	   		      	  SCP6041 AS price ,SCP6039  as lpaev , SCP6040  as spaev \r\n" + 
+      	   		"      	   				   FROM SCP60100 WITH (NOLOCK) INNER JOIN SL010100 ON  SCP6002= SL01001 LEFT JOIN SY240100 on SCP6009=SY24002 and SY24001='BG' WHERE  \r\n" + 
+      	   		"      	   		                getdate() BETWEEN  SCP6039 AND SCP6040 \r\n" + 
+      	   		"			union\r\n" + 
+      	   		" SELECT  SL01001 AS custid,'' AS clgroup,SCP6001 AS prodid,'' AS prodgroup,SCP6070 as ale,\r\n" + 
+      	   		"      	   		      	  SCP6069 AS price ,SCP6068  as lpaev , SCP6067  as spaev \r\n" + 
+      	   		"      	   				   FROM SCP60100 WITH (NOLOCK) INNER JOIN SL010100 ON  SCP6002= SL01001 LEFT JOIN SY240100 on SCP6009=SY24002 and SY24001='BG' WHERE  \r\n" + 
+      	   		"      	   		                getdate() BETWEEN  SCP6067 AND SCP6068	\r\n" + 
+      	   		"								union\r\n" + 
+      	   		" SELECT  SL01001 AS custid,'' AS clgroup,SCP6001 AS prodid,'' AS prodgroup,SCP6098 as ale,\r\n" + 
+      	   		"      	   		      	  SCP6097 AS price ,SCP6096 as lpaev , SCP6095  as spaev \r\n" + 
+      	   		"      	   				   FROM SCP60100 WITH (NOLOCK) INNER JOIN SL010100 ON  SCP6002= SL01001 LEFT JOIN SY240100 on SCP6009=SY24002 and SY24001='BG' WHERE  \r\n" + 
+      	   		"      	   		                getdate() BETWEEN  SCP6095 AND SCP6096 				\r\n" + 
+      	   		"								  order by 1";
 
              Vector result = new Vector();
                try {
@@ -875,7 +890,7 @@ System.out.println("fixed size " + result.size());
                    String clGroup = rs.getString("clgroup");
                    String prodID = rs.getString("prodid").trim();
                    String prodGroup = rs.getString("prodgroup");           
-                   String discount = rs.getString("SCP6009");
+                   String discount = rs.getString("ale");
                    double price = rs.getDouble("price");
                    String ldate = rs.getString("lpaev");
                    String sdate = rs.getString("spaev");

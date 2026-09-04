@@ -2468,7 +2468,7 @@ String arve = rs.getString("bill");
 
 
   private Connection getNewConnection() throws SQLException{
-    return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
+    return DriverManager.getConnection(getParent().getProps().getProperty("dsn.url"), getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
   }
 
 
@@ -2537,8 +2537,9 @@ private HashSet<String> inTT = null;
 	  String noOPT = getParent().getProps().getProperty("nostepgroup");
 	  
     String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
-    		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-    		"    		a.groupBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat , '' as sorting from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
+    		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  a.groupBackOfficeId AS grupp2 ,a.increasestep as opt, "
+    		+ " a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat,'' as sorting  ,a.MARKUPGROUPID as deposit, " + 
+    		"      a.MARKUPCOEF as depositmulti from   dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
     		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
 
              String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  \r\n" + 
@@ -2739,6 +2740,16 @@ boolean noopt = false;
           String unit = rs.getString("unit");
                if(unit!=null && unit.trim().length()>0){
                    prod.setUnit(unit);
+               }
+               
+               String depo = rs.getString("deposit");
+               if(depo != null && depo.trim().length()  > 0 ){
+                   prod.DEPO_WO_VAT = 0.1;
+
+            	   double dep = rs.getDouble("depositmulti");
+            	   if(dep > 0 ) {
+            		   prod.DEPO_WO_VAT = 0.1 * dep;
+            	   }
                }
                
        if(startsWithDigitDash(nimetus)) {
@@ -3299,7 +3310,6 @@ boolean noopt = false;
          NF = aNF;
        }
 
-      private String url = "jdbc:odbc:eugestaest";
       private Vector debt = new Vector();
 	  private Vector custProds = new Vector();
 	  private String subjectFilesTo = null;

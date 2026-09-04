@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -14837,8 +14838,13 @@ shipdate = getCalXML(asi);
       
    //   FileReader ff = new FileReader(file);
     //  BufferedReader in = new BufferedReader(ff);
-
-      BufferedReader in = new BufferedReader( new InputStreamReader(new FileInputStream(file), "windows-1257"));
+      
+      
+      Charset charset = "true".equals(parent.getProps().getProperty("order.file.utf")) 
+    		    ? StandardCharsets.UTF_8 
+    		    : Charset.forName("windows-1257");
+      
+      BufferedReader in = new BufferedReader( new InputStreamReader(new FileInputStream(file), charset ));
      	          
       String line;
       String num = "";
@@ -14846,29 +14852,10 @@ shipdate = getCalXML(asi);
       int linesonorder = 0;
       int count = 0;
       while((line = in.readLine()) != null){
-     if("true".equals(parent.getProps().getProperty("fixlines"))){
-    	    	
-    	         
-      //  System.out.println("line:" + line);
-         in.mark(200);
-         String line2 = in.readLine();
-         if(line2 != null && line2.trim().length() < 10){
-        	 line = line + line2;
-        	 
-        	 line2 = in.readLine();
-             if(line2 != null && line2.trim().length() < 10){
-               	 line = line + line2;
-                    	 
-             }
-          }else{
-        	 in.reset();
-         }
-         System.out.println("lineend :" + line);
-         
-    	     }
+     
       	String text = "";
       	line = line.replaceAll(";;", "; ;");
-      //	line = decode(line);
+     
       	count ++;
         StringTokenizer st =  new StringTokenizer(line, String.valueOf(ImportPanel.SEPARATOR));
         if (st.hasMoreTokens()){

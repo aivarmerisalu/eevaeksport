@@ -695,10 +695,25 @@ String cmd3 = " select tbl.klient as kli ,sum(tbl.overdebt) as ove,sum(tbl.debt)
    // Siin on soodukad k�ik 
    try{
           
-            String sqq = " SELECT  SCP6002 AS clgroup,SCP6001  AS prodid, SCP6008 AS price \r\n" + 
-            		"      , SCP6010 as start , SCP6011 as lopp FROM  SCP60400 WHERE  \r\n" + 
-            		"        getdate() BETWEEN  SCP6010 AND SCP6011 \r\n" + 
-            		"        and len(SCP6002)=4 ";
+            String sqq = "   SELECT  SCP6002 AS clgroup,SCP6001  AS prodid, SCP6008 AS price \r\n" + 
+            		"            		     , SCP6010 as start , SCP6011 as lopp FROM  SCP60400 WHERE  \r\n" + 
+            		"            		        getdate() BETWEEN  SCP6010 AND SCP6011 \r\n" + 
+            		"            		        and len(SCP6002)=4\r\n" + 
+            		"							union \r\n" + 
+            		"								  SELECT  SCP6002 AS clgroup,SCP6001  AS prodid, SCP6041 AS price \r\n" + 
+            		"            		     , SCP6039 as start , SCP6040 as lopp FROM  SCP60400 WHERE  \r\n" + 
+            		"            		        getdate() BETWEEN  SCP6039 AND SCP6040 \r\n" + 
+            		"            		        and len(SCP6002)=4\r\n" + 
+            		"							     union\r\n" + 
+            		"								  SELECT  SCP6002 AS clgroup,SCP6001  AS prodid, SCP6069 AS price \r\n" + 
+            		"            		     , SCP6067 as start , SCP6068 as lopp FROM  SCP60400 WHERE  \r\n" + 
+            		"            		        getdate() BETWEEN  SCP6067 AND SCP6068 \r\n" + 
+            		"            		        and len(SCP6002)=4\r\n" + 
+            		"							     union \r\n" + 
+            		"								  SELECT  SCP6002 AS clgroup,SCP6001  AS prodid, SCP6097 AS price \r\n" + 
+            		"            		     , SCP6095 as start , SCP6096 as lopp FROM  SCP60400 WHERE  \r\n" + 
+            		"            		        getdate() BETWEEN  SCP6095 AND SCP6096\r\n" + 
+            		"            		        and len(SCP6002)=4 ";
             
             st = con.createStatement();       
             rs = st.executeQuery(sqq);

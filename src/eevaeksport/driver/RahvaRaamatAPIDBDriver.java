@@ -30,8 +30,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -190,90 +192,93 @@ public class RahvaRaamatAPIDBDriver extends AbstractDBDriver implements BulkUpda
    	return null;
    }
 
-	public Vector getLastThreeData() {
-		Vector result = new Vector();
-		try {
-		
-			 Integer total = getPagination("getCustomerOrders");
-	         
-		 	 	for (int a = 0 ; a < total; a++) {
-		 	 		String aa = "";
-		 	 	    if(a > 0) {
-		 	 	    	aa = a + "";
-		 	 	    }
-		 	 	    
-		 	 	  try {	
-		     	org.json.simple.JSONObject cc = Converter.readJSONFile("data//getCustomerOrders" + aa +".json");
-		 		org.json.simple.JSONArray values = (org.json.simple.JSONArray) cc.get("data");
-		 		
-		 		  int lenn = values.size();
-		 		
-		 		  for (int i = 0; i < lenn; i++) {
-		 			  
-		 				org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
-		         		String customerNumber = (String) cob.get("location_code");
-		         		String cuCode = locations.get(customerNumber);
-		         		
-		         		if(cuCode != null) {
-		         			try {
-
-		         				/*
-		         			      "location_code": "10ETKTIK",
-		         			      "product_id": "R822691",
-		         			      "quantity": "2",
-		         			      "date": "2026-07-20T00:00:00.000Z"
-		         			     */
-		         				
-		         	        	String prodId = ((String) cob.get("product_id"));
-		         	            String startDate = (String)cob.get("date");		
-
-							 	MatrixLine ml = new MatrixLine();
-								 ml.setCustID(cuCode);
-								 ml.setProdID(prodId);
-								
-							     if(cob.get("quantity") != null) {
-									ml.setPrice(Double.parseDouble((String)cob.get("quantity")));// see on sassis ja vajab erilähenemist	
-							     }
-							     
-							     ml.setStartDate(startDate.substring(5,10));
-							    
-							    
-							     /*ml.setDiscount(rs3.getDouble("hind"));
-								
-								double kmin = rs3.getDouble("kogusmin");
-								
-								ml.setMinAm(kmin);
-								ml.setLineinfo(rs3.getString("doknr").trim());
-								
-								int color = rs3.getInt("color");
-								if(color == 1) {
-									ml.setCliGroup("green");
-								}
-		                      
-								if(kmin < 0) {
-									ml.setCliGroup("red");
-								}
-							    */
-								result.add(ml);
-	     
-		         			}catch(Exception e) {e.printStackTrace();}
-		         		}
-		 		     }
-		 	 	  }catch(Exception e) {e.printStackTrace();}
-		 	 	}
-
-			
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		System.out.println("LastThree " + result.size());
-
-		return result;
-
-	}
 	
+
+   public Vector getLastThreeData() {
+       Vector result = new Vector();
+       
+       // Key: Customer ID (cuCode), Value: List of MatrixLines for that customer
+       Map<String, List<MatrixLine>> customerMap = new HashMap<>();
+
+       try {
+           Integer total = getPagination("getCustomerOrders");
+
+           for (int a = 0; a < total; a++) {
+               String aa = (a > 0) ? String.valueOf(a) : "";
+
+               try {
+                   JSONObject cc = Converter.readJSONFile("data//getCustomerOrders" + aa + ".json");
+                   JSONArray values = (JSONArray) cc.get("data");
+
+                   int lenn = values.size();
+
+                   for (int i = 0; i < lenn; i++) {
+                       JSONObject cob = (JSONObject) values.get(i);
+                       String customerNumber = (String) cob.get("location_code");
+                       String cuCode = locations.get(customerNumber);
+
+                       if (cuCode != null) {
+                           try {
+                               String prodId = (String) cob.get("product_id");
+                               String startDate = (String) cob.get("date");
+
+                               MatrixLine ml = new MatrixLine();
+                               ml.setCustID(cuCode);
+                               ml.setProdID(prodId);
+
+                               if (cob.get("quantity") != null) {
+                                   ml.setPrice(Double.parseDouble((String) cob.get("quantity")));
+                               }
+
+                               // Preserve the full ISO date string for sorting/identifying unique dates
+                               ml.setStartDate(startDate.substring(5, 10)); // e.g., "07-20"
+                               ml.setLineinfo(startDate.substring(0, 10));  // e.g., "2026-07-20"
+
+                               // Group items by customer code
+                               customerMap.putIfAbsent(cuCode, new ArrayList<>());
+                               customerMap.get(cuCode).add(ml);
+
+                           } catch (Exception e) {
+                               e.printStackTrace();
+                           }
+                       }
+                   }
+               } catch (Exception e) {
+                   e.printStackTrace();
+               }
+           }
+
+           // Filter and collect only lines belonging to the last 3 dates per customer
+           for (List<MatrixLine> lines : customerMap.values()) {
+               
+               // 1. Sort customer lines by ISO date string (YYYY-MM-DD) descending
+               lines.sort((l1, l2) -> l2.getLineinfo().compareTo(l1.getLineinfo()));
+
+               // 2. Identify the top 3 distinct dates for this customer
+               Set<String> topThreeDates = new LinkedHashSet<>();
+               for (MatrixLine line : lines) {
+                   topThreeDates.add(line.getLineinfo());
+                   if (topThreeDates.size() == 3) {
+                       break;
+                   }
+               }
+
+               // 3. Add all lines matching those top 3 dates into the final result
+               for (MatrixLine line : lines) {
+                   if (topThreeDates.contains(line.getLineinfo())) {
+                       result.add(line);
+                   }
+               }
+           }
+
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+
+       System.out.println("LastThree " + result.size());
+       return result;
+   }
+   
 	private String getDateX(String input) {
 		if(input == null) {
 			return null;

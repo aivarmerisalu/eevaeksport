@@ -1791,8 +1791,8 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
 
 
   private Connection getNewConnection() throws SQLException{
-    return DriverManager.getConnection(url, getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
-  }
+	    return DriverManager.getConnection(getParent().getProps().getProperty("dsn.url"), getParent().getProps().getProperty("dsn.user"), getParent().getProps().getProperty("dsn.pass"));
+	  }
 
 
       public String getDistribution() {
@@ -2142,7 +2142,6 @@ private HashSet<String> inTT = null;
          NF = aNF;
        }
 
-      private String url = "jdbc:odbc:eugestaest";
       private Vector debt = new Vector();
 	  private Vector custProds = new Vector();
 	  private String subjectFilesTo = null;

@@ -2698,94 +2698,10 @@ public Vector getPriceMatrixData(){
     try {
     	
  	   Connection con = getNewConnection();
-	        Statement stmt = con.createStatement();
-	    /*    ResultSet rs = stmt.executeQuery(sql);
-      while (rs.next()) {
-
-        String custID = "";//Converter.enCodeEst(rs.getString("custid").trim());
-        String clGroup = rs.getString("clgroup");
-        String prodID = rs.getString("prodid").trim();
-        
-        String prodGroup = rs.getString("prodgroup");
-       
-        double price = rs.getDouble("price");
-        double disc = rs.getDouble("disc");
-        String info = rs.getString("info");
-        String date = rs.getString("paev");
-        String sdate = rs.getString("startday");
-
-        String comm = rs.getString("COMM");
-        String komment = "";
-        if(comm != null && comm.trim().length() > 0){
-            StringTokenizer st = new StringTokenizer(comm,"|");
-                	while(st.hasMoreTokens()){
-                		String token = st.nextToken();
-                		if(token.trim().length()> 0 && !komment.contains(token)){
-                			komment = komment + token + "|";
-                        }
-                }
-        }
-    
-        MatrixLine mline = new MatrixLine();
-
-        if (custID != null && custID.length() > 0) {
-          mline.setCustID(custID);
-        }
-        
-        if (info !=null && info.trim().length() > 0) {
-            mline.setLineinfo(Converter.cleanLitLatEst(info.trim()));
-          }
-        
-        if (komment.trim().length() > 0) {
-        	if(mline.getLineinfo() != null){
-        		  mline.setLineinfo(mline.getLineinfo() + "|" +Converter.cleanLitLatEst(komment.trim()));
-        	 }else{
-        		  mline.setLineinfo(Converter.cleanLitLatEst(komment.trim()));
-            }
-          }
-        
-        
-        if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
-          mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
-        }
-
+	   Statement stmt = con.createStatement();
+	   ResultSet rs = stmt.executeQuery(sql4);
       
-        if(date != null && !date.startsWith("1753")){
-       	// mline.setEndDate(date.substring(0,10));
-        }
-        if(sdate != null  && !sdate.startsWith("1753")){
-         	 if(mline.getEndDate() == null){
-         	 }
-          }
-        if (prodID != null && prodID.length() > 0) {
-          mline.setProdID(prodID);
-        }
-        if (mline.getProdID() == null &&  prodGroup != null && prodGroup.trim().length() > 0) {
-          mline.setProdGroup(prodGroup.trim());
-          mline.setDiscGroup(prodGroup.trim());
-        }
-
-        if (price != 0) {
-          mline.setPrice(price);
-
-        }
-        if (disc != 0) {
-            mline.setDiscount(disc);
-
-          }
-      //  mline.setProdLevel("pr"); // paneme long listi 
-        if( mline.getPrice() > 0 || mline.getDiscount() > 0){
-        	olemas.add(clGroup.trim()+prodID.trim());
-            result.add(mline);    
-        }
-        
-      }
-      rs.close();
-      
-     */
-
-       ResultSet rs = stmt.executeQuery(sql4);
-      while (rs.next()) {
+	   while (rs.next()) {
 
         String custID =  Converter.enCodeEst(rs.getString("custid").trim());
         String clGroup = rs.getString("clgroup");

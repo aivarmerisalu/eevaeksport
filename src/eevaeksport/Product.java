@@ -295,6 +295,7 @@ public class Product {
     private double maxDiscount = 0;
     private double minPrice = 0;
     private boolean label = false;
+    public String phototag = " ";
     private boolean noCommas = false;
     public String licence = null;
     private String nameSorting = null;

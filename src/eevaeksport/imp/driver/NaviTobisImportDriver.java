@@ -428,7 +428,12 @@ System.out.println(sql);
 	        if(order.getStatus() == 6){
 	        	status = "6";
 	        }
+	        
 		String ladu = "CS";
+		if(parent.getProps().getProperty("stockcode.navi") != null) {
+			ladu = parent.getProps().getProperty("stockcode.navi"); 
+		}
+		
 		
 		String smode = "";
 		if(order.getShipMode() != null && order.getShipMode().trim().length()>0){

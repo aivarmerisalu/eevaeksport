@@ -43,6 +43,7 @@ import eevaeksport.EksportFrame;
 import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
+import eevaeksport.Quest;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.util.Converter;
 
@@ -56,7 +57,7 @@ import eevaeksport.util.Converter;
  */
 
 public class AxaAmberLITDBDriver extends AbstractDBDriver  implements Manager,Promo,
-BulkUpdater, Discounter,PictureMaker,FixLoader {
+BulkUpdater, Discounter,PictureMaker,FixLoader, WebReporter {
   public AxaAmberLITDBDriver(EksportPanel parent){
     super(parent);
     this.subjectFilesTo = parent.getString("filemsg");
@@ -2753,6 +2754,156 @@ System.out.println("prods " + prods.size());
 	    	}
 	     
 	  }
+
+		
+		private HashMap<String, Customer> getCust() {
+			
+			HashMap<String, Customer> custMap = new HashMap<String, Customer>();
+			  
+	        String     cmd = "  SELECT  cus.name,cus.custclassificationid as nimelisa,cus.namealias,cus.accountnum,cus.invoiceaccount AS payer, " +
+	    			  " a.street  + ', ' + a.city as address , PriceGroup as grupp , COMPANYCHAINID as chain ,  "
+	    			  + " subsegmentid as sugg , erpagentdiscedit as maxallow , inventlocation as dealer , astsalesorderpriority as hinnasyst "
+	    			  + " , agreementdisc as leping , a.city as city , a.street as street  ,cus.memo as cuinfo , subsegmentid as cate  "
+	    			  +  " FROM custtable cus left outer JOIN paymterm  pay on cus.paymtermid=pay.paymtermid and  pay.dataareaid='bd'  " +
+	    			  "	LEFT JOIN dirpartytable dp ON dp.partyid=cus.partyid  inner join address a on a.ADDRRECID = dp.RECID WHERE   cus.dataareaid in ('bd')  "
+	    			  + " and (SPIEAGENTACCOUNTID != '' or SPITELESALESAGENTGROUPID != '')  and erpactive =1 ";
+	    			  
+	     
+
+	         if (isDebug()) System.out.println(cmd);
+		        
+		       try { 
+		Connection con =  getNewConnection();       
+		Statement stmt = con.createStatement();
+		ResultSet rs = stmt.executeQuery(cmd);
+		
+		while(rs.next()){
+		String name = rs.getString("name").trim();
+		String accountnum = rs.getString("accountnum").trim();
+		Customer cust = new Customer(accountnum);
+		  cust.setPayer(rs.getString("payer"));
+		String aadr = rs.getString("address");
+
+		if (aadr != null) {
+		       cust.setAddress(Converter.adressLink(Converter.enCodeEst(aadr.trim().replace('\n',' ').replaceAll("\\s+", " ").trim()), "Lithuania"));
+				}
+				
+				name = name.replaceAll("\\s*\\([^()]*\\)\\s*$", "").trim();
+				cust.setName(name);
+				
+				String seg = rs.getString("chain");
+				if(seg != null && seg.trim().length() > 0) {
+					 cust.setChain(seg);
+				}
+				
+				String city = rs.getString("city");
+				if(city != null && city.trim().length() > 0) {
+				  cust.addCity( city.trim());
+				}
+				
+				 custMap.put(cust.getID(),cust);	
+				}
+			     rs.close();
+			     stmt.close();
+			     con.close();
+			   }catch(Exception e) {e.printStackTrace();}
+		       
+		     return custMap;
+			}
+
+		
+		private HashMap<String, Product> getProds() {
+			
+			HashMap<String, Product> prodMap = new HashMap<String, Product>();
+			  
+
+			  String list = "'ALCO','CIGA','NALC','TARA','NFOO','FOOD'";
+			  if( parent.getProps().getProperty("prodgrouplist") != null){
+				  list = parent.getProps().getProperty("prodgrouplist"); 
+			  }
+			   
+			  System.out.println("noprodcat " + noprodcat);
+			  
+			  
+			  
+		    String cmd = "   SELECT  inv.itemid, inv.itemname AS nimetus, inv.SPIBRANDID AS grupp2 , " + 
+		"  bar.itembarcode AS ean ,inv.ITEMSUBGROUPID AS grupp, mod.unitid As unit, '21' as vat,mod.LineDisc as alegr  " +
+		 " , ITEMGROUPID as type ,lowestqty as mini , multipleqty as opti ,NEWITEM as uus ,sellout as out , topitem as tops , topoffitem as tops2 "
+		 + " FROM inventtable inv with(nolock) " +
+		"  left join InventItemSalesSetup s with(nolock) on s.itemid = inv.itemid and s.dataareaid=inv.dataareaid left join pricedisctable as disc with(nolock) on inv.itemid=disc.itemrelation and disc.dataareaid=inv.dataareaid " +
+		"  and disc.module = 1  and disc.relation=4  and disc.itemcode=0 and disc.accountcode=1 and accountrelation like 'Stan%' and (disc.todate > getdate() or year( disc.todate ) = 1900) and   (disc.fromdate < getdate()+1 or year( disc.fromdate ) = 1900 ) " +
+		"  left join inventitembarcode bar with(nolock)  on bar.dataareaid = inv.dataareaid  and  bar.itemid = inv.itemid and bar.barcodesetupid ='EANBottle'  and useforprinting = 1  " +
+		" left JOIN inventtablemodule mod with(nolock) ON mod.itemid = inv.itemid and mod.dataareaid=inv.dataareaid  " +
+		" WHERE  inv.dataareaid='bd'    AND mod.dataareaid='bd'   " +
+		"  AND moduletype=2 and active = 1  and inv.onlyretail = 0  and ITEMGROUPID in (" + list + ") " +
+		"  order by inv.itemid, disc.todate desc "; // vynas
+		    
+			
+			
+			
+	         if (isDebug()) System.out.println(cmd);
+		        
+		       try { 
+		Connection con =  getNewConnection();       
+		Statement stmt = con.createStatement();
+		ResultSet rs = stmt.executeQuery(cmd);
+		
+		while(rs.next()){
+		String prodid = rs.getString("itemid").trim();
+		Product prod = new Product(prodid);
+
+		String name = rs.getString("nimetus").trim();
+				
+				prod.setName(name);
+				
+				String brandname = rs.getString("grupp2");
+				if(brandname != null && brandname.trim().length() > 0) {
+				  prod.setGroupSecond(brandname.trim());
+				}
+				
+			/*	Double kaal = rs.getDouble("kaal");
+				if(kaal > 0) {
+					prod.setMeasure(kaal);
+				}
+				
+				String tootja = rs.getString("tootja");
+				if(tootja != null && tootja.trim().length() > 0) {
+				  prod.setNameSorting(tootja.trim());
+				}*/
+
+				String ean = rs.getString("ean");
+				if(ean != null && ean.trim().length() > 0) {
+					String grupp = rs.getString("grupp");
+					if(grupp != null && grupp.trim().length() > 0) {
+					  prod.setGroup(grupp.trim());
+					}
+
+					
+				  prod.setEAN(ean.trim());
+				  prodMap.put(ean,prod);	
+				 }
+				
+				}
+			     rs.close();
+			     stmt.close();
+			     con.close();
+			   }catch(Exception e) {e.printStackTrace();}
+		       
+		     return prodMap;
+			}
+		
+
+	  
+	  
+
+	@Override
+	public void WebReporter() {
+		HashMap<String, Customer> customers = getCust();
+		HashMap<String, Product> products = getProds();
+
+		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent, customers, products);
+		   System.exit(0);
+	}
     
     
 }

@@ -1203,7 +1203,7 @@ if(text.indexOf("\"")!=-1){
 	   		    	 nimi = "<noname>";
 	   		     }
 	   				
-	   				System.out.println(ol.getDiscount());
+	   			//	System.out.println(ol.getDiscount());
 	   			body = body + "\nProduct code : " + ol.getToode()+
 	   					      "\nProduct name : " + nimi +
 	   					      "\nStandard price: " + prod.getPrice() + "EUR" + 
@@ -1215,6 +1215,14 @@ if(text.indexOf("\"")!=-1){
 		   			if(ol.getPartii() != null && ol.getPartii().trim().length() > 0) {
 		   		        body = body +   "\nComment : " +  ol.getPartii().trim();
 		   			}
+		   			String inff = ord.getTeostaja();
+		     	 	if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
+		     	 		String reason = inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
+		     	 		if(reason.equals("105")) {
+		     	 		  body = body + "\n\nReason : Neteisinga kaina";
+		     	 		}
+		     	 	}
+				 
 		   			  
 	   			 }
                  if(comment != null) {

@@ -1167,7 +1167,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("DirectoLinpet")
 					    || driver.getDriverVersion().equals("DirectoAgapics")
 					    
-				
+					    || driver.getDriverVersion().equals("HorizonSmil")
 					    || driver.getDriverVersion().equals("HorizonMuiz")
 					    || driver.getDriverVersion().equals("HorizonKonig")
 					    || driver.getDriverVersion().equals("NaviNematekas")
@@ -1847,7 +1847,7 @@ public class EksportPanel extends JPanel implements ActionListener,
                 }
                 
                 File wqs = new File("allowed.txt");
-                if(wqs.exists()){
+                if(wqs.exists() && wqs.length() > 100){
                     zip.addFile("allowed.txt");
                 }
                 
@@ -4933,13 +4933,16 @@ if (getProps().getProperty("no.matrixagent") != null) {
        buf.append(prod.TAARA_VAT);
 
        buf.append(EksportPanel.separator);
-       buf.append(prod.DEPO_WO_VAT);
+       buf.append(NN3.format(prod.DEPO_WO_VAT));
 
        buf.append(EksportPanel.separator);
        buf.append(prod.volMeasure);
 
        buf.append(EksportPanel.separator);
        buf.append(prod.pack);
+
+       buf.append(EksportPanel.separator);
+       buf.append(prod.phototag);
        
        buf.append(lineSeparator);
        
@@ -5078,13 +5081,13 @@ if (getProps().getProperty("no.matrixagent") != null) {
     		    }
     			if(what.equals("cust")){
     				 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, false,user,pass,duplicates,sendpartner, https,getProps());
-    	        			
-    			}
+    	        }
     			if(what.equals("custroute")){
-   				 Converter.sendCustomerJson(driver.getCustomers(null), rcompany, true,user,pass,duplicates,sendpartner, https,getProps());
-   	        			
-   			}
-        			
+   				    Converter.sendCustomerJson(driver.getCustomers(null), rcompany, true,user,pass,duplicates,sendpartner, https,getProps());
+   	            }
+    			if(what.equals("agent")){
+    				 Converter.sendAgentJson(driver.getAgents(),user,pass, rcompany, false, https);
+   		        }	
     		}
     		
     	 

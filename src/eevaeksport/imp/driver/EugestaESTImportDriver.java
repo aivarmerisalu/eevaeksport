@@ -18,7 +18,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -540,9 +542,47 @@ private Product getProd(String toode){
       }
   
   
+  
+  
+  private HashMap promos = null;
+  
+  private HashMap getPromos() {
+	  
+	  HashMap res = new HashMap();
+	 String fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minqty, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , max(b.regionbackofficeid) as ladu from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
+		  		"EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty > 0  group by a.promotionBackOfficeId,a.productBackOfficeId, minqty, minPrice\r\n" + 
+		  		"				  				order by a.promotionBackOfficeId,productBackOfficeId, minqty, minPrice";
+		 
+
+		   try {
+	  		   Connection con = getNewConnection();
+	  	        Statement stmt = con.createStatement();
+	  	        ResultSet rs1 = stmt.executeQuery(fff);
+			 
+		      while(rs1.next()){
+		   	  
+		   	  String gruppx = parent.make(rs1.getString("custgr"));
+		   	  String toodex = parent.make(rs1.getString("prodid"));
+		   	  Double kogus = rs1.getDouble("minqty");
+		   	  Double hind = rs1.getDouble("minPrice");
+		    
+    res.put(toodex + "-" + kogus + "-" + hind, gruppx);
+		   	  
+		      }
+		     rs1.close(); 
+		     stmt.close();
+		     con.close();
+		   }catch(Exception e) {e.printStackTrace();}
+		   
+		   return res;
+		   
+  }
 
  private void makeOutput(Order orde , boolean ret , boolean repr ){
-	 
+	   
+	 if(promos == null) {
+		    promos = getPromos();
+		 }
 	 
 	 int salesid =  getNextSalesid() ;
 	    try {
@@ -587,8 +627,15 @@ private Product getProd(String toode){
 	      
 	      String pobj = " "; // juhul kui on valitud promo siis peab see olema täidetud
 	    		  
-	      if(orderLine.selActCode != null) {
+	      if(orderLine.selActCode != null && orderLine.selActCode.trim().length() > 0) {
 	    	  pobj = orderLine.selActCode;
+	      }else if(disc > 0) {
+	    	 // System.out.println("itemid price :" + itemid + "-" + kogus + "-" + price);
+	    	  if(promos.get(itemid + "-" + kogus + "-" + price) != null) {
+	    		  pobj = (String)promos.get(itemid + "-" + kogus + "-" + price);
+	    		//  System.out.println("leidsin camp " + pobj);
+	    	  }
+	    	  // vaatame kas on olemas promo sellele tootele ja kui koodi pole siis lisame.
 	      }
 	   
 	   //	  DEFAULT_APPLIED = applied promo;
@@ -606,7 +653,11 @@ private Product getProd(String toode){
 	          double rp = 0;
 	          
 	          if(repr) {
-	        		  rp =  price * ((100-disc)/100);
+	        		 // rp =  price * ((100-disc)/100);
+	        		  
+	        		   rp = price - orderLine.getPrice();  // saame orig dokumendi hinna ja vahe kaudu kätte 
+            		   //price * ((100-disc)/100);
+        	
 	        	      disc = 0;
 	        	  String inff = orde.getTeostaja();
 	                if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
@@ -614,7 +665,7 @@ private Product getProd(String toode){
 	    		    }
 	        	  
 	                kogus = -1 * kogus;
-	        	   System.out.println("promo code " + itemid + " " + pobj + " " + price + " " + rp + " " + kogus  );
+	        	  // System.out.println("promo code " + itemid + " " + pobj + " " + price + " " + rp + " " + kogus  );
 	        	 
 	          }
 	          

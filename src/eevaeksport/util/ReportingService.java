@@ -12,6 +12,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -602,13 +603,38 @@ String web =  "https://api.mobitrek.eu/rest/package/list/";
         return client.execute(httpPost);
 
 }
+
+ static HttpResponse restPatchRequest(String uri, String json, HttpClient client) throws Exception {
+
+
+ 	Converter.doTrustToCertificates();
+ 	Converter.trustAllHttpsURLConnection();
+	 HttpPatch httpPatch = new HttpPatch(uri);
+	 if(json != null){
+		 httpPatch.setEntity(new StringEntity(json,"utf-8"));
+		 httpPatch.setHeader("Accept", "application/json");
+		 httpPatch.setHeader("Content-type", "application/json;charset=utf-8");
+	 }
+     return client.execute(httpPatch);
+
+}
  
 
  public String postJson(String json,String url ) throws Exception{
 	 	HttpClient cli = getClient();
 		HttpResponse resp = restPostRequest(url, json, cli);
 		String aaa = EntityUtils.toString(resp.getEntity());
-		System.out.println("Response " + aaa);
+		System.out.println("Response post manager " + aaa);
+		return aaa;
+	}
+ 
+ 
+
+ public String patchJson(String json,String url ) throws Exception{
+	 	HttpClient cli = getClient();
+		HttpResponse resp = restPatchRequest(url, json, cli);
+		String aaa = EntityUtils.toString(resp.getEntity());
+		System.out.println("Response patch manager " + aaa );
 		return aaa;
 	}
  

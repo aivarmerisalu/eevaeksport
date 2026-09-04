@@ -20,6 +20,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -70,6 +71,13 @@ public class EugestaLATImportDriver extends AbstractImportDriver{
     if("true".equals( parent.getProps().getProperty("testing"))){
     	testing = true;
     }
+    String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
+    try {
+        Class.forName(databaseDriverName).newInstance();
+      } catch (Exception e){
+         parent.showError(e);
+      }
+      
     loadSignatures();
   }
   
@@ -103,7 +111,9 @@ public class EugestaLATImportDriver extends AbstractImportDriver{
 
 
   private Connection getNewConnection2() throws SQLException{
-	    return DriverManager.getConnection(parent.getProps().getProperty("dsn.urlimport"), parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+	    return DriverManager.getConnection(parent.getProps().getProperty("dsn.urlimport"));
+
+	 // return DriverManager.getConnection(parent.getProps().getProperty("dsn.urlimport"), parent.getProps().getProperty("dsn.userimp"), parent.getProps().getProperty("dsn.passimp"));
 	  }
 
   public String getImportFile(){
@@ -536,7 +546,9 @@ private Product getProd(String toode){
   
 
  private void makeOutput(Order orde , boolean ret , boolean repr ){
-	 
+	 if(promos == null) {
+	    promos = getPromos();
+	 }
 	 
 	 int salesid =  getNextSalesid() ;
 	    try {
@@ -628,6 +640,42 @@ private Product getProd(String toode){
 	 return out;
  }
  
+ private HashMap promos = null;
+ 
+ private HashMap getPromos() {
+	  
+	  HashMap res = new HashMap();
+	 String fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minqty, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , max(b.regionbackofficeid) as ladu from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
+		  		"EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty > 0  group by a.promotionBackOfficeId,a.productBackOfficeId, minqty, minPrice\r\n" + 
+		  		"				  				order by a.promotionBackOfficeId,productBackOfficeId, minqty, minPrice";
+		 
+
+		   try {
+	  		   Connection con = getNewConnection();
+	  	        Statement stmt = con.createStatement();
+	  	        ResultSet rs1 = stmt.executeQuery(fff);
+			 
+		      while(rs1.next()){
+		   	  
+		   	  String gruppx = parent.make(rs1.getString("custgr"));
+		   	  String toodex = parent.make(rs1.getString("prodid"));
+		   	  Double kogus = rs1.getDouble("minqty");
+		   	  Double hind = rs1.getDouble("minPrice");
+		    
+   res.put(toodex + "-" + kogus + "-" + hind, gruppx);
+		   	  
+		      }
+		     rs1.close(); 
+		     stmt.close();
+		     con.close();
+		   }catch(Exception e) {e.printStackTrace();}
+		   
+		   return res;
+		   
+ }
+
+ 
+ 
  private void addInvoiceLines(int salesid, Order orde, boolean tagastus, boolean repr) throws SQLException{
 
 	    Enumeration enumr = orde.getOrderLines().elements();
@@ -666,11 +714,20 @@ private Product getProd(String toode){
 	      
 	      String pobj = " "; // juhul kui on valitud promo siis peab see olema täidetud
 	    		  
-	      if(orderLine.selActCode != null) {
-	    	  pobj = orderLine.selActCode;
-	      }
 	   
-
+		  
+	      if(orderLine.selActCode != null && orderLine.selActCode.trim().length() > 0) {
+	    	  pobj = orderLine.selActCode;
+	      }else if(disc > 0) {
+	    	 // System.out.println("itemid price :" + itemid + "-" + kogus + "-" + price);
+	    	  if(promos.get(itemid + "-" + kogus + "-" + price) != null) {
+	    		  pobj = (String)promos.get(itemid + "-" + kogus + "-" + price);
+	    		//  System.out.println("leidsin camp " + pobj);
+	    	  }
+	    	  // vaatame kas on olemas promo sellele tootele ja kui koodi pole siis lisame.
+	      }
+	      
+	      
 	         String agent = orde.getAgent();
 	         String originalInvoiceNumber  = "";
 	         String eanReturn = "";
@@ -713,7 +770,8 @@ private Product getProd(String toode){
 	            	   }catch(Exception e) {}
 	               }
 	              
-	               rp =  price * ((100-disc)/100);
+	               rp = price - orderLine.getPrice();  // saame orig dokumendi hinna ja vahe kaudu kätte 
+	            		   //price * ((100-disc)/100);
 	        	  disc = 0;
 	          }
 	          
@@ -858,7 +916,7 @@ if (start != -1 && end != -1 && start < end - 1) {
 		  }
 	  }
 	  
-	  System.out.println("ref " + ref + " ' " + ref2);
+	//  System.out.println("ref mazītiņš pasūtījumiņš" + ref + " ' " + ref2);
 		String inff = order.getTeostaja();
 
 		  System.out.println("inff " + inff);
@@ -889,13 +947,14 @@ if (start != -1 && end != -1 && start < end - 1) {
 		  ref = ref.substring(0,299);
 	  }
 	  
+	  
 	  String sql = " INSERT INTO  ORDERS (  " +
 	                     " ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ," +
 	            "DELIVERY_DATE , STATUS  ,AGENT_ID ,ORDERING_TIME ," +
 	            "ORDER_MESSAGE ,ORDER_TYPE ,GPS_DATA ,WAREHOUSE_ID  ,rec_completed ,ERROR_CODE ,ERROR_MESSAGE ,STATUS_CHANGE_DATE,Cust_Ref, ModeOfDelivery  ) " +
 	            " VALUES (" + salesid + ", cast(getdate() as date),'" + order.getCompany()  +"',  " + deltype+ 
 	            ",cast(? as date),'" + status + "','" + order.getAgent() +"'," + orderingTime +
-	            ",'"+ ref + "'," + ordtype +",'',null,0,'','',getdate(),'" + ref2 + "', '" + shipm + "')" ; // + shipm
+	            ",?," + ordtype +",'',null,0,'','',getdate(),?, '" + shipm + "')" ; // + shipm
 	  
 	        System.out.println(sql);
 	        try{
@@ -915,6 +974,8 @@ if (start != -1 && end != -1 && start < end - 1) {
 	              
 	              
 	             stmt2.setTimestamp(1, new java.sql.Timestamp(dat.getTime()));
+	             stmt2.setString(2, ref);
+	             stmt2.setString(3, ref2);
 	             stmt2.executeUpdate();
 	             stmt2.close();
 	    

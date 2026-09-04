@@ -1199,7 +1199,7 @@ System.out.println(cmd);
     	 cmd =" SELECT   t.[No_] AS toode, (case when isnull(est.Translation,'')<>'' THEN est.Translation  else case when isnull(enu.Translation,'')<>'' THEN enu.Translation  " +
     	" else case when t.[Aprašas 3]<>'' then t.[Aprašas 3] else (t.[Description] + t.[Description 2]) end end end) " +
     	" as nimi,  t.[Unit Price] AS myygihind,  '' AS grupp2, t.[Global Dimension 2 Code] AS grupp  , " +
-    	" t.[Base Unit of Measure] AS unit, [No_ 2] AS ean, '' AS status , [Max discount]  AS maxdiscount,  '' aS type, [Units per Parcel] AS kastis, " +
+    	" t.[Base Unit of Measure] AS unit, [No_ 2] AS ean, '' AS status , [Max discount]  AS maxdiscount,  '' aS type, [Units per Parcel] AS kastis, [Sell only in parcels]  as optam , " +
     	" [Item Disc_ Group] as alegr ,  '' AS kaal,[VAT Prod_ Posting Group] AS vat , [Units per Pallet] as pallet  , " +
     	" [Unit List Price] as listprice ,[New until] as newprod ,[Nelikvidas]  as status2 FROM [2015_Tobis$Item] t   LEFT JOIN [2015_Tobis$Translations] est on  est.TableNo=27  " +
     	" and est.Field=3  and est.Language='EST' and t.No_=est.[Primary Key Value 1]  	 LEFT JOIN [2015_Tobis$Translations] enu on  " +
@@ -1280,6 +1280,12 @@ System.out.println(cmd);
                        prod.setInCases(cases);
                 	}
                 
+
+                    int	opt = rs.getInt("optam");
+                    	if(cases > 0 && opt == 1){
+                           prod.setOptAmountInUnits(cases);
+                    	}   
+                    	
                 	String alegrupp = rs.getString("alegr");
                 	if(alegrupp != null && alegrupp.trim().length() > 0){
                 		prod.setAlegrupp(alegrupp);	

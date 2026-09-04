@@ -684,7 +684,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            rs.close();    	
       
            String sql2 = " 		 select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday,\r\n" + 
-           		"			  max([beginsinstoredate]) as store,max(datediff(day,beginsinstoredate, c.nextdelivery)) as vahe,\r\n" + 
+           		"			  max([beginsinstoredate]) as store,min(datediff(day,beginsinstoredate, c.nextdelivery)) as vahe,\r\n" + 
            		"              		minPrice as price ,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as dealer, max(isPaper) as ispaper , MANDATORY from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
            		"              		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
            		"        		inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
@@ -710,7 +710,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            MatrixLine mline = new MatrixLine();
            mline.setCliGroup(clGroup);
            mline.setProdID(prodID);
-           mline.setStartDate(sdate.substring(0,10) + "/" +store.substring(0,10));
+           mline.setStartDate(store.substring(0,10) + "/" + sdate.substring(0,10));
            mline.setEndDate(edate.substring(0,10));
            String lisa = "";
            if(vahe < 1) {
@@ -981,7 +981,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  
 		  String cmd1 = " SELECT a.CUSTACCOUNT AS klient, a.ITEMID AS toode, sum(a.INVOICEQTY) AS kogus  FROM BIF03_SALESLINE a " + 
 		  		"   WHERE a.SALESDATE > GETDATE() - 300 AND a.EG_SALESCANCELREASONID <> 'GKR' AND a.INVENTLOCATIONID != 'STORNO' " + 
-		  		"   AND a.SALESSTATUS <> 1 group by CUSTACCOUNT, ITEMID  " ;
+		  		"   AND a.SALESSTATUS <> 1  group by CUSTACCOUNT, ITEMID  " ;
 		    
 		  
 		  
@@ -1036,7 +1036,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 			        
 
 			    String last3 = " SELECT jou.clientBackOfficeId as klient , jou.productBackOfficeId as toode , " + 
-			    		"	jou.Quantity  as kogus, jou.Price as lastprice, jou.deliverydate  as lastdate, (jou.invoiceNumber) as lastdok  FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >= getdate()-300 " + 
+			    		"	jou.Quantity  as kogus, jou.Price as lastprice, jou.deliverydate  as lastdate, (jou.invoiceNumber) as lastdok "
+			    		+ " FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >= getdate()-300 and DOCUMENTTYPE in (3) " + 
 			    		"	 order by jou.clientBackOfficeId,  jou.productBackOfficeId, jou.deliverydate desc " ;
 			    	 
 			    	 rs = stmt.executeQuery(last3);
@@ -1064,16 +1065,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 			                 		if(lisainfo.get(key) != null) {
 			                 			value = lisainfo.get(key) + "|" + value;
 			                 		}
-			                 	if(ldoc.startsWith("KR") && amount < 0) {
 			                 		 lisainfo.put(key, value);
 			                 		 count++;
-			                 	  }else if(!ldoc.startsWith("KR")){
-			                 		 lisainfo.put(key, value);
-			                 		 count++;
-				                 }
-			                 			
-			                 	 
-			                 	}
+				                }
 			                  
 			                 oldkey = key;
 			                
@@ -1429,7 +1423,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
           
           agent.setLanguage("LAT");
           agent.setCountry("lv");
-          agent.setPassWord("0000");
+         // agent.setPassWord("0000");
         
 
    		String agentAGENTS = props.getProperty(agent.getID());
@@ -2961,7 +2955,8 @@ private HashSet<String> inTT = null;
 	  
     String cmd = "  Select posWeight as sorting , a.backOfficeId as itemid,a.Name AS nimetus,c.Name as namebr, a.quantityBox AS kastis,a.quantityPallete as alusel , b.CONVERTLAYER as layer , a.quantityPack as pakk,  \r\n" + 
     		"    		a.Price AS price, a.barCode AS ean,a.groupBackOfficeId AS grupp,  \r\n" + 
-    		"    		a.brandBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
+    		"    		a.brandBackOfficeId AS grupp2 ,a.increasestep as opt, a.minimalOrderQuantity as mini ,a.unitName AS unit, a.vatPercent as vat ,a.MARKUPGROUPID as deposit, "
+    		+ " a.MARKUPCOEF as depositmulti from  dbo.EPASAULE_PRODUCTS a LEFT join dbo.BID01_ITEM b on b.itemid= a.backOfficeId\r\n" + 
     		"			 left join EPASAULE_BRANDS c on c.backOfficeId = a.brandBackofficeId "  ;
 
              String cmd2 = " Select productBackofficeId as toode,sum(Inventory) as stock, (case when regionBackofficeId = '24EWC' then '24N' else regionBackofficeId end) as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  " + 
@@ -3145,6 +3140,16 @@ boolean noopt = false;
           String unit = rs.getString("unit");
                if(unit!=null && unit.trim().length()>0){
                    prod.setUnit(unit);
+               }
+         
+               String depo = rs.getString("deposit");
+               if(depo != null && depo.trim().length()  > 0 ){
+                   prod.DEPO_WO_VAT = 0.1;
+
+            	   double dep = rs.getDouble("depositmulti");
+            	   if(dep > 0 ) {
+            		   prod.DEPO_WO_VAT = 0.1 * dep;
+            	   }
                }
                
        if(startsWithDigitDash(nimetus)) {

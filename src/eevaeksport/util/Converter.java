@@ -5002,6 +5002,7 @@ public class Converter {
 		 // Lõpp - vaatame mis küsimused on juba olemas
 			   
 				  HashSet answersDone = null;
+				  HashSet answersToSave = new HashSet();
 					try {
 						answersDone = (HashSet)Converter.readObject("answersdone.obj");
 					} catch (Exception e1) {
@@ -5010,7 +5011,6 @@ public class Converter {
 			if(answersDone == null) {
 			  answersDone = new HashSet();
 			}
-			   
 			   
 
 			
@@ -5312,6 +5312,7 @@ public class Converter {
 
                                                 changesMade = true;
                                                 answersDone.add(key+created);
+                                                answersToSave.add(key+created);
                                                 
                                                 if(comm != null && comm.trim().length() > 0) {
                                                 	 cell = row.getCell((short) 21); // kommentaari cell
@@ -5319,6 +5320,7 @@ public class Converter {
 		    	                 			      }
                                                 
                                                 } else {
+                                                	answersToSave.add(key+created);
                                                 	System.out.println("vastus olemas, ei lisa " + key);
                                                 }
 				    	               }
@@ -5578,9 +5580,11 @@ public class Converter {
 
 			                                      changesMade = true;
 			                                     answersDone.add("master" + key + created);
+			                                     answersToSave.add("master" + key + created);
 
 			                                  } else {
 			                                      System.out.println("vastus olemas, ei lisa " + key);
+			                                      answersToSave.add("master" + key + created);
 			                                  }
 
 			                              } catch (Exception e) {
@@ -5605,7 +5609,7 @@ public class Converter {
 			          }
 
 			              try {
-			                  Converter.saveObject(answersDone, "answersdone.obj");
+			                  Converter.saveObject(answersToSave, "answersdone.obj");
 			              } catch (IOException e) {
 			                  e.printStackTrace();
 			              }
@@ -10101,7 +10105,7 @@ try{
 	  }
 		MyJSON myson = new MyJSON();
 		
-			myson.setUrl("https://api.mobitrek.eu/rest/managers/");
+			myson.setUrl("https://api.mobitrek.eu/rest/manager");
 			
 		
 	  JSONArray array = new JSONArray();
@@ -10119,7 +10123,7 @@ try{
 	value.put("company", company);
 	
 	if(ag.getGroup()!= null){
-		value.put("groupcode", ag.getGroup());
+		//value.put("groupcode", ag.getGroup());
 	}
 	
 	if(ag.restEmail != null){
@@ -10131,7 +10135,7 @@ try{
 	}	
 
 	if(ag.getPassWord()!= null){
-		value.put("passWord", ag.getPassWord());
+		//value.put("passWord", ag.getPassWord());
 	}
 	
 	if(ag.getLanguage() != null){
@@ -10172,6 +10176,7 @@ try{
 				serv.company = company;
 				serv.https = https;
 			    serv.postJson(deCode(array.toString()), myson.getUrl());
+			    serv.patchJson(deCode(array.toString()), "https://api.mobitrek.eu/rest/manager/list");
 				serv.closeClient();
 			} catch (Exception e) {
 				System.out.println(deCode(array.toString()));

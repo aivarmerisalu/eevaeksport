@@ -73,72 +73,17 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 
 		String acc = null;
 
-		try {
-			String sql2 = " select k.[No_] AS klient " + " FROM [Viï¿½iunai Baltic$Customer] k  where k.[No_] = '"
-					+ id.trim() + "'";
-			System.out.println(sql2);
-
-			Statement st2 = con.createStatement();
-			ResultSet rs2 = st2.executeQuery(sql2);
-
-			while (rs2.next()) {
-				acc = rs2.getString("klient").trim();
-
-			}
-			rs2.close();
-			st2.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		if (acc == null) {
-			acc = id;
-		}
-
-		System.out.println("Klient: " + acc);
+		
 		return acc;
 
 	}
 
 	public String identifyProduct(String ean, String prodID) throws SQLException {
 
-		String sql1 = "SELECT [No_] AS toode  FROM [Viï¿½iunai Baltic$Item] LEFT JOIN [Viï¿½iunai Baltic$Item Unit of Measure]"
-				+ " vat ON (vat.[Item No_]=[No_] and vat.[Code]='Dï¿½ï¿½.' ) " + "  WHERE [Brï¿½kï¿½ninis kodas] ='"
-				+ ean + "'  order by [Blocked] "; // and [Blocked]=0
-
-		String sql2 = " SELECT [No_] AS toode FROM [Viï¿½iunai Baltic$Item] " + "  WHERE [No_] = '" + prodID + "' "; // and
-																														// [Blocked]=0
-
+	
 		String prod = null;
 
-		Statement st1 = con.createStatement();
-		ResultSet rs1 = st1.executeQuery(sql1);
-
-		System.out.println(sql1);
-		if (rs1.next()) {
-			if (ean.trim().length() > 0) {
-				prod = rs1.getString("toode").trim();
-			}
-		}
-		System.out.println("peale esimest " + prod);
-
-		if (prod == null || prod.trim().length() == 0) {
-			System.out.println(sql2);
-			rs1 = st1.executeQuery(sql2);
-			while (rs1.next()) {
-
-				if (prodID != null && prodID.trim().length() > 0) {
-					prod = rs1.getString("toode").trim();
-				}
-			}
-			System.out.println("peale teist " + prod);
-		}
-
-		rs1.close();
-		st1.close();
-
-		System.out.println("Tagastan toote:" + prod + " prodID:" + prodID + " ean:" + ean);
+		
 		return prod;
 
 	}

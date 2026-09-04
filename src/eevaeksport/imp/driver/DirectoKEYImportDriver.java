@@ -1093,7 +1093,7 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 		    		  hind =  this.getPriceAction(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
 				  }catch(Exception e){
 		    	  }
-				 // System.out.println("HindAction " + line.getToode() + " " + hind);
+				//  System.out.println("HindAction " + line.getToode() + " " + hind);
 			    	
 				  if(hind < 0.0006){
                       try{
@@ -1102,7 +1102,7 @@ public class DirectoKEYImportDriver extends AbstractImportDriver{
 			    	  }
 			     }
 		    	  
-		    	System.out.println("Hind " + line.getToode() + " " + hind);
+		    	//System.out.println("Hind " + line.getToode() + " " + hind);
 		    	  
                   if(line.getDiscount() > 0) {
                 	  hind = line.getPrice();

@@ -555,7 +555,8 @@ public class RivileArktisDBDriver extends AbstractDBDriver implements  BulkUpdat
               
               String hinnak = rs.getString("hinnad");
               if(hinnak != null && hinnak.trim().length() > 0){
-            	  cust.setCustType(hinnak.trim());  
+            	  cust.setCustType(hinnak.trim());
+            	  cust.setGroup(hinnak.trim());
               }
               customers.put(name, cust);
               custMap.put(cust.getPayer(), cust);

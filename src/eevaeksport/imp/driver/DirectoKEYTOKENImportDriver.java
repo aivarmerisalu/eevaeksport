@@ -17,9 +17,14 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -33,6 +38,7 @@ import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import ee.mobilejava.earve.GenericDOM;
 import eevaeksport.Agent;
@@ -65,8 +71,9 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
     eans = new TreeMap();
     company = parent.getProps().getProperty("company");
     kliendid = getCustomers(null);
-    tooted = this.getProducts();
+    tooted = this.getProducts(null);
     grupid = this.getProdGroups(); 
+    mlines = getPriceMatrixData();
     companytoken = parent.getProps().getProperty("companytoken");
     
   }
@@ -136,65 +143,109 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 		  	
 	   }
   
-  public TreeMap getProducts(){
+  public TreeMap getProducts(Agent agent){
+		 
+    TreeMap tm = new TreeMap();
+    
+    try {
 
-	    TreeMap tm = new TreeMap();
-	     
-	     try {
-	 
-	    	   FileReader fr = new FileReader(getDir() + "tooted.xml");
-	           BufferedReader reader = new BufferedReader(fr);
-	         String line = null;
 
-	          while((line = reader.readLine()) != null  ){
-	        	  if((line.trim().length()) > 50){
-	        	  int len = line.indexOf("code=");
-	        	  String id   = line.substring(len + 6);
-	      	      Product prod = new Product(id.substring(0,id.indexOf("\"")));
-	      	      len = line.indexOf("default_name=");
-	      	     String name   = line.substring(len + 14);
-	      	    prod.setName(deCode(name.substring(0,name.indexOf("\""))));
-	      	  len = line.indexOf("base_price=");
-	      	   if(len != -1){
-	      		 String price   =  line.substring(len + 12);  
-	       	    prod.setPrice(Double.parseDouble(price.substring(0,price.indexOf("\""))));//hulgihind      	    
-	      	   }
-	      	    
-	      	 
-	      	   
-	      	    
-	    	 len = line.indexOf("purchase_price=");
-	      	 if(len != -1){
-		      		String price   =  line.substring(len + 16);  
-		      	    prod.setInCases(Double.parseDouble(price.substring(0,price.indexOf("\""))));// ostuhind
-	      	 }
-	      	    
-	      	 len = line.indexOf("class=");
-      	 	 if(len != -1){
-      	 	     String grupp   = line.substring(len + 7);  
-     	          prod.setGroup(grupp.substring(0,grupp.indexOf("\"")));
-      	 	 }    
-	      	 
-      	 	 
-      	 	 len = line.indexOf("stripe_code=");
-       	    if(len != -1){
-       	    	 String ean   = line.substring(len + 13);
-       	    	 ean = ean.substring(0,ean.indexOf("\""));
-           	     prod.setEAN(ean);
-           	     eans.put(ean, prod.getID());
-           	}
-       	   
-	      	 
-	      	     tm.put(prod.getID(),prod);	
-	          }	   
-	          }
-        	  
-	    
-	     } catch (Exception e){
-	       e.printStackTrace();
-	     }
-	     return tm;
-	   }
+		 File f = new File (getDir() + "tooted.xml");
+   	  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		     DocumentBuilder db;
+			db = dbf.newDocumentBuilder();      	
+	    	FileInputStream in = getCleanInputStream(f);
+	    	String handler = null;
+	        Document doc = db.parse(in,handler);
+	        Node root = getNode(doc, "transport");      
+	   
+	    	Node read = getNode(root, "items");
+	        for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	        	  Node rida = read.getChildNodes().item(i);
+	        	  try{
+	        		  if(rida.getNodeName().equals("item")){
+	        			 
+	        			  boolean goes = true;
+	        			  
+	        			 String id = rida.getAttributes().getNamedItem("code").getNodeValue();
+	        			 
+	        			 Node nd = rida.getAttributes().getNamedItem("name");
+	        			 if(nd != null) {
+	        			 String name = rida.getAttributes().getNamedItem("name").getNodeValue();
+	        			
+	        			    Product prod = new Product(id);
+	        			    prod.setName(name);
+	        			    
+	        	      	    	
+		        			 try{
+			        			 prod.setUnit(rida.getAttributes().getNamedItem("unit").getNodeValue());
+		                 	    } catch(Exception aa){}	   
+		        			 
+		        			 
+		        			 String add = "";
+	        			 try{
+	        				
+	        			 String ean = rida.getAttributes().getNamedItem("barcode").getNodeValue();
+	                 	     prod.setEAN(ean);
+	                  	     
+	                    	   if("true".equals(parent.getProps().getProperty("add.ean"))){
+	                    		   try{ add = ean.substring(ean.length()-4); 
+	                    	       }catch(Exception e ){}
+	                    		 }
+	                       }catch(Exception aa){}
+
+
+      		        	  if("true".equals(parent.getProps().getProperty("name.code.front"))){
+      		     			 prod.setName((id + " " + name + " " +  add).trim()); 
+      		     		 }else{
+      		     			 prod.setName((name + " " + id + " " + add).trim()); 
+      		     		 }
+	        			
+
+      		        	  if(parent.getProps().getProperty("vat") != null){
+      		        		  prod.setVat(parent.getProps().getProperty("vat"));
+      		        	  }
+      		      	    
+      		      	     prod.setPrice(1);
+      		      	     
+      		      	    try{
+	        			 prod.setPrice(Double.parseDouble(rida.getAttributes().getNamedItem("salesprice").getNodeValue()));
+                	    } catch(Exception aa){}	 
+      		      	    
+      		      	 try{
+	        			 prod.setInCases(Double.parseDouble(rida.getAttributes().getNamedItem("package1").getNodeValue()));
+                	    } catch(Exception aa){}	 
+      		      	    
+      		      try{
+	        			 prod.setGroup(rida.getAttributes().getNamedItem("class").getNodeValue());
+	        			 
+             	    } catch(Exception aa){}	   
+    			 
+   		      		         
+      		         	    if(goes ){
+      		         	    	 tm.put(prod.getID(), prod);	
+      		         	        } 
+	               
+      		        	  
+	        }}
+	        	  }catch (Exception e) {
+	        		  e.printStackTrace();
+	        	  }
+	        }
+
+   
+    } catch (Exception e){
+      e.printStackTrace();
+    }
+   
+    
+      System.out.println("tooted tehtud " + tm.size());
+    
+    return tm;
+  }
+  
+  
+
   
   private String company = null;
   
@@ -241,111 +292,151 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	  
 	  
   
-	  public Vector getFixedAssortmentData() {
-	       Vector lines = new Vector();
-	       
-	       try {
-	   		  File f = new File (getDir() + "hinnakiri.xml");
-	   		  System.out.println("siin matix");
-	   	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	   	     DocumentBuilder db;
-	   		db = dbf.newDocumentBuilder();      	
-	       	FileInputStream in = getCleanInputStream(f);
-	       	String handler = null;
-	           Document doc = db.parse(in,handler);
-	           Node root = getNode(doc, "transport");      
-	      
-	       	Node read = getNode(root, "priceformulas");
-	           for (int i = 0; i < read.getChildNodes().getLength(); i++){
-	           	  Node rida = read.getChildNodes().item(i);
-	           	  try{
-	           		  if(rida.getNodeName().equals("priceformula")){
-	           			
-	           			 String custID = " ";
-	                     String clGroup = " ";
-	                     String prodID = " ";
-	                     String prodGroup = " ";
-	                     String start = " ";
-	                     String end = " ";
-	                     MatrixLine mline = new MatrixLine();
-	                    try{
-	                    	 try{
-	                    	     clGroup = rida.getAttributes().getNamedItem("code").getNodeValue();
-	                           }catch(Exception aa){}
-	                    	 try{
-		                         prodID =  rida.getAttributes().getNamedItem("item").getNodeValue();  
-	                    	   }catch(Exception aa){ }
-	                    	 try{
-	                             prodGroup =  rida.getAttributes().getNamedItem("class").getNodeValue();
-	                    	  }catch(Exception aa){ }
-	                    	  try{
-		                             start =  rida.getAttributes().getNamedItem("start_date").getNodeValue();
-		                    	  }catch(Exception aa){ }
-		                    	  try{
-			                             end =  rida.getAttributes().getNamedItem("end_date").getNodeValue();
-			                    	  }catch(Exception aa){ }
-	                    	  
-	                         String mode = rida.getAttributes().getNamedItem("what").getNodeValue();
-	                        
-	                         try{
-	                        double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
-	                        mline.setDiscount(value);
-	                         }catch(Exception aa){ }
-	                         mline.setProdLevel(mode);
-	                       
-	                         
-	                         if (custID != null && custID.trim().length() > 0) {
-	                           mline.setCustID(custID.trim());
-	                         }
-	                         if (clGroup != null
-	                             && clGroup.trim().length() > 0) {
-	                           mline.setCliGroup(clGroup.trim());
-	                         }
+		public Vector getPriceMatrixData() {
+			   	Vector lines = new Vector();
+			    
+			    try {
+					  File f = new File (getDir() + "hinnakiri.xml");
+					//  System.out.println("siin matix");
+				     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				     DocumentBuilder db;
+					db = dbf.newDocumentBuilder();      	
+			    	FileInputStream in = getCleanInputStream(f);
+			    	String handler = null;
+			        Document doc = db.parse(in,handler);
+			        Node root = getNode(doc, "transport");    
+			     
+			        Calendar cc = Calendar.getInstance();
+			        cc.add(Calendar.DATE, 1);
+			        Date all = cc.getTime();
+			       
+			    	Node read = getNode(root, "priceformularows");
+			        for (int i = 0; i < read.getChildNodes().getLength(); i++){
+			        	  Node rida = read.getChildNodes().item(i);
+			        	  try{
+			        		  if(rida.getNodeName().equals("priceformularow")){
+			        			
+			        			 String custID = " ";
+			                  String clGroup = " ";
+			                  String prodID = " ";
+			                  String prodGroup = " ";
+			                  String start = " ";
+			                  String end = " ";
+			                  String currency = "";
+			                  MatrixLine mline = new MatrixLine();
+			                 try{
+			                 	 try{
+			                 	     clGroup = ensureLen(rida.getAttributes().getNamedItem("code").getNodeValue());
+			                        }catch(Exception aa){}
+			                 	 try{
+				                         prodID =  rida.getAttributes().getNamedItem("item").getNodeValue();  
+			                 	   }catch(Exception aa){ }
+			                 	 try{
+			                          prodGroup =  rida.getAttributes().getNamedItem("class").getNodeValue();
+			                 	  }catch(Exception aa){ }
+			                 	  try{
+				                             start =  rida.getAttributes().getNamedItem("date1").getNodeValue();
+				                    	  }catch(Exception aa){ }
+				                    	  try{
+					                             end =  rida.getAttributes().getNamedItem("date2").getNodeValue();
+					                    	  }catch(Exception aa){ }
+				                    	  try{
+					                             currency =  rida.getAttributes().getNamedItem("currency").getNodeValue();
+					                    	  }catch(Exception aa){ }
+				                    	  String mode = null;  
+				                    	  try{  	  
+			                       mode = rida.getAttributes().getNamedItem("type").getNodeValue();
+				                    	  }catch(Exception aa){ }
+			                      try{
+			                     double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
+			                     if(mode != null && mode.equals("8")){
+			                    	 mline.setPrice(value);
+			                     }else{
+			                         mline.setDiscount(value);
+			                     }
+			                      }catch(Exception aa){ }
+			                  
+			                      
+			                      mline.setProdLevel(mode);
+			                    
+			                      
+			                      if (custID != null && custID.trim().length() > 0) {
+			                        mline.setCustID(custID.trim());
+			                      }
+			                      if (currency != null && currency.trim().length() > 0) {
+			                          mline.setCurrency(currency.trim());
+			                        }
+			                      
+			                      if (clGroup != null
+			                          && clGroup.trim().length() > 0) {
+			                        mline.setCliGroup(clGroup.trim());
+			                      }
 
-	                         if (prodID != null && prodID.trim().length() > 0) {
-	                           mline.setProdID(prodID.trim());
-	                         }
-	                         
-	                         if (mline.getProdID() == null && prodGroup != null
-	                             && prodGroup.trim().length() > 0) {
-	                           mline.setProdGroup(prodGroup);
-	                         }   
-	                         
-	                         if(start != " " && end != " "){
-	                        	 mline.setStartDate(start);
-	                        	 mline.setEndDate(end);
-	                             Date alg = getCalXML(start); 
-	                             Date lopp = getCalXML(end); 
-	                             
-	                             if(alg.before(new Date()) && lopp.after(new Date())){
-	                            	
-	                            	 lines.add(mline);	
-	                             }
-	                           
-	                         }else{
-	                        	 lines.add(mline);	
-	     	                 }
-	                    
-	                    }catch(Exception e){
-	                    	e.printStackTrace();
-	                    }
-	                    
-	                   }
-	                	
-	           	  }catch(Exception e){
-	           		  e.printStackTrace();
-	           	  }
-	                
-	           }
-	           
-	   	}catch(Exception e){
-	   		e.printStackTrace();
-	   	}
-	       
-	    System.out.println("siin matix" + lines.size());
-	       return lines;
-	 }
-	  
+			                      if (prodID != null && prodID.trim().length() > 0) {
+			                        mline.setProdID(prodID.trim());
+			                      }
+			                      
+			                      if (mline.getProdID() == null && prodGroup != null
+			                          && prodGroup.trim().length() > 0) {
+			                        mline.setProdGroup(prodGroup);
+			                      }   
+			                      
+			                      if(!clGroup.equals("00001")) {
+			                      if(start != " " && end != " "){
+			                    	  Date alg = getCalXML(start); 
+			                          Date lopp = getCalXML(end); 
+			                          
+			                    	  start = start.substring(0,10).substring(5);
+			                    	  end = end.substring(0,10).substring(5);
+			                    	  mline.setStartDate(start);
+			                     	  mline.setEndDate(end);
+			                          
+			                          if(alg.before(all) && lopp.after(new Date())){
+			                         	 lines.add(mline);	
+			                          }
+			                          
+			                      } else {
+			                     	 lines.add(mline);	
+			  	                 }
+			                      }
+			                 }catch(Exception e){
+			                 	e.printStackTrace();
+			                 }
+			                 
+			                }
+			             	
+			        	  }catch(Exception e){
+			        		  e.printStackTrace();
+			        	  }
+			        }
+			        
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			    
+			 System.out.println("siin matrix" + lines.size());
+			    return lines;
+
+
+			   }
+		 private String ensureLen(String in ){
+			 
+			 if(in.length() == 4){
+				 in = "0" + in ;
+			 }
+			 if(in.length() == 3){
+				 in = "00" + in ;
+			 }
+			 if(in.length() == 2){
+				 in = "000" + in ;
+			 }
+
+			 if(in.length() == 1){
+				 in = "0000" + in ;
+			 }
+			 return in;
+		 }
+		   
 	  
 	  
 	  private Date getCalXML(String ss){
@@ -361,10 +452,11 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	  
 	  
   
+
+  
   public TreeMap getCustomers(Agent agent){
-	     TreeMap tm = new TreeMap();
-	     impCodes =new TreeMap();
-	   
+	   TreeMap tm = new TreeMap();
+	 
 	   try {
 	 		  File f = new File (getDir() + "kliendid.xml");
 	 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -372,68 +464,263 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	 		db = dbf.newDocumentBuilder();      	
 	     	FileInputStream in = getCleanInputStream(f);
 	     	String handler = null;
-	         Document doc = db.parse(in,handler);
-	         Node root = getNode(doc, "transport");      
-	      //   System.out.println(root);
+	        Document doc = db.parse(in,handler);
+	        Node root = getNode(doc, "transport");      
 	     	Node read = getNode(root, "customers");
+	     	
+	     	HashMap<String, Customer> payersDebt = new HashMap<String, Customer>();
+
+	     	HashMap<String, String> payersPRLists = new HashMap<String, String>();
+	     	
+	     	  for (int i = 0; i < read.getChildNodes().getLength(); i++){
+	         	  Node rida = read.getChildNodes().item(i);
+	         	  if(rida.getNodeName().equals("customer")){
+	         		 String name = null;
+	         		boolean addaadr = true;
+		         	  try{
+		         		
+		         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
+		         		  Customer cust = new Customer(id);
+		         		 String vatregno = "";
+			         		try{ 
+			         			vatregno =  rida.getAttributes().getNamedItem("vatregno").getNodeValue(); 
+			 	         		cust.setVatnr(vatregno);
+			 	         		cust.setPayer(vatregno);
+			 	         		
+			 	         		if(rida.getAttributes().getNamedItem("specialpriceformula") != null) {
+			 	         	      String price_list =  rida.getAttributes().getNamedItem("specialpriceformula").getNodeValue();
+
+		 	         	    	  String old = payersPRLists.get(vatregno);
+			 	         	      if(old != null) {
+			 	         	    	  if(!old.contains(price_list+ ",")) {
+			 	         	    	     payersPRLists.put(vatregno, old +  price_list + "," );
+			 	         	    	  }
+			 	         	       }else {
+			 	         	         payersPRLists.put(vatregno, price_list + ",");
+			 	         	      }
+			 	         		}
+			 	         		
+				         		Double limit = 0.0;
+				         		try{ 
+				         			limit =  Double.parseDouble(rida.getAttributes().getNamedItem("creditlimit").getNodeValue()); 
+				         			if(limit > 0)
+				 	         		cust.setCredit(limit+"");
+				 	         	 }catch(Exception ee){
+				         		 }
+		                         
+				         	
+				         		Double debt = null;
+				         		try{ 
+				         			debt =  Double.parseDouble(rida.getAttributes().getNamedItem("balance").getNodeValue()); 
+				         			if(debt > 0) {
+				 	         		cust.setUsedCredit(debt);
+				         			payersDebt.put(vatregno, cust);
+				         			}
+				 	         	 }catch(Exception ee){
+				         		 }
+			 	         		
+			 	         	 }catch(Exception ee){
+			         		 }
+	                         
+		         	  }catch(Exception e) {
+		         		  
+		         	  }
+	         	  }
+	     	  }
+	     	  
+	     	 read = getNode(root, "customers");
 	     	//System.out.println("ridu  " + read.getChildNodes().getLength() + read.toString());
 	         for (int i = 0; i < read.getChildNodes().getLength(); i++){
 	         	  Node rida = read.getChildNodes().item(i);
-	         	  try{
-	         		  Customer customer = new Customer(rida.getAttributes().getNamedItem("code").getNodeValue());
-	         		  customer.setName(deCode(rida.getAttributes().getNamedItem("name").getNodeValue()));
-	         		 
-	         		  
-	         		  
+	         	  
+	         	 // System.out.println("node name " + rida.getNodeName());
+	         	  if(rida.getNodeName().equals("customer")){
+	         		 String name = null;
+	         		boolean addaadr = true;
+		         	  try{
+		         		   name =  rida.getAttributes().getNamedItem("name").getNodeValue();
+		         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
+		         		  Customer customer = new Customer(id);
+		         		  customer.restName = name;
+		         		  String kkood = id;
+		         		  try{
+		         			  String payer = rida.getAttributes().getNamedItem("payer").getNodeValue();
+			         		  
+			         		  if(payer != null && payer.trim().length() > 0 ){
+			         			  customer.setPayer(payer.trim());
+			         		  }
+	  
+		         		  }catch(Exception e){
+		         			  
+		         		  }
 		         		
-		       		  String sendaadr = ""; 
+		         	
+		         		
+		         		 String country = "Estonia";
+		       		  if(parent.getProps().getProperty("country") != null){
+		       			  country = parent.getProps().getProperty("country");
+		       		  }
+		       		//deliveryaddress1="Klonėnų vs. 1" deliveryaddress2="19156 Širvintų r" deliveryaddress3="Leedu" country="LT"
+		         		 String kname = name;
+		         		 String sendaadr = ""; 
 		         		 
 		         		try { 
 		 	         		  sendaadr =  rida.getAttributes().getNamedItem("deliveryaddress1").getNodeValue();
+		 	         		  String linn = "";
+		 	         		try {
+				 	         	    linn =  rida.getAttributes().getNamedItem("deliveryaddress2").getNodeValue().replaceAll(";", ","); 
+				 	         	    sendaadr = sendaadr + " " + linn;
+				 	         		customer.restCity = linn;
+				 	         		}catch(Exception eed){
+					         		 }
 		 	         		  customer.restStreet = sendaadr.replaceAll(";", ",");
-		 	         		} catch (Exception ee){
+		 	         		  name = name + " " + sendaadr;
+		 	         		addaadr = false;
+		 	         		
+		 	         		String maa = "";
+		 	         		try{
+		 	         	      maa =  rida.getAttributes().getNamedItem("deliveryaddress3").getNodeValue().replaceAll(";", ","); 
+		 	         		  country = maa;
+
+		 	         		  if("true".equals(parent.getProps().getProperty("use.country"))){
+		 	         			name = name + " " + maa;	  
+		 	         		  }
+		 	         		
+		 	         		} catch(Exception eed){
+			         		 
+		 	         		}
+		 	         		
+		 	         		customer.setAddress(Converter.adressLink(sendaadr, country));
+		 	         	
+		         		
+		         		} catch (Exception ee){
 		         		 
-		         		    }
+		         		}
 			         	
 		         		
 		         		String asula = "";
 		         		try{ 
-		 	         	  asula =  rida.getAttributes().getNamedItem("deliveryaddress2").getNodeValue().replaceAll(";", ","); 
+		 	         		  asula =  rida.getAttributes().getNamedItem("deliveryaddress2").getNodeValue().replaceAll(";", ","); 
+		 	         		sendaadr = sendaadr + " " + asula;
 		 	         		customer.restCity = asula; 
 		 	         	
 		 	         		String maa = "";
 		 	         		try{
-		 	         	    maa =  rida.getAttributes().getNamedItem("deliveryaddress3").getNodeValue().replaceAll(";", ","); 
-		 	         		customer.restZipCode = maa;
+		 	         	  maa =  rida.getAttributes().getNamedItem("deliveryaddress3").getNodeValue().replaceAll(";", ","); 
+		 	         		country = maa;
 		 	         		}catch(Exception eed){
 			         		 }
 		 	         		
+		 	         		customer.setAddress(Converter.adressLink(sendaadr, country));
 		 	         	 }catch(Exception ee){
 		         		 }
 		         		
-	         		  
-	         		  try{     	
-		         		  customer.setGroup(deCode(rida.getAttributes().getNamedItem("pricelist").getNodeValue()));
-	         	         } catch (Exception e) {}
-	         		
-	         		        customer.addAgent(new Agent(deCode(rida.getAttributes().getNamedItem("salesman").getNodeValue())));
-	                      
-	         		    tm.put(customer.getID(), customer);
-	                      
-	         	  }catch(Exception e){
+
+                        
+		         		String vatregno = "";
+		         		try{ 
+		         			vatregno =  rida.getAttributes().getNamedItem("vatregno").getNodeValue(); 
+		 	         		customer.setVatnr(vatregno);
+		 	         		customer.setPayer(vatregno);
+		 	         	 }catch(Exception ee){
+		         		 }
+                        
+		         		
+		         
+
+		         		try{ 
+		         			double discount  =  Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
+		         			if(discount > 0){
+		         		 		customer.setDiscount(discount);
+		    		 	  }
+		 	         	 }catch(Exception ee){
+		         		 }
+		         		
+		         		
+		         		
+		         		 
+		         		 
+		         		  customer.setName(name);
+		         		 
+		         		
+		         		 //contact="Justyna Marciniak-Ashtiani" phone="+358503235307" email="justyna.marciniak-ashtiani@edenred.com"
+		         		
+		         		
+		         		  
+		         		  try{
+		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("priceformula").getNodeValue());         	
+			         		   customer.setGroup(Converter.deCode(price_list));
+			         		  if("true".equals(parent.getProps().getProperty("fixed.frompricelist"))){
+			       			   customer.addFixSortCode(Converter.deCode(price_list)); 
+			       		       }
+		         		  }catch(Exception e){
+		         		  }
+		         		  
+		         		  
+		         		  
+		
+		         		  try{
+		         			  String	 price_list =  rida.getAttributes().getNamedItem("specialpriceformula").getNodeValue() ;
+		         			  
+		         			  StringTokenizer ss = new StringTokenizer(price_list,",");
+		         			  while (ss.hasMoreTokens()){
+		         				  
+                                  String as = ensureLen(ss.nextToken());
+			         			  
+                                 if(customer.getGroup() != null && customer.getGroup().trim().length() > 0){
+                               	  if(!customer.getGroup().contains(as+"|")) {
+			         				    customer.setGroup(customer.getGroup() + "|" + Converter.deCode(as));
+                               	  }
+					         	    }else{
+			         				 customer.setGroup(Converter.deCode(as));
+					         	   }
+					         		
+                                  if("true".equals(parent.getProps().getProperty("fixed.frompricelist"))){
+					       			   customer.addFixSortCode(Converter.deCode(as)); 
+					       		   }  
+		         			  }
+		         			  
+			         		  }catch(Exception e){
+			         		  }
+		         		  
+		         		if( vatregno != null &&  payersPRLists.get(vatregno) != null) {
+		         			String price_list = payersPRLists.get(vatregno);
+		         			StringTokenizer ss = new StringTokenizer(price_list,",");
+		         			  while (ss.hasMoreTokens()){
+		         			     String as = ensureLen(ss.nextToken());
+			         		      if(customer.getGroup() != null && customer.getGroup().trim().length() > 0){
+			         		    	 if(!customer.getGroup().contains(as+"|")) {
+				         			 customer.setGroup(customer.getGroup() + "|" + Converter.deCode(as));
+			         		    	 }
+			         		    	 } else {
+			         				 customer.setGroup(Converter.deCode(as));
+					         	    }
+					         		
+                                if("true".equals(parent.getProps().getProperty("fixed.frompricelist"))){
+					       			   customer.addFixSortCode(Converter.deCode(as)); 
+					       		   }  
+		         			  }
+		         		}
+		 	         		
+		         		  
+	        		      
+	         		        tm.put(customer.getID(), customer);
+	                  
+    		
+    		   	  }catch(Exception e){
+	         		  e.printStackTrace();
 	         	  }
 	              
-	         }
-	         
+	         	  }}
 	 	}catch(Exception e){
 	 		e.printStackTrace();
-	 	}   
-	 	//System.out.println("ImpCodes " + impCodes.toString());
-	 	
-  return tm;
-}
+	 	}
+	
+	   System.out.println("cust size " + tm.size());
+		   
+    return tm;
+  }
 
-  
   
   
   
@@ -441,32 +728,6 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	    return parent.getProps().getProperty("imp.read");
 	  }
 
-  
-  public TreeMap getList(){
-	  TreeMap companies = new TreeMap();
-	    File file = new File("klient" + File.separator + "klient.txt");
-	    try{
-	      BufferedReader reader = new BufferedReader(new FileReader(file));
-	      String s = null;
-	      while((s = reader.readLine()) != null){
-	        StringTokenizer st = new StringTokenizer(s, ";");
-	        if (st.hasMoreTokens()){
-	          String compID = st.nextToken();
-	          if (compID.trim().equals("")){
-	          compID =null;
-	          }
-	          String name = null;
-	          if (compID!= null){
-	            name = st.nextToken();
-	            companies.put(compID, name);
-	          }
-	         }
-	      }
-	    } catch (IOException e){
-	      parent.showError(e);
-	    }
-	    return companies;
-	  }
   
   
   public String identifyCustomer(String id,String regnr)  {
@@ -512,7 +773,6 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 
   public void makeOrder(Order order) throws SQLException{
        counter = 0;
-      // System.exit(0);
 		 makeOutput(order); 
     
   }
@@ -522,12 +782,7 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	    String year =   cal.get(Calendar.YEAR) + "";
 	    String month = String.valueOf(cal.get(Calendar.MONTH) + 1);
 	    String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-
 	    String hour = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
-
-	    String minute = String.valueOf(cal.get(Calendar.MINUTE));
-
-	    String second = String.valueOf(cal.get(Calendar.SECOND));
 	 
 	   sb.append(  year + "-");
 	    if (month.length() == 1){
@@ -539,24 +794,14 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	      sb.append("0");
 	    }
 	     sb.append(day);
-	  //28.06.2010 20:00:33Y-m-d\TH:i:s n2002-05-30T09:00:00
 	   
 	     if (hour.length() == 1){
 		      hour = "0" + hour ;
 		    }
-	    /* sb.append("T" +hour + ":");
-
-	     if (minute.length() == 1){
-		      sb.append("0");
-		    }
-	     sb.append(minute + ":");
-	     if (second.length() == 1){
-		      sb.append("0");
-		    }
-	     sb.append(second);*/
 	     
 	    return sb.toString();
 	  }
+  
 
   
   
@@ -683,8 +928,6 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 			  
 		  }
 	  }
-		   
-	  
 	  return ppp.getInUnit();
   }
   
@@ -695,8 +938,6 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	
 	  String kgrupp = null;
 	  String tgrupp = null;
-	  String tm1grupp = null;
-	  String tm2grupp = null;
 	  if(ccc != null){
 		    kgrupp = ccc.getGroup();		 
 	      }
@@ -704,34 +945,29 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 	  if(ppp != null){
 			tgrupp = ppp.getGroup();		 
 		  }
-	  if(grupid.get(tgrupp) != null){
-		  Toode tt = (Toode)grupid.get(tgrupp);
-		  if(tt.getGr1() != null){
-			  tm1grupp = tt.getGr1();
-		  }
-		  if(tt.getGr2() != null){
-			  tm2grupp = tt.getGr2();
-		  }
-		  
-	  }
+	  
 	  Enumeration enumr = mlines.elements();
 	  
-	 /// System.out.println("sss " + kgrupp + " tootegr " + tgrupp+ " tooteM1gr " + tm1grupp + " tooteM2gr " + tm2grupp );
+	//  System.out.println("sss " + kgrupp + " tootegr " + tgrupp+ " tooteM1gr " + tm1grupp + " tooteM2gr " + tm2grupp );
 	  
 	  while (enumr.hasMoreElements()){
 		  MatrixLine mm = (MatrixLine)enumr.nextElement();
+
 		  if(mm.getStartDate()!= null && mm.getStartDate().trim().length() > 1){
-			
-		  if(mm.getCliGroup()!= null && mm.getCliGroup().equals(kgrupp) ){
+			//if(mm.getCliGroup() != null && mm.getCliGroup().indexOf("Elva") != -1) {
+			//  System.out.println("Hinnakiri "  + mm.getCliGroup() + " " + kgrupp + " " + mm.getStartDate());
+	//}
+		  if(mm.getCliGroup()!= null && kgrupp.contains(mm.getCliGroup()) ){
 			  //leidsime rea mis on hinnakirja oma
-			  System.out.println("Hinnakiri leitud "  + mm.getCliGroup() + " tr " + mm.getProdGroup() + " tt " + mm.getProdID());
+			//  System.out.println("Hinnakiri leitud "  + mm.getCliGroup());
 			  if (mm.getProdID() != null && mm.getProdID().equals(ppp.getID())){
 				  //leidsime ka toote 
 
-				  System.out.println("Toode leitud "  + mm.getProdLevel());
 				   String mode = mm.getProdLevel();
 				   double value = mm.getDiscount();
-				   
+				   double price = mm.getPrice();
+
+				//	  System.out.println("Toode leitud "  + mm.getProdLevel() + " " + value + " " + price);
 				   if(mode.equals("1")){
 					   return ppp.getInCases()* (100 - value)/ 100;
 				   }
@@ -742,9 +978,9 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 					   return ppp.getPrice()* (100 - value)/ 100;
 				   }
 				   if(mode.equals("8") ){
-					   return value ;
+					   return price ;
 				   }
-				  
+			    
 			  }
 			  
 			
@@ -764,50 +1000,9 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 					   return ppp.getPrice()* (100 - value)/ 100;
 				   }
 				   if(mode.equals("8") ){
-					   return value ;
+					   return mm.getPrice() ;
 				   }  
 			  }	 
-			  
-			  if (tm1grupp != null && mm.getProdGroup() != null && mm.getProdGroup().equals(tm1grupp)){
-				  //leidsime ka tootegrupi
-				  System.out.println("Tootegrupp master 1 leitud " + mm.getProdLevel());
-				   String mode = mm.getProdLevel();
-				   double value = mm.getDiscount();
-				   
-				   if(mode.equals("1")){
-					   return ppp.getInCases()* (100 - value)/ 100;
-				   }
-				   if(mode.equals("2")){
-					   return ppp.getInUnit()* (100 - value)/ 100;
-				   }			   
-				   if(mode.equals("3") && ppp.getPrice() > 0){
-					   return ppp.getPrice()* (100 - value)/ 100;
-				   }
-				   if(mode.equals("8") ){
-					   return value ;
-				   }  
-			  }
-			  
-
-			  if (tm2grupp != null && mm.getProdGroup() != null && mm.getProdGroup().equals(tm2grupp)){
-				  //leidsime ka tootegrupi
-				  System.out.println("Tootegrupp master 2 leitud " + mm.getProdLevel());
-				   String mode = mm.getProdLevel();
-				   double value = mm.getDiscount();
-				   
-				   if(mode.equals("1")){
-					   return ppp.getInCases()* (100 - value)/ 100;
-				   }
-				   if(mode.equals("2")){
-					   return ppp.getInUnit()* (100 - value)/ 100;
-				   }			   
-				   if(mode.equals("3") && ppp.getPrice() > 0){
-					   return ppp.getPrice()* (100 - value)/ 100;
-				   }
-				   if(mode.equals("8") ){
-					   return value ;
-				   }  
-			  }
 			  
 		  }
 		  }
@@ -999,11 +1194,12 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 			    	  order_xml = order_xml + "comment=\"" + line.getPartii() + "\" " ;
 				  }
 			      // order_xml = order_xml + "description=\"" + ppp.getName() + "\" " ;
-		    	  double hind = 0;
+		    	  double hind = line.getPrice();
 		    	  
 		    	  try{
 		    		  hind =  this.getPriceAction(line.getToode(),order.getCompany(),ppp)+ 0.0005 ;
 				  }catch(Exception e){
+					  e.printStackTrace();
 		    	  }
 				//  System.out.println("HindAction " + line.getToode() + " " + hind);
 			    	
@@ -1014,9 +1210,10 @@ public class DirectoKEYTOKENImportDriver extends AbstractImportDriver{
 			    	  }
 			     }
 		    	  
-		    //	System.out.println("Hind " + line.getToode() + " " + hind);
-				  hind = line.getPrice();
-            	  
+		    //	System.out.println("Hind " + line.getToode() + " " + hind + " " + line.getPrice());
+		    	if(hind < 0.0006){
+	               hind = line.getPrice();
+		    	} 
                   if(line.getDiscount() > 0 ) {
                 	  if (order.getStatus() != 1000) {
                 		  order_xml = order_xml +"discount=\""+ line.getDiscount() +"\" ";

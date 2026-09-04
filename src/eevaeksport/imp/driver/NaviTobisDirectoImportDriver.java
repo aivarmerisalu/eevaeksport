@@ -308,8 +308,11 @@ System.out.println(sql);
 		 	try {
 		 		String ordnum = getNum()+ "";
 		 		String comm = "";
+		 		comm = "comment=\""+ ord.getAgent() + "\" " ;
+	 			
+		 		
 		 		if(ord.getInfo() != null && ord.getInfo().trim().length() >0){
-		 			comm = "comment=\""+ escape(ord.getInfo()) + "\" " ;
+		 			comm = "comment=\""+ ord.getAgent() + " " + escape(ord.getInfo()) + "\" " ;
 		 			if(ord.getStatus() > 5){
 			 			comm = "cutomer_orderno=\""+ escape( ord.getInfo()) + "\" " ;
 			 		}
@@ -317,7 +320,6 @@ System.out.println(sql);
 		 		
 
 		 	   	String custid = (ord.getCompany());
-		 	   	System.out.println("enne " + custid );
 		 	     custid =   (String) this.custcodes.get(custid);
 		 	     if(custid == null) {
 		 	    	 custid = (ord.getCompany());
@@ -1739,7 +1741,11 @@ System.out.println(sql);
 	        if(ord.getStatus() == 6){
 	        	status = "6";
 	        }
+	        
 		String ladu = "CS";
+		if(parent.getProps().getProperty("stockcode.navi") != null) {
+			ladu = parent.getProps().getProperty("stockcode.navi"); 
+		}
 		
 		String smode = "";
 		if(ord.getShipMode() != null && ord.getShipMode().trim().length()>0){

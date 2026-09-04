@@ -1775,8 +1775,10 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				if(mintime.get(prod.getID()) != null){
 					prod.setTimeToSell(Long.parseLong(mintime.get(prod.getID())+""));
 				}
-				prod.setName(Converter.enCodeEst(weight.substring(0, weight.indexOf('.') + 4) + " "
-						+ name.replace('~', '-')) + " " + prod.getID());
+				name = Converter.enCodeEst(weight.substring(0, weight.indexOf('.') + 4) + " "
+						+ name.replace('~', '-')) + " " + prod.getID();
+				name = name.replaceAll("\\?+", "");
+				prod.setName(name);
 				tm.put(prod.getName(), prod);
 			}
 
