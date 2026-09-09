@@ -2089,7 +2089,7 @@ con.close();
 		
 	  	 String    sql = " select '' AS custid,pyno AS clgroup,itno AS prodid,'' AS prodgroup, " +
 	      "   max((Price * ((100-discount)/100))+ excise) AS price ,0 as disc, '' as paev,'' as startday, max(discount) as info  " +
-	      "  ,  max(DISCOUNT_QTY) as extra from alc.discounts_view t where  camp = '0'  group by t.pyno,t.itno order by pyno,itno " ;
+	      "  ,  max(DISCOUNT_QTY) as extra from alc.MJ_DISCOUNTS t where  camp = '0'  group by t.pyno,t.itno order by pyno,itno " ;
 	
 
   Vector result = new Vector();
@@ -2175,7 +2175,7 @@ con.close();
       sql = "  select '' AS custid,pyno AS clgroup,itno AS prodid,'' AS prodgroup,  " +
 	     "  max((Price * ((100-discount)/100)) + excise) AS price ,0 as disc, todt as paev,fromdt as startday"
 	     + " ,max(discount) as info , DISCOUNT_QTY as extra" +
-	     "   from alc.discounts_view t where  camp != '0'  group by t.pyno,t.itno,fromdt,todt,DISCOUNT_QTY order by pyno,itno " ;
+	     "   from alc.MJ_DISCOUNTS t where  camp != '0'  group by t.pyno,t.itno,fromdt,todt,DISCOUNT_QTY order by pyno,itno " ;
 
        rs = stmt.executeQuery(sql);
       while (rs.next()) {
@@ -2260,7 +2260,7 @@ con.close();
       // kliendip�histe hindade kysimine mis on erinevad maksja omadest 
       sql = "  select cuno AS custid,'' AS clgroup,itno AS prodid,'' AS prodgroup,  " +
 	     "  max((Price * ((100-discount)/100)) + excise) AS price ,0 as disc, todt as paev,fromdt as startday ,max(discount) as info" +
-	     " , DISCOUNT_QTY as extra from alc.discounts_view t where  cuno is not null"
+	     " , DISCOUNT_QTY as extra from alc.MJ_DISCOUNTS t where  cuno is not null"
 	     + "  group by t.cuno,t.itno,fromdt,todt,DISCOUNT_QTY order by cuno,itno " ;
 
     rs = stmt.executeQuery(sql);

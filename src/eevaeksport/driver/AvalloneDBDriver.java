@@ -8,6 +8,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -24,6 +28,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -45,7 +52,7 @@ import eevaeksport.util.Converter;
  * @author Tarmo Tubro
  * @version 1.0
  */
-public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter {
+public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,WebReporter {
 
     /**
      * Constructor declarationgetcustomerpr
@@ -765,17 +772,18 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 
 
 		
-		
+				prods = new HashMap();
 		
                   
-        // String cmd = "SELECT toode, nimetus, yhik, myygihind FROM toode WHERE (len(trim(toode)) > 3) AND (trim(toode.grupp) = 'L')";
-         String  cmd = "SELECT toode, rusnimetus ,nimetus , kastis as tykke, myygihind, yhik,liik AS grupp,ribakood AS ean,markused,maxale,ended,tasusumma as link , toptoode as top , uuskuni as uus FROM toode WHERE " +
-         " (myygikood = 'K' OR  myygikood = '5%' OR  myygikood = 'TUB' OR  myygikood = 'M' OR  myygikood = '32' or myygikood = '37') AND len(trim(toode)) >2 AND (keeld2=.F. )  ORDER BY toode";
+         String  cmd = "SELECT toode, t.rusnimetus ,t.nimetus , kastis as tykke, myygihind, yhik,t.liik AS grupp,l.artlnimi as grnimi,ribakood AS ean,markused,maxale,ended,tasusumma as link ,\r\n" + 
+         		" toptoode as top , uuskuni as uus,  netomass ,analoog as pan,r.nimetus as rnimi FROM toode t\r\n" + 
+         		"left join  ../andmed/artliik l ON l.liik=t.liik  LEFT JOIn ../andmed/riik r on r.kood = paritoluri   WHERE \r\n" + 
+         		"          (myygikood = 'K' OR  myygikood = '5%' OR  myygikood = 'TUB' OR  myygikood = 'M' OR  myygikood = '32' or myygikood = '37') AND len(trim(toode)) >2 AND (keeld2=.F. )  ORDER BY toode";
+         
        if (isDebug()) {
            	System.out.println(cmd);
            	}
-StringBuffer sb = new StringBuffer();
-
+          StringBuffer sb = new StringBuffer();
           stmt = con.createStatement();
                       ResultSet rs = stmt.executeQuery(cmd);
 
@@ -786,6 +794,10 @@ StringBuffer sb = new StringBuffer();
                       	String rusnimetus =rs.getString("rusnimetus");
                         String nimetus =rs.getString("nimetus");
                         Product prod = new Product(kood);
+                        
+                        Product prod2 = new Product(kood);
+                        prod2.setName(nimetus.trim());
+                        
                         if(rusnimetus != null && rusnimetus.trim().length()>0){
                         	nimetus = rusnimetus.trim();
                         }
@@ -797,10 +809,18 @@ StringBuffer sb = new StringBuffer();
                                              
         
                           prod.setPrice(rs.getDouble("myygihind"));
+                          prod2.setPrice(prod.getPrice());
+                          
                           String grupp = enCode(rs.getString("grupp"));
-
+                          String gruppn = rs.getString("grnimi");
+                          if(gruppn != null && gruppn.trim().length()>0){
+                        	  prod2.setGroup(gruppn.trim());
+                          }
+                          
                           if(grupp != null && grupp.trim().length()>0){
-                          prod.setGroup(grupp.trim());}
+                              prod.setGroup(grupp.trim());
+                           }
+                          
                           if(kood.startsWith("RR")){
                         	  prod.setGroup("RRR");
                           }
@@ -808,6 +828,7 @@ StringBuffer sb = new StringBuffer();
                           String ean = rs.getString("ean");
                           if (ean != null && ean.trim().length()>0){
                             prod.setEAN(ean.trim());
+                            prod2.setEAN(ean.trim());
                           }
        
                           
@@ -833,6 +854,7 @@ StringBuffer sb = new StringBuffer();
           				
           			if(sto1.get(prod.getID()) != null){
           				prod.setStock(Double.parseDouble(sto1.get(prod.getID())+""));
+          				prod2.setStock(Double.parseDouble(sto1.get(prod.getID())+""));
           			}
           				
           			 String link = enCode(rs.getString("link"));
@@ -854,14 +876,32 @@ StringBuffer sb = new StringBuffer();
                     		 prod.setStatusNew("1");
                     	 }
                      }
+                     
+                     Double nm = rs.getDouble("netomass");
+                     if(nm > 0) {
+                    	 prod2.setMeasure(nm);
+                     }
+                     String pan = rs.getString("pan");
+                     if(pan != null && pan.trim().length() > 2) {
+                    	 prod2.DEPO_WO_VAT = 0.1;
+                     }
+                    
+                     String rrr = rs.getString("rnimi");
+                     if(rrr != null && rrr.trim().length() > 2) {
+                    	 prod2.artikkel = rrr.trim();
+                     }
+                    
+                      
+                        
           				prod.setVat("24");
           				prod.setName(prod.getName() + add);
+          				
           				prod.setPartii(prod.getPartii() + add);
           				nimetus = prod.getName();
           				
           				          
                      sb.append(prod.getID()+ ";" + nimetus + ";" + prod.getEAN() + ";" + prod.getStock()+"\n");
-                          
+                          prods.put(prod.getID(), prod2);
                           products.put(nimetus, prod);
 
                       }
@@ -876,6 +916,9 @@ StringBuffer sb = new StringBuffer();
         connectionDown();
         return products;
     }
+    
+    private HashMap prods = null;
+    
 	public static void saveObject(Object obj, String file) throws IOException {
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
 		oos.writeObject(obj);
@@ -1123,6 +1166,99 @@ StringBuffer sb = new StringBuffer();
 	public Vector getLastThreeData() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+
+	@Override
+	public void WebReporter() {
+	 
+		this.getProducts(null);
+		int counter = 0;
+		
+		JSONArray arr = new JSONArray(); 
+	Iterator itera = prods.keySet().iterator();
+			while(itera.hasNext()){
+			counter++;
+			String toode = (String)itera.next();
+		    Product prod = (Product)prods.get(toode);
+		    JSONObject tt = new JSONObject();
+		    tt.put("Toode1", toode);
+		    tt.put("Nimetus", prod.getName());
+		    tt.put("Hind", prod.getPrice());
+		    if( prod.getMeasure() > 0) {
+			   tt.put("Laoseis", prod.getStock());
+		    }
+		    if( prod.getMeasure() > 0) {
+		       tt.put("Netomass", prod.getMeasure());
+		    }    
+		    if( prod.getInCases() > 0) {
+		      tt.put("Kastis", prod.getInCases());
+		    } 
+		    if(  prod.DEPO_WO_VAT > 0) {
+		       tt.put("Pant", prod.DEPO_WO_VAT);
+		    }
+		    if(  prod.artikkel != null) {
+		       tt.put("Paritoluriik", prod.artikkel);
+		     }
+		  
+		    if( prod.getGroup() != null &&  prod.getGroup().trim().length() > 0) {
+		        tt.put("Liik", prod.getGroup());
+		       }
+		    
+		    if( prod.getEAN() != null &&  prod.getEAN().trim().length() > 0) {
+		    tt.put("Ribakood", prod.getEAN());
+		    }
+			    
+		  arr.add(tt);
+		 if(counter == 499) {
+			 if(sendStuffToAPI(arr)) {
+			 counter = 0;
+			 arr = new JSONArray();
+			 }
+		 }
+		}
+		
+			if(arr.size() > 0) {
+				sendStuffToAPI(arr);
+			}
+			
+			System.exit(0);
+			
+	}
+	
+	private boolean sendStuffToAPI(JSONArray json) {
+		System.out.println("saadan " + json.size());
+		
+
+		        try {
+		            URL url = new URL("https://sharks.pw/avallone/wp-json/eeva/v1/products-batch");
+		            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+		            // Pärimismeetod ja päised
+		            conn.setRequestMethod("POST");
+		            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+		            conn.setRequestProperty("X-Eeva-Secret", getParent().getProps().getProperty("api.pass"));
+		            conn.setDoOutput(true);
+
+
+		            // Andmete saatmine
+		            try (OutputStream os = conn.getOutputStream()) {
+		                byte[] input = json.toJSONString().getBytes(StandardCharsets.UTF_8);
+		                os.write(input, 0, input.length);
+		            }
+
+		            // Vastuse kood
+		            int responseCode = conn.getResponseCode();
+		            System.out.println("Vastuse kood: " + responseCode);
+
+		            conn.disconnect();
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }
+		
+		
+		return true;
 	}
 }
 

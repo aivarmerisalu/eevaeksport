@@ -1012,6 +1012,10 @@ Statement st = null;
               stmt = con2.prepareStatement(cmd);
        	      rs = stmt.executeQuery();
 
+       	      HashMap<String, Double> lims = new HashMap<String, Double>();
+
+       	      HashMap<String, Integer> terms = new HashMap<String, Integer>();
+       	      
 	   while (rs.next()) {
 		     
 		   Double uselim = rs.getDouble("uselim");
@@ -1032,8 +1036,27 @@ Statement st = null;
 				  cust.setGroup(payid);
 	          }
 		   
+		   if(uselim > 0) {
+			   lims.put(payid, uselim);
+		   }
+		   if(useterm > 0) {
+			   terms.put(payid, useterm);
+		   }
+		   
 		   if(uselim > 0 || useterm > 0) {
-			 //  cust.setSalesBlock(true);
+			   
+			   if(uselim > 0 && useterm == 0) {
+				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");
+			   }
+			   if(uselim == 0 && useterm > 0) {
+				   cust.setInfo("Klientas blokuotas dėl neapmokėtų sąskaitų (" + useterm + "+ d.).");
+			   }
+			   if(uselim > 0 && useterm > 0) {
+				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " € ir (" + useterm + "+ d.).");
+			   }
+		   } else if(lims.get(payid) != null || terms.get(payid) != null){
+			   uselim = lims.get(payid);
+			   useterm = terms.get(payid);
 			   if(uselim > 0 && useterm == 0) {
 				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");
 			   }

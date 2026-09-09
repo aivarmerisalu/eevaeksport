@@ -276,7 +276,11 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
             	File inpda = new File ( pictspda + toode+ ".jpg"); 
             	if(!inpda.exists()) {
             	try {
-                	Converter.shrinkAndCopyFile(in,inpda,400);
+            		int size = 400;
+            		if(toode.startsWith("i") || toode.startsWith("u") || toode.startsWith("r") || toode.startsWith("t")) {
+            			size = 1280;
+            		}
+                	Converter.shrinkAndCopyFile(in,inpda,size);
                 } catch(Exception e) {
             		System.out.println("pahasti prod.getID() " + toode);
             		e.printStackTrace();

@@ -935,6 +935,7 @@ public class EksportPanel extends JPanel implements ActionListener,
             		|| driver.getDriverVersion().equals("NaviLivikoLAT")
             		|| driver.getDriverVersion().equals("EevaArke")
             		|| driver.getDriverVersion().equals("HorizonKonig")
+            		|| driver.getDriverVersion().equals("HorizonSmil")
             		|| driver.getDriverVersion().equals("AxaJNGLAT")
             		|| driver.getDriverVersion().equals("SmartenR")
             		|| driver.getDriverVersion().equals("Kalev")
@@ -1359,6 +1360,7 @@ public class EksportPanel extends JPanel implements ActionListener,
                 		  || driver.getDriverVersion().equals("NaviLivikoLIT")
                 		  || driver.getDriverVersion().equals("EevaArke")
                 		  || driver.getDriverVersion().equals("HorizonKonig")
+                		  || driver.getDriverVersion().equals("HorizonSmil")
                 		  || driver.getDriverVersion().equals("AxaFazerLT")
                 		  || driver.getDriverVersion().equals("AxaJNGLAT")
                 		  || driver.getDriverVersion().equals("Kalev")
@@ -3540,34 +3542,34 @@ if (getProps().getProperty("no.matrixagent") != null) {
     private void LastThreeFile(String agentCode, TreeMap customers,Vector pricematrix) {
     	   if(pricematrix != null){
     		   
-    		  System.out.println("LastThree " +  pricematrix.size());
+    		  System.out.println("LastThree " +  pricematrix.size() + "*" + agentCode + "*");
     		   String fileName = "lastthree.txt";
     	       StringBuffer buf = new StringBuffer();
     	       Iterator codes = customers.values().iterator();
-    	       Vector done = new Vector();
+    	      
     	       while(codes.hasNext()){
     	         Customer cust = (Customer)codes.next();
     	         if(cust.hasAgent(agentCode))
     	      
     	         if ((cust.getAgents()!= null && cust.hasAgent(agentCode)) || agentCode == null){
+
+  	    	       System.out.println("buffer0 " + agentCode + "*" + cust.getID());
     	          Enumeration enume = pricematrix.elements();
     	          while (enume.hasMoreElements()) {
     	            MatrixLine mline = (MatrixLine) enume.nextElement();
+
     	              if(mline.getCustID()!= null && mline.getCustID().equals(cust.getID())){
-    	            	  
+
+    	  	    	       System.out.println("sisse  " + agentCode + "*" + cust.getID() + " " + mline.getStringForLastThree());
     	            	  if(agentCode.equals("130") && !cust.getCity().equals("99")){
     	            		  buf.append(mline.getStringForLastThree() + lineSeparator);
-    	    	               done.add(mline.getStringForLastThree()); 
-    	            	  }else if(!agentCode.equals("130")){
+    	    	         }else if(!agentCode.equals("130")){
     	            		  buf.append(mline.getStringForLastThree() + lineSeparator);
-    	    	               done.add(mline.getStringForLastThree()); 
-    	            	  }
-    	            	
+    	    	         }
     	              }
-    	          }
+    	           }
     	         }
     	       }
-    	     //  System.out.println("buffer " + buf.toString());
     	          try {
     	          	if(buf.length()>3){
     	          		zip.addFile(fileName, buf.toString());

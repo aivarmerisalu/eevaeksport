@@ -152,9 +152,8 @@ try{
 		oos.writeObject(obj);
 		oos.close();
 	}
-	
   
-  private String weburl = "https://horizonweb-cloud.visma.lv/REST_H34780920/rest/TNdmPvzSale/template/303";
+  private String weburl = null;
 		
   private String getDateNiceString(Calendar cal){
 	    StringBuffer sb = new StringBuffer();
@@ -200,7 +199,7 @@ try{
 		  System.out.println("weburl " + weburl);
 		  DefaultHttpClient httpClient = new DefaultHttpClient();
 		 // Credentials defaultcreds = new UsernamePasswordCredentials("restmappost", "R");
-		  Credentials defaultcreds = new UsernamePasswordCredentials("merisoftrest",  parent.getProps().getProperty("wsdl.pass"));
+		  Credentials defaultcreds = new UsernamePasswordCredentials("REST_INT",  parent.getProps().getProperty("wsdl.pass"));
 		  
 		  httpClient.getCredentialsProvider().setCredentials(
                    AuthScope.ANY, defaultcreds);
@@ -298,7 +297,7 @@ try{
   
   
   private void makeOutput(Order order){
-	  Hashtable pandikas =  new Hashtable();
+	//  Hashtable pandikas =  new Hashtable();
 	
 	/* // TreeMap pants = null;
 	try {
@@ -367,7 +366,7 @@ try{
 		           String  order_xml = "<resource> <description>Merisoft Order</description>" +
 		           "<entity xsi:schemaLocation=\"TNdmPvzSale.xsd TNdmPvzSale.xsd\" xmlns=\"TNdmPvzSale.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
 	 		    "   <PK_DOKT> " +
-        " <href>/rest/TdmDocType/303</href> " +
+        " <href>/rest/TdmDocType/5</href> " +
         " <title>NPMERI : Order Merisoft</title> " +
         " </PK_DOKT>" +
         " <PAMV_ID>2711</PAMV_ID> "  + 
@@ -479,7 +478,7 @@ try{
 				     Agent ag = new Agent(agg);
 				     System.setProperty("mail.smtps.ssl.protocols", "TLSv1.2");
 				      ag.setName(agg);
-				       Converter.sendCommentEmail("New Order " + comm, null, doknr, cukood, cuid.getName(), null, false, ag, parent, null);
+				    //   Converter.sendCommentEmail("New Order " + comm, null, doknr, cukood, cuid.getName(), null, false, ag, parent, null);
 				     }
 		      if("true".equals(parent.getProps().getProperty("testing"))){
 			 		System.out.println("Testing ");
