@@ -79,9 +79,8 @@ try{
 			f.delete();
 			signatures = new Vector();
 		} else {
-			signatures = (Vector) readObject("signatures.vec");
+			signatures = (Vector) Converter.readObject("signatures.vec");
 		}
-
 		
 	} catch (Exception e) {
 		signatures = new Vector();
@@ -89,18 +88,6 @@ try{
 
 	}
 
-		
-	   public static Object readObject(String s) throws IOException,
-       ClassNotFoundException, IOException {
-     Object obj = null;
-     File f = new File(s);
-     if (f.exists()){
-       ObjectInputStream ois = new ObjectInputStream(new FileInputStream(s));
-       obj = ois.readObject();
-       ois.close();
-     }
-     return obj;
-   }
 
 	
   
@@ -118,9 +105,7 @@ try{
   public String identifyProduct(String ean, String prodID) throws SQLException{ 	  
     return null;
 }
-  
 
-	
   
   
   public void makeOrder(Order order) throws SQLException{
@@ -140,18 +125,12 @@ try{
         		  }
     	
        try {
-		saveObject(signatures, "signatures.vec");
+		Converter.saveObject(signatures, "signatures.vec");
 	} catch (IOException e) {
 		e.printStackTrace();
 	}
   }
   
-  
-  public static void saveObject(Object obj, String file) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
-		oos.writeObject(obj);
-		oos.close();
-	}
   
   private String weburl = null;
 		
@@ -173,22 +152,9 @@ try{
 	      sb.append("0");
 	    }
 	     sb.append(day);
-	  //28.06.2010 20:00:33Y-m-d\TH:i:s n2002-05-30T09:00:00
-	   
 	     if (hour.length() == 1){
 		      hour = "0" + hour ;
 		    }
-	    /* sb.append("T" +hour + ":");
-
-	     if (minute.length() == 1){
-		      sb.append("0");
-		    }
-	     sb.append(minute + ":");
-	     if (second.length() == 1){
-		      sb.append("0");
-		    }
-	     sb.append(second);*/
-	     
 	    return sb.toString();
 	  }
   
@@ -199,7 +165,7 @@ try{
 		  System.out.println("weburl " + weburl);
 		  DefaultHttpClient httpClient = new DefaultHttpClient();
 		 // Credentials defaultcreds = new UsernamePasswordCredentials("restmappost", "R");
-		  Credentials defaultcreds = new UsernamePasswordCredentials("REST_INT",  parent.getProps().getProperty("wsdl.pass"));
+		  Credentials defaultcreds = new UsernamePasswordCredentials(parent.getProps().getProperty("wsdl.user"),  parent.getProps().getProperty("wsdl.pass"));
 		  
 		  httpClient.getCredentialsProvider().setCredentials(
                    AuthScope.ANY, defaultcreds);
@@ -246,10 +212,10 @@ try{
 	  return false;
  }
  
- private String url = "jdbc:odbc:horizon";
  
  private Connection getNewConnection() throws SQLException{
-	    return DriverManager.getConnection(url, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+	    return DriverManager.getConnection(parent.getProps().getProperty("dsn.url"), 
+	    		parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
 	  }
 
  
@@ -297,25 +263,13 @@ try{
   
   
   private void makeOutput(Order order){
-	//  Hashtable pandikas =  new Hashtable();
 	
-	/* // TreeMap pants = null;
-	try {
-		//pants = getPandiPakend();
-	//	System.out.println("pants " + pants.size());
-	} catch (SQLException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	}*/
 	 	try {
-	 		
-	 	
 	 	
 	 		String comm = "";
 	 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 	 			comm =  order.getInfo() ;
 	 		}
-	 	//	System.out.println("Comment " + comm);
 			
 	 		String doknr = order.getDokNr();
 	 		 Calendar  shipDate = order.getShipCal();
@@ -351,22 +305,16 @@ try{
 		
 		           String aadr = "<NdmPvzAddition>";
 		           if(adid != null){
-		        	   aadr =  " <NdmPvzAddition><PK_ADRESE><href>/rest/TNdmAdr/" + adid + "</href></PK_ADRESE>";
+		        	   aadr =  " <NdmPvzAddition>";
 		           }
 		         
 		           String agg = order.getAgent();
-		           if(agg.equals("6")) {
-		        	   agg = "57";
-		           }
-		      
-		           if(agg.equals("19")) {
-		        	   agg = "54";
-		           }
 		        
 		           String  order_xml = "<resource> <description>Merisoft Order</description>" +
 		           "<entity xsi:schemaLocation=\"TNdmPvzSale.xsd TNdmPvzSale.xsd\" xmlns=\"TNdmPvzSale.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
 	 		    "   <PK_DOKT> " +
-        " <href>/rest/TdmDocType/5</href> " +
+		           //rest/TLgPiepDBL/template
+        " <href>/rest/TLgPiepDBL/template/361</href> " +
         " <title>NPMERI : Order Merisoft</title> " +
         " </PK_DOKT>" +
         " <PAMV_ID>2711</PAMV_ID> "  + 
@@ -379,18 +327,14 @@ try{
         " <PK_PARD><href>/rest/TNdmPard/" + agg + "</href></PK_PARD>" + 
         " <PK_VAL> <href>/rest/TsdmValName/3</href><title>EUR</title></PK_VAL><PAMAT>TextOnAccount</PAMAT><TIPS>1</TIPS>" +
         " <PK_PROJ><href>/rest/TdmProject/1</href><title>V : Visi projekti</title></PK_PROJ>" +
+        "<PK_ADRESE><href>/rest/TNdmAdr/" + adid + "</href></PK_ADRESE>" +
        aadr +   
-        " <PVN_TIPS>0</PVN_TIPS> <PIELIKUMS>" + comm+ "</PIELIKUMS>" +
-		" <PK_NDARAPR><href>/rest/TdmNDarAprBL/1</href></PK_NDARAPR></NdmPvzAddition>" ; 
+        " <PVN_TIPS>0</PVN_TIPS> " +
+		" <PK_NDARAPR><href>/rest/TdmNDarAprBL/1</href></PK_NDARAPR></NdmPvzAddition><NOTES>" + comm+ "</NOTES>" ; 
       
       
-    /*  " <urn:soPo>" + doknr + "</urn:soPo> " +
-      " <urn:soCurr>EUR</urn:soCurr> " +
-      " <urn:soSlspsn>" + order.getAgent() + "</urn:soSlspsn>" ;
-      */
       
-      
-      order_xml = order_xml + "<tblRindas>";
+      order_xml = order_xml + "<LgPiepRows>";
 
 	     	 Vector lines = order.getOrderLines();
 		      for (int i = 0; i < lines.size(); i++) {
@@ -413,48 +357,16 @@ try{
                       order_xml = order_xml +"<ATLAIDE>"+ line.getDiscount() + "</ATLAIDE>";
 			      }
 			      order_xml = order_xml + "</row>";
-			 
 			     counter++;
-			   /*  if(pants != null) {
-			    	 String pant = (String) pants.get(prid)  ; 
-				     
-				     if(pant != null){
-			           	  if(pandikas.get(pant) == null){
-			           		  pandikas.put(pant,line.getKogus()+"");
-			                 } else {
-			                 	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+line.getKogus())+"");
-			                 }
-			              } 
-			     }*/
-			    
-		             
-	      }
-		      
-		      
-		      
-		      
-		      /*if( pandikas.size()>0){ // kommentisin v�lja pandi asja Kalevi soovil sept 2018
-		        	Enumeration enumpant = pandikas.keys();
-		        	
-		         while(enumpant.hasMoreElements()){
-		         	String kood = (String)enumpant.nextElement();
-		         	if(kood.trim().length()>0){
-		             	 order_xml = order_xml + "<row>";
-				         order_xml = order_xml +  "<RN_VEIDS>2</RN_VEIDS> ";
-				         order_xml = order_xml +  "<PK_NOM>" + kood + "</PK_NOM>";
-				         order_xml = order_xml + "</row>";
-		        	}    	
-		         }
-		        }*/
-		      
-		      
 	
+		      }
+		      
 		
-	 	order_xml = order_xml + "</tblRindas>";
+	 	order_xml = order_xml + "</LgPiepRows>";
 	 	order_xml = order_xml + "</entity>";
 	 	order_xml = order_xml + "</resource>";
 	
-	 	System.out.println("output " +order_xml); 
+	 	System.out.println("output " + order_xml); 
 	 	
 	 		
 	 	try {

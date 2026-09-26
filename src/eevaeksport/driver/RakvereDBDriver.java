@@ -132,7 +132,9 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     
        
   	   private   void getProdGroupsMilk(TreeMap groups){
-	    	File f = new File(this.getExcelDir() + "tootedmilk.xlsx");
+	    	File f = new File(this.getExcelDir() + "TootedMilk.xlsx");
+
+			System.out.println("groups milk fail olemas " + f.exists());
 			
 			try {
 				
@@ -149,6 +151,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
 						String grupp = formatter.formatCellValue(row.getCell((short) 6)).trim();
 						String gname = formatter.formatCellValue(row.getCell((short) 7)).trim();
 						groups.put(grupp, Converter.enCodeEst(gname));
+						System.out.println("groups milk " + grupp + " " + gname);
 						
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -159,11 +162,12 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
 			}catch(Exception e ) {
 				e.printStackTrace();
 			}
+			
 	    
 	   }   		
  	   
  	   private   void getProductsMilk(TreeMap prods){
- 	    	File f = new File(this.getExcelDir() + "tootedmilk.xlsx");
+ 	    	File f = new File(this.getExcelDir() + "TootedMilk.xlsx");
  			
  			try {
  				
@@ -1098,7 +1102,7 @@ try {
 	}
  }catch (Exception e){
 }
-System.out.println(groups.toString());
+//System.out.println(groups.toString());
 
 
     	return groups;

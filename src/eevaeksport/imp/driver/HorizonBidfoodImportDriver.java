@@ -242,10 +242,9 @@ try{
 	  return false;
  }
  
- private String url = "jdbc:odbc:horizon";
  
  private Connection getNewConnection() throws SQLException{
-	    return DriverManager.getConnection(url, parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
+	    return DriverManager.getConnection(parent.getProps().getProperty("dsn.url"), parent.getProps().getProperty("dsn.user"), parent.getProps().getProperty("dsn.pass"));
 	  }
 
  
@@ -253,7 +252,7 @@ try{
 
 	    Connection con = getNewConnection();
 	  	
-	    String cmd = "SELECT  K.PK_KLIENTS AS id, K.KODS AS kood, K.NOSAUK AS nimi FROM   APV07062.DKLIENTS K " +
+	    String cmd = "SELECT  K.PK_KLIENTS AS id, K.KODS AS kood, K.NOSAUK AS nimi FROM   CESARS1372.DKLIENTS K " +
 	  			" WHERE K.KODS = '" +kood+"'" ;  
 
 	  	Statement st = con.createStatement();
@@ -270,13 +269,37 @@ try{
 	    return liik;
 	}
 
+
+ public String getCustContrID(String kood , String id)  {
+	 String liik = null;
+	 
+	 try {
+	 Connection con = getNewConnection();
+	  	
+	    String cmd =  " select a.pk_lig as id  FROM CESARS1372.DKLIENTS K LEFT JOIN CESARS1372.NADRESES A ON A.PK_KLIENTS = K.PK_KLIENTS \r\n" + 
+	    		"	        			    where A.LEG_ADR = 2 and a.PK_LIG != '' and K.Kods = '" + kood+ "' and PK_ADRESE=" + id; 
+          System.out.println(cmd);
+	  	Statement st = con.createStatement();
+	    ResultSet rs = st.executeQuery(cmd);
+	   
+	    if (rs.next()) {
+	        liik = rs.getString("id");
+	      }
+	    rs.close();
+	    st.close();
+	    con.close();
+	 } catch(Exception e) {e.printStackTrace();}
+	    
+	    return liik;
+	}
+ 
  public String getProdId(String kood) throws SQLException {
 
 	    Connection con = getNewConnection();
 	    
 
 	  	
-	    String cmd = "SELECT PK_NOM AS id FROM   APV07062.NNOM t " +
+	    String cmd = "SELECT PK_NOM AS id FROM   CESARS1372.NNOM t " +
 	  			" WHERE t.KODS = '" +Converter.deCode(kood)+"'" ;  
 
 	  	Statement st = con.createStatement();
@@ -343,50 +366,41 @@ try{
 		        	cukood = escape(cukood.substring(0,cukood.lastIndexOf("_")));
 			    }
 		           
+		        
+		        String contr = getCustContrID(cukood , adid);
+		        System.out.println("Contract ID " + contr + " " + cukood + " " + adid);
 		           Customer cuid = getCustId(cukood);
 		
 		           String aadr = "<NdmPvzAddition>";
 		           if(adid != null){
-		        	   aadr =  " <NdmPvzAddition><PK_ADRESE><href>/rest/TNdmAdr/" + adid + "</href></PK_ADRESE>";
+		        	   aadr =  " <NdmPvzAddition>";
 		           }
 		         
 		           String agg = order.getAgent();
-		           if(agg.equals("6")) {
-		        	   agg = "57";
-		           }
-		      
-		           if(agg.equals("19")) {
-		        	   agg = "54";
-		           }
 		        
 		           String  order_xml = "<resource> <description>Merisoft Order</description>" +
 		           "<entity xsi:schemaLocation=\"TNdmPvzSale.xsd TNdmPvzSale.xsd\" xmlns=\"TNdmPvzSale.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
 	 		    "   <PK_DOKT> " +
-        " <href>/rest/TdmDocType/5</href> " +
+        " <href>/rest/TLgPiepDBL/template/559</href> " +
         " <title>NPMERI : Order Merisoft</title> " +
         " </PK_DOKT>" +
         " <PAMV_ID>2711</PAMV_ID> "  + 
         " <PK_IESTADE><href>/rest/TdmDIestadeBL/1</href></PK_IESTADE>" +
-       // " <PK_PVNK><href>/rest/TdmPvnKat/1</href></PK_PVNK>" +
         " <PK_R_ES><href>/rest/TDdmSaviRek/7092</href></PK_R_ES> " + 
         " <PK_KLIENTS><href>/rest/TDdmCustomer/" + cuid.getID() + "</href></PK_KLIENTS> "+   
         " <DAT_DOK>" + getDateNiceString(cal) + "</DAT_DOK>" + //getDateNiceString(Calendar.getInstance())
         " <DAT_PIEG>" + getDateNiceString(cal) + "</DAT_PIEG>" + 
         " <PK_PARD><href>/rest/TNdmPard/" + agg + "</href></PK_PARD>" + 
-        " <PK_VAL> <href>/rest/TsdmValName/3</href><title>EUR</title></PK_VAL><PAMAT>TextOnAccount</PAMAT><TIPS>1</TIPS>" +
+        " <PK_VAL> <href>/rest/TsdmValName/1</href><title>EUR</title></PK_VAL><PAMAT>TextOnAccount</PAMAT><TIPS>1</TIPS>" +
         " <PK_PROJ><href>/rest/TdmProject/1</href><title>V : Visi projekti</title></PK_PROJ>" +
+        " <PK_ADRESE><href>/rest/TNdmAdr/" + adid + "</href></PK_ADRESE> " +
        aadr +   
-        " <PVN_TIPS>0</PVN_TIPS> <PIELIKUMS>" + comm+ "</PIELIKUMS>" +
-		" <PK_NDARAPR><href>/rest/TdmNDarAprBL/1</href></PK_NDARAPR></NdmPvzAddition>" ; 
+        " <PVN_TIPS>0</PVN_TIPS> " +
+		" <PK_NDARAPR><href>/rest/TdmNDarAprBL/1</href></PK_NDARAPR></NdmPvzAddition>" +
+		" <PK_LIG><href>/rest/TdmKlLigumiBL/" + contr + "</href></PK_LIG><PK_NOL><href>/rest/TNdmNol/4</href></PK_NOL><NOTES>" + comm + "</NOTES>";
       
       
-    /*  " <urn:soPo>" + doknr + "</urn:soPo> " +
-      " <urn:soCurr>EUR</urn:soCurr> " +
-      " <urn:soSlspsn>" + order.getAgent() + "</urn:soSlspsn>" ;
-      */
-      
-      
-      order_xml = order_xml + "<tblRindas>";
+      order_xml = order_xml + "<LgPiepRows>";
 
 	     	 Vector lines = order.getOrderLines();
 		      for (int i = 0; i < lines.size(); i++) {
@@ -411,42 +425,11 @@ try{
 			      order_xml = order_xml + "</row>";
 			 
 			     counter++;
-			   /*  if(pants != null) {
-			    	 String pant = (String) pants.get(prid)  ; 
-				     
-				     if(pant != null){
-			           	  if(pandikas.get(pant) == null){
-			           		  pandikas.put(pant,line.getKogus()+"");
-			                 } else {
-			                 	pandikas.put(pant,(new Double((String)pandikas.get(pant)).doubleValue()+line.getKogus())+"");
-			                 }
-			              } 
-			     }*/
-			    
-		             
+			         
 	      }
 		      
-		      
-		      
-		      
-		      /*if( pandikas.size()>0){ // kommentisin v�lja pandi asja Kalevi soovil sept 2018
-		        	Enumeration enumpant = pandikas.keys();
-		        	
-		         while(enumpant.hasMoreElements()){
-		         	String kood = (String)enumpant.nextElement();
-		         	if(kood.trim().length()>0){
-		             	 order_xml = order_xml + "<row>";
-				         order_xml = order_xml +  "<RN_VEIDS>2</RN_VEIDS> ";
-				         order_xml = order_xml +  "<PK_NOM>" + kood + "</PK_NOM>";
-				         order_xml = order_xml + "</row>";
-		        	}    	
-		         }
-		        }*/
-		      
-		      
-	
 		
-	 	order_xml = order_xml + "</tblRindas>";
+	 	order_xml = order_xml + "</LgPiepRows>";
 	 	order_xml = order_xml + "</entity>";
 	 	order_xml = order_xml + "</resource>";
 	

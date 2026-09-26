@@ -83,6 +83,11 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		    pass = getParent().getProps().getProperty("rest.pass");
 		    rcompany = getParent().getProps().getProperty("rest.company");
 		    rcompanyx = getParent().getProps().getProperty("rest.companyx");
+
+			if("true".equals(parent.getProps().getProperty("365grouping"))){
+				group365 = true;
+			}
+		    
 	    }
 
 	  
@@ -91,6 +96,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	  String pass = null;
 	  String rcompany = null;
 	  String rcompanyx = null;
+	  boolean group365 = false;
 	
 
 	public String getPilotDayData(Agent agent) {
@@ -481,6 +487,10 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		TreeMap tm = new TreeMap();
 		setTreeGroup(true);
 		String cmd = " SELECT  * from MobileJavaVIK.v_VIK_GetProdGroups";
+           if(this.group365) {
+			 cmd = " SELECT  * from MobileJavaVIK.v_VIK_GetProdGroups365";
+           }
+		
 		try {
 			Connection con = getNewConnectionView();
 			System.out.println(cmd);
@@ -489,20 +499,11 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 			while (rs.next()) {
 				String id = rs.getString("kood");
 				if (cleardots(id).equals("28")) {
-					id = "5.1.";//5.01.
+					if(!this.group365) {
+					 id = "5.1.";
+					}
 				}
-				if (id.equals("1.10.")) {
-				//	id = "1.a.";//5.01.
-				}
-				if (id.equals("1.11.")) {
-					//id = "1.b.";//5.01.
-				}
-				if (id.equals("1.12.")) {
-					//id = "1.c.";
-				}
-				if (id.equals("1.13.")) {
-					//id = "1.d.";
-				}
+				
 				
 				String name = rs.getString("nimi");
 				if ((id.trim().length() == 4 || id.trim().length() == 5)
@@ -526,39 +527,20 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 		TreeMap tm = new TreeMap();
 		String cmd = "SELECT  [Kodas] AS kood,[Aprašas] AS nimi  FROM [Vičiūnai ir Ko$Prekių grupavimas] order by [Kodas]";
 		System.out.println(cmd);
+		 if(this.group365) {
+			 cmd = " SELECT  * from MobileJavaVIK.v_VIK_GetProdGroups365";
+           }
 		try {
 			Connection con = getNewConnection2();
+			if(this.group365) {
+				con = this.getNewConnectionView();
+			}
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(cmd);
 			while (rs.next()) {
 				String groupID = rs.getString("kood");
-/*				if (cleardots(groupID).equals("20801")) {
-					groupID = "5.01.01.";
-				}
-				if (cleardots(groupID).equals("20802")) {
-					groupID = "5.01.02.";
-				}
-				if (cleardots(groupID).equals("20803")) {
-					groupID = "5.01.03.";
-				}
-				if (cleardots(groupID).equals("20804")) {
-					groupID = "5.01.04.";
-				}
-				if (cleardots(groupID).equals("20805")) {
-					groupID = "5.01.05.";
-				}
-				if (cleardots(groupID).equals("20806")) {
-					groupID = "5.01.06.";
-				}
-				if (cleardots(groupID).equals("20807")) {
-					groupID = "5.01.07.";
-				}
-				if (cleardots(groupID).equals("20808")) {
-					groupID = "5.01.08.";
-				}
-				if (cleardots(groupID).equals("20809")) {
-					groupID = "5.01.09.";
-				}*/
+			 if(!group365) {
+					
 				if (cleardots(groupID).equals("281")) {
 					groupID = "5.1.1.";
 				}
@@ -586,94 +568,19 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				if (cleardots(groupID).equals("289")) {
 					groupID = "5.1.9.";
 				}
-
-				/*
-				
-				if (cleardots(groupID).equals("1101")) {
-					groupID = "1.a.1.";
-				}
-				if (cleardots(groupID).equals("1102")) {
-					groupID = "1.a.2.";
-				}
-				if (cleardots(groupID).equals("1103")) {
-					groupID = "1.a.3.";
-				}
-				
-				
-				if (cleardots(groupID).equals("1111")) {
-					groupID = "1.b.1.";
-				}
-				if (cleardots(groupID).equals("1112")) {
-					groupID = "1.b.2.";
-				}
-				if (cleardots(groupID).equals("1113")) {
-					groupID = "1.b.3.";
-				}
-				
-				
-				
-				if (cleardots(groupID).equals("1121")) {
-					groupID = "1.c.1.";
-				}
-				if (cleardots(groupID).equals("1122")) {
-					groupID = "1.c.2.";
-				}
-				if (cleardots(groupID).equals("1123")) {
-					groupID = "1.c.3.";
-				}
-				if (cleardots(groupID).equals("1124")) {
-					groupID = "1.c.4.";
-				}
-				if (cleardots(groupID).equals("1125")) {
-					groupID = "1.c.5.";
-				}
-				if (cleardots(groupID).equals("1126")) {
-					groupID = "1.c.6.";
-				}
-				if (cleardots(groupID).equals("1127")) {
-					groupID = "1.c.7.";
-				}
-				if (cleardots(groupID).equals("1128")) {
-					groupID = "1.c.8.";
-				}
-				if (cleardots(groupID).equals("1129")) {
-					groupID = "1.c.9.";
-				}
-				
-
-				if (cleardots(groupID).equals("1131")) {
-					groupID = "1.d.1.";
-				}
-				if (cleardots(groupID).equals("1132")) {
-					groupID = "1.d.2.";
-				}
-				if (cleardots(groupID).equals("1133")) {
-					groupID = "1.d.3.";
-				}
-				if (cleardots(groupID).equals("1134")) {
-					groupID = "1.d.4.";
-				}
-				if (cleardots(groupID).equals("1135")) {
-					groupID = "1.d.5.";
-				}
-				if (cleardots(groupID).equals("1136")) {
-					groupID = "1.d.6.";
-				}
-				if (cleardots(groupID).equals("1137")) {
-					groupID = "1.d.7.";
-				}
-				if (cleardots(groupID).equals("1138")) {
-					groupID = "1.d.8.";
-				}
-				if (cleardots(groupID).equals("1139")) {
-					groupID = "1.d.9.";
-				}*/
-				
-				
 				String name = rs.getString("nimi");
 				if (groupID.length() > 5) {
 					tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + " " + name));
 				}
+			 }else {
+				 String name = rs.getString("nimi");
+					if (groupID.length() == 6) {
+						tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + " " + name));
+					}
+			 }
+
+				
+				
 			}
 
 			rs.close();
@@ -1622,7 +1529,21 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				if(topstuff.contains(id)){
 					prod.setStatusTop("1");
 				}
-				
+				if(this.group365) {
+					String gr1 = rs.getString("GroupCode365");
+					String grupp = cleardots(gr1);
+					     prod.setGroup(grupp);
+					     
+					String gr2 = rs.getString("SubGroup1Code365");
+				   	String grupp2 = cleardots(gr2);
+					     prod.setGroupSecond(grupp2);
+
+					String gr3 = rs.getString("SubGroup2Code365");
+					String grupp3 = cleardots(gr3);
+						    //prod.setGroupSecond(grupp3);
+						   	
+	   
+				} else {
 				String gr1 = rs.getString("grupp");
 			
 				String grupp = cleardots(gr1);
@@ -1631,49 +1552,42 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				}
 				prod.setGroup(grupp);
    
-				
-				
-  
 				String gr2 = rs.getString("grupp2");
    			
 				String grupp2 = cleardots(gr2);
-			
+						
+						if (grupp2.equals("281")) {
+							grupp2 = "511";
+						}
+						if (grupp2.equals("282")) {
+							grupp2 = "512";
+						}
+						if (grupp2.equals("283")) {
+							grupp2 = "513";
+						}
+						if (grupp2.equals("284")) {
+							grupp2 = "514";
+						}
+						if (grupp2.equals("285")) {
+							grupp2 = "515";
+						}
+						if (grupp2.equals("286")) {
+							grupp2 = "516";
+						}
+						if (grupp2.equals("287")) {
+							grupp2 = "517";
+						}
+						if (grupp2.equals("288")) {
+							grupp2 = "518";
+						}
+						if (grupp2.equals("289")) {
+							grupp2 = "519";
+						}
+					
+				  prod.setGroupSecond(grupp2);
+				}
 				
-			if (grupp2.equals("281")) {
-				grupp2 = "511";
-			}
-			if (grupp2.equals("282")) {
-				grupp2 = "512";
-			}
-			if (grupp2.equals("283")) {
-				grupp2 = "513";
-			}
-			if (grupp2.equals("284")) {
-				grupp2 = "514";
-			}
-			if (grupp2.equals("285")) {
-				grupp2 = "515";
-			}
-			if (grupp2.equals("286")) {
-				grupp2 = "516";
-			}
-			if (grupp2.equals("287")) {
-				grupp2 = "517";
-			}
-			if (grupp2.equals("288")) {
-				grupp2 = "518";
-			}
-			if (grupp2.equals("289")) {
-				grupp2 = "519";
-			}
-			
-			
-			
-		
-			
-			
-				prod.setGroupSecond(grupp2);
-
+				
 				prod.setUnit(rs.getString("unit"));
 				String ean = (rs.getString("ean"));
 				if (ean.trim().length() > 0) {

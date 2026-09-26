@@ -466,6 +466,10 @@ public class PalettiLitDBDriver extends AbstractDBDriver implements  BulkUpdater
           TreeMap tm = new TreeMap();
 
                 String cmd = " select ParentKodas as mother , KODAS AS kood,PAVADINIMAS  AS nimi  from gruko where  ParentKodas is not null  order by kodas";
+                
+                cmd = " select g.ParentKodas as mother , g.KODAS AS kood,g.PAVADINIMAS  AS nimi ,a.barkodas from gruko g \r\n" + 
+                		"inner join verko a on a.VERTYBGRUPESKODAS = g.KODAS where  a.SASKPREKODAS = '2040' and a.BARKODAS != ''\r\n" + 
+                		"and g.ParentKodas is not null group by g.kodas,g.ParentKodas, g.PAVADINIMAS,a.barkodas  order by a.barkodas";
            try {
             stmt = con.prepareStatement(cmd);
             ResultSet rs = stmt.executeQuery();
@@ -475,7 +479,11 @@ public class PalettiLitDBDriver extends AbstractDBDriver implements  BulkUpdater
               String mother = this.ensure6(rs.getString("mother").trim()) + ".";
               String liik = rs.getString("kood").trim();
               String nimetus =  liik + " " +   Converter.enCodeEst(rs.getString("nimi").trim());
-            
+              
+              String sort = rs.getString("barkodas");
+              if(sort != null && sort.trim().length() > 0 ){
+            	  nimetus = sort+"_"+nimetus;
+              }
               if (liik != "") {
                 tm.put(mother + liik,nimetus);
               }

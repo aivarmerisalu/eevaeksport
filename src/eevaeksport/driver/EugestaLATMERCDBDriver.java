@@ -742,9 +742,9 @@ public class EugestaLATMERCDBDriver extends AbstractDBDriver  implements Manager
 		  		"	  			  		            PARTITION BY a.CUSTACCOUNT, a.ITEMID  \r\n" + 
 		  		"	  			  		            ORDER BY a.SALESDATE DESC  \r\n" + 
 		  		"	  			  		        ) AS rn  \r\n" + 
-		  		"	  			  		    FROM BIF03_SALESLINE a \r\n" + 
+		  		"	  			  		    FROM EPASAULE_SALESLINE a \r\n" + 
 		  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID  \r\n" + 
-		  		"	  			  		    LEFT JOIN BID44_SALESCANCELREASONS c  \r\n" + 
+		  		"	  			  		    LEFT JOIN EPASAULE_SALESCANCELREASONS c  \r\n" + 
 		  		"	  			  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID  \r\n" + 
 		  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 300  \r\n" + 
 		  		"	  			  		      AND a.EG_SALESCANCELREASONID <> 'GKR'  \r\n" + 

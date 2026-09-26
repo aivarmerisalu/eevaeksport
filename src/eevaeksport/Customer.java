@@ -26,6 +26,7 @@ public class Customer {
   }
   public String restPriority = null;
   public double criticalDebt = 0;
+  public String debtMessage = null;
   public String restPartner = null;
   public String restName = null;
   public boolean diffBack = false;

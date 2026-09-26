@@ -653,9 +653,9 @@ private Product getProd(String toode){
 	          double rp = 0;
 	          
 	          if(repr) {
-	        		 // rp =  price * ((100-disc)/100);
+	        		  rp =  price * ((100-disc)/100);
 	        		  
-	        		   rp = price - orderLine.getPrice();  // saame orig dokumendi hinna ja vahe kaudu kätte 
+	        		  // rp = price - orderLine.getPrice();  // saame orig dokumendi hinna ja vahe kaudu kätte 
             		   //price * ((100-disc)/100);
         	
 	        	      disc = 0;

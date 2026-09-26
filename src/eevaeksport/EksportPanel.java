@@ -3553,14 +3553,14 @@ if (getProps().getProperty("no.matrixagent") != null) {
     	      
     	         if ((cust.getAgents()!= null && cust.hasAgent(agentCode)) || agentCode == null){
 
-  	    	       System.out.println("buffer0 " + agentCode + "*" + cust.getID());
+  	    	   //    System.out.println("buffer0 " + agentCode + "*" + cust.getID());
     	          Enumeration enume = pricematrix.elements();
     	          while (enume.hasMoreElements()) {
     	            MatrixLine mline = (MatrixLine) enume.nextElement();
 
     	              if(mline.getCustID()!= null && mline.getCustID().equals(cust.getID())){
 
-    	  	    	       System.out.println("sisse  " + agentCode + "*" + cust.getID() + " " + mline.getStringForLastThree());
+    	  	    	   //    System.out.println("sisse  " + agentCode + "*" + cust.getID() + " " + mline.getStringForLastThree());
     	            	  if(agentCode.equals("130") && !cust.getCity().equals("99")){
     	            		  buf.append(mline.getStringForLastThree() + lineSeparator);
     	    	         }else if(!agentCode.equals("130")){
@@ -4302,6 +4302,13 @@ if (getProps().getProperty("no.matrixagent") != null) {
            bb = "1";
            if(!cust.repriceallowed){
         	   bb =  "0";
+           }
+           buf.append(bb); 
+
+           buf.append(EksportPanel.separator);
+           bb = " ";
+           if(cust.debtMessage != null){
+        	   bb = cust.debtMessage;
            }
            buf.append(bb); 
            

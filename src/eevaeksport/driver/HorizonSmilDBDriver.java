@@ -129,7 +129,7 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
 	            
 	            if((abi != null && abi.trim().length() > 0)) {
 	            String formattedAbi = abi.trim();
-	            String accountnum = kood + formattedAbi;
+	            String accountnum = kood + "_" + formattedAbi;
 
 	            MatrixLine ml = new MatrixLine();
 	            ml.setCustID(accountnum);
@@ -236,12 +236,12 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
         String sql2 = "   SELECT  N.KODS AS prodid , '' as custid ,  CENA.PK_CENVEID as clgroup, " +
   "    0 AS discount  ,  CENA.CENA AS price , CENA.NO_DAT as algus , CENA.LIDZ_DAT  as lopp , " +
 	"	 datediff( day,CENA.NO_DAT , CENA.LIDZ_DAT)  as paevi  " +
-  "		  FROM   APV07062.NCEN CENA, APV07062.NNOM N, APV07062.NCENVEID CV, TRIDLV4697.SVALUTAS VAL  WHERE " +
+  "		  FROM   APV07062.NCEN CENA, APV07062.NNOM N, APV07062.NCENVEID CV, APV08682.SVALUTAS VAL  WHERE " +
   "		  CENA.PK_NOM=N.PK_NOM AND CENA.PK_CENVEID=CV.PK_CENVEID AND  " +
   "		  CENA.PK_VAL=VAL.PK_VAL AND N.STATUSS = 0 AND CV.STATUSS = 1 AND " + 
   "		 CENA.NO_DAT <= getdate()+1  AND  " +
   "		  CENA.LIDZ_DAT >= getdate()-1   AND CV.TIPS IN (0)  and VAL.KODS = 'EUR' " +
-	"		   and  CENA.PK_CENVEID not in ( 10 ) order by  N.KODS";
+	"		   and  CENA.PK_CENVEID not in ( 1 ) order by  N.KODS";
 
        
    
@@ -323,14 +323,15 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
 	  
 	   kogused = new TreeMap();
 		  
-	   String  cmd = "  SELECT  NN.KODS as toode , SUM(CASE WHEN V.STATUSS IN (0, 1, 3) THEN V.DAUDZ ELSE 0 END) AS stock,  " +
-	"	SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.DAUDZ ELSE 0 END) AS DAUDZ, SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.DAUDZ2 ELSE 0 END) AS DAUDZ2, " + 
-	"	SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.SUMMA ELSE 0 END) AS SUMMA,"
-	+ " SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.SUMMA2V ELSE 0 END) AS SUMMA2V ,V.PK_NOL as ladu  " +
-	"	FROM APV07062.NVOL V, APV07062.NNOM N7, APV07062.NNOMGLIM NGL7, APV07062.NNOM NN , APV07062.NVOLDAT DT WHERE N7.PK_NOM = V.PK_NOM AND N7.PK_NOMGR = NGL7.PK_CHILD " +
-	"	AND  V.DAT < getdate()  AND V.PK_NOMPART = DT.PK_NOMPART AND V.PK_NOL = DT.PK_NOL AND DT.DATB >= getdate()  AND V.STATUSS IN (0,1,3) " +
-	"	AND V.PK_NOM = NN.PK_NOM AND V.PK_NOL in( '6', '12') and NN.ATLUZSK=1  GROUP BY V.PK_NOL, NN.KODS " +
-	"	ORDER BY V.PK_NOL, NN.KODS";
+	   String  cmd = "  SELECT  NN.KODS as toode , SUM(CASE WHEN V.STATUSS IN (0, 1, 3) THEN V.DAUDZ ELSE 0 END) AS stock,  \r\n" + 
+	   		"		SUM(CASE WHEN V.STATUSS IN (1) THEN V.DAUDZ ELSE 0 END) AS DAUDZ, SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.DAUDZ2 ELSE 0 END) AS DAUDZ2, \r\n" + 
+	   		"		V.PK_NOL as ladu  \r\n" + 
+	   		"		FROM APV07062.NVOL V, APV07062.NNOM NN , APV07062.NVOLDAT DT WHERE \r\n" + 
+	   		"		 V.DAT < getdate()  AND V.PK_NOMPART = DT.PK_NOMPART AND V.PK_NOL = DT.PK_NOL AND DT.DATB >= getdate()  AND V.STATUSS IN (0,1,3)\r\n" + 
+	   		"		AND V.PK_NOM = NN.PK_NOM  and NN.ATLUZSK=1 \r\n" + 
+	   		"		and V.PK_NOL in (12) \r\n" + 
+	   		"		GROUP BY V.PK_NOL, NN.KODS \r\n" + 
+	   		"		ORDER BY V.PK_NOL, NN.KODS";
 
 
 	       if (isDebug()) System.out.println(cmd);
@@ -598,6 +599,7 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
     			"    A.PK_ADRESE AS aid,\r\n" +
     			"    K.KODS AS kood,\r\n" + 
     			"    k.PK_CENVEID as hinnak ," +
+    			" 	K.PK_GRUPA  AS hinnak2," +
     			"    K.REG_NR AS payer,\r\n" + 
     			"    K.ADRESE AS address,\r\n" + 
     			"    A.ADRESE AS address2,\r\n" + 
@@ -608,17 +610,18 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
     			"    K.LIC_IZDAT AS lepalg,\r\n" + 
     			"    K.TELEFONS AS phone,\r\n" + 
     			"    K.MOBTEL AS mphone,\r\n" + 
-    			"    K.EPASTS AS email\r\n" + 
-    			"FROM APV07062.DKLIENTS K\r\n" + 
-    			"LEFT JOIN APV07062.NADRESES A\r\n" + 
+    			"    K.EPASTS AS email, \r\n" +
+    			"	 A.PIEZIMES as tarne\r\n" +
+    			" FROM APV07062.DKLIENTS K\r\n" + 
+    			" LEFT JOIN APV07062.NADRESES A\r\n" + 
     			"    ON A.PK_KLIENTS = K.PK_KLIENTS\r\n" + 
     			"    AND A.LEG_ADR = 2\r\n" + 
-    			"WHERE K.STATUSS = 0\r\n" + 
+    			" WHERE K.STATUSS = 0\r\n" + 
     			"  AND K.PK_DOKT IS NOT NULL\r\n" + 
     			"  AND K.PAMV_ID NOT IN (1810, 11970)\r\n" + 
     			"  AND K.TIPS IN (3, 4, 6)\r\n" + 
     			"  AND K.DBKRPAZ = 1\r\n" + 
-    			"ORDER BY K.NOSAUK ASC;" ;
+    			" ORDER BY K.NOSAUK ASC;" ;
      
     //  if (isDebug()) System.out.println(cmd);
        
@@ -626,7 +629,7 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
     	
     	Connection con = this.getNewConnection();
     	Statement stmt =con.createStatement();
-      ResultSet rs = stmt.executeQuery(cmd);
+        ResultSet rs = stmt.executeQuery(cmd);
       
       while(rs.next()){
 
@@ -644,10 +647,21 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
         String accountnum = kood +  abi;
         Customer cust = new Customer(accountnum);
         cust.setPayer(kood);
-        
+        boolean olemas = false;
         int  hinnak = rs.getInt("hinnak");
-        if ( hinnak  > 0 && hinnak != 10) {
+        if ( hinnak  > 0 && hinnak != 1) {
         	cust.setGroup(hinnak + "");
+        	olemas = true;
+        }
+        
+        int  hinnak2 = rs.getInt("hinnak2");
+        if ( hinnak2  > 0 && hinnak2 != 10) {
+        	if(!olemas) {
+        	 cust.setGroup(hinnak2 + "");
+        	}else {
+        		cust.setGroup(cust.getGroup() + "|" + hinnak2);
+        	}
+        	
         }
         
         if(salesres.get(accountnum) != null){
@@ -732,12 +746,12 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
         	
         	//paneme kõigile kõik kylge 
         	
-      Iterator itera =  this.getAgents1().keySet().iterator();
+      /*Iterator itera =  this.getAgents1().keySet().iterator();
       
       while (itera.hasNext()){
     	  Agent agg = ((Agent)this.getAgents1().get(itera.next()));
-    	  cust.addAgent(agg);
-      }
+    	//  cust.addAgent(agg);
+      }*/
           cust.addAgent(new Agent(agen.trim())); 
          
           
@@ -749,7 +763,7 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
 				
 				if(agg != null && agg.getDubbler().size()>0){
 					for (int i = 0 ; i < agg.getDubbler().size() ; i++){
-						cust.addAgent(new Agent((String)agg.getDubbler().elementAt(i)));
+					//	cust.addAgent(new Agent((String)agg.getDubbler().elementAt(i)));
 					}
 				}
 			}
@@ -807,6 +821,10 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
         	}
         }
         
+        String tarne = rs.getString("tarne");
+        if (tarne != null && tarne.trim().length()>0) {
+            cust.setCity("Logistika: " + tarne.trim());
+        }
           
         boolean laks = true;
                     if((payer == null || payer.trim().length() == 0) && payers.contains(cust.getID())){
@@ -882,19 +900,15 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
     Connection con = getNewConnection();
     TreeMap   tm = new TreeMap();
      
-    String sql = " SELECT  G.PK_NOMGR AS kood, G.KODS AS abi, G.NOSAUK AS nimi  FROM   APV07062.NNOMGR G  " + 
-    		" LEFT OUTER JOIN APV07062.NNOMGR VGR ON G.PK_GRUPA=VGR.PK_NOMGR  WHERE G.STATUSS = 0 and VGR.PK_NOMGR = 8 ORDER BY G.NPK ";
+    String sql = " SELECT  G.PK_NOMGR AS kood, G.NOSAUK AS nimi  FROM   APV07062.NNOMGR G  inner join  APV07062.NNOM  t on t.PK_NOMGR = g.PK_NOMGR\r\n" + 
+    		"	 inner join APV07062.NIPASR n ON n.PK_NOM = t.PK_NOM and n.PK_NIPAS = 93  WHERE G.STATUSS = 0 group by G.PK_NOMGR ,G.NOSAUK  ";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
 
     while (rs.next()) {
       String liik = rs.getString("kood").trim();
-      String sort = rs.getString("abi").trim();
       String nimi = rs.getString("nimi").trim();
-      if(sort.length() == 1){
-    	  sort = "0" + sort;
-      }
-        tm.put(liik, sort + "_" + Converter.enCodeEst(nimi));
+        tm.put(liik,  Converter.enCodeEst(nimi));
     }
    
     rs.close();
@@ -919,11 +933,11 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
   
   public TreeMap getProducts(Agent agent){
 
-	  String cmd = " select t.KODS as  itemid,t.NOSAUK  AS nimetus, t.M_ATT12 AS kastis,1 AS alusel , bar.BAR_KODS AS ean ,PK_NOMGR AS grupp,\r\n" + 
-	  		"	  		 yh.kods As unit , M_ATT13 as optam \r\n" + 
-	  		"	  			 from APV07062.NNOM  t inner join APV07062.NIPASR n ON n.PK_NOM = t.PK_NOM and n.PK_NIPAS = 93  LEFT OUTER JOIN APV07062.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1 \r\n" + 
-	  		"	  			 LEFT OUTER JOIN APV07062.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN \r\n" + 
-	  		"	  			 where  t.STATUSS = 0 ";
+	  String cmd = "select t.KODS as  itemid,t.NOSAUK  AS nimetus, t.M_ATT12 AS kastis,1 AS alusel , bar.BAR_KODS AS ean ,PK_NOMGR AS grupp, yh.kods As unit , M_ATT13 as optam, u.PK_NIPASR as type\r\n" + 
+	  		" 			 from APV07062.NNOM  t inner join APV07062.NIPASR n ON n.PK_NOM = t.PK_NOM and n.PK_NIPAS = 93 \r\n" + 
+	  		"			 LEFT OUTER join APV07062.NIPASR u ON U.PK_NOM = t.PK_NOM and u.PK_NIPAS=94  LEFT OUTER JOIN APV07062.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1  \r\n" + 
+	  		" 			 LEFT OUTER JOIN APV07062.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN \r\n" + 
+	  		"	  		 where  t.STATUSS = 0  ";
     
 	  
     getSaveStockInfo();
@@ -997,6 +1011,18 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
       } else {
     	  prod.setOptAmountInUnits(1); 
       }
+      
+      Integer type = rs.getInt("type");
+      if(type > 0){
+    	  
+    	  if(type == 32) {
+              prod.setType("Cesvaines");  
+    	  } else if(type == 31) {
+        	  prod.setType("Smiltenes");
+    	  }
+    	  
+        }
+      
       
        prod.setVat("21");
     

@@ -555,10 +555,16 @@ private Vector signatures = new Vector();
 	        header.appendChild(age);
 	        
 	        
-	        
-	        
-		       // "Adl PaymTerm Code '90D'"
-		        System.out.println("Paym term " + order.getPaymTerm());
+	          String smode = order.getCompName();
+	          if(smode != null && smode.trim().length() > 0) {
+
+		        	Node pt = doc.createElement("DlvMode");
+			        Text ptVal = doc.createTextNode(smode.trim());
+			        pt.appendChild(ptVal);
+			        header.appendChild(pt);
+	          }
+		        
+		     //   System.out.println("Paym term " + order.getPaymTerm());
 		        if(order.getPaymTerm() == -2){
 		        	
 		        	Node pt = doc.createElement("PaymentTerm");

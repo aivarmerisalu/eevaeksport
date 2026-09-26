@@ -667,8 +667,13 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
  	
       
 	    String sql4a = "SELECT p.pricelistBackOfficeId as grupp, p.productBackOfficeId as toode, p.price as hind" + 
-	    		" FROM EPASAULE_PRICES p inner join EPASAULE_PRODUCTS a on a.backOfficeId = productBackOfficeId and p.price !=a.price where "
+	    		" FROM EPASAULE_PRICES p  where "
 	    		+ "p.price > 0  " ;	
+	    
+	    sql4a = "SELECT p.custpricegroup as grupp, p.itemid as toode, p.price as hind" + 
+	    		" FROM MJ_PRICES p  where "
+	    		+ "p.price > 0  " ;	
+	    
            rs = stmt.executeQuery(sql4a);
            while (rs.next()) {
 
@@ -827,8 +832,11 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   public String getSaveStockInfo(){
 	  
 
-	  String  cmd = "Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail  " + 
-       		"             		group by productBackofficeId,regionBackofficeId,bestBefore order by productBackofficeId,  regionBackofficeId desc,bestBefore " ;
+	  String  cmd = "Select productBackofficeId as toode,sum(Inventory) as stock, regionBackofficeId as ladu, bestBefore as partii from  dbo.EPASAULE_INVENTORIES_detail \r\n" + 
+	  		"       	           		group by productBackofficeId,regionBackofficeId,bestBefore \r\n" + 
+	  		"					union	" + 
+	  		"			select PARENTITEMID as toode,(BOMQTY) as stock , '24N' as ladu, '' as partii  from 	EPASAULE_PHANTOMBOM " + 
+	  		"		order by 1, 3 desc,4 " ;
     
 	  if(usedProds == null){
 		    this.getProducts(null);
@@ -983,7 +991,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   private void makeCustprod(){
 		 
 	  
-		  String cmd1 = " SELECT a.CUSTACCOUNT AS klient, a.ITEMID AS toode, sum(a.INVOICEQTY) AS kogus  FROM BIF03_SALESLINE a " + 
+		  String cmd1 = " SELECT a.CUSTACCOUNT AS klient, a.ITEMID AS toode, sum(a.INVOICEQTY) AS kogus  FROM EPASAULE_SALESLINE a " + 
 		  		"   WHERE a.SALESDATE > GETDATE() - 300 AND a.EG_SALESCANCELREASONID <> 'GKR' AND a.INVENTLOCATIONID != 'STORNO' " + 
 		  		"   AND a.SALESSTATUS <> 1  group by CUSTACCOUNT, ITEMID  " ;
 		    
@@ -1005,9 +1013,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		  		"	  			  		            PARTITION BY a.CUSTACCOUNT, a.ITEMID  \r\n" + 
 		  		"	  			  		            ORDER BY a.SALESDATE DESC  \r\n" + 
 		  		"	  			  		        ) AS rn  \r\n" + 
-		  		"	  			  		    FROM BIF03_SALESLINE a \r\n" + 
+		  		"	  			  		    FROM EPASAULE_SALESLINE a \r\n" + 
 		  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID  \r\n" + 
-		  		"	  			  		    LEFT JOIN BID44_SALESCANCELREASONS c  \r\n" + 
+		  		"	  			  		    LEFT JOIN EPASAULE_SALESCANCELREASONS c  \r\n" + 
 		  		"	  			  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID  \r\n" + 
 		  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 300  \r\n" + 
 		  		"	  			  		      AND a.EG_SALESCANCELREASONID <> 'GKR'  \r\n" + 

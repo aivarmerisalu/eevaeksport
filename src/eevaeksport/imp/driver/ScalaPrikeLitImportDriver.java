@@ -761,25 +761,9 @@ return res;
 			  poscomm =  readPosExcel() ;
 		  }
 		  
-		  setOrder(order);
+		    setOrder(order);
 		    makeOutput(order);
-	/*	  Vector splitted =  splitOrder(order);
-      if("true".equals(parent.getProps().getProperty("testing"))){
-    	  System.out.println("comp " + order.getCompany() + " " + sendKinnitus(order.getCompany()) );
-    	  if(sendKinnitus(order.getCompany())){
-	        	sendKinnitusEmail(order.getCompany(),getNimi(order.getCompany()),order.getOrderLines(), this.identifyCustomerAGENT(order.getCompany()) ,
-		    			  order.getInfo(), getAddress(order.getCompany()));
-	        }
-	         System.exit(0);
-          }
-		  Enumeration en = splitted.elements();
-		  while(en.hasMoreElements()){
-			  Order ord = (Order)en.nextElement();
-			  if(ord.getOrderLines().size() > 0){
-				    setOrder(ord);
-				    makeOutput(ord);
-				}
-		     }*/
+	
 	     }
 
 	

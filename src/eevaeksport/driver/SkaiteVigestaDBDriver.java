@@ -1046,28 +1046,31 @@ Statement st = null;
 		   if(uselim > 0 || useterm > 0) {
 			   
 			   if(uselim > 0 && useterm == 0) {
-				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");
+				   cust.debtMessage = ("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");
+
 			   }
 			   if(uselim == 0 && useterm > 0) {
-				   cust.setInfo("Klientas blokuotas dėl neapmokėtų sąskaitų (" + useterm + "+ d.).");
+				   cust.debtMessage = ("Klientas blokuotas dėl neapmokėtų sąskaitų (" + useterm + "+ d.).");
 			   }
 			   if(uselim > 0 && useterm > 0) {
-				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " € ir (" + useterm + "+ d.).");
+				   cust.debtMessage = ("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " € ir (" + useterm + "+ d.).");
 			   }
 		   } else if(lims.get(payid) != null || terms.get(payid) != null){
 			   uselim = lims.get(payid);
 			   useterm = terms.get(payid);
 			   if(uselim > 0 && useterm == 0) {
-				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");
+				   cust.debtMessage = ("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");
 			   }
 			   if(uselim == 0 && useterm > 0) {
-				   cust.setInfo("Klientas blokuotas dėl neapmokėtų sąskaitų (" + useterm + "+ d.).");
+				   cust.debtMessage = ("Klientas blokuotas dėl neapmokėtų sąskaitų (" + useterm + "+ d.).");
 			   }
 			   if(uselim > 0 && useterm > 0) {
-				   cust.setInfo("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " € ir (" + useterm + "+ d.).");
+				   cust.debtMessage = ("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " € ir (" + useterm + "+ d.).");
 			   }
 		   }
-		   
+		   if(cust.debtMessage != null) {
+			   System.out.println(cust.getID() + " " + cust.getAgents() + " " + cust.debtMessage);
+		   }
 		   String nim = rs.getString("nimi2").replaceAll("\""," ").trim();
 		   String nims = rs.getString("nimi").replaceAll("\""," ").trim();
 		   

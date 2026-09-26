@@ -37,8 +37,11 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -5171,7 +5174,7 @@ public class Converter {
 			      // siin loeme tulemused tagasi - ja teeme küsimuste parsimise.
 			 Calendar from = Calendar.getInstance();
 			// from.set(Calendar.HOUR, 15);
-			 from.add(Calendar.DAY_OF_YEAR, -3);
+			 from.add(Calendar.DAY_OF_YEAR, -4);
 			 Calendar to = Calendar.getInstance();    
 			 to.add(Calendar.DAY_OF_YEAR, 2);
 
@@ -5592,13 +5595,79 @@ public class Converter {
 			                              }
 			                          }
 
-			                          ff.close();
+			                     /*     ff.close();
 
 			                          if (changesMade) {
 			                              System.out.println("Salvestan faili...");
 			                              FileOutputStream fos = new FileOutputStream(file.getAbsolutePath());
 			                              workbook.write(fos);
 			                              fos.close();
+			                          }*/
+			                          
+			                          ff.close();
+
+			                          if (changesMade) {
+			                              System.out.println("Salvestan faili...");
+
+			                              Path target = file.toPath();
+
+			                              // Create temporary file in the SAME directory.
+			                              // This is important because it allows the final move to be atomic
+			                              // on filesystems that support atomic moves.
+			                              Path tempFile = Files.createTempFile(
+			                                  target.getParent(),
+			                                  target.getFileName().toString(),
+			                                  ".tmp"
+			                              );
+
+			                              boolean saved = false;
+
+			                              try {
+			                                  // Write the complete XLSX to the temporary file.
+			                                  try (FileOutputStream fos = new FileOutputStream(tempFile.toFile())) {
+			                                      workbook.write(fos);
+			                                      fos.flush();
+
+			                                      // Make sure Java/OS has pushed the data to the file.
+			                                      fos.getFD().sync();
+			                                  }
+
+			                                  System.out.println("Temporary Excel file written: "
+			                                          + tempFile.toAbsolutePath());
+
+			                                  // Only now replace the original file.
+			                                  try {
+			                                      Files.move(
+			                                          tempFile,
+			                                          target,
+			                                          StandardCopyOption.REPLACE_EXISTING,
+			                                          StandardCopyOption.ATOMIC_MOVE
+			                                      );
+			                                  } catch (AtomicMoveNotSupportedException e) {
+			                                      // Some filesystems don't support ATOMIC_MOVE.
+			                                      // Still replace only AFTER the complete temp file was written.
+			                                      Files.move(
+			                                          tempFile,
+			                                          target,
+			                                          StandardCopyOption.REPLACE_EXISTING
+			                                      );
+			                                  }
+
+			                                  saved = true;
+
+			                                  System.out.println("Excel file saved successfully: "
+			                                          + target.toAbsolutePath());
+
+			                              } finally {
+			                                  // If anything went wrong, remove only the temporary file.
+			                                  // The original Excel file has not been touched.
+			                                  if (!saved) {
+			                                      Files.deleteIfExists(tempFile);
+			                                      System.err.println(
+			                                          "Excel save failed. Original file was left untouched."
+			                                      );
+			                                  }
+			                              }
 			                          }
 
 			                      } catch (Exception e) {
