@@ -194,12 +194,14 @@ try{
 	  			  counter = 0;
 	  			  makeOutput(order,tagastus);
 	  			  log.error("made Output 1 " + order.getCompany() + " " + fileName);
+	  			  System.out.println("Output 1 ");
 	  		    }else{
 	  		    	this.trouble = null;
 	  			  counter = 0;
 	  			  makeOutput2(order,tagastus);
 	  			  log.error("made Output 2 " + order.getCompany() + " " + fileName);
-	  		      
+	  			  System.out.println("Output 2 ");
+	  	  		      
 	  		    }
 			  
 			  
@@ -518,7 +520,7 @@ private HashMap prodnames = null;
             	    sb.append("          <ItemDescription>" + (escape(prodnames.get(line.getToode())+"")) + "</ItemDescription>" + ls);               
                }
                   
-                  if(tagastus) {
+                  if(tagastus ) {
                 	  sb.append("         <AmountToReturn>" + escape(getNF().format(line.getKogus()*-1)) + "</AmountToReturn>" + ls);
                 	  
                   }else {
@@ -703,6 +705,11 @@ private HashMap prodnames = null;
 	           if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
 	        	   reasonCode =  inff.substring(inff.indexOf("[")+1, inff.indexOf("]"));
 	   		   }
+	           
+	           if(reason == null) {
+	        	 reason =  (String)reasons.get(reasonCode);
+	           }
+	           
 	           System.out.println("reason2 " + reason + " " + reasonCode);
 
 	       
@@ -890,14 +897,30 @@ private HashMap prodnames = null;
 	             	  sb.append("         <ItemUnitRecord>" + ls);
 	                  sb.append("                <ItemUnit>tk</ItemUnit>" + ls);
 	                  sb.append("         </ItemUnitRecord>" + ls);
-	                  sb.append("         <AmountOrdered>" + escape(getNF().format(line.getKogus()*-1 )) + "</AmountOrdered>" + ls);
 	                
+	                  if(tagastus ) {
+	                	  sb.append("         <AmountToReturn>" + escape(getNF().format(line.getKogus()*-1)) + "</AmountToReturn>" + ls);
+	                	  
+	                  }else {
+	                	  sb.append("         <AmountOrdered>" + escape(getNF().format(line.getKogus())) + "</AmountOrdered>" + ls);
+		  
+	                  }
+	      
+	                  
 	                  sbmiinus.append("         <BaseUnit>tk</BaseUnit>" + ls);
 	                  sbmiinus.append("         <ItemUnitRecord>" + ls);
 	                  sbmiinus.append("                <ItemUnit>tk</ItemUnit>" + ls);
 	                  sbmiinus.append("         </ItemUnitRecord>" + ls);
 	                  sbmiinus.append("         <AmountOrdered>" + escape(getNF().format(line.getKogus())) + "</AmountOrdered>" + ls);
 	                
+	                  if(tagastus ) {
+	                	  sbmiinus.append("         <AmountToReturn>" + escape(getNF().format(line.getKogus()*-1)) + "</AmountToReturn>" + ls);
+	                	  
+	                  }else {
+	                	  sbmiinus.append("         <AmountOrdered>" + escape(getNF().format(line.getKogus())) + "</AmountOrdered>" + ls);
+		  
+	                  }
+	      
 	               if(line.getDiscount() > 0){
 	                 sb.append("         <Addition addCode=\"DSC\"><AddRate>" +
 	             	  escape(getNF().format(line.getDiscount())) + "</AddRate></Addition>" + ls); 

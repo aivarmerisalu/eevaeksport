@@ -170,7 +170,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
    " k.KODS as klient,H.[PK_GRUPA] as clgrupp,datediff(day,[NO_DAT] , [LIDZ_DAT]) as paevi " +
     " FROM [CESARS1372].[NCEN]  H  inner join  CESARS1372.DKLIENTS K ON H.PK_KLIENTS=K.PK_KLIENTS  "
     + "inner join  CESARS1372.NNOM n on n.PK_NOM= h.PK_NOM where GETDATE()"
-    + " between NO_DAT and LIDZ_DAT and year(LIDZ_DAT) != 3000";
+    + " between NO_DAT and LIDZ_DAT and year(NO_DAT) != 3000";
 	  Statement st = null;
       try {
     	 
@@ -198,7 +198,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
           if (custID != null && custID.trim().length() > 0 && !custID.trim().equals("1")) {
             mline.setCustID(custID.trim());
           }else if ( clgr != null && clgr.trim().length() > 0) {
-                mline.setCliGroup(clgr.trim());
+                mline.setCliGroup("G" + clgr.trim());
           }
 
           if (prodID != null && prodID.trim().length() > 0) {
@@ -258,7 +258,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
               	                          
               	                    //KLIENDIGRUPP JA TOOTEGRUPP
               	                          if (clgroup != null && clgroup.trim().length() > 0) {
-              	                                  mline.setCliGroup(clgroup.trim());
+              	                                  mline.setCliGroup("P"+clgroup.trim());
               	                          }
               	                       
               	                          if (prodID != null && prodID.trim().length() > 0) {
@@ -318,14 +318,15 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
 	  
 	   kogused = new TreeMap();
 		  
-	   String  cmd = "  SELECT  NN.KODS as toode , SUM(CASE WHEN V.STATUSS IN (0, 1, 3) THEN V.DAUDZ ELSE 0 END) AS stock,  " +
-	"	SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.DAUDZ ELSE 0 END) AS DAUDZ, SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.DAUDZ2 ELSE 0 END) AS DAUDZ2, " + 
-	"	SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.SUMMA ELSE 0 END) AS SUMMA,"
-	+ " SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.SUMMA2V ELSE 0 END) AS SUMMA2V ,V.PK_NOL as ladu  " +
-	"	FROM CESARS1372.NVOL V, CESARS1372.NNOM N7, CESARS1372.NNOMGLIM NGL7, CESARS1372.NNOM NN , CESARS1372.NVOLDAT DT WHERE N7.PK_NOM = V.PK_NOM AND N7.PK_NOMGR = NGL7.PK_CHILD " +
-	"	AND  V.DAT < getdate()  AND V.PK_NOMPART = DT.PK_NOMPART AND V.PK_NOL = DT.PK_NOL AND DT.DATB >= getdate()  AND V.STATUSS IN (0,1,3) " +
-	"	AND V.PK_NOM = NN.PK_NOM AND V.PK_NOL in( '4') and NN.ATLUZSK=1  GROUP BY V.PK_NOL, NN.KODS " +
-	"	ORDER BY V.PK_NOL, NN.KODS";
+	   String cmd = "  SELECT  NN.KODS as toode , SUM(CASE WHEN V.STATUSS IN (0, 1, 3) THEN V.DAUDZ ELSE 0 END) AS stock,  \r\n" + 
+		   		"		SUM(CASE WHEN V.STATUSS IN (1) THEN V.DAUDZ ELSE 0 END) AS DAUDZ, SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.DAUDZ2 ELSE 0 END) AS DAUDZ2, \r\n" + 
+		   		"		V.PK_NOL as ladu  \r\n" + 
+		   		"		FROM CESARS1372.NVOL V, CESARS1372.NNOM NN , CESARS1372.NVOLDAT DT WHERE \r\n" + 
+		   		"		 V.DAT < getdate()  AND V.PK_NOMPART = DT.PK_NOMPART AND V.PK_NOL = DT.PK_NOL AND DT.DATB >= getdate()  AND V.STATUSS IN (0,1,3)\r\n" + 
+		   		"		AND V.PK_NOM = NN.PK_NOM  and NN.ATLUZSK=1 \r\n" + 
+		   		"		and V.PK_NOL in ('4') \r\n" + 
+		   		"		GROUP BY V.PK_NOL, NN.KODS \r\n" + 
+		   		"		ORDER BY V.PK_NOL, NN.KODS";
 
 
 	       if (isDebug()) System.out.println(cmd);
@@ -593,6 +594,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
     			"    A.PK_ADRESE AS aid,\r\n" +
     			"    K.KODS AS kood,\r\n" + 
     			"    k.PK_CENVEID as hinnak ," +
+    			" 	K.PK_GRUPA  AS hinnak2," +
     			"    K.REG_NR AS payer,\r\n" + 
     			"    K.ADRESE AS address,\r\n" + 
     			"    A.ADRESE AS address2,\r\n" + 
@@ -639,12 +641,24 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
         String accountnum = kood +  abi;
         Customer cust = new Customer(accountnum);
         cust.setPayer(kood);
+        cust.setGroup(kood);
         
+        boolean olemas = false;
         int  hinnak = rs.getInt("hinnak");
-        if ( hinnak  > 0 && hinnak != 10) {
-        	cust.setGroup(hinnak + "");
+        if ( hinnak  > 0 && hinnak != 1) {
+        	cust.setGroup(cust.getGroup() + "|P" + hinnak + "");
+        	olemas = true;
         }
         
+        int  hinnak2 = rs.getInt("hinnak2");
+        if ( hinnak2  > 0 && hinnak2 != 1) {
+        	if(!olemas) {
+        	 cust.setGroup("G"+hinnak2 + "");
+        	}else {
+        		cust.setGroup(cust.getGroup() + "|G" + hinnak2);
+        	}
+        	
+        }
         if(salesres.get(accountnum) != null){
         	cust.setInfo("CHART Sales :|Year Month|Sales EUR|" + salesres.get(accountnum) );
         }
@@ -910,11 +924,12 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
   public TreeMap getProducts(Agent agent){
 
 	  String cmd = "select  t.KODS as  itemid,t.NOSAUK  AS nimetus, t.M_ATT12 AS kastis,1 AS alusel , bar.BAR_KODS AS ean ,PK_NOMGR AS grupp,\r\n" + 
-	  		"	  		 yh.kods As unit , M_ATT13 as optam, md.daudz as maxdisc ,t.descr as info, oh.daudz as omahind\r\n" + 
+	  		"	  		 yh.kods As unit , op.daudz as optam, md.daudz as maxdisc ,t.descr as info, oh.daudz as omahind\r\n" + 
 	  		"	  			 from CESARS1372.NNOM  t LEFT OUTER JOIN CESARS1372.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1\r\n" + 
 	  		"	  			 LEFT OUTER JOIN CESARS1372.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN \r\n" + 
 	  		"				 left join CESARS1372.nipasr md on md.PK_NOM=t.PK_NOM and md.PK_NIPAS = 20\r\n" + 
 	  		"	  			 left join CESARS1372.nipasr oh on oh.PK_NOM=t.PK_NOM and oh.PK_NIPAS = 19\r\n" + 
+	  		"	  			 left join CESARS1372.nipasr op on op.PK_NOM=t.PK_NOM and op.PK_NIPAS = 5\r\n" + 
 	  		"	  			  where  t.STATUSS = 0 and  t.B2B_PAZ = 1 ";
     
 	  
@@ -1180,7 +1195,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
   }
 
   public String getDriverVersion(){
-    return "HorizonSmil";
+    return "HorizonBidfood";
   }
 
   public String getSubjectFilesTo(){

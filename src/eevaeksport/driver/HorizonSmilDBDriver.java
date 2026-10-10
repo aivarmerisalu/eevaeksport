@@ -201,7 +201,7 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
           if (custID != null && custID.trim().length() > 0 && !custID.trim().equals("1")) {
             mline.setCustID(custID.trim());
           }else if ( clgr != null && clgr.trim().length() > 0) {
-                mline.setCliGroup(clgr.trim());
+                mline.setCliGroup("G" + clgr.trim());
           }
 
           if (prodID != null && prodID.trim().length() > 0) {
@@ -261,7 +261,7 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
               	                          
               	                    //KLIENDIGRUPP JA TOOTEGRUPP
               	                          if (clgroup != null && clgroup.trim().length() > 0) {
-              	                                  mline.setCliGroup(clgroup.trim());
+              	                                  mline.setCliGroup("P" + clgroup.trim());
               	                          }
               	                       
               	                          if (prodID != null && prodID.trim().length() > 0) {
@@ -650,16 +650,16 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
         boolean olemas = false;
         int  hinnak = rs.getInt("hinnak");
         if ( hinnak  > 0 && hinnak != 1) {
-        	cust.setGroup(hinnak + "");
+        	cust.setGroup("P" + hinnak + "");
         	olemas = true;
         }
         
         int  hinnak2 = rs.getInt("hinnak2");
-        if ( hinnak2  > 0 && hinnak2 != 10) {
+        if ( hinnak2  > 0 && hinnak2 != 1) {
         	if(!olemas) {
-        	 cust.setGroup(hinnak2 + "");
+        	 cust.setGroup("G"+hinnak2 + "");
         	}else {
-        		cust.setGroup(cust.getGroup() + "|" + hinnak2);
+        		cust.setGroup(cust.getGroup() + "|G" + hinnak2);
         	}
         	
         }
@@ -989,8 +989,10 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
         
 
         String ean = rs.getString("ean");
+        String add = "";
         if(ean != null && ean.trim().length()>4){
         prod.setEAN(ean);
+        add = ean.trim().substring(ean.length()-4);
         }
         String grp = rs.getString("grupp");
         if(grp != null){
@@ -998,7 +1000,7 @@ public class HorizonSmilDBDriver extends AbstractDBDriver  implements Manager,Pr
         }
         
         
-      prod.setName(nimetus + " " + kood);
+      prod.setName(nimetus + " " + kood + " " + add);
    
       String unit = rs.getString("unit");
       if(unit!=null && unit.trim().length()>0){

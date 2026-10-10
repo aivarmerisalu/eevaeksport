@@ -120,7 +120,9 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
          	         	if(in.exists()){
          	         	File inpda = new File ( pictsUnion + toode +".jpg" ); 
          	         	if(!inpda.exists()) {
+         	         		try {
          	         		Converter.shrinkAndCopyFile(in,inpda);
+         	         		}catch(Exception e){}
          	         	}
  		             	
  		             	}else {
@@ -129,7 +131,10 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
  			                 if(f.exists()){
  			                	 File inpda = new File ( pictsUnion + toode +".png" );
  			                	 if(!inpda.exists()) {
- 			     	         		Converter.shrinkAndCopyFile(f,inpda);	
+ 			                		 try {
+ 			                	 
+ 			     	         		Converter.shrinkAndCopyFile(f,inpda);
+ 			                		 }catch(Exception e){}
  			     	         	}
  			           	    	
  			                 } else {
@@ -137,7 +142,10 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
  			                     if(f.exists()){
  			                    	 File inpda = new File ( pictsUnion + toode +".PNG" );
  				                	 if(!inpda.exists()) {
+ 				                	
+ 				                	 try {
  				     	         		Converter.shrinkAndCopyFile(f,inpda);	
+ 				                	 }catch(Exception e){}
  				     	         	}
  				                 }	
  			                 }
@@ -149,7 +157,10 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 	         	if(in.exists()){
 	         	File inpda = new File ( pictsUnion + toode +".jpg" );
 	         	if(!inpda.exists()) {
-	         		Converter.shrinkAndCopyFile(in,inpda);	
+	         		
+	         	try {
+	         		Converter.shrinkAndCopyFile(in,inpda);
+	         	}catch(Exception e){}
 	         	}
 	         	
             	} else {
@@ -158,16 +169,22 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		                 if(f.exists()){
 		                	 File inpda = new File ( pictsUnion + toode +".png" );
 		                	 if(!inpda.exists()) {
-		     	         		Converter.shrinkAndCopyFile(f,inpda);	
-		     	         	}
+		                		 try {
+		         	         		Converter.shrinkAndCopyFile(in,inpda);
+		         	         	}catch(Exception e){}
+		         	         	
+		         	         	}
 		           	    	
 		                 } else {
 		                	 f = new File(picts2 + toode+".PNG");
 		                     if(f.exists()){
 		                    	 File inpda = new File ( pictsUnion + toode +".PNG" );
 			                	 if(!inpda.exists()) {
-			     	         		Converter.shrinkAndCopyFile(f,inpda);	
-			     	         	}
+			                		 try {
+			         	         		Converter.shrinkAndCopyFile(in,inpda);
+			         	         	}catch(Exception e){}
+			         	         	
+			         	         		}
 			                 }	
 		                 }
                      }
@@ -192,7 +209,10 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
  		         	if(in.exists()){
  		         	File inpda = new File ( pictsUnion + toode +".jpg" );
  		         	if(!inpda.exists()) {
- 		         		Converter.shrinkAndCopyFile(in,inpda);	
+ 		         		try {
+ 			         		Converter.shrinkAndCopyFile(in,inpda);
+ 			         	}catch(Exception e){}
+ 			         	
  		            }
  		         	
  		       	} else {
@@ -200,8 +220,10 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 	         		 in = new File ( picts + seal+ ".JPG"); 
  		         	if(in.exists()){
  		         		File	 inpda = new File ( pictsUnion + toode +".JPG" );
- 		         	if(!inpda.exists()) {
- 		         		Converter.shrinkAndCopyFile(in,inpda);	
+ 		         	if(!inpda.exists()) { try {
+			         		Converter.shrinkAndCopyFile(in,inpda);
+			         	}catch(Exception e){}
+			         	
  		         	}
 	         	} else {
 	         		
@@ -209,7 +231,10 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 		         	if(in.exists()){
 		         		File	 inpda = new File ( pictsUnion + toode +".png" );
 		         	if(!inpda.exists()) {
-		         		Converter.shrinkAndCopyFile(in,inpda);	
+		         		try {
+ 			         		Converter.shrinkAndCopyFile(in,inpda);
+ 			         	}catch(Exception e){}
+ 			         	
 		         	}
          	}else {
          		
@@ -217,7 +242,10 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 	         	if(in.exists()){
 	         		File	 inpda = new File ( pictsUnion + toode +".PNG" );
 	         	if(!inpda.exists()) {
-	         		Converter.shrinkAndCopyFile(in,inpda);	
+	         		try {
+			         		Converter.shrinkAndCopyFile(in,inpda);
+			         	}catch(Exception e){}
+			         	
 	         	}
      	}
 	         	}    	
@@ -355,13 +383,22 @@ public class VichiLATSQLUUSDBDriver extends AbstractDBDriver implements
 			                  		
 		             	if(name.startsWith("1")) {
 		             		File inpda = new File ( pictspda + "C"+ name); 
-			             	Converter.shrinkAndCopyFile(in,inpda);
-			             	inpda = new File ( pictspda + "S"+ name); 
-			             	Converter.shrinkAndCopyFile(in,inpda);
+		             		try {
+	 			         		Converter.shrinkAndCopyFile(in,inpda);
+	 			         	}catch(Exception e){}
+	 			         	
+		             		inpda = new File ( pictspda + "S"+ name); 
+		             		try {
+	 			         		Converter.shrinkAndCopyFile(in,inpda);
+	 			         	}catch(Exception e){}
+	 			         	
 			             		
 		             	}
 		             	File inpda = new File ( pictspda + name); 
-		             	Converter.shrinkAndCopyFile(in,inpda);
+		             	try {
+ 			         		Converter.shrinkAndCopyFile(in,inpda);
+ 			         	}catch(Exception e){}
+ 			         	
 		             	}
 		             }
 		             

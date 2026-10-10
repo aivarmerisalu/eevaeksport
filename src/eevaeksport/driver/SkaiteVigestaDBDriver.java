@@ -945,6 +945,7 @@ Statement st = null;
      " WHERE      masm.kodas is not null and pl.MES_PAV_Trumpinys !='' ";
 	
         log(cmd);
+        
 
 		 
 		 
@@ -954,31 +955,29 @@ Statement st = null;
  " WHERE     op.OperacijosTipoId = (2000018) and year(op.Data) = year(getdate()) and month(op.Data) = month(getdate()) "+
  " order by 1,2";
 		 
-		//  TreeMap fourThousand= get4Thousand();
-		//
-		  
-		  this.makePaymentsFile();
-		    HashMap baasMap = new HashMap();
-			TreeMap customers = new TreeMap();
+		 
+		          this.makePaymentsFile();
+		        HashMap baasMap = new HashMap();
+			    TreeMap customers = new TreeMap();
 		        HashMap custMap = new HashMap();
 		        HashMap deguSumm = new HashMap();
+
+		        HashMap<String,Double> payerDebt = new HashMap<String,Double>();
+		        HashMap<String,Double> payerUsed = new HashMap<String,Double>();
 		    	
-				 try {	     
-		 Connection con2 = this.getNewConnection();
+		 try {	     
+		    Connection con2 = this.getNewConnection();
 	        PreparedStatement stmt = con2.prepareStatement(degu);
 	        ResultSet  rs = stmt.executeQuery();
 
 		   while (rs.next()) {
 			 String klient = (rs.getString("klient").trim());
-			 String toode = (rs.getString("toode").trim());
 			 double kogus = rs.getDouble("summa");
 			 if(deguSumm.get(klient) != null){
 				 double asi = Double.parseDouble(deguSumm.get(klient)+"");
 				 deguSumm.put(klient,asi + (kogus )); 
-				    		 
-			 }else{
+			  } else {
 				 deguSumm.put(klient,kogus ); 
-				    	 
 			 }
 		     }
 			 rs.close();
@@ -1003,30 +1002,74 @@ Statement st = null;
 				   rs.close();
 				   stmt.close();
 				   con.close();
-		 
 				}catch(Exception e) {
-					
 				}
-		 
-		 
+			 
+			 try {
+			        String ddd = "SELECT SumokaPartneriaiId as payer,  SUM(ROUND((op.Suma - op.ApmoketaSuma) * op.Kursas, 2) * (CASE pot.PartOperacijosTipas WHEN 1 THEN 1 ELSE - 1 END)) AS Expr1   \r\n" + 
+			        		"                              FROM         dbo.Operacijos AS op\r\n" + 
+			        		"							   INNER JOIN    dbo.PirkimuOpTipai AS pot ON op.OperacijosTipoId = pot.OperacijosTipoId \r\n" + 
+			        		"							   INNER JOIN   dbo.OperacijosPartneriai AS opp ON op.OperacijosId = opp.OperacijosId\r\n" + 
+			        		"							   INNER JOIN dbo.PartneriaiPa AS partpa ON opp.PartneriaiId = partpa.PartneriaiId INNER JOIN  \r\n" + 
+			        		"                       dbo.MokejimoSalygos AS msal ON partpa.MokejimoSalygosID = msal.MokejimoSalygosID  \r\n" + 
+			        		"                               WHERE     (pot.PartOperacijosTipas IN (1, 3, 12)) AND (opp.spec = 0) and op.Data+CONVERT(SmallInt, msal.Terminas)  < getdate()\r\n" + 
+			        		"							 AND \r\n" + 
+			        		"			 	  (op.Suma > op.ApmoketaSuma) group by  SumokaPartneriaiId";
+
+				 stmt = con2.prepareStatement(ddd);
+			       rs = stmt.executeQuery();
+
+				   while (rs.next()) {
+					 String payer = (rs.getString("payer").trim());
+					 Double ring = (rs.getDouble("Expr1"));
+					 payerDebt.put(payer,ring); 
+				     }
+
+				   rs.close();
+				   stmt.close();
+				}catch(Exception e) {
+				}
+
+			 try {
+			        String ddd = "SELECT SumokaPartneriaiId as payer,  SUM(ROUND((op.Suma - op.ApmoketaSuma) * op.Kursas, 2) * (CASE pot.PartOperacijosTipas WHEN 1 THEN 1 ELSE - 1 END)) AS Expr1   \r\n" + 
+			        		"                              FROM         dbo.Operacijos AS op\r\n" + 
+			        		"							   INNER JOIN    dbo.PirkimuOpTipai AS pot ON op.OperacijosTipoId = pot.OperacijosTipoId \r\n" + 
+			        		"							   INNER JOIN   dbo.OperacijosPartneriai AS opp ON op.OperacijosId = opp.OperacijosId\r\n" + 
+			        		"							   INNER JOIN dbo.PartneriaiPa AS partpa ON opp.PartneriaiId = partpa.PartneriaiId INNER JOIN  \r\n" + 
+			        		"                       dbo.MokejimoSalygos AS msal ON partpa.MokejimoSalygosID = msal.MokejimoSalygosID  \r\n" + 
+			        		"                               WHERE     (pot.PartOperacijosTipas IN (1, 3, 12)) AND (opp.spec = 0) " + 
+			        		"							 AND  (op.Suma > op.ApmoketaSuma) group by  SumokaPartneriaiId";
+
+				 stmt = con2.prepareStatement(ddd);
+			       rs = stmt.executeQuery();
+
+				   while (rs.next()) {
+					 String payer = (rs.getString("payer").trim());
+					 Double ring = (rs.getDouble("Expr1"));
+					 payerUsed.put(payer,ring); 
+				     }
+
+				   rs.close();
+				   stmt.close();
+				}catch(Exception e) {
+				}
+			
+			 
               stmt = con2.prepareStatement(cmd);
        	      rs = stmt.executeQuery();
 
        	      HashMap<String, Double> lims = new HashMap<String, Double>();
-
        	      HashMap<String, Integer> terms = new HashMap<String, Integer>();
        	      
 	   while (rs.next()) {
 		     
 		   Double uselim = rs.getDouble("uselim");
 		   Integer useterm = rs.getInt("useterm");
-		   
-		   
-		   String id = rs.getString("CustomerASId").trim();
 		   String regno = rs.getString("regno");
-		   
 		   String payid = rs.getString("pay").trim();
+		   
 		   Customer cust = new Customer(rs.getString("kood").trim());
+		   
 		   if(regno != null && regno.trim().length() > 0){
 			   cust.setRegnr(regno.trim());
 		   }
@@ -1046,9 +1089,7 @@ Statement st = null;
 		   if(uselim > 0 || useterm > 0) {
 			   
 			   if(uselim > 0 && useterm == 0) {
-				   cust.debtMessage = ("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");
-
-			   }
+				   cust.debtMessage = ("Šio kliento užsakymai bus blokuojami dėl : " + uselim.intValue() + " €");			   }
 			   if(uselim == 0 && useterm > 0) {
 				   cust.debtMessage = ("Klientas blokuotas dėl neapmokėtų sąskaitų (" + useterm + "+ d.).");
 			   }
@@ -1071,9 +1112,8 @@ Statement st = null;
 		   if(cust.debtMessage != null) {
 			   System.out.println(cust.getID() + " " + cust.getAgents() + " " + cust.debtMessage);
 		   }
-		   String nim = rs.getString("nimi2").replaceAll("\""," ").trim();
-		   String nims = rs.getString("nimi").replaceAll("\""," ").trim();
-		   
+		 
+		 String nim = rs.getString("nimi2").replaceAll("\""," ").trim();
 		 String nimi = Converter.enCodeEst(nim);
 		 String payer = rs.getString("payer");
 		 
@@ -1133,6 +1173,9 @@ Statement st = null;
                 double debti = rs.getDouble("debt");
                
                 	cust.setDebt(debti);
+                	if(payerDebt.get(payer) != null) {
+                		cust.setDebt(payerDebt.get(payer));
+                 	}
                 
                 String agen = rs.getString("agent");
                 if(agen != null){
@@ -1155,26 +1198,6 @@ Statement st = null;
       			}
                 }
                 
-                
-               /* if(fourThousand.get(payer) != null) {
-                  cust.noCashSales = true;
-                  cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(payer) +""))+"€");
-                  } else if(fourThousand.get("P" + payer) != null) {
-                    cust.noCashSales = true;
-                    cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" + payer) +""))+"€");
-                  } else if(fourThousand.get(cust.getID()) != null) {
-                    cust.noCashSales = true;
-                    cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(cust.getID()) +""))+"€");
-                  } else if(fourThousand.get(payid) != null) {
-                    cust.noCashSales = true;
-                    cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get(payid) +""))+"€");
-                  } else if(fourThousand.get("P" + cust.getID()) != null) {
-                      cust.noCashSales = true;
-                      cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" + cust.getID()) +""))+"€");
-                    } else if(fourThousand.get("P" +payid) != null) {
-                      cust.noCashSales = true;
-                      cust.addCity("1 nov sales : " + ((int)Double.parseDouble(fourThousand.get("P" +payid) +""))+"€");
-                    }*/
                 
                 
                 if(custBonuses.get(cust.getID()) != null) {

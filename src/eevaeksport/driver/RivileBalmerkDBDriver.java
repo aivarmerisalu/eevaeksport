@@ -128,9 +128,8 @@ public class RivileBalmerkDBDriver extends AbstractDBDriver implements  BulkUpda
     	                      Path targetFile = targetDir.resolve(ean + ".jpg");
 
 	                          try {
-    	                      if (Files.notExists(targetFile) || Files.size(targetFile) != Files.size(file)) {
     	                              Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
-    	                         }
+    	                         
     	                          } catch (IOException e) {
     	                              e.printStackTrace();
     	                          }
@@ -196,7 +195,9 @@ public class RivileBalmerkDBDriver extends AbstractDBDriver implements  BulkUpda
              	File inpda = new File ( pictspda + toode + ".jpg" ); 
              	
              	  if(!inpda.exists() || inpda.length() != in.length()) {
+             		  try {
              		  Converter.shrinkAndCopyFile(in,inpda);
+             		  }catch(Exception e) {}
              	  }
              
              	}

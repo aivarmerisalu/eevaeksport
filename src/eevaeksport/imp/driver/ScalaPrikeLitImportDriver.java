@@ -8,6 +8,10 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -1006,7 +1010,7 @@ return res;
 		        }
 		         
 		         
-		         sb2.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" + ls);
+		         sb2.append("<?xml version=\"1.0\" encoding=\"utf-8-sig\"?>" + ls); //ISO-8859-1
 			      sb2.append("<msg:Msg xsi:schemaLocation=\"http://Epicor.com/Message/2.0 http://scshost/schemas/epicor/ScalaMessage.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:msg=\"http://Epicor.com/Message/2.0\">" + ls);			      
 			      sb2.append("  <msg:Hdr>" + ls);
 			      sb2.append("   <msg:Sender>" + ls);
@@ -1289,7 +1293,7 @@ return res;
 		        
 		          sb2.append("      <dta:OrderLine>" + ls);
 		          sb2.append("         <dta:LineNum>" + getLineNr(ccc) + "</dta:LineNum>" + ls);
-		          sb2.append("         <dta:StockCode>" + escape(toode) + "</dta:StockCode>" + ls);
+		          sb2.append("         <dta:StockCode>" + Converter.deCode(escape(toode)) + "</dta:StockCode>" + ls);
 		          sb2.append("         <dta:QtyOrdered>" + nf.format(kogus) + "</dta:QtyOrdered>" + ls);
 			      	if(hind > 0){
 			         // sb2.append("         <dta:UnitPrice>" + nf.format(hind) + "</dta:UnitPrice>" + ls);
@@ -1404,9 +1408,21 @@ return res;
 		    	  try{
 				    	String fileName2 = escape(parent.getProps().getProperty("conv.dir3")  + order.getAgent())
 				    	+ "." + doknr   +  ".xml";
-			          	FileOutputStream fos = new FileOutputStream(fileName2);
+			        /*  	FileOutputStream fos = new FileOutputStream(fileName2);
 				        fos.write(sb2.toString().getBytes());
-				        fos.close();
+				        fos.close();*/
+				      //  Converter.saveFileInUTF8(fileName2, sb2);
+				        
+				    	try (OutputStream out = new FileOutputStream(fileName2);
+				                Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
+
+				               // UTF-8 BOM
+				               out.write(0xEF);
+				               out.write(0xBB);
+				               out.write(0xBF);
+
+				               writer.write(sb2.toString());
+				           }
 			            	
 				    }catch(Exception e){
 				    	e.printStackTrace();
@@ -1415,10 +1431,21 @@ return res;
 				    try{
 				    	String fileName3 = escape(parent.getProps().getProperty("conv.dir4")  + order.getAgent())
 				    	+ "." + doknr   +  ".xml";
-			          	FileOutputStream fos = new FileOutputStream(fileName3);
+/*			          	FileOutputStream fos = new FileOutputStream(fileName3);
 				        fos.write(sb2.toString().getBytes());
-				        fos.close();
-			            	
+				        fos.close();*/
+
+				        //Converter.saveFileInUTF8(fileName3, sb2);
+				    	try (OutputStream out = new FileOutputStream(fileName3);
+				                Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
+
+				               // UTF-8 BOM
+				               out.write(0xEF);
+				               out.write(0xBB);
+				               out.write(0xBF);
+
+				               writer.write(sb2.toString());
+				           }
 				    }catch(Exception e){
 				    	e.printStackTrace();
 				    }

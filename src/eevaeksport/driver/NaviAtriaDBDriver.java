@@ -371,10 +371,9 @@ public class NaviAtriaDBDriver extends AbstractDBDriver implements BulkUpdater,D
 		  if(eanprods == null) {
 			  eanprods = new TreeMap();
 		  }
-		  System.out.println("8009q " + eanprods.toString());
 		this.getProducts(null);
-		System.out.println("8009q " + eanprods.get("4740171188164"));
-		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+		
+		TreeMap contracts = Converter.loadFixFromExcels( getParent().getProps().getProperty("excel.sortdir"),eanprods,parent);
 		System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
 		if(contracts.size() > 0) {
 			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);

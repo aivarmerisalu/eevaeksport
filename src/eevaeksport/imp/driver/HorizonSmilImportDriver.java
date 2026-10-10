@@ -293,6 +293,9 @@ try{
 		           if (shipDate != null && isBeforeDay(cal,shipDate) ) {			        	
 		               cal = shipDate;
 		               }        	    
+		           if(order.isShipDateUsed()) {
+		        	   cal = order.getShipCal();
+		           }
 		           
 		        String cukood =  Converter.deCode(order.getCompany());
 		        String adid = null;
@@ -322,8 +325,8 @@ try{
        // " <PK_PVNK><href>/rest/TdmPvnKat/1</href></PK_PVNK>" +
         " <PK_R_ES><href>/rest/TDdmSaviRek/7092</href></PK_R_ES> " + 
         " <PK_KLIENTS><href>/rest/TDdmCustomer/" + cuid.getID() + "</href></PK_KLIENTS> "+   
-        " <DAT_DOK>" + getDateNiceString(cal) + "</DAT_DOK>" + //getDateNiceString(Calendar.getInstance())
-        " <DAT_PIEG>" + getDateNiceString(cal) + "</DAT_PIEG>" + 
+        " <DAT_DOK>" + getDateNiceString(Calendar.getInstance()) + "</DAT_DOK>" + //getDateNiceString(Calendar.getInstance())
+        " <NEED_DATE>" + getDateNiceString(cal) + "</NEED_DATE>" + 
         " <PK_PARD><href>/rest/TNdmPard/" + agg + "</href></PK_PARD>" + 
         " <PK_VAL> <href>/rest/TsdmValName/3</href><title>EUR</title></PK_VAL><PAMAT>TextOnAccount</PAMAT><TIPS>1</TIPS>" +
         " <PK_PROJ><href>/rest/TdmProject/1</href><title>V : Visi projekti</title></PK_PROJ>" +

@@ -1664,18 +1664,16 @@ return bomKount;
         if(asendused == null) {
         	asendused = getAsendused();
         }
-//'PR' +
+
         String cmd =" SELECT  RTRIM(SC01001) AS toode,(RTRIM(SC01002)+' ' " +
-               " +rtrim(SC01003)) + ' ' +RTRIM(SC01001) AS nimi,SC39004 AS myygihind ,SC01009 AS tykke, SC03004 ,(SC03003-SC03004) AS stock, SC01011 AS maxale,SC01150 AS pandikas , " +  
-    " case when  SC01031 = 1 then 1 else 0 end AS out ,SC01037 AS grupp,SC01132 AS ean  , SC01016 as letter , SC01067 as gr2  ,SC01161 as statustop" +
+               " +rtrim(SC01003)) + ' ' + RTRIM(SC01001) AS nimi,SC39004 AS myygihind ,SC01009 AS tykke, SC03004 ,(SC03003-SC03004) AS stock, SC01011 AS maxale,SC01150 AS pandikas , " +  
+    " case when  SC01031 = 1 then 1 else 0 end AS out ,SC01037 AS grupp,SC01132 AS ean , SC01016 as letter , SC01067 as gr2  ,SC01161 as statustop" +
     " FROM SC010500 left outer JOIN SC030500 on SC03001=SC01001 and SC03002='01' AND (SC03003-SC03004)!=0 left outer JOIN SC390500 ON SC01001 " +
-    " = SC39001 and SC39002='00' " +
-    "    WHERE   LEN(LTRIM(SC01037))>0  and rtrim(ltrim(SC01016)) != 'S' ORDER BY LEFT(RTRIM(SC01037),1),SC01001 " ;
+    " = SC39001 and SC39002='00' WHERE LEN(LTRIM(SC01037)) > 0  and rtrim(ltrim(SC01016)) != 'S' ORDER BY LEFT(RTRIM(SC01037),1),SC01001 " ;
 	
-        //and SC39004 > 0
         if (isDebug()) {
-	    System.out.println(cmd);
-	}
+	      System.out.println(cmd);
+	    }
 
       
         
@@ -1733,7 +1731,7 @@ return bomKount;
                 }
                 prod.setStock(0);
                 prod.setInCases(parseDouble(rs.getString("tykke").trim()));
-               
+               Double sto = rs.getDouble("stock");
                 if(girteka){
                   if( gir.get(prod.getID())!= null ){
                 	  double rr = Double.parseDouble("" +gir.get(prod.getID()));
@@ -1744,7 +1742,7 @@ return bomKount;
                 	//  System.out.println("Setin stocki " + prod.getID() + " " + prod.getStock());
                   }
                 } else {
-                	 prod.setStock(rs.getDouble("stock"));	
+                	 prod.setStock(sto);	
                 }
               //  prod.setMaxDiscount(parseDouble(rs.getString("maxale").trim()));
                 
@@ -1770,9 +1768,8 @@ return bomKount;
                 String letter = rs.getString("letter");
                 
                 boolean ok = true;
-                 if(letter != null && letter.trim().length()>0 && letter.trim().equals("X") && prod.getStock() <= 0){
+                 if(letter != null && letter.trim().length()>0 && letter.trim().equals("X") && prod.getStock() <= 0 && sto <= 0){
                   ok = false;
-                //  System.out.println("Välja Pole laos " +  prod.getName());
                 }
                  
                  gr = rs.getString("gr2");
@@ -1805,7 +1802,7 @@ return bomKount;
                  }
               prod.setVat("21"); 
               if(ok){
-  		        products.put(nimetus, prod);  
+  		        products.put(nimetus + prod.getID(), prod);  
               }
 
 	    }

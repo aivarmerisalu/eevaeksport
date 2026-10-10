@@ -412,11 +412,29 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	        		  }
 	        		  jsonline.put("UnitCode", line.getUnit());
 	        		  
+
+	        		     double matrix = price;
+	        		     boolean wasPriceWithData = false;
 	        		  
 	        		   if(disc > 0  && !repr){
-	        			   jsonline.put("PriceGiven", this.nf.format(price));
-	  	        	  
+
 	  	        		     String par = line.getPartii();
+
+		        		     try {
+		        		     if(par != null && par.trim().length() >0) {
+		        		    	 String mat = par.substring(par.indexOf(":")+1);
+		        		    	    if(mat.contains("++")) {
+		        			    		  mat = mat.substring(0,mat.indexOf("++"));
+		        			    	  }	    	 
+		        		    	 matrix = Double.parseDouble( mat);
+		        		    	 wasPriceWithData = true;
+		        		        }
+		        		      } catch(Exception e) {
+		        		      }
+	        			   
+	        			   
+	        			   jsonline.put("PriceGiven", this.nf.format(matrix));
+	  	        	  
 	  	        		     if(par != null && par.trim().length() >0) {
 	  	        		    	    if(par.contains("++")) {
 	  	        			    		  par = par.substring(0,par.indexOf("++"));
@@ -428,13 +446,12 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	  	        		     }
 	  	        	    }
 
-		        	    
 	  	        	 
 		        	    if(repr){
 		        	    	 String par = line.getPartii();
 		        	    	 jsonline.put("Qty", kogus);
 		        	    	 
-		        	    	 double matrix = price;
+		        	    	  matrix = price;
 		        		     try {
 		        		     if(par != null && par.trim().length() >0) {
 		        		    	 String mat = par.substring(par.indexOf(":")+1);
@@ -458,7 +475,23 @@ try (CloseableHttpResponse response = client.execute(post)) {
 		  	        		        }  
 	  	        		    	  jsonline.put("OriginalDocNumber", par);
 	  	        		     } 
-		        	        double compsum = (price - (price * (100-disc)/100)) * kogus  ;
+	  	        		     
+		        	        
+		        	        
+		        	        double discPrice = line.getPrice() * (100 - line.getDiscount()) / 100;
+
+	        			    if( wasPriceWithData) {
+	        			    	//peame hinna ka panema mitte vahe vaid sissetulnud 
+	        	          		    discPrice = matrix * (100 - line.getDiscount()) / 100;
+	        			    }
+	        			    double diff = matrix-discPrice;
+
+	        			    price = discPrice;
+	        			    if(line.getDiscount() ==  100) {
+	        			    	price = 0;
+	        			    	diff = matrix;
+	        			    }
+	        			    	double compsum = diff * kogus  ;
 		        		         jsonline.put("CompensationSum", this.nf.format(compsum));
 		        		         
 		        		    } else if(tagastus){

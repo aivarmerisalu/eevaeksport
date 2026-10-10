@@ -2233,12 +2233,14 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 				File ffc = new File(pictssou + "00"+ photoname);
 				if(ff.exists()) {
 					// teeme faili väiksemaks
+					try {
 					Converter.shrinkAndCopyFile(ff.getAbsolutePath(), ffc.getAbsolutePath(),1000);
 					
 				   if( serv.uploadFile("https://api.mobitrek.eu/rest/task/" + done + "/uploadFile/" , ffc.getAbsolutePath(), null, "tasks") ){
      	       	      System.out.println("Uploaded " + ff.getName() + " " + ff.getAbsolutePath());
      	           }
-				  // System.exit(0);
+					}catch(Exception r) {}
+				 
 				} 
 				
 				
@@ -2442,70 +2444,7 @@ String cmd =   " select toode, saaja,  kogus,  kuup from cesu.mjprodorderhist ";
 
   Hashtable prodean = new Hashtable(); 
 
-	
-  private void makePictureCatuus(){
-  	    
-    	
-    	String pictssou = parent.getProps().getProperty("pict.dir");
-  	    String pictspda = parent.getProps().getProperty("pictpda.dir");
-       
-  	 try {
-     	  
-          File f = new File(pictspda +"list.txt");
-          if (f.exists())f.delete();
-          //Kataloogi sisude kustutamine
-      	 	 File res2 = new File (pictspda);
-             String[] ff2 = res2.list();
-         	 for(int i = 0;ff2.length>i;i++){
-             	(new File ( pictspda + ff2[i])).delete(); 
-             }
-//         	 L�ppes kustutamine 
-  		 
-  		 TreeMap prods = this.getProducts(null);
 
-         StringBuffer buf = new StringBuffer();
-         Iterator enume = prods.keySet().iterator();
-    
-         while (enume.hasNext()) {
-    	    	String asi = (String)enume.next();
-    	    	Product prod = (Product)prods.get(asi);
-    	    	String toode = prod.getEAN().trim();  
-               if(toode.length() > 0){
-                	
-    	   	  res2 = new File (pictssou);
-              ff2 = res2.list();
-             
-         	 for(int i = 0;ff2.length>i;i++){
-             	if( ff2[i].startsWith(toode)){
-               // System.out.println("pilt olemas " + ff2[i]);
-            	File in = new File ( pictssou + ff2[i]); 
-              	if(in.isFile()){
-              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
-                  	Converter.shrinkAndCopyFile(in,inpda,400);
-            	    if(buf.toString().indexOf(prod.getID()+".jpg;"  + inpda.length()) == -1){
-                    		buf.append(prod.getID()+".jpg;"  + inpda.length() + "\n");
-                    	}
-                   }
-                 }
-               }
-             }
-    	 }
-         try {
-     		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
-     		os.write(buf.toString());
-     		os.close();
-     	  }catch (Exception ex) {
-     		ex.printStackTrace();
-     	  }
-  	 
-  	 } catch (Exception e) {
-    	    getParent().showError(e);
-    	}
-    
-  	 
-  	 
-  }
-    
 
   
   
@@ -3420,6 +3359,7 @@ private void addToDayReportDB(String agent, String cucode, String filename, long
 	 		" VALUES ( '" + cucode +"',?, ? , sysdate ,'" + agent + "')"  ;
      try {
     	Connection con = getNewConnection();
+    	   con.setAutoCommit(false);
         PreparedStatement ps = con.prepareStatement(sql);
           Timestamp ss = new Timestamp(comlpTime);
             ps.setTimestamp(1, ss);
@@ -3449,6 +3389,7 @@ private void addToTaskDB(Long taskid,String agent, String cucode,String filename
      try {
     	// System.out.println(sql);
        Connection con = getNewConnection();
+       con.setAutoCommit(false);
          PreparedStatement ps = con.prepareStatement(sql);
          Timestamp ss = new Timestamp(comlpTime);
          

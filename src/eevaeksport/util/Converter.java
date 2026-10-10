@@ -5627,11 +5627,9 @@ public class Converter {
 			                                  try (FileOutputStream fos = new FileOutputStream(tempFile.toFile())) {
 			                                      workbook.write(fos);
 			                                      fos.flush();
-
-			                                      // Make sure Java/OS has pushed the data to the file.
-			                                      fos.getFD().sync();
 			                                  }
 
+			                                  
 			                                  System.out.println("Temporary Excel file written: "
 			                                          + tempFile.toAbsolutePath());
 
@@ -11916,6 +11914,27 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 			    	e.printStackTrace();
 			    }
 		}
+	
+	
+	public static void addtoFileInUTF8(String filename, String sb) {
+	    try {
+	        Writer out = new BufferedWriter(
+	            new OutputStreamWriter(
+	                new FileOutputStream(filename, true), 
+	                "UTF-8"
+	            )
+	        );
+
+	        try {
+	            out.write(sb);
+	        } finally {
+	            out.close();
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
 	
 	public static void saveFileInANSI2(String filename, String sb ){
 	      try{

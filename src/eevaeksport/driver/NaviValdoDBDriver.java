@@ -1782,7 +1782,9 @@ private void makePictureCat(){
             	if(in.isFile()){
             	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
             	if(!inpda.exists()) {
+            		try {
             		Converter.shrinkAndCopyFile(in,inpda,250);
+            		}catch(Exception e) {System.out.println("kehv pilt " + prod.getID());}
             	}
                 	
                 	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 

@@ -2171,9 +2171,9 @@ System.out.println("fixed size " + result.size());
     //  Siin Paneme sortimendid Sisse 
             
           String sql2 = "SELECT  SL01001 AS klient ,ST03017 AS toode ,sum(case when ST03015 >= getdate()-30 " +
-        "  		 then ST03020 else 0 end ) as pluss,max(ST03020) AS Kogus,ST03015  as lastdate ,max(ST03014) as arvenr " +
+        "  		 then ST03020 else 0 end ) as pluss,max(ST03020) AS Kogus,(ST03021 *((100-ST03022)/100)) as hind ,ST03015  as lastdate ,max(ST03014) as arvenr " +
          "   FROM ST030100  WITH(NOLOCK) INNER JOIN SL010100 WITH(NOLOCK) ON ST03001 = SL01001 WHERE ST03015> ? AND ST03016>0 AND ST03020>0 and left(SL01001,2) !='M3' " +
-         "  GROUP BY SL01001,ST03017, ST03015 ORDER BY SL01001,ST03017 ,ST03015 ASC";
+         "  GROUP BY SL01001,ST03017, ST03015 ,ST03021 ,ST03022  ORDER BY SL01001,ST03017 ,ST03015 ASC";
 
 					if (isDebug()) {
 					System.out.println(sql2);
@@ -2191,7 +2191,8 @@ System.out.println("fixed size " + result.size());
               String tootekood = rs.getString("toode").trim();
               double pluss = rs.getDouble("pluss");
               double kogus = Double.parseDouble(rs.getString("kogus").trim());
-           
+              double hind = Double.parseDouble(rs.getString("hind").trim());
+              
               Date date = rs.getDate("lastdate");
               String arvenr = rs.getString("arvenr");
               boolean ok = true;
@@ -2206,8 +2207,8 @@ System.out.println("fixed size " + result.size());
               if(ok){
 
                   CustProd cp = new CustProd(kliendikood, tootekood, kogus,pluss ,0,
-                  		date.toString().substring(5,10),0,0,0," ");
-                  cp.setAbiKood(arvenr);
+                  		date.toString().substring(5,10),hind,0,0," ");
+                    cp.setAbiKood(arvenr);
                     custProds.add(cp);  
                     Product prod = new Product(tootekood);
                     Customer cust = (Customer)kliendid.get(kliendikood);
@@ -2376,7 +2377,7 @@ con2.close();
           
           
         connectionDown();
-        System.out.println("CustProd lï¿½peb");
+        System.out.println("CustProd lõpeb");
 	return custProds;
     }
 
@@ -2384,7 +2385,7 @@ con2.close();
     public String getPilotDayData(Agent agent){
     	
     	
-        String sql = "  SELECT case when OR01001 = OR01072 then 0 else 1 end as abi , SL01002 AS nimi ,OR01015 AS kuup ,OR01001  AS number, OR01024*1.2 AS summa FROM  " + 
+        String sql = "  SELECT case when OR01001 = OR01072 then 0 else 1 end as abi , SL01002 AS nimi ,OR01015 AS kuup ,OR01001  AS number, OR01024*1.24 AS summa FROM  " + 
                  "  OR010100 INNER JOIN SL010100 ON OR01004 = SL01001 WHERE OR01015 > getdate()-1 and OR01019=?  "
                  + " ORDER BY case when OR01001 = OR01072 then 0 else 1 end ";
 

@@ -1,10 +1,8 @@
 package eevaeksport.driver;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -18,6 +16,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +30,9 @@ import java.util.Vector;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import ee.mobilejava.wrapper.SupervisorInfoWrapper;
 import eevaeksport.Agent;
@@ -54,7 +56,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,PictureMaker {
+public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,Manager,PictureMaker,FixLoader {
 
   public NaviLivikoLATDBDriver(EksportPanel parent) {
     super(parent);
@@ -67,9 +69,7 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 	    parent.showError(e);
 	}
 	
-	    user =  getParent().getProps().getProperty("rest.user");
-	    pass = getParent().getProps().getProperty("rest.pass");
-	    rcompanyx = getParent().getProps().getProperty("rest.companyx");
+	
 	    nodebt.add("S6807"); // maxima
 	    nodebt.add("S7189"); // rkiosk
 	    nodebt.add("S6021"); // Rimi
@@ -78,14 +78,14 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 	    nodebt.add("S6029"); // harju ty
 	    nodebt.add("S6641"); // prisma
 	    nodebt.add("S6891"); // Comarket
-	  
-  }
-
-  Vector nodebt = new Vector();
-
-  String user =  null;
-  String pass = null;
-  String rcompanyx = null;
+	    user =  getParent().getProps().getProperty("rest.user");
+	    pass = getParent().getProps().getProperty("rest.pass");
+	    rcompany = getParent().getProps().getProperty("rest.companyx");
+	     }
+  
+	  String user =  null;
+	  String pass = null;
+	  String rcompany = null;
   
   
    public String getPilotDayData(Agent agent){
@@ -95,12 +95,82 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
    	return null;
    }
 
+   
+   
+   @Override
+  	public void FixLoader() {
+  		this.getProducts(null);
+  		TreeMap contracts = Converter.loadFixFromExcels("excelsort",eanprods,parent);
+  		System.out.println("Contracts " + contracts.keySet().size() + " " + contracts.keySet().toString());
+  		if(contracts.size() > 0) {
+  			Converter.sendContractJson(contracts ,  rcompany,  user ,  pass);
+  		}
+  		
+  		System.exit(0);
+  	}
 
    public Vector getPriceMatrixData(){
 
-	
+	TreeMap actions = new TreeMap();
+	TreeMap<String,Boolean> dates = new TreeMap<String,Boolean> ();
+	TreeMap<String,Boolean> datesgreen = new TreeMap<String,Boolean> ();
+	   Calendar now = Calendar.getInstance();
+	   now.add(Calendar.DATE, -1);
+	   
+	   try {
 
-	  	 String  sql = " select * from PriceMatrixData where [minamount] = 0 " ; 
+		      String cmd = " select Campaign, name ,sellingstartday as ddd , sellingendday as ggg from CustomerCampaign" + 
+		      		"  group by Campaign, name, sellingstartday, sellingendday " ;
+										
+	  	  System.out.println(cmd);
+	  	     
+	  	      Connection conv = getNewConnection2();
+	  	       Statement stmt1 = conv.createStatement();
+	  	       ResultSet rs1 = stmt1.executeQuery(cmd);
+	  	       while(rs1.next()){
+	  	          
+	  	    	
+	  	    	String camp = rs1.getString("Campaign");
+	  	    	 String name = rs1.getString("name");
+	  	    	 java.sql.Date dd = rs1.getDate("ddd");
+	  	    	 java.sql.Date gg = rs1.getDate("ggg");
+	  	    	 Calendar cc = Calendar.getInstance();
+	  	    	 cc.setTime(gg);
+	  	    	 cc.add(Calendar.DAY_OF_YEAR, -1);
+	  	    	Calendar bb = Calendar.getInstance();
+	  	    	 bb.setTime(dd);
+	  	    	 bb.add(Calendar.DAY_OF_YEAR, -1);
+	  	    	Date ggu = cc.getTime();
+	  	    	Date ddu = bb.getTime();
+	  	         boolean valid = false;
+	  	       boolean green = false;
+	  	         if(ddu.getTime() < now.getTimeInMillis() ) {
+	  	        	 valid = true;
+	  	         }
+	  	         if( ggu.getTime() > now.getTimeInMillis() ) {
+	  	        	 green = true;
+	  	         }
+	  	    	 
+	  	          if(name != null && name.trim().length() > 0 && camp != null && camp.trim().length() > 0  ) {
+	  	        	   actions.put(Converter.cleanLitLatEst(camp.trim()), name.trim());
+	  	        	 dates.put(Converter.cleanLitLatEst(camp.trim()), valid);
+	  	        	 datesgreen.put(Converter.cleanLitLatEst(camp.trim()), green);
+	  	          }
+	  	        
+	  	         }
+
+	  	       rs1.close();
+	  	       stmt1.close();
+	  	       conv.close();
+	  	      } catch (Exception e){
+	  	        e.printStackTrace();
+	  	      }
+	        
+	   
+	   
+
+	  	 String  sql = " select * from PriceMatrixData  order by salestype desc, clgroup desc " ; 
+	  	 // lisasin clgr et saaks odavviinadele õige hinna ette
 	
   	 
 	  	System.out.println("matrix  " + sql);
@@ -119,10 +189,12 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
             
              double price = rs.getDouble("price");
              double disc = rs.getDouble("disc");
-             String date = rs.getString("endday");
-             String sdate = rs.getString("startday");
+             Date date = rs.getDate("endday");
+             Date sdate = rs.getDate("startday");
              int type = rs.getInt("salestype");
-          
+
+             String lineinfo = Converter.cleanLitLatEst(rs.getString("notes")).replaceAll(";", ",");
+          boolean goes = true;
            //  int paevi = rs.getInt("paevi");
              
              MatrixLine mline = new MatrixLine();
@@ -134,23 +206,53 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
              
              if (mline.getCustID() == null && clGroup !=null && clGroup.trim().length() > 0) {
                mline.setCliGroup(Converter.cleanLitLatEst(clGroup.trim()));
+               if(dates.get(clGroup.trim()) != null ) {
+            	   goes = dates.get(clGroup.trim());
+            	   }
              }
 
-             if( type == 3){ // on kampaania
-            	 if(sdate != null  && !sdate.startsWith("1753")){
-                	 mline.setStartDate(turn(sdate.substring(0,10)));
+             boolean green = false;
+             if(datesgreen.get(Converter.cleanLitLatEst(clGroup.trim())) != null ) {
+            	 green = datesgreen.get(Converter.cleanLitLatEst(clGroup.trim()));
+          	   }
+             
+             if( type == 3 ){ // on kampaania
+            	
+            	 
+            	// if(green) {
+            		 
+            	 if(sdate != null  && !sdate.toLocaleString().startsWith("1753")){
+                	 mline.setStartDate(Converter.getDDsMMMsYYYYString(sdate));
                  }
-                 if(date != null && !date.startsWith("1753")){
-                	 mline.setEndDate(turn(date.substring(0,10)));
+            	 
+            	
+            		 if(date != null && !date.toLocaleString().startsWith("1753")){
+                    	 mline.setEndDate(Converter.getDDsMMMsYYYYString(date));
+                     }	 
+            	 //}else {
+            		// mline.setProdLevel("pr");
+            	 //}
+                 
+                 
+                 if(actions.get(Converter.cleanLitLatEst(clGroup.trim())) != null) {
+                	 mline.setLineinfo(actions.get(Converter.cleanLitLatEst(clGroup.trim()))+"");
                  }
              }
              
              if( type == 1 && price  > 0) {
-            	 if(date != null && !date.startsWith("1753")){
-                	 mline.setLineinfo(turn(date.substring(0,10)));
+            	 if(date != null && !date.toLocaleString().startsWith("1753")){
+                	 mline.setLineinfo(Converter.getDDsMMMsYYYYString(date));
+                	// mline.setProdLevel("pr");
                  }
              }
-             
+              if(lineinfo != null && lineinfo.trim().length() > 0) {
+            	  String ex = mline.getLineinfo();
+            	  if(ex == null) {
+            		  mline.setLineinfo(lineinfo.trim());
+            	     } else {
+            		  mline.setLineinfo(ex + "|" + lineinfo);  
+            	  }
+              }
             
              //pika hinna määramine
              
@@ -164,24 +266,26 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 
              if (price != 0) {
                mline.setPrice(price);
-
              }
+
              if (disc != 0) {
                  mline.setDiscount(disc);
-
                }
+
              if(mline.getPrice() > 0 || mline.getDiscount() > 0){
-                 result.add(mline);    
-           // System.out.println("lisan rida");
+            	if(goes) {
+            		  result.add(mline);    
+            	   }
+            	}
              }
-             
-           }
+           
            rs.close();
            stmt.close();
            con.close();
          }catch(Exception e){
         	 e.printStackTrace();
          } 
+         
 	System.out.println("matrix result " + result.size());
     return result;
       }
@@ -199,9 +303,42 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
    public Vector getLastThreeData() {
 
 		Vector result = new Vector();
-	
+		try {
+		
+
+					String sq3 = "SELECT * FROM InvoiceLastFive order by kuupaev desc,arvenr ";
+					
+					Connection con3 = getNewConnection2();
+					Statement st3 = con3.createStatement();
+					ResultSet rs3 = st3.executeQuery(sq3);
+					while (rs3.next()) {
+						MatrixLine ml = new MatrixLine();
+						ml.setCustID(rs3.getString("klkood").trim());
+						ml.setStartDate(rs3.getString("kuupaev").substring(5,10));
+						ml.setLineinfo(rs3.getString("arvenr").trim());
+						double kordaja = 1;
+						String liik  = rs3.getString("liik").trim();
+						if(liik != null & liik.equals("kreedit")) {
+							kordaja = -1;
+						}
+					 	ml.setProdID(rs3.getString("toode").trim());
+						ml.setPrice(rs3.getDouble("kogus")* kordaja);
+						ml.setDiscount(rs3.getDouble("price"));
+						
+						result.add(ml);
+					}
+					rs3.close();
+					st3.close();
+					con3.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return result;
 	}
+
+
 
 
 
@@ -237,21 +374,26 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 
   		           while (rs.next()) {
 
-  		             String sortid = rs.getString("sortid").trim();
+  		             String sortid = rs.getString("sortid").trim()+"x";
   		             String prodID = rs.getString("prodid").trim();
+  		             int optio = rs.getInt("optionalitem");
   		             
   		   
 						MatrixLine mline = new MatrixLine();
 						
 
 								if (sortid != null
-										&& sortid.trim().length() > 0) {
-									mline.setCliGroup(sortid.trim());
+										&& sortid.trim().length() > 1) {
+									mline.setCliGroup(Converter.cleanLitLatEst(sortid.trim()).replaceAll(";", ":"));
 								}
 
 								if (prodID != null
 										&& prodID.trim().length() > 0) {
 									mline.setProdID(prodID.trim());
+								}
+								
+								if(optio == 1) {
+									mline.setLineinfo("CENTRAL"); // valikuline optional item
 								}
 								
 								
@@ -281,7 +423,7 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
        public String getSaveStockInfo(){
 
  	  	  
-    		  String  cmd = " select * from stock ";
+    		  String  cmd = " select * from stock where kogus != 0 ";
     		  if(usedProds == null){
     			  this.getProducts(null);
     		  }
@@ -347,23 +489,19 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
            public TreeMap getProdGroups() throws SQLException {
         	     TreeMap   tm = new TreeMap();
         	   //  setTreeGroup(true);
-        	     String cmd = " select left(kood,3) as kood  ,max(nimi)as nimi from prodgroups group by left(kood,3)";
+        	     String cmd = " select kood as kood  , max(nimi)as nimi from prodgroups group by kood";
+        	     cmd = "select grupp from products group by grupp";
         	     	  try {
         	       	 Connection con = getNewConnection2();
         	       	System.out.println(cmd);
         	   	        Statement stmt = con.createStatement();
         	   	        ResultSet rs = stmt.executeQuery(cmd);
         	   	        while(rs.next()){
-        	   	            String id = Converter.cleanLitLatEst(rs.getString("kood").trim());     
-        	                String name = rs.getString("nimi").trim() ;
-        	                
-        	                if(name.indexOf(" ") != -1) {
-        	                	name = name.substring(0,name.indexOf(" "));
-        	                }
-        	            
-        	                tm.put(id, name.trim());  	             
-        	   	        
-        	   	     }
+        	   	            String id = Converter.cleanLitLatEst(rs.getString("grupp").trim());     
+        	               if(id.length() > 0) {
+        	                  tm.put(id, id);  	
+        	               }
+        	   	       }
         	   	      rs.close();
         	   	      con.close();
 
@@ -377,34 +515,33 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
            
            
 
-         
+           
            public TreeMap getProdGroupsSecond() throws SQLException {
         	     TreeMap   tm = new TreeMap();
-          	   //  setTreeGroup(true);
-          	     String cmd = " select * from countries ";
-          	     	  try {
-          	       	 Connection con = getNewConnection2();
-          	       	System.out.println(cmd);
-          	   	        Statement stmt = con.createStatement();
-          	   	        ResultSet rs = stmt.executeQuery(cmd);
-          	   	        while(rs.next()){
-          	   	            String id = Converter.cleanLitLatEst(rs.getString("code").trim());     
-          	                String name = rs.getString("name") ;
-          	                 tm.put(id, name.trim());  	             
-          	   	        }
-          	   	      rs.close();
-          	   	      con.close();
+        	   //  setTreeGroup(true);
+        	     String cmd = " select kood as kood  , max(nimi)as nimi from prodgroups group by kood";
+        	     cmd = "select grupp2 from products group by grupp2 ";
+        	     	  try {
+        	       	 Connection con = getNewConnection2();
+        	       	System.out.println(cmd);
+        	   	        Statement stmt = con.createStatement();
+        	   	        ResultSet rs = stmt.executeQuery(cmd);
+        	   	        while(rs.next()){
+        	   	            String id = Converter.cleanLitLatEst(rs.getString("grupp2").trim());     
+        	               if(id.length() > 0) {
+        	                  tm.put(id, id);  	
+        	               }
+        	   	       }
+        	   	      rs.close();
+        	   	      con.close();
 
-          	        } catch (Exception e){
-          	          e.printStackTrace();
-          	        }
-          	    
-          	         return tm;
-             }
-
+        	        } catch (Exception e){
+        	          e.printStackTrace();
+        	        }
+        	         return tm;
+        	   }
 
            
-   private TreeMap teised = new TreeMap();
    
    public TreeMap getAgents(){
 	   StringBuffer sb2 = new StringBuffer();
@@ -427,8 +564,8 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 	          agent.setObject(rs.getString("objekt"));
 	          agent.setName(name);
 
-	          agent.setLanguage("LAT");
-	          agent.setCountry("lv");
+	          agent.setLanguage("EST");
+	          agent.setCountry("ee");
 	          agent.setPassWord("0000");
 	          String email = parent.parseFirstEmail(parent.getEmail(agent.getID()));
 	          if(email.length() > 1){
@@ -453,6 +590,7 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 	       
 	    } catch (Exception e){
 	        getParent().showError(e);
+	       
 	      }
 	    
 	    if(sb2.length() > 2){
@@ -462,7 +600,30 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 	    	}
 	      }
 
-	   
+	    Agent aa = new Agent("MERC1");
+        aa.setName("MERC1");
+        agents.put("MERC1", aa);
+        agents1.put(aa.getID(), aa);
+        
+        Agent aa2 = new Agent("MERC2");
+        aa2.setName("MERC2");
+        agents.put("MERC2", aa2);
+        agents1.put(aa2.getID(), aa2);
+        
+        Agent aa3 = new Agent("MERC3");
+        aa3.setName("MERC3");
+        agents.put("MERC3", aa3);
+        agents1.put(aa3.getID(), aa3);
+        
+        Agent aa4 = new Agent("MERC4");
+        aa4.setName("MERC4");
+        agents.put("MERC4", aa4);
+        agents1.put(aa4.getID(), aa4);
+	 
+        Agent aa5 = new Agent("MERC5");
+        aa5.setName("MERC5");
+        agents.put("MERC5", aa5);
+        agents1.put(aa5.getID(), aa5);
 	  // this.setBulkSales(agents);
      return agents;
    }
@@ -511,7 +672,7 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 		
 	  
 	    String sql3 = "select kogus as amount,  'pdl' as unit  , t.nimi as name from  " +
-				   " OpenOrders rid  inner join  products t on t.toode = rid.toode where   tellimusenr =  '" + id + "'";
+				   " OpenOrders rid  inner join  products t on t.toode = rid.toode where   tellimusenr =  '" + id + "' and t.nimi != ''";
 	 //   System.out.println("sql 3 " + sql3 );
 	    Connection cc = this.getNewConnection2();
 	    PreparedStatement stmt3 = cc.prepareStatement(sql3);
@@ -526,11 +687,15 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 */
 
 	       ResultSet  rs2 = stmt3.executeQuery();
-	   
+	   try {
 		    while(rs2.next()){
 		    	sb.append("[" +nf.format(rs2.getDouble("amount"))+"] " 
 		       + rs2.getString("unit").replaceAll("\\r\\n|\\r|\\n", " ").trim()+ " " + rs2.getString("name").toLowerCase().replaceAll("\\r\\n|\\r|\\n", " ").trim() + "|");
 		    }
+	   } catch(Exception e) {
+		   e.printStackTrace();
+		   System.out.println("sql3 " + sql3);
+	   }
 	   
 		    rs2.close();
 	        stmt3.close();
@@ -589,8 +754,87 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
   }
   
   
+  Vector nodebt = new Vector();
   
        public TreeMap getCustomers(Agent agent){
+    	   
+    	   
+    	   try {
+    		   
+        	   
+        	   
+    		   Connection conv = getNewConnection2();
+     	       Statement stmt1 = conv.createStatement();
+     	     
+    	 	StringBuffer sb = new StringBuffer();
+    	   ResultSet  rs1 = stmt1.executeQuery("select Code as id, description as nimi from ReturnReason");
+    	    while(rs1.next()){
+    	    	String id = rs1.getString("id");
+    	    	String name = rs1.getString("nimi");
+    	    	if(name != null && name.trim().length() > 0){
+    	    	      sb.append( id+ ";" +Converter.enCodeEst(name.trim()) + "\n");	
+    	    	}
+    	    }
+    	   rs1.close();
+    	   stmt1.close();
+    	   conv.close();
+    	  // System.out.println("REASON " + sb.toString());
+    	   if(sb.length() > 0){
+    		   Converter.saveFile("returnreason.txt", sb.toString());
+    	   }
+    	       
+    	   
+           }catch(Exception r) {
+    		  r.printStackTrace(); 
+    	   }
+    	   
+
+    	   
+    	   
+    	 TreeMap webmerc1 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC1");
+    	 TreeMap webmerc2 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC2");
+    	 TreeMap webmerc3 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC3");
+    	 TreeMap webmerc4 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC4");
+    	 TreeMap webmerc5 =  Converter.getWebMercagents(rcompany, user, pass,false,"MERC5");
+    	 Calendar now = Calendar.getInstance();
+    	 long en = now.getTimeInMillis();
+    	 now.add(Calendar.DAY_OF_MONTH, -32);
+    	 long st = now.getTimeInMillis();
+    	 HashSet contacted = new HashSet();
+    	 JSONArray dayr =  Converter.getWebDayReport(st, en, rcompany, user, pass);
+    	 
+    	// System.out.println("dayr " + dayr);
+    	 int lennx = dayr.length();
+			for (int u = 0; u < lennx; u++) {
+         	JSONObject gr = null;
+			try {
+				gr = dayr.getJSONObject(u);
+				 String key = (String)gr.get("custid");
+				
+	           String agentname = null;
+			    try {
+				  agentname = (String)gr.get("agent");
+				  agentname = agentname.replaceAll("\t", ",");
+			     }catch (Exception e){
+			     }
+			    if(agentname != null && !agentname.contains("MERC")) {
+			    	 contacted.add(key);
+			    }
+			   
+		
+	         	
+			} catch (JSONException e) {
+			  e.printStackTrace();
+			}
+         
+			}
+    System.out.println("contacted "+ contacted.size()); 
+      try{
+       	   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
+       		
+       }catch(Exception e){
+       	e.printStackTrace();
+       }
     	   
     	   TreeMap openOrders = this.getOpenOrders();
 
@@ -616,7 +860,7 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
      	        debt.setDuedate(rs1.getDate("duedate"));
        	        
      	        
-     	        if(addDebt(debt.getPayerID()) && !nodebt.contains(debt.getPayerID()) ) {
+     	        if(addDebt(debt.getPayerID()) && !nodebt.contains(debt.getPayerID())) {
      	        	  this.debtList.add(debt);
      	        }
      	      
@@ -638,7 +882,7 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
         
         try {
 
-	      String cmd = "  select * from CustomerCampaign " ;
+	      String cmd = "  select * from CustomerCampaign order by sellingendday desc" ;
 									
   	  System.out.println(cmd);
   	     
@@ -652,9 +896,9 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
   	          
   	          if(klkood != null && klkood.trim().length() > 0 && camp != null && camp.trim().length() > 0  ) {
   	        	  if(actions.get(klkood.trim()) != null) {
-  	        		  actions.put(klkood.trim(), actions.get(klkood.trim()) + "|" + camp);
+  	        		  actions.put(klkood.trim(), actions.get(klkood.trim()) + "|" + Converter.cleanLitLatEst(camp));
   	        	  }else {
-  	        		  actions.put(klkood.trim(), camp);
+  	        		  actions.put(klkood.trim(), Converter.cleanLitLatEst(camp));
   	        	  }
   	          }
   	        
@@ -685,6 +929,7 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
   	    	String fixx = rs1.getString("sortid");
   	          
   	          if(klkood != null && klkood.trim().length() > 0 && fixx != null && fixx.trim().length() > 0  ) {
+  	        	  fixx = Converter.cleanLitLatEst(fixx.trim().replaceAll(";", ":")+"x");
   	        	  if(fixsort.get(klkood.trim()) != null) {
   	        		fixsort.put(klkood.trim(), fixsort.get(klkood.trim()) + "|" + fixx);
   	        	  }else {
@@ -786,41 +1031,45 @@ con3.close();
     	        Statement stmt = con.createStatement();
     	        ResultSet rs = stmt.executeQuery(sql);
     	        while(rs.next()){
-    	        	 String name = rs.getString("nimi").trim();
-    	      	   
-        	         int namelen = name.length();
-        	         name = name.replaceAll("\"", " ");
-        	           String id = rs.getString("kood").trim();
-        	           name = name + " " + id;
-        	         
-        	           Customer customer = new Customer(id);
-        	           
-        	           String payer = null;
-        	           if (name.equals("")) name = "<" + id + ">";
-        	             customer.setName(Converter.enCodeEst(name));
-        	             
-        	             payer = rs.getString("payer");
-        	          if(payer != null && payer.trim().length()>0){
-        	           	 payer = payer.trim();
-        	             customer.setPayer(payer);
-        	            // customer.setRegnr(payer);
-        	             }
-                       
-        	          
-        	           	if(minordsum > 0){
-                    	   customer.setMinsum(minordsum);
-                       }
-        	           	
-                       
-        	             String aadress = rs.getString("aadress");
-        	           
-        	             if( aadress != null && aadress.trim().length()>0){
-        	               customer.setAddress(Converter.adressLink(Converter.enCodeEst(aadress.trim()),"Estonia"));
-        	               name = name + " " + Converter.enCodeEst(aadress.trim());
-        	              customer.setName(Converter.enCodeEst(name));
-        	             }
-        	   
-    	         	String ag = rs.getString("agent").trim();
+    	         String name = rs.getString("nimi").trim();
+    	   
+    	         int namelen = name.length();
+    	         name = name.replaceAll("\"", " ");
+    	           String id = rs.getString("kood").trim();
+    	           name = name + " " + id;
+    	         
+    	           Customer customer = new Customer(id);
+    	           
+    	           String payer = null;
+    	           if (name.equals("")) name = "<" + id + ">";
+    	             customer.setName(Converter.enCodeEst(name));
+    	             
+    	             payer = rs.getString("payer");
+    	          if(payer != null && payer.trim().length()>0){
+    	           	 payer = payer.trim();
+    	             customer.setPayer(payer);
+    	            // customer.setRegnr(payer);
+    	             }
+                   
+    	          
+    	           	if(minordsum > 0){
+                	   customer.setMinsum(minordsum);
+                   }
+    	           	
+                   
+    	             String aadress = rs.getString("aadress");
+    	           
+    	             if( aadress != null && aadress.trim().length()>0){
+    	               customer.setAddress(Converter.adressLink(Converter.enCodeEst(aadress.trim()),"Latvija"));
+    	               name = name + " " + Converter.enCodeEst(aadress.trim());
+    	              customer.setName(Converter.enCodeEst(name));
+    	             }
+    	             if(!contacted.contains(customer.getID())) {
+    	            	 customer.diffBack2 = true;
+    	            	 customer.needsToBeVisited = true;
+    	             }
+    	         
+    	         	String ag = rs.getString("agent");
     	             
     	             String sbb = rs.getString("blokk");
     	             if(sbb.equals("1")){
@@ -832,19 +1081,48 @@ con3.close();
     	             	 
     	             
     	         if(fixsort.get(customer.getID())!= null){
-    	        	StringTokenizer st = new StringTokenizer(fixsort.get(customer.getID())+"" ,"|"  ) ;
-    	        	while(st.hasMoreTokens()) {
-    	        		customer.addFixSortCode(st.nextToken());
+    	        	StringTokenizer st2 = new StringTokenizer(fixsort.get(customer.getID())+"" ,"|"  ) ;
+    	        	while(st2.hasMoreTokens()) {
+    	        		customer.addFixSortCode(st2.nextToken());
     	        	}
     	         }
     	      
     	         	
-        	             
-    	         	customer.addAgent(new Agent(ag));
+        	             if(ag != null) {
+    	         	customer.addAgent(new Agent(ag.trim()));
     	             customer.setMainAgent(ag.trim());
+    	             Agent aa1 = (Agent)agents1.get(ag.trim());
+    	           	if(aa1 != null) {
+    	           	
+    	       		Vector vec = aa1.getDubbler();
+    	       		if(vec!= null && vec.size() >0){
+    	       			Enumeration en2 = vec.elements();
+    	       			while(en2.hasMoreElements()){
+    	       				String age = (String) en2.nextElement();
+    	       				customer.addAgent(new Agent(age));
+    	       			}
+    	       		}
+    	           }
+        	             }
     	             
+    	             if(webmerc1.get(customer.getID()) != null) {
+    	            		 customer.addAgent(new Agent("MERC1")); 
+    	              }
+    	             if(webmerc2.get(customer.getID()) != null) {
+	            		 customer.addAgent(new Agent("MERC2")); 
+	                  }
+    	             if(webmerc3.get(customer.getID()) != null) {
+	            		 customer.addAgent(new Agent("MERC3")); 
+	                  }
+    	             if(webmerc4.get(customer.getID()) != null) {
+	            		 customer.addAgent(new Agent("MERC4")); 
+	                  }
+    	             
+    	             if(webmerc5.get(customer.getID()) != null) {
+	            		 customer.addAgent(new Agent("MERC5")); 
+	                  }
     	             if (ag != null ){
-	           				Agent agg = ((Agent)this.getAgents1().get(ag));
+	           				Agent agg = ((Agent)this.getAgents1().get(ag.trim()));
 	         				
 	           				if(agg != null && agg.getDubbler().size()>0){
 	           					//System.out.println("dubbing " + agg + "  " + agg.getDubbler().toString());
@@ -872,13 +1150,14 @@ con3.close();
     	           	if(num != null && num.trim().length()>0){
     	             customer.setDiscount(Double.parseDouble((num.trim())));
     	           	}
-    	            if(	!nodebt.contains(customer.getPayer())) {
-    	            	int kred = rs.getInt("krediit");
-        	           	if(kred>0){
-        	              customer.setCredit(kred + "");
-        	           	}
-        	           		
-    	            }
+    	           	
+    	           if(	!nodebt.contains(customer.getPayer())) {
+    	        	   int kred = rs.getInt("krediit");
+       	           	if(kred>0){
+       	              customer.setCredit(kred + "");
+       	           	}   
+    	           }
+    	           	
     	           	
     	
     	        	String visit = rs.getString("visit");
@@ -900,32 +1179,31 @@ con3.close();
     	        
     	             }
     	           if(	!nodebt.contains(customer.getPayer())) {
-        	        	 
-        	           if(debtsall.get(customer.getPayer()) != null){
-        	        	   customer.setUsedCredit(Double.parseDouble(debtsall.get(customer.getPayer())+""));
-        	           }
-        	           
-        	           if(debtsall.get(customer.getID()) != null){
-        	        	   customer.setUsedCredit(Double.parseDouble(debtsall.get(customer.getID())+""));
-        	           }
-        	           
-        	           if(debtsover.get(customer.getPayer()) != null){
-        	        	   customer.setDebt(Double.parseDouble(debtsover.get(customer.getPayer())+""));
-        	           }
-        	           
-        	           if(debtsover.get(customer.getID()) != null){
-        	        	   customer.setDebt(Double.parseDouble(debtsover.get(customer.getID())+""));
-        	           }
-        	           }
+      	        	 
+    	           if(debtsall.get(customer.getPayer()) != null){
+    	        	   customer.setUsedCredit(Double.parseDouble(debtsall.get(customer.getPayer())+""));
+    	           }
+    	           
+    	           if(debtsall.get(customer.getID()) != null){
+    	        	   customer.setUsedCredit(Double.parseDouble(debtsall.get(customer.getID())+""));
+    	           }
+    	           
+    	           if(debtsover.get(customer.getPayer()) != null){
+    	        	   customer.setDebt(Double.parseDouble(debtsover.get(customer.getPayer())+""));
+    	           }
+    	           
+    	           if(debtsover.get(customer.getID()) != null){
+    	        	   customer.setDebt(Double.parseDouble(debtsover.get(customer.getID())+""));
+    	           }
+    	           }
+    	           
     	           if(openOrders.get(customer.getID()) != null){
     	        	   customer.addToCustDataVec(customer.getID() + ";tarasaldo; ;Open Order |"   +  openOrders.get(customer.getID()));
     	           }
     	           
     	          //
     	           String cont = rs.getString("kontakt");
-    	           if(cont != null && cont.trim().length()>0){
-    	               customer.setPersonalData(cont.trim().trim().replaceAll(";", ":"));   
-    	           }
+    	           
     	           
     	           String all = rs.getString("sendall");
     	           if("1".equals(all)){
@@ -937,47 +1215,22 @@ con3.close();
     	               customer.setMainAgent(" ");
     	           }
 
-                 
-
-    	        
-    	       
-    	           /*	      
-    	           String delivery = rs.getString("delivery");
-    	           if(delivery != null && delivery.trim().length()>0){
-    	        	  delivery = delivery.replaceAll(";", ",").replaceAll("\\r\\n|\\r|\\n", " ").trim();
-    	        	     if(customer.getCity()!= null && customer.getCity().trim().length() > 0 ){
-        	        		   customer.setCity(customer.getCity() + "|DD:" + delivery); 
-        	       	             }else{
-        	        			   customer.setCity("DD:" + delivery );
-        	       	         }
-        	           }
-    	        	
-
-    	           String chain = rs.getString("chain");
-    	           if(chain != null && chain.trim().length()>0){
-    	           customer.setChain(chain.trim());   
-    	           }
     	           
-*/
-    	           
-    	           
-
     	           String alegr = rs.getString("alegr");
     	           if(alegr != null && alegr.trim().length()>0){
     	        	customer.setGroup(Converter.cleanLitLatEst(alegr.trim()));
     	        	customer.setCustType(Converter.cleanLitLatEst(alegr.trim()));
     	           }
     	           
+    	           
     	           String alegr2 = rs.getString("alegr2");
     	           if(alegr2 != null && alegr2.trim().length()>0){
-    	       
-    	        	if(customer.getGroup().trim().length() >0){
+    	             if(customer.getGroup().trim().length() >0){
     	        	 	customer.setGroup(customer.getGroup().trim() + "|" + Converter.cleanLitLatEst(alegr2.trim())); 	
-    	        	}else{
+    	        	  }else{
     	        	 	customer.setGroup(Converter.cleanLitLatEst(alegr2.trim())); 
+    	        	  }
     	        	}
-    	        	
-    	           }
     	           
     	           
     	           if(actions.get(customer.getID()) != null) {
@@ -991,23 +1244,35 @@ con3.close();
 
     	           String note = rs.getString("note");
     	           if(note != null && note.trim().length()>0){
-    	        	   
     	        	customer.setCity(Converter.deCode(note.trim().replaceAll(";", ":")));
-    	        
     	           }
     	           
-
+    	        
     	           String email  = rs.getString("email");
     	           if(email != null && email.trim().length()>0){
+    	        
+    	    	       customer.setPersonalData (Converter.deCode(email.trim().replaceAll(";", ":")));   
+    	        	  customer.setInfoEmail(email.trim().replaceAll(";", ",").replace('/',','));
+    	           }
+    	           
+    	           
+if(cont != null && cont.trim().length()>0){
+    	        	   
+    	        	   if(cont.contains(" 5")) {
+    	        		   int a = cont.indexOf(" 5");
+    	        		   cont = cont.substring(0,a) + "|Tel: " + cont.substring(a+2);
+    	        	   }
     	        	   
     	        	   if(customer.getPersonalData() != null) {
-
-    	    	        	customer.setPersonalData (customer.getPersonalData() + "|" +Converter.deCode(email.trim().replaceAll(";", ":")));
+    	        		   customer.setPersonalData(customer.getPersonalData() + "|" + cont.trim().replaceAll(";", ":"));   
     	        	   }else {
-
-    	    	        	customer.setPersonalData (Converter.deCode(email.trim().replaceAll(";", ":")));   
+    	        		   customer.setPersonalData(cont.trim().replaceAll(";", ":"));     
     	        	   }
+    	        	   
+    	            
     	           }
+    	           
+    	           
     	           
     	           String chain = rs.getString("chain");
     	           if(chain != null && chain.trim().length()>0){
@@ -1048,7 +1313,29 @@ con3.close();
     	     }
     	   
     	   
-    	  
+Customer c1 = new Customer("MUUKON");
+c1.setName("X-TEGEVUSED Kontor");
+c1.noOrder = true;
+
+Customer c2 = new Customer("MUULADU");
+c2.setName("X-TEGEVUSED Ladu");
+c2.noOrder = true;
+
+Enumeration enums = getParent().getAgentsHash().elements();
+while (enums.hasMoreElements()) {
+  Agent a = (Agent) enums.nextElement();
+  c1.addAgent(a);
+}
+
+ enums = getParent().getAgentsHash().elements();
+while (enums.hasMoreElements()) {
+  Agent a = (Agent) enums.nextElement();
+  c2.addAgent(a);
+}
+tm.put("X-TEGEVUSED Kontor", c1);
+   this.customers.add(c1.getID());
+   tm.put("X-TEGEVUSED Ladu", c2);
+   this.customers.add(c2.getID());
   		
     	   
     	     return tm;
@@ -1062,9 +1349,10 @@ con3.close();
 
    private TreeMap agents1 = new TreeMap();
    private HashSet usedProds = null;
-   
+   private TreeMap eanprods = null;
    
    public TreeMap getProducts(Agent agent){
+	  // eanprods =  Converter.loadMore();
      TreeMap tm = new TreeMap();
       TreeMap  ladutr = new TreeMap();
       TreeMap  ladumuu = new TreeMap();
@@ -1108,9 +1396,13 @@ con3.close();
        e.printStackTrace();
    }
  
-  
+     
+    
      try {
-     	String cmd = "select * from Products"; // and t.[Unit Price] > 0
+    	 TreeMap grs = getProdGroups();
+         TreeMap grs2 = getProdGroupsSecond();
+      
+     	String cmd = "select *  from Products where nimi !='' "; // and t.[Unit Price] > 0
      	
       System.out.println(cmd);
       
@@ -1122,7 +1414,6 @@ con3.close();
             String id = rs.getString("toode").trim();
             Product prod = new Product(id);
          	String name = rs.getString("nimi").trim();
-         	 name = name + " " + id ;
 //         	double netto = rs.getDouble("netto");
          	String namesort = name;
          	int namelen = name.length();
@@ -1154,16 +1445,22 @@ con3.close();
             	//  prod.setStock(new Double((String)ladutr.get(id)).doubleValue());
               }
               
-                String grupp = Converter.cleanLitLatEst(rs.getString("prodgroup"));
+                String grupp = Converter.cleanLitLatEst(rs.getString("grupp"));
                  
               if(grupp != null && grupp.trim().length()>0 ){
-                 prod.setGroup(grupp.trim().substring(0,3));  
+                 prod.setGroup(grupp.trim());  
               }
           
-              String country = Converter.cleanLitLatEst(rs.getString("country"));
+              String country = Converter.cleanLitLatEst(rs.getString("grupp2"));
               
               if(country != null && country.trim().length()>0 ){
-                 prod.setGroupSecond(country.trim());  
+                 prod.setGroupSecond(country.trim());
+              }
+           
+              country = Converter.cleanLitLatEst(rs.getString("country"));
+              
+              if(country != null && country.trim().length()>0 ){
+                 prod.setPartii("Country : " + country.trim());
               }
               
             
@@ -1172,16 +1469,10 @@ con3.close();
               String ean = (rs.getString("ean"));
                  if (ean != null &&ean.trim().length()>3){
                    prod.setEAN(ean.trim());
+                  // eanprods.put(ean.trim(), prod.getID());
                    name = name + " " + ean.substring(ean.length()-4) + " ";
                  }
         
-             //	if(maxdisc.get(prod.getID()) != null){
-                //prod.setMaxDiscount(Double.parseDouble(maxdisc.get(prod.getID())+""));
-               // }
-             
-                 
-               //  [status] [nvarchar](10) NULL, -- UUS VÄLI 'lõpumüük', 'uudistoode'
-               //  [statustop] [int] NULL, -- UUS VÄLI 0-tava, 1-top toode
 
                  String status = (rs.getString("status"));
                  if (status != null && status.trim().length()>0){
@@ -1198,16 +1489,14 @@ con3.close();
                  
                  
                  int top = rs.getInt("statustop");
-                 if(top == 1) {
-                	 prod.setStatusTop("1");
-                 }
+                
 
                 double	cases = rs.getDouble("kastis");
                 	if(cases > 0){
                       prod.setInCases(cases);
                     }
                 	
-                	prod.setVat("20");
+                	prod.setVat("21");
               
                    
 
@@ -1218,16 +1507,47 @@ con3.close();
 
                    String liik = (rs.getString("liik"));
                    if (liik != null && liik.trim().length()>0){
-                	   prod.setType(liik.trim());
+                	   if(liik.trim().equals("IMPORT") || liik.trim().equals("LIVIKO")) {
+                		   prod.setType("OMAD");
+                	   }else {
+                		   prod.setType("MUUD");
+                	   }
+                	  
+                	  
                    }
                           
-                       
-                
+                   
+                   int nautimus = rs.getInt("nautimus");
+                   int gbox = rs.getInt("giftbox");
+                   if(gbox == 1) {
+                	   prod.setStatusGiftPack("1");
+                   }
+                   if(nautimus > 0 && top == 1) {
+                	   prod.setStatusTop("12");
+                   }else if(top == 1) {
+                    	 prod.setStatusTop("1");
+                     }else if(nautimus > 0) {
+                    	 prod.setStatusTop("2");
+                	   
+                   }
+
+    int alusel = rs.getInt("alusel");
+    if(alusel > 0 ) {
+    	prod.setOnPallet(alusel);
+    }
+
+                   
+
+    String link  = rs.getString("weblink");
+     if(link != null && link.trim().length() > 4 ) {
+         prod.weblink = link;
+      }
+                   
                    boolean goes = true;
                   
                    if(goes){
                 	   usedProds.add(prod.getID());
-                	   name = name + "{" + namelen + "}";
+                	   name = name + " {" + namelen + "}";
                 	   prod.setName(Converter.enCodeEst(name));
                 	   prod.setNameSorting(namesort);
                        tm.put(name, prod); 
@@ -1352,9 +1672,12 @@ con3.close();
                  String prodID = rs.getString("toode").trim();;
 
                  double amount = 0;
-                 String lastdate = " ";
                  amount = rs.getDouble("kogus");
-                 lastdate = rs.getString("lastdate").trim().substring(5,10);
+
+                 String lastdate = rs.getString("lastdate").trim().substring(5,10);
+                
+               //  lastdate = rs.getString().trim().substring(5,10);
+                // lastdate = lastdate.substring(3,5)+ "-" + lastdate.substring(0,2);
                     Customer cust = (Customer)kliendid.get(custID);
                     if (cust == null){
                       cust = new Customer(custID);
@@ -1539,7 +1862,7 @@ private TreeMap makePlans(){
 	   }catch (Exception e){
 		   e.printStackTrace();
 	   }
-		System.out.println("jooksevplaan " + res.toString());
+		//System.out.println("jooksevplaan " + res.toString());
 		
 	   return res;
  }
@@ -1618,7 +1941,7 @@ public void setBulkSales(Map agents) {
  	          }
  	           asi = asi + "Sales plan: " + (int)psales + " €||";    
  	           agent.setStart( Converter.enCodeEst(asi ));
- 	           System.out.println(Converter.enCodeEst(agentID + "' " +asi  + " "  + plans.get(agent.getID())) );
+ 	         //  System.out.println(Converter.enCodeEst(agentID + "' " +asi  + " "  + plans.get(agent.getID())) );
  	           
  	                  
  	                

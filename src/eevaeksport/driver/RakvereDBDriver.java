@@ -70,8 +70,6 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
     public RakvereDBDriver(EksportPanel parent) {
         super(parent);
         this.subjectFilesTo = parent.getString("filemsg");
-        // String databaseDriverName = "com.hxtt.sql.dbf.DBFDriver";
-        //String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
         String databaseDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
         try {
             Class.forName(databaseDriverName).newInstance();
@@ -140,7 +138,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
 				
 				FileInputStream ff = new FileInputStream(f);
 				XSSFWorkbook workbook = new XSSFWorkbook((ff));
-				XSSFSheet sheet = workbook.getSheetAt(0);
+				XSSFSheet sheet = workbook.getSheet("Tooted");
 				XSSFRow row = null;
 	  	        DataFormatter formatter = new DataFormatter();
 
@@ -148,10 +146,10 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
 	  				row = sheet.getRow(a);
 					try {
 						
-						String grupp = formatter.formatCellValue(row.getCell((short) 6)).trim();
-						String gname = formatter.formatCellValue(row.getCell((short) 7)).trim();
+						String grupp = formatter.formatCellValue(row.getCell((short) 7)).trim();
+						String gname = formatter.formatCellValue(row.getCell((short) 8)).trim();
 						groups.put(grupp, Converter.enCodeEst(gname));
-						System.out.println("groups milk " + grupp + " " + gname);
+						//System.out.println("groups milk " + grupp + " " + gname);
 						
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -168,33 +166,40 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
  	   
  	   private   void getProductsMilk(TreeMap prods){
  	    	File f = new File(this.getExcelDir() + "TootedMilk.xlsx");
- 			
+			
  			try {
  				
  				FileInputStream ff = new FileInputStream(f);
  				XSSFWorkbook workbook = new XSSFWorkbook((ff));
- 				XSSFSheet sheet = workbook.getSheetAt(0);
+ 				XSSFSheet sheet = workbook.getSheet("Tooted");
+ 				
  				XSSFRow row = null;
  	  	        DataFormatter formatter = new DataFormatter();
 
- 	  			for (int a = 1; a <  sheet.getLastRowNum()+1; a++) {
+ 	  	 	   	
+ 	  			for (int a = 1; a <  sheet.getLastRowNum(); a++) {
  	  				row = sheet.getRow(a);
  					try {
- 						
  						String kood = formatter.formatCellValue(row.getCell((short) 0)).trim();
+
+ 						//System.out.println("piim " + kood);
+ 	 					
  						String nimi = formatter.formatCellValue(row.getCell((short) 2)).trim();
  						String ean = formatter.formatCellValue(row.getCell((short) 3));
  						String unit = "tk.";
  						Double kastis = 1.0 ;
  						try {
- 						kastis = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 5)).trim());
- 						}catch (Exception r) {
+ 						kastis = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 6)).trim());
+ 						}catch (Exception w) {
  							
  						}
- 						String grupp = formatter.formatCellValue(row.getCell((short) 6)).trim();
- 						String gname = formatter.formatCellValue(row.getCell((short) 7)).trim();
+ 						String grupp = formatter.formatCellValue(row.getCell((short) 7)).trim();
+ 						String gname = formatter.formatCellValue(row.getCell((short) 8)).trim();
  						
- 						Double kaal = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 8)).trim());
+ 						Double kaal = 0d;
+ 						try {
+ 						kaal = Double.parseDouble(formatter.formatCellValue(row.getCell((short) 9)).trim());
+ 						}catch(Exception e) {}
  						if(nimi.length() > 3) {
  						Product prod = new Product(kood);
  						prod.setUnit(unit);
@@ -211,6 +216,7 @@ public class RakvereDBDriver extends AbstractDBDriver implements Discounter, Man
  						prod.setVat("24");
  						prod.setType("PIIM");
  						prods.put(" NM " + nimi, prod);
+ 						//System.out.println("piim2 " + nimi);
  						}
  					} catch (Exception e) {
  						e.printStackTrace();

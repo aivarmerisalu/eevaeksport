@@ -869,8 +869,12 @@ private Product getProd(String toode){
  private void addInvoiceHeader(int salesid, Order order, boolean tagastus, boolean repr) throws SQLException{
 	      
 	      String ref = " ";
+	      String comm = "";
 	      if(order.getInfo() != null && order.getInfo().trim().length()>0 ){
 	      	ref = order.getInfo().trim();
+	      	 if(tagastus) {
+	      	   comm = " " + ref;
+	      	  }
 	      }
 
 	      if(order.getReference() != null && order.getReference().trim().length()>0 ){
@@ -946,7 +950,9 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  if(ref.length() > 299) {
 		  ref = ref.substring(0,299);
 	  }
-	  
+	  if(tagastus) {
+		  ref = "";
+	  }
 	  
 	  String sql = " INSERT INTO  ORDERS (  " +
 	                     " ID ,ORDERING_DATE ,CLIENT_ID ,DELIVERY_TYPE ," +
@@ -974,7 +980,7 @@ if (start != -1 && end != -1 && start < end - 1) {
 	              
 	              
 	             stmt2.setTimestamp(1, new java.sql.Timestamp(dat.getTime()));
-	             stmt2.setString(2, ref);
+	             stmt2.setString(2, (comm + " " +  ref).trim() );
 	             stmt2.setString(3, ref2);
 	             stmt2.executeUpdate();
 	             stmt2.close();

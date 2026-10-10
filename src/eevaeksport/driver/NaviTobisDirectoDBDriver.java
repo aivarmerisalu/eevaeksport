@@ -153,6 +153,7 @@ public class NaviTobisDirectoDBDriver extends AbstractDBDriver implements BulkUp
           httpsURL = logurl  + company + "/" + comphelp + "/xmlcore.asp"; //?get=1&what=stocklevel
           myurl = new URL(httpsURL);
           
+          
           byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
           int postDataLength = postData.length;
           con = (HttpsURLConnection)myurl.openConnection();
@@ -3360,7 +3361,8 @@ System.out.println(cmd);
                    try {
                 	   int status = rs.getInt("status3");
                        if(status > 0) {
-                    	   prod.setStatusSellout("1");
+                    	 //  prod.setStatusSellout("1");
+                    	   name = "#ISP " + name;
                        }   
                    }catch(Exception e) {
                 	   
@@ -4678,7 +4680,7 @@ HashMap prodHash = new HashMap();
    	      		 String package1 =  rida.getAttributes().getNamedItem("package1").getNodeValue(); 
    	      	 	      	    prod.setInCases(Double.parseDouble(package1)); 
    	 	    	 }catch (Exception e){
-   	 	           e.printStackTrace();
+   	 	          // e.printStackTrace();
    	 	    	 }
       	   	
    	    	 
@@ -4748,15 +4750,20 @@ HashMap prodHash = new HashMap();
                            }
     					}
 
+    					if("ILLIQID_LEVEL".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+    						String asi = nn2.getAttributes().getNamedItem("content").getNodeValue();
+    						if(asi.equals("1")) {
+    							prod.setStatusSellout("1");
+    						}
+    					}    					
     					
-if("SELL_IN_PACKAGES_ONLY".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+                       if("SELL_IN_PACKAGES_ONLY".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
     						String grupp3 = nn2.getAttributes().getNamedItem("content").getNodeValue();
                            if(grupp3.equals("TAIP")) {
                            	if(prod.getInCases() > 0 ){
                                   prod.setOptAmountInUnits(prod.getInCases());
                            	}                
-                       	
-                               }
+                       	  }
     					}
 
 

@@ -103,6 +103,7 @@ public class S1TabakDBDriver extends AbstractDBDriver implements BulkUpdater,Dis
 	  user =  getParent().getProps().getProperty("rest.user");
       pass = getParent().getProps().getProperty("rest.pass");
       companyx = getParent().getProps().getProperty("rest.companyx");
+      
    
        }
     
@@ -841,7 +842,8 @@ if(seis > 0) {
                      }
                      Agent agent = new Agent(id);
                      agent.setName(Converter.enCodeEst(name + " " + id));
-                     tm.put(agent.getName(), agent);	
+                     tm.put(agent.getName(), agent);
+                     agents1.put(id,agent);
                      
                  }
              } catch (Exception e) {
@@ -902,6 +904,14 @@ if(seis > 0) {
 
           Hashtable custAgents = readCustAgents();
           clGroups = new HashMap();
+          
+          
+          try{
+       	   Converter.getManagersReplacements(agents1, companyx, user , pass, false);
+       	        	
+       }catch(Exception e){
+       	e.printStackTrace();
+       }
        
 	    try {
 	        
@@ -1056,8 +1066,22 @@ if(seis > 0) {
             	 ArrayList<String> arr = (ArrayList)custAgents.get(cust.getID());
             	 for(String ag : arr) {
             		 cust.addAgent(new Agent(ag));
+
+                     Agent agg = ((Agent)agents1.get(ag));
+        				
+        				if(agg != null && agg.getDubbler().size()>0){
+        					//System.out.println("dubbing " + agg + "  " + agg.getDubbler().toString());
+        					for (int r = 0 ; r < agg.getDubbler().size() ; r++){
+        						Agent dub = new Agent((String)agg.getDubbler().elementAt(r));
+        						cust.addAgent(dub);
+        					}
+        				}
+            	 
             	 }
              }
+             
+             
+             
              if(overdebts.get(id) != null) {
             	 cust.setDebt(Double.parseDouble(overdebts.get(id)+""));
              }
@@ -1077,6 +1101,7 @@ if(seis > 0) {
 
 private Hashtable prodNames = null;
 
+private TreeMap agents1 = new TreeMap();
 private HashMap prodPrices = null;   
 
    public TreeMap getProducts(Agent agent){

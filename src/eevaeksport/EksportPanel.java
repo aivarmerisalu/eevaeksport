@@ -252,6 +252,10 @@ public class EksportPanel extends JPanel implements ActionListener,
             createWebreport2();	
            }
         
+
+        if(parent.isWebReporter3()) {
+            createWebreport3();	
+           }
         if (parent.isMakePicture2()){
         	makePictures2();
           }
@@ -415,7 +419,9 @@ public class EksportPanel extends JPanel implements ActionListener,
     private void createWebreport2(){
     	((WebReporter2)driver).WebReporter2();
     }
-    
+    private void createWebreport3(){
+    	((eevaeksport.driver.WebReporter3)driver).WebReporter3();
+    }
     private void makePictures2(){
     	((PictureMaker2)driver).PictureMaker2();
     }
@@ -936,6 +942,7 @@ public class EksportPanel extends JPanel implements ActionListener,
             		|| driver.getDriverVersion().equals("EevaArke")
             		|| driver.getDriverVersion().equals("HorizonKonig")
             		|| driver.getDriverVersion().equals("HorizonSmil")
+            		|| driver.getDriverVersion().equals("HorizonBidfood")
             		|| driver.getDriverVersion().equals("AxaJNGLAT")
             		|| driver.getDriverVersion().equals("SmartenR")
             		|| driver.getDriverVersion().equals("Kalev")
@@ -1167,7 +1174,8 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("NaviIceco")
 					    || driver.getDriverVersion().equals("DirectoLinpet")
 					    || driver.getDriverVersion().equals("DirectoAgapics")
-					    
+
+	            		|| driver.getDriverVersion().equals("HorizonBidfood")
 					    || driver.getDriverVersion().equals("HorizonSmil")
 					    || driver.getDriverVersion().equals("HorizonMuiz")
 					    || driver.getDriverVersion().equals("HorizonKonig")
@@ -1361,6 +1369,8 @@ public class EksportPanel extends JPanel implements ActionListener,
                 		  || driver.getDriverVersion().equals("EevaArke")
                 		  || driver.getDriverVersion().equals("HorizonKonig")
                 		  || driver.getDriverVersion().equals("HorizonSmil")
+
+                  		|| driver.getDriverVersion().equals("HorizonBidfood")
                 		  || driver.getDriverVersion().equals("AxaFazerLT")
                 		  || driver.getDriverVersion().equals("AxaJNGLAT")
                 		  || driver.getDriverVersion().equals("Kalev")

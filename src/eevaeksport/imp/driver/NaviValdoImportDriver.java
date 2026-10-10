@@ -672,24 +672,6 @@ String fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().t
 		    	diff = matrix;
 		    }
 
-
-		 //   System.out.println( "  dp "  + discPrice + " disc " + disc + " diff" + diff  + " pr");
-		    
-		    
-		    /*matrix  1.62 true SAUTETI KAPOSTI 700G LV
-  dp 1.6200000047683716 disc 100.0 diff1.62 pr
- SELECT [Search Description] AS nimi  FROM [VOLDEMĀRS SIA$Item]  where [No_] ='0
-201006'
-matrix  0.95 true PUPINAS BALTAS 'VALDO' FAS. 0,5 KG P/M
-  dp 0.949999988079071 disc 50.0 diff1.1920928910669204E-8 pr
- SELECT [Search Description] AS nimi  FROM [VOLDEMĀRS SIA$Item]  where [No_] ='0
-504358'
-matrix  0.58 true SINEPES STIPRAS VALDO 200G UA
-  dp 0.5799999833106995 disc 50.0 diff1.6689300497141346E-8 pr
- SELECT [Search Description] AS nimi  FROM [VOLDEMĀRS SIA$Item]  where [No_] ='0
-602074'*/
-		    
-		    
 		    	double compsum = diff * kogus  ;
 		        Text yhiku_hindVal = doc.createTextNode(this.nf.format(compsum));
 			     yhiku_hind.appendChild(yhiku_hindVal);

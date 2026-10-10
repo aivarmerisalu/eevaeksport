@@ -2,22 +2,17 @@ package eevaeksport.driver;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -35,35 +30,21 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.poi.common.usermodel.Hyperlink;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import eevaeksport.Agent;
 import eevaeksport.CustProd;
@@ -106,9 +87,6 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     pass = getParent().getProps().getProperty("rest.pass");
     rcompany = getParent().getProps().getProperty("rest.companyx");
     country = getParent().getProps().getProperty("country");
-    
-
-    
      }
   
   String user =  null;
@@ -116,9 +94,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
   String rcompany = null;
   String country = null;
   
-  
-
-  
+ 
   /**
    *
    */
@@ -277,7 +253,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
             	if(!inpda.exists()) {
             	try {
             		int size = 400;
-            		if(toode.startsWith("i") || toode.startsWith("u") || toode.startsWith("r") || toode.startsWith("t")) {
+            		if(toode.startsWith("i") || toode.startsWith("u") || toode.startsWith("r") || toode.startsWith("t") || toode.startsWith("F")) {
             			size = 1280;
             		}
                 	Converter.shrinkAndCopyFile(in,inpda,size);
@@ -779,19 +755,61 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		           Connection con = getNewConnection();
 		           Statement st = con.createStatement();
 		           ResultSet rs = st.executeQuery(cmd2);
-
+    HashSet local = new HashSet(); 
 		           String ags =   sortags.get("SUGGED");
+		           
 		           while (rs.next()) {
 
 			             String prodID = rs.getString("ItemID").trim();
 			             if(usedProds.contains(prodID)){
 								result.append( " ;" + Converter.cleanLitLatEst("SUGGED; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
+								local.add(prodID);
 			 				}
-						
+				   }
+		           rs.close();
+
+
+		           String sql2 = " 	select  productBackOfficeId as ItemID from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
+		           		"    inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
+		           		"    inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
+		           		"    where c.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
+		           		"    group by  productBackOfficeId ";
+		           		
+		           rs = st.executeQuery(sql2);
+		          
+		           while (rs.next()) {
+
+			             String prodID = rs.getString("ItemID").trim();
+			            if(!local.contains(prodID)){
+								result.append( " ;" + Converter.cleanLitLatEst("PROMOSTUFF; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
+								//System.out.println("Lisame ald SUGGED");
+			 				}
 		           }
 		           rs.close();
 
-				    rs = st.executeQuery(cmd);
+		            sql2 = " 	SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin, EG_ASSORTITEMSTATUS as status \r\n" + 
+		            		"						FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId \r\n" + 
+		            		"					 where s.EG_ASSORTITEMSTATUS in (0,1,2)\r\n" + 
+		            		"					 and assortimentBackOfficeId = 'REKLAMA' order by str(a.posWeight) + a.Name ";
+			           		
+			           rs = st.executeQuery(sql2);
+
+			          
+			           while (rs.next()) {
+
+				             String prodID = rs.getString("ItemID").trim();
+				            if(!local.contains(prodID)){
+									result.append( " ;" + Converter.cleanLitLatEst("SUGGED; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
+									//System.out.println("Lisame ald SUGGED");
+				 				}
+							
+			           }
+			           rs.close();
+			           
+
+		           
+		           
+				   rs = st.executeQuery(cmd);
 		           
 		           while (rs.next()) {
 
@@ -2340,14 +2358,14 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         String pricegroup = rs.getString("pricegroup");
         if(pricegroup != null && pricegroup.trim().length()>0){
         	
-       if(!pricegroup.trim().equals("BASE")) {
+      // if(!pricegroup.trim().equals("BASE")) {
     	   
          if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
         	 cust.setGroup(cust.getGroup() + "|" +pricegroup.trim());
          } else {
         	 cust.setGroup(pricegroup.trim());
          }
-       }
+       //}
          
         } 
         
@@ -2594,7 +2612,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         if(fixed != null && fixed.trim().length() > 0) {
         	String sugg = fixed.trim();
         	if(!cust.getID().startsWith("MRC")) {
-        		sugg = sugg + "|" + "SUGGED";
+        		sugg = sugg + "|SUGGED|PROMOSTUFF";
         	}
         	cust.suggAssortCode = sugg ;
           //  cust.addFixSortCode(Converter.cleanLitLatEst(fixed.trim())+"x");
@@ -2623,11 +2641,11 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
           }
           
 
-          if(agsS.length() > 0) {
+          if(agsS.trim().length() > 0) {
            sortags.put("SUGGED", agsS+",");
           }
           
-          if(ags.length() > 0) {
+          if(ags.trim().length() > 0) {
             sortags.put(fixed.trim(), ags+",");
            }
         

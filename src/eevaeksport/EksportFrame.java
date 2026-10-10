@@ -72,12 +72,16 @@ static Category log = Category.getRoot();
 
       if (args[i].trim().equalsIgnoreCase("/webreporter2")){
     	  setWebReporter2(true);
-          
         }
-
+      
+      if (args[i].trim().equalsIgnoreCase("/webreporter3")){
+    	  setWebReporter3(true);
+        }
+      
       if (args[i].trim().equalsIgnoreCase("/fixloader")){
           this.setFixLoader(true);
         }
+      
       if (args[i].trim().equalsIgnoreCase("/fixreporter")){
           this.setFixReporter(true);
         }
@@ -585,6 +589,7 @@ static Category log = Category.getRoot();
   private boolean fixReporter = false;
   private boolean webReporter = false;
   private boolean webReporter2 = false;
+  private boolean webReporter3 = false;
   private boolean saveStock = false;
   private boolean distRep = false;
   public boolean isDistRep() {
@@ -789,6 +794,14 @@ public void setWebReporter(boolean webReporter) {
 
 public void setWebReporter2(boolean webReporter2) {
 	this.webReporter2 = webReporter2;
+}
+
+public void setWebReporter3(boolean webReporter3) {
+	this.webReporter3 = webReporter3;
+}
+
+public boolean isWebReporter3() {
+	return webReporter3;
 }
 
 public boolean isDashboardCreator() {

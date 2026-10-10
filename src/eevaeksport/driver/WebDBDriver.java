@@ -1,64 +1,44 @@
 package eevaeksport.driver;
-import java.awt.Color;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import javax.swing.GroupLayout.Alignment;
 
 import org.apache.poi.common.usermodel.Hyperlink;
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFComment;
-import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
-import ee.merisoft.sm.Product;
+import eevaeksport.Product;
 import eevaeksport.Agent;
+import eevaeksport.Customer;
 import eevaeksport.DealerProduct;
 import eevaeksport.EksportPanel;
 import eevaeksport.Quest;
-import eevaeksport.QuestLine;
 import eevaeksport.util.Converter;
 
 /**
@@ -70,7 +50,7 @@ import eevaeksport.util.Converter;
  * @version 1.0
  */
 
-public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,FixLoader,FixReporter,WebReporter,WebReporter2 {
+public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,FixLoader,FixReporter,WebReporter,WebReporter2,WebReporter3{
 
   public WebDBDriver(EksportPanel parent) {
     super(parent);
@@ -200,6 +180,84 @@ public class WebDBDriver extends AbstractDBDriver implements BulkUpdater,Discoun
       return res;
    }
 
+
+   public HashMap<String, Customer> getCust(){
+	 HashMap<String, Customer> res = new HashMap<String, Customer>();
+	 
+	 Converter.loadCustDimensions("chain", companyx , user ,  pass);
+	  TreeMap chains =  Converter.getCustDimsLoading("chain");	
+	 JSONArray custs =  Converter.getWebCustomersAll( companyx , user ,  pass);
+	  for(int i = 0; i < custs.length(); i++) {
+		 try {
+			JSONObject cu = (JSONObject) custs.get(i);
+			String code = (String)cu.get("code");
+			String name = (String)cu.get("name");
+			String city = (String)cu.get("city"); 
+
+			ArrayList chain = (ArrayList)chains.get(code); 
+			
+			Customer cust = new Customer(code);
+			cust.setName(name);
+			if(city != null) {
+				cust.setCity(city);
+			}
+			if(chain != null && chain.size() > 0) {
+				for (int e = 0; e < chain.size(); e++) {
+				  cust.setChain((String)chain.get(e));
+				}
+			}
+			
+
+		//	System.out.println("cu " + chain +" "+ cu.toString() );
+			res.put(code, cust);
+			
+		} catch (JSONException e) {
+		}
+	 }
+	//  System.exit(0);
+      return res;
+   }
+   
+
+   public HashMap<String, Product> getProds(){
+	 HashMap<String, Product> res = new HashMap<String, Product>();
+	 JSONArray prods =  Converter.getWebProducts( companyx , user ,  pass);
+	  for(int i = 0; i < prods.length(); i++) {
+		 try {
+			JSONObject pr = (JSONObject) prods.get(i);
+			String code = (String)pr.get("code");
+			String ean = (String)pr.get("EAN");
+			String name = (String)pr.get("name");
+	       JSONArray gr1 = (JSONArray)pr.get("group");
+	       JSONArray gr2 = (JSONArray)pr.get("group2");
+			
+			if(ean != null && ean.length() > 0) {
+				Product prod = new Product(code);
+				prod.setName(name);
+				prod.setEAN(ean);
+				 if(gr1 != null && gr1.length() > 0){
+					for(int u = 0 ; u< gr1.length(); u++) {
+						JSONObject ob = (JSONObject)gr1.get(u);
+						prod.setGroup(ob.getString("code"));
+					}
+				 }
+				 if(gr2 != null && gr2.length() > 0){
+						for(int u = 0 ; u< gr2.length(); u++) {
+							JSONObject ob = (JSONObject)gr2.get(u);
+							prod.setGroupSecond(ob.getString("code"));
+						}
+					 }
+				 
+				res.put(ean, prod);
+			}
+			
+		} catch (JSONException e) {
+		}
+	 }
+	//  System.exit(0);
+      return res;
+   }
+   
    
    public String getAssortmentStr(Agent agent){
        return null;
@@ -1087,11 +1145,23 @@ System.out.println("no data to save");
 	  
 	  System.exit(0);
   }
+  
 
 @Override
 public void WebReporter2() {
 	Converter.uploadQuestsAndAnswers(companyx, user, pass, parent.getProps(),this.getExcelDir());
 	System.out.println("web " );
+	System.exit(0);
+}
+
+@Override
+public void WebReporter3() {
+	//pricetracker
+	HashMap<String, Product> products = getProds();
+	HashMap<String, Customer> customers = getCust();
+	
+	ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", companyx, user, pass, getParent(), customers, products);
+	System.out.println("pricetracker " );
 	System.exit(0);
 }
 

@@ -66,7 +66,7 @@ public class PronetImportDriver extends AbstractImportDriver{
   public PronetImportDriver(ImportPanel parent) {
     this.parent = parent;
     PropertyConfigurator.configure("log4j.properties");
-    url = parent.getProps().getProperty("pronet.url");
+    url = parent.getProps().getProperty("pronet.urlimp");
   
    if(url == null){
 	   url =  "https://analytics.program.pronet-kr.si/api/rest/BP5/createOrder";
