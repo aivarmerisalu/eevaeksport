@@ -149,7 +149,6 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 			comm = order.getInfo();
 		}
-	
 		  JSONObject ordMain = new JSONObject();
 		  JSONArray ordArray = new JSONArray();
 	      JSONObject ord = new JSONObject();
@@ -167,7 +166,6 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 	 	  ord.put("OrderDeliveryDate", Converter.jsonDate(order.getShipCal().getTime()));
 	 	}
 	 	
-	 
 	  Vector lines2 = order.getOrderLines();
 		 JSONArray linesA = new JSONArray();
 		 
