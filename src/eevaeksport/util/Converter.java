@@ -6365,22 +6365,27 @@ public class Converter {
 	                
 	                if(parent.getProps().getProperty("smtpport") != null)
 	                mail.setPort(parent.getProps().getProperty("smtpport"));
-	               
+	               String err = "";
 	                if(error) {
 	                	mail.setSubjectFilesTo("Fixed sortiment loading error report : " + format );
+	                	err = "error";
 	                } else {
 	                	mail.setSubjectFilesTo("Fixed sortiment upload : " + format );
 	                }
 		  	  		
 		  	  		mail.setFrom(parent.getProps().getProperty("from"));
-		  	  		
-		  	  
-		  	  	
-		  	  		String lisa = "";
-		  	  		
 		  	  		mail.setEncoding("utf-8");
-		  	  		mail.setBodyHtml("<br>" + lisa + comment.replaceAll("\n", "<br>") + "<br><br>");
+		  	  		mail.setBodyHtml("<br>" + comment.replaceAll("\n", "<br>") + "<br><br>");
 		  	  		mail.setSendNotice(false);
+		  	  		
+		  	  		File dir = new File("excelsort/report/");
+		  	  		if(!dir.exists()) {
+		  	  			dir.mkdir();
+		  	  		}
+		  	  		
+		  	  		String filename = dir +"/"+ err + "." + Converter.getDDsMMMsYYYYString(new Date())+ ".txt";
+		  	  		
+		  	  		Converter.saveFileInANSI(filename,  comment);
 		  	  		
 		  	  	 StringTokenizer st = new StringTokenizer(parent.getProps().getProperty("fixsort.erroremail"),",");
 		  	  	 while(st.hasMoreTokens()) {
