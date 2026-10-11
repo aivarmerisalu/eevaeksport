@@ -184,7 +184,6 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 	     
 	     
 	  ord.put("LINES", linesA);
-	 
 	  ordArray.add(ord);
 	  ordMain.put("ORDERS", ordArray);
 	  
