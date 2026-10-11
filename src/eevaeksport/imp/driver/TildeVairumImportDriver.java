@@ -128,12 +128,6 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
           request.setHeader("Content-Type", "application/json");
           request.setHeader("Accept", "application/json");
 
-          StringEntity jsonEntity = new StringEntity(
-              json,
-              org.apache.http.entity.ContentType.APPLICATION_JSON
-          );
-         // request.setEntity(jsonEntity);
-
           try (CloseableHttpResponse response = client.execute(request)) {
               HttpEntity entity = response.getEntity();
 
