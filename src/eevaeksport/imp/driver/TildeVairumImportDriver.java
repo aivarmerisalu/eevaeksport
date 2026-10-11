@@ -147,8 +147,6 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
   private void makeOutput(Order order){
 	  
 	  
-	  
-	  
 	  String comm = null;
 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 			comm = order.getInfo();
