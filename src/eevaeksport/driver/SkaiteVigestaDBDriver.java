@@ -909,7 +909,30 @@ Statement st = null;
     	  custAgents = new HashMap(); // siin on siis kliendi kood ja agent vastavalt
     	  
         String cmd = "SELECT  case when MES_KRED_ARLIMITAS = 1 then MES_KRED_LIMITAS  else 0 end as uselim,\r\n" + 
-        		"							 case when MES_KRED_ARTERMINAS = 1 then MES_KRED_TERMINAS  else 0 end  as useterm, CONVERT(Int, part.PartneriaiId) AS CustomerASId, part.regnr as regno , (select  oo.Kodas from Adresai uu " + 
+        		"							 case when MES_KRED_ARTERMINAS = 1 then MES_KRED_TERMINAS  else 0 end  as useterm, "
+        		+ "( SELECT CASE\r\n" + 
+        		"        WHEN ll.MES_KRED_ARLIMITAS = 1 THEN ll.MES_KRED_LIMITAS\r\n" + 
+        		"        ELSE 0\r\n" + 
+        		"    END\r\n" + 
+        		"        FROM Adresai AS uu\r\n" + 
+        		"        INNER JOIN Partneriai AS oo\r\n" + 
+        		"            ON oo.AdresoId = uu.AdresoId\r\n" + 
+        		"			inner join PL_PARTNERIAI ll on ll.PartneriaiId = oo.PartneriaiId\r\n" + 
+        		"        WHERE oo.PartneriaiId = partpa.SumokaPartneriaiID\r\n" + 
+        		"    ) AS uselimpay,\r\n" + 
+        		"\r\n" + 
+        		"	\r\n" + 
+        		"(  SELECT CASE\r\n" + 
+        		"        WHEN ll.MES_KRED_ARTERMINAS = 1 THEN ll.MES_KRED_ARTERMINAS\r\n" + 
+        		"        ELSE 0\r\n" + 
+        		"    END\r\n" + 
+        		"        FROM Adresai AS uu\r\n" + 
+        		"        INNER JOIN Partneriai AS oo\r\n" + 
+        		"            ON oo.AdresoId = uu.AdresoId\r\n" + 
+        		"			inner join PL_PARTNERIAI ll on ll.PartneriaiId = oo.PartneriaiId\r\n" + 
+        		"        WHERE oo.PartneriaiId = partpa.SumokaPartneriaiID\r\n" + 
+        		"    ) AS usetermpay, "
+        		+ "CONVERT(Int, part.PartneriaiId) AS CustomerASId, part.regnr as regno , (select  oo.Kodas from Adresai uu " + 
 				" INNER JOIN Partneriai oo  ON oo.AdresoId = uu.AdresoId  where oo.PartneriaiId=partpa.SumokaPartneriaiID  ) as pay, CONVERT(varchar(20), part.Kodas) AS kood,pl.MES_PAV_Trumpinys as nimi2, CONVERT(varchar(40), part.Pavad) AS nimi,   " +
                    "   SumokaPartneriaiID AS payer ,  rtrim(adr.Adresas)  + case when adr.Indeksas IS NULL then '' else ' ' + rtrim(adr.Indeksas)end + ' ' + " +
                    " case when adr.Miestas IS NULL then '' else ' ' + rtrim(adr.Miestas)end AS Address,part.pvmnr as vatno, " +
@@ -1063,8 +1086,8 @@ Statement st = null;
        	      
 	   while (rs.next()) {
 		     
-		   Double uselim = rs.getDouble("uselim");
-		   Integer useterm = rs.getInt("useterm");
+		   Double uselim = rs.getDouble("uselimpay");
+		   Integer useterm = rs.getInt("usetermpay");
 		   String regno = rs.getString("regno");
 		   String payid = rs.getString("pay").trim();
 		   

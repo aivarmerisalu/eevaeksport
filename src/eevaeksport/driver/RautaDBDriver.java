@@ -4172,8 +4172,21 @@ public static String getYYYYpMMpDD(Date dd){
    
    private void makeStl(String body ,String xml, String agent ,String kellele){
 	   
+	   
+	   
+	     String fileName = escape(parent.getProps().getProperty("conv.dir") + "ord" + "_tellimus_" + agent) 
+		          + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".xml";
+		     
+		      String pais =  "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tjd>";
+		      String lopp =  "</tjd>";
+		      try{
+		          FileOutputStream fos = new FileOutputStream(fileName);
+			        fos.write((pais + xml + lopp).getBytes());
+			        fos.close();
+		             }catch (Exception r){ }
+		
 	         
-	      String agemail = null;
+	     String agemail = null;
 	      Properties propse =  new Properties();
 		    try{
 		    	propse =  EksportFrame.loadProps("emailid.txt");
