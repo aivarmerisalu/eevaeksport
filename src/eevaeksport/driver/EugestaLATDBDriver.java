@@ -1067,7 +1067,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 			    String last3 = " SELECT jou.clientBackOfficeId as klient , jou.productBackOfficeId as toode , " + 
 			    		"	jou.Quantity  as kogus, jou.Price as lastprice, jou.deliverydate  as lastdate, (jou.invoiceNumber) as lastdok "
-			    		+ " FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >= getdate()-300 and DOCUMENTTYPE in (3) " + 
+			    		+ " FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >= getdate()-300 and DOCUMENTTYPE in (3) and len(jou.invoiceNumber) < 11 " + 
 			    		"	 order by jou.clientBackOfficeId,  jou.productBackOfficeId, jou.deliverydate desc " ;
 			    	 
 			    	 rs = stmt.executeQuery(last3);
@@ -2290,7 +2290,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
                     		"                                                        , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
                     		"                                   Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
                     		"                                    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-                    		"                                    contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2,"
+                    		"                                    contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub,a.[EG_EXTERNALCLASS] as type1, a.[EG_EXTERNALCODE] as type2,"
                     		+ " gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 , EG_AGENTREPRICINGALLOWED as reprice, DeliveryComment as del3 \r\n" + 
                     		"                                    from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
                     		"                                LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
@@ -2632,10 +2632,10 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
             Iterator itera =   cust.getAgents().keySet().iterator();
           while(itera.hasNext()) { 
           String aa = (String)itera.next();
-            if(!ags.contains(aa)) {
+            if(!ags.contains(aa) && ags.length() > 0) {
             	ags = ags + "," + aa;
             }
-            if(!agsS.contains(aa)) {
+            if(!agsS.contains(aa)&& agsS.length() > 0) {
               	agsS = agsS + "," + aa;
               }
           }
@@ -2669,15 +2669,25 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
                	}
         }
         
-        String type2 = rs.getString("type2");
-        if(type2 != null && type2.trim().length() > 0) {
+        String extCode = null;
+        String type1 = rs.getString("type1");
+        if(type1 != null && type1.trim().length() > 0) {
+        	extCode = type1.trim();
         	//cust.addCity("SubSegment: " + Converter.enCodeEst(type2.trim()));
         }
-
-        
-        if(type != null && type.trim().length() > 0) {
-        	//cust.addCity("Tips: " + Converter.enCodeEst(type.trim()));
+        String type2 = rs.getString("type2");
+        if(type2 != null && type2.trim().length() > 0) {
+        	if(extCode == null) {
+        		extCode = type2.trim();
+        	}else {
+        		extCode = extCode + "_" + type2.trim();
+        	}
+        	//cust.addCity("SubSegment: " + Converter.enCodeEst(type2.trim()));
         }
+        
+         if(extCode != null) {
+        	 cust.restExcternalCode = extCode;
+         }
         
         String del1 = rs.getString("del1");
         

@@ -1243,7 +1243,7 @@ private Hashtable custCodes = null;
         custCodes = new Hashtable();
         // String cmd = "SELECT k.kood, k.nimi FROM (klient k INNER JOIN omrid ON k.kood = omrid.klient INNER JOIN rid ON rid.dokumnr = omrid.tasudjrk) WHERE omrid.rid2obj='" + agentCode + "' AND (len(rid.toode) > 2) GROUP BY k.kood";
         String cmd =
-            " SELECT k.kood,k.maksja, k.nimi,aadress,k.hinnaale AS ale,k.visit, k.tarne as abi,k.objekt2  as agent,k.klikaart as agent2 ,wwwpage as kkyl" +
+            " SELECT k.kood,k.maksja, k.nimi,aadress,k.hinnaale AS ale,k.visit, k.tarne as abi,k.objekt2  as agent,k.agent2 as agent2 ,wwwpage as kkyl" +
             " ,k.infomail as partner ,liik " +
           "  FROM firma1.klient k  where mitteakt is false ORDER BY k.nimi";
 

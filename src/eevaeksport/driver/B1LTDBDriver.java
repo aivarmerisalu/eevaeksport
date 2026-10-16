@@ -1130,14 +1130,14 @@ private void saveFile (String filename, String url ) {
 public String getSaveStockInfo() {
 
 	
-	downloadData("stocks");
+	//downloadData("stocks");
 	
 	
 	
 	  HashMap<String,Double> stock = new HashMap<String,Double>();
 		org.json.simple.JSONObject cc = 	Converter.readJSONFile("data//stocks.json");
 		int pages =  Integer.parseInt(cc.get("pages")+"");
-			  System.out.println("pages prod " + pages);
+			  System.out.println("pages stocks " + pages);
 			for (int u = 0; pages > u ;u++) {
 			//	System.out.println( "ii " + u);
 				 String fname ="stocks.json";
@@ -1175,6 +1175,8 @@ public String getSaveStockInfo() {
 	  
 			}
 
+			System.out.println("Stock Size " + stock.size()+ " " + stock.get("56"));
+			
 		      StringBuffer products = new StringBuffer();	
 	
 		      

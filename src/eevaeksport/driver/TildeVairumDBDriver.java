@@ -270,7 +270,7 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
     public TreeMap getAgents() {
         connectionUp();
         agent1 = new TreeMap();
-        String  cmd = "select  TypeId as agent , TypeName as name,* from PartnerType";
+        String  cmd = "select  TypeId as agent , TypeName as name from PartnerType";
         TreeMap agents = new TreeMap();
 
 	    Properties propse =  new Properties();

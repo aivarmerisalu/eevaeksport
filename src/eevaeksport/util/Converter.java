@@ -8852,6 +8852,9 @@ try{
 	if(ccc.restPerPhone != null && ccc.restPerPhone.trim().length() > 0){
 		value.put("perphone", ccc.restPerPhone);
 	}
+	if(ccc.restExcternalCode != null && ccc.restExcternalCode.trim().length() > 0){
+		value.put("externalCode", ccc.restExcternalCode);
+	}
 	if(ccc.getLicence() != null && ccc.getLicence().trim().length() > 0){
 		value.put("licence", ccc.getLicence());
 	}

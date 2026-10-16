@@ -1651,7 +1651,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				}
 				
 				if(nullseis.get(prod.getID()) != null) {
-					prod.setStock(-1);;
+					prod.setStock(-1);
 				}
 
 				if (discT.containsKey(id)) {

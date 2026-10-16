@@ -3602,7 +3602,7 @@ if (getProps().getProperty("no.matrixagent") != null) {
         
         if (driver.getDriverVersion().equals("Movex") || driver.getDriverVersion().equals("AxaBuraLat") 
         		|| driver.getDriverVersion().equals("KMAHorti")  || driver.getDriverVersion().equals("DirectoAgapics")
-        		 || driver.getDriverVersion().equals("EugestaLAT")  || driver.getDriverVersion().equals("EugestaLIT")){
+        		 || driver.getDriverVersion().equals("EugestaLAT") ){
         	
            System.out.println("Bufri0 suurus " + buf.length());
            

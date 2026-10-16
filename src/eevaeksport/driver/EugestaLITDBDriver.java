@@ -304,7 +304,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 		
 		try {
 			
-			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
+			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.newinassort as newin " + 
 					"					FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId"
 					+ "  where s.EG_ASSORTITEMSTATUS = 1 order by str(a.posWeight) + a.Name ";
 			
@@ -319,8 +319,8 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 		             String sortid = rs.getString("ClientGR").trim()+"x";
 		             String prodID = rs.getString("ItemID").trim();
 		             int optio = rs.getInt("newin");
-		             
-		   
+
+						
 						MatrixLine mline = new MatrixLine();
 						
 
@@ -335,8 +335,9 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 								}
 								
 								if(optio == 1) {
-								   mline.setLineinfo("NEW"); // valikuline optional item
+									mline.setLineinfo("NEW");
 								}
+								
 								if(!inTT.contains(sortid)) {
 									result.add(mline);	
 								}
@@ -727,8 +728,9 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 		
 		try {
 			
-			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin " + 
-					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId  where s.EG_ASSORTITEMSTATUS = 1 order by str(a.posWeight) + a.Name";
+			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin ,s.posWeight as topstatus\r\n" + 
+					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId \r\n" + 
+					"	 where s.[posWeight] > 0 order by str(a.posWeight) + a.Name";
 			
 		
 		         if (isDebug()) System.out.println(cmd);
@@ -740,10 +742,22 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 		             String sortid = rs.getString("ClientGR").trim();
 		             String prodID = rs.getString("ItemID").trim();
+		             Integer optio = rs.getInt("topstatus");
+		             String status = " ";
+		             String color = " ";
+						if(optio == 1) {
+						 	color = "g";
+						 	status = "TOP";
+						} else if(optio == 2) {
+							color = "r";
+						} else if(optio == 3) {
+							color = "l";
+						}
+						
 		       
 								if(inTT.contains(sortid)) {
-									result.append( " ;" + Converter.cleanLitLatEst(sortid + "; ;" + prodID + "; ;")+ "\n");
-		 						}
+									result.append( " ;" + Converter.cleanLitLatEst(sortid + "; ;" + prodID + ";" + status + "; ; ;" + color)+ "\n");
+			            		}
 							}
 						
 					 rs.close();
@@ -755,7 +769,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 		}
              
 
-	//	System.out.println("ASSO size " + result.toString());
+		//System.out.println("ASSO size " + result.toString());
 	
 		return result.toString();
 
@@ -1838,7 +1852,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
                     		"                                                                                                             , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
                     		"                                                             Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
                     		"                                                                 contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-                    		"                                                             contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+                    		"                                                             contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, a.[EG_EXTERNALCLASS] as type1, a.[EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
                     		"                                                                                           from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
                     		"                                                                                           LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
                     		"" ; 
@@ -2185,7 +2199,7 @@ String arve = rs.getString("bill");
         
         String fixed = rs.getString("fixed");
         if(fixed != null && fixed.trim().length() > 0) {
-        	if(seg != null && seg.trim().equals("TT")) {
+        	if(fixed.trim().contains("TT_")) {
         		inTT.add(fixed.trim());
         		cust.suggAssortCode = fixed.trim();
         	 } else {
@@ -2209,11 +2223,25 @@ String arve = rs.getString("bill");
                	}
         }
         
+        String extCode = null;
+        String type1 = rs.getString("type1");
+        if(type1 != null && type1.trim().length() > 0) {
+        	extCode = type1.trim();
+        	//cust.addCity("SubSegment: " + Converter.enCodeEst(type2.trim()));
+        }
         String type2 = rs.getString("type2");
         if(type2 != null && type2.trim().length() > 0) {
-        	//cust.addCity("Funkcija: " + type2.trim());
+        	if(extCode == null) {
+        		extCode = type2.trim();
+        	}else {
+        		extCode = extCode + "_" + type2.trim();
+        	}
+        	//cust.addCity("SubSegment: " + Converter.enCodeEst(type2.trim()));
         }
-
+        
+         if(extCode != null) {
+        	 cust.restExcternalCode = extCode;
+         }
         
         if(type != null && type.trim().length() > 0) {
         	cust.addCity("Tipas: " + type.trim());
@@ -3396,7 +3424,7 @@ boolean noopt = false;
         		"     , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
         		"    Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
         		"    contactPhone as perphone,   segmentname as seg  ,accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-        		"   contractDate as cdate , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
+        		"   contractDate as cdate , assortimentBackOfficeId as fixed ,subsegmentname as segsub, a.[EG_EXTERNALCLASS] as type1, a.[EG_EXTERNALCODE] as type2, gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
         		"   from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
         		"   LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 
         		"" ; 

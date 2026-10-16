@@ -16,6 +16,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -210,29 +212,83 @@ try{
 	  }
 	  return  EntityUtils.toString(response.getEntity());
   }
-	  
-  
- private boolean isBeforeDay(Calendar cal , Calendar ship){
-	  
-	  Calendar cc = Calendar.getInstance();
-	  cc.setTimeInMillis(cal.getTimeInMillis());
-	  cc.set(Calendar.HOUR, 1);
-	  cc.set(Calendar.MINUTE, 1);
-	  cc.set(Calendar.SECOND, 1);
-	  cc.set(Calendar.MILLISECOND, 1);
-	  
-	  Calendar ss = Calendar.getInstance();
-	  ss.setTimeInMillis(ship.getTimeInMillis());
-	  ss.set(Calendar.HOUR, 1);
-	  ss.set(Calendar.MINUTE, 1);
-	  ss.set(Calendar.SECOND, 1);
-	  ss.set(Calendar.MILLISECOND, 1);
-	  if(cc.getTime().before(ss.getTime())){
-		  return true;
-	  }
-	  return false;
-  }
 	
+  
+  
+  private String getWebStockConf(String xml, String shipdate) throws ParseException, IOException{
+	  HttpResponse response = null;
+	  try{
+		String   weburl = parent.getProps().getProperty("wsdl.urlconfstock");
+		  
+		//System.out.println("xml " + xml);
+		
+		String ordNum = "";
+
+// Match the digits after the final slash inside the href tag
+Pattern pattern = Pattern.compile("<href>.*/(\\d+)</href>");
+Matcher matcher = pattern.matcher(xml);
+
+if (matcher.find()) {
+	ordNum = matcher.group(1);
+    System.out.println("Stock Conf Order Number: " + ordNum ); 
+}
+
+String aa = "<resource><pkOrder>" + ordNum + "</pkOrder><accDate>" + shipdate + "</accDate></resource>";		
+System.out.println("Stock Conf Order Number0: " + aa ); 
+
+		  DefaultHttpClient httpClient = new DefaultHttpClient();
+		  Credentials defaultcreds = new UsernamePasswordCredentials(parent.getProps().getProperty("wsdl.user"),  parent.getProps().getProperty("wsdl.pass"));
+		  httpClient.getCredentialsProvider().setCredentials(
+                   AuthScope.ANY, defaultcreds);
+		  HttpPost postRequest = new HttpPost(weburl);
+		  StringEntity input = new StringEntity(aa);
+		  input.setContentType("application/xml");
+		  postRequest.setEntity(input);
+		  response = httpClient.execute(postRequest);	  
+	  }catch(Exception e){
+		  trouble = "NO conformation \n" + xml;
+		  e.printStackTrace();
+	  }
+	  return  EntityUtils.toString(response.getEntity());
+  }
+
+  private String getWebConfirm(String xml, String shipdate) throws ParseException, IOException{
+	  HttpResponse response = null;
+	  try{
+		String   weburl = parent.getProps().getProperty("wsdl.urlconf");
+		  
+		//System.out.println("xml " + xml);
+		
+		String ordNum = "";
+
+// Match the digits after the final slash inside the href tag
+Pattern pattern = Pattern.compile("<href>.*/(\\d+)</href>");
+Matcher matcher = pattern.matcher(xml);
+
+if (matcher.find()) {
+	ordNum = matcher.group(1);
+    System.out.println("Order Number: " + ordNum ); 
+}
+
+String aa = "<resource><pkOrder>" + ordNum + "</pkOrder><accDate>" + shipdate + "</accDate></resource>";		
+System.out.println("Order Numbe0r: " + aa ); 
+
+		  DefaultHttpClient httpClient = new DefaultHttpClient();
+		  Credentials defaultcreds = new UsernamePasswordCredentials(parent.getProps().getProperty("wsdl.user"),  parent.getProps().getProperty("wsdl.pass"));
+		  httpClient.getCredentialsProvider().setCredentials(
+                   AuthScope.ANY, defaultcreds);
+		  HttpPost postRequest = new HttpPost(weburl);
+		  StringEntity input = new StringEntity(aa);
+		  input.setContentType("application/xml");
+		  postRequest.setEntity(input);
+		  response = httpClient.execute(postRequest);	  
+	  }catch(Exception e){
+		  trouble = "NO conformation \n" + xml;
+		  e.printStackTrace();
+	  }
+	  return  EntityUtils.toString(response.getEntity());
+  }
+  
 
  private boolean isToday(Calendar cal){
 	  Calendar cc = Calendar.getInstance();
@@ -467,8 +523,16 @@ try{
 		      }
 			 	
 	 		String xml = getWeb(order_xml , "DokNr:" + order.getDokNr() + " Company:" + cukood);		
-	 	//	System.out.println("Tulemus " + xml);
-		     Converter.saveFileInUTF8(fileName, xml);
+	 	
+	 		
+	 		System.out.println("Tulemus0 " + xml);
+		   // Teeme kinnituse ka 
+	 	  String    xml2 = getWebConfirm(xml, getDateNiceString(cal));
+	 		System.out.println("Tulemus1 " + xml);
+	 		  String    xml3 = getWebStockConf(xml, getDateNiceString(cal));
+		 		System.out.println("Tulemus2 " + xml);
+				
+	 		Converter.saveFileInUTF8(fileName, xml + "\n" + xml2 + "\n" + xml3);
 		     
 	      
 	      setNumAddedLines(counter); 
