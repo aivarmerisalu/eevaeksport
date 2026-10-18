@@ -2614,7 +2614,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         	if(!cust.getID().startsWith("MRC")) {
         		sugg = sugg + "|SUGGED|PROMOSTUFF";
         	}
-        	cust.suggAssortCode = sugg ;
+        	cust.suggAssortCode = Converter.cleanLitLatEst(sugg) ;
           //  cust.addFixSortCode(Converter.cleanLitLatEst(fixed.trim())+"x");
        
         	String ags = sortags.get(fixed.trim()); 

@@ -509,7 +509,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				if ((id.trim().length() == 4 || id.trim().length() == 5)
 						&& id.trim().length() > 0) {
 					tm.put(cleardots(id), Converter.enCodeEst(id.substring(0, 1) + " "
-							+ cleardots(id) + " " + name));
+							+ cleardots(id) + "_" + name));
 				}
 			}
 
@@ -570,12 +570,12 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				}
 				String name = rs.getString("nimi");
 				if (groupID.length() > 5) {
-					tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + " " + name));
+					tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + "_" + name));
 				}
 			 }else {
 				 String name = rs.getString("nimi");
 					if (groupID.length() == 6) {
-						tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + " " + name));
+						tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + "_" + name));
 					}
 			 }
 
@@ -1685,6 +1685,22 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 						prod.setPartii("CoO: " + origi.trim() );
 					}
 				}
+				 origi = rs.getString("KeepingCond");
+				if (origi != null && origi.trim().length() > 0) {
+					
+					if(origi.contains("-")) {
+						prod.setType("Frozen");
+					} else  {
+						prod.setType("Cold");
+					}
+					
+					if(prod.getPartii() != null && prod.getPartii().trim().length() > 1) {
+						prod.setPartii(prod.getPartii() + "|Keep: " + origi.trim() );
+					} else {
+						prod.setPartii("Keep: " + origi.trim() );
+					}
+				}
+				
 				
 				if(mintime.get(prod.getID()) != null){
 					prod.setTimeToSell(Long.parseLong(mintime.get(prod.getID())+""));

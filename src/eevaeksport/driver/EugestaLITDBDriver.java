@@ -677,7 +677,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
            		"           	          		minPrice as price ,b.regionbackofficeid as dealer from dbo.EPASAULE_PROMOTIONOBJECTS a \r\n" + 
            		"           		           		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId  \r\n" + 
            		"								inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
-           		"    	              		 	 where c.nextdelivery between [date from] and [date to]  and minqty = 0   \r\n" + 
+           		"    	              		 	 where c.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
            		"           		           		 group by  a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid,  [date from] ,[date to], minPrice \r\n" + 
            		"           		           		 order by a.promotionBackOfficeId , productBackOfficeId, b.regionbackofficeid, [date from] ,[date to], minPrice";
            rs = stmt.executeQuery(sql2);
@@ -2498,7 +2498,7 @@ String arve = rs.getString("bill");
 private HashSet<String> inTT = null;
 
   public TreeMap getProdGroups() throws SQLException {
-
+	   this.setTreeGroup(true);
 	   Connection con = getNewConnection();
 	    TreeMap   tm = new TreeMap();
 	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_GROUPS ";
@@ -2508,12 +2508,13 @@ private HashSet<String> inTT = null;
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
 	      String nimi = Converter.cleanLitLatEst(rs.getString("nimetus").trim());
-	      nimi = nimi.replaceAll("NESTLE", "NES");
-	      nimi = nimi.replaceAll("BARILLA", "BAR");
-	      nimi = nimi.replaceAll("IMPERIAL", "IMP");
-	      nimi = nimi.replaceAll("COFFEE", "COF");
-			  
-	        tm.put(liik, Converter.enCodeEst(nimi));
+	      int ind = nimi.lastIndexOf("-");
+	      if(ind != -1) {
+	    	  nimi = nimi.substring(ind+1);
+	      }
+	   	  if(liik.length()== 2) {
+	             tm.put(liik, Converter.enCodeEst(nimi));
+			  }
 	    }
 	    rs.close();
 	    st.close();
@@ -2524,24 +2525,27 @@ private HashSet<String> inTT = null;
 
   public TreeMap getProdGroupsSecond() throws SQLException {
 	  
+	  Connection con = getNewConnection();
 	    TreeMap   tm = new TreeMap();
-	  /*  String    sql = "  SELECT backOfficeId as liik, Name as nimetus FROM dbo.EPASAULE_GROUPS  ";
-	    Connection con = getNewConnection();
-		
+	    String    sql = " SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_GROUPS ";
 	    Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(sql);
 
 	    while (rs.next()) {
 	      String liik = rs.getString("liik").trim();
-	        tm.put(liik, Converter.enCodeEst(rs.getString("nimetus").trim()));
+	      String nimi = Converter.cleanLitLatEst(rs.getString("nimetus").trim());
+	      int ind = nimi.lastIndexOf("-");
+	      if(ind != -1) {
+	    	  nimi = nimi.substring(ind+1);
+	      }
+	   	  if(liik.length()== 3) {
+	             tm.put(liik, Converter.enCodeEst(nimi));
+			  }
 	    }
-	    
 	    rs.close();
 	    st.close();
-	    con.close();*/
-
-	    return tm;
-
+	    con.close();
+return tm;	   
   }
 
   private Vector prodcodes = null;
@@ -2623,9 +2627,7 @@ private HashSet<String> inTT = null;
         	String toode = rs.getString("toode").trim();
         	String ladu = rs.getString("ladu").trim();
         	Double disc = rs.getDouble("disc");
-
-        	
-        	//sb0.append(gr+ ";" + toode + ";" + disc + ";" + ladu +"\n");
+        	sb0.append(gr+ ";" + toode + ";" + disc + ";" + ladu +"\n");
          }
         rs.close();
         if(sb0.length() > 0) {
@@ -2744,8 +2746,11 @@ boolean noopt = false;
 
      String grupp2 = rs.getString("grupp2");
           if(grupp2 != null && grupp2.trim().length()>0){ 
-              prod.setGroup(grupp2);
-              if(grupp2.trim().equals(noOPT)) {
+              
+        	  prod.setGroup(grupp2.substring(0,2));
+        	  prod.setGroupSecond(grupp2);
+            
+        	  if(grupp2.trim().equals(noOPT)) {
              	 noopt = true;
               }
            }

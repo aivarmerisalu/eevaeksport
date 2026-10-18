@@ -48,7 +48,7 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 	user =  parent.getProps().getProperty("rest.user");
     pass = parent.getProps().getProperty("rest.pass");
     rcompany = parent.getProps().getProperty("rest.companyx");
-    System.out.println("Tooted " + getData("/products/list",""));
+   // System.out.println("Tooted " + getData("/products/list",""));
    
   }
   

@@ -22,6 +22,7 @@ import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -225,13 +226,11 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
 
                 public void setBulkSales(Map agents){
               
-          		String cmd =  " SELECT sum(rid.kogus*(rid.hind))AS sales, " +
-          		 " dok.pais2obj  AS agent FROM dok " + //k.objekt2
-                 " INNER JOIN rid ON dok.doktyyp+STR(dok.dokumnr,7)=rid.doktyyp+STR(rid.dokumnr,7)  INNER JOIN yksus y ON y.yksus = dok.pais2obj " +
-                 " WHERE  len(trim(dok.klient)) > 1  AND YEAR(dok.kuupaev)=YEAR(date()) " + // INNER JOIN klient k on k.kood = dok.saaja 
-                 "  AND MONTH(dok.kuupaev)=MONTH(date()) AND y.klassif=2 AND (dok.doktyyp = 'G' OR dok.doktyyp = 'Y')" +
-                 "  AND (rid.doktyyp ='G' or rid.doktyyp ='Y') " +
-          		 "  AND dok.yksus in ('1','3') AND len(trim(rid.toode))>2  GROUP BY  dok.pais2obj" ; //k.objekt2
+          		String cmd =  "  select  k.partnertypeid as agent , max(AmountFinal) as sales " + 
+          				"	 from storedocline r INNER JOIN storedoc d ON d.StoreDOcID = r.StoreDOcID and d.PartnerID != ''\r\n" + 
+          				"	 INNER JOIN Partner k ON d.PartnerID = k.PartnerID\r\n" + 
+          				"	 where  year(d.DocDate) = YEAR(getdate()) and MONTH(d.DocDate) = MONTH(getdate()) and d.StoreDocTypeID = 3 and d.PartnerID != '' and k.partnertypeid != ''\r\n" + 
+          				"	 GROUP BY k.partnertypeid" ; 
           	
           		log(cmd);
           		
@@ -318,11 +317,10 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
     	
         
         try{
-     	   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
-     		
-     }catch(Exception e){
-     	e.printStackTrace();
-     }
+     	//   Converter.getManagersReplacements(agent1, rcompany, user, pass, false); 
+     	 } catch(Exception e){
+     	  //e.printStackTrace();
+         }
 
 
         TreeMap customers = new TreeMap();
@@ -427,7 +425,7 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
         }
             
             if(debtH.get(klid) != null) {
-            	cust.setDebt(debtH.get(klid));
+            	//cust.setDebt(debtH.get(klid));
             }
             
             
@@ -457,6 +455,7 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
 
     public TreeMap getProducts(Agent agent) {
        
+    getCustomerProductsListAction();
     getSaveStockInfo();
     //seisud
 	TreeMap products = new TreeMap();
@@ -464,8 +463,9 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
 	try {
    
 	              
-         String  cmd = " select  ProductID as idd , ProductCode as kood , ProductBarCode as ean,ProductName as nimi, u.ProductUnitName as unit,ProductTypeID as grupp " + 
-         		"   from product p left join productunit u on u.productunitid=p.productunitid ";
+         String  cmd = " \r\n" + 
+         		"					 select  p.ProductID as idd , p.ProductCode as kood , p.ProductBarCode as ean,ProductName as nimi, u.ProductUnitName as unit,p.ProductTypeID as grupp , h.Price\r\n" + 
+         		"         		   from product p left join productunit u on u.productunitid=p.productunitid left join ProductPrice h on h.ProductID = p.ProductID   and h.TypeID = 18  ";
          
        if (isDebug()) {
            	System.out.println(cmd);
@@ -482,6 +482,7 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
                           String nimetus = rs.getString("nimi").trim();
                           String unit = rs.getString("unit");
                           String grupp = rs.getString("grupp");
+                          Double hind = rs.getDouble("price");
                           
                           
                           Product prod = new Product(idd);
@@ -499,16 +500,24 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
                               prod.setUnit(unit.trim());
                             }
                         
+                           boolean goes = false;
+                           
                            if(this.seisud.get(idd) != null) {
                         	 prod.setStock(seisud.get(idd));
+                        	 goes = true;
                            }
-                        
-                        
-                           
-          				  prod.setVat("21");
-          		
-                          products.put(nimetus + kood, prod);
-
+                           if(prodsSold.contains(idd)) {
+                        	   goes = true;
+                           }
+                            prod.setVat("21");
+                            if(hind != null && hind > 0) {
+                            	prod.setPrice(hind);
+                            }
+                          
+          		        if(goes) {
+                           products.put(nimetus + kood, prod);
+          		        }
+          		        
                       }
                       rs.close();
                       stmt.close();
@@ -537,11 +546,11 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
      ResultSet rs = stmt.executeQuery(sql);
 
      while (rs.next()) {
-       String liik=Converter.enCodeEst(rs.getString("liik").trim());
-       String nimetus=Converter.enCodeEst(rs.getString("nimi").trim());
+       String liik = Converter.enCodeEst(rs.getString("liik").trim());
+       String nimetus = rs.getString("nimi").trim();
        if (liik != ""){
-       tm.put(liik,nimetus);
-       }
+       tm.put(liik, Converter.cleanLitLatEst(nimetus.substring(0,2)) + "_" + Converter.enCodeEst(nimetus));
+        }
      }
      rs.close();
      stmt.close();
@@ -552,27 +561,28 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
  }
 
 
+   private Vector custProds = null;
+   private HashSet prodsSold = null;
+   public Vector getCustomerProductsList(String agentCode) {
+      	return custProds;
+   }
 
-
-    public Vector getCustomerProductsList(String agentCode) {
-       
-	/*
-	 * String cmd = "SELECT omrid.klient,rid.toode FROM omrid INNER JOIN rid ON omrid.tasudjrk = rid.dokumnr WHERE omrid.rid2obj='" +
-	 * agentCode + "' AND (len(omrid.klient) > 1) AND (len(rid.toode) > 2) AND omrid.tasudtyyp='G' AND omrid.reakuupaev >= " +
-	 * getStartingTime() + " GROUP BY omrid.klient, rid.toode ORDER BY omrid.klient, rid.nimetus";
-	 */
-	String cmd =
-	    "SELECT dok.saaja,rid.toode,dok.kuupaev,rid.kogus, rid.hind FROM dok INNER \r\n" + 
-	    "	   JOIN rid ON dok.dokumnr = rid.dokumnr INNER JOIN toode on rid.toode = toode.toode WHERE \r\n" + 
-	    "	     len(trim(dok.klient)) > 1 AND len(trim(rid.toode)) > 2 \r\n" + 
-	    "	      AND dok.kuupaev >= date() -180 \r\n" + 
-	    "	     AND  dok.doktyyp = 'G' AND rid.doktyyp= 'G' and rid.toode not in ('001','002','003','004') GROUP BY dok.saaja, rid.toode ORDER BY dok.saaja, toode.toode,dok.kuupaev";
-
+    public Vector getCustomerProductsListAction() {
+    	if(custProds == null) {
+    		custProds = new Vector();	
+    	}
+    	prodsSold = new HashSet();
+      
+	String cmd =" select d.PartnerID as saaja, a.AddressID as aadr ,ProductID as toode, d.DocDate as kuupaev, Quantity as kogus,AmountFinal/Quantity as hind, DocNoSerial+DocNo as doc\r\n" + 
+			"				 from storedocline r\r\n" + 
+			"				  INNER JOIN storedoc d ON d.StoreDOcID = r. StoreDOcID and d.PartnerID != ''\r\n" + 
+			"				  INNER JOIN PartnerAddress a on a.PartnerID = d.PartnerID and d.PartnerAddressGLNCode = a.GLNCode where d.DocDate >= getdate()-90 and d.StoreDocTypeID = 3\r\n" + 
+			"				  GROUP BY d.PartnerID, a.AddressID ,ProductID, d.DocDate, Quantity ,AmountFinal, DocNoSerial+DocNo  ORDER BY d.PartnerID, a.AddressID ,ProductID, d.DocDate " ;
 	if (isDebug()) {
 	    System.out.println(cmd);
 	}
-
-	Vector custProds = new Vector();
+  
+	Vector custPro = new Vector();
 
 	try {
 	    Connection con = DriverManager.getConnection(url);
@@ -581,17 +591,21 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
 
 	    while (rs.next()) {
 		String kliendikood = rs.getString("saaja").trim();
+		String aadr = rs.getString("aadr").trim();
 		String tootekood = rs.getString("toode").trim();
 		 String kuupaev = rs.getString("kuupaev");
         double kogus = Double.parseDouble(rs.getString("kogus").trim());
         double hind = Double.parseDouble(rs.getString("hind").trim());
-     
-
-                if (kliendikood.length() > 1) {
-                  CustProd cp = new CustProd(kliendikood, tootekood, kogus ,0 ,0,kuupaev.substring(5,10),hind,0,0," ");
+        String doknr = rs.getString("doc").trim();
+		
+                  CustProd cp = new CustProd(kliendikood + "_" + aadr, tootekood, kogus ,0 ,0,kuupaev.substring(5,10),hind,0,0," ");
+                  cp.setAbiKood(doknr);
                   custProds.add(cp);
-                }
-	    }
+                  if(!prodsSold.contains(tootekood)) {
+                	  prodsSold.add(tootekood);
+                  }
+                
+	     }
 
             rs.close();
             stmt.close();
@@ -608,21 +622,19 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
     public Vector getDebt(String agentCode) throws SQLException{
       Vector list = new Vector();
       
-      String sql = "SELECT saaja,tasudok AS number,tasukuup AS maksepaev,tasumata, kuupaev,(date()-tasukuup) AS yle FROM " +
-                   " dok WHERE  doktyyp='G' AND tasumata<>0  " + // tasukuup<date()+10 AND
-                   " ORDER BY saaja ";
+      String sql = "select PartnerID as saaja, FinancialDocNo as number,FinancialdocDate as kuupaev, DisbursementTerm as maksepaev, NotDisburseAmount as tasumata,  \r\n" + 
+      		"	  daycount*-1 as yle from v_DebtAnalysisY where NotDisburseAmount != 0 and PartnerID != ''  order by PartnerID,FinancialDocNo ";
 
       Connection con = DriverManager.getConnection(url);
       Statement stmt = con.createStatement();
       ResultSet rs = stmt.executeQuery(sql);
       while(rs.next()){
         Debt debt = new Debt();
-        debt.setCustID(rs.getString("saaja").trim());
+        debt.setPayerID(rs.getString("saaja").trim());
         debt.setDoknr(rs.getString("number").trim());
-        debt.setDuedate(rs.getDate("maksepaev"));
-
-        debt.setSum(rs.getDouble("tasumata"));
         debt.setDate(rs.getDate("kuupaev"));
+        debt.setDuedate(rs.getDate("maksepaev"));
+        debt.setSum(rs.getDouble("tasumata"));
         debt.setDue(rs.getString("yle"));
         list.addElement(debt);
       }
@@ -633,29 +645,10 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
       return list;
     }
 
-    /**
-     * Method declaration
-     *
-     *
-     * @param agentCode
-     *
-     * @return
-     *
-     * @see
-     */
     public double getSalary(String agentCode) {
-      
         return 0;
     }
 
-    /**
-     * Method declaration
-     *
-     *
-     * @return
-     *
-     * @see
-     */
     public String getStartingTime() {
         Calendar cal = Calendar.getInstance();
 
@@ -671,26 +664,10 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
         return sqlDate;
     }
 
-    /**
-     * Method declaration
-     *
-     *
-     * @return
-     *
-     * @see
-     */
     public String getDriverVersion() {
         return DRIVER_VERSION;
     }
 
-    /**
-     * Method declaration
-     *
-     *
-     * @return
-     *
-     * @see
-     */
     public String getSubjectFilesTo() {
         return this.subjectFilesTo;
     }
@@ -700,108 +677,48 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
 
 
     public String getNonMobileOrders(Agent agent){
-      connectionUp();
-
-     String sql = " SELECT tasudok AS arve,kuupaev,k.nimi,doksumma AS summa FROM dok d INNER JOIN klient k ON k.kood=d.klient " +
-               " WHERE kalktoode!='MobileJava' AND kuupaev > date()-3 AND pais2obj=?";
-
-
-      StringBuffer sb = new StringBuffer();
-
-        try {
-        	Connection con = DriverManager.getConnection(url);
-            PreparedStatement st = con.prepareStatement(sql);
-            st.setString(1, agent.getID());
-            String sep= System.getProperty("line.separator");
-            ResultSet	      rs = st.executeQuery();
-
-            sb.append("ARVE    Nimi  \t\t\tKuup�ev\t\tSumma" + sep);
-            sb.append("------------------------------------------------------" + sep);
-            while(rs.next()){
-              sb.append(rs.getString("arve").trim() + "\t");
-              sb.append(rs.getString("nimi").trim() + "\t");
-              sb.append(rs.getString("kuupaev").trim() + "\t");
-              sb.append(rs.getString("summa").trim() + sep);
-
-            }
-            rs.close();
-            st.close();
-            con.close();
-        } catch (Exception e) {
-            getParent().showError(e);
-        }
-
-    
-        return sb.toString();
+      return null;
     }
 
-
-
-    /**
-     * Method declaration
-     *
-     *
-     * @param s
-     *
-     * @see
-     */
     public void log(String s) {
         getParent().log(s);
     }
 
-    // private String url = "jdbc:DBF:///c://work/avallone/dbf";
     public static final String DRIVER_VERSION = "TildeVairum";
     private String url = null;
     private String subjectFilesTo = null;
 
-
-
 	@Override
 	public Vector getFixedAssortmentData() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 
 	@Override
 	public String getProductSortingData() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
-
 
 	@Override
 	public Vector getLastThreeData() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 
 	@Override
 	public void WebReporter() {
-	 
-	
 			
 	}
 	
 
-
-
-
 	@Override
 	public void connectionUp() {
-		// TODO Auto-generated method stub
 		
 	}
 
 
-
 	@Override
 	public void connectionDown() {
-		// TODO Auto-generated method stub
 		
 	}
 }
