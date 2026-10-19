@@ -508,8 +508,13 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				String name = rs.getString("nimi");
 				if ((id.trim().length() == 4 || id.trim().length() == 5)
 						&& id.trim().length() > 0) {
-					tm.put(cleardots(id), Converter.enCodeEst(id.substring(0, 1) + " "
+			 if(this.group365) {
+					tm.put(cleardots(id), Converter.enCodeEst(id.substring(0, 1) + "_"
 							+ cleardots(id) + "_" + name));
+				} else {
+					tm.put(cleardots(id), Converter.enCodeEst(id.substring(0, 1) + " "
+							+ cleardots(id) + " " + name));
+				}
 				}
 			}
 
@@ -570,7 +575,7 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				}
 				String name = rs.getString("nimi");
 				if (groupID.length() > 5) {
-					tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + "_" + name));
+					tm.put(cleardots(groupID),Converter.enCodeEst(cleardots(groupID) + " " + name));
 				}
 			 }else {
 				 String name = rs.getString("nimi");

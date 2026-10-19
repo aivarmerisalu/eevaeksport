@@ -287,66 +287,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
   public Vector getFixedAssortmentData() {
 		Vector result = new Vector();
-		/*
-		
-		try {
-			
-			String  cmd = "SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin ,s.EG_ASSORTITEMSTATUS as status " + 
-					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId " + 
-					"	order by str(a.posWeight) + a.Name ";
-			
-		
-		         if (isDebug()) System.out.println(cmd);
-		           Connection con = getNewConnection();
-		           Statement st = con.createStatement();
-		           ResultSet rs = st.executeQuery(cmd);
-
-		           while (rs.next()) {
-
-		             String sortid = rs.getString("ClientGR").trim()+"x";
-		             String prodID = rs.getString("ItemID").trim();
-		             int optio = rs.getInt("newin");
-		             int status = rs.getInt("status"); 
-		             
-		             if(usedProds.contains(prodID)){
-							
-						MatrixLine mline = new MatrixLine();
-						
-
-								if (sortid != null
-										&& sortid.trim().length() > 1) {
-									mline.setCliGroup(Converter.cleanLitLatEst(sortid.trim()).replaceAll(";", ":"));
-								}
-
-								if (prodID != null
-										&& prodID.trim().length() > 0) {
-									mline.setProdID(prodID.trim());
-								}
-								
-								if(optio == 1) {
-								   mline.setLineinfo("NEW"); // valikuline optional item
-								}else if (status == 0) {
-								   mline.setLineinfo("CENTRAL");
-								}
-							if(status != 2) {
-									result.add(mline);	
-								}
-							}
-		           }
-						
-					 rs.close();
-					 st.close();
-					con.close();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-*/
-
-		//System.out.println("fix size " + result.size());
 		return result;
-
-	
 }
 
   
@@ -2632,10 +2573,10 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
             Iterator itera =   cust.getAgents().keySet().iterator();
           while(itera.hasNext()) { 
           String aa = (String)itera.next();
-            if(!ags.contains(aa) && ags.length() > 0) {
+            if(!ags.contains(aa) ) {
             	ags = ags + "," + aa;
             }
-            if(!agsS.contains(aa)&& agsS.length() > 0) {
+            if(!agsS.contains(aa)) {
               	agsS = agsS + "," + aa;
               }
           }
@@ -3206,8 +3147,7 @@ boolean noopt = false;
             	    usedProds.add(prod.getID());
             	  }
                }
-               
-               
+            
                Double vat = rs.getDouble("vat");
                prod.setVat(vat + "");
                prod.setNameSorting(sorting + nimetus);
