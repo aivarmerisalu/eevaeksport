@@ -29,7 +29,9 @@ import org.w3c.dom.NodeList;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -46,6 +48,7 @@ import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -55,7 +58,7 @@ import java.util.stream.Collectors;
 
 
 
-public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter{
+public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,Discounter,PictureMaker{
 
     public BC365ValdoDBDriver(EksportPanel parent) {
         super(parent);
@@ -87,6 +90,88 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
        Public API
        ========================= */
 
+    @Override
+    public void PictureMaker() {
+    	 makePictureCat();
+    	  System.exit(0);
+    	
+    }
+    
+    private void makePictureCat(){
+	    
+      	
+      	String pictssou = parent.getProps().getProperty("pict.dir");
+    	    String pictspda = parent.getProps().getProperty("pictpda.dir");
+    	    TreeMap phsize = new TreeMap();
+    	    
+    	    
+    	 try {
+       	  File f = new File(pictspda +"list.txt");
+            if (f.exists())f.delete();
+            //Kataloogi sisude kustutamine
+        	  File res2 = new File (pictspda);
+               String[] ff2 = res2.list();
+          
+//           	 Lõppes kustutamine 
+    		 
+    		 TreeMap prods = this.getProducts(null);
+           StringBuffer buf = new StringBuffer();
+           Iterator enume = prods.keySet().iterator();
+      
+           while (enume.hasNext()) {
+      	    	String asi = (String)enume.next();
+      	    	Product prod = (Product)prods.get(asi);
+      	    	String toode = prod.getID();  
+                 if(toode.length() > 0){
+                  	
+      	   	  res2 = new File (pictssou);
+                ff2 = res2.list();
+              
+           	 for(int i = 0;ff2.length>i;i++){
+               	if( ff2[i].startsWith(toode)){
+                 // System.out.println("pilt olemas " + ff2[i]);
+              	File in = new File ( pictssou + ff2[i]); 
+                	if(in.isFile()){
+                	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
+                	if(!inpda.exists()) {
+                		try {
+                		Converter.shrinkAndCopyFile(in,inpda,250);
+                		}catch(Exception e) {System.out.println("kehv pilt " + prod.getID());}
+                	}
+                    	
+                    	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 
+                    	phsize.put(prod.getID(), kkk.length());
+              	    }
+                   }
+                 }
+               }
+      	   }
+          
+           
+         Iterator itera =   phsize.keySet().iterator();
+         while(itera.hasNext()) {
+      	   String prid = (String)itera.next();
+      		buf.append(prid +".jpg;"  + phsize.get(prid) + "\n");
+                 
+         }
+          
+           
+           try {
+       		PrintWriter os = new PrintWriter(new FileWriter(pictspda + "list.txt", true));
+       		os.write(buf.toString());
+       		os.close();
+       	  }catch (Exception ex) {
+       		ex.printStackTrace();
+       	  }
+    	 
+    	 } catch (Exception e) {
+      	    getParent().showError(e);
+      	}
+        
+    }
+
+
+    
 
     public void downloadData(String operation) {
         if (operation == null) {
@@ -847,6 +932,10 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     Object unitsPerPallet = cob.get("unitsPerPallet");
                     if (unitsPerPallet != null) prod.setOnPallet(Double.parseDouble(unitsPerPallet.toString()));
 
+                    Object reorderPoint = cob.get("reorderPoint");
+                    if (reorderPoint != null) prod.setOptAmountInUnits(Double.parseDouble(reorderPoint.toString()));
+
+                    
                     // Barcode
                     String barcode = (String) cob.get("barcode");
                     if (barcode != null && barcode.length() > 0) {
@@ -924,8 +1013,10 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                             String prid = (String) hisObj.get("itemNo");
                             Object qtyObj = hisObj.get("salesAmount");
                             Object price = hisObj.get("salesPrice");
-                            if (prid != null && qtyObj != null) {
-                                double qty = Double.parseDouble(qtyObj.toString());
+
+                            Object qtyObj2 = hisObj.get("quantity");
+                            if (prid != null && qtyObj2 != null) {
+                                double qty = Double.parseDouble(qtyObj2.toString());
                                 double hind = Double.parseDouble(price.toString());
                                 CustProd cp = new CustProd(cuid, prid, qty ,0 ,0,postingDate,hind,0,0," ");
                                 cp.setAbiKood(shipmentNo);
@@ -1042,7 +1133,38 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
     @Override public String getDistribution() { return ""; }
     @Override public String getSaveStockInfo() { return ""; }
     @Override public String getSaveDebtInfo() { return ""; }
-    @Override public TreeMap getProdGroups() throws SQLException { return new TreeMap(); }
+    
+    @Override public TreeMap getProdGroups() throws SQLException { 
+    	TreeMap tm = new TreeMap();
+    	  int part = 1;
+          while (true) {
+              File itemFile = new File("data/items" + part + ".json");
+              if (!itemFile.exists()) break;
+
+              System.out.println("Processing product file: " + itemFile.getName());
+
+              try {
+                  org.json.simple.JSONArray values =
+                          (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(itemFile.getPath());
+
+                  for (int i = 0; i < values.size(); i++) {
+                      org.json.simple.JSONObject cob = (org.json.simple.JSONObject) values.get(i);
+                      String brand = (String) cob.get("brandDimensionCode");
+                      if (brand != null && tm.get(brand) == null) {
+                          tm.put(brand, brand);  
+                      }
+                  }
+
+              } catch (Exception e) {
+                  e.printStackTrace();
+              }
+              part++;
+          }
+
+    	
+    	return tm; 
+    	
+    }
 
 
 

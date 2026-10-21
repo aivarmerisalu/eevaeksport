@@ -224,8 +224,8 @@ try{
 	    Connection con = getNewConnection();
 	  	
 	    String cmd = "SELECT  K.PK_KLIENTS AS id, K.KODS AS kood, K.NOSAUK AS nimi FROM   APV07062.DKLIENTS K " +
-	  			" WHERE K.KODS = '" +kood+"'" ;  
-
+	  			" WHERE K.KODS = '" +Converter.deCode(kood)+"'" ;  
+System.out.println(cmd);
 	  	Statement st = con.createStatement();
 	    ResultSet rs = st.executeQuery(cmd);
 	    Customer liik = null;

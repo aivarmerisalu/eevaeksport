@@ -43,19 +43,16 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
   public TildeVairumImportDriver(ImportPanel parent) {
     this.parent = parent;
     PropertyConfigurator.configure("log4j.properties");
-    logurl = parent.getProps().getProperty("API.url"); 
+    logurl = parent.getProps().getProperty("API.urlimport"); 
     secret = parent.getProps().getProperty("API.secret"); 
 	user =  parent.getProps().getProperty("rest.user");
     pass = parent.getProps().getProperty("rest.pass");
-    rcompany = parent.getProps().getProperty("rest.companyx");
-   // System.out.println("Tooted " + getData("/products/list",""));
    
   }
   
   String logurl = null;
   String user =  null;
   String pass = null;
-  String rcompany = null;
   String secret = null;
 
 	  
@@ -103,6 +100,7 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 	    //  auth_key: 12345678-1234-1234-1234-12345678901
 	      request.setHeader("auth_key",  secret);
 	      request.setHeader("Content-Type", "application/json");
+	      request.setHeader("Accept", "application/json");
 	      
 	      StringEntity jsonEntity = new StringEntity(json);
 	        request.setEntity(jsonEntity);
@@ -149,21 +147,33 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 		if(order.getInfo() != null && order.getInfo().trim().length() >0){
 			comm = order.getInfo();
 		}
-		  JSONObject ordMain = new JSONObject();
-		  JSONArray ordArray = new JSONArray();
-	      JSONObject ord = new JSONObject();
-	  String num = order.getAgent() + order.getDokNr();
-	  ord.put("OrderNumber",num.substring(num.length()-10));
-	  ord.put("OrderCustomerDeliveryAddress",  order.getCompany());
-	  ord.put("OrderDate", Converter.jsonDate(Calendar.getInstance().getTime()));
-	  ord.put("OrderSalesperson", order.getAgent());
+		
+	  JSONObject ord = new JSONObject();
+	  ord.put("type_id",21);
+	  
+	  String num = order.getAgent() + "-" + order.getDokNr();
+	 
+	  ord.put("number",num);
+	  String cukood =  Converter.deCode(order.getCompany());
+      String adid = null;
+      if(cukood.indexOf("_")!= -1){
+      	adid =  cukood.substring(cukood.lastIndexOf("_")+1);
+      	cukood = cukood.substring(0,cukood.lastIndexOf("_"));
+	    }
+	   ord.put("customer_id",  cukood);
+	  if(adid != null) {
+	    ord.put("billing_address_id",  adid);
+	  }
+	  
+	   ord.put("date_created", Converter.jsonDate(Calendar.getInstance().getTime()));
+	   ord.put("agent_id", order.getAgent());
 
 	  if (comm != null) {
-		  ord.put("OrderComment", Converter.cleanLitLatEst(comm));
+		  ord.put("note", Converter.cleanLitLatEst(comm));
 	  }
 	  
 	 	if(order.isShipDateUsed()) {
-	 	  ord.put("OrderDeliveryDate", Converter.jsonDate(order.getShipCal().getTime()));
+	 	  ord.put("date_delivery", Converter.jsonDate(order.getShipCal().getTime()));
 	 	}
 	 	
 	  Vector lines2 = order.getOrderLines();
@@ -173,35 +183,45 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 	      JSONObject lin = new JSONObject();
 	   	  OrderLine line = (OrderLine) lines2.elementAt(i);
 	   	  
-	   	  lin.put("ItemId", line.getToode() );
-	   	  lin.put("Qty",  line.getKogus());
-	 	  lin.put("Unit", line.getUnit());
+	   	  lin.put("product_id", line.getToode());
+	   	  lin.put("quantity",  line.getKogus());
+	 	  lin.put("unit_name", line.getUnit());
+	 	  
+	 	  if(line.getDiscount() > 0) {
+//	 		 lin.put("discount_percent", line.getUnit());
+	 		 lin.put("price", line.getPrice());
+	 	  }
 	 	  
 	     linesA.add(lin);
 	    
 	     this.addNumLine();
 	     }
+	/*     OrderNumber -> JSON "number": "13608"
+	    	 CustomerID -> JSON "customer_id": "3341"
+	    	 AddressID -> I’ll introduce a new JSON field "billing_address_id": "7585" (right now there is "billing" tag with detailed address information)
+	    	 Date -> JSON "date_created": "2026-10-21 00:00:00"
+	    	 AgentID  -> I’ll introduce a new JSON field "agent_id": "1234" (right now there is no such field)
+	    	 DateOfDelivery -> I’ll introduce a new JSON field "date_delivery": "2026-10-21 00:00:00"
+	    	 OrderComment -> JSON "note": "order notes"
+
+	    	  
+
+	    	 ProductID -> JSON "product_id": "112233"
+	    	 AmountOrdered -> JSON "quantity": 4,
+	    	 Unit -> JSON "unit_name”: "PCS"
+	    	 Discount -> JSON "discount_percent": 10
+	    	 Price -> JSON "price": 12.34
+
+*/	    	      
 	     
-	     
-	  ord.put("LINES", linesA);
-	  ordArray.add(ord);
-	  ordMain.put("ORDERS", ordArray);
+	  ord.put("line_items", linesA);
 	  
-	  Converter.saveFile("orders/response/" + order.getDokNr() + "request.json" , ordMain.toJSONString() );
-	  String res = postData( ordMain.toJSONString());
+	  
+	  Converter.saveFile("orders/response/" + order.getDokNr() + "request.json" , ord.toJSONString() );
+	  String res = postData( ord.toJSONString());
 	  System.out.println("res " + res);
-	  JSONParser parser = new JSONParser();
-	  
-	  try {
-		JSONObject res2 = (JSONObject) parser.parse(res);
-		if(res2.get("ExceptionType") != null) {
-			this.trouble = res;
-		}
-		System.out.println(res2.toJSONString());
-		  Converter.saveFile("orders/response/" + order.getDokNr() + "reply.json" , res2.toJSONString() );
-	} catch (ParseException e) {
-		e.printStackTrace();
-	}
+	  Converter.saveFile("orders/response/" + order.getDokNr() + "reply.json" , res );
+	
    
 //System.exit(0);
 	 }

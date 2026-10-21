@@ -4643,44 +4643,19 @@ HashMap prodHash = new HashMap();
       		 
       	 }
       	 
-      
-      	 try {
-      	  String namec =  rida.getAttributes().getNamedItem("name").getNodeValue(); 
-    	  //  System.out.println("prod " + id + " + " + namec);
-    	
-      	  namec = namec.replace("´", "'");
-      	  String addid = "";
-      	 if("true".equals(getParent().getProps().getProperty("name.code.front"))){
-      		 addid = id;
-      	 }
-        	  if("true".equals(getParent().getProps().getProperty("name.code.front"))){
-     			 prod.setName( ( id + " " + Converter.enCodeEst(namec.replaceAll("²", "x2"))).trim() + " GETZ " + add ); 
-     		 }else{
-     			 prod.setName(( Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " + id ).trim() + " GETZ " + add ); 
-     		 }
-        	
-        	  if(getParent().getProps().getProperty("vat") != null){
-        		  prod.setVat(getParent().getProps().getProperty("vat"));
-        	  }
-      	    
-      	   }catch(Exception e) {
-      		   goes = false;
-      	   }
+      	
       	     prod.setPrice(1);
       	     
-      	     
    	    	 try{
-      		 String pri =  rida.getAttributes().getNamedItem("price").getNodeValue(); 
+      		  String pri =  rida.getAttributes().getNamedItem("price").getNodeValue(); 
       	 	      	    prod.setPrice(Double.parseDouble(pri) ); 
- 	    	 }catch (Exception e){
- 	    
+ 	    	 } catch (Exception e){
  	    	 }
    	    	 
    	    	 try{
    	      		 String package1 =  rida.getAttributes().getNamedItem("package1").getNodeValue(); 
    	      	 	      	    prod.setInCases(Double.parseDouble(package1)); 
    	 	    	 }catch (Exception e){
-   	 	          // e.printStackTrace();
    	 	    	 }
       	   	
    	    	 
@@ -4698,37 +4673,39 @@ HashMap prodHash = new HashMap();
       		 
        		 if(rid.getNodeName().equals("stocklevels")) {
        			 Node sto = this.getNode(rid, "stocklevel");
-       		
-       		//System.out.println("Stock " + rid.getNodeName() + " " + rid.getAttributes().getLength());
-      	
-      	 	 if( getParent().getProps().getProperty("stockcode") != null && sto != null && 
+       	 	 if( getParent().getProps().getProperty("stockcode") != null && sto != null && 
       	 		sto.getAttributes().getNamedItem("stock").getNodeValue().equals(getParent().getProps().getProperty("stockcode"))){
-      	 		 
-      	 		// System.out.println("Stock " + sto.getAttributes().getNamedItem("level").getNodeValue());
       	 		double stoo = Double.parseDouble(sto.getAttributes().getNamedItem("level").getNodeValue());
       	 		prod.setStock(stoo);
-      	 		
-      	 	 }
-      		 }
-       		
-    			
+      	 	  }
+      		  }
+       		 try {
+             	  String namec =  rida.getAttributes().getNamedItem("name").getNodeValue(); 
+           	 	  namec = namec.replace("´", "'");
+             
+           	 	  if(getParent().getProps().getProperty("vat") != null){
+               		  prod.setVat(getParent().getProps().getProperty("vat"));
+               	  }
+             	
   	    		 if(rid.getNodeName().equals("datafields")){
     				
     				 for (int re = 0; re < rid.getChildNodes().getLength(); re++){
     					 Node nn2 = rid.getChildNodes().item(re);
     					 
     					if("data".equals(nn2.getNodeName())) {
-    						
-    						//System.out.println("nodes " + nn2.getAttributes().getNamedItem("code").getNodeValue());
     					
     					if("WEB_ART".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
-    						
-							if("Rodyti B2B".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
+    						if("Rodyti B2B".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
 								goes = true;
-							//			System.out.println("On Fix " + customer.getName());
 							}
-        					
-    					}
+        				 }
+    					if("ISPARDAVIMINE".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+    						if("TAIP".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
+								namec = "#ISP "+ namec;
+								System.out.println("GETZ ISP11 " +prod.getID());
+							}
+        				 }
+    					
     				   }
     					/*if(prod.getID().equals("MOT090513OD")) {
     			      		System.out.println("MOT090513OD 0000" + goes );
@@ -4765,12 +4742,31 @@ HashMap prodHash = new HashMap();
                            	}                
                        	  }
     					}
-
+                       if("ISPARDAVIMINE".equals(nn2.getAttributes().getNamedItem("code").getNodeValue())) {
+   						if("TAIP".equals(nn2.getAttributes().getNamedItem("content").getNodeValue())) {
+								//namec = "#ISP "+ namec;
+							//	System.out.println("GETZ ISP0 " +prod.getID());
+							}
+       				 }
 
     				 }
 	         		
 	         		 }
-      		 
+  	    		  String addid = "";
+              	 if("true".equals(getParent().getProps().getProperty("name.code.front"))){
+              		 addid = id;
+              	 }
+                	  if("true".equals(getParent().getProps().getProperty("name.code.front"))){
+             			 prod.setName( ( id + " " + Converter.enCodeEst(namec.replaceAll("²", "x2"))).trim() + " GETZ " + add ); 
+             		 }else{
+             			 prod.setName(( Converter.enCodeEst(namec.replaceAll("²", "x2")) + " " + id ).trim() + " GETZ " + add ); 
+             		 }
+                	
+       	   }catch(Exception e) {
+       		   e.printStackTrace();
+       		   goes = false;
+       	   }
+			
       		 
       		 }
      	         // prod.setStock((int)Double.parseDouble(stock.substring(0,stock.indexOf("\""))));

@@ -1076,7 +1076,9 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	        if(lastdoc.length() > 0) {
                 cp.setAbiKood(lastdoc);
 	        }
-	        custProds.add(cp);
+	        if(kogus != 0) {
+		         custProds.add(cp);
+		        }
 	        prods.addElement(tootekood);
 	        //}
 	      }

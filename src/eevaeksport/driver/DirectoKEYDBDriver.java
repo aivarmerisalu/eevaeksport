@@ -2523,12 +2523,25 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
       	 try {
       	  String namec =  rida.getAttributes().getNamedItem("name").getNodeValue(); 
     	  //  System.out.println("prod " + id + " + " + namec);
+
+        	try {
+           	 String stop =  rida.getAttributes().getNamedItem("ISPARDAVIMINE").getNodeValue();
+           	if(stop.equals("Taip")){
+           		namec = "#ISP " +  namec ;
+           	}
+           	
+           	}catch(Exception e) {
+           		
+           	}
     	
       	  namec = namec.replace("´", "'");
       	  String addid = "";
       	 if("true".equals(getParent().getProps().getProperty("name.code.front"))){
       		 addid = id;
       	 }
+      	 
+      	 
+      	 
         	  if("true".equals(getParent().getProps().getProperty("name.code.front"))){
      			 prod.setName( ( id + " " + Converter.enCodeEst(namec) + " " +  add).trim()); 
      		 }else{
@@ -2553,255 +2566,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
  	    	 }
       	   
       	    	
-        		
-    	   /*
-    	   
-           	 len = line.indexOf("unit=");
-           	 if(len != -1){
-           	   String unit   =  line.substring(len + 6);  
- 	          prod.setUnit(unit.substring(0,unit.indexOf("\"")));
-   	   		 }
-           	 
-           	 String kast = "package2=";
-           	 if(getParent().getProps().getProperty("kastis") != null){
-           		kast =  getParent().getProps().getProperty("kastis");
-           	 }
-           	 
-           	len = line.indexOf(kast);
-          	 if(len != -1){
-          	   String incase   =  line.substring(len + 10); 
-          	   try{
-          		   prod.setInCases(Double.parseDouble(incase.substring(0,incase.indexOf("\""))));
-         	   }catch(Exception e){
-          	   }
-	         }
-          	 
-         
-          	 
-           	 
-      	
-      	if(noTexts.size() > 0){
-      		for(int u = 0 ; u < noTexts.size(); u++){
-      			String aa = noTexts.elementAt(u) + "";
-      			if(namec.toLowerCase().contains(aa)){
-          			goes = false;	
-      			}	
-      		}
-      	}
-
-     	  
-      	
-	if(codeEnds.size() > 0){
-      		for(int u = 0 ; u < codeEnds.size(); u++){
-      			String aa = codeEnds.elementAt(u) + "";
-      			if(id.toLowerCase().endsWith(aa.toLowerCase())){
-          			goes = false;	
-      			}	
-      		}
-      	}
-	 	  
-  	
-      		 len = line.indexOf("class=");
-      	 	 if(len != -1){
-      	 	     String grupp   = line.substring(len + 7);
-      	 	     grupp =   grupp.substring(0,grupp.indexOf("\""));
-      	 	    // System.out.println("grupp" + grupp + " " + yesClasses.toString());
-      	 	     if(yesClasses.size() > 0 && !yesClasses.contains(grupp)){
-      	 	    	goes = false; 
-      	 	     }
-      	 
-      	    //  	log.info("33 " + goes + " " + grupp);
-      	 	  prod.setGroup(Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
-
-          	  len = line.indexOf("supplier_code=");
-        	    if(len != -1 && hasSupplier){
-        	    	 String gr1  = line.substring(len + 15);
-        	   	    gr1 = gr1.substring(0,gr1.indexOf("\""));
-            	     prod.setGroup(Converter.cleanLitLatEst(gr1.replaceAll(";",":").replaceAll("&amp;", "&")));
-            	     prod.setGroupSecond(Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
-            	   //  System.out.println("Grupid " +  prod.getGroup() + "*" + prod.getGroupSecond() + "*" + gr1);
-        	         
-         	    	  
-               }
-      	 	  
-      	 	    
-        	 if( typeIndent !=  null){
-            		
-              		 len = line.indexOf("<data code=\"" +typeIndent + "\"");
-              		 int lll = ("<data code=\"" +typeIndent + "\"").length();
-               	    if(len != -1){
-               	    	 String  gr   = line.substring(len + lll + 10);
-               	    	 gr = gr.substring(0,gr.indexOf("\""));
-               	    	 prod.setType(gr.replaceAll("&amp;", "&")); 
-                   	 }
-              	}
-        	    
-      	 	  if( groupIndent !=  null){
-            		
-           		 len = line.indexOf("<data code=\"" +groupIndent + "\"");
-           		 int lll = ("<data code=\"" +groupIndent + "\"").length();
-            	    if(len != -1){
-            	    	 String  gr   = line.substring(len + lll + 10);
-            	    	 
-            	    	 gr = gr.substring(0,gr.indexOf("\""));
-            	    	 prod.setGroup(gr.replaceAll(";",":").replaceAll("&amp;", "&"));
-                	   this.prGroups.put(gr.replaceAll(";",":").replaceAll("&amp;", "&"), gr.replaceAll(";",":").replaceAll("&amp;", "&")); 
-                	   prod.setGroupSecond(Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
-                	 }
-           	     }
-      	 	 }
-
-      	 	 len = line.indexOf("data code=\"GENERAL\""); 
-      	 	 if(len != -1){
-      	 		 try {
-      	 		   String    areto =  line.substring(len + 29); 
-       	 	      areto = areto.substring(0,areto.indexOf("\""));
-                 // System.out.println("areto " + areto );
-       	 	      prod.addBarcode(areto); 
-      	 		 }catch(Exception e) {
-      	 			 
-      	 		 }
-      	 	      	 	 }
-      	 
-      	 	 if(lang2 != null && line.indexOf("param=\"" + lang2 + "\"") != -1) {
-           	 	
-          	 	 len = line.indexOf("data code=\"ART_LANG\""); 
-          	 	 if(len != -1){
-          	 		 try {
-          	 		   String   vahe =  line.substring(len + 30); 
-           	 	    String  areto = vahe.substring(0,vahe.indexOf(">"));
-                      //System.out.println("areto " + areto  + "\n vahe: " + vahe);
-                      if(areto.contains("param=\"" + lang2 + "\"")) {
-                    	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\"")) + " " +  add + shelf); 
-                      } else {
-                    	  len = vahe.indexOf("data code=\"ART_LANG\""); 
-                    	//  System.out.println("len2 " + len);
-                    	  if(len != -1){
-                   	 		
-                   	 		    vahe =  vahe.substring(len + 30); 
-                    	 	     areto = vahe.substring(0,vahe.indexOf(">"));
-                    	 	     
-                    	 	   // System.out.println("areto2 " + areto );
-                                if(areto.contains("param=\"" + lang2 + "\"")) {
-                              	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                                }else {
-                                	len = vahe.indexOf("data code=\"ART_LANG\""); 
-                              	  
-                              	  if(len != -1){
-                             	 		 try {
-                             	 		    vahe =  vahe.substring(len + 30); 
-                              	 	     areto = vahe.substring(0,vahe.indexOf(">"));
-                              	 	     
-                              	 	    //System.out.println("areto3 " + areto );
-                                          if(areto.contains("param=\"" + lang2 + "\"")) {
-                                        	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                                          }	
-                                
-                   	 	 }catch(Exception ee) {
-              	 			 
-              	 		 }
-                    	  
-                              	  }  
-                      }
-                    	  }
-           	 	  
-          	 	      	 	 
-                    	  }
-          	 	 }catch(Exception ee) {
-      	 			 
-      	 		 }
-          	 	 }
-          	 //	 System.out.println(prod.getName());
-          	 //System.exit(0);	 
-          	  } 
-      	 	 
-      	 	 
-      	  if(lang != null && line.indexOf("param=\"" + lang + "\"") != -1) {
-      	 	
-      	 	 len = line.indexOf("data code=\"ART_LANG\""); 
-      	 	 if(len != -1){
-      	 		 try {
-      	 		   String   vahe =  line.substring(len + 30); 
-       	 	    String  areto = vahe.substring(0,vahe.indexOf(">"));
-                  //System.out.println("areto " + areto  + "\n vahe: " + vahe);
-                  if(areto.contains("param=\"" + lang + "\"")) {
-                	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                  } else {
-                	  len = vahe.indexOf("data code=\"ART_LANG\""); 
-                	//  System.out.println("len2 " + len);
-                	  if(len != -1){
-               	 		
-               	 		    vahe =  vahe.substring(len + 30); 
-                	 	     areto = vahe.substring(0,vahe.indexOf(">"));
-                	 	     
-                	 	   // System.out.println("areto2 " + areto );
-                            if(areto.contains("param=\"" + lang + "\"")) {
-                          	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                            }else {
-                            	len = vahe.indexOf("data code=\"ART_LANG\""); 
-                          	  
-                          	  if(len != -1){
-                         	 		 try {
-                         	 		    vahe =  vahe.substring(len + 30); 
-                          	 	     areto = vahe.substring(0,vahe.indexOf(">"));
-                          	 	     
-                          	 	    //System.out.println("areto3 " + areto );
-                                      if(areto.contains("param=\"" + lang + "\"")) {
-                                    	  prod.setName(addid + " " + areto.substring(0,areto.indexOf("\""))+ " " +  add + shelf); 
-                                      }	
-                            
-               	 	 }catch(Exception ee) {
-          	 			 
-          	 		 }
-                	  
-                          	  }  
-                  }
-                	  }
-       	 	  
-      	 	      	 	 
-                	  }
-      	 	 }catch(Exception ee) {
-  	 			 
-  	 		 }
-      	 	 }
-      	 //	 System.out.println(prod.getName());
-      	 //System.exit(0);	 
-      	  }
-      	  
-      	  
-      	  
-      	 String  areto = "";
-      	 	 len = line.indexOf("data code=\"ALK_REG\""); 
-      	 	 if(len != -1){
-      	 	      areto =  line.substring(len + 29); 
-      	 	      areto = areto.substring(0,areto.indexOf("\""));
-                // System.out.println("areto " + areto );
-
-      	 	 }
-
-      	 	 len = line.indexOf("data code=\"TELEMA_EXP\""); 
-      	 	 if(len != -1){
-      	 	     goes = true;
-
-      	 	 }      	 	
-      	 	 
-      	 	 double mahto = 0;
-      	 	 String maht = "";
-      	 	 len = line.indexOf("data code=\"KOGUS\""); 
-      	 	 if(len != -1){
-      	 		 try{ 
-      	 		 maht =  line.substring(len + 18); 
-      	 	      maht = maht.substring(0,maht.indexOf("\""));
-                 //  System.out.println("maht " + maht );
-                  
-                	   mahto = Double.parseDouble(maht.replace(',', '.'));
-                   }catch(Exception e){
-                	   
-                   }
-      	 	 }
-      	 	 
-      	 	 */
-      	 	if("true".equals(getParent().getProps().getProperty("stocktozero"))){
+     	 	if("true".equals(getParent().getProps().getProperty("stocktozero"))){
       	 		prod.setStock(0);
            	 }
       	 	 
@@ -2853,6 +2618,7 @@ public class DirectoKEYDBDriver extends AbstractDBDriver implements BulkUpdater,
       		
       	}
      
+      	
       	    if(goes ){
       	    	if(!usedGroups.contains(prod.getGroup())){
       	    		usedGroups.add(prod.getGroup());

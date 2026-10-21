@@ -583,6 +583,47 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       rs.close();
  	
       
+      String s1 = "WITH RankedPrices AS (\r\n" + 
+      		"    SELECT\r\n" + 
+      		"        c.PARENTPRICEGROUPID,\r\n" + 
+      		"        c.CHILDPRICEGROUPID,\r\n" + 
+      		"        c.PRIORITY,\r\n" + 
+      		"        p.itemid AS toode,\r\n" + 
+      		"        p.price AS hind,\r\n" + 
+      		"        ROW_NUMBER() OVER (\r\n" + 
+      		"            PARTITION BY p.itemid\r\n" + 
+      		"            ORDER BY c.PRIORITY DESC\r\n" + 
+      		"        ) AS rn\r\n" + 
+      		"    FROM MJ_PRICES p\r\n" + 
+      		"    INNER JOIN MJ_PRICE_COMPOSITE c\r\n" + 
+      		"        ON c.CHILDPRICEGROUPID = p.custpricegroup\r\n" + 
+      		")\r\n" + 
+      		"SELECT\r\n" + 
+      		"    PARENTPRICEGROUPID as grupp,\r\n" + 
+      		"    toode,\r\n" + 
+      		"    hind\r\n" + 
+      		"FROM RankedPrices\r\n" + 
+      		"WHERE rn = 1\r\n" + 
+      		"ORDER BY PRIORITY DESC;";
+      
+      rs = stmt.executeQuery(s1);
+      while (rs.next()) {
+
+              String gr = rs.getString("grupp");
+              if(prs.contains(gr)) {
+              String tt = rs.getString("toode");
+              Double pr = rs.getDouble("hind");
+                        MatrixLine mline = new MatrixLine();
+                                  mline.setCliGroup(gr);
+                                  mline.setProdID(tt);
+                                  mline.setPrice(pr);
+                          lines.add(mline);
+              }
+              
+        }
+      rs.close();
+      
+      
 	    String sql4a = "SELECT p.pricelistBackOfficeId as grupp, p.productBackOfficeId as toode, p.price as hind" + 
 	    		" FROM EPASAULE_PRICES p  where "
 	    		+ "p.price > 0  " ;	
@@ -1095,8 +1136,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
                    		if(lisainfo.get(key) != null) {
                    			cp.returnData = lisainfo.get(key)+"";
                    		}
-                   		
-		             custProds.add(cp);
+                   	//	if(kogus != 0) {
+               	         custProds.add(cp);
+               	      //  }
 		         }
 		        }
 		      }

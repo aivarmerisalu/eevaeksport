@@ -349,8 +349,6 @@ try (CloseableHttpResponse response = client.execute(post)) {
 			  jHeader.put("ExpectedDeliveryDate", year +"-"+ month +"-"+ day);
 	        		        
 
-	        boolean invoice = false;
-	          
 	        System.out.println("Seisund " + repr + " " + tagastus );
 	        
 		     String func = "ORDER";
