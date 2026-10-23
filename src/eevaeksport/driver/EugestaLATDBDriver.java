@@ -797,15 +797,25 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 		             String sortid = rs.getString("ClientGR").trim();
 		             String prodID = rs.getString("ItemID").trim();
+		             int optio = rs.getInt("newin");
 		             int status = rs.getInt("status");
 		       
 		            ags =   sortags.get(sortid);
 		           if(ags == null) {
 		        	   ags = "";
 		           }
+		           
 		           String must = " ";
 		           if(status == 1) {
 		        	   must = "TOP";
+		           }
+		           
+		           if(optio == 1) {
+		        	   if(must.trim().length() == 0) {
+		        	    must = "NEW";
+		        	   }else {
+		        		   must = must + " NEW";
+		        	   }
 		           }
 		           
 		             if(usedProds.contains(prodID)){
