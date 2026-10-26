@@ -1218,6 +1218,7 @@ public class EksportPanel extends JPanel implements ActionListener,
 					    || driver.getDriverVersion().equals("ODOOApi")
 					    || driver.getDriverVersion().equals("AxaAmberAT")
 					    || driver.getDriverVersion().equals("NaviValdo")
+					    || driver.getDriverVersion().equals("BC365Valdo")
 					    || driver.getDriverVersion().equals("SamsonasCSV")
 					    || driver.getDriverVersion().equals("RivileTridens")
 					    || driver.getDriverVersion().equals("S1XMLRadex")

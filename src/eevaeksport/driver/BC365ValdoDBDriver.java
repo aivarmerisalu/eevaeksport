@@ -470,7 +470,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+	//		getPriceMatrixData();
 	  //System.out.println("Managersize " + tm.size());
 		//	getCustomerProductsList(null);
 	   return tm;
@@ -763,7 +763,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
                     String priceGroup = (String) cob.get("priceGroupCode");
                     if (priceGroup != null) cust.setGroup(priceGroup.trim());
-
+           
                     String storeCat = (String) cob.get("storeCatDimensionCode");
                     if (storeCat != null && storeCat.trim().length() > 0) cust.setChain(storeCat.trim());
 
@@ -774,7 +774,6 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
                     // ===== ASSIGN SALESPERSONS BASED ON customerShipToCode =====
                     List<String> salespersons = shipToMap.get(number);
-                 //   System.out.println("Agent " + salespersons);
                     
                     
                     List<Agent> salespersonsRoute = shipToRouteMap.get(number);
@@ -818,6 +817,8 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
                     if ("A".equals(status)) {
                         tm.put(cust.getName(), cust);
+                        System.out.println("pg code " + cust.getGroup());
+
                     }
                 }
 
@@ -993,7 +994,9 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     File fil = new File("data/GetSalesHistory" + weekNumber + weekYear + ".json");
 
                     try {
+                    	if(oldData != null) {
                     	System.out.println("oldata enne " + oldData.size());
+                    	}
                  
                     	if(fil.exists()) {
                     	org.json.simple.JSONObject hisData =
@@ -1040,10 +1043,10 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                 	for(CustProd cp : oldData.values()) {
                 		res.add(cp);
                 	}
+                	System.out.println("oldata pärast " + oldData.size());
                 }
 
-            	System.out.println("oldata pärast " + oldData.size());
-    	
+        
     	return res; 
     }
     
@@ -1100,6 +1103,9 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     ml.setPrice(price);
                     lines.add(ml);
 
+                    if(priceGroupCode.equals("SPEC10")) {
+                    	System.out.println("spec10 " + ml.toString());
+                    }
                 }
 
                 part++;
@@ -1108,7 +1114,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+  System.out.println("lines " + lines.size());
         return lines;
     }
 
@@ -1124,7 +1130,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
     @Override public String getAssortmentStr(Agent agent) { return ""; }
     @Override public String getStartingTime() { return ""; }
     @Override public String getDealerCustomerCSV(String agentCode) { return ""; }
-    @Override public String getDriverVersion() { return "BC365ValdoDBDriver"; }
+    @Override public String getDriverVersion() { return "BC365Valdo"; }
     @Override public String getSubjectFilesTo() { return ""; }
     @Override public double getSalary(String agentCode) { return 0.0; }
     @Override public void connectionUp() {}
