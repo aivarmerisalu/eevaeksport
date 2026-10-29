@@ -22,6 +22,10 @@ import org.json.simple.JSONObject;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -32,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -341,6 +346,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
     public String callOperation(String operation, String json) throws Exception {
 
+        System.out.println("op " + operation);
         String serviceUrl = parent.getProps().getProperty("api.SERVICE_URL");
         String namespace  = parent.getProps().getProperty("api.NAMESPACE");
         String domain     = parent.getProps().getProperty("api.DOMAIN");
@@ -414,22 +420,14 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
     private String extractReturnValue(InputStream xmlStream) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
-        
-     /*   String text = new BufferedReader(
-                new InputStreamReader(xmlStream, StandardCharsets.UTF_8))
-            .lines()
-            .collect(Collectors.joining("\n"));
-        System.out.println(text);*/
 
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(xmlStream);
-
         NodeList nodes = document.getElementsByTagName("return_value");
 
         if (nodes.getLength() == 0) {
             throw new RuntimeException("SOAP response does not contain <return_value>" );
         }
-
         StringBuilder sb = new StringBuilder();
         NodeList children = nodes.item(0).getChildNodes();
 
@@ -438,7 +436,9 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                 sb.append(children.item(i).getNodeValue());
             }
         }
-        return sb.toString().trim();
+        String tulem = sb.toString().trim();
+
+        return tulem;
     }
 
     /* =========================
@@ -764,7 +764,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     String priceGroup = (String) cob.get("priceGroupCode");
                     if (priceGroup != null) cust.setGroup(priceGroup.trim());
            
-                    String storeCat = (String) cob.get("storeCatDimensionCode");
+                    String storeCat = (String) cob.get("franchise");
                     if (storeCat != null && storeCat.trim().length() > 0) cust.setChain(storeCat.trim());
 
                     Object consignationDaysObj = cob.get("consignationDays");
@@ -1082,11 +1082,11 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     }
 
                     // ===== CLEAN priceGroupCode =====
-                    String priceGroupCode = clean((String) cob.get("priceGroupCode"));
-                    if (priceGroupCode == null || priceGroupCode.length() == 0) {
-                        continue;   // skip empty price groups (remove if not wanted)
-                    }
-
+                    String priceGroupCode = (String) cob.get("priceGroupCode");
+                    String promotionCode = (String) cob.get("promotionCode");
+                    String sDate = (String) cob.get("startingDate");
+                    String eDate = (String) cob.get("endingDate");
+                       
                     // ===== READ price =====
                     Object priceObj = cob.get("unitPrice");
                     Double price = 0.0;
@@ -1098,13 +1098,19 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     }
 
                     // ===== SET MatrixLine =====
-                    ml.setCliGroup(priceGroupCode);
+                   if(  priceGroupCode != null && priceGroupCode.trim().length() > 0) {
+                     ml.setCliGroup(priceGroupCode);
+                   }
+                   if(  promotionCode != null && promotionCode.trim().length() > 0) {
+                       ml.setStartDate(sDate);
+                       ml.setEndDate(eDate);
+                   }
                     ml.setProdID(itemNo);
                     ml.setPrice(price);
                     lines.add(ml);
 
                     if(priceGroupCode.equals("SPEC10")) {
-                    	System.out.println("spec10 " + ml.toString());
+                   // 	System.out.println("spec10 " + ml.toString());
                     }
                 }
 

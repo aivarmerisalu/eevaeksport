@@ -160,7 +160,7 @@ public class HansaPommDBDriver extends AbstractDBDriver implements BulkUpdater,D
               while((line = reader.readLine()) != null){
             	  
             	  if(line.indexOf("reb2") != -1){
-            		  System.out.println("sees " + line);
+            		//  System.out.println("sees " + line);
             		  while((line = reader.readLine()) != null && !line.startsWith("pldef2") ){
             			//  System.out.println("V�ljas2 " + line.length() + " " + line);
             			   
@@ -178,7 +178,7 @@ public class HansaPommDBDriver extends AbstractDBDriver implements BulkUpdater,D
             					  ha = ha.substring(0,ha.length()-1);
             				  }
             				  
-            				  System.out.println(kuupa + kuupl + ha);
+            				//  System.out.println(kuupa + kuupl + ha);
             				  while((line = reader.readLine()) != null && line.length() > 0 
             						  && line.length() < 25  ){
             					  line = line.replaceAll("\t","| "); 
@@ -904,6 +904,7 @@ TreeMap tr = new TreeMap();
         if(hinnak != null && hinnak.trim().length() > 0){
         	customer.setGroup(hinnak.trim());	
         }
+        try {
           st.nextToken();
           
            st.nextToken();
@@ -972,18 +973,10 @@ TreeMap tr = new TreeMap();
            
            if (st.hasMoreTokens()){
            	String cred = st.nextToken().trim();
-           	if(cred.length()>0 && cred.trim().length()>0){
-           	//	customer.setCredit(cred.replaceAll(" ", "").replaceAll(",", "."));	
-           	}          
+           	          
            }
            
-           /*
 
-           if (st.hasMoreTokens()){
-            customer.setVisit(st.nextToken().trim());
-            System.out.println(customer.getVisit());
-          }*/
-           
            String tok = "";
            String tok2 = "";
            String pricelist = "";
@@ -1025,9 +1018,9 @@ TreeMap tr = new TreeMap();
         	if(i==37){
                 phon2 = toke.trim();	
                 	}
-        	//if(line.contains("2883|")) {
+        	if(line.contains("|")) {
         	//	System.out.println("tok : " + i + " " + toke);
-        	//}
+        	}
            }
         
            if(phon2.trim().length()>0){
@@ -1090,6 +1083,7 @@ TreeMap tr = new TreeMap();
              this.customers.add(customer.getID());
              buf.append(customer.getID() + ";" + customer.getName() + ";" +  customer.getAddress() + "; ; ; ; ; ; \n");
            }
+        }catch(Exception e) {}
          }
      	
      	}
@@ -1369,7 +1363,7 @@ TreeMap tr = new TreeMap();
         if(part.endsWith("/")) {
         	part = part.substring(0,part.length()-1).trim();
         }
-       System.out.println("Out1 " + prod.getID() + " " + part);
+      // System.out.println("Out1 " + prod.getID() + " " + part);
         prod.setPartii(part);
         prod.setVat("24");
          	if( goes && prod.getName()!= null ){

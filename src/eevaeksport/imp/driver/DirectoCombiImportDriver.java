@@ -13,6 +13,12 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
@@ -92,6 +98,71 @@ public class DirectoCombiImportDriver extends AbstractImportDriver{
   private String tobisDataDir = null;
   String logurl = null;
   boolean testing = false;
+        
+      private static final Path FILE_PATH = Paths.get("ordernum.txt");
+      private static final long DEFAULT_START_NUMBER = 9000000L; // Change this as needed
+
+      /**
+       * Retrieves the next order number, increments it, and saves it back to the file.
+       * 
+       * @return The next order number to use.
+       */
+      public static synchronized long getNextOrderNumber() {
+          long currentNumber = getCurrentOrderNumber();
+          long nextNumber = currentNumber + 1;
+          saveOrderNumber(nextNumber);
+          return nextNumber;
+      }
+
+      /**
+       * Reads the current order number from the file. 
+       * If the file doesn't exist or is empty, it initializes it with the default start number.
+       */
+      public static synchronized long getCurrentOrderNumber() {
+          if (!Files.exists(FILE_PATH)) {
+              saveOrderNumber(DEFAULT_START_NUMBER);
+              return DEFAULT_START_NUMBER;
+          }
+          
+          try {
+        	  byte[] bytes = Files.readAllBytes(FILE_PATH);
+              String content = new String(bytes, StandardCharsets.UTF_8).trim();
+              if (content.isEmpty()) {
+                  saveOrderNumber(DEFAULT_START_NUMBER);
+                  return DEFAULT_START_NUMBER;
+              }
+              return Long.parseLong(content);
+          } catch (IOException | NumberFormatException e) {
+              // Fallback in case of read error or corrupted text file
+              System.err.println("Error reading order number file. Resetting to default.");
+              saveOrderNumber(DEFAULT_START_NUMBER);
+              return DEFAULT_START_NUMBER;
+          }
+      }
+
+      /**
+       * Programmatically sets the order number. 
+       * (Optional: You can also just open ordernum.txt and edit it manually).
+       */
+      public static synchronized void setOrderNumber(long newNumber) {
+          saveOrderNumber(newNumber);
+      }
+
+      private static void saveOrderNumber(long number) {
+          try {
+              byte[] bytes = String.valueOf(number).getBytes(StandardCharsets.UTF_8);
+              Files.write(
+                  FILE_PATH, 
+                  bytes, 
+                  StandardOpenOption.CREATE, 
+                  StandardOpenOption.TRUNCATE_EXISTING
+              );
+          } catch (IOException e) {
+              throw new RuntimeException("Failed to save order number to file", e);
+          }
+      }
+  
+  
   
  private Vector splitOrder (Order order){
  	  
@@ -1365,7 +1436,7 @@ hind =   Converter.Round((float)hind, 2);
 	      
 	      } 
 	    if(props.get("doknr") == null ) {
-	    	props.put("doknr", "5000001");
+	    	props.put("doknr", "9000001");
 	    	
 	    	 try {
 				saveProps(props,"serial.txt","value");
@@ -1373,7 +1444,7 @@ hind =   Converter.Round((float)hind, 2);
 				
 				e.printStackTrace();
 			}
-	    	 return 5000000;
+	    	 return 9000000;
 	    }else {
 	    	int i = Integer.parseInt(props.get("doknr")+"");
 	    	i++;
@@ -1580,8 +1651,14 @@ hind =   Converter.Round((float)hind, 2);
 	 	    if(!getzorder) {
 	 	    	url = new URL(logurl + companyT + "/xmlcore.asp");
 	 	    }
+	 	    Boolean allorders = true;
+	 	    
+	 	    if(!getzorder && "true".equals(parent.getProps().getProperty("getzolny"))) {
+	 	    	allorders = false;
+	 	    }
+	 	    
 	 	    System.out.println(url.toString());
-	 	    if(!testing) {
+	 	    if(!testing && allorders) {
 	 	    URLConnection conn = url.openConnection();
 	 	    conn.setDoOutput(true);
 	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());

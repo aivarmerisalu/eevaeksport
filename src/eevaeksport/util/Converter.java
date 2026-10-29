@@ -1121,26 +1121,16 @@ public class Converter {
 				e.printStackTrace();
 			}
 	  }
-		     
-		     
-	   public static TreeMap loadMore() {
+		
+	   public static TreeMap loadMore(String path) {
 		   TreeMap res = new TreeMap();
 		   try {
 			   
-			   File ff= new File("eans.txt");
-			   if(!ff.exists()) {
-				  ff =  new File("excelsort/eans/eans.txt");
-			   }
-			   if(!ff.exists()) {
-					  ff =  new File("c:/mobilejava/excelsort/eans/eans.txt");
-				   }
+			   File  ff =  new File(path +"eans/eans.txt");
 			    FileInputStream is = new FileInputStream(ff);
 				InputStreamReader isr = new InputStreamReader(is, "utf-8");
 				BufferedReader reader = new BufferedReader(isr);
-				
-				
 			    String    line = null;
-			 
 			    try {
 			        while((line = reader.readLine()) != null) {
 			      StringTokenizer st = new StringTokenizer(line,";");
@@ -1148,7 +1138,6 @@ public class Converter {
 			    	  res.put(st.nextToken(), st.nextToken());
 			      }
 			        }
-
 			       
 			    } finally {
 			        reader.close();
@@ -1161,6 +1150,42 @@ public class Converter {
 		
 		   
 	//	 System.out.println("lis suurus " + res.size());
+		   
+		   return res;
+	   }
+
+		     
+	   public static TreeMap loadMore() {
+		   TreeMap res = new TreeMap();
+		   try {
+			   
+			   File ff= new File("eans.txt");
+			   if(!ff.exists()) {
+				  ff =  new File("excelsort/eans/eans.txt");
+			   }
+			   
+			   if(!ff.exists()) {
+					  ff =  new File("c:/mobilejava/excelsort/eans/eans.txt");
+				   }
+			    FileInputStream is = new FileInputStream(ff);
+				InputStreamReader isr = new InputStreamReader(is, "utf-8");
+				BufferedReader reader = new BufferedReader(isr);
+			    String    line = null;
+			    try {
+			        while((line = reader.readLine()) != null) {
+			      StringTokenizer st = new StringTokenizer(line,";");
+			      while(st.hasMoreTokens()) {
+			    	  res.put(st.nextToken(), st.nextToken());
+			      }
+			        }
+			       
+			    } finally {
+			        reader.close();
+			    }
+			 
+		   }catch(Exception e) {
+			   e.printStackTrace();
+		   }
 		   
 		   return res;
 	   }

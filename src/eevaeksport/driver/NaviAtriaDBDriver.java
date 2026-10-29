@@ -366,7 +366,7 @@ public class NaviAtriaDBDriver extends AbstractDBDriver implements BulkUpdater,D
    @Override
 	public void FixLoader() {
 	   
-	   eanprods =  Converter.loadMore();
+	   eanprods =  Converter.loadMore(getParent().getProps().getProperty("excel.sortdir"));
 		  
 		  if(eanprods == null) {
 			  eanprods = new TreeMap();

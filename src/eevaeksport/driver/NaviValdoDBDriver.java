@@ -1550,7 +1550,6 @@ con3.close();
           
                double lprice = rs.getDouble("lastprice");
                String ldoc = rs.getString("lastdoc");
-               String ldoc1 = rs.getString("lastdoc1");
              
               String key = custID+ "_" + custAbi + "-" + prodID;
               if(oldkey == null) {
@@ -1560,13 +1559,11 @@ con3.close();
               if(!oldkey.equals(key)) {
             	  count = 0;
               }
-              
                	if(count < 3) {
                		String value = ldoc + "," + lastdate + "," +this.getNF().format(amount) + "," + this.getNF().format(lprice) ;
                		if(lisainfo.get(key) != null) {
                			value = lisainfo.get(key) + "|" + value;
                		}
-               		
                	   lisainfo.put(key, value);
                	}
                 
@@ -1581,7 +1578,7 @@ con3.close();
     java.sql.Date now = new java.sql.Date(cal.getTimeInMillis());
     
     HashSet loetud = new HashSet ();
-    rs.close();
+    
     rs = stmt.executeQuery(cmd);
     while(rs.next()){
 
@@ -1618,7 +1615,6 @@ con3.close();
                  
                     
                     
-                    Product prod = new Product(prodID);
                     CustProd cp = new CustProd(custID+ "_" + custAbi , prodID,amount , 0, 0,lastdate,lprice,open,0," ");
                  
                     if(ldoc1 != null && ldoc1.trim().length() > 0) {
@@ -1647,15 +1643,15 @@ con3.close();
          stmt.close();
          con.close();
 
-
-
      } catch (Exception e){
        e.printStackTrace();
      }
+     
+     System.out.println("custProd sees "  + vec.size() + "  " + tobeSaved.size());
      try {
-    	 String path = 	getParent().getProps().getProperty("oldvec.savepath");
-    		    
-        Converter.saveObject(tobeSaved, path +  "navicustprods.vec");
+    if(tobeSaved.size() > 0) {
+         Converter.saveObject(tobeSaved, getParent().getProps().getProperty("oldvec.savepath") +  "navicustprods.vec");
+    }
      }catch(Exception e) {
     	 e.printStackTrace();
      }

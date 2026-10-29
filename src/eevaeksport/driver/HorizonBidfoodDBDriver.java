@@ -1001,7 +1001,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
         }
       
       double opt = rs.getDouble("optam");
-      if(opt > 1) {
+      if(opt > 0.05) {
          prod.setOptAmountInUnits(opt);
       } else {
     	  prod.setOptAmountInUnits(1); 
