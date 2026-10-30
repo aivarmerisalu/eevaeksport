@@ -911,8 +911,22 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     String brand = (String) cob.get("brandDimensionCode");
                     if (brand != null) prod.setGroup(brand.trim());
 
+
+                    // Barcode
+                    String addon = "";
+                    String barcode = (String) cob.get("barcode");
+                    if (barcode != null && barcode.length() > 0) {
+                        prod.setEAN(clean(barcode));
+                        if(barcode.length() > 4) {
+                        	addon = barcode.substring(barcode.length()-4);
+                        }
+                    }
+                    
                     String desc = (String) cob.get("searchDescription");
-                    if (desc != null) prod.setName(clean(desc) + " " + number);
+                    if (desc != null) {
+                   	    prod.setNameSorting(Converter.cleanLitLatEst(desc));
+                   	 	 prod.setName(clean( desc.trim() + " " + addon ));
+                    }
 
                     // Unit
                     String unit = (String) cob.get("baseUnitOfMeasure");
@@ -943,11 +957,6 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     if (reorderPoint != null) prod.setOptAmountInUnits(Double.parseDouble(reorderPoint.toString()));
 
                     
-                    // Barcode
-                    String barcode = (String) cob.get("barcode");
-                    if (barcode != null && barcode.length() > 0) {
-                        prod.setEAN(clean(barcode));
-                    }
 
                     tm.put(prod.getName(), prod);
                 }
