@@ -84,6 +84,7 @@ public class Agent {
   private Vector todayCusts = null;
   private String passWord = null;
   private boolean isPilot = false;
+  public boolean isMainagent = false;
   private boolean showmarketinfoall = true;
   private String code = null;
   private String visit = null;

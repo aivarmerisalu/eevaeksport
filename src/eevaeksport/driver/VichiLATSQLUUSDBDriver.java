@@ -1766,7 +1766,7 @@ cn.close();
 				}
 
 				double opt = rs.getDouble("optimum");
-				if (opt > 0) {
+				if (opt > 0 && !"KG".equals(prod.getUnit())) {
 					prod.setOptAmountInUnits(opt);
 				}
 

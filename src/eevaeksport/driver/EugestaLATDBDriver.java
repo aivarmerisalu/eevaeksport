@@ -652,12 +652,12 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       
            String sql2 = " 		 select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday,\r\n" + 
            		"			  max([beginsinstoredate]) as store,min(datediff(day,beginsinstoredate, c.nextdelivery)) as vahe,\r\n" + 
-           		"              		minPrice as price ,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as dealer, max(isPaper) as ispaper , MANDATORY from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
+           		"              		minPrice as price ,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as dealer, max(isPaper) as ispaper , MANDATORY, ISSELLOUT from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
            		"              		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
            		"        		inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
            		"         		 	 where c.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
-           		"         		  group by  a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end),  [date from] ,[date to], minPrice,MANDATORY \r\n" + 
-           		"                  order by a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), [date from] ,[date to], minPrice,MANDATORY\r\n" + 
+           		"         		  group by  a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end),  [date from] ,[date to], minPrice,MANDATORY,ISSELLOUT \r\n" + 
+           		"                  order by a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), [date from] ,[date to], minPrice,MANDATORY,ISSELLOUT\r\n" + 
            		"					 ";
            rs = stmt.executeQuery(sql2);
            while (rs.next()) {
@@ -672,7 +672,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            String dealer = rs.getString("dealer");
            Integer isPaper =  rs.getInt("isPaper");
            String manda = rs.getString("MANDATORY"); // Y või N kui N siis peaks värvima.
-            
+           Integer sellout = rs.getInt("ISSELLOUT"); // Y või N kui N siis peaks värvima.
+                 
            
            MatrixLine mline = new MatrixLine();
            mline.setCliGroup(clGroup);
@@ -684,9 +685,15 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
              lisa = "SOON ";
            }
            
-           // ;AKC1000032775
            if(isPaper != null && isPaper == 1) {
-        	   lisa = lisa  + Converter.enCodeEst("AVĪZE") ;
+        	   lisa = lisa  + Converter.enCodeEst("AVĪZE") + " " ;
+           }
+           if(dealer != null && !dealer.trim().equals("24N")) {// kui ei ole pealadu siis paneme külge
+           	mline.dealer = dealer.trim();
+           }
+           
+           if((dealer != null && (dealer.trim().equals("24N") || dealer.trim().equals("24EWC"))) && sellout != null && sellout == 1) {
+        	   lisa = lisa  + Converter.enCodeEst("SELLOUT") ;
            }
            
            if(lisa.trim().length() > 0) {
@@ -694,9 +701,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            }
            
            mline.setPrice(price);
-            if(dealer != null && !dealer.trim().equals("24N")) {// kui ei ole pealadu siis paneme külge
-            	mline.dealer = dealer.trim();
-            }
+            
            lines.add(mline);
            
            }
@@ -1358,7 +1363,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
       Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
 	    
-    String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr , email , phone from  dbo.EPASAULE_AGENTS";
+    String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr , email , phone  from  dbo.EPASAULE_AGENTS";
 
     String cmdg = "select Agent_BackofficeID as kood , group_backofficeID as grupp,forSale, forMerch from EPASAULE_AGENTS_EAGENTGROUPS";
     String cmdb = "select Agent_BackofficeID as kood , brand_backofficeID as brand,forSale, forMerch from EPASAULE_AGENTS_EAGENTBRANDS";
@@ -1784,7 +1789,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	        LocalDate today = LocalDate.now();
 
 	        HashMap<String, Integer> customerDeliveries = new HashMap<String, Integer>();
-	        String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
+	        String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route , 1 as mainagent from  dbo.EPASAULE_AGENTS_CLIENTS " ;
       		try {
 	    	   Connection con = this.getNewConnection();
 	    	 
@@ -1794,6 +1799,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	    	                 String ag = rs1.getString("kood").trim();
 	    	                 String klient = rs1.getString("klient").trim();
 	    	                 String pattern = rs1.getString("route");
+	    	                 String mainag = rs1.getString("mainagent");
 	        
 
 	            Map<Character, Set<Integer>> schedule = parse(pattern);
@@ -2133,7 +2139,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     
     try {
     	
-    	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
+    	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route, 1 as mainagent  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
       		
     	   Connection con = this.getNewConnection();
 
@@ -2145,6 +2151,12 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     	                 if(agsActive.contains(ag.getID())) {
     	                 String cli = rs1.getString("klient").trim();
     	                 String route = rs1.getString("route");
+    	                 
+    	                 String mainag = rs1.getString("mainagent");
+    	                 if(mainag.equals("1")) {
+    	                	 ag.isMainagent = true;
+    	                 }
+    	                 
     	                 if(route != null && route.trim().length() > 0) {
     	                	 
                           
@@ -2426,13 +2438,15 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
             for(Agent agentL : vv) {
 
                   cust.addAgent(agentL);
-                  
+                if(agentL.isMainagent) {
+                	  cust.setMainAgent(agentL.getID());
+         	    }
+                
    	          if(agentL.nextContact != null) {
    	              cust.addCity("N11124xxkamais: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
    	          }
    		          
    	          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-   	        	  cust.setMainAgent(agentL.getID());
    	        	  agvisit.put(agentL.getID(), agentL.getVisit());
    	          }
            	 
@@ -3190,7 +3204,7 @@ boolean noopt = false;
        }
        
        if(nimetus.startsWith("L") && nimetus.contains("P - ")) {
-    	   prod.setStatusSellout("1");
+    	 //  prod.setStatusSellout("1");
        }
        
                if(partii.get(prod.getID()) != null) {

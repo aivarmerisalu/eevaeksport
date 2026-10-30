@@ -762,10 +762,16 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     //if (paymentMethod != null) { cust.setPaymentMethod(paymentMethod.trim()); }
 
                     String priceGroup = (String) cob.get("priceGroupCode");
-                    if (priceGroup != null) cust.setGroup(priceGroup.trim());
+                    if (priceGroup != null) {
+                    	cust.setGroup(priceGroup.trim());
+                    	cust.addCity("Grupa: " + priceGroup.trim());
+                    }
            
                     String storeCat = (String) cob.get("franchise");
-                    if (storeCat != null && storeCat.trim().length() > 0) cust.setChain(storeCat.trim());
+                    if (storeCat != null && storeCat.trim().length() > 0) {
+                    	cust.setChain(storeCat.trim());
+                    	cust.addCity("Franchise: " + storeCat.trim());
+                    }
 
                     Object consignationDaysObj = cob.get("consignationDays");
                     if (consignationDaysObj != null) {
@@ -1104,14 +1110,12 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                    if(  promotionCode != null && promotionCode.trim().length() > 0) {
                        ml.setStartDate(sDate);
                        ml.setEndDate(eDate);
+                       ml.setLineinfo(promotionCode);
                    }
                     ml.setProdID(itemNo);
                     ml.setPrice(price);
                     lines.add(ml);
 
-                    if(priceGroupCode.equals("SPEC10")) {
-                   // 	System.out.println("spec10 " + ml.toString());
-                    }
                 }
 
                 part++;

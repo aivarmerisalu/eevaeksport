@@ -1708,7 +1708,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     try {
     	
     	StringBuffer sb0 = new StringBuffer();
-    	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
+    	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route,1 as mainagent  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
       		
     	   Connection con = this.getNewConnection();
     	 
@@ -1718,6 +1718,13 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     	                 Agent ag = new Agent(rs1.getString("kood").trim());
     	                 String cli = rs1.getString("klient").trim();
     	                 String route = rs1.getString("route");
+    	                 
+    	                 
+    	                 String mainag = rs1.getString("mainagent");
+    	                 if(mainag.equals("1")) {
+    	                	 ag.isMainagent = true;
+    	                 }
+    	                
     	                 if(route != null && route.trim().length() > 0) {
 
                              if(agsActive.contains(ag.getID())) {
@@ -1991,13 +1998,15 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
          for(Agent agentL : vv) {
 
                cust.addAgent(agentL);
+               if(agentL.isMainagent) {
+             	  cust.setMainAgent(agentL.getID());
+      	    }
                
 	          if(agentL.nextContact != null) {
 	              cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
 	          }
 		          
 	          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
-	        	  cust.setMainAgent(agentL.getID());
 	        	  agvisit.put(agentL.getID(), agentL.getVisit());
 	          }
 	          agentsExists.add(agentL);
