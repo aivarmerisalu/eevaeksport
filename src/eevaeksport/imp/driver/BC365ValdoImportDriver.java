@@ -529,7 +529,19 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	   String resp =   callOperation("ImportOrder", jOrder.toJSONString());
 	     fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + "-" + (uni + "").trim() +  "response.json";
 	     Converter.saveFile(fileName, resp); 
-	   
+
+	     String loginfo = Converter.getDDpMMpYYYYpString(Calendar.getInstance()) +  ";" + order.getAgent() + ";" + order.getDokNr() + ";" + order.getCompany() +";"+ 
+	     order.getOrderLines().size()+ ";"+ order.filename + ";" + order.getDokNr().trim() + "-" + (uni + "").trim() +  ".json";
+	     
+	     
+	     Path p = Paths.get(parent.getProps().getProperty("log.dir") + "loginfo.csv");
+	     String s = System.lineSeparator() + loginfo;
+	     try {
+	    	    Files.write(p, s.getBytes(), StandardOpenOption.APPEND);
+	    	} catch (IOException e) {
+	    	    System.err.println(e);
+	    	}
+
 	     
 	     
 		} catch (Exception e) {
