@@ -908,8 +908,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   private void makeCustprod(){
 	 
 	  
-	//  1. teeme tellimus ja arve listi 
-	  
+	 
 	  String cmd = "select SALESID as tell,  INVOICEID as arve from BIF01_CUSTINVOICETRANS b where invoicedate > getdate()-120 group by SALESID,INVOICEID " ;
 
 	  String cmd1 = "	 SELECT    a.CUSTACCOUNT AS klient,   a.ITEMID AS toode,    sum(a.INVOICEQTY) AS kogus   FROM BIF03_SALESLINE a  \r\n" + 
@@ -946,6 +945,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"	  			  		      AND a.EG_SALESCANCELREASONID <> 'GKR'  \r\n" + 
 	  		"	  			  		      AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
 	  		"	  			  		      AND a.SALESSTATUS <> 1  \r\n" + 
+	  		" and a.INVOICEQTY != 0 " +
 	  		"	  						  union  \r\n" + 
 	  		"	  						   SELECT    \r\n" + 
 	  		"	  			  		        a.CUSTACCOUNT AS klient,  \r\n" + 
@@ -964,7 +964,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"	  			  		        ) AS rn  \r\n" + 
 	  		"	  			  		    FROM [MJ_EE].[dbo].[Sales_GKR] a   \r\n" + 
 	  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.SellerItemCode  \r\n" + 
-	  		"	  			  		)  \r\n" + 
+	  		"	  			  where a.AmountDespatched != 0		)  \r\n" + 
 	  		"	  			  		  \r\n" + 
 	  		"	  			  		SELECT *  \r\n" + 
 	  		"	  			  		FROM cte  \r\n" + 
@@ -1072,9 +1072,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
 	        if(lastdoc.length() > 0) {
                 cp.setAbiKood(lastdoc);
 	        }
-	        if(kogus != 0) {
-	         custProds.add(cp);
-	        }
+	        custProds.add(cp);
 	        prods.addElement(tootekood);
 	        //}
 	      }

@@ -2175,7 +2175,7 @@ try {
 				//e1.printStackTrace();
 			}
 			}
-			
+			System.out.println("readdata " + readdata);
 		if(readdata) {	
 			
 			FileInputStream ff = new FileInputStream(f);
@@ -2203,11 +2203,11 @@ try {
 					omagroups.put(a + "", row.getCell((short) a)
 							.getStringCellValue());
 				} catch (Exception e) {
-					// System.out.println(row.getCell((short)a).getNumericCellValue());
+					 System.out.println(row.getCell((short)a).getNumericCellValue());
 				}
 			}
 
-		//	 System.out.println("omagroups " + omagroups.toString());
+			 System.out.println("omagroups " + omagroups.toString());
 
 			
 			//mis kood on sortimedi koodid ja tootekoodide sortimendi t�hised kokku 
@@ -2243,7 +2243,7 @@ try {
 				}
 			}
 				
-	//		 System.out.println("omaTootegroups " + omaTootegroups.toString());
+		 System.out.println("omaTootegroups " + omaTootegroups.toString());
 			
 			TreeMap tulemusKood = new TreeMap();
 
@@ -2438,7 +2438,7 @@ try {
 								  String pood =  clGroup;
 			                         Contract con = new Contract(pood);
 									
-			                        	// System.out.println("Sees " +a + " " + pood + " " + prodIDe + " " + pood);
+			                        	 System.out.println("Sees " +a + " " + pood + " " + prodIDe + " " + pood);
 			                        
 										if(res.get(pood) != null){
 			            	                 con = (Contract)res.get(pood);
@@ -2469,7 +2469,7 @@ try {
 			e.printStackTrace();
 		}
     	}catch(Exception e) {
-    		
+    		e.printStackTrace();
     	}
     	return res;
     }
