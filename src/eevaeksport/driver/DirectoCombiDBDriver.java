@@ -592,7 +592,8 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 	}catch(Exception e){
 		e.printStackTrace();
 	}
-    
+
+    System.out.println("siin matrix getziga" + lines.size());
     
     //Tobise oa ka 
     try {
@@ -750,7 +751,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 		e.printStackTrace();
 	}
     
- System.out.println("siin matrix" + lines.size());
+ System.out.println("siin matrix tobisega" + lines.size());
     return lines;
 
 
@@ -1557,17 +1558,13 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
      System.out.println("Võlas olevaid kliente kasutusel "  + custDebtUsed.size());
      System.out.println("Agent1 suurus "  + agent1.size());
        
-     
      if("true".equals(getParent().getProps().getProperty("fixed.frompricelist"))){
     	  fixedLines = getFixedAssortmentData1();
     	     }
-   
      
      Agent aaa = new Agent ("LADU");
      aaa.setName("LADu");
      tm.put("LADU", aaa);
-
-    // setBulkSales(tm);
      return tm;
    }
 
@@ -1613,6 +1610,8 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
            	  }
             }
            
+
+           inputLineBuf = new StringBuffer();
            //lõpeb tootegruppidega tegelemine 
            System.out.println("Tootegrupid tehtud" );
                 try {
@@ -1627,7 +1626,6 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
            in = new BufferedReader(isr);
 
            inputLine = "";
-          inputLineBuf = new StringBuffer();
           while ((inputLine = in.readLine()) != null){
           	inputLine = Converter.enCodeEst(inputLine);
           	inputLineBuf.append(inputLine.replaceAll("/>","/>\n" ).replaceAll("\u2013", "").replaceAll("\u2122", "").replaceAll("\u2022", "").replaceAll("\u00B0", "").replaceAll("&quot;", "") );
@@ -4585,14 +4583,14 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 			        		 if(isOkDate(date)){
 			        				Vector cps = this.getCPT(Converter.deCode(custid),number,date);
 			     					if(cps != null){
-			     						System.out.println("cps Tobis size custid " + custid + " tobise kood" + custid2 + " " + cps.size());
+			     					//	System.out.println("cps Tobis size custid " + custid + " tobise kood" + custid2 + " " + cps.size());
 			     						Enumeration eee = cps.elements();
 			     						int i = 0;
 			     						while( eee.hasMoreElements()){
 			     							CustProd cp = (CustProd)eee.nextElement();
 				     						custProds.add(cp);
 				     						if(i == 0) {
-				     						  System.out.println("cps Tobis " + cp.getCustID() + " " + cp.getProdID());
+				     					//	  System.out.println("cps Tobis " + cp.getCustID() + " " + cp.getProdID());
 				     						  i++; 
 				     						}
 				     						
