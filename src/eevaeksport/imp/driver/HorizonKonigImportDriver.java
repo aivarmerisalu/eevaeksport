@@ -1878,7 +1878,7 @@ try{
 
         con.close();
 	    
-	  //  System.out.println("Klient: " + acc + " " + id);
+	    System.out.println("Klient: " + acc + " " + id);
 	    return acc;
 
 	  }

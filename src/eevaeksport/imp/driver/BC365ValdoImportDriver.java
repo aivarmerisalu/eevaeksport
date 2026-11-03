@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -51,6 +52,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+import org.xml.sax.InputSource;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
@@ -530,8 +535,12 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	     fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + "-" + (uni + "").trim() +  "response.json";
 	     Converter.saveFile(fileName, resp); 
 
+	     String error = soapErrorParser(resp);
+	     if(error.length() > 1) {
+	    	 this.troubles.append(error);
+	     }
 	     String loginfo = Converter.getDDpMMpYYYYpString(Calendar.getInstance()) +  ";" + order.getAgent() + ";" + order.getDokNr() + ";" + order.getCompany() +";"+ 
-	     order.getOrderLines().size()+ ";"+ order.filename + ";" + order.getDokNr().trim() + "-" + (uni + "").trim() +  ".json";
+	     order.getOrderLines().size()+ ";"+ order.filename + ";" + order.getDokNr().trim() + "-" + (uni + "").trim() +  ".json;" + error;
 	     
 	     
 	     Path p = Paths.get(parent.getProps().getProperty("log.dir") + "loginfo.csv");
@@ -549,8 +558,56 @@ try (CloseableHttpResponse response = client.execute(post)) {
 		}
 	 }
 
+  public static JsonNode getSoapReturnValue(String xml) throws Exception {
 
-   
+	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	    factory.setNamespaceAware(true);
+
+	    Document document = factory.newDocumentBuilder().parse(
+	        new InputSource(new StringReader(xml))
+	    );
+
+	    NodeList nodes = document.getElementsByTagNameNS("*", "return_value");
+
+	    if (nodes.getLength() == 0) {
+	        return null;
+	    }
+
+	    String json = nodes.item(0).getTextContent();
+
+	    ObjectMapper mapper = new ObjectMapper();
+
+	    return mapper.readTree(json);
+	}
+
+
+  private String soapErrorParser (String xml) {
+
+          DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+          factory.setNamespaceAware(true);
+
+          DocumentBuilder builder = null;
+			try {
+				builder = factory.newDocumentBuilder();
+
+          Document document = builder.parse(
+              new InputSource(new StringReader(xml))
+          );
+
+          NodeList faultStrings = document.getElementsByTagNameNS("*", "faultstring");
+
+          if (faultStrings.getLength() > 0) {
+              String errorMessage = faultStrings.item(0).getTextContent();
+
+              System.out.println("Error: " + errorMessage);
+              return errorMessage;
+          }
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+          return "";
+      }
    
    public NumberFormat getNF() {
 		nf.setGroupingUsed(false);

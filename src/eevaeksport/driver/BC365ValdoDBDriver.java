@@ -22,6 +22,7 @@ import org.json.simple.JSONObject;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -29,6 +30,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,6 +38,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -1068,6 +1071,40 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
     public Vector getPriceMatrixData() {
 
         Vector lines = new Vector();
+         HashMap avs = new HashMap();
+
+        try {
+
+            int part = 1;
+
+            while (true) {
+
+                File f = new File("data/Promotions" + part + ".json");
+                if (!f.exists()) break;
+
+                System.out.println("Loading salesPrices file: " + f.getName());
+
+                org.json.simple.JSONArray values =
+                        (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(f.getPath());
+
+                for (Object obj : values) {
+
+                    org.json.simple.JSONObject cob =
+                            (org.json.simple.JSONObject) obj;
+                 //   [{"promotionCode":"AIB09-1126AV","campaignCategory":"AV","categoryDescription":"TEST2-OKT import","startingDate":"2026-09-29","endingDate":"2026-11-02"},
+                    String campaignCategory = (String) cob.get("campaignCategory");
+                    String promotionCode = (String) cob.get("promotionCode");
+                    if(campaignCategory != null) {
+                    	avs.put(promotionCode, campaignCategory);
+                    }
+                  
+                }
+                part++;
+            }
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }
+        
 
         try {
 
@@ -1101,7 +1138,11 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     String promotionCode = (String) cob.get("promotionCode");
                     String sDate = (String) cob.get("startingDate");
                     String eDate = (String) cob.get("endingDate");
-                       
+                    String camp  = (String) cob.get("campaignCategory");
+                    if(avs.get(promotionCode) != null) {
+                    	camp = (String)avs.get(promotionCode);
+                    }
+                      
                     // ===== READ price =====
                     Object priceObj = cob.get("unitPrice");
                     Double price = 0.0;
@@ -1119,7 +1160,12 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                    if(  promotionCode != null && promotionCode.trim().length() > 0) {
                        ml.setStartDate(sDate);
                        ml.setEndDate(eDate);
-                       ml.setLineinfo(promotionCode);
+                      // ml.setLineinfo(promotionCode);
+                   }
+                   
+
+                   if(camp != null && camp.trim().length() > 0 && camp.trim().endsWith("AV")) {
+                  	 ml.setLineinfo(camp);
                    }
                     ml.setProdID(itemNo);
                     ml.setPrice(price);
@@ -1143,6 +1189,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
  			 return debt;
  	   }
     
+
     
     
     @Override public String getCustProdDiscounts(Agent agent) { return ""; }
@@ -1185,8 +1232,6 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
               }
               part++;
           }
-
-    	
     	return tm; 
     	
     }
