@@ -1476,10 +1476,12 @@ hind =   Converter.Round((float)hind, 2);
 	 	try {
 	 		String ordnum = getNum()+ "";
 	 		Customer ccc = (Customer)kliendid.get(order.getCompany());
+	 		boolean hasTobisCust = false;
 	 		if(!getzorder) {
 	 			 String tcode = (String)this.tobisCustCodes.get(order.getCompany());
 	 			 if(tcode != null) {
 	 			   ccc = (Customer)kliendidT.get(tcode);
+                   hasTobisCust = true;
 	 			 }
 	 			 System.out.println("TCODE " + tcode + " " + ccc + " " +order.getCompany());
 		 	 }
@@ -1656,7 +1658,9 @@ hind =   Converter.Round((float)hind, 2);
 	 	    if(!getzorder && "true".equals(parent.getProps().getProperty("getzolny"))) {
 	 	    	allorders = false;
 	 	    }
-	 	    
+	 	    if(!getzorder && !hasTobisCust ) { //kui pole tobise kliendi koodi sisestaud või pole seda klienti olemas.
+	 	    	allorders = false;
+	 	    }
 	 	    System.out.println(url.toString());
 	 	    if(!testing && allorders) {
 	 	    URLConnection conn = url.openConnection();

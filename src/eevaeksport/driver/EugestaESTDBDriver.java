@@ -1917,7 +1917,8 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
         }
         
 
-       
+
+        cust.restActive = true;
         
         String aleke = rs.getString("linedisc");
         if(aleke != null && aleke.trim().length()>0){
@@ -3450,18 +3451,13 @@ boolean noopt = false;
 			
 			String seg = rs.getString("seg");
 			if(seg != null && seg.trim().length() > 0) {
-			    //cust.addCity(seg.trim());
-				 cust.setChain(seg);
+				 cust.setChain(seg.trim());
 			}
-			
-			
 			
 			String city = rs.getString("city");
 			if(city != null && city.trim().length() > 0) {
 			  cust.addCity( city.trim());
 			}
-			
-			
 			
 			custMap.put(cust.getID(),cust);	
 			}

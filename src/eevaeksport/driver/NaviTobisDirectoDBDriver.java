@@ -1978,7 +1978,7 @@ private HashSet getSales5M() throws SQLException {
     	        e.printStackTrace();
     	      }
     	    
-    	    System.out.println("debt size " + debtList.size());
+    	  //  System.out.println("debt size " + debtList.size());
     	    if(!useold) {
     	 	   Iterator enums = this.dirCustCodes.keySet().iterator();
     	 	   String gS = getParent().getProps().getProperty("keyInvoice");
@@ -2135,7 +2135,7 @@ private HashSet getSales5M() throws SQLException {
     	 	 
     	    
     	    }
-       	    System.out.println("debt size2 " + debtList.size());
+       	  //  System.out.println("debt size2 " + debtList.size());
     	    
     	    
     	/// KLIENDI ANDMETE LEIDMINE

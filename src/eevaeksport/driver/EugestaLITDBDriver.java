@@ -2155,7 +2155,8 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
         	   }
            }
         }
-        
+
+        cust.restActive = true;
         
 String arve = rs.getString("bill");
         
@@ -2630,7 +2631,7 @@ return tm;
     	
     	 ResultSet rs = stmt.executeQuery(minP);
         
-         
+        try { 
          while(rs.next()){
         	String gr = rs.getString("grupp").trim();
         	String toode = rs.getString("toode").trim();
@@ -2643,7 +2644,7 @@ return tm;
         	Converter.saveFile("maxdiscounts.txt", sb0.toString());
         }
       //  System.out.println("prodMaxDisc " + prodMaxDisc.toString());
-    	
+        }catch(Exception e) {e.printStackTrace();}
     	
        rs = stmt.executeQuery(cmd);
       HashMap prodHash = new HashMap();

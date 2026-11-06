@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -414,7 +415,7 @@ private Product getProd(String toode){
 	  Order ord24B = new Order(order.getCompany(),agcode);
 	  Order ord24EWC = new Order(order.getCompany(),agcode);
 	 
-	  
+	 
 
 	  ord24B.setAgentCode(order.getAgentCode());
 	  ord24B.setDokNr(order.getDokNr());
@@ -866,8 +867,30 @@ private Product getProd(String toode){
      return null; 
  }
  
+ private HashSet<String> getRefs(){
+	 HashSet<String> res = new HashSet<String>();
+	 String cmd = "Select Cust_Ref as nimi from  ORDERS where ORDERING_DATE > getdate()-3 and Cust_Ref != ''  group by Cust_Ref " ;
+
+	   System.out.println(cmd);
+		   try {
+			    Connection con = getNewConnection2();
+		        Statement stmt = con.createStatement();
+		        ResultSet rs = stmt.executeQuery(cmd);
+		        
+		        while(rs.next()){
+		        	res.add(rs.getString("nimi").trim());
+		        }
+		        rs.close();
+		        stmt.close();
+		        con.close();
+		   }catch (Exception e) {e.printStackTrace();}
+
+	 return res;
+ }
+ 
  private void addInvoiceHeader(int salesid, Order order, boolean tagastus, boolean repr) throws SQLException{
-	      
+	      HashSet<String> refs = getRefs();
+	      System.out.println("refs " + refs.size());
 	      String ref = " ";
 	      String comm = "";
 	      if(order.getInfo() != null && order.getInfo().trim().length()>0 ){
@@ -875,7 +898,7 @@ private Product getProd(String toode){
 	      	 if(tagastus) {
 	      	   comm = " " + ref;
 	      	  }
-	      }
+	        }
 
 	      if(order.getReference() != null && order.getReference().trim().length()>0 ){
 	      	ref = order.getReference().trim();
@@ -917,6 +940,20 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  if(ref2.trim().length() == 0) { //kui on tava tellimus siis paneme sisemise tellimuse numbri 
 		  if(!repr && !tagastus) {
 		    ref2 = order.getDokNr();
+		
+		    String baseRef = ref2;
+		      
+		    if(refs.contains(ref2)) {
+		    	ref2 = baseRef + "-1"; 
+		    }
+		    if(refs.contains(ref2)) {
+		    	ref2 = baseRef + "-2"; 
+		    }
+		    if(refs.contains(ref2)) {
+		    	ref2 = baseRef + "-3"; 
+		    }
+		    System.out.println("ref2 " + ref2);
+		     
 		  }
 	  }
 	  

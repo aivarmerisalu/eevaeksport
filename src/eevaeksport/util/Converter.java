@@ -5423,6 +5423,7 @@ public class Converter {
 			                                	  }
 			                                	  if(cust.getChain().trim().length() > 0) {
 				                                	    chain = cust.getChain();
+				                                	    System.out.println("chain sees " + chain);
 				                                	  }
 			                                  }
 			                              
@@ -8621,10 +8622,10 @@ public static void loadVisitLines(String status,String company, String user , St
 				e1.printStackTrace();
 			}
 			serv.closeClient();
-		  System.out.println("Custs used "  + used.size());
 		  	
 		}
-	  
+		//  System.out.println("Custs used "  + used.size());
+			
 		
 		
 		MyJSON myson = new MyJSON();
@@ -8638,16 +8639,16 @@ public static void loadVisitLines(String status,String company, String user , St
 		TreeMap visits = new TreeMap();
 		
 		while (itera.hasNext()){
-			Customer ccc = (Customer)itera.next();
-			if(!used.contains(ccc.getID()) || used.size() == 0){
-				
 			
+		Customer ccc = (Customer)itera.next();
+		 if(!used.contains(ccc.getID()) || used.size() == 0){
 			String visit = ccc.getVisit();
 			String call = ccc.getCallDay();
 			
-			if(ccc.hasAgents()){
+	if(ccc.hasAgents() || "true".equals(props.get("rest.sendnoagentcustomers")) ){
 			JSONObject value = new JSONObject();
-try{
+  
+ try{
 
 	value.put("code", ccc.getID());
 	if(ccc.restName != null){
@@ -8910,6 +8911,7 @@ try{
 	if(ccc.restActive && value.length() > 0 ){
 		array.put(value);
 	}
+	
 	
 	if(cou == 150){
 		myson.setJson(deCode(array.toString()));

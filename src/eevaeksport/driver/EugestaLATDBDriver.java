@@ -2311,9 +2311,6 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
  
       while(rs.next()){
         String name = rs.getString("name").trim();
-        
-        boolean goes = true;
-        
         String accountnum = rs.getString("accountnum").trim();
        
         Customer cust = new Customer(accountnum);
@@ -2325,7 +2322,6 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
             	cust.setCredit(limit+"");	
         	}else {
         		cust.setSalesBlockPrepay(true);
-        		//System.out.println("Ettemakse klient " + cust.getID());
         	}
         }
         
@@ -2455,7 +2451,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            // nyyd kammime läbi kõik, kes on kliendil küljes ja lisama asendajatele ka samad routingud
            	 // kui on asendamine sii speame külge panema visit day ka 
           
-          
+          cust.restActive = true;
           
           List<Agent> agentsToAdd = new ArrayList<>();
 
@@ -2727,10 +2723,9 @@ String del3 = rs.getString("del3");
         	cust.addToCustDataVec(accountnum+ ";custbudget; ;" + budgets.get(accountnum));
         }
         
-        if(goes) {
-            customers.put(name, cust);
+            customers.put(name + cust.getID(), cust);
             custMap.put(cust.getID(),cust);	
-        }
+        
   
       }
 

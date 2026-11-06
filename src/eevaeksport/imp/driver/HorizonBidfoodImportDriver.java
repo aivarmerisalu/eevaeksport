@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -19,14 +21,25 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.params.BasicHttpParams;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Category;
 import org.apache.log4j.PropertyConfigurator;
@@ -192,7 +205,7 @@ try{
 	  }
   
   
-  private String getWeb(String req, String req2) throws ParseException, IOException{
+  private String getWebold(String req, String req2) throws ParseException, IOException{
 	  HttpResponse response = null;
 	  try{
 		String   weburl = parent.getProps().getProperty("wsdl.url");
@@ -214,6 +227,90 @@ try{
   }
 	
   
+  private String getWeb(String req, String req2)
+	        throws ParseException, IOException {
+
+	    HttpResponse response = null;
+	    DefaultHttpClient httpClient = null;
+		String   weburl = parent.getProps().getProperty("wsdl.url");
+		  
+			    try {
+	        System.out.println("weburl " + weburl);
+
+	        // Trust all SSL certificates (TEMPORARY TESTING ONLY)
+	        SSLContext sslContext = SSLContext.getInstance("TLS");
+
+	        sslContext.init(
+	            null,
+	            new TrustManager[] {
+	                new X509TrustManager() {
+	                    public X509Certificate[] getAcceptedIssuers() {
+	                        return new X509Certificate[0];
+	                    }
+
+	                    public void checkClientTrusted(
+	                            X509Certificate[] certs, String authType) {
+	                    }
+
+	                    public void checkServerTrusted(
+	                            X509Certificate[] certs, String authType) {
+	                    }
+	                }
+	            },
+	            new SecureRandom()
+	        );
+
+	        SSLSocketFactory sslSocketFactory =
+	            new SSLSocketFactory(sslContext);
+
+	        sslSocketFactory.setHostnameVerifier(
+	            SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER
+	        );
+
+	        SchemeRegistry schemeRegistry = new SchemeRegistry();
+
+	        schemeRegistry.register(
+	            new Scheme("https", 443, sslSocketFactory)
+	        );
+
+	        schemeRegistry.register(
+	            new Scheme("http", 80, PlainSocketFactory.getSocketFactory())
+	        );
+
+	        ClientConnectionManager connectionManager =
+	            new SingleClientConnManager(
+	                new BasicHttpParams(),
+	                schemeRegistry
+	            );
+
+	        httpClient = new DefaultHttpClient(connectionManager);
+
+	     Credentials defaultcreds = new UsernamePasswordCredentials(parent.getProps().getProperty("wsdl.user"),  parent.getProps().getProperty("wsdl.pass"));
+	    	
+	        httpClient.getCredentialsProvider().setCredentials(
+	            AuthScope.ANY, defaultcreds
+	        );
+
+	       
+	        HttpPost postRequest = new HttpPost(weburl);
+	        StringEntity input = new StringEntity(req, "UTF-8");
+	        input.setContentType("application/xml");
+	        postRequest.setEntity(input);
+	        response = httpClient.execute(postRequest);
+	        return EntityUtils.toString(response.getEntity(), "UTF-8");
+
+	    } catch (Exception e) {
+	        trouble = "NOT IMPORTED ORDER \n" + req2;
+	        e.printStackTrace();
+	        throw new IOException("API request failed", e);
+
+	    } finally {
+	        if (httpClient != null) {
+	            httpClient.getConnectionManager().shutdown();
+	        }
+	    }
+	}
+
 
 
   private String getWebConfirm(String xml, String shipdate) throws ParseException, IOException{
@@ -237,7 +334,63 @@ if (matcher.find()) {
 String aa = "<resource><pkOrder>" + ordNum + "</pkOrder><accDate>" + shipdate + "</accDate></resource>";		
 System.out.println("Order Numbe0r: " + aa ); 
 
-		  DefaultHttpClient httpClient = new DefaultHttpClient();
+
+
+
+DefaultHttpClient httpClient = null;
+	    
+    System.out.println("weburl " + weburl);
+    // Trust all SSL certificates (TEMPORARY TESTING ONLY)
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+
+    sslContext.init(
+        null,
+        new TrustManager[] {
+            new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+
+                public void checkClientTrusted(
+                        X509Certificate[] certs, String authType) {
+                }
+
+                public void checkServerTrusted(
+                        X509Certificate[] certs, String authType) {
+                }
+            }
+        },
+        new SecureRandom()
+    );
+
+    SSLSocketFactory sslSocketFactory =
+        new SSLSocketFactory(sslContext);
+
+    sslSocketFactory.setHostnameVerifier(
+        SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER
+    );
+
+    SchemeRegistry schemeRegistry = new SchemeRegistry();
+
+    schemeRegistry.register(
+        new Scheme("https", 443, sslSocketFactory)
+    );
+
+    schemeRegistry.register(
+        new Scheme("http", 80, PlainSocketFactory.getSocketFactory())
+    );
+
+    ClientConnectionManager connectionManager =
+        new SingleClientConnManager(
+            new BasicHttpParams(),
+            schemeRegistry
+        );
+
+    httpClient = new DefaultHttpClient(connectionManager);
+
+
+
+		//  DefaultHttpClient httpClient = new DefaultHttpClient();
 		  Credentials defaultcreds = new UsernamePasswordCredentials(parent.getProps().getProperty("wsdl.user"),  parent.getProps().getProperty("wsdl.pass"));
 		  httpClient.getCredentialsProvider().setCredentials(
                    AuthScope.ANY, defaultcreds);

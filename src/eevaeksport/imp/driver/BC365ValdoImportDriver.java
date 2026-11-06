@@ -256,6 +256,7 @@ try (CloseableHttpResponse response = client.execute(post)) {
 		    	  if(ol.getPartii().contains("++")) {
 		    		  retemail = ol.getPartii().substring(ol.getPartii().indexOf("++")+2);
 		    	  }
+		    	  System.out.println(ol.getPartii() + " * " + retemail );
 		     }
 	   	 	 }  
 	   	

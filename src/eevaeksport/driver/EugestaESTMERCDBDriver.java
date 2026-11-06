@@ -1489,7 +1489,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
               cust.addCity("Järgmine: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
           }
           
-          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+          if(agentL.getVisit() != null && agentL.getVisit().length() > 0 &&  agsActive.contains(agentL.getID())) {
         	  cust.setMainAgent(agentL.getID());
           }
         
@@ -1512,6 +1512,7 @@ public class EugestaESTMERCDBDriver extends AbstractDBDriver  implements Manager
      	}
       
         
+       
         
         String chain = rs.getString("chain");
         if(chain != null && chain.trim().length() > 0) {

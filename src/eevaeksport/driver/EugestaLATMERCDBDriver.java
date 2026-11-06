@@ -2113,7 +2113,7 @@ public class EugestaLATMERCDBDriver extends AbstractDBDriver  implements Manager
    	              cust.addCity("N11124xxkamais: " + agentL.getID() + " '" + agentL.nextContact.format(FMT).replace('.', '-').replace('.', '-') + "'");  
    	          }
    		          
-   	          if(agentL.getVisit() != null && agentL.getVisit().length() > 0) {
+   	          if(agentL.getVisit() != null && agentL.getVisit().length() > 0  &&  agsActive.contains(agentL.getID())) {
    	        	  cust.setMainAgent(agentL.getID());
    	        	  agvisit.put(agentL.getID(), agentL.getVisit());
    	          }
