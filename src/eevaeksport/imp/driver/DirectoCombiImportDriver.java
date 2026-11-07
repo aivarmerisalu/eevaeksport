@@ -1546,7 +1546,9 @@ hind =   Converter.Round((float)hind, 2);
 	 		 if (order.getStatus() == 1000) {
 	 			 priceList = "";
 	 		 }
-	 	    String  order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
+	 		String  order_xml = "";
+	 		 if(ccc != null) {
+	 	      order_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + 
 	          "<transport>" +
 	          "<order " + 
 	         "webid=\"" + ordnum + "\" " + //order.getDokNr()+
@@ -1640,7 +1642,7 @@ hind =   Converter.Round((float)hind, 2);
 	 	order_xml = order_xml + "</transport>";
 	    System.out.println("output " +order_xml); 
 	 	
-	 	
+	 		 }
 	 		
 	 	try {
 	 	    // Construct data

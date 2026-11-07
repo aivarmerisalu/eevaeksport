@@ -588,7 +588,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     }
 
                     // Overdue logic (since no dueDate, treat postingDate as due)
-                    if (today.after(invDateObj)) {
+                    if (today.after(dueDateObj)) {
 
                         if (volad.get(payer) != null) {
                             volad.put(payer, balDue + volad.get(payer));
@@ -730,6 +730,9 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
                     Customer cust = new Customer(number);
                     cust.setPayer(number);
+                    if(number.contains("_")) {
+                    	   cust.setPayer(number.substring(0,number.indexOf("_")));
+                    }
                     
                    
                     
@@ -826,7 +829,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
                     if ("A".equals(status)) {
                         tm.put(cust.getName(), cust);
-                        System.out.println("pg code " + cust.getGroup());
+                        //System.out.println("pg code " + cust.getGroup());
 
                     }
                 }
@@ -856,7 +859,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
             File stockFile = new File("data/InventoryQty" + stockPart + ".json");
             if (!stockFile.exists()) break;
 
-            System.out.println("Loading stock file: " + stockFile.getName());
+           // System.out.println("Loading stock file: " + stockFile.getName());
 
             try {
                 org.json.simple.JSONArray stockValues =
@@ -885,7 +888,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
             File itemFile = new File("data/items" + part + ".json");
             if (!itemFile.exists()) break;
 
-            System.out.println("Processing product file: " + itemFile.getName());
+          //  System.out.println("Processing product file: " + itemFile.getName());
 
             try {
                 org.json.simple.JSONArray values =
@@ -1012,9 +1015,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     File fil = new File("data/GetSalesHistory" + weekNumber + weekYear + ".json");
 
                     try {
-                    	if(oldData != null) {
-                    	System.out.println("oldata enne " + oldData.size());
-                    	}
+                    	
                  
                     	if(fil.exists()) {
                     	org.json.simple.JSONObject hisData =
@@ -1082,7 +1083,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                 File f = new File("data/Promotions" + part + ".json");
                 if (!f.exists()) break;
 
-                System.out.println("Loading salesPrices file: " + f.getName());
+            //    System.out.println("Loading salesPrices file: " + f.getName());
 
                 org.json.simple.JSONArray values =
                         (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(f.getPath());
@@ -1115,7 +1116,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                 File f = new File("data/priceList" + part + ".json");
                 if (!f.exists()) break;
 
-                System.out.println("Loading salesPrices file: " + f.getName());
+            //    System.out.println("Loading salesPrices file: " + f.getName());
 
                 org.json.simple.JSONArray values =
                         (org.json.simple.JSONArray) Converter.readJSONArrFileUTF(f.getPath());

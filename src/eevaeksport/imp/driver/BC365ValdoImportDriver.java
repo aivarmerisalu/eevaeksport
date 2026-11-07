@@ -3,6 +3,7 @@ package eevaeksport.imp.driver;
 
 
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +84,31 @@ public class BC365ValdoImportDriver extends AbstractImportDriver{
     if("true".equals( parent.getProps().getProperty("testing"))){
     	testing = true;
     }
+    loadSignatures();
   }
+  
+  private Vector signatures = new Vector();
+
+  private void loadSignatures(){
+		
+	  try{		
+	  		File f = new File("signatures.vec");
+	  		Calendar ss = Calendar.getInstance();
+	  		
+	  		if (f.exists() && f.lastModified() < ss.getTimeInMillis() - 3600000) {// kui on yle tunni vana siis maha 
+	  			f.delete();
+	  			signatures = new Vector();
+	  		} else {
+	  			signatures = (Vector) Converter.readObject("signatures.vec");
+	  		}
+
+	  		
+	  	} catch (Exception e) {
+	  		signatures = new Vector();
+	  	}
+
+	  	}
+  
   
   
   
@@ -189,15 +214,27 @@ try (CloseableHttpResponse response = client.execute(post)) {
   
 }
   
-
-
-
+  private String trouble = null;
   
   public void makeOrder(Order order) throws SQLException{
-
-     makeOutput(order); 
+	  
+	  if (signatures == null){
+	   	   signatures = new Vector();
+	      }
+	    String signature = order.getSignature();
+	  if(signatures.contains(signature)){
+		  this.trouble = "REPRETATING ORDER agent :" + order.getAgent() + " customer :" + order.getCompany() ;
+		    		  
+	  } else {
+  	      makeOutput(order);
+  		  signatures.add(signature);
+ 	  }
      
-     
+	   try {
+			Converter.saveObject(signatures, "signatures.vec");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     
   }
   
@@ -443,6 +480,9 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	  	        		    	    if(par.contains("++")) {
 	  	        			    		  par = par.substring(0,par.indexOf("++"));
 	  	        			    	  }
+	  	        		    	    if(par.contains(":")) {
+	  	        		    	    	par = par.substring(0,par.indexOf(":"));
+	  	        		    	    }
 	  	        		    	  if(par.length() > 20) {
 	  	        		        	par = par.substring(0,20);
 	  	        		        }  
@@ -463,17 +503,21 @@ try (CloseableHttpResponse response = client.execute(post)) {
 		        			    		  mat = mat.substring(0,mat.indexOf("++"));
 		        			    	  }	    	 
 		        		    	 matrix = Double.parseDouble( mat);
+		        		    	 wasPriceWithData = true;
 		        		        }
 		        		      } catch(Exception e) {}
 		        		     
 		        	    	 
 		        	    	 jsonline.put("PriceOld", matrix);
-		        	    	 jsonline.put("PriceNew", (price * (100-disc)/100));
+		        	    	 jsonline.put("PriceNew", (matrix * (100-disc)/100));
 		        	    	
 	  	        		     if(par != null && par.trim().length() >0) {
 	  	        		    	    if(par.contains("++")) {
 	  	        			    		  par = par.substring(0,par.indexOf("++"));
 	  	        			    	  }
+	  	        		    	  if(par.contains(":")) {
+	  	        		    	    	par = par.substring(0,par.indexOf(":"));
+	  	        		    	    }
 	  	        		    	  if(par.length() > 20) {
 		  	        		        	par = par.substring(0,20);
 		  	        		        }  
@@ -489,12 +533,14 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	        	          		    discPrice = matrix * (100 - line.getDiscount()) / 100;
 	        			    }
 	        			    double diff = matrix-discPrice;
-
+	        			    System.out.println("diff0 " + matrix + " " + discPrice);
+		        			
 	        			    price = discPrice;
 	        			    if(line.getDiscount() ==  100) {
 	        			    	price = 0;
 	        			    	diff = matrix;
 	        			    }
+	        			    System.out.println("diff " + diff + " " + kogus);
 	        			    	double compsum = diff * kogus  ;
 		        		         jsonline.put("CompensationSum", this.nf.format(compsum));
 		        		         
@@ -531,7 +577,7 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	      System.out.println(fileName);
 
 		     Converter.saveFile(fileName,jOrder.toJSONString()); 
-		     
+		     if(!"true".equals(parent.getProps().getProperty("testing"))) {
 	   String resp =   callOperation("ImportOrder", jOrder.toJSONString());
 	     fileName = parent.getProps().getProperty("conv.dir") + order.getDokNr().trim() + "-" + (uni + "").trim() +  "response.json";
 	     Converter.saveFile(fileName, resp); 
@@ -553,7 +599,7 @@ try (CloseableHttpResponse response = client.execute(post)) {
 	    	}
 
 	     
-	     
+		     }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

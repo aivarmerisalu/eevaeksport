@@ -1,3 +1,4 @@
+
 /*--- formatted by Jindent 2.1, (www.c-lab.de/~jindent) ---*/
 
 package eevaeksport.driver;
@@ -697,31 +698,13 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 
     
     private String enCode(String res ){
-	  	 
-
-	  	res =res.replaceAll("�","11111xx");
-	  	res =res.replaceAll("�","11112xx");
-		res =res.replaceAll("�","11114xx");
-		res =res.replaceAll("�","11113xx");
-
-		res =res.replaceAll("�","11115xx");
-		res =res.replaceAll("�","11116xx");
-		res =res.replaceAll("�","11117xx");
-		res =res.replaceAll("�","11118xx");
-		
-		res =res.replaceAll("�","11119xx");
-		res =res.replaceAll("�","11120xx");
-		res =res.replaceAll("�","11121xx");
-		res =res.replaceAll("�","11122xx");
-	
-	  	return res;
+		  	return Converter.enCodeEst(res);
 	  }
     
 
         public String getDistribution() {
           return null;
         }
-
         
         
         
@@ -733,6 +716,7 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 	TreeMap products = new TreeMap();
 	TreeMap sto1 = new TreeMap();
 	TreeMap sto3 = new TreeMap();
+	TreeMap stoml = new TreeMap();
 	try {
    
 		
@@ -763,6 +747,22 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
 				
 				while(rs7.next()){
 				sto3.put(rs7.getString("toode").trim(), "VIA:" + rs7.getDouble("kokku") + "|");
+				}
+				rs7.close();
+				pstm1.close();
+				}catch (Exception e){
+				e.printStackTrace();
+				}   
+
+				String sql5 = " select toode , kogus as kokku from seisud  " +
+				        "   where  osak='ML' order by toode  " ; 
+				
+				try{
+				PreparedStatement pstm1 = con.prepareStatement(sql5);
+				ResultSet rs7 = pstm1.executeQuery();
+				
+				while(rs7.next()){
+				stoml.put(rs7.getString("toode").trim(),rs7.getDouble("kokku"));
 				}
 				rs7.close();
 				pstm1.close();
@@ -856,7 +856,11 @@ public class AvalloneDBDriver extends AbstractDBDriver implements BulkUpdater,Di
           				prod.setStock(Double.parseDouble(sto1.get(prod.getID())+""));
           				prod2.setStock(Double.parseDouble(sto1.get(prod.getID())+""));
           			}
-          				
+          		
+          			if(stoml.get(prod.getID()) != null) {
+          				prod2.setStock(prod.getStock() + Double.parseDouble(stoml.get(prod.getID())+""));
+                  		
+          			}
           			 String link = enCode(rs.getString("link"));
 
                      if(link != null && link.trim().length()>10){

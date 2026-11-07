@@ -75,6 +75,7 @@ import eevaeksport.EksportPanel;
 import eevaeksport.MatrixLine;
 import eevaeksport.Product;
 import eevaeksport.Quest;
+import eevaeksport.driver.EugestaLATDBDriver.GroupResult;
 import eevaeksport.manager.ManagerData;
 import eevaeksport.util.Converter;
 
@@ -924,15 +925,10 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  
 	//  1. teeme tellimus ja arve listi 
 	  
-	  String cmd = "select SALESID as tell,  INVOICEID as arve from BIF01_CUSTINVOICETRANS b where invoicedate > getdate()-120 group by SALESID,INVOICEID " ;
 
 	  String cmd1 = "	 SELECT    a.CUSTACCOUNT AS klient,   a.ITEMID AS toode,    sum(a.INVOICEQTY) AS kogus   FROM BIF03_SALESLINE a  \r\n" + 
 	  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 180 AND a.EG_SALESCANCELREASONID <> 'GKR'   AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
-	  		"	  			  		      AND a.SALESSTATUS <> 1 group by CUSTACCOUNT, ITEMID  \r\n" + 
-	  		"	  						  union  \r\n" + 
-	  		"	  						   SELECT   a.CUSTACCOUNT AS klient, a.SellerItemCode AS toode, sum( a.AmountDespatched) AS kogus \r\n" + 
-	  		"	  			  		    FROM [MJ_EE].[dbo].[Sales_GKR] a  group by CUSTACCOUNT, SellerItemCode " ;
-	  
+	  		"	  			  		      AND a.SALESSTATUS <> 1 group by CUSTACCOUNT, ITEMID ";
 		  
 	  
 	  
@@ -956,30 +952,11 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID  \r\n" + 
 	  		"	  			  		    LEFT JOIN BID44_SALESCANCELREASONS c  \r\n" + 
 	  		"	  			  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID  \r\n" + 
-	  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 180  \r\n" + 
+	  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 360  \r\n" + 
 	  		"	  			  		      AND a.EG_SALESCANCELREASONID <> 'GKR'  \r\n" + 
 	  		"	  			  		      AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
-	  		"	  			  		      AND a.SALESSTATUS <> 1  \r\n" + 
-	  		"	  						  union  \r\n" + 
-	  		"	  						   SELECT    \r\n" + 
-	  		"	  			  		        a.CUSTACCOUNT AS klient,  \r\n" + 
-	  		"	  			  		        a.SellerItemCode AS toode,  \r\n" + 
-	  		"	  		                    RIGHT('00000000' + CAST(t.posWeight AS VARCHAR(20)), 8) as sorting,  \r\n" + 
-	  		"	  			  		        0 AS tellitud,  \r\n" + 
-	  		"	  			  		        a.AmountDespatched AS sisse,  \r\n" + 
-	  		"	  			  		        0 AS tarnimata,  \r\n" + 
-	  		"	  			  		        '' AS CANCELREASON,  \r\n" + 
-	  		"	  			  		        a.DELIVERYDATEACTUAL AS lastdate,  \r\n" + 
-	  		"	  			  		        (a.ItemPrice * (100 - a.DiscountPercent)/100 ) AS lastprice,  \r\n" + 
-	  		"	  			  		        a.orderno AS ordernr, \r\n" + 
-	  		"	  			  		        ROW_NUMBER() OVER (  \r\n" + 
-	  		"	  			  		            PARTITION BY a.CUSTACCOUNT, a.SellerItemCode  \r\n" + 
-	  		"	  			  		            ORDER BY a.DELIVERYDATEACTUAL DESC  \r\n" + 
-	  		"	  			  		        ) AS rn  \r\n" + 
-	  		"	  			  		    FROM [MJ_EE].[dbo].[Sales_GKR] a   \r\n" + 
-	  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.SellerItemCode  \r\n" + 
-	  		"	  			  		)  \r\n" + 
-	  		"	  			  		  \r\n" + 
+	  		"	  			  		      AND a.SALESSTATUS <> 1  and a.INVOICEQTY != 0  \r\n" + 
+	  		"	  					)  \r\n" + 
 	  		"	  			  		SELECT *  \r\n" + 
 	  		"	  			  		FROM cte  \r\n" + 
 	  		"	  			  		WHERE rn = 1 order by klient, sorting ,toode ";
@@ -997,26 +974,65 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	    	
 	    	Connection con = getNewConnection();
 	     	Statement stmt = con.createStatement();
-	     	ResultSet rs = stmt.executeQuery(cmd);
-	
-	      while(rs.next()){
-	    	  String tell = rs.getString("tell").trim();
-	    	  
-	    	  if(tell.length() > 9) {
-	    		  tell = tell.substring(0,9);
-	    	  }
-	        arveNRid.put(tell, rs.getString("arve").trim());
-	      }
-	        rs.close();
-	     	
-	        rs = stmt.executeQuery(cmd1);
+	     	ResultSet  rs = stmt.executeQuery(cmd1);
 	    	
 		      while(rs.next()){
 		    	  last180d.put(rs.getString("klient").trim() + "-" +  rs.getString("toode").trim(), rs.getDouble("kogus"));
 		      }
 		        rs.close();
+
+
+		    	
+		        HashMap lisainfo = new HashMap();
+		        String oldkey = null;
+		        int count = 0;
+		        
+
+		    String last3 = " SELECT jou.clientBackOfficeId as klient , jou.productBackOfficeId as toode , " + 
+		    		"	jou.Quantity  as kogus, jou.Price as lastprice, jou.deliverydate  as lastdate, (jou.invoiceNumber) as lastdok "
+		    		+ " FROM EPASAULE_DELIVERIES  jou  WHERE  jou.deliverydate >= getdate()-300 and DOCUMENTTYPE in (3) and len(jou.invoiceNumber) < 11 " + 
+		    		"	 order by jou.clientBackOfficeId,  jou.productBackOfficeId, jou.deliverydate desc " ;
+		    	 
+		    	 rs = stmt.executeQuery(last3);
+		    	 
+		    	 while(rs.next()){
+
+		              String custID = rs.getString("klient").trim();
+		              String prodID = rs.getString("toode").trim();;
+		              double amount = rs.getDouble("kogus");
+		              double lprice = rs.getDouble("lastprice");
+			          String lastdate = rs.getString("lastdate").trim().substring(0,10);
+		              String ldoc = rs.getString("lastdok");
+		              String key = custID + "-" + prodID;
+		            
+		              if(oldkey == null) {
+		              	   oldkey = key;
+		                 }
+		                
+		                if(!oldkey.equals(key)) {
+		              	   count = 0;
+		                 }
+		                
+		                 	if(count < 3) {
+		                 		String value = ldoc + "," + lastdate + "," +this.getNF().format(amount) + "," + this.getNF().format(lprice) ;
+		                 		if(lisainfo.get(key) != null) {
+		                 			value = lisainfo.get(key) + "|" + value;
+		                 		}
+		                 		 lisainfo.put(key, value);
+		                 		 count++;
+			                }
+		                  
+		                 oldkey = key;
+		                
+		        }
+
+		      rs.close();
+
+		        
+		        
 	     	
-	     //	System.out.println("last180d size " + last180d.size());
+
+		        
 	     	
 	     	 rs = stmt.executeQuery(cmd2);
 	
@@ -1071,16 +1087,19 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	        	 sold180 = aaa;
 	         }
 	         
-	        //if(kogus != 0) {
 	        CustProd cp = new CustProd(kliendikood, tootekood, kogus , sold180 , 0,lastdate,lastprice,mata,0,reason);
 	        if(lastdoc.length() > 0) {
                 cp.setAbiKood(lastdoc);
 	        }
-	        if(kogus != 0) {
+	        String key = kliendikood+ "-" + tootekood; // lisame tagastus docid.
+       		
+       		if(lisainfo.get(key) != null) {
+       			cp.returnData = lisainfo.get(key)+"";
+       		}
 		         custProds.add(cp);
-		        }
+		        
 	        prods.addElement(tootekood);
-	        //}
+	        
 	      }
 	      rs.close();
 	      stmt.close();
@@ -1090,11 +1109,11 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	    }
   }
   
-  
   private Map<String, Map<String, Double>> manaPlans;
   private Map<String, Map<String, Double>> custPlans;
   private Map<String, Double> manaTotalPlans;
   private Map<String, Double> custTotalPlans;
+  private Map<String, String> groupGroupingFocus;
   private Map<String, String> groupGrouping;
   private ArrayList<String> noSalesGroups;
   
@@ -1102,15 +1121,18 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
   private void loadPlans () {
 	  
 	  
-	  getCustomerPRGroupSales();
 	  
 	  custPlans = new HashMap<String, Map<String, Double>>();
 	  manaPlans = new HashMap<String, Map<String, Double>>();
+	  custPlanGruppedFocus = new HashMap<String, Map<String, Double>>();
+	  custPlanGrupped = new HashMap<String, Map<String, Double>>();
 	  custTotalPlans = new HashMap<String, Double>();
 	  manaTotalPlans = new HashMap<String, Double>();
+	  groupGroupingFocus = new HashMap<String, String>();
 	  groupGrouping = new HashMap<String, String>();
 	  noSalesGroups = new  ArrayList<String>();
-	
+		  
+	  
 	  try{
 		 	
 	 		Calendar cal = Calendar.getInstance();
@@ -1134,7 +1156,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 					 row = sheet.getRow(i);
 					String prGR = formatter.formatCellValue(row.getCell(0));
 					String grGR = formatter.formatCellValue(row.getCell(1));
-					groupGrouping.put(prGR, grGR);
+					//groupGrouping.put(prGR, grGR);
 	 		   }
 	 		}
 	 		
@@ -1149,6 +1171,57 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 					noSalesGroups.add(prGR);
 	 		   }
 	 		}
+	 		
+	 		 String year = Calendar.getInstance().get(Calendar.YEAR)+"";
+	 		 sheet = workbook.getSheet("Motivation " + year);
+	 		 row = null; 
+	 		
+	 		if(sheet != null) {
+	 			
+	 			String currentMonth =
+	 			        java.time.Month.of(Calendar.getInstance().get(Calendar.MONTH) + 1)
+	 			                .getDisplayName(
+	 			                        java.time.format.TextStyle.FULL,
+	 			                        Locale.ENGLISH);
+
+	 			 row = sheet.getRow(6);
+
+	 			int monthCellIndex = -1;
+
+	 			for (int c = 0; c < row.getLastCellNum(); c++) {
+
+	 			   Cell cell = row.getCell(c);
+
+	 			    String value = formatter.formatCellValue(cell).trim();
+
+	 			    if (value.equalsIgnoreCase(currentMonth)) {
+	 			        monthCellIndex = c ;
+	 			        break;
+	 			    }
+	 			}
+
+	 			System.out.println("Month = " + currentMonth);
+	 			System.out.println("Found in column = " + monthCellIndex);
+	 			
+	 			if(monthCellIndex != -1) {
+	 			for(int i = 7 ; i < sheet.getLastRowNum() + 1;i++){
+					 row = sheet.getRow(i);
+					 
+					String prGR = formatter.formatCellValue(row.getCell(0));
+					String grGR = formatter.formatCellValue(row.getCell(monthCellIndex));
+					if(grGR!= null && grGR.length() > 0) {
+						groupGroupingFocus.put(prGR, grGR);	
+					}
+
+				     grGR = formatter.formatCellValue(row.getCell(1));
+				 	 groupGrouping.put(prGR, grGR);	
+					
+	 		     }
+	 		   }
+	 		 }
+	 		
+	 		//System.out.println("groupGrouping " + groupGrouping.toString());	
+	 		
 	 		
 	 		sheet = workbook.getSheet(jooksev);
 	 	
@@ -1175,7 +1248,18 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	 						             custPlans
 	 						                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
 	 						                .merge(gr, plan, Double::sum);
-	 								   }
+	 						            if (this.groupGroupingFocus.get(gr) != null) {
+	 						  			 custPlanGruppedFocus
+	 						                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
+	 						                .merge(groupGroupingFocus.get(gr), plan, Double::sum);
+	 						            }
+	 						            
+	 						           if (this.groupGrouping.get(gr) != null) {
+		 						  			 custPlanGrupped
+		 						                .computeIfAbsent(cust, k -> new HashMap<String, Double>())
+		 						                .merge(groupGrouping.get(gr), plan, Double::sum);
+		 						            }
+	 								  }
 	 								}
 	 					
 	 					
@@ -1199,7 +1283,8 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	   }catch(Exception e) {
 		   e.printStackTrace();
 	   }
-	  
+
+	  getCustomerPRGroupSales(); 
   }
   
   
@@ -2938,7 +3023,456 @@ boolean noopt = false;
 
   
   
-  public void setBulkSales(Map agents){
+
+  HashMap<String, Map<String, Double>> custSalesGruppedFocus = null;
+	 HashMap<String, Map<String, Double>> custPlanGruppedFocus = null;
+
+
+  HashMap<String, Map<String, Double>> custSalesGrupped = null;
+	 HashMap<String, Map<String, Double>> custPlanGrupped = null;
+
+public void setBulkSales(Map agents){
+	   
+ 
+
+   int yy = Calendar.getInstance().get(Calendar.YEAR);
+   int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+   int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+   double planprec = dd/d2;
+	  HashMap<String,String> grnames = new HashMap<String,String>();
+	  String grSqlAdd = "";
+	  if( noSalesGroups != null && noSalesGroups.size() > 0 ) {
+		  grSqlAdd = "and EG_PRODUCTGROUPID not in (";
+		  for (String gr : noSalesGroups) {
+			  grSqlAdd = grSqlAdd + "'" + gr + "' ,";
+		  }
+		  grSqlAdd = grSqlAdd.substring(0,grSqlAdd.length()-1); // võtame viimase koma maha
+		  grSqlAdd = grSqlAdd + ") ";
+	  }
+	 // Teeme gruppide myygid valmis 
+	  String cmd0 =  "SELECT EG_AGENTID as agent, EG_PRODUCTGROUPID as gr,SUM(d.LINEAMOUNTMST ) AS summa\r\n" + 
+	  		"	  		 FROM [BIF01_CUSTINVOICETRANS] d \r\n" + 
+	  		"	  		 INNER JOIN BID01_ITEM b ON d.ITEMID = b.ITEMID \r\n" + 
+	  		"	  		 WHERE d.INVOICEDATE >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+	  		"	  		AND d.INVOICEDATE < DATEADD(MONTH, 1,DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) \r\n" + 
+	  		"			group by EG_AGENTID, EG_PRODUCTGROUPID having eg_agentid != ''" ;
+	  
+	try {	
+	   Connection con = this.getNewConnection();
+   Statement stmt = con.createStatement();
+   ResultSet rs = stmt.executeQuery(cmd0);
+
+
+	  manaSales = new HashMap<String, Map<String, Double>>();
+	
+	while(rs.next()) {
+		
+		    String agentID = rs.getString("agent").trim();
+			String gr = rs.getString("gr");
+		    Double sales = rs.getDouble("summa");
+				 
+
+			if(sales != null && sales > 0) {
+						 manaSales
+			                .computeIfAbsent(agentID, k -> new HashMap<String, Double>())
+			                .merge(gr, sales, Double::sum);
+			   }
+		
+	}
+	
+	rs.close();
+	
+	
+	  String    sql = "  SELECT backOfficeId as liik,Name as nimetus FROM dbo.EPASAULE_BRANDS ";
+
+	  rs = stmt.executeQuery(sql);
+ while (rs.next()) {
+   String liik = rs.getString("liik").trim();
+     grnames.put(liik, rs.getString("nimetus").trim());
+ }
+ 
+ rs.close();
+ stmt.close();
+	con.close();
+	
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+	//  System.out.println("manaSales " + manaSales.toString());
+	  
+	//Teeme igale managerile grupeeritud  grupeeritud Objekti 
+
+	 HashMap<String, Map<String, Double>> manaSalesGrupped = new HashMap<String, Map<String, Double>>();
+	 HashMap<String, Map<String, Double>> manaPlanGrupped = new HashMap<String, Map<String, Double>>();
+	
+	
+	 HashMap<String, Map<String, Double>> manaSalesFocusGrupped = new HashMap<String, Map<String, Double>>();
+	 HashMap<String, Map<String, Double>> manaPlanFocusGrupped = new HashMap<String, Map<String, Double>>();
+
+	 Iterator<String> iterau = manaPlans.keySet().iterator();
+	 while (iterau.hasNext()) {
+		 String agID = iterau.next();
+
+		 Map<String, Double> osales = manaPlans.get(agID);
+		 
+		 Iterator<String>  itera2 = osales.keySet().iterator();
+			 while (itera2.hasNext()) {
+				 String grID = itera2.next();
+			double psales = osales.get(grID);
+		  
+		    if(this.groupGroupingFocus.get(grID) != null) {
+		    	manaPlanFocusGrupped 
+             .computeIfAbsent(agID, k -> new HashMap<String, Double>())
+             .merge(groupGroupingFocus.get(grID), psales, Double::sum);
+		 
+		    }
+		    if(this.groupGrouping.get(grID) != null) {
+		    	manaPlanGrupped 
+             .computeIfAbsent(agID, k -> new HashMap<String, Double>())
+             .merge(groupGrouping.get(grID), psales, Double::sum);
+		 
+		    }
+		    
+		 }
+	 }
+	// System.out.println("grNames " + grnames.toString());
+	 
+	 HashMap<String, List<GroupResult>> managerResultsFocus = new HashMap<>();
+
+	 HashMap<String, List<GroupResult>> managerResults = new HashMap<>();
+
+	 Iterator<String> iteraq = manaSales.keySet().iterator();
+	 while (iteraq.hasNext()) {
+	     String agID = iteraq.next();
+
+	     Map<String, Double> osales = manaSales.get(agID);
+	     Map<String, Double> oplan = manaPlans.get(agID);
+
+	     Iterator<String> itera2 = osales.keySet().iterator();
+	     while (itera2.hasNext()) {
+	         String grID = itera2.next();
+	         
+
+			 if(this.groupGroupingFocus.get(grID) != null) {
+				String cat = this.groupGroupingFocus.get(grID); 
+	         double psales = osales.get(grID);
+
+	         if (oplan != null && oplan.get(grID) != null) {
+	             double pplan = oplan.get(grID);
+	             double missing =  psales - pplan;
+
+	             String grnimi = grnames.get(grID);
+	             if (grnimi == null) {
+	                 grnimi = grID;
+	             }
+
+	             managerResultsFocus
+	                 .computeIfAbsent(agID, k -> new ArrayList<>())
+	                 .add(new GroupResult("focus " + grnimi + " (" + cat + ")", missing));
+	         }
+
+	         if (this.groupGroupingFocus.get(grID) != null) {
+	             manaSalesFocusGrupped
+	                 .computeIfAbsent(agID, k -> new HashMap<String, Double>())
+	                 .merge(groupGroupingFocus.get(grID), psales, Double::sum);
+	         }
+	     }
+			 
+
+			 if(this.groupGrouping.get(grID) != null) {
+				String cat = this.groupGrouping.get(grID); 
+	         double psales = osales.get(grID);
+
+	         if (oplan != null && oplan.get(grID) != null) {
+	             double pplan = oplan.get(grID);
+	             double missing =  psales - pplan;
+
+	             String grnimi = grnames.get(grID);
+	             if (grnimi == null) {
+	                 grnimi = grID;
+	             }
+
+	             managerResults
+	                 .computeIfAbsent(agID, k -> new ArrayList<>())
+	                 .add(new GroupResult(grnimi + " (" + cat + ")", missing));
+	         }
+
+	         if (this.groupGrouping.get(grID) != null) {
+	             manaSalesGrupped
+	                 .computeIfAbsent(agID, k -> new HashMap<String, Double>())
+	                 .merge(groupGrouping.get(grID), psales, Double::sum);
+	         }
+	     }
+			 
+			 }
+	 }
+	 
+	 
+	 HashMap <String, String> manaGrpouTotalsFocus = new HashMap<String, String>();
+
+//	 HashMap <String, String> manaGrpouTotals = new HashMap<String, String>();
+	 
+	 for (String agID : managerResultsFocus.keySet()) {
+
+	     List<GroupResult> results = managerResultsFocus.get(agID);
+
+	     // sort by smallest missing first
+	     results.sort(Comparator.comparingDouble(r -> r.missing));
+
+	     StringBuilder sb = new StringBuilder();
+
+	     for (GroupResult r : results) {
+	         if (r.missing < 0) {
+	             sb.append(r.name)
+	               .append(" Diff : ")
+	               .append((int) r.missing)
+	               .append(" €|");
+	         } else {
+	             sb.append(r.name)
+	               .append(" Diff : +")
+	               .append((int) r.missing)
+	               .append(" €|");
+	         }
+	     }
+
+	     manaGrpouTotalsFocus.put(agID, sb.toString());
+	 }	 
+
+	 
+/*	 for (String agID : managerResults.keySet()) {
+
+	     List<GroupResult> results = managerResults.get(agID);
+
+	     // sort by smallest missing first
+	     results.sort(Comparator.comparingDouble(r -> r.missing));
+
+	     StringBuilder sb = new StringBuilder();
+
+	     for (GroupResult r : results) {
+	         if (r.missing < 0) {
+	             sb.append(r.name)
+	               .append(" Diff : ")
+	               .append((int) r.missing)
+	               .append(" €|");
+	         } else {
+	             sb.append(r.name)
+	               .append(" Diff : +")
+	               .append((int) r.missing)
+	               .append(" €|");
+	         }
+	     }
+
+	     manaGrpouTotals.put(agID, sb.toString());
+	 }	 */
+	 // System.out.println("manaGrpouTotals " + manaGrpouTotals.toString());
+	 
+	// System.exit(0);
+	// System.out.println("grupped " + manaPlanGrupped.toString() );
+	 
+	 HashMap <String, String> manaCategoryFocusTotals = new HashMap<String, String>();
+	 
+	 Iterator<String> itera = manaPlanFocusGrupped.keySet().iterator();
+	 while (itera.hasNext()) {
+		 String agID = itera.next();
+		 
+		  Map<String, Double> osales = manaPlanFocusGrupped.get(agID);
+		  Map<String, Double> rsales = manaSalesFocusGrupped.get(agID);
+
+		  Iterator<String>  itera2 = osales.keySet().iterator();
+			 while (itera2.hasNext()) {
+				 String grID = itera2.next();
+				 
+				 
+			double psales = osales.get(grID);
+		 if(rsales != null && rsales.get(grID) != null) {
+		  
+		  double msales = rsales.get(grID);
+		  double  tehtudsalperc = msales/psales;
+   	  double plaanitavMyykSal = d2 * msales/dd;
+   	  double  prognosalperc = plaanitavMyykSal/psales;
+   	
+   	  if(tehtudsalperc > 10){
+   		  tehtudsalperc = 0;  
+   	  }
+   	  
+   	  if(prognosalperc > 10){
+   		  prognosalperc = 0;  
+   	  }
+   	  
+   	  String done = (int)(msales - psales)+"";
+   	  if(!done.startsWith("-")) {
+   		  done = "+" + done;
+   	  }
+   //	Plan- Plāns; Done- Izpilde; Diff- Starpība, esti- Projekcija
+     	
+   	  String asi = "Fokus Cat. : " + grID + "|Done/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Done. : " + done + " €";
+
+   	  if(tehtudsalperc > 0) {
+   		  asi = asi + "|Done/Estimate : " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  
+            }
+         
+         if(manaCategoryFocusTotals.get(agID) != null) {
+             manaCategoryFocusTotals.put(agID, manaCategoryFocusTotals.get(agID) + asi);
+          } else {
+             manaCategoryFocusTotals.put(agID, asi);	
+         }
+         
+		  }
+		 
+		}
+	 }
+
+HashMap <String, String> manaCategoryTotals = new HashMap<String, String>();
+	  itera = manaPlanGrupped.keySet().iterator();
+	 while (itera.hasNext()) {
+		 String agID = itera.next();
+		 
+		  Map<String, Double> osales = manaPlanGrupped.get(agID);
+		  Map<String, Double> rsales = manaSalesGrupped.get(agID);
+
+		  Iterator<String>  itera2 = osales.keySet().iterator();
+			 while (itera2.hasNext()) {
+				 String grID = itera2.next();
+				 
+				 
+			double psales = osales.get(grID);
+		 if(rsales != null && rsales.get(grID) != null) {
+		  
+		  double msales = rsales.get(grID);
+		  double  tehtudsalperc = msales/psales;
+   	  double plaanitavMyykSal = d2 * msales/dd;
+   	  double  prognosalperc = plaanitavMyykSal/psales;
+   	
+   	  if(tehtudsalperc > 10){
+   		  tehtudsalperc = 0;  
+   	  }
+   	  
+   	  if(prognosalperc > 10){
+   		  prognosalperc = 0;  
+   	  }
+   	  
+   	  String done = (int)(msales - psales)+"";
+   	  if(!done.startsWith("-")) {
+   		  done = "+" + done;
+   	  }
+   	
+     	//Plan- Plāns; Done- Izpilde; Diff- Starpība, esti- Projekcija
+   	  String asi = " Kat. : " + grID + "|Done/Plan : " + (int) msales +  " € / " + (int) psales +  " €|done : " + done + " €";
+
+   	  if(tehtudsalperc > 0) {
+   		  asi = asi + "|Done/Estimate : " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  
+            }
+         
+         if(manaCategoryTotals.get(agID) != null) {
+             manaCategoryTotals.put(agID, manaCategoryTotals.get(agID) + asi);
+          } else {
+             manaCategoryTotals.put(agID, asi);	
+         }
+         
+		  }
+		 
+		}
+	 }
+
+	 
+	 // teeme siin gruppidele eraldi missingu
+	 // 1  selgitame välja top 10 grupi plaani
+	 
+	 
+		String cmd = "SELECT EG_AGENTID as agent, SUM(d.LINEAMOUNTMST ) AS summa\r\n" + 
+				"	  		 FROM [BIF01_CUSTINVOICETRANS] d \r\n" + 
+				"	  		 INNER JOIN BID01_ITEM b ON d.ITEMID = b.ITEMID \r\n" + 
+				"	  		 WHERE d.INVOICEDATE >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)\r\n" + 
+				"	  		AND d.INVOICEDATE < DATEADD(MONTH, 1,DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) \r\n" + 
+				"			group by EG_AGENTID having eg_agentid != ''";
+		
+		try {
+			
+			   Connection con = this.getNewConnection();
+		       Statement stmt = con.createStatement();
+		       ResultSet rs = stmt.executeQuery(cmd);
+			
+			while(rs.next()) {
+				
+				String agentID = rs.getString("agent").trim();
+				Agent agent = (Agent)agents.get(agentID);
+				
+				double msales = (int)rs.getDouble("summa");
+				if (agent != null){
+
+					//agent.todayCycleCode = todayCycleCode;
+					
+				if(this.manaTotalPlans.get(agentID) != null) {
+					String asi = "Done: " + (int)msales + " €|";
+					
+                 if(dd > 6){
+                   double psales = manaTotalPlans.get(agentID);
+               	  double  tehtudsalperc = msales/psales;
+               	  double plaanitavMyykSal = d2 * msales/dd;
+               	  double  prognosalperc = plaanitavMyykSal/psales;
+               	
+               	  if(tehtudsalperc > 10){
+               		  tehtudsalperc = 0;  
+               	  }
+               	  
+               	  if(prognosalperc > 10){
+               		  prognosalperc = 0;  
+               	  }
+//Plan- Plāns; Done- Izpilde; Diff- Starpība, esti- Projekcija
+					asi = "Done: " + (int)msales + " €|";
+					asi = asi + " Plan: " + (int)psales + " €|";
+
+		      	  String done = (int)(msales - psales)+"";
+		      	  if(!done.startsWith("-")) {
+		      		  done = "+" + done;
+		      	  }
+					asi = asi + " Done: " + done + " €|";
+               	  
+               	    asi = asi + "Done/Estimate. :";
+                     asi = asi + "     " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %||";  
+                     
+                     if(manaCategoryFocusTotals.get(agentID) != null) {
+                     	asi = asi + manaCategoryFocusTotals.get(agentID); 
+                     }
+                     
+                     if(manaCategoryTotals.get(agentID) != null) {
+                     	asi = asi + manaCategoryTotals.get(agentID); 
+                     }
+                     
+                     if(manaGrpouTotalsFocus.get(agentID) != null) {
+                     	asi = asi + manaGrpouTotalsFocus.get(agentID); 
+                     }
+                   
+                  //   if(manaGrpouTotals.get(agentID) != null) {
+                    // 	asi = asi + manaGrpouTotals.get(agentID); 
+                     //}
+                     
+                     agent.setStart(asi);
+                     
+                 }
+                 
+				  } else {
+					agent.setMonthSales((int)msales);
+				  }
+				
+				 }
+			}
+			
+			rs.close();
+			stmt.close();
+			con.close();
+		} catch (Exception e) {
+			getParent().showError(e);
+		}
+		
+     }
+
+
+
+private Map<String,  Double> custTotalSales;
+
+  
+  public void setBulkSalesOld(Map agents){
 	  
 	  
     

@@ -643,19 +643,18 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 	                    	  try{  	  
                        mode = rida.getAttributes().getNamedItem("what").getNodeValue();
 	                    	  }catch(Exception aa){ }
-                      try{
-                     double value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
+	                    	  double value = 0;
+	                    	  try{
+                       value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
                      if(mode != null && mode.equals("8")){
                     	 mline.setPrice(value);
                      }else{
                          mline.setDiscount(value);
                      }
                       }catch(Exception aa){ }
-                  
-                      
+                    
                       mline.setProdLevel(mode);
                     
-                      boolean goes = false;
                       
                       if (currency != null && currency.trim().length() > 0) {
                           mline.setCurrency(currency.trim());
@@ -664,7 +663,8 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
                       if (clGroup != null
                           && clGroup.trim().length() > 0) {
                     	  
-                    	  
+                    	   mline.setCliGroup("TB_"+ clGroup.trim());
+                           
                     	 if( tbPrCodes.get(clGroup.trim()) != null) {
                     	   HashSet aa = (HashSet)tbPrCodes.get(clGroup.trim());
                     	  Iterator itera = aa.iterator();
@@ -673,11 +673,13 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
                     		  cuid = (String) tobisCustCodes.get(cuid);
                     	  if(this.tobisCustPrlists.get(cuid) != null) {
                              mline.setCliGroup(tobisCustPrlists.get(cuid)+"");
-                             goes = true;
                              break;
                     	  }
                     	 }
                     	 }
+                      }
+                      if(clGroup.equals("4355")) {
+                    	  System.out.println("4355 " + prodGroup + " " + value);
                       }
 
                       if (prodID != null && prodID.trim().length() > 0) {
@@ -723,17 +725,13 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
                           }
                           
                           if(alg.before(new Date()) && lopp.after(new Date())){
-                        	  if(goes) {
-                         	     lines.add(mline);	
-                              }
+                        	     lines.add(mline);	
                           }
                         
                           
                       } else {
-                    	  if(goes) {
                      	     lines.add(mline);	
-                    	  }
-  	                 }
+                       }
                  
                  }catch(Exception e){
                  	e.printStackTrace();

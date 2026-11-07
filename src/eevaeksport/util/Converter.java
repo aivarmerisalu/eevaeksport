@@ -1744,7 +1744,7 @@ public class Converter {
 									ni = a;
 								}
 								
-								if(gg.toLowerCase().equals("kad") || gg.toLowerCase().equals("kadaka")) {
+								if(gg.toLowerCase().equals("must") || gg.toLowerCase().indexOf("mustam") != -1) {
 									r = a;
 									break;
 								}
@@ -1754,7 +1754,8 @@ public class Converter {
 							}
 						}
 					
-						
+					//	 System.out.println( " " + r + " " + ea +  " " + ni);
+							
 						
 						for (int a = r; a < row.getLastCellNum(); a++) {
 							try {
@@ -1804,7 +1805,8 @@ public class Converter {
                              String value =  formatter.formatCellValue(row.getCell(a));
                              
                               
-                              if(value.trim().length() > 0 && (value.trim().equals("PS") || value.trim().equals("HK") || value.trim().equals("x"))) {
+                              if(value.trim().length() > 0 && (value.trim().equals("PS") || value.trim().equals("HK") || value.trim().equals("x")
+                            		  || value.trim().equals("X"))) {
                               //	 System.out.println("Sees " +a + " " + value + " " + ean + " "+ r);
                               
 							if(res.get(pood) != null){
