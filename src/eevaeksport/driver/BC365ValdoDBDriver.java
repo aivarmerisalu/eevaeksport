@@ -55,6 +55,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -764,14 +765,19 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     // Optional fields
                     String status = (String) cob.get("status");
 
-                    String paymentMethod = (String) cob.get("paymentMethodCode");
-                    //if (paymentMethod != null) { cust.setPaymentMethod(paymentMethod.trim()); }
 
                     String priceGroup = (String) cob.get("priceGroupCode");
                     if (priceGroup != null) {
                     	cust.setGroup(priceGroup.trim());
                     	cust.addCity("Grupa: " + priceGroup.trim());
                     }
+                    
+                    if(cust.getGroup() != null && cust.getGroup().trim().length() > 0) {
+                   	 cust.setGroup(cust.getGroup() + "|" +cust.getPayer().trim());
+                     } else {
+                   	  cust.setGroup(cust.getPayer().trim());
+                     }
+                  
            
                     String storeCat = (String) cob.get("franchise");
                     if (storeCat != null && storeCat.trim().length() > 0) {
@@ -1181,6 +1187,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
             e.printStackTrace();
         }
   System.out.println("lines " + lines.size());
+  Collections.reverse(lines);
         return lines;
     }
 

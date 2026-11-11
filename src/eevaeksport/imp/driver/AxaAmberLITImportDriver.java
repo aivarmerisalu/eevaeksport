@@ -397,6 +397,7 @@ private Vector signatures = new Vector();
 	  ordBR.setDokNr(order.getDokNr());
 	  ordBR.setCompName(order.getShipMode());
 	  ordBR.setShipCal(order.getShipCal().getTimeInMillis() +"");
+	  ordBR.setShipDateUsed(order.isShipDateUsed());
 	  ordBR.setStatus(order.getStatus());
 	  ordBR.setInfo(order.getInfo());
 	  ordBR.setPaymTerm(order.getPaymTerm());
@@ -407,6 +408,7 @@ private Vector signatures = new Vector();
  	  ordS0.setDokNr(order.getDokNr());
  	  ordS0.setCompName(order.getShipMode());
  	  ordS0.setShipCal(order.getShipCal().getTimeInMillis() +"");
+ 	  ordS0.setShipDateUsed(order.isShipDateUsed());
  	  ordS0.setStatus(order.getStatus());
  	  ordS0.setInfo(order.getInfo());
  	  ordS0.setDealer("100");
@@ -418,6 +420,7 @@ private Vector signatures = new Vector();
  	  ordSG.setDokNr(order.getDokNr());
  	  ordSG.setCompName(order.getShipMode());
  	  ordSG.setShipCal(order.getShipCal().getTimeInMillis() +"");
+ 	  ordSG.setShipDateUsed(order.isShipDateUsed());
  	  ordSG.setStatus(order.getStatus());
  	  ordSG.setInfo(order.getInfo());
  	  ordSG.setPaymTerm(order.getPaymTerm());
@@ -694,18 +697,37 @@ if (inff != null && inff.trim().length()>0 && inff.indexOf("[") !=-1){
 	        
 	        Node delkuupaev = doc.createElement("ExpectedDeliveryDate");
 	        Calendar delcal = Calendar.getInstance();
-	        delcal.setTime(order.getShipCal().getTime());
+	        if(order.isShipDateUsed()) {
+	          delcal.setTime(order.getShipCal().getTime());
+	        }else {
+	        	int workingDaysToAdd = 2;
+
+	            while (workingDaysToAdd > 0) {
+	            	delcal.add(Calendar.DAY_OF_MONTH, 1);
+
+	                int dayOfWeek = delcal.get(Calendar.DAY_OF_WEEK);
+
+	                if (dayOfWeek != Calendar.SATURDAY &&
+	                    dayOfWeek != Calendar.SUNDAY) {
+	                    workingDaysToAdd--;
+	                }
+	            }
+	        }
 
 	         month = (delcal.get(Calendar.MONTH) + 1) + "";
 	        if (month.length() == 1) month = "0" + month;
-	         day = delcal.get(Calendar.DAY_OF_MONTH) + "";
+	             day = delcal.get(Calendar.DAY_OF_MONTH) + "";
 	        if (day.length() == 1) day = "0" + day;
-   year = delcal.get(Calendar.YEAR) + "";
-  if(year.length() == 2){
-	  year = "20" + year;
-  }
+                  year = delcal.get(Calendar.YEAR) + "";
+			if(year.length() == 2){
+				  year = "20" + year;
+			  }
 	         dateString = year +"-"+ month +"-"+ day;
+	         
+	         
 	        Text delkuupaevVal = doc.createTextNode(dateString);
+	        
+	        
 	        delkuupaev.appendChild(delkuupaevVal);
 	        header.appendChild(delkuupaev);		        
 

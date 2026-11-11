@@ -5420,10 +5420,10 @@ public class Converter {
 			                                  
 			                                  if(customers != null && customers.get(custid) != null) {
 			                                	  Customer cust = (Customer)customers.get(custid);
-			                                	  if(cust.getCity().trim().length() > 0) {
+			                                	  if(cust.getCity() != null && cust.getCity().trim().length() > 0) {
 			                                	    city = cust.getCity();
 			                                	  }
-			                                	  if(cust.getChain().trim().length() > 0) {
+			                                	  if(cust.getChain() != null && cust.getChain().trim().length() > 0) {
 				                                	    chain = cust.getChain();
 				                                	    System.out.println("chain sees " + chain);
 				                                	  }
@@ -5440,7 +5440,7 @@ public class Converter {
 
 			                                      String questLineID = (String)ob.get("prodid");
 			                                      
-			                                      String custID = (String) ob.get("custid");
+			                                      String custID = ((String) ob.get("custid")).trim();
 			                                      String prodname = (String) ob.get("prodname");
 			                                      if(prodname.contains("|")) {
 			                                    	  prodean = prodname.substring(prodname.indexOf("|")+1);
@@ -5448,11 +5448,17 @@ public class Converter {
 			                                       }
 			                                      
 			                                      String custname = (String) ob.get("custname");
+			                                      if(custname.contains(custID)) {
+			                                    	  custname = custname.replaceAll(custID, " ").trim();
+			                                      }
 			                                      Number normalprNum = (Number) ob.get("normalpr");
 			                                      Double normalpr = normalprNum != null ? normalprNum.doubleValue() : null;
 			                                      Number actionprNum = (Number) ob.get("priceCamp");
 			                                      Double actionpr = actionprNum != null ? actionprNum.doubleValue() : null;
 			                                      String comm = (String) ob.get("comment");
+			                                      if(comm == null) {
+			                                    	  comm = "";
+			                                      }
 			                                     
 			                                      String tootja = null;
 				                                  String grupp = null;

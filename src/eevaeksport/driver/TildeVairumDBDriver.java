@@ -79,7 +79,7 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
         user =  getParent().getProps().getProperty("rest.user");
         pass = getParent().getProps().getProperty("rest.pass");
         rcompany = getParent().getProps().getProperty("rest.companyx");
-        url = "jdbc:odbc:" + getParent().getProps().getProperty("dsn.url");;
+        url = "jdbc:odbc:" + getParent().getProps().getProperty("dsn.url");
     
        }
     
@@ -463,9 +463,9 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
 	try {
    
 	              
-         String  cmd = " \r\n" + 
-         		"					 select  p.ProductID as idd , p.ProductCode as kood , p.ProductBarCode as ean,ProductName as nimi, u.ProductUnitName as unit,p.ProductTypeID as grupp , h.Price\r\n" + 
-         		"         		   from product p left join productunit u on u.productunitid=p.productunitid left join ProductPrice h on h.ProductID = p.ProductID   and h.TypeID = 18  ";
+         String  cmd = " select  p.ProductID as idd , p.ProductCode as kood , p.ProductBarCode as ean,ProductName as nimi, u.ProductUnitName as unit"
+         		+ ",p.ProductTypeID as grupp , h.Price  from product p left join productunit u on u.productunitid=p.productunitid"
+         		+ " left join ProductPrice h on h.ProductID = p.ProductID   and h.TypeID = 18  ";
          
        if (isDebug()) {
            	System.out.println(cmd);
@@ -572,22 +572,33 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
     		custProds = new Vector();	
     	}
     	prodsSold = new HashSet();
+    	
+    	/*
+    	 see on siis kui saab addressID täita glnkoodi väljal 				  
+		   select d.PartnerID as saaja, d.PartnerAddressGLNCode as aadr ,ProductID as toode, d.DocDate as kuupaev, Quantity as kogus,AmountFinal/Quantity as hind, DocNoSerial+DocNo as doc
+							 from storedocline r
+							  INNER JOIN storedoc d ON d.StoreDOcID = r. StoreDOcID and d.PartnerAddressGLNCode != ''
+							  INNER JOIN PartnerAddress a on a.PartnerID = d.PartnerID  
+							  where d.DocDate >= getdate()-90 and d.StoreDocTypeID = 3 and  len(d.PartnerAddressGLNCode) < 13 and  d.PartnerAddressGLNCode = str(a.AddressID)
+							  GROUP BY d.PartnerID, d.PartnerAddressGLNCode ,ProductID, d.DocDate, Quantity ,AmountFinal, DocNoSerial+DocNo  ORDER BY d.PartnerID, d.PartnerAddressGLNCode ,ProductID, d.DocDate 
+							  
+    	 */
       
 	String cmd =" select d.PartnerID as saaja, a.AddressID as aadr ,ProductID as toode, d.DocDate as kuupaev, Quantity as kogus,AmountFinal/Quantity as hind, DocNoSerial+DocNo as doc\r\n" + 
 			"				 from storedocline r\r\n" + 
 			"				  INNER JOIN storedoc d ON d.StoreDOcID = r. StoreDOcID and d.PartnerID != ''\r\n" + 
 			"				  INNER JOIN PartnerAddress a on a.PartnerID = d.PartnerID and d.PartnerAddressGLNCode = a.GLNCode where d.DocDate >= getdate()-90 and d.StoreDocTypeID = 3\r\n" + 
 			"				  GROUP BY d.PartnerID, a.AddressID ,ProductID, d.DocDate, Quantity ,AmountFinal, DocNoSerial+DocNo  ORDER BY d.PartnerID, a.AddressID ,ProductID, d.DocDate " ;
+	
 	if (isDebug()) {
 	    System.out.println(cmd);
 	}
   
-	Vector custPro = new Vector();
 
 	try {
 	    Connection con = DriverManager.getConnection(url);
         Statement stmt = con.createStatement();
-	    ResultSet	      rs = stmt.executeQuery(cmd);
+	    ResultSet rs = stmt.executeQuery(cmd);
 
 	    while (rs.next()) {
 		String kliendikood = rs.getString("saaja").trim();
@@ -604,8 +615,7 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
                   if(!prodsSold.contains(tootekood)) {
                 	  prodsSold.add(tootekood);
                   }
-                
-	     }
+       }
 
             rs.close();
             stmt.close();
@@ -633,10 +643,19 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
         debt.setPayerID(rs.getString("saaja").trim());
         debt.setDoknr(rs.getString("number").trim());
         debt.setDate(rs.getDate("kuupaev"));
-        debt.setDuedate(rs.getDate("maksepaev"));
-        debt.setSum(rs.getDouble("tasumata"));
-        debt.setDue(rs.getString("yle"));
+        Date dd = rs.getDate("maksepaev");
+        if(dd != null) {
+          debt.setDuedate(dd);
+        }else {
+        	debt.setDuedate(debt.getDate());
+        }
+         debt.setSum(rs.getDouble("tasumata"));
+        if(dd != null) {
+          debt.setDue(rs.getString("yle"));
+        }
+        
         list.addElement(debt);
+        
       }
       rs.close();
       stmt.close();

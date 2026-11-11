@@ -2,7 +2,12 @@ package eevaeksport.imp.driver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +35,8 @@ import org.json.simple.parser.ParseException;
 import com.amazonaws.util.IOUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eevaeksport.Debt;
 import eevaeksport.imp.ImportPanel;
 import eevaeksport.imp.Order;
 import eevaeksport.imp.OrderLine;
@@ -47,6 +54,7 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
     secret = parent.getProps().getProperty("API.secret"); 
 	user =  parent.getProps().getProperty("rest.user");
     pass = parent.getProps().getProperty("rest.pass");
+    url = "jdbc:odbc:" + parent.getProps().getProperty("dsn.url");
    
   }
   
@@ -54,12 +62,12 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
   String user =  null;
   String pass = null;
   String secret = null;
-
+  String url = null;
 	  
   
   public static String deCode(String res ){
 	return Converter.deCode(res);
-}
+  }
 
   
   public String getImportFile(){
@@ -80,14 +88,36 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
   
   
     public void makeOrder(Order order) throws SQLException{
-    	
-    	
+  
+    	adressGlns = getAddressGlns();
         makeOutput(order); 
-  }
+  
+    }
   
 
-  TreeMap paymTerms = null;
-  TreeMap products = null;
+  HashMap adressGlns = null;
+  
+  
+  private HashMap getAddressGlns(){
+	  HashMap list = new HashMap();
+      
+      String sql = "select a.AddressID as saaja ,a.GLNCode as gln from partneraddress a where a.GLNCode != '' ";
+try {
+      Connection con = DriverManager.getConnection(url);
+      Statement stmt = con.createStatement();
+      ResultSet rs = stmt.executeQuery(sql);
+      while(rs.next()){
+        String adID = rs.getString("saaja");
+        String gln = rs.getString("gln").trim();
+        list.put(adID, gln);
+      }
+      rs.close();
+      stmt.close();
+      con.close();
+       }catch(Exception e) {e.printStackTrace();}
+      return list;
+    }
+
   
   
   private String postData( String json){
@@ -116,31 +146,7 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 	    return res;
   }
   
-  private String getData(String service , String json) {
-      String url = logurl;
-
-      try (CloseableHttpClient client = HttpClients.createDefault()) {
-          HttpGet request = new HttpGet(url + service);
-
-          request.setHeader("auth_key", secret);
-          request.setHeader("Content-Type", "application/json");
-          request.setHeader("Accept", "application/json");
-
-          try (CloseableHttpResponse response = client.execute(request)) {
-              HttpEntity entity = response.getEntity();
-
-              if (entity != null) {
-                  return EntityUtils.toString(entity, "UTF-8");
-              }
-          }
-      } catch (IOException e) {
-          e.printStackTrace();
-      }
-      return null;
-  }
-  
-
-  
+   
   private void makeOutput(Order order){
 	  
 	  String comm = null;
@@ -163,6 +169,15 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 	   ord.put("customer_id",  cukood);
 	  if(adid != null) {
 	    ord.put("billing_address_id",  adid);
+	    String gln = adid;
+	    if(this.adressGlns.get(adid) != null) {
+	    	gln = (String)this.adressGlns.get(adid); 
+	    }
+	    
+	    if(gln != null && gln.length() > 0 ) {
+	      ord.put("billing_address_gln_code",  gln);
+	    }
+	    
 	  }
 	  
 	   ord.put("date_created", Converter.jsonDate(Calendar.getInstance().getTime()));
@@ -196,26 +211,8 @@ public class TildeVairumImportDriver extends AbstractImportDriver{
 	    
 	     this.addNumLine();
 	     }
-	/*     OrderNumber -> JSON "number": "13608"
-	    	 CustomerID -> JSON "customer_id": "3341"
-	    	 AddressID -> I’ll introduce a new JSON field "billing_address_id": "7585" (right now there is "billing" tag with detailed address information)
-	    	 Date -> JSON "date_created": "2026-10-21 00:00:00"
-	    	 AgentID  -> I’ll introduce a new JSON field "agent_id": "1234" (right now there is no such field)
-	    	 DateOfDelivery -> I’ll introduce a new JSON field "date_delivery": "2026-10-21 00:00:00"
-	    	 OrderComment -> JSON "note": "order notes"
-
-	    	  
-
-	    	 ProductID -> JSON "product_id": "112233"
-	    	 AmountOrdered -> JSON "quantity": 4,
-	    	 Unit -> JSON "unit_name”: "PCS"
-	    	 Discount -> JSON "discount_percent": 10
-	    	 Price -> JSON "price": 12.34
-
-*/	    	      
 	     
 	  ord.put("line_items", linesA);
-	  
 	  
 	  Converter.saveFile("orders/response/" + order.getDokNr() + "request.json" , ord.toJSONString() );
 	  String res = postData( ord.toJSONString());

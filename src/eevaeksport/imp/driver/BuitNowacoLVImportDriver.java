@@ -288,8 +288,8 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 
 			String number = order.getDokNr();
 			if (number == null || number.length() == 0) {
-				number = (Calendar.getInstance().getTimeInMillis() + "").substring(5);
-			}
+				number = (Calendar.getInstance().getTimeInMillis() + "").substring(5) + "1";
+			  }
 
 			long uni = Calendar.getInstance().getTimeInMillis();
 			Node header = doc.createElement("Order-Header");
@@ -318,7 +318,7 @@ public class BuitNowacoLVImportDriver extends AbstractImportDriver {
 				com2.appendChild(comVal2);
 				header.appendChild(com2);
 
-			}else {
+			} else {
 				comm = " ";
 			}
 			System.out.println("Remarks " + comm);

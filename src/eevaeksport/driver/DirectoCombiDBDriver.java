@@ -397,7 +397,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 	         		  try{
 		         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
 		         		  String prlist = rida.getAttributes().getNamedItem("price_list").getNodeValue();
-		         		  res.put(id, prlist);
+		         		  res.put(id, ensureLen(prlist));
 		         	  }catch(Exception e) {}
 	         	  }
 	         }
@@ -428,7 +428,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 	         	  if(rida.getNodeName().equals("customer")){
 	         		  try{
 		         		  String id =  rida.getAttributes().getNamedItem("code").getNodeValue();
-		         		  String prlist = rida.getAttributes().getNamedItem("price_list").getNodeValue();
+		         		  String prlist = ensureLen(rida.getAttributes().getNamedItem("price_list").getNodeValue());
 		         		  HashSet aa = (HashSet)res.get(prlist);
 		         		  if(aa == null) {
 		         			  aa = new HashSet();
@@ -598,7 +598,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
     //Tobise oa ka 
     try {
 		  File f = new File (this.tobisDataDir + "hinnakiri.xml");
-		  System.out.println("siin matix tobis");
+		//  System.out.println("siin matix tobis");
 	     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	     DocumentBuilder db;
 		db = dbf.newDocumentBuilder();      	
@@ -623,12 +623,17 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
                  try{
                  	 try{
                  	     clGroup = ensureLen(rida.getAttributes().getNamedItem("code").getNodeValue());
+                       //  System.out.print("TB mline " + clGroup);
                         }catch(Exception aa){}
                  	 try{
 	                         prodID =  rida.getAttributes().getNamedItem("item").getNodeValue();  
+	                        // System.out.println(" " + prodID);
+	                         
                  	   }catch(Exception aa){ }
                  	 try{
                           prodGroup =  rida.getAttributes().getNamedItem("class").getNodeValue();
+                        //  System.out.println(" " + prodGroup);
+                          
                  	  }catch(Exception aa){ }
                  	  try{
 	                             start =  rida.getAttributes().getNamedItem("start_date").getNodeValue();
@@ -641,10 +646,10 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 		                    	  }catch(Exception aa){ }
 	                    	  String mode = null;  
 	                    	  try{  	  
-                       mode = rida.getAttributes().getNamedItem("what").getNodeValue();
+                                mode = rida.getAttributes().getNamedItem("what").getNodeValue();
 	                    	  }catch(Exception aa){ }
 	                    	  double value = 0;
-	                    	  try{
+	                  try{
                        value = Double.parseDouble(rida.getAttributes().getNamedItem("discount").getNodeValue());
                      if(mode != null && mode.equals("8")){
                     	 mline.setPrice(value);
@@ -662,10 +667,10 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
                       
                       if (clGroup != null
                           && clGroup.trim().length() > 0) {
-                    	  
-                    	   mline.setCliGroup("TB_"+ clGroup.trim());
+                    	  clGroup = ensureLen(clGroup.trim());
+                    	  mline.setCliGroup("TB_"+ clGroup.trim());
                            
-                    	 if( tbPrCodes.get(clGroup.trim()) != null) {
+                    	/* if( tbPrCodes.get(clGroup.trim()) != null) {
                     	   HashSet aa = (HashSet)tbPrCodes.get(clGroup.trim());
                     	  Iterator itera = aa.iterator();
                     	  while (itera.hasNext()) {
@@ -676,12 +681,9 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
                              break;
                     	  }
                     	 }
-                    	 }
+                    	 }*/
                       }
-                      if(clGroup.equals("4355")) {
-                    	  System.out.println("4355 " + prodGroup + " " + value);
-                      }
-
+                
                       if (prodID != null && prodID.trim().length() > 0) {
                         mline.setProdID("TB_" + prodID.trim());
                       }
@@ -691,6 +693,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
                         mline.setProdGroup("TB_" + prodGroup);
                       }   
                       
+                	    
                       if("true".equals(getParent().getProps().getProperty("add.startdate"))){
                     	  if(clGroup != null  && clGroup.trim().length() > 0) {
                     		  if (prodID != null && prodID.trim().length() > 0) {
@@ -732,7 +735,13 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
                       } else {
                      	     lines.add(mline);	
                        }
-                 
+                      if(clGroup != null && clGroup.contains("4355")) {
+                    	 // System.out.println( prodGroup + " " + value + " " + mline.getCliGroup());
+
+                          System.out.println("4355 " + value + "'" + mline.getCliGroup()+ "'" + mline.getProdGroup() + "'" + mline.getProdID());
+                      }
+
+                      
                  }catch(Exception e){
                  	e.printStackTrace();
                  }
@@ -1487,7 +1496,8 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
    //  this.getProducts(null);
      //File ff = new File(this.getExcelDir() + "graafikud.xlsx");
    //  Converter.sendExcelVisits(ff,rcompany,user,pass);
-     
+   //  this.getCustomers(null);
+    // getPriceMatrixData();
      // loene võimalikud agendid sisse 
      agent1 = new TreeMap();
  	try {
@@ -2160,8 +2170,8 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 		         		  
 		         		  try{
 		         			 String price_list =  ensureLen(rida.getAttributes().getNamedItem("price_list").getNodeValue());         	
-			         		   customer.setGroup(Converter.deCode(price_list));
-			         		  tobisCustPrlists.put(id, Converter.deCode(price_list));
+			         		   customer.setGroup((Converter.deCode(price_list)));
+			         		  tobisCustPrlists.put(id,(Converter.deCode(price_list)));
 			         		  
 			         		  if(dirTobCode != null && tbPrCodes.get(dirTobCode) != null) {
 			         			  if(customer.getGroup()!= null && customer.getGroup().trim().length() > 0) {
@@ -4393,7 +4403,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 						     				  int ff = (int)((Calendar.getInstance().getTimeInMillis() - getDate(duedate).getTime())/86400000);
 						     				  dd.setDue(ff + "");
 						     				  dd.setSum(vv);
-						     					System.out.println("aaa Tobis " + date + " " + duedate + " " + number + " " + custid + " " +ff);	
+						     				//	System.out.println("aaa Tobis " + date + " " + duedate + " " + number + " " + custid + " " +ff);	
 								        			  
 						     				  if(dueSums.get(custid) != null){
 						     					  double ss = Double.parseDouble(dueSums.get(custid) + "")+ vv ;
@@ -4448,7 +4458,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
    
    public Vector getCustomerProductsList2(){
 	   //1.teeme klientide arvete nimekirja .
-	   
+	   if(!useold) {
 	   File cpdatadir = new File("cpdata");
 	   if(!cpdatadir.exists()) {
 		   cpdatadir.mkdir();
@@ -4607,7 +4617,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 			   a.printStackTrace();
 		   }
 		   
-		   
+	   }
 	   }
 	   return custProds;
    }

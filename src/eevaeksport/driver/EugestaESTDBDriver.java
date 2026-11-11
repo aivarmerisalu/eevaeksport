@@ -3410,14 +3410,9 @@ boolean noopt = false;
 		
 		HashMap<String, Customer> custMap = new HashMap<String, Customer>();
 		  
-        String cmd = "Select a.name ,BackOfficeId as accountnum, debitorBackOfficeId as payer,CreditLimit as limit , (case when EG_IGNOREMINORDER = 0 then minOrderSum else 0 end) as minsum, '' as linedisc\r\n" + 
-        		"        		     , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
-        		"        		    Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
-        		"        		    contactPhone as perphone,   segmentname as seg  ,accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  ,\r\n" + 
-        		"					 alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-        		"        		   contractDate as cdate , assortimentBackOfficeId as fixed ,subsegmentname as segsub, a.[EG_EXTERNALCODE] as type2, \r\n" + 
-        		"				   gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2  \r\n" + 
-        		"        		   from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID" ; 
+        String cmd = "Select a.name ,BackOfficeId as accountnum, debitorBackOfficeId as payer ,a.address ," + 
+        		"        segmentname as seg , a.city as city  " + 
+        		"       from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID" ; 
         
 
          if (isDebug()) System.out.println(cmd);

@@ -106,16 +106,12 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
     rcompany = getParent().getProps().getProperty("rest.companyx");
     country = getParent().getProps().getProperty("country");
     
-
-    
      }
   
   String user =  null;
   String pass = null;
   String rcompany = null;
   String country = null;
-  
-  
 
   
   /**
@@ -230,9 +226,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 		
 		 products.append(cust.getID() + ";" + getParent().getNF().format(cust.getDebt()) + ";" + bl + "\n");
 		}
-      
-		return products.toString();
-
+      return products.toString();
      }
 
   
@@ -1083,7 +1077,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	         
 	         double sold180 = 0;
 	         Double aaa = last180d.get(kliendikood + "-" + tootekood);
-	         if(aaa > 0) {
+	         if(aaa != null && aaa > 0) {
 	        	 sold180 = aaa;
 	         }
 	         
@@ -1292,20 +1286,20 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
   private HashSet<String> agsActive = null;
   
   public TreeMap getAgents(){
-
-      Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
+	
+      agsActive = new HashSet<String>();
       String todayCycleCode = getCycleDay();
       System.out.println("Today is: " + todayCycleCode);
+
+      Properties props = EksportFrame.loadProps(parent.getProps().getProperty("emailfile"));
 	    
-    String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr from  dbo.EPASAULE_AGENTS";
+    String cmd = "select backOfficeId as kood ,agentName as name , repricingLimit as repr , email , phone  from  dbo.EPASAULE_AGENTS";
 
     String cmdg = "select Agent_BackofficeID as kood , group_backofficeID as grupp,forSale, forMerch from EPASAULE_AGENTS_EAGENTGROUPS";
     String cmdb = "select Agent_BackofficeID as kood , brand_backofficeID as brand,forSale, forMerch from EPASAULE_AGENTS_EAGENTBRANDS";
     
     if (isDebug()) System.out.println(cmd);
     TreeMap agents = new TreeMap();
-
-    agsActive = new HashSet<String>();
     
     try {
     	Connection con = getNewConnection();
@@ -1316,6 +1310,9 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
          
          while(rs.next()){
           String agentID = rs.getString("kood").trim();
+          
+          
+          
           String gr = rs.getString("grupp").trim();
           ArrayList gr1 = (ArrayList)grs.get(agentID);
         		  if(gr1 == null) {
@@ -1348,15 +1345,28 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
         while(rs.next()){
         String agentID = rs.getString("kood").trim();
           Agent agent = new Agent(agentID);
+          
           String name = rs.getString("name").trim();
           Double reprLim = rs.getDouble("repr");
           if(reprLim > 0) {
         	  agent.repriceLimit = reprLim;
-          } else if(reprLim < 0) {
+           } else if(reprLim < 0) {
         	  agent.repriceLimit = -1.0;
-          }else {
+           } else {
          	  agent.repriceLimit = 0.0;
+           }
+
+          String email = rs.getString("email");
+          if(email != null && email.trim().length() > 0) {
+        	  agent.restEmail = email.trim();
           }
+          
+          String phone = rs.getString("phone");
+          if(phone != null && phone.trim().length() > 0) {
+        	  agent.restPhone = phone.trim();
+        	  agent.setPhone(phone.trim());
+          }
+          
           agent.setName(name);
           agent.setIsPilot(true);
           agent.todayCycleCode = todayCycleCode;
@@ -1369,15 +1379,18 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
         	  agent.setProdGroupListSec((ArrayList)grsS.get(agentID));
           }
           
-          agent.setLanguage("EST");
-          agent.setCountry("et");
-          agent.setPassWord("0000");
-          String agentAGENTS = props.getProperty(agent.getID());
-   		if(agentAGENTS != null){
-   			agsActive.add(agent.getID());
-   		}
+          agent.setLanguage("LIT");
+          agent.setCountry("lt");
+         // agent.setPassWord("0000");
+        
+
+   		String agentAGENTS = props.getProperty(agent.getID());
+ 		if(agentAGENTS != null){
+ 			agsActive.add(agent.getID());
+ 			agent.setActive(true);
+ 		}
           
-          agents.put(name, agent);
+          agents.put(name + " " + agent.getID(), agent);
           agent1.put(agent.getID(), agent);
         }
      rs.close();
@@ -1393,7 +1406,6 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
     
     return agents;
   }
-
   private TreeMap agent1 = new TreeMap();
   
    
@@ -2705,9 +2717,9 @@ return tm;
     	
     	StringBuffer sb0 = new StringBuffer();
     	
-    	String minP = " select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  b.regionbackofficeid as ladu,ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) AS disc   \r\n" + 
+    	String minP = " select a.promotionBackOfficeId as grupp ,a.productBackOfficeId as toode,  b.regionbackofficeid as ladu,ROUND(100 - [minPrice] * 100.0 /  NULLIF([maxPrice], 0) , 2) AS disc   \r\n" + 
     			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice != 0\r\n" + 
-    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid, ROUND(100 - [minPrice] * 100.0 / [maxPrice] , 2) \r\n" + 
+    			"    											group by a.promotionBackOfficeId,a.productBackOfficeId,b.regionbackofficeid, ROUND(100 - [minPrice] * 100.0 /  NULLIF([maxPrice], 0) , 2) \r\n" + 
     			"    											union all\r\n" + 
     			"    											select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid , b.regionbackofficeid as ladu , 100 AS disc \r\n" + 
     			"    							from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty = 0 and minPrice != maxPrice and minPrice = 0\r\n" + 

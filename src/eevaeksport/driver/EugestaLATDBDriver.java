@@ -651,11 +651,11 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
            rs.close();    	
       
            String sql2 = " 		 select   a.promotionBackOfficeId as clgroup , productBackOfficeId as prodid, [date from] as startday,[date to] as endday,\r\n" + 
-           		"			  max([beginsinstoredate]) as store,min(datediff(day,beginsinstoredate, c.nextdelivery)) as vahe,\r\n" + 
-           		"              		minPrice as price ,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as dealer, max(isPaper) as ispaper , MANDATORY, ISSELLOUT from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
+           		"			  max([beginsinstoredate]) as store,min(datediff(day,[date from], nextdelivery)) as vahe,\r\n" + 
+           		"              		minPrice as price ,(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as dealer, max(isPaper) as ispaper , MANDATORY, ISSELLOUT from dbo.EPASAULE_PROMOTIONOBJECTS_ND a  \r\n" + 
            		"              		inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
-           		"        		inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
-           		"         		 	 where c.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
+           		//"        		inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
+           		"         		 	 where nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
            		"         		  group by  a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end),  [date from] ,[date to], minPrice,MANDATORY,ISSELLOUT \r\n" + 
            		"                  order by a.promotionBackOfficeId , productBackOfficeId, (case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end), [date from] ,[date to], minPrice,MANDATORY,ISSELLOUT\r\n" + 
            		"					 ";
@@ -756,10 +756,10 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		           rs.close();
 
 
-		           String sql2 = " 	select  productBackOfficeId as ItemID from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
+		           String sql2 = " 	select  productBackOfficeId as ItemID from dbo.EPASAULE_PROMOTIONOBJECTS_ND a  \r\n" + 
 		           		"    inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
-		           		"    inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
-		           		"    where c.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
+		           	//	"    inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
+		           		"    where nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
 		           		"    group by  productBackOfficeId ";
 		           		
 		           rs = st.executeQuery(sql2);
@@ -2233,11 +2233,11 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	       	              
 	    	  	            
     	              
-    	              aaa = " select a.clientBackOfficeId as klient,  a.promotionBackOfficeId as promo, c.nextdelivery , max([date from]), min([date to])\r\n" + 
-    	              		"  from dbo.EPASAULE_PROMOTIONOBJECTS a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
-    	              		"inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
-    	              		"    	              			where c.nextdelivery between [date from] and [date to]  \r\n" + 
-    	              		"    	              			group by  a.promotionBackOfficeId , clientBackOfficeId ,c.nextdelivery\r\n" + 
+    	              aaa = " select a.clientBackOfficeId as klient,  a.promotionBackOfficeId as promo, a.nextdelivery , max([date from]), min([date to])\r\n" + 
+    	              		"  from dbo.EPASAULE_PROMOTIONOBJECTS_ND a inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId\r\n" + 
+    	              	//	"inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
+    	              		"    	              			where a.nextdelivery between [date from] and [date to]  \r\n" + 
+    	              		"    	              			group by  a.promotionBackOfficeId , clientBackOfficeId ,a.nextdelivery\r\n" + 
     	              		"    	              			 order by 1,2 " ;
     	        		
     	              	rs1 = stmt.executeQuery(aaa);
@@ -2786,7 +2786,8 @@ String del3 = rs.getString("del3");
 
               
 				 
-				  fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minqty, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , max(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu from EPASAULE_PROMOTIONOBJECTS as a INNER JOIN \r\n" + 
+				  fff = " select a.promotionBackOfficeId as custgr ,a.productBackOfficeId as prodid, a.minqty, a.minPrice , max (a.[date to]) as paev , max(b.description) as nimi , "
+				  		+ "max(case when b.regionBackofficeId = '24EWC' then '24N' else b.regionBackofficeId end) as ladu from EPASAULE_PROMOTIONOBJECTS_ND as a INNER JOIN \r\n" + 
 				  		"				  		EPASAULE_PROMO b ON a.promotionBackOfficeId = b.promotionBackOfficeId where minqty > 0  group by a.promotionBackOfficeId,a.productBackOfficeId, minqty, minPrice\r\n" + 
 				  		"				  						  				order by a.promotionBackOfficeId,productBackOfficeId, minqty, minPrice";
 				 
@@ -2957,7 +2958,7 @@ private HashSet<String> inTT = null;
 	   Connection con = getNewConnection();
 	   
 	    String    sql = " select kood from(\r\n" + 
-	    		"select  productBackOfficeId as kood from dbo.EPASAULE_PROMOTIONOBJECTS a  \r\n" + 
+	    		"select  productBackOfficeId as kood from dbo.EPASAULE_PROMOTIONOBJECTS_ND a  \r\n" + 
 	    		"group by  productBackOfficeId  \r\n" + 
 	    		"union all\r\n" + 
 	    		"select productBackOfficeId as kood from EPASAULE_ASSORTMENTS\r\n" + 

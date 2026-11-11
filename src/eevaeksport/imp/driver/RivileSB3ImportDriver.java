@@ -974,6 +974,12 @@ System.exit(0);
 	   if(toode.equals("032")) {
 		   res = "06";
 	   }
+	   if(toode.equals("033")) {
+		   res = "04";
+	   }
+	   if(toode.equals("034")) {
+		   res = "04";
+	   }
 	   /*
 
 
@@ -992,7 +998,7 @@ System.exit(0);
    private String changeVaat(String toode) {
 	   
 	   String res  = toode;
-	   if(toode.equals("022") || toode.equals("023") ||  toode.equals("024") || toode.equals("025") || toode.equals("026") || toode.equals("027") || toode.equals("028")) {
+	   if(toode.equals("034") || toode.equals("033") || toode.equals("022") || toode.equals("023") ||  toode.equals("024") || toode.equals("025") || toode.equals("026") || toode.equals("027") || toode.equals("028")) {
 		   res = "02";
 	   }
 	   if(toode.equals("030") || toode.equals("031") ) {
