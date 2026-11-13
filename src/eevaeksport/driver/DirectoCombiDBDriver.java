@@ -3555,6 +3555,15 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
           			   
           		   }
           		 }
+          	   
+          	 
+          	   if("true".equals(getParent().getProps().getProperty("add.eanT"))){
+          		   try{
+          				add = ean.substring(ean.length()-4); 
+          	       }catch(Exception e ){
+          			   
+          		   }
+          		 }
       	    }
       	   
       	
@@ -4045,6 +4054,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
 		      	    	ean =  ean.replaceAll(";", ":");
 		          	     prod.setEAN(ean);
 		          	     eanProds.put(ean, prod);
+		          	     
 		          	     
 		      	    }
 		      	  len = line.indexOf("default_name=");

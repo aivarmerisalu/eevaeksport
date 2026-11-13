@@ -251,9 +251,9 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
               	                          String clgroup = rs.getString("clgroup");
               	                          double price = rs.getDouble("price");
               	                      
-              	                        //  String algus = rs.getString("algus");
-              	                        //  String lopp = rs.getString("lopp");
-              	                        //  int paevi = rs.getInt("paevi");
+              	                          String algus = rs.getString("algus");
+              	                          String lopp = rs.getString("lopp");
+              	                          int paevi = rs.getInt("paevi");
               	                          MatrixLine mline = new MatrixLine();
               	                          
               	                    //KLIENDIGRUPP JA TOOTEGRUPP
@@ -269,7 +269,16 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
               	                          if (price != 0) {
               	                                  mline.setPrice(price);
               	                          }
-              	                          
+              	                        if(paevi < 125){
+              	                      	
+              	                          if (lopp != null) {
+              	                     				mline.setEndDate(lopp.substring(0, 10));
+              	                     			}
+              	                     	  if (algus != null) {
+              	                     				mline.setStartDate(algus.substring(0, 10));
+              	                     			}
+              	                     	  
+              	                     	  }
               	                          
               	                           if(mline.getPrice() > 0){
               	                        	   lines.add(mline);

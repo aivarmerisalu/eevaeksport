@@ -952,6 +952,9 @@ if (start != -1 && end != -1 && start < end - 1) {
 		    if(refs.contains(ref2)) {
 		    	ref2 = baseRef + "-3"; 
 		    }
+		    if(order.getDealer().equals("24B") ) {
+		    	ref2 = baseRef;
+		    }
 		    System.out.println("ref2 " + ref2);
 		     
 		  }

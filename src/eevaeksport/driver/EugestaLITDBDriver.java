@@ -946,7 +946,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  		"	  		 Inner join dbo.EPASAULE_PRODUCTS t on t.backOfficeId = a.ITEMID  \r\n" + 
 	  		"	  			  		    LEFT JOIN BID44_SALESCANCELREASONS c  \r\n" + 
 	  		"	  			  		        ON c.EG_SALESCANCELREASONID = a.EG_SALESCANCELREASONID  \r\n" + 
-	  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 360  \r\n" + 
+	  		"	  			  		    WHERE a.SALESDATE > GETDATE() - 300  \r\n" + 
 	  		"	  			  		      AND a.EG_SALESCANCELREASONID <> 'GKR'  \r\n" + 
 	  		"	  			  		      AND a.INVENTLOCATIONID != 'STORNO'  \r\n" + 
 	  		"	  			  		      AND a.SALESSTATUS <> 1  and a.INVOICEQTY != 0  \r\n" + 

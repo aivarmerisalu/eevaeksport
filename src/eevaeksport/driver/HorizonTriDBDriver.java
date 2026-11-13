@@ -161,14 +161,14 @@ public class HorizonTriDBDriver extends AbstractDBDriver  implements Manager,Pro
         
   	  // võtame välja need mis on aktiivsed - kui on Klient ja kaup konkreetselt 
         String sql2 = "   SELECT  N.KODS AS prodid , '' as custid ,  CENA.PK_CENVEID as clgroup, " +
-  "    0 AS discount  ,  CENA.CENA AS price , CENA.NO_DAT as algus , CENA.LIDZ_DAT  as lopp , " +
-	"	 datediff( day,CENA.NO_DAT , CENA.LIDZ_DAT)  as paevi  " +
-  "		  FROM   TRIDLV7866.NCEN CENA, TRIDLV7866.NNOM N, TRIDLV7866.NCENVEID CV, TRIDLV4697.SVALUTAS VAL  WHERE " +
-  "		  CENA.PK_NOM=N.PK_NOM AND CENA.PK_CENVEID=CV.PK_CENVEID AND  " +
-  "		  CENA.PK_VAL=VAL.PK_VAL AND N.STATUSS = 0 AND CV.STATUSS = 1 AND " + 
+  "      0 AS discount  ,  CENA.CENA AS price , CENA.NO_DAT as algus , CENA.LIDZ_DAT  as lopp , " +
+  "	     datediff( day,CENA.NO_DAT , CENA.LIDZ_DAT)  as paevi  " +
+  "		 FROM   TRIDLV7866.NCEN CENA, TRIDLV7866.NNOM N, TRIDLV7866.NCENVEID CV, TRIDLV4697.SVALUTAS VAL  WHERE " +
+  "		 CENA.PK_NOM=N.PK_NOM AND CENA.PK_CENVEID=CV.PK_CENVEID AND  " +
+  "		 CENA.PK_VAL=VAL.PK_VAL AND N.STATUSS = 0 AND CV.STATUSS = 1 AND " + 
   "		 CENA.NO_DAT <= getdate()+1  AND  " +
-  "		  CENA.LIDZ_DAT >= getdate()-1   AND CV.TIPS IN (0)  and VAL.KODS = 'EUR' " +
-	"		   and  CENA.PK_CENVEID not in ( 4,18 ) order by  N.KODS";
+  "		 CENA.LIDZ_DAT >= getdate()-1   AND CV.TIPS IN (0)  and VAL.KODS = 'EUR' " +
+  "		 and  CENA.PK_CENVEID not in ( 4,18 ) order by  N.KODS, datediff( day,CENA.NO_DAT , CENA.LIDZ_DAT) desc ";
 
        
    
@@ -199,8 +199,6 @@ public class HorizonTriDBDriver extends AbstractDBDriver  implements Manager,Pro
               	                          if (price != 0) {
               	                                  mline.setPrice(price);
               	                          }
-              	                          
-              	                         
               	                          
               	                          
               	                           if(mline.getPrice() > 0){
@@ -674,17 +672,9 @@ try{
         cust.setName(name + " " + accountnum);
          
         String payer = rs.getString("payer");
-        if(payer != null && payer.trim().length() > 0){
-        	//cust.setPayer(payer.trim());
-        }else{
-        	//cust.setPayer(accountnum);
-        }
-       
- 
         
-       String aadr = rs.getString("address2");
+        String aadr = rs.getString("address2");
        
- 
         if (aadr != null) {
         	String asi = aadr.trim();
         	if(asi.toLowerCase().indexOf("latvija") != -1){
@@ -694,7 +684,7 @@ try{
         		}
         	}
         	
-        	String addrx = Converter.enCodeEst(asi.replace('\n',' ').replaceAll("\\r\\n|\\r|\\n", " "));
+        String addrx = Converter.enCodeEst(asi.replace('\n',' ').replaceAll("\\r\\n|\\r|\\n", " "));
          	 name = name + " " + addrx;
              cust.setAddress(Converter.adressLink(addrx,"Latvia"));
              cust.restStreet = addrx;
