@@ -1809,7 +1809,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
     try {
     	
     	StringBuffer sb0 = new StringBuffer();
-    	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route,1 as mainagent  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
+    	   String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route,secondary as mainagent  from  dbo.EPASAULE_AGENTS_CLIENTS " ;
       		
     	   Connection con = this.getNewConnection();
     	 
@@ -1821,7 +1821,7 @@ public class EugestaLITDBDriver extends AbstractDBDriver  implements Manager,Pro
     	                 String route = rs1.getString("route");
     	                 
     	                 String mainag = rs1.getString("mainagent");
-    	                 if(mainag.equals("1")) {
+    	                 if(mainag.equals("0")) {
     	                	 ag.isMainagent = true;
     	                 }
     	                

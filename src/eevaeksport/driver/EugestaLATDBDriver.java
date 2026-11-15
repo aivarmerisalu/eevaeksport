@@ -1789,7 +1789,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	        LocalDate today = LocalDate.now();
 
 	        HashMap<String, Integer> customerDeliveries = new HashMap<String, Integer>();
-	        String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route , 1 as mainagent from  dbo.EPASAULE_AGENTS_CLIENTS " ;
+	        String aaa = "SELECT AgentBackofficeID as kood , ClientBackofficeID as klient, route , secondary as mainagent from  dbo.EPASAULE_AGENTS_CLIENTS " ;
       		try {
 	    	   Connection con = this.getNewConnection();
 	    	 
@@ -2153,7 +2153,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     	                 String route = rs1.getString("route");
     	                 
     	                 String mainag = rs1.getString("mainagent");
-    	                 if(mainag.equals("1")) {
+    	                 if(mainag.equals("0")) {
     	                	 ag.isMainagent = true;
     	                 }
     	                 
