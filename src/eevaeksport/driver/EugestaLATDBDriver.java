@@ -742,7 +742,8 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		           Connection con = getNewConnection();
 		           Statement st = con.createStatement();
 		           ResultSet rs = st.executeQuery(cmd2);
-    HashSet local = new HashSet(); 
+		           
+                   HashSet local = new HashSet(); 
 		           String ags =   sortags.get("SUGGED");
 		           
 		           while (rs.next()) {
@@ -759,7 +760,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		           String sql2 = " 	select  productBackOfficeId as ItemID from dbo.EPASAULE_PROMOTIONOBJECTS_ND a  \r\n" + 
 		           		"    inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
 		           	//	"    inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
-		           		"    where nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
+		           		"    where a.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
 		           		"    group by  productBackOfficeId ";
 		           		
 		           rs = st.executeQuery(sql2);
@@ -774,7 +775,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 		           }
 		           rs.close();
 
-		            sql2 = " 	SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin, EG_ASSORTITEMSTATUS as status \r\n" + 
+		            sql2 =  " 	SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin, EG_ASSORTITEMSTATUS as status \r\n" + 
 		            		"						FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId \r\n" + 
 		            		"					 where s.EG_ASSORTITEMSTATUS in (0,1,2)\r\n" + 
 		            		"					 and assortimentBackOfficeId = 'REKLAMA' order by str(a.posWeight) + a.Name ";

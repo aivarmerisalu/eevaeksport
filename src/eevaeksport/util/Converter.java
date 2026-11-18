@@ -2235,7 +2235,7 @@ public class Converter {
 								level = loe +  "|" + level;
 								System.out.println("uu " + ean + " " + level + " " + toode);
 								nimed.put(toode, tnimi);
-							  if(toode.equals(ean)  ) { //  && false
+							  if(toode.equals(ean) && toode.length() < 13) { //  && false
 								  
 								  if(errors == null) {
 									  errors = "Tuvastamatta tooted sortimendis\n Maxima formaat\n fail : " + file.getName() +"\n\nEAN     Nimetus\n";

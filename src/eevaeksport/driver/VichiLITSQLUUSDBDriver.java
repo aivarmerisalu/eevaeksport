@@ -484,11 +484,13 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 	}
 
 	public TreeMap getProdGroups() throws SQLException {
-		TreeMap tm = new TreeMap();
+		TreeMap<String,String> tm = new TreeMap<String,String>();
 		setTreeGroup(true);
 		String cmd = " SELECT  * from MobileJavaVIK.v_VIK_GetProdGroups";
            if(this.group365) {
-			 cmd = " SELECT  * from MobileJavaVIK.v_VIK_GetProdGroups365";
+			 cmd = " SELECT  * , "
+			 		+ " (select u.nimi from MobileJavaVIK.v_VIK_GetProdGroups365 u where u.kood = substring(a.kood,0,3) ) as upname"
+			 		+ " from MobileJavaVIK.v_VIK_GetProdGroups365 a";
            }
 		
 		try {
@@ -506,11 +508,12 @@ public class VichiLITSQLUUSDBDriver extends AbstractDBDriver implements
 				
 				
 				String name = rs.getString("nimi");
+				String uname =rs.getString("upname");
 				if ((id.trim().length() == 4 || id.trim().length() == 5)
 						&& id.trim().length() > 0) {
 			 if(this.group365) {
-					tm.put(cleardots(id), Converter.enCodeEst(id.substring(0, 1) + "_"
-							+ cleardots(id) + "_" + name));
+					tm.put(cleardots(id), Converter.enCodeEst(//id.substring(0, 1) + "_" + 
+							 cleardots(id) + "_" + uname.substring(0,3)+ " " + name));
 				} else {
 					tm.put(cleardots(id), Converter.enCodeEst(id.substring(0, 1) + " "
 							+ cleardots(id) + " " + name));
