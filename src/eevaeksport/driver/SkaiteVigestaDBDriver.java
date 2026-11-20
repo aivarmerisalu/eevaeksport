@@ -193,7 +193,11 @@ public class SkaiteVigestaDBDriver extends AbstractDBDriver implements BulkUpdat
     	              	if(in.isFile()){
     	              	File inpda = new File ( pictspda + prod.getID()+ ".jpg"); 
     	              	if(!inpda.exists()) {
+    	              		try {
     	              		Converter.shrinkAndCopyFile(in,inpda,400);
+    	              		}catch(Exception e) {
+    	              			e.printStackTrace();
+    	              		}
     	              	}
     	                  	
     	                  	File kkk =  new File ( pictspda + prod.getID()+ ".jpg"); 

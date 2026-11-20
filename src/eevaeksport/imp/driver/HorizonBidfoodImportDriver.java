@@ -425,7 +425,7 @@ DefaultHttpClient httpClient = null;
 
 	    Connection con = getNewConnection();
 	  	
-	    String cmd = "SELECT  K.PK_KLIENTS AS id, K.KODS AS kood, K.NOSAUK AS nimi FROM   CESARS1372.DKLIENTS K " +
+	    String cmd = "SELECT  K.PK_KLIENTS AS id, K.KODS AS kood, K.NOSAUK AS nimi FROM   BIDFLV7991.DKLIENTS K " +
 	  			" WHERE K.KODS = '" +kood+"'" ;  
 
 	  	Statement st = con.createStatement();
@@ -449,7 +449,7 @@ DefaultHttpClient httpClient = null;
 	 try {
 	 Connection con = getNewConnection();
 	  	
-	    String cmd =  " select a.pk_lig as id  FROM CESARS1372.DKLIENTS K LEFT JOIN CESARS1372.NADRESES A ON A.PK_KLIENTS = K.PK_KLIENTS \r\n" + 
+	    String cmd =  " select a.pk_lig as id  FROM BIDFLV7991.DKLIENTS K LEFT JOIN BIDFLV7991.NADRESES A ON A.PK_KLIENTS = K.PK_KLIENTS \r\n" + 
 	    		"	        			    where A.LEG_ADR = 2 and a.PK_LIG != '' and K.Kods = '" + kood+ "' and PK_ADRESE=" + id; 
           System.out.println(cmd);
 	  	Statement st = con.createStatement();
@@ -472,7 +472,7 @@ DefaultHttpClient httpClient = null;
 	    
 
 	  	
-	    String cmd = "SELECT PK_NOM AS id FROM   CESARS1372.NNOM t " +
+	    String cmd = "SELECT PK_NOM AS id FROM   BIDFLV7991.NNOM t " +
 	  			" WHERE t.KODS = '" +Converter.deCode(kood)+"'" ;  
 
 	  	Statement st = con.createStatement();
@@ -556,7 +556,7 @@ DefaultHttpClient httpClient = null;
 		           String  order_xml = "<resource> <description>Merisoft Order</description>" +
 		           "<entity xsi:schemaLocation=\"TNdmPvzSale.xsd TNdmPvzSale.xsd\" xmlns=\"TNdmPvzSale.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
 	 		    "   <PK_DOKT> " +
-        " <href>/rest/TLgPiepDBL/template/559</href> " +
+        " <href>/rest/TLgPiepDBL/template/576</href> " +
         " <title>NPMERI : Order Merisoft</title> " +
         " </PK_DOKT>" +
         " <PAMV_ID>2711</PAMV_ID> "  + 

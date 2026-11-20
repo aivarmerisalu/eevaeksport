@@ -156,6 +156,25 @@ public class AvalloneImportDriver
 	    return kastis;
 	  }
 
+
+  public double getHind(String prodID) throws SQLException{
+	    String sql1 = "SELECT myygihind FROM toode where toode='" + prodID + "'";
+
+	    double hind = 0;
+  System.out.println(sql1);
+	    	    Statement st1 = con.createStatement();
+	    ResultSet rs1 = st1.executeQuery(sql1);
+
+	   if (rs1.next()) {
+	      hind = rs1.getDouble("myygihind");
+	    }
+	    
+	    rs1.close();
+	    st1.close();
+
+	    return hind;
+	  }
+  
   private Vector splitOrder (Order order){
 	  Vector result = new Vector();
 	  Order ordNorm = new Order(order.getCompany(),order.getAgentFirstName());
@@ -231,11 +250,8 @@ public class AvalloneImportDriver
 		    ladu = getLadu(ladu, ord);
 		    System.out.println("ladu ;" +  ladu);
 		    addInvoiceHeader(invoiceID,ladu);
-		    addInvoiceLines(invoiceID);
+		    addInvoiceLines(invoiceID,ord);
 	  }
-		 
-	  
-	  
    
   }
 
@@ -315,11 +331,12 @@ public class AvalloneImportDriver
 	  }
   
   public String getImportFile(){
-    return "C:/Mobile Tellimused/";
-  }
+	    return parent.getProps().getProperty("imp.read");
+	  }
+
   
-  private void addInvoiceLines(int invID) throws SQLException{
-    String sql = " INSERT INTO rid VALUES('T',?, ?, 0, ?, ?,'','','',0,'','','','',date()," +
+  private void addInvoiceLines(int invID, Order ord) throws SQLException{
+    String sql = " INSERT INTO rid VALUES('T',?, ?, ?, ?, ?,'','','',0,'','','','',date()," +
                  "0,0,0,?,'','','','','','','',0,0,'','','','',0,.F.,.F.,0,0,.F.,'',0,'','',0,'',.F.,'',0)";
     
     PreparedStatement st = con.prepareStatement(sql);
@@ -327,7 +344,6 @@ public class AvalloneImportDriver
     Enumeration enumr = order.getOrderLines().elements();
     while(enumr.hasMoreElements()){
       OrderLine line = (OrderLine)enumr.nextElement();
-      st.setInt(1, invID);
       String toode = line.getToode();
       if (toode == null){
       toode = " ";
@@ -336,18 +352,28 @@ public class AvalloneImportDriver
       if(line.getUnit().equals("DPA")){
     	  kastis = getKastis(line.getToode());
       }
+      double disc = line.getDiscount();
+      double price = 0;
+      if(ord.getStatus() == 888) {
+    	//price = line.getPrice();  
+    	Double pr = getHind(toode);
+    	disc = (1 - (line.getPrice()/pr)) *100;
+    	
+      }
       
-      st.setString(4, toode);
+      st.setInt(1, invID);
       st.setString(2, line.getTooteNimi());
-      st.setDouble(3, line.getKogus()*kastis);
-      st.setDouble(5, line.getDiscount());
-     // st.setDouble(6, line.getPrice());
-	
+      st.setDouble(3, price);
+  	  st.setDouble(4, line.getKogus()*kastis);
+      st.setString(5, toode);
+      st.setDouble(6, disc);
+      
       if(line.getEAN() == null ){
 		 st.executeUpdate();	
-	}else if( !line.getEAN().startsWith("205000003") ){
-	 st.executeUpdate();
-    }
+	    } else if( !line.getEAN().startsWith("205000003") ){
+	     st.executeUpdate();
+        }
+      
       setNumAddedLines(getNumAddedLines() + 1);
     }
     st.close();
@@ -355,7 +381,7 @@ public class AvalloneImportDriver
 
   private void addInvoiceHeader(int invID,String ladu) throws SQLException{
 	  String ordernumber = order.getDokNr();
-	  if(ordernumber == null){
+	  if(ordernumber == null && order.getStatus() != 888){
 		  ordernumber = order.getInfo();
 	  }
 	  
@@ -368,8 +394,15 @@ public class AvalloneImportDriver
 		  dd = new Date(order.getShipCal().getTimeInMillis());
 	  }
 
+	  System.out.println("status " + order.getStatus() + " " + order.getInfo());
+	  
+	  String ss = "Mobiilne Tellimus";
+	  if(order.getStatus() == 888) {
+		  ss = order.getInfo();
+	  }
+	  
     String sql = "INSERT INTO dok VALUES ('T',?, date(), 'LT1',?,1, 'EUR','" + ordernumber + "','', date(),'"+ ladu +"', '1', ?,?,0, .F., 'ADMIN','ADMIN', " +
-         "'23 59', '', '1', 1,date(), 'Mobiilne Tellimus','', .F., '','', '', '', '', '','','','epoc','','', 0, .F.,0,0,0, '', '', .F., " +
+         "'23 59', '', '1', 1,date(), ?,'', .F., '','', '', '', '', '','','','epoc','','', 0, .F.,0,0,0, '', '', .F., " +
         "date(),?,.T., 0, '2000000000',0, '','" + ordernumber + "',date(),'','','','','',0,'',0,date())  ";
     
     
@@ -380,10 +413,10 @@ public class AvalloneImportDriver
     PreparedStatement stmt = con.prepareStatement(sql);
     stmt.setInt(1, invID);
     stmt.setString(2, order.getCompany());
-    //stmt.setString(3, String.valueOf(invID));
     stmt.setString(3, order.getAgent());
     stmt.setString(4, order.getCompany());
-    stmt.setDate(5, dd);
+    stmt.setString(5, ss);
+    stmt.setDate(6, dd);
     stmt.executeUpdate();
     
     stmt = con.prepareStatement(sql2);

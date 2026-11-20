@@ -70,6 +70,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -497,7 +499,10 @@ public String parseFirstEmail(String emails) {
             			sap = false;
             		}
             		System.out.println("NAME   " + fileName + " " + sap + " " + file.getName().length());
-          if(fileName.toLowerCase().endsWith(".txt") &&( file.getName().startsWith("tellimus") || file.getName().startsWith("t-"))&& !file.getName().startsWith("tellimus_")){
+            		if(fileName.toLowerCase().endsWith(".json")){
+                     	 System.out.println("JSON tellimus Shark JSON formaat");
+                        loadJSONSharkOrder(orders, file,troubles);
+                     } else  if(fileName.toLowerCase().endsWith(".txt") &&( file.getName().startsWith("tellimus") || file.getName().startsWith("t-"))&& !file.getName().startsWith("tellimus_")){
           	 System.out.println("txt tellimus TelemaTXT formaat");
              loadTelTXTOrder(orders, file,troubles);
           }else if(fileName.toLowerCase().endsWith(".txt") && file.getName().startsWith("aruanne")){
@@ -826,11 +831,12 @@ public String parseFirstEmail(String emails) {
           					fff.mkdir();
           				}
           				
-              			File ff = new File(parent.getProps().getProperty("imp.read") + "done" + File.separator  + file.getName());
-              			
+      					File ff = new File(parent.getProps().getProperty("imp.read") + "done" + File.separator  + file.getName());
               			if(ff.exists()){
               				ff.delete();
               			}	
+              			file.renameTo(new File(parent.getProps().getProperty("imp.read") + "done" + File.separator  + file.getName()));
+                  			
           			}else{
           				System.out.println("Siin oleme 01 ");
           				File fff = new File(parent.getProps().getProperty("imp.read2") + "done");
@@ -8472,7 +8478,76 @@ System.out.println("token" + token);
 	  }
 	  
 
-  
+  private void loadJSONSharkOrder(Orders orders, File f,StringBuffer troubles) throws IOException{
+	    String fileName = f.getAbsolutePath();
+	    
+	    firma = "ERAKLIENTEPO";
+	    String shipdate = Calendar.getInstance().getTimeInMillis() + "";
+		
+	    
+		JSONParser parser = new JSONParser();
+		Object obj = null;
+		FileReader fr = new FileReader(fileName);
+		try {
+			obj = parser.parse(fr);
+		 } catch (ParseException e1) {
+			e1.printStackTrace();
+		}
+		
+         org.json.simple.JSONObject conList = (org.json.simple.JSONObject) obj;
+
+         String dokNr = "WEB-" + (String)conList.get("Tellimus");
+         
+
+         org.json.simple.JSONObject tarne = (org.json.simple.JSONObject) conList.get("Tarne");
+         
+         String tviis = (String)tarne.get("Viis");
+         String tkood = (String)tarne.get("Kood");
+         String tautom = (String)tarne.get("Pakiautomaat");
+
+         String tsaaja = (String)tarne.get("Saaja");
+         String ttelfa = (String)tarne.get("Telefon");
+         String taadr1 = (String)tarne.get("Aadress1");
+         String taadr2 = (String)tarne.get("Aadress2");
+         String tlinn = (String)tarne.get("Linn");
+         String tind = (String)tarne.get("Postiindeks");
+              
+        /* "Viis": "Smartposti pakiautomaat",
+         "Kood": "itella-shipping",
+         "Pakiautomaat": "104163203",
+         "Saaja": "Mari Maasikas",
+         "Ettevote": "",
+         "Telefon": "+372 5555 5555",
+         "Aadress1": "Näidise tn 1",
+         "Aadress2": "",
+         "Linn": "Tallinn",
+         "Maakond": "",
+         "Postiindeks": "10111",
+         */
+         org.json.simple.JSONArray read = (org.json.simple.JSONArray) conList.get("Read");
+          Iterator<org.json.simple.JSONObject> iterat = ((List) read).iterator();
+         
+           while (iterat.hasNext()) {
+        	 org.json.simple.JSONObject cob = iterat.next();
+        	  
+        		String prod = (String)cob.get("Toode1");
+        		String name = (String)cob.get("Nimetus");
+        		Double price = (Double)cob.get("Hind");
+        		Double kogus = Double.parseDouble(cob.get("Kogus")+"");
+        		Double disc = Double.parseDouble(cob.get("Soodustus")+"");
+        		Double summa = Double.parseDouble(cob.get("Summa")+"");
+        		String ean = null;
+        	    System.out.println(firma+"*"+ prod+"*"+ name +"*"+kogus+"*"+ dokNr  );
+  	         
+        	    orders.setInfo(tsaaja + " " + ttelfa + " " + tviis + " " + tkood + " " + tautom);
+  	          orders.add(firma, prod, name ,kogus, dokNr, null, 0, disc,shipdate,"0",price,0,false,"",888," ",null,"",ean,null,true,null,null);
+  	      
+         }
+       fr.close();
+	    
+	 //  System.exit(0); 
+
+	  }
   
   
   private void loadTelTXTOrder(Orders orders, File f,StringBuffer troubles) throws IOException{

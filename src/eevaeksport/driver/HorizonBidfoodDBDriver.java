@@ -91,11 +91,11 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
 	        "            PARTITION BY K.kods, G.PK_ADRESE " +
 	        "            ORDER BY D.DAT_DOK DESC " +
 	        "        ) AS date_rank " +
-	        "    FROM CESARS1372.DPIRMDOK D " +
-	        "    INNER JOIN CESARS1372.NDOK r ON r.PK_DOK = D.PK_DOK " +
-	        "    LEFT JOIN CESARS1372.NNOM N ON r.PK_NOM = N.PK_NOM " +
-	        "    LEFT JOIN CESARS1372.NDOKG G ON D.PK_DOK = G.PK_DOK " +
-	        "    LEFT JOIN CESARS1372.DKLIENTS K ON D.PK_KLIENTS = K.PK_KLIENTS " +
+	        "    FROM BIDFLV7991.DPIRMDOK D " +
+	        "    INNER JOIN BIDFLV7991.NDOK r ON r.PK_DOK = D.PK_DOK " +
+	        "    LEFT JOIN BIDFLV7991.NNOM N ON r.PK_NOM = N.PK_NOM " +
+	        "    LEFT JOIN BIDFLV7991.NDOKG G ON D.PK_DOK = G.PK_DOK " +
+	        "    LEFT JOIN BIDFLV7991.DKLIENTS K ON D.PK_KLIENTS = K.PK_KLIENTS " +
 	        "    WHERE D.DAT_DOK > GETDATE() - 60 " +
 	        "      AND N.kods IS NOT NULL " +
 	        ") " +
@@ -107,10 +107,10 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
 	        "    r.DAUDZ AS kogus, " +
 	        "    rd.kuupaev " +
 	        "FROM RankedDates rd " +
-	        "INNER JOIN CESARS1372.DPIRMDOK D ON rd.PK_DOK = D.PK_DOK " +
-	        "INNER JOIN CESARS1372.NDOK r ON r.PK_DOK = D.PK_DOK " +
-	        "LEFT JOIN CESARS1372.NNOM N ON r.PK_NOM = N.PK_NOM AND r.RN_VEIDS IN (0, 3, 5) " +
-	        "LEFT JOIN CESARS1372.NVIEN VIEN ON r.PK_VIEN = VIEN.PK_VIEN " +
+	        "INNER JOIN BIDFLV7991.DPIRMDOK D ON rd.PK_DOK = D.PK_DOK " +
+	        "INNER JOIN BIDFLV7991.NDOK r ON r.PK_DOK = D.PK_DOK " +
+	        "LEFT JOIN BIDFLV7991.NNOM N ON r.PK_NOM = N.PK_NOM AND r.RN_VEIDS IN (0, 3, 5) " +
+	        "LEFT JOIN BIDFLV7991.NVIEN VIEN ON r.PK_VIEN = VIEN.PK_VIEN " +
 	        "WHERE rd.date_rank <= 5 " +
 	        "  AND r.DAUDZ != 0 " +
 	        "  AND N.kods IS NOT NULL " +
@@ -167,9 +167,9 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
 	  Vector lines = new Vector();
 	  
 	String sql = " SELECT  N.KODS as toode,[CENA] as hind ,[NO_DAT] as algus ,[LIDZ_DAT] as lopp , " +
-   " k.KODS as klient,H.[PK_GRUPA] as clgrupp,datediff(day,[NO_DAT] , [LIDZ_DAT]) as paevi " +
-    " FROM [CESARS1372].[NCEN]  H  inner join  CESARS1372.DKLIENTS K ON H.PK_KLIENTS=K.PK_KLIENTS  "
-    + "inner join  CESARS1372.NNOM n on n.PK_NOM= h.PK_NOM where GETDATE()"
+   " k.KODS as klient,H.[PK_GRUPA] as clgrupp,datediff(day,[NO_DAT] , [LIDZ_DAT]) as paevi , AKCIJA as camp " +
+    " FROM [BIDFLV7991].[NCEN]  H  inner join  BIDFLV7991.DKLIENTS K ON H.PK_KLIENTS=K.PK_KLIENTS  "
+    + "inner join  BIDFLV7991.NNOM n on n.PK_NOM= h.PK_NOM where GETDATE()"
     + " between NO_DAT and LIDZ_DAT and year(NO_DAT) != 3000";
 	  Statement st = null;
       try {
@@ -189,6 +189,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
           String custID = rs.getString("klient");//.trim();
           String clgr = rs.getString("clgrupp");//.trim();
           int paevi = rs.getInt("paevi");
+          int camp =rs.getInt("camp");
           
           
           MatrixLine mline = new MatrixLine();
@@ -213,9 +214,12 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
      	  if (algus != null) {
      				mline.setStartDate(algus.substring(0, 10));
      			}
-     	  
      	  }
-     	  
+          if(camp == 1) {
+           	 if (algus != null) {
+     				mline.setStartDate(algus.substring(0, 10));
+     			}	
+           }	  
      	  
           mline.setPrice(price);
 
@@ -232,8 +236,8 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
   	  // võtame välja need mis on aktiivsed - kui on Klient ja kaup konkreetselt 
         String sql2 = "   SELECT  N.KODS AS prodid , '' as custid ,  CENA.PK_CENVEID as clgroup, " +
   "    0 AS discount  ,  CENA.CENA AS price , CENA.NO_DAT as algus , CENA.LIDZ_DAT  as lopp , " +
-	"	 datediff( day,CENA.NO_DAT , CENA.LIDZ_DAT)  as paevi  " +
-  "		  FROM   CESARS1372.NCEN CENA, CESARS1372.NNOM N, CESARS1372.NCENVEID CV, CESARS2559.SVALUTAS VAL  WHERE " +
+	"	 datediff( day,CENA.NO_DAT , CENA.LIDZ_DAT)  as paevi ,AKCIJA as camp " +
+  "		  FROM   BIDFLV7991.NCEN CENA, BIDFLV7991.NNOM N, BIDFLV7991.NCENVEID CV, BIDFLV4454.SVALUTAS VAL  WHERE " +
   "		  CENA.PK_NOM=N.PK_NOM AND CENA.PK_CENVEID=CV.PK_CENVEID AND  " +
   "		  CENA.PK_VAL=VAL.PK_VAL AND N.STATUSS = 0 AND CV.STATUSS = 1 AND " + 
   "		 CENA.NO_DAT <= getdate()+1  AND  " +
@@ -254,6 +258,9 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
               	                          String algus = rs.getString("algus");
               	                          String lopp = rs.getString("lopp");
               	                          int paevi = rs.getInt("paevi");
+              	                        int camp =rs.getInt("camp");
+              	                      
+              	                          
               	                          MatrixLine mline = new MatrixLine();
               	                          
               	                    //KLIENDIGRUPP JA TOOTEGRUPP
@@ -279,6 +286,11 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
               	                     			}
               	                     	  
               	                     	  }
+              	                        if(camp == 1) {
+              	                        	 if (algus != null) {
+           	                     				mline.setStartDate(algus.substring(0, 10));
+           	                     			}	
+              	                        }
               	                          
               	                           if(mline.getPrice() > 0){
               	                        	   lines.add(mline);
@@ -330,7 +342,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
 	   String cmd = "  SELECT  NN.KODS as toode , SUM(CASE WHEN V.STATUSS IN (0, 1, 3) THEN V.DAUDZ ELSE 0 END) AS stock,  \r\n" + 
 		   		"		SUM(CASE WHEN V.STATUSS IN (1) THEN V.DAUDZ ELSE 0 END) AS DAUDZ, SUM(CASE WHEN V.STATUSS IN (0, 1) THEN V.DAUDZ2 ELSE 0 END) AS DAUDZ2, \r\n" + 
 		   		"		V.PK_NOL as ladu  \r\n" + 
-		   		"		FROM CESARS1372.NVOL V, CESARS1372.NNOM NN , CESARS1372.NVOLDAT DT WHERE \r\n" + 
+		   		"		FROM BIDFLV7991.NVOL V, BIDFLV7991.NNOM NN , BIDFLV7991.NVOLDAT DT WHERE \r\n" + 
 		   		"		 V.DAT < getdate()  AND V.PK_NOMPART = DT.PK_NOMPART AND V.PK_NOL = DT.PK_NOL AND DT.DATB >= getdate()  AND V.STATUSS IN (0,1,3)\r\n" + 
 		   		"		AND V.PK_NOM = NN.PK_NOM  and NN.ATLUZSK=1 \r\n" + 
 		   		"		and V.PK_NOL in ('4') \r\n" + 
@@ -397,7 +409,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
   public TreeMap getAgents(){
 	  
 	  
-    String cmd = "  SELECT M.PK_PARD AS agent, M.NOSAUK AS nimi  FROM  CESARS1372.NPARD M  WHERE "
+    String cmd = "  SELECT M.PK_PARD AS agent, M.NOSAUK AS nimi  FROM  BIDFLV7991.NPARD M  WHERE "
     		+ "M.PAMVID IN (2110) AND M.STATUSS = 1 and len(NOSAUK) > 3 ";
     if (isDebug()) System.out.println(cmd);
     TreeMap agents = new TreeMap();
@@ -465,11 +477,11 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
 	  
  
     String salessql = " SELECT K.KODS as klient ,A.PK_ADRESE as aid, round(SUM(summa_pv),0) AS summa,str(datepart(YYYY,D.DAT_DOK))+' '+str(datepart(mm,D.DAT_DOK)) as kuu " +
-		 "  FROM   CESARS1372.DPIRMDOK D LEFT OUTER JOIN CESARS1372.DKLIENTS N ON D.PK_ESPATS=N.PK_KLIENTS " +
-		 "  LEFT JOIN CESARS1372.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS " +
-		 "  JOIN CESARS1372.NDOKG G ON D.PK_DOK = G.PK_DOK " +
-		 "  LEFT OUTER JOIN (SELECT PK_DOK, MAX(LAIKS) AS LAIKS FROM CESARS1372.SDOKEVNT GROUP BY PK_DOK) LASTEV ON LASTEV.PK_DOK = D.PK_DOK " +
-		 "  LEFT OUTER JOIN CESARS1372.NADRESES A ON A.PK_ADRESE=G.PK_ADRESE,  CESARS2559.SVALUTAS V " +
+		 "  FROM   BIDFLV7991.DPIRMDOK D LEFT OUTER JOIN BIDFLV7991.DKLIENTS N ON D.PK_ESPATS=N.PK_KLIENTS " +
+		 "  LEFT JOIN BIDFLV7991.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS " +
+		 "  JOIN BIDFLV7991.NDOKG G ON D.PK_DOK = G.PK_DOK " +
+		 "  LEFT OUTER JOIN (SELECT PK_DOK, MAX(LAIKS) AS LAIKS FROM BIDFLV7991.SDOKEVNT GROUP BY PK_DOK) LASTEV ON LASTEV.PK_DOK = D.PK_DOK " +
+		 "  LEFT OUTER JOIN BIDFLV7991.NADRESES A ON A.PK_ADRESE=G.PK_ADRESE,  BIDFLV4454.SVALUTAS V " +
 		 "   WHERE D.PAMV_ID IN (2710,2720,2711,2721,2712,2786,2713,2737,2718,2728,18212,2745,2782,24501,2797,2798,2739,18086,2736,2783,2799,18091,15008,15011,2738,2792,2795,2742,2793,2796)" +
 		"	AND D.PK_VAL=V.PK_VAL AND  D.DAT_DOK > getdate()-120 " +
 		"	 AND D.PAMV_ID = 2711 AND  NOT (D.STATUSS = 4) and K.KODS is not null " +
@@ -480,13 +492,13 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
 
  
 
- String sqldebt = "	  select k.KODS AS klient,sum(D.SUMMA_APMP-D.SUMMA_PIESP) AS tasumata FROM   CESARS1372.DPIRMDOK  d " +
-   " LEFT JOIN CESARS1372.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS where  "
+ String sqldebt = "	  select k.KODS AS klient,sum(D.SUMMA_APMP-D.SUMMA_PIESP) AS tasumata FROM   BIDFLV7991.DPIRMDOK  d " +
+   " LEFT JOIN BIDFLV7991.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS where  "
    + "(D.SUMMA_PIESP-D.SUMMA_APMP)!=0 AND d.APM_TERM < getdate()+1  and APM_TERM > getdate()-300  AND d.STATUSS !=4" +
 	" group by k.KODS ";
  
- String sqldebtall = "	  select k.KODS AS klient,sum(D.SUMMA_APMP-D.SUMMA_PIESP) AS tasumata FROM   CESARS1372.DPIRMDOK  d " +
-		   " LEFT JOIN CESARS1372.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS where  (D.SUMMA_PIESP-D.SUMMA_APMP)!=0   and APM_TERM > getdate()-300"
+ String sqldebtall = "	  select k.KODS AS klient,sum(D.SUMMA_APMP-D.SUMMA_PIESP) AS tasumata FROM   BIDFLV7991.DPIRMDOK  d " +
+		   " LEFT JOIN BIDFLV7991.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS where  (D.SUMMA_PIESP-D.SUMMA_APMP)!=0   and APM_TERM > getdate()-300"
 		   + "  AND d.STATUSS !=4  group by k.KODS ";
  
  //    tal_visitationdays ,talspartnercode,
@@ -615,8 +627,8 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
     			"    K.TELEFONS AS phone,\r\n" + 
     			"    K.MOBTEL AS mphone,\r\n" + 
     			"    K.EPASTS AS email\r\n" + 
-    			"FROM CESARS1372.DKLIENTS K\r\n" + 
-    			"LEFT JOIN CESARS1372.NADRESES A\r\n" + 
+    			"FROM BIDFLV7991.DKLIENTS K\r\n" + 
+    			"LEFT JOIN BIDFLV7991.NADRESES A\r\n" + 
     			"    ON A.PK_KLIENTS = K.PK_KLIENTS\r\n" + 
     			"    AND A.LEG_ADR = 2\r\n" + 
     			"WHERE K.STATUSS = 0\r\n" + 
@@ -839,8 +851,8 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
       
 
       String sql = "	  select k.KODS AS klient,d.DOK_NR AS number,d.DOK_NR2 AS number2 ,d.DOK_SERIJA  as seria,APM_TERM AS maksepaev,(D.SUMMA_APMP-D.SUMMA_PIESP) AS tasumata, " +
-      "  DAT_DOK AS kuupaev , datediff(day,APM_TERM,getdate()) AS yle FROM   CESARS1372.DPIRMDOK  d  " +
-       "  LEFT JOIN CESARS1372.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS where "
+      "  DAT_DOK AS kuupaev , datediff(day,APM_TERM,getdate()) AS yle FROM   BIDFLV7991.DPIRMDOK  d  " +
+       "  LEFT JOIN BIDFLV7991.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS where "
        + " (D.SUMMA_PIESP-D.SUMMA_APMP)!=0 and APM_TERM > getdate()-300    AND d.STATUSS !=4 ";
                    
                 rs = stmt.executeQuery(sql);
@@ -899,7 +911,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
     Connection con = getNewConnection();
     TreeMap   tm = new TreeMap();
      
-    String sql = " 	SELECT  G.PK_NOMGR AS kood, G.NOSAUK AS nimi  FROM   CESARS1372.NNOMGR G  inner join  CESARS1372.NNOM  t on t.PK_NOMGR = g.PK_NOMGR " + 
+    String sql = " 	SELECT  G.PK_NOMGR AS kood, G.NOSAUK AS nimi  FROM   BIDFLV7991.NNOMGR G  inner join  BIDFLV7991.NNOM  t on t.PK_NOMGR = g.PK_NOMGR " + 
     		"  WHERE G.STATUSS = 0 group by G.PK_NOMGR ,G.NOSAUK";
     Statement st = con.createStatement();
     ResultSet rs = st.executeQuery(sql);
@@ -934,11 +946,11 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
 
 	  String cmd = "select  t.KODS as  itemid,t.NOSAUK  AS nimetus, t.M_ATT12 AS kastis,1 AS alusel , bar.BAR_KODS AS ean ,PK_NOMGR AS grupp,\r\n" + 
 	  		"	  		 yh.kods As unit , op.daudz as optam, md.daudz as maxdisc ,t.descr as info, oh.daudz as omahind\r\n" + 
-	  		"	  			 from CESARS1372.NNOM  t LEFT OUTER JOIN CESARS1372.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1\r\n" + 
-	  		"	  			 LEFT OUTER JOIN CESARS1372.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN \r\n" + 
-	  		"				 left join CESARS1372.nipasr md on md.PK_NOM=t.PK_NOM and md.PK_NIPAS = 20\r\n" + 
-	  		"	  			 left join CESARS1372.nipasr oh on oh.PK_NOM=t.PK_NOM and oh.PK_NIPAS = 19\r\n" + 
-	  		"	  			 left join CESARS1372.nipasr op on op.PK_NOM=t.PK_NOM and op.PK_NIPAS = 5\r\n" + 
+	  		"	  			 from BIDFLV7991.NNOM  t LEFT OUTER JOIN BIDFLV7991.NBARKODS bar ON bar.PK_NOM=t.PK_NOM AND bar.IS_MAIN = 1\r\n" + 
+	  		"	  			 LEFT OUTER JOIN BIDFLV7991.NVIEN yh ON t.PK_VIEN=yh.PK_VIEN \r\n" + 
+	  		"				 left join BIDFLV7991.nipasr md on md.PK_NOM=t.PK_NOM and md.PK_NIPAS = 20\r\n" + 
+	  		"	  			 left join BIDFLV7991.nipasr oh on oh.PK_NOM=t.PK_NOM and oh.PK_NIPAS = 19\r\n" + 
+	  		"	  			 left join BIDFLV7991.nipasr op on op.PK_NOM=t.PK_NOM and op.PK_NIPAS = 5\r\n" + 
 	  		"	  			  where  t.STATUSS = 0 and  t.B2B_PAZ = 1 ";
     
 	  
@@ -950,7 +962,7 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
     try {
     	
         String hsql =  "  SELECT  N.KODS AS toode, CENA.CENA AS hind " +
-    		 " FROM   CESARS1372.NCEN CENA, CESARS1372.NNOM N, CESARS1372.NCENVEID CV, CESARS2559.SVALUTAS VAL  WHERE  " +
+    		 " FROM   BIDFLV7991.NCEN CENA, BIDFLV7991.NNOM N, BIDFLV7991.NCENVEID CV, BIDFLV4454.SVALUTAS VAL  WHERE  " +
     		 " (CENA.PK_NOM=N.PK_NOM) AND (CENA.PK_CENVEID=CV.PK_CENVEID) AND  " +
     		 " (CENA.PK_VAL=VAL.PK_VAL) AND (( ( (N.STATUSS = 0) ) AND ( (CV.STATUSS = 1) ) AND "
     		 + "( (CENA.PK_CENVEID = 1) ) AND ( (CENA.NO_DAT <= getdate()+1) ) AND  " +
@@ -1058,10 +1070,10 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
 	 int counter = 1;
 
 	 String cmd = " SELECT  PK_ADRESE as abi, K.kods as klient,N.kods as prodid ,r.DAUDZ as qty,D.DAT_DOK AS lastdate ,max(r.CENA) as hind ,max(D.DOK_NR) as dok " +
-	 " FROM   CESARS1372.NDOK r LEFT OUTER JOIN CESARS1372.NNOM N ON r.PK_NOM=N.PK_NOM AND r.RN_VEIDS IN (0,3,5)  " +
-	 " LEFT OUTER JOIN CESARS1372.NVIEN VIEN ON r.PK_VIEN=VIEN.PK_VIEN, CESARS1372.DPIRMDOK D " +
-	 " LEFT JOIN CESARS1372.NDOKG G ON D.PK_DOK = G.PK_DOK " +
-	 " LEFT JOIN CESARS1372.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS "+
+	 " FROM   BIDFLV7991.NDOK r LEFT OUTER JOIN BIDFLV7991.NNOM N ON r.PK_NOM=N.PK_NOM AND r.RN_VEIDS IN (0,3,5)  " +
+	 " LEFT OUTER JOIN BIDFLV7991.NVIEN VIEN ON r.PK_VIEN=VIEN.PK_VIEN, BIDFLV7991.DPIRMDOK D " +
+	 " LEFT JOIN BIDFLV7991.NDOKG G ON D.PK_DOK = G.PK_DOK " +
+	 " LEFT JOIN BIDFLV7991.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS "+
 	 " WHERE r.PK_DOK=D.PK_DOK AND D.DAT_DOK > getdate()-90 AND D.PAMV_ID = 2711 and N.kods is not null " +
 	 " GROUP BY K.KODS,PK_ADRESE,N.NOSAUK,N.KODS  ,D.DAT_DOK ,r.DAUDZ " +
 	 " ORDER BY K.KODS,N.NOSAUK,N.KODS  ,D.DAT_DOK ,r.DAUDZ " ;
@@ -1140,11 +1152,11 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
  
    
      String cmd ="  SELECT K.PK_PARD as agent , round(SUM(summa_pv),0) AS summa " +
-		"   FROM   CESARS1372.DPIRMDOK D LEFT OUTER JOIN CESARS1372.DKLIENTS N ON D.PK_ESPATS=N.PK_KLIENTS " +
-		"   LEFT JOIN CESARS1372.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS " +
-		"   JOIN CESARS1372.NDOKG G ON D.PK_DOK = G.PK_DOK " +
-		"   LEFT OUTER JOIN (SELECT PK_DOK, MAX(LAIKS) AS LAIKS FROM CESARS1372.SDOKEVNT GROUP BY PK_DOK) LASTEV ON LASTEV.PK_DOK = D.PK_DOK " +
-		"   LEFT OUTER JOIN CESARS1372.NADRESES A ON A.PK_ADRESE=G.PK_ADRESE, CESARS2559.SVALUTAS V " +
+		"   FROM   BIDFLV7991.DPIRMDOK D LEFT OUTER JOIN BIDFLV7991.DKLIENTS N ON D.PK_ESPATS=N.PK_KLIENTS " +
+		"   LEFT JOIN BIDFLV7991.DKLIENTS K ON D.PK_KLIENTS=K.PK_KLIENTS " +
+		"   JOIN BIDFLV7991.NDOKG G ON D.PK_DOK = G.PK_DOK " +
+		"   LEFT OUTER JOIN (SELECT PK_DOK, MAX(LAIKS) AS LAIKS FROM BIDFLV7991.SDOKEVNT GROUP BY PK_DOK) LASTEV ON LASTEV.PK_DOK = D.PK_DOK " +
+		"   LEFT OUTER JOIN BIDFLV7991.NADRESES A ON A.PK_ADRESE=G.PK_ADRESE, BIDFLV4454.SVALUTAS V " +
 		"    WHERE D.PAMV_ID IN (2710,2720,2711,2721,2712,2786,2713,2737,2718,2728,18212,2745,2782,24501,2797,2798,2739,18086,2736,2783,2799,18091,15008,15011,2738,2792,2795,2742,2793,2796) " +
 		"	AND D.PK_VAL=V.PK_VAL AND  YEAR(D.DAT_DOK) = YEAR( getdate()) and  MONTH(D.DAT_DOK) = MONTH( getdate())  " +
 		"	 AND D.PAMV_ID = 2711 AND  NOT (D.STATUSS = 4) and K.PK_PARD !='' " +
