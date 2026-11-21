@@ -131,6 +131,10 @@ private HashMap pants = null;
 	  if(toode.equals("405340094252")) {
 		  return "087";
 	  }
+
+	  if(toode.equals("400210301021")) {
+		  return "033";
+	  }
 	  
 	  if(pants == null) {
 		  pants = new HashMap();
