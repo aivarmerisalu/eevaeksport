@@ -1965,7 +1965,7 @@ public class EugestaLATMERCDBDriver extends AbstractDBDriver  implements Manager
                     		"                                                        , pricelistBackOfficeId as pricegroup,a.address ,\r\n" + 
                     		"                                   Status AS block , channel as chain , clientType as typeo,b.description as type, phone , contactPerson as pername, email as peremail,\r\n" + 
                     		"                                    contactPhone as perphone,  accountantemail as acco,  EG_EMAILDEBTS as bill ,consignationPeriod as term,a.city as city  , alcoLicense as alic, tobaccoLicense as tlic,\r\n" + 
-                    		"                                    contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, [EG_EXTERNALCODE] as type2,"
+                    		"                                    contractDate as cdate , segmentname as seg , assortimentBackOfficeId as fixed ,subsegmentname as segsub, a.[EG_EXTERNALCODE] as type2,"
                     		+ " gkrnextdelivery as via3l, nextdelivery as del1, nextdelivery2 as del2 , EG_AGENTREPRICINGALLOWED as reprice, DeliveryComment as del3 \r\n" + 
                     		"                                    from  dbo.EPASAULE_CLIENTS a  left join BID29_LINEOFBUSINESS b on a.clientType=b.LINEOFBUSINESSID\r\n" + 
                     		"                                LEFT JOIN [BID02_CUSTORDER] c on a.BackOfficeId=c.ACCOUNTNUM\r\n" + 

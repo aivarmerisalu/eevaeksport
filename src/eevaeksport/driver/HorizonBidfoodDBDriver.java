@@ -636,7 +636,8 @@ public class HorizonBidfoodDBDriver extends AbstractDBDriver  implements Manager
     			"  AND K.PAMV_ID NOT IN (1810, 11970)\r\n" + 
     			"  AND K.TIPS IN (3, 4, 6)\r\n" + 
     			"  AND K.DBKRPAZ = 1\r\n" + 
-    			"ORDER BY K.NOSAUK ASC" ;
+    			"  AND a.PK_LIG != '' " + // eping peab olema täidetud.
+    			" ORDER BY K.NOSAUK ASC" ;
      
     //  if (isDebug()) System.out.println(cmd);
        

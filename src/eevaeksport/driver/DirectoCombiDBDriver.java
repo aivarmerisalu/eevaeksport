@@ -2971,6 +2971,7 @@ public class DirectoCombiDBDriver extends AbstractDBDriver implements BulkUpdate
       	 	     }
       	 
       	 	  prod.setGroup("TB_" + Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
+      	 	  prod.setDiscgrupp("TB_" + Converter.cleanLitLatEst(grupp.replaceAll(";",":").replaceAll("&amp;", "&")));
 
           	  len = line.indexOf("supplier_code=");
         	    if(len != -1 && hasSupplier){

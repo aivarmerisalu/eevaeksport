@@ -543,6 +543,7 @@ DefaultHttpClient httpClient = null;
 		           
 		        
 		        String contr = getCustContrID(cukood , adid);
+		        if(contr != null) {
 		        System.out.println("Contract ID " + contr + " " + cukood + " " + adid);
 		           Customer cuid = getCustId(cukood);
 		
@@ -655,10 +656,12 @@ DefaultHttpClient httpClient = null;
 	 	} catch (Exception e) {
 	 		e.printStackTrace();
 	 		
-	 	  trouble = "NOT IMPORTED ORDER \n" + order_xml;
+	 	
 	 	//  System.exit(0);
 	 	}
-
+	 	
+        }else {
+        }
 	 	
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1076,13 +1076,19 @@ payers = new TreeMap();
 		  " or( GETDATE()<=PRI.TODATE+1 AND year(PRI.fromDATE) =1900) ) and promostatus in (1,4)";
  
  
-           String   sql = "  SELECT a.orderaccount AS klient, a.accountnum as payer ,a.invoice AS number,co.duedate AS maksepaev,co.amountmst AS tasumata,  " +
+           String   sql = "  SELECT a.orderaccount AS klient, a.accountnum as payer ,a.invoice AS number, a.documentnum as tell ,co.duedate AS maksepaev,co.amountmst AS tasumata,  " +
                   "  co.transdate AS kuupaev , datediff(day,co.duedate,getdate()) AS yle, "
                   + "case when  co.amountmst = a.amountmst then 0 else a.amountmst end as orig FROM custtransopen co with(nolock) " +
 				" INNER JOIN custtrans a with(nolock) ON co.REFRECID=a.recid and a.dataareaid=co.dataareaid " +
                  "   WHERE co.dataareaid='bd' AND a.dataareaid='bd'  and a.storno = 0  and a.POSTINGPROFILE not in('SAUBD', 'ABEJSKOL', 'DOUBT')" +
 				"	 ORDER BY a.accountnum,co.transdate " ; // tahtsid kõiki arveid  and co.duedate < getdate()+5  and a.invoice != ''
-			  
+			  sql = "SELECT a.orderaccount AS klient, a.accountnum as payer ,a.invoice AS number, b.salesid as tell ,co.duedate AS maksepaev,co.amountmst AS tasumata,  \r\n" + 
+			  		"                    co.transdate AS kuupaev , datediff(day,co.duedate,getdate()) AS yle,\r\n" + 
+			  		"                 case when  co.amountmst = a.amountmst then 0 else a.amountmst end as orig FROM custtransopen co with(nolock) \r\n" + 
+			  		"				 INNER JOIN custtrans a with(nolock) ON co.REFRECID=a.recid and a.dataareaid=co.dataareaid \r\n" + 
+			  		"				 LEFT JOIN CustInvoiceJour  b with(nolock) ON b.invoiceid =a.invoice and a.dataareaid=co.dataareaid \r\n" + 
+			  		"                    WHERE co.dataareaid='bd' AND a.dataareaid='bd'  and a.storno = 0  and a.POSTINGPROFILE not in('SAUBD', 'ABEJSKOL', 'DOUBT')\r\n" + 
+			  		"					 ORDER BY a.accountnum,co.transdate";
            
            String salessql = " SELECT  jou.orderaccount as klient,( ltrim( case when month(sal.invoicedate) <10 then  '0' + ltrim(str(month(sal.invoicedate))) else ltrim(str(month(sal.invoicedate))) end) ) as kuu, " +
         "  round(SUM(lineamount),0) AS summa FROM custinvoicetrans sal with(nolock) INNER JOIN custinvoicejour jou  with(nolock) ON  " +
@@ -1579,6 +1585,10 @@ payers = new TreeMap();
                         String number = rs.getString("number");
                         if(number == null || number.trim().length() == 0) {
                         	number = "CreditInvoice";
+                        }
+                        String tell = rs.getString("tell");
+                        if(tell != null && tell.trim().length() > 0) {
+                        	number = number + "/"+ tell.trim();
                         }
                         debt.setDoknr(number);
                         debt.setDuedate(rs.getDate("maksepaev"));

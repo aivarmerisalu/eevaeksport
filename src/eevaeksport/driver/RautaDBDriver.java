@@ -1468,31 +1468,10 @@ public static String getYYYYpMMpDD(Date dd){
    private  TreeMap agents2 = new TreeMap(); 
    
    public TreeMap getAgents(){
-	 //  getDebt(null);
-	   
 
-	  //   File ff = new File(this.getExcelDir() + "graafikud.xlsx");
-	   //  Converter.sendExcelVisits(ff,"rivona.lt","rivona.lt","vilnius222");
-	   //  Converter.sendExcelVisits(ff,"klp","klp","dione");
-	   //  Converter.sendExcelVisits(ff,"orklafood","orklafood","spilva123");
-	    // Converter.sendExcelVisits(ff,"orklalv","orkla.lv","Riga111");
-	   //  Converter.sendExcelVisits(ff,"droid@skonis-kvapas.lt","skonis","skonis12");
-	    // Converter.sendExcelVisits(ff,"pda@dunker.ee","dunker.ee","demo21");
-	   // Converter.sendExcelVisits(ff,"ladu@balbiino.ee","balbiino","demo24");
-	     
-	 //  makePlans();
-	 //  getCustomerProductsListVec();
-	 //  getCustomerProductsList(null);
-	 //  getJooksevMyyk(true);
-	 //  getJooksevMyyk(false);
 		      TreeMap tm = new TreeMap(); 
-//System.out.println(Converter.getDays("E1K32R2"));
-//System.out.println(Converter.getDays("ETKNRLP"));
-  
 		      
  	try {
- 		
- 		
  	    
     	Properties props = new Properties();
 		try {
@@ -3771,6 +3750,8 @@ public static String getYYYYpMMpDD(Date dd){
 			
 				System.out.println("Sees toimetan");
 				String xml = "";
+				String xmlu = "";
+				
 				String sb0 = "";
 				String xml2 = "";
 				String xml3 = "";
@@ -3788,6 +3769,10 @@ public static String getYYYYpMMpDD(Date dd){
 				
 				//xml2 = xml2 +  "<tj_id>" + wr.getInfo().getAgentID() + "</tj_id>";
 				xml = xml +  "<myyja_id>" + wr.getInfo().getAgentID() + "</myyja_id>\n";
+
+
+				
+				
 				kontakt = kontakt +  "<myyja_id>" + wr.getInfo().getAgentID() + "</myyja_id>\n";
 				xmlInv = xmlInv +  "<myyja_id>" + wr.getInfo().getAgentID() + "</myyja_id>\n";
 				xml2 = xml2 + "<tj>\n";
@@ -3803,6 +3788,8 @@ public static String getYYYYpMMpDD(Date dd){
 				//ps.setString(2, Converter.deCode(wr.getInfo().getAgentName()));
 				//ps.setString(3, lw.getLine().getCustID());
 			     xml = xml  +  "<mp_id>" + lw.getLine().getCustID() + "</mp_id>\n";
+			     xmlu = xmlu  +  "<myygipunkt_id>" + lw.getLine().getCustID() + "</myygipunkt_id>\n";
+				
 			     kontakt = kontakt  +  "<mp_id>" + lw.getLine().getCustID() + "</mp_id>\n"; 
 			     kontakt = kontakt +  "<muutmiskuup>" + this.getKuup() + "</muutmiskuup>\n";
 					
@@ -3821,6 +3808,8 @@ public static String getYYYYpMMpDD(Date dd){
 				//ps.setString(4, Converter.deCode(lw.getLine().getCustName()));
 				//ps.setString(5, lw.getLine().getProdID());
 				xml = xml +  "<va_id>" + prodID + "</va_id>\n";
+				xmlu = xmlu +  "<valjaanne_id>" + prodID + "</valjaanne_id>\n";
+
 				xml2 = xml2 +  "<va_id>" + prodID + "</va_id>\n";
 				xml3 = xml3 +  "<va_id>" + prodID + "</va_id>\n";
 				xmlTJ = xmlTJ +  "<va_id>" + prodID + "</va_id>\n";
@@ -3844,7 +3833,11 @@ public static String getYYYYpMMpDD(Date dd){
 				//ps.setString(6, Converter.deCode(lw.getLine().getProdName()));
 				//ps.setDouble(7, lw.getLine().getNormalPrice());
 				xml = xml +  "<kogus_saata>" + lw.getLine().getNormalPrice() + "</kogus_saata>\n";
+
+				xmlu = xmlu +  "<kogus_tel>" + lw.getLine().getNormalPrice() + "</kogus_tel>\n";
 				xml2 = xml2 +  "<kogus_jaotada>" + lw.getLine().getNormalPrice() + "</kogus_jaotada>\n";
+				
+
 			
 				String cr1 = lw.getLine().getResStr1();
 				if (cr1 == null) {
@@ -3871,8 +3864,9 @@ public static String getYYYYpMMpDD(Date dd){
 					}
 						
 					System.out.println("Tjuht " + juht + " aadr "+ email);
+					xmlu = "<tel>" + xmlu + "</tel>";
+					this.makeStl(sb0 ,xml,xmlu,wr.getInfo().getAgentID(),email);
 					
-					this.makeStl(sb0 ,xml,wr.getInfo().getAgentID(),email);
 				}
 				
 				if(lw.getLine().getGroupTotal() > 0){
@@ -4170,9 +4164,21 @@ public static String getYYYYpMMpDD(Date dd){
 	   return this.getYYYYpMMpDD(null);
    }
    
-   private void makeStl(String body ,String xml, String agent ,String kellele){
+   private void makeStl(String body ,String xml,String xml2, String agent ,String kellele){
 	   
-	   
+	   /*<teld>
+
+<tel>
+
+<myygipunkt_id>6441</myygipunkt_id>
+
+<valjaanne_id>5298</valjaanne_id>
+
+<kogus_tel>150.0</kogus_tel>
+
+</tel>
+
+</teld>*/
 	   
 	     String fileName = escape(parent.getProps().getProperty("conv.dir") + "ord" + "_tellimus_" + agent) 
 		          + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".xml";
@@ -4185,7 +4191,19 @@ public static String getYYYYpMMpDD(Date dd){
 			        fos.close();
 		             }catch (Exception r){ }
 		
-	         
+		       fileName = escape(parent.getProps().getProperty("conv.dir") + "ord" + "_tel_" + agent) 
+			          + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".xml";
+			     
+			      String pais0 =  "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><teld>";
+			      String lopp0 =  "</teld>";
+			      try{
+			          FileOutputStream fos = new FileOutputStream(fileName);
+				        fos.write((pais0 + xml2 + lopp0).getBytes());
+				        fos.close();
+			             }catch (Exception r){ }
+			
+		         
+		      
 	     String agemail = null;
 	      Properties propse =  new Properties();
 		    try{

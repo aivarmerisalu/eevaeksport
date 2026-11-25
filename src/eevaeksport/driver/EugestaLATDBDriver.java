@@ -1856,7 +1856,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
    
       
       if (customerDeliveries.get(custID) != null) {
-    	  asi = " |Kopa/Atlicis piegades :  " + customerDeliveries.get(custID)+" / "+ customerDeliveries.get(custID + "rem") + "||";
+    	  asi = " |Kopā/Atlikušas piegādes :  " + customerDeliveries.get(custID)+" / "+ customerDeliveries.get(custID + "rem") + "||";
       }
       
         double cSales = 0 ;
@@ -1881,7 +1881,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
     	  
 
         
-       asi = asi + "Izpilde/Plan :   " + (int)cSales + " € / " + (int)cpSales+ " €|";
+       asi = asi + "Izpilde/Plāns :   " + (int)cSales + " € / " + (int)cpSales+ " €|";
       
       if(dd > 6 && tehtudsalperc > 0 && prognosalperc > 0){
     	  asi = asi + "Izpilde/Projekcija :  ";
@@ -1891,7 +1891,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       
       
  	String asi3 = "";
- 	 if(custPlanGruppedFocus != null && custSalesGruppedFocus != null) {
+ 	 if(false && custPlanGruppedFocus != null && custSalesGruppedFocus != null) { // kommentisin välja 
  		 
  		  Map<String, Double> osales = custPlanGruppedFocus.get(custID);
  		  Map<String, Double> rsales = custSalesGruppedFocus.get(custID);
@@ -1921,14 +1921,14 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
        		  done = "+" + done;
        	  }
 
-       	   asi3 = asi3  + "Fokus Cat. : " + grID + "|Izpilde/Plan : " + (int) msales +  " € / " + (int) psales +  " €|Starpība : " + done + " € |";
+       	   asi3 = asi3  + "Fokus Kat. : " + grID + "|Izpilde/Plāns : " + (int) msales +  " € / " + (int) psales +  " €|Starpība : " + done + " € |";
        	   if(msales > 0) {
                asi3 = asi3 + "|Izpilde/Projekcija :   " +(int)(tehtudsalpercC*100) + "% / " + (int)(prognosalpercC*100)  + " %| |";  
        	    } else {
        		   asi3 = asi3 + " | |";
        	    }
  		 } else {
- 			   asi3 = asi3  + "Focus Cat. : " + grID + "|Izpilde/Plāns : " + 0 +  " € / " + (int) psales +  " €|Starpība : " + (int) psales + " € |";
+ 			   asi3 = asi3  + "Focus Kat. : " + grID + "|Izpilde/Plāns : " + 0 +  " € / " + (int) psales +  " €|Starpība : " + (int) psales + " € |";
  	           asi3 = asi3 + " | |";  
  	 	 }
  		  }
@@ -1966,14 +1966,14 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
       		  done = "+" + done;
       	  }
 
-      	   asi3 = asi3  + " Cat. : " + grID + "|Izpilde/Plāns : " + (int) msales +  " € / " + (int) psales +  " €|Starpība : " + done + " € |";
+      	   asi3 = asi3  + " Kat. : " + grID + "|Izpilde/Plāns : " + (int) msales +  " € / " + (int) psales +  " €|Starpība : " + done + " € |";
       	   if(msales > 0) {
                asi3 = asi3 + "Izpilde/Projekcija :   " +(int)(tehtudsalpercC*100) + "% / " + (int)(prognosalpercC*100)  + " % | |";  
       	   } else {
       		   asi3 = asi3 + "|";
       	   }
 		 } else {
-			   asi3 = asi3  + " Cat. : " + grID + "|Izpilde/Plāns : " + 0 +  " € / " + (int) psales +  " €|Starpība : -" + (int) psales + " € | ";
+			   asi3 = asi3  + " Kat. : " + grID + "|Izpilde/Plāns : " + 0 +  " € / " + (int) psales +  " €|Starpība : -" + (int) psales + " € | ";
 	             asi3 = asi3 + "|";  
 	 			 
 		 }
@@ -1989,7 +1989,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
        String asi2 = "";
        
        for (String group : ch.keySet()) {
-        if(this.groupGroupingFocus.get(group) != null) {
+        if(false && this.groupGroupingFocus.get(group) != null) { // kommentisin välja 
     	 String grName = groupNames.get(group);
          String catName = this.groupGroupingFocus.get(group);
          Double gpSales = ch.get(group);
@@ -2035,60 +2035,9 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
          }
     	 }
        
-       
-       
-       
-     /*  if(this.groupGrouping.get(group) != null) {
-      	 String grName = groupNames.get(group);
-           String catName = this.groupGrouping.get(group);
-           Double gpSales = ch.get(group);
-           Double gSales = 0.0;
-           if( custSales.get(custID) != null && custSales.get(custID).get(group) != null) {
-          	 gSales = custSales.get(custID).get(group);
-           }
-           
-           if(gpSales != null && gpSales >0) {
-          	 plaanitavMyykSal = 0;
-          	 tehtudsalperc = 0;
-          	 prognosalperc = 0;
-          	 
-          	 if(gSales != null && gSales > 0) {
-                 plaanitavMyykSal = d2 * gSales/dd;
-                 tehtudsalperc = gSales/gpSales;
-                 prognosalperc = plaanitavMyykSal/gpSales;
-          	 }
-           if(tehtudsalperc > 10){
-       		  tehtudsalperc = 0;  
-       	  }
-       	  
-       	  if(prognosalperc > 10){
-       		  prognosalperc = 0;  
-       	  }
-       	  
-       	 String done = (int)(gSales - gpSales)+"";
-        	  if(!done.startsWith("-")) {
-        		  done = "+" + done;
-        	  }else {
-        		  done = done.substring(1);
-        	  }
-        	  
-        	  asi2 = asi2 + "GR : " + grName + " (" + catName + ")"  + "|Sales/Plan : " + (int) gSales.doubleValue() + 
-        			  " € / " + (int) gpSales.doubleValue() +  " €|Diff. : " + done + " € |";
-        	
-        	  if(tehtudsalperc > 0) {
-                 asi2 = asi2 + "done/esti. :  " + (int)(tehtudsalperc*100) + " % / " + (int)(prognosalperc*100)  + " %| |";  
-             } else {
-            	 asi2 = asi2 + " | ";
-             }
-           }
-      	 }*/
          }
      
        
-       
-       
-       
-
 	     res.put(custID, asi  +asi3 + asi2);
      }
 	  
@@ -3705,7 +3654,7 @@ if(sb0.length() > 0) {
       	  }
       //	Plan- Plāns; Done- Izpilde; Diff- Starpība, esti- Projekcija
         	
-      	  String asi = "Fokus Cat. : " + grID + "|Izpilde/Plāns : " + (int) msales +  " € / " + (int) psales +  " €|Starpība. : " + done + " €";
+      	  String asi = "Fokus Kat. : " + grID + "|Izpilde/Plāns : " + (int) msales +  " € / " + (int) psales +  " €|Starpība. : " + done + " €";
 
       	  if(tehtudsalperc > 0) {
       		  asi = asi + "|Izpilde/Projekcija : " +(int)(tehtudsalperc*100) + "% / " + (int)(prognosalperc*100)  + " %| |";  

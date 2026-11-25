@@ -1733,7 +1733,10 @@ public class EksportPanel extends JPanel implements ActionListener,
                 if(sv.exists()){
                     zip.addFile("supervisor2.txt");
                 }
-                
+                sv = new File("supervisor3.txt");
+                if(sv.exists()){
+                    zip.addFile("supervisor3.txt");
+                }
                 File mdf = new File("maxdiscounts.txt");
                 if(mdf.exists()){
                     zip.addFile("maxdiscounts.txt");

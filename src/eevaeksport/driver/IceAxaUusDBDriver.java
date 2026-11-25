@@ -591,7 +591,7 @@ try {
     		"				  cus.blocked, (select l.locator  from  LOGISTICSELECTRONICADDRESS l WITH (NOLOCK)  where l.recid = dp.primarycontactphone) as phone,\r\n" + 
     		"				  '' AS celluralphone,  '' as kett ,  cp.name as chain ,  custclassificationid as type,\r\n" + 
     		"				  adr.zipcode as indeks,  adr.state as region,   adr.city, adr.street,\r\n" + 
-    		"				  cus.paymtermid as pay , d.notes" + 
+    		"				  cus.paymtermid as pay , d.notes , cus.pricegroup" + 
     		"             FROM  custtable cus with(nolock)  LEFT JOIN custgroup cp on cp.custgroup = cus.custgroup and cp.dataareaid=cus.dataareaid \r\n" + 
     		"			 LEFT OUTER JOIN DEFAULTDIMENSIONVIEW dim ON cus.PARTITION = dim.PARTITION AND cus.DEFAULTDIMENSION = dim.DEFAULTDIMENSION AND dim.NAME = N'Agent'\r\n" + 
     		"			 inner join DirPartyTable dp with(nolock) ON cus.partY=dp.REcid  inner join \r\n" + 
@@ -847,7 +847,21 @@ String region = rs.getString("region");
          if(leping != null && leping.trim().length()>0){
         	 cust.setInfo(cust.getInfo() + "|PV: " +leping.trim() );
          }              
-               
+         
+
+         String  pricegr = rs.getString("pricegroup");
+         if(pricegr != null && pricegr.trim().length()> 0) {
+        	 if(!pricegr.trim().equals("Pood")) {
+        		 if(cust.getGroup()== null || cust.getGroup().trim().length() == 0) {
+        			 cust.setGroup( Converter.cleanLitLatEst(pricegr.trim()));
+        		 }else {
+        		 cust.setGroup(cust.getGroup() + "|" + Converter.cleanLitLatEst(pricegr.trim()));
+        	 }
+        		 }
+         }
+                 
+         
+         
         String cmd2 = "SELECT disc.percent1 AS discount FROM pricedisctable disc  WHERE disc.accountrelation='" + aleke + "' AND " +
                " disc.dataareaid='dat' AND len(disc.itemrelation)=0  AND fromdate<=getdate() and todate >= getdate()";
         ResultSet rs1 = stm.executeQuery(cmd2);
@@ -2129,32 +2143,37 @@ public Vector getPriceMatrixData() {
             rs.close();
             
             
-            String sql2 = " select pd.accountrelation AS clgroup, " +
-			  " (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, " +  
-			  " (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, " +
-			  "   pd.fromdate as algus , pd.todate as lopp  ,  datediff(day,pd.fromdate,pd.todate) as paevi from  " +
-			  "   pricedisctable pd where   getdate() between pd.fromdate -3 and pd.todate  and pd.accountcode=1 and percent1 > 0 " +
-			  "    and dataareaid = 'dat' order by pd.accountrelation , pd.itemrelation, pd.fromdate desc " ;
+            String sql2 = "select pd.accountrelation AS clgroup, \r\n" + 
+            		"			   (case when pd.itemcode = 0 then pd.itemrelation else ''end) AS prodid, \r\n" + 
+            		"			   (case when pd.itemcode = 1 then pd.itemrelation else ''end) AS prodgroup,(percent1) AS discount, amount as price,\r\n" + 
+            		"			     pd.fromdate as algus , pd.todate as lopp  ,  datediff(day,pd.fromdate,pd.todate) as paevi, pd.accountcode from  \r\n" + 
+            		"			     pricedisctable pd where   getdate() between pd.fromdate -3 and pd.todate \r\n" + 
+            		"			      and dataareaid = 'dat' \r\n" + 
+            		"				  order by pd.accountrelation , pd.itemrelation, pd.fromdate desc " ;
             
             rs = stmt.executeQuery(sql2);
 HashSet conta = new HashSet();
             while (rs.next()) {
 
-                    String clGroup = rs.getString("clgroup");
+                    String clGroup = Converter.cleanLitLatEst(rs.getString("clgroup"));
                     String prodID = rs.getString("prodid");
                     String prodGroup = rs.getString("prodgroup");
                     double discount = rs.getDouble("discount");
+
+                    double price = rs.getDouble("price");
                     String fromdate = rs.getString("algus");
                     String todate = rs.getString("lopp");
-                    double price = 0;
                     
                     String asi = "";
+                    if(discount > 0) {
                     if(prodID != null && prodHash.get(prodID) != null) {
                     	Product pr = (Product) prodHash.get(prodID);
                     	if(pr.getPrice() > 0) {
                     	  	price = pr.getPrice() * (100 - discount) / 100;
                       }
+                     }
                     }
+                    
                     int paevi = rs.getInt("paevi");
                     MatrixLine mline = new MatrixLine();
                     
@@ -2181,17 +2200,10 @@ HashSet conta = new HashSet();
                      
                    
                     if(paevi < 180){
-                        
                     	mline.setStartDate(fromdate.substring(0,10));
                         mline.setEndDate(todate.substring(0,10));
-                     // 	mline.setLineinfo("TOP");
-                      //	mline.setProdLevel("ca");
-						
-                        
-                    }else{
-                    	
+                    } else{
                     	mline.setProdLevel("pr");
-                    
                     }
                
                     if(!added.contains(asi)){
