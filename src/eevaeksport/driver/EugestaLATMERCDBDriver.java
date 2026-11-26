@@ -635,11 +635,13 @@ public class EugestaLATMERCDBDriver extends AbstractDBDriver  implements Manager
    }
 
 
+
   public String getAssortmentStr(Agent agent){
 	  StringBuffer result = new StringBuffer();
 		
 		try {
 			
+			String cmd2 = "select productBackOfficeId as ItemID from EPASAULE_PRODUCTS_ADVERTISING";
 			
 			String  cmd = " SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin, EG_ASSORTITEMSTATUS as status " + 
 					"	FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId "
@@ -649,22 +651,105 @@ public class EugestaLATMERCDBDriver extends AbstractDBDriver  implements Manager
 		         if (isDebug()) System.out.println(cmd);
 		           Connection con = getNewConnection();
 		           Statement st = con.createStatement();
-		           ResultSet rs = st.executeQuery(cmd);
-
+		           ResultSet rs = st.executeQuery(cmd2);
+		           
+                   HashSet local = new HashSet(); 
 		           String ags =   sortags.get("SUGGED");
-
+		           
 		           while (rs.next()) {
+
+			             String prodID = rs.getString("ItemID").trim();
+			             if(usedProds.contains(prodID)){
+								result.append( " ;" + Converter.cleanLitLatEst("SUGGED; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
+								local.add(prodID);
+			 				}
+				   }
+		           rs.close();
+
+
+		           String sql2 = " 	select  productBackOfficeId as ItemID from dbo.EPASAULE_PROMOTIONOBJECTS_ND a  \r\n" + 
+		           		"    inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
+		           		"    where a.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice \r\n" + 
+		           		"  AND productBackOfficeId NOT LIKE '[iu]%'  group by  productBackOfficeId ";
+		           		
+		           rs = st.executeQuery(sql2);
+		          
+		           while (rs.next()) {
+			             String prodID = rs.getString("ItemID").trim();
+			            if(!local.contains(prodID)){
+								result.append( " ;" + Converter.cleanLitLatEst("PROMOSTUFF; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
+							}
+		           }
+		           rs.close();
+
+		           
+
+		           
+		           sql2 = " select  productBackOfficeId as ItemID , clientBackOfficeId as custID from dbo.EPASAULE_PROMOTIONOBJECTS_ND a  \r\n" + 
+		           		"		           		    inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
+		           		"		           		    where a.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice     \r\n" + 
+		           		"		           		  AND productBackOfficeId  LIKE '[iu]%'  group by clientBackOfficeId, productBackOfficeId";
+		           		
+		           rs = st.executeQuery(sql2);
+		          
+ 		             while (rs.next()) {
+			             String prodID = rs.getString("ItemID").trim();
+			             String custID = rs.getString("custID").trim();
+								result.append(custID + "; ; ;" + prodID + "; ; ; ; ;" + ags + "\n");
+				           }
+		           rs.close();
+
+		           
+		           
+		           
+		           
+		            sql2 =  " 	SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin, EG_ASSORTITEMSTATUS as status \r\n" + 
+		            		"						FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId \r\n" + 
+		            		"					 where s.EG_ASSORTITEMSTATUS in (0,1,2)\r\n" + 
+		            		"					 and assortimentBackOfficeId = 'REKLAMA' order by str(a.posWeight) + a.Name ";
+			           		
+			           rs = st.executeQuery(sql2);
+
+			          
+			           while (rs.next()) {
+
+				             String prodID = rs.getString("ItemID").trim();
+				            if(!local.contains(prodID)){
+									result.append( " ;" + Converter.cleanLitLatEst("SUGGED; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
+									//System.out.println("Lisame ald SUGGED");
+				 				}
+							
+			           }
+			           rs.close();
+			           
+
+		           
+		           
+				   rs = st.executeQuery(cmd);
+		           
+		           while (rs.next()) {
+
 		             String sortid = rs.getString("ClientGR").trim();
 		             String prodID = rs.getString("ItemID").trim();
+		             int optio = rs.getInt("newin");
 		             int status = rs.getInt("status");
 		       
 		            ags =   sortags.get(sortid);
 		           if(ags == null) {
 		        	   ags = "";
 		           }
+		           
 		           String must = " ";
 		           if(status == 1) {
 		        	   must = "TOP";
+		           }
+		           
+		           if(optio == 1) {
+		        	   if(must.trim().length() == 0) {
+		        	    must = "NEW";
+		        	   }else {
+		        		   must = must + " NEW";
+		        	   }
 		           }
 		           
 		             if(usedProds.contains(prodID)){
@@ -687,7 +772,6 @@ public class EugestaLATMERCDBDriver extends AbstractDBDriver  implements Manager
 
 
   }
-
   public String getSaveStockInfo(){
 	      return null; 
 	 	   }
@@ -2285,9 +2369,14 @@ public class EugestaLATMERCDBDriver extends AbstractDBDriver  implements Manager
         
         String fixed = rs.getString("fixed");
         if(fixed != null && fixed.trim().length() > 0) {
-        	String sugg = fixed.trim();
-        	cust.suggAssortCode = sugg ;
-          //  cust.addFixSortCode(Converter.cleanLitLatEst(fixed.trim())+"x");
+      
+         	String sugg = fixed.trim();
+        	if(!cust.getID().startsWith("MRC")) {
+        		sugg = sugg + "|SUGGED|PROMOSTUFF";
+        	}
+        	cust.suggAssortCode = Converter.cleanLitLatEst(sugg) ;
+
+       
        
         	String ags = sortags.get(fixed.trim()); 
             if(ags == null){

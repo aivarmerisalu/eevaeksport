@@ -725,7 +725,6 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
      return this.debt;
    }
 
-
   public String getAssortmentStr(Agent agent){
 	  StringBuffer result = new StringBuffer();
 		
@@ -759,22 +758,40 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 
 		           String sql2 = " 	select  productBackOfficeId as ItemID from dbo.EPASAULE_PROMOTIONOBJECTS_ND a  \r\n" + 
 		           		"    inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
-		           	//	"    inner join EPASAULE_CLIENTS c ON a.clientBackOfficeId = c.BackOfficeId\r\n" + 
-		           		"    where a.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice  \r\n" + 
-		           		"    group by  productBackOfficeId ";
+		           		"    where a.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice \r\n" + 
+		           		"  AND productBackOfficeId NOT LIKE '[iu]%'  group by  productBackOfficeId ";
 		           		
 		           rs = st.executeQuery(sql2);
 		          
 		           while (rs.next()) {
-
 			             String prodID = rs.getString("ItemID").trim();
 			            if(!local.contains(prodID)){
 								result.append( " ;" + Converter.cleanLitLatEst("PROMOSTUFF; ;" + prodID + "; ; ; ; ;"+ags)+ "\n");
-								//System.out.println("Lisame ald SUGGED");
-			 				}
+							}
 		           }
 		           rs.close();
 
+		           
+
+		           
+		           sql2 = " select  productBackOfficeId as ItemID , clientBackOfficeId as custID from dbo.EPASAULE_PROMOTIONOBJECTS_ND a  \r\n" + 
+		           		"		           		    inner join dbo.EPASAULE_PROMO b on a.promotionBackOfficeId = b.promotionBackOfficeId \r\n" + 
+		           		"		           		    where a.nextdelivery between [date from] and [date to]  and minqty = 0 and minPrice = maxPrice     \r\n" + 
+		           		"		           		  AND productBackOfficeId  LIKE '[iu]%'  group by clientBackOfficeId, productBackOfficeId";
+		           		
+		           rs = st.executeQuery(sql2);
+		          
+ 		             while (rs.next()) {
+			             String prodID = rs.getString("ItemID").trim();
+			             String custID = rs.getString("custID").trim();
+								result.append(custID + "; ; ;" + prodID + "; ; ; ; ;" + ags + "\n");
+				           }
+		           rs.close();
+
+		           
+		           
+		           
+		           
 		            sql2 =  " 	SELECT  s.assortimentBackOfficeId as ClientGR ,s.productBackOfficeId as ItemID , s.NEWINASSORT as newin, EG_ASSORTITEMSTATUS as status \r\n" + 
 		            		"						FROM EPASAULE_ASSORTMENTS s inner join dbo.EPASAULE_PRODUCTS a ON a.backOfficeId = s.productBackOfficeId \r\n" + 
 		            		"					 where s.EG_ASSORTITEMSTATUS in (0,1,2)\r\n" + 
@@ -1928,7 +1945,7 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
        		   asi3 = asi3 + " | |";
        	    }
  		 } else {
- 			   asi3 = asi3  + "Focus Kat. : " + grID + "|Izpilde/Plāns : " + 0 +  " € / " + (int) psales +  " €|Starpība : " + (int) psales + " € |";
+ 			   asi3 = asi3  + "Fokus Kat. : " + grID + "|Izpilde/Plāns : " + 0 +  " € / " + (int) psales +  " €|Starpība : " + (int) psales + " € |";
  	           asi3 = asi3 + " | |";  
  	 	 }
  		  }
@@ -3620,7 +3637,7 @@ if(sb0.length() > 0) {
 	 
 	 HashMap <String, String> manaCategoryFocusTotals = new HashMap<String, String>();
 	 
-	 Iterator<String> itera = manaPlanFocusGrupped.keySet().iterator();
+	/* Iterator<String> itera = manaPlanFocusGrupped.keySet().iterator();
 	 while (itera.hasNext()) {
 		 String agID = itera.next();
 		 
@@ -3669,10 +3686,10 @@ if(sb0.length() > 0) {
 		  }
 		 
 		}
-	 }
+	 }*/
 
  HashMap <String, String> manaCategoryTotals = new HashMap<String, String>();
-	  itera = manaPlanGrupped.keySet().iterator();
+	 Iterator<String> itera = manaPlanGrupped.keySet().iterator();
 	 while (itera.hasNext()) {
 		 String agID = itera.next();
 		 

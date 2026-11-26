@@ -221,12 +221,14 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
         		            );
 
         		            JSONObject js = new JSONObject();
-        		            js.put("FromEntryNo", 0);
+        		           // js.put("FromEntryNo", 0);
         		            js.put("FromDate", fromDate.format(apiFormatter));
         		            js.put("ToDate", toDate.format(apiFormatter));
         		            js.put("ItemNo", "");
         		            js.put("Limit", 10000);
 
+        		            
+        		            System.out.println(js.toJSONString());
 
         		            File file = new File("data" + File.separator + filename + ".json");
         		            if(i > 1) {
@@ -555,9 +557,8 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                 if (invnr.length() == 0) {
                 	invnr = "No Number";
                 }
-               // {"customerNo":"11971000","customerShipToCode":"1197100004","postingDate":"2025-12-19","dueDate":"2026-01-02","externalDocumentNo":"VLD25_140373","remainingAmount":28.74},
-                // ===== CREATE DEBT OBJECT =====
-
+              
+                
                 Debt dd = new Debt();
                 dd.setCustID(custid);
                 dd.setPayerID(payer);
@@ -998,13 +999,19 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
     		}catch(Exception e) {e.printStackTrace();}
     		}
 
-    	
-    	// siia tuleb teha laadimine et saaks tagastus dokumentte toimetada.
-    	
-                WeekFields weekFields = WeekFields.ISO;
+    	        WeekFields weekFields = WeekFields.ISO;
                 LocalDate currentWeekStart =
                         LocalDate.now().with(DayOfWeek.MONDAY);
+                
+                
 
+            	// siia tuleb teha laadimine et saaks tagastus dokumentte toimetada.
+                
+                HashMap lisainfo = new HashMap();
+                String oldkey = null;
+                int count = 0;
+                
+                
                 for (int r = 0; r < 20; r++) {
 
                     LocalDate weekDate = currentWeekStart.minusWeeks(r);
@@ -1015,13 +1022,10 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                     int weekYear =
                             weekDate.get(weekFields.weekBasedYear());
 
-               
-
 
                     File fil = new File("data/GetSalesHistory" + weekNumber + weekYear + ".json");
 
                     try {
-                    	
                  
                     	if(fil.exists()) {
                     	org.json.simple.JSONObject hisData =
@@ -1039,10 +1043,75 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                             String shipmentNo = (String) hisObj.get("shipmentNo");
                             String postingDate = (String) hisObj.get("postingDate");
                             String prid = (String) hisObj.get("itemNo");
-                            Object qtyObj = hisObj.get("salesAmount");
                             Object price = hisObj.get("salesPrice");
-
                             Object qtyObj2 = hisObj.get("quantity");
+
+                            if (prid != null && qtyObj2 != null) {
+                                double qty = Double.parseDouble(qtyObj2.toString());
+                                double hind = Double.parseDouble(price.toString());
+                                
+                                String key = cuid + "-" + prid;
+                                if(oldkey == null) {
+                              	  oldkey = key;
+                                }
+                                
+                                if(!oldkey.equals(key)) {
+                              	  count = 0;
+                                }
+                                 	if(count < 3) {
+                                 		String value = shipmentNo + "," + postingDate + "," + qty + "," + hind ;
+                                 		if(lisainfo.get(key) != null && !(lisainfo.get(key)+"").contains(value) ) {
+                                 			value = lisainfo.get(key) + "|" + value;
+                                 		}
+                                 	   lisainfo.put(key, value);
+                                 	}
+                                  
+                                 oldkey = key;
+                                 count++;
+                          	    
+                            }
+                          }
+                    	}
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            
+                System.out.println("lisainfo " + lisainfo.keySet().size());
+             //   System.exit(0);
+
+                          
+
+                for (int r = 0; r < 20; r++) {
+
+                    LocalDate weekDate = currentWeekStart.minusWeeks(r);
+                    int weekNumber =  weekDate.get(weekFields.weekOfWeekBasedYear());
+                    int weekYear =  weekDate.get(weekFields.weekBasedYear());
+
+                    File fil = new File("data/GetSalesHistory" + weekNumber + weekYear + ".json");
+
+                    try {
+                 
+                    	if(fil.exists()) {
+                    	org.json.simple.JSONObject hisData =
+                                 (org.json.simple.JSONObject) Converter.readJSONFile(fil.getPath());
+
+                    	
+                        org.json.simple.JSONArray hisValues =
+                                (org.json.simple.JSONArray) hisData.get("data") ;
+
+                        for (int i = 0; i < hisValues.size(); i++) {
+                            org.json.simple.JSONObject hisObj =
+                                    (org.json.simple.JSONObject) hisValues.get(i);
+
+                            String cuid = (String) hisObj.get("customerShipToCode");
+                            String shipmentNo = (String) hisObj.get("shipmentNo");
+                            String postingDate = (String) hisObj.get("postingDate");
+                            String prid = (String) hisObj.get("itemNo");
+                            Object price = hisObj.get("salesPrice");
+                            Object qtyObj2 = hisObj.get("quantity");
+
                             if (prid != null && qtyObj2 != null) {
                                 double qty = Double.parseDouble(qtyObj2.toString());
                                 double hind = Double.parseDouble(price.toString());
@@ -1050,6 +1119,13 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
                                 cp.setAbiKood(shipmentNo);
                           	    res.add(cp); 
                     	     
+                          	  String key = cuid + "-" + prid;
+                      		
+                      		if(lisainfo.get(key) != null) {
+                      			cp.returnData = lisainfo.get(key)+"";
+                      		}
+                      
+                          	    
                           	    // võtame maha vanast kui on juba müüdud
                           	    if(oldData != null && oldData.get(cuid + prid) != null) {
                           	    	oldData.remove(cuid + prid);
@@ -1098,7 +1174,6 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
                     org.json.simple.JSONObject cob =
                             (org.json.simple.JSONObject) obj;
-                 //   [{"promotionCode":"AIB09-1126AV","campaignCategory":"AV","categoryDescription":"TEST2-OKT import","startingDate":"2026-09-29","endingDate":"2026-11-02"},
                     String campaignCategory = (String) cob.get("campaignCategory");
                     String promotionCode = (String) cob.get("promotionCode");
                     if(campaignCategory != null) {
@@ -1266,7 +1341,25 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 
 	@Override
 	public void setBulkSales(Map agents) {
-		// TODO Auto-generated method stub
-		
+				try {
+				org.json.simple.JSONArray cc = 	Converter.readJSONArrFileUTF("data//Agents1.json");
+				  int lenn = cc.size();
+				  for (int i = 0; i < lenn; i++) {
+					org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
+		            String salesCode = (String)cob.get("code");
+		            double mSales = Double.parseDouble(cob.get("sales")+"");
+		            if (salesCode != null && salesCode.trim().length() > 0) {
+		            	
+		            	Agent agent = (Agent)agents.get(salesCode);
+          				if (agent != null){
+          					agent.setMonthSales((int)mSales);
+          				}
+          			  }
+		          	}
+				  
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 	}
+	
 }

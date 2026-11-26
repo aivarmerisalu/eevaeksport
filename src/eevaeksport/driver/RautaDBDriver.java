@@ -3760,17 +3760,12 @@ public static String getYYYYpMMpDD(Date dd){
 				String xmlTJOut = "";
 				String inventuur = "";
 				String kontakt  = "";
-
 				
-			//	ps.setString(1, wr.getInfo().getAgentID());
 				String prodID =  prodid.get(lw.getLine().getProdID()) + "";
 				
 				kontakt = "<contact>";
 				
-				//xml2 = xml2 +  "<tj_id>" + wr.getInfo().getAgentID() + "</tj_id>";
 				xml = xml +  "<myyja_id>" + wr.getInfo().getAgentID() + "</myyja_id>\n";
-
-
 				
 				
 				kontakt = kontakt +  "<myyja_id>" + wr.getInfo().getAgentID() + "</myyja_id>\n";
@@ -3838,6 +3833,7 @@ public static String getYYYYpMMpDD(Date dd){
 				xml2 = xml2 +  "<kogus_jaotada>" + lw.getLine().getNormalPrice() + "</kogus_jaotada>\n";
 				
 
+		
 			
 				String cr1 = lw.getLine().getResStr1();
 				if (cr1 == null) {
@@ -3847,7 +3843,10 @@ public static String getYYYYpMMpDD(Date dd){
 				if(cr1.equals("RAUTATJ") && lw.getLine().getNormalPrice() > 0){
 					 xmlTJ = xmlTJ +  "<y_ks>" + (int)lw.getLine().getNormalPrice() + "</y_ks>\n";
 				}
-			
+		
+				// System.out.println("toimetan " + xmlu + " " + lw.getLine().getGroupTotal() + " " + !lw.getLine().isPartner() +" "+ cr1.equals("RAUTA")); 
+
+				
 				sb0 = sb0 + "Kogus saata  "+ lw.getLine().getNormalPrice() + "\n";
 				//ps.setDouble(8, lw.getLine().getAmount());
 				
@@ -4053,7 +4052,7 @@ public static String getYYYYpMMpDD(Date dd){
 					cc = " ";
 				}
 
-				 System.out.println("xmlInv0 " + cr1 + " '" + cc + "'"); 
+
 				if(cr1.equals("INVCOUNT") && cc.trim().length()	> 0){
 					 xmlInv = xmlInv +  "<yksus>" + cc + "</yksus>\n";
 					 xmlInv = xmlInv +  "<inv_id>" + lw.getLine().getProdID() + "</inv_id>\n";
@@ -4166,31 +4165,20 @@ public static String getYYYYpMMpDD(Date dd){
    
    private void makeStl(String body ,String xml,String xml2, String agent ,String kellele){
 	   
-	   /*<teld>
 
-<tel>
-
-<myygipunkt_id>6441</myygipunkt_id>
-
-<valjaanne_id>5298</valjaanne_id>
-
-<kogus_tel>150.0</kogus_tel>
-
-</tel>
-
-</teld>*/
+   //System.out.println("makeSTL " + xml2);
 	   
 	     String fileName = escape(parent.getProps().getProperty("conv.dir") + "ord" + "_tellimus_" + agent) 
 		          + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".xml";
 		     
 		      String pais =  "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tjd>";
 		      String lopp =  "</tjd>";
-		      try{
+		    /*  try{
 		          FileOutputStream fos = new FileOutputStream(fileName);
 			        fos.write((pais + xml + lopp).getBytes());
 			        fos.close();
 		             }catch (Exception r){ }
-		
+		*/
 		       fileName = escape(parent.getProps().getProperty("conv.dir") + "ord" + "_tel_" + agent) 
 			          + ( Calendar.getInstance().getTimeInMillis()+"").substring(5,13)   +  ".xml";
 			     
@@ -4202,7 +4190,7 @@ public static String getYYYYpMMpDD(Date dd){
 				        fos.close();
 			             }catch (Exception r){ }
 			
-		         
+		         System.out.println("makeSTL file " + fileName);
 		      
 	     String agemail = null;
 	      Properties propse =  new Properties();

@@ -1685,6 +1685,7 @@ con3.close();
    private TreeMap debtDays = new TreeMap();
  
    public NumberFormat getNF() {
+	   NF.setGroupingUsed(false);
 	return NF;
 }
 /**
@@ -1692,6 +1693,7 @@ con3.close();
  */
 public void setNF(NumberFormat nf) {
 	NF = nf;
+	 NF.setGroupingUsed(false);
 }
 
 

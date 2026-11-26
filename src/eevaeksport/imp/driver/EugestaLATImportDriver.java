@@ -469,7 +469,7 @@ private Product getProd(String toode){
 	  Enumeration enumr = lines.elements();
 	  while  (enumr.hasMoreElements()){
 		  OrderLine lin = (OrderLine)enumr.nextElement();
-		  System.out.println("partii split " + lin.getPartii() + " ");
+		//  System.out.println("partii split " + lin.getPartii() + " ");
 		    if(lin.getDealer().equals("208_MRC")){
 		    	ord208_MRC.add(lin.getToode(), lin.getKogus(), lin.getBonus(), lin.getDiscount(), lin.getPl()+"", lin.getPrice(),
 		     			lin.getTooteNimi(), lin.getUnit(), lin.getPartii(),lin.getEAN(),null,lin.selActCode,lin.docType);
@@ -832,7 +832,7 @@ private Product getProd(String toode){
 	          		+ ")";
 
 	              log.info("SALES_LINE_SQL: " + sql);
-	              System.out.println(sql);
+	            //  System.out.println(sql);
 	              PreparedStatement st2 = con.prepareStatement(sql);
 	              st2.executeUpdate();
 	              addNumLine();
@@ -888,6 +888,8 @@ private Product getProd(String toode){
 	 return res;
  }
  
+ private HashMap<String,String> custRefsMem = new HashMap<String,String>();
+ 
  private void addInvoiceHeader(int salesid, Order order, boolean tagastus, boolean repr) throws SQLException{
 	      HashSet<String> refs = getRefs();
 	      System.out.println("refs " + refs.size());
@@ -942,7 +944,17 @@ if (start != -1 && end != -1 && start < end - 1) {
 		    ref2 = order.getDokNr();
 		
 		    String baseRef = ref2;
-		      
+		    if(!baseRef.equals("null")) {
+		    	custRefsMem.put(order.getCompany(), ref2);
+		    }else if(baseRef.equals("null")) {
+		    	baseRef = custRefsMem.get(order.getCompany());
+		    	if(baseRef == null) {
+		    		baseRef = (Calendar.getInstance().getTimeInMillis()+"").substring(5,12);
+		    	}
+		    }
+		    
+		    System.out.println("baseRef " + baseRef);
+		    
 		    if(refs.contains(ref2)) {
 		    	ref2 = baseRef + "-1"; 
 		    }

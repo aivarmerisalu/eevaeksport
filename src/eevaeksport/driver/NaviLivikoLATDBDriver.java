@@ -801,13 +801,14 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
     	 now.add(Calendar.DAY_OF_MONTH, -32);
     	 long st = now.getTimeInMillis();
     	 HashSet contacted = new HashSet();
+    	 try {
     	 JSONArray dayr =  Converter.getWebDayReport(st, en, rcompany, user, pass);
     	 
     	// System.out.println("dayr " + dayr);
     	 int lennx = dayr.length();
 			for (int u = 0; u < lennx; u++) {
          	JSONObject gr = null;
-			try {
+			
 				gr = dayr.getJSONObject(u);
 				 String key = (String)gr.get("custid");
 				
@@ -823,11 +824,13 @@ public class NaviLivikoLATDBDriver extends AbstractDBDriver implements BulkUpdat
 			   
 		
 	         	
-			} catch (JSONException e) {
-			  e.printStackTrace();
-			}
+			
          
 			}
+			
+			} catch (Exception e) {
+				  e.printStackTrace();
+				}
     System.out.println("contacted "+ contacted.size()); 
       try{
        	   Converter.getManagersReplacements(agents1, rcompany, user, pass, false); 
