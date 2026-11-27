@@ -1159,8 +1159,17 @@ public void WebReporter3() {
 	//pricetracker
 	HashMap<String, Product> products = getProds();
 	HashMap<String, Customer> customers = getCust();
+	HashMap<String, String> custHelper = new HashMap<String, String>();
+	custHelper.put("ELEKTRA ", "ELEKTRA");
+	custHelper.put("RRLEKTUS ", "RRLEKTUS");
+	custHelper.put("MAXIMA ", "MAXIMA");
+	custHelper.put("SELVER ", "SELVER");
+	custHelper.put("TARTU TK ", "COOP");
+	custHelper.put("CIRCLE K ", "CIRCLE K");
+	custHelper.put("HARJU T", "COOP");
+	custHelper.put("RIMI ", "RIMI");
 	
-	ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", companyx, user, pass, getParent(), customers, products);
+	ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", companyx, user, pass, getParent(), customers, products, custHelper);
 	System.out.println("pricetracker " );
 	System.exit(0);
 }

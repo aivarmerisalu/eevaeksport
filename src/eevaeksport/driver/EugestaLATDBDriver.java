@@ -3980,8 +3980,18 @@ if(sb0.length() > 0) {
 	public void FixLoader() {
 		HashMap<String, Customer> customers = new HashMap<String, Customer>();
 		HashMap<String, Product> products = new HashMap<String, Product>();
+		HashMap<String, String> custHelper = new HashMap<String, String>();
+		custHelper.put("ELEKTRA ", "ELEKTRA");
+		custHelper.put("RRLEKTUS ", "RRLEKTUS");
+		custHelper.put("MAXIMA ", "MAXIMA");
+		custHelper.put("SELVER ", "SELVER");
+		custHelper.put("TARTU TK ", "COOP");
+		custHelper.put("CIRCLE K ", "CIRCLE K");
+		custHelper.put("HARJU T", "COOP");
+		custHelper.put("RIMI ", "RIMI");
 
-		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent, customers, products);
+
+		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent, customers, products, custHelper);
 		   System.exit(0);
 	
 	}

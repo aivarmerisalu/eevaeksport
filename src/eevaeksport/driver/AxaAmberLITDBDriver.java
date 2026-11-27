@@ -2910,8 +2910,17 @@ System.out.println("prods " + prods.size());
 	public void WebReporter() {
 		HashMap<String, Customer> customers = getCust();
 		HashMap<String, Product> products = getProds();
+		HashMap<String, String> custHelper = new HashMap<String, String>();
+		custHelper.put("ELEKTRA ", "ELEKTRA");
+		custHelper.put("RRLEKTUS ", "RRLEKTUS");
+		custHelper.put("MAXIMA ", "MAXIMA");
+		custHelper.put("SELVER ", "SELVER");
+		custHelper.put("TARTU TK ", "COOP");
+		custHelper.put("CIRCLE K ", "CIRCLE K");
+		custHelper.put("HARJU T", "COOP");
+		custHelper.put("RIMI ", "RIMI");
 
-		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent, customers, products);
+		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent, customers, products , custHelper);
 		   System.exit(0);
 	}
     

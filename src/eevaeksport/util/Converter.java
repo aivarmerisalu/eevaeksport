@@ -4968,7 +4968,7 @@ public class Converter {
 
 	 
 		public static ArrayList<Quest> loadPriceTrackerFromExcels(String dirx,String companyx, String user, String pass, EksportPanel parent,
-				HashMap<String,Customer> customers, HashMap <String, Product> products) {
+				HashMap<String,Customer> customers, HashMap <String, Product> products, HashMap<String,String> custHelper) {
 			
 			
 			String country = parent.getProps().getProperty("rep.country");
@@ -5417,7 +5417,9 @@ public class Converter {
 			                                  
 			                                  String city = null;
 			                                  String chain = null;
-			                                  
+
+			                                  org.json.simple.JSONObject ob = answBuffer.get(key);
+			                                  String custname = (String) ob.get("custname"); 
 			                                  if(customers != null && customers.get(custid) != null) {
 			                                	  Customer cust = (Customer)customers.get(custid);
 			                                	  if(cust.getCity() != null && cust.getCity().trim().length() > 0) {
@@ -5427,10 +5429,19 @@ public class Converter {
 				                                	    chain = cust.getChain();
 				                                	    System.out.println("chain sees " + chain);
 				                                	  }
+			                                  }else {
+			                                	  if(custHelper != null) {
+			                                	Iterator itera = custHelper.keySet().iterator(); 
+			                                	  while (itera.hasNext()) {
+			                                		  String part = (String)itera.next();
+			                                		  if(custname.startsWith(part)) {
+			                                			  chain = custHelper.get(part);
+			                                		  }
+			                                	   }
+			                                	  }
 			                                  }
 			                              
 
-			                                  org.json.simple.JSONObject ob = answBuffer.get(key);
 			                                  String created = (String) ob.get("resstr3"); 
 
 			                                  if (!answersDone.contains("master" + key + created)) {
@@ -5447,7 +5458,7 @@ public class Converter {
 			                                    	  prodname = prodname.substring(0,prodname.indexOf("|"));
 			                                       }
 			                                      
-			                                      String custname = (String) ob.get("custname");
+			                                    
 			                                      if(custname.contains(custID)) {
 			                                    	  custname = custname.replaceAll(custID, " ").trim();
 			                                      }

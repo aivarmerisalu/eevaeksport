@@ -105,8 +105,6 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
     rcompany = getParent().getProps().getProperty("rest.companyx");
     country = getParent().getProps().getProperty("country");
     
-
-    
      }
   
   String user =  null;
@@ -114,9 +112,7 @@ public class EugestaESTDBDriver extends AbstractDBDriver  implements Manager,Pro
   String rcompany = null;
   String country = null;
   
-  
-
-  
+    
   /**
    *
    */
@@ -3422,6 +3418,7 @@ boolean noopt = false;
 	ResultSet rs = stmt.executeQuery(cmd);
 	
 	while(rs.next()){
+		try {
 	String name = rs.getString("name").trim();
 	String accountnum = rs.getString("accountnum").trim();
 	Customer cust = new Customer(accountnum);
@@ -3454,8 +3451,10 @@ boolean noopt = false;
 			}
 			
 			custMap.put(cust.getID(),cust);	
-			}
-		     rs.close();
+			
+	        }catch(Exception e) {e.printStackTrace();}
+	    }
+		rs.close();
 		     stmt.close();
 		     con.close();
 		   }catch(Exception e) {e.printStackTrace();}
@@ -3470,8 +3469,17 @@ boolean noopt = false;
 
 		HashMap<String, Customer> customers = getCust();
 		HashMap<String, Product> products = getProds();
+		HashMap<String, String> custHelper = new HashMap<String, String>();
+		custHelper.put("ELEKTRA ", "ELEKTRA");
+		custHelper.put("RRLEKTUS ", "RRLEKTUS");
+		custHelper.put("MAXIMA ", "MAXIMA");
+		custHelper.put("SELVER ", "SELVER");
+		custHelper.put("TARTU TK ", "COOP");
+		custHelper.put("CIRCLE K ", "CIRCLE K");
+		custHelper.put("HARJU T", "COOP");
+		custHelper.put("RIMI ", "RIMI");
 
-		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent, customers, products);
+		ArrayList<Quest> quests = Converter.loadPriceTrackerFromExcels("excelpricetracker", rcompany, user, pass, parent, customers, products, custHelper);
 		   System.exit(0);
 	
 	}
