@@ -1347,7 +1347,7 @@ public class BC365ValdoDBDriver extends AbstractDBDriver implements BulkUpdater,
 				  for (int i = 0; i < lenn; i++) {
 					org.json.simple.JSONObject cob = (org.json.simple.JSONObject) cc.get(i);
 		            String salesCode = (String)cob.get("code");
-		            double mSales = Double.parseDouble(cob.get("sales")+"");
+		            double mSales = Double.parseDouble(cob.get("curMonthSales")+"");
 		            if (salesCode != null && salesCode.trim().length() > 0) {
 		            	
 		            	Agent agent = (Agent)agents.get(salesCode);

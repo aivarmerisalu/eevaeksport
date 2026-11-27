@@ -1860,20 +1860,21 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
 	  HashMap<String,String> res = new HashMap<String,String>();
 	  
       
-      int yy = Calendar.getInstance().get(Calendar.YEAR);
       int dd = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
       int d2 = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
-      double planprec = dd/d2;
-   
+     
       // siin itereerime plaani läbi 
       
      for(String custID : custPlans.keySet()) {
       
       String asi = "";
    
+      int leftVisits = 0;
       
+      customerDeliveries.get(custID + "rem");
       if (customerDeliveries.get(custID) != null) {
     	  asi = " |Kopā/Atlikušas piegādes :  " + customerDeliveries.get(custID)+" / "+ customerDeliveries.get(custID + "rem") + "||";
+    	  leftVisits = customerDeliveries.get(custID + "rem");
       }
       
         double cSales = 0 ;
@@ -1888,12 +1889,17 @@ public class EugestaLATDBDriver extends AbstractDBDriver  implements Manager,Pro
         double plaanitavMyykSal = d2 * cSales/dd;
         double  tehtudsalperc = cSales/cpSales;
         double  prognosalperc = plaanitavMyykSal/cpSales;
+        
         if(tehtudsalperc > 10){
     		  tehtudsalperc = 0;  
     	  }
     	  
     	  if(prognosalperc > 10){
     		  prognosalperc = 0;  
+    	  }
+    	  
+    	  if(leftVisits == 0) {
+    		  prognosalperc = tehtudsalperc;
     	  }
     	  
 

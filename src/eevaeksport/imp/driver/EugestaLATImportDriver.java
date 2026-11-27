@@ -936,7 +936,7 @@ if (start != -1 && end != -1 && start < end - 1) {
 	  String shipm = "";
 	  if(order.getShipMode() != null && order.getShipMode().trim().length() > 0) {
 		  shipm = getAgentSHM(order.getAgent());
-		  System.out.println("shipmode " + order.getAgent() + " " + shipm);
+		 // System.out.println("shipmode " + order.getAgent() + " " + shipm);
 	  }
 		
 	  if(ref2.trim().length() == 0) { //kui on tava tellimus siis paneme sisemise tellimuse numbri 

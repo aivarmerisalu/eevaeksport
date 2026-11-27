@@ -584,11 +584,11 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
 							  
     	 */
       
-	String cmd =" select d.PartnerID as saaja, a.AddressID as aadr ,ProductID as toode, d.DocDate as kuupaev, Quantity as kogus,AmountFinal/Quantity as hind, DocNoSerial+DocNo as doc\r\n" + 
-			"				 from storedocline r\r\n" + 
-			"				  INNER JOIN storedoc d ON d.StoreDOcID = r. StoreDOcID and d.PartnerID != ''\r\n" + 
-			"				  INNER JOIN PartnerAddress a on a.PartnerID = d.PartnerID and d.PartnerAddressGLNCode = a.GLNCode where d.DocDate >= getdate()-90 and d.StoreDocTypeID = 3\r\n" + 
-			"				  GROUP BY d.PartnerID, a.AddressID ,ProductID, d.DocDate, Quantity ,AmountFinal, DocNoSerial+DocNo  ORDER BY d.PartnerID, a.AddressID ,ProductID, d.DocDate " ;
+	String cmd = " select d.PartnerID as saaja, a.AddressID as aadr ,ProductID as toode, d.DocDate as kuupaev, Quantity as kogus,AmountFinal/Quantity as hind, DocNoSerial+DocNo as doc\r\n" + 
+			"							 from storedocline r\r\n" + 
+			"							  INNER JOIN storedoc d ON d.StoreDOcID = r.StoreDOcID and d.PartnerID != '' \r\n" + 
+			"							  INNER JOIN v_PartnerAddress a on a.Address = d.PartnerAddress  where d.DocDate >= getdate()-90 and d.StoreDocTypeID = 3\r\n" + 
+			"						  GROUP BY d.PartnerID, a.AddressID ,ProductID, d.DocDate, Quantity ,AmountFinal, DocNoSerial+DocNo  ORDER BY d.PartnerID, a.AddressID ,ProductID, d.DocDate";
 	
 	if (isDebug()) {
 	    System.out.println(cmd);
@@ -607,7 +607,12 @@ public class TildeVairumDBDriver extends AbstractDBDriver implements BulkUpdater
 		 String kuupaev = rs.getString("kuupaev");
         double kogus = Double.parseDouble(rs.getString("kogus").trim());
         double hind = Double.parseDouble(rs.getString("hind").trim());
-        String doknr = rs.getString("doc").trim();
+        String doknr = rs.getString("doc");
+        if(doknr == null) {
+        	doknr = " ";
+        }else {
+        	doknr = doknr.trim();
+        }
 		
                   CustProd cp = new CustProd(kliendikood + "_" + aadr, tootekood, kogus ,0 ,0,kuupaev.substring(5,10),hind,0,0," ");
                   cp.setAbiKood(doknr);
